@@ -22,6 +22,10 @@ namespace System.DirectoryServices.Tests
 														    LdapConfiguration.Configuration.AuthenticationTypes))
             {
                 string ouName = "NetCoreDevs";
+                
+                // ensure cleanup before doing the creation.
+                DeleteOU(de, ouName);
+
                 CreateOU(de, ouName, ".Net Core Developers Unit");
                 try
                 {
@@ -36,39 +40,43 @@ namespace System.DirectoryServices.Tests
         }
 
         [ConditionalFact(nameof(IsLdapConfigurationExist))]
-        public void TestCN() // adding and removing organization unit
+        public void TestOrganizationalRole() // adding and removing users to/from the ou
         {
 			using (DirectoryEntry de = new DirectoryEntry(LdapConfiguration.Configuration.LdapPath,
 														    LdapConfiguration.Configuration.UserName,
 														    LdapConfiguration.Configuration.Password,
 														    LdapConfiguration.Configuration.AuthenticationTypes))
             {
-                DirectoryEntry rootOU = CreateOU(de, "CoreFxRootOU", "CoreFx Root OU");
-                try
+                DeleteOU(de, "CoreFxRootOU");
+
+                using (DirectoryEntry rootOU = CreateOU(de, "CoreFxRootOU", "CoreFx Root OU"))
                 {
-                    DirectoryEntry child1OU = CreateOU(rootOU, "CoreFxChild1OU", "CoreFx Child OU 1");
-                    DirectoryEntry child2OU = CreateOU(rootOU, "CoreFxChild2OU", "CoreFx Child OU 2");
+                    try
+                    {
+                        DirectoryEntry child1OU = CreateOU(rootOU, "CoreFxChild1OU", "CoreFx Child OU 1");
+                        DirectoryEntry child2OU = CreateOU(rootOU, "CoreFxChild2OU", "CoreFx Child OU 2");
 
-                    CreateCN(child1OU, "user.ou1.1", "User 1 is in CoreFx ou 1", "1 111 111 11111");
-                    CreateCN(child1OU, "user.ou1.2", "User 2 is in CoreFx ou 1", "1 222 222 22222");
+                        CreateOrganizationalRole(child1OU, "user.ou1.1", "User 1 is in CoreFx ou 1", "1 111 111 11111");
+                        CreateOrganizationalRole(child1OU, "user.ou1.2", "User 2 is in CoreFx ou 1", "1 222 222 22222");
 
-                    CreateCN(child2OU, "user.ou2.1", "User 1 is in CoreFx ou 2", "1 333 333 3333");
-                    CreateCN(child2OU, "user.ou2.2", "User 2 is in CoreFx ou 2", "1 333 333 3333");
+                        CreateOrganizationalRole(child2OU, "user.ou2.1", "User 1 is in CoreFx ou 2", "1 333 333 3333");
+                        CreateOrganizationalRole(child2OU, "user.ou2.2", "User 2 is in CoreFx ou 2", "1 333 333 3333");
 
-                    // now let's search for the added data:
-                    SearchOUByName(rootOU, "CoreFxChild1OU");
-                    SearchOUByName(rootOU, "CoreFxChild2OU");
+                        // now let's search for the added data:
+                        SearchOUByName(rootOU, "CoreFxChild1OU");
+                        SearchOUByName(rootOU, "CoreFxChild2OU");
 
-                    SearchCNByName(child1OU, "user.ou1.1");
-                    SearchCNByName(child1OU, "user.ou1.2");
+                        SearchCreateOrganizationalRole(child1OU, "user.ou1.1");
+                        SearchCreateOrganizationalRole(child1OU, "user.ou1.2");
 
-                    SearchCNByName(child2OU, "user.ou2.1");
-                    SearchCNByName(child2OU, "user.ou2.2");
-                }
-                finally
-                {
-                    // rootOU.DeleteTree(); doesn't work as getting "A protocol error occurred. (Exception from HRESULT: 0x80072021)"
-                    DeleteOU(de, "CoreFxRootOU");
+                        SearchCreateOrganizationalRole(child2OU, "user.ou2.1");
+                        SearchCreateOrganizationalRole(child2OU, "user.ou2.2");
+                    }
+                    finally
+                    {
+                        // rootOU.DeleteTree(); doesn't work as getting "A protocol error occurred. (Exception from HRESULT: 0x80072021)"
+                        DeleteOU(de, "CoreFxRootOU");
+                    }
                 }
             }
         }
@@ -83,7 +91,7 @@ namespace System.DirectoryServices.Tests
             return ouCoreDevs;
         }
 
-        private DirectoryEntry CreateCN(DirectoryEntry ouEntry, string cn, string description, string phone)
+        private DirectoryEntry CreateOrganizationalRole(DirectoryEntry ouEntry, string cn, string description, string phone)
         {
 			DirectoryEntry cnEntry = ouEntry.Children.Add($"cn={cn}","Class");
 			cnEntry.Properties["objectClass"].Value = "organizationalRole";
@@ -112,19 +120,20 @@ namespace System.DirectoryServices.Tests
 
         private void DeleteDirectoryEntry(DirectoryEntry parent, DirectoryEntry de)
         {
-			foreach (DirectoryEntry child in de.Children)
+            foreach (DirectoryEntry child in de.Children)
             {
-				DeleteDirectoryEntry(de, child);
-			}
-			
+                DeleteDirectoryEntry(de, child);
+            }
+
             parent.Children.Remove(de);
-			parent.CommitChanges();
+            parent.CommitChanges();
         }
 
         private void SearchOUByName(DirectoryEntry de, string ouName)
         {
             using (DirectorySearcher ds = new DirectorySearcher(de))
             {
+                ds.ClientTimeout = new TimeSpan(0, 2, 0);
                 ds.Filter = $"(&(objectClass=organizationalUnit)(ou={ouName}))";
                 ds.PropertiesToLoad.Add("ou");
                 SearchResult sr = ds.FindOne();
@@ -132,7 +141,7 @@ namespace System.DirectoryServices.Tests
             }
         }
 
-        private void SearchCNByName(DirectoryEntry de, string cnName)
+        private void SearchCreateOrganizationalRole(DirectoryEntry de, string cnName)
         {
             using (DirectorySearcher ds = new DirectorySearcher(de))
             {
