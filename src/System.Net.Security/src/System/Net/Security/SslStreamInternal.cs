@@ -157,7 +157,7 @@ namespace System.Net.Security
 
         internal IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
         {
-            return TaskToApm.Begin(WriteAsync(new ReadOnlyMemory<byte>(buffer, offset, count), CancellationToken.None), asyncCallback, asyncState);
+            return TaskToApm.Begin(WriteAsync(buffer, offset, count, CancellationToken.None), asyncCallback, asyncState);
         }
 
         internal void EndWrite(IAsyncResult asyncResult) => TaskToApm.End(asyncResult);
@@ -166,6 +166,12 @@ namespace System.Net.Security
         {
             SslWriteAsync writeAdapter = new SslWriteAsync(_sslState, cancellationToken);
             return WriteAsyncInternal(writeAdapter, buffer);
+        }
+
+        internal Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            ValidateParameters(buffer, offset, count);
+            return WriteAsync(new ReadOnlyMemory<byte>(buffer, offset, count), cancellationToken);
         }
 
         private void ResetReadBuffer()

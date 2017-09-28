@@ -568,7 +568,7 @@ namespace System.Net.Security
 
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            return _sslState.SecureStream.WriteAsync(new ReadOnlyMemory<byte>(buffer, offset, count), cancellationToken);
+            return _sslState.SecureStream.WriteAsync(buffer, offset, count, cancellationToken);
         }
 
         public override Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
