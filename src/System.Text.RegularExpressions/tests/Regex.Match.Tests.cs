@@ -267,7 +267,7 @@ namespace System.Text.RegularExpressions.Tests
 
         [Theory]
         [MemberData(nameof(Match_Basic_TestData))]
-        [MemberData(nameof(RegexCompilationHelper.TransformRegexOptions), nameof(RegexMatchTests.Match_Basic_TestData), 2, MemberType = typeof(RegexCompilationHelper))]
+        [MemberData(nameof(RegexCompilationHelper.TransformRegexOptions), nameof(Match_Basic_TestData), 2, MemberType = typeof(RegexCompilationHelper))]
         public void Match(string pattern, string input, RegexOptions options, int beginning, int length, bool expectedSuccess, string expectedValue)
         {
             bool isDefaultStart = RegexHelpers.IsDefaultStart(input, options, beginning);
