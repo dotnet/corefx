@@ -53,9 +53,9 @@ namespace System.Net.Security
             return new SafeFreeSslCredentials(certificate, protocols, policy);
         }
 
-        public static SecurityStatusPal EncryptMessage(SafeDeleteContext securityContext, byte[] input, int offset, int size, int headerSize, int trailerSize, ref byte[] output, out int resultSize)
+        public static SecurityStatusPal EncryptMessage(SafeDeleteContext securityContext, ReadOnlyMemory<byte> input, int headerSize, int trailerSize, ref byte[] output, out int resultSize)
         {
-            return EncryptDecryptHelper(securityContext, input, offset, size, true, ref output, out resultSize);
+            return EncryptDecryptHelper(securityContext, input, true, ref output, out resultSize);
         }
 
         public static SecurityStatusPal DecryptMessage(SafeDeleteContext securityContext, byte[] buffer, ref int offset, ref int count)
