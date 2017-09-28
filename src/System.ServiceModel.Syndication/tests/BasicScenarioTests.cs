@@ -698,5 +698,82 @@ namespace System.ServiceModel.Syndication.Tests
             Assert.True(!res.LastUpdatedTime.Equals(new DateTimeOffset()));
         }
 
+        //failed
+        [Fact]
+        public static void AtomEntryPositiveTest()
+        {
+            string filePath = @"brief-entry-noerror.xml";
+            string serializeFilePath = Path.GetTempFileName();
+
+            XmlReader reader = XmlReader.Create(filePath , new XmlReaderSettings() {Async=true});
+            Atom10ItemFormatter atomformatter = new Atom10ItemFormatter();
+            try
+            {
+                Task<SyndicationItem> task = SyndicationItem.LoadAsync(reader);
+                Task.WhenAll(task);
+                SyndicationItem feedObjct = task.Result;
+
+                XmlWriter writer = XmlWriter.Create(serializeFilePath);
+                Atom10ItemFormatter f = new Atom10ItemFormatter(feedObjct);
+                f.WriteToAsync(writer).GetAwaiter().GetResult();
+                writer.Close();
+
+                //TODO:
+                // compare file filePath and serializeFilePath
+            }
+            finally
+            {
+                File.Delete(serializeFilePath);
+            }
+        }
+
+        //result not except
+        [Fact]
+        public static void AtomEntryPositiveTest_write()
+        {
+            SyndicationItem item1 = new SyndicationItem("SyndicationFeed released for .net Core", "A lot of text describing the release of .net core feature", new Uri("http://Contoso.com/news/path"));
+            string serializeFilePath = Path.GetTempFileName();
+
+            try
+            {
+                XmlWriter writer = XmlWriter.Create(serializeFilePath, new XmlWriterSettings() { Async = true });
+
+                Atom10ItemFormatter f = new Atom10ItemFormatter(item1);
+                Task task = f.WriteToAsync(writer);
+                Task.WhenAll(task);
+                writer.Close();
+            }
+            finally
+            {
+                File.Delete(serializeFilePath);
+            }
+        }
+
+        //pass
+        [Fact]
+        public static void AtomFeedPositiveTest()
+        {
+            string filePath = @"absolute_rel.xml";
+            string serializeFilePath = Path.GetTempFileName();
+
+            XmlReader reader = XmlReader.Create(filePath, new XmlReaderSettings() { Async = true });
+            Atom10ItemFormatter atomformatter = new Atom10ItemFormatter();
+            try
+            {
+                CancellationToken ct = new CancellationToken();
+                Task<SyndicationFeed> task = SyndicationFeed.LoadAsync(reader, ct);
+                Task.WhenAll(task);
+                SyndicationFeed feedObjct = task.Result;
+
+                XmlWriter writer = XmlWriter.Create(serializeFilePath);
+                Atom10FeedFormatter f = new Atom10FeedFormatter(feedObjct);
+                f.WriteToAsync(writer,ct).GetAwaiter().GetResult();
+                writer.Close();
+            }
+            finally
+            {
+                File.Delete(serializeFilePath);
+            }
+        }
     }
 }
