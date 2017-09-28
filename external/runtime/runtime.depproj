@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <UsingTask TaskName="DownloadFileFromUrl" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
+  <UsingTask TaskName="ZipFileExtractToDirectory" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
   <PropertyGroup>
     <NugetRuntimeIdentifier>$(PackageRID)</NugetRuntimeIdentifier>
     <RidSpecificAssets>true</RidSpecificAssets>
@@ -71,6 +73,43 @@
           UseHardlinksIfPossible="true" />
 
     <Exec Command="chmod +x $(TestHostRootPath)dotnet" Condition="'$(RunningOnUnix)' == 'true'"/>
+  </Target>
+
+  <PropertyGroup>
+    <_CoreCLRPackageId>runtime.$(NugetRuntimeIdentifier).Microsoft.NETCore.Runtime.CoreCLR</_CoreCLRPackageId>
+    <_CoreCLRSymbolPackageUrl>https://dotnet.myget.org/F/dotnet-core/symbols/$(_CoreCLRPackageId)/$(CoreClrPackageVersion)</_CoreCLRSymbolPackageUrl>
+    <_CoreCLRSymbolPackageDestinationDirectory>$(IntermediateOutputPath)/symbolPackages/</_CoreCLRSymbolPackageDestinationDirectory>
+    <_CoreCLRSymbolPackageDestinationFile>$(_CoreCLRSymbolPackageDestinationDirectory)$(_CoreCLRPackageId).$(CoreClrPackageVersion).symbols.nupkg.zip</_CoreCLRSymbolPackageDestinationFile>
+    <_CoreCLRSymbolPackageUnzipFolder>$(_CoreCLRSymbolPackageDestinationDirectory)/$(_CoreCLRPackageId).$(CoreClrPackageVersion)</_CoreCLRSymbolPackageUnzipFolder>
+  </PropertyGroup>
+
+  <Target Name="DownloadCoreCLRSymbolPackage"
+          Inputs="$(_CoreCLRSymbolPackageDestinationFile)"
+          Outputs="$(_CoreCLRSymbolPackageUnzipFolder)"
+          Condition="'$(CoreCLROverridePath)' == ''">
+
+      <DownloadFileFromUrl DownloadSource="$(_CoreCLRSymbolPackageUrl)"
+                           DestinationFile="$(_CoreCLRSymbolPackageDestinationFile)"
+                           TreatErrorsAsWarnings="true" />
+
+      <Warning Text="Failed to download CoreCLR symbols" Condition="!Exists('$(_CoreCLRSymbolPackageDestinationFile)')" />
+
+      <ZipFileExtractToDirectory SourceArchive="$(_CoreCLRSymbolPackageDestinationFile)"
+                                 DestinationDirectory="$(_CoreCLRSymbolPackageUnzipFolder)"
+                                 OverwriteDestination="true"
+                                 Condition="Exists('$(_CoreCLRSymbolPackageDestinationFile)')" />
+  </Target>
+
+  <Target Name="BinPlaceCoreCLRSymbols"
+          AfterTargets="ResolveNuGetPackages"
+          DependsOnTargets="DownloadCoreCLRSymbolPackage"
+          Condition="'$(CoreCLROverridePath)' == ''">
+
+      <ItemGroup>
+        <_CoreCLRSymbolFiles Condition="Exists('$(_CoreCLRSymbolPackageUnzipFolder)')" Include="$(_CoreCLRSymbolPackageUnzipFolder)/runtimes/$(NugetRuntimeIdentifier)/native/*.pdb" />
+        <_CoreCLRSymbolFiles Condition="Exists('$(_CoreCLRSymbolPackageUnzipFolder)')" Include="$(_CoreCLRSymbolPackageUnzipFolder)/runtimes/$(NugetRuntimeIdentifier)/native/*.dbg" />
+        <ReferenceCopyLocalPaths Condition="@(_CoreCLRSymbolFiles) != ''" Include="@(_CoreCLRSymbolFiles)"/>
+      </ItemGroup>
   </Target>
 
   <Target Name="OverrideRuntime"
