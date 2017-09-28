@@ -25,7 +25,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="LDAP.Configuration.xml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="LDAP.Configuration.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
