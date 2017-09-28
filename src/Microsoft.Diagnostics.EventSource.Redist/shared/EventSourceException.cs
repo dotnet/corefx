@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Resources;
 using System.Runtime.Serialization;
 
 #if ES_BUILD_STANDALONE
