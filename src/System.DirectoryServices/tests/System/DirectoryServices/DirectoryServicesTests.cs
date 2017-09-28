@@ -16,10 +16,10 @@ namespace System.DirectoryServices.Tests
         [ConditionalFact(nameof(IsLdapConfigurationExist))]
         public void TestOU() // adding and removing organization unit
         {
-			using (DirectoryEntry de = new DirectoryEntry(LdapConfiguration.Configuration.LdapPath,
-														    LdapConfiguration.Configuration.UserName,
-														    LdapConfiguration.Configuration.Password,
-														    LdapConfiguration.Configuration.AuthenticationTypes))
+            using (DirectoryEntry de = new DirectoryEntry(LdapConfiguration.Configuration.LdapPath,
+                                                            LdapConfiguration.Configuration.UserName,
+                                                            LdapConfiguration.Configuration.Password,
+                                                            LdapConfiguration.Configuration.AuthenticationTypes))
             {
                 string ouName = "NetCoreDevs";
                 
@@ -42,10 +42,10 @@ namespace System.DirectoryServices.Tests
         [ConditionalFact(nameof(IsLdapConfigurationExist))]
         public void TestOrganizationalRole() // adding and removing users to/from the ou
         {
-			using (DirectoryEntry de = new DirectoryEntry(LdapConfiguration.Configuration.LdapPath,
-														    LdapConfiguration.Configuration.UserName,
-														    LdapConfiguration.Configuration.Password,
-														    LdapConfiguration.Configuration.AuthenticationTypes))
+            using (DirectoryEntry de = new DirectoryEntry(LdapConfiguration.Configuration.LdapPath,
+                                                            LdapConfiguration.Configuration.UserName,
+                                                            LdapConfiguration.Configuration.Password,
+                                                            LdapConfiguration.Configuration.AuthenticationTypes))
             {
                 DeleteOU(de, "CoreFxRootOU");
 
@@ -66,11 +66,11 @@ namespace System.DirectoryServices.Tests
                         SearchOUByName(rootOU, "CoreFxChild1OU");
                         SearchOUByName(rootOU, "CoreFxChild2OU");
 
-                        SearchCreateOrganizationalRole(child1OU, "user.ou1.1");
-                        SearchCreateOrganizationalRole(child1OU, "user.ou1.2");
+                        SearchOrganizationalRole(child1OU, "user.ou1.1");
+                        SearchOrganizationalRole(child1OU, "user.ou1.2");
 
-                        SearchCreateOrganizationalRole(child2OU, "user.ou2.1");
-                        SearchCreateOrganizationalRole(child2OU, "user.ou2.2");
+                        SearchOrganizationalRole(child2OU, "user.ou2.1");
+                        SearchOrganizationalRole(child2OU, "user.ou2.2");
                     }
                     finally
                     {
@@ -93,13 +93,13 @@ namespace System.DirectoryServices.Tests
 
         private DirectoryEntry CreateOrganizationalRole(DirectoryEntry ouEntry, string cn, string description, string phone)
         {
-			DirectoryEntry cnEntry = ouEntry.Children.Add($"cn={cn}","Class");
-			cnEntry.Properties["objectClass"].Value = "organizationalRole";
-			cnEntry.Properties["cn"].Value = cn;
-			cnEntry.Properties["description"].Value = description;
-			cnEntry.Properties["ou"].Value = ouEntry.Name;
-			cnEntry.Properties["telephoneNumber"].Value = phone;
-			cnEntry.CommitChanges();
+            DirectoryEntry cnEntry = ouEntry.Children.Add($"cn={cn}","Class");
+            cnEntry.Properties["objectClass"].Value = "organizationalRole";
+            cnEntry.Properties["cn"].Value = cn;
+            cnEntry.Properties["description"].Value = description;
+            cnEntry.Properties["ou"].Value = ouEntry.Name;
+            cnEntry.Properties["telephoneNumber"].Value = phone;
+            cnEntry.CommitChanges();
             return cnEntry;
         }
 
@@ -141,7 +141,7 @@ namespace System.DirectoryServices.Tests
             }
         }
 
-        private void SearchCreateOrganizationalRole(DirectoryEntry de, string cnName)
+        private void SearchOrganizationalRole(DirectoryEntry de, string cnName)
         {
             using (DirectorySearcher ds = new DirectorySearcher(de))
             {
@@ -151,6 +151,5 @@ namespace System.DirectoryServices.Tests
                 Assert.Equal(cnName, sr.Properties["cn"][0]);
             }
         }
-
     }
 }
