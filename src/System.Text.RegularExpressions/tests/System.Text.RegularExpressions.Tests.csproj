@@ -26,7 +26,6 @@
     <Compile Include="Regex.Match.Tests.cs" />
     <Compile Include="Regex.Tests.Common.cs" />
     <Compile Include="RegexCompilationHelper.cs" />
-    <Compile Include="RegexCompilationInfoTests.cs" />
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
@@ -36,6 +35,7 @@
     <Compile Include="GroupCollectionTests2.cs" />
     <Compile Include="MatchCollectionTests2.cs" />
     <Compile Include="PrecompiledRegexScenarioTest.cs" />
+    <Compile Include="RegexCompilationInfoTests.cs" />
     <Compile Include="RegexGroupNameTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>

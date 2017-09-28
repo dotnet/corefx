@@ -7,7 +7,6 @@ using Xunit;
 
 namespace System.Text.RegularExpressions.Tests
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
     public class RegexCompilationInfoTests
     {
         private RegexCompilationInfo Instance
