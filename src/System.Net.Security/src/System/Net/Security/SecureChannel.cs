@@ -902,8 +902,7 @@ namespace System.Net.Security
             if (NetEventSource.IsEnabled)
             {
                 NetEventSource.Enter(this, buffer, 0, buffer.Length);
-                int eventLength = Math.Min(buffer.Length, 128);
-                NetEventSource.DumpBuffer(this, buffer.Slice(0, eventLength).ToArray(), 0, eventLength);
+                NetEventSource.DumpBuffer(this, buffer);
             }
 
             byte[] writeBuffer = output;
