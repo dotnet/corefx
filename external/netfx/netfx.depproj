@@ -24,7 +24,7 @@
       <Version>1.0.1</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library" Condition="'$(TargetGroup)' == 'netfx'">
-      <Version>$(NETStandardPackageVersion)</Version>
+      <Version>$(NETStandardLibraryPackageVersion)</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -40,7 +40,7 @@
   <Target Name="FilterNETStandardShims" BeforeTargets="FilterNugetPackages"
           Condition="'$(RefOutputPath)' == '$(NetFxRefPath)'">
     <PropertyGroup>
-      <_NETStandardRefFolder>$(PackagesDir)$(NETStandardPackageId.ToLower())\$(NETStandardPackageVersion)\build\netstandard2.0\ref</_NETStandardRefFolder>
+      <_NETStandardRefFolder>$(PackagesDir)$(NETStandardLibraryPackageId.ToLower())\$(NETStandardLibraryPackageVersion)\build\netstandard2.0\ref</_NETStandardRefFolder>
     </PropertyGroup>
     <ItemGroup>
       <_excludeForNetFx Include="@(NetFxReference);netstandard" />
@@ -56,8 +56,8 @@
     <ItemGroup>
       <Reference Include="@(_netstandardShimAssemblies)">
         <Private>False</Private>
-        <NuGetPackageId>$(NETStandardPackageId)</NuGetPackageId>
-        <NuGetPackageVersion>$(NETStandardPackageVersion)</NuGetPackageVersion>
+        <NuGetPackageId>$(NETStandardLibraryPackageId)</NuGetPackageId>
+        <NuGetPackageVersion>$(NETStandardLibraryPackageVersion)</NuGetPackageVersion>
       </Reference>
     </ItemGroup>
   </Target>

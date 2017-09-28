@@ -88,8 +88,8 @@
       <!-- ApplyBaseline doesn't handle NuGet versions, so workaround that by
            adding after we've baselined.
            https://github.com/dotnet/buildtools/issues/1432 -->
-      <Dependency Include="$(NETStandardPackageId)">
-        <Version>$(NETStandardPackageVersion)</Version>
+      <Dependency Include="$(NETStandardLibraryPackageId)">
+        <Version>$(NETStandardLibraryPackageVersion)</Version>
         <TargetFramework>$(TargetFramework)</TargetFramework>
       </Dependency>
     </ItemGroup>
