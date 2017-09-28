@@ -2,19 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Text;
+using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.ComponentModel;
-using System.Diagnostics;
+using System.Text;
 using Microsoft.Win32;
-using Microsoft.Win32.SafeHandles;
-using System;
-using System.Security;
-using System.Security.Permissions;
-using System.IO;
-using System.Globalization;
-using System.Runtime.Versioning;
 
 namespace System.Diagnostics
 {
@@ -293,7 +286,7 @@ namespace System.Diagnostics
 
                 StringBuilder retUserName = new StringBuilder();
 
-                if (UnsafeNativeMethods.LookupAccountSid(MachineName, sid, bufUserName, ref userNameLen, bufDomainName, ref domainNameLen, ref sidNameUse) != 0)
+                if (Interop.Kernel32.LookupAccountSid(MachineName, sid, bufUserName, ref userNameLen, bufDomainName, ref domainNameLen, ref sidNameUse) != 0)
                 {
                     retUserName.Append(bufDomainName.ToString());
                     retUserName.Append("\\");
@@ -399,8 +392,10 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (eventKey != null) eventKey.Close();
-                if (logKey != null) logKey.Close();
+                if (eventKey != null)
+                    eventKey.Close();
+                if (logKey != null)
+                    logKey.Close();
             }
 
         }

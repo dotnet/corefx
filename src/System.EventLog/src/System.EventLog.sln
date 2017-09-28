@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26919.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.EventLog", "System.EventLog.csproj", "{4BCD2E8F-6ADC-43A2-B827-7F264E9885D8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		netcoreapp-Debug|Any CPU = netcoreapp-Debug|Any CPU
+		netcoreapp-Release|Any CPU = netcoreapp-Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4BCD2E8F-6ADC-43A2-B827-7F264E9885D8}.netcoreapp-Debug|Any CPU.ActiveCfg = netcoreapp-Debug|Any CPU
+		{4BCD2E8F-6ADC-43A2-B827-7F264E9885D8}.netcoreapp-Debug|Any CPU.Build.0 = netcoreapp-Debug|Any CPU
+		{4BCD2E8F-6ADC-43A2-B827-7F264E9885D8}.netcoreapp-Release|Any CPU.ActiveCfg = netcoreapp-Release|Any CPU
+		{4BCD2E8F-6ADC-43A2-B827-7F264E9885D8}.netcoreapp-Release|Any CPU.Build.0 = netcoreapp-Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {45AB551E-2717-4F15-A059-92E759FB8C52}
+	EndGlobalSection
+EndGlobal

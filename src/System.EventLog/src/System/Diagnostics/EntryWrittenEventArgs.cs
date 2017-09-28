@@ -6,7 +6,7 @@ namespace System.Diagnostics
 {
     public class EntryWrittenEventArgs : EventArgs
     {
-        private readonly EventLogEntry entry;
+        private readonly EventLogEntry _entry;
 
         public EntryWrittenEventArgs()
         {
@@ -14,14 +14,14 @@ namespace System.Diagnostics
 
         public EntryWrittenEventArgs(EventLogEntry entry)
         {
-            this.entry = entry;
+            _entry = entry;
         }
 
         public EventLogEntry Entry
         {
             get
             {
-                return entry;
+                return _entry;
             }
         }
     }

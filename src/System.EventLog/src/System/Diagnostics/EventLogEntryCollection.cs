@@ -8,18 +8,18 @@ namespace System.Diagnostics
 {
     public class EventLogEntryCollection : ICollection
     {
-        private readonly EventLogInternal log;
+        private readonly EventLogInternal _log;
 
         internal EventLogEntryCollection(EventLogInternal log)
         {
-            this.log = log;
+            _log = log;
         }
 
         public int Count
         {
             get
             {
-                return log.EntryCount;
+                return _log.EntryCount;
             }
         }
 
@@ -27,7 +27,7 @@ namespace System.Diagnostics
         {
             get
             {
-                return log.GetEntryAt(index);
+                return _log.GetEntryAt(index);
             }
         }
 
@@ -43,7 +43,7 @@ namespace System.Diagnostics
 
         internal EventLogEntry GetEntryAtNoThrow(int index)
         {
-            return log.GetEntryAtNoThrow(index);
+            return _log.GetEntryAtNoThrow(index);
         }
 
         bool ICollection.IsSynchronized
@@ -64,7 +64,7 @@ namespace System.Diagnostics
 
         void ICollection.CopyTo(Array array, int index)
         {
-            EventLogEntry[] entries = log.GetAllEntries();
+            EventLogEntry[] entries = _log.GetAllEntries();
             Array.Copy(entries, 0, array, index, entries.Length);
         }
 

@@ -38,6 +38,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.LoadLibraryEx.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.LoadLibraryEx.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.LookupAccountSid.cs">
+      <Link>Common\Interop\Windows\kernel32\Interop.LookupAccountSid.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
     </Compile>

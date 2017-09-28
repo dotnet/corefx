@@ -2,26 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Runtime.InteropServices;
-using System.ComponentModel;
-using System.Diagnostics;
-using System;
-using Microsoft.Win32;
-using Microsoft.Win32.SafeHandles;
-using System.IO;
 using System.Collections;
-using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Globalization;
-using System.ComponentModel.Design;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
-using System.Reflection;
-using System.Runtime.Versioning;
-using System.Runtime.CompilerServices;
-using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using System.Threading;
+using Microsoft.Win32;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.Diagnostics
 {
@@ -557,7 +549,8 @@ namespace System.Diagnostics
                 }
                 finally
                 {
-                    if (eventlogkey != null) eventlogkey.Close();
+                    if (eventlogkey != null)
+                        eventlogkey.Close();
 
                     // Revert registry and environment permission asserts
                     CodeAccessPermission.RevertAssert();
@@ -565,7 +558,8 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (mutex != null) mutex.ReleaseMutex();
+                if (mutex != null)
+                    mutex.ReleaseMutex();
             }
         }
 
@@ -706,8 +700,10 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (eventkey != null) eventkey.Close();
-                if (logKey != null) logKey.Close();
+                if (eventkey != null)
+                    eventkey.Close();
+                if (logKey != null)
+                    logKey.Close();
 
                 // Revert registry and environment permission asserts
                 CodeAccessPermission.RevertAssert();
@@ -813,7 +809,8 @@ namespace System.Diagnostics
                         }
                         finally
                         {
-                            if (sourceKey != null) sourceKey.Close();
+                            if (sourceKey != null)
+                                sourceKey.Close();
                         }
                     }
 
@@ -823,7 +820,8 @@ namespace System.Diagnostics
                 }
                 finally
                 {
-                    if (eventkey != null) eventkey.Close();
+                    if (eventkey != null)
+                        eventkey.Close();
 
                     // Revert registry and environment permission asserts
                     CodeAccessPermission.RevertAssert();
@@ -867,7 +865,8 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (eventkey != null) eventkey.Close();
+                if (eventkey != null)
+                    eventkey.Close();
                 // Revert registry and environment permission asserts
                 CodeAccessPermission.RevertAssert();
             }
@@ -904,7 +903,8 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (lmkey != null) lmkey.Close();
+                if (lmkey != null)
+                    lmkey.Close();
             }
 
             return null;
@@ -1145,7 +1145,8 @@ namespace System.Diagnostics
             {
                 for (int i = 0; i < handles.Length; i++)
                 {
-                    if (handles[i].IsAllocated) handles[i].Free();
+                    if (handles[i].IsAllocated)
+                        handles[i].Free();
                 }
                 stringsRoot.Free();
             }

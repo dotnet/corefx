@@ -2,26 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Runtime.InteropServices;
-using System.ComponentModel;
-using System.Diagnostics;
-using System;
-using Microsoft.Win32;
-using Microsoft.Win32.SafeHandles;
-using System.IO;
 using System.Collections;
 using System.Collections.Specialized;
-using System.Globalization;
+using System.ComponentModel;
 using System.ComponentModel.Design;
+using System.Globalization;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
-using System.Reflection;
-using System.Runtime.Versioning;
-using System.Runtime.CompilerServices;
-using System.Diagnostics.CodeAnalysis;
+using System.Threading;
+using Microsoft.Win32;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.Diagnostics
 {
@@ -238,7 +231,8 @@ namespace System.Diagnostics
                     }
                     finally
                     {
-                        if (logkey != null) logkey.Close();
+                        if (logkey != null)
+                            logkey.Close();
                         // Revert registry and environment permission asserts
                         CodeAccessPermission.RevertAssert();
                     }
@@ -499,7 +493,8 @@ namespace System.Diagnostics
         {
             string currentMachineName = this.machineName;
 
-            if (boolFlags[Flag_initializing]) throw new InvalidOperationException(SR.InitTwice);
+            if (boolFlags[Flag_initializing])
+                throw new InvalidOperationException(SR.InitTwice);
             boolFlags[Flag_initializing] = true;
             if (boolFlags[Flag_monitoring])
                 StopListening(GetLogName(currentMachineName));
@@ -1016,7 +1011,8 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (lmkey != null) lmkey.Close();
+                if (lmkey != null)
+                    lmkey.Close();
             }
 
             return null;
@@ -1043,7 +1039,8 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (eventkey != null) eventkey.Close();
+                if (eventkey != null)
+                    eventkey.Close();
             }
 
             return logkey;
@@ -1067,7 +1064,8 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (logkey != null) logkey.Close();
+                if (logkey != null)
+                    logkey.Close();
 
                 // Revert registry and environment permission asserts
                 CodeAccessPermission.RevertAssert();

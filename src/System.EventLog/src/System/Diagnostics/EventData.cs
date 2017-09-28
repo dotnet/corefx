@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
-using System.Security.Permissions;
-using System.Security;
 
 namespace System.Diagnostics
 {

@@ -2,9 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Security;
-using System.Security.Permissions;
-
 namespace System.Diagnostics
 {
     public class EventSourceCreationData
@@ -19,7 +16,7 @@ namespace System.Diagnostics
             LogName = logName;
         }
 
-        internal EventSourceCreationData(string source, string logName, string machineName): this(source, logName)
+        internal EventSourceCreationData(string source, string logName, string machineName) : this(source, logName)
         {
             MachineName = machineName;
         }
@@ -27,7 +24,7 @@ namespace System.Diagnostics
         private EventSourceCreationData(string source, string logName, string machineName,
                                           string messageResourceFile, string parameterResourceFile,
                                           string categoryResourceFile, short categoryCount)
-                                          :this(source,logName,machineName)
+                                          : this(source, logName, machineName)
 
         {
             MessageResourceFile = messageResourceFile;
