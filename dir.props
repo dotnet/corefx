@@ -31,6 +31,7 @@
     <PackageOutputRoot Condition="'$(PackageOutputRoot)'==''">$(BinDir)packages/</PackageOutputRoot>
 
     <!-- Input Directories -->
+    <PackagesDir>$(DotNetRestorePackagesPath)</PackagesDir>
     <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir)packages/</PackagesDir>
     <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
     <IlasmToolPath>$(ToolsDir)ilasm/ilasm</IlasmToolPath>
@@ -55,8 +56,12 @@
   <!-- Provides package dependency version properties and verification/auto-upgrade configuration -->
   <Import Project="$(MSBuildThisFileDirectory)dependencies.props" />
 
+  <ItemGroup>
+    <DotnetSourceList Include="$(DotNetSourceBuildRestoreSources)" />
+  </ItemGroup>
+
   <!-- list of nuget package sources passed to nuget restore -->
-  <ItemGroup Condition="'$(ExcludeInternetFeeds)' != 'true'">
+  <ItemGroup Condition="'$(DotNetBuildOffline)' != 'true'">
     <!-- Example to consume local CoreCLR package:
          /p:OverridePackageSource=C:\coreclr\bin\Product\Windows_NT.x64.Debug\.nuget\pkg
     -->
