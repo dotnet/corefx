@@ -85,7 +85,7 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.WaitCommEvent.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.WaitCommEvent.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFile.cs">
+    <Compile Condition="'$(TargetGroup)' != 'uap'" Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFile.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.CreateFile.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.ReadFile_SafeHandle_IntPtr.cs">
