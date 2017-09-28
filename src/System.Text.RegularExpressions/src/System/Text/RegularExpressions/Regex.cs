@@ -948,19 +948,19 @@ namespace System.Text.RegularExpressions
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "assemblyname", Justification = "Microsoft: already shipped since v1 - can't fix without causing a breaking change")]
         public static void CompileToAssembly(RegexCompilationInfo[] regexinfos, AssemblyName assemblyname)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.PlatformNotSupported_CompileToAssembly);
         }
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "assemblyname", Justification = "Microsoft: already shipped since v1 - can't fix without causing a breaking change")]
         public static void CompileToAssembly(RegexCompilationInfo[] regexinfos, AssemblyName assemblyname, CustomAttributeBuilder[] attributes)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.PlatformNotSupported_CompileToAssembly);
         }
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "assemblyname", Justification = "Microsoft: already shipped since v1 - can't fix without causing a breaking change")]
         public static void CompileToAssembly(RegexCompilationInfo[] regexinfos, AssemblyName assemblyname, CustomAttributeBuilder[] attributes, string resourceFile)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.PlatformNotSupported_CompileToAssembly);
         }
 #endif
 

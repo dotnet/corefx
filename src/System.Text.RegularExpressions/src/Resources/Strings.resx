@@ -145,6 +145,9 @@
   <data name="OnlyAllowedOnce" xml:space="preserve">
     <value>This operation is only allowed once per object.</value>
   </data>
+  <data name="PlatformNotSupported_CompileToAssembly" xml:space="preserve">
+    <value>This platform does not support writing compiled regular expressions to an assembly.</value>
+  </data>
   <data name="QuantifyAfterNothing" xml:space="preserve">
     <value>Quantifier {x,y} following nothing.</value>
   </data>
