@@ -243,7 +243,7 @@ namespace System.Diagnostics
         // Cache a single buffer for use in GetProcessInfos().
         private static long[] CachedBuffer;
 
-        internal static ProcessInfo[] GetProcessInfos(int processId = AllProcessIds)
+        internal static ProcessInfo[] GetProcessInfos(Predicate<int> processIdFilter = null)
         {
             int requiredSize = 0;
             int status;
@@ -294,7 +294,7 @@ namespace System.Diagnostics
                 }
 
                 // Parse the data block to get process information
-                processInfos = GetProcessInfos(bufferHandle.AddrOfPinnedObject(), processId);
+                processInfos = GetProcessInfos(bufferHandle.AddrOfPinnedObject(), processIdFilter);
             }
             finally
             {

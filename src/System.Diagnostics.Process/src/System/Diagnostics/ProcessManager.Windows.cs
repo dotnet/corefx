@@ -75,7 +75,7 @@ namespace System.Diagnostics
             else
             {
                 // local case: do not use performance counter and also attempt to get the matching (by pid) process only
-                ProcessInfo[] processInfos = NtProcessInfoHelper.GetProcessInfos(processId);
+                ProcessInfo[] processInfos = NtProcessInfoHelper.GetProcessInfos(pid => pid == processId);
                 if (processInfos.Length == 1)
                 {
                     return processInfos[0];
@@ -662,8 +662,6 @@ namespace System.Diagnostics
 
     internal static partial class NtProcessInfoHelper
     {
-        private const int AllProcessIds = -1;
-
         private static int GetNewBufferSize(int existingBufferSize, int requiredSize)
         {
             if (requiredSize == 0)
@@ -701,7 +699,7 @@ namespace System.Diagnostics
         private const int DefaultCachedBufferSize = 128 * 1024;
 #endif
 
-        private static unsafe ProcessInfo[] GetProcessInfos(IntPtr dataPtr, int processId)
+        private static unsafe ProcessInfo[] GetProcessInfos(IntPtr dataPtr, Predicate<int> processIdFilter)
         {
             // Use a dictionary to avoid duplicate entries if any
             // 60 is a reasonable number for processes on a normal machine.
@@ -716,8 +714,7 @@ namespace System.Diagnostics
 
                 // Process ID shouldn't overflow. OS API GetCurrentProcessID returns DWORD.
                 var processInfoProcessId = pi.UniqueProcessId.ToInt32();
-                Debug.Assert(processInfoProcessId != AllProcessIds, $"Any process ID is expected to be zero or greater so it should never match our magic number {AllProcessIds}");
-                if (processId == AllProcessIds || processId == processInfoProcessId)
+                if (processIdFilter == null || processIdFilter(processInfoProcessId))
                 {
                     // get information for a process
                     ProcessInfo processInfo = new ProcessInfo();

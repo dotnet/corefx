@@ -77,7 +77,7 @@ namespace System.Diagnostics
 
     internal static partial class NtProcessInfoHelper
     {
-        internal static ProcessInfo[] GetProcessInfos(int processId = AllProcessIds)
+        internal static ProcessInfo[] GetProcessInfos(Predicate<int> processIdFilter = null)
         {
             throw new PlatformNotSupportedException(SR.GetProcessInfoNotSupported); // NtDll.NtQuerySystemInformation is not available in Uap
         }
