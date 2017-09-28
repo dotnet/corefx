@@ -2,29 +2,29 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Runtime.InteropServices;
+using System.ComponentModel;
+using System.Diagnostics;
+using System;
+using Microsoft.Win32;
+using Microsoft.Win32.SafeHandles;
+using System.IO;
+using System.Collections;
+using System.Collections.Specialized;
+using System.Globalization;
+using System.ComponentModel.Design;
+using System.Security;
+using System.Security.Permissions;
+using System.Reflection;
+using System.Runtime.Versioning;
+using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
+
 namespace System.Diagnostics
 {
-    using System.Text;
-    using System.Text.RegularExpressions;
-    using System.Threading;
-    using System.Runtime.InteropServices;
-    using System.ComponentModel;
-    using System.Diagnostics;
-    using System;
-    using Microsoft.Win32;
-    using Microsoft.Win32.SafeHandles;
-    using System.IO;
-    using System.Collections;
-    using System.Collections.Specialized;
-    using System.Globalization;
-    using System.ComponentModel.Design;
-    using System.Security;
-    using System.Security.Permissions;
-    using System.Reflection;
-    using System.Runtime.Versioning;
-    using System.Runtime.CompilerServices;
-    using System.Diagnostics.CodeAnalysis;
-
     [
     DefaultEvent("EntryWritten"),
     //InstallerType("System.Diagnostics.EventLogInstaller, " + AssemblyRef.SystemConfigurationInstall),
@@ -32,7 +32,6 @@ namespace System.Diagnostics
     ]
     public class EventLog : Component, ISupportInitialize
     {
-
         private const string EventLogKey = "SYSTEM\\CurrentControlSet\\Services\\EventLog";
         internal const string DllName = "EventLogMessages.dll";
         private const string eventLogMutexName = "netfxeventlog.1.0";
@@ -470,7 +469,6 @@ namespace System.Diagnostics
                         sourceKey.Flush();
                         sourceKey.Close();
                     }
-
                     // Revert registry and environment permission asserts
                     CodeAccessPermission.RevertAssert();
                 }
@@ -492,7 +490,6 @@ namespace System.Diagnostics
 
         public static void Delete(string logName, string machineName)
         {
-
             if (!SyntaxCheck.CheckMachineName(machineName))
                 throw new ArgumentException(SR.InvalidParameterFormat, nameof(machineName));
             if (logName == null || logName.Length == 0)
@@ -649,7 +646,6 @@ namespace System.Diagnostics
                         key.Flush();
                         key.Close();
                     }
-
                     // Revert registry and environment permission asserts
                     CodeAccessPermission.RevertAssert();
                 }
@@ -944,7 +940,6 @@ namespace System.Diagnostics
 
         public static string LogNameFromSourceName(string source, string machineName)
         {
-
             return _InternalLogNameFromSourceName(source, machineName);
         }
 
@@ -1165,7 +1160,6 @@ namespace System.Diagnostics
 
             return msg;
         }
-
 
         // CharIsPrintable used to be Char.IsPrintable, but Jay removed it and
         // is forcing people to use the Unicode categories themselves.  Copied

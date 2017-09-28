@@ -2,22 +2,22 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Text;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.ComponentModel;
+using System.Diagnostics;
+using Microsoft.Win32;
+using Microsoft.Win32.SafeHandles;
+using System;
+using System.Security;
+using System.Security.Permissions;
+using System.IO;
+using System.Globalization;
+using System.Runtime.Versioning;
+
 namespace System.Diagnostics
 {
-    using System.Text;
-    using System.Runtime.InteropServices;
-    using System.Runtime.Serialization;
-    using System.ComponentModel;
-    using System.Diagnostics;
-    using Microsoft.Win32;
-    using Microsoft.Win32.SafeHandles;
-    using System;
-    using System.Security;
-    using System.Security.Permissions;
-    using System.IO;
-    using System.Globalization;
-    using System.Runtime.Versioning;
-
     [
     ToolboxItem(false),
     DesignTimeVisible(false),
@@ -71,9 +71,7 @@ namespace System.Diagnostics
             }
         }
 
-        [
-        MonitoringDescription("The binary data associated with this entry in the event log.")
-        ]
+        [MonitoringDescription("The binary data associated with this entry in the event log.")]
         public byte[] Data
         {
             get
@@ -114,9 +112,7 @@ namespace System.Diagnostics
             }
         }
 
-        [
-        MonitoringDescription("An application-specific category number assigned to this entry.")
-        ]
+        [MonitoringDescription("An application-specific category number assigned to this entry.")]
         public short CategoryNumber
         {
             get

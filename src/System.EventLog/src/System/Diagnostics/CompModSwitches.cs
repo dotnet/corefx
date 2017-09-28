@@ -2,30 +2,29 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Configuration.Assemblies;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters;
+using System.Security.Permissions;
+using System.Threading;
+
 namespace System.ComponentModel
 {
-    using System.Configuration.Assemblies;
-    using System.Diagnostics;
-    using System.Runtime.InteropServices;
-    using System.Runtime.Serialization.Formatters;
-    using System.Security.Permissions;
-    using System.Threading;
-
     internal static class CompModSwitches
     {
-
-        private static volatile BooleanSwitch commonDesignerServices;
-        private static volatile TraceSwitch eventLog;
+        private static volatile BooleanSwitch s_commonDesignerServices;
+        private static volatile TraceSwitch s_eventLog;
 
         public static BooleanSwitch CommonDesignerServices
         {
             get
             {
-                if (commonDesignerServices == null)
+                if (s_commonDesignerServices == null)
                 {
-                    commonDesignerServices = new BooleanSwitch("CommonDesignerServices", "Assert if any common designer service is not found.");
+                    s_commonDesignerServices = new BooleanSwitch("CommonDesignerServices", "Assert if any common designer service is not found.");
                 }
-                return commonDesignerServices;
+                return s_commonDesignerServices;
             }
         }
 
@@ -33,11 +32,11 @@ namespace System.ComponentModel
         {
             get
             {
-                if (eventLog == null)
+                if (s_eventLog == null)
                 {
-                    eventLog = new TraceSwitch("EventLog", "Enable tracing for the EventLog component.");
+                    s_eventLog = new TraceSwitch("EventLog", "Enable tracing for the EventLog component.");
                 }
-                return eventLog;
+                return s_eventLog;
             }
         }
 

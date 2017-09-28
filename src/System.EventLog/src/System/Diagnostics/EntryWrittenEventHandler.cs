@@ -4,9 +4,5 @@
 
 namespace System.Diagnostics
 {
-
-    using System.Diagnostics;
-    using System;
-
     public delegate void EntryWrittenEventHandler(object sender, EntryWrittenEventArgs e);
 }

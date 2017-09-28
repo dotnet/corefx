@@ -9,78 +9,45 @@ namespace System.Diagnostics
 {
     public class EventSourceCreationData
     {
-        private string _logName = "Application";
-        private string _machineName = ".";
-        private string _source;
-        private string _messageResourceFile;
-        private string _parameterResourceFile;
-        private string _categoryResourceFile;
         private int _categoryCount;
 
         private EventSourceCreationData() { }
 
         public EventSourceCreationData(string source, string logName)
         {
-            _source = source;
-            _logName = logName;
+            Source = source;
+            LogName = logName;
         }
 
-        internal EventSourceCreationData(string source, string logName, string machineName)
+        internal EventSourceCreationData(string source, string logName, string machineName): this(source, logName)
         {
-            _source = source;
-            _logName = logName;
-            _machineName = machineName;
+            MachineName = machineName;
         }
 
         private EventSourceCreationData(string source, string logName, string machineName,
                                           string messageResourceFile, string parameterResourceFile,
                                           string categoryResourceFile, short categoryCount)
+                                          :this(source,logName,machineName)
+
         {
-            _source = source;
-            _logName = logName;
-            _machineName = machineName;
-            _messageResourceFile = messageResourceFile;
-            _parameterResourceFile = parameterResourceFile;
-            _categoryResourceFile = categoryResourceFile;
+            MessageResourceFile = messageResourceFile;
+            ParameterResourceFile = parameterResourceFile;
+            CategoryResourceFile = categoryResourceFile;
             CategoryCount = categoryCount;
         }
 
 
-        public string LogName
-        {
-            get { return _logName; }
-            set { _logName = value; }
-        }
+        public string LogName { get; set; } = "Application";
 
-        public string MachineName
-        {
-            get { return _machineName; }
-            set { _machineName = value; }
-        }
+        public string MachineName { get; set; } = ".";
 
-        public string Source
-        {
-            get { return _source; }
-            set { _source = value; }
-        }
+        public string Source { get; set; }
 
-        public string MessageResourceFile
-        {
-            get { return _messageResourceFile; }
-            set { _messageResourceFile = value; }
-        }
+        public string MessageResourceFile { get; set; }
 
-        public string ParameterResourceFile
-        {
-            get { return _parameterResourceFile; }
-            set { _parameterResourceFile = value; }
-        }
+        public string ParameterResourceFile { get; set; }
 
-        public string CategoryResourceFile
-        {
-            get { return _categoryResourceFile; }
-            set { _categoryResourceFile = value; }
-        }
+        public string CategoryResourceFile { get; set; }
 
         public int CategoryCount
         {

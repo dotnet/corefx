@@ -8,7 +8,6 @@ using System.Security;
 
 namespace System.Diagnostics
 {
-
     public class EventInstance
     {
         private int _categoryNumber;
@@ -32,7 +31,7 @@ namespace System.Diagnostics
             set
             {
                 if (value > UInt16.MaxValue || value < 0)
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(CategoryId));
 
                 _categoryNumber = value;
             }

@@ -4,18 +4,14 @@
 
 namespace System.Diagnostics
 {
-
-    using System.Diagnostics;
-    using System;
-    using System.ComponentModel;
-
     public class EntryWrittenEventArgs : EventArgs
     {
-        private EventLogEntry entry;
+        private readonly EventLogEntry entry;
 
         public EntryWrittenEventArgs()
         {
         }
+
         public EntryWrittenEventArgs(EventLogEntry entry)
         {
             this.entry = entry;
@@ -25,7 +21,7 @@ namespace System.Diagnostics
         {
             get
             {
-                return this.entry;
+                return entry;
             }
         }
     }

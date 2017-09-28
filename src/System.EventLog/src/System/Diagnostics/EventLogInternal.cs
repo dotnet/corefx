@@ -2,33 +2,31 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Runtime.InteropServices;
+using System.ComponentModel;
+using System.Diagnostics;
+using System;
+using Microsoft.Win32;
+using Microsoft.Win32.SafeHandles;
+using System.IO;
+using System.Collections;
+using System.Collections.Specialized;
+using System.Globalization;
+using System.ComponentModel.Design;
+using System.Security;
+using System.Security.Permissions;
+using System.Reflection;
+using System.Runtime.Versioning;
+using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
+
 namespace System.Diagnostics
 {
-    using System.Text;
-    using System.Text.RegularExpressions;
-    using System.Threading;
-    using System.Runtime.InteropServices;
-    using System.ComponentModel;
-    using System.Diagnostics;
-    using System;
-    using Microsoft.Win32;
-    using Microsoft.Win32.SafeHandles;
-    using System.IO;
-    using System.Collections;
-    using System.Collections.Specialized;
-    using System.Globalization;
-    using System.ComponentModel.Design;
-    using System.Security;
-    using System.Security.Permissions;
-    using System.Reflection;
-    using System.Runtime.Versioning;
-    using System.Runtime.CompilerServices;
-    using System.Diagnostics.CodeAnalysis;
-
-
     internal class EventLogInternal : IDisposable, ISupportInitialize
     {
-
         private EventLogEntryCollection entriesCollection;
         internal string logName;
         // used in monitoring for event postings.
@@ -255,17 +253,10 @@ namespace System.Diagnostics
             get
             {
                 string currentMachineName = this.machineName;
-                if (logName == null || logName.Length == 0)
-                {
-                    EventLogPermission permission = new EventLogPermission(EventLogPermissionAccess.Administer, currentMachineName);
-                    permission.Demand();
-                }
-
                 return GetLogName(currentMachineName);
             }
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2103:ReviewImperativeSecurity", Justification = "matell: Safe, machineName doesn't change")]
         private string GetLogName(string currentMachineName)
         {
             if ((logName == null || logName.Length == 0) && sourceName != null && sourceName.Length != 0)
@@ -1286,7 +1277,6 @@ namespace System.Diagnostics
 
         private static void StaticCompletionCallback(object context, bool wasSignaled)
         {
-
             LogListeningInfo info = (LogListeningInfo)context;
             if (info == null)
                 return;
