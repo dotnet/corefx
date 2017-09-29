@@ -6,11 +6,7 @@ using System.Reflection;
 using System;
 
 
-#if XMLSERIALIZERGENERATOR
-namespace Microsoft.XmlSerializer.Generator
-#else
 namespace System.Xml.Serialization
-#endif
 {
     /// <internalonly/>
     public class XmlMemberMapping
