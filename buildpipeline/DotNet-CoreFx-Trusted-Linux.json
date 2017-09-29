@@ -463,7 +463,7 @@
       "value": "microsoft/dotnet-buildtools-prereqs"
     },
     "PB_DockerTag": {
-      "value": "debian82_prereqs_2",
+      "value": "centos-7-d485f41-20173404063424",
       "allowOverride": true
     },
     "PB_CloudDropAccountName": {
