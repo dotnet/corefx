@@ -29,8 +29,8 @@ namespace Microsoft.XmlSerializer.Generator
             bool force = false;
             bool proxyOnly = false;
             bool disableRun = true;
-            bool nologo = false;
-            bool parsableerrors = false;
+            bool noLogo = false;
+            bool parsableErrors = false;
             bool silent = false;
             bool warnings = false;
 
@@ -96,7 +96,7 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "nologo"))
                     {
-                        nologo = true;
+                        noLogo = true;
                     }
                     else if (ArgumentMatch(arg, "silent"))
                     {
@@ -104,7 +104,7 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "parsableerrors"))
                     {
-                        parsableerrors = true;
+                        parsableErrors = true;
                     }
                     else if (ArgumentMatch(arg, "verbose"))
                     {
@@ -128,7 +128,7 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                 }
 
-                if (!nologo)
+                if (!noLogo)
                 {
                     WriteHeader();
                 }
@@ -137,7 +137,7 @@ namespace Microsoft.XmlSerializer.Generator
                 {
                     foreach (string err in errs)
                     {
-                        Console.Error.WriteLine(FormatMessage(parsableerrors, true, SR.Format(SR.Warning, err)));
+                        Console.Error.WriteLine(FormatMessage(parsableErrors, true, SR.Format(SR.Warning, err)));
                     }
                 }
 
@@ -145,7 +145,7 @@ namespace Microsoft.XmlSerializer.Generator
                 {
                     if (assembly == null)
                     {
-                        Console.Error.WriteLine(FormatMessage(parsableerrors, false, SR.Format(SR.ErrMissingRequiredArgument, SR.Format(SR.ErrAssembly, "assembly"))));
+                        Console.Error.WriteLine(FormatMessage(parsableErrors, false, SR.Format(SR.ErrMissingRequiredArgument, SR.Format(SR.ErrAssembly, "assembly"))));
                     }
 
                     WriteHelp();
@@ -159,7 +159,7 @@ namespace Microsoft.XmlSerializer.Generator
                     return 0;
                 }
 
-                GenerateFile(types, assembly, proxyOnly, silent, warnings, force, codePath, parsableerrors);
+                GenerateFile(types, assembly, proxyOnly, silent, warnings, force, codePath, parsableErrors);
             }
             catch (Exception e)
             {
@@ -168,7 +168,7 @@ namespace Microsoft.XmlSerializer.Generator
                     throw;
                 }
 
-                WriteError(e, parsableerrors);
+                WriteError(e, parsableErrors);
                 return 1;
             }
 
