@@ -25,7 +25,11 @@ namespace System.Xml.Serialization
     using System.Xml;
 
     ///<internalonly/>
+#if XMLSERIALIZERGENERATOR
+    internal abstract class XmlSerializationWriter : XmlSerializationGeneratedCode
+#else
     public abstract class XmlSerializationWriter : XmlSerializationGeneratedCode
+#endif
     {
         private XmlWriter _w;
         private XmlSerializerNamespaces _namespaces;

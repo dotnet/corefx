@@ -14,7 +14,7 @@ namespace Microsoft.XmlSerializer.Generator
 {
     public class Sgen
     {
-        public static int Main(string[] args)
+        static int Main(string[] args)
         {
             Sgen sgen = new Sgen();
             return sgen.Run(args);
