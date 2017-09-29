@@ -697,18 +697,16 @@ namespace System.ServiceModel.Syndication.Tests
             // *** ASSERT *** \\
             Assert.True(!res.LastUpdatedTime.Equals(new DateTimeOffset()));
         }
-
-        //failed
+        
         [Fact]
         public static void AtomEntryPositiveTest()
         {
             string filePath = @"brief-entry-noerror.xml";
             string serializeFilePath = Path.GetTempFileName();
-
-            XmlReader reader = XmlReader.Create(filePath , new XmlReaderSettings() {Async=true});
-            Atom10ItemFormatter atomformatter = new Atom10ItemFormatter();
+            
             try
             {
+                XmlReader reader = XmlReader.Create(filePath , new XmlReaderSettings() {Async=true});
                 Task<SyndicationItem> task = SyndicationItem.LoadAsync(reader);
                 Task.WhenAll(task);
                 SyndicationItem feedObjct = task.Result;
@@ -720,6 +718,8 @@ namespace System.ServiceModel.Syndication.Tests
 
                 //TODO:
                 // compare file filePath and serializeFilePath
+                XmlDiff diff = new XmlDiff();
+                Assert.True(diff.Compare(filePath, serializeFilePath));
             }
             finally
             {
@@ -749,17 +749,15 @@ namespace System.ServiceModel.Syndication.Tests
             }
         }
 
-        //pass
         [Fact]
         public static void AtomFeedPositiveTest()
         {
             string filePath = @"absolute_rel.xml";
             string serializeFilePath = Path.GetTempFileName();
 
-            XmlReader reader = XmlReader.Create(filePath, new XmlReaderSettings() { Async = true });
-            Atom10ItemFormatter atomformatter = new Atom10ItemFormatter();
             try
             {
+                XmlReader reader = XmlReader.Create(filePath, new XmlReaderSettings() { Async = true });
                 CancellationToken ct = new CancellationToken();
                 Task<SyndicationFeed> task = SyndicationFeed.LoadAsync(reader, ct);
                 Task.WhenAll(task);
@@ -769,6 +767,9 @@ namespace System.ServiceModel.Syndication.Tests
                 Atom10FeedFormatter f = new Atom10FeedFormatter(feedObjct);
                 f.WriteToAsync(writer,ct).GetAwaiter().GetResult();
                 writer.Close();
+
+                XmlDiff diff = new XmlDiff();
+                Assert.True(diff.Compare(filePath, serializeFilePath));
             }
             finally
             {
