@@ -40,7 +40,7 @@ namespace System.Buffers
         /// <exception cref="System.ArgumentNullException">
         /// Throw when pinned pointer is null.
         /// </exception>
-        public void AddOffset(int offset)
+        internal void AddOffset(int offset)
         {
             if (_pointer == null)
             {
