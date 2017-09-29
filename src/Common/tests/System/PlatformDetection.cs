@@ -161,6 +161,7 @@ namespace System
         public static bool IsNotFedoraOrRedHatOrCentos => !IsDistroAndVersion("fedora") && !IsDistroAndVersion("rhel") && !IsDistroAndVersion("centos");
 
         public static bool IsFedora => IsDistroAndVersion("fedora");
+        public static bool IsRedHat69 => IsDistroAndVersion("rhel", "6.9") || IsDistroAndVersion("rhl", "6.9");
 
         private static bool GetIsWindowsSubsystemForLinux()
         {
