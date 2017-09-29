@@ -13,8 +13,9 @@ namespace System.IO.Pipes.Tests
 {
     public partial class NamedPipeTest_RunAsClient : RemoteExecutorTestBase
     {
-        public static bool IsNotWinRTOrIsWindows10Version16256OrGreater => PlatformDetection.IsNotWinRTSupported || PlatformDetection.IsWindows10Version16256OrGreater;
+        public static bool IsNotWinRTOrIsWindows10Version16256OrGreater => PlatformDetection.IsNotInAppContainer || PlatformDetection.IsWindows10Version16256OrGreater;
 
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/24318")]
         [ConditionalFact(nameof(IsNotWinRTOrIsWindows10Version16256OrGreater))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes
         public async Task RunAsClient_Windows()

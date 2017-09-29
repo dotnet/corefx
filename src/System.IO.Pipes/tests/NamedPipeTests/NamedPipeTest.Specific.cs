@@ -16,7 +16,7 @@ namespace System.IO.Pipes.Tests
     /// </summary>
     public class NamedPipeTest_Specific : NamedPipeTestBase
     {
-        public static bool IsNotWinRTOrIsWindows10Version16256OrGreater => PlatformDetection.IsNotWinRTSupported || PlatformDetection.IsWindows10Version16256OrGreater;
+        public static bool IsNotWinRTOrIsWindows10Version16256OrGreater => PlatformDetection.IsNotInAppContainer || PlatformDetection.IsWindows10Version16256OrGreater;
 
         [ConditionalFact(nameof(IsNotWinRTOrIsWindows10Version16256OrGreater))]
         public void InvalidConnectTimeout_Throws_ArgumentOutOfRangeException()
@@ -190,6 +190,7 @@ namespace System.IO.Pipes.Tests
             }
         }
 
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/24318")]
         [ConditionalFact(nameof(IsNotWinRTOrIsWindows10Version16256OrGreater))]
         [PlatformSpecific(TestPlatforms.Windows)] // Win32 P/Invokes to verify the user name
         public async Task Windows_GetImpersonationUserName_Succeed()
