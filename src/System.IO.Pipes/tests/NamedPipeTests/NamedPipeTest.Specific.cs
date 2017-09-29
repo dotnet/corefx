@@ -80,7 +80,7 @@ namespace System.IO.Pipes.Tests
         [InlineData(PipeOptions.None)]
         [InlineData(PipeOptions.Asynchronous)]
         [PlatformSpecific(TestPlatforms.Windows)] // Unix currently doesn't support message mode
-        public void Windows_MessagePipeTransissionMode(PipeOptions serverOptions)
+        public void Windows_MessagePipeTransmissionMode(PipeOptions serverOptions)
         {
             byte[] msg1 = new byte[] { 5, 7, 9, 10 };
             byte[] msg2 = new byte[] { 2, 4 };
@@ -236,7 +236,7 @@ namespace System.IO.Pipes.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)] // Unix currently doesn't support message mode
-        public void Unix_MessagePipeTransissionMode()
+        public void Unix_MessagePipeTransmissionMode()
         {
             Assert.Throws<PlatformNotSupportedException>(() => new NamedPipeServerStream(GetUniquePipeName(), PipeDirection.InOut, 1, PipeTransmissionMode.Message));
         }
