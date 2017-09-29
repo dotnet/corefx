@@ -901,7 +901,7 @@ namespace System.Net.Security
         {
             if (NetEventSource.IsEnabled)
             {
-                NetEventSource.Enter(this, buffer, 0, buffer.Length);
+                NetEventSource.Enter(this, buffer, buffer.Length);
                 NetEventSource.DumpBuffer(this, buffer);
             }
 
