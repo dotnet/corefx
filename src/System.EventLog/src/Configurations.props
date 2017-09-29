@@ -4,6 +4,7 @@
     <PackageConfigurations>
       netcoreapp;
       netfx;
+      netstandard;
     </PackageConfigurations>
   </PropertyGroup>
 </Project>

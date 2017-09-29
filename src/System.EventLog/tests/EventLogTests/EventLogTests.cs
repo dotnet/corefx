@@ -9,7 +9,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void EventLogReIntializationException()
         {
-            var eventLog = new EventLog();
+            EventLog eventLog = new EventLog();
             eventLog.BeginInit();
             Assert.Throws<InvalidOperationException>(() => eventLog.BeginInit());
             eventLog.Close();

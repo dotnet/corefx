@@ -19,7 +19,6 @@ namespace System.Diagnostics
 {
     [
     DefaultEvent("EntryWritten"),
-    //InstallerType("System.Diagnostics.EventLogInstaller, " + AssemblyRef.SystemConfigurationInstall),
     MonitoringDescription("Provides interaction with Windows event logs.")
     ]
     public class EventLog : Component, ISupportInitialize
@@ -27,61 +26,27 @@ namespace System.Diagnostics
         private const string EventLogKey = "SYSTEM\\CurrentControlSet\\Services\\EventLog";
         internal const string DllName = "EventLogMessages.dll";
         private const string eventLogMutexName = "netfxeventlog.1.0";
-
         private const int DefaultMaxSize = 512 * 1024;
         private const int DefaultRetention = 7 * SecondsPerDay;
         private const int SecondsPerDay = 60 * 60 * 24;
+        
+        private EventLogInternal _underlyingEventLog;
 
-        private EventLogInternal m_underlyingEventLog;
-
-        private static volatile bool s_CheckedOsVersion;
-        private static volatile bool s_SkipRegPatch;
-
-        private static bool SkipRegPatch
-        {
-            get
-            {
-                if (!s_CheckedOsVersion)
-                {
-                    OperatingSystem os = Environment.OSVersion;
-                    s_SkipRegPatch = (os.Platform == PlatformID.Win32NT) && (os.Version.Major > 5);
-                    s_CheckedOsVersion = true;
-                }
-                return s_SkipRegPatch;
-            }
-        }
-
-        internal static PermissionSet _UnsafeGetAssertPermSet()
-        {
-            PermissionSet permissionSet = new PermissionSet(PermissionState.None);
-
-            RegistryPermission registryPermission = new RegistryPermission(PermissionState.Unrestricted);
-            permissionSet.AddPermission(registryPermission);
-
-            EnvironmentPermission environmentPermission = new EnvironmentPermission(PermissionState.Unrestricted);
-            permissionSet.AddPermission(environmentPermission);
-
-            SecurityPermission securityPermission = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
-            permissionSet.AddPermission(securityPermission);
-
-            return permissionSet;
-        }
-
-        public EventLog() : this("", ".", "")
+        public EventLog() : this(string.Empty, ".", string.Empty)
         {
         }
 
-        public EventLog(string logName) : this(logName, ".", "")
+        public EventLog(string logName) : this(logName, ".", string.Empty)
         {
         }
 
-        public EventLog(string logName, string machineName) : this(logName, machineName, "")
+        public EventLog(string logName, string machineName) : this(logName, machineName, string.Empty)
         {
         }
 
         public EventLog(string logName, string machineName, string source)
         {
-            m_underlyingEventLog = new EventLogInternal(logName, machineName, source, this);
+            _underlyingEventLog = new EventLogInternal(logName, machineName, source, this);
         }
 
         [Browsable(false)]
@@ -91,7 +56,7 @@ namespace System.Diagnostics
         {
             get
             {
-                return m_underlyingEventLog.Entries;
+                return _underlyingEventLog.Entries;
             }
         }
 
@@ -100,7 +65,7 @@ namespace System.Diagnostics
         {
             get
             {
-                return m_underlyingEventLog.LogDisplayName;
+                return _underlyingEventLog.LogDisplayName;
             }
         }
 
@@ -113,19 +78,19 @@ namespace System.Diagnostics
         {
             get
             {
-                return m_underlyingEventLog.Log;
+                return _underlyingEventLog.Log;
             }
             set
             {
-                EventLogInternal newLog = new EventLogInternal(value, m_underlyingEventLog.MachineName, m_underlyingEventLog.Source, this);
-                EventLogInternal oldLog = m_underlyingEventLog;
+                EventLogInternal newLog = new EventLogInternal(value, _underlyingEventLog.MachineName, _underlyingEventLog.Source, this);
+                EventLogInternal oldLog = _underlyingEventLog;
 
                 if (oldLog.EnableRaisingEvents)
                 {
                     newLog.onEntryWrittenHandler = oldLog.onEntryWrittenHandler;
                     newLog.EnableRaisingEvents = true;
                 }
-                m_underlyingEventLog = newLog;
+                _underlyingEventLog = newLog;
                 oldLog.Close();
             }
         }
@@ -138,19 +103,19 @@ namespace System.Diagnostics
         {
             get
             {
-                return m_underlyingEventLog.MachineName;
+                return _underlyingEventLog.MachineName;
             }
             set
             {
-                EventLogInternal newLog = new EventLogInternal(m_underlyingEventLog.logName, value, m_underlyingEventLog.sourceName, this);
-                EventLogInternal oldLog = m_underlyingEventLog;
+                EventLogInternal newLog = new EventLogInternal(_underlyingEventLog.logName, value, _underlyingEventLog.sourceName, this);
+                EventLogInternal oldLog = _underlyingEventLog;
 
                 if (oldLog.EnableRaisingEvents)
                 {
                     newLog.onEntryWrittenHandler = oldLog.onEntryWrittenHandler;
                     newLog.EnableRaisingEvents = true;
                 }
-                m_underlyingEventLog = newLog;
+                _underlyingEventLog = newLog;
                 oldLog.Close();
             }
         }
@@ -158,45 +123,32 @@ namespace System.Diagnostics
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
         [ComVisible(false)]
-        public long MaximumKilobytes
+        public long MaximumKilobytes 
         {
-            get
-            {
-                return m_underlyingEventLog.MaximumKilobytes;
-            }
-
-            set
-            {
-                m_underlyingEventLog.MaximumKilobytes = value;
-            }
+            get => _underlyingEventLog.MaximumKilobytes;
+            set => _underlyingEventLog.MaximumKilobytes = value;
+            
         }
 
         [Browsable(false)]
         [ComVisible(false)]
         public OverflowAction OverflowAction
         {
-            get
-            {
-                return m_underlyingEventLog.OverflowAction;
-            }
+            get => _underlyingEventLog.OverflowAction;
+            
         }
 
         [Browsable(false)]
         [ComVisible(false)]
         public int MinimumRetentionDays
         {
-            get
-            {
-                return m_underlyingEventLog.MinimumRetentionDays;
-            }
+            get => _underlyingEventLog.MinimumRetentionDays;
         }
 
         internal bool ComponentDesignMode
         {
-            get
-            {
-                return this.DesignMode;
-            }
+            get => this.DesignMode;
+            
         }
 
         internal object ComponentGetService(Type service)
@@ -209,14 +161,8 @@ namespace System.Diagnostics
         [DefaultValue(false)]
         public bool EnableRaisingEvents
         {
-            get
-            {
-                return m_underlyingEventLog.EnableRaisingEvents;
-            }
-            set
-            {
-                m_underlyingEventLog.EnableRaisingEvents = value;
-            }
+            get => _underlyingEventLog.EnableRaisingEvents;
+            set => _underlyingEventLog.EnableRaisingEvents = value;
         }
 
         [Browsable(false)]
@@ -224,15 +170,9 @@ namespace System.Diagnostics
         [MonitoringDescription("The object used to marshal the event handler calls issued as a result of an EventLog change.")]
         public ISynchronizeInvoke SynchronizingObject
         {
-            get
-            {
-                return m_underlyingEventLog.SynchronizingObject;
-            }
+            get => _underlyingEventLog.SynchronizingObject;
 
-            set
-            {
-                m_underlyingEventLog.SynchronizingObject = value;
-            }
+            set => _underlyingEventLog.SynchronizingObject = value;
         }
 
         [ReadOnly(true)]
@@ -242,22 +182,19 @@ namespace System.Diagnostics
         [SettingsBindable(true)]
         public string Source
         {
-            get
-            {
-                return m_underlyingEventLog.Source;
-            }
+            get => _underlyingEventLog.Source;
+            
             set
             {
-                EventLogInternal newLog = new EventLogInternal(m_underlyingEventLog.Log, m_underlyingEventLog.MachineName, CheckAndNormalizeSourceName(value), this);
-                EventLogInternal oldLog = m_underlyingEventLog;
+                EventLogInternal newLog = new EventLogInternal(_underlyingEventLog.Log, _underlyingEventLog.MachineName, CheckAndNormalizeSourceName(value), this);
+                EventLogInternal oldLog = _underlyingEventLog;
 
-                new EventLogPermission(EventLogPermissionAccess.Write, oldLog.machineName).Assert();
                 if (oldLog.EnableRaisingEvents)
                 {
                     newLog.onEntryWrittenHandler = oldLog.onEntryWrittenHandler;
                     newLog.EnableRaisingEvents = true;
                 }
-                m_underlyingEventLog = newLog;
+                _underlyingEventLog = newLog;
                 oldLog.Close();
             }
         }
@@ -267,27 +204,27 @@ namespace System.Diagnostics
         {
             add
             {
-                m_underlyingEventLog.EntryWritten += value;
+                _underlyingEventLog.EntryWritten += value;
             }
             remove
             {
-                m_underlyingEventLog.EntryWritten -= value;
+                _underlyingEventLog.EntryWritten -= value;
             }
         }
 
         public void BeginInit()
         {
-            m_underlyingEventLog.BeginInit();
+            _underlyingEventLog.BeginInit();
         }
 
         public void Clear()
         {
-            m_underlyingEventLog.Clear();
+            _underlyingEventLog.Clear();
         }
 
         public void Close()
         {
-            m_underlyingEventLog.Close();
+            _underlyingEventLog.Close();
         }
 
         public static void CreateEventSource(string source, string logName)
@@ -304,7 +241,7 @@ namespace System.Diagnostics
         public static void CreateEventSource(EventSourceCreationData sourceData)
         {
             if (sourceData == null)
-                throw new ArgumentNullException("sourceData");
+                throw new ArgumentNullException(nameof(sourceData));
 
             string logName = sourceData.LogName;
             string source = sourceData.Source;
@@ -340,9 +277,6 @@ namespace System.Diagnostics
                 }
 
                 Debug.WriteLineIf(CompModSwitches.EventLog.TraceVerbose, "CreateEventSource: Getting DllPath");
-
-                PermissionSet permissionSet = _UnsafeGetAssertPermSet();
-                permissionSet.Assert();
 
                 RegistryKey baseKey = null;
                 RegistryKey eventKey = null;
@@ -394,9 +328,6 @@ namespace System.Diagnostics
 
                         logKey = eventKey.CreateSubKey(logName);
 
-                        if (!SkipRegPatch)
-                            logKey.SetValue("Sources", new string[] { logName, source }, RegistryValueKind.MultiString);
-
                         SetSpecialLogRegValues(logKey, logName);
 
                         // A source with the same name as the log has to be created
@@ -410,26 +341,6 @@ namespace System.Diagnostics
                         if (!createLogKey)
                         {
                             SetSpecialLogRegValues(logKey, logName);
-
-                            if (!SkipRegPatch)
-                            {
-                                string[] sources = logKey.GetValue("Sources") as string[];
-                                if (sources == null)
-                                    logKey.SetValue("Sources", new string[] { logName, source }, RegistryValueKind.MultiString);
-                                else
-                                {
-                                    // We have a race with OS EventLog here.
-                                    // OS might update Sources as well. We should avoid writing the 
-                                    // source name if OS beats us.
-                                    if (Array.IndexOf(sources, source) == -1)
-                                    {
-                                        string[] newsources = new string[sources.Length + 1];
-                                        Array.Copy(sources, newsources, sources.Length);
-                                        newsources[sources.Length] = source;
-                                        logKey.SetValue("Sources", newsources, RegistryValueKind.MultiString);
-                                    }
-                                }
-                            }
                         }
 
                         sourceKey = logKey.CreateSubKey(source);
@@ -438,40 +349,17 @@ namespace System.Diagnostics
                 }
                 finally
                 {
-                    if (baseKey != null)
-                        baseKey.Close();
-
-                    if (eventKey != null)
-                        eventKey.Close();
-
-                    if (logKey != null)
-                    {
-                        logKey.Flush();
-                        logKey.Close();
-                    }
-
-                    if (sourceLogKey != null)
-                    {
-                        sourceLogKey.Flush();
-                        sourceLogKey.Close();
-                    }
-
-                    if (sourceKey != null)
-                    {
-                        sourceKey.Flush();
-                        sourceKey.Close();
-                    }
-                    // Revert registry and environment permission asserts
-                    CodeAccessPermission.RevertAssert();
+                    baseKey?.Close();
+                    eventKey?.Close();
+                    logKey?.Close();
+                    sourceLogKey?.Close();
+                    sourceKey?.Close();
                 }
             }
             finally
             {
-                if (mutex != null)
-                {
-                    mutex.ReleaseMutex();
-                    mutex.Close();
-                }
+                 mutex?.ReleaseMutex();
+                 mutex.Close();
             }
         }
 
@@ -491,8 +379,6 @@ namespace System.Diagnostics
 
             //Check environment before even trying to play with the registry
             SharedUtils.CheckEnvironment();
-            PermissionSet permissionSet = _UnsafeGetAssertPermSet();
-            permissionSet.Assert();
 
             RegistryKey eventlogkey = null;
 
@@ -549,17 +435,12 @@ namespace System.Diagnostics
                 }
                 finally
                 {
-                    if (eventlogkey != null)
-                        eventlogkey.Close();
-
-                    // Revert registry and environment permission asserts
-                    CodeAccessPermission.RevertAssert();
+                    eventlogkey?.Close();
                 }
             }
             finally
             {
-                if (mutex != null)
-                    mutex.ReleaseMutex();
+                mutex?.ReleaseMutex();
             }
         }
 
@@ -578,10 +459,6 @@ namespace System.Diagnostics
 
             //Check environment before looking at the registry
             SharedUtils.CheckEnvironment();
-
-            //SECREVIEW: Note that EventLog permission is demanded above.
-            PermissionSet permissionSet = _UnsafeGetAssertPermSet();
-            permissionSet.Assert();
 
             Mutex mutex = null;
             RuntimeHelpers.PrepareConstrainedRegions();
@@ -615,33 +492,10 @@ namespace System.Diagnostics
                     key = FindSourceRegistration(source, machineName, false);
                     key.DeleteSubKeyTree(source);
 
-                    if (!SkipRegPatch)
-                    {
-                        string[] sources = (string[])key.GetValue("Sources");
-                        ArrayList newsources = new ArrayList(sources.Length - 1);
-
-                        for (int i = 0; i < sources.Length; i++)
-                        {
-                            if (sources[i] != source)
-                            {
-                                newsources.Add(sources[i]);
-                            }
-                        }
-                        string[] newsourcesArray = new string[newsources.Count];
-                        newsources.CopyTo(newsourcesArray);
-
-                        key.SetValue("Sources", newsourcesArray, RegistryValueKind.MultiString);
-                    }
                 }
                 finally
                 {
-                    if (key != null)
-                    {
-                        key.Flush();
-                        key.Close();
-                    }
-                    // Revert registry and environment permission asserts
-                    CodeAccessPermission.RevertAssert();
+                    key?.Close();
                 }
             }
             finally
@@ -653,9 +507,9 @@ namespace System.Diagnostics
 
         protected override void Dispose(bool disposing)
         {
-            if (m_underlyingEventLog != null)
+            if (_underlyingEventLog != null)
             {
-                m_underlyingEventLog.Dispose(disposing);
+                _underlyingEventLog.Dispose(disposing);
             }
 
             base.Dispose(disposing);
@@ -663,7 +517,7 @@ namespace System.Diagnostics
 
         public void EndInit()
         {
-            m_underlyingEventLog.EndInit();
+            _underlyingEventLog.EndInit();
         }
 
         public static bool Exists(string logName)
@@ -682,10 +536,6 @@ namespace System.Diagnostics
             //Check environment before looking at the registry
             SharedUtils.CheckEnvironment();
 
-            //SECREVIEW: Note that EventLog permission is demanded above.
-            PermissionSet permissionSet = _UnsafeGetAssertPermSet();
-            permissionSet.Assert();
-
             RegistryKey eventkey = null;
             RegistryKey logKey = null;
 
@@ -700,13 +550,8 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (eventkey != null)
-                    eventkey.Close();
-                if (logKey != null)
-                    logKey.Close();
-
-                // Revert registry and environment permission asserts
-                CodeAccessPermission.RevertAssert();
+                eventkey?.Close();
+                logKey?.Close();
             }
         }
 
@@ -740,9 +585,6 @@ namespace System.Diagnostics
             if (source != null && source.Length != 0)
             {
                 SharedUtils.CheckEnvironment();
-
-                PermissionSet permissionSet = _UnsafeGetAssertPermSet();
-                permissionSet.Assert();
 
                 RegistryKey eventkey = null;
                 try
@@ -809,8 +651,7 @@ namespace System.Diagnostics
                         }
                         finally
                         {
-                            if (sourceKey != null)
-                                sourceKey.Close();
+                            sourceKey?.Close();
                         }
                     }
 
@@ -820,11 +661,7 @@ namespace System.Diagnostics
                 }
                 finally
                 {
-                    if (eventkey != null)
-                        eventkey.Close();
-
-                    // Revert registry and environment permission asserts
-                    CodeAccessPermission.RevertAssert();
+                    eventkey?.Close();
                 }
             }
 
@@ -847,8 +684,6 @@ namespace System.Diagnostics
             SharedUtils.CheckEnvironment();
 
             string[] logNames = new string[0];
-            PermissionSet permissionSet = _UnsafeGetAssertPermSet();
-            permissionSet.Assert();
 
             RegistryKey eventkey = null;
             try
@@ -865,10 +700,7 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (eventkey != null)
-                    eventkey.Close();
-                // Revert registry and environment permission asserts
-                CodeAccessPermission.RevertAssert();
+                eventkey?.Close();
             }
 
             // now create EventLog objects that point to those logs
@@ -903,8 +735,7 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (lmkey != null)
-                    lmkey.Close();
+                lmkey?.Close();
             }
 
             return null;
@@ -948,7 +779,7 @@ namespace System.Diagnostics
             using (RegistryKey key = FindSourceRegistration(source, machineName, true))
             {
                 if (key == null)
-                    return "";
+                    return string.Empty;
                 else
                 {
                     string name = key.Name;
@@ -963,13 +794,13 @@ namespace System.Diagnostics
         [ComVisible(false)]
         public void ModifyOverflowPolicy(OverflowAction action, int retentionDays)
         {
-            m_underlyingEventLog.ModifyOverflowPolicy(action, retentionDays);
+            _underlyingEventLog.ModifyOverflowPolicy(action, retentionDays);
         }
 
         [ComVisible(false)]
         public void RegisterDisplayName(string resourceFile, long resourceId)
         {
-            m_underlyingEventLog.RegisterDisplayName(resourceFile, resourceId);
+            _underlyingEventLog.RegisterDisplayName(resourceFile, resourceId);
         }
 
         private static void SetSpecialLogRegValues(RegistryKey logKey, string logName)
@@ -983,24 +814,6 @@ namespace System.Diagnostics
                 logKey.SetValue("MaxSize", DefaultMaxSize, RegistryValueKind.DWord);
             if (logKey.GetValue("AutoBackupLogFiles") == null)
                 logKey.SetValue("AutoBackupLogFiles", 0, RegistryValueKind.DWord);
-
-            if (!SkipRegPatch)
-            {
-                // In Vista, "retention of events for 'n' days" concept is removed
-                if (logKey.GetValue("Retention") == null)
-                    logKey.SetValue("Retention", DefaultRetention, RegistryValueKind.DWord);
-
-                if (logKey.GetValue("File") == null)
-                {
-                    string filename;
-                    if (logName.Length > 8)
-                        filename = @"%SystemRoot%\System32\config\" + logName.Substring(0, 8) + ".evt";
-                    else
-                        filename = @"%SystemRoot%\System32\config\" + logName + ".evt";
-
-                    logKey.SetValue("File", filename, RegistryValueKind.ExpandString);
-                }
-            }
         }
 
         private static void SetSpecialSourceRegValues(RegistryKey sourceLogKey, EventSourceCreationData sourceData)
@@ -1234,7 +1047,7 @@ namespace System.Diagnostics
         public static void WriteEntry(string source, string message, EventLogEntryType type, int eventID, short category,
                                byte[] rawData)
         {
-            using (EventLogInternal log = new EventLogInternal("", ".", CheckAndNormalizeSourceName(source)))
+            using (EventLogInternal log = new EventLogInternal(string.Empty, ".", CheckAndNormalizeSourceName(source)))
             {
                 log.WriteEntry(message, type, eventID, category, rawData);
             }
@@ -1244,7 +1057,7 @@ namespace System.Diagnostics
                                byte[] rawData)
         {
 
-            m_underlyingEventLog.WriteEntry(message, type, eventID, category, rawData);
+            _underlyingEventLog.WriteEntry(message, type, eventID, category, rawData);
         }
 
         [ComVisible(false)]
@@ -1256,12 +1069,12 @@ namespace System.Diagnostics
         [ComVisible(false)]
         public void WriteEvent(EventInstance instance, byte[] data, params Object[] values)
         {
-            m_underlyingEventLog.WriteEvent(instance, data, values);
+            _underlyingEventLog.WriteEvent(instance, data, values);
         }
 
         public static void WriteEvent(string source, EventInstance instance, params Object[] values)
         {
-            using (EventLogInternal log = new EventLogInternal("", ".", CheckAndNormalizeSourceName(source)))
+            using (EventLogInternal log = new EventLogInternal(string.Empty, ".", CheckAndNormalizeSourceName(source)))
             {
                 log.WriteEvent(instance, null, values);
             }
@@ -1269,7 +1082,7 @@ namespace System.Diagnostics
 
         public static void WriteEvent(string source, EventInstance instance, byte[] data, params Object[] values)
         {
-            using (EventLogInternal log = new EventLogInternal("", ".", CheckAndNormalizeSourceName(source)))
+            using (EventLogInternal log = new EventLogInternal(string.Empty, ".", CheckAndNormalizeSourceName(source)))
             {
                 log.WriteEvent(instance, data, values);
             }

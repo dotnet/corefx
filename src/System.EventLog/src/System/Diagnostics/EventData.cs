@@ -25,7 +25,7 @@ namespace System.Diagnostics
 
         public int CategoryId
         {
-            get { return _categoryNumber; }
+            get => _categoryNumber;
             set
             {
                 if (value > UInt16.MaxValue || value < 0)
@@ -37,12 +37,12 @@ namespace System.Diagnostics
 
         public EventLogEntryType EntryType
         {
-            get { return _entryType; }
+            get => _entryType;
 
             set
             {
                 if (!Enum.IsDefined(typeof(EventLogEntryType), value))
-                    throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(EventLogEntryType));
+                    throw new InvalidEnumArgumentException(nameof(EntryType), (int)value, typeof(EventLogEntryType));
 
                 _entryType = value;
             }
@@ -50,7 +50,7 @@ namespace System.Diagnostics
 
         public long InstanceId
         {
-            get { return _instanceId; }
+            get => _instanceId;
             set
             {
                 if (value > UInt32.MaxValue || value < 0)

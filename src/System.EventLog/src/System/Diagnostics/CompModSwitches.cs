@@ -17,7 +17,7 @@ namespace System.ComponentModel
             {
                 if (s_commonDesignerServices == null)
                 {
-                    s_commonDesignerServices = new BooleanSwitch("CommonDesignerServices", "Assert if any common designer service is not found.");
+                    s_commonDesignerServices = new BooleanSwitch(nameof(CommonDesignerServices), "Assert if any common designer service is not found.");
                 }
                 return s_commonDesignerServices;
             }
@@ -29,7 +29,7 @@ namespace System.ComponentModel
             {
                 if (s_eventLog == null)
                 {
-                    s_eventLog = new TraceSwitch("EventLog", "Enable tracing for the EventLog component.");
+                    s_eventLog = new TraceSwitch(nameof(EventLog), "Enable tracing for the EventLog component.");
                 }
                 return s_eventLog;
             }

@@ -206,8 +206,6 @@ namespace System.Diagnostics
                 {
                     //Check environment before looking at the registry
                     SharedUtils.CheckEnvironment();
-                    PermissionSet permissionSet = EventLog._UnsafeGetAssertPermSet();
-                    permissionSet.Assert();
 
                     RegistryKey logkey = null;
 
@@ -294,9 +292,6 @@ namespace System.Diagnostics
                 // valid range is 64 KB to 4 GB
                 if (value < 64 || value > 0x3FFFC0 || value % 64 != 0)
                     throw new ArgumentOutOfRangeException("MaximumKilobytes", SR.MaximumKilobytesOutOfRange);
-
-                PermissionSet permissionSet = EventLog._UnsafeGetAssertPermSet();
-                permissionSet.Assert();
 
                 long regvalue = value * 1024; // convert to bytes
                 int i = unchecked((int)regvalue);
@@ -1048,9 +1043,6 @@ namespace System.Diagnostics
 
         private object GetLogRegValue(string currentMachineName, string valuename)
         {
-            PermissionSet permissionSet = EventLog._UnsafeGetAssertPermSet();
-            permissionSet.Assert();
-
             RegistryKey logkey = null;
 
             try
@@ -1112,9 +1104,6 @@ namespace System.Diagnostics
 
                 retentionvalue = (long)retentionDays * SecondsPerDay;
             }
-
-            PermissionSet permissionSet = EventLog._UnsafeGetAssertPermSet();
-            permissionSet.Assert();
 
             using (RegistryKey logkey = GetLogRegKey(currentMachineName, true))
                 logkey.SetValue("Retention", retentionvalue, RegistryValueKind.DWord);
@@ -1191,9 +1180,6 @@ namespace System.Diagnostics
         public void RegisterDisplayName(string resourceFile, long resourceId)
         {
             string currentMachineName = this.machineName;
-
-            PermissionSet permissionSet = EventLog._UnsafeGetAssertPermSet();
-            permissionSet.Assert();
 
             using (RegistryKey logkey = GetLogRegKey(currentMachineName, true))
             {
