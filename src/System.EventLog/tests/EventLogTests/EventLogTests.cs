@@ -16,17 +16,6 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
-        public void CheckSourceExistance()
-        {
-            if (!EventLog.SourceExists("MySource"))
-            {
-                EventLog.CreateEventSource("MySource", "MyNewLog");
-            }
-
-            Assert.True(EventLog.SourceExists("MySource"));
-        }
-
-        [ConditionalFact(nameof(IsProcessElevated))]
         public void CLearLogTest()
         {
             if (!EventLog.SourceExists("MySource"))
