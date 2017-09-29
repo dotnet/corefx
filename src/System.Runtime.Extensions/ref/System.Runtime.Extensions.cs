@@ -907,6 +907,7 @@ namespace System
         public virtual int Next(int maxValue) { throw null; }
         public virtual int Next(int minValue, int maxValue) { throw null; }
         public virtual void NextBytes(byte[] buffer) { }
+        public virtual void NextBytes(Span<byte> buffer) { }
         public virtual double NextDouble() { throw null; }
         protected virtual double Sample() { throw null; }
     }
@@ -1222,6 +1223,8 @@ namespace System.IO
         public virtual int Read() { throw null; }
         public virtual int Read(byte[] buffer, int index, int count) { throw null; }
         public virtual int Read(char[] buffer, int index, int count) { throw null; }
+        public virtual int Read(System.Span<byte> destination) { throw null; }
+        public virtual int Read(System.Span<char> destination) { throw null; }
         protected internal int Read7BitEncodedInt() { throw null; }
         public virtual bool ReadBoolean() { throw null; }
         public virtual byte ReadByte() { throw null; }
@@ -1471,8 +1474,10 @@ namespace System.IO
         public virtual int Peek() { throw null; }
         public virtual int Read() { throw null; }
         public virtual int Read(char[] buffer, int index, int count) { throw null; }
+        public virtual int Read(Span<char> destination) { throw null; }
         public virtual System.Threading.Tasks.Task<int> ReadAsync(char[] buffer, int index, int count) { throw null; }
         public virtual int ReadBlock(char[] buffer, int index, int count) { throw null; }
+        public virtual int ReadBlock(Span<char> destination) { throw null; }
         public virtual System.Threading.Tasks.Task<int> ReadBlockAsync(char[] buffer, int index, int count) { throw null; }
         public virtual string ReadLine() { throw null; }
         public virtual System.Threading.Tasks.Task<string> ReadLineAsync() { throw null; }
@@ -1514,6 +1519,7 @@ namespace System.IO
         public virtual void Write(uint value) { }
         [System.CLSCompliantAttribute(false)]
         public virtual void Write(ulong value) { }
+        public virtual void Write(ReadOnlySpan<char> source) { }
         public virtual System.Threading.Tasks.Task WriteAsync(char value) { throw null; }
         public System.Threading.Tasks.Task WriteAsync(char[] buffer) { throw null; }
         public virtual System.Threading.Tasks.Task WriteAsync(char[] buffer, int index, int count) { throw null; }
@@ -1538,6 +1544,7 @@ namespace System.IO
         public virtual void WriteLine(uint value) { }
         [System.CLSCompliantAttribute(false)]
         public virtual void WriteLine(ulong value) { }
+        public virtual void WriteLine(ReadOnlySpan<char> source) { }
         public virtual System.Threading.Tasks.Task WriteLineAsync() { throw null; }
         public virtual System.Threading.Tasks.Task WriteLineAsync(char value) { throw null; }
         public System.Threading.Tasks.Task WriteLineAsync(char[] buffer) { throw null; }

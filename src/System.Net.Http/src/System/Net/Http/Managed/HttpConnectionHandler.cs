@@ -50,7 +50,14 @@ namespace System.Net.Http
             {
                 callback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) =>
                 {
-                    return _settings._serverCertificateCustomValidationCallback(request, certificate as X509Certificate2, chain, sslPolicyErrors);
+                    try
+                    {
+                        return _settings._serverCertificateCustomValidationCallback(request, certificate as X509Certificate2, chain, sslPolicyErrors);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new HttpRequestException(SR.net_http_ssl_connection_failed, e);
+                    }
                 };
             }
 
@@ -82,7 +89,7 @@ namespace System.Net.Http
 
             TransportContext transportContext = null;
 
-            if (uri.Scheme == UriScheme.Https)
+            if (HttpUtilities.IsSupportedSecureScheme(uri.Scheme))
             {
                 SslStream sslStream = await EstablishSslConnection(uri.IdnHost, request, stream).ConfigureAwait(false);
                 stream = sslStream;
