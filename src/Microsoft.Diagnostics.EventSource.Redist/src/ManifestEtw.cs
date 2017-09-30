@@ -21,6 +21,8 @@ namespace Microsoft.Win32
         [SuppressUnmanagedCodeSecurityAttribute()]
         internal static unsafe class ManifestEtw
         {
+// Disable warning about unused fields as these structures are defined by the corresponding Windows APIs.
+#pragma warning disable CS0649
             //
             // ETW Library
             //
@@ -207,6 +209,8 @@ namespace Microsoft.Win32
                 void* OutBuffer,
                 int OutBufferSize,
                 ref int ReturnLength);
+
+#pragma warning restore CS0649
         }
     }
 }
