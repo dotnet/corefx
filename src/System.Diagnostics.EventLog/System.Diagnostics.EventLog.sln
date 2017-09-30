@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26919.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.EventLog", "..\src\System.EventLog.csproj", "{432779B9-3CBD-4871-A7DC-D8A192319DBD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.EventLog", "src\System.Diagnostics.EventLog.csproj", "{432779B9-3CBD-4871-A7DC-D8A192319DBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.EventLog.Tests", "..\tests\System.EventLog.Tests.csproj", "{5B218883-369E-4C3D-8BD0-74843474DCBD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Diagnostics.EventLog.Tests", "tests\System.Diagnostics.EventLog.Tests.csproj", "{5B218883-369E-4C3D-8BD0-74843474DCBD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -3,10 +3,14 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
+    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard'">SR.PlatformNotSupported_EventLog</GeneratePlatformNotSupportedAssemblyMessage>
+    <!-- Although we have a netstandard configuration, we know we are not currently UAP compatible-->
+    <UWPCompatible>false</UWPCompatible>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="System\Diagnostics\CompModSwitches.cs" />
     <Compile Include="System\Diagnostics\EntryWrittenEventArgs.cs" />
     <Compile Include="System\Diagnostics\EntryWrittenEventHandler.cs" />
@@ -44,8 +48,12 @@
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
     </Compile>
-  </ItemGroup> 
-  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+  </ItemGroup>  
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
     <Reference Include="System.Collections.Specialized" />
     <Reference Include="System.ComponentModel" />
     <Reference Include="System.ComponentModel.Primitives" />

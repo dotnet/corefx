@@ -9,7 +9,6 @@
   <ItemGroup>
     <Compile Include="EventLogTests/EventLogTests.cs" />
     <Compile Include="EventLogTests/EventLogTestsBase.cs" />
-    <Compile Include="EventLogTests\Class1.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
