@@ -3252,7 +3252,11 @@ namespace System.Diagnostics.Tracing
                     // 5 chunks, so only the largest manifests will hit the pause.
                     if ((envelope.ChunkNumber % 5) == 0)
                     {
+#if ES_BUILD_STANDALONE
+                        Thread.Sleep(15);
+#else
                         RuntimeThread.Sleep(15);
+#endif
                     }
                 }
             }
@@ -3413,7 +3417,7 @@ namespace System.Diagnostics.Tracing
             if (eventSourceType.IsAbstract() && (flags & EventManifestOptions.Strict) == 0)
                 return null;
 
-#if DEBUG && ES_BUILD_STANDALONE
+#if DEBUG && ES_BUILD_STANDALONE && TEST_SUPPORT
             TestSupport.TestHooks.MaybeThrow(eventSourceType,
                                         TestSupport.Category.ManifestError,
                                         "EventSource_CreateManifestAndDescriptors",
@@ -4244,7 +4248,7 @@ namespace System.Diagnostics.Tracing
             0x87, 0xF8, 0x1A, 0x15, 0xBF, 0xC1, 0x30, 0xFB,
         };
 
-        #endregion
+#endregion
     }
 
     /// <summary>
@@ -4523,7 +4527,7 @@ namespace System.Diagnostics.Tracing
         }
 
 
-        #region private
+#region private
         /// <summary>
         /// This routine adds newEventSource to the global list of eventSources, it also assigns the
         /// ID to the eventSource (which is simply the ordinal in the global list).
@@ -4793,7 +4797,7 @@ namespace System.Diagnostics.Tracing
         /// Used to register AD/Process shutdown callbacks.
         /// </summary>
         private static bool s_EventSourceShutdownRegistered = false;
-        #endregion
+#endregion
     }
 
     /// <summary>
@@ -4835,7 +4839,7 @@ namespace System.Diagnostics.Tracing
             return eventSource.EnableEventForDispatcher(dispatcher, eventId, false);
         }
 
-        #region private
+#region private
 
         internal EventCommandEventArgs(EventCommand command, IDictionary<string, string> arguments, EventSource eventSource,
             EventListener listener, int perEventSourceSessionId, int etwSessionId, bool enable, EventLevel level, EventKeywords matchAnyKeyword)
@@ -4863,7 +4867,7 @@ namespace System.Diagnostics.Tracing
         internal EventKeywords matchAnyKeyword;
         internal EventCommandEventArgs nextCommand;     // We form a linked list of these deferred commands.      
 
-        #endregion
+#endregion
     }
 
     /// <summary>
@@ -5083,7 +5087,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        #region private
+#region private
         internal EventWrittenEventArgs(EventSource eventSource)
         {
             m_eventSource = eventSource;
@@ -5096,7 +5100,7 @@ namespace System.Diagnostics.Tracing
         internal EventOpcode m_opcode;
         internal EventLevel m_level;
         internal EventKeywords m_keywords;
-        #endregion
+#endregion
     }
 
     /// <summary>
@@ -5208,10 +5212,10 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public EventActivityOptions ActivityOptions { get; set; }
 
-        #region private
+#region private
         EventOpcode m_opcode;
         private bool m_opcodeSet;
-        #endregion
+#endregion
     }
 
     /// <summary>
@@ -5351,7 +5355,7 @@ namespace System.Diagnostics.Tracing
     };
 
 
-    #region private classes
+#region private classes
 
 #if FEATURE_ACTIVITYSAMPLING
 
@@ -5699,7 +5703,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        #region private
+#region private
 
         /// <summary>
         /// Creates a new ActivityFilter that is triggered by 'eventId' from 'source' ever
@@ -5868,7 +5872,7 @@ namespace System.Diagnostics.Tracing
 
         ActivityFilter m_next;      // We create a linked list of these
         Action<Guid> m_myActivityDelegate;
-        #endregion
+#endregion
     };
 
 
@@ -6674,7 +6678,7 @@ namespace System.Diagnostics.Tracing
             return sb.ToString();
         }
 
-        #region private
+#region private
         private void WriteNameAndMessageAttribs(StringBuilder stringBuilder, string elementName, string name)
         {
             stringBuilder.Append(" name=\"").Append(name).Append("\"");
@@ -7020,7 +7024,7 @@ namespace System.Diagnostics.Tracing
         string eventName;               // Name of the event currently being processed. 
         int numParams;                  // keeps track of the number of args the event has. 
         List<int> byteArrArgIndices;    // keeps track of the index of each byte[] argument
-        #endregion
+#endregion
     }
 
     /// <summary>
@@ -7044,6 +7048,6 @@ namespace System.Diagnostics.Tracing
 #endif
     };
 
-    #endregion
+#endregion
 }
 
