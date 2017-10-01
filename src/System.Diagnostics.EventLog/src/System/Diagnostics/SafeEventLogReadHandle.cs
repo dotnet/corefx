@@ -11,15 +11,11 @@ namespace Microsoft.Win32.SafeHandles
     {
         internal SafeEventLogReadHandle() : base(true) { }
 
-#pragma warning disable BCL0015 // Disable Pinvoke analyzer errors.
         [DllImport(Interop.Libraries.Advapi32, CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
         internal static extern SafeEventLogReadHandle OpenEventLog(string UNCServerName, string sourceName);
-#pragma warning restore BCL0015
 
-#pragma warning disable BCL0015 // Disable Pinvoke analyzer errors. 
         [DllImport(Interop.Libraries.Advapi32, SetLastError = true)]
         private static extern bool CloseEventLog(IntPtr hEventLog);
-#pragma warning restore BCL0015
 
         override protected bool ReleaseHandle()
         {

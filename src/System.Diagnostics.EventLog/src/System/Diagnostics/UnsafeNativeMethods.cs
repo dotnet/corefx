@@ -14,22 +14,25 @@ namespace Microsoft.Win32
         public static extern bool ReportEvent(SafeHandle hEventLog, short type, ushort category,
                                                 uint eventID, byte[] userSID, short numStrings, int dataLen, HandleRef strings,
                                                 byte[] rawData);
-#pragma warning disable BCL0015 // Disable Pinvoke analyzer errors. 
+
         [DllImport(Interop.Libraries.Advapi32, CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern bool ClearEventLog(SafeHandle hEventLog, HandleRef lpctstrBackupFileName);
+
         [DllImport(Interop.Libraries.Advapi32, CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern bool GetNumberOfEventLogRecords(SafeHandle hEventLog, out int count);
+
         [DllImport(Interop.Libraries.Advapi32, CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetOldestEventLogRecord(SafeHandle hEventLog, out int number);
+
         [DllImport(Interop.Libraries.Advapi32, CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool ReadEventLog(SafeHandle hEventLog, int dwReadFlags,
                                                  int dwRecordOffset, byte[] buffer, int numberOfBytesToRead, out int bytesRead,
                                                  out int minNumOfBytesNeeded);
+        
         [DllImport(Interop.Libraries.Advapi32, CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool NotifyChangeEventLog(SafeHandle hEventLog, SafeWaitHandle hEvent);
-#pragma warning restore BCL0015
     }
 }
