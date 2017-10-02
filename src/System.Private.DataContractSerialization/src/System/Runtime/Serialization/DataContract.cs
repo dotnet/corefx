@@ -30,10 +30,6 @@ namespace System.Runtime.Serialization
         // this the global dictionary for data contracts introduced for multi-file.
         private static Dictionary<Type, DataContract> s_dataContracts = new Dictionary<Type, DataContract>();
 
-        // static regexes that are used again over time
-        private static readonly Regex s_simpleSRSInternalsVisibleRegex = new Regex(Globals.SimpleSRSInternalsVisiblePattern);
-        private static readonly Regex s_fullSRSInternalsVisibleRegex = new Regex(Globals.FullSRSInternalsVisiblePattern);
-
         public static Dictionary<Type, DataContract> GetDataContracts()
         {
             return s_dataContracts;
@@ -2297,8 +2293,8 @@ namespace System.Runtime.Serialization
             {
                 string internalsVisibleAttributeAssemblyName = internalsVisibleAttribute.AssemblyName;
 
-                if (s_simpleSRSInternalsVisibleRegex.IsMatch(internalsVisibleAttributeAssemblyName) ||
-                    s_fullSRSInternalsVisibleRegex.IsMatch(internalsVisibleAttributeAssemblyName))
+                if (internalsVisibleAttributeAssemblyName.Trim().Equals("System.Runtime.Serialization") ||
+                    Regex.IsMatch(internalsVisibleAttributeAssemblyName, Globals.FullSRSInternalsVisiblePattern))
                 {
                     return true;
                 }
