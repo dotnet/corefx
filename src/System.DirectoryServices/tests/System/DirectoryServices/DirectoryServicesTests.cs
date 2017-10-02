@@ -51,7 +51,7 @@ namespace System.DirectoryServices.Tests
                         DirectoryEntry child2OU = CreateOU(rootOU, "CoreFxChild2OU", "CoreFx Child OU 2");
 
                         CreateOrganizationalRole(child1OU, "user.ou1.1", "User 1 is in CoreFx ou 1", "1 111 111 1111");
-                        CreateOrganizationalRole(child1OU, "user.ou1.2", "User 2 is in CoreFx ou 1", "1 222 222 22222");
+                        CreateOrganizationalRole(child1OU, "user.ou1.2", "User 2 is in CoreFx ou 1", "1 222 222 2222");
 
                         CreateOrganizationalRole(child2OU, "user.ou2.1", "User 1 is in CoreFx ou 2", "1 333 333 3333");
                         CreateOrganizationalRole(child2OU, "user.ou2.2", "User 2 is in CoreFx ou 2", "1 333 333 3333");
@@ -167,7 +167,7 @@ namespace System.DirectoryServices.Tests
         }
 
         [ConditionalFact(nameof(IsLdapConfigurationExist))]
-        public void TestCopy()
+        public void TestCopyTo()
         {
             using (DirectoryEntry de = CreateRootEntry())
             {
