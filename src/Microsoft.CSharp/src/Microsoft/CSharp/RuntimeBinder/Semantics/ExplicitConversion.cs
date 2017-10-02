@@ -137,8 +137,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     default:
                         Debug.Fail($"Bad type kind: {_typeDest.GetTypeKind()}");
                         return false;
+
                     case TypeKind.TK_VoidType:
                         return false; // Can't convert to a method group or anon method.
+
                     case TypeKind.TK_NullType:
                         return false;  // Can never convert TO the null type.
 
@@ -147,13 +149,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             return true;
                         }
+
                         break;
+
                     case TypeKind.TK_PointerType:
                         if (bindExplicitConversionToPointer())
                         {
                             return true;
                         }
+
                         break;
+
                     case TypeKind.TK_AggregateType:
                         {
                             AggCastResult result = bindExplicitConversionToAggregate(_typeDest as AggregateType);
@@ -162,10 +168,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             {
                                 return true;
                             }
+
                             if (result == AggCastResult.Abort)
                             {
                                 return false;
                             }
+
                             break;
                         }
                 }
@@ -175,6 +183,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     return _binder.bindUserDefinedConversion(_exprSrc, _typeSrc, _typeDest, _needsExprDest, out _exprDest, false);
                 }
+
                 return false;
             }
 
