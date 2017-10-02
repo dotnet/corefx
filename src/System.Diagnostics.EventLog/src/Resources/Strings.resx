@@ -193,7 +193,7 @@
     <value>Cannot monitor EntryWritten events for this EventLog. This might be because the EventLog is on a remote machine which is not a supported scenario.</value>
   </data>
   <data name="CantOpenLog" xml:space="preserve">
-    <value>Cannot open log {0} on machine {1}. Windows has not provided an error code.</value>
+    <value>Cannot open log {0} on computer '{1}'. {2}</value>
   </data>
   <data name="CantOpenLogAccess" xml:space="preserve">
     <value>Cannot open log for source '{0}'. You may not have write access.</value>

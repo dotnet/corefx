@@ -1143,7 +1143,7 @@ namespace System.Diagnostics
                     e = SharedUtils.CreateSafeWin32Exception();
                 }
 
-                throw new InvalidOperationException(SR.Format(SR.CantOpenLog, logname.ToString(), currentMachineName), e);
+                throw new InvalidOperationException(SR.Format(SR.CantOpenLog, logname.ToString(), currentMachineName, e?.Message ?? ""));
             }
 
             readHandle = handle;

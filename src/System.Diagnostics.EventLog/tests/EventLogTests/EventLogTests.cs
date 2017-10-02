@@ -29,5 +29,12 @@ namespace System.Diagnostics.Tests
             myLog.Clear();
             Assert.Equal(0, myLog.Entries.Count);
         }
+
+        [Fact]
+        public void ApplicationEventLog_Count()
+        {
+            EventLog ael = new EventLog("Application");
+            Assert.InRange(ael.Entries.Count, 1, Int32.MaxValue);
+        }
     }
 }
