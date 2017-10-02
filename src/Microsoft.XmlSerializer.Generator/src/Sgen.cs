@@ -265,7 +265,14 @@ namespace Microsoft.XmlSerializer.Generator
                     using (FileStream fs = File.Create(codePath))
                     {
                         MethodInfo method = typeof(System.Xml.Serialization.XmlSerializer).GetMethod("GenerateSerializer", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-                        success = (bool)method.Invoke(null, new object[] { serializableTypes, allMappings, fs });
+                        if (method == null)
+                        {
+                            Console.Error.WriteLine(FormatMessage(false, SR.GenerateSerializerNotFound));
+                        }
+                        else
+                        { 
+                            success = (bool)method.Invoke(null, new object[] { serializableTypes, allMappings, fs });
+                        }
                     }
                 }
                 catch (UnauthorizedAccessException)
