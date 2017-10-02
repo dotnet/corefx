@@ -28,7 +28,11 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
+#if XMLSERIALIZERGENERATOR
+    internal struct XmlDeserializationEvents
+#else
     public struct XmlDeserializationEvents
+#endif
     {
         private XmlNodeEventHandler _onUnknownNode;
         private XmlAttributeEventHandler _onUnknownAttribute;
@@ -97,7 +101,11 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
+#if XMLSERIALIZERGENERATOR
+    internal abstract class XmlSerializerImplementation
+#else
     public abstract class XmlSerializerImplementation
+#endif
     {
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializerImplementation.Reader"]/*' />
         public virtual XmlSerializationReader Reader { get { throw new NotSupportedException(); } }
@@ -119,7 +127,11 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
+#if XMLSERIALIZERGENERATOR
+    internal class XmlSerializer
+#else
     public class XmlSerializer
+#endif
     {
         internal enum SerializationMode
         {
