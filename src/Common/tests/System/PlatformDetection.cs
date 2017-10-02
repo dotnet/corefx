@@ -279,26 +279,81 @@ namespace System
                 {
                     if (line.StartsWith("ID=", System.StringComparison.Ordinal))
                     {
-                        ret.Id = line.Substring("ID=".Length);
+                        ret.Id = RemoveQuotes(line.Substring("ID=".Length));
                     }
                     else if (line.StartsWith("VERSION_ID=", System.StringComparison.Ordinal))
                     {
-                        ret.VersionId = line.Substring("VERSION_ID=".Length);
+                        ret.VersionId = RemoveQuotes(line.Substring("VERSION_ID=".Length));
                     }
                 }
             }
-
-            string versionId = ret.VersionId;
-            if (versionId.Length >= 2 && versionId[0] == '"' && versionId[versionId.Length - 1] == '"')
+            else 
             {
-                // Remove quotes.
-                ret.VersionId = versionId.Substring(1, versionId.Length - 2);
-            }
+                string fileName = null;
+                if (File.Exists("/etc/redhat-release"))
+                    fileName = "/etc/redhat-release";
 
-            if (ret.Id.Length >= 2 && ret.Id[0] == '"' && ret.Id[ret.Id.Length - 1] == '"')
-            {
-                // Remove quotes.
-                ret.Id = ret.Id.Substring(1, ret.Id.Length - 2);
+                if (fileName == null && File.Exists("/etc/system-release"))
+                    fileName = "/etc/system-release";
+                
+                if (fileName != null)
+                {
+                    // Parse the format like the following line:
+                    // Red Hat Enterprise Linux Server release 7.3 (Maipo)
+                    using (StreamReader file = new StreamReader(fileName))
+                    {
+                        string line = file.ReadLine();
+                        if (!String.IsNullOrEmpty(line))
+                        {
+                            if (line.StartsWith("Red Hat Enterprise Linux", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ret.Id = "rhel";
+                            }
+                            else if (line.StartsWith("Centos", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ret.Id = "centos";
+                            }
+                            else if (line.StartsWith("Red Hat", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ret.Id = "rhl";
+                            }
+                            else 
+                            {
+                                // automatically generate the distro label
+                                string [] words = line.Split(' ');
+                                StringBuilder sb = new StringBuilder();
+
+                                foreach (string word in words)
+                                {
+                                    if (word.Length > 0)
+                                    {
+                                        if (Char.IsNumber(word[0]) || 
+                                            word.Equals("release", StringComparison.OrdinalIgnoreCase) ||
+                                            word.Equals("server", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                break;
+                                            }
+                                        sb.Append(Char.ToLower(word[0]));
+                                    }
+                                }
+                                ret.Id = sb.ToString();
+                            }
+
+                            int i = 0;
+                            while (i < line.Length && !Char.IsNumber(line[i])) // stop at first number
+                                i++;
+
+                            if (i < line.Length)
+                            {
+                                int j = i + 1;
+                                while (j < line.Length && (Char.IsNumber(line[j]) || line[j] == '.'))
+                                    j++;
+
+                                ret.VersionId = line.Substring(i, j - i);
+                            }
+                        }
+                    }
+                }
             }
 
             return ret;
@@ -347,6 +402,18 @@ namespace System
             }
 
             return -1;
+        }
+
+        private static string RemoveQuotes(string s)
+        {
+            s = s.Trim();
+            if (s.Length >= 2 && s[0] == '"' && s[s.Length - 1] == '"')
+            {
+                // Remove quotes.
+                s = s.Substring(1, s.Length - 2);
+            }
+
+            return s;
         }
 
         [DllImport("ntdll.dll")]
