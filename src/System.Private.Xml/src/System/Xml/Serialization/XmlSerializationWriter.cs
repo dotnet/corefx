@@ -1444,7 +1444,12 @@ namespace System.Xml.Serialization
 
 
     ///<internalonly/>
+#if XMLSERIALIZERGENERATOR
+    internal delegate void XmlSerializationWriteCallback(object o);
+#else
     public delegate void XmlSerializationWriteCallback(object o);
+#endif
+
 
     internal static class DynamicAssemblies
     {
