@@ -56,10 +56,6 @@
   <!-- Provides package dependency version properties and verification/auto-upgrade configuration -->
   <Import Project="$(MSBuildThisFileDirectory)dependencies.props" />
 
-  <ItemGroup>
-    <DotnetSourceList Include="$(DotNetSourceBuildRestoreSources)" />
-  </ItemGroup>
-
   <!-- list of nuget package sources passed to nuget restore -->
   <ItemGroup Condition="'$(DotNetBuildOffline)' != 'true'">
     <!-- Example to consume local CoreCLR package:
@@ -71,6 +67,10 @@
     <DotnetSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-buildtools/api/v3/index.json" />
     <DotnetSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v3/index.json" />
     <DotnetSourceList Include="https:%2F%2Fapi.nuget.org/v3/index.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotnetSourceList Include="$(DotNetSourceBuildRestoreSources)" />
   </ItemGroup>
 
   <PropertyGroup>
