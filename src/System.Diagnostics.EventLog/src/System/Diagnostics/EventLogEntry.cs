@@ -35,11 +35,7 @@ namespace System.Diagnostics
 
         private EventLogEntry(SerializationInfo info, StreamingContext context)
         {
-            dataBuf = (byte[])info.GetValue("DataBuffer", typeof(byte[]));
-            string logName = info.GetString("LogName");
-            string machineName = info.GetString("MachineName");
-            owner = new EventLogInternal(logName, machineName, "");
-            GC.SuppressFinalize(this);
+            throw new PlatformNotSupportedException();
         }
 
         [MonitoringDescription("The machine on which this event log resides.")]
@@ -135,10 +131,7 @@ namespace System.Diagnostics
             }
         }
 
-        [
-        MonitoringDescription("The text of the message for this entry."),
-        //Editor("System.ComponentModel.Design.BinaryEditor, " + AssemblyRef.SystemDesign, "System.Drawing.Design.UITypeEditor, " + AssemblyRef.SystemDrawing)
-        ]
+        [MonitoringDescription("The text of the message for this entry.")]
         public string Message
         {
             get
@@ -379,25 +372,13 @@ namespace System.Diagnostics
 
             try
             {
-                eventKey = EventLog.GetEventLogRegKey(machineName, false);
-                if (eventKey == null)
-                    return null;
-                if (logName == null)
-                    logKey = eventKey.OpenSubKey("Application", /*writable*/false);
-                else
-                    logKey = eventKey.OpenSubKey(logName, /*writable*/false);
-                if (logKey == null)
-                    return null;
-                return logKey.OpenSubKey(source, /*writable*/false);
+                return eventKey?.OpenSubKey(logName ?? "Application", /*writable*/false)?.OpenSubKey(source, /*writeable*/false);
             }
             finally
             {
-                if (eventKey != null)
-                    eventKey.Close();
-                if (logKey != null)
-                    logKey.Close();
+                eventKey?.Close();
+                logKey?.Close();
             }
-
         }
 
         private string GetMessageLibraryNames(string libRegKey)
@@ -415,8 +396,7 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (regKey != null)
-                    regKey.Close();
+                regKey?.Close();
             }
 
             if (fileName == null)
@@ -425,7 +405,6 @@ namespace System.Diagnostics
             // convert any absolute paths on a remote machine to use the \\MACHINENAME\DRIVELETTER$ shares
             if (owner.MachineName != ".")
             {
-
                 string[] fileNames = fileName.Split(';');
 
                 StringBuilder result = new StringBuilder();
@@ -458,8 +437,7 @@ namespace System.Diagnostics
                 return fileName;
             }
         }
-
-
+        
         private short ShortFrom(byte[] buf, int offset)
         {
             // assumes little Endian byte order.
@@ -468,13 +446,7 @@ namespace System.Diagnostics
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            int len = IntFrom(dataBuf, bufOffset + FieldOffsets.LENGTH);
-            byte[] buf = new byte[len];
-            Array.Copy(dataBuf, bufOffset, buf, 0, len);
-
-            info.AddValue("DataBuffer", buf, typeof(byte[]));
-            info.AddValue("LogName", owner.Log);
-            info.AddValue("MachineName", owner.MachineName);
+            throw new PlatformNotSupportedException(); 
         }
 
         private static class FieldOffsets
@@ -500,7 +472,6 @@ namespace System.Diagnostics
 
         private static readonly DateTime beginningOfTime = new DateTime(1970, 1, 1, 0, 0, 0);
         private const int OFFSETFIXUP = 4 + 4 + 4 + 4 + 4 + 4 + 2 + 2 + 2 + 2 + 4 + 4 + 4 + 4 + 4 + 4;
-
     }
 }
 

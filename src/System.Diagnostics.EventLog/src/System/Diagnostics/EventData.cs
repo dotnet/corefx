@@ -38,7 +38,6 @@ namespace System.Diagnostics
         public EventLogEntryType EntryType
         {
             get => _entryType;
-
             set
             {
                 if (!Enum.IsDefined(typeof(EventLogEntryType), value))

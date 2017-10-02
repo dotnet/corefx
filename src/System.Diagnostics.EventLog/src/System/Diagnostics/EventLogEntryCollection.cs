@@ -94,7 +94,6 @@ namespace System.Diagnostics
             {
                 num++;
                 cachedEntry = entries.GetEntryAtNoThrow(num);
-
                 return cachedEntry != null;
             }
 

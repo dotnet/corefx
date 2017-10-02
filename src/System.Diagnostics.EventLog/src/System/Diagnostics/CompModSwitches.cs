@@ -34,7 +34,5 @@ namespace System.ComponentModel
                 return s_eventLog;
             }
         }
-
     }
 }
-

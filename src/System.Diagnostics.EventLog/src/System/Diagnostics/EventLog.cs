@@ -17,10 +17,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.Diagnostics
 {
-    [
-    DefaultEvent("EntryWritten"),
-    MonitoringDescription("Provides interaction with Windows event logs.")
-    ]
+    [DefaultEvent("EntryWritten"), MonitoringDescription("Provides interaction with Windows event logs.")]
     public class EventLog : Component, ISupportInitialize
     {
         private const string EventLogKey = "SYSTEM\\CurrentControlSet\\Services\\EventLog";
@@ -69,7 +66,6 @@ namespace System.Diagnostics
             }
         }
 
-        //[TypeConverter("System.Diagnostics.Design.LogConverter, " + AssemblyRef.SystemDesign)]
         [ReadOnly(true)]
         [MonitoringDescription("Gets or sets the name of the log to read from and write to.")]
         [DefaultValue("")]
@@ -127,7 +123,6 @@ namespace System.Diagnostics
         {
             get => _underlyingEventLog.MaximumKilobytes;
             set => _underlyingEventLog.MaximumKilobytes = value;
-            
         }
 
         [Browsable(false)]
@@ -135,7 +130,6 @@ namespace System.Diagnostics
         public OverflowAction OverflowAction
         {
             get => _underlyingEventLog.OverflowAction;
-            
         }
 
         [Browsable(false)]
@@ -148,7 +142,6 @@ namespace System.Diagnostics
         internal bool ComponentDesignMode
         {
             get => this.DesignMode;
-            
         }
 
         internal object ComponentGetService(Type service)
@@ -171,19 +164,16 @@ namespace System.Diagnostics
         public ISynchronizeInvoke SynchronizingObject
         {
             get => _underlyingEventLog.SynchronizingObject;
-
             set => _underlyingEventLog.SynchronizingObject = value;
         }
 
         [ReadOnly(true)]
-        //[TypeConverter("System.Diagnostics.Design.StringValueConverter, " + AssemblyRef.SystemDesign)]
         [MonitoringDescription("The application name (source name) to use when writing to the event log.")]
         [DefaultValue("")]
         [SettingsBindable(true)]
         public string Source
         {
             get => _underlyingEventLog.Source;
-            
             set
             {
                 EventLogInternal newLog = new EventLogInternal(_underlyingEventLog.Log, _underlyingEventLog.MachineName, CheckAndNormalizeSourceName(value), this);
@@ -359,7 +349,7 @@ namespace System.Diagnostics
             finally
             {
                  mutex?.ReleaseMutex();
-                 mutex.Close();
+                 mutex?.Close();
             }
         }
 
@@ -455,8 +445,6 @@ namespace System.Diagnostics
             {
                 throw new ArgumentException(SR.Format(SR.InvalidParameter, nameof(machineName), machineName));
             }
-
-
             //Check environment before looking at the registry
             SharedUtils.CheckEnvironment();
 
@@ -478,7 +466,6 @@ namespace System.Diagnostics
                         else
                             throw new ArgumentException(SR.Format(SR.SourceNotRegistered, source, machineName, "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\EventLog"));
                     }
-
                     // Check parent registry key (Event Log Name) and if it's equal to source, then throw an exception.
                     // The reason: each log registry key must always contain subkey (i.e. source) with the same name.
                     string keyname = key.Name;
@@ -491,7 +478,6 @@ namespace System.Diagnostics
                 {
                     key = FindSourceRegistration(source, machineName, false);
                     key.DeleteSubKeyTree(source);
-
                 }
                 finally
                 {
@@ -500,18 +486,13 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (mutex != null)
-                    mutex.ReleaseMutex();
+               mutex?.ReleaseMutex();
             }
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (_underlyingEventLog != null)
-            {
-                _underlyingEventLog.Dispose(disposing);
-            }
-
+            _underlyingEventLog?.Dispose(disposing);
             base.Dispose(disposing);
         }
 
@@ -554,13 +535,10 @@ namespace System.Diagnostics
                 logKey?.Close();
             }
         }
-
-
         // Try to find log file name with the same 8 first characters.
         // Returns 'null' if no "same first 8 chars" log is found.   logName.Length must be > 7
         private static string FindSame8FirstCharsLog(RegistryKey keyParent, string logName)
         {
-
             string logNameFirst8 = logName.Substring(0, 8);
             string[] logNames = keyParent.GetSubKeyNames();
 
@@ -568,7 +546,7 @@ namespace System.Diagnostics
             {
                 string currentLogName = logNames[i];
                 if (currentLogName.Length >= 8 &&
-                     string.Compare(currentLogName.Substring(0, 8), logNameFirst8, StringComparison.OrdinalIgnoreCase) == 0)
+                    string.Compare(currentLogName.Substring(0, 8), logNameFirst8, StringComparison.OrdinalIgnoreCase) == 0)
                     return currentLogName;
             }
 
@@ -679,7 +657,6 @@ namespace System.Diagnostics
             {
                 throw new ArgumentException(SR.Format(SR.InvalidParameter, nameof(machineName), machineName));
             }
-
             //Check environment before looking at the registry
             SharedUtils.CheckEnvironment();
 
@@ -702,7 +679,6 @@ namespace System.Diagnostics
             {
                 eventkey?.Close();
             }
-
             // now create EventLog objects that point to those logs
             EventLog[] logs = new EventLog[logNames.Length];
             for (int i = 0; i < logNames.Length; i++)
@@ -713,7 +689,6 @@ namespace System.Diagnostics
 
             return logs;
         }
-
 
         internal static RegistryKey GetEventLogRegKey(string machine, bool writable)
         {
@@ -728,7 +703,6 @@ namespace System.Diagnostics
                 else
                 {
                     lmkey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, machine);
-
                 }
                 if (lmkey != null)
                     return lmkey.OpenSubKey(EventLogKey, writable);
@@ -737,7 +711,6 @@ namespace System.Diagnostics
             {
                 lmkey?.Close();
             }
-
             return null;
         }
 
@@ -790,7 +763,6 @@ namespace System.Diagnostics
             }
         }
 
-
         [ComVisible(false)]
         public void ModifyOverflowPolicy(OverflowAction action, int retentionDays)
         {
@@ -818,15 +790,15 @@ namespace System.Diagnostics
 
         private static void SetSpecialSourceRegValues(RegistryKey sourceLogKey, EventSourceCreationData sourceData)
         {
-            if (String.IsNullOrEmpty(sourceData.MessageResourceFile))
+            if (string.IsNullOrEmpty(sourceData.MessageResourceFile))
                 sourceLogKey.SetValue("EventMessageFile", GetDllPath(sourceData.MachineName), RegistryValueKind.ExpandString);
             else
                 sourceLogKey.SetValue("EventMessageFile", FixupPath(sourceData.MessageResourceFile), RegistryValueKind.ExpandString);
 
-            if (!String.IsNullOrEmpty(sourceData.ParameterResourceFile))
+            if (!string.IsNullOrEmpty(sourceData.ParameterResourceFile))
                 sourceLogKey.SetValue("ParameterMessageFile", FixupPath(sourceData.ParameterResourceFile), RegistryValueKind.ExpandString);
 
-            if (!String.IsNullOrEmpty(sourceData.CategoryResourceFile))
+            if (!string.IsNullOrEmpty(sourceData.CategoryResourceFile))
             {
                 sourceLogKey.SetValue("CategoryMessageFile", FixupPath(sourceData.CategoryResourceFile), RegistryValueKind.ExpandString);
                 sourceLogKey.SetValue("CategoryCount", sourceData.CategoryCount, RegistryValueKind.DWord);
@@ -843,7 +815,6 @@ namespace System.Diagnostics
 
         internal static string TryFormatMessage(SafeLibraryHandle hModule, uint messageNum, string[] insertionStrings)
         {
-
             if (insertionStrings.Length == 0)
             {
                 return UnsafeTryFormatMessage(hModule, messageNum, insertionStrings);
@@ -887,7 +858,6 @@ namespace System.Diagnostics
                     }
                 }
             }
-
             // Replacement strings are 1 indexed.
             if (largestNumber > insertionStrings.Length)
             {
@@ -903,7 +873,6 @@ namespace System.Diagnostics
 
             return UnsafeTryFormatMessage(hModule, messageNum, insertionStrings);
         }
-
         // FormatMessageW will AV if you don't pass in enough format strings.  If you call TryFormatMessage we ensure insertionStrings
         // is long enough.  You don't want to call this directly unless you're sure insertionStrings is long enough!
         internal static string UnsafeTryFormatMessage(SafeLibraryHandle hModule, uint messageNum, string[] insertionStrings)
@@ -912,7 +881,7 @@ namespace System.Diagnostics
 
             int msgLen = 0;
             StringBuilder buf = new StringBuilder(1024);
-            int flags = NativeMethods.FORMAT_MESSAGE_FROM_HMODULE | NativeMethods.FORMAT_MESSAGE_ARGUMENT_ARRAY;
+            int flags = Interop.Kernel32.FORMAT_MESSAGE_FROM_HMODULE | Interop.Kernel32.FORMAT_MESSAGE_ARGUMENT_ARRAY;
 
             IntPtr[] addresses = new IntPtr[insertionStrings.Length];
             GCHandle[] handles = new GCHandle[insertionStrings.Length];
@@ -920,7 +889,7 @@ namespace System.Diagnostics
 
             if (insertionStrings.Length == 0)
             {
-                flags |= NativeMethods.FORMAT_MESSAGE_IGNORE_INSERTS;
+                flags |= Interop.Kernel32.FORMAT_MESSAGE_IGNORE_INSERTS;
             }
 
             try
@@ -930,8 +899,8 @@ namespace System.Diagnostics
                     handles[i] = GCHandle.Alloc(insertionStrings[i], GCHandleType.Pinned);
                     addresses[i] = handles[i].AddrOfPinnedObject();
                 }
-                int lastError = NativeMethods.ERROR_INSUFFICIENT_BUFFER;
-                while (msgLen == 0 && lastError == NativeMethods.ERROR_INSUFFICIENT_BUFFER)
+                int lastError = Interop.Kernel32.ERROR_INSUFFICIENT_BUFFER;
+                while (msgLen == 0 && lastError == Interop.Kernel32.ERROR_INSUFFICIENT_BUFFER)
                 {
                     msgLen = Interop.Kernel32.FormatMessage(
                         flags,
@@ -945,7 +914,7 @@ namespace System.Diagnostics
                     if (msgLen == 0)
                     {
                         lastError = Marshal.GetLastWin32Error();
-                        if (lastError == NativeMethods.ERROR_INSUFFICIENT_BUFFER)
+                        if (lastError == Interop.Kernel32.ERROR_INSUFFICIENT_BUFFER)
                             buf.Capacity = buf.Capacity * 2;
                     }
                 }
@@ -974,7 +943,6 @@ namespace System.Diagnostics
 
             return msg;
         }
-
         // CharIsPrintable used to be Char.IsPrintable, but Jay removed it and
         // is forcing people to use the Unicode categories themselves.  Copied
         // the code here.  
@@ -986,7 +954,6 @@ namespace System.Diagnostics
             (uc == UnicodeCategory.OtherNotAssigned));
         }
 
-        // SECREVIEW: Make sure this method catches all the strange cases.
         internal static bool ValidLogName(string logName, bool ignoreEmpty)
         {
             // No need to trim here since the next check will verify that there are no spaces.
@@ -1044,8 +1011,7 @@ namespace System.Diagnostics
             WriteEntry(source, message, type, eventID, category, null);
         }
 
-        public static void WriteEntry(string source, string message, EventLogEntryType type, int eventID, short category,
-                               byte[] rawData)
+        public static void WriteEntry(string source, string message, EventLogEntryType type, int eventID, short category, byte[] rawData)
         {
             using (EventLogInternal log = new EventLogInternal(string.Empty, ".", CheckAndNormalizeSourceName(source)))
             {
@@ -1053,10 +1019,8 @@ namespace System.Diagnostics
             }
         }
 
-        public void WriteEntry(string message, EventLogEntryType type, int eventID, short category,
-                               byte[] rawData)
+        public void WriteEntry(string message, EventLogEntryType type, int eventID, short category, byte[] rawData)
         {
-
             _underlyingEventLog.WriteEntry(message, type, eventID, category, rawData);
         }
 

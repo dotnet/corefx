@@ -26,7 +26,6 @@ namespace System.Diagnostics
         private int lastSeenCount;
         // holds the machine we're on, or null if it's the local machine
         internal readonly string machineName;
-
         // the delegate to call when an event arrives
         internal EntryWrittenEventHandler onEntryWrittenHandler;
         // holds onto the handle for reading
@@ -134,7 +133,6 @@ namespace System.Diagnostics
                 throw new ArgumentException(SR.Format(SR.InvalidParameter, "machineName", machineName));
 
             this.machineName = machineName;
-
             this.logName = logName;
             this.sourceName = source;
             readHandle = null;
@@ -206,7 +204,6 @@ namespace System.Diagnostics
                 {
                     //Check environment before looking at the registry
                     SharedUtils.CheckEnvironment();
-
                     RegistryKey logkey = null;
 
                     try
@@ -235,7 +232,6 @@ namespace System.Diagnostics
                         CodeAccessPermission.RevertAssert();
                     }
                 }
-
                 return logDisplayName;
             }
         }
@@ -510,7 +506,6 @@ namespace System.Diagnostics
                 if (error != NativeMethods.ERROR_FILE_NOT_FOUND)
                     throw SharedUtils.CreateSafeWin32Exception();
             }
-
             // now that we've cleared the event log, we need to re-open our handles, because
             // the internal state of the event log has changed.
             Reset(currentMachineName);
@@ -595,7 +590,6 @@ namespace System.Diagnostics
             {
                 int oldest = OldestEntryNumber;
                 int count = EntryCount + oldest;
-
                 // Ensure lastSeenCount is within bounds.  This deals with the case where the event log has been cleared between
                 // notifications.
                 if (lastSeenCount < oldest || lastSeenCount > count)
@@ -665,7 +659,6 @@ namespace System.Diagnostics
                     {
                         Close();
                     }
-
                     // This is probably unnecessary
                     if (readHandle != null)
                     {
@@ -720,13 +713,13 @@ namespace System.Diagnostics
 
                     if (hModule == null || hModule.IsInvalid)
                     {
-                        hModule = Interop.Kernel32.LoadLibraryExW(dllName, IntPtr.Zero, NativeMethods.LOAD_LIBRARY_AS_DATAFILE);
+                        hModule = Interop.Kernel32.LoadLibraryExW(dllName, IntPtr.Zero, Interop.Kernel32.LOAD_LIBRARY_AS_DATAFILE);
                         MessageLibraries[dllName] = hModule;
                     }
                 }
                 else
                 {
-                    hModule = Interop.Kernel32.LoadLibraryExW(dllName, IntPtr.Zero, NativeMethods.LOAD_LIBRARY_AS_DATAFILE);
+                    hModule = Interop.Kernel32.LoadLibraryExW(dllName, IntPtr.Zero, Interop.Kernel32.LOAD_LIBRARY_AS_DATAFILE);
                 }
 
                 if (hModule.IsInvalid)
@@ -749,7 +742,6 @@ namespace System.Diagnostics
                 {
                     return msg;
                 }
-
             }
             return null;
         }
@@ -779,10 +771,9 @@ namespace System.Diagnostics
                 {
                     error = Marshal.GetLastWin32Error();
                     Debug.WriteLineIf(CompModSwitches.EventLog.TraceVerbose, "Error from ReadEventLog is " + error.ToString(CultureInfo.InvariantCulture));
-#if !RETRY_ON_ALL_ERRORS
-                    if (error == NativeMethods.ERROR_INSUFFICIENT_BUFFER || error == NativeMethods.ERROR_EVENTLOG_FILE_CHANGED)
+
+                    if (error == Interop.Kernel32.ERROR_INSUFFICIENT_BUFFER || error == NativeMethods.ERROR_EVENTLOG_FILE_CHANGED)
                     {
-#endif
                         if (error == NativeMethods.ERROR_EVENTLOG_FILE_CHANGED)
                         {
                             Reset(currentMachineName);
@@ -797,13 +788,12 @@ namespace System.Diagnostics
                                                          oldestEntry + idx, buf, buf.Length, out bytesRead, out minBytesNeeded);
                         if (!success)
                             break;
-#if !RETRY_ON_ALL_ERRORS
                     }
                     else
                     {
                         break;
                     }
-#endif
+                    
                     error = 0;
                 }
                 entries[idx] = new EventLogEntry(buf, 0, this);
@@ -954,7 +944,7 @@ namespace System.Diagnostics
             {
                 int error = Marshal.GetLastWin32Error();
                 Debug.WriteLineIf(CompModSwitches.EventLog.TraceVerbose, "Error from ReadEventLog is " + error.ToString(CultureInfo.InvariantCulture));
-                if (error == NativeMethods.ERROR_INSUFFICIENT_BUFFER || error == NativeMethods.ERROR_EVENTLOG_FILE_CHANGED)
+                if (error == Interop.Kernel32.ERROR_INSUFFICIENT_BUFFER || error == NativeMethods.ERROR_EVENTLOG_FILE_CHANGED)
                 {
                     if (error == NativeMethods.ERROR_EVENTLOG_FILE_CHANGED)
                     {
@@ -1125,7 +1115,6 @@ namespace System.Diagnostics
                 throw new InvalidOperationException(SR.Format(SR.LogDoesNotExists, logname, currentMachineName));
             //Check environment before calling api
             SharedUtils.CheckEnvironment();
-
             // Clean up cache variables.
             // [alexvec] The initilizing code is put here to guarantee, that first read of events
             //           from log file will start by filling up the cache buffer.
@@ -1142,10 +1131,8 @@ namespace System.Diagnostics
                 {
                     e = SharedUtils.CreateSafeWin32Exception();
                 }
-
                 throw new InvalidOperationException(SR.Format(SR.CantOpenLog, logname.ToString(), currentMachineName, e?.Message ?? ""));
             }
-
             readHandle = handle;
         }
 
@@ -1158,7 +1145,6 @@ namespace System.Diagnostics
             Debug.WriteLineIf(CompModSwitches.EventLog.TraceVerbose, "EventLog::OpenForWrite");
             if (sourceName == null || sourceName.Length == 0)
                 throw new ArgumentException(SR.NeedSourceToOpen);
-
             //Check environment before calling api
             SharedUtils.CheckEnvironment();
 
@@ -1172,7 +1158,6 @@ namespace System.Diagnostics
                 }
                 throw new InvalidOperationException(SR.Format(SR.CantOpenLogAccess, sourceName), e);
             }
-
             writeHandle = handle;
         }
 
@@ -1196,11 +1181,9 @@ namespace System.Diagnostics
             bool openWrite = IsOpenForWrite;
             bool isMonitoring = boolFlags[Flag_monitoring];
             bool isListening = boolFlags[Flag_registeredAsListener];
-
             // close everything down
             Close(currentMachineName);
             cache = null;
-
             // and get us back into the same state as before
             if (openRead)
                 OpenForRead(currentMachineName);
@@ -1221,21 +1204,16 @@ namespace System.Diagnostics
 
                 LogListeningInfo info = (LogListeningInfo)listenerInfos[compLogName];
                 Debug.Assert(info != null);
-
                 // remove the requested component from the list.
                 info.listeningComponents.Remove(component);
                 if (info.listeningComponents.Count != 0)
                     return;
-
                 // if that was the last interested compononent, destroy the handles and stop listening.
-
                 info.handleOwner.Dispose();
-
                 //Unregister the thread pool wait handle
                 info.registeredWaitHandle.Unregister(info.waitHandle);
                 // close the handle
                 info.waitHandle.Close();
-
                 listenerInfos[compLogName] = null;
             }
         }
@@ -1315,19 +1293,16 @@ namespace System.Diagnostics
                     (uc == UnicodeCategory.LineSeparator) || (uc == UnicodeCategory.ParagraphSeparator) ||
             (uc == UnicodeCategory.OtherNotAssigned));
         }
-
         // SECREVIEW: Make sure this method catches all the strange cases.
         internal static bool ValidLogName(string logName, bool ignoreEmpty)
         {
             if (logName.Length == 0 && !ignoreEmpty)
                 return false;
-
             //any space, backslash, asterisk, or question mark is bad
             //any non-printable characters are also bad
             foreach (char c in logName)
                 if (!CharIsPrintable(c) || (c == '\\') || (c == '*') || (c == '?'))
                     return false;
-
             return true;
         }
 
@@ -1364,7 +1339,6 @@ namespace System.Diagnostics
                         if (rightLogName != null && currentLogName != null && String.Compare(rightLogName, currentLogName, StringComparison.OrdinalIgnoreCase) != 0)
                             throw new ArgumentException(SR.Format(SR.LogSourceMismatch, Source.ToString(), currentLogName, rightLogName));
                     }
-
                 }
                 finally
                 {
@@ -1382,7 +1356,6 @@ namespace System.Diagnostics
                 if (rightLogName != null && currentLogName != null && String.Compare(rightLogName, currentLogName, StringComparison.OrdinalIgnoreCase) != 0)
                     throw new ArgumentException(SR.Format(SR.LogSourceMismatch, Source.ToString(), currentLogName, rightLogName));
             }
-
             boolFlags[Flag_sourceVerified] = true;
         }
 
@@ -1409,7 +1382,6 @@ namespace System.Diagnostics
         public void WriteEntry(string message, EventLogEntryType type, int eventID, short category,
                                byte[] rawData)
         {
-
             if (eventID < 0 || eventID > ushort.MaxValue)
 
                 throw new ArgumentException(SR.Format(SR.EventID, eventID.ToString(), 0, ushort.MaxValue));
@@ -1425,9 +1397,7 @@ namespace System.Diagnostics
             {
                 boolFlags[Flag_writeGranted] = true;
             }
-
             VerifyAndCreateSource(sourceName, currentMachineName);
-
             // now that the source has been hooked up to our DLL, we can use "normal"
             // (message-file driven) logging techniques.
             // Our DLL has 64K different entries; all of them just display the first
@@ -1470,7 +1440,6 @@ namespace System.Diagnostics
                         strings[i] = String.Empty;
                 }
             }
-
             InternalWriteEvent((uint)instance.InstanceId, (ushort)instance.CategoryId, instance.EntryType, strings, data, currentMachineName);
         }
 
@@ -1544,7 +1513,5 @@ namespace System.Diagnostics
             public WaitHandle waitHandle;
             public ArrayList listeningComponents = new ArrayList();
         }
-
     }
-
 }

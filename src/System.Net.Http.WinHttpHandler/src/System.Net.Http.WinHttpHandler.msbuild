@@ -9,8 +9,6 @@
     <CompileItem Include="$(CommonPath)\Interop\Windows\Crypt32\Interop.certificates_types.cs" />
     <CompileItem Include="$(CommonPath)\Interop\Windows\Crypt32\Interop.certificates.cs" />
     <CompileItem Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FormatMessage.cs" />
-    <CompileItem Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs" />
-    <CompileItem Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FreeLibrary.cs" />
     <CompileItem Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetModuleHandle.cs" />
     <CompileItem Include="$(CommonPath)\Interop\Windows\Interop.HRESULT_FROM_WIN32.cs" />
     <CompileItem Include="$(CommonPath)\Interop\Windows\SChannel\UnmanagedCertificateContext.IntPtr.cs" />

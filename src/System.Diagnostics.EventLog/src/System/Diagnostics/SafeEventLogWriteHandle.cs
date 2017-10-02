@@ -17,12 +17,9 @@ namespace Microsoft.Win32.SafeHandles
         [DllImport(Interop.Libraries.Advapi32, SetLastError = true)]
         private static extern bool DeregisterEventSource(IntPtr hEventLog);
 
-        override protected bool ReleaseHandle()
+        protected override bool ReleaseHandle()
         {
             return DeregisterEventSource(handle);
         }
     }
 }
-
-
-

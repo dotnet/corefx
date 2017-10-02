@@ -32,8 +32,7 @@ namespace System.Diagnostics
             CategoryResourceFile = categoryResourceFile;
             CategoryCount = categoryCount;
         }
-
-
+        
         public string LogName { get; set; } = "Application";
 
         public string MachineName { get; set; } = ".";
@@ -59,5 +58,3 @@ namespace System.Diagnostics
         }
     }
 }
-
-

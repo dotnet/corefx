@@ -6,23 +6,15 @@ namespace System.Diagnostics
 {
     public class EntryWrittenEventArgs : EventArgs
     {
-        private readonly EventLogEntry _entry;
-
         public EntryWrittenEventArgs()
         {
         }
 
         public EntryWrittenEventArgs(EventLogEntry entry)
         {
-            _entry = entry;
+            Entry = entry;
         }
 
-        public EventLogEntry Entry
-        {
-            get
-            {
-                return _entry;
-            }
-        }
+        public EventLogEntry Entry { get; }
     }
 }
