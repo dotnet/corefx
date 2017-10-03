@@ -7,6 +7,13 @@ using System.Runtime.CompilerServices;
 
 namespace System.Buffers.Binary
 {
+    /// <summary>
+    /// Reads bytes as primitives with specific endianness
+    /// </summary>
+    /// <remarks>
+    /// For native formats, SpanExtensions.Read&lt;T&gt; should be used.
+    /// Use these helpers when you need to read specific endinanness.
+    /// </remarks>
     public static partial class SpanBinaryExtensions
     {
         /// <summary>
@@ -88,7 +95,7 @@ namespace System.Buffers.Binary
         /// Reads a structure of type T out of a span of bytes.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Read<[Primitive]T>(this Span<byte> buffer)
+        public static T Read<T>(this Span<byte> buffer)
             where T : struct
         {
             if (Unsafe.SizeOf<T>() > buffer.Length)
@@ -99,10 +106,10 @@ namespace System.Buffers.Binary
         }
 
         /// <summary>
-        /// Reads a structure of type T out of a read only span of bytes.
+        /// Reads a structure of type T out of a read-only span of bytes.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Read<[Primitive]T>(this ReadOnlySpan<byte> buffer)
+        public static T Read<T>(this ReadOnlySpan<byte> buffer)
             where T : struct
         {
             if (Unsafe.SizeOf<T>() > buffer.Length)
@@ -117,7 +124,7 @@ namespace System.Buffers.Binary
         /// <returns>If the span is too small to contain the type T, return false.</returns>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryRead<[Primitive]T>(this ReadOnlySpan<byte> buffer, out T value)
+        public static bool TryRead<T>(this ReadOnlySpan<byte> buffer, out T value)
             where T : struct
         {
             if (Unsafe.SizeOf<T>() > (uint)buffer.Length)
@@ -130,11 +137,11 @@ namespace System.Buffers.Binary
         }
 
         /// <summary>
-        /// Reads a structure of type T out of a readonly span of bytes.
+        /// Reads a structure of type T out of a read-only span of bytes.
         /// <returns>If the span is too small to contain the type T, return false.</returns>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryRead<[Primitive]T>(this Span<byte> buffer, out T value)
+        public static bool TryRead<T>(this Span<byte> buffer, out T value)
             where T : struct
         {
             if (Unsafe.SizeOf<T>() > (uint)buffer.Length)
