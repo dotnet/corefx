@@ -122,16 +122,17 @@ namespace System.ComponentModel.DataAnnotations
                 return true;
             }
 
+            Type type = value.GetType();
             PropertyInfo property = null;
             try
             {
-                // On CoreRT, this property may not be enabled for reflection.
-                // It may be possible to eliminate the exception by using direct reflection
-                // (i.e. not via the RuntimeReflectionExtensions or the new split TypeInfo format.
-                property = value.GetType().GetRuntimeProperty("Count");
+                // On CoreRT, this property may not be enabled for reflection.                
+                property = type.GetRuntimeProperty("Count");
             }
-            catch (TypeAccessException)
+            catch (TypeAccessException ex)
             {
+                throw new MissingMemberException(string.Format(CultureInfo.CurrentCulture,
+                    SR.LengthAttribute_CoreRT_TypeAccessException, type), ex);
             }
 
             if (property != null && property.CanRead && property.PropertyType == typeof(int))
