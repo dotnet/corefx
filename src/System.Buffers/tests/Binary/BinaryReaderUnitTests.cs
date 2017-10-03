@@ -329,9 +329,9 @@ namespace System.Buffers.Binary.Tests
         public void ReadingStructFieldByFieldOrReadAndReverse()
         {
             Assert.True(BitConverter.IsLittleEndian);
-            Span<byte> spanBE = new byte[Unsafe.SizeOf<TestStructExplicit>()];
+            Span<byte> spanBE = new byte[Unsafe.SizeOf<TestHelpers.TestStructExplicit>()];
 
-            TestStructExplicit testExplicitStruct = new TestStructExplicit
+            var testExplicitStruct = new TestHelpers.TestStructExplicit
             {
                 S0 = short.MaxValue,
                 I0 = int.MaxValue,
@@ -364,7 +364,7 @@ namespace System.Buffers.Binary.Tests
 
             ReadOnlySpan<byte> readOnlySpanBE = new ReadOnlySpan<byte>(spanBE.ToArray());
 
-            TestStructExplicit readStructAndReverse = spanBE.Read<TestStructExplicit>();
+            var readStructAndReverse = spanBE.Read<TestHelpers.TestStructExplicit>();
             if (BitConverter.IsLittleEndian)
             {
                 readStructAndReverse.S0 = readStructAndReverse.S0.Reverse();
@@ -381,7 +381,7 @@ namespace System.Buffers.Binary.Tests
                 readStructAndReverse.UL1 = readStructAndReverse.UL1.Reverse();
             }
 
-            TestStructExplicit readStructFieldByField = new TestStructExplicit
+            var readStructFieldByField = new TestHelpers.TestStructExplicit
             {
                 S0 = spanBE.ReadInt16BigEndian(),
                 I0 = spanBE.Slice(2).ReadInt32BigEndian(),
@@ -397,7 +397,7 @@ namespace System.Buffers.Binary.Tests
                 UL1 = spanBE.Slice(48).ReadUInt64BigEndian()
             };
 
-            TestStructExplicit readStructAndReverseFromReadOnlySpan = readOnlySpanBE.Read<TestStructExplicit>();
+            var readStructAndReverseFromReadOnlySpan = readOnlySpanBE.Read<TestHelpers.TestStructExplicit>();
             if (BitConverter.IsLittleEndian)
             {
                 readStructAndReverseFromReadOnlySpan.S0 = readStructAndReverseFromReadOnlySpan.S0.Reverse();
@@ -414,7 +414,7 @@ namespace System.Buffers.Binary.Tests
                 readStructAndReverseFromReadOnlySpan.UL1 = readStructAndReverseFromReadOnlySpan.UL1.Reverse();
             }
 
-            TestStructExplicit readStructFieldByFieldFromReadOnlySpan = new TestStructExplicit
+            var readStructFieldByFieldFromReadOnlySpan = new TestHelpers.TestStructExplicit
             {
                 S0 = readOnlySpanBE.ReadInt16BigEndian(),
                 I0 = readOnlySpanBE.Slice(2).ReadInt32BigEndian(),
@@ -467,35 +467,6 @@ namespace System.Buffers.Binary.Tests
             public long L1;
             public ushort US1;
             public uint UI1;
-            public ulong UL1;
-        }
-
-        [StructLayout(LayoutKind.Explicit)]
-        private struct TestStructExplicit
-        {
-            [FieldOffset(0)]
-            public short S0;
-            [FieldOffset(2)]
-            public int I0;
-            [FieldOffset(6)]
-            public long L0;
-            [FieldOffset(14)]
-            public ushort US0;
-            [FieldOffset(16)]
-            public uint UI0;
-            [FieldOffset(20)]
-            public ulong UL0;
-            [FieldOffset(28)]
-            public short S1;
-            [FieldOffset(30)]
-            public int I1;
-            [FieldOffset(34)]
-            public long L1;
-            [FieldOffset(42)]
-            public ushort US1;
-            [FieldOffset(44)]
-            public uint UI1;
-            [FieldOffset(48)]
             public ulong UL1;
         }
     }
