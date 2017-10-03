@@ -12,7 +12,6 @@
     <Compile Include="EventLogTests\EventLogWriteEntryEventTests.cs" />
     <Compile Include="EventLogTests\EventLogSourceCreationTests.cs" />
     <Compile Include="EventLogTests\EventLogTests.cs" />
-    <Compile Include="EventLogTests\EventLogTestsBase.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

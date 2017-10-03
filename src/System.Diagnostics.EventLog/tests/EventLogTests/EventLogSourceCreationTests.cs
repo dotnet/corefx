@@ -2,7 +2,7 @@
 
 namespace System.Diagnostics.Tests
 {
-    public class EventLogSourceCreationTests : EventLogTestsBase
+    public class EventLogSourceCreationTests
     {
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void CheckSourceExistenceAndDeletion()

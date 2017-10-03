@@ -2,7 +2,7 @@
 
 namespace System.Diagnostics.Tests
 {
-    public class EventLogTests : EventLogTestsBase
+    public class EventLogTests
     {
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void EventLogReinitializationException()

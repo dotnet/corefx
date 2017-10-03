@@ -7,6 +7,7 @@
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard'">SR.PlatformNotSupported_EventLog</GeneratePlatformNotSupportedAssemblyMessage>
     <!-- Although we have a netstandard configuration, we know we are not currently UAP compatible-->
     <UWPCompatible>false</UWPCompatible>
+    <ProjectGuid>{432779B9-3CBD-4871-A7DC-D8A192319DBD}</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
@@ -19,8 +20,12 @@
     <Compile Include="System\Diagnostics\EntryWrittenEventArgs.cs" />
     <Compile Include="System\Diagnostics\EntryWrittenEventHandler.cs" />
     <Compile Include="System\Diagnostics\EventData.cs" />
-    <Compile Include="System\Diagnostics\EventLog.cs" />
-    <Compile Include="System\Diagnostics\EventLogEntry.cs" />
+    <Compile Include="System\Diagnostics\EventLog.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="System\Diagnostics\EventLogEntry.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\Diagnostics\EventLogEntryCollection.cs" />
     <Compile Include="System\Diagnostics\EventLogEntryType.cs" />
     <Compile Include="System\Diagnostics\EventLogInternal.cs" />
@@ -49,6 +54,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.LookupAccountSid.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.LookupAccountSid.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.WaitForSingleObject.cs">
+      <Link>Common\Interop\Windows\kernel32\Interop.WaitForSingleObject.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
     </Compile>
@@ -56,7 +64,7 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
-  </ItemGroup>  
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
     <Reference Include="System.Collections.Specialized" />
     <Reference Include="System.ComponentModel" />

@@ -11,7 +11,6 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using Microsoft.Win32;
-using Microsoft.Win32.SafeHandles;
 
 namespace System.Diagnostics
 {
@@ -148,7 +147,7 @@ namespace System.Diagnostics
             {
                 Thread.BeginCriticalRegion();
                 Thread.BeginThreadAffinity();
-                int result = WaitForSingleObjectDontCallThis(mutexIn.SafeWaitHandle, 500);
+                int result = Interop.Kernel32.WaitForSingleObject(mutexIn.SafeWaitHandle, 500);
                 switch (result)
                 {
                     case NativeMethods.WAIT_OBJECT_0:
@@ -175,8 +174,6 @@ namespace System.Diagnostics
             return ret;
         }
 
-        [DllImport(Interop.Libraries.Kernel32, ExactSpelling = true, SetLastError = true, EntryPoint = "WaitForSingleObject")]
-        private static extern int WaitForSingleObjectDontCallThis(SafeWaitHandle handle, int timeout);
         internal static string GetLatestBuildDllDirectory(string machineName)
         {
             string dllDir = "";
