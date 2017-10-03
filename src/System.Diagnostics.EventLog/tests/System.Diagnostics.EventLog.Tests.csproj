@@ -9,7 +9,6 @@
     <ProjectGuid>{5B218883-369E-4C3D-8BD0-74843474DCBD}</ProjectGuid>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="EventLogTests\EventLogWriteEntryEventTests.cs" />
     <Compile Include="EventLogTests\EventLogSourceCreationTests.cs" />
     <Compile Include="EventLogTests\EventLogTests.cs" />
   </ItemGroup>
