@@ -4,31 +4,40 @@ namespace System.Diagnostics.Tests
 {
     public class EventLogSourceCreationTests : EventLogTestsBase
     {
-        //[ConditionalFact(nameof(IsProcessElevated))]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public void CheckSourceExistanceAndDeletion()
+        public void CheckSourceExistenceAndDeletion()
         {
+            if (!AdminHelpers.IsProcessElevated())
+                return;
+
             string source = Guid.NewGuid().ToString("N");
-            if (!EventLog.SourceExists(source))
+            try
             {
                 EventLog.CreateEventSource(source, "MyNewLog");
+                Assert.True(EventLog.SourceExists(source));
             }
-            Assert.True(EventLog.SourceExists(source));
-            EventLog.DeleteEventSource(source);
+            finally
+            {
+                EventLog.DeleteEventSource(source);
+            }
             Assert.False(EventLog.SourceExists(source));
         }
 
-        //[ConditionalFact(nameof(IsProcessElevated))]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void CheckSourceExistsArgumentNull()
         {
+            if (!AdminHelpers.IsProcessElevated())
+                return;
+
             Assert.False(EventLog.SourceExists(null));
         }
 
-        //[ConditionalFact(nameof(IsProcessElevated))]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void DeleteUnregisteredSource()
         {
+            if (!AdminHelpers.IsProcessElevated())
+                return;
+
             Assert.Throws<System.ArgumentException>(() => EventLog.DeleteEventSource(Guid.NewGuid().ToString("N")));
         }
     }

@@ -5,29 +5,32 @@ namespace System.Diagnostics.Tests
     public class EventLogTests : EventLogTestsBase
     {
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public void EventLogReIntializationException()
+        public void EventLogReinitializationException()
         {
-            EventLog eventLog = new EventLog();
-            eventLog.BeginInit();
-            Assert.Throws<InvalidOperationException>(() => eventLog.BeginInit());
-            eventLog.Close();
+            using (EventLog eventLog = new EventLog())
+            {
+                eventLog.BeginInit();
+                Assert.Throws<InvalidOperationException>(() => eventLog.BeginInit());
+                eventLog.Close();
+            }
         }
 
-        //[ConditionalFact(nameof(IsProcessElevated))]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void ClearLogTest()
         {
-            if (!EventLog.SourceExists("MySource"))
-            {
-                EventLog.CreateEventSource("MySource", "MyNewLog");
-            }
+            if (!AdminHelpers.IsProcessElevated())
+                return;
 
-            EventLog myLog = new EventLog();
-            myLog.Source = "MySource";
-            myLog.WriteEntry("Writing to event log.");
-            Assert.Equal(1, myLog.Entries.Count);
-            myLog.Clear();
-            Assert.Equal(0, myLog.Entries.Count);
+            string source = Guid.NewGuid().ToString("N");
+            EventLog.CreateEventSource(source, "MyNewLog");
+            using (EventLog myLog = new EventLog())
+            {
+                myLog.Source = source;
+                myLog.WriteEntry("Writing to event log.");
+                Assert.True(myLog.Entries.Count != 0);
+                myLog.Clear();
+                Assert.Equal(0, myLog.Entries.Count);
+            }
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -37,24 +40,18 @@ namespace System.Diagnostics.Tests
             Assert.InRange(ael.Entries.Count, 1, Int32.MaxValue);
         }
 
-        //[ConditionalFact(nameof(IsProcessElevated))]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void DelteLogTest()
         {
-            string source = Guid.NewGuid().ToString("N");
-            string logName;
-            if (!EventLog.SourceExists(source))
-            {
-                EventLog.CreateEventSource(source, "MyLog");
-            }
-            Assert.True(EventLog.Exists("MyLog"));
+            if (!AdminHelpers.IsProcessElevated())
+                return;
 
-            if (EventLog.SourceExists(source))
-            {
-                logName = EventLog.LogNameFromSourceName(source, ".");
-                EventLog.Delete(logName);
-                Assert.False(EventLog.Exists(logName));
-            }
+            string source = Guid.NewGuid().ToString("N");
+            string logName = Guid.NewGuid().ToString("N");
+            EventLog.CreateEventSource(source, logName);
+            Assert.True(EventLog.Exists(logName));
+            EventLog.Delete(logName);
+            Assert.False(EventLog.Exists(logName));
         }
     }
 }
