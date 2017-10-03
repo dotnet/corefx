@@ -18,11 +18,17 @@
     <Compile Include="$(CommonTestPath)\System\Collections\DictionaryExtensions.cs">
       <Link>Common\System\Collections\DictionaryExtensions.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\ByteUtils.cs">
+      <Link>Common\System\Security\Cryptography\ByteUtils.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Linux\procfs\Interop.ProcFsStat.cs">
       <Link>Common\Interop\Linux\procfs\Interop.ProcFsStat.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\CharArrayHelpers.cs">
       <Link>Common\System\CharArrayHelpers.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Marvin.cs">
+      <Link>Common\System\Marvin.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\StringExtensions.cs">
       <Link>Common\System\StringExtensions.cs</Link>
@@ -64,6 +70,7 @@
     <Compile Include="Tests\System\AssertExtensionTests.cs" />
     <Compile Include="Tests\System\CharArrayHelpersTests.cs" />
     <Compile Include="Tests\System\IO\StringParserTests.cs" />
+    <Compile Include="Tests\System\MarvinTests.cs" />
     <Compile Include="Tests\System\Security\IdentityHelperTests.cs" />
     <Compile Include="Tests\System\StringExtensions.Tests.cs" />
     <Compile Include="Tests\System\Collections\Generic\ArrayBuilderTests.cs" />
