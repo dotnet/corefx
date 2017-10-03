@@ -32,7 +32,7 @@ internal partial class Interop
             parameters.dwSize = (uint)Marshal.SizeOf<Interop.Kernel32.CREATEFILE2_EXTENDED_PARAMETERS>();
 
             parameters.dwFileAttributes = (uint)dwFlagsAndAttributes & 0x0000FFFF;
-            parameters.dwSecurityQosFlags = (uint)dwFlagsAndAttributes & 0x000F0000;
+            parameters.dwSecurityQosFlags = (uint)dwFlagsAndAttributes & 0x001F0000;
             parameters.dwFileFlags = (uint)dwFlagsAndAttributes & 0xFFF00000;
 
             parameters.hTemplateFile = hTemplateFile;
