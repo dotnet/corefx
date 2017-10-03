@@ -8,7 +8,7 @@
 // TestOuter - If true, runs outerloop, if false runs just innerloop
 
 def submittedHelixJson = null
-def submitToHelix = (params.TGroup == 'netcoreapp' || params.TGroup == 'uap')
+def submitToHelix = (params.TGroup == 'netcoreapp' || params.TGroup == 'uap' || params.TGroup == 'uapaot')
 
 simpleNode('Windows_NT','latest') {
     stage ('Checkout source') {
@@ -47,8 +47,6 @@ simpleNode('Windows_NT','latest') {
             }
             if (submitToHelix) {
                 archiveTests = 'true'
-            }
-            if (submitToHelix || params.TGroup == 'uapaot') {
                 additionalArgs += ' -SkipTests'
             }
             bat ".\\build-tests.cmd ${framework} -buildArch=${params.AGroup} -${params.CGroup}${additionalArgs} -- /p:RuntimeOS=win10 /p:ArchiveTests=${archiveTests}"
@@ -76,7 +74,7 @@ simpleNode('Windows_NT','latest') {
                     if (params.AGroup == 'x64') {
                         targetHelixQueues += ['Windows.10.Nano.Amd64.Open']
                     }
-                } else if (params.TGroup == 'uap') {
+                } else if (params.TGroup == 'uap' || params.TGroup == 'uapaot') {
                     targetHelixQueues = ['Windows.10.Amd64.ClientRS2.Open']
                 }
 
