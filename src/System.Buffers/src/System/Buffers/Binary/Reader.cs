@@ -14,7 +14,7 @@ namespace System.Buffers.Binary
     /// For native formats, SpanExtensions.Read&lt;T&gt; should be used.
     /// Use these helpers when you need to read specific endinanness.
     /// </remarks>
-    public static partial class SpanBinaryExtensions
+    public static partial class BinaryPrimitives
     {
         /// <summary>
         /// This is a no-op and added only for consistency.
@@ -22,7 +22,7 @@ namespace System.Buffers.Binary
         /// rather than having to skip sbyte fields.
         /// </summary> 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static sbyte Reverse(this sbyte value)
+        public static sbyte ReverseEndianness(sbyte value)
         {
             return value;
         }
@@ -31,7 +31,7 @@ namespace System.Buffers.Binary
         /// Reverses a primitive value - performs an endianness swap
         /// </summary> 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static short Reverse(this short value)
+        public static short ReverseEndianness(short value)
         {
             return (short)((value & 0x00FF) << 8 | (value & 0xFF00) >> 8);
         }
@@ -40,13 +40,13 @@ namespace System.Buffers.Binary
         /// Reverses a primitive value - performs an endianness swap
         /// </summary> 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int Reverse(this int value) => (int)Reverse((uint)value);
+        public static int ReverseEndianness(int value) => (int)ReverseEndianness((uint)value);
 
         /// <summary>
         /// Reverses a primitive value - performs an endianness swap
         /// </summary> 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long Reverse(this long value) => (long)Reverse((ulong)value);
+        public static long ReverseEndianness(long value) => (long)ReverseEndianness((ulong)value);
 
         /// <summary>
         /// This is a no-op and added only for consistency.
@@ -54,7 +54,7 @@ namespace System.Buffers.Binary
         /// rather than having to skip byte fields.
         /// </summary> 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte Reverse(this byte value)
+        public static byte ReverseEndianness(byte value)
         {
             return value;
         }
@@ -63,7 +63,7 @@ namespace System.Buffers.Binary
         /// Reverses a primitive value - performs an endianness swap
         /// </summary> 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ushort Reverse(this ushort value)
+        public static ushort ReverseEndianness(ushort value)
         {
             return (ushort)((value & 0x00FFU) << 8 | (value & 0xFF00U) >> 8);
         }
@@ -72,7 +72,7 @@ namespace System.Buffers.Binary
         /// Reverses a primitive value - performs an endianness swap
         /// </summary> 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint Reverse(this uint value)
+        public static uint ReverseEndianness(uint value)
         {
             value = (value << 16) | (value >> 16);
             value = (value & 0x00FF00FF) << 8 | (value & 0xFF00FF00) >> 8;
@@ -83,7 +83,7 @@ namespace System.Buffers.Binary
         /// Reverses a primitive value - performs an endianness swap
         /// </summary> 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong Reverse(this ulong value)
+        public static ulong ReverseEndianness(ulong value)
         {
             value = (value << 32) | (value >> 32);
             value = (value & 0x0000FFFF0000FFFF) << 16 | (value & 0xFFFF0000FFFF0000) >> 16;
@@ -92,24 +92,10 @@ namespace System.Buffers.Binary
         }
 
         /// <summary>
-        /// Reads a structure of type T out of a span of bytes.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Read<T>(this Span<byte> buffer)
-            where T : struct
-        {
-            if (Unsafe.SizeOf<T>() > buffer.Length)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-            return Unsafe.ReadUnaligned<T>(ref buffer.DangerousGetPinnableReference());
-        }
-
-        /// <summary>
         /// Reads a structure of type T out of a read-only span of bytes.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Read<T>(this ReadOnlySpan<byte> buffer)
+        public static T ReadCurrentEndianness<T>(ReadOnlySpan<byte> buffer)
             where T : struct
         {
             if (Unsafe.SizeOf<T>() > buffer.Length)
@@ -124,24 +110,7 @@ namespace System.Buffers.Binary
         /// <returns>If the span is too small to contain the type T, return false.</returns>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryRead<T>(this ReadOnlySpan<byte> buffer, out T value)
-            where T : struct
-        {
-            if (Unsafe.SizeOf<T>() > (uint)buffer.Length)
-            {
-                value = default;
-                return false;
-            }
-            value = Unsafe.ReadUnaligned<T>(ref buffer.DangerousGetPinnableReference());
-            return true;
-        }
-
-        /// <summary>
-        /// Reads a structure of type T out of a read-only span of bytes.
-        /// <returns>If the span is too small to contain the type T, return false.</returns>
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryRead<T>(this Span<byte> buffer, out T value)
+        public static bool TryReadCurrentEndianness<T>(ReadOnlySpan<byte> buffer, out T value)
             where T : struct
         {
             if (Unsafe.SizeOf<T>() > (uint)buffer.Length)

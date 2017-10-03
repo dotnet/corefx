@@ -6,6 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Xunit;
 
+using static System.Buffers.Binary.BinaryPrimitives;
+
 namespace System.Buffers.Binary.Tests
 {
     public class BinaryReaderUnitTests
@@ -22,60 +24,60 @@ namespace System.Buffers.Binary.Tests
                 span = new Span<byte>(&value, 8);
             }
 
-            Assert.Equal<byte>(0x11, span.Read<byte>());
-            Assert.True(span.TryRead(out byte byteValue));
+            Assert.Equal<byte>(0x11, ReadCurrentEndianness<byte>(span));
+            Assert.True(TryReadCurrentEndianness(span, out byte byteValue));
             Assert.Equal(0x11, byteValue);
 
-            Assert.Equal<sbyte>(0x11, span.Read<sbyte>());
-            Assert.True(span.TryRead(out byte sbyteValue));
+            Assert.Equal<sbyte>(0x11, ReadCurrentEndianness<sbyte>(span));
+            Assert.True(TryReadCurrentEndianness(span, out byte sbyteValue));
             Assert.Equal(0x11, byteValue);
 
-            Assert.Equal<ushort>(0x1122, span.ReadUInt16BigEndian());
-            Assert.True(span.TryReadUInt16BigEndian(out ushort ushortValue));
+            Assert.Equal<ushort>(0x1122, ReadUInt16BigEndian(span));
+            Assert.True(TryReadUInt16BigEndian(span, out ushort ushortValue));
             Assert.Equal(0x1122, ushortValue);
 
-            Assert.Equal<ushort>(0x2211, span.ReadUInt16LittleEndian());
-            Assert.True(span.TryReadUInt16LittleEndian(out ushortValue));
+            Assert.Equal<ushort>(0x2211, ReadUInt16LittleEndian(span));
+            Assert.True(TryReadUInt16LittleEndian(span, out ushortValue));
             Assert.Equal(0x2211, ushortValue);
 
-            Assert.Equal<short>(0x1122, span.ReadInt16BigEndian());
-            Assert.True(span.TryReadInt16BigEndian(out short shortValue));
+            Assert.Equal<short>(0x1122, ReadInt16BigEndian(span));
+            Assert.True(TryReadInt16BigEndian(span, out short shortValue));
             Assert.Equal(0x1122, shortValue);
 
-            Assert.Equal<short>(0x2211, span.ReadInt16LittleEndian());
-            Assert.True(span.TryReadInt16LittleEndian(out shortValue));
+            Assert.Equal<short>(0x2211, ReadInt16LittleEndian(span));
+            Assert.True(TryReadInt16LittleEndian(span, out shortValue));
             Assert.Equal(0x2211, ushortValue);
 
-            Assert.Equal<uint>(0x11223344, span.ReadUInt32BigEndian());
-            Assert.True(span.TryReadUInt32BigEndian(out uint uintValue));
+            Assert.Equal<uint>(0x11223344, ReadUInt32BigEndian(span));
+            Assert.True(TryReadUInt32BigEndian(span, out uint uintValue));
             Assert.Equal<uint>(0x11223344, uintValue);
 
-            Assert.Equal<uint>(0x44332211, span.ReadUInt32LittleEndian());
-            Assert.True(span.TryReadUInt32LittleEndian(out uintValue));
+            Assert.Equal<uint>(0x44332211, ReadUInt32LittleEndian(span));
+            Assert.True(TryReadUInt32LittleEndian(span, out uintValue));
             Assert.Equal<uint>(0x44332211, uintValue);
 
-            Assert.Equal<int>(0x11223344, span.ReadInt32BigEndian());
-            Assert.True(span.TryReadInt32BigEndian(out int intValue));
+            Assert.Equal<int>(0x11223344, ReadInt32BigEndian(span));
+            Assert.True(TryReadInt32BigEndian(span, out int intValue));
             Assert.Equal<int>(0x11223344, intValue);
 
-            Assert.Equal<int>(0x44332211, span.ReadInt32LittleEndian());
-            Assert.True(span.TryReadInt32LittleEndian(out intValue));
+            Assert.Equal<int>(0x44332211, ReadInt32LittleEndian(span));
+            Assert.True(TryReadInt32LittleEndian(span, out intValue));
             Assert.Equal<int>(0x44332211, intValue);
 
-            Assert.Equal<ulong>(0x1122334455667788, span.ReadUInt64BigEndian());
-            Assert.True(span.TryReadUInt64BigEndian(out ulong ulongValue));
+            Assert.Equal<ulong>(0x1122334455667788, ReadUInt64BigEndian(span));
+            Assert.True(TryReadUInt64BigEndian(span, out ulong ulongValue));
             Assert.Equal<ulong>(0x1122334455667788, ulongValue);
 
-            Assert.Equal<ulong>(0x8877665544332211, span.ReadUInt64LittleEndian());
-            Assert.True(span.TryReadUInt64LittleEndian(out ulongValue));
+            Assert.Equal<ulong>(0x8877665544332211, ReadUInt64LittleEndian(span));
+            Assert.True(TryReadUInt64LittleEndian(span, out ulongValue));
             Assert.Equal<ulong>(0x8877665544332211, ulongValue);
 
-            Assert.Equal<long>(0x1122334455667788, span.ReadInt64BigEndian());
-            Assert.True(span.TryReadInt64BigEndian(out long longValue));
+            Assert.Equal<long>(0x1122334455667788, ReadInt64BigEndian(span));
+            Assert.True(TryReadInt64BigEndian(span, out long longValue));
             Assert.Equal<long>(0x1122334455667788, longValue);
 
-            Assert.Equal<long>(unchecked((long)0x8877665544332211), span.ReadInt64LittleEndian());
-            Assert.True(span.TryReadInt64LittleEndian(out longValue));
+            Assert.Equal<long>(unchecked((long)0x8877665544332211), ReadInt64LittleEndian(span));
+            Assert.True(TryReadInt64LittleEndian(span, out longValue));
             Assert.Equal<long>(unchecked((long)0x8877665544332211), longValue);
         }
 
@@ -90,60 +92,60 @@ namespace System.Buffers.Binary.Tests
                 span = new ReadOnlySpan<byte>(&value, 8);
             }
 
-            Assert.Equal<byte>(0x11, span.Read<byte>());
-            Assert.True(span.TryRead(out byte byteValue));
+            Assert.Equal<byte>(0x11, ReadCurrentEndianness<byte>(span));
+            Assert.True(TryReadCurrentEndianness(span, out byte byteValue));
             Assert.Equal(0x11, byteValue);
 
-            Assert.Equal<sbyte>(0x11, span.Read<sbyte>());
-            Assert.True(span.TryRead(out byte sbyteValue));
+            Assert.Equal<sbyte>(0x11, ReadCurrentEndianness<sbyte>(span));
+            Assert.True(TryReadCurrentEndianness(span, out byte sbyteValue));
             Assert.Equal(0x11, byteValue);
 
-            Assert.Equal<ushort>(0x1122, span.ReadUInt16BigEndian());
-            Assert.True(span.TryReadUInt16BigEndian(out ushort ushortValue));
+            Assert.Equal<ushort>(0x1122, ReadUInt16BigEndian(span));
+            Assert.True(TryReadUInt16BigEndian(span, out ushort ushortValue));
             Assert.Equal(0x1122, ushortValue);
 
-            Assert.Equal<ushort>(0x2211, span.ReadUInt16LittleEndian());
-            Assert.True(span.TryReadUInt16LittleEndian(out ushortValue));
+            Assert.Equal<ushort>(0x2211, ReadUInt16LittleEndian(span));
+            Assert.True(TryReadUInt16LittleEndian(span, out ushortValue));
             Assert.Equal(0x2211, ushortValue);
 
-            Assert.Equal<short>(0x1122, span.ReadInt16BigEndian());
-            Assert.True(span.TryReadInt16BigEndian(out short shortValue));
+            Assert.Equal<short>(0x1122, ReadInt16BigEndian(span));
+            Assert.True(TryReadInt16BigEndian(span, out short shortValue));
             Assert.Equal(0x1122, shortValue);
 
-            Assert.Equal<short>(0x2211, span.ReadInt16LittleEndian());
-            Assert.True(span.TryReadInt16LittleEndian(out shortValue));
+            Assert.Equal<short>(0x2211, ReadInt16LittleEndian(span));
+            Assert.True(TryReadInt16LittleEndian(span, out shortValue));
             Assert.Equal(0x2211, ushortValue);
 
-            Assert.Equal<uint>(0x11223344, span.ReadUInt32BigEndian());
-            Assert.True(span.TryReadUInt32BigEndian(out uint uintValue));
+            Assert.Equal<uint>(0x11223344, ReadUInt32BigEndian(span));
+            Assert.True(TryReadUInt32BigEndian(span, out uint uintValue));
             Assert.Equal<uint>(0x11223344, uintValue);
 
-            Assert.Equal<uint>(0x44332211, span.ReadUInt32LittleEndian());
-            Assert.True(span.TryReadUInt32LittleEndian(out uintValue));
+            Assert.Equal<uint>(0x44332211, ReadUInt32LittleEndian(span));
+            Assert.True(TryReadUInt32LittleEndian(span, out uintValue));
             Assert.Equal<uint>(0x44332211, uintValue);
 
-            Assert.Equal<int>(0x11223344, span.ReadInt32BigEndian());
-            Assert.True(span.TryReadInt32BigEndian(out int intValue));
+            Assert.Equal<int>(0x11223344, ReadInt32BigEndian(span));
+            Assert.True(TryReadInt32BigEndian(span, out int intValue));
             Assert.Equal<int>(0x11223344, intValue);
 
-            Assert.Equal<int>(0x44332211, span.ReadInt32LittleEndian());
-            Assert.True(span.TryReadInt32LittleEndian(out intValue));
+            Assert.Equal<int>(0x44332211, ReadInt32LittleEndian(span));
+            Assert.True(TryReadInt32LittleEndian(span, out intValue));
             Assert.Equal<int>(0x44332211, intValue);
 
-            Assert.Equal<ulong>(0x1122334455667788, span.ReadUInt64BigEndian());
-            Assert.True(span.TryReadUInt64BigEndian(out ulong ulongValue));
+            Assert.Equal<ulong>(0x1122334455667788, ReadUInt64BigEndian(span));
+            Assert.True(TryReadUInt64BigEndian(span, out ulong ulongValue));
             Assert.Equal<ulong>(0x1122334455667788, ulongValue);
 
-            Assert.Equal<ulong>(0x8877665544332211, span.ReadUInt64LittleEndian());
-            Assert.True(span.TryReadUInt64LittleEndian(out ulongValue));
+            Assert.Equal<ulong>(0x8877665544332211, ReadUInt64LittleEndian(span));
+            Assert.True(TryReadUInt64LittleEndian(span, out ulongValue));
             Assert.Equal<ulong>(0x8877665544332211, ulongValue);
 
-            Assert.Equal<long>(0x1122334455667788, span.ReadInt64BigEndian());
-            Assert.True(span.TryReadInt64BigEndian(out long longValue));
+            Assert.Equal<long>(0x1122334455667788, ReadInt64BigEndian(span));
+            Assert.True(TryReadInt64BigEndian(span, out long longValue));
             Assert.Equal<long>(0x1122334455667788, longValue);
 
-            Assert.Equal<long>(unchecked((long)0x8877665544332211), span.ReadInt64LittleEndian());
-            Assert.True(span.TryReadInt64LittleEndian(out longValue));
+            Assert.Equal<long>(unchecked((long)0x8877665544332211), ReadInt64LittleEndian(span));
+            Assert.True(TryReadInt64LittleEndian(span, out longValue));
             Assert.Equal<long>(unchecked((long)0x8877665544332211), longValue);
         }
 
@@ -152,23 +154,23 @@ namespace System.Buffers.Binary.Tests
         {
             Span<byte> span = new byte[] { 1 };
 
-            Assert.Equal<byte>(1, span.Read<byte>());
-            Assert.True(span.TryRead(out byte byteValue));
+            Assert.Equal<byte>(1, ReadCurrentEndianness<byte>(span));
+            Assert.True(TryReadCurrentEndianness(span, out byte byteValue));
             Assert.Equal(1, byteValue);
 
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Read<short>());
-            Assert.False(span.TryRead(out short shortValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Read<int>());
-            Assert.False(span.TryRead(out int intValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Read<long>());
-            Assert.False(span.TryRead(out long longValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadCurrentEndianness<short>(_span));
+            Assert.False(TryReadCurrentEndianness(span, out short shortValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadCurrentEndianness<int>(_span));
+            Assert.False(TryReadCurrentEndianness(span, out int intValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadCurrentEndianness<long>(_span));
+            Assert.False(TryReadCurrentEndianness(span, out long longValue));
 
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Read<ushort>());
-            Assert.False(span.TryRead(out ushort ushortValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Read<uint>());
-            Assert.False(span.TryRead(out uint uintValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Read<ulong>());
-            Assert.False(span.TryRead(out ulong ulongValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadCurrentEndianness<ushort>(_span));
+            Assert.False(TryReadCurrentEndianness(span, out ushort ushortValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadCurrentEndianness<uint>(_span));
+            Assert.False(TryReadCurrentEndianness(span, out uint uintValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadCurrentEndianness<ulong>(_span));
+            Assert.False(TryReadCurrentEndianness(span, out ulong ulongValue));
         }
 
         [Fact]
@@ -176,23 +178,23 @@ namespace System.Buffers.Binary.Tests
         {
             ReadOnlySpan<byte> span = new byte[] { 1 };
 
-            Assert.Equal<byte>(1, span.Read<byte>());
-            Assert.True(span.TryRead(out byte byteValue));
+            Assert.Equal<byte>(1, ReadCurrentEndianness<byte>(span));
+            Assert.True(TryReadCurrentEndianness(span, out byte byteValue));
             Assert.Equal(1, byteValue);
 
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Read<short>());
-            Assert.False(span.TryRead(out short shortValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Read<int>());
-            Assert.False(span.TryRead(out int intValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Read<long>());
-            Assert.False(span.TryRead(out long longValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadCurrentEndianness<short>(_span));
+            Assert.False(TryReadCurrentEndianness(span, out short shortValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadCurrentEndianness<int>(_span));
+            Assert.False(TryReadCurrentEndianness(span, out int intValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadCurrentEndianness<long>(_span));
+            Assert.False(TryReadCurrentEndianness(span, out long longValue));
 
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Read<ushort>());
-            Assert.False(span.TryRead(out ushort ushortValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Read<uint>());
-            Assert.False(span.TryRead(out uint uintValue));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Read<ulong>());
-            Assert.False(span.TryRead(out ulong ulongValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadCurrentEndianness<ushort>(_span));
+            Assert.False(TryReadCurrentEndianness(span, out ushort ushortValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadCurrentEndianness<uint>(_span));
+            Assert.False(TryReadCurrentEndianness(span, out uint uintValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadCurrentEndianness<ulong>(_span));
+            Assert.False(TryReadCurrentEndianness(span, out ulong ulongValue));
         }
 
         [Fact]
@@ -203,10 +205,10 @@ namespace System.Buffers.Binary.Tests
             sbyte signedValueMax = sbyte.MaxValue;
             sbyte signedValueMin = sbyte.MinValue;
 
-            Assert.Equal(valueMax, valueMax.Reverse());
-            Assert.Equal(valueMin, valueMin.Reverse());
-            Assert.Equal(signedValueMax, signedValueMax.Reverse());
-            Assert.Equal(signedValueMin, signedValueMin.Reverse());
+            Assert.Equal(valueMax, ReverseEndianness(valueMax));
+            Assert.Equal(valueMin, ReverseEndianness(valueMin));
+            Assert.Equal(signedValueMax, ReverseEndianness(signedValueMax));
+            Assert.Equal(signedValueMin, ReverseEndianness(signedValueMin));
         }
 
         [Fact]
@@ -216,51 +218,51 @@ namespace System.Buffers.Binary.Tests
 
             Span<byte> spanBE = new byte[Unsafe.SizeOf<TestStruct>()];
 
-            spanBE.WriteInt16BigEndian(testStruct.S0);
-            spanBE.Slice(2).WriteInt32BigEndian(testStruct.I0);
-            spanBE.Slice(6).WriteInt64BigEndian(testStruct.L0);
-            spanBE.Slice(14).WriteUInt16BigEndian(testStruct.US0);
-            spanBE.Slice(16).WriteUInt32BigEndian(testStruct.UI0);
-            spanBE.Slice(20).WriteUInt64BigEndian(testStruct.UL0);
-            spanBE.Slice(28).WriteInt16BigEndian(testStruct.S1);
-            spanBE.Slice(30).WriteInt32BigEndian(testStruct.I1);
-            spanBE.Slice(34).WriteInt64BigEndian(testStruct.L1);
-            spanBE.Slice(42).WriteUInt16BigEndian(testStruct.US1);
-            spanBE.Slice(44).WriteUInt32BigEndian(testStruct.UI1);
-            spanBE.Slice(48).WriteUInt64BigEndian(testStruct.UL1);
+            WriteInt16BigEndian(spanBE, testStruct.S0);
+            WriteInt32BigEndian(spanBE.Slice(2), testStruct.I0);
+            WriteInt64BigEndian(spanBE.Slice(6), testStruct.L0);
+            WriteUInt16BigEndian(spanBE.Slice(14), testStruct.US0);
+            WriteUInt32BigEndian(spanBE.Slice(16), testStruct.UI0);
+            WriteUInt64BigEndian(spanBE.Slice(20), testStruct.UL0);
+            WriteInt16BigEndian(spanBE.Slice(28), testStruct.S1);
+            WriteInt32BigEndian(spanBE.Slice(30), testStruct.I1);
+            WriteInt64BigEndian(spanBE.Slice(34), testStruct.L1);
+            WriteUInt16BigEndian(spanBE.Slice(42), testStruct.US1);
+            WriteUInt32BigEndian(spanBE.Slice(44), testStruct.UI1);
+            WriteUInt64BigEndian(spanBE.Slice(48), testStruct.UL1);
 
             ReadOnlySpan<byte> readOnlySpanBE = new ReadOnlySpan<byte>(spanBE.ToArray());
 
             var readStruct = new TestStruct
             {
-                S0 = spanBE.ReadInt16BigEndian(),
-                I0 = spanBE.Slice(2).ReadInt32BigEndian(),
-                L0 = spanBE.Slice(6).ReadInt64BigEndian(),
-                US0 = spanBE.Slice(14).ReadUInt16BigEndian(),
-                UI0 = spanBE.Slice(16).ReadUInt32BigEndian(),
-                UL0 = spanBE.Slice(20).ReadUInt64BigEndian(),
-                S1 = spanBE.Slice(28).ReadInt16BigEndian(),
-                I1 = spanBE.Slice(30).ReadInt32BigEndian(),
-                L1 = spanBE.Slice(34).ReadInt64BigEndian(),
-                US1 = spanBE.Slice(42).ReadUInt16BigEndian(),
-                UI1 = spanBE.Slice(44).ReadUInt32BigEndian(),
-                UL1 = spanBE.Slice(48).ReadUInt64BigEndian()
+                S0 = ReadInt16BigEndian(spanBE),
+                I0 = ReadInt32BigEndian(spanBE.Slice(2)),
+                L0 = ReadInt64BigEndian(spanBE.Slice(6)),
+                US0 = ReadUInt16BigEndian(spanBE.Slice(14)),
+                UI0 = ReadUInt32BigEndian(spanBE.Slice(16)),
+                UL0 = ReadUInt64BigEndian(spanBE.Slice(20)),
+                S1 = ReadInt16BigEndian(spanBE.Slice(28)),
+                I1 = ReadInt32BigEndian(spanBE.Slice(30)),
+                L1 = ReadInt64BigEndian(spanBE.Slice(34)),
+                US1 = ReadUInt16BigEndian(spanBE.Slice(42)),
+                UI1 = ReadUInt32BigEndian(spanBE.Slice(44)),
+                UL1 = ReadUInt64BigEndian(spanBE.Slice(48))
             };
 
             var readStructFromReadOnlySpan = new TestStruct
             {
-                S0 = readOnlySpanBE.ReadInt16BigEndian(),
-                I0 = readOnlySpanBE.Slice(2).ReadInt32BigEndian(),
-                L0 = readOnlySpanBE.Slice(6).ReadInt64BigEndian(),
-                US0 = readOnlySpanBE.Slice(14).ReadUInt16BigEndian(),
-                UI0 = readOnlySpanBE.Slice(16).ReadUInt32BigEndian(),
-                UL0 = readOnlySpanBE.Slice(20).ReadUInt64BigEndian(),
-                S1 = readOnlySpanBE.Slice(28).ReadInt16BigEndian(),
-                I1 = readOnlySpanBE.Slice(30).ReadInt32BigEndian(),
-                L1 = readOnlySpanBE.Slice(34).ReadInt64BigEndian(),
-                US1 = readOnlySpanBE.Slice(42).ReadUInt16BigEndian(),
-                UI1 = readOnlySpanBE.Slice(44).ReadUInt32BigEndian(),
-                UL1 = readOnlySpanBE.Slice(48).ReadUInt64BigEndian()
+                S0 = ReadInt16BigEndian(readOnlySpanBE),
+                I0 = ReadInt32BigEndian(readOnlySpanBE.Slice(2)),
+                L0 = ReadInt64BigEndian(readOnlySpanBE.Slice(6)),
+                US0 = ReadUInt16BigEndian(readOnlySpanBE.Slice(14)),
+                UI0 = ReadUInt32BigEndian(readOnlySpanBE.Slice(16)),
+                UL0 = ReadUInt64BigEndian(readOnlySpanBE.Slice(20)),
+                S1 = ReadInt16BigEndian(readOnlySpanBE.Slice(28)),
+                I1 = ReadInt32BigEndian(readOnlySpanBE.Slice(30)),
+                L1 = ReadInt64BigEndian(readOnlySpanBE.Slice(34)),
+                US1 = ReadUInt16BigEndian(readOnlySpanBE.Slice(42)),
+                UI1 = ReadUInt32BigEndian(readOnlySpanBE.Slice(44)),
+                UL1 = ReadUInt64BigEndian(readOnlySpanBE.Slice(48))
             };
 
             Assert.Equal(testStruct, readStruct);
@@ -274,51 +276,51 @@ namespace System.Buffers.Binary.Tests
 
             Span<byte> spanLE = new byte[Unsafe.SizeOf<TestStruct>()];
 
-            spanLE.WriteInt16LittleEndian(testStruct.S0);
-            spanLE.Slice(2).WriteInt32LittleEndian(testStruct.I0);
-            spanLE.Slice(6).WriteInt64LittleEndian(testStruct.L0);
-            spanLE.Slice(14).WriteUInt16LittleEndian(testStruct.US0);
-            spanLE.Slice(16).WriteUInt32LittleEndian(testStruct.UI0);
-            spanLE.Slice(20).WriteUInt64LittleEndian(testStruct.UL0);
-            spanLE.Slice(28).WriteInt16LittleEndian(testStruct.S1);
-            spanLE.Slice(30).WriteInt32LittleEndian(testStruct.I1);
-            spanLE.Slice(34).WriteInt64LittleEndian(testStruct.L1);
-            spanLE.Slice(42).WriteUInt16LittleEndian(testStruct.US1);
-            spanLE.Slice(44).WriteUInt32LittleEndian(testStruct.UI1);
-            spanLE.Slice(48).WriteUInt64LittleEndian(testStruct.UL1);
+            WriteInt16LittleEndian(spanLE, testStruct.S0);
+            WriteInt32LittleEndian(spanLE.Slice(2), testStruct.I0);
+            WriteInt64LittleEndian(spanLE.Slice(6), testStruct.L0);
+            WriteUInt16LittleEndian(spanLE.Slice(14), testStruct.US0);
+            WriteUInt32LittleEndian(spanLE.Slice(16), testStruct.UI0);
+            WriteUInt64LittleEndian(spanLE.Slice(20), testStruct.UL0);
+            WriteInt16LittleEndian(spanLE.Slice(28), testStruct.S1);
+            WriteInt32LittleEndian(spanLE.Slice(30), testStruct.I1);
+            WriteInt64LittleEndian(spanLE.Slice(34), testStruct.L1);
+            WriteUInt16LittleEndian(spanLE.Slice(42), testStruct.US1);
+            WriteUInt32LittleEndian(spanLE.Slice(44), testStruct.UI1);
+            WriteUInt64LittleEndian(spanLE.Slice(48), testStruct.UL1);
 
             ReadOnlySpan<byte> readOnlySpanLE = new ReadOnlySpan<byte>(spanLE.ToArray());
 
             var readStruct = new TestStruct
             {
-                S0 = spanLE.ReadInt16LittleEndian(),
-                I0 = spanLE.Slice(2).ReadInt32LittleEndian(),
-                L0 = spanLE.Slice(6).ReadInt64LittleEndian(),
-                US0 = spanLE.Slice(14).ReadUInt16LittleEndian(),
-                UI0 = spanLE.Slice(16).ReadUInt32LittleEndian(),
-                UL0 = spanLE.Slice(20).ReadUInt64LittleEndian(),
-                S1 = spanLE.Slice(28).ReadInt16LittleEndian(),
-                I1 = spanLE.Slice(30).ReadInt32LittleEndian(),
-                L1 = spanLE.Slice(34).ReadInt64LittleEndian(),
-                US1 = spanLE.Slice(42).ReadUInt16LittleEndian(),
-                UI1 = spanLE.Slice(44).ReadUInt32LittleEndian(),
-                UL1 = spanLE.Slice(48).ReadUInt64LittleEndian()
+                S0 = ReadInt16LittleEndian(spanLE),
+                I0 = ReadInt32LittleEndian(spanLE.Slice(2)),
+                L0 = ReadInt64LittleEndian(spanLE.Slice(6)),
+                US0 = ReadUInt16LittleEndian(spanLE.Slice(14)),
+                UI0 = ReadUInt32LittleEndian(spanLE.Slice(16)),
+                UL0 = ReadUInt64LittleEndian(spanLE.Slice(20)),
+                S1 = ReadInt16LittleEndian(spanLE.Slice(28)),
+                I1 = ReadInt32LittleEndian(spanLE.Slice(30)),
+                L1 = ReadInt64LittleEndian(spanLE.Slice(34)),
+                US1 = ReadUInt16LittleEndian(spanLE.Slice(42)),
+                UI1 = ReadUInt32LittleEndian(spanLE.Slice(44)),
+                UL1 = ReadUInt64LittleEndian(spanLE.Slice(48))
             };
 
             var readStructFromReadOnlySpan = new TestStruct
             {
-                S0 = readOnlySpanLE.ReadInt16LittleEndian(),
-                I0 = readOnlySpanLE.Slice(2).ReadInt32LittleEndian(),
-                L0 = readOnlySpanLE.Slice(6).ReadInt64LittleEndian(),
-                US0 = readOnlySpanLE.Slice(14).ReadUInt16LittleEndian(),
-                UI0 = readOnlySpanLE.Slice(16).ReadUInt32LittleEndian(),
-                UL0 = readOnlySpanLE.Slice(20).ReadUInt64LittleEndian(),
-                S1 = readOnlySpanLE.Slice(28).ReadInt16LittleEndian(),
-                I1 = readOnlySpanLE.Slice(30).ReadInt32LittleEndian(),
-                L1 = readOnlySpanLE.Slice(34).ReadInt64LittleEndian(),
-                US1 = readOnlySpanLE.Slice(42).ReadUInt16LittleEndian(),
-                UI1 = readOnlySpanLE.Slice(44).ReadUInt32LittleEndian(),
-                UL1 = readOnlySpanLE.Slice(48).ReadUInt64LittleEndian()
+                S0 = ReadInt16LittleEndian(readOnlySpanLE),
+                I0 = ReadInt32LittleEndian(readOnlySpanLE.Slice(2)),
+                L0 = ReadInt64LittleEndian(readOnlySpanLE.Slice(6)),
+                US0 = ReadUInt16LittleEndian(readOnlySpanLE.Slice(14)),
+                UI0 = ReadUInt32LittleEndian(readOnlySpanLE.Slice(16)),
+                UL0 = ReadUInt64LittleEndian(readOnlySpanLE.Slice(20)),
+                S1 = ReadInt16LittleEndian(readOnlySpanLE.Slice(28)),
+                I1 = ReadInt32LittleEndian(readOnlySpanLE.Slice(30)),
+                L1 = ReadInt64LittleEndian(readOnlySpanLE.Slice(34)),
+                US1 = ReadUInt16LittleEndian(readOnlySpanLE.Slice(42)),
+                UI1 = ReadUInt32LittleEndian(readOnlySpanLE.Slice(44)),
+                UL1 = ReadUInt64LittleEndian(readOnlySpanLE.Slice(48))
             };
 
             Assert.Equal(testStruct, readStruct);
@@ -326,7 +328,7 @@ namespace System.Buffers.Binary.Tests
         }
 
         [Fact]
-        public void ReadingStructFieldByFieldOrReadAndReverse()
+        public void ReadingStructFieldByFieldOrReadAndReverseEndianness()
         {
             Assert.True(BitConverter.IsLittleEndian);
             Span<byte> spanBE = new byte[Unsafe.SizeOf<TestHelpers.TestStructExplicit>()];
@@ -347,87 +349,87 @@ namespace System.Buffers.Binary.Tests
                 UL1 = ulong.MinValue
             };
 
-            spanBE.WriteInt16BigEndian(testExplicitStruct.S0);
-            spanBE.Slice(2).WriteInt32BigEndian(testExplicitStruct.I0);
-            spanBE.Slice(6).WriteInt64BigEndian(testExplicitStruct.L0);
-            spanBE.Slice(14).WriteUInt16BigEndian(testExplicitStruct.US0);
-            spanBE.Slice(16).WriteUInt32BigEndian(testExplicitStruct.UI0);
-            spanBE.Slice(20).WriteUInt64BigEndian(testExplicitStruct.UL0);
-            spanBE.Slice(28).WriteInt16BigEndian(testExplicitStruct.S1);
-            spanBE.Slice(30).WriteInt32BigEndian(testExplicitStruct.I1);
-            spanBE.Slice(34).WriteInt64BigEndian(testExplicitStruct.L1);
-            spanBE.Slice(42).WriteUInt16BigEndian(testExplicitStruct.US1);
-            spanBE.Slice(44).WriteUInt32BigEndian(testExplicitStruct.UI1);
-            spanBE.Slice(48).WriteUInt64BigEndian(testExplicitStruct.UL1);
+            WriteInt16BigEndian(spanBE, testExplicitStruct.S0);
+            WriteInt32BigEndian(spanBE.Slice(2), testExplicitStruct.I0);
+            WriteInt64BigEndian(spanBE.Slice(6), testExplicitStruct.L0);
+            WriteUInt16BigEndian(spanBE.Slice(14), testExplicitStruct.US0);
+            WriteUInt32BigEndian(spanBE.Slice(16), testExplicitStruct.UI0);
+            WriteUInt64BigEndian(spanBE.Slice(20), testExplicitStruct.UL0);
+            WriteInt16BigEndian(spanBE.Slice(28), testExplicitStruct.S1);
+            WriteInt32BigEndian(spanBE.Slice(30), testExplicitStruct.I1);
+            WriteInt64BigEndian(spanBE.Slice(34), testExplicitStruct.L1);
+            WriteUInt16BigEndian(spanBE.Slice(42), testExplicitStruct.US1);
+            WriteUInt32BigEndian(spanBE.Slice(44), testExplicitStruct.UI1);
+            WriteUInt64BigEndian(spanBE.Slice(48), testExplicitStruct.UL1);
 
             Assert.Equal(56, spanBE.Length);
 
             ReadOnlySpan<byte> readOnlySpanBE = new ReadOnlySpan<byte>(spanBE.ToArray());
 
-            var readStructAndReverse = spanBE.Read<TestHelpers.TestStructExplicit>();
+            var readStructAndReverse = ReadCurrentEndianness<TestHelpers.TestStructExplicit>(spanBE);
             if (BitConverter.IsLittleEndian)
             {
-                readStructAndReverse.S0 = readStructAndReverse.S0.Reverse();
-                readStructAndReverse.I0 = readStructAndReverse.I0.Reverse();
-                readStructAndReverse.L0 = readStructAndReverse.L0.Reverse();
-                readStructAndReverse.US0 = readStructAndReverse.US0.Reverse();
-                readStructAndReverse.UI0 = readStructAndReverse.UI0.Reverse();
-                readStructAndReverse.UL0 = readStructAndReverse.UL0.Reverse();
-                readStructAndReverse.S1 = readStructAndReverse.S1.Reverse();
-                readStructAndReverse.I1 = readStructAndReverse.I1.Reverse();
-                readStructAndReverse.L1 = readStructAndReverse.L1.Reverse();
-                readStructAndReverse.US1 = readStructAndReverse.US1.Reverse();
-                readStructAndReverse.UI1 = readStructAndReverse.UI1.Reverse();
-                readStructAndReverse.UL1 = readStructAndReverse.UL1.Reverse();
+                readStructAndReverse.S0 = ReverseEndianness(readStructAndReverse.S0);
+                readStructAndReverse.I0 = ReverseEndianness(readStructAndReverse.I0);
+                readStructAndReverse.L0 = ReverseEndianness(readStructAndReverse.L0);
+                readStructAndReverse.US0 = ReverseEndianness(readStructAndReverse.US0);
+                readStructAndReverse.UI0 = ReverseEndianness(readStructAndReverse.UI0);
+                readStructAndReverse.UL0 = ReverseEndianness(readStructAndReverse.UL0);
+                readStructAndReverse.S1 = ReverseEndianness(readStructAndReverse.S1);
+                readStructAndReverse.I1 = ReverseEndianness(readStructAndReverse.I1);
+                readStructAndReverse.L1 = ReverseEndianness(readStructAndReverse.L1);
+                readStructAndReverse.US1 = ReverseEndianness(readStructAndReverse.US1);
+                readStructAndReverse.UI1 = ReverseEndianness(readStructAndReverse.UI1);
+                readStructAndReverse.UL1 = ReverseEndianness(readStructAndReverse.UL1);
             }
 
             var readStructFieldByField = new TestHelpers.TestStructExplicit
             {
-                S0 = spanBE.ReadInt16BigEndian(),
-                I0 = spanBE.Slice(2).ReadInt32BigEndian(),
-                L0 = spanBE.Slice(6).ReadInt64BigEndian(),
-                US0 = spanBE.Slice(14).ReadUInt16BigEndian(),
-                UI0 = spanBE.Slice(16).ReadUInt32BigEndian(),
-                UL0 = spanBE.Slice(20).ReadUInt64BigEndian(),
-                S1 = spanBE.Slice(28).ReadInt16BigEndian(),
-                I1 = spanBE.Slice(30).ReadInt32BigEndian(),
-                L1 = spanBE.Slice(34).ReadInt64BigEndian(),
-                US1 = spanBE.Slice(42).ReadUInt16BigEndian(),
-                UI1 = spanBE.Slice(44).ReadUInt32BigEndian(),
-                UL1 = spanBE.Slice(48).ReadUInt64BigEndian()
+                S0 = ReadInt16BigEndian(spanBE),
+                I0 = ReadInt32BigEndian(spanBE.Slice(2)),
+                L0 = ReadInt64BigEndian(spanBE.Slice(6)),
+                US0 = ReadUInt16BigEndian(spanBE.Slice(14)),
+                UI0 = ReadUInt32BigEndian(spanBE.Slice(16)),
+                UL0 = ReadUInt64BigEndian(spanBE.Slice(20)),
+                S1 = ReadInt16BigEndian(spanBE.Slice(28)),
+                I1 = ReadInt32BigEndian(spanBE.Slice(30)),
+                L1 = ReadInt64BigEndian(spanBE.Slice(34)),
+                US1 = ReadUInt16BigEndian(spanBE.Slice(42)),
+                UI1 = ReadUInt32BigEndian(spanBE.Slice(44)),
+                UL1 = ReadUInt64BigEndian(spanBE.Slice(48))
             };
 
-            var readStructAndReverseFromReadOnlySpan = readOnlySpanBE.Read<TestHelpers.TestStructExplicit>();
+            var readStructAndReverseFromReadOnlySpan = ReadCurrentEndianness<TestHelpers.TestStructExplicit>(readOnlySpanBE);
             if (BitConverter.IsLittleEndian)
             {
-                readStructAndReverseFromReadOnlySpan.S0 = readStructAndReverseFromReadOnlySpan.S0.Reverse();
-                readStructAndReverseFromReadOnlySpan.I0 = readStructAndReverseFromReadOnlySpan.I0.Reverse();
-                readStructAndReverseFromReadOnlySpan.L0 = readStructAndReverseFromReadOnlySpan.L0.Reverse();
-                readStructAndReverseFromReadOnlySpan.US0 = readStructAndReverseFromReadOnlySpan.US0.Reverse();
-                readStructAndReverseFromReadOnlySpan.UI0 = readStructAndReverseFromReadOnlySpan.UI0.Reverse();
-                readStructAndReverseFromReadOnlySpan.UL0 = readStructAndReverseFromReadOnlySpan.UL0.Reverse();
-                readStructAndReverseFromReadOnlySpan.S1 = readStructAndReverseFromReadOnlySpan.S1.Reverse();
-                readStructAndReverseFromReadOnlySpan.I1 = readStructAndReverseFromReadOnlySpan.I1.Reverse();
-                readStructAndReverseFromReadOnlySpan.L1 = readStructAndReverseFromReadOnlySpan.L1.Reverse();
-                readStructAndReverseFromReadOnlySpan.US1 = readStructAndReverseFromReadOnlySpan.US1.Reverse();
-                readStructAndReverseFromReadOnlySpan.UI1 = readStructAndReverseFromReadOnlySpan.UI1.Reverse();
-                readStructAndReverseFromReadOnlySpan.UL1 = readStructAndReverseFromReadOnlySpan.UL1.Reverse();
+                readStructAndReverseFromReadOnlySpan.S0 = ReverseEndianness(readStructAndReverseFromReadOnlySpan.S0);
+                readStructAndReverseFromReadOnlySpan.I0 = ReverseEndianness(readStructAndReverseFromReadOnlySpan.I0);
+                readStructAndReverseFromReadOnlySpan.L0 = ReverseEndianness(readStructAndReverseFromReadOnlySpan.L0);
+                readStructAndReverseFromReadOnlySpan.US0 = ReverseEndianness(readStructAndReverseFromReadOnlySpan.US0);
+                readStructAndReverseFromReadOnlySpan.UI0 = ReverseEndianness(readStructAndReverseFromReadOnlySpan.UI0);
+                readStructAndReverseFromReadOnlySpan.UL0 = ReverseEndianness(readStructAndReverseFromReadOnlySpan.UL0);
+                readStructAndReverseFromReadOnlySpan.S1 = ReverseEndianness(readStructAndReverseFromReadOnlySpan.S1);
+                readStructAndReverseFromReadOnlySpan.I1 = ReverseEndianness(readStructAndReverseFromReadOnlySpan.I1);
+                readStructAndReverseFromReadOnlySpan.L1 = ReverseEndianness(readStructAndReverseFromReadOnlySpan.L1);
+                readStructAndReverseFromReadOnlySpan.US1 = ReverseEndianness(readStructAndReverseFromReadOnlySpan.US1);
+                readStructAndReverseFromReadOnlySpan.UI1 = ReverseEndianness(readStructAndReverseFromReadOnlySpan.UI1);
+                readStructAndReverseFromReadOnlySpan.UL1 = ReverseEndianness(readStructAndReverseFromReadOnlySpan.UL1);
             }
 
             var readStructFieldByFieldFromReadOnlySpan = new TestHelpers.TestStructExplicit
             {
-                S0 = readOnlySpanBE.ReadInt16BigEndian(),
-                I0 = readOnlySpanBE.Slice(2).ReadInt32BigEndian(),
-                L0 = readOnlySpanBE.Slice(6).ReadInt64BigEndian(),
-                US0 = readOnlySpanBE.Slice(14).ReadUInt16BigEndian(),
-                UI0 = readOnlySpanBE.Slice(16).ReadUInt32BigEndian(),
-                UL0 = readOnlySpanBE.Slice(20).ReadUInt64BigEndian(),
-                S1 = readOnlySpanBE.Slice(28).ReadInt16BigEndian(),
-                I1 = readOnlySpanBE.Slice(30).ReadInt32BigEndian(),
-                L1 = readOnlySpanBE.Slice(34).ReadInt64BigEndian(),
-                US1 = readOnlySpanBE.Slice(42).ReadUInt16BigEndian(),
-                UI1 = readOnlySpanBE.Slice(44).ReadUInt32BigEndian(),
-                UL1 = readOnlySpanBE.Slice(48).ReadUInt64BigEndian()
+                S0 = ReadInt16BigEndian(readOnlySpanBE),
+                I0 = ReadInt32BigEndian(readOnlySpanBE.Slice(2)),
+                L0 = ReadInt64BigEndian(readOnlySpanBE.Slice(6)),
+                US0 = ReadUInt16BigEndian(readOnlySpanBE.Slice(14)),
+                UI0 = ReadUInt32BigEndian(readOnlySpanBE.Slice(16)),
+                UL0 = ReadUInt64BigEndian(readOnlySpanBE.Slice(20)),
+                S1 = ReadInt16BigEndian(readOnlySpanBE.Slice(28)),
+                I1 = ReadInt32BigEndian(readOnlySpanBE.Slice(30)),
+                L1 = ReadInt64BigEndian(readOnlySpanBE.Slice(34)),
+                US1 = ReadUInt16BigEndian(readOnlySpanBE.Slice(42)),
+                UI1 = ReadUInt32BigEndian(readOnlySpanBE.Slice(44)),
+                UL1 = ReadUInt64BigEndian(readOnlySpanBE.Slice(48))
             };
 
             Assert.Equal(testExplicitStruct, readStructAndReverse);

@@ -7,13 +7,13 @@ using System.Runtime.CompilerServices;
 
 namespace System.Buffers.Binary
 {
-    public static partial class SpanBinaryExtensions
+    public static partial class BinaryPrimitives
     {
         /// <summary>
         /// Writes a structure of type T into a span of bytes.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Write<T>(this Span<byte> buffer, T value)
+        public static void WriteCurrentEndianness<T>(ref Span<byte> buffer, T value)
             where T : struct
         {
             if ((uint)Unsafe.SizeOf<T>() > (uint)buffer.Length)
@@ -28,7 +28,7 @@ namespace System.Buffers.Binary
         /// <returns>If the span is too small to contain the type T, return false.</returns>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryWrite<T>(this Span<byte> buffer, T value)
+        public static bool TryWriteCurrentEndianness<T>(ref Span<byte> buffer, T value)
             where T : struct
         {
             if (Unsafe.SizeOf<T>() > (uint)buffer.Length)

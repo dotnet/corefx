@@ -6,19 +6,18 @@ using System.Runtime.CompilerServices;
 
 namespace System.Buffers.Binary
 {
-    public static partial class SpanBinaryExtensions
+    public static partial class BinaryPrimitives
     {
-        #region ReadBigEndianROSpan
         /// <summary>
         /// Reads an Int16 out of a read-only span of bytes as big endian.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static short ReadInt16BigEndian(this ReadOnlySpan<byte> buffer)
+        public static short ReadInt16BigEndian(ReadOnlySpan<byte> buffer)
         {
-            short result = buffer.Read<short>();
+            short result = ReadCurrentEndianness<short>(buffer);
             if (BitConverter.IsLittleEndian)
             {
-                result = result.Reverse();
+                result = ReverseEndianness(result);
             }
             return result;
         }
@@ -27,12 +26,12 @@ namespace System.Buffers.Binary
         /// Reads an Int32 out of a read-only span of bytes as big endian.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int ReadInt32BigEndian(this ReadOnlySpan<byte> buffer)
+        public static int ReadInt32BigEndian(ReadOnlySpan<byte> buffer)
         {
-            int result = buffer.Read<int>();
+            int result = ReadCurrentEndianness<int>(buffer);
             if (BitConverter.IsLittleEndian)
             {
-                result = result.Reverse();
+                result = ReverseEndianness(result);
             }
             return result;
         }
@@ -41,12 +40,12 @@ namespace System.Buffers.Binary
         /// Reads an Int64 out of a read-only span of bytes as big endian.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long ReadInt64BigEndian(this ReadOnlySpan<byte> buffer)
+        public static long ReadInt64BigEndian(ReadOnlySpan<byte> buffer)
         {
-            long result = buffer.Read<long>();
+            long result = ReadCurrentEndianness<long>(buffer);
             if (BitConverter.IsLittleEndian)
             {
-                result = result.Reverse();
+                result = ReverseEndianness(result);
             }
             return result;
         }
@@ -55,12 +54,12 @@ namespace System.Buffers.Binary
         /// Reads a UInt16 out of a read-only span of bytes as big endian.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ushort ReadUInt16BigEndian(this ReadOnlySpan<byte> buffer)
+        public static ushort ReadUInt16BigEndian(ReadOnlySpan<byte> buffer)
         {
-            ushort result = buffer.Read<ushort>();
+            ushort result = ReadCurrentEndianness<ushort>(buffer);
             if (BitConverter.IsLittleEndian)
             {
-                result = result.Reverse();
+                result = ReverseEndianness(result);
             }
             return result;
         }
@@ -69,12 +68,12 @@ namespace System.Buffers.Binary
         /// Reads a UInt32 out of a read-only span of bytes as big endian.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint ReadUInt32BigEndian(this ReadOnlySpan<byte> buffer)
+        public static uint ReadUInt32BigEndian(ReadOnlySpan<byte> buffer)
         {
-            uint result = buffer.Read<uint>();
+            uint result = ReadCurrentEndianness<uint>(buffer);
             if (BitConverter.IsLittleEndian)
             {
-                result = result.Reverse();
+                result = ReverseEndianness(result);
             }
             return result;
         }
@@ -83,207 +82,27 @@ namespace System.Buffers.Binary
         /// Reads a UInt64 out of a read-only span of bytes as big endian.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong ReadUInt64BigEndian(this ReadOnlySpan<byte> buffer)
+        public static ulong ReadUInt64BigEndian(ReadOnlySpan<byte> buffer)
         {
-            ulong result = buffer.Read<ulong>();
+            ulong result = ReadCurrentEndianness<ulong>(buffer);
             if (BitConverter.IsLittleEndian)
             {
-                result = result.Reverse();
-            }
-            return result;
-        }
-        #endregion
-
-        #region ReadBigEndianSpan
-        /// <summary>
-        /// Reads an Int16 out of a span of bytes as big endian.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static short ReadInt16BigEndian(this Span<byte> buffer)
-        {
-            short result = buffer.Read<short>();
-            if (BitConverter.IsLittleEndian)
-            {
-                result = result.Reverse();
+                result = ReverseEndianness(result);
             }
             return result;
         }
 
-        /// <summary>
-        /// Reads an Int32 out of a span of bytes as big endian.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int ReadInt32BigEndian(this Span<byte> buffer)
-        {
-            int result = buffer.Read<int>();
-            if (BitConverter.IsLittleEndian)
-            {
-                result = result.Reverse();
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Reads an Int64 out of a span of bytes as big endian.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long ReadInt64BigEndian(this Span<byte> buffer)
-        {
-            long result = buffer.Read<long>();
-            if (BitConverter.IsLittleEndian)
-            {
-                result = result.Reverse();
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Reads a UInt16 out of a span of bytes as big endian.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ushort ReadUInt16BigEndian(this Span<byte> buffer)
-        {
-            ushort result = buffer.Read<ushort>();
-            if (BitConverter.IsLittleEndian)
-            {
-                result = result.Reverse();
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Reads a UInt32 out of a span of bytes as big endian.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint ReadUInt32BigEndian(this Span<byte> buffer)
-        {
-            uint result = buffer.Read<uint>();
-            if (BitConverter.IsLittleEndian)
-            {
-                result = result.Reverse();
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Reads a UInt64 out of a span of bytes as big endian.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong ReadUInt64BigEndian(this Span<byte> buffer)
-        {
-            ulong result = buffer.Read<ulong>();
-            if (BitConverter.IsLittleEndian)
-            {
-                result = result.Reverse();
-            }
-            return result;
-        }
-        #endregion
-
-        #region TryReadBigEndianSpan
-        /// <summary>
-        /// Reads an Int16 out of a span of bytes as big endian.
-        /// <returns>If the span is too small to contain an Int16, return false.</returns>
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadInt16BigEndian(this Span<byte> buffer, out short value)
-        {
-            bool success = buffer.TryRead(out value);
-            if (BitConverter.IsLittleEndian)
-            {
-                value = value.Reverse();
-            }
-            return success;
-        }
-
-        /// <summary>
-        /// Reads an Int32 out of a span of bytes as big endian.
-        /// <returns>If the span is too small to contain an Int32, return false.</returns>
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadInt32BigEndian(this Span<byte> buffer, out int value)
-        {
-            bool success = buffer.TryRead(out value);
-            if (BitConverter.IsLittleEndian)
-            {
-                value = value.Reverse();
-            }
-            return success;
-        }
-
-        /// <summary>
-        /// Reads an Int64 out of a span of bytes as big endian.
-        /// <returns>If the span is too small to contain an Int64, return false.</returns>
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadInt64BigEndian(this Span<byte> buffer, out long value)
-        {
-            bool success = buffer.TryRead(out value);
-            if (BitConverter.IsLittleEndian)
-            {
-                value = value.Reverse();
-            }
-            return success;
-        }
-
-        /// <summary>
-        /// Reads a UInt16 out of a span of bytes as big endian.
-        /// <returns>If the span is too small to contain a UInt16, return false.</returns>
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadUInt16BigEndian(this Span<byte> buffer, out ushort value)
-        {
-            bool success = buffer.TryRead(out value);
-            if (BitConverter.IsLittleEndian)
-            {
-                value = value.Reverse();
-            }
-            return success;
-        }
-
-        /// <summary>
-        /// Reads a UInt32 out of a span of bytes as big endian.
-        /// <returns>If the span is too small to contain a UInt32, return false.</returns>
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadUInt32BigEndian(this Span<byte> buffer, out uint value)
-        {
-            bool success = buffer.TryRead(out value);
-            if (BitConverter.IsLittleEndian)
-            {
-                value = value.Reverse();
-            }
-            return success;
-        }
-
-        /// <summary>
-        /// Reads a UInt64 out of a span of bytes as big endian.
-        /// <returns>If the span is too small to contain a UInt64, return false.</returns>
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadUInt64BigEndian(this Span<byte> buffer, out ulong value)
-        {
-            bool success = buffer.TryRead(out value);
-            if (BitConverter.IsLittleEndian)
-            {
-                value = value.Reverse();
-            }
-            return success;
-        }
-        #endregion
-
-        #region TryReadBigEndianROSpan
         /// <summary>
         /// Reads an Int16 out of a read-only span of bytes as big endian.
         /// <returns>If the span is too small to contain an Int16, return false.</returns>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadInt16BigEndian(this ReadOnlySpan<byte> buffer, out short value)
+        public static bool TryReadInt16BigEndian(ReadOnlySpan<byte> buffer, out short value)
         {
-            bool success = buffer.TryRead(out value);
+            bool success = TryReadCurrentEndianness(buffer, out value);
             if (BitConverter.IsLittleEndian)
             {
-                value = value.Reverse();
+                value = ReverseEndianness(value);
             }
             return success;
         }
@@ -293,12 +112,12 @@ namespace System.Buffers.Binary
         /// <returns>If the span is too small to contain an Int32, return false.</returns>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadInt32BigEndian(this ReadOnlySpan<byte> buffer, out int value)
+        public static bool TryReadInt32BigEndian(ReadOnlySpan<byte> buffer, out int value)
         {
-            bool success = buffer.TryRead(out value);
+            bool success = TryReadCurrentEndianness(buffer, out value);
             if (BitConverter.IsLittleEndian)
             {
-                value = value.Reverse();
+                value = ReverseEndianness(value);
             }
             return success;
         }
@@ -308,12 +127,12 @@ namespace System.Buffers.Binary
         /// <returns>If the span is too small to contain an Int64, return false.</returns>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadInt64BigEndian(this ReadOnlySpan<byte> buffer, out long value)
+        public static bool TryReadInt64BigEndian(ReadOnlySpan<byte> buffer, out long value)
         {
-            bool success = buffer.TryRead(out value);
+            bool success = TryReadCurrentEndianness(buffer, out value);
             if (BitConverter.IsLittleEndian)
             {
-                value = value.Reverse();
+                value = ReverseEndianness(value);
             }
             return success;
         }
@@ -323,12 +142,12 @@ namespace System.Buffers.Binary
         /// <returns>If the span is too small to contain a UInt16, return false.</returns>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadUInt16BigEndian(this ReadOnlySpan<byte> buffer, out ushort value)
+        public static bool TryReadUInt16BigEndian(ReadOnlySpan<byte> buffer, out ushort value)
         {
-            bool success = buffer.TryRead(out value);
+            bool success = TryReadCurrentEndianness(buffer, out value);
             if (BitConverter.IsLittleEndian)
             {
-                value = value.Reverse();
+                value = ReverseEndianness(value);
             }
             return success;
         }
@@ -338,12 +157,12 @@ namespace System.Buffers.Binary
         /// <returns>If the span is too small to contain a UInt32, return false.</returns>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadUInt32BigEndian(this ReadOnlySpan<byte> buffer, out uint value)
+        public static bool TryReadUInt32BigEndian(ReadOnlySpan<byte> buffer, out uint value)
         {
-            bool success = buffer.TryRead(out value);
+            bool success = TryReadCurrentEndianness(buffer, out value);
             if (BitConverter.IsLittleEndian)
             {
-                value = value.Reverse();
+                value = ReverseEndianness(value);
             }
             return success;
         }
@@ -353,16 +172,15 @@ namespace System.Buffers.Binary
         /// <returns>If the span is too small to contain a UInt64, return false.</returns>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadUInt64BigEndian(this ReadOnlySpan<byte> buffer, out ulong value)
+        public static bool TryReadUInt64BigEndian(ReadOnlySpan<byte> buffer, out ulong value)
         {
-            bool success = buffer.TryRead(out value);
+            bool success = TryReadCurrentEndianness(buffer, out value);
             if (BitConverter.IsLittleEndian)
             {
-                value = value.Reverse();
+                value = ReverseEndianness(value);
             }
             return success;
         }
-        #endregion
     }
 }
 

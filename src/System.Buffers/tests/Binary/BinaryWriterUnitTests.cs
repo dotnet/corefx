@@ -6,6 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Xunit;
 
+using static System.Buffers.Binary.BinaryPrimitives;
+
 namespace System.Buffers.Binary.Tests
 {
     public class BinaryWriterUnitTests
@@ -19,44 +21,44 @@ namespace System.Buffers.Binary.Tests
 
             Span<byte> span = new byte[8];
 
-            span.Write<byte>(0x11);
+            WriteCurrentEndianness<byte>(ref span, 0x11);
             TestHelpers.Validate<byte>(span, 0x11);
-            Assert.True(span.TryWrite<byte>(0x11));
+            Assert.True(TryWriteCurrentEndianness<byte>(ref span, 0x11));
             TestHelpers.Validate<byte>(span, 0x11);
 
-            span.Write<sbyte>(0x11);
+            WriteCurrentEndianness<sbyte>(ref span, 0x11);
             TestHelpers.Validate<sbyte>(span, 0x11);
-            Assert.True(span.TryWrite<sbyte>(0x11));
+            Assert.True(TryWriteCurrentEndianness<sbyte>(ref span, 0x11));
             TestHelpers.Validate<sbyte>(span, 0x11);
 
-            span.Write<ushort>(0x1122);
+            WriteCurrentEndianness<ushort>(ref span, 0x1122);
             TestHelpers.Validate<ushort>(span, 0x1122);
-            Assert.True(span.TryWrite<ushort>(0x1122));
+            Assert.True(TryWriteCurrentEndianness<ushort>(ref span, 0x1122));
             TestHelpers.Validate<ushort>(span, 0x1122);
 
-            span.Write<uint>(0x11223344);
+            WriteCurrentEndianness<uint>(ref span, 0x11223344);
             TestHelpers.Validate<uint>(span, 0x11223344);
-            Assert.True(span.TryWrite<uint>(0x11223344));
+            Assert.True(TryWriteCurrentEndianness<uint>(ref span, 0x11223344));
             TestHelpers.Validate<uint>(span, 0x11223344);
 
-            span.Write<ulong>(0x1122334455667788);
+            WriteCurrentEndianness<ulong>(ref span, 0x1122334455667788);
             TestHelpers.Validate<ulong>(span, 0x1122334455667788);
-            Assert.True(span.TryWrite<ulong>(0x1122334455667788));
+            Assert.True(TryWriteCurrentEndianness<ulong>(ref span, 0x1122334455667788));
             TestHelpers.Validate<ulong>(span, 0x1122334455667788);
 
-            span.Write<short>(0x1122);
+            WriteCurrentEndianness<short>(ref span, 0x1122);
             TestHelpers.Validate<short>(span, 0x1122);
-            Assert.True(span.TryWrite<short>(0x1122));
+            Assert.True(TryWriteCurrentEndianness<short>(ref span, 0x1122));
             TestHelpers.Validate<short>(span, 0x1122);
 
-            span.Write<int>(0x11223344);
+            WriteCurrentEndianness<int>(ref span, 0x11223344);
             TestHelpers.Validate<int>(span, 0x11223344);
-            Assert.True(span.TryWrite<int>(0x11223344));
+            Assert.True(TryWriteCurrentEndianness<int>(ref span, 0x11223344));
             TestHelpers.Validate<int>(span, 0x11223344);
 
-            span.Write<long>(0x1122334455667788);
+            WriteCurrentEndianness<long>(ref span, 0x1122334455667788);
             TestHelpers.Validate<long>(span, 0x1122334455667788);
-            Assert.True(span.TryWrite<long>(0x1122334455667788));
+            Assert.True(TryWriteCurrentEndianness<long>(ref span, 0x1122334455667788));
             TestHelpers.Validate<long>(span, 0x1122334455667788);
         }
 
@@ -69,23 +71,23 @@ namespace System.Buffers.Binary.Tests
         {
             Assert.True(BitConverter.IsLittleEndian);
             var span = new Span<byte>(new byte[2]);
-            span.WriteInt16BigEndian(value);
-            short read = span.ReadInt16BigEndian();
+            WriteInt16BigEndian(span, value);
+            short read = ReadInt16BigEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            Assert.True(span.TryWriteInt16BigEndian(value));
-            read = span.ReadInt16BigEndian();
+            Assert.True(TryWriteInt16BigEndian(span, value));
+            read = ReadInt16BigEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            span.WriteInt16LittleEndian(value);
-            read = span.ReadInt16LittleEndian();
+            WriteInt16LittleEndian(span, value);
+            read = ReadInt16LittleEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            Assert.True(span.TryWriteInt16LittleEndian(value));
-            read = span.ReadInt16LittleEndian();
+            Assert.True(TryWriteInt16LittleEndian(span, value));
+            read = ReadInt16LittleEndian(span);
             Assert.Equal(value, read);
         }
 
@@ -98,23 +100,23 @@ namespace System.Buffers.Binary.Tests
         {
             Assert.True(BitConverter.IsLittleEndian);
             var span = new Span<byte>(new byte[2]);
-            span.WriteUInt16BigEndian(value);
-            ushort read = span.ReadUInt16BigEndian();
+            WriteUInt16BigEndian(span, value);
+            ushort read = ReadUInt16BigEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            Assert.True(span.TryWriteUInt16BigEndian(value));
-            read = span.ReadUInt16BigEndian();
+            Assert.True(TryWriteUInt16BigEndian(span, value));
+            read = ReadUInt16BigEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            span.WriteUInt16LittleEndian(value);
-            read = span.ReadUInt16LittleEndian();
+            WriteUInt16LittleEndian(span, value);
+            read = ReadUInt16LittleEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            Assert.True(span.TryWriteUInt16LittleEndian(value));
-            read = span.ReadUInt16LittleEndian();
+            Assert.True(TryWriteUInt16LittleEndian(span, value));
+            read = ReadUInt16LittleEndian(span);
             Assert.Equal(value, read);
         }
 
@@ -129,23 +131,23 @@ namespace System.Buffers.Binary.Tests
         {
             Assert.True(BitConverter.IsLittleEndian);
             var span = new Span<byte>(new byte[4]);
-            span.WriteInt32BigEndian(value);
-            int read = span.ReadInt32BigEndian();
+            WriteInt32BigEndian(span, value);
+            int read = ReadInt32BigEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            Assert.True(span.TryWriteInt32BigEndian(value));
-            read = span.ReadInt32BigEndian();
+            Assert.True(TryWriteInt32BigEndian(span, value));
+            read = ReadInt32BigEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            span.WriteInt32LittleEndian(value);
-            read = span.ReadInt32LittleEndian();
+            WriteInt32LittleEndian(span, value);
+            read = ReadInt32LittleEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            Assert.True(span.TryWriteInt32LittleEndian(value));
-            read = span.ReadInt32LittleEndian();
+            Assert.True(TryWriteInt32LittleEndian(span, value));
+            read = ReadInt32LittleEndian(span);
             Assert.Equal(value, read);
         }
 
@@ -160,23 +162,23 @@ namespace System.Buffers.Binary.Tests
         {
             Assert.True(BitConverter.IsLittleEndian);
             var span = new Span<byte>(new byte[4]);
-            span.WriteUInt32BigEndian(value);
-            uint read = span.ReadUInt32BigEndian();
+            WriteUInt32BigEndian(span, value);
+            uint read = ReadUInt32BigEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            Assert.True(span.TryWriteUInt32BigEndian(value));
-            read = span.ReadUInt32BigEndian();
+            Assert.True(TryWriteUInt32BigEndian(span, value));
+            read = ReadUInt32BigEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            span.WriteUInt32LittleEndian(value);
-            read = span.ReadUInt32LittleEndian();
+            WriteUInt32LittleEndian(span, value);
+            read = ReadUInt32LittleEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            Assert.True(span.TryWriteUInt32LittleEndian(value));
-            read = span.ReadUInt32LittleEndian();
+            Assert.True(TryWriteUInt32LittleEndian(span, value));
+            read = ReadUInt32LittleEndian(span);
             Assert.Equal(value, read);
         }
 
@@ -195,23 +197,23 @@ namespace System.Buffers.Binary.Tests
         {
             Assert.True(BitConverter.IsLittleEndian);
             var span = new Span<byte>(new byte[8]);
-            span.WriteInt64BigEndian(value);
-            long read = span.ReadInt64BigEndian();
+            WriteInt64BigEndian(span, value);
+            long read = ReadInt64BigEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            Assert.True(span.TryWriteInt64BigEndian(value));
-            read = span.ReadInt64BigEndian();
+            Assert.True(TryWriteInt64BigEndian(span, value));
+            read = ReadInt64BigEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            span.WriteInt64LittleEndian(value);
-            read = span.ReadInt64LittleEndian();
+            WriteInt64LittleEndian(span, value);
+            read = ReadInt64LittleEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            Assert.True(span.TryWriteInt64LittleEndian(value));
-            read = span.ReadInt64LittleEndian();
+            Assert.True(TryWriteInt64LittleEndian(span, value));
+            read = ReadInt64LittleEndian(span);
             Assert.Equal(value, read);
         }
 
@@ -230,23 +232,23 @@ namespace System.Buffers.Binary.Tests
         {
             Assert.True(BitConverter.IsLittleEndian);
             var span = new Span<byte>(new byte[8]);
-            span.WriteUInt64BigEndian(value);
-            ulong read = span.ReadUInt64BigEndian();
+            WriteUInt64BigEndian(span, value);
+            ulong read = ReadUInt64BigEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            Assert.True(span.TryWriteUInt64BigEndian(value));
-            read = span.ReadUInt64BigEndian();
+            Assert.True(TryWriteUInt64BigEndian(span, value));
+            read = ReadUInt64BigEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            span.WriteUInt64LittleEndian(value);
-            read = span.ReadUInt64LittleEndian();
+            WriteUInt64LittleEndian(span, value);
+            read = ReadUInt64LittleEndian(span);
             Assert.Equal(value, read);
 
             span.Clear();
-            Assert.True(span.TryWriteUInt64LittleEndian(value));
-            read = span.ReadUInt64LittleEndian();
+            Assert.True(TryWriteUInt64LittleEndian(span, value));
+            read = ReadUInt64LittleEndian(span);
             Assert.Equal(value, read);
         }
 
@@ -256,28 +258,28 @@ namespace System.Buffers.Binary.Tests
             byte value = 1;
             Span<byte> span = new byte[1];
             
-            span.Write<byte>(value);
-            byte read = span.Read<byte>();
+            WriteCurrentEndianness<byte>(ref span, value);
+            byte read = ReadCurrentEndianness<byte>(span);
             Assert.Equal<byte>(value, read);
 
             span.Clear();
-            Assert.True(span.TryWrite<byte>(value));
-            read = span.Read<byte>();
+            Assert.True(TryWriteCurrentEndianness<byte>(ref span, value));
+            read = ReadCurrentEndianness<byte>(span);
             Assert.Equal<byte>(value, read);
 
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Write<short>(value));
-            Assert.False(span.TryWrite<short>(value));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Write<int>(value));
-            Assert.False(span.TryWrite<int>(value));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Write<long>(value));
-            Assert.False(span.TryWrite<long>(value));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteCurrentEndianness<short>(ref _span, value));
+            Assert.False(TryWriteCurrentEndianness<short>(ref span, value));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteCurrentEndianness<int>(ref _span, value));
+            Assert.False(TryWriteCurrentEndianness<int>(ref span, value));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteCurrentEndianness<long>(ref _span, value));
+            Assert.False(TryWriteCurrentEndianness<long>(ref span, value));
 
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Write<ushort>(value));
-            Assert.False(span.TryWrite<ushort>(value));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Write<uint>(value));
-            Assert.False(span.TryWrite<uint>(value));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => _span.Write<ulong>(value));
-            Assert.False(span.TryWrite<ulong>(value));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteCurrentEndianness<ushort>(ref _span, value));
+            Assert.False(TryWriteCurrentEndianness<ushort>(ref span, value));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteCurrentEndianness<uint>(ref _span, value));
+            Assert.False(TryWriteCurrentEndianness<uint>(ref span, value));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteCurrentEndianness<ulong>(ref _span, value));
+            Assert.False(TryWriteCurrentEndianness<ulong>(ref span, value));
         }
     }
 }

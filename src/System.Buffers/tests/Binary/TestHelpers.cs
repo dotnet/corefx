@@ -6,6 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Xunit;
 
+using static System.Buffers.Binary.BinaryPrimitives;
+
 namespace System.Buffers.Binary.Tests
 {
     public static class TestHelpers
@@ -13,7 +15,7 @@ namespace System.Buffers.Binary.Tests
 
         public static void Validate<T>(Span<byte> span, T value) where T : struct
         {
-            T read = span.Read<T>();
+            T read = ReadCurrentEndianness<T>(span);
             Assert.Equal(value, read);
             span.Clear();
         }
@@ -76,18 +78,18 @@ namespace System.Buffers.Binary.Tests
         {
             Span<byte> spanBE = new byte[Unsafe.SizeOf<TestStructExplicit>()];
 
-            spanBE.WriteInt16BigEndian(testExplicitStruct.S0);
-            spanBE.Slice(2).WriteInt32BigEndian(testExplicitStruct.I0);
-            spanBE.Slice(6).WriteInt64BigEndian(testExplicitStruct.L0);
-            spanBE.Slice(14).WriteUInt16BigEndian(testExplicitStruct.US0);
-            spanBE.Slice(16).WriteUInt32BigEndian(testExplicitStruct.UI0);
-            spanBE.Slice(20).WriteUInt64BigEndian(testExplicitStruct.UL0);
-            spanBE.Slice(28).WriteInt16BigEndian(testExplicitStruct.S1);
-            spanBE.Slice(30).WriteInt32BigEndian(testExplicitStruct.I1);
-            spanBE.Slice(34).WriteInt64BigEndian(testExplicitStruct.L1);
-            spanBE.Slice(42).WriteUInt16BigEndian(testExplicitStruct.US1);
-            spanBE.Slice(44).WriteUInt32BigEndian(testExplicitStruct.UI1);
-            spanBE.Slice(48).WriteUInt64BigEndian(testExplicitStruct.UL1);
+            WriteInt16BigEndian(spanBE, testExplicitStruct.S0);
+            WriteInt32BigEndian(spanBE.Slice(2), testExplicitStruct.I0);
+            WriteInt64BigEndian(spanBE.Slice(6), testExplicitStruct.L0);
+            WriteUInt16BigEndian(spanBE.Slice(14), testExplicitStruct.US0);
+            WriteUInt32BigEndian(spanBE.Slice(16), testExplicitStruct.UI0);
+            WriteUInt64BigEndian(spanBE.Slice(20), testExplicitStruct.UL0);
+            WriteInt16BigEndian(spanBE.Slice(28), testExplicitStruct.S1);
+            WriteInt32BigEndian(spanBE.Slice(30), testExplicitStruct.I1);
+            WriteInt64BigEndian(spanBE.Slice(34), testExplicitStruct.L1);
+            WriteUInt16BigEndian(spanBE.Slice(42), testExplicitStruct.US1);
+            WriteUInt32BigEndian(spanBE.Slice(44), testExplicitStruct.UI1);
+            WriteUInt64BigEndian(spanBE.Slice(48), testExplicitStruct.UL1);
 
             Assert.Equal(56, spanBE.Length);
             return spanBE;
@@ -97,18 +99,18 @@ namespace System.Buffers.Binary.Tests
         {
             Span<byte> spanLE = new byte[Unsafe.SizeOf<TestStructExplicit>()];
 
-            spanLE.WriteInt16LittleEndian(testExplicitStruct.S0);
-            spanLE.Slice(2).WriteInt32LittleEndian(testExplicitStruct.I0);
-            spanLE.Slice(6).WriteInt64LittleEndian(testExplicitStruct.L0);
-            spanLE.Slice(14).WriteUInt16LittleEndian(testExplicitStruct.US0);
-            spanLE.Slice(16).WriteUInt32LittleEndian(testExplicitStruct.UI0);
-            spanLE.Slice(20).WriteUInt64LittleEndian(testExplicitStruct.UL0);
-            spanLE.Slice(28).WriteInt16LittleEndian(testExplicitStruct.S1);
-            spanLE.Slice(30).WriteInt32LittleEndian(testExplicitStruct.I1);
-            spanLE.Slice(34).WriteInt64LittleEndian(testExplicitStruct.L1);
-            spanLE.Slice(42).WriteUInt16LittleEndian(testExplicitStruct.US1);
-            spanLE.Slice(44).WriteUInt32LittleEndian(testExplicitStruct.UI1);
-            spanLE.Slice(48).WriteUInt64LittleEndian(testExplicitStruct.UL1);
+            WriteInt16LittleEndian(spanLE, testExplicitStruct.S0);
+            WriteInt32LittleEndian(spanLE.Slice(2), testExplicitStruct.I0);
+            WriteInt64LittleEndian( spanLE.Slice(6), testExplicitStruct.L0);
+            WriteUInt16LittleEndian(spanLE.Slice(14), testExplicitStruct.US0);
+            WriteUInt32LittleEndian(spanLE.Slice(16), testExplicitStruct.UI0);
+            WriteUInt64LittleEndian(spanLE.Slice(20), testExplicitStruct.UL0);
+            WriteInt16LittleEndian(spanLE.Slice(28), testExplicitStruct.S1);
+            WriteInt32LittleEndian(spanLE.Slice(30), testExplicitStruct.I1);
+            WriteInt64LittleEndian(spanLE.Slice(34), testExplicitStruct.L1);
+            WriteUInt16LittleEndian(spanLE.Slice(42), testExplicitStruct.US1);
+            WriteUInt32LittleEndian(spanLE.Slice(44), testExplicitStruct.UI1);
+            WriteUInt64LittleEndian(spanLE.Slice(48), testExplicitStruct.UL1);
 
             Assert.Equal(56, spanLE.Length);
             return spanLE;

@@ -6,6 +6,8 @@ using Microsoft.Xunit.Performance;
 using Xunit;
 using System.Net;
 
+using static System.Buffers.Binary.BinaryPrimitives;
+
 namespace System.Buffers.Binary.Tests
 {
     public class BinaryReadAndWriteTests
@@ -24,21 +26,21 @@ namespace System.Buffers.Binary.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        readStruct = spanBE.Read<TestHelpers.TestStructExplicit>();
+                        readStruct = ReadCurrentEndianness<TestHelpers.TestStructExplicit>(spanBE);
                         if (BitConverter.IsLittleEndian)
                         {
-                            readStruct.S0 = readStruct.S0.Reverse();
-                            readStruct.I0 = readStruct.I0.Reverse();
-                            readStruct.L0 = readStruct.L0.Reverse();
-                            readStruct.US0 = readStruct.US0.Reverse();
-                            readStruct.UI0 = readStruct.UI0.Reverse();
-                            readStruct.UL0 = readStruct.UL0.Reverse();
-                            readStruct.S1 = readStruct.S1.Reverse();
-                            readStruct.I1 = readStruct.I1.Reverse();
-                            readStruct.L1 = readStruct.L1.Reverse();
-                            readStruct.US1 = readStruct.US1.Reverse();
-                            readStruct.UI1 = readStruct.UI1.Reverse();
-                            readStruct.UL1 = readStruct.UL1.Reverse();
+                            readStruct.S0 = ReverseEndianness(readStruct.S0);
+                            readStruct.I0 = ReverseEndianness(readStruct.I0);
+                            readStruct.L0 = ReverseEndianness(readStruct.L0);
+                            readStruct.US0 = ReverseEndianness(readStruct.US0);
+                            readStruct.UI0 = ReverseEndianness(readStruct.UI0);
+                            readStruct.UL0 = ReverseEndianness(readStruct.UL0);
+                            readStruct.S1 = ReverseEndianness(readStruct.S1);
+                            readStruct.I1 = ReverseEndianness(readStruct.I1);
+                            readStruct.L1 = ReverseEndianness(readStruct.L1);
+                            readStruct.US1 = ReverseEndianness(readStruct.US1);
+                            readStruct.UI1 = ReverseEndianness(readStruct.UI1);
+                            readStruct.UL1 = ReverseEndianness(readStruct.UL1);
                         }
                     }
                 }
@@ -59,21 +61,21 @@ namespace System.Buffers.Binary.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        readStruct = spanLE.Read<TestHelpers.TestStructExplicit>();
+                        readStruct = ReadCurrentEndianness<TestHelpers.TestStructExplicit>(spanLE);
                         if (!BitConverter.IsLittleEndian)
                         {
-                            readStruct.S0 = readStruct.S0.Reverse();
-                            readStruct.I0 = readStruct.I0.Reverse();
-                            readStruct.L0 = readStruct.L0.Reverse();
-                            readStruct.US0 = readStruct.US0.Reverse();
-                            readStruct.UI0 = readStruct.UI0.Reverse();
-                            readStruct.UL0 = readStruct.UL0.Reverse();
-                            readStruct.S1 = readStruct.S1.Reverse();
-                            readStruct.I1 = readStruct.I1.Reverse();
-                            readStruct.L1 = readStruct.L1.Reverse();
-                            readStruct.US1 = readStruct.US1.Reverse();
-                            readStruct.UI1 = readStruct.UI1.Reverse();
-                            readStruct.UL1 = readStruct.UL1.Reverse();
+                            readStruct.S0 = ReverseEndianness(readStruct.S0);
+                            readStruct.I0 = ReverseEndianness(readStruct.I0);
+                            readStruct.L0 = ReverseEndianness(readStruct.L0);
+                            readStruct.US0 = ReverseEndianness(readStruct.US0);
+                            readStruct.UI0 = ReverseEndianness(readStruct.UI0);
+                            readStruct.UL0 = ReverseEndianness(readStruct.UL0);
+                            readStruct.S1 = ReverseEndianness(readStruct.S1);
+                            readStruct.I1 = ReverseEndianness(readStruct.I1);
+                            readStruct.L1 = ReverseEndianness(readStruct.L1);
+                            readStruct.US1 = ReverseEndianness(readStruct.US1);
+                            readStruct.UI1 = ReverseEndianness(readStruct.UI1);
+                            readStruct.UL1 = ReverseEndianness(readStruct.UL1);
                         }
                     }
                 }
@@ -96,18 +98,18 @@ namespace System.Buffers.Binary.Tests
                     {
                         readStruct = new TestHelpers.TestStructExplicit
                         {
-                            S0 = spanBE.ReadInt16BigEndian(),
-                            I0 = spanBE.Slice(2).ReadInt32BigEndian(),
-                            L0 = spanBE.Slice(6).ReadInt64BigEndian(),
-                            US0 = spanBE.Slice(14).ReadUInt16BigEndian(),
-                            UI0 = spanBE.Slice(16).ReadUInt32BigEndian(),
-                            UL0 = spanBE.Slice(20).ReadUInt64BigEndian(),
-                            S1 = spanBE.Slice(28).ReadInt16BigEndian(),
-                            I1 = spanBE.Slice(30).ReadInt32BigEndian(),
-                            L1 = spanBE.Slice(34).ReadInt64BigEndian(),
-                            US1 = spanBE.Slice(42).ReadUInt16BigEndian(),
-                            UI1 = spanBE.Slice(44).ReadUInt32BigEndian(),
-                            UL1 = spanBE.Slice(48).ReadUInt64BigEndian()
+                            S0 = ReadInt16BigEndian(spanBE),
+                            I0 = ReadInt32BigEndian(spanBE.Slice(2)),
+                            L0 = ReadInt64BigEndian(spanBE.Slice(6)),
+                            US0 = ReadUInt16BigEndian(spanBE.Slice(14)),
+                            UI0 = ReadUInt32BigEndian(spanBE.Slice(16)),
+                            UL0 = ReadUInt64BigEndian(spanBE.Slice(20)),
+                            S1 = ReadInt16BigEndian(spanBE.Slice(28)),
+                            I1 = ReadInt32BigEndian(spanBE.Slice(30)),
+                            L1 = ReadInt64BigEndian(spanBE.Slice(34)),
+                            US1 = ReadUInt16BigEndian(spanBE.Slice(42)),
+                            UI1 = ReadUInt32BigEndian(spanBE.Slice(44)),
+                            UL1 = ReadUInt64BigEndian(spanBE.Slice(48))
                         };
                     }
                 }
@@ -130,18 +132,18 @@ namespace System.Buffers.Binary.Tests
                     {
                         readStruct = new TestHelpers.TestStructExplicit
                         {
-                            S0 = spanLE.ReadInt16LittleEndian(),
-                            I0 = spanLE.Slice(2).ReadInt32LittleEndian(),
-                            L0 = spanLE.Slice(6).ReadInt64LittleEndian(),
-                            US0 = spanLE.Slice(14).ReadUInt16LittleEndian(),
-                            UI0 = spanLE.Slice(16).ReadUInt32LittleEndian(),
-                            UL0 = spanLE.Slice(20).ReadUInt64LittleEndian(),
-                            S1 = spanLE.Slice(28).ReadInt16LittleEndian(),
-                            I1 = spanLE.Slice(30).ReadInt32LittleEndian(),
-                            L1 = spanLE.Slice(34).ReadInt64LittleEndian(),
-                            US1 = spanLE.Slice(42).ReadUInt16LittleEndian(),
-                            UI1 = spanLE.Slice(44).ReadUInt32LittleEndian(),
-                            UL1 = spanLE.Slice(48).ReadUInt64LittleEndian()
+                            S0 = ReadInt16LittleEndian(spanLE),
+                            I0 = ReadInt32LittleEndian(spanLE.Slice(2)),
+                            L0 = ReadInt64LittleEndian(spanLE.Slice(6)),
+                            US0 = ReadUInt16LittleEndian(spanLE.Slice(14)),
+                            UI0 = ReadUInt32LittleEndian(spanLE.Slice(16)),
+                            UL0 = ReadUInt64LittleEndian(spanLE.Slice(20)),
+                            S1 = ReadInt16LittleEndian(spanLE.Slice(28)),
+                            I1 = ReadInt32LittleEndian(spanLE.Slice(30)),
+                            L1 = ReadInt64LittleEndian(spanLE.Slice(34)),
+                            US1 = ReadUInt16LittleEndian(spanLE.Slice(42)),
+                            UI1 = ReadUInt32LittleEndian(spanLE.Slice(44)),
+                            UL1 = ReadUInt64LittleEndian(spanLE.Slice(48))
                         };
                     }
                 }
@@ -215,18 +217,18 @@ namespace System.Buffers.Binary.Tests
                         };
                         if (BitConverter.IsLittleEndian)
                         {
-                            readStruct.S0 = readStruct.S0.Reverse();
-                            readStruct.I0 = readStruct.I0.Reverse();
-                            readStruct.L0 = readStruct.L0.Reverse();
-                            readStruct.US0 = readStruct.US0.Reverse();
-                            readStruct.UI0 = readStruct.UI0.Reverse();
-                            readStruct.UL0 = readStruct.UL0.Reverse();
-                            readStruct.S1 = readStruct.S1.Reverse();
-                            readStruct.I1 = readStruct.I1.Reverse();
-                            readStruct.L1 = readStruct.L1.Reverse();
-                            readStruct.US1 = readStruct.US1.Reverse();
-                            readStruct.UI1 = readStruct.UI1.Reverse();
-                            readStruct.UL1 = readStruct.UL1.Reverse();
+                            readStruct.S0 = ReverseEndianness(readStruct.S0);
+                            readStruct.I0 = ReverseEndianness(readStruct.I0);
+                            readStruct.L0 = ReverseEndianness(readStruct.L0);
+                            readStruct.US0 = ReverseEndianness(readStruct.US0);
+                            readStruct.UI0 = ReverseEndianness(readStruct.UI0);
+                            readStruct.UL0 = ReverseEndianness(readStruct.UL0);
+                            readStruct.S1 = ReverseEndianness(readStruct.S1);
+                            readStruct.I1 = ReverseEndianness(readStruct.I1);
+                            readStruct.L1 = ReverseEndianness(readStruct.L1);
+                            readStruct.US1 = ReverseEndianness(readStruct.US1);
+                            readStruct.UI1 = ReverseEndianness(readStruct.UI1);
+                            readStruct.UL1 = ReverseEndianness(readStruct.UL1);
                         }
                     }
                 }
@@ -236,7 +238,7 @@ namespace System.Buffers.Binary.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        private static void MeasureReverse()
+        private static void MeasureReverseEndianness()
         {
             var myArray = new int[1000];
             
@@ -248,7 +250,7 @@ namespace System.Buffers.Binary.Tests
                     {
                         for (int j = 0; j < myArray.Length; j++)
                         {
-                            myArray[j] = myArray[j].Reverse();
+                            myArray[j] = ReverseEndianness(myArray[j]);
                         }
                     }
                 }
