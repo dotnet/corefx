@@ -10,10 +10,10 @@ Global
 		netcoreapp-Windows_NT-Release|Any CPU = netcoreapp-Windows_NT-Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0CAF38F5-C7E7-46F2-8F39-C5D57492FF7F}.netcoreapp-Windows_NT-Debug|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Debug|Any CPU
-		{0CAF38F5-C7E7-46F2-8F39-C5D57492FF7F}.netcoreapp-Windows_NT-Debug|Any CPU.Build.0 = netcoreapp-Windows_NT-Debug|Any CPU
-		{0CAF38F5-C7E7-46F2-8F39-C5D57492FF7F}.netcoreapp-Windows_NT-Release|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Release|Any CPU
-		{0CAF38F5-C7E7-46F2-8F39-C5D57492FF7F}.netcoreapp-Windows_NT-Release|Any CPU.Build.0 = netcoreapp-Windows_NT-Release|Any CPU
+		{0CAF38F5-C7E7-46F2-8F39-C5D57492FF7F}.netfx-Windows_NT-Debug|Any CPU.ActiveCfg = netfx-Windows_NT-Debug|Any CPU
+		{0CAF38F5-C7E7-46F2-8F39-C5D57492FF7F}.netfx-Windows_NT-Debug|Any CPU.Build.0 = netfx-Windows_NT-Debug|Any CPU
+		{0CAF38F5-C7E7-46F2-8F39-C5D57492FF7F}.netfx-Windows_NT-Release|Any CPU.ActiveCfg = netfx-Windows_NT-Release|Any CPU
+		{0CAF38F5-C7E7-46F2-8F39-C5D57492FF7F}.netfx-Windows_NT-Release|Any CPU.Build.0 = netfx-Windows_NT-Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

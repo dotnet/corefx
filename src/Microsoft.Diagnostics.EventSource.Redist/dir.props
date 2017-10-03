@@ -5,7 +5,5 @@
     <PackageVersion>2.0.0</PackageVersion>
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <AssemblyKey>MSFT</AssemblyKey>
-    <IsNETCoreApp>false</IsNETCoreApp>
-    <IsUAP>false</IsUAP>
   </PropertyGroup>
 </Project>
