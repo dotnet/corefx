@@ -31,8 +31,12 @@ internal partial class Interop
             Interop.Kernel32.CREATEFILE2_EXTENDED_PARAMETERS parameters;
             parameters.dwSize = (uint)Marshal.SizeOf<Interop.Kernel32.CREATEFILE2_EXTENDED_PARAMETERS>();
 
+            // The dwFlagsAndAttributes is carrying a combination of flags that are mapped to different fields of the extended
+            // parameters. The possible range of values for dwFileAttributes and dwFileFlags cannot be fully covered coming from 
+            // a single int but are enough for correction creation of the named pipe client. The SECURITY_VALID_SQOS_FLAGS need
+            // to be all available for proper impersonation.
             parameters.dwFileAttributes = (uint)dwFlagsAndAttributes & 0x0000FFFF;
-            parameters.dwSecurityQosFlags = (uint)dwFlagsAndAttributes & 0x001F0000;
+            parameters.dwSecurityQosFlags = (uint)dwFlagsAndAttributes & 0x001F0000; // SECURITY_VALID_SQOS_FLAGS
             parameters.dwFileFlags = (uint)dwFlagsAndAttributes & 0xFFF00000;
 
             parameters.hTemplateFile = hTemplateFile;
