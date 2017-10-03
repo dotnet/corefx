@@ -3,14 +3,38 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <AssemblyName>System.Runtime.Intrinsics.X86</AssemblyName>
-    <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)'== 'netcoreapp'">true</IsPartialFacadeAssembly>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
+    <Reference Include="netstandard" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
+    <Compile Include="System\Runtime\Intrinsics\X86\Aes.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Avx.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Avx2.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Bmi1.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Bmi2.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Fma.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Lzcnt.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Pclmulqdq.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Popcnt.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Sse.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Sse2.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Sse3.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Sse41.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Sse42.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Ssse3.cs" />
+    <Compile Include="System\Runtime\Intrinsics\X86\Enums.cs" />
+    <Compile Include="System\Runtime\Intrinsics\Vector128.cs" />
+    <Compile Include="System\Runtime\Intrinsics\Vector256.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
