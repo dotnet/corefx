@@ -1303,39 +1303,6 @@ namespace System.Net.Security
             }
         }
 
-        internal void CheckEnqueueWrite()
-        {
-            // Clear previous request.
-            _queuedWriteStateRequest = null;
-            int lockState = Interlocked.CompareExchange(ref _lockWriteState, LockWrite, LockNone);
-            if (lockState != LockHandshake)
-            {
-                // Proceed with write.
-                return;
-            }
-
-            LazyAsyncResult lazyResult = null;
-            lock (this)
-            {
-                if (_lockWriteState != LockHandshake)
-                {
-                    // Handshake has completed before we grabbed the lock.
-                    CheckThrow(authSuccessCheck: true);
-                    return;
-                }
-
-                _lockWriteState = LockPendingWrite;
-
-                lazyResult = new LazyAsyncResult(null, null, /*must be */null);
-                _queuedWriteStateRequest = lazyResult;
-            }
-
-            // Need to exit from lock before waiting.
-            lazyResult.InternalWaitForCompletion();
-            CheckThrow(authSuccessCheck: true);
-            return;
-        }
-
         internal void FinishWrite()
         {
             int lockState = Interlocked.CompareExchange(ref _lockWriteState, LockNone, LockWrite);

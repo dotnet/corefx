@@ -39,7 +39,7 @@ namespace System.Net.Security
 
             public Task LockAsync()
             {
-                _sslState.CheckEnqueueWrite();
+                _sslState.CheckEnqueueWriteAsync().GetAwaiter().GetResult();
                 return Task.CompletedTask;
             }
 
