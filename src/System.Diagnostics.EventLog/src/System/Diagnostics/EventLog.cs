@@ -293,7 +293,6 @@ namespace System.Diagnostics
                     logKey = eventKey.OpenSubKey(logName, true);
                     if (logKey == null && logName.Length >= 8)
                     {
-
                         string logNameFirst8 = logName.Substring(0, 8);
                         if (string.Compare(logNameFirst8, "AppEvent", StringComparison.OrdinalIgnoreCase) == 0 ||
                              string.Compare(logNameFirst8, "SecEvent", StringComparison.OrdinalIgnoreCase) == 0 ||
@@ -317,9 +316,7 @@ namespace System.Diagnostics
                         }
 
                         logKey = eventKey.CreateSubKey(logName);
-
                         SetSpecialLogRegValues(logKey, logName);
-
                         // A source with the same name as the log has to be created
                         // by default. It is the behavior expected by EventLog API.
                         sourceLogKey = logKey.CreateSubKey(logName);
@@ -348,8 +345,8 @@ namespace System.Diagnostics
             }
             finally
             {
-                 mutex?.ReleaseMutex();
-                 mutex?.Close();
+                mutex?.ReleaseMutex();
+                mutex?.Close();
             }
         }
 
@@ -366,7 +363,6 @@ namespace System.Diagnostics
                 throw new ArgumentException(SR.NoLogName);
             if (!ValidLogName(logName, false))
                 throw new InvalidOperationException(SR.BadLogName);
-
             //Check environment before even trying to play with the registry
             SharedUtils.CheckEnvironment();
 
@@ -377,7 +373,6 @@ namespace System.Diagnostics
             try
             {
                 SharedUtils.EnterMutex(eventLogMutexName, ref mutex);
-
                 try
                 {
                     eventlogkey = GetEventLogRegKey(machineName, true);
@@ -390,7 +385,6 @@ namespace System.Diagnostics
                     {
                         if (logKey == null)
                             throw new InvalidOperationException(SR.Format(SR.MissingLog, logName, machineName));
-
                         //clear out log before trying to delete it
                         //that way, if we can't delete the log file, no entries will persist because it has been cleared
                         EventLog logToClear = new EventLog(logName, machineName);
@@ -419,7 +413,6 @@ namespace System.Diagnostics
                             catch { }
                         }
                     }
-
                     // now delete the registry entry
                     eventlogkey.DeleteSubKeyTree(logName);
                 }
@@ -454,7 +447,6 @@ namespace System.Diagnostics
             {
                 SharedUtils.EnterMutex(eventLogMutexName, ref mutex);
                 RegistryKey key = null;
-
                 // First open the key read only so we can do some checks.  This is important so we get the same 
                 // exceptions even if we don't have write access to the reg key. 
                 using (key = FindSourceRegistration(source, machineName, true))
@@ -576,7 +568,6 @@ namespace System.Diagnostics
                     }
 
                     StringBuilder inaccessibleLogs = null;
-
                     // Most machines will return only { "Application", "System", "Security" },
                     // but you can create your own if you want.
                     string[] logNames = eventkey.GetSubKeyNames();
@@ -779,7 +770,6 @@ namespace System.Diagnostics
         {
             // Set all the default values for this log.  AutoBackupLogfiles only makes sense in 
             // Win2000 SP4, WinXP SP1, and Win2003, but it should alright elsewhere. 
-
             // Since we use this method on the existing system logs as well as our own,
             // we need to make sure we don't overwrite any existing values. 
             if (logKey.GetValue("MaxSize") == null)
@@ -834,7 +824,6 @@ namespace System.Diagnostics
             {
                 if (formatString[i] == '%')
                 {
-                    // See if a number follows this, if so, grab the number.
                     if (formatString.Length > i + 1)
                     {
                         StringBuilder sb = new StringBuilder();
@@ -843,7 +832,6 @@ namespace System.Diagnostics
                             sb.Append(formatString[i + 1]);
                             i++;
                         }
-
                         // move over the non number character that broke us out of the loop
                         i++;
 

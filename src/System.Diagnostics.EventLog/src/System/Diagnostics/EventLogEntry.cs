@@ -229,7 +229,8 @@ namespace System.Diagnostics
                 int bufpos = bufOffset + IntFrom(dataBuf, bufOffset + FieldOffsets.STRINGOFFSET);
                 int i = 0;
                 int numStrings = ShortFrom(dataBuf, bufOffset + FieldOffsets.NUMSTRINGS);
-                while (i < numStrings) {
+                while (i < numStrings)
+                {
                     char ch = CharFrom(dataBuf, bufpos);
                     buf.Append(ch);
                     bufpos += 2;
@@ -276,7 +277,6 @@ namespace System.Diagnostics
                 int sidNameUse = 0;
                 StringBuilder bufUserName = new StringBuilder(userNameLen);
                 StringBuilder bufDomainName = new StringBuilder(domainNameLen);
-
                 StringBuilder retUserName = new StringBuilder();
 
                 if (Interop.Kernel32.LookupAccountSid(MachineName, sid, bufUserName, ref userNameLen, bufDomainName, ref domainNameLen, ref sidNameUse) != 0)
@@ -401,7 +401,6 @@ namespace System.Diagnostics
 
             if (fileName == null)
                 return null;
-
             // convert any absolute paths on a remote machine to use the \\MACHINENAME\DRIVELETTER$ shares
             if (owner.MachineName != ".")
             {
@@ -474,4 +473,3 @@ namespace System.Diagnostics
         private const int OFFSETFIXUP = 4 + 4 + 4 + 4 + 4 + 4 + 2 + 2 + 2 + 2 + 4 + 4 + 4 + 4 + 4 + 4;
     }
 }
-

@@ -28,4 +28,3 @@ internal partial class Interop
             IntPtr[] arguments);
     }
 }
-

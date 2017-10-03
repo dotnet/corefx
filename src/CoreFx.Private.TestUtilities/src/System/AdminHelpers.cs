@@ -14,7 +14,6 @@ namespace System
         /// </summary>
         /// <param name="commandLine">The command line to run as sudo</param>
         /// <returns> Returns the process exit code (0 typically means it is successful)</returns>
-        
         public static int RunAsSudo(string commandLine)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo()

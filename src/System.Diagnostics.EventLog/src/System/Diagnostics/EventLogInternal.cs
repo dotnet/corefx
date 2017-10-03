@@ -36,7 +36,6 @@ namespace System.Diagnostics
         private SafeEventLogWriteHandle writeHandle;
 
         private string logDisplayName;
-
         // cache system state variables
         // the initial size of the buffer (it can be made larger if necessary)
         private const int BUF_SIZE = 40000;
@@ -87,6 +86,7 @@ namespace System.Diagnostics
                     Object o = new Object();
                     Interlocked.CompareExchange(ref m_InstanceLockObject, o, null);
                 }
+
                 return m_InstanceLockObject;
             }
         }
@@ -101,6 +101,7 @@ namespace System.Diagnostics
                     Object o = new Object();
                     Interlocked.CompareExchange(ref s_InternalSyncObject, o, null);
                 }
+
                 return s_InternalSyncObject;
             }
         }
@@ -195,7 +196,6 @@ namespace System.Diagnostics
         {
             get
             {
-
                 if (logDisplayName != null)
                     return logDisplayName;
 
@@ -228,8 +228,6 @@ namespace System.Diagnostics
                     {
                         if (logkey != null)
                             logkey.Close();
-                        // Revert registry and environment permission asserts
-                        CodeAccessPermission.RevertAssert();
                     }
                 }
                 return logDisplayName;
@@ -276,7 +274,6 @@ namespace System.Diagnostics
                     int intval = (int)val;         // cast to an int first to unbox
                     return ((uint)intval) / 1024;   // then convert to kilobytes
                 }
-
                 // 512k is the default value
                 return 0x200;
             }
@@ -284,7 +281,6 @@ namespace System.Diagnostics
             set
             {
                 string currentMachineName = this.machineName;
-
                 // valid range is 64 KB to 4 GB
                 if (value < 64 || value > 0x3FFFC0 || value % 64 != 0)
                     throw new ArgumentOutOfRangeException("MaximumKilobytes", SR.MaximumKilobytesOutOfRange);
@@ -454,7 +450,6 @@ namespace System.Diagnostics
                 info.listeningComponents.Add(component);
 
                 info.handleOwner = new EventLogInternal(compLogName, compMachineName);
-
                 // tell the event log system about it
                 info.waitHandle = new AutoResetEvent(false);
                 bool success = UnsafeNativeMethods.NotifyChangeEventLog(info.handleOwner.ReadHandle, info.waitHandle.SafeWaitHandle);
@@ -518,7 +513,6 @@ namespace System.Diagnostics
 
         private void Close(string currentMachineName)
         {
-
             Debug.WriteLineIf(CompModSwitches.EventLog.TraceVerbose, "EventLog::Close");
             //Trace("Close", "Closing the event log");
             if (readHandle != null)
@@ -565,7 +559,6 @@ namespace System.Diagnostics
 
         private void CompletionCallback(object context)
         {
-
             if (boolFlags[Flag_disposed])
             {
                 // This object has been disposed previously, ignore firing the event.
@@ -585,7 +578,6 @@ namespace System.Diagnostics
             }
 
             int i = lastSeenCount;
-
             try
             {
                 int oldest = OldestEntryNumber;
@@ -989,7 +981,6 @@ namespace System.Diagnostics
                 else
                 {
                     lmkey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, machine);
-
                 }
                 if (lmkey != null)
                     return lmkey.OpenSubKey(EventLogKey, writable);
@@ -1048,9 +1039,6 @@ namespace System.Diagnostics
             {
                 if (logkey != null)
                     logkey.Close();
-
-                // Revert registry and environment permission asserts
-                CodeAccessPermission.RevertAssert();
             }
         }
 
@@ -1083,7 +1071,6 @@ namespace System.Diagnostics
 
             if (action < OverflowAction.DoNotOverwrite || action > OverflowAction.OverwriteOlder)
                 throw new InvalidEnumArgumentException("action", (int)action, typeof(OverflowAction));
-
             // this is a long because in the if statement we may need to store values as
             // large as UInt32.MaxValue - 1.  This would overflow an int.
             long retentionvalue = (long)action;
@@ -1116,8 +1103,8 @@ namespace System.Diagnostics
             //Check environment before calling api
             SharedUtils.CheckEnvironment();
             // Clean up cache variables.
-            // [alexvec] The initilizing code is put here to guarantee, that first read of events
-            //           from log file will start by filling up the cache buffer.
+            // The initilizing code is put here to guarantee, that first read of events
+            // from log file will start by filling up the cache buffer.
             lastSeenEntry = 0;
             lastSeenPos = 0;
             bytesCached = 0;
@@ -1293,7 +1280,7 @@ namespace System.Diagnostics
                     (uc == UnicodeCategory.LineSeparator) || (uc == UnicodeCategory.ParagraphSeparator) ||
             (uc == UnicodeCategory.OtherNotAssigned));
         }
-        // SECREVIEW: Make sure this method catches all the strange cases.
+
         internal static bool ValidLogName(string logName, bool ignoreEmpty)
         {
             if (logName.Length == 0 && !ignoreEmpty)
@@ -1446,7 +1433,6 @@ namespace System.Diagnostics
         private void InternalWriteEvent(uint eventID, ushort category, EventLogEntryType type, string[] strings,
                                 byte[] rawData, string currentMachineName)
         {
-
             // check arguments
             if (strings == null)
                 strings = new string[0];

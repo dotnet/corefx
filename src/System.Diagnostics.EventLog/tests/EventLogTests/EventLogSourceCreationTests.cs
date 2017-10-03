@@ -1,4 +1,5 @@
 ﻿using Xunit;
+using System;
 
 namespace System.Diagnostics.Tests
 {
@@ -20,6 +21,7 @@ namespace System.Diagnostics.Tests
             {
                 EventLog.DeleteEventSource(source);
             }
+            
             Assert.False(EventLog.SourceExists(source));
         }
 
