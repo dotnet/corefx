@@ -7,11 +7,7 @@ using System;
 using System.Text;
 
 
-#if XMLSERIALIZERGENERATOR
-namespace Microsoft.XmlSerializer.Generator
-#else
 namespace System.Xml.Serialization
-#endif
 {
     ///<internalonly/>
     /// <devdoc>
