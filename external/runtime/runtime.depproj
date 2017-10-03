@@ -89,7 +89,9 @@
   <Target Name="BinPlaceCoreCLRSymbols"
           AfterTargets="ResolveNuGetPackages"
           DependsOnTargets="DownloadAndUnzipSymbolPackage"
-          Condition="'$(CoreCLROverridePath)' == ''">
+          Condition="'$(CoreCLROverridePath)' == '' AND '$(DownloadCoreCLRSymbols)' != 'false'">
+
+      <Warning Text="Failed to download CoreCLR symbols" Condition="@(SymbolPackagesDownloaded) == ''" />
 
       <ItemGroup>
         <_CoreCLRSymbolFiles Condition="@(SymbolPackagesDownloaded) != ''" Include="%(SymbolPackagesDownloaded.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/native/*.pdb" />
