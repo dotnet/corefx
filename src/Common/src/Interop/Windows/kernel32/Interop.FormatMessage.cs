@@ -29,6 +29,7 @@ internal partial class Interop
             int nSize,
             IntPtr[] arguments);
 
+        // Windows API FormatMessage lets you format a message string given an errorcode. 
         internal static string GetMessage(int errorCode)
         {
             return GetMessage(IntPtr.Zero, errorCode);

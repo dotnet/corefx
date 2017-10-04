@@ -56,6 +56,7 @@ namespace System.Diagnostics
                     pos += 2;
                     ch = CharFrom(dataBuf, pos);
                 }
+
                 return buf.ToString();
             }
         }
@@ -153,10 +154,12 @@ namespace System.Diagnostics
                             msgBuf.Append(strings[i]);
                             msgBuf.Append("'");
                         }
+
                         msg = msgBuf.ToString();
                     }
                     else
                         msg = ReplaceMessageParameters(msg, ReplacementStrings);
+                    
                     message = msg;
                 }
 
@@ -204,8 +207,10 @@ namespace System.Diagnostics
                         i++;
                         buf = new StringBuilder();
                     }
+
                     bufpos += 2;
                 }
+
                 return strings;
             }
         }
@@ -223,8 +228,10 @@ namespace System.Diagnostics
         }
 
 #if false
-        internal string StringsBuffer {
-            get {
+        internal string StringsBuffer 
+        {
+            get 
+            {
                 StringBuilder buf = new StringBuilder();
                 int bufpos = bufOffset + IntFrom(dataBuf, bufOffset + FieldOffsets.STRINGOFFSET);
                 int i = 0;
@@ -237,6 +244,7 @@ namespace System.Diagnostics
                     if (ch == '\0')
                         i++;
                 }
+
                 return buf.ToString();
             }
         }
@@ -313,6 +321,7 @@ namespace System.Diagnostics
                 {
                     return false;
                 }
+                
             return true;
         }
 

@@ -230,6 +230,7 @@ namespace System.Diagnostics
                             logkey.Close();
                     }
                 }
+
                 return logDisplayName;
             }
         }
@@ -249,6 +250,7 @@ namespace System.Diagnostics
             {
                 logName = EventLog._InternalLogNameFromSourceName(sourceName, currentMachineName);
             }
+
             return logName;
         }
 
@@ -343,6 +345,7 @@ namespace System.Diagnostics
                     else
                         return (int)(((double)retention) / SecondsPerDay);
                 }
+
                 return 7;
             }
         }
@@ -529,6 +532,7 @@ namespace System.Diagnostics
                 //Trace("Close", "Closed read handle");
                 Debug.WriteLineIf(CompModSwitches.EventLog.TraceVerbose, "EventLog::Close: closed read handle");
             }
+
             if (writeHandle != null)
             {
                 try
@@ -543,6 +547,7 @@ namespace System.Diagnostics
                 //Trace("Close", "Closed write handle");
                 Debug.WriteLineIf(CompModSwitches.EventLog.TraceVerbose, "EventLog::Close: closed write handle");
             }
+
             if (boolFlags[Flag_monitoring])
                 StopRaisingEvents(/*currentMachineName,*/ GetLogName(currentMachineName));
 
@@ -574,6 +579,7 @@ namespace System.Diagnostics
                     Debug.WriteLineIf(CompModSwitches.EventLog.TraceVerbose, "EventLog::CompletionStatusChanged: aborting because we're already notifying.");
                     return;
                 }
+
                 boolFlags[Flag_notifying] = true;
             }
 
@@ -735,6 +741,7 @@ namespace System.Diagnostics
                     return msg;
                 }
             }
+
             return null;
         }
 
@@ -817,6 +824,7 @@ namespace System.Diagnostics
                 // is not yet valid
                 return -1;
             }
+
             while (lastSeenEntry < entryIndex)
             {
                 lastSeenEntry++;
@@ -833,6 +841,7 @@ namespace System.Diagnostics
                         break;
                 }
             }
+
             while (lastSeenEntry > entryIndex)
             {
                 lastSeenEntry--;
@@ -849,6 +858,7 @@ namespace System.Diagnostics
                         break;
                 }
             }
+
             if (lastSeenPos >= bytesCached)
             {
                 // we ran past the end. move back to the last one and return -1
@@ -901,6 +911,7 @@ namespace System.Diagnostics
             catch (InvalidOperationException)
             {
             }
+
             return entry;
         }
 
@@ -961,6 +972,7 @@ namespace System.Diagnostics
                     throw new InvalidOperationException(SR.Format(SR.CantReadLogEntryAt, index.ToString(CultureInfo.CurrentCulture)), SharedUtils.CreateSafeWin32Exception());
                 }
             }
+
             bytesCached = bytesRead;
             firstCachedEntry = index;
             lastSeenEntry = index;
@@ -1120,6 +1132,7 @@ namespace System.Diagnostics
                 }
                 throw new InvalidOperationException(SR.Format(SR.CantOpenLog, logname.ToString(), currentMachineName, e?.Message ?? ""));
             }
+
             readHandle = handle;
         }
 
@@ -1427,6 +1440,7 @@ namespace System.Diagnostics
                         strings[i] = String.Empty;
                 }
             }
+            
             InternalWriteEvent((uint)instance.InstanceId, (ushort)instance.CategoryId, instance.EntryType, strings, data, currentMachineName);
         }
 

@@ -86,6 +86,7 @@ namespace System.Diagnostics
                     newLog.onEntryWrittenHandler = oldLog.onEntryWrittenHandler;
                     newLog.EnableRaisingEvents = true;
                 }
+
                 _underlyingEventLog = newLog;
                 oldLog.Close();
             }
@@ -111,6 +112,7 @@ namespace System.Diagnostics
                     newLog.onEntryWrittenHandler = oldLog.onEntryWrittenHandler;
                     newLog.EnableRaisingEvents = true;
                 }
+
                 _underlyingEventLog = newLog;
                 oldLog.Close();
             }
@@ -184,6 +186,7 @@ namespace System.Diagnostics
                     newLog.onEntryWrittenHandler = oldLog.onEntryWrittenHandler;
                     newLog.EnableRaisingEvents = true;
                 }
+
                 _underlyingEventLog = newLog;
                 oldLog.Close();
             }
@@ -242,6 +245,7 @@ namespace System.Diagnostics
             {
                 throw new ArgumentException(SR.Format(SR.InvalidParameter, nameof(machineName), machineName));
             }
+
             if (logName == null || logName.Length == 0)
                 logName = "Application";
             if (!ValidLogName(logName, false))
@@ -1053,5 +1057,4 @@ namespace System.Diagnostics
             return source;
         }
     }
-
 }

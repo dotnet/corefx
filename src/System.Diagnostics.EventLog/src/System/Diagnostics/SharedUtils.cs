@@ -32,6 +32,7 @@ namespace System.Diagnostics
                     Object o = new Object();
                     Interlocked.CompareExchange(ref s_InternalSyncObject, o, null);
                 }
+                
                 return s_InternalSyncObject;
             }
         }
