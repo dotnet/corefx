@@ -189,21 +189,15 @@ internal static partial class Interop
             int retVal;
             unsafe
             {
-                MemoryHandle handle = input.Retain(true);
-                try
+                using (MemoryHandle handle = input.Retain(pin: true))
                 {
                     retVal = Ssl.SslWrite(context, (byte*)handle.PinnedPointer, input.Length);
-                }
-                finally
-                {
-                    handle.Dispose();
                 }
             }
 
             if (retVal != input.Length)
             {
-                Exception innerError;
-                errorCode = GetSslError(context, retVal, out innerError);
+                errorCode = GetSslError(context, retVal, out Exception innerError);
                 retVal = 0;
 
                 switch (errorCode)

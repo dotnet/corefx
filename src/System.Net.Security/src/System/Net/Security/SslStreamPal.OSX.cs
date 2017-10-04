@@ -94,11 +94,10 @@ namespace System.Net.Security
 
                 unsafe
                 {
-                    MemoryHandle memHandle = input.Retain(true);
+                    MemoryHandle memHandle = input.Retain(pin: true);
                     try
                     {
-                        int written;
-                        PAL_TlsIo status = Interop.AppleCrypto.SslWrite(sslHandle, (byte*)memHandle.PinnedPointer, input.Length, out written);
+                        PAL_TlsIo status = Interop.AppleCrypto.SslWrite(sslHandle, (byte*)memHandle.PinnedPointer, input.Length, out int written);
 
                         if (status < 0)
                         {
