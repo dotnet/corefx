@@ -26,6 +26,11 @@
     ]
   },
   {
+    "Name": "Microsoft.Diagnostics.Tracing.EventSource.Redist",
+    "Description": "Microsoft.Diagnostics.Tracing.EventSource NuGet package which provides an enhanced developer experience.",
+    "CommonTypes": []
+  },
+  {
     "Name": "Microsoft.NETCore",
     "Description": "Provides a set of packages that can be used when building portable libraries on .NETCore based platforms.",
     "CommonTypes": []
