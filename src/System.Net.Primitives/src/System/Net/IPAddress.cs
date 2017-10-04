@@ -83,6 +83,8 @@ namespace System.Net
             set
             {
                 Debug.Assert(IsIPv4);
+                _toString = null;
+                _hashCode = 0;
                 _addressOrScopeId = value;
             }
         }
@@ -97,6 +99,8 @@ namespace System.Net
             set
             {
                 Debug.Assert(IsIPv6);
+                _toString = null;
+                _hashCode = 0;
                 _addressOrScopeId = value;
             }
         }
@@ -558,8 +562,6 @@ namespace System.Net
                 {
                     if (PrivateAddress != value)
                     {
-                        _toString = null;
-                        _hashCode = 0;
                         PrivateAddress = unchecked((uint)value);
                     }
                 }
