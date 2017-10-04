@@ -8,6 +8,8 @@ using System.Runtime.Serialization;
 
 namespace System.Net.Mail
 {
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class SmtpException : Exception, ISerializable
     {
         private SmtpStatusCode _statusCode = SmtpStatusCode.GeneralFailure;
@@ -95,7 +97,6 @@ namespace System.Net.Mail
 
         protected SmtpException(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext)
         {
-            throw new PlatformNotSupportedException();
         }
 
         internal SmtpException(SmtpStatusCode statusCode, string serverMessage, bool serverResponse) : base(GetMessageForStatus(statusCode, serverMessage))
@@ -109,12 +110,13 @@ namespace System.Net.Mail
 
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            base.GetObjectData(serializationInfo, streamingContext);
+            GetObjectData(serializationInfo, streamingContext);
         }
 
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
             base.GetObjectData(serializationInfo, streamingContext);
+            serializationInfo.AddValue("Status", (int)_statusCode, typeof(int));
         }
 
         public SmtpStatusCode StatusCode

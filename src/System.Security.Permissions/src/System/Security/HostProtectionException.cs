@@ -7,14 +7,12 @@ using System.Security.Permissions;
 
 namespace System.Security
 {
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public partial class HostProtectionException : System.SystemException
     {
         public HostProtectionException() { }
-        protected HostProtectionException(SerializationInfo info, StreamingContext context)
-        {
-            throw new PlatformNotSupportedException();
-        }
-
+        protected HostProtectionException(SerializationInfo info, StreamingContext context) { }
         public HostProtectionException(string message) { }
         public HostProtectionException(string message, Exception e) { }
         public HostProtectionException(string message, HostProtectionResource protectedResources, HostProtectionResource demandedResources) { }
