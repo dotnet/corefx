@@ -105,9 +105,6 @@
   <data name="NoConstructors" xml:space="preserve">
     <value>型 '{0}' のコンストラクターが定義されていません</value>
   </data>
-  <data name="BadDelegateConstructor" xml:space="preserve">
-    <value>デリゲート '{0}' には有効なコンストラクターがありません</value>
-  </data>
   <data name="PropertyLacksGet" xml:space="preserve">
     <value>get アクセサーがないため、プロパティまたはインデクサー '{0}' をこのコンテキストで使用することはできません</value>
   </data>
@@ -159,9 +156,6 @@
   <data name="BadArity" xml:space="preserve">
     <value>ジェネリック {1} '{0}' の使用には、'{2}' 型の引数が必要です</value>
   </data>
-  <data name="BadTypeArgument" xml:space="preserve">
-    <value>型 '{0}' は型引数としては使えません</value>
-  </data>
   <data name="TypeArgsNotAllowed" xml:space="preserve">
     <value>{1} '{0}' は型引数と一緒には使用できません</value>
   </data>
@@ -186,14 +180,8 @@
   <data name="TypeVarCantBeNull" xml:space="preserve">
     <value>Null 非許容の値型である可能性があるため、Null を型パラメーター '{0}' に変換できません。'default({0})' を使用してください。</value>
   </data>
-  <data name="BadRetType" xml:space="preserve">
-    <value>'{1} {0}' には、不適切な戻り値の型が指定されています</value>
-  </data>
   <data name="CantInferMethTypeArgs" xml:space="preserve">
     <value>メソッド '{0}' の型引数を使い方から推論することはできません。型引数を明示的に指定してください。</value>
-  </data>
-  <data name="MethGrpToNonDel" xml:space="preserve">
-    <value>メソッド グループ '{0}' を非デリゲート型 '{1}' に変換することはできません。このメソッドを呼び出しますか?</value>
   </data>
   <data name="RefConstraintNotSatisfied" xml:space="preserve">
     <value>型 '{2}' は、ジェネリック型のパラメーター '{1}'、またはメソッド '{0}' として使用するために、参照型でなければなりません</value>
@@ -212,9 +200,6 @@
   </data>
   <data name="ConvertToStaticClass" xml:space="preserve">
     <value>スタティック型 '{0}' へ変換できません</value>
-  </data>
-  <data name="GenericArgIsStaticClass" xml:space="preserve">
-    <value>'{0}': スタティック型を型引数として使用することはできません</value>
   </data>
   <data name="IncrementLvalueExpected" xml:space="preserve">
     <value>インクリメント演算子またはデクリメント演算子のオペランドには、変数、プロパティ、またはインデクサーを指定してください。</value>
@@ -269,9 +254,6 @@
   </data>
   <data name="RefReadonlyLocalCause" xml:space="preserve">
     <value>'{1}' であるため、'{0}' は ref または out 引数として渡せません</value>
-  </data>
-  <data name="DelegateOnNullable" xml:space="preserve">
-    <value>'System.Nullable&lt;T&gt;' のメンバーであるために、'{0}' のデリゲートをバインドできません。</value>
   </data>
   <data name="BadCtorArgCount" xml:space="preserve">
     <value>'{0}' に、引数を '{1}' 個指定できるコンストラクターがありません</value>

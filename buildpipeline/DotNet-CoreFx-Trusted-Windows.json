@@ -62,13 +62,14 @@
       "alwaysRun": false,
       "displayName": "Install Signing Plugin",
       "timeoutInMinutes": 0,
+      "condition": "ne(variables['PB_SignType'], 'oss')",
       "task": {
         "id": "30666190-6959-11e5-9f96-f56098202fef",
         "versionSpec": "1.*",
         "definitionType": "task"
       },
       "inputs": {
-        "signType": "$(PB_SignType)",
+        "signType": "real",
         "zipSources": "false",
         "version": "",
         "feedSource": "https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json"
@@ -373,7 +374,7 @@
       "allowOverride": true
     },
     "PB_BuildArguments": {
-      "value": "-buildArch=x64 -Release -- /p:SignType=test /p:RuntimeOS=win10",
+      "value": "-buildArch=x64 -Release -- /p:SignType=$(PB_SignType) /p:RuntimeOS=win10",
       "allowOverride": true
     },
     "PB_BuildTestsArguments": {
@@ -466,7 +467,8 @@
       "isSecret": true
     },
     "PB_SignType": {
-      "value": "real"
+      "value": "real",
+      "allowOverride": true
     }
   },
   "demands": [

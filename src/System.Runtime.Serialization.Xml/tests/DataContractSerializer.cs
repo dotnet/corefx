@@ -3393,8 +3393,7 @@ public static partial class DataContractSerializerTests
 
 
     [Fact]
-    [ActiveIssue(22776,TargetFrameworkMonikers.UapAot)]
-    public static void DCS_BasicPerSerializerRoundTripAndCompare_SampleTypes_FailedInuapaot_IncludeDataSet()
+    public static void DCS_BasicPerSerializerRoundTripAndCompare_DataSet()
     {
 
         TestObjectInObjectContainerWithSimpleResolver(new SerializationTestTypes.DCPublicDatasetPublic(true), @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data z:Id=""i1"" i:type=""a:SerializationTestTypes.DCPublicDatasetPublic***"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.DCPublicDatasetPublic***""><dataSet><xs:schema id=""MyData"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns="""" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><xs:element name=""MyData"" msdata:IsDataSet=""true"" msdata:UseCurrentLocale=""true""><xs:complexType><xs:choice minOccurs=""0"" maxOccurs=""unbounded""><xs:element name=""MyTable""><xs:complexType><xs:sequence><xs:element name=""Data"" type=""xs:string"" minOccurs=""0""/></xs:sequence></xs:complexType></xs:element></xs:choice></xs:complexType></xs:element></xs:schema><diffgr:diffgram xmlns:diffgr=""urn:schemas-microsoft-com:xml-diffgram-v1"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><MyData xmlns=""""><MyTable diffgr:id=""MyTable1"" msdata:rowOrder=""0"" diffgr:hasChanges=""inserted""><Data>10</Data></MyTable></MyData></diffgr:diffgram></dataSet><dataSet2><xs:schema id=""MyData"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns="""" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><xs:element name=""MyData"" msdata:IsDataSet=""true"" msdata:UseCurrentLocale=""true""><xs:complexType><xs:choice minOccurs=""0"" maxOccurs=""unbounded""><xs:element name=""MyTable""><xs:complexType><xs:sequence><xs:element name=""Data"" type=""xs:string"" minOccurs=""0""/></xs:sequence></xs:complexType></xs:element></xs:choice></xs:complexType></xs:element></xs:schema><diffgr:diffgram xmlns:diffgr=""urn:schemas-microsoft-com:xml-diffgram-v1"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><MyData xmlns=""""><MyTable diffgr:id=""MyTable1"" msdata:rowOrder=""0"" diffgr:hasChanges=""inserted""><Data>10</Data></MyTable></MyData></diffgr:diffgram></dataSet2><dataTable><xs:schema id=""MyData"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns="""" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><xs:element name=""MyData"" msdata:IsDataSet=""true"" msdata:MainDataTable=""MyTable"" msdata:UseCurrentLocale=""true""><xs:complexType><xs:choice minOccurs=""0"" maxOccurs=""unbounded""><xs:element name=""MyTable""><xs:complexType><xs:sequence><xs:element name=""Data"" type=""xs:string"" minOccurs=""0""/></xs:sequence></xs:complexType></xs:element></xs:choice></xs:complexType></xs:element></xs:schema><diffgr:diffgram xmlns:diffgr=""urn:schemas-microsoft-com:xml-diffgram-v1"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><MyData xmlns=""""><MyTable diffgr:id=""MyTable1"" msdata:rowOrder=""0"" diffgr:hasChanges=""inserted""><Data>10</Data></MyTable></MyData></diffgr:diffgram></dataTable><dataTable2><xs:schema id=""MyData"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns="""" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><xs:element name=""MyData"" msdata:IsDataSet=""true"" msdata:MainDataTable=""MyTable"" msdata:UseCurrentLocale=""true""><xs:complexType><xs:choice minOccurs=""0"" maxOccurs=""unbounded""><xs:element name=""MyTable""><xs:complexType><xs:sequence><xs:element name=""Data"" type=""xs:string"" minOccurs=""0""/></xs:sequence></xs:complexType></xs:element></xs:choice></xs:complexType></xs:element></xs:schema><diffgr:diffgram xmlns:diffgr=""urn:schemas-microsoft-com:xml-diffgram-v1"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata""><MyData xmlns=""""><MyTable diffgr:id=""MyTable1"" msdata:rowOrder=""0"" diffgr:hasChanges=""inserted""><Data>10</Data></MyTable></MyData></diffgr:diffgram></dataTable2></_data><_data2 z:Ref=""i1"" xmlns:z=""http://schemas.microsoft.com/2003/10/Serialization/""/></ObjectContainer>");
@@ -3437,8 +3436,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(22777, TargetFrameworkMonikers.UapAot)]
-    public static void DCS_BasicPerSerializerRoundTripAndCompare_SampleTypes_FailedInuapaot_InheritedFromIList()
+    public static void DCS_BasicPerSerializerRoundTripAndCompare_TypeInheritedFromIListT()
     {
         string assemblyName = typeof(DataContractSerializerTests).Assembly.FullName;
 
@@ -3452,8 +3450,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(22778, TargetFrameworkMonikers.UapAot)]
-    public static void DCS_BasicPerSerializerRoundTripAndCompare_SampleTypes_FailedInuapaot_InheritedFromIList_CanPassInReflectionOnly()
+    public static void DCS_BasicPerSerializerRoundTripAndCompare_InheritedFromIList()
     {
         TestObjectInObjectContainerWithSimpleResolver(new SerializationTestTypes.SampleListExplicitWithoutDC(true), @"<ObjectContainer xmlns=""http://schemas.datacontract.org/2004/07/SerializationTestTypes"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><_data i:type=""a:SerializationTestTypes.SampleListExplicitWithoutDC***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.SampleListExplicitWithoutDC***""><anyType i:type=""b:dateTime"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">0001-01-01T00:00:00</anyType><anyType i:type=""b:duration"" xmlns:b=""http://schemas.microsoft.com/2003/10/Serialization/"">P10675199DT2H48M5.4775807S</anyType><anyType i:type=""b:string"" xmlns:b=""http://www.w3.org/2001/XMLSchema""/><anyType i:type=""b:double"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">1.7976931348623157E+308</anyType><anyType i:type=""b:double"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">-INF</anyType><anyType i:type=""b:guid"" xmlns:b=""http://schemas.microsoft.com/2003/10/Serialization/"">0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb</anyType></_data><_data2 i:type=""a:SerializationTestTypes.SampleListExplicitWithoutDC***"" xmlns:a=""http://schemas.datacontract.org/2004/07/SerializationTestTypes.SampleListExplicitWithoutDC***""><anyType i:type=""b:dateTime"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">0001-01-01T00:00:00</anyType><anyType i:type=""b:duration"" xmlns:b=""http://schemas.microsoft.com/2003/10/Serialization/"">P10675199DT2H48M5.4775807S</anyType><anyType i:type=""b:string"" xmlns:b=""http://www.w3.org/2001/XMLSchema""/><anyType i:type=""b:double"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">1.7976931348623157E+308</anyType><anyType i:type=""b:double"" xmlns:b=""http://www.w3.org/2001/XMLSchema"">-INF</anyType><anyType i:type=""b:guid"" xmlns:b=""http://schemas.microsoft.com/2003/10/Serialization/"">0c9e174e-cdd8-4b68-a70d-aaeb26c7deeb</anyType></_data2></ObjectContainer>");
 
@@ -3536,8 +3533,7 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-    [ActiveIssue(22779, TargetFrameworkMonikers.UapAot)]
-    public static void DCS_BasicPerSerializerRoundTripAndCompare_Collections_FailedInuapaot_InCollections()
+    public static void DCS_BasicPerSerializerRoundTripAndCompare_CollectionDataContract()
     {
         string assemblyName = typeof(DataContractSerializerTests).Assembly.FullName;
         string corelibAssemblyName = typeof(String).Assembly.FullName;
@@ -4015,6 +4011,49 @@ public static partial class DataContractSerializerTests
         Assert.Equal(value.DateTimeOffset, actual.DateTimeOffset);
         Assert.NotNull(actual.AnIntList);
         Assert.Equal(0, actual.AnIntList.Count);
+    }
+
+    [Fact]
+#if !ReflectionOnly
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "dotnet-corefx #24265")]
+#endif
+    public static void DCS_TypeWithPrimitiveKnownTypes()
+    {
+        var list = new TypeWithPrimitiveKnownTypes();
+        list.Add(true);
+        list.Add('c');
+        list.Add(new DateTime(100));
+        list.Add(11.1m);
+        list.Add(22.2);
+        list.Add(33.3f);
+        list.Add(new Guid());
+        list.Add(11);
+        list.Add(1111111111111111111L);
+        list.Add(new XmlQualifiedName("NAME", "NS"));
+        list.Add((short)44);
+        list.Add((sbyte)-1);
+        list.Add("test string");
+        list.Add(new TimeSpan(100));
+        list.Add((byte)1);
+        list.Add(uint.MaxValue);
+        list.Add(ulong.MaxValue);
+        list.Add(ushort.MaxValue);
+        list.Add(new Uri("http://foo"));
+        var actual = SerializeAndDeserialize(list, "<TypeWithPrimitiveKnownTypes xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><anyType i:type=\"a:boolean\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">true</anyType><anyType i:type=\"a:char\" xmlns:a=\"http://schemas.microsoft.com/2003/10/Serialization/\">99</anyType><anyType i:type=\"a:dateTime\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">0001-01-01T00:00:00.00001</anyType><anyType i:type=\"a:decimal\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">11.1</anyType><anyType i:type=\"a:double\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">22.2</anyType><anyType i:type=\"a:float\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">33.3</anyType><anyType i:type=\"a:guid\" xmlns:a=\"http://schemas.microsoft.com/2003/10/Serialization/\">00000000-0000-0000-0000-000000000000</anyType><anyType i:type=\"a:int\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">11</anyType><anyType i:type=\"a:long\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">1111111111111111111</anyType><anyType i:type=\"a:QName\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\" xmlns:b=\"NS\">b:NAME</anyType><anyType i:type=\"a:short\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">44</anyType><anyType i:type=\"a:byte\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">-1</anyType><anyType i:type=\"a:string\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">test string</anyType><anyType i:type=\"a:duration\" xmlns:a=\"http://schemas.microsoft.com/2003/10/Serialization/\">PT0.00001S</anyType><anyType i:type=\"a:unsignedByte\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">1</anyType><anyType i:type=\"a:unsignedInt\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">4294967295</anyType><anyType i:type=\"a:unsignedLong\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">18446744073709551615</anyType><anyType i:type=\"a:unsignedShort\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">65535</anyType><anyType i:type=\"a:anyURI\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">http://foo/</anyType></TypeWithPrimitiveKnownTypes>");
+        Assert.True(Enumerable.SequenceEqual(list, actual));
+
+        list.Clear();
+        list.Add(new byte[] { 1, 2 });
+        actual = SerializeAndDeserialize(list, "<TypeWithPrimitiveKnownTypes xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><anyType i:type=\"a:base64Binary\" xmlns:a=\"http://www.w3.org/2001/XMLSchema\">AQI=</anyType></TypeWithPrimitiveKnownTypes>");
+        Assert.NotNull(actual);
+        Assert.Single(actual);
+        Assert.True(actual[0] is byte[]);
+        Assert.True(((byte[])list[0]).SequenceEqual(((byte[])actual[0])));
+
+        list.Clear();
+        list.Add(new object());
+        actual = SerializeAndDeserialize(list, "<TypeWithPrimitiveKnownTypes xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><anyType/></TypeWithPrimitiveKnownTypes>");
+        Assert.NotNull(actual);
     }
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null, bool skipStringCompare = false)

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using Xunit;
 
 namespace System.Net.Sockets.Tests
@@ -44,6 +45,7 @@ namespace System.Net.Sockets.Tests
         // but also not so large that it takes too long to run.
         const int Timeout = 2000;
 
+        [ActiveIssue(23767, TestPlatforms.AnyUnix)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(true)]
@@ -106,7 +108,7 @@ namespace System.Net.Sockets.Tests
 
                 acceptedSocket.ForceNonBlocking(forceNonBlocking);
 
-                DateTime start = default(DateTime);
+                var sw = new Stopwatch();
 
                 // Force Send to timeout by filling the kernel buffer.
                 var sendBuffer = new byte[16 * 1024];
@@ -114,18 +116,18 @@ namespace System.Net.Sockets.Tests
                 {
                     while (true)
                     {
-                        start = DateTime.UtcNow;
+                        sw.Restart();
                         acceptedSocket.Send(sendBuffer);
                     }
                 }));
 
-                double elapsed = (DateTime.UtcNow - start).TotalMilliseconds;
+                double elapsed = sw.Elapsed.TotalMilliseconds;
 
                 Assert.Equal(SocketError.TimedOut, sockEx.SocketErrorCode);
                 Assert.True(acceptedSocket.Connected);
 
                 // Try to ensure that the elapsed timeout is reasonably correct
-                Assert.InRange(elapsed, Timeout * 0.75, Timeout * 1.5);
+                Assert.InRange(elapsed, Timeout * 0.5, Timeout * 2);
             }
         }
     }

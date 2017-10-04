@@ -25,7 +25,7 @@ namespace System
         public static bool IsNetfx462OrNewer() { return false; }
         public static bool IsNetfx470OrNewer() { return false; }
         public static bool IsNetfx471OrNewer() { return false; }
-        public static bool IsWinRT => false;
+        public static bool IsInAppContainer => false;
         public static int WindowsVersion => -1;
 
         public static bool IsOpenSUSE => IsDistroAndVersion("opensuse");
@@ -33,20 +33,30 @@ namespace System
         public static bool IsDebian => IsDistroAndVersion("debian");
         public static bool IsDebian8 => IsDistroAndVersion("debian", "8");
         public static bool IsUbuntu1404 => IsDistroAndVersion("ubuntu", "14.04");
+        public static bool IsUbuntu1604 => IsDistroAndVersion("ubuntu", "16.04");
+        public static bool IsUbuntu1704 => IsDistroAndVersion("ubuntu", "17.04");
+        public static bool IsUbuntu1710 => IsDistroAndVersion("ubuntu", "17.10");
         public static bool IsCentos7 => IsDistroAndVersion("centos", "7");
         public static bool IsTizen => IsDistroAndVersion("tizen");
         public static bool IsNotFedoraOrRedHatOrCentos => !IsDistroAndVersion("fedora") && !IsDistroAndVersion("rhel") && !IsDistroAndVersion("centos");
         public static bool IsFedora => IsDistroAndVersion("fedora");
         public static bool IsWindowsNanoServer => false;
+        public static bool IsWindowsServerCore => false;
         public static bool IsWindowsAndElevated => false;
+        public static bool IsWindowsRedStone2 => false; 
+
+        public static bool IsRedHat => IsDistroAndVersion("rhel") || IsDistroAndVersion("rhl");
+        public static bool IsNotRedHat => !IsRedHat;
+        public static bool IsRedHat69 => IsDistroAndVersion("rhel", "6.9") || IsDistroAndVersion("rhl", "6.9");
+        public static bool IsNotRedHat69 => !IsRedHat69;
 
         public static Version OSXKernelVersion { get; } = GetOSXKernelVersion();
 
         public static string GetDistroVersionString()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                return "";
+                return "OSX Version=" + s_osxProductVersion.ToString();
             }
 
             DistroInfo v = ParseOsReleaseFile();
@@ -100,6 +110,77 @@ namespace System
                     else if (line.StartsWith("PRETTY_NAME=", System.StringComparison.Ordinal))
                     {
                         ret.PrettyName = RemoveQuotes(line.Substring("PRETTY_NAME=".Length));
+                    }
+                }
+            }
+            else 
+            {
+                string fileName = null;
+                if (File.Exists("/etc/redhat-release"))
+                    fileName = "/etc/redhat-release";
+
+                if (fileName == null && File.Exists("/etc/system-release"))
+                    fileName = "/etc/system-release";
+                
+                if (fileName != null)
+                {
+                    // Parse the format like the following line:
+                    // Red Hat Enterprise Linux Server release 7.3 (Maipo)
+                    using (StreamReader file = new StreamReader(fileName))
+                    {
+                        string line = file.ReadLine();
+                        if (!String.IsNullOrEmpty(line))
+                        {
+                            if (line.StartsWith("Red Hat Enterprise Linux", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ret.Id = "rhel";
+                            }
+                            else if (line.StartsWith("Centos", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ret.Id = "centos";
+                            }
+                            else if (line.StartsWith("Red Hat", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ret.Id = "rhl";
+                            }
+                            else 
+                            {
+                                // automatically generate the distro label
+                                string [] words = line.Split(' ');
+                                StringBuilder sb = new StringBuilder();
+
+                                foreach (string word in words)
+                                {
+                                    if (word.Length > 0)
+                                    {
+                                        if (Char.IsNumber(word[0]) || 
+                                            word.Equals("release", StringComparison.OrdinalIgnoreCase) ||
+                                            word.Equals("server", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                break;
+                                            }
+                                        sb.Append(Char.ToLower(word[0]));
+                                    }
+                                }
+                                ret.Id = sb.ToString();
+                            }
+
+                            int i = 0;
+                            while (i < line.Length && !Char.IsNumber(line[i])) // stop at first number
+                                i++;
+
+                            if (i < line.Length)
+                            {
+                                int j = i + 1;
+                                while (j < line.Length && (Char.IsNumber(line[j]) || line[j] == '.'))
+                                    j++;
+
+                                ret.VersionId = line.Substring(i, j - i);
+                                ret.Version = line.Substring(i, line.Length - i);
+                            }
+
+                            ret.PrettyName = line;
+                        }
                     }
                 }
             }

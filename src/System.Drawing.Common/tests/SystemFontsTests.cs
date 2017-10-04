@@ -19,7 +19,6 @@ namespace System.Drawing.Tests
             yield return new object[] { (Func<Font>)(() => SystemFonts.StatusFont) };
         }
 
-        [ActiveIssue(23690, TestPlatforms.Linux)]
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [MemberData(nameof(SystemFonts_TestData))]
         public void SystemFont_Get_ReturnsExpected(Func<Font> getFont)
@@ -30,7 +29,9 @@ namespace System.Drawing.Tests
                 Assert.NotNull(font);
                 Assert.NotNull(otherFont);
                 Assert.NotSame(font, otherFont);
-                Assert.Equal(font, otherFont);
+
+                // Assert.Equal on a font will use the native handle to assert equality, which is not always guaranteed.
+                Assert.Equal(font.Name, otherFont.Name);
             }
         }
 
