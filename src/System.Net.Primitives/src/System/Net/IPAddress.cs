@@ -627,14 +627,13 @@ namespace System.Net
                 Span<byte> addressAndScopeIdSpan;
                 unsafe
                 {
-                    var addressSpan = new ReadOnlySpan<byte>(Unsafe.AsPointer(ref _numbers[0]), IPAddressParserStatics.IPv6AddressBytes);
-                    var scopeIdSpan = new ReadOnlySpan<byte>(Unsafe.AsPointer(ref _addressOrScopeId), sizeof(uint));
-
                     byte* addressAndScopeId = stackalloc byte[addressAndScopeIdLength];
                     addressAndScopeIdSpan = new Span<byte>(addressAndScopeId, addressAndScopeIdLength);
-                    addressSpan.CopyTo(addressAndScopeIdSpan);
-                    scopeIdSpan.CopyTo(addressAndScopeIdSpan.Slice(IPAddressParserStatics.IPv6AddressBytes));
                 }
+
+                new ReadOnlySpan<ushort>(_numbers).AsBytes().CopyTo(addressAndScopeIdSpan);
+                Span<byte> scopeIdSpan = addressAndScopeIdSpan.Slice(IPAddressParserStatics.IPv6AddressBytes);
+                BitConverter.TryWriteBytes(scopeIdSpan, _addressOrScopeId);
 
                 hashCode = Marvin.ComputeHash32(
                     ref addressAndScopeIdSpan[0],
