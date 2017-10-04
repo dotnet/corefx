@@ -1476,9 +1476,11 @@ namespace System.IO
         public virtual int Read(char[] buffer, int index, int count) { throw null; }
         public virtual int Read(Span<char> destination) { throw null; }
         public virtual System.Threading.Tasks.Task<int> ReadAsync(char[] buffer, int index, int count) { throw null; }
+        public virtual System.Threading.Tasks.ValueTask<int> ReadAsync(System.Memory<char> destination, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public virtual int ReadBlock(char[] buffer, int index, int count) { throw null; }
         public virtual int ReadBlock(Span<char> destination) { throw null; }
         public virtual System.Threading.Tasks.Task<int> ReadBlockAsync(char[] buffer, int index, int count) { throw null; }
+        public virtual System.Threading.Tasks.ValueTask<int> ReadBlockAsync(Memory<char> destination, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public virtual string ReadLine() { throw null; }
         public virtual System.Threading.Tasks.Task<string> ReadLineAsync() { throw null; }
         public virtual string ReadToEnd() { throw null; }
@@ -1523,6 +1525,7 @@ namespace System.IO
         public virtual System.Threading.Tasks.Task WriteAsync(char value) { throw null; }
         public System.Threading.Tasks.Task WriteAsync(char[] buffer) { throw null; }
         public virtual System.Threading.Tasks.Task WriteAsync(char[] buffer, int index, int count) { throw null; }
+        public virtual System.Threading.Tasks.Task WriteAsync(ReadOnlyMemory<char> source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public virtual System.Threading.Tasks.Task WriteAsync(string value) { throw null; }
         public virtual void WriteLine() { }
         public virtual void WriteLine(bool value) { }
@@ -1549,6 +1552,7 @@ namespace System.IO
         public virtual System.Threading.Tasks.Task WriteLineAsync(char value) { throw null; }
         public System.Threading.Tasks.Task WriteLineAsync(char[] buffer) { throw null; }
         public virtual System.Threading.Tasks.Task WriteLineAsync(char[] buffer, int index, int count) { throw null; }
+        public virtual System.Threading.Tasks.Task WriteLineAsync(System.ReadOnlyMemory<char> source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public virtual System.Threading.Tasks.Task WriteLineAsync(string value) { throw null; }
     }
 }
