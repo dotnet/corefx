@@ -1038,7 +1038,7 @@ namespace System.Diagnostics.Tests
             Assert.Throws<InvalidOperationException>(() => process.StandardInput);
         }
 
-        // [Fact] // uncomment for diagnostic purposes to list processes to console
+        // [Fact]
         public void TestDiagnosticsWithConsoleWriteLine()
         {
             foreach (var p in Process.GetProcesses().OrderBy(p => p.Id))

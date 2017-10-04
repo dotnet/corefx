@@ -13,23 +13,23 @@ namespace System.Diagnostics
         /// </summary>
         private ThreadPriorityLevel PriorityLevelCore
         {
-            get { throw new PlatformNotSupportedException(); }  // Not available on POSIX
-            set { throw new PlatformNotSupportedException(); }  // Not available on POSIX
-        }
-
-        /// <summary>
-        /// Returns the amount of time the thread has spent running code inside the operating
-        /// system core.
-        /// </summary>
-        public TimeSpan PrivilegedProcessorTime
-        {
-            get { throw new PlatformNotSupportedException(); }  // Not available on POSIX
+            get
+            {
+                Interop.libutil.proc_stats stat = Interop.libutil.getThreadInfo(_processId, Id);
+                return Interop.Sys.GetThreadPriorityFromNiceValue((int)stat.nice);
+            }
+            set
+            {
+                throw new PlatformNotSupportedException(); // We can find no API to set this
+            }
         }
 
         /// <summary>Returns the time the associated thread was started.</summary>
         public DateTime StartTime
         {
-            get { throw new PlatformNotSupportedException(); }  // Not available on POSIX
+            // kinfo_proc has one  antry per thread but ki_start seems to be same for 
+            // all threads e.g. reflects process start. This may be re-visited later.
+            get { throw new PlatformNotSupportedException(); }
         }
 
         /// <summary>
@@ -39,7 +39,11 @@ namespace System.Diagnostics
         /// </summary>
         public TimeSpan TotalProcessorTime
         {
-            get { throw new PlatformNotSupportedException(); }  // Not available on POSIX
+            get
+            {
+                Interop.libutil.proc_stats stat = Interop.libutil.getThreadInfo(_processId, Id);
+                return Process.TicksToTimeSpan(stat.userTime + stat.systemTime);
+            }
         }
 
         /// <summary>
@@ -48,7 +52,25 @@ namespace System.Diagnostics
         /// </summary>
         public TimeSpan UserProcessorTime
         {
-            get { throw new PlatformNotSupportedException(); }  // Not available on POSIX
+            get
+            {
+                Interop.libutil.proc_stats stat = Interop.libutil.getThreadInfo(_processId, Id);
+                return Process.TicksToTimeSpan(stat.userTime);
+            }
+        }
+
+        /// <summary>
+        /// Returns the amount of time the thread has spent running code inside the operating
+        /// system core.
+        /// </summary>
+        public TimeSpan PrivilegedProcessorTime
+        {
+            get
+            {
+                Interop.libutil.proc_stats stat = Interop.libutil.getThreadInfo(_processId, Id);
+                return Process.TicksToTimeSpan(stat.systemTime);
+            }
+
         }
     }
 }

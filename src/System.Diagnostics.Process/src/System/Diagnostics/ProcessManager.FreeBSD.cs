@@ -23,9 +23,7 @@ namespace System.Diagnostics
         {
             ThrowIfRemoteMachine(machineName);
 
-            System.Console.WriteLine("GetProcessInfos????");
             int[] procIds = GetProcessIds(machineName);
-            System.Console.WriteLine("GetProcessInfos!!!!");
 
             // Iterate through all process IDs to load information about each process
             var processes = new List<ProcessInfo>(procIds.Length);
@@ -53,8 +51,6 @@ namespace System.Diagnostics
                 throw new ArgumentOutOfRangeException(nameof(pid));
             }
 
-            System.Console.WriteLine("CreateProcessInfo called for {0}", pid);
-
             ProcessInfo procInfo = new ProcessInfo()
             {
                 ProcessId = pid
@@ -66,21 +62,19 @@ namespace System.Diagnostics
             //if (info.HasValue)
             if (true)
             {
-                // Set the values we have; all the other values don't have meaning or don't exist on OSX
-                //Interop.libproc.proc_taskallinfo temp = info.Value;
+                // Set the values we have; all the other values don't have meaning or don't exist
                 //unsafe { procInfo.ProcessName = Marshal.PtrToStringAnsi(new IntPtr(temp.pbsd.pbi_comm)); }
-                info.ProcessName = info.ProcessName;
+                procInfo.ProcessName = info.ProcessName;
                 procInfo.BasePriority = info.BasePriority;
                 procInfo.VirtualBytes = info.VirtualBytes;
                 procInfo.WorkingSet = info.WorkingSet;
+                procInfo.SessionId = info.SessionId;
+                //procInfo._threadInfoList = info._threadInfoList;
+                foreach (ThreadInfo ti in info._threadInfoList)
+                {
+                    procInfo._threadInfoList.Add(ti);
+                }
             }
-             System.Console.WriteLine("GetProcessInfoById2 path={0}",info.ProcessName);
-
-            // Get the sessionId for the given pid, getsid returns -1 on error
-            int sessionId = Interop.Sys.GetSid(pid);
-            if (sessionId != -1)
-                procInfo.SessionId = sessionId;
-
 
             return procInfo;
         }
@@ -109,7 +103,7 @@ namespace System.Diagnostics
                     };
                 }
             }
-            catch (Exception e){  System.Console.WriteLine("GetModules FAILED!!!! {0}", e.ToString()); } // eat all errors
+            catch { } // eat all errors
 
             return new ProcessModuleCollection(0);
         }

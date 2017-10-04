@@ -32,7 +32,13 @@ namespace System.Diagnostics.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "Process.Modules is not supported on uap")]
         public void Modules_Get_ContainsHostFileName()
         {
+            System.Console.WriteLine("STarting!!!!");
             ProcessModuleCollection modules = Process.GetCurrentProcess().Modules;
+            System.Console.WriteLine("MODULES!!!!");
+            try {
+            System.Console.WriteLine(modules.Cast<ProcessModule>());
+            } catch (Exception e){  System.Console.WriteLine("GetModules FAILED!!!! {0}", e.ToString()); }
+
             Assert.Contains(modules.Cast<ProcessModule>(), m => m.FileName.Contains(HostRunnerName));
         }
 

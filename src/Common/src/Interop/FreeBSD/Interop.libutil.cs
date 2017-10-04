@@ -13,7 +13,7 @@ internal static partial class Interop
 {
     internal static partial class libutil
     {
-        internal const string lib_name = "libutil";
+        private const ulong SecondsToNanoSeconds = 1000000000;
 
         // Constants from sys/syslimits.h
         private const int PATH_MAX  = 1024;
@@ -28,6 +28,11 @@ internal static partial class Interop
         private const int LOGINCLASSLEN = 17;
         private const int KI_NGROUPS = 16;
 
+        private const int KI_NSPARE_INT = 4;
+        private const int KI_NSPARE_LONG = 12;
+        private const int KI_NSPARE_PTR = 6;
+
+
         // Constants from sys/_sigset.h
         private const int _SIG_WORDS = 4;
 
@@ -35,6 +40,10 @@ internal static partial class Interop
         private const int CTL_KERN = 1;
         private const int KERN_PROC = 14;
         private const int KERN_PROC_PATHNAME = 12;
+        private const int KERN_PROC_PROC = 8;
+        private const int KERN_PROC_ALL = 0; 
+        private const int KERN_PROC_PID  = 1;
+        private const int KERN_PROC_INC_THREAD = 16;
 
         // Constants from proc_info.h
         private const int MAXTHREADNAMESIZE = 64;
@@ -42,6 +51,14 @@ internal static partial class Interop
         private const int PROC_PIDTHREADINFO = 5;
         private const int PROC_PIDLISTTHREADS = 6;
         private const int PROC_PIDPATHINFO_MAXSIZE = 4 * PATH_MAX;
+
+        internal struct proc_stats
+        {
+            internal long startTime;        /* time_t */
+            internal int nice;
+            internal ulong userTime;        /* in ticks */
+            internal ulong systemTime;      /* in ticks */
+        }
 
         // From sys/_sigset.h
         [StructLayout(LayoutKind.Sequential)]
@@ -78,8 +95,8 @@ internal static partial class Interop
         [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct rusage
         {
-            public timeval ru_utime;               /* user time used */
-            public timeval ru_stime;               /* system time used */
+            public timeval ru_utime;        /* user time used */
+            public timeval ru_stime;        /* system time used */
             long    ru_maxrss;              /* max resident set size */
             long    ru_ixrss;               /* integral shared memory size */
             long    ru_idrss;               /* integral unshared data " */
@@ -114,8 +131,8 @@ internal static partial class Interop
             public int ki_ppid;                /* parent process id */
             int ki_pgid;                        /* process group id */
             int ki_tpgid;                       /* tty process group id */
-            int ki_sid;                         /* Process session ID */
-            int ki_tsid;                        /* Terminal session ID */
+            public int ki_sid;                         /* Process session ID */
+            public int ki_tsid;                        /* Terminal session ID */
             short   ki_jobc;                    /* job control counter */
             short   ki_spare_short1;            /* unused (just here for alignment) */
             int ki_tdev;                        /* controlling tty dev */
@@ -163,6 +180,30 @@ internal static partial class Interop
             public fixed byte    ki_comm[COMMLEN+1];    /* command name */
             fixed byte    ki_emul[KI_EMULNAMELEN+1];    /* emulation name */
             fixed byte    ki_loginclass[LOGINCLASSLEN+1]; /* login class */
+            fixed byte    ki_sparestrings[50]; /* spare string space */
+            fixed int ki_spareints[KI_NSPARE_INT];    /* spare room for growth */
+            int ki_oncpu;       /* Which cpu we are on */
+            int ki_lastcpu;     /* Last cpu we were on */
+            int ki_tracer;      /* Pid of tracing process */
+            int ki_flag2;       /* P2_* flags */
+            int ki_fibnum;      /* Default FIB number */
+            uint   ki_cr_flags;        /* Credential flags */
+            int ki_jid;         /* Process jail ID */
+            public int ki_numthreads;      /* XXXKSE number of threads in total */
+            public int ki_tid;         /* XXXKSE thread id */
+            fixed byte ki_pri[4];    /* process priority */
+            public rusage ki_rusage;   /* process rusage statistics */
+            /* XXX - most fields in ki_rusage_ch are not (yet) filled in */
+            rusage ki_rusage_ch;    /* rusage of children processes */
+            void *ki_pcb;        /* kernel virtual addr of pcb */
+            void    *ki_kstack;     /* kernel virtual addr of stack */
+            void    *ki_udata;      /* User convenience pointer */
+            public void *ki_tdaddr;  /* address of thread */
+
+            fixed long ki_spareptrs[KI_NSPARE_PTR];   /* spare room for growth */
+            fixed long    ki_sparelongs[KI_NSPARE_LONG];  /* spare room for growth */
+            long    ki_sflag;       /* PS_* flags */
+            public long    ki_tdflags;     /* XXXKSE kthread flag */
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -174,21 +215,12 @@ internal static partial class Interop
         [DllImport("libc", SetLastError = true)]
         private static extern unsafe int sysctl(
             int [] name,
-            uint namelen,
+            int namelen,
             byte* oldp,
            ulong *oldlenp,
            void *newp,
            ulong newlen);
         
-        /// <summary>
-        /// Queries the OS for the PIDs for all running processes
-        /// </summary>
-        /// <param name="buffer">A pointer to the memory block where the PID array will start</param>
-        /// <param name="buffersize">The length of the block of memory allocated for the PID array</param>
-        /// <returns>Returns the number of elements (PIDs) in the buffer</returns>
-        [DllImport(lib_name, SetLastError = true)]
-        private static extern unsafe kinfo_proc * kinfo_getallproc(ref int cnt);
-
         /// <summary>
         /// Queries the OS for the list of all running processes and returns the PID for each
         /// </summary>
@@ -196,52 +228,37 @@ internal static partial class Interop
         internal static unsafe int[] proc_listallpids()
         {
             int numProcesses=0;
+            int[] pids;
 
-            // Get the number of processes currently running to know how much data to allocate
-            kinfo_proc * entries = kinfo_getallproc(ref numProcesses);
+            kinfo_proc * entries = getProcInfo(0, false, out numProcesses);
 
-            if (numProcesses <= 0)
+            if (entries == null || numProcesses <= 0)
             {
                 throw new Win32Exception(SR.CantGetAllPids);
             }
 
-            int[] processes;
-
-            do
-            {
-                // Create a new array for the processes (plus a 10% buffer in case new processes have spawned)
-                // Since we don't know how many threads there could be, if result == size, that could mean two things
-                // 1) We guessed exactly how many processes there are
-                // 2) There are more processes that we didn't get since our buffer is too small
-                // To make sure it isn't #2, when the result == size, increase the buffer and try again
-                processes = new int[(int)(numProcesses * 1.10)];
-
-                fixed (int* pBuffer = &processes[0])
+            Span<kinfo_proc>  list = new Span<kinfo_proc>(entries, numProcesses);
+            pids = new int[numProcesses];
+            int idx=0;
+            // walk thorough process list and skip kernel threads
+            for(int i=0; i < list.Length; i++) {
+                if (list[i].ki_ppid == 0)
                 {
-                    //numProcesses = proc_listallpids(pBuffer, processes.Length * sizeof(int));
-                    if (numProcesses <= 0)
-                    {
-                        throw new Win32Exception(SR.CantGetAllPids);
-                    }
+                    // skip kernel threads
+                    numProcesses-=1;
+                }
+                else
+                {
+                    pids[idx] = list[i].ki_pid;
+                    idx += 1;
                 }
             }
-            while (numProcesses == processes.Length);
-
             // Remove extra elements
-            Array.Resize<int>(ref processes, numProcesses);
+            Array.Resize<int>(ref pids, numProcesses);
+            Marshal.FreeHGlobal((IntPtr)entries);
 
-            return processes;
+            return pids;
         }
-
-
-        /// <param name="pid">The PID of the process</param>
-        /// <returns>
-        /// The amount of data actually returned. If this size matches the bufferSize parameter then
-        /// the data is valid. If the sizes do not match then the data is invalid, most likely due 
-        /// to not having enough permissions to query for the data of that specific process
-        /// </returns>
-        [DllImport(lib_name, SetLastError = true)]
-        private static extern unsafe kinfo_proc * kinfo_getproc(int pid);
 
 
         /// <summary>
@@ -269,6 +286,51 @@ internal static partial class Interop
         }
 
         /// <summary>
+        /// Gets information about process or thread(s)
+        /// </summary>
+        /// <param name="pid">The PID of the process. If PID is 0, this will return all processes</param>
+        public static unsafe kinfo_proc* getProcInfo(int pid, bool threads, out int count)
+        {
+            int[] name = new int[4];
+            ulong bytesLength = 0;
+            byte* pBuffer;
+            kinfo_proc* kinfo;
+
+            count = -1;
+
+            name[0] = CTL_KERN;
+            name[1] = KERN_PROC;
+            name[2] = (pid == 0) ? KERN_PROC_PROC : KERN_PROC_PID | (threads ? KERN_PROC_INC_THREAD : 0);
+            name[3] = pid;
+
+            int ret = sysctl(name, pid == 0 ? 3 : 4 , null , &bytesLength, null, 0);
+            if (ret != 0 )
+            {
+                throw new ArgumentOutOfRangeException(nameof(pid));
+            }
+            //buffer =  new byte[bytesLength];
+
+            pBuffer = (byte*)Marshal.AllocHGlobal((int)bytesLength);
+            ret = sysctl(name, pid == 0 ? 3 : 4 , pBuffer, &bytesLength, null, 0);
+            if (ret != 0 ) {
+                Marshal.FreeHGlobal((IntPtr)pBuffer);
+                throw new ArgumentOutOfRangeException(nameof(pid));
+            }
+
+            kinfo = (kinfo_proc*)pBuffer;
+            if (kinfo->ki_structsize != sizeof(kinfo_proc))
+            {
+                // failed consistency check 
+                Marshal.FreeHGlobal((IntPtr)pBuffer);
+                throw new ArgumentOutOfRangeException(nameof(pid));
+            }
+
+            count = (int)bytesLength / sizeof(kinfo_proc);
+
+            return kinfo;
+        }
+
+        /// <summary>
         /// Gets the process information for a given process
         /// </summary>
         /// <param name="pid">The PID (process ID) of the process</param>
@@ -284,47 +346,84 @@ internal static partial class Interop
                 throw new ArgumentOutOfRangeException(nameof(pid));
             }
 
-            string  path = getProcPath(pid);
+            int count;
+            kinfo_proc *kinfo = getProcInfo(pid, true, out count);
+            if (kinfo == null || count < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pid));
+            }
+
+            Span<kinfo_proc> process = new Span<kinfo_proc>(kinfo, count);
 
             // Get the process information for the specified pid
             ProcessInfo info = new ProcessInfo();
-            kinfo_proc *result = kinfo_getproc(pid);
-            if (result != null) {
-                info.ProcessName = path;
-                info.BasePriority = result->ki_nice;
-                info.VirtualBytes = (long)result->ki_size;
-                info.WorkingSet = result->ki_rssize;
-                Marshal.FreeHGlobal((IntPtr)result);
+
+            info.ProcessName = Marshal.PtrToStringAnsi((IntPtr)kinfo->ki_comm);
+            info.BasePriority = kinfo->ki_nice;
+            info.VirtualBytes = (long)kinfo->ki_size;
+            info.WorkingSet = kinfo->ki_rssize;
+            info.SessionId = kinfo ->ki_sid;
+
+            for(int i=0; i < process.Length; i++)
+            {
+                var ti = new ThreadInfo()
+                {
+                    _processId = pid,
+                    _threadId = (ulong)process[i].ki_tid,
+                    _basePriority = process[i].ki_nice,
+                    _startAddress = (IntPtr)process[i].ki_tdaddr
+                };
+                info._threadInfoList.Add(ti);
             }
+            Marshal.FreeHGlobal((IntPtr)kinfo);
 
             return info;
         }
 
         /// <summary>
-        /// Gets the rusage information for the process identified by the PID
+        /// Gets the process information for a given process
         /// </summary>
-        /// <param name="pid">The process to retrieve the rusage for</param>
-        /// <returns>On success, returns a struct containing info about the process; on
-        /// failure or when the caller doesn't have permissions to the process, throws a Win32Exception
+        // 
+        /// <param name="pid">The PID (process ID) of the process</param>
+        /// <param name="tid">The TID (thread ID) of the process</param>
+        /// <returns>
+        /// Returns basic info about thread. If tis is 0, it will return
+        /// info for process e.g. main thread.
         /// </returns>
-        internal static unsafe rusage proc_pid_rusage(int pid)
+        public unsafe static proc_stats getThreadInfo(int pid, int tid)
         {
-            // Negative PIDs are invalid
-            if (pid < 0)
+            proc_stats ret = new proc_stats();
+            int count;
+
+            kinfo_proc* info =  getProcInfo(pid, (tid == 0 ? false: true), out count);
+            if (info != null && count >= 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(pid), SR.NegativePidNotSupported);
+                if (tid == 0)
+                {
+                    ret.startTime = info->ki_start.tv_sec;
+                    ret.nice = info->ki_nice;
+                    ret.userTime = (ulong)info->ki_rusage.ru_utime.tv_sec * SecondsToNanoSeconds + (ulong)info->ki_rusage.ru_utime.tv_usec;
+                    ret.systemTime = (ulong)info->ki_rusage.ru_stime.tv_sec * SecondsToNanoSeconds + (ulong)info->ki_rusage.ru_stime.tv_usec;
+                }
+                else
+                {
+                    Span<kinfo_proc>  list = new Span<kinfo_proc>(info, count);
+                    for(int i=0; i < list.Length; i++)
+                    {
+                        if (list[i].ki_tid == tid)
+                        {
+                            ret.startTime = list[i].ki_start.tv_sec;
+                            ret.nice = list[i].ki_nice;
+                            ret.userTime = (ulong)list[i].ki_rusage.ru_utime.tv_sec * SecondsToNanoSeconds + (ulong)list[i].ki_rusage.ru_utime.tv_usec;
+                            ret.systemTime = (ulong)list[i].ki_rusage.ru_stime.tv_sec * SecondsToNanoSeconds + (ulong)list[i].ki_rusage.ru_stime.tv_usec;
+                            break;
+                        }
+                    }
+                }
+                Marshal.FreeHGlobal((IntPtr)info);
             }
 
-            rusage info = new rusage();
-
-            // Get the PIDs rusage info
-            kinfo_proc *result = kinfo_getproc(pid);
-            if (result == null)
-            {
-                throw new InvalidOperationException(SR.RUsageFailure);
-            }
-
-            return info;
+            return ret;
         }
     }
 }
