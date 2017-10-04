@@ -18,7 +18,7 @@
     <!-- We're building some non-netcoreapp target, run on the Tools CLI.
          Reuse the same runtimeconfig used by CSC. -->
      <GeneratorRuntimeConfig>$(ToolsDir)csc.runtimeconfig.json</GeneratorRuntimeConfig>
-     <GeneratorCliPath>$(ToolsDir)dotnetcli/</GeneratorCliPath>
+     <GeneratorCliPath>$(ToolsDir)dotnet/</GeneratorCliPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
