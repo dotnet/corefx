@@ -130,9 +130,9 @@ namespace System
         {
             using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
             {
-                Span<byte> bytes = stackalloc byte[sizeof(ulong)];
+                var bytes = new byte[sizeof(ulong)];
                 rng.GetBytes(bytes);
-                return BitConverter.ToUInt64(bytes);
+                return BitConverter.ToUInt64(bytes, 0);
             }
         }
     }
