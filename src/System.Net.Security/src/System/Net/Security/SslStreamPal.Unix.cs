@@ -55,62 +55,18 @@ namespace System.Net.Security
 
         public static SecurityStatusPal EncryptMessage(SafeDeleteContext securityContext, ReadOnlyMemory<byte> input, int headerSize, int trailerSize, ref byte[] output, out int resultSize)
         {
-            resultSize = 0;
-            try
-            {
-                Interop.Ssl.SslErrorCode errorCode = Interop.Ssl.SslErrorCode.SSL_ERROR_NONE;
-                SafeSslHandle scHandle = ((SafeDeleteSslContext)securityContext).SslContext;
-
-                resultSize = Interop.OpenSsl.Encrypt(scHandle, input, ref output, out errorCode);
-                switch (errorCode)
-                {
-                    case Interop.Ssl.SslErrorCode.SSL_ERROR_RENEGOTIATE:
-                        return new SecurityStatusPal(SecurityStatusPalErrorCode.Renegotiate);
-                    case Interop.Ssl.SslErrorCode.SSL_ERROR_ZERO_RETURN:
-                        return new SecurityStatusPal(SecurityStatusPalErrorCode.ContextExpired);
-                    case Interop.Ssl.SslErrorCode.SSL_ERROR_NONE:
-                    case Interop.Ssl.SslErrorCode.SSL_ERROR_WANT_READ:
-                        return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
-                    default:
-                        return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, new Interop.OpenSsl.SslException((int)errorCode));
-                }
-            }
-            catch (Exception ex)
-            {
-                return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, ex);
-            }
+            return EncryptDecryptHelper(securityContext, input, offset:0, size: 0, encrypt: true, output: ref output, resultSize: out resultSize);
         }
 
         public static SecurityStatusPal DecryptMessage(SafeDeleteContext securityContext, byte[] buffer, ref int offset, ref int count)
         {
-            int resultSize = 0;
-            try
+            SecurityStatusPal retVal = EncryptDecryptHelper(securityContext, buffer, offset, count, false, ref buffer, out int resultSize);
+            if (retVal.ErrorCode == SecurityStatusPalErrorCode.OK ||
+                retVal.ErrorCode == SecurityStatusPalErrorCode.Renegotiate)
             {
-                Interop.Ssl.SslErrorCode errorCode = Interop.Ssl.SslErrorCode.SSL_ERROR_NONE;
-                SafeSslHandle scHandle = ((SafeDeleteSslContext)securityContext).SslContext;
-
-                resultSize = Interop.OpenSsl.Decrypt(scHandle, buffer, offset, count, out errorCode);
-
-                switch (errorCode)
-                {
-                    case Interop.Ssl.SslErrorCode.SSL_ERROR_RENEGOTIATE:
-                        count = resultSize;
-                        return new SecurityStatusPal(SecurityStatusPalErrorCode.Renegotiate);
-                    case Interop.Ssl.SslErrorCode.SSL_ERROR_ZERO_RETURN:
-                        return new SecurityStatusPal(SecurityStatusPalErrorCode.ContextExpired);
-                    case Interop.Ssl.SslErrorCode.SSL_ERROR_NONE:
-                    case Interop.Ssl.SslErrorCode.SSL_ERROR_WANT_READ:
-                        count = resultSize;
-                        return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
-
-                    default:
-                        return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, new Interop.OpenSsl.SslException((int)errorCode));
-                }
+                count = resultSize;
             }
-            catch (Exception ex)
-            {
-                return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, ex);
-            }
+            return retVal;
         }
 
         public static ChannelBinding QueryContextChannelBinding(SafeDeleteContext securityContext, ChannelBindingKind attribute)
@@ -180,6 +136,42 @@ namespace System.Net.Security
             catch (Exception exc)
             {
                 return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, exc);
+            }
+        }
+
+        private static SecurityStatusPal EncryptDecryptHelper(SafeDeleteContext securityContext, ReadOnlyMemory<byte> input, int offset, int size, bool encrypt, ref byte[] output, out int resultSize)
+        {
+            resultSize = 0;
+            try
+            {
+                Interop.Ssl.SslErrorCode errorCode = Interop.Ssl.SslErrorCode.SSL_ERROR_NONE;
+                SafeSslHandle scHandle = ((SafeDeleteSslContext)securityContext).SslContext;
+
+                if (encrypt)
+                {
+                    resultSize = Interop.OpenSsl.Encrypt(scHandle, input, ref output, out errorCode);
+                }
+                else
+                {
+                    resultSize = Interop.OpenSsl.Decrypt(scHandle, output, offset, size, out errorCode);
+                }
+
+                switch (errorCode)
+                {
+                    case Interop.Ssl.SslErrorCode.SSL_ERROR_RENEGOTIATE:
+                        return new SecurityStatusPal(SecurityStatusPalErrorCode.Renegotiate);
+                    case Interop.Ssl.SslErrorCode.SSL_ERROR_ZERO_RETURN:
+                        return new SecurityStatusPal(SecurityStatusPalErrorCode.ContextExpired);
+                    case Interop.Ssl.SslErrorCode.SSL_ERROR_NONE:
+                    case Interop.Ssl.SslErrorCode.SSL_ERROR_WANT_READ:
+                        return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
+                    default:
+                        return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, new Interop.OpenSsl.SslException((int)errorCode));
+                }
+            }
+            catch (Exception ex)
+            {
+                return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, ex);
             }
         }
 
