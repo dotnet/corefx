@@ -19,7 +19,7 @@
       <ExceptionForDepsJson Include="microsoft.netcore.app" />
 
       <!-- TODO: We should see about generating this from scratch instead of relying on a previous deps file as a template -->
-      <_sharedFrameworkDepsJson Include="$(ToolsDir)dotnetcli\shared\Microsoft.NETCore.App\*\Microsoft.NETCore.App.deps.json" />
+      <_sharedFrameworkDepsJson Include="$(ToolsDir)dotnet\shared\Microsoft.NETCore.App\*\Microsoft.NETCore.App.deps.json" />
     </ItemGroup>
 
     <PropertyGroup>

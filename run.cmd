@@ -42,7 +42,7 @@ call %~dp0init-tools.cmd
 if NOT [%ERRORLEVEL%]==[0] exit /b 1
 
 set _toolRuntime=%~dp0Tools
-set _dotnet=%_toolRuntime%\dotnetcli\dotnet.exe
+set _dotnet=%_toolRuntime%\dotnet\dotnet.exe
 set _json=%~dp0config.json
 
 :: run.exe depends on running in the root directory, notably because the config.json specifies
