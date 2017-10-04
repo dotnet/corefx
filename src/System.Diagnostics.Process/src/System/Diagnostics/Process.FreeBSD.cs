@@ -173,6 +173,19 @@ namespace System.Diagnostics
                 if (result == 0) resultingMax = new IntPtr((long)limits.CurrentLimit);
             }
         }
+        // <summary>Gets execution path</summary>
+        private string GetPathToOpenFile()
+        {
+            Interop.Sys.FileStatus stat;
+            if (Interop.Sys.Stat("/usr/local/bin/open", out stat) == 0 )
+            {
+                return "/usr/local/bin/open";
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         // -----------------------------
         // ---- PAL layer ends here ----
