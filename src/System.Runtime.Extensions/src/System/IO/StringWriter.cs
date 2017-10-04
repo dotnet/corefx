@@ -2,8 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Text;
 using System.Globalization;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.IO
@@ -124,6 +125,22 @@ namespace System.IO
             _sb.Append(buffer, index, count);
         }
 
+        public override void Write(ReadOnlySpan<char> source)
+        {
+            if (GetType() != typeof(StringWriter))
+            {
+                base.Write(source);
+                return;
+            }
+
+            if (!_isOpen)
+            {
+                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
+            }
+
+            _sb.Append(source);
+        }
+
         // Writes a string to the underlying string buffer. If the given string is
         // null, nothing is written.
         //
@@ -140,8 +157,25 @@ namespace System.IO
             }
         }
 
+        public override void WriteLine(ReadOnlySpan<char> source)
+        {
+            if (GetType() != typeof(StringWriter))
+            {
+                base.WriteLine(source);
+                return;
+            }
+
+            if (!_isOpen)
+            {
+                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
+            }
+
+            _sb.Append(source);
+            WriteLine();
+        }
+
         #region Task based Async APIs
-        
+
         public override Task WriteAsync(char value)
         {
             Write(value);
@@ -160,6 +194,17 @@ namespace System.IO
             return Task.CompletedTask;
         }
 
+        public override Task WriteAsync(ReadOnlyMemory<char> source, CancellationToken cancellationToken = default)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Task.FromCanceled(cancellationToken);
+            }
+
+            Write(source.Span);
+            return Task.CompletedTask;
+        }
+
         public override Task WriteLineAsync(char value)
         {
             WriteLine(value);
@@ -175,6 +220,17 @@ namespace System.IO
         public override Task WriteLineAsync(char[] buffer, int index, int count)
         {
             WriteLine(buffer, index, count);
+            return Task.CompletedTask;
+        }
+
+        public override Task WriteLineAsync(ReadOnlyMemory<char> source, CancellationToken cancellationToken = default)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Task.FromCanceled(cancellationToken);
+            }
+
+            WriteLine(source.Span);
             return Task.CompletedTask;
         }
 

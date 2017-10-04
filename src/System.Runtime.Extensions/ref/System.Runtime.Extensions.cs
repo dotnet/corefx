@@ -1435,8 +1435,12 @@ namespace System.IO
         public override int Peek() { throw null; }
         public override int Read() { throw null; }
         public override int Read(char[] buffer, int index, int count) { throw null; }
+        public override int Read(System.Span<char> destination) { throw null; }
+        public override int ReadBlock(System.Span<char> destination) { throw null; }
         public override System.Threading.Tasks.Task<int> ReadAsync(char[] buffer, int index, int count) { throw null; }
+        public override System.Threading.Tasks.ValueTask<int> ReadAsync(System.Memory<char> destination, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override System.Threading.Tasks.Task<int> ReadBlockAsync(char[] buffer, int index, int count) { throw null; }
+        public override System.Threading.Tasks.ValueTask<int> ReadBlockAsync(Memory<char> destination, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override string ReadLine() { throw null; }
         public override System.Threading.Tasks.Task<string> ReadLineAsync() { throw null; }
         public override string ReadToEnd() { throw null; }
@@ -1456,12 +1460,16 @@ namespace System.IO
         public override string ToString() { throw null; }
         public override void Write(char value) { }
         public override void Write(char[] buffer, int index, int count) { }
+        public override void Write(System.ReadOnlySpan<char> source) { throw null; }
         public override void Write(string value) { }
+        public override void WriteLine(System.ReadOnlySpan<char> source) { throw null; }
         public override System.Threading.Tasks.Task WriteAsync(char value) { throw null; }
         public override System.Threading.Tasks.Task WriteAsync(char[] buffer, int index, int count) { throw null; }
+        public override System.Threading.Tasks.Task WriteAsync(ReadOnlyMemory<char> source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override System.Threading.Tasks.Task WriteAsync(string value) { throw null; }
         public override System.Threading.Tasks.Task WriteLineAsync(char value) { throw null; }
         public override System.Threading.Tasks.Task WriteLineAsync(char[] buffer, int index, int count) { throw null; }
+        public override System.Threading.Tasks.Task WriteLineAsync(ReadOnlyMemory<char> source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override System.Threading.Tasks.Task WriteLineAsync(string value) { throw null; }
     }
     public abstract partial class TextReader : System.MarshalByRefObject, System.IDisposable
