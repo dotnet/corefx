@@ -15,7 +15,7 @@ namespace System.Buffers.Binary.Tests
 
         public static void Validate<T>(Span<byte> span, T value) where T : struct
         {
-            T read = ReadCurrentEndianness<T>(span);
+            T read = ReadMachineEndian<T>(span);
             Assert.Equal(value, read);
             span.Clear();
         }

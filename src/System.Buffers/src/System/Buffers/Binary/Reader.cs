@@ -95,9 +95,13 @@ namespace System.Buffers.Binary
         /// Reads a structure of type T out of a read-only span of bytes.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T ReadCurrentEndianness<T>(ReadOnlySpan<byte> buffer)
+        public static T ReadMachineEndian<T>(ReadOnlySpan<byte> buffer)
             where T : struct
         {
+            if (BinaryHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                Environment.FailFast($"Cannot read a span into the non-blittable type <{typeof(T).Name}>.");
+            }
             if (Unsafe.SizeOf<T>() > buffer.Length)
             {
                 throw new ArgumentOutOfRangeException();
@@ -110,9 +114,13 @@ namespace System.Buffers.Binary
         /// <returns>If the span is too small to contain the type T, return false.</returns>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadCurrentEndianness<T>(ReadOnlySpan<byte> buffer, out T value)
+        public static bool TryReadMachineEndian<T>(ReadOnlySpan<byte> buffer, out T value)
             where T : struct
         {
+            if (BinaryHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                Environment.FailFast($"Cannot read a span into the non-blittable type <{typeof(T).Name}>.");
+            }
             if (Unsafe.SizeOf<T>() > (uint)buffer.Length)
             {
                 value = default;

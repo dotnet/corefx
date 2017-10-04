@@ -16,7 +16,7 @@ namespace System.Buffers.Binary
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteInt16BigEndian(Span<byte> buffer, short value)
         {
-            WriteCurrentEndianness(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
+            WriteMachineEndian(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace System.Buffers.Binary
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteInt32BigEndian(Span<byte> buffer, int value)
         {
-            WriteCurrentEndianness(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
+            WriteMachineEndian(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace System.Buffers.Binary
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteInt64BigEndian(Span<byte> buffer, long value)
         {
-            WriteCurrentEndianness(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
+            WriteMachineEndian(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace System.Buffers.Binary
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteUInt16BigEndian(Span<byte> buffer, ushort value)
         {
-            WriteCurrentEndianness(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
+            WriteMachineEndian(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace System.Buffers.Binary
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteUInt32BigEndian(Span<byte> buffer, uint value)
         {
-            WriteCurrentEndianness(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
+            WriteMachineEndian(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace System.Buffers.Binary
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteUInt64BigEndian(Span<byte> buffer, ulong value)
         {
-            WriteCurrentEndianness(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
+            WriteMachineEndian(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace System.Buffers.Binary
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryWriteInt16BigEndian(Span<byte> buffer, short value)
         {
-            return TryWriteCurrentEndianness(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
+            return TryWriteMachineEndian(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace System.Buffers.Binary
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryWriteInt32BigEndian(Span<byte> buffer, int value)
         {
-            return TryWriteCurrentEndianness(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
+            return TryWriteMachineEndian(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace System.Buffers.Binary
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryWriteInt64BigEndian(Span<byte> buffer, long value)
         {
-            return TryWriteCurrentEndianness(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
+            return TryWriteMachineEndian(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace System.Buffers.Binary
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryWriteUInt16BigEndian(Span<byte> buffer, ushort value)
         {
-            return TryWriteCurrentEndianness(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
+            return TryWriteMachineEndian(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace System.Buffers.Binary
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryWriteUInt32BigEndian(Span<byte> buffer, uint value)
         {
-            return TryWriteCurrentEndianness(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
+            return TryWriteMachineEndian(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace System.Buffers.Binary
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryWriteUInt64BigEndian(Span<byte> buffer, ulong value)
         {
-            return TryWriteCurrentEndianness(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
+            return TryWriteMachineEndian(ref buffer, BitConverter.IsLittleEndian ? ReverseEndianness(value) : value);
         }
     }
 }

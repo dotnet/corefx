@@ -13,9 +13,13 @@ namespace System.Buffers.Binary
         /// Writes a structure of type T into a span of bytes.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteCurrentEndianness<T>(ref Span<byte> buffer, T value)
+        public static void WriteMachineEndian<T>(ref Span<byte> buffer, T value)
             where T : struct
         {
+            if (BinaryHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                Environment.FailFast($"Cannot write the non-blittable type <{typeof(T).Name}> into the span.");
+            }
             if ((uint)Unsafe.SizeOf<T>() > (uint)buffer.Length)
             {
                 throw new ArgumentOutOfRangeException();
@@ -28,9 +32,13 @@ namespace System.Buffers.Binary
         /// <returns>If the span is too small to contain the type T, return false.</returns>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryWriteCurrentEndianness<T>(ref Span<byte> buffer, T value)
+        public static bool TryWriteMachineEndian<T>(ref Span<byte> buffer, T value)
             where T : struct
         {
+            if (BinaryHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                Environment.FailFast($"Cannot write the non-blittable type <{typeof(T).Name}> into the span.");
+            }
             if (Unsafe.SizeOf<T>() > (uint)buffer.Length)
             {
                 return false;

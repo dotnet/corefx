@@ -31,8 +31,8 @@ namespace System.Buffers.Binary
         public static long ReverseEndianness(long value) { throw null; }
         public static ulong ReverseEndianness(ulong value) { throw null; }
 
-        public static T ReadCurrentEndianness<T>(ReadOnlySpan<byte> buffer) where T : struct { throw null; }
-        public static bool TryReadCurrentEndianness<T>(ReadOnlySpan<byte> buffer, out T value) where T : struct { throw null; }
+        public static T ReadMachineEndian<T>(ReadOnlySpan<byte> buffer) where T : struct { throw null; }
+        public static bool TryReadMachineEndian<T>(ReadOnlySpan<byte> buffer, out T value) where T : struct { throw null; }
 
         public static short ReadInt16LittleEndian(ReadOnlySpan<byte> buffer) { throw null; }
         public static int ReadInt32LittleEndian(ReadOnlySpan<byte> buffer) { throw null; }
@@ -62,8 +62,8 @@ namespace System.Buffers.Binary
         public static bool TryReadUInt32BigEndian(ReadOnlySpan<byte> buffer, out uint value) { throw null; }
         public static bool TryReadUInt64BigEndian(ReadOnlySpan<byte> buffer, out ulong value) { throw null; }
 
-        public static void WriteCurrentEndianness<T>(ref Span<byte> buffer, T value) where T : struct { throw null; }
-        public static bool TryWriteCurrentEndianness<T>(ref Span<byte> buffer, T value) where T : struct { throw null; }
+        public static void WriteMachineEndian<T>(ref Span<byte> buffer, T value) where T : struct { throw null; }
+        public static bool TryWriteMachineEndian<T>(ref Span<byte> buffer, T value) where T : struct { throw null; }
 
         public static void WriteInt16LittleEndian(Span<byte> buffer, short value) { throw null; }
         public static void WriteInt32LittleEndian(Span<byte> buffer, int value) { throw null; }

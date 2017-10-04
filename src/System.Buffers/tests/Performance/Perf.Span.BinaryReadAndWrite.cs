@@ -26,7 +26,7 @@ namespace System.Buffers.Binary.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        readStruct = ReadCurrentEndianness<TestHelpers.TestStructExplicit>(spanBE);
+                        readStruct = ReadMachineEndian<TestHelpers.TestStructExplicit>(spanBE);
                         if (BitConverter.IsLittleEndian)
                         {
                             readStruct.S0 = ReverseEndianness(readStruct.S0);
@@ -61,7 +61,7 @@ namespace System.Buffers.Binary.Tests
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        readStruct = ReadCurrentEndianness<TestHelpers.TestStructExplicit>(spanLE);
+                        readStruct = ReadMachineEndian<TestHelpers.TestStructExplicit>(spanLE);
                         if (!BitConverter.IsLittleEndian)
                         {
                             readStruct.S0 = ReverseEndianness(readStruct.S0);
