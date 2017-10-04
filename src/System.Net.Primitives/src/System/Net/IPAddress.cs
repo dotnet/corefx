@@ -626,16 +626,12 @@ namespace System.Net
             if (IsIPv6)
             {
                 const int addressAndScopeIdLength = IPAddressParserStatics.IPv6AddressBytes + sizeof(uint);
-                Span<byte> addressAndScopeIdSpan;
-                unsafe
-                {
-                    byte* addressAndScopeId = stackalloc byte[addressAndScopeIdLength];
-                    addressAndScopeIdSpan = new Span<byte>(addressAndScopeId, addressAndScopeIdLength);
-                }
+                Span<byte> addressAndScopeIdSpan = stackalloc byte[addressAndScopeIdLength];
 
                 new ReadOnlySpan<ushort>(_numbers).AsBytes().CopyTo(addressAndScopeIdSpan);
                 Span<byte> scopeIdSpan = addressAndScopeIdSpan.Slice(IPAddressParserStatics.IPv6AddressBytes);
-                BitConverter.TryWriteBytes(scopeIdSpan, _addressOrScopeId);
+                bool scopeWritten = BitConverter.TryWriteBytes(scopeIdSpan, _addressOrScopeId);
+                Debug.Assert(scopeWritten);
 
                 hashCode = Marvin.ComputeHash32(
                     ref addressAndScopeIdSpan[0],

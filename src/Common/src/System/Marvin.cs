@@ -124,17 +124,15 @@ namespace System
             return (value << shift) | (value >> (32 - shift));
         }
 
-        public static ulong DefaultSeed => s_defaultSeed;
-
-        private static ulong s_defaultSeed = GenerateSeed();
+        public static ulong DefaultSeed { get; } = GenerateSeed();
 
         private static ulong GenerateSeed()
         {
             using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
             {
-                var bytes = new byte[sizeof(ulong)];
+                Span<byte> bytes = stackalloc byte[sizeof(ulong)];
                 rng.GetBytes(bytes);
-                return BitConverter.ToUInt64(bytes, 0);
+                return BitConverter.ToUInt64(bytes);
             }
         }
     }
