@@ -23,18 +23,18 @@ OSName=$(uname -s)
     case $OSName in
         Darwin)
             OS=OSX
-            __DOTNET_PKG=dotnet-dev-osx-x64
+            __DOTNET_PKG=dotnet-sdk-${__DOTNET_TOOLS_VERSION}-osx-x64
             ulimit -n 2048
             ;;
 
         Linux)
-            __DOTNET_PKG=dotnet-dev-linux-x64
+            __DOTNET_PKG=dotnet-sdk-${__DOTNET_TOOLS_VERSION}-linux-x64
             OS=Linux
 
             if [ -e /etc/redhat-release ]; then
                 redhatRelease=$(</etc/redhat-release)
                 if [[ $redhatRelease == "CentOS release 6."* || $redhatRelease == "Red Hat Enterprise Linux Server release 6."* ]]; then
-                    __DOTNET_PKG=dotnet-dev-rhel.6-x64
+                    __DOTNET_PKG=dotnet-sdk-${__DOTNET_TOOLS_VERSION}-rhel.6-x64
                 fi
             fi
 
@@ -43,7 +43,7 @@ OSName=$(uname -s)
         *)
             echo "Unsupported OS '$OSName' detected. Downloading linux-x64 tools."
             OS=Linux
-            __DOTNET_PKG=dotnet-dev-linux-x64
+            __DOTNET_PKG=dotnet-sdk-${__DOTNET_TOOLS_VERSION}-linux-x64
             ;;
   esac
 fi
@@ -66,7 +66,7 @@ if [ ! -e $__INIT_TOOLS_DONE_MARKER ]; then
             cp -r $DOTNET_TOOL_DIR/* $__DOTNET_PATH
         else
             echo "Installing dotnet cli..."
-            __DOTNET_LOCATION="https://dotnetcli.azureedge.net/dotnet/Sdk/${__DOTNET_TOOLS_VERSION}/${__DOTNET_PKG}.${__DOTNET_TOOLS_VERSION}.tar.gz"
+            __DOTNET_LOCATION="https://dotnetcli.azureedge.net/dotnet/Sdk/${__DOTNET_TOOLS_VERSION}/${__DOTNET_PKG}.tar.gz"
             # curl has HTTPS CA trust-issues less often than wget, so lets try that first.
             echo "Installing '${__DOTNET_LOCATION}' to '$__DOTNET_PATH/dotnet.tar'" >> $__init_tools_log
             which curl > /dev/null 2> /dev/null
