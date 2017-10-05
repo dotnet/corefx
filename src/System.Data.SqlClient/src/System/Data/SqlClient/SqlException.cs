@@ -36,7 +36,7 @@ namespace System.Data.SqlClient
 
         private SqlException(SerializationInfo si, StreamingContext sc) : base(si, sc) 
         {
-            HResult = HResults.SqlException;
+            HResult = SqlExceptionHResult;
             foreach (SerializationEntry siEntry in si) 
             {
                 if ("ClientConnectionId" == siEntry.Name) 
