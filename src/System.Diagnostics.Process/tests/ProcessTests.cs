@@ -172,7 +172,7 @@ namespace System.Diagnostics.Tests
                 }
                 else
                 {
-                    if (px != null)
+                    if (px != null) // sometimes process is null
                     {
                         Assert.Equal("notepad", px.ProcessName);
 
