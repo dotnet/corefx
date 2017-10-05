@@ -5,7 +5,6 @@
 using System;
 using System.Text;
 using System.Runtime.InteropServices;
-using Microsoft.Win32.SafeHandles;
 
 internal partial class Interop
 {
@@ -94,10 +93,6 @@ internal partial class Interop
 
             return true;
         }
-
-        [DllImport(Interop.Libraries.Kernel32, CharSet = System.Runtime.InteropServices.CharSet.Auto, SetLastError = true, BestFitMapping = true)]
-        public static unsafe extern int FormatMessage(int dwFlags, SafeLibraryHandle lpSource, uint dwMessageId,
-    int dwLanguageId, StringBuilder lpBuffer, int nSize, IntPtr[] arguments);
 
         // Windows API FormatMessage lets you format a message string given an errorcode.
         // Unlike other APIs this API does not support a way to query it for the total message size.
