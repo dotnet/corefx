@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
-using System.Security.Permissions;
 using System.Security.Principal;
 using System.Text;
 using System.Threading;
@@ -16,27 +15,6 @@ namespace System.Diagnostics
 {
     internal static class SharedUtils
     {
-        internal const int UnknownEnvironment = 0;
-        internal const int W2kEnvironment = 1;
-        internal const int NtEnvironment = 2;
-        internal const int NonNtEnvironment = 3;
-        private static volatile int environment = UnknownEnvironment;
-
-        private static Object s_InternalSyncObject;
-        private static Object InternalSyncObject
-        {
-            get
-            {
-                if (s_InternalSyncObject == null)
-                {
-                    Object o = new Object();
-                    Interlocked.CompareExchange(ref s_InternalSyncObject, o, null);
-                }
-
-                return s_InternalSyncObject;
-            }
-        }
-
         internal static Win32Exception CreateSafeWin32Exception()
         {
             return CreateSafeWin32Exception(0);
@@ -45,50 +23,18 @@ namespace System.Diagnostics
         internal static Win32Exception CreateSafeWin32Exception(int error)
         {
             Win32Exception newException = null;
-            SecurityPermission securityPermission = new SecurityPermission(PermissionState.Unrestricted);
-            securityPermission.Assert();
-            try
-            {
-                if (error == 0)
-                    newException = new Win32Exception();
-                else
-                    newException = new Win32Exception(error);
-            }
-            finally
-            {
-                SecurityPermission.RevertAssert();
-            }
+            if (error == 0)
+                newException = new Win32Exception();
+            else
+                newException = new Win32Exception(error);
 
             return newException;
-        }
-
-        internal static int CurrentEnvironment
-        {
-            get
-            {
-                if (environment == UnknownEnvironment)
-                {
-                    lock (InternalSyncObject)
-                    {
-                        if (environment == UnknownEnvironment)
-                        {
-                            environment = W2kEnvironment;
-                        }
-                    }
-                }
-
-                return environment;
-            }
         }
 
         internal static void EnterMutex(string name, ref Mutex mutex)
         {
             string mutexName = null;
-            if (CurrentEnvironment == W2kEnvironment)
-                mutexName = "Global\\" + name;
-            else
-                mutexName = name;
-
+            mutexName = "Global\\" + name;
             EnterMutexWithoutGlobal(mutexName, ref mutex);
         }
 
