@@ -314,7 +314,6 @@ namespace System.Numerics
             {
                 int unalignedBytes = byteCount % 4;
                 int dwordCount = byteCount / 4 + (unalignedBytes == 0 ? 0 : 1);
-                bool isZero = true;
                 uint[] val = new uint[dwordCount];
 
                 // Copy all dwords, except but don't do the last one if it's not a full four bytes
@@ -324,7 +323,6 @@ namespace System.Numerics
                     for (int byteInDword = 0; byteInDword < 4; byteInDword++)
                     {
                         byte curByteValue = value[curByte];
-                        if (curByteValue != 0x00) isZero = false;
                         val[curDword] = (val[curDword] << 8) | curByteValue;
                         curByte--;
                     }
@@ -338,16 +336,11 @@ namespace System.Numerics
                     for (curByte = byteCount - 1; curByte >= byteCount - unalignedBytes; curByte--)
                     {
                         byte curByteValue = value[curByte];
-                        if (curByteValue != 0x00) isZero = false;
                         val[curDword] = (val[curDword] << 8) | curByteValue;
                     }
                 }
 
-                if (isZero)
-                {
-                    this = s_bnZeroInt;
-                }
-                else if (isNegative)
+                if (isNegative)
                 {
                     NumericsHelpers.DangerousMakeTwosComplement(val); // Mutates val
 
@@ -356,23 +349,32 @@ namespace System.Numerics
                     while (len >= 0 && val[len] == 0) len--;
                     len++;
 
-                    if (len == 1 && unchecked((int)(val[0])) > 0)
+                    if (len == 1)
                     {
-                        if (val[0] == 1 /* abs(-1) */)
+                        switch (val[0])
                         {
-                            this = s_bnMinusOneInt;
-                        }
-                        else if (val[0] == kuMaskHighBit) // abs(Int32.MinValue)
-                        {
-                            this = s_bnMinInt;
-                        }
-                        else
-                        {
-                            _sign = (-1) * ((int)val[0]);
-                            _bits = null;
+                            case 1: // abs(-1)
+                                this = s_bnMinusOneInt;
+                                return;
+
+                            case kuMaskHighBit: // abs(Int32.MinValue)
+                                this = s_bnMinInt;
+                                return;
+
+                            default:
+                                if (unchecked((int)val[0]) > 0)
+                                {
+                                    _sign = (-1) * ((int)val[0]);
+                                    _bits = null;
+                                    AssertValid();
+                                    return;
+                                }
+
+                                break;
                         }
                     }
-                    else if (len != val.Length)
+
+                    if (len != val.Length)
                     {
                         _sign = -1;
                         _bits = new uint[len];

@@ -195,8 +195,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 _pFixedResults[iParam] = GetTypeManager().GetErrorType(
-                                        null/*pParentType*/,
-                                        null,
                                         ((TypeParameterType)_pMethodTypeParameters[iParam]).GetName(),
                                         BSYMMGR.EmptyTypeArray());
             }
@@ -1351,11 +1349,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //   public override M<U>(U u) { M(u); } // should infer M<int>
             // }
 
-            if (pSource is TypeParameterType sourceParamType)
-            {
-                pSource = sourceParamType.GetEffectiveBaseClass();
-            }
-
             if (!(pSource is ArrayType pArraySource))
             {
                 return false;
@@ -1509,10 +1502,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pSource.isClassType())
             {
                 pSourceBase = (pSource as AggregateType).GetBaseClass();
-            }
-            else if (pSource is TypeParameterType sourceType)
-            {
-                pSourceBase = sourceType.GetEffectiveBaseClass();
             }
 
             while (pSourceBase != null)

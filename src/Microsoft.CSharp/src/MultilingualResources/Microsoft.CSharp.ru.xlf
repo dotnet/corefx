@@ -130,10 +130,6 @@
           <source>The type '{0}' has no constructors defined</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Для типа "{0}" нет определенных конструкторов</target>
         </trans-unit>
-        <trans-unit id="BadDelegateConstructor" translate="yes" xml:space="preserve">
-          <source>The delegate '{0}' does not have a valid constructor</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Делегат "{0}" не имеет допустимого конструктора</target>
-        </trans-unit>
         <trans-unit id="PropertyLacksGet" translate="yes" xml:space="preserve">
           <source>The property or indexer '{0}' cannot be used in this context because it lacks the get accessor</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">The property or indexer "{0}" cannot be used in this context because it lacks the get accessor</target>
@@ -202,10 +198,6 @@
           <source>Using the generic {1} '{0}' requires '{2}' type arguments</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Использование универсального {1} "{0}" требует аргументов типа "{2}"</target>
         </trans-unit>
-        <trans-unit id="BadTypeArgument" translate="yes" xml:space="preserve">
-          <source>The type '{0}' may not be used as a type argument</source>
-          <target state="needs-review-translation" state-qualifier="mt-suggestion">Тип '{0}' не может использоваться в качестве аргумента типа</target>
-        </trans-unit>
         <trans-unit id="TypeArgsNotAllowed" translate="yes" xml:space="preserve">
           <source>The {1} '{0}' cannot be used with type arguments</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">{1} "{0}" не может использоваться с аргументами типа</target>
@@ -234,21 +226,9 @@
           <source>The type '{3}' cannot be used as type parameter '{2}' in the generic type or method '{0}'. There is no boxing conversion from '{3}' to '{1}'.</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Невозможно использовать тип "{3}" в качестве параметра типа "{2}" в универсальном типе или методе "{0}". Нет преобразования-упаковки из "{3}" в "{1}".</target>
         </trans-unit>
-        <trans-unit id="TypeVarCantBeNull" translate="yes" xml:space="preserve">
-          <source>Cannot convert null to type parameter '{0}' because it could be a non-nullable value type. Consider using 'default({0})' instead.</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Cannot convert null to type parameter "{0}" because it could be a non-nullable value type. Вместо этого рекомендуется использовать "default({0})".</target>
-        </trans-unit>
-        <trans-unit id="BadRetType" translate="yes" xml:space="preserve">
-          <source>'{1} {0}' has the wrong return type</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">"{1} {0}" имеет неправильный возвращаемый тип</target>
-        </trans-unit>
         <trans-unit id="CantInferMethTypeArgs" translate="yes" xml:space="preserve">
           <source>The type arguments for method '{0}' cannot be inferred from the usage. Try specifying the type arguments explicitly.</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">The type arguments for method "{0}" cannot be inferred from the usage. Попытайтесь явно определить аргументы-типы.</target>
-        </trans-unit>
-        <trans-unit id="MethGrpToNonDel" translate="yes" xml:space="preserve">
-          <source>Cannot convert method group '{0}' to non-delegate type '{1}'. Did you intend to invoke the method?</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Не удается преобразовать группу методов "{0}" в тип, не являющийся делегатом "{1}". Предполагается ли вызывать этот метод?</target>
         </trans-unit>
         <trans-unit id="RefConstraintNotSatisfied" translate="yes" xml:space="preserve">
           <source>The type '{2}' must be a reference type in order to use it as parameter '{1}' in the generic type or method '{0}'</source>
@@ -273,10 +253,6 @@
         <trans-unit id="ConvertToStaticClass" translate="yes" xml:space="preserve">
           <source>Cannot convert to static type '{0}'</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Не удается выполнить преобразование к статическому типу "{0}"</target>
-        </trans-unit>
-        <trans-unit id="GenericArgIsStaticClass" translate="yes" xml:space="preserve">
-          <source>'{0}': static types cannot be used as type arguments</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">"{0}": нельзя использовать статические типы в качестве аргументов-типов</target>
         </trans-unit>
         <trans-unit id="IncrementLvalueExpected" translate="yes" xml:space="preserve">
           <source>The operand of an increment or decrement operator must be a variable, property or indexer</source>
@@ -349,10 +325,6 @@
         <trans-unit id="RefReadonlyLocalCause" translate="yes" xml:space="preserve">
           <source>Cannot pass '{0}' as a ref or out argument because it is a '{1}'</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">Не удалось передать "{0}" как ссылку или аргумент out, так как это "{1}"</target>
-        </trans-unit>
-        <trans-unit id="DelegateOnNullable" translate="yes" xml:space="preserve">
-          <source>Cannot bind delegate to '{0}' because it is a member of 'System.Nullable<it id="1" pos="open">&lt;T&gt;</it>'</source>
-          <target state="needs-review-translation" state-qualifier="mt-suggestion">Не удается привязать делегат '{0}', потому что он является членом «System.Nullable<it id="1" pos="open">&lt;T&gt;</it>»</target>
         </trans-unit>
         <trans-unit id="BadCtorArgCount" translate="yes" xml:space="preserve">
           <source>'{0}' does not contain a constructor that takes '{1}' arguments</source>

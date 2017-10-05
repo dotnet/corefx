@@ -130,10 +130,6 @@
           <source>The type '{0}' has no constructors defined</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">型 '{0}' のコンストラクターが定義されていません</target>
         </trans-unit>
-        <trans-unit id="BadDelegateConstructor" translate="yes" xml:space="preserve">
-          <source>The delegate '{0}' does not have a valid constructor</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">デリゲート '{0}' には有効なコンストラクターがありません</target>
-        </trans-unit>
         <trans-unit id="PropertyLacksGet" translate="yes" xml:space="preserve">
           <source>The property or indexer '{0}' cannot be used in this context because it lacks the get accessor</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">get アクセサーがないため、プロパティまたはインデクサー '{0}' をこのコンテキストで使用することはできません</target>
@@ -202,10 +198,6 @@
           <source>Using the generic {1} '{0}' requires '{2}' type arguments</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">ジェネリック {1} '{0}' の使用には、'{2}' 型の引数が必要です</target>
         </trans-unit>
-        <trans-unit id="BadTypeArgument" translate="yes" xml:space="preserve">
-          <source>The type '{0}' may not be used as a type argument</source>
-          <target state="needs-review-translation" state-qualifier="mt-suggestion">型 '{0}' は型引数としては使えません</target>
-        </trans-unit>
         <trans-unit id="TypeArgsNotAllowed" translate="yes" xml:space="preserve">
           <source>The {1} '{0}' cannot be used with type arguments</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">{1} '{0}' は型引数と一緒には使用できません</target>
@@ -234,21 +226,9 @@
           <source>The type '{3}' cannot be used as type parameter '{2}' in the generic type or method '{0}'. There is no boxing conversion from '{3}' to '{1}'.</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">型 '{3}' はジェネリック型またはメソッド '{0}' 内で型パラメーター '{2}' として使用できません。'{3}' から '{1}' へのボックス変換がありません。</target>
         </trans-unit>
-        <trans-unit id="TypeVarCantBeNull" translate="yes" xml:space="preserve">
-          <source>Cannot convert null to type parameter '{0}' because it could be a non-nullable value type. Consider using 'default({0})' instead.</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">Null 非許容の値型である可能性があるため、Null を型パラメーター '{0}' に変換できません。'default({0})' を使用してください。</target>
-        </trans-unit>
-        <trans-unit id="BadRetType" translate="yes" xml:space="preserve">
-          <source>'{1} {0}' has the wrong return type</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">'{1} {0}' には、不適切な戻り値の型が指定されています</target>
-        </trans-unit>
         <trans-unit id="CantInferMethTypeArgs" translate="yes" xml:space="preserve">
           <source>The type arguments for method '{0}' cannot be inferred from the usage. Try specifying the type arguments explicitly.</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">メソッド '{0}' の型引数を使い方から推論することはできません。型引数を明示的に指定してください。</target>
-        </trans-unit>
-        <trans-unit id="MethGrpToNonDel" translate="yes" xml:space="preserve">
-          <source>Cannot convert method group '{0}' to non-delegate type '{1}'. Did you intend to invoke the method?</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">メソッド グループ '{0}' を非デリゲート型 '{1}' に変換することはできません。このメソッドを呼び出しますか?</target>
         </trans-unit>
         <trans-unit id="RefConstraintNotSatisfied" translate="yes" xml:space="preserve">
           <source>The type '{2}' must be a reference type in order to use it as parameter '{1}' in the generic type or method '{0}'</source>
@@ -273,10 +253,6 @@
         <trans-unit id="ConvertToStaticClass" translate="yes" xml:space="preserve">
           <source>Cannot convert to static type '{0}'</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">スタティック型 '{0}' へ変換できません</target>
-        </trans-unit>
-        <trans-unit id="GenericArgIsStaticClass" translate="yes" xml:space="preserve">
-          <source>'{0}': static types cannot be used as type arguments</source>
-          <target state="needs-review-translation" state-qualifier="tm-suggestion">'{0}': スタティック型を型引数として使用することはできません</target>
         </trans-unit>
         <trans-unit id="IncrementLvalueExpected" translate="yes" xml:space="preserve">
           <source>The operand of an increment or decrement operator must be a variable, property or indexer</source>
@@ -349,10 +325,6 @@
         <trans-unit id="RefReadonlyLocalCause" translate="yes" xml:space="preserve">
           <source>Cannot pass '{0}' as a ref or out argument because it is a '{1}'</source>
           <target state="needs-review-translation" state-qualifier="tm-suggestion">'{1}' であるため、'{0}' は ref または out 引数として渡せません</target>
-        </trans-unit>
-        <trans-unit id="DelegateOnNullable" translate="yes" xml:space="preserve">
-          <source>Cannot bind delegate to '{0}' because it is a member of 'System.Nullable<it id="1" pos="open">&lt;T&gt;</it>'</source>
-          <target state="needs-review-translation" state-qualifier="mt-suggestion">'System.Nullable<it id="1" pos="open">&lt;T&gt;</it>' のメンバーであるために、'{0}' のデリゲートをバインドできません。</target>
         </trans-unit>
         <trans-unit id="BadCtorArgCount" translate="yes" xml:space="preserve">
           <source>'{0}' does not contain a constructor that takes '{1}' arguments</source>
