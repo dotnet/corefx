@@ -129,6 +129,8 @@ namespace System.IO
         {
             if (GetType() != typeof(StringWriter))
             {
+                // This overload was added affter the Write(char[], ...) overload, and so in case
+                // a derived type may have overridden it, we need to delegate to it, which the base does.
                 base.Write(source);
                 return;
             }
@@ -161,6 +163,8 @@ namespace System.IO
         {
             if (GetType() != typeof(StringWriter))
             {
+                // This overload was added affter the WriteLine(char[], ...) overload, and so in case
+                // a derived type may have overridden it, we need to delegate to it, which the base does.
                 base.WriteLine(source);
                 return;
             }

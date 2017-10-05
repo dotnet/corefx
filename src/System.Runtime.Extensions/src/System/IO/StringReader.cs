@@ -122,6 +122,8 @@ namespace System.IO
         {
             if (GetType() != typeof(StringReader))
             {
+                // This overload was added affter the Read(char[], ...) overload, and so in case
+                // a derived type may have overridden it, we need to delegate to it, which the base does.
                 return base.Read(destination);
             }
 
