@@ -158,7 +158,7 @@ namespace System.Diagnostics
                     }
                     else
                         msg = ReplaceMessageParameters(msg, ReplacementStrings);
-                    
+
                     message = msg;
                 }
 
@@ -225,29 +225,6 @@ namespace System.Diagnostics
                 return (UInt32)IntFrom(dataBuf, bufOffset + FieldOffsets.EVENTID);
             }
         }
-
-#if false
-        internal string StringsBuffer 
-        {
-            get 
-            {
-                StringBuilder buf = new StringBuilder();
-                int bufpos = bufOffset + IntFrom(dataBuf, bufOffset + FieldOffsets.STRINGOFFSET);
-                int i = 0;
-                int numStrings = ShortFrom(dataBuf, bufOffset + FieldOffsets.NUMSTRINGS);
-                while (i < numStrings)
-                {
-                    char ch = CharFrom(dataBuf, bufpos);
-                    buf.Append(ch);
-                    bufpos += 2;
-                    if (ch == '\0')
-                        i++;
-                }
-
-                return buf.ToString();
-            }
-        }
-#endif
 
         [MonitoringDescription("The time at which the application logged this entry.")]
         public DateTime TimeGenerated
@@ -320,7 +297,7 @@ namespace System.Diagnostics
                 {
                     return false;
                 }
-                
+
             return true;
         }
 
@@ -445,7 +422,7 @@ namespace System.Diagnostics
                 return fileName;
             }
         }
-        
+
         private short ShortFrom(byte[] buf, int offset)
         {
             // assumes little Endian byte order.
@@ -454,7 +431,7 @@ namespace System.Diagnostics
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            throw new PlatformNotSupportedException(); 
+            throw new PlatformNotSupportedException();
         }
 
         private static class FieldOffsets

@@ -3,6 +3,6 @@
   <Import Project="..\dir.props" />
   <PropertyGroup>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
-    <OpenKey>MSFT</OpenKey>
+    <AssemblyKey>Open</AssemblyKey>
   </PropertyGroup>
 </Project>
