@@ -5,6 +5,7 @@
 using System;
 using System.Text;
 using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 
 internal partial class Interop
 {
@@ -14,6 +15,7 @@ internal partial class Interop
         private const int FORMAT_MESSAGE_FROM_HMODULE = 0x00000800;
         private const int FORMAT_MESSAGE_FROM_SYSTEM = 0x00001000;
         private const int FORMAT_MESSAGE_ARGUMENT_ARRAY = 0x00002000;
+        
         private const int ERROR_INSUFFICIENT_BUFFER = 0x7A;
         private const int InitialBufferSize = 256;
         private const int BufferSizeIncreaseFactor = 4;
@@ -29,7 +31,9 @@ internal partial class Interop
             int nSize,
             IntPtr[] arguments);
 
-        // Windows API FormatMessage lets you format a message string given an errorcode. 
+        /// <summary>
+        ///     Returns a string message for the specified Win32 error code.
+        /// </summary>
         internal static string GetMessage(int errorCode)
         {
             return GetMessage(IntPtr.Zero, errorCode);
@@ -74,8 +78,7 @@ internal partial class Interop
                 while (i > 0)
                 {
                     char ch = sb[i - 1];
-                    if (ch > 32 && ch != '.')
-                        break;
+                    if (ch > 32 && ch != '.') break;
                     i--;
                 }
                 errorMsg = sb.ToString(0, i);
@@ -91,5 +94,23 @@ internal partial class Interop
 
             return true;
         }
+
+        [DllImport(Interop.Libraries.Kernel32, CharSet = System.Runtime.InteropServices.CharSet.Auto, SetLastError = true, BestFitMapping = true)]
+        public static unsafe extern int FormatMessage(int dwFlags, SafeLibraryHandle lpSource, uint dwMessageId,
+    int dwLanguageId, StringBuilder lpBuffer, int nSize, IntPtr[] arguments);
+
+        // Windows API FormatMessage lets you format a message string given an errorcode.
+        // Unlike other APIs this API does not support a way to query it for the total message size.
+        //
+        // So the API can only be used in one of these two ways.
+        // a. You pass a buffer of appropriate size and get the resource.
+        // b. Windows creates a buffer and passes the address back and the onus of releasing the buffer lies on the caller.
+        //
+        // Since the error code is coming from the user, it is not possible to know the size in advance.
+        // Unfortunately we can't use option b. since the buffer can only be freed using LocalFree and it is a private API on onecore.
+        // Also, using option b is ugly for the managed code and could cause memory leak in situations where freeing is unsuccessful.
+        // 
+        // As a result we use the following approach.
+        // We initially call the API with a buffer size of 256 and then gradually increase the size in case of failure until we reach the maximum allowed limit of 65K.
     }
 }
