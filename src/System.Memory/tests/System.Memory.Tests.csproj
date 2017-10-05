@@ -88,7 +88,7 @@
     <Compile Include="Memory\ToArray.cs" />
     <Compile Include="Memory\TryGetArray.cs" />
   </ItemGroup>
-  <ItemGroup>
+    <ItemGroup>
     <Compile Include="ReadOnlyMemory\CtorArray.cs" />
     <Compile Include="ReadOnlyMemory\CtorArrayIntInt.cs" />
     <Compile Include="ReadOnlyMemory\DangerousTryGetArray.cs" />
