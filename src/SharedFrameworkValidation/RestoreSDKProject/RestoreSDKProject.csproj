@@ -57,7 +57,7 @@
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(CoreFxPackageVersion)" />
     <PackageReference Include="System.ValueTuple" Version="$(CoreFxPackageVersion)" />
   </ItemGroup>
-  
+
   <Target Name="BinPlaceMetaPackageRef" BeforeTargets="CoreCompile">
     <Copy SourceFiles="%(ReferencePath.Identity)" DestinationFolder="$(_MetaPackageDestinationFolder)" />
   </Target>
