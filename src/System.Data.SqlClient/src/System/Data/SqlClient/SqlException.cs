@@ -16,6 +16,8 @@ using System.Text; // StringBuilder
 
 namespace System.Data.SqlClient
 {
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed partial class SqlException : System.Data.Common.DbException
     {
         private const string OriginalClientConnectionIdKey = "OriginalClientConnectionId";
@@ -32,9 +34,24 @@ namespace System.Data.SqlClient
             _clientConnectionId = conId;
         }
 
+        private SqlException(SerializationInfo si, StreamingContext sc) : base(si, sc) 
+        {
+            HResult = HResults.SqlException;
+            foreach (SerializationEntry siEntry in si) 
+            {
+                if ("ClientConnectionId" == siEntry.Name) 
+                {
+                    _clientConnectionId = (Guid)siEntry.Value;
+                    break;
+                }
+            }
+        }
+
         public override void GetObjectData(SerializationInfo si, StreamingContext context)
         {
             base.GetObjectData(si, context);
+            si.AddValue("Errors", null, typeof(SqlErrorCollection));
+            si.AddValue("ClientConnectionId", _clientConnectionId, typeof(Guid));
         }
 
         // runtime will call even if private...

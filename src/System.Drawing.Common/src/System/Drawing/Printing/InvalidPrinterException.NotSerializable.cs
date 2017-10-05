@@ -10,7 +10,13 @@ namespace System.Drawing.Printing
     {
         protected InvalidPrinterException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            throw new PlatformNotSupportedException();
+            // Ignoring not deserializable input
+        }
+
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+            info.AddValue("settings", null);
         }
     }
 }

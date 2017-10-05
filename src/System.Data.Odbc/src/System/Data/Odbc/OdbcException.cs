@@ -34,6 +34,12 @@ namespace System.Data.Odbc
             HResult = HResults.OdbcException;
         }
 
+        private OdbcException(SerializationInfo si, StreamingContext sc) : base(si, sc)
+        {
+            // Ignoring not deserializable input
+            HResult = HResults.OdbcException;
+        }
+
         public OdbcErrorCollection Errors
         {
             get
@@ -45,6 +51,8 @@ namespace System.Data.Odbc
         public override void GetObjectData(SerializationInfo si, StreamingContext context)
         {
             base.GetObjectData(si, context);
+            si.AddValue("odbcRetcode", (ODBC32.RetCode)100, typeof(ODBC32.RETCODE)); // NO DATA
+            si.AddValue("odbcErrors", null, typeof(OdbcErrorCollection));
         }
 
         // mdac bug 62559 - if we don't have it return nothing (empty string)
