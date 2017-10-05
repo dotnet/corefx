@@ -14,7 +14,6 @@ namespace System.Diagnostics
     [
     ToolboxItem(false),
     DesignTimeVisible(false),
-    Serializable,
     ]
     public sealed class EventLogEntry : Component, ISerializable
     {
@@ -381,6 +380,7 @@ namespace System.Diagnostics
 
             try
             {
+                eventKey = EventLog.GetEventLogRegKey(machineName, false);
                 return eventKey?.OpenSubKey(logName ?? "Application", /*writable*/false)?.OpenSubKey(source, /*writeable*/false);
             }
             finally

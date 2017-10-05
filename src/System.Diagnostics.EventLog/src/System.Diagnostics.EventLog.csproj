@@ -66,6 +66,8 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+    <Reference Include="Microsoft.Win32.Primitives" />
+    <Reference Include="Microsoft.Win32.Registry" />
     <Reference Include="System.Collections.Specialized" />
     <Reference Include="System.ComponentModel" />
     <Reference Include="System.ComponentModel.Primitives" />
@@ -74,19 +76,17 @@
     <Reference Include="System.Diagnostics.Process" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.TraceSource" />
+    <Reference Include="System.IO.FileSystem" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Security.Permissions" />
+    <Reference Include="System.Security.Principal.Windows" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.AccessControl" />
     <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Threading.ThreadPool" />
-    <Reference Include="System.IO.FileSystem" />
-    <Reference Include="System.Security.Principal.Windows" />
-    <Reference Include="Microsoft.Win32.Primitives" />
-    <Reference Include="Microsoft.Win32.Registry" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

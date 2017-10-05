@@ -14,10 +14,9 @@ namespace Microsoft.Win32
         public const int WAIT_OBJECT_0 = 0x00000000;
         public const int WAIT_TIMEOUT = 0x00000102;
         public const int WAIT_ABANDONED = 0x00000080;
-        public const int LOAD_LIBRARY_AS_DATAFILE = 0x00000002;
         public const int SEEK_READ = 0x2;
         public const int FORWARDS_READ = 0x4;
-        public const int BACKWARDS_READ = 0x8; 
+        public const int BACKWARDS_READ = 0x8;
         public const int ERROR_EVENTLOG_FILE_CHANGED = 1503;
         public const int ERROR_FILE_NOT_FOUND = 2;
     }

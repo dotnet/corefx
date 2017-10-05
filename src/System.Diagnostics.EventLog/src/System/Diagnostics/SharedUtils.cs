@@ -32,7 +32,7 @@ namespace System.Diagnostics
                     Object o = new Object();
                     Interlocked.CompareExchange(ref s_InternalSyncObject, o, null);
                 }
-                
+
                 return s_InternalSyncObject;
             }
         }
@@ -72,33 +72,13 @@ namespace System.Diagnostics
                     {
                         if (environment == UnknownEnvironment)
                         {
-                            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                            {
-                                if (Environment.OSVersion.Version.Major >= 5)
-                                    environment = W2kEnvironment;
-                                else
-                                    environment = NtEnvironment;
-                            }
-                            else
-                                environment = NonNtEnvironment;
+                            environment = W2kEnvironment;
                         }
                     }
                 }
 
                 return environment;
             }
-        }
-
-        internal static void CheckEnvironment()
-        {
-            if (CurrentEnvironment == NonNtEnvironment)
-                throw new PlatformNotSupportedException(SR.WinNTRequired);
-        }
-
-        internal static void CheckNtEnvironment()
-        {
-            if (CurrentEnvironment == NtEnvironment)
-                throw new PlatformNotSupportedException(SR.Win2000Required);
         }
 
         internal static void EnterMutex(string name, ref Mutex mutex)
@@ -179,8 +159,6 @@ namespace System.Diagnostics
             string dllDir = "";
             RegistryKey baseKey = null;
             RegistryKey complusReg = null;
-            RegistryPermission registryPermission = new RegistryPermission(PermissionState.Unrestricted);
-            registryPermission.Assert();
 
             try
             {
@@ -295,13 +273,8 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (complusReg != null)
-                    complusReg.Close();
-
-                if (baseKey != null)
-                    baseKey.Close();
-
-                RegistryPermission.RevertAssert();
+                complusReg?.Close();
+                baseKey?.Close();
             }
 
             return dllDir;

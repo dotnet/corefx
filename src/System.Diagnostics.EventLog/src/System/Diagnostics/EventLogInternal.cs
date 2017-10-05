@@ -10,7 +10,6 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security;
 using System.Security.Permissions;
 using System.Threading;
 using Microsoft.Win32;
@@ -126,12 +125,12 @@ namespace System.Diagnostics
         {
             //look out for invalid log names
             if (logName == null)
-                throw new ArgumentNullException("logName");
+                throw new ArgumentNullException(nameof(logName));
             if (!ValidLogName(logName, true))
                 throw new ArgumentException(SR.BadLogName);
 
             if (!SyntaxCheck.CheckMachineName(machineName))
-                throw new ArgumentException(SR.Format(SR.InvalidParameter, "machineName", machineName));
+                throw new ArgumentException(SR.Format(SR.InvalidParameter, nameof(machineName), machineName));
 
             this.machineName = machineName;
             this.logName = logName;
@@ -202,8 +201,6 @@ namespace System.Diagnostics
                 string currentMachineName = this.machineName;
                 if (GetLogName(currentMachineName) != null)
                 {
-                    //Check environment before looking at the registry
-                    SharedUtils.CheckEnvironment();
                     RegistryKey logkey = null;
 
                     try
@@ -226,8 +223,7 @@ namespace System.Diagnostics
                     }
                     finally
                     {
-                        if (logkey != null)
-                            logkey.Close();
+                        logkey?.Close();
                     }
                 }
 
@@ -258,8 +254,7 @@ namespace System.Diagnostics
         {
             get
             {
-                string currentMachineName = this.machineName;
-                return currentMachineName;
+                return this.machineName;
             }
         }
 
@@ -792,7 +787,7 @@ namespace System.Diagnostics
                     {
                         break;
                     }
-                    
+
                     error = 0;
                 }
                 entries[idx] = new EventLogEntry(buf, 0, this);
@@ -999,8 +994,7 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (lmkey != null)
-                    lmkey.Close();
+                lmkey?.Close();
             }
 
             return null;
@@ -1027,8 +1021,7 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (eventkey != null)
-                    eventkey.Close();
+                eventkey?.Close();
             }
 
             return logkey;
@@ -1049,8 +1042,7 @@ namespace System.Diagnostics
             }
             finally
             {
-                if (logkey != null)
-                    logkey.Close();
+                logkey?.Close();
             }
         }
 
@@ -1112,8 +1104,7 @@ namespace System.Diagnostics
 
             if (!EventLog.Exists(logname, currentMachineName))        // do not open non-existing Log [alexvec]
                 throw new InvalidOperationException(SR.Format(SR.LogDoesNotExists, logname, currentMachineName));
-            //Check environment before calling api
-            SharedUtils.CheckEnvironment();
+
             // Clean up cache variables.
             // The initilizing code is put here to guarantee, that first read of events
             // from log file will start by filling up the cache buffer.
@@ -1145,8 +1136,6 @@ namespace System.Diagnostics
             Debug.WriteLineIf(CompModSwitches.EventLog.TraceVerbose, "EventLog::OpenForWrite");
             if (sourceName == null || sourceName.Length == 0)
                 throw new ArgumentException(SR.NeedSourceToOpen);
-            //Check environment before calling api
-            SharedUtils.CheckEnvironment();
 
             SafeEventLogWriteHandle handle = SafeEventLogWriteHandle.RegisterEventSource(currentMachineName, sourceName);
             if (handle.IsInvalid)
@@ -1440,7 +1429,7 @@ namespace System.Diagnostics
                         strings[i] = String.Empty;
                 }
             }
-            
+
             InternalWriteEvent((uint)instance.InstanceId, (ushort)instance.CategoryId, instance.EntryType, strings, data, currentMachineName);
         }
 

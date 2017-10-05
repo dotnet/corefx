@@ -367,8 +367,6 @@ namespace System.Diagnostics
                 throw new ArgumentException(SR.NoLogName);
             if (!ValidLogName(logName, false))
                 throw new InvalidOperationException(SR.BadLogName);
-            //Check environment before even trying to play with the registry
-            SharedUtils.CheckEnvironment();
 
             RegistryKey eventlogkey = null;
 
@@ -442,8 +440,6 @@ namespace System.Diagnostics
             {
                 throw new ArgumentException(SR.Format(SR.InvalidParameter, nameof(machineName), machineName));
             }
-            //Check environment before looking at the registry
-            SharedUtils.CheckEnvironment();
 
             Mutex mutex = null;
             RuntimeHelpers.PrepareConstrainedRegions();
@@ -505,13 +501,10 @@ namespace System.Diagnostics
         public static bool Exists(string logName, string machineName)
         {
             if (!SyntaxCheck.CheckMachineName(machineName))
-                throw new ArgumentException(SR.Format(SR.InvalidParameterFormat, "machineName"));
+                throw new ArgumentException(SR.Format(SR.InvalidParameterFormat, nameof(machineName)));
 
             if (logName == null || logName.Length == 0)
                 return false;
-
-            //Check environment before looking at the registry
-            SharedUtils.CheckEnvironment();
 
             RegistryKey eventkey = null;
             RegistryKey logKey = null;
@@ -558,8 +551,6 @@ namespace System.Diagnostics
         {
             if (source != null && source.Length != 0)
             {
-                SharedUtils.CheckEnvironment();
-
                 RegistryKey eventkey = null;
                 try
                 {
@@ -652,8 +643,6 @@ namespace System.Diagnostics
             {
                 throw new ArgumentException(SR.Format(SR.InvalidParameter, nameof(machineName), machineName));
             }
-            //Check environment before looking at the registry
-            SharedUtils.CheckEnvironment();
 
             string[] logNames = new string[0];
 

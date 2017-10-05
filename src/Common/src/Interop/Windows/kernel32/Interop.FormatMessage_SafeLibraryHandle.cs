@@ -17,7 +17,7 @@ internal partial class Interop
         public const int FORMAT_MESSAGE_ARGUMENT_ARRAY = 0x00002000;
         public const int ERROR_INSUFFICIENT_BUFFER = 0x7A;
 
-        [DllImport(Libraries.Kernel32, CharSet = CharSet.Auto, SetLastError = true, BestFitMapping = true)]
+        [DllImport(Libraries.Kernel32, CharSet = CharSet.Unicode, SetLastError = true, BestFitMapping = true)]
         public static unsafe extern int FormatMessage(
             int dwFlags,
             SafeLibraryHandle lpSource,
