@@ -4,7 +4,6 @@
   <PropertyGroup>
     <AssemblyName>System.Runtime.Intrinsics.X86</AssemblyName>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <ProjectGuid>{7DBCB068-D920-4732-BAC2-6353205B745F}</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
