@@ -17,8 +17,7 @@ namespace System.Globalization.Tests
                 || (PlatformDetection.IsUbuntu && !PlatformDetection.IsUbuntu1404)
                 || PlatformDetection.IsFedora
                 || (PlatformDetection.IsDebian && !PlatformDetection.IsDebian8)
-                || PlatformDetection.IsRedHat69
-                || PlatformDetection.IsCentOS69
+                || PlatformDetection.IsRedHatFamily69
                )
             {
                 return new int[] { 3 };

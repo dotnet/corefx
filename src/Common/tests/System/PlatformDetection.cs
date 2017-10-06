@@ -158,11 +158,12 @@ namespace System
         public static bool IsWindowsSubsystemForLinux => m_isWindowsSubsystemForLinux.Value;
         public static bool IsNotWindowsSubsystemForLinux => !IsWindowsSubsystemForLinux;
 
-        public static bool IsNotFedoraOrRedHatOrCentos => !IsDistroAndVersion("fedora") && !IsDistroAndVersion("rhel") && !IsDistroAndVersion("centos");
+        public static bool IsNotFedoraOrRedHatFamily => !IsDistroAndVersion("fedora") && !IsRedHatFamily;
 
         public static bool IsFedora => IsDistroAndVersion("fedora");
-        public static bool IsRedHat69 => IsDistroAndVersion("rhel", "6.9") || IsDistroAndVersion("rhl", "6.9");
-        public static bool IsCentOS69 => IsDistroAndVersion("centos", "6.9");
+        public static bool IsRedHatFamily => IsRedHatFamilyAndVersion();
+        public static bool IsRedHatFamily7 => IsRedHatFamilyAndVersion("7");
+        public static bool IsRedHatFamily69 => IsRedHatFamilyAndVersion("6.9");
 
         private static bool GetIsWindowsSubsystemForLinux()
         {
@@ -188,7 +189,6 @@ namespace System
         public static bool IsDebian => IsDistroAndVersion("debian");
         public static bool IsDebian8 => IsDistroAndVersion("debian", "8");
         public static bool IsUbuntu1404 => IsDistroAndVersion("ubuntu", "14.04");
-        public static bool IsCentos7 => IsDistroAndVersion("centos", "7");
 
         private static readonly Version s_osxProductVersion = GetOSXProductVersion();
  
@@ -258,6 +258,20 @@ namespace System
             {
                 IdVersionPair v = ParseOsReleaseFile();
                 if (v.Id == distroId && (versionId == null || v.VersionId == versionId))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsRedHatFamilyAndVersion(string versionId = null)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                IdVersionPair v = ParseOsReleaseFile();
+                if ((v.Id == "rhl" || v.Id == "rhel" || v.Id == "centos") && (versionId == null || v.VersionId == versionId))
                 {
                     return true;
                 }
