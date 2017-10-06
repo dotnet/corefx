@@ -79,7 +79,18 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "type"))
                     {
-                        types.Add(value);
+                        if (value.Contains(";"))
+                        {
+                            var typelist = value.Split(';');
+                            foreach (var type in typelist)
+                            {
+                                types.Add(type);
+                            }
+                        }
+                        else if(value != string.Empty)
+                        {
+                            types.Add(value);
+                        }
                     }
                     else if (ArgumentMatch(arg, "assembly"))
                     {
@@ -384,7 +395,16 @@ namespace Microsoft.XmlSerializer.Generator
         private static Assembly LoadAssembly(string assemblyName, bool throwOnFail)
         {
             Assembly assembly = null;
-            string path = Path.GetFullPath(assemblyName);
+            string path;
+            if(Path.IsPathRooted(assemblyName))
+            {
+                path = assemblyName;
+            }
+            else
+            {
+                path = Path.GetFullPath(assemblyName);
+            }
+
             assembly = Assembly.LoadFile(path);
             if (assembly == null)
             {
