@@ -756,6 +756,13 @@ namespace System.Xml.Serialization
             TempAssembly tempAssembly = null;
             if (assembly == null)
             {
+                if (Mode == SerializationMode.PreGenOnly)
+                {
+                    AssemblyName name = type.Assembly.GetName();
+                    string serializerName = Compiler.GetTempAssemblyName(name, null);
+                    throw new FileLoadException(SR.Format(SR.FailLoadAssemblyUnderPregenMode, serializerName));
+                }
+
                 if (XmlMapping.IsShallow(mappings))
                 {
                     return Array.Empty<XmlSerializer>();

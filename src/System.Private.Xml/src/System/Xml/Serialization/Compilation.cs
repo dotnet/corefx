@@ -192,6 +192,11 @@ namespace System.Xml.Serialization
                 }
                 if (serializer == null)
                 {
+                    if (XmlSerializer.Mode == SerializationMode.PreGenOnly)
+                    {
+                        throw new Exception(SR.Format(SR.FailLoadAssemblyUnderPregenMode, serializerName));
+                    }
+
                     return null;
                 }
             }
