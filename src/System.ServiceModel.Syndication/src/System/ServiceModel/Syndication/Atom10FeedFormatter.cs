@@ -67,7 +67,7 @@ namespace System.ServiceModel.Syndication
             }
             if (!typeof(SyndicationFeed).IsAssignableFrom(feedTypeToCreate))
             {
-                throw new ArgumentException(string.Format(SR.InvalidObjectTypePassed, nameof(feedTypeToCreate), nameof(SyndicationFeed)));
+                throw new ArgumentException(SR.Format(SR.InvalidObjectTypePassed, nameof(feedTypeToCreate), nameof(SyndicationFeed)));
             }
             _maxExtensionSize = int.MaxValue;
             _preserveAttributeExtensions = _preserveElementExtensions = true;
@@ -122,7 +122,7 @@ namespace System.ServiceModel.Syndication
         {
             if (!CanRead(reader))
             {
-                throw new XmlException(string.Format(SR.UnknownFeedXml, reader.LocalName, reader.NamespaceURI));
+                throw new XmlException(SR.Format(SR.UnknownFeedXml, reader.LocalName, reader.NamespaceURI));
             }
 
             SetFeed(CreateFeedInstance());
@@ -625,7 +625,7 @@ namespace System.ServiceModel.Syndication
                     kind = TextSyndicationContentKind.XHtml;
                     break;
 
-                    throw new XmlException(string.Format(SR.Atom10SpecRequiresTextConstruct, context, type));
+                    throw new XmlException(SR.Format(SR.Atom10SpecRequiresTextConstruct, context, type));
             }
 
             Dictionary<XmlQualifiedName, string> attrs = null;

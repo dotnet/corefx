@@ -509,7 +509,7 @@ namespace System.ServiceModel.Syndication
                 IXmlLineInfo lineInfo = reader as IXmlLineInfo;
                 if (lineInfo != null && lineInfo.HasLineInfo())
                 {
-                    s += " " + string.Format(SR.XmlLineInfo, lineInfo.LineNumber, lineInfo.LinePosition);
+                    s += " " + SR.Format(SR.XmlLineInfo, lineInfo.LineNumber, lineInfo.LinePosition);
                 }
 
                 throw new XmlException(s);
@@ -530,19 +530,19 @@ namespace System.ServiceModel.Syndication
                 switch (reader.NodeType)
                 {
                     case XmlNodeType.Element:
-                        return string.Format(SR.XmlFoundElement, GetName(reader.Prefix, reader.LocalName), reader.NamespaceURI);
+                        return SR.Format(SR.XmlFoundElement, GetName(reader.Prefix, reader.LocalName), reader.NamespaceURI);
                     case XmlNodeType.EndElement:
-                        return string.Format(SR.XmlFoundEndElement, GetName(reader.Prefix, reader.LocalName), reader.NamespaceURI);
+                        return SR.Format(SR.XmlFoundEndElement, GetName(reader.Prefix, reader.LocalName), reader.NamespaceURI);
                     case XmlNodeType.Text:
                     case XmlNodeType.Whitespace:
                     case XmlNodeType.SignificantWhitespace:
-                        return string.Format(SR.XmlFoundText, reader.Value);
+                        return SR.Format(SR.XmlFoundText, reader.Value);
                     case XmlNodeType.Comment:
-                        return string.Format(SR.XmlFoundComment, reader.Value);
+                        return SR.Format(SR.XmlFoundComment, reader.Value);
                     case XmlNodeType.CDATA:
-                        return string.Format(SR.XmlFoundCData, reader.Value);
+                        return SR.Format(SR.XmlFoundCData, reader.Value);
                 }
-                return string.Format(SR.XmlFoundNodeType, reader.NodeType);
+                return SR.Format(SR.XmlFoundNodeType, reader.NodeType);
             }
 
             static public void ThrowStartElementExpected(XmlDictionaryReader reader)

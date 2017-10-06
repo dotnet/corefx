@@ -35,7 +35,7 @@ namespace System.ServiceModel.Syndication
 
             if (!typeof(InlineCategoriesDocument).IsAssignableFrom(inlineDocumentType))
             {
-                throw new ArgumentException(string.Format(SR.InvalidObjectTypePassed, nameof(inlineDocumentType), nameof(InlineCategoriesDocument)));
+                throw new ArgumentException(SR.Format(SR.InvalidObjectTypePassed, nameof(inlineDocumentType), nameof(InlineCategoriesDocument)));
             }
 
             if (referencedDocumentType == null)
@@ -45,7 +45,7 @@ namespace System.ServiceModel.Syndication
 
             if (!typeof(ReferencedCategoriesDocument).IsAssignableFrom(referencedDocumentType))
             {
-                throw new ArgumentException(string.Format(SR.InvalidObjectTypePassed, nameof(referencedDocumentType), nameof(ReferencedCategoriesDocument)));
+                throw new ArgumentException(SR.Format(SR.InvalidObjectTypePassed, nameof(referencedDocumentType), nameof(ReferencedCategoriesDocument)));
             }
 
             _maxExtensionSize = int.MaxValue;
@@ -124,7 +124,7 @@ namespace System.ServiceModel.Syndication
 
             if (!await CanReadAsync(reader))
             {
-                throw new XmlException(string.Format(SR.UnknownDocumentXml, reader.LocalName, reader.NamespaceURI));
+                throw new XmlException(SR.Format(SR.UnknownDocumentXml, reader.LocalName, reader.NamespaceURI));
             }
 
             await ReadDocumentAsync(XmlReaderWrapper.CreateFromReader(reader));

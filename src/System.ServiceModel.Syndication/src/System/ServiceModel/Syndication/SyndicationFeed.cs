@@ -380,7 +380,7 @@ namespace System.ServiceModel.Syndication
                 await rssSerializer.ReadFromAsync(reader, new CancellationToken());
                 return rssSerializer.Feed;
             }
-            throw new XmlException(string.Format(SR.UnknownFeedXml, reader.LocalName, reader.NamespaceURI));
+            throw new XmlException(SR.Format(SR.UnknownFeedXml, reader.LocalName, reader.NamespaceURI));
         }
 
         //=================================
@@ -419,7 +419,7 @@ namespace System.ServiceModel.Syndication
                 return rssSerializer.Feed as TSyndicationFeed;
             }
 
-            throw new XmlException(string.Format(SR.UnknownFeedXml, reader.LocalName, reader.NamespaceURI));
+            throw new XmlException(SR.Format(SR.UnknownFeedXml, reader.LocalName, reader.NamespaceURI));
         }
 
         public virtual SyndicationFeed Clone(bool cloneItems)

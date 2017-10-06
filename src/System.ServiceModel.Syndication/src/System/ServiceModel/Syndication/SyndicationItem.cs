@@ -218,7 +218,7 @@ namespace System.ServiceModel.Syndication
                 return rssSerializer.Item as TSyndicationItem;
             }
 
-            throw new XmlException(string.Format(SR.UnknownItemXml, reader.LocalName, reader.NamespaceURI));
+            throw new XmlException(SR.Format(SR.UnknownItemXml, reader.LocalName, reader.NamespaceURI));
         }
 
 

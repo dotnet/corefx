@@ -89,7 +89,7 @@ namespace System.ServiceModel.Syndication
             }
             if (!typeof(SyndicationFeed).IsAssignableFrom(feedTypeToCreate))
             {
-                throw new ArgumentException(string.Format(SR.InvalidObjectTypePassed, nameof(feedTypeToCreate), nameof(SyndicationFeed)));
+                throw new ArgumentException(SR.Format(SR.InvalidObjectTypePassed, nameof(feedTypeToCreate), nameof(SyndicationFeed)));
             }
             _serializeExtensionsAsAtom = true;
             _maxExtensionSize = int.MaxValue;
@@ -161,7 +161,7 @@ namespace System.ServiceModel.Syndication
         {
             if (!CanRead(reader))
             {
-                throw new XmlException(string.Format(SR.UnknownFeedXml, reader.LocalName, reader.NamespaceURI));
+                throw new XmlException(SR.Format(SR.UnknownFeedXml, reader.LocalName, reader.NamespaceURI));
             }
 
             SetFeed(CreateFeedInstance());
@@ -919,7 +919,7 @@ namespace System.ServiceModel.Syndication
             string version = reader.GetAttribute(Rss20Constants.VersionTag, Rss20Constants.Rss20Namespace);
             if (version != Rss20Constants.Version)
             {
-                throw new NotSupportedException(FeedUtils.AddLineInfo(reader, (string.Format(SR.UnsupportedRssVersion, version))));
+                throw new NotSupportedException(FeedUtils.AddLineInfo(reader, (SR.Format(SR.UnsupportedRssVersion, version))));
             }
 
             if (reader.AttributeCount > 1)
