@@ -162,6 +162,7 @@ namespace System
 
         public static bool IsFedora => IsDistroAndVersion("fedora");
         public static bool IsRedHat69 => IsDistroAndVersion("rhel", "6.9") || IsDistroAndVersion("rhl", "6.9");
+        public static bool IsCentOS69 => IsDistroAndVersion("centos", "6.9");
 
         private static bool GetIsWindowsSubsystemForLinux()
         {

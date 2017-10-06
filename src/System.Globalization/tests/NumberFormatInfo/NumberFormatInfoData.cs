@@ -18,6 +18,7 @@ namespace System.Globalization.Tests
                 || PlatformDetection.IsFedora
                 || (PlatformDetection.IsDebian && !PlatformDetection.IsDebian8)
                 || PlatformDetection.IsRedHat69
+                || PlatformDetection.IsCentOS69
                )
             {
                 return new int[] { 3 };
