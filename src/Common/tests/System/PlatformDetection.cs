@@ -164,6 +164,7 @@ namespace System
         public static bool IsRedHatFamily => IsRedHatFamilyAndVersion();
         public static bool IsRedHatFamily7 => IsRedHatFamilyAndVersion("7");
         public static bool IsRedHatFamily69 => IsRedHatFamilyAndVersion("6.9");
+        public static bool IsNotRedHatFamily69 => !IsRedHatFamilyAndVersion("6.9");
 
         private static bool GetIsWindowsSubsystemForLinux()
         {
