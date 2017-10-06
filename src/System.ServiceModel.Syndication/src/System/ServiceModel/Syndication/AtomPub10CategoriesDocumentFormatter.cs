@@ -86,13 +86,11 @@ namespace System.ServiceModel.Syndication
                 throw new ArgumentNullException(nameof(reader));
             }
 
-            XmlReaderWrapper wrappedReader = XmlReaderWrapper.CreateFromReader(reader);
-            return wrappedReader.IsStartElementAsync(App10Constants.Categories, App10Constants.Namespace);
+            reader = XmlReaderWrapper.CreateFromReader(reader);
+            return reader.IsStartElementAsync(App10Constants.Categories, App10Constants.Namespace);
         }
 
-
-
-        private Task ReadXmlAsync(XmlReaderWrapper reader)
+        Task ReadXmlAsync(XmlReader reader)
         {
             if (reader == null)
             {
@@ -173,7 +171,7 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        private async Task ReadDocumentAsync(XmlReaderWrapper reader)
+        private async Task ReadDocumentAsync(XmlReader reader)
         {
             try
             {

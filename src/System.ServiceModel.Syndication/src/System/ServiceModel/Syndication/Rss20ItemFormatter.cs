@@ -12,7 +12,6 @@ namespace System.ServiceModel.Syndication
     using System.Xml.Schema;
     using System.Xml.Serialization;
 
-
     [XmlRoot(ElementName = Rss20Constants.ItemTag, Namespace = Rss20Constants.Rss20Namespace)]
     public class Rss20ItemFormatter : SyndicationItemFormatter
     {
@@ -153,7 +152,7 @@ namespace System.ServiceModel.Syndication
             return SyndicationItemFormatter.CreateItemInstance(_itemType);
         }
 
-        private Task ReadItemAsync(XmlReaderWrapper reader)
+        private Task ReadItemAsync(XmlReader reader)
         {
             SetItem(CreateItemInstance());
             return _feedSerializer.ReadItemFromAsync(XmlReaderWrapper.CreateFromReader(XmlDictionaryReader.CreateDictionaryReader(reader)), this.Item);

@@ -67,11 +67,11 @@ namespace System.ServiceModel.Syndication
                 throw new ArgumentNullException(nameof(reader));
             }
 
-            XmlReaderWrapper readerWrapper = XmlReaderWrapper.CreateFromReader(reader);
-            return readerWrapper.IsStartElementAsync(App10Constants.Service, App10Constants.Namespace);
+            reader = XmlReaderWrapper.CreateFromReader(reader);
+            return reader.IsStartElementAsync(App10Constants.Service, App10Constants.Namespace);
         }
 
-        private Task ReadXml(XmlReaderWrapper reader)
+        Task ReadXml(XmlReader reader)
         {
             if (reader == null)
             {
@@ -103,15 +103,15 @@ namespace System.ServiceModel.Syndication
                 throw new ArgumentNullException(nameof(reader));
             }
 
-            XmlReaderWrapper wrappedReader = XmlReaderWrapper.CreateFromReader(reader);
-            await wrappedReader.MoveToContentAsync();
+            reader = XmlReaderWrapper.CreateFromReader(reader);
+            await reader.MoveToContentAsync();
 
             if (!await CanReadAsync(reader))
             {
                 throw new XmlException(string.Format(SR.UnknownDocumentXml, reader.LocalName, reader.NamespaceURI));
             }
 
-            await ReadDocumentAsync(wrappedReader);
+            await ReadDocumentAsync(reader);
         }
 
         public override async Task WriteToAsync(XmlWriter writer)
@@ -133,7 +133,7 @@ namespace System.ServiceModel.Syndication
             await writer.WriteEndElementAsync();
         }
 
-        internal static async Task<CategoriesDocument> ReadCategories(XmlReaderWrapper reader, Uri baseUri, CreateInlineCategoriesDelegate inlineCategoriesFactory, CreateReferencedCategoriesDelegate referencedCategoriesFactory, string version, bool preserveElementExtensions, bool preserveAttributeExtensions, int maxExtensionSize)
+        internal static async Task<CategoriesDocument> ReadCategories(XmlReader reader, Uri baseUri, CreateInlineCategoriesDelegate inlineCategoriesFactory, CreateReferencedCategoriesDelegate referencedCategoriesFactory, string version, bool preserveElementExtensions, bool preserveAttributeExtensions, int maxExtensionSize)
         {
             string link = reader.GetAttribute(App10Constants.Href, string.Empty);
             if (string.IsNullOrEmpty(link))
@@ -149,8 +149,6 @@ namespace System.ServiceModel.Syndication
                 return referencedCategories;
             }
         }
-
-
 
         internal static async Task WriteCategoriesInnerXml(XmlWriter writer, CategoriesDocument categories, Uri baseUri, string version)
         {
@@ -187,7 +185,7 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        private static async Task ReadInlineCategoriesAsync(XmlReaderWrapper reader, InlineCategoriesDocument inlineCategories, Uri baseUri, string version, bool preserveElementExtensions, bool preserveAttributeExtensions, int _maxExtensionSize)
+        private static async Task ReadInlineCategoriesAsync(XmlReader reader, InlineCategoriesDocument inlineCategories, Uri baseUri, string version, bool preserveElementExtensions, bool preserveAttributeExtensions, int _maxExtensionSize)
         {
             inlineCategories.BaseUri = baseUri;
             if (reader.HasAttributes)
@@ -280,7 +278,7 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        private static async Task ReadReferencedCategoriesAsync(XmlReaderWrapper reader, ReferencedCategoriesDocument referencedCategories, Uri baseUri, Uri link, string version, bool preserveElementExtensions, bool preserveAttributeExtensions, int maxExtensionSize)
+        private static async Task ReadReferencedCategoriesAsync(XmlReader reader, ReferencedCategoriesDocument referencedCategories, Uri baseUri, Uri link, string version, bool preserveElementExtensions, bool preserveAttributeExtensions, int maxExtensionSize)
         {
             referencedCategories.BaseUri = baseUri;
             referencedCategories.Link = link;
@@ -408,7 +406,7 @@ namespace System.ServiceModel.Syndication
             writer.WriteAttributeString("xml", "lang", Atom10FeedFormatter.XmlNs, lang);
         }
 
-        private async Task<ResourceCollectionInfo> ReadCollection(XmlReaderWrapper reader, Workspace workspace)
+        private async Task<ResourceCollectionInfo> ReadCollection(XmlReader reader, Workspace workspace)
         {
             ResourceCollectionInfo result = CreateCollection(workspace);
             result.BaseUri = workspace.BaseUri;
@@ -483,14 +481,9 @@ namespace System.ServiceModel.Syndication
                     {
                         if (_preserveElementExtensions)
                         {
-                            if (buffer == null)
-                            {
-                                buffer = new XmlBuffer(_maxExtensionSize);
-                                extWriter = buffer.OpenSection(XmlDictionaryReaderQuotas.Max);
-                                extWriter.WriteStartElement(Rss20Constants.ExtensionWrapperTag);
-                            }
-
-                            await XmlReaderWrapper.WriteNodeAsync(extWriter, reader, false);
+                            var tuple = await SyndicationFeedFormatter.CreateBufferIfRequiredAndWriteNodeAsync(buffer, extWriter, reader, _maxExtensionSize);
+                            buffer = tuple.Item1;
+                            extWriter = tuple.Item2;
                         }
                         else
                         {
@@ -513,7 +506,7 @@ namespace System.ServiceModel.Syndication
             return result;
         }
 
-        private async Task ReadDocumentAsync(XmlReaderWrapper reader)
+        private async Task ReadDocumentAsync(XmlReader reader)
         {
             ServiceDocument result = CreateDocumentInstance();
             try
@@ -606,7 +599,7 @@ namespace System.ServiceModel.Syndication
             SetDocument(result);
         }
 
-        private async Task<Workspace> ReadWorkspace(XmlReaderWrapper reader, ServiceDocument document)
+        private async Task<Workspace> ReadWorkspace(XmlReader reader, ServiceDocument document)
         {
             Workspace result = CreateWorkspace(document);
             result.BaseUri = document.BaseUri;

@@ -405,7 +405,7 @@ namespace System.ServiceModel.Syndication
             }
             else
             {
-                await extWriter.WriteNodeAsync(reader, false);
+                await extWriter.InternalWriteNodeAsync(reader, false);
             }
 
             return Tuple.Create(buffer, extWriter);
@@ -477,7 +477,7 @@ namespace System.ServiceModel.Syndication
             person.LoadElementExtensions(buffer);
         }
 
-        internal static async Task MoveToStartElementAsync(XmlReaderWrapper reader)
+        internal static async Task MoveToStartElementAsync(XmlReader reader)
         {
             if (!await reader.IsStartElementAsync())
             {
