@@ -29,20 +29,14 @@
     <Compile Include="System\Collections\Specialized\DictionaryWrapper.cs" />
     <Compile Include="System\Diagnostics\AsyncStreamReader.cs" />
     <Compile Include="System\Diagnostics\DataReceivedEventArgs.cs" />
-    <Compile Include="System\Diagnostics\Process.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="System\Diagnostics\Process.cs" />
     <Compile Include="System\Diagnostics\ProcessInfo.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.cs" />
-    <Compile Include="System\Diagnostics\ProcessModule.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="System\Diagnostics\ProcessModule.cs" />
     <Compile Include="System\Diagnostics\ProcessModuleCollection.cs" />
     <Compile Include="System\Diagnostics\ProcessPriorityClass.cs" />
     <Compile Include="System\Diagnostics\ProcessStartInfo.cs" />
-    <Compile Include="System\Diagnostics\ProcessThread.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="System\Diagnostics\ProcessThread.cs" />
     <Compile Include="System\Diagnostics\ProcessThreadCollection.cs" />
     <Compile Include="System\Diagnostics\ProcessWindowStyle.cs" />
     <Compile Include="System\Diagnostics\ThreadInfo.cs" />
@@ -393,9 +387,7 @@
     <Compile Include="$(CommonPath)\Interop\Windows\shell32\Interop.ShellExecuteExW.cs">
       <Link>Common\Interop\Windows\shell32\Interop.ShellExecuteExW.cs</Link>
     </Compile>
-    <Compile Include="System\Diagnostics\Process.Win32.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="System\Diagnostics\Process.Win32.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.Win32.cs" />
     <Compile Include="System\Diagnostics\ProcessStartInfo.Win32.cs" />
   </ItemGroup>
