@@ -2772,6 +2772,8 @@ namespace System
         public virtual bool IsEnum { get { throw null; } }
         public bool IsExplicitLayout { get { throw null; } }
         public virtual bool IsGenericParameter { get { throw null; } }
+        public virtual bool IsGenericTypeParameter { get { throw null; } }
+        public virtual bool IsGenericMethodParameter { get { throw null; } }
         public virtual bool IsGenericType { get { throw null; } }
         public virtual bool IsGenericTypeDefinition { get { throw null; } }
         public bool IsImport { get { throw null; } }
@@ -3841,7 +3843,8 @@ namespace System.Buffers
         public MemoryHandle(IRetainable owner, void* pinnedPointer = null,  System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle))  { throw null; }
         [System.CLSCompliantAttribute(false)]
         public void* PinnedPointer { get { throw null; } }
-        public void Dispose()  { throw null; }
+        internal void AddOffset(int offset) { throw null; }
+        public void Dispose() { throw null; }
     }
 
     public interface IRetainable 
@@ -6364,6 +6367,8 @@ namespace System.Reflection
         protected override bool IsArrayImpl() { throw null; }
         protected override bool IsPrimitiveImpl() { throw null; }
         protected override bool IsByRefImpl() { throw null; }
+        public override bool IsGenericTypeParameter { get { throw null; } }
+        public override bool IsGenericMethodParameter { get { throw null; } }
         protected override bool IsPointerImpl() { throw null; }
         protected override bool IsValueTypeImpl() { throw null; }
         protected override bool IsCOMObjectImpl() { throw null; }
