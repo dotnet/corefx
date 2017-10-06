@@ -156,7 +156,7 @@ namespace System.ServiceModel.Syndication
             }
             if (feedAlternateLink != null)
             {
-                this.Links.Add(SyndicationLink.CreateAlternateLink(feedAlternateLink));
+                Links.Add(SyndicationLink.CreateAlternateLink(feedAlternateLink));
             }
             _id = id;
             _lastUpdatedTime = lastUpdatedTime;

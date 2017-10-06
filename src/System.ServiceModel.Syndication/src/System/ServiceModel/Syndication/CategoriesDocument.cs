@@ -83,7 +83,7 @@ namespace System.ServiceModel.Syndication
 
         public void Save(XmlWriter writer)
         {
-            this.GetFormatter().WriteTo(writer);
+            GetFormatter().WriteTo(writer);
         }
 
         protected internal virtual bool TryParseAttribute(string name, string ns, string value, string version)

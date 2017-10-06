@@ -107,7 +107,7 @@ namespace System.ServiceModel.Syndication
                 throw new ArgumentNullException(nameof(writer));
             }
 
-            if (this.Document == null)
+            if (Document == null)
             {
                 throw new InvalidOperationException(SR.DocumentFormatterDoesNotHaveDocument);
             }
@@ -137,7 +137,7 @@ namespace System.ServiceModel.Syndication
                 throw new ArgumentNullException(nameof(writer));
             }
 
-            if (this.Document == null)
+            if (Document == null)
             {
                 throw new InvalidOperationException(SR.DocumentFormatterDoesNotHaveDocument);
             }
@@ -179,14 +179,14 @@ namespace System.ServiceModel.Syndication
                 SetDocument(await AtomPub10ServiceDocumentFormatter.ReadCategories(reader, null,
                     delegate ()
                     {
-                        return this.CreateInlineCategoriesDocument();
+                        return CreateInlineCategoriesDocument();
                     },
 
                     delegate ()
                     {
-                        return this.CreateReferencedCategoriesDocument();
+                        return CreateReferencedCategoriesDocument();
                     },
-                    this.Version,
+                    Version,
                     _preserveElementExtensions,
                     _preserveAttributeExtensions,
                     _maxExtensionSize));
@@ -205,7 +205,7 @@ namespace System.ServiceModel.Syndication
         {
             // declare the atom10 namespace upfront for compactness
             writer.WriteAttributeString(Atom10Constants.Atom10Prefix, Atom10FeedFormatter.XmlNsNs, Atom10Constants.Atom10Namespace);
-            return AtomPub10ServiceDocumentFormatter.WriteCategoriesInnerXml(writer, this.Document, null, this.Version);
+            return AtomPub10ServiceDocumentFormatter.WriteCategoriesInnerXml(writer, Document, null, Version);
         }
     }
 }

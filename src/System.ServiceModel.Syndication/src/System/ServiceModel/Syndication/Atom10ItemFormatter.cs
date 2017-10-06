@@ -132,17 +132,17 @@ namespace System.ServiceModel.Syndication
         private Task ReadItemAsync(XmlReader reader)
         {
             SetItem(CreateItemInstance());
-            return _feedSerializer.ReadItemFromAsync(XmlReaderWrapper.CreateFromReader(XmlDictionaryReader.CreateDictionaryReader(reader)), this.Item);
+            return _feedSerializer.ReadItemFromAsync(XmlReaderWrapper.CreateFromReader(XmlDictionaryReader.CreateDictionaryReader(reader)), Item);
         }
 
         private Task WriteItemAsync(XmlWriter writer)
         {
-            if (this.Item == null)
+            if (Item == null)
             {
                 throw new InvalidOperationException(SR.ItemFormatterDoesNotHaveItem);
             }
             XmlDictionaryWriter w = XmlDictionaryWriter.CreateDictionaryWriter(writer);
-            return _feedSerializer.WriteItemContentsAsync(w, this.Item);
+            return _feedSerializer.WriteItemContentsAsync(w, Item);
         }
     }
 

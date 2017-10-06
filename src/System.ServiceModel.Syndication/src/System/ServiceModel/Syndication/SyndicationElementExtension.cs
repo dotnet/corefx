@@ -166,7 +166,7 @@ namespace System.ServiceModel.Syndication
 
         public async Task<XmlReader> GetReaderAsync()
         {
-            await this.EnsureBuffer();
+            await EnsureBuffer();
             XmlReader reader = XmlReaderWrapper.CreateFromReader(_buffer.GetReader(0));
             int index = 0;
             reader.ReadStartElement(Rss20Constants.ExtensionWrapperTag);
@@ -212,7 +212,7 @@ namespace System.ServiceModel.Syndication
                 using (XmlDictionaryWriter writer = _buffer.OpenSection(XmlDictionaryReaderQuotas.Max))
                 {
                     writer.WriteStartElement(Rss20Constants.ExtensionWrapperTag);
-                    await this.WriteToAsync(writer);
+                    await WriteToAsync(writer);
                     writer.WriteEndElement();
                 }
                 _buffer.CloseSection();
@@ -325,7 +325,7 @@ namespace System.ServiceModel.Syndication
                 {
                     using (XmlWriter writer = XmlWriter.Create(stream))
                     {
-                        this.WriteToAsync(writer);
+                        WriteToAsync(writer);
                     }
 
                     stream.Seek(0, SeekOrigin.Begin);

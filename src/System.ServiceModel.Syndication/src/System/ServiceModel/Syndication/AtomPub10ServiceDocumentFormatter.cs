@@ -88,7 +88,7 @@ namespace System.ServiceModel.Syndication
                 throw new ArgumentNullException(nameof(writer));
             }
 
-            if (this.Document == null)
+            if (Document == null)
             {
                 throw new InvalidOperationException(SR.DocumentFormatterDoesNotHaveDocument);
             }
@@ -121,7 +121,7 @@ namespace System.ServiceModel.Syndication
                 throw new ArgumentNullException(nameof(writer));
             }
 
-            if (this.Document == null)
+            if (Document == null)
             {
                 throw new InvalidOperationException(SR.DocumentFormatterDoesNotHaveDocument);
             }
@@ -432,7 +432,7 @@ namespace System.ServiceModel.Syndication
                         }
 
                         string val = await reader.GetValueAsync();
-                        if (!TryParseAttribute(name, ns, val, result, this.Version))
+                        if (!TryParseAttribute(name, ns, val, result, Version))
                         {
                             if (_preserveAttributeExtensions)
                             {
@@ -468,7 +468,7 @@ namespace System.ServiceModel.Syndication
                             {
                                 return CreateReferencedCategories(result);
                             },
-                            this.Version,
+                            Version,
                             _preserveElementExtensions,
                             _preserveAttributeExtensions,
                             _maxExtensionSize));
@@ -477,7 +477,7 @@ namespace System.ServiceModel.Syndication
                     {
                         result.Accepts.Add(reader.ReadElementString());
                     }
-                    else if (!TryParseElement(reader, result, this.Version))
+                    else if (!TryParseElement(reader, result, Version))
                     {
                         if (_preserveElementExtensions)
                         {
@@ -535,7 +535,7 @@ namespace System.ServiceModel.Syndication
                             }
 
                             string val = await reader.GetValueAsync();
-                            if (!TryParseAttribute(name, ns, val, result, this.Version))
+                            if (!TryParseAttribute(name, ns, val, result, Version))
                             {
                                 if (_preserveAttributeExtensions)
                                 {
@@ -559,7 +559,7 @@ namespace System.ServiceModel.Syndication
                             {
                                 result.Workspaces.Add(ReadWorkspace(reader, result).Result);
                             }
-                            else if (!TryParseElement(reader, result, this.Version))
+                            else if (!TryParseElement(reader, result, Version))
                             {
                                 if (_preserveElementExtensions)
                                 {
@@ -621,7 +621,7 @@ namespace System.ServiceModel.Syndication
                         }
 
                         string val = await reader.GetValueAsync();
-                        if (!TryParseAttribute(name, ns, val, result, this.Version))
+                        if (!TryParseAttribute(name, ns, val, result, Version))
                         {
                             if (_preserveAttributeExtensions)
                             {
@@ -647,7 +647,7 @@ namespace System.ServiceModel.Syndication
                     {
                         result.Collections.Add(ReadCollection(reader, result).Result);
                     }
-                    else if (!TryParseElement(reader, result, this.Version))
+                    else if (!TryParseElement(reader, result, Version))
                     {
                         if (_preserveElementExtensions)
                         {
@@ -691,7 +691,7 @@ namespace System.ServiceModel.Syndication
                 await writer.WriteAttributeStringAsync(App10Constants.Href, FeedUtils.GetUriString(collection.Link));
             }
 
-            await WriteAttributeExtensionsAsync(writer, collection, this.Version);
+            await WriteAttributeExtensionsAsync(writer, collection, Version);
             if (collection.Title != null)
             {
                 await collection.Title.WriteToAsync(writer, Atom10Constants.TitleTag, Atom10Constants.Atom10Namespace);
@@ -704,10 +704,10 @@ namespace System.ServiceModel.Syndication
 
             for (int i = 0; i < collection.Categories.Count; ++i)
             {
-                await WriteCategoriesAsync(writer, collection.Categories[i], baseUri, this.Version);
+                await WriteCategoriesAsync(writer, collection.Categories[i], baseUri, Version);
             }
 
-            await WriteElementExtensionsAsync(writer, collection, this.Version);
+            await WriteElementExtensionsAsync(writer, collection, Version);
             await writer.WriteEndElementAsync();
         }
 
@@ -715,25 +715,25 @@ namespace System.ServiceModel.Syndication
         {
             // declare the atom10 namespace upfront for compactness
             await writer.WriteAttributeStringAsync(Atom10Constants.Atom10Prefix, Atom10FeedFormatter.XmlNsNs, Atom10Constants.Atom10Namespace);
-            if (!string.IsNullOrEmpty(this.Document.Language))
+            if (!string.IsNullOrEmpty(Document.Language))
             {
-                WriteXmlLang(writer, this.Document.Language);
+                WriteXmlLang(writer, Document.Language);
             }
 
-            Uri baseUri = this.Document.BaseUri;
+            Uri baseUri = Document.BaseUri;
             if (baseUri != null)
             {
                 WriteXmlBase(writer, baseUri);
             }
 
-            WriteAttributeExtensions(writer, this.Document, this.Version);
+            WriteAttributeExtensions(writer, Document, Version);
 
-            for (int i = 0; i < this.Document.Workspaces.Count; ++i)
+            for (int i = 0; i < Document.Workspaces.Count; ++i)
             {
-                await WriteWorkspaceAsync(writer, this.Document.Workspaces[i], baseUri);
+                await WriteWorkspaceAsync(writer, Document.Workspaces[i], baseUri);
             }
 
-            await WriteElementExtensionsAsync(writer, this.Document, this.Version);
+            await WriteElementExtensionsAsync(writer, Document, Version);
         }
 
         private async Task WriteWorkspaceAsync(XmlWriter writer, Workspace workspace, Uri baseUri)
@@ -746,7 +746,7 @@ namespace System.ServiceModel.Syndication
                 WriteXmlBase(writer, baseUriToWrite);
             }
 
-            WriteAttributeExtensions(writer, workspace, this.Version);
+            WriteAttributeExtensions(writer, workspace, Version);
             if (workspace.Title != null)
             {
                 await workspace.Title.WriteToAsync(writer, Atom10Constants.TitleTag, Atom10Constants.Atom10Namespace);
@@ -757,7 +757,7 @@ namespace System.ServiceModel.Syndication
                 await WriteCollectionAsync(writer, workspace.Collections[i], baseUri);
             }
 
-            await WriteElementExtensionsAsync(writer, workspace, this.Version);
+            await WriteElementExtensionsAsync(writer, workspace, Version);
             await writer.WriteEndElementAsync();
         }
     }
