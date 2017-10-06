@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+
+using System.Collections.Concurrent;
 #if FEATURE_REGISTRY
 using Microsoft.Win32;
 #endif
@@ -21,7 +23,7 @@ namespace System.Diagnostics
         private string _machineName;
         private string _perfLcid;
 
-        private static Dictionary<String, PerformanceCounterLib> s_libraryTable;
+        private static ConcurrentDictionary<String, PerformanceCounterLib> s_libraryTable;
         private Dictionary<int, string> _nameTable;
         private readonly object _nameTableLock = new Object();
 
@@ -67,16 +69,12 @@ namespace System.Diagnostics
             else
                 machineName = machineName.ToLowerInvariant();
 
-            LazyInitializer.EnsureInitialized(ref s_libraryTable, ref s_internalSyncObject, () => new Dictionary<string, PerformanceCounterLib>());
+            LazyInitializer.EnsureInitialized(ref s_libraryTable, ref s_internalSyncObject, () => new ConcurrentDictionary<string, PerformanceCounterLib>());
 
             string libraryKey = machineName + ":" + lcidString;
-            PerformanceCounterLib library;
-            if (!PerformanceCounterLib.s_libraryTable.TryGetValue(libraryKey, out library))
-            {
-                library = new PerformanceCounterLib(machineName, lcidString);
-                PerformanceCounterLib.s_libraryTable[libraryKey] = library;
-            }
-            return library;
+
+	        return PerformanceCounterLib.s_libraryTable.GetOrAdd(libraryKey,
+		        (k) => new PerformanceCounterLib(machineName, lcidString));
         }
 
         internal byte[] GetPerformanceData(string item)
