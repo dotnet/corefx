@@ -11,7 +11,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
-
+using System.Threading.Tasks;
 using static Interop.Advapi32;
 
 namespace System.ServiceProcess
@@ -301,8 +301,9 @@ namespace System.ServiceProcess
         ///       Service Control Manager. Specifies the actions to take when a
         ///       service resumes normal functioning after being paused.</para>
         /// </devdoc>
-        protected virtual void OnContinue()
+        protected virtual Task OnContinue()
         {
+            return Task.CompletedTask;
         }
 
         /// <devdoc>
@@ -312,8 +313,9 @@ namespace System.ServiceProcess
         ///       the service by the Service Control Manager. Specifies the
         ///       actions to take when a service pauses.</para>
         /// </devdoc>
-        protected virtual void OnPause()
+        protected virtual Task OnPause()
         {
+            return Task.CompletedTask;
         }
 
         /// <devdoc>
@@ -322,17 +324,18 @@ namespace System.ServiceProcess
         ///         power status has changed.
         ///    </para>
         /// </devdoc>
-        protected virtual bool OnPowerEvent(PowerBroadcastStatus powerStatus)
+        protected virtual Task<bool> OnPowerEvent(PowerBroadcastStatus powerStatus)
         {
-            return true;
+            return Task.FromResult(true);
         }
 
         /// <devdoc>
         ///    <para>When implemented in a derived class,
         ///       executes when a Terminal Server session change event is received.</para>
         /// </devdoc>
-        protected virtual void OnSessionChange(SessionChangeDescription changeDescription)
+        protected virtual Task OnSessionChange(SessionChangeDescription changeDescription)
         {
+            return Task.CompletedTask;
         }
 
         /// <devdoc>
@@ -342,8 +345,9 @@ namespace System.ServiceProcess
         ///       happen just prior
         ///       to the system shutting down.</para>
         /// </devdoc>
-        protected virtual void OnShutdown()
+        protected virtual Task OnShutdown()
         {
+            return Task.CompletedTask;
         }
 
         /// <devdoc>
@@ -361,8 +365,9 @@ namespace System.ServiceProcess
         ///       services that start automatically at boot-up?
         ///    </note>
         /// </devdoc>
-        protected virtual void OnStart(string[] args)
+        protected virtual Task OnStart(string[] args)
         {
+            return Task.CompletedTask;
         }
 
         /// <devdoc>
@@ -372,8 +377,9 @@ namespace System.ServiceProcess
         ///       service stops
         ///       running.</para>
         /// </devdoc>
-        protected virtual void OnStop()
+        protected virtual Task OnStop()
         {
+            return Task.CompletedTask;
         }
 
         private unsafe void DeferredContinue()
@@ -382,7 +388,7 @@ namespace System.ServiceProcess
             {
                 try
                 {
-                    OnContinue();
+                    OnContinue().GetAwaiter().GetResult();
                     WriteLogEntry(SR.ContinueSuccessful);
                     _status.currentState = ServiceControlStatus.STATE_RUNNING;
                 }
@@ -402,11 +408,12 @@ namespace System.ServiceProcess
             }
         }
 
-        private void DeferredCustomCommand(int command)
+        private async Task DeferredCustomCommand(int command)
         {
             try
             {
-                OnCustomCommand(command);
+                await OnCustomCommand(command)
+                    .ConfigureAwait(false);
                 WriteLogEntry(SR.CommandSuccessful);
             }
             catch (Exception e)
@@ -425,7 +432,7 @@ namespace System.ServiceProcess
             {
                 try
                 {
-                    OnPause();
+                    OnPause().GetAwaiter().GetResult();
                     WriteLogEntry(SR.PauseSuccessful);
                     _status.currentState = ServiceControlStatus.STATE_PAUSED;
                 }
@@ -445,7 +452,7 @@ namespace System.ServiceProcess
             }
         }
 
-        private void DeferredPowerEvent(int eventType, IntPtr eventData)
+        private async Task DeferredPowerEvent(int eventType, IntPtr eventData)
         {
             // Note: The eventData pointer might point to an invalid location
             // This might happen because, between the time the eventData ptr was
@@ -454,7 +461,7 @@ namespace System.ServiceProcess
             try
             {
                 PowerBroadcastStatus status = (PowerBroadcastStatus)eventType;
-                bool statusResult = OnPowerEvent(status);
+                bool statusResult = await OnPowerEvent(status).ConfigureAwait(false);
 
                 WriteLogEntry(SR.PowerEventOK);
             }
@@ -468,11 +475,12 @@ namespace System.ServiceProcess
             }
         }
 
-        private void DeferredSessionChange(int eventType, int sessionId)
+        private async Task DeferredSessionChange(int eventType, int sessionId)
         {
             try
             {
-                OnSessionChange(new SessionChangeDescription((SessionChangeReason)eventType, sessionId));
+               await OnSessionChange(new SessionChangeDescription((SessionChangeReason)eventType, sessionId))
+                    .ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -499,7 +507,7 @@ namespace System.ServiceProcess
                 SetServiceStatus(_statusHandle, pStatus);
                 try
                 {
-                    OnStop();
+                    OnStop().GetAwaiter().GetResult();
                     WriteLogEntry(SR.StopSuccessful);
                     _status.currentState = ServiceControlStatus.STATE_STOPPED;
                     SetServiceStatus(_statusHandle, pStatus);
@@ -518,7 +526,7 @@ namespace System.ServiceProcess
         {
             try
             {
-                OnShutdown();
+                OnShutdown().GetAwaiter().GetResult();
                 WriteLogEntry(SR.Format(SR.ShutdownOK));
 
                 if (_status.currentState == ServiceControlStatus.STATE_PAUSED || _status.currentState == ServiceControlStatus.STATE_RUNNING)
@@ -558,8 +566,9 @@ namespace System.ServiceProcess
         ///    custom command?
         /// </note>
         /// </devdoc>
-        protected virtual void OnCustomCommand(int command)
+        protected virtual Task OnCustomCommand(int command)
         {
+            return Task.CompletedTask;
         }
 
         /// <devdoc>
@@ -627,9 +636,10 @@ namespace System.ServiceProcess
             Run(new ServiceBase[] { service });
         }
 
-        public void Stop()
+        public Task Stop()
         {
             DeferredStop();
+            return Task.CompletedTask;
         }
 
         private void Initialize(bool multipleServices)
