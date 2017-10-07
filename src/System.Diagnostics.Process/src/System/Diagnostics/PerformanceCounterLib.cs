@@ -23,7 +23,7 @@ namespace System.Diagnostics
         private string _machineName;
         private string _perfLcid;
 
-        private static ConcurrentDictionary<String, PerformanceCounterLib> s_libraryTable;
+        private static ConcurrentDictionary<(string, string), PerformanceCounterLib> s_libraryTable;
         private Dictionary<int, string> _nameTable;
         private readonly object _nameTableLock = new Object();
 
@@ -69,11 +69,10 @@ namespace System.Diagnostics
             else
                 machineName = machineName.ToLowerInvariant();
 
-            LazyInitializer.EnsureInitialized(ref s_libraryTable, ref s_internalSyncObject, () => new ConcurrentDictionary<string, PerformanceCounterLib>());
+            LazyInitializer.EnsureInitialized(ref s_libraryTable, ref s_internalSyncObject, () => new ConcurrentDictionary<(string, string), PerformanceCounterLib>());
+            (string machineName, string lcidString) libraryIdentity = (machineName, lcidString);
 
-            string libraryKey = machineName + ":" + lcidString;
-
-	        return PerformanceCounterLib.s_libraryTable.GetOrAdd(libraryKey,(k, arg) => new PerformanceCounterLib(arg.machineName, arg.lcidString), (machineName: machineName, lcidString: lcidString));
+            return PerformanceCounterLib.s_libraryTable.GetOrAdd(libraryIdentity, (k, arg) => new PerformanceCounterLib(arg.machineName, arg.lcidString), libraryIdentity);
         }
 
         internal byte[] GetPerformanceData(string item)
