@@ -251,7 +251,7 @@ namespace System.Diagnostics
             {
                 filename = ResolvePath(startInfo.FileName);
                 argv = ParseArgv(startInfo);
-                if (Directory.Exists(startInfo.FileName))
+                if (Directory.Exists(filename))
                 {
                     throw new Win32Exception(SR.DirectoryNotValidAsInput);
                 }
@@ -383,7 +383,7 @@ namespace System.Diagnostics
                 try
                 {
                     path = Path.Combine(Path.GetDirectoryName(path), filename);
-                    if (File.Exists(path))
+                    if (File.Exists(path) && !Directory.Exists(path))
                     {
                         return path;
                     }
@@ -393,7 +393,7 @@ namespace System.Diagnostics
 
             // Then check the current directory
             path = Path.Combine(Directory.GetCurrentDirectory(), filename);
-            if (File.Exists(path))
+            if (File.Exists(path) && !Directory.Exists(path))
             {
                 return path;
             }

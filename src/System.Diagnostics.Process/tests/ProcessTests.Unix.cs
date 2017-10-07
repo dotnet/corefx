@@ -72,6 +72,25 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [Fact]
+        [OuterLoop("Opens program")]
+        [PlatformSpecific(TestPlatforms.Linux)]
+        public void ProcessStart_DirectoryNameInCurDirectorySameAsFileNameInExecDirectory_Success()
+        {
+            string fileToOpen = "dotnet";
+            var dotnetFolderInCurDirectory = Path.Combine(Environment.CurrentDirectory, "dotnet");
+            if (!Directory.Exists(dotnetFolderInCurDirectory))
+            {
+                Directory.CreateDirectory(dotnetFolderInCurDirectory);
+            }
+            using (var px = Process.Start(fileToOpen))
+            {
+                px.Kill();
+                px.WaitForExit();
+                Assert.True(px.HasExited);
+            }
+        }
+
         [Theory, InlineData(true), InlineData(false)]
         [OuterLoop("Opens program")]
         public void ProcessStart_UseShellExecute_OnUnix_SuccessWhenProgramInstalled(bool isFolder)
