@@ -272,7 +272,7 @@ namespace System
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 IdVersionPair v = ParseOsReleaseFile();
-                bool isRedHat = v.Id == "rhl" || v.Id == "rhel";
+                bool isRedHat = v.Id == "rhel";
                 // RedHat includes minor version. We need to account for that when comparing
                 if ((isRedHat || v.Id == "centos") && (versionId == null || v.VersionId == versionId || (isRedHat && RedHatVersionEqual(versionId, v.VersionId))))
                 {
@@ -352,10 +352,6 @@ namespace System
                             else if (line.StartsWith("Centos", StringComparison.OrdinalIgnoreCase))
                             {
                                 ret.Id = "centos";
-                            }
-                            else if (line.StartsWith("Red Hat", StringComparison.OrdinalIgnoreCase))
-                            {
-                                ret.Id = "rhl";
                             }
                             else 
                             {
