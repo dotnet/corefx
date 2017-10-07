@@ -11,6 +11,7 @@ using System.Threading;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace System.ServiceProcess.Tests
 {
@@ -30,52 +31,52 @@ namespace System.ServiceProcess.Tests
             this.CanHandlePowerEvent = false;
         }
 
-        protected override void OnContinue()
+        protected override Task OnContinue()
         {
             WriteLog(nameof(OnContinue));
-            base.OnContinue();
+            return base.OnContinue();
         }
 
-        protected override void OnCustomCommand(int command)
+        protected override Task OnCustomCommand(int command)
         {
             WriteLog(nameof(OnCustomCommand) + " command=" + command);
-            base.OnCustomCommand(command);
+            return base.OnCustomCommand(command);
         }
 
-        protected override void OnPause()
+        protected override Task OnPause()
         {
             WriteLog(nameof(OnPause));
-            base.OnPause();
+            return base.OnPause();
         }
 
-        protected override void OnSessionChange(SessionChangeDescription changeDescription)
+        protected override Task OnSessionChange(SessionChangeDescription changeDescription)
         {
             WriteLog(nameof(OnSessionChange) + " change=" + changeDescription.ToString());
-            base.OnSessionChange(changeDescription);
+            return base.OnSessionChange(changeDescription);
         }
 
-        protected override bool OnPowerEvent(PowerBroadcastStatus powerStatus)
+        protected override Task<bool> OnPowerEvent(PowerBroadcastStatus powerStatus)
         {
             WriteLog(nameof(OnPowerEvent) + " status=" + powerStatus.ToString());
             return base.OnPowerEvent(powerStatus);
         }
 
-        protected override void OnShutdown()
+        protected override Task OnShutdown()
         {
             WriteLog(nameof(OnShutdown));
-            base.OnShutdown();
+            return base.OnShutdown();
         }
 
-        protected override void OnStart(string[] args)
+        protected override Task OnStart(string[] args)
         {
             WriteLog(nameof(OnStart) + " args=" + string.Join(",", args));
-            base.OnStart(args);
+            return base.OnStart(args);
         }
 
-        protected override void OnStop()
+        protected override async Task OnStop()
         {
             WriteLog(nameof(OnStop));
-            base.OnStop();
+            await base.OnStop();
 
             if (_log != null)
             {

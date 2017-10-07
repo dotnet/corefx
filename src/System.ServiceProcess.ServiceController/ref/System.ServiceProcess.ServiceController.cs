@@ -5,6 +5,8 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+using System.Threading.Tasks;
+
 namespace System.ServiceProcess
 {
     public enum PowerBroadcastStatus
@@ -38,20 +40,20 @@ namespace System.ServiceProcess
         protected System.IntPtr ServiceHandle { get { throw null; } }
         public string ServiceName { get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }
-        protected virtual void OnContinue() { }
-        protected virtual void OnCustomCommand(int command) { }
-        protected virtual void OnPause() { }
-        protected virtual bool OnPowerEvent(System.ServiceProcess.PowerBroadcastStatus powerStatus) { throw null; }
-        protected virtual void OnSessionChange(System.ServiceProcess.SessionChangeDescription changeDescription) { }
-        protected virtual void OnShutdown() { }
-        protected virtual void OnStart(string[] args) { }
-        protected virtual void OnStop() { }
+        protected virtual Task OnContinue() { throw null; }
+        protected virtual Task OnCustomCommand(int command) { throw null; }
+        protected virtual Task OnPause() { throw null; }
+        protected virtual Task<bool> OnPowerEvent(System.ServiceProcess.PowerBroadcastStatus powerStatus) { throw null; }
+        protected virtual Task OnSessionChange(System.ServiceProcess.SessionChangeDescription changeDescription) { throw null; }
+        protected virtual Task OnShutdown() { throw null; }
+        protected virtual Task OnStart(string[] args) { throw null; }
+        protected virtual Task OnStop() { throw null; }
         public void RequestAdditionalTime(int milliseconds) { }
         public static void Run(System.ServiceProcess.ServiceBase service) { }
         public static void Run(System.ServiceProcess.ServiceBase[] services) { }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public void ServiceMainCallback(int argCount, System.IntPtr argPointer) { }
-        public void Stop() { }
+        public Task Stop() { throw null; }
     }
     public partial class ServiceController : System.ComponentModel.Component
     {
