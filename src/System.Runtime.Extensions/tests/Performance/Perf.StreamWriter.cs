@@ -78,6 +78,38 @@ namespace System.IO.Tests
 
         [Benchmark]
         [MemberData(nameof(WriteLengthMemberData))]
+        public void WriteReadOnlySpan(int writeLength)
+        {
+            char[] buffer = new string('a', writeLength + 10).ToCharArray();
+            ReadOnlySpan<char> span = new ReadOnlySpan<char>(buffer);
+
+            int innerIterations = MemoryStreamSize / writeLength;
+            int outerIteration = TotalWriteCount / innerIterations;
+            using (var stream = new MemoryStream(MemoryStreamSize))
+            {
+                using (var writer = new StreamWriter(stream, new UTF8Encoding(false, true), DefaultStreamWriterBufferSize, true))
+                {
+                    foreach (var iteration in Benchmark.Iterations)
+                    {
+                        using (iteration.StartMeasurement())
+                        {
+                            for (int i = 0; i < outerIteration; i++)
+                            {
+                                for (int j = 0; j < innerIterations; j++)
+                                {
+                                    writer.Write(span);
+                                }
+                                writer.Flush();
+                                stream.Position = 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        [MemberData(nameof(WriteLengthMemberData))]
         public void WriteString(int writeLength)
         {
             string value = new string('a', writeLength);

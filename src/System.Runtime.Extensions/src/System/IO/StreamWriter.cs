@@ -331,52 +331,13 @@ namespace System.IO
                 return;
             }
 
-            CheckAsyncTaskInProgress();
-
-            // Threshold of 4 was chosen after running perf tests
-            if (buffer.Length <= 4)
+            if (GetType() == typeof(StreamWriter))
             {
-                for (int i = 0; i < buffer.Length; i++)
-                {
-                    if (_charPos == _charLen)
-                    {
-                        Flush(false, false);
-                    }
-
-                    Debug.Assert(_charLen - _charPos > 0, "StreamWriter::Write(char[]) isn't making progress!  This is most likely a race in user code.");
-                    _charBuffer[_charPos] = buffer[i];
-                    _charPos++;
-                }
+                WriteCore(new ReadOnlySpan<char>(buffer));
             }
             else
             {
-                int count = buffer.Length;
-
-                int index = 0;
-                while (count > 0)
-                {
-                    if (_charPos == _charLen)
-                    {
-                        Flush(false, false);
-                    }
-
-                    int n = _charLen - _charPos;
-                    if (n > count)
-                    {
-                        n = count;
-                    }
-
-                    Debug.Assert(n > 0, "StreamWriter::Write(char[]) isn't making progress!  This is most likely a race in user code.");
-                    Buffer.BlockCopy(buffer, index * sizeof(char), _charBuffer, _charPos * sizeof(char), n * sizeof(char));
-                    _charPos += n;
-                    index += n;
-                    count -= n;
-                }
-            }
-
-            if (_autoFlush)
-            {
-                Flush(true, false);
+                base.Write(buffer);
             }
         }
 
@@ -480,52 +441,13 @@ namespace System.IO
                 return;
             }
 
-            CheckAsyncTaskInProgress();
-
-            int count = value.Length;
-
-            // Threshold of 4 was chosen after running perf tests
-            if (count <= 4)
+            if (GetType() == typeof(StreamWriter))
             {
-                for (int i = 0; i < count; i++)
-                {
-                    if (_charPos == _charLen)
-                    {
-                        Flush(false, false);
-                    }
-
-                    Debug.Assert(_charLen - _charPos > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
-                    _charBuffer[_charPos] = value[i];
-                    _charPos++;
-                }
+                WriteCore(value.AsReadOnlySpan());
             }
             else
             {
-                int index = 0;
-                while (count > 0)
-                {
-                    if (_charPos == _charLen)
-                    {
-                        Flush(false, false);
-                    }
-
-                    int n = _charLen - _charPos;
-                    if (n > count)
-                    {
-                        n = count;
-                    }
-
-                    Debug.Assert(n > 0, "StreamWriter::Write(String) isn't making progress!  This is most likely a race condition in user code.");
-                    value.CopyTo(index, _charBuffer, _charPos, n);
-                    _charPos += n;
-                    index += n;
-                    count -= n;
-                }
-            }
-
-            if (_autoFlush)
-            {
-                Flush(true, false);
+                base.Write(value);
             }
         }
 
@@ -542,7 +464,7 @@ namespace System.IO
 
             if (GetType() == typeof(StreamWriter))
             {
-                WriteLineCore(value.AsSpan());
+                WriteLineCore(value.AsReadOnlySpan());
             }
             else
             {
@@ -552,15 +474,7 @@ namespace System.IO
 
         public override void WriteLine(ReadOnlySpan<char> source)
         {
-            if (GetType() == typeof(StreamWriter))
-            {
-                WriteLineCore(source);
-            }
-            else
-            {
-                base.WriteLine(source);
-            }
-
+            WriteLineCore(source);
         }
 
         private void WriteLineCore(ReadOnlySpan<char> value)
