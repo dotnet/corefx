@@ -11,8 +11,7 @@ namespace System.IO.Tests
         [Fact]
         public void WriteReadOnlySpanTest()
         {
-            char[] chArr = setupArray();
-            ReadOnlySpan<char> readSpan = new ReadOnlySpan<char>(chArr);
+            ReadOnlySpan<char> readSpan = new ReadOnlySpan<char>(TestDataProvider.CharData);
 
             Stream ms = CreateStream();
             StreamWriter sw = new StreamWriter(ms);
@@ -34,7 +33,7 @@ namespace System.IO.Tests
         public void WriteLineReadOnlySpanTest()
         {
             char[] chArr = setupArray();
-            ReadOnlySpan<char> readSpan = new ReadOnlySpan<char>(chArr);
+            ReadOnlySpan<char> readSpan = new ReadOnlySpan<char>(TestDataProvider.CharData);
 
             Stream ms = CreateStream();
             StreamWriter sw = new StreamWriter(ms);
