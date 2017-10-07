@@ -73,8 +73,7 @@ namespace System.Diagnostics
 
             string libraryKey = machineName + ":" + lcidString;
 
-	        return PerformanceCounterLib.s_libraryTable.GetOrAdd(libraryKey,
-		        (k) => new PerformanceCounterLib(machineName, lcidString));
+	        return PerformanceCounterLib.s_libraryTable.GetOrAdd(libraryKey,(k, arg) => new PerformanceCounterLib(arg.machineName, arg.lcidString), (machineName: machineName, lcidString: lcidString));
         }
 
         internal byte[] GetPerformanceData(string item)
