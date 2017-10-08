@@ -528,7 +528,7 @@ namespace System.Net.Security
             {
                 // This is inefficient yet simple and should be a REALLY rare case.
                 int toCopy = Math.Min(_queuedReadCount, buffer.Length);
-                ((Span<byte>)_queuedReadData).Slice(0, toCopy).CopyTo(buffer.Span);
+                new Span<byte>(_queuedReadData, 0, toCopy).CopyTo(buffer.Span);
                 _queuedReadCount -= toCopy;
                 if (_queuedReadCount == 0)
                 {
@@ -1258,9 +1258,9 @@ namespace System.Net.Security
                 }
 
                 _lockReadState = LockPendingRead;
-                TaskCompletionSource<int> tcs = new TaskCompletionSource<int>(buffer, TaskCreationOptions.RunContinuationsAsynchronously);
-                _queuedReadStateRequest = tcs;
-                return new ValueTask<int>(tcs.Task);
+                TaskCompletionSource<int> taskCompletionSource = new TaskCompletionSource<int>(buffer, TaskCreationOptions.RunContinuationsAsynchronously);
+                _queuedReadStateRequest = taskCompletionSource;
+                return new ValueTask<int>(taskCompletionSource.Task);
             }
         }
 
@@ -1365,20 +1365,23 @@ namespace System.Net.Security
         private void HandleQueuedCallback(ref object queuedStateRequest)
         {
             object obj = queuedStateRequest;
+            if (obj == null)
+            {
+                return;
+            }
             queuedStateRequest = null;
+                        
             switch (obj)
             {
-                case null:
-                    break;
                 case LazyAsyncResult lazy:
                     lazy.InvokeCallback();
                     break;
-                case TaskCompletionSource<int> tsc when tsc.Task.AsyncState != null:
-                    Memory<byte> array = (Memory<byte>)tsc.Task.AsyncState;
-                    tsc.SetResult(CheckOldKeyDecryptedData(array));
+                case TaskCompletionSource<int> taskCompletionSource when taskCompletionSource.Task.AsyncState != null:
+                    Memory<byte> array = (Memory<byte>)taskCompletionSource.Task.AsyncState;
+                    taskCompletionSource.SetResult(CheckOldKeyDecryptedData(array));
                     break;
-                case TaskCompletionSource<int> tsc:
-                    tsc.SetResult(0);
+                case TaskCompletionSource<int> taskCompletionSource:
+                    taskCompletionSource.SetResult(0);
                     break;
                 default:
                     ThreadPool.QueueUserWorkItem(new WaitCallback(AsyncResumeHandshake), obj);

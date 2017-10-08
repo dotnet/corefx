@@ -197,28 +197,7 @@ namespace System.Net.Security
                 throw new ArgumentOutOfRangeException(nameof(count), SR.net_offset_plus_count);
             }
         }
-
-        private AsyncProtocolRequest GetOrCreateProtocolRequest(ref AsyncProtocolRequest aprField, LazyAsyncResult asyncResult)
-        {
-            AsyncProtocolRequest request = null;
-            if (asyncResult != null)
-            {
-                // SslStreamInternal supports only a single read and a single write operation at a time.
-                // As such, we can cache and reuse the AsyncProtocolRequest object that's used throughout
-                // the implementation.
-                request = aprField;
-                if (request != null)
-                {
-                    request.Reset(asyncResult);
-                }
-                else
-                {
-                    aprField = request = new AsyncProtocolRequest(asyncResult);
-                }
-            }
-            return request;
-        }
-
+               
         private async ValueTask<int> ReadAsyncInternal<TReadAdapter>(TReadAdapter adapter, Memory<byte> buffer)
             where TReadAdapter : ISslReadAdapter
         {
@@ -236,7 +215,8 @@ namespace System.Net.Security
                     _nestedRead = 0;
                     return copyBytes;
                 }
-                copyBytes = await adapter.LockAsync(buffer);
+
+                copyBytes = await adapter.LockAsync(buffer).ConfigureAwait(false);
                 try
                 {
                     if (copyBytes > 0)
@@ -245,14 +225,14 @@ namespace System.Net.Security
                     }
 
                     ResetReadBuffer();
-                    int readBytes = await FillBufferAsync(adapter, SecureChannel.ReadHeaderSize);
+                    int readBytes = await FillBufferAsync(adapter, SecureChannel.ReadHeaderSize).ConfigureAwait(false);
                     int payloadBytes = _sslState.GetRemainingFrameSize(_internalBuffer, _internalOffset, readBytes);
                     if (payloadBytes < 0)
                     {
                         throw new IOException(SR.net_frame_read_size);
                     }
 
-                    readBytes = await FillBufferAsync(adapter, SecureChannel.ReadHeaderSize + payloadBytes);
+                    readBytes = await FillBufferAsync(adapter, SecureChannel.ReadHeaderSize + payloadBytes).ConfigureAwait(false);
                     if (readBytes < 0)
                     {
                         throw new IOException(SR.net_frame_read_size);
@@ -300,13 +280,8 @@ namespace System.Net.Security
                         throw new IOException(SR.net_io_decrypt, message.GetException());
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (!(e is IOException))
                 {
-                    if (e is IOException)
-                    {
-                        throw;
-                    }
-
                     throw new IOException(SR.net_io_read, e);
                 }
                 finally
@@ -450,7 +425,7 @@ namespace System.Net.Security
                 ValueTask<int> t = adapter.ReadAsync(_internalBuffer, _internalBufferCount, _internalBuffer.Length - _internalBufferCount);
                 if (!t.IsCompletedSuccessfully)
                 {
-                    return new ValueTask<int>(InternalFillBufferAsync(adapter, t, minSize, initialCount));
+                    return new ValueTask<int>(InternalFillBufferAsync(adapter, t.AsTask(), minSize, initialCount));
                 }
                 int bytes = t.Result;
                 if (bytes == 0)
@@ -469,11 +444,11 @@ namespace System.Net.Security
 
             return new ValueTask<int>(minSize);
 
-            async Task<int> InternalFillBufferAsync(TReadAdapter adap, ValueTask<int> task, int min, int initial)
+            async Task<int> InternalFillBufferAsync(TReadAdapter adap, Task<int> task, int min, int initial)
             {
                 while (true)
                 {
-                    int b = await task;
+                    int b = await task.ConfigureAwait(false);
                     if (b == 0)
                     {
                         if (_internalBufferCount != initial)
@@ -490,7 +465,7 @@ namespace System.Net.Security
                         return min;
                     }
 
-                    b = await adap.ReadAsync(_internalBuffer, _internalBufferCount, _internalBuffer.Length - _internalBufferCount);
+                    task = adap.ReadAsync(_internalBuffer, _internalBufferCount, _internalBuffer.Length - _internalBufferCount).AsTask();
                 }
             }
         }
@@ -513,8 +488,8 @@ namespace System.Net.Security
             int copyBytes = Math.Min(_decryptedBytesCount, buffer.Length);
             if (copyBytes != 0)
             {
-                ((Span<byte>)_internalBuffer).Slice(_decryptedBytesOffset, copyBytes).CopyTo(buffer.Span);
-                
+                new Span<byte>(_internalBuffer, _decryptedBytesOffset, copyBytes).CopyTo(buffer.Span);
+
                 _decryptedBytesOffset += copyBytes;
                 _decryptedBytesCount -= copyBytes;
             }

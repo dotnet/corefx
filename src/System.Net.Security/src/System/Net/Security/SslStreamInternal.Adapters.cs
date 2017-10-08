@@ -32,7 +32,7 @@ namespace System.Net.Security
                 _sslState = sslState;
             }
 
-            public ValueTask<int> ReadAsync(byte[] buffer, int offset, int count) => new ValueTask<int>(_sslState.InnerStream.ReadAsync(buffer, offset, count, _cancellationToken));
+            public ValueTask<int> ReadAsync(byte[] buffer, int offset, int count) => _sslState.InnerStream.ReadAsync(new Memory<byte>(buffer, offset, count), _cancellationToken);
 
             public ValueTask<int> LockAsync(Memory<byte> buffer) => _sslState.CheckEnqueueReadAsync(buffer);
         }
