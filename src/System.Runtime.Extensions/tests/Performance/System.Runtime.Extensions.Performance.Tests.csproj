@@ -10,6 +10,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <ItemGroup>
+    <Compile Include="Perf.ArrayList.cs" />
     <Compile Include="Perf.Environment.cs" />
     <Compile Include="Perf.Path.cs" />
     <Compile Include="Perf.Random.cs" />
