@@ -1424,7 +1424,7 @@
       <Version>1.0.3</Version>
     </StablePackage>
     <StablePackage Include="runtime.native.System.Security.Cryptography">
-      <Version>4.0.3</Version>
+      <Version>4.0.2</Version>
     </StablePackage>
     <StablePackage Include="runtime.opensuse.13.2-x64.runtime.native.System.Security.Cryptography">
       <Version>1.0.3</Version>
