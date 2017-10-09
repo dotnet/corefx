@@ -35,22 +35,6 @@ namespace System.ServiceModel.Syndication
         private bool _preserveElementExtensions;
         private bool _serializeExtensionsAsAtom;
 
-        //Custom Parsers
-        //   value, localname , ns , result
-        public Func<string, string, string, string> StringParser { get; set; } = DefaultStringParser;
-        public Func<string, string, string, DateTimeOffset> DateParser { get; set; } = DefaultDateParser;
-        public Func<string, string, string, Uri> UriParser { get; set; } = DefaultUriParser;
-
-        static private string DefaultStringParser(string value, string localName, string ns)
-        {
-            return value;
-        }
-
-        static private Uri DefaultUriParser(string value, string localName, string ns)
-        {
-            return new Uri(value, UriKind.RelativeOrAbsolute);
-        }
-
         private async Task<bool> OnReadImage(XmlReader reader, SyndicationFeed result)
         {
             await reader.ReadStartElementAsync();
@@ -60,11 +44,11 @@ namespace System.ServiceModel.Syndication
             {
                 if (await reader.IsStartElementAsync(Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace))
                 {
-                    result.ImageUrl = UriParser(await reader.ReadElementStringAsync(), Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace);
+                    result.ImageUrl = UriParser(await reader.ReadElementStringAsync(), UriKind.RelativeOrAbsolute, Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace);
                 }
                 else if (await reader.IsStartElementAsync(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace))
                 {
-                    result.ImageLink = UriParser(await reader.ReadElementStringAsync(), Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace);
+                    result.ImageLink = UriParser(await reader.ReadElementStringAsync(), UriKind.RelativeOrAbsolute, Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace);
                 }
                 else if (await reader.IsStartElementAsync(Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace))
                 {
@@ -75,13 +59,9 @@ namespace System.ServiceModel.Syndication
             return true;
         }
 
-        public Rss20FeedFormatter()
-            : this(typeof(SyndicationFeed))
-        {
-        }
+        public Rss20FeedFormatter() : this(typeof(SyndicationFeed)) { }
 
-        public Rss20FeedFormatter(Type feedTypeToCreate)
-            : base()
+        public Rss20FeedFormatter(Type feedTypeToCreate) : base()
         {
             if (feedTypeToCreate == null)
             {
@@ -97,15 +77,12 @@ namespace System.ServiceModel.Syndication
             _preserveAttributeExtensions = true;
             _atomSerializer = new Atom10FeedFormatter(feedTypeToCreate);
             _feedType = feedTypeToCreate;
+            DateTimeParser = DateTimeHelper.CreateRss20DateTimeParser();
         }
 
-        public Rss20FeedFormatter(SyndicationFeed feedToWrite)
-            : this(feedToWrite, true)
-        {
-        }
+        public Rss20FeedFormatter(SyndicationFeed feedToWrite) : this(feedToWrite, true) { }
 
-        public Rss20FeedFormatter(SyndicationFeed feedToWrite, bool serializeExtensionsAsAtom)
-            : base(feedToWrite)
+        public Rss20FeedFormatter(SyndicationFeed feedToWrite, bool serializeExtensionsAsAtom) : base(feedToWrite)
         {
             // No need to check that the parameter passed is valid - it is checked by the c'tor of the base class
             _serializeExtensionsAsAtom = serializeExtensionsAsAtom;
@@ -114,6 +91,7 @@ namespace System.ServiceModel.Syndication
             _preserveAttributeExtensions = true;
             _atomSerializer = new Atom10FeedFormatter(Feed);
             _feedType = feedToWrite.GetType();
+            DateTimeParser = DateTimeHelper.CreateRss20DateTimeParser();
         }
 
         public bool PreserveAttributeExtensions
@@ -301,7 +279,7 @@ namespace System.ServiceModel.Syndication
                                             string str = await reader.ReadStringAsync();
                                             if (!string.IsNullOrEmpty(str))
                                             {
-                                                result.PublishDate = DateParser(str, reader.LocalName, reader.NamespaceURI);
+                                                result.PublishDate = DateTimeParser(str, reader.LocalName, reader.NamespaceURI);
                                             }
 
                                             await reader.ReadEndElementAsync();
@@ -326,7 +304,7 @@ namespace System.ServiceModel.Syndication
                                                 string val = await reader.GetValueAsync();
                                                 if (name == Rss20Constants.UrlTag && ns == Rss20Constants.Rss20Namespace)
                                                 {
-                                                    feed.Links.Add(SyndicationLink.CreateSelfLink(UriParser(val, Rss20Constants.UrlTag, ns)));
+                                                    feed.Links.Add(SyndicationLink.CreateSelfLink(UriParser(val, UriKind.RelativeOrAbsolute, Rss20Constants.UrlTag, ns)));
                                                 }
                                                 else if (!FeedUtils.IsXmlns(name, ns))
                                                 {
@@ -704,7 +682,7 @@ namespace System.ServiceModel.Syndication
             }
             string localName = reader.LocalName;
             string namespaceUri = reader.NamespaceURI;
-            link.Uri = UriParser(await reader.ReadElementStringAsync(), localName, namespaceUri);//new Uri(uri, UriKind.RelativeOrAbsolute);
+            link.Uri = UriParser(await reader.ReadElementStringAsync(), UriKind.RelativeOrAbsolute, localName, namespaceUri);
             return link;
         }
 
@@ -890,7 +868,7 @@ namespace System.ServiceModel.Syndication
                         break;
 
                     case Rss20Constants.LinkTag:
-                        textInput.link = new SyndicationLink(UriParser(val, name, namespaceUri));
+                        textInput.link = new SyndicationLink(UriParser(val, UriKind.RelativeOrAbsolute, name, namespaceUri));
                         break;
 
                     case Rss20Constants.NameTag:
@@ -1019,7 +997,7 @@ namespace System.ServiceModel.Syndication
 
                                         if (!string.IsNullOrEmpty(str))
                                         {
-                                            result.LastUpdatedTime = DateParser(str, Rss20Constants.LastBuildDateTag, reader.NamespaceURI);
+                                            result.LastUpdatedTime = DateTimeParser(str, Rss20Constants.LastBuildDateTag, reader.NamespaceURI);
                                         }
 
                                         await reader.ReadEndElementAsync();
@@ -1552,67 +1530,6 @@ namespace System.ServiceModel.Syndication
             await WriteAttributeExtensionsAsync(writer, person, Version);
             await writer.WriteStringAsync(person.Email);
             await writer.WriteEndElementAsync();
-        }
-
-        private static bool OriginalDateParser(string dateTimeString, out DateTimeOffset dto)
-        {
-            StringBuilder dateTimeStringBuilder = new StringBuilder(dateTimeString.Trim());
-            if (dateTimeStringBuilder.Length < 18)
-            {
-                return false;
-            }
-
-            int timeZoneStartIndex;
-            for (timeZoneStartIndex = dateTimeStringBuilder.Length - 1; dateTimeStringBuilder[timeZoneStartIndex] != ' '; timeZoneStartIndex--) ;
-            timeZoneStartIndex++;
-
-            string timeZoneSuffix = dateTimeStringBuilder.ToString().Substring(timeZoneStartIndex);
-            dateTimeStringBuilder.Remove(timeZoneStartIndex, dateTimeStringBuilder.Length - timeZoneStartIndex);
-            bool isUtc;
-            dateTimeStringBuilder.Append(NormalizeTimeZone(timeZoneSuffix, out isUtc));
-            string wellFormattedString = dateTimeStringBuilder.ToString();
-
-            DateTimeOffset theTime;
-            string[] parseFormat =
-            {
-                "ddd, dd MMMM yyyy HH:mm:ss zzz",
-                "dd MMMM yyyy HH:mm:ss zzz",
-                "ddd, dd MMM yyyy HH:mm:ss zzz",
-                "dd MMM yyyy HH:mm:ss zzz",
-
-                "ddd, dd MMMM yyyy HH:mm zzz",
-                "dd MMMM yyyy HH:mm zzz",
-                "ddd, dd MMM yyyy HH:mm zzz",
-                "dd MMM yyyy HH:mm zzz"
-            };
-
-            if (DateTimeOffset.TryParseExact(wellFormattedString, parseFormat,
-                CultureInfo.InvariantCulture.DateTimeFormat,
-                (isUtc ? DateTimeStyles.AdjustToUniversal : DateTimeStyles.None), out theTime))
-            {
-                dto = theTime;
-                return true;
-            }
-
-            return false;
-        }
-
-        // Custom parsers
-        public static DateTimeOffset DefaultDateParser(string dateTimeString, string localName, string ns)
-        {
-            bool parsed = false;
-            DateTimeOffset dto;
-            parsed = DateTimeOffset.TryParse(dateTimeString, out dto);
-            if (parsed)
-                return dto;
-
-            //original parser here
-            parsed = OriginalDateParser(dateTimeString, out dto);
-            if (parsed)
-                return dto;
-
-            //Impossible to parse - using a default date;
-            return new DateTimeOffset();
         }
     }
 

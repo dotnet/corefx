@@ -32,6 +32,13 @@ namespace System.ServiceModel.Syndication
             _feed = feedToWrite;
         }
 
+        public Func<string, string, string, string> StringParser { get; set; } = DefaultStringParser;
+
+        public Func<string, UriKind, string, string, Uri> UriParser { get; set; } = DefaultUriParser;
+
+        // Different DateTimeParsers are needed for Atom and Rss so can't set inline
+        public Func<string, string, string, DateTimeOffset> DateTimeParser { get; set; }
+
         public SyndicationFeed Feed
         {
             get
@@ -373,6 +380,16 @@ namespace System.ServiceModel.Syndication
         internal protected virtual void SetFeed(SyndicationFeed feed)
         {
             _feed = feed ?? throw new ArgumentNullException(nameof(feed));
+        }
+
+        private static string DefaultStringParser(string value, string localName, string ns)
+        {
+            return value;
+        }
+
+        private static Uri DefaultUriParser(string value, UriKind kind, string localName, string ns)
+        {
+            return new Uri(value, kind);
         }
 
         internal static void CloseBuffer(XmlBuffer buffer, XmlDictionaryWriter extWriter)
