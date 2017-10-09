@@ -30,31 +30,26 @@
  <Target Name="GenerateSerializationAssemblyForReferenceAssembly" AfterTargets="GenerateSerializationAssembly" Condition="@(SerializationAssembly)!=''">
     <ItemGroup Condition="@(SerializationAssembly)!=''" Label="Parse SerializationAssembly">
       <SearchSerializationAssembly Include="@(Reference)">
-        <SerializationAssembly>%(SerializationAssembly.Identity)</SerializationAssembly>
+        <AssemblyName>%(SerializationAssembly.Identity)</AssemblyName>
+        <SerializationTypes>%(SerializationAssembly.SerializationType)</SerializationTypes>
       </SearchSerializationAssembly>
-      <TargetSerializationAssembly Include="@(SearchSerializationAssembly)" Condition="$([System.String]::new('%(SearchSerializationAssembly.Identity)').EndsWith('%(SearchSerializationAssembly.SerializationAssembly).dll'))" />
-      <TargetSerializationAssemblyAndType Include="@(TargetSerializationAssembly)">
-        <TargetSerializationAssembly>%(SerializationAssembly.Identity)</TargetSerializationAssembly>
-        <TargetSerializationType>@(SerializationAssembly-&gt;Metadata('SerializationType'))</TargetSerializationType>
-      </TargetSerializationAssemblyAndType>
+      <TargetSerializationAssembly Include="@(SearchSerializationAssembly)" Condition="$([System.String]::new('%(SearchSerializationAssembly.Identity)').EndsWith('%(SearchSerializationAssembly.AssemblyName).dll'))" />
     </ItemGroup>
 
     <ItemGroup>
       <ReferenceSerializerName Include="%(SerializationAssembly.Identity).XmlSerializers" />
-      <ReferenceSerializerDllImmediatePath Include="$(IntermediateOutputPath)%(ReferenceSerializerName.Identity).dll" />
-      <ReferenceSerializerPdbImmediatePath Include="$(IntermediateOutputPath)%(ReferenceSerializerName.Identity).pdb" />
-      <ReferenceSerializerCsImmediatePath Include="$(IntermediateOutputPath)%(ReferenceSerializerName.Identity).cs" />
+      <ReferenceSerializeImmediatePath Include="$(IntermediateOutputPath)%(ReferenceSerializerName.Identity)" />
   </ItemGroup>
     
-    <Delete Files="@(ReferenceSerializerDllImmediatePath)" />
-    <Delete Files="@(ReferenceSerializerPdbImmediatePath)" />
-    <Delete Files="@(ReferenceSerializerCsImmediatePath)" />
+    <Delete Files="%(ReferenceSerializeImmediatePath.Identity).dll" />
+    <Delete Files="%(ReferenceSerializeImmediatePath.Identity).cs" />
+    <Delete Files="%(ReferenceSerializeImmediatePath.Identity).pdb" />
     <Message Text="Running Serialization Tool for Reference Assembly" Importance="normal" />
-    <Exec Command="dotnet Microsoft.XmlSerializer.Generator /force /quiet /assembly:%(TargetSerializationAssemblyAndType.Identity) /type:%(TargetSerializationAssemblyAndType.TargetSerializationType) /out:$(IntermediateOutputPath)" Condition="$([System.String]::new('%(TargetSerializationAssemblyAndType.Identity)').EndsWith('%(TargetSerializationAssemblyAndType.TargetSerializationAssembly).dll'))" ContinueOnError="true" />
+    <Exec Command="dotnet Microsoft.XmlSerializer.Generator /force /quiet /assembly:%(TargetSerializationAssembly.Identity) /type:%(TargetSerializationAssembly.SerializationTypes) /out:$(IntermediateOutputPath)" ContinueOnError="true" />
     <Warning Condition="Exists('$(IntermediateOutputPath)%(ReferenceSerializerName.Identity).cs') != 'true'" Text="SGEN : warning SGEN1: Fail to generate %(ReferenceSerializerName.Identity)'. Please follow the instructions in https://go.microsoft.com/fwlink/?linkid=858594 and try again." />
     <Csc Condition="Exists('$(IntermediateOutputPath)%(ReferenceSerializerName.Identity).cs') == 'true'" ContinueOnError="true" OutputAssembly="$(IntermediateOutputPath)%(ReferenceSerializerName.Identity).dll" References="@(ReferencePath);@(IntermediateAssembly)" EmitDebugInformation="$(DebugSymbols)" Sources="$(IntermediateOutputPath)%(ReferenceSerializerName.Identity).cs" TargetType="Library" ToolExe="$(CscToolExe)" ToolPath="$(CscToolPath)" />
     <Warning Condition="Exists('$(IntermediateOutputPath)%(ReferenceSerializerName.Identity).dll') != 'true' And Exists('$(IntermediateOutputPath)%(ReferenceSerializerName.Identity).cs') == 'true'" Text="SGEN : warning SGEN1: Fail to compile %(ReferenceSerializerName.Identity).cs. Please follow the instructions in https://go.microsoft.com/fwlink/?linkid=858594 and try again." />
-    <Copy Condition="Exists('%(ReferenceSerializerDllImmediatePath.Identity)') == 'true'" SourceFiles="%(ReferenceSerializerDllImmediatePath.Identity)" DestinationFolder="$(OutputPath)" />
+    <Copy Condition="Exists('%(ReferenceSerializeImmediatePath.Identity).dll') == 'true'" SourceFiles="%(ReferenceSerializeImmediatePath.Identity).dll" DestinationFolder="$(OutputPath)" />
   </Target>
 
   <Target Name="CleanReferenceSerializationAssembly" AfterTargets="CoreClean" Condition="@(SerializationAssembly)!=''">
