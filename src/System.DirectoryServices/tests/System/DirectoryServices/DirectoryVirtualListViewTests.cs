@@ -31,6 +31,7 @@ namespace System.DirectoryServices.Tests
             Assert.Equal(afterCount, listView.AfterCount);
             Assert.Equal(0, listView.ApproximateTotal);
             Assert.Equal(0, listView.BeforeCount);
+            Assert.NotNull(listView.DirectoryVirtualListViewContext);
             Assert.Null(listView.DirectoryVirtualListViewContext);
             Assert.Equal(0, listView.Offset);
             Assert.Equal(string.Empty, listView.Target);
