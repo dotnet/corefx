@@ -1207,7 +1207,7 @@ namespace System
                     {
                         int numBytesWritten;
                         writeSuccess = (0 != Interop.Kernel32.WriteFile(hFile, p + offset, count, out numBytesWritten, IntPtr.Zero));
-                        Debug.Assert(!writeSuccess || count == numBytesWritten);
+                        Debug.Assert(writeSuccess);
                     }
                     else
                     {
