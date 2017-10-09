@@ -158,13 +158,14 @@ namespace System
         public static bool IsWindowsSubsystemForLinux => m_isWindowsSubsystemForLinux.Value;
         public static bool IsNotWindowsSubsystemForLinux => !IsWindowsSubsystemForLinux;
 
-        public static bool IsNotFedoraOrRedHatFamily => !IsDistroAndVersion("fedora") && !IsRedHatFamily;
-
         public static bool IsFedora => IsDistroAndVersion("fedora");
+
+        // RedHat family covers RedHat and CentOS
         public static bool IsRedHatFamily => IsRedHatFamilyAndVersion();
         public static bool IsRedHatFamily7 => IsRedHatFamilyAndVersion("7");
         public static bool IsRedHatFamily69 => IsRedHatFamilyAndVersion("6.9");
-        public static bool IsNotRedHatFamily69 => !IsRedHatFamilyAndVersion("6.9");
+        public static bool IsNotRedHatFamily69 => !IsRedHatFamily69;
+        public static bool IsNotFedoraOrRedHatFamily => !IsFedora && !IsRedHatFamily;
 
         private static bool GetIsWindowsSubsystemForLinux()
         {
@@ -272,9 +273,9 @@ namespace System
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 IdVersionPair v = ParseOsReleaseFile();
-                bool isRedHat = v.Id == "rhel";
+
                 // RedHat includes minor version. We need to account for that when comparing
-                if ((isRedHat || v.Id == "centos") && (versionId == null || v.VersionId == versionId || (isRedHat && RedHatVersionEqual(versionId, v.VersionId))))
+                if ((v.Id == "rhel" || v.Id == "centos") && VersionEqual(versionId, v.VersionId))
                 {
                     return true;
                 }
@@ -283,26 +284,30 @@ namespace System
             return false;
         }
 
-        private static bool RedHatVersionEqual(string expectedVersionId, string actualVersionId)
+        private static bool VersionEqual(string expectedVersionId, string actualVersionId)
         {
             if (expectedVersionId == null)
             {
                 return true;
             }
 
-            if (expectedVersionId.Contains("."))
+            string[] expected = expectedVersionId.Split('.');
+            string[] actual = actualVersionId.Split('.');
+
+            if (expected.Length > actual.Length)
             {
-                return expectedVersionId == actualVersionId;
+                return false;
             }
 
-            int dotPos = actualVersionId.IndexOf('.');
-            string minorVersion = actualVersionId;
-            if (dotPos != -1)
+            for (int i = 0; i < expected.Length; i++)
             {
-                minorVersion = minorVersion.Substring(dotPos + 1);
+                if (expected[i] != actual[i])
+                {
+                    return false;
+                }
             }
-            
-            return expectedVersionId == minorVersion;
+
+            return true;
         }
 
         private static IdVersionPair ParseOsReleaseFile()
