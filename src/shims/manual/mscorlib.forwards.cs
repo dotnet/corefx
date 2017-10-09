@@ -21,6 +21,7 @@
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.CultureAwareComparer))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.OrdinalComparer))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.UnitySerializationHolder))]
+[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Diagnostics.Contracts.ContractException))]
 
 // This is temporary as we are building the mscorlib shim against netfx461 which doesn't contain ValueTuples.
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple))]

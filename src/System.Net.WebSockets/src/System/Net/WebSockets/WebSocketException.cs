@@ -127,13 +127,12 @@ namespace System.Net.WebSockets
         private WebSocketException(SerializationInfo serializationInfo, StreamingContext streamingContext)
             : base(serializationInfo, streamingContext)
         {
-            _webSocketErrorCode = (WebSocketError)serializationInfo.GetInt32(nameof(WebSocketErrorCode));
         }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
-            info.AddValue(nameof(WebSocketErrorCode), (int)_webSocketErrorCode);
+            info.AddValue(nameof(WebSocketErrorCode), _webSocketErrorCode);
         }
 
         public override int ErrorCode

@@ -50,7 +50,7 @@ namespace System.Data.SqlClient
         public override void GetObjectData(SerializationInfo si, StreamingContext context)
         {
             base.GetObjectData(si, context);
-            si.AddValue("Errors", null, typeof(SqlErrorCollection));
+            si.AddValue("Errors", null); // Not specifying type to enable serialization of null value of non-serializable type
             si.AddValue("ClientConnectionId", _clientConnectionId, typeof(Guid));
         }
 

@@ -3,10 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Serialization;
 
 namespace System.Net.Http
 {
-    [SuppressMessage("Microsoft.Serialization", "CA2229")]
+    [Serializable]
     public class HttpRequestException : Exception
     {
         public HttpRequestException()
@@ -24,6 +25,10 @@ namespace System.Net.Http
             {
                 HResult = inner.HResult;
             }
+        }
+
+        protected HttpRequestException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
         }
     }
 }

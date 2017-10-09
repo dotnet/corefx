@@ -8,6 +8,8 @@ using System.Text;
 
 namespace System.Data.Odbc
 {
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class OdbcException : System.Data.Common.DbException
     {
         private OdbcErrorCollection _odbcErrors = new OdbcErrorCollection();
@@ -51,8 +53,8 @@ namespace System.Data.Odbc
         public override void GetObjectData(SerializationInfo si, StreamingContext context)
         {
             base.GetObjectData(si, context);
-            si.AddValue("odbcRetcode", (ODBC32.RetCode)100, typeof(ODBC32.RETCODE)); // NO DATA
-            si.AddValue("odbcErrors", null, typeof(OdbcErrorCollection));
+            si.AddValue("odbcRetcode", (ODBC32.RETCODE)100, typeof(ODBC32.RETCODE)); // NO DATA
+            si.AddValue("odbcErrors", null); // Not specifying type to enable serialization of null value of non-serializable type
         }
 
         // mdac bug 62559 - if we don't have it return nothing (empty string)
