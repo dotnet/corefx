@@ -33,10 +33,10 @@ namespace System.Xml
 
         protected XmlException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            _res = (string)info.GetValue("_res", typeof(string));
-            _args = (string[])info.GetValue("_args", typeof(string[]));
-            _lineNumber = (int)info.GetValue("_lineNumber", typeof(int));
-            _linePosition = (int)info.GetValue("_linePosition", typeof(int));
+            _res = (string)info.GetValue("res", typeof(string));
+            _args = (string[])info.GetValue("args", typeof(string[]));
+            _lineNumber = (int)info.GetValue("lineNumber", typeof(int));
+            _linePosition = (int)info.GetValue("linePosition", typeof(int));
 
             // deserialize optional members
             _sourceUri = string.Empty;

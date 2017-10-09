@@ -37,7 +37,7 @@ namespace System.Data.SqlClient
         private SqlException(SerializationInfo si, StreamingContext sc) : base(si, sc) 
         {
             HResult = SqlExceptionHResult;
-            foreach (SerializationEntry siEntry in si) 
+            foreach (SerializationEntry siEntry in si)
             {
                 if ("ClientConnectionId" == siEntry.Name) 
                 {
@@ -78,37 +78,37 @@ namespace System.Data.SqlClient
 
         public byte Class
         {
-            get { return this.Errors[0].Class; }
+            get { return Errors.Count > 0 ? this.Errors[0].Class : default; }
         }
 
         public int LineNumber
         {
-            get { return this.Errors[0].LineNumber; }
+            get { return Errors.Count > 0 ? Errors[0].LineNumber : default; }
         }
 
         public int Number
         {
-            get { return this.Errors[0].Number; }
+            get { return Errors.Count > 0 ? Errors[0].Number : default; }
         }
 
         public string Procedure
         {
-            get { return this.Errors[0].Procedure; }
+            get { return Errors.Count > 0 ? Errors[0].Procedure : default; }
         }
 
         public string Server
         {
-            get { return this.Errors[0].Server; }
+            get { return Errors.Count > 0 ? Errors[0].Server : default; }
         }
 
         public byte State
         {
-            get { return this.Errors[0].State; }
+            get { return Errors.Count > 0 ? Errors[0].State : default; }
         }
 
         override public string Source
         {
-            get { return this.Errors[0].Source; }
+            get { return Errors.Count > 0 ? Errors[0].Source : default; }
         }
 
         public override string ToString()
@@ -118,7 +118,7 @@ namespace System.Data.SqlClient
             sb.AppendFormat(SQLMessage.ExClientConnectionId(), _clientConnectionId);
 
             // Append the error number, state and class if the server provided it
-            if (Number != 0)
+            if (Errors.Count > 0 && Number != 0)
             {
                 sb.AppendLine();
                 sb.AppendFormat(SQLMessage.ExErrorNumberStateClass(), Number, State, Class);

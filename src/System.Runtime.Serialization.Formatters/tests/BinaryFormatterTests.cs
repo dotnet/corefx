@@ -31,7 +31,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         // Used for updating blobs in BinaryFormatterTestData.cs
-        //[Fact]
+        [Fact]
         public void UpdateBlobs()
         {
             string testDataFilePath = GetTestDataFilePath();
@@ -71,7 +71,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
             SanityCheckBlob(obj, blobs);
 
-            foreach (string blob in blobs)
+            foreach (string blob in blobs.Take(1))
             {
                 if (isEqualityComparer)
                 {
@@ -486,7 +486,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
 
             // Exceptions in Net Native can't be reflected and therefore skipping blob sanity check
-            if (obj is Exception && PlatformDetection.IsNetNative)
+            if (obj is Exception/* && PlatformDetection.IsNetNative*/)
             {
                 return;
             }

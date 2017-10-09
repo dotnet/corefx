@@ -62,7 +62,7 @@ namespace System.Data.Odbc
         {
             get
             {
-                if (0 < Errors.Count)
+                if (Errors != null && 0 < Errors.Count)
                 {
                     string source = Errors[0].Source;
                     return string.IsNullOrEmpty(source) ? "" : source; // base.Source;

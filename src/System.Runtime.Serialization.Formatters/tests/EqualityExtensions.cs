@@ -8,7 +8,9 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Data.SqlTypes;
+using System.DirectoryServices.ActiveDirectory;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -22,37 +24,20 @@ namespace System.Runtime.Serialization.Formatters.Tests
     {
         private static MethodInfo GetExtensionMethod(Type extendedType)
         {
-            Type currentType = extendedType;
-
-            while (currentType != null)
+            if (extendedType.IsGenericType)
             {
-                if (extendedType.IsGenericType)
-                {
-                    MethodInfo method = typeof(EqualityExtensions).GetMethods()
-                        ?.SingleOrDefault(m =>
-                            m.Name == "IsEqual" &&
-                            m.GetParameters().Length == 2 &&
-                            m.GetParameters()[0].ParameterType.Name == currentType.Name &&
-                            m.IsGenericMethodDefinition);
+                MethodInfo method = typeof(EqualityExtensions).GetMethods()
+                    ?.SingleOrDefault(m =>
+                        m.Name == "IsEqual" &&
+                        m.GetParameters().Length == 2 &&
+                        m.GetParameters()[0].ParameterType.Name == extendedType.Name &&
+                        m.IsGenericMethodDefinition);
 
-                    // If extension method found, make it generic and return
-                    if (method != null)
-                        return method.MakeGenericMethod(currentType.GenericTypeArguments[0]);
-                }
-                else
-                {
-                    MethodInfo method = typeof(EqualityExtensions).GetMethod("IsEqual", new[] { currentType, currentType });
-
-                    // If suitable extension method found, stop searching.
-                    if (method != null)
-                        return method;
-                }
-                
-                // Go up the hierarchy to check if the base type has a suitable extension method.
-                currentType = currentType.BaseType;
+                // If extension method found, make it generic and return
+                return method?.MakeGenericMethod(extendedType.GenericTypeArguments[0]);
             }
 
-            return null;
+            return typeof(EqualityExtensions).GetMethod("IsEqual", new[] { extendedType, extendedType });
         }
 
         public static bool CheckEquals(object objA, object objB)
@@ -1042,6 +1027,42 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             return IsEqual(@this as Exception, other as Exception) &&
                 @this.InnerExceptions.CheckSequenceEquals(other.InnerExceptions);
+        }
+
+        public static bool IsEqual(this ActiveDirectoryServerDownException @this, ActiveDirectoryServerDownException other)
+        {
+            // Name and ToString are different by design
+
+            return @this != null &&
+                other != null &&
+                // On full framework, line number may be method body start
+                // On Net Native we can't reflect on Exceptions and change its StackTrace
+                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
+                (@this.StackTrace == other.StackTrace)) &&
+                @this.Data.CheckSequenceEquals(other.Data) &&
+                @this.Source == other.Source &&
+                // On Net Native we can't reflect on Exceptions and change its HResult
+                (PlatformDetection.IsNetNative ? true : @this.HResult == other.HResult) &&
+                @this.HelpLink == other.HelpLink &&
+                CheckEquals(@this.InnerException, other.InnerException);
+        }
+
+        public static bool IsEqual(this SqlException @this, SqlException other)
+        {
+            // Source and ToString are different by design
+
+            return @this != null &&
+                other != null &&
+                // On full framework, line number may be method body start
+                // On Net Native we can't reflect on Exceptions and change its StackTrace
+                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
+                (@this.StackTrace == other.StackTrace)) &&
+                @this.Data.CheckSequenceEquals(other.Data) &&
+                @this.Message == other.Message &&
+                // On Net Native we can't reflect on Exceptions and change its HResult
+                (PlatformDetection.IsNetNative ? true : @this.HResult == other.HResult) &&
+                @this.HelpLink == other.HelpLink &&
+                CheckEquals(@this.InnerException, other.InnerException);
         }
 
         public class ReferenceComparer<T> : IEqualityComparer<T> where T: class

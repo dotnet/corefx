@@ -10,7 +10,7 @@ namespace System.ComponentModel.DataAnnotations
     ///     Exception used for validation using <see cref="ValidationAttribute" />.
     /// </summary>
     [Serializable]
-    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.ComponentModel.DataAnnotations, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
     public class ValidationException : Exception
     {
         private ValidationResult _validationResult;
