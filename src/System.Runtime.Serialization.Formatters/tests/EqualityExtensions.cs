@@ -22,19 +22,37 @@ namespace System.Runtime.Serialization.Formatters.Tests
     {
         private static MethodInfo GetExtensionMethod(Type extendedType)
         {
-            if (extendedType.IsGenericType)
+            Type currentType = extendedType;
+
+            while (currentType != null)
             {
-                MethodInfo method = typeof(EqualityExtensions).GetMethods()
+                if (extendedType.IsGenericType)
+                {
+                    MethodInfo method = typeof(EqualityExtensions).GetMethods()
                         ?.SingleOrDefault(m =>
                             m.Name == "IsEqual" &&
                             m.GetParameters().Length == 2 &&
-                            m.GetParameters()[0].ParameterType.Name == extendedType.Name &&
+                            m.GetParameters()[0].ParameterType.Name == currentType.Name &&
                             m.IsGenericMethodDefinition);
-                if (method != null)
-                    return method.MakeGenericMethod(extendedType.GenericTypeArguments[0]);
+
+                    // If extension method found, make it generic and return
+                    if (method != null)
+                        return method.MakeGenericMethod(currentType.GenericTypeArguments[0]);
+                }
+                else
+                {
+                    MethodInfo method = typeof(EqualityExtensions).GetMethod("IsEqual", new[] { currentType, currentType });
+
+                    // If suitable extension method found, stop searching.
+                    if (method != null)
+                        return method;
+                }
+                
+                // Go up the hierarchy to check if the base type has a suitable extension method.
+                currentType = currentType.BaseType;
             }
 
-            return typeof(EqualityExtensions).GetMethod("IsEqual", new[] { extendedType, extendedType });
+            return null;
         }
 
         public static bool CheckEquals(object objA, object objB)
