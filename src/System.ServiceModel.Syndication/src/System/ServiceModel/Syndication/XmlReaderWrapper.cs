@@ -323,7 +323,7 @@ namespace System.ServiceModel.Syndication
 
     internal static class XmlReaderExtensions
     {
-        static private uint s_isTextualNodeBitmap = 0x6018; // 00 0110 0000 0001 1000
+        private const uint IsTextualNodeBitmap = 0x6018; // 00 0110 0000 0001 1000
 
         public static async Task ReadStartElementAsync(this XmlReader reader)
         {
@@ -403,26 +403,26 @@ namespace System.ServiceModel.Syndication
 #if DEBUG
             // This code verifies IsTextualNodeBitmap mapping of XmlNodeType to a bool specifying
             // whether the node is 'textual' = Text, CDATA, Whitespace or SignificantWhitespace.
-            Debug.Assert(0 == (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.None)));
-            Debug.Assert(0 == (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.Element)));
-            Debug.Assert(0 == (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.Attribute)));
-            Debug.Assert(0 != (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.Text)));
-            Debug.Assert(0 != (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.CDATA)));
-            Debug.Assert(0 == (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.EntityReference)));
-            Debug.Assert(0 == (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.Entity)));
-            Debug.Assert(0 == (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.ProcessingInstruction)));
-            Debug.Assert(0 == (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.Comment)));
-            Debug.Assert(0 == (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.Document)));
-            Debug.Assert(0 == (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.DocumentType)));
-            Debug.Assert(0 == (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.DocumentFragment)));
-            Debug.Assert(0 == (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.Notation)));
-            Debug.Assert(0 != (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.Whitespace)));
-            Debug.Assert(0 != (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.SignificantWhitespace)));
-            Debug.Assert(0 == (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.EndElement)));
-            Debug.Assert(0 == (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.EndEntity)));
-            Debug.Assert(0 == (s_isTextualNodeBitmap & (1 << (int)XmlNodeType.XmlDeclaration)));
+            Debug.Assert(0 == (IsTextualNodeBitmap & (1 << (int)XmlNodeType.None)));
+            Debug.Assert(0 == (IsTextualNodeBitmap & (1 << (int)XmlNodeType.Element)));
+            Debug.Assert(0 == (IsTextualNodeBitmap & (1 << (int)XmlNodeType.Attribute)));
+            Debug.Assert(0 != (IsTextualNodeBitmap & (1 << (int)XmlNodeType.Text)));
+            Debug.Assert(0 != (IsTextualNodeBitmap & (1 << (int)XmlNodeType.CDATA)));
+            Debug.Assert(0 == (IsTextualNodeBitmap & (1 << (int)XmlNodeType.EntityReference)));
+            Debug.Assert(0 == (IsTextualNodeBitmap & (1 << (int)XmlNodeType.Entity)));
+            Debug.Assert(0 == (IsTextualNodeBitmap & (1 << (int)XmlNodeType.ProcessingInstruction)));
+            Debug.Assert(0 == (IsTextualNodeBitmap & (1 << (int)XmlNodeType.Comment)));
+            Debug.Assert(0 == (IsTextualNodeBitmap & (1 << (int)XmlNodeType.Document)));
+            Debug.Assert(0 == (IsTextualNodeBitmap & (1 << (int)XmlNodeType.DocumentType)));
+            Debug.Assert(0 == (IsTextualNodeBitmap & (1 << (int)XmlNodeType.DocumentFragment)));
+            Debug.Assert(0 == (IsTextualNodeBitmap & (1 << (int)XmlNodeType.Notation)));
+            Debug.Assert(0 != (IsTextualNodeBitmap & (1 << (int)XmlNodeType.Whitespace)));
+            Debug.Assert(0 != (IsTextualNodeBitmap & (1 << (int)XmlNodeType.SignificantWhitespace)));
+            Debug.Assert(0 == (IsTextualNodeBitmap & (1 << (int)XmlNodeType.EndElement)));
+            Debug.Assert(0 == (IsTextualNodeBitmap & (1 << (int)XmlNodeType.EndEntity)));
+            Debug.Assert(0 == (IsTextualNodeBitmap & (1 << (int)XmlNodeType.XmlDeclaration)));
 #endif
-            return 0 != (s_isTextualNodeBitmap & (1 << (int)nodeType));
+            return 0 != (IsTextualNodeBitmap & (1 << (int)nodeType));
         }
 
         public static async Task ReadEndElementAsync(this XmlReader reader)

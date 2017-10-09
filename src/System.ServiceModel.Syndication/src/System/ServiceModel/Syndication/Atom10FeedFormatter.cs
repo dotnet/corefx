@@ -924,7 +924,6 @@ namespace System.ServiceModel.Syndication
             return result;
         }
 
-
         private async Task ReadItemFromAsync(XmlReaderWrapper reader, SyndicationItem result, Uri feedBaseUri)
         {
             try
