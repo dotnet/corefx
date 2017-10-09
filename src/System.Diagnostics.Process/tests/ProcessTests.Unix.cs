@@ -74,20 +74,30 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [OuterLoop("Opens program")]
-        [PlatformSpecific(TestPlatforms.Linux)]
         public void ProcessStart_DirectoryNameInCurDirectorySameAsFileNameInExecDirectory_Success()
         {
             string fileToOpen = "dotnet";
-            var dotnetFolderInCurDirectory = Path.Combine(Environment.CurrentDirectory, "dotnet");
-            if (!Directory.Exists(dotnetFolderInCurDirectory))
+            string curDir = Environment.CurrentDirectory;
+            string dotnetFolder = Path.Combine(Path.GetTempPath(),"dotnet");
+            bool shouldDelete = !Directory.Exists(dotnetFolder);
+            try
             {
-                Directory.CreateDirectory(dotnetFolderInCurDirectory);
+                Directory.SetCurrentDirectory(Path.GetTempPath());
+                Directory.CreateDirectory(dotnetFolder);
+
+                using (var px = Process.Start(fileToOpen))
+                {
+                    Assert.NotNull(px);
+                }
             }
-            using (var px = Process.Start(fileToOpen))
+            finally
             {
-                px.Kill();
-                px.WaitForExit();
-                Assert.True(px.HasExited);
+                if (shouldDelete)
+                {
+                    Directory.Delete(dotnetFolder);
+                }
+
+                Directory.SetCurrentDirectory(curDir);
             }
         }
 

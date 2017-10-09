@@ -383,7 +383,7 @@ namespace System.Diagnostics
                 try
                 {
                     path = Path.Combine(Path.GetDirectoryName(path), filename);
-                    if (File.Exists(path) && !Directory.Exists(path))
+                    if (File.Exists(path))
                     {
                         return path;
                     }
@@ -393,7 +393,7 @@ namespace System.Diagnostics
 
             // Then check the current directory
             path = Path.Combine(Directory.GetCurrentDirectory(), filename);
-            if (File.Exists(path) && !Directory.Exists(path))
+            if (File.Exists(path))
             {
                 return path;
             }
