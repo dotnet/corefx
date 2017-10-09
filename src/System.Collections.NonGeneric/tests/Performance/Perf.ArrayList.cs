@@ -26,13 +26,13 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 2000000)]
         public void Add()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             foreach (var iteration in Benchmark.Iterations)
             {
                 var elements = new ArrayList();
                 using (iteration.StartMeasurement())
                 {
-                    for (int element = 0; element < innerIteractionCount; element++)
+                    for (int element = 0; element < innerIterationCount; element++)
                     {
                         elements.Add(element);
                     }
@@ -43,13 +43,13 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 8000)]
         public void AddRange()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             ArrayList elements = CreateArrayListOfInts(10000);            
             foreach (var iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int element = 0; element < innerIteractionCount; element++)
+                    for (int element = 0; element < innerIterationCount; element++)
                     {
                         var elementsCollection = new ArrayList();
                         elementsCollection.AddRange(elements);
@@ -61,14 +61,14 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 10)]
         public void BinarySearch()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             ArrayList elements = CreateArrayListOfInts(100000);
             Comparer<int> comparer = Comparer<int>.Default;
             foreach (var iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int index = 0; index < innerIteractionCount; index++)
+                    for (int index = 0; index < innerIterationCount; index++)
                     {
                         for (int i = 0; i < elements.Count; i++)
                         {
@@ -82,7 +82,7 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 5000)]
         public void Clear()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             ArrayList elements = CreateArrayListOfInts(10000);
             int elementsCollectionSize = (int)Benchmark.InnerIterationCount;
             foreach (var iteration in Benchmark.Iterations)
@@ -95,7 +95,7 @@ namespace System.Collections.Tests
                 
                 using (iteration.StartMeasurement())
                 {
-                    for (int index = 0; index < innerIteractionCount; index++)
+                    for (int index = 0; index < innerIterationCount; index++)
                     {
                         elementsCollection[index].Clear();
                     }                        
@@ -106,7 +106,7 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 1000)]
         public void Contains()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             int size = 100000;
             ArrayList elements = CreateArrayListOfInts(size);
             object contained = elements[size / 2];
@@ -114,7 +114,7 @@ namespace System.Collections.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         elements.Contains(contained);
                     }
@@ -125,12 +125,12 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 100000000)]
         public void Ctor_Default()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             foreach (var iteration in Benchmark.Iterations)
             { 
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         new ArrayList();
                     }
@@ -141,14 +141,14 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 10000)]
         public void Ctor_ICollection()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             ArrayList elements = CreateArrayListOfInts(10000);
             object[] array = elements.ToArray();
             foreach (var iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         new ArrayList(array);
                     }
@@ -159,13 +159,13 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 100000000)]
         public void Count()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             ArrayList elements = CreateArrayListOfInts(10000);            
             foreach (var iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         _temp = elements.Count;
                     }
@@ -176,14 +176,14 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 100000000)]
         public void Indexer()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             ArrayList elements = CreateArrayListOfInts((int)Benchmark.InnerIterationCount);
             object temp;
             foreach (var iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int index = 0; index < innerIteractionCount; index++)
+                    for (int index = 0; index < innerIterationCount; index++)
                     {
                         temp = elements[index];
                     }
@@ -194,13 +194,13 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 10000)]
         public void Enumerator()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             ArrayList elements = CreateArrayListOfInts(10000);
             foreach (var iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         foreach (var element in elements) { }
                     }
@@ -211,14 +211,14 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 10000)]
         public void SetCapacity()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             int size = 10000;
             ArrayList elements = CreateArrayListOfInts(size);
             foreach (var iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         // Capacity set back and forth between "size + 1" and "size + 2"
                         elements.Capacity = size + (i % 2) + 1;
@@ -230,14 +230,14 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 50000)]
         public void ToArray()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             foreach (var iteration in Benchmark.Iterations)
             {
                 ArrayList elements = CreateArrayListOfInts(10000);
 
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         elements.ToArray();
                     }
@@ -248,7 +248,7 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 500)]
         public void IndexOf()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             ArrayList elements = CreateArrayListOfInts();
 
             int nonexistentElemetnt = -1;
@@ -260,7 +260,7 @@ namespace System.Collections.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         elements.IndexOf(nonexistentElemetnt);
                         elements.IndexOf(firstElemetnt);
@@ -276,7 +276,7 @@ namespace System.Collections.Tests
         [InlineData(99999, 100000)]
         public void InsertRange(int index, int length)
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             ArrayList elements = CreateArrayListOfInts(length);
             var arrayList = new ArrayList(elements);
 
@@ -284,7 +284,7 @@ namespace System.Collections.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         arrayList.InsertRange(index, elements);
                     }                    
@@ -295,7 +295,7 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 5000)]
         public void CopyTo()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             int size = 10000;
             ArrayList elements = CreateArrayListOfInts(size);
             int[] destination = new int[size];
@@ -304,7 +304,7 @@ namespace System.Collections.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         elements.CopyTo(destination, 0);
                     }                    
@@ -315,7 +315,7 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 10000)]
         public void LastIndexOf()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             int size = 10000;
             ArrayList elements = CreateArrayListOfInts(size);
             int element = size / 2;
@@ -324,7 +324,7 @@ namespace System.Collections.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         elements.LastIndexOf(element);
                     }                    
@@ -335,7 +335,7 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 1000)]
         public void Remove()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             ArrayList elements = CreateArrayListOfInts();
             int element = elements.Count / 2;
 
@@ -343,7 +343,7 @@ namespace System.Collections.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         elements.Remove(element);
                     }                    
@@ -354,7 +354,7 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 10000)]
         public void RemoveRange()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             var random = new Random();
             int size = (int)Benchmark.InnerIterationCount;
             ArrayList elements = new ArrayList(size);
@@ -373,7 +373,7 @@ namespace System.Collections.Tests
 
                 using (iteration.StartMeasurement())
                 {
-                    for (int index = 0; index < innerIteractionCount; index++)
+                    for (int index = 0; index < innerIterationCount; index++)
                     {
                         elementsCollection[index].RemoveRange(1, size - 2);
                     }
@@ -384,7 +384,7 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 1000)]
         public void Reverse()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             int startIndex = 0;
             int count = 100000;
             ArrayList elements = CreateArrayListOfInts(count);
@@ -393,7 +393,7 @@ namespace System.Collections.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         elements.Reverse(startIndex, count);
                     }                   
@@ -404,7 +404,7 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 10000000)]
         public void SetRange()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             int startIndex = 0;
             int size = 100000;
             ArrayList elements = CreateArrayListOfInts(size);
@@ -414,7 +414,7 @@ namespace System.Collections.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         elements.SetRange(startIndex, elements);
                     }                    
@@ -425,7 +425,7 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 20000000)]
         public void GetRange()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             int startIndex = 0;
             int size = 100000;
             ArrayList elements = CreateArrayListOfInts(size);
@@ -434,7 +434,7 @@ namespace System.Collections.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < innerIteractionCount; i++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         elements.GetRange(startIndex, size);
                     }                    
@@ -445,7 +445,7 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 10000000)]
         public void Sort()
         {
-            int innerIteractionCount = (int)Benchmark.InnerIterationCount;
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             int size = (int)Benchmark.InnerIterationCount;           
             var random = new Random();
             int elementsCollectionSize = (int)Benchmark.InnerIterationCount;
@@ -465,7 +465,7 @@ namespace System.Collections.Tests
 
                 using (iteration.StartMeasurement())
                 {
-                    for (int index = 0; index < innerIteractionCount; index++)
+                    for (int index = 0; index < innerIterationCount; index++)
                     {
                         elementsCollection[index].Sort();
                     }
