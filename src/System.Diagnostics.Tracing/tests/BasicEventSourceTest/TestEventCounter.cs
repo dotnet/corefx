@@ -42,7 +42,7 @@ namespace BasicEventSourceTests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "Disabled for non-deterministic errors.  Already fixed in master branch.")]
         public void Test_Write_Metric_EventListener()
         {
             using (var listener = new EventListenerListener())
