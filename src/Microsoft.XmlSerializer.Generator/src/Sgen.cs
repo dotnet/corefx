@@ -81,7 +81,7 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         if(value != string.Empty)
                         {
-                            var typelist = value.Split(';');
+                            string[] typelist = value.Split(';');
                             foreach (var type in typelist)
                             {
                                 types.Add(type);

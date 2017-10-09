@@ -53,7 +53,7 @@
   </Target>
 
   <Target Name="CleanReferenceSerializationAssembly" AfterTargets="CoreClean" Condition="@(SerializationAssembly)!=''">
-    <Message Text="Cleaning serialization files..." Importance="normal" />
+    <Message Text="Cleaning serialization files for reference assemblies ..." Importance="normal" />
     <Delete Condition="Exists('$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll') == 'true'" Files="$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll" />
   </Target>
 </Project>
