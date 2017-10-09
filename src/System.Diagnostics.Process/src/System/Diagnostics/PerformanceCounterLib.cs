@@ -3,10 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 
-using System.Collections.Concurrent;
 #if FEATURE_REGISTRY
 using Microsoft.Win32;
 #endif
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
