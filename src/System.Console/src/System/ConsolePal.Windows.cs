@@ -1208,7 +1208,7 @@ namespace System
                         int numBytesWritten;
                         writeSuccess = (0 != Interop.Kernel32.WriteFile(hFile, p + offset, count, out numBytesWritten, IntPtr.Zero));
                         // In some cases we have seen numBytesWritten returned that is twice count;
-                        // so we aren't asserting the value of it.
+                        // so we aren't asserting the value of it. See corefx #24508
                     }
                     else
                     {
