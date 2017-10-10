@@ -44,8 +44,10 @@
     </PropertyGroup>
     <ItemGroup>
       <_excludeForNetFx Include="@(NetFxReference);netstandard" />
-      <_netstandardShimAssemblies Include="$(_NETStandardRefFolder)\*.dll" Exclude="@(_excludeForNetFx->'$(_NETStandardRefFolder)\%(Identity).dll')" />
-      <FileToExclude Include="@(_netstandardShimAssemblies->'%(FileName)')" />
+      <_allnetstandardAssemblies Include="$(_NETStandardRefFolder)\*.dll" />
+      <_netstandardAssemblyFileNames Include="@(_allnetstandardAssemblies->'%(Filename)')" Exclude="@(_excludeForNetFx)" />
+      <_netstandardShimAssemblies Include="@(_netstandardAssemblyFileNames->'$(_NETStandardRefFolder)\%(Identity).dll')" />
+      <FileToExclude Include="@(_netstandardAssemblyFileNames)" />
     </ItemGroup>
   </Target>
 
