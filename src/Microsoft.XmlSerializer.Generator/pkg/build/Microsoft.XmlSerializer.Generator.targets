@@ -58,6 +58,6 @@
   </Target>
 
   <Target Name="CopySerializerForReferenceAssembly" AfterTargets="PrepareForPublish" Condition="@(SerializationAssembly)!=''">
-    <Copy Condition="Exists('$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll') == 'true'" SourceFiles="$(OutputPath)\$(AssemblyName).XmlSerializers.dll" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="false" />
+    <Copy Condition="Exists('$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll') == 'true'" SourceFiles="$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="false" />
   </Target>
 </Project>
