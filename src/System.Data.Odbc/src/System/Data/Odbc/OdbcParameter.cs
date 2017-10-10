@@ -747,8 +747,6 @@ namespace System.Data.Odbc
                 }
             };
 
-            int cbParameterSize = GetParameterSize(value, offset, ordinal); // count of bytes for the data, for SQLBindParameter
-
             // Upgrade input value type if the size of input value is bigger than the max size of the input value type.
             switch (_bindtype._sql_type)
             {
@@ -774,6 +772,8 @@ namespace System.Data.Odbc
                     }
                     break;
             }
+
+            int cbParameterSize = GetParameterSize(value, offset, ordinal); // count of bytes for the data, for SQLBindParameter
 
             _prepared_Sql_C_Type = sql_c_type;
             _preparedOffset = offset;
