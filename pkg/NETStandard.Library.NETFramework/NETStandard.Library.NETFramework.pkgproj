@@ -54,8 +54,11 @@
       <!-- don't include shims for anything from the targeting pack or built explicitly -->
       <_excludeShimsLib Include="@(_netFxReference);@(_libFileNames)"/>
 
+      <_netstandardrefs Include="$(NETStandardPackageRefPath)\*.dll" />
+      <_netstandardrefsfiles Include="@(_netstandardrefs->'%(Filename)')" Exclude="@(_excludeShimsLib)" />
+
       <!-- fill in with netstandard.dll-based shims -->
-      <LibFile Include="$(NETStandardPackageRefPath)\*.dll" Exclude="@(_excludeShimsLib->'$(NETStandardPackageRefPath)\%(Identity).dll')">
+      <LibFile Include="@(_netstandardrefsfiles->'$(NETStandardPackageRefPath)\%(Identity).dll')">
         <TargetFramework>$(TargetFramework)</TargetFramework>
       </LibFile>
     </ItemGroup>
