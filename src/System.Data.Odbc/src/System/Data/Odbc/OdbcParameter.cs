@@ -752,21 +752,21 @@ namespace System.Data.Odbc
             {
                 case ODBC32.SQL_TYPE.VARBINARY:
                     // Max length of VARBINARY is 8,000 of byte array.
-                    if (_internalSize > 8000)
+                    if (size > 8000)
                     {
                         _bindtype = TypeMap._Image; // will change to LONGVARBINARY
                     }
                     break;
                 case ODBC32.SQL_TYPE.VARCHAR:
                     // Max length of VARCHAR is 8,000 of non-unicode characters.
-                    if (_internalSize > 8000)
+                    if (size > 8000)
                     {
                         _bindtype = TypeMap._Text; // will change to LONGVARCHAR
                     }
                     break;
                 case ODBC32.SQL_TYPE.WVARCHAR:
                     // Max length of WVARCHAR (NVARCHAR) is 4,000 of unicode characters. 
-                    if (_internalSize > 4000)
+                    if (size > 4000)
                     {
                         _bindtype = TypeMap._NText; // will change to WLONGVARCHAR
                     }
