@@ -305,9 +305,8 @@ namespace System.DirectoryServices.Tests
         }
 
         [ConditionalFact(nameof(IsLdapConfigurationExist))]
-        public void TestDirectoryEntryNegativeCases()
+        public void TestInvalidServerPath()
         {
-            // Test invalid server path
             using (DirectoryEntry de = new DirectoryEntry("SomeWrongPath"))
             {
                 Assert.Throws<COMException>(() => { foreach (var e in de.Children) {} } );
@@ -317,8 +316,11 @@ namespace System.DirectoryServices.Tests
                     Assert.Throws<COMException>(() => ds.FindAll() );
                 }
             }
+        }
 
-            // Test with missing user and password data
+        [ConditionalFact(nameof(IsLdapConfigurationExist))]
+        public void TestMissingUserAndPasswordInfo()
+        {
             using (DirectoryEntry de = new DirectoryEntry(LdapConfiguration.Configuration.LdapPath))
             {
                 CheckSpecificException(() => { foreach (var e in de.Children) {} } );
@@ -328,8 +330,11 @@ namespace System.DirectoryServices.Tests
                     CheckSpecificException(() => ds.FindAll());
                 }
             }
+        }
 
-            // Test with invalid user and password data
+        [ConditionalFact(nameof(IsLdapConfigurationExist))]
+        public void TestInvalidUserAndPassword()
+        {
             using (DirectoryEntry de = new DirectoryEntry(LdapConfiguration.Configuration.LdapPath, "wrongUser", "wrongPassword"))
             {
                 CheckSpecificException(() => { foreach (var e in de.Children) {} });
@@ -340,7 +345,6 @@ namespace System.DirectoryServices.Tests
                 }
             }
 
-            // Test with invalid password
             using (DirectoryEntry de = new DirectoryEntry(
                                             LdapConfiguration.Configuration.LdapPath, 
                                             LdapConfiguration.Configuration.UserName, 
@@ -352,12 +356,30 @@ namespace System.DirectoryServices.Tests
                 {
                     ds.Filter = $"(objectClass=*)";
                     CheckSpecificException(() => ds.FindAll() );
+                }
+            }
+        }
 
+        [ConditionalFact(nameof(IsLdapConfigurationExist))]
+        public void TestInvalidSearchFilter()
+        {
+            using (DirectoryEntry de = new DirectoryEntry(
+                                            LdapConfiguration.Configuration.LdapPath, 
+                                            LdapConfiguration.Configuration.UserName, 
+                                            "wrongPassword"
+                                            ))
+            {
+                using (DirectorySearcher ds = new DirectorySearcher(de))
+                {
                     ds.Filter = $"(objectClass=*))"; // invalid search filter
                     CheckSpecificException(() => ds.FindOne() );
                 }
             }
+        }
 
+        [ConditionalFact(nameof(IsLdapConfigurationExist))]
+        public void TestUnAllowedProperty()
+        {
             using (DirectoryEntry de = CreateRootEntry())
             {
                 DeleteOU(de, "NegativeRoot");
@@ -369,7 +391,7 @@ namespace System.DirectoryServices.Tests
                         DirectoryEntry entry = rootOU.Children.Add($"cn=MyNamedObject","Class");
                         entry.Properties["objectClass"].Value = "namedObject";
                         entry.Properties["cn"].Value = "MyNamedObject";
-                        entry.Properties["description"].Value = "description"; // description is now allowed in the schema
+                        entry.Properties["description"].Value = "description"; // description is not allowed in the schema
                         Assert.Throws<DirectoryServicesCOMException>(() => entry.CommitChanges());
                     }
                 }
