@@ -10,7 +10,7 @@ namespace System.Collections.Tests
 {
     public class Perf_ArrayList
     {
-        private static volatile int _temp;
+        private static volatile int s_temp;
 
         private ArrayList CreateArrayListOfInts(int size = 100000)
         {
@@ -27,12 +27,13 @@ namespace System.Collections.Tests
         public void Add()
         {
             int innerIterationCount = (int)Benchmark.InnerIterationCount;
+            var element = new object();
             foreach (var iteration in Benchmark.Iterations)
             {
                 var elements = new ArrayList();
                 using (iteration.StartMeasurement())
                 {
-                    for (int element = 0; element < innerIterationCount; element++)
+                    for (int i = 0; i < innerIterationCount; i++)
                     {
                         elements.Add(element);
                     }
@@ -44,15 +45,21 @@ namespace System.Collections.Tests
         public void AddRange()
         {
             int innerIterationCount = (int)Benchmark.InnerIterationCount;
-            ArrayList elements = CreateArrayListOfInts(10000);            
+            ArrayList elements = CreateArrayListOfInts(10000);
+            int elementsCollectionSize = (int)Benchmark.InnerIterationCount;
             foreach (var iteration in Benchmark.Iterations)
             {
+                ArrayList[] elementsCollection = new ArrayList[elementsCollectionSize];
+                for (int index = 0; index < elementsCollectionSize; index++)
+                {
+                    elementsCollection[index] = new ArrayList(elements);
+                }
+
                 using (iteration.StartMeasurement())
                 {
-                    for (int element = 0; element < innerIterationCount; element++)
+                    for (int index = 0; index < innerIterationCount; index++)
                     {
-                        var elementsCollection = new ArrayList();
-                        elementsCollection.AddRange(elements);
+                        elementsCollection[index].AddRange(elements);
                     }                    
                 }
             }
@@ -167,7 +174,7 @@ namespace System.Collections.Tests
                 {
                     for (int i = 0; i < innerIterationCount; i++)
                     {
-                        _temp = elements.Count;
+                        s_temp = elements.Count;
                     }
                 }
             }
@@ -354,14 +361,8 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 10000)]
         public void RemoveRange()
         {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-            var random = new Random();
             int size = (int)Benchmark.InnerIterationCount;
             ArrayList elements = new ArrayList(size);
-            for (int index = 0; index < size; index++)
-            {
-                elements.Add(random.Next());
-            }
 
             foreach (var iteration in Benchmark.Iterations)
             {
@@ -373,7 +374,7 @@ namespace System.Collections.Tests
 
                 using (iteration.StartMeasurement())
                 {
-                    for (int index = 0; index < innerIterationCount; index++)
+                    for (int index = 0; index < size; index++)
                     {
                         elementsCollection[index].RemoveRange(1, size - 2);
                     }
@@ -445,9 +446,8 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 10000000)]
         public void Sort()
         {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
             int size = (int)Benchmark.InnerIterationCount;           
-            var random = new Random();
+            var random = new Random(32829);
             int elementsCollectionSize = (int)Benchmark.InnerIterationCount;
             ArrayList elements = new ArrayList(size);
             for (int index = 0; index < elements.Count; index++)
@@ -465,7 +465,7 @@ namespace System.Collections.Tests
 
                 using (iteration.StartMeasurement())
                 {
-                    for (int index = 0; index < innerIterationCount; index++)
+                    for (int index = 0; index < size; index++)
                     {
                         elementsCollection[index].Sort();
                     }
