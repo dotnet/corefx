@@ -27,7 +27,7 @@
     <Copy Condition="Exists('$(OutputPath)\$(AssemblyName).XmlSerializers.dll')=='true'" SourceFiles="$(OutputPath)\$(AssemblyName).XmlSerializers.dll" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="false" />
   </Target>
   
- <Target Name="GenerateSerializationAssemblyForReferenceAssembly" AfterTargets="GenerateSerializationAssembly" Condition="@(SerializationAssembly)!=''">
+  <Target Name="GenerateSerializationAssemblyForReferenceAssembly" AfterTargets="GenerateSerializationAssembly" Condition="@(SerializationAssembly)!=''">
     <ItemGroup Condition="@(SerializationAssembly)!=''" Label="Parse SerializationAssembly">
       <SearchSerializationAssembly Include="@(Reference)">
         <AssemblyName>%(SerializationAssembly.Identity)</AssemblyName>
@@ -39,7 +39,7 @@
     <ItemGroup>
       <ReferenceSerializerName Include="%(SerializationAssembly.Identity).XmlSerializers" />
       <ReferenceSerializeImmediatePath Include="$(IntermediateOutputPath)%(ReferenceSerializerName.Identity)" />
-  </ItemGroup>
+    </ItemGroup>
     
     <Delete Files="%(ReferenceSerializeImmediatePath.Identity).dll" />
     <Delete Files="%(ReferenceSerializeImmediatePath.Identity).cs" />
@@ -58,6 +58,6 @@
   </Target>
 
   <Target Name="CopySerializerForReferenceAssembly" AfterTargets="PrepareForPublish" Condition="@(SerializationAssembly)!=''">
-    <Copy Condition="Exists('$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll') == 'true'" SourceFiles="$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="false" />
+    <Copy Condition="Exists('$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll') == 'true'" SourceFiles="$(OutputPath)\$(AssemblyName).XmlSerializers.dll" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="false" />
   </Target>
 </Project>
