@@ -12,6 +12,7 @@ namespace System.DirectoryServices.Tests
     public class DirectoryServicesTests
     {
         internal static bool IsLdapConfigurationExist => LdapConfiguration.Configuration != null;
+        internal static bool IsActiveDirectoryServer => IsLdapConfigurationExist && LdapConfiguration.Configuration.IsActiveDirectoryServer;
         
         [ConditionalFact(nameof(IsLdapConfigurationExist))]
         public void TestOU() // adding and removing organization unit
@@ -301,6 +302,175 @@ namespace System.DirectoryServices.Tests
                     DeleteOU(de, "RootToDelete");
                 }
             }
+        }
+
+        [ConditionalFact(nameof(IsLdapConfigurationExist))]
+        public void TestDirectoryEntryNegativeCases()
+        {
+            // Test invalid server path
+            using (DirectoryEntry de = new DirectoryEntry("SomeWrongPath"))
+            {
+                Assert.Throws<COMException>(() => { foreach (var e in de.Children) {} } );
+                using (DirectorySearcher ds = new DirectorySearcher(de))
+                {
+                    ds.Filter = $"(objectClass=*)";
+                    Assert.Throws<COMException>(() => ds.FindAll() );
+                }
+            }
+
+            // Test with missing user and password data
+            using (DirectoryEntry de = new DirectoryEntry(LdapConfiguration.Configuration.LdapPath))
+            {
+                CheckSpecificException(() => { foreach (var e in de.Children) {} } );
+                using (DirectorySearcher ds = new DirectorySearcher(de))
+                {
+                    ds.Filter = $"(objectClass=*)";
+                    CheckSpecificException(() => ds.FindAll());
+                }
+            }
+
+            // Test with invalid user and password data
+            using (DirectoryEntry de = new DirectoryEntry(LdapConfiguration.Configuration.LdapPath, "wrongUser", "wrongPassword"))
+            {
+                CheckSpecificException(() => { foreach (var e in de.Children) {} });
+                using (DirectorySearcher ds = new DirectorySearcher(de))
+                {
+                    ds.Filter = $"(objectClass=*)";
+                    CheckSpecificException(() => ds.FindAll() );
+                }
+            }
+
+            // Test with invalid password
+            using (DirectoryEntry de = new DirectoryEntry(
+                                            LdapConfiguration.Configuration.LdapPath, 
+                                            LdapConfiguration.Configuration.UserName, 
+                                            "wrongPassword"
+                                            ))
+            {
+                CheckSpecificException(() => { foreach (var e in de.Children) {} } );
+                using (DirectorySearcher ds = new DirectorySearcher(de))
+                {
+                    ds.Filter = $"(objectClass=*)";
+                    CheckSpecificException(() => ds.FindAll() );
+
+                    ds.Filter = $"(objectClass=*))"; // invalid search filter
+                    CheckSpecificException(() => ds.FindOne() );
+                }
+            }
+
+            using (DirectoryEntry de = CreateRootEntry())
+            {
+                DeleteOU(de, "NegativeRoot");
+                
+                try
+                {
+                    using (DirectoryEntry rootOU = CreateOU(de, "NegativeRoot", "Negative Test Root OU"))
+                    {
+                        DirectoryEntry entry = rootOU.Children.Add($"cn=MyNamedObject","Class");
+                        entry.Properties["objectClass"].Value = "namedObject";
+                        entry.Properties["cn"].Value = "MyNamedObject";
+                        entry.Properties["description"].Value = "description"; // description is now allowed in the schema
+                        Assert.Throws<DirectoryServicesCOMException>(() => entry.CommitChanges());
+                    }
+                }
+                finally
+                {
+                    DeleteOU(de, "NegativeRoot");
+                }
+            }
+        }
+
+        [ConditionalFact(nameof(IsLdapConfigurationExist))]
+        public void TestSearch()
+        {
+            using (DirectoryEntry de = CreateRootEntry())
+            {
+                DeleteOU(de, "SearchRoot");
+                
+                try
+                {
+                    using (DirectoryEntry rootOU = CreateOU(de, "SearchRoot", "Root OU"))
+                    using (DirectoryEntry childOU = CreateOU(rootOU, "Search.Child1", "Root Child 1 OU"))
+                    using (DirectoryEntry anotherChildOU = CreateOU(rootOU, "Search.Child2", "Root Child 2 OU"))
+                    using (DirectoryEntry grandChildOU = CreateOU(childOU, "Search.GrandChild", "Grand Child OU"))
+                    using (DirectoryEntry user1 = CreateOrganizationalRole(grandChildOU, "user.search.grandChild.1", "Grand Child User", "1 111 111 1111"))
+                    using (DirectoryEntry user2 = CreateOrganizationalRole(grandChildOU, "user.search.grandChild.2", "Grand Child User", "1 222 222 2222"))
+                    {
+                        user1.Properties["postalCode"].Value = 98052;
+                        user1.Properties["postalAddress"].Value = "12345 SE 1st Street, City1, State1";
+                        user1.CommitChanges();
+
+                        user2.Properties["postalCode"].Value = 98088;
+                        user2.Properties["postalAddress"].Value = "67890 SE 2nd Street, City2, State2";
+                        user2.CommitChanges();
+
+                        using (DirectorySearcher ds = new DirectorySearcher(rootOU))
+                        {
+                            ds.ClientTimeout = new TimeSpan(0, 2, 0);
+                            ds.Filter = "(objectClass=organizationalUnit)";
+                            Assert.Equal(4, ds.FindAll().Count);
+
+                            ds.Filter = "(objectClass=organizationalRole)";
+                            Assert.Equal(2, ds.FindAll().Count);
+
+                            ds.Filter = "(ou=SearchRoot)";
+                            Assert.Equal(1, ds.FindAll().Count);
+
+                            ds.Filter = "(ou=Search.Child1)";
+                            Assert.Equal(1, ds.FindAll().Count);
+                            
+                            ds.Filter = "(ou=Search.Child2)";
+                            Assert.Equal(1, ds.FindAll().Count);
+                            
+                            ds.Filter = "(ou=Search.GrandChild)";
+                            Assert.Equal(1, ds.FindAll().Count);
+
+                            ds.Filter = "(description=Grand Child OU)";
+                            Assert.Equal(1, ds.FindAll().Count);
+
+                            ds.Filter = "(description=*)";
+                            Assert.Equal(6, ds.FindAll().Count);
+
+                            ds.Filter = "(&(description=*)(objectClass=organizationalUnit))";
+                            Assert.Equal(4, ds.FindAll().Count);
+
+                            ds.Filter = "(&(description=*)(objectClass=organizationalRole))";
+                            Assert.Equal(2, ds.FindAll().Count);
+
+                            ds.Filter = "(&(description=No Description)(objectClass=organizationalRole))";
+                            Assert.Equal(0, ds.FindAll().Count);
+
+                            ds.Filter = "(postalCode=*)";
+                            Assert.Equal(2, ds.FindAll().Count);
+
+                            ds.Filter = "(postalCode=98052)";
+                            Assert.Equal(1, ds.FindAll().Count);
+                            SearchResult sr = ds.FindOne();
+                            Assert.Equal("98052", sr.Properties["postalCode"][0]);
+
+                            ds.Filter = "(postalCode=98088)";
+                            Assert.Equal(1, ds.FindAll().Count);
+                            sr = ds.FindOne();
+                            Assert.Equal("98088", sr.Properties["postalCode"][0]);
+                        }
+                    }
+                }
+                finally
+                {
+                    DeleteOU(de, "SearchRoot");
+                }
+            }
+        }
+
+        private void CheckSpecificException(Action blockToExecute)
+        {
+            Exception exception = Record.Exception(blockToExecute);
+            Assert.NotNull(exception);
+
+            if (IsActiveDirectoryServer)
+                Assert.IsType<DirectoryServicesCOMException>(exception);
+            else
+                Assert.IsType<COMException>(exception);
         }
 
         private DirectoryEntry CreateOU(DirectoryEntry de, string ou, string description)
