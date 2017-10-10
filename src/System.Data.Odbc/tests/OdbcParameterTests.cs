@@ -154,14 +154,13 @@ namespace System.Data.Odbc.Tests
                     "SET @v4 = datalength(@v2); " +
                 "END;";
 
-            DataTestUtility.RunNonQuery(DataTestUtility.OdbcConnStr, removeExistingStoredProcSql);
-            DataTestUtility.RunNonQuery(DataTestUtility.OdbcConnStr, createTestStoredProcSql);
-
-            DbAccessor dbAccessUtil = new DbAccessor();
-            dbAccessUtil.connectSqlServer(DataTestUtility.OdbcConnStr);
-
             try
             {
+                DataTestUtility.RunNonQuery(DataTestUtility.OdbcConnStr, removeExistingStoredProcSql);
+                DataTestUtility.RunNonQuery(DataTestUtility.OdbcConnStr, createTestStoredProcSql);
+
+                DbAccessor dbAccessUtil = new DbAccessor();
+                dbAccessUtil.connectSqlServer(DataTestUtility.OdbcConnStr);
                 dbAccessUtil.callProc("{ call testStoredProc(?,?,?,?) }", procDataType, procDataSize, v1, out v2, out v3, out v4);
                 dbAccessUtil.commit();
                 dbAccessUtil.disconnect();
