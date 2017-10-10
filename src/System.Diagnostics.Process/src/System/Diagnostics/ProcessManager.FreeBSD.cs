@@ -13,7 +13,7 @@ namespace System.Diagnostics
         /// <summary>Gets the IDs of all processes on the current machine.</summary>
         public static int[] GetProcessIds()
         {
-            return Interop.libutil.proc_listallpids();
+            return Interop.Process.proc_listallpids();
         }
 
         /// <summary>Gets process infos for each process on the specified machine.</summary>
@@ -58,22 +58,16 @@ namespace System.Diagnostics
 
             // Try to get the task info. This can fail if the user permissions don't permit
             // this user context to query the specified process
-            ProcessInfo info = Interop.libutil.GetProcessInfoById(pid);
-            //if (info.HasValue)
-            if (true)
+            ProcessInfo iinfo = Interop.Process.GetProcessInfoById(pid);
+
+            procInfo.ProcessName = iinfo.ProcessName;
+            procInfo.BasePriority = iinfo.BasePriority;
+            procInfo.VirtualBytes = iinfo.VirtualBytes;
+            procInfo.WorkingSet = iinfo.WorkingSet;
+            procInfo.SessionId = iinfo.SessionId;
+            foreach (ThreadInfo ti in iinfo._threadInfoList)
             {
-                // Set the values we have; all the other values don't have meaning or don't exist
-                //unsafe { procInfo.ProcessName = Marshal.PtrToStringAnsi(new IntPtr(temp.pbsd.pbi_comm)); }
-                procInfo.ProcessName = info.ProcessName;
-                procInfo.BasePriority = info.BasePriority;
-                procInfo.VirtualBytes = info.VirtualBytes;
-                procInfo.WorkingSet = info.WorkingSet;
-                procInfo.SessionId = info.SessionId;
-                //procInfo._threadInfoList = info._threadInfoList;
-                foreach (ThreadInfo ti in info._threadInfoList)
-                {
                     procInfo._threadInfoList.Add(ti);
-                }
             }
 
             return procInfo;
@@ -90,7 +84,7 @@ namespace System.Diagnostics
             // and why MainModule exists.
             try
             {
-                string exePath = Interop.libutil.getProcPath(processId);
+                string exePath = Interop.Process.getProcPath(processId);
                 if (!string.IsNullOrEmpty(exePath))
                 {
                     return new ProcessModuleCollection(1)
@@ -112,38 +106,5 @@ namespace System.Diagnostics
         // ---- Unix PAL layer ends here ----
         // ----------------------------------
 
-        //private static System.Diagnostics.ThreadState ConvertOsxThreadRunStateToThreadState(Interop.libproc.ThreadRunState state)
-        private static System.Diagnostics.ThreadState  ConvertOsxThreadRunStateToThreadState()
-        {
-            return System.Diagnostics.ThreadState.Running;
-            //switch (state)
-            //{
-
-                //case Interop.libproc.ThreadRunState.TH_STATE_RUNNING:
-                //    return System.Diagnostics.ThreadState.Running;
-                //case Interop.libproc.ThreadRunState.TH_STATE_STOPPED:
-                //    return System.Diagnostics.ThreadState.Terminated;
-                //case Interop.libproc.ThreadRunState.TH_STATE_HALTED:
-                //    return System.Diagnostics.ThreadState.Wait;
-                //case Interop.libproc.ThreadRunState.TH_STATE_UNINTERRUPTIBLE:
-                //    return System.Diagnostics.ThreadState.Running;
-                //case Interop.libproc.ThreadRunState.TH_STATE_WAITING:
-                //    return System.Diagnostics.ThreadState.Standby;
-            //    default:
-            //        throw new ArgumentOutOfRangeException(nameof(state));
-           // }
-        }
-
-        //private static System.Diagnostics.ThreadWaitReason ConvertOsxThreadFlagsToWaitReason(Interop.libproc.ThreadFlags flags)
-        private static System.Diagnostics.ThreadWaitReason ConvertOsxThreadFlagsToWaitReason()
-        {
-             return System.Diagnostics.ThreadWaitReason.Unknown;
-
-            // Since ThreadWaitReason isn't a flag, we have to do a mapping and will lose some information.
-            //if ((flags & Interop.libproc.ThreadFlags.TH_FLAGS_SWAPPED) == Interop.libproc.ThreadFlags.TH_FLAGS_SWAPPED)
-            //    return System.Diagnostics.ThreadWaitReason.PageOut;
-            //else
-            //    return System.Diagnostics.ThreadWaitReason.Unknown; // There isn't a good mapping for anything else
-        }
-    }    
+    }
 }

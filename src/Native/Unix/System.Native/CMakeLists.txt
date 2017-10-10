@@ -19,6 +19,7 @@ set(NATIVE_SOURCES
     pal_time.cpp
     pal_uid.cpp
     pal_datetime.cpp
+    pal_sysctl.cpp
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL Linux)

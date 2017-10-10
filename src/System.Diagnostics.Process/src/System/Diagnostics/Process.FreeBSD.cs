@@ -44,10 +44,9 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveId);
-                Interop.libutil.proc_stats stat = Interop.libutil.getThreadInfo(_processId, 0);
-                long unixSeconds = DateTimeOffset.Now.ToUnixTimeSeconds();
+                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, 0);
 
-                return  DateTime.Now.Subtract(TimeSpan.FromSeconds(unixSeconds-stat.startTime));
+                return  new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(stat.startTime);
             }
         }
 
@@ -61,7 +60,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveId);
-                Interop.libutil.proc_stats stat = Interop.libutil.getThreadInfo(_processId, 0);
+                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, 0);
                 return Process.TicksToTimeSpan(stat.userTime + stat.systemTime);
             }
         }
@@ -76,7 +75,7 @@ namespace System.Diagnostics
             {
                 EnsureState(State.HaveId);
 
-                Interop.libutil.proc_stats stat = Interop.libutil.getThreadInfo(_processId, 0);
+                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, 0);
                 return Process.TicksToTimeSpan(stat.userTime);
             }
         }
@@ -88,7 +87,7 @@ namespace System.Diagnostics
             {
                 EnsureState(State.HaveId);
 
-                Interop.libutil.proc_stats stat = Interop.libutil.getThreadInfo(_processId, 0);
+                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, 0);
                 return Process.TicksToTimeSpan(stat.systemTime);
             }
         }
@@ -114,7 +113,8 @@ namespace System.Diagnostics
         /// </summary>
         private void GetWorkingSetLimits(out IntPtr minWorkingSet, out IntPtr maxWorkingSet)
         {
-            // We can only do this for the current process on OS X
+            // Current implementation on FreeBSD uses getrlimit() and that works only for
+            // current process.
             if (_processId != Interop.Sys.GetPid())
                 throw new PlatformNotSupportedException(SR.OsxExternalProcessWorkingSetNotSupported);
 
@@ -143,7 +143,8 @@ namespace System.Diagnostics
         /// <param name="resultingMax">The resulting maximum working set limit after any changes applied.</param>
         private void SetWorkingSetLimitsCore(IntPtr? newMin, IntPtr? newMax, out IntPtr resultingMin, out IntPtr resultingMax)
         {
-            // We can only do this for the current process on OS X
+            // Current implementation on FreeBSD uses getrlimit() and that works only for
+            // current process.
             if (_processId != Interop.Sys.GetPid())
                 throw new PlatformNotSupportedException(SR.OsxExternalProcessWorkingSetNotSupported);
 
@@ -193,7 +194,7 @@ namespace System.Diagnostics
         /// <summary>Gets the path to the current executable, or null if it could not be retrieved.</summary>
         private static string GetExePath()
         {
-            return Interop.libutil.getProcPath(Interop.Sys.GetPid());
+            return Interop.Process.getProcPath(Interop.Sys.GetPid());
         }
 
         // ----------------------------------

@@ -229,7 +229,7 @@ namespace System.Diagnostics.Tests
             string path = GetTestFilePath();
             File.Create(path).Dispose();
             int mode;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")))
+            if (PlatformDetection.IsFreeBSD)
             {
                 mode = Convert.ToInt32("644", 8);
             }

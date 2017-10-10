@@ -15,7 +15,7 @@ namespace System.Diagnostics
         {
             get
             {
-                Interop.libutil.proc_stats stat = Interop.libutil.getThreadInfo(_processId, Id);
+                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, Id);
                 return Interop.Sys.GetThreadPriorityFromNiceValue((int)stat.nice);
             }
             set
@@ -41,7 +41,7 @@ namespace System.Diagnostics
         {
             get
             {
-                Interop.libutil.proc_stats stat = Interop.libutil.getThreadInfo(_processId, Id);
+                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, Id);
                 return Process.TicksToTimeSpan(stat.userTime + stat.systemTime);
             }
         }
@@ -54,7 +54,7 @@ namespace System.Diagnostics
         {
             get
             {
-                Interop.libutil.proc_stats stat = Interop.libutil.getThreadInfo(_processId, Id);
+                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, Id);
                 return Process.TicksToTimeSpan(stat.userTime);
             }
         }
@@ -67,7 +67,7 @@ namespace System.Diagnostics
         {
             get
             {
-                Interop.libutil.proc_stats stat = Interop.libutil.getThreadInfo(_processId, Id);
+                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, Id);
                 return Process.TicksToTimeSpan(stat.systemTime);
             }
 
