@@ -27,16 +27,13 @@
     <Copy Condition="Exists('$(OutputPath)\$(AssemblyName).XmlSerializers.dll')=='true'" SourceFiles="$(OutputPath)\$(AssemblyName).XmlSerializers.dll" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="false" />
   </Target>
   
-  <Target Name="GenerateSerializationAssemblyForReferenceAssembly" AfterTargets="GenerateSerializationAssembly" Condition="@(SerializationAssembly)!=''">
-    <ItemGroup Condition="@(SerializationAssembly)!=''" Label="Parse SerializationAssembly">
+  <Target Name="GenerateSerializationAssemblyForReferenceAssemblies" AfterTargets="GenerateSerializationAssembly" Condition="@(SerializationAssembly)!=''">
+    <ItemGroup>
       <SearchSerializationAssembly Include="@(Reference)">
         <AssemblyName>%(SerializationAssembly.Identity)</AssemblyName>
         <SerializationTypes>%(SerializationAssembly.SerializationType)</SerializationTypes>
       </SearchSerializationAssembly>
       <TargetSerializationAssembly Include="@(SearchSerializationAssembly)" Condition="$([System.String]::new('%(SearchSerializationAssembly.Identity)').EndsWith('%(SearchSerializationAssembly.AssemblyName).dll'))" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ReferenceSerializerName Include="%(SerializationAssembly.Identity).XmlSerializers" />
       <ReferenceSerializeImmediatePath Include="$(IntermediateOutputPath)%(ReferenceSerializerName.Identity)" />
     </ItemGroup>
@@ -52,12 +49,12 @@
     <Copy Condition="Exists('%(ReferenceSerializeImmediatePath.Identity).dll') == 'true'" SourceFiles="%(ReferenceSerializeImmediatePath.Identity).dll" DestinationFolder="$(OutputPath)" />
   </Target>
 
-  <Target Name="CleanReferenceSerializationAssembly" AfterTargets="CoreClean" Condition="@(SerializationAssembly)!=''">
+  <Target Name="CleanReferenceSerializationAssemblies" AfterTargets="CoreClean" Condition="@(SerializationAssembly)!=''">
     <Message Text="Cleaning serialization files for reference assemblies ..." Importance="normal" />
     <Delete Condition="Exists('$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll') == 'true'" Files="$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll" />
   </Target>
 
-  <Target Name="CopySerializerForReferenceAssembly" AfterTargets="PrepareForPublish" Condition="@(SerializationAssembly)!=''">
+  <Target Name="CopySerializerForReferenceAssemblies" AfterTargets="PrepareForPublish" Condition="@(SerializationAssembly)!=''">
     <Copy Condition="Exists('$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll') == 'true'" SourceFiles="$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="false" />
   </Target>
 </Project>
