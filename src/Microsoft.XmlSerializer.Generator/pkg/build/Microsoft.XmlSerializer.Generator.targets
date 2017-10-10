@@ -56,4 +56,8 @@
     <Message Text="Cleaning serialization files for reference assemblies ..." Importance="normal" />
     <Delete Condition="Exists('$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll') == 'true'" Files="$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll" />
   </Target>
+
+  <Target Name="CopySerializerForReferenceAssembly" AfterTargets="PrepareForPublish" Condition="@(SerializationAssembly)!=''">
+    <Copy Condition="Exists('$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll') == 'true'" SourceFiles="$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="false" />
+  </Target>
 </Project>
