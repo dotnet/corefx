@@ -1,0 +1,6 @@
+// The netfx facades have their versions locked, but we should
+// permit the netcoreapp implementations to use a higher runtime assembly
+// version than the ref assembly.
+// The refs shouldn't get bumped because that could push the 1.0 assembly to
+// a higher version than the 1.1 assembly.
+PermitHigherCompatibleImplementationVersion
