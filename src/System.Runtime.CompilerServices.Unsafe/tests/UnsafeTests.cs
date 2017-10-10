@@ -432,12 +432,15 @@ namespace System.Runtime.CompilerServices
         }
 
         [Fact]
-        public static unsafe void InAsRef()
+        public static void InAsRef()
         {
             int[] a = new int[] { 0x123, 0x234, 0x345, 0x456 };
 
             ref int r = ref Unsafe.AsRef<int>(a[0]);
             Assert.Equal(0x123, r);
+
+            r = 0x42;
+            Assert.Equal(0x42, a[0]);
         }
 
         [Fact]
