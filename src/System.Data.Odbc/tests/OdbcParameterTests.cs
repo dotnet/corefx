@@ -138,12 +138,14 @@ namespace System.Data.Odbc.Tests
 
         private static void RunTestProcedure(string procDataType, int procDataSize, object v1, out object v2, out int v3, out int v4)
         {
+            string procName = DataTestUtility.GetUniqueName("ODBCTEST", "", "");
+
             string removeExistingStoredProcSql =
-                "IF OBJECT_ID('testStoredProc', 'P') IS NOT NULL " +
-                    "DROP PROCEDURE testStoredProc;";
+                $"IF OBJECT_ID('{procName}', 'P') IS NOT NULL " +
+                    $"DROP PROCEDURE {procName};";
 
             string createTestStoredProcSql =
-                "CREATE PROCEDURE testStoredProc (" +
+                $"CREATE PROCEDURE {procName} (" +
                     $"@v1 {procDataType}({procDataSize}), " +
                     $"@v2 {procDataType}({procDataSize}) OUT, " +
                     "@v3 INTEGER OUT, " +
@@ -161,7 +163,7 @@ namespace System.Data.Odbc.Tests
 
                 DbAccessor dbAccessUtil = new DbAccessor();
                 dbAccessUtil.connectSqlServer(DataTestUtility.OdbcConnStr);
-                dbAccessUtil.callProc("{ call testStoredProc(?,?,?,?) }", procDataType, procDataSize, v1, out v2, out v3, out v4);
+                dbAccessUtil.callProc("{ call "+ procName+"(?,?,?,?) }", procDataType, procDataSize, v1, out v2, out v3, out v4);
                 dbAccessUtil.commit();
                 dbAccessUtil.disconnect();
             }
