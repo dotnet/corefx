@@ -484,6 +484,54 @@ namespace System.DirectoryServices.Tests
             }
         }
 
+        [ConditionalFact(nameof(IsLdapConfigurationExist))]
+        public void TestAttributesWithDifferentTypes()
+        {
+            // Windows server looks not supporting extensibleObject.
+            // It throw exception with the message "The specified directory service attribute or value does not exist."
+            if (IsActiveDirectoryServer)
+                return;
+
+            using (DirectoryEntry de = CreateRootEntry())
+            {
+                DeleteOU(de, "AttributesRoot");
+
+                try
+                {
+                    using (DirectoryEntry rootOU = CreateOU(de, "AttributesRoot", "Attributes Root OU"))
+                    {
+                        DirectoryEntry cnEntry = rootOU.Children.Add($"cn=CustomUser","Class");
+                        cnEntry.Properties["objectClass"].Value = new string [] { "extensibleObject", "organizationalRole" };
+                        cnEntry.Properties["cn"].Value = "CustomUser";
+                        cnEntry.Properties["description"].Value = "Some Custom User";
+                        cnEntry.Properties["telephoneNumber"].Value = "1 111 111 11111";
+                        cnEntry.Properties["changeNumber"].Value = 101;
+                        cnEntry.Properties["deleteOldRDN"].Value = true;
+                        cnEntry.CommitChanges();
+
+                        using (DirectorySearcher ds = new DirectorySearcher(de))
+                        {
+                            ds.ClientTimeout = new TimeSpan(0, 2, 0);
+                            ds.Filter = $"(cn=CustomUser)";
+                            SearchResult sr = ds.FindOne();
+                            if (sr == null)
+                            {
+                                throw new DirectoryServicesCOMException($"Couldn't find CustomUser in the entry {de.Name}");
+                            }
+                            Assert.Equal(true, sr.Properties["deleteOldRDN"][0]);
+                            Assert.Equal(101, sr.Properties["changeNumber"][0]);
+                            Assert.Equal("Some Custom User", sr.Properties["description"][0]);
+                            Assert.Equal("1 111 111 11111", sr.Properties["telephoneNumber"][0]);
+                        }
+                    }
+                }
+                finally
+                {
+                    DeleteOU(de, "AttributesRoot");
+                }
+            }
+        }
+
         private void CheckSpecificException(Action blockToExecute)
         {
             Exception exception = Record.Exception(blockToExecute);
