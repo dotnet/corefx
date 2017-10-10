@@ -13,6 +13,7 @@
     <AssemblyVersion>4.2.0.1</AssemblyVersion>
     <AssemblyVersion Condition="'$(TargetGroup)'=='net46'">4.0.0.0</AssemblyVersion>
     <AssemblyVersion Condition="'$(TargetGroup)'=='net461' or '$(TargetGroup)' == 'netcore50'">4.1.0.0</AssemblyVersion>
+    <AssemblyVersion Condition="'$(TargetGroup)'=='net463'">4.2.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CLSCompliant>false</CLSCompliant>
     <DefineConstants>INTERNAL_ASYMMETRIC_IMPLEMENTATIONS</DefineConstants>
