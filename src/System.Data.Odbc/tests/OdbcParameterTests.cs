@@ -135,7 +135,6 @@ namespace System.Data.Odbc.Tests
             Assert.Equal(str1000.Length * 2, inputLength);
             Assert.Equal(str2000.Length * 2, outputLength);
         }
-        
 
         private static void RunTestProcedure(string procDataType, int procDataSize, object v1, out object v2, out int v3, out int v4)
         {
@@ -155,18 +154,23 @@ namespace System.Data.Odbc.Tests
                     "SET @v4 = datalength(@v2); " +
                 "END;";
 
-            DataTestUtility.RunNonQuery(DataTestUtility.TcpConnStr, removeExistingStoredProcSql);
-            DataTestUtility.RunNonQuery(DataTestUtility.TcpConnStr, createTestStoredProcSql);
+            DataTestUtility.RunNonQuery(DataTestUtility.OdbcConnStr, removeExistingStoredProcSql);
+            DataTestUtility.RunNonQuery(DataTestUtility.OdbcConnStr, createTestStoredProcSql);
 
             DbAccessor dbAccessUtil = new DbAccessor();
             dbAccessUtil.connectSqlServer(DataTestUtility.OdbcConnStr);
-            dbAccessUtil.callProc("{ call testStoredProc(?,?,?,?) }", procDataType, procDataSize, v1, out v2, out v3, out v4);
-            dbAccessUtil.commit();
-            dbAccessUtil.disconnect();
 
-            DataTestUtility.RunNonQuery(DataTestUtility.TcpConnStr, removeExistingStoredProcSql);
+            try
+            {
+                dbAccessUtil.callProc("{ call testStoredProc(?,?,?,?) }", procDataType, procDataSize, v1, out v2, out v3, out v4);
+                dbAccessUtil.commit();
+                dbAccessUtil.disconnect();
+            }
+            finally
+            {
+                DataTestUtility.RunNonQuery(DataTestUtility.OdbcConnStr, removeExistingStoredProcSql);
+            }
         }
-        
 
         private class DbAccessor
         {

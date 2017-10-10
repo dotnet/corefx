@@ -9,27 +9,24 @@ namespace System.Data.Odbc.Tests
     public static class DataTestUtility
     {
         public static readonly string OdbcConnStr = null;
-        public static readonly string TcpConnStr = null;
 
         static DataTestUtility()
         {
             OdbcConnStr = Environment.GetEnvironmentVariable("TEST_ODBC_CONN_STR");
-            TcpConnStr = Environment.GetEnvironmentVariable("TEST_TCP_CONN_STR");
         }
 
         public static bool AreConnStringsSetup()
         {
-            return !string.IsNullOrEmpty(OdbcConnStr) && !string.IsNullOrEmpty(TcpConnStr);
+            return !string.IsNullOrEmpty(OdbcConnStr);
         }
 
         public static void RunNonQuery(string connectionString, string sql)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (OdbcConnection connection = new OdbcConnection(connectionString))
             {
-                connection.Open();
-                using (SqlCommand command = connection.CreateCommand())
+                using (OdbcCommand command = new OdbcCommand(sql, connection))
                 {
-                    command.CommandText = sql;
+                    connection.Open();
                     command.ExecuteNonQuery();
                 }
             }
