@@ -21,7 +21,7 @@
 
   <!-- Auto-upgraded properties for each build info dependency. -->
   <PropertyGroup>
-    <PlatformPackageVersion>2.0.0</PlatformPackageVersion>
+    <PlatformPackageVersion>2.0.1</PlatformPackageVersion>
     <CoreFxExpectedPrerelease>servicing-25727-01</CoreFxExpectedPrerelease>
     <CoreClrPackageVersion>2.0.2-servicing-25730-01</CoreClrPackageVersion>
     <ExternalExpectedPrerelease>beta-25307-00</ExternalExpectedPrerelease>
