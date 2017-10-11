@@ -27,7 +27,7 @@ namespace System.ServiceModel.Syndication.Tests
         NodeType
     }
 
-    public class XmlDiff :IDisposable
+    public class XmlDiff
     {
         XmlDiffDocument _SourceDoc;
         XmlDiffDocument _TargetDoc;
@@ -258,7 +258,9 @@ namespace System.ServiceModel.Syndication.Tests
                             WriteResult(sourceChild, targetChild, DiffType.Success);
                             // Check whether this Node has  Children, if it does call CompareChildren recursively
                             if (sourceChild.FirstChild != null)
+                            { 
                                 tempFlag = CompareChildren(sourceChild, targetChild);
+                            }
                             else if (targetChild.FirstChild != null)
                             {
                                 WriteResult(null, targetChild, DiffType.TargetExtra);
@@ -900,14 +902,6 @@ namespace System.ServiceModel.Syndication.Tests
                 default:
                     return String.Empty;
             }
-        }
-
-        public void Dispose()
-        {
-            this._SourceDoc = null;
-            this._TargetDoc = null;
-            this._Writer = null;
-            this._Output = null;
         }
     }
 }

@@ -397,10 +397,11 @@ namespace System.ServiceModel.Syndication.Tests
                 readerSettings.ValidationType = ValidationType.DTD;
             }
 
-            //XmlReader reader = XmlReader.Create(File.OpenRead(xmlFileName))
-            XmlReader reader = XmlReader.Create(xmlFileName);
+            FileStream fs = File.OpenRead(xmlFileName);
+            XmlReader reader = XmlReader.Create(fs);
             Load(reader);
             reader.Close();
+            fs.Dispose();
         }
 
         public virtual void Load(XmlReader reader)
