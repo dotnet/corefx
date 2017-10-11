@@ -23,7 +23,7 @@ namespace System.Collections.Tests
             return arrayListOfInts;
         }
 
-        [Benchmark(InnerIterationCount = 2000000)]
+        [Benchmark(InnerIterationCount = 10000000)]
         public void Add()
         {
             int innerIterationCount = (int)Benchmark.InnerIterationCount;
@@ -41,7 +41,7 @@ namespace System.Collections.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = 8000)]
+        [Benchmark(InnerIterationCount = 5000)]
         public void AddRange()
         {
             int size = (int)Benchmark.InnerIterationCount;
@@ -360,7 +360,7 @@ namespace System.Collections.Tests
         public void RemoveRange()
         {
             int size = (int)Benchmark.InnerIterationCount;
-            ArrayList elements = new ArrayList(size);
+            ArrayList elements = CreateArrayListOfInts(size);
 
             foreach (var iteration in Benchmark.Iterations)
             {
