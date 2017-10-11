@@ -30,28 +30,18 @@ namespace System.Data.Common
         [DefaultValue("")]
         public abstract string ParameterName { get; set; }
 
-        byte IDbDataParameter.Precision
-        {
-            get { return 0; }
-            set { }
-        }
-
-        byte IDbDataParameter.Scale
-        {
-            get { return 0; }
-            set { }
-        }
-
+        // These properties pick up the implementation of IDbDataParameter.Precision and Scale
+        // so that Db-agnostic code via IDbConnection actually works.
         public virtual byte Precision
         {
-            get { return ((IDbDataParameter)this).Precision; }
-            set { ((IDbDataParameter)this).Precision = value; }
+            get { return 0; }
+            set { }
         }
 
         public virtual byte Scale
         {
-            get { return ((IDbDataParameter)this).Scale; }
-            set { ((IDbDataParameter)this).Scale = value; }
+            get { return 0; }
+            set { }
         }
 
         public abstract int Size { get; set; }
