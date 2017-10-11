@@ -193,7 +193,7 @@
       },
       "inputs": {
         "filename": "docker",
-        "arguments": "exec $(PB_DockerContainerName) $(PB_GitDirectory)/sync.sh -p -- /p:ArchGroup=$(PB_Architecture)",
+        "arguments": "exec $(PB_DockerContainerName) $(PB_GitDirectory)/sync.sh $(PB_SyncArguments)",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
@@ -479,6 +479,10 @@
     },
     "PB_CleanAgent": {
       "value": "true"
+    },
+    "PB_SyncArguments": {
+      "value": "-p -- /p:ArchGroup=$(PB_Architecture)",
+      "allowOverride": true
     }
   },
   "demands": [

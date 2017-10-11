@@ -3,13 +3,17 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <Import Project="$(ToolsDir)PublishContent.targets" />
   <Import Project="$(ToolsDir)versioning.targets" />
+  <UsingTask TaskName="PushToBlobFeed" AssemblyFile="$(ToolsDir)\Microsoft.DotNet.Build.Tasks.Feed\net46\Microsoft.DotNet.Build.Tasks.Feed.dll" />
 
   <PropertyGroup>
-    <PublishPattern Condition="'$(PublishPattern)' == ''">$(PackageOutputRoot)**\*.nupkg</PublishPattern>
+    <PublishPattern Condition="'$(PublishPattern)' == ''">$(PackageOutputRoot)\**\*.nupkg</PublishPattern>
+    <SymbolsPackagesPattern>$(PackageOutputRoot)\**\*.symbols.nupkg</SymbolsPackagesPattern>
   </PropertyGroup>
 
   <ItemGroup>
     <_PackagesToPublish Include="$(PublishPattern)" />
+    <_PackagesToPublish Remove="*.*" Condition="'$(PublishSymbols)' == 'true'" />
+    <_PackagesToPublish Include="$(SymbolsPackagesPattern)" Condition="'$(PublishSymbols)' == 'true'" />
   </ItemGroup>
   
   <Target Name="CreateContainerName"
@@ -24,4 +28,21 @@
     <!-- skip uploadToAzure when there are no nupkgs -->
     <CallTarget Targets="UploadToAzure" Condition="'@(_PackagesToPublish)' != ''" />
   </Target>  
+  
+  <Target Name="FinalPublish" >
+    <PropertyGroup>
+      <PackageDownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(PackagesDir)AzureTransfer\$(ConfigurationGroup)</PackageDownloadDirectory>
+      <FinalPublishPattern>$(PackageDownloadDirectory)\**\*.nupkg</FinalPublishPattern>
+      <FinalSymbolsPackagesPattern>$(PackageDownloadDirectory)\**\*.symbols.nupkg</FinalSymbolsPackagesPattern>
+    </PropertyGroup>
+    <ItemGroup>
+      <ItemsToPush Include="$(FinalPublishPattern)" Exclude="$(FinalSymbolsPackagesPattern)" />
+    </ItemGroup>
+    <Error Text="ItemsToPush: '@(ItemsToPush)' is empty."  
+           Condition="'@(ItemsToPush)' == ''" /> 
+    <PushToBlobFeed ExpectedFeedUrl="$(ExpectedFeedUrl)"
+                    AccountKey="$(AccountKey)"
+                    ItemsToPush="@(ItemsToPush)"
+                    Overwrite="$(PublishOverwrite)" />
+  </Target>
 </Project>
