@@ -27,7 +27,7 @@
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\NETStandard.Library.NETFramework\NETStandard.Library.NETFramework.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="$(MSBuildThisFileDirectory)..pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
   </ItemGroup>
