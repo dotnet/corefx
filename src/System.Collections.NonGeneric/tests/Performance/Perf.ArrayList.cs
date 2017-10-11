@@ -44,20 +44,19 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 8000)]
         public void AddRange()
         {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
+            int size = (int)Benchmark.InnerIterationCount;
             ArrayList elements = CreateArrayListOfInts(10000);
-            int elementsCollectionSize = (int)Benchmark.InnerIterationCount;
             foreach (var iteration in Benchmark.Iterations)
             {
-                ArrayList[] elementsCollection = new ArrayList[elementsCollectionSize];
-                for (int index = 0; index < elementsCollectionSize; index++)
+                ArrayList[] elementsCollection = new ArrayList[size];
+                for (int index = 0; index < size; index++)
                 {
-                    elementsCollection[index] = new ArrayList(elements);
+                    elementsCollection[index] = new ArrayList();
                 }
 
                 using (iteration.StartMeasurement())
                 {
-                    for (int index = 0; index < innerIterationCount; index++)
+                    for (int index = 0; index < size; index++)
                     {
                         elementsCollection[index].AddRange(elements);
                     }                    
@@ -89,20 +88,19 @@ namespace System.Collections.Tests
         [Benchmark(InnerIterationCount = 5000)]
         public void Clear()
         {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
+            int size = (int)Benchmark.InnerIterationCount;
             ArrayList elements = CreateArrayListOfInts(10000);
-            int elementsCollectionSize = (int)Benchmark.InnerIterationCount;
             foreach (var iteration in Benchmark.Iterations)
             {              
-                ArrayList[] elementsCollection = new ArrayList[elementsCollectionSize];
-                for (int index = 0; index < elementsCollectionSize; index++)
+                ArrayList[] elementsCollection = new ArrayList[size];
+                for (int index = 0; index < size; index++)
                 {
                     elementsCollection[index] = new ArrayList(elements);
                 }                    
                 
                 using (iteration.StartMeasurement())
                 {
-                    for (int index = 0; index < innerIterationCount; index++)
+                    for (int index = 0; index < size; index++)
                     {
                         elementsCollection[index].Clear();
                     }                        
@@ -448,7 +446,6 @@ namespace System.Collections.Tests
         {
             int size = (int)Benchmark.InnerIterationCount;           
             var random = new Random(32829);
-            int elementsCollectionSize = (int)Benchmark.InnerIterationCount;
             ArrayList elements = new ArrayList(size);
             for (int index = 0; index < elements.Count; index++)
             {
@@ -457,8 +454,8 @@ namespace System.Collections.Tests
 
             foreach (var iteration in Benchmark.Iterations)
             {
-                ArrayList[] elementsCollection = new ArrayList[elementsCollectionSize];
-                for (int index = 0; index < elementsCollectionSize; index++)
+                ArrayList[] elementsCollection = new ArrayList[size];
+                for (int index = 0; index < size; index++)
                 {
                     elementsCollection[index] = new ArrayList(elements);
                 }
