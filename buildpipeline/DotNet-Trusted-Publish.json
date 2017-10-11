@@ -265,10 +265,6 @@
       "value": "False",
       "allowOverride": true
     },
-    "PublishToBlobStorage": {
-      "value": "True",
-      "allowOverride": true
-    },    
     "system.debug": {
       "value": "false",
       "allowOverride": true
