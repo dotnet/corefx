@@ -16,6 +16,8 @@ namespace System.Net.WebSockets.Client.Tests
 {
     public class SendReceiveTest : ClientWebSocketTestBase
     {
+        public static bool PartialMessagesSupported => PlatformDetection.ClientWebSocketPartialMessagesSupported;
+
         public SendReceiveTest(ITestOutputHelper output) : base(output) { }
 
         [OuterLoop] // TODO: Issue #11345
@@ -54,9 +56,8 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ActiveIssue(21102, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
+        [ConditionalTheory(nameof(WebSocketsSupported), nameof(PartialMessagesSupported)), MemberData(nameof(EchoServers))]
         public async Task SendReceive_PartialMessageBeforeCompleteMessageArrives_Success(Uri server)
         {
             var rand = new Random();
@@ -284,6 +285,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
+        [ActiveIssue(23765)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendReceive_VaryingLengthBuffers_Success(Uri server)

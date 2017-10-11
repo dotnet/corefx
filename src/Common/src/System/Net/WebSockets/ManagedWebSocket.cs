@@ -22,7 +22,7 @@ namespace System.Net.WebSockets
     /// Thread-safety:
     /// - It's acceptable to call ReceiveAsync and SendAsync in parallel.  One of each may run concurrently.
     /// - It's acceptable to have a pending ReceiveAsync while CloseOutputAsync or CloseAsync is called.
-    /// - Attemping to invoke any other operations in parallel may corrupt the instance.  Attempting to invoke
+    /// - Attempting to invoke any other operations in parallel may corrupt the instance.  Attempting to invoke
     ///   a send operation while another is in progress or a receive operation while another is in progress will
     ///   result in an exception.
     /// </remarks>
@@ -41,10 +41,6 @@ namespace System.Net.WebSockets
         {
             return new ManagedWebSocket(stream, isServer, subprotocol, keepAliveInterval, receiveBufferSize, receiveBuffer);
         }
-
-        /// <summary>Per-thread cached 4-byte mask byte array.</summary>
-        [ThreadStatic]
-        private static byte[] t_headerMask;
 
         /// <summary>Thread-safe random number generator used to generate masks for each send.</summary>
         private static readonly RandomNumberGenerator s_random = RandomNumberGenerator.Create();
@@ -84,8 +80,6 @@ namespace System.Net.WebSockets
         private readonly CancellationTokenSource _abortSource = new CancellationTokenSource();
         /// <summary>Buffer used for reading data from the network.</summary>
         private byte[] _receiveBuffer;
-        /// <summary>Gets whether the receive buffer came from the ArrayPool.</summary>
-        private readonly bool _receiveBufferFromPool;
         /// <summary>
         /// Tracks the state of the validity of the UTF8 encoding of text payloads.  Text may be split across fragments.
         /// </summary>
@@ -201,8 +195,12 @@ namespace System.Net.WebSockets
             }
             else
             {
-                _receiveBufferFromPool = true;
-                _receiveBuffer = ArrayPool<byte>.Shared.Rent(Math.Max(receiveBufferSize, MaxMessageHeaderLength));
+                // Just allocate the array.  We avoid using the pool because often many web sockets will be used concurrently,
+                // and if each web socket rents a similarly sized buffer from the pool for its duration, we'll end up draining
+                // the pool, such that other web sockets will allocate anyway, as will anyone else in the process using the
+                // pool.  If someone wants to pool, they can do so by passing in the buffer they want to use, and they can
+                // get it from whatever pool they like.
+                _receiveBuffer = new byte[Math.Max(receiveBufferSize, MaxMessageHeaderLength)];
             }
 
             // Set up the abort source so that if it's triggered, we transition the instance appropriately.
@@ -245,12 +243,6 @@ namespace System.Net.WebSockets
                 _disposed = true;
                 _keepAliveTimer?.Dispose();
                 _stream?.Dispose();
-                if (_receiveBufferFromPool)
-                {
-                    byte[] old = _receiveBuffer;
-                    _receiveBuffer = null;
-                    ArrayPool<byte>.Shared.Return(old);
-                }
                 if (_state < WebSocketState.Aborted)
                 {
                     _state = WebSocketState.Closed;
@@ -403,12 +395,11 @@ namespace System.Net.WebSockets
                 writeTask = _stream.WriteAsync(_sendBuffer, 0, sendBytes, CancellationToken.None);
 
                 // If the operation happens to complete synchronously (or, more specifically, by
-                // the time we get from the previous line to here, release the semaphore, propagate
-                // exceptions, and we're done.
+                // the time we get from the previous line to here), release the semaphore, return
+                // the task, and we're done.
                 if (writeTask.IsCompleted)
                 {
-                    writeTask.GetAwaiter().GetResult(); // propagate any exceptions
-                    return Task.CompletedTask;
+                    return writeTask;
                 }
 
                 // Up until this point, if an exception occurred (such as when accessing _stream or when
@@ -520,7 +511,16 @@ namespace System.Net.WebSockets
             {
                 // This exists purely to keep the connection alive; don't wait for the result, and ignore any failures.
                 // The call will handle releasing the lock.
-                SendFrameLockAcquiredNonCancelableAsync(MessageOpcode.Ping, true, new ArraySegment<byte>(Array.Empty<byte>()));
+                Task t = SendFrameLockAcquiredNonCancelableAsync(MessageOpcode.Ping, true, new ArraySegment<byte>(Array.Empty<byte>()));
+
+                // "Observe" any exception, ignoring it to prevent the unobserved exception event from being raised.
+                if (!t.IsCompletedSuccessfully)
+                {
+                    t.ContinueWith(p => { Exception ignored = p.Exception; },
+                        CancellationToken.None,
+                        TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                        TaskScheduler.Default);
+                }
             }
             else
             {
@@ -600,13 +600,8 @@ namespace System.Net.WebSockets
         /// <summary>Writes a 4-byte random mask to the specified buffer at the specified offset.</summary>
         /// <param name="buffer">The buffer to which to write the mask.</param>
         /// <param name="offset">The offset into the buffer at which to write the mask.</param>
-        private static void WriteRandomMask(byte[] buffer, int offset)
-        {
-            byte[] mask = t_headerMask ?? (t_headerMask = new byte[MaskLength]);
-            Debug.Assert(mask.Length == MaskLength, $"Expected mask of length {MaskLength}, got {mask.Length}");
-            s_random.GetBytes(mask);
-            Buffer.BlockCopy(mask, 0, buffer, offset, MaskLength);
-        }
+        private static void WriteRandomMask(byte[] buffer, int offset) =>
+            s_random.GetBytes(buffer, offset, MaskLength);
 
         /// <summary>
         /// Receive the next text, binary, continuation, or close message, returning information about it and
@@ -690,25 +685,24 @@ namespace System.Net.WebSockets
                     Debug.Assert(header.Opcode == MessageOpcode.Binary || header.Opcode == MessageOpcode.Text, $"Unexpected opcode {header.Opcode}");
 
                     // If there's no data to read, return an appropriate result.
-                    int bytesToRead = (int)Math.Min(payloadBuffer.Count, header.PayloadLength);
-                    if (bytesToRead == 0)
+                    if (header.PayloadLength == 0 || payloadBuffer.Count == 0)
                     {
                         _lastReceiveHeader = header;
                         return new WebSocketReceiveResult(
                             0,
                             header.Opcode == MessageOpcode.Text ? WebSocketMessageType.Text : WebSocketMessageType.Binary,
-                            header.PayloadLength == 0 ? header.Fin : false);
+                            header.Fin && header.PayloadLength == 0);
                     }
 
                     // Otherwise, read as much of the payload as we can efficiently, and upate the header to reflect how much data
                     // remains for future reads.
-
-                    if (_receiveBufferCount == 0)
+                    int bytesToCopy = Math.Min(payloadBuffer.Count, (int)Math.Min(header.PayloadLength, _receiveBuffer.Length));
+                    Debug.Assert(bytesToCopy > 0, $"Expected {nameof(bytesToCopy)} > 0");
+                    if (_receiveBufferCount < bytesToCopy)
                     {
-                        await EnsureBufferContainsAsync(1, cancellationToken, throwOnPrematureClosure: false).ConfigureAwait(false);
+                        await EnsureBufferContainsAsync(bytesToCopy, cancellationToken, throwOnPrematureClosure: true).ConfigureAwait(false);
                     }
 
-                    int bytesToCopy = Math.Min(bytesToRead, _receiveBufferCount);
                     if (_isServer)
                     {
                         _receivedMaskOffsetOffset = ApplyMask(_receiveBuffer, _receiveBufferOffset, header.Mask, _receivedMaskOffsetOffset, bytesToCopy);
@@ -728,7 +722,7 @@ namespace System.Net.WebSockets
                     return new WebSocketReceiveResult(
                         bytesToCopy,
                         header.Opcode == MessageOpcode.Text ? WebSocketMessageType.Text : WebSocketMessageType.Binary,
-                        bytesToCopy == 0 || (header.Fin && header.PayloadLength == 0));
+                        header.Fin && header.PayloadLength == 0);
                 }
             }
             catch (Exception exc)

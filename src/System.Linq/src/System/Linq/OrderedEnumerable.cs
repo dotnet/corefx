@@ -11,15 +11,10 @@ namespace System.Linq
     {
         internal IEnumerable<TElement> _source;
 
-        private int[] SortedMap(Buffer<TElement> buffer)
-        {
-            return GetEnumerableSorter().Sort(buffer._items, buffer._count);
-        }
+        private int[] SortedMap(Buffer<TElement> buffer) => GetEnumerableSorter().Sort(buffer._items, buffer._count);
 
-        private int[] SortedMap(Buffer<TElement> buffer, int minIdx, int maxIdx)
-        {
-            return GetEnumerableSorter().Sort(buffer._items, buffer._count, minIdx, maxIdx);
-        }
+        private int[] SortedMap(Buffer<TElement> buffer, int minIdx, int maxIdx) =>
+            GetEnumerableSorter().Sort(buffer._items, buffer._count, minIdx, maxIdx);
 
         public IEnumerator<TElement> GetEnumerator()
         {
@@ -73,8 +68,7 @@ namespace System.Linq
 
         public int GetCount(bool onlyIfCheap)
         {
-            IIListProvider<TElement> listProv = _source as IIListProvider<TElement>;
-            if (listProv != null)
+            if (_source is IIListProvider<TElement> listProv)
             {
                 return listProv.GetCount(onlyIfCheap);
             }
@@ -187,39 +181,22 @@ namespace System.Linq
             return (count <= maxIdx ? count : maxIdx + 1) - minIdx;
         }
 
-        private EnumerableSorter<TElement> GetEnumerableSorter()
-        {
-            return GetEnumerableSorter(null);
-        }
+        private EnumerableSorter<TElement> GetEnumerableSorter() => GetEnumerableSorter(null);
 
         internal abstract EnumerableSorter<TElement> GetEnumerableSorter(EnumerableSorter<TElement> next);
 
-        internal CachingComparer<TElement> GetComparer()
-        {
-            return GetComparer(null);
-        }
+        private CachingComparer<TElement> GetComparer() => GetComparer(null);
 
         internal abstract CachingComparer<TElement> GetComparer(CachingComparer<TElement> childComparer);
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        IOrderedEnumerable<TElement> IOrderedEnumerable<TElement>.CreateOrderedEnumerable<TKey>(Func<TElement, TKey> keySelector, IComparer<TKey> comparer, bool descending)
-        {
-            return new OrderedEnumerable<TElement, TKey>(_source, keySelector, comparer, descending, this);
-        }
+        IOrderedEnumerable<TElement> IOrderedEnumerable<TElement>.CreateOrderedEnumerable<TKey>(Func<TElement, TKey> keySelector, IComparer<TKey> comparer, bool descending) =>
+            new OrderedEnumerable<TElement, TKey>(_source, keySelector, comparer, @descending, this);
 
-        public IPartition<TElement> Skip(int count)
-        {
-            return new OrderedPartition<TElement>(this, count, int.MaxValue);
-        }
+        public IPartition<TElement> Skip(int count) => new OrderedPartition<TElement>(this, count, int.MaxValue);
 
-        public IPartition<TElement> Take(int count)
-        {
-            return new OrderedPartition<TElement>(this, 0, count - 1);
-        }
+        public IPartition<TElement> Take(int count) => new OrderedPartition<TElement>(this, 0, count - 1);
 
         public TElement TryGetElementAt(int index, out bool found)
         {
@@ -399,26 +376,16 @@ namespace System.Linq
 
     internal sealed class OrderedEnumerable<TElement, TKey> : OrderedEnumerable<TElement>
     {
-        internal readonly OrderedEnumerable<TElement> _parent;
-        internal readonly Func<TElement, TKey> _keySelector;
-        internal readonly IComparer<TKey> _comparer;
-        internal readonly bool _descending;
+        private readonly OrderedEnumerable<TElement> _parent;
+        private readonly Func<TElement, TKey> _keySelector;
+        private readonly IComparer<TKey> _comparer;
+        private readonly bool _descending;
 
         internal OrderedEnumerable(IEnumerable<TElement> source, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, bool descending, OrderedEnumerable<TElement> parent)
         {
-            if (source == null)
-            {
-                throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (keySelector == null)
-            {
-                throw Error.ArgumentNull(nameof(keySelector));
-            }
-
-            _source = source;
+            _source = source ?? throw Error.ArgumentNull(nameof(source));
             _parent = parent;
-            _keySelector = keySelector;
+            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
             _comparer = comparer ?? Comparer<TKey>.Default;
             _descending = descending;
         }
@@ -552,77 +519,77 @@ namespace System.Linq
             return map;
         }
 
-        internal TElement ElementAt(TElement[] elements, int count, int idx)
-        {
-            return elements[QuickSelect(ComputeMap(elements, count), count - 1, idx)];
-        }
+        internal TElement ElementAt(TElement[] elements, int count, int idx) =>
+            elements[QuickSelect(ComputeMap(elements, count), count - 1, idx)];
 
-        private int CompareKeys(int index1, int index2)
-        {
-            return index1 == index2 ? 0 : CompareAnyKeys(index1, index2);
-        }
-
-        private void QuickSort(int[] map, int left, int right)
-        {
-            do
-            {
-                int i = left;
-                int j = right;
-                int x = map[i + ((j - i) >> 1)];
-                do
-                {
-                    while (i < map.Length && CompareKeys(x, map[i]) > 0)
-                    {
-                        i++;
-                    }
-
-                    while (j >= 0 && CompareKeys(x, map[j]) < 0)
-                    {
-                        j--;
-                    }
-
-                    if (i > j)
-                    {
-                        break;
-                    }
-
-                    if (i < j)
-                    {
-                        int temp = map[i];
-                        map[i] = map[j];
-                        map[j] = temp;
-                    }
-
-                    i++;
-                    j--;
-                }
-                while (i <= j);
-
-                if (j - left <= right - i)
-                {
-                    if (left < j)
-                    {
-                        QuickSort(map, left, j);
-                    }
-
-                    left = i;
-                }
-                else
-                {
-                    if (i < right)
-                    {
-                        QuickSort(map, i, right);
-                    }
-
-                    right = j;
-                }
-            }
-            while (left < right);
-        }
+        protected abstract void QuickSort(int[] map, int left, int right);
 
         // Sorts the k elements between minIdx and maxIdx without sorting all elements
         // Time complexity: O(n + k log k) best and average case. O(n^2) worse case.
-        private void PartialQuickSort(int[] map, int left, int right, int minIdx, int maxIdx)
+        protected abstract void PartialQuickSort(int[] map, int left, int right, int minIdx, int maxIdx);
+
+        // Finds the element that would be at idx if the collection was sorted.
+        // Time complexity: O(n) best and average case. O(n^2) worse case.
+        protected abstract int QuickSelect(int[] map, int right, int idx);
+    }
+
+    internal sealed class EnumerableSorter<TElement, TKey> : EnumerableSorter<TElement>
+    {
+        private readonly Func<TElement, TKey> _keySelector;
+        private readonly IComparer<TKey> _comparer;
+        private readonly bool _descending;
+        private readonly EnumerableSorter<TElement> _next;
+        private TKey[] _keys;
+
+        internal EnumerableSorter(Func<TElement, TKey> keySelector, IComparer<TKey> comparer, bool descending, EnumerableSorter<TElement> next)
+        {
+            _keySelector = keySelector;
+            _comparer = comparer;
+            _descending = descending;
+            _next = next;
+        }
+
+        internal override void ComputeKeys(TElement[] elements, int count)
+        {
+            _keys = new TKey[count];
+            for (int i = 0; i < count; i++)
+            {
+                _keys[i] = _keySelector(elements[i]);
+            }
+
+            _next?.ComputeKeys(elements, count);
+        }
+
+        internal override int CompareAnyKeys(int index1, int index2)
+        {
+            int c = _comparer.Compare(_keys[index1], _keys[index2]);
+            if (c == 0)
+            {
+                if (_next == null)
+                {
+                    return index1 - index2; // ensure stability of sort
+                }
+
+                return _next.CompareAnyKeys(index1, index2);
+            }
+
+            // -c will result in a negative value for int.MinValue (-int.MinValue == int.MinValue).
+            // Flipping keys earlier is more likely to trigger something strange in a comparer,
+            // particularly as it comes to the sort being stable.
+            return (_descending != (c > 0)) ? 1 : -1;
+        }
+
+        
+        private int CompareKeys(int index1, int index2) => index1 == index2 ? 0 : CompareAnyKeys(index1, index2);
+
+        protected override void QuickSort(int[] keys, int lo, int hi) =>
+            Array.Sort(keys, lo, hi - lo + 1, Comparer<int>.Create(CompareAnyKeys)); // TODO #24115: Remove Create call when delegate-based overload is available
+
+
+
+        // Sorts the k elements between minIdx and maxIdx without sorting all elements
+        // Time complexity: O(n + k log k) best and average case. O(n^2) worse case.
+        protected override void PartialQuickSort(int[] map, int left, int right, int minIdx, int maxIdx)
         {
             do
             {
@@ -691,7 +658,7 @@ namespace System.Linq
 
         // Finds the element that would be at idx if the collection was sorted.
         // Time complexity: O(n) best and average case. O(n^2) worse case.
-        private int QuickSelect(int[] map, int right, int idx)
+        protected override int QuickSelect(int[] map, int right, int idx)
         {
             int left = 0;
             do
@@ -759,56 +726,6 @@ namespace System.Linq
             while (left < right);
 
             return map[idx];
-        }
-    }
-
-    internal sealed class EnumerableSorter<TElement, TKey> : EnumerableSorter<TElement>
-    {
-        internal readonly Func<TElement, TKey> _keySelector;
-        internal readonly IComparer<TKey> _comparer;
-        internal readonly bool _descending;
-        internal readonly EnumerableSorter<TElement> _next;
-        internal TKey[] _keys;
-
-        internal EnumerableSorter(Func<TElement, TKey> keySelector, IComparer<TKey> comparer, bool descending, EnumerableSorter<TElement> next)
-        {
-            _keySelector = keySelector;
-            _comparer = comparer;
-            _descending = descending;
-            _next = next;
-        }
-
-        internal override void ComputeKeys(TElement[] elements, int count)
-        {
-            _keys = new TKey[count];
-            for (int i = 0; i < count; i++)
-            {
-                _keys[i] = _keySelector(elements[i]);
-            }
-
-            if (_next != null)
-            {
-                _next.ComputeKeys(elements, count);
-            }
-        }
-
-        internal override int CompareAnyKeys(int index1, int index2)
-        {
-            int c = _comparer.Compare(_keys[index1], _keys[index2]);
-            if (c == 0)
-            {
-                if (_next == null)
-                {
-                    return index1 - index2;
-                }
-
-                return _next.CompareAnyKeys(index1, index2);
-            }
-
-            // -c will result in a negative value for int.MinValue (-int.MinValue == int.MinValue).
-            // Flipping keys earlier is more likely to trigger something strange in a comparer,
-            // particularly as it comes to the sort being stable.
-            return (_descending != (c > 0)) ? 1 : -1;
         }
     }
 }

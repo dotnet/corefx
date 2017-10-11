@@ -9,11 +9,11 @@ using Xunit;
 
 namespace System.IO.Tests
 {
-    public class File_Copy_str_str : FileSystemTest
+    public partial class File_Copy_str_str : FileSystemTest
     {
         #region Utilities
 
-        public static string[] WindowsInvalidUnixValid = new string[] { "         ", " ", "\n", ">", "<", "\t" };
+        public static TheoryData WindowsInvalidUnixValid = new TheoryData<string> { "         ", " ", "\n", ">", "<", "\t" };
         public virtual void Copy(string source, string dest)
         {
             File.Copy(source, dest);
@@ -160,33 +160,30 @@ namespace System.IO.Tests
 
         #region PlatformSpecific
 
-        [Fact]
+        [Theory, 
+            MemberData(nameof(WindowsInvalidUnixValid))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Whitespace path throws ArgumentException
-        public void WindowsWhitespacePath()
+        public void WindowsWhitespacePath(string invalid)
         {
             string testFile = GetTestFilePath();
             File.Create(testFile).Dispose();
-            foreach (string invalid in WindowsInvalidUnixValid)
-            {
-                Assert.Throws<ArgumentException>(() => Copy(testFile, invalid));
-                Assert.Throws<ArgumentException>(() => Copy(invalid, testFile));
-            }
+
+            Assert.Throws<ArgumentException>(() => Copy(testFile, invalid));
+            Assert.Throws<ArgumentException>(() => Copy(invalid, testFile));
         }
 
-        [Fact]
+        [Theory,
+            MemberData(nameof(WindowsInvalidUnixValid))]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Whitespace path allowed
-        public void UnixWhitespacePath()
+        public void UnixWhitespacePath(string valid)
         {
             string testFile = GetTestFilePath();
             File.Create(testFile).Dispose();
-            foreach (string valid in WindowsInvalidUnixValid)
-            {
-                Copy(testFile, Path.Combine(TestDirectory, valid));
-                Assert.True(File.Exists(testFile));
-                Assert.True(File.Exists(Path.Combine(TestDirectory, valid)));
-            }
-        }
 
+            Copy(testFile, Path.Combine(TestDirectory, valid));
+            Assert.True(File.Exists(testFile));
+            Assert.True(File.Exists(Path.Combine(TestDirectory, valid)));
+        }
         #endregion
     }
 

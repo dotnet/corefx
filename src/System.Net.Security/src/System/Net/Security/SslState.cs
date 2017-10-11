@@ -120,11 +120,6 @@ namespace System.Net.Security
                 throw new ArgumentNullException(nameof(serverCertificate));
             }
 
-            if (clientCertificates == null)
-            {
-                clientCertificates = new X509CertificateCollection();
-            }
-
             if (targetHost.Length == 0)
             {
                 targetHost = "?" + Interlocked.Increment(ref s_uniqueNameInteger).ToString(NumberFormatInfo.InvariantInfo);
@@ -484,10 +479,10 @@ namespace System.Net.Security
             }
         }
 
-        internal SecurityStatusPal EncryptData(byte[] buffer, int offset, int count, ref byte[] outBuffer, out int outSize)
+        internal SecurityStatusPal EncryptData(ReadOnlyMemory<byte> buffer, ref byte[] outBuffer, out int outSize)
         {
             CheckThrow(true);
-            return Context.Encrypt(buffer, offset, count, ref outBuffer, out outSize);
+            return Context.Encrypt(buffer, ref outBuffer, out outSize);
         }
 
         internal SecurityStatusPal DecryptData(byte[] buffer, ref int offset, ref int count)
@@ -1284,10 +1279,31 @@ namespace System.Net.Security
             }
         }
 
-        // Returns: 
-        // true  - operation queued
-        // false - operation can proceed
-        internal bool CheckEnqueueWrite(AsyncProtocolRequest asyncRequest)
+        internal Task CheckEnqueueWriteAsync()
+        {
+            // Clear previous request.
+            int lockState = Interlocked.CompareExchange(ref _lockWriteState, LockWrite, LockNone);
+            if (lockState != LockHandshake)
+            {
+                return Task.CompletedTask;
+            }
+
+            lock (this)
+            {
+                if (_lockWriteState != LockHandshake)
+                {
+                    CheckThrow(authSuccessCheck: true);
+                    return Task.CompletedTask;
+                }
+
+                _lockWriteState = LockPendingWrite;
+                TaskCompletionSource<int> completionSource = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+                _queuedWriteStateRequest = completionSource;
+                return completionSource.Task;
+            }
+        }
+
+        internal void CheckEnqueueWrite()
         {
             // Clear previous request.
             _queuedWriteStateRequest = null;
@@ -1295,7 +1311,7 @@ namespace System.Net.Security
             if (lockState != LockHandshake)
             {
                 // Proceed with write.
-                return false;
+                return;
             }
 
             LazyAsyncResult lazyResult = null;
@@ -1304,18 +1320,11 @@ namespace System.Net.Security
                 if (_lockWriteState != LockHandshake)
                 {
                     // Handshake has completed before we grabbed the lock.
-                    CheckThrow(true);
-                    return false;
+                    CheckThrow(authSuccessCheck: true);
+                    return;
                 }
 
                 _lockWriteState = LockPendingWrite;
-
-                // Still pending, wait or enqueue.
-                if (asyncRequest != null)
-                {
-                    _queuedWriteStateRequest = asyncRequest;
-                    return true;
-                }
 
                 lazyResult = new LazyAsyncResult(null, null, /*must be */null);
                 _queuedWriteStateRequest = lazyResult;
@@ -1323,8 +1332,8 @@ namespace System.Net.Security
 
             // Need to exit from lock before waiting.
             lazyResult.InternalWaitForCompletion();
-            CheckThrow(true);
-            return false;
+            CheckThrow(authSuccessCheck: true);
+            return;
         }
 
         internal void FinishWrite()

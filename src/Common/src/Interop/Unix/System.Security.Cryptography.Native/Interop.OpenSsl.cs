@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -50,9 +51,10 @@ internal static partial class Interop
         {
             SafeSslHandle context = null;
 
-            IntPtr method = GetSslMethod(protocols);
-
-            using (SafeSslContextHandle innerContext = Ssl.SslCtxCreate(method))
+            // Always use SSLv23_method, regardless of protocols.  It supports negotiating to the highest
+            // mutually supported version and can thus handle any of the set protocols, and we then use
+            // SetProtocolOptions to ensure we only allow the ones requested.
+            using (SafeSslContextHandle innerContext = Ssl.SslCtxCreate(Ssl.SslMethods.SSLv23_method))
             {
                 if (innerContext.IsInvalid)
                 {
@@ -180,29 +182,22 @@ internal static partial class Interop
             return stateOk;
         }
 
-        internal static int Encrypt(SafeSslHandle context, byte[] input, int offset, int count, ref byte[] output, out Ssl.SslErrorCode errorCode)
+        internal static int Encrypt(SafeSslHandle context, ReadOnlyMemory<byte> input, ref byte[] output, out Ssl.SslErrorCode errorCode)
         {
-            Debug.Assert(input != null);
-            Debug.Assert(offset >= 0);
-            Debug.Assert(count > 0);
-            Debug.Assert(offset <= input.Length);
-            Debug.Assert(input.Length - offset >= count);
-
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
 
             int retVal;
             unsafe
             {
-                fixed (byte* fixedBuffer = input)
+                using (MemoryHandle handle = input.Retain(pin: true))
                 {
-                    retVal = Ssl.SslWrite(context, fixedBuffer + offset, count);
+                    retVal = Ssl.SslWrite(context, (byte*)handle.PinnedPointer, input.Length);
                 }
             }
 
-            if (retVal != count)
+            if (retVal != input.Length)
             {
-                Exception innerError;
-                errorCode = GetSslError(context, retVal, out innerError);
+                errorCode = GetSslError(context, retVal, out Exception innerError);
                 retVal = 0;
 
                 switch (errorCode)
@@ -307,54 +302,6 @@ internal static partial class Interop
             }
 
             bindingHandle.SetCertHashLength(certHashLength);
-        }
-
-        private static IntPtr GetSslMethod(SslProtocols protocols)
-        {
-#pragma warning disable 0618 // Ssl2, Ssl3 are deprecated.
-            bool ssl2 = (protocols & SslProtocols.Ssl2) == SslProtocols.Ssl2;
-            bool ssl3 = (protocols & SslProtocols.Ssl3) == SslProtocols.Ssl3;
-#pragma warning restore
-            bool tls10 = (protocols & SslProtocols.Tls) == SslProtocols.Tls;
-            bool tls11 = (protocols & SslProtocols.Tls11) == SslProtocols.Tls11;
-            bool tls12 = (protocols & SslProtocols.Tls12) == SslProtocols.Tls12;
-
-            IntPtr method = Ssl.SslMethods.SSLv23_method; // default
-            string methodName = "SSLv23_method";
-
-            if (!ssl2)
-            {
-                if (!ssl3)
-                {
-                    if (!tls11 && !tls12)
-                    {
-                        method = Ssl.SslMethods.TLSv1_method;
-                        methodName = "TLSv1_method";
-                    }
-                    else if (!tls10 && !tls12)
-                    {
-                        method = Ssl.SslMethods.TLSv1_1_method;
-                        methodName = "TLSv1_1_method";
-                    }
-                    else if (!tls10 && !tls11)
-                    {
-                        method = Ssl.SslMethods.TLSv1_2_method;
-                        methodName = "TLSv1_2_method";
-                    }
-                }
-                else if (!tls10 && !tls11 && !tls12)
-                {
-                    method = Ssl.SslMethods.SSLv3_method;
-                    methodName = "SSLv3_method";
-                }
-            }
-
-            if (IntPtr.Zero == method)
-            {
-                throw new SslException(SR.Format(SR.net_get_ssl_method_failed, methodName));
-            }
-
-            return method;
         }
 
         private static int VerifyClientCertificate(int preverify_ok, IntPtr x509_ctx_ptr)

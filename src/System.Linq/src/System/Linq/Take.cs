@@ -21,14 +21,12 @@ namespace System.Linq
                 return EmptyPartition<TSource>.Instance;
             }
 
-            IPartition<TSource> partition = source as IPartition<TSource>;
-            if (partition != null)
+            if (source is IPartition<TSource> partition)
             {
                 return partition.Take(count);
             }
 
-            IList<TSource> sourceList = source as IList<TSource>;
-            if (sourceList != null)
+            if (source is IList<TSource> sourceList)
             {
                 return new ListPartition<TSource>(sourceList, 0, count - 1);
             }
@@ -118,10 +116,18 @@ namespace System.Linq
             Debug.Assert(source != null);
             Debug.Assert(count > 0);
 
-            var queue = new Queue<TSource>();
+            Queue<TSource> queue;
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
+                if (!e.MoveNext())
+                {
+                    yield break;
+                }
+
+                queue = new Queue<TSource>();
+                queue.Enqueue(e.Current);
+
                 while (e.MoveNext())
                 {
                     if (queue.Count < count)

@@ -14,6 +14,7 @@ namespace System.Diagnostics.Tests
     public class ProcessThreadTests : ProcessTestBase
     {
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestCommonPriorityAndTimeProperties()
         {
             CreateDefaultProcess();
@@ -44,6 +45,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestThreadCount()
         {
             int numOfThreads = 10;
@@ -85,6 +87,7 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(~TestPlatforms.OSX)] // OSX throws PNSE from StartTime
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public async Task TestStartTimeProperty()
         {
             TimeSpan allowedWindow = TimeSpan.FromSeconds(1);
@@ -137,6 +140,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestStartAddressProperty()
         {
             using (Process p = Process.GetCurrentProcess())
@@ -153,6 +157,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestPriorityLevelProperty()
         {
             CreateDefaultProcess();
@@ -186,6 +191,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestThreadStateProperty()
         {
             CreateDefaultProcess();
@@ -198,6 +204,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void Threads_GetMultipleTimes_ReturnsSameInstance()
         {
             CreateDefaultProcess();

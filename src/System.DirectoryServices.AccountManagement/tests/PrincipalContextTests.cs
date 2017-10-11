@@ -10,7 +10,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
 {
     public class PrincipalContextTests
     {
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] 
         public void Ctor_ContextType()
         {
             var context = new PrincipalContext(ContextType.Machine);
@@ -19,10 +19,12 @@ namespace System.DirectoryServices.AccountManagement.Tests
             Assert.Null(context.Container);
             Assert.Null(context.UserName);
             Assert.Equal(ContextOptions.Negotiate, context.Options);
-            Assert.Throws<InvalidCastException>(() => context.ConnectedServer);
+            Assert.NotNull(context.ConnectedServer);
+            Assert.Equal(Environment.MachineName, context.ConnectedServer);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         [InlineData(ContextType.Machine, null)]
         [InlineData(ContextType.Machine, "")]
         [InlineData(ContextType.Machine, "\0")]
@@ -42,11 +44,13 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
             else
             {
-                Assert.Throws<InvalidCastException>(() => context.ConnectedServer);
+                Assert.NotNull(context.ConnectedServer);
+                Assert.Equal(Environment.MachineName, context.ConnectedServer);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         [InlineData(ContextType.Machine, null, null)]
         [InlineData(ContextType.Machine, "", null)]
         [InlineData(ContextType.Machine, "\0", null)]
@@ -66,11 +70,13 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
             else
             {
-                Assert.Throws<InvalidCastException>(() => context.ConnectedServer);
+                Assert.NotNull(context.ConnectedServer);
+                Assert.Equal(Environment.MachineName, context.ConnectedServer);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         [InlineData(ContextType.Machine, null, null, ContextOptions.Negotiate)]
         [InlineData(ContextType.Machine, "", null, ContextOptions.Negotiate)]
         [InlineData(ContextType.Machine, "\0", null, ContextOptions.Negotiate)]
@@ -90,11 +96,14 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
             else
             {
-                Assert.Throws<InvalidCastException>(() => context.ConnectedServer);
+                Assert.NotNull(context.ConnectedServer);
+                Assert.Equal(Environment.MachineName, context.ConnectedServer);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ActiveIssue(23800)]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         [InlineData(ContextType.Machine, null, "userName", "password")]
         [InlineData(ContextType.Machine, "", "", "")]
         [InlineData(ContextType.Machine, "\0", "userName", "")]
@@ -114,11 +123,13 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
             else
             {
-                Assert.Throws<InvalidCastException>(() => context.ConnectedServer);
+                Assert.Throws<Exception>(() => context.ConnectedServer);
             }
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ActiveIssue(23800)]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         [InlineData(ContextType.Machine, null, null, "userName", "password")]
         [InlineData(ContextType.Machine, "", null, "", "")]
         [InlineData(ContextType.Machine, "\0", null, "userName", "")]
@@ -138,7 +149,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
             else
             {
-                Assert.Throws<InvalidCastException>(() => context.ConnectedServer);
+                Assert.Throws<Exception>(() => context.ConnectedServer);
             }
         }
 
@@ -159,7 +170,11 @@ namespace System.DirectoryServices.AccountManagement.Tests
         [Fact]
         public void Ctor_DomainContextType_ThrowsPrincipalServerDownException()
         {
-            Assert.Throws<PrincipalServerDownException>(() => new PrincipalContext(ContextType.Domain));
+            if (Environment.MachineName.Equals(Environment.UserDomainName, StringComparison.OrdinalIgnoreCase))
+            {
+                // The machine is not connected to a domain. we expect PrincipalContext(ContextType.Domain) to throw
+                Assert.Throws<PrincipalServerDownException>(() => new PrincipalContext(ContextType.Domain));
+            }
         }
 
         [Fact]
@@ -273,7 +288,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
             Assert.Throws<ObjectDisposedException>(() => context.UserName);
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(null, null, true)]
         [InlineData("", "", false)]
         public void ValidateCredentials_Invoke_ReturnsExpected(string userName, string password, bool expected)
@@ -283,14 +298,18 @@ namespace System.DirectoryServices.AccountManagement.Tests
             Assert.Equal(expected, context.ValidateCredentials(userName, password, ContextOptions.Negotiate));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ActiveIssue(23800)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] 
+        [OuterLoop("Takes too long on domain joined machines")]
         public void ValidateCredentials_InvalidUserName_ThrowsException()
         {
             var context = new PrincipalContext(ContextType.Machine);
             Assert.Throws<Exception>(() => context.ValidateCredentials("\0", "password"));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ActiveIssue(23800)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] 
+        [OuterLoop("Takes too long on domain joined machines")]
         public void ValidateCredentials_IncorrectUserNamePassword_ThrowsException()
         {
             var context = new PrincipalContext(ContextType.Machine);

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -22,7 +23,6 @@ namespace System.Net.Security.Tests
     {
         private const string Krb5ConfigFile = "/etc/krb5.conf";
         private const string KDestroyCmd = "kdestroy";
-        private const string SudoCommand = "sudo";
         private const string ScriptName = "setup-kdc.sh";
         private const string ScriptUninstallArgs = "--uninstall --yes";
         private const string ScriptInstallArgs = "--password {0} --yes";
@@ -73,15 +73,31 @@ namespace System.Net.Security.Tests
             }
 
             // Clear the credentials
-            var startInfo = new ProcessStartInfo(KDestroyCmd);
-            startInfo.UseShellExecute = true;
-            startInfo.CreateNoWindow = true;
-            startInfo.Arguments = "-A";
-            using (Process clearCreds = Process.Start(startInfo))
+            try
             {
-                clearCreds.WaitForExit();
-                output.WriteLine("kdestroy returned {0}", clearCreds.ExitCode);
-                return (clearCreds.ExitCode == 0);
+                var startInfo = new ProcessStartInfo(KDestroyCmd);
+                startInfo.UseShellExecute = true;
+                startInfo.CreateNoWindow = true;
+                startInfo.Arguments = "-A";
+                using (Process clearCreds = Process.Start(startInfo))
+                {
+                    clearCreds.WaitForExit();
+                    output.WriteLine("kdestroy returned {0}", clearCreds.ExitCode);
+                    return (clearCreds.ExitCode == 0);
+                }
+            }
+            catch (Win32Exception)
+            {
+                // https://github.com/dotnet/corefx/issues/24000
+                // on these distros right now
+                Assert.True(PlatformDetection.IsUbuntu1704 ||
+                            PlatformDetection.IsUbuntu1710 ||
+                            PlatformDetection.IsOpenSUSE   ||
+                            PlatformDetection.IsFedora     ||
+                            PlatformDetection.IsDebian     ||
+                            PlatformDetection.IsCentos7);
+
+                return false;
             }
         }
 
@@ -103,20 +119,9 @@ namespace System.Net.Security.Tests
 
         private static int RunSetupScript(string args = null)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-
-            // since ProcessStartInfo does not support Verb, we use sudo as
-            // the program to be run
-            startInfo.FileName = SudoCommand;
-            startInfo.Arguments = string.Format("bash {0} {1}", ScriptName, args);
-
             try
             {
-                using (Process kdcSetup = Process.Start(startInfo))
-                {
-                    kdcSetup.WaitForExit();
-                    return kdcSetup.ExitCode;
-                }
+                return AdminHelpers.RunAsSudo($"bash {ScriptName} {args}");
             }
             catch
             {

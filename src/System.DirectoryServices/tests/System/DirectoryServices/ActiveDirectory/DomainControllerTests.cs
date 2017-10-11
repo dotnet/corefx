@@ -26,7 +26,8 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             AssertExtensions.Throws<ArgumentException>("context", () => DomainController.GetDomainController(context));
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [OuterLoop("Takes too long on domain joined machines")]
         [InlineData("\0")]
         [InlineData("server:port")]
         [InlineData("[")]
@@ -37,12 +38,12 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             Assert.Throws<ActiveDirectoryObjectNotFoundException>(() => DomainController.GetDomainController(context));
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Access to path is denied when in App container")]
-        public void GetDomainController_InvalidIPV6_ThrowsInvalidCastException()
+        public void GetDomainController_InvalidIPV6_ThrowsActiveDirectoryObjectNotFoundException()
         {
             var context = new DirectoryContext(DirectoryContextType.DirectoryServer, "[::1]:port");
-            Assert.Throws<InvalidCastException>(() => DomainController.GetDomainController(context));
+            Assert.Throws<ActiveDirectoryObjectNotFoundException>(() => DomainController.GetDomainController(context));
         }
 
         [Fact]
@@ -108,12 +109,17 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not approved COM object for app")]
         public void FindAll_NoSuchName_ReturnsEmpty()
         {
-            var context = new DirectoryContext(DirectoryContextType.Domain, "\0");
-            Assert.Empty(DomainController.FindAll(context));
-            Assert.Empty(DomainController.FindAll(context, "siteName"));
+            // Domain joined machines can have entries in the DomainController.
+            if (Environment.MachineName.Equals(Environment.UserDomainName, StringComparison.OrdinalIgnoreCase))
+            {
+                var context = new DirectoryContext(DirectoryContextType.Domain, "\0");
+                Assert.Empty(DomainController.FindAll(context));
+                Assert.Empty(DomainController.FindAll(context, "siteName"));
+            }
         }
 
         [Fact]
+        [OuterLoop]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Getting information about domain is denied inside App")]
         [ActiveIssue("https://github.com/dotnet/corefx/issues/21553", TargetFrameworkMonikers.UapAot)]
         public void FindAll_NullName_ThrowsActiveDirectoryOperationException()
