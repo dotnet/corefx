@@ -98,10 +98,17 @@ namespace System.Buffers.Binary
         public static T ReadMachineEndian<T>(ReadOnlySpan<byte> buffer)
             where T : struct
         {
-            if (BinaryHelpers.IsReferenceOrContainsReferences<T>())
+#if netcoreapp
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
-                Environment.FailFast($"Cannot read a span into the non-blittable type <{typeof(T).Name}>.");
+                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
             }
+#else
+            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
+            }
+#endif
             if (Unsafe.SizeOf<T>() > buffer.Length)
             {
                 throw new ArgumentOutOfRangeException();
@@ -117,10 +124,17 @@ namespace System.Buffers.Binary
         public static bool TryReadMachineEndian<T>(ReadOnlySpan<byte> buffer, out T value)
             where T : struct
         {
-            if (BinaryHelpers.IsReferenceOrContainsReferences<T>())
+#if netcoreapp
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
-                Environment.FailFast($"Cannot read a span into the non-blittable type <{typeof(T).Name}>.");
+                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
             }
+#else
+            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
+            }
+#endif
             if (Unsafe.SizeOf<T>() > (uint)buffer.Length)
             {
                 value = default;

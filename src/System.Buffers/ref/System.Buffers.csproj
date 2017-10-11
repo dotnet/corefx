@@ -11,9 +11,6 @@
   <ItemGroup>
     <Compile Include="System.Buffers.cs" />
   </ItemGroup>
-  <ItemGroup>
-     <ProjectReference Include="..\..\System.Memory\ref\System.Memory.csproj" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.1'">
     <Reference Include="System.Runtime" />
   </ItemGroup>
