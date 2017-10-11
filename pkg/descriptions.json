@@ -154,6 +154,11 @@
     "CommonTypes": []
   },
   {
+    "Name": "System.ServiceModel.Syndication",
+    "Description": "Provides classes related to service model syndication.",
+    "CommonTypes": []
+  },
+  {
     "Name": "NETStandard.Library.NETFramework",
     "Description": "Adds NETStandard2.0 support to .NET Framework.",
     "CommonTypes": [
@@ -1408,16 +1413,6 @@
       "System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute",
       "System.Runtime.InteropServices.WindowsRuntime.WriteOnlyArrayAttribute",
       "System.Runtime.InteropServices.WindowsRuntime.ReturnValueNameAttribute"
-    ]
-  },
-  {
-    "Name": "System.Runtime.Intrinsics.X86",
-    "Description": "Provides classes which expose low-level processor intrinsics for the x86 family of instruction set architectures.",
-    "CommonTypes": [
-      "System.Runtime.Intrinsics.X86.Sse",
-      "System.Runtime.Intrinsics.X86.Avx",
-      "System.Runtime.Intrinsics.X86.Popcnt",
-      "System.Runtime.Intrinsics.X86.Fma",
     ]
   },
   {

@@ -74,29 +74,37 @@
   </Target>
 
   <PropertyGroup>
-    <_CoreCLRPackageId>runtime.$(NugetRuntimeIdentifier).Microsoft.NETCore.Runtime.CoreCLR</_CoreCLRPackageId>
     <SymbolPackagesDir>$(PackagesDir)symbolpackages/</SymbolPackagesDir>
   </PropertyGroup>
 
-  <ItemGroup>
-    <SymbolPackagesToDownload Include="$(_CoreCLRPackageId)">
-      <Url>https://dotnet.myget.org/F/dotnet-core/symbols/$(_CoreCLRPackageId)/$(CoreClrPackageVersion)/</Url>
-      <DestinationFile>$(_CoreCLRPackageId).$(CoreClrPackageVersion).symbols.nupkg.zip</DestinationFile>
-      <UnzipDestinationDir>$(SymbolPackagesDir)/$(_CoreCLRPackageId).$(CoreClrPackageVersion)</UnzipDestinationDir>
-    </SymbolPackagesToDownload>
-  </ItemGroup>
+  <Target Name="CalculateCoreCLRSymbolPackageProperties"
+          BeforeTargets="DownloadAndUnzipSymbolPackage">
+
+    <ItemGroup>
+      <_CoreCLRSymbolPackagesToDownload Include="@(ReferenceCopyLocalPaths->'%(NuGetPackageId)')" Condition="$([System.String]::Copy('%(Identity)').EndsWith('System.Private.CoreLib.dll'))">
+        <Url>https://dotnet.myget.org/F/dotnet-core/symbols/%(NuGetPackageId)/%(NuGetPackageVersion)/</Url>
+        <DestinationFile>%(NuGetPackageId).%(NuGetPackageVersion).symbols.nupkg.zip</DestinationFile>
+        <UnzipDestinationDir>$(SymbolPackagesDir)/%(NuGetPackageId).%(NuGetPackageVersion)</UnzipDestinationDir>
+      </_CoreCLRSymbolPackagesToDownload>
+    </ItemGroup>
+
+    <!-- Calculate the packages to download incrementally if we haven't downloaded them -->
+    <ItemGroup>
+      <SymbolPackagesToDownload Include="@(_CoreCLRSymbolPackagesToDownload)" Condition="!Exists('%(UnzipDestinationDir)')" />
+    </ItemGroup>
+  </Target>
 
   <Target Name="BinPlaceCoreCLRSymbols"
           AfterTargets="ResolveNuGetPackages"
-          DependsOnTargets="DownloadAndUnzipSymbolPackage"
+          DependsOnTargets="CalculateCoreCLRSymbolPackageProperties;DownloadAndUnzipSymbolPackage"
           Condition="'$(CoreCLROverridePath)' == '' AND '$(DownloadCoreCLRSymbols)' != 'false'">
 
-      <Warning Text="Failed to download CoreCLR symbols" Condition="@(SymbolPackagesDownloaded) == ''" />
+      <Warning Text="Failed to download CoreCLR symbols" Condition="'@(SymbolPackagesDownloaded)' == '' AND '@(SymbolPackagesToDownload)' != ''" />
 
       <ItemGroup>
-        <_CoreCLRSymbolFiles Condition="@(SymbolPackagesDownloaded) != ''" Include="%(SymbolPackagesDownloaded.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/native/*.pdb" />
-        <_CoreCLRSymbolFiles Condition="@(SymbolPackagesDownloaded) != ''" Include="%(SymbolPackagesDownloaded.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/native/*.dbg" />
-        <ReferenceCopyLocalPaths Condition="@(SymbolPackagesDownloaded) != ''" Include="@(_CoreCLRSymbolFiles)"/>
+        <_CoreCLRSymbolFiles Include="%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/native/*.pdb" />
+        <_CoreCLRSymbolFiles Include="%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(NugetRuntimeIdentifier)/native/*.dbg" />
+        <ReferenceCopyLocalPaths Include="@(_CoreCLRSymbolFiles)"/>
       </ItemGroup>
   </Target>
 
