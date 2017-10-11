@@ -27,6 +27,7 @@ namespace System.Net.Http
         private const int Expect100TimeoutMilliseconds = 1000;
 
         private static readonly byte[] s_contentLength0NewlineAsciiBytes = Encoding.ASCII.GetBytes("Content-Length: 0\r\n");
+        private static readonly byte[] s_spaceHttp10NewlineAsciiBytes = Encoding.ASCII.GetBytes(" HTTP/1.0\r\n");
         private static readonly byte[] s_spaceHttp11NewlineAsciiBytes = Encoding.ASCII.GetBytes(" HTTP/1.1\r\n");
         private static readonly byte[] s_hostKeyAndSeparator = Encoding.ASCII.GetBytes(HttpKnownHeaderNames.Host + ": ");
 
@@ -190,15 +191,10 @@ namespace System.Net.Http
             _currentRequest = request;
             try
             {
+                bool isHttp10 = request.Version.Major == 1 && request.Version.Minor == 0;
+
                 // Send the request.
                 if (NetEventSource.IsEnabled) Trace($"Sending request: {request}");
-
-                if (request.Version.Major != 1 || request.Version.Minor != 1)
-                {
-                    // TODO #23132: Support 1.0
-                    // TODO #23134: Support 2.0
-                    throw new PlatformNotSupportedException($"Only HTTP 1.1 supported -- request.Version was {request.Version}");
-                }
 
                 // Add headers to define content transfer, if not present
                 if (request.Content != null &&
@@ -209,13 +205,22 @@ namespace System.Net.Http
                     request.Headers.TransferEncodingChunked = true;
                 }
 
+                if (isHttp10 && request.HasHeaders && request.Headers.TransferEncodingChunked == true)
+                {
+                    // HTTP 1.0 does not support chunking
+                    throw new NotSupportedException(SR.net_http_unsupported_chunking);
+                }
+
                 // Write request line
                 await WriteStringAsync(request.Method.Method, cancellationToken).ConfigureAwait(false);
                 await WriteByteAsync((byte)' ', cancellationToken).ConfigureAwait(false);
                 await WriteStringAsync(
                     _usingProxy ? request.RequestUri.AbsoluteUri : request.RequestUri.PathAndQuery,
                     cancellationToken).ConfigureAwait(false);
-                await WriteBytesAsync(s_spaceHttp11NewlineAsciiBytes, cancellationToken).ConfigureAwait(false);
+
+                // fall-back to 1.1 for all versions other than 1.0
+                await WriteBytesAsync(isHttp10 ? s_spaceHttp10NewlineAsciiBytes : s_spaceHttp11NewlineAsciiBytes,
+                                      cancellationToken).ConfigureAwait(false);
 
                 // Write request headers
                 if (request.HasHeaders)
@@ -225,7 +230,7 @@ namespace System.Net.Http
 
                 if (request.Content == null)
                 {
-                    // Write out Content-Length: 0 header to indicate no body, 
+                    // Write out Content-Length: 0 header to indicate no body,
                     // unless this is a method that never has a body.
                     if (request.Method != HttpMethod.Get && request.Method != HttpMethod.Head)
                     {
@@ -347,7 +352,7 @@ namespace System.Net.Http
                 }
 
                 // Create the response stream.
-                HttpContentReadStream responseStream;
+                HttpContentStream responseStream;
                 if (request.Method == HttpMethod.Head || (int)response.StatusCode == 204 || (int)response.StatusCode == 304)
                 {
                     responseStream = EmptyReadStream.Instance;
@@ -369,6 +374,10 @@ namespace System.Net.Http
                 else if (response.Headers.TransferEncodingChunked == true)
                 {
                     responseStream = new ChunkedEncodingReadStream(this);
+                }
+                else if (response.StatusCode == HttpStatusCode.SwitchingProtocols)
+                {
+                    responseStream = new RawConnectionStream(this);
                 }
                 else
                 {
@@ -592,78 +601,74 @@ namespace System.Net.Http
 
         private static bool IsDigit(byte c) => (uint)(c - '0') <= '9' - '0';
 
-        private void WriteToBuffer(byte[] buffer, int offset, int count)
+        private void WriteToBuffer(ReadOnlyMemory<byte> source)
         {
-            Debug.Assert(count <= _writeBuffer.Length - _writeOffset);
-
-            Buffer.BlockCopy(buffer, offset, _writeBuffer, _writeOffset, count);
-            _writeOffset += count;
+            Debug.Assert(source.Length <= _writeBuffer.Length - _writeOffset);
+            source.Span.CopyTo(new Span<byte>(_writeBuffer, _writeOffset, source.Length));
+            _writeOffset += source.Length;
         }
 
-        private async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        private async Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
         {
             int remaining = _writeBuffer.Length - _writeOffset;
 
-            if (count <= remaining)
+            if (source.Length <= remaining)
             {
                 // Fits in current write buffer.  Just copy and return.
-                WriteToBuffer(buffer, offset, count);
+                WriteToBuffer(source);
                 return;
             }
 
             if (_writeOffset != 0)
             {
                 // Fit what we can in the current write buffer and flush it.
-                WriteToBuffer(buffer, offset, remaining);
+                WriteToBuffer(source.Slice(0, remaining));
+                source = source.Slice(remaining);
                 await FlushAsync(cancellationToken).ConfigureAwait(false);
-
-                // Update offset and count to reflect the write we just did.
-                offset += remaining;
-                count -= remaining;
             }
 
-            if (count >= _writeBuffer.Length)
+            if (source.Length >= _writeBuffer.Length)
             {
                 // Large write.  No sense buffering this.  Write directly to stream.
                 // CONSIDER: May want to be a bit smarter here?  Think about how large writes should work...
-                await WriteToStreamAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+                await WriteToStreamAsync(source, cancellationToken).ConfigureAwait(false);
             }
             else
             {
                 // Copy remainder into buffer
-                WriteToBuffer(buffer, offset, count);
+                WriteToBuffer(source);
             }
         }
 
-        private Task WriteWithoutBufferingAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        private Task WriteWithoutBufferingAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
         {
             if (_writeOffset == 0)
             {
                 // There's nothing in the write buffer we need to flush.
                 // Just write the supplied data out to the stream.
-                return WriteToStreamAsync(buffer, offset, count, cancellationToken);
+                return WriteToStreamAsync(source, cancellationToken);
             }
 
             int remaining = _writeBuffer.Length - _writeOffset;
-            if (count <= remaining)
+            if (source.Length <= remaining)
             {
                 // There's something already in the write buffer, but the content
                 // we're writing can also fit after it in the write buffer.  Copy
                 // the content to the write buffer and then flush it, so that we
                 // can do a single send rather than two.
-                WriteToBuffer(buffer, offset, count);
+                WriteToBuffer(source);
                 return FlushAsync(cancellationToken);
             }
 
             // There's data in the write buffer and the data we're writing doesn't fit after it.
             // Do two writes, one to flush the buffer and then another to write the supplied content.
-            return FlushThenWriteWithoutBufferingAsync(buffer, offset, count, cancellationToken);
+            return FlushThenWriteWithoutBufferingAsync(source, cancellationToken);
         }
 
-        private async Task FlushThenWriteWithoutBufferingAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        private async Task FlushThenWriteWithoutBufferingAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
         {
             await FlushAsync(cancellationToken).ConfigureAwait(false);
-            await WriteToStreamAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+            await WriteToStreamAsync(source, cancellationToken).ConfigureAwait(false);
         }
 
         private Task WriteByteAsync(byte b, CancellationToken cancellationToken)
@@ -679,7 +684,7 @@ namespace System.Net.Http
         private async Task WriteByteSlowAsync(byte b, CancellationToken cancellationToken)
         {
             Debug.Assert(_writeOffset == _writeBuffer.Length);
-            await WriteToStreamAsync(_writeBuffer, 0, _writeBuffer.Length, cancellationToken).ConfigureAwait(false);
+            await WriteToStreamAsync(_writeBuffer, cancellationToken).ConfigureAwait(false);
 
             _writeBuffer[0] = b;
             _writeOffset = 1;
@@ -733,7 +738,7 @@ namespace System.Net.Http
                 }
                 else if (_writeOffset == _writeBuffer.Length)
                 {
-                    await WriteToStreamAsync(_writeBuffer, 0, _writeBuffer.Length, cancellationToken).ConfigureAwait(false);
+                    await WriteToStreamAsync(_writeBuffer, cancellationToken).ConfigureAwait(false);
                     _writeOffset = 0;
                 }
             }
@@ -801,17 +806,17 @@ namespace System.Net.Http
         {
             if (_writeOffset > 0)
             {
-                Task t = WriteToStreamAsync(_writeBuffer, 0, _writeOffset, cancellationToken);
+                Task t = WriteToStreamAsync(new ReadOnlyMemory<byte>(_writeBuffer, 0, _writeOffset), cancellationToken);
                 _writeOffset = 0;
                 return t;
             }
             return Task.CompletedTask;
         }
 
-        private Task WriteToStreamAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        private Task WriteToStreamAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
         {
-            if (NetEventSource.IsEnabled) Trace($"Writing {count} bytes.");
-            return _stream.WriteAsync(buffer, offset, count, cancellationToken);
+            if (NetEventSource.IsEnabled) Trace($"Writing {source.Length} bytes.");
+            return _stream.WriteAsync(source, cancellationToken);
         }
 
         private async ValueTask<ArraySegment<byte>> ReadNextLineAsync(CancellationToken cancellationToken)
@@ -867,7 +872,7 @@ namespace System.Net.Http
         }
 
         // Throws IOException on EOF.  This is only called when we expect more data.
-        private Task FillAsync(CancellationToken cancellationToken)
+        private async Task FillAsync(CancellationToken cancellationToken)
         {
             int remaining = _readLength - _readOffset;
             Debug.Assert(remaining >= 0);
@@ -906,59 +911,37 @@ namespace System.Net.Http
             // erroneous data sent on it by the server in response to no request from us.
             // We need to consume that read prior to issuing another read request.
             Task<int> t = _readAheadTask;
+            int bytesRead;
             if (t != null)
             {
                 Debug.Assert(_readOffset == 0);
                 Debug.Assert(_readLength == 0);
                 _readAheadTask = null;
+                bytesRead = await t.ConfigureAwait(false);
             }
             else
             {
-                // No existing read ahead.  Issue a new read for us much space as remains in the buffer.
-                t = _stream.ReadAsync(_readBuffer, _readLength, _readBuffer.Length - _readLength, cancellationToken);
+                ValueTask<int> vt = _stream.ReadAsync(new Memory<byte>(_readBuffer, _readLength, _readBuffer.Length - _readLength), cancellationToken);
+                bytesRead = vt.IsCompletedSuccessfully ? vt.Result : await vt.AsTask().ConfigureAwait(false);
             }
 
-            if (t.IsCompleted)
+            if (NetEventSource.IsEnabled) Trace($"Received {bytesRead} bytes.");
+            if (bytesRead == 0)
             {
-                // The read completed synchronously, so update the amount of data in the buffer and return.
-                int bytesRead = t.GetAwaiter().GetResult();
-                if (NetEventSource.IsEnabled) Trace($"Received {bytesRead} bytes.");
-                if (bytesRead == 0)
-                {
-                    throw new IOException(SR.net_http_invalid_response);
-                }
-
-                _readLength += bytesRead;
-                return Task.CompletedTask;
+                throw new IOException(SR.net_http_invalid_response);
             }
-            else
-            {
-                // Using async/await results in slightly higher allocations for the case of a single await,
-                // and it's simple to transform this one into ContinueWith.
-                return t.ContinueWith((completed, state) =>
-                {
-                    var innerConnection = (HttpConnection)state;
-                    int bytesRead = completed.GetAwaiter().GetResult();
-                    if (NetEventSource.IsEnabled) innerConnection.Trace($"Received {bytesRead} bytes.");
-                    if (bytesRead == 0)
-                    {
-                        throw new IOException(SR.net_http_invalid_response);
-                    }
-
-                    innerConnection._readLength += bytesRead;
-                }, this, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
-            }
+            _readLength += bytesRead;
         }
 
-        private void ReadFromBuffer(byte[] buffer, int offset, int count)
+        private void ReadFromBuffer(Span<byte> buffer)
         {
-            Debug.Assert(count <= _readLength - _readOffset);
+            Debug.Assert(buffer.Length <= _readLength - _readOffset);
 
-            Buffer.BlockCopy(_readBuffer, _readOffset, buffer, offset, count);
-            _readOffset += count;
+            new Span<byte>(_readBuffer, _readOffset, buffer.Length).CopyTo(buffer);
+            _readOffset += buffer.Length;
         }
 
-        private async ValueTask<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        private async ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
         {
             // This is called when reading the response body
 
@@ -966,15 +949,22 @@ namespace System.Net.Http
             if (remaining > 0)
             {
                 // We have data in the read buffer.  Return it to the caller.
-                count = Math.Min(count, remaining);
-                ReadFromBuffer(buffer, offset, count);
-                return count;
+                if (destination.Length <= remaining)
+                {
+                    ReadFromBuffer(destination.Span);
+                    return destination.Length;
+                }
+                else
+                {
+                    ReadFromBuffer(destination.Span.Slice(0, remaining));
+                    return remaining;
+                }
             }
 
             // No data in read buffer. 
             // Do an unbuffered read directly against the underlying stream.
             Debug.Assert(_readAheadTask == null, "Read ahead task should have been consumed as part of the headers.");
-            count = await _stream.ReadAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+            int count = await _stream.ReadAsync(destination, cancellationToken).ConfigureAwait(false);
             if (NetEventSource.IsEnabled) Trace($"Received {count} bytes.");
             return count;
         }
@@ -1004,7 +994,7 @@ namespace System.Net.Http
 
                 // Don't use FillAsync here as it will throw on EOF.
                 Debug.Assert(_readAheadTask == null);
-                _readLength = await _stream.ReadAsync(_readBuffer, 0, _readBuffer.Length, cancellationToken).ConfigureAwait(false);
+                _readLength = await _stream.ReadAsync(_readBuffer, cancellationToken).ConfigureAwait(false);
                 if (_readLength == 0)
                 {
                     // End of stream
