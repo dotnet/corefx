@@ -248,8 +248,8 @@ namespace System.Buffers.Binary
         public static bool TryReadUInt32BigEndian(ReadOnlySpan<byte> buffer, out uint value) { throw null; }
         public static bool TryReadUInt64BigEndian(ReadOnlySpan<byte> buffer, out ulong value) { throw null; }
 
-        public static void WriteMachineEndian<T>(ref Span<byte> buffer, T value) where T : struct { throw null; }
-        public static bool TryWriteMachineEndian<T>(ref Span<byte> buffer, T value) where T : struct { throw null; }
+        public static void WriteMachineEndian<T>(Span<byte> buffer, ref T value) where T : struct { throw null; }
+        public static bool TryWriteMachineEndian<T>(Span<byte> buffer, ref T value) where T : struct { throw null; }
 
         public static void WriteInt16LittleEndian(Span<byte> buffer, short value) { throw null; }
         public static void WriteInt32LittleEndian(Span<byte> buffer, int value) { throw null; }

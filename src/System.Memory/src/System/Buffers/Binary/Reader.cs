@@ -98,7 +98,7 @@ namespace System.Buffers.Binary
         public static T ReadMachineEndian<T>(ReadOnlySpan<byte> buffer)
             where T : struct
         {
-#if netcoreapp
+#if IsPartialFacade
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
@@ -124,7 +124,7 @@ namespace System.Buffers.Binary
         public static bool TryReadMachineEndian<T>(ReadOnlySpan<byte> buffer, out T value)
             where T : struct
         {
-#if netcoreapp
+#if IsPartialFacade
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));

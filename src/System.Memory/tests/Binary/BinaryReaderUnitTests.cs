@@ -171,6 +171,9 @@ namespace System.Buffers.Binary.Tests
             Assert.False(TryReadMachineEndian(span, out uint uintValue));
             TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<ulong>(_span));
             Assert.False(TryReadMachineEndian(span, out ulong ulongValue));
+
+            TestHelpers.AssertThrows<ArgumentException, byte>(span, (_span) => ReadMachineEndian<TestHelpers.TestValueTypeWithReference>(_span));
+            TestHelpers.AssertThrows<ArgumentException, byte>(span, (_span) => TryReadMachineEndian(_span, out TestHelpers.TestValueTypeWithReference stringValue));
         }
 
         [Fact]

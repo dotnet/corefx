@@ -20,45 +20,53 @@ namespace System.Buffers.Binary.Tests
 
             Span<byte> span = new byte[8];
 
-            WriteMachineEndian<byte>(ref span, 0x11);
-            TestHelpers.Validate<byte>(span, 0x11);
-            Assert.True(TryWriteMachineEndian<byte>(ref span, 0x11));
-            TestHelpers.Validate<byte>(span, 0x11);
+            byte byteValue = 0x11;
+            WriteMachineEndian<byte>(span, ref byteValue);
+            TestHelpers.Validate<byte>(span, byteValue);
+            Assert.True(TryWriteMachineEndian<byte>(span, ref byteValue));
+            TestHelpers.Validate<byte>(span, byteValue);
 
-            WriteMachineEndian<sbyte>(ref span, 0x11);
-            TestHelpers.Validate<sbyte>(span, 0x11);
-            Assert.True(TryWriteMachineEndian<sbyte>(ref span, 0x11));
-            TestHelpers.Validate<sbyte>(span, 0x11);
+            sbyte sbyteValue = 0x11;
+            WriteMachineEndian<sbyte>(span, ref sbyteValue);
+            TestHelpers.Validate<sbyte>(span, sbyteValue);
+            Assert.True(TryWriteMachineEndian<sbyte>(span, ref sbyteValue));
+            TestHelpers.Validate<sbyte>(span, sbyteValue);
 
-            WriteMachineEndian<ushort>(ref span, 0x1122);
-            TestHelpers.Validate<ushort>(span, 0x1122);
-            Assert.True(TryWriteMachineEndian<ushort>(ref span, 0x1122));
-            TestHelpers.Validate<ushort>(span, 0x1122);
+            ushort ushortValue = 0x1122;
+            WriteMachineEndian<ushort>(span, ref ushortValue);
+            TestHelpers.Validate<ushort>(span, ushortValue);
+            Assert.True(TryWriteMachineEndian<ushort>(span, ref ushortValue));
+            TestHelpers.Validate<ushort>(span, ushortValue);
 
-            WriteMachineEndian<uint>(ref span, 0x11223344);
-            TestHelpers.Validate<uint>(span, 0x11223344);
-            Assert.True(TryWriteMachineEndian<uint>(ref span, 0x11223344));
-            TestHelpers.Validate<uint>(span, 0x11223344);
+            uint uintValue = 0x11223344;
+            WriteMachineEndian<uint>(span, ref uintValue);
+            TestHelpers.Validate<uint>(span, uintValue);
+            Assert.True(TryWriteMachineEndian<uint>(span, ref uintValue));
+            TestHelpers.Validate<uint>(span, uintValue);
 
-            WriteMachineEndian<ulong>(ref span, 0x1122334455667788);
-            TestHelpers.Validate<ulong>(span, 0x1122334455667788);
-            Assert.True(TryWriteMachineEndian<ulong>(ref span, 0x1122334455667788));
-            TestHelpers.Validate<ulong>(span, 0x1122334455667788);
+            ulong ulongValue = 0x1122334455667788;
+            WriteMachineEndian<ulong>(span, ref ulongValue);
+            TestHelpers.Validate<ulong>(span, ulongValue);
+            Assert.True(TryWriteMachineEndian<ulong>(span, ref ulongValue));
+            TestHelpers.Validate<ulong>(span, ulongValue);
 
-            WriteMachineEndian<short>(ref span, 0x1122);
-            TestHelpers.Validate<short>(span, 0x1122);
-            Assert.True(TryWriteMachineEndian<short>(ref span, 0x1122));
-            TestHelpers.Validate<short>(span, 0x1122);
+            short shortValue = 0x1122;
+            WriteMachineEndian<short>(span, ref shortValue);
+            TestHelpers.Validate<short>(span, shortValue);
+            Assert.True(TryWriteMachineEndian<short>(span, ref shortValue));
+            TestHelpers.Validate<short>(span, shortValue);
 
-            WriteMachineEndian<int>(ref span, 0x11223344);
-            TestHelpers.Validate<int>(span, 0x11223344);
-            Assert.True(TryWriteMachineEndian<int>(ref span, 0x11223344));
-            TestHelpers.Validate<int>(span, 0x11223344);
+            int intValue = 0x11223344;
+            WriteMachineEndian<int>(span, ref intValue);
+            TestHelpers.Validate<int>(span, intValue);
+            Assert.True(TryWriteMachineEndian<int>(span, ref intValue));
+            TestHelpers.Validate<int>(span, intValue);
 
-            WriteMachineEndian<long>(ref span, 0x1122334455667788);
-            TestHelpers.Validate<long>(span, 0x1122334455667788);
-            Assert.True(TryWriteMachineEndian<long>(ref span, 0x1122334455667788));
-            TestHelpers.Validate<long>(span, 0x1122334455667788);
+            long longValue = 0x1122334455667788;
+            WriteMachineEndian<long>(span, ref longValue);
+            TestHelpers.Validate<long>(span, longValue);
+            Assert.True(TryWriteMachineEndian<long>(span, ref longValue));
+            TestHelpers.Validate<long>(span, longValue);
         }
 
         [Theory]
@@ -254,31 +262,52 @@ namespace System.Buffers.Binary.Tests
         [Fact]
         public void SpanWriteFail()
         {
-            byte value = 1;
+            byte byteValue = 1;
+            sbyte sbyteValue = 1;
+            short shortValue = 1;
+            ushort ushortValue = 1;
+            int intValue = 1;
+            uint uintValue = 1;
+            long longValue = 1;
+            ulong ulongValue = 1;
+            
             Span<byte> span = new byte[1];
             
-            WriteMachineEndian<byte>(ref span, value);
+            WriteMachineEndian<byte>(span, ref byteValue);
             byte read = ReadMachineEndian<byte>(span);
-            Assert.Equal<byte>(value, read);
+            Assert.Equal<byte>(byteValue, read);
 
             span.Clear();
-            Assert.True(TryWriteMachineEndian<byte>(ref span, value));
+            Assert.True(TryWriteMachineEndian<byte>(span, ref byteValue));
             read = ReadMachineEndian<byte>(span);
-            Assert.Equal<byte>(value, read);
+            Assert.Equal<byte>(byteValue, read);
 
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteMachineEndian<short>(ref _span, value));
-            Assert.False(TryWriteMachineEndian<short>(ref span, value));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteMachineEndian<int>(ref _span, value));
-            Assert.False(TryWriteMachineEndian<int>(ref span, value));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteMachineEndian<long>(ref _span, value));
-            Assert.False(TryWriteMachineEndian<long>(ref span, value));
+            WriteMachineEndian<sbyte>(span, ref sbyteValue);
+            sbyte readSbyte = ReadMachineEndian<sbyte>(span);
+            Assert.Equal<sbyte>(sbyteValue, readSbyte);
 
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteMachineEndian<ushort>(ref _span, value));
-            Assert.False(TryWriteMachineEndian<ushort>(ref span, value));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteMachineEndian<uint>(ref _span, value));
-            Assert.False(TryWriteMachineEndian<uint>(ref span, value));
-            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteMachineEndian<ulong>(ref _span, value));
-            Assert.False(TryWriteMachineEndian<ulong>(ref span, value));
+            span.Clear();
+            Assert.True(TryWriteMachineEndian<sbyte>(span, ref sbyteValue));
+            readSbyte = ReadMachineEndian<sbyte>(span);
+            Assert.Equal<sbyte>(sbyteValue, readSbyte);
+
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteMachineEndian<short>(_span, ref shortValue));
+            Assert.False(TryWriteMachineEndian<short>(span, ref shortValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteMachineEndian<int>(_span, ref intValue));
+            Assert.False(TryWriteMachineEndian<int>(span, ref intValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteMachineEndian<long>(_span, ref longValue));
+            Assert.False(TryWriteMachineEndian<long>(span, ref longValue));
+
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteMachineEndian<ushort>(_span, ref ushortValue));
+            Assert.False(TryWriteMachineEndian<ushort>(span, ref ushortValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteMachineEndian<uint>(_span, ref uintValue));
+            Assert.False(TryWriteMachineEndian<uint>(span, ref uintValue));
+            TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => WriteMachineEndian<ulong>(_span, ref ulongValue));
+            Assert.False(TryWriteMachineEndian<ulong>(span, ref ulongValue));
+
+            var structValue = new TestHelpers.TestValueTypeWithReference{ I = 1, S = "1" };
+            TestHelpers.AssertThrows<ArgumentException, byte>(span, (_span) => WriteMachineEndian<TestHelpers.TestValueTypeWithReference>(_span, ref structValue));
+            TestHelpers.AssertThrows<ArgumentException, byte>(span, (_span) => TryWriteMachineEndian<TestHelpers.TestValueTypeWithReference>(_span, ref structValue));
         }
     }
 }
