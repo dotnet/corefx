@@ -53,6 +53,7 @@
     <Reference Include="System.Reflection" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Condition="'$(TargetGroup)' != 'netstandard1.1'" Include="System.Numerics.Vectors" />
     <Reference Condition="'$(TargetGroup)' != 'netstandard1.1'" Include="System.Runtime.CompilerServices.Unsafe" />
