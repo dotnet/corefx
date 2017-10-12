@@ -29,14 +29,14 @@ namespace System.ServiceModel.Syndication.Tests
 
     public class XmlDiff
     {
-        XmlDiffDocument _SourceDoc;
-        XmlDiffDocument _TargetDoc;
+        private XmlDiffDocument _SourceDoc;
+        private XmlDiffDocument _TargetDoc;
 
-        XmlTextWriter _Writer;     // Writer to write out the result
-        StringBuilder _Output;
+        private XmlTextWriter _Writer;     // Writer to write out the result
+        private StringBuilder _Output;
 
         // Option Flags
-        XmlDiffOption _XmlDiffOption = XmlDiffOption.None;
+        private XmlDiffOption _XmlDiffOption = XmlDiffOption.None;
 
         public XmlDiff()
         {
@@ -128,26 +128,26 @@ namespace System.ServiceModel.Syndication.Tests
 
         private void InitFiles()
         {
-            this._SourceDoc = new XmlDiffDocument();
-            this._SourceDoc.Option = this._XmlDiffOption;
-            this._TargetDoc = new XmlDiffDocument();
-            this._TargetDoc.Option = this.Option;
+            _SourceDoc = new XmlDiffDocument();
+            _SourceDoc.Option = _XmlDiffOption;
+            _TargetDoc = new XmlDiffDocument();
+            _TargetDoc.Option = this.Option;
             _Output = new StringBuilder(String.Empty);
         }
 
         public bool Compare(String source, String target)
         {
             InitFiles();
-            this._SourceDoc.Load(source);
-            this._TargetDoc.Load(target);
+            _SourceDoc.Load(source);
+            _TargetDoc.Load(target);
             return Diff();
         }
 
         public bool Compare(XmlReader source, XmlReader target)
         {
             InitFiles();
-            this._SourceDoc.Load(source);
-            this._TargetDoc.Load(target);
+            _SourceDoc.Load(source);
+            _TargetDoc.Load(target);
             return Diff();
         }
 
@@ -155,9 +155,9 @@ namespace System.ServiceModel.Syndication.Tests
         {
             InitFiles();
 
-            this._SourceDoc.Load(source);
-            this._TargetDoc.Load(target);
-            XPathNavigator nav = this._SourceDoc.CreateNavigator();
+            _SourceDoc.Load(source);
+            _TargetDoc.Load(target);
+            XPathNavigator nav = _SourceDoc.CreateNavigator();
 
             if (!string.IsNullOrEmpty(advOptions.IgnoreChildOrderExpr))
             {
@@ -166,8 +166,8 @@ namespace System.ServiceModel.Syndication.Tests
                     advOptions,
                     nav);
 
-                this._SourceDoc.SortChildren(expr);
-                this._TargetDoc.SortChildren(expr);
+                _SourceDoc.SortChildren(expr);
+                _TargetDoc.SortChildren(expr);
             }
 
             if (advOptions.IgnoreNodesExpr != null && advOptions.IgnoreNodesExpr != "")
@@ -177,8 +177,8 @@ namespace System.ServiceModel.Syndication.Tests
                     advOptions,
                     nav);
 
-                this._SourceDoc.IgnoreNodes(expr);
-                this._TargetDoc.IgnoreNodes(expr);
+                _SourceDoc.IgnoreNodes(expr);
+                _TargetDoc.IgnoreNodes(expr);
             }
 
             if (advOptions.IgnoreValuesExpr != null && advOptions.IgnoreValuesExpr != "")
@@ -188,8 +188,8 @@ namespace System.ServiceModel.Syndication.Tests
                     advOptions,
                     nav);
 
-                this._SourceDoc.IgnoreValues(expr);
-                this._TargetDoc.IgnoreValues(expr);
+                _SourceDoc.IgnoreValues(expr);
+                _TargetDoc.IgnoreValues(expr);
             }
 
             return Diff();
@@ -221,12 +221,11 @@ namespace System.ServiceModel.Syndication.Tests
             _Writer = new XmlTextWriter(new StringWriter(_Output));
             _Writer.WriteStartElement(String.Empty, "Root", String.Empty);
 
-            flag = CompareChildren(this._SourceDoc, this._TargetDoc);
+            flag = CompareChildren(_SourceDoc, _TargetDoc);
 
             _Writer.WriteEndElement();
             _Writer.Close();
             return flag;
-
         }
 
         //  This function is being called recursively to compare the children of a certain node.
@@ -258,7 +257,7 @@ namespace System.ServiceModel.Syndication.Tests
                             WriteResult(sourceChild, targetChild, DiffType.Success);
                             // Check whether this Node has  Children, if it does call CompareChildren recursively
                             if (sourceChild.FirstChild != null)
-                            { 
+                            {
                                 tempFlag = CompareChildren(sourceChild, targetChild);
                             }
                             else if (targetChild.FirstChild != null)
@@ -299,7 +298,6 @@ namespace System.ServiceModel.Syndication.Tests
                         }
                         else
                         {
-
                             // Child nodes not matched, start the recovery process
                             bool recoveryFlag = false;
 
@@ -407,7 +405,6 @@ namespace System.ServiceModel.Syndication.Tests
                         WriteResult(sourceChild, null, DiffType.SourceExtra);
                         flag = false;
                         sourceChild = sourceChild.NextSibling;
-
                     }
                 }
                 else if (targetChild != null)
@@ -558,7 +555,6 @@ namespace System.ServiceModel.Syndication.Tests
                     break;
                 default:
                     break;
-
             }
 
             return DiffType.Success;
@@ -614,7 +610,6 @@ namespace System.ServiceModel.Syndication.Tests
                     }
                     else
                     {
-
                         _Writer.WriteString(GetNodeText(sourceNode, result));
                     }
                     _Writer.WriteEndElement();
@@ -631,7 +626,6 @@ namespace System.ServiceModel.Syndication.Tests
                     }
                     else
                     {
-
                         _Writer.WriteString(GetNodeText(targetNode, result));
                     }
                     _Writer.WriteEndElement();
@@ -870,7 +864,6 @@ namespace System.ServiceModel.Syndication.Tests
 
         private String GetDiffType(DiffType type)
         {
-
             switch (type)
             {
                 case DiffType.None:

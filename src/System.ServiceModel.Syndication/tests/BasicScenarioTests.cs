@@ -692,24 +692,26 @@ namespace System.ServiceModel.Syndication.Tests
             // *** ASSERT *** \\
             Assert.True(!res.LastUpdatedTime.Equals(new DateTimeOffset()));
         }
-        
+
         [Fact]
         [ActiveIssue(24571)]
-        public static void AtomEntryPositiveTest()
+        public static async Task AtomEntryPositiveTest()
         {
             string filePath = @"brief-entry-noerror.xml";
             string serializeFilePath = Path.GetTempFileName();
-            
+
+            XmlReader reader = null;
+            XmlWriter writer = null;
+
             try
             {
-                XmlReader reader = XmlReader.Create(filePath , new XmlReaderSettings() {Async=true});
-                Task<SyndicationItem> task = SyndicationItem.LoadAsync(reader);
-                Task.WhenAll(task);
-                SyndicationItem feedObjct = task.Result;
+                reader = XmlReader.Create(filePath, new XmlReaderSettings() { Async = true });
+                SyndicationItem feedObjct = await SyndicationItem.LoadAsync(reader);
+                reader.Close();
 
-                XmlWriter writer = XmlWriter.Create(serializeFilePath);
-                Atom10ItemFormatter f = new Atom10ItemFormatter(feedObjct);
-                f.WriteToAsync(writer).GetAwaiter().GetResult();
+                writer = XmlWriter.Create(serializeFilePath, new XmlWriterSettings() { Async = true });
+                Atom10ItemFormatter atomformatter = new Atom10ItemFormatter(feedObjct);
+                await atomformatter.WriteToAsync(writer);
                 writer.Close();
 
                 // compare file filePath and serializeFilePath
@@ -718,6 +720,14 @@ namespace System.ServiceModel.Syndication.Tests
             }
             finally
             {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                }
+                if (writer != null)
+                {
+                    writer.Dispose();
+                }
                 File.Delete(serializeFilePath);
             }
         }
@@ -729,9 +739,11 @@ namespace System.ServiceModel.Syndication.Tests
             SyndicationItem item1 = new SyndicationItem("SyndicationFeed released for .net Core", "A lot of text describing the release of .net core feature", new Uri("http://Contoso.com/news/path"));
             string serializeFilePath = Path.GetTempFileName();
 
+            XmlWriter writer = null;
+
             try
             {
-                XmlWriter writer = XmlWriter.Create(serializeFilePath, new XmlWriterSettings() { Async = true });
+                writer = XmlWriter.Create(serializeFilePath, new XmlWriterSettings() { Async = true });
 
                 Atom10ItemFormatter f = new Atom10ItemFormatter(item1);
                 Task task = f.WriteToAsync(writer);
@@ -743,27 +755,60 @@ namespace System.ServiceModel.Syndication.Tests
             }
             finally
             {
+                if(writer !=null)
+                {
+                    writer.Dispose();
+                }
                 File.Delete(serializeFilePath);
             }
         }
 
         [Fact]
-        public static void AtomFeedPositiveTest()
+        [ActiveIssue(24604)]
+        public static async Task AtomEntryPositiveTest_writeAsync()
         {
-            string filePath = @"absolute_rel.xml";
+            SyndicationItem item1 = new SyndicationItem("SyndicationFeed released for .net Core", "A lot of text describing the release of .net core feature", new Uri("http://Contoso.com/news/path"));
             string serializeFilePath = Path.GetTempFileName();
+
+            XmlWriter writer = null;
 
             try
             {
-                XmlReader reader = XmlReader.Create(filePath, new XmlReaderSettings() { Async = true });
-                CancellationToken ct = new CancellationToken();
-                Task<SyndicationFeed> task = SyndicationFeed.LoadAsync(reader, ct);
-                Task.WhenAll(task);
-                SyndicationFeed feedObjct = task.Result;
+                writer = XmlWriter.Create(serializeFilePath, new XmlWriterSettings());
+                Atom10ItemFormatter f = new Atom10ItemFormatter(item1);
+                await f.WriteToAsync(writer);
+                writer.Close();
 
-                XmlWriter writer = XmlWriter.Create(serializeFilePath);
+                //TODO:
+                // Check file content
+            }
+            finally
+            {
+                if (writer != null)
+                {
+                    writer.Dispose();
+                }
+                File.Delete(serializeFilePath);
+            }
+        }
+
+        [Fact]
+        public static async Task AtomFeedPositiveTest()
+        {
+            string filePath = @"absolute_rel.xml";
+            string serializeFilePath = Path.GetTempFileName();
+            XmlReader reader = null;
+            XmlWriter writer = null;
+
+            try
+            {
+                reader = XmlReader.Create(filePath, new XmlReaderSettings());
+                CancellationToken ct = new CancellationToken();
+                SyndicationFeed feedObjct = await SyndicationFeed.LoadAsync(reader, ct);
+
+                writer = XmlWriter.Create(serializeFilePath);
                 Atom10FeedFormatter f = new Atom10FeedFormatter(feedObjct);
-                f.WriteToAsync(writer, ct).GetAwaiter().GetResult();
+                await f.WriteToAsync(writer, ct);
                 writer.Close();
 
                 CompareHelper ch = new CompareHelper();
@@ -776,6 +821,14 @@ namespace System.ServiceModel.Syndication.Tests
             }
             finally
             {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                }
+                if (writer != null)
+                {
+                    writer.Dispose();
+                }
                 File.Delete(serializeFilePath);
             }
         }
@@ -784,7 +837,7 @@ namespace System.ServiceModel.Syndication.Tests
         public static List<AllowableDifference> GetAtomFeedPositiveTestAllowableDifferences()
         {
             return new List<AllowableDifference>(new AllowableDifference[]
-                    {
+            {
                 new AllowableDifference("<content xmlns=\"http://www.w3.org/2005/Atom\" />","<content type=\"text\" xmlns=\"http://www.w3.org/2005/Atom\" />"),
                 new AllowableDifference("<content>","<content type=\"text\">"),
                 new AllowableDifference("<content src=\"http://example.org/2003/12/13/atom03\" xmlns=\"http://www.w3.org/2005/Atom\" />","<content src=\"http://example.org/2003/12/13/atom03\" type=\"text\" xmlns=\"http://www.w3.org/2005/Atom\" />"),

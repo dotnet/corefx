@@ -21,8 +21,8 @@ namespace System.ServiceModel.Syndication.Tests
 
     public class CompareHelper
     {
-        List<AllowableDifference> _allowableDifferences = null;
-        
+        private List<AllowableDifference> _allowableDifferences = null;
+
         private XmlDiff _diff;
 
         public List<AllowableDifference> AllowableDifferences
@@ -33,7 +33,7 @@ namespace System.ServiceModel.Syndication.Tests
             }
             set
             {
-                _allowableDifferences= value;
+                _allowableDifferences = value;
             }
         }
 
@@ -50,7 +50,7 @@ namespace System.ServiceModel.Syndication.Tests
         }
         public bool Compare(string source, string target)
         {
-            if (Diff.Compare(source,target))
+            if (Diff.Compare(source, target))
             {
                 return true;
             }
@@ -64,7 +64,7 @@ namespace System.ServiceModel.Syndication.Tests
                 if (attrFailures.Count == totalFailures.Count)
                 {
                     bool allFailuresAllowed = true;
-                    foreach(XmlNode node in attrFailures)
+                    foreach (XmlNode node in attrFailures)
                     {
                         if (!IsAllowableFailure(node))
                         {
@@ -81,7 +81,7 @@ namespace System.ServiceModel.Syndication.Tests
             }
         }
 
-        bool IsAllowableFailure(XmlNode failedNode)
+        private bool IsAllowableFailure(XmlNode failedNode)
         {
             //DiffType="1" is <x /> vs. <x></x>, ignore
             XmlAttribute diffType;
@@ -108,7 +108,7 @@ namespace System.ServiceModel.Syndication.Tests
                     return true;
                 }
             }
-            
+
             return false;
         }
     }

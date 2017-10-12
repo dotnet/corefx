@@ -28,25 +28,25 @@ namespace System.ServiceModel.Syndication.Tests
 
     public class XmlDiffAdvancedOptions
     {
-        private string m_IgnoreNodesExpr;
-        private string m_IgnoreValuesExpr;
-        private string m_IgnoreChildOrderExpr;
-        private IDictionary<string, string> m_addedNamespaces;
+        private string _ignoreNodesExpr;
+        private string _ignoreValuesExpr;
+        private string _ignoreChildOrderExpr;
+        private IDictionary<string, string> _addedNamespaces;
 
         public XmlDiffAdvancedOptions()
         {
-            m_addedNamespaces = new Dictionary<string, string>();
+            _addedNamespaces = new Dictionary<string, string>();
         }
 
         public string IgnoreNodesExpr
         {
             get
             {
-                return m_IgnoreNodesExpr;
+                return _ignoreNodesExpr;
             }
             set
             {
-                m_IgnoreNodesExpr = value;
+                _ignoreNodesExpr = value;
             }
         }
 
@@ -54,11 +54,11 @@ namespace System.ServiceModel.Syndication.Tests
         {
             get
             {
-                return m_IgnoreValuesExpr;
+                return _ignoreValuesExpr;
             }
             set
             {
-                m_IgnoreValuesExpr = value;
+                _ignoreValuesExpr = value;
             }
         }
 
@@ -66,27 +66,27 @@ namespace System.ServiceModel.Syndication.Tests
         {
             get
             {
-                return m_IgnoreChildOrderExpr;
+                return _ignoreChildOrderExpr;
             }
             set
             {
-                m_IgnoreChildOrderExpr = value;
+                _ignoreChildOrderExpr = value;
             }
         }
 
         public void AddNamespace(string prefix, string uri)
         {
-            m_addedNamespaces[prefix] = uri;
+            _addedNamespaces[prefix] = uri;
         }
 
         public bool HadAddedNamespace()
         {
-            return 0 != m_addedNamespaces.Count;
+            return 0 != _addedNamespaces.Count;
         }
 
         public IDictionary<string, string> AddedNamespaces
         {
-            get { return m_addedNamespaces; }
+            get { return _addedNamespaces; }
         }
     }
 }

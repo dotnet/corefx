@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Author:       Sam Ruby <rubys@intertwingly.net>
-License:      Python
--->
-
-<!--
 Description:  No errors should be produced by a minimal entry
 Expect:       !Error
 -->
