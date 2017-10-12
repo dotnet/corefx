@@ -921,10 +921,12 @@ namespace System.Collections.Immutable
         /// <returns>
         /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
         /// </returns>
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() =>
-            this.IsEmpty ?
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return this.IsEmpty ?
                 Enumerable.Empty<T>().GetEnumerator() :
                 this.GetEnumerator();
+        }
 
         #endregion
 
