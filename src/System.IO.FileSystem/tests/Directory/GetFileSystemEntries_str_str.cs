@@ -652,11 +652,26 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Search pattern with double dots throws ArgumentException
-        public void WindowsSearchPatternWithDoubleDots()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void WindowsSearchPatternWithDoubleDots_NetFX()
         {
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "abc..")));
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, ".."));
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, @".." + Path.DirectorySeparatorChar));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void WindowsSearchPatternWithDoubleDots()
+        {
+            // Throwing for these sorts of paths was an artifact of trying to enforce limited trust scenarios.
+            // It prevents access to real paths, and we already don't do this on Unix so we've removed it from CoreFX.
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "abc..")));
+
+            // Use GetTestFilePath to make sure we don't walk out of our directory
+            GetEntries(GetTestFilePath(), "..");
+            GetEntries(GetTestFilePath(), @".." + Path.DirectorySeparatorChar);
         }
 
         private static char[] OldWildcards = new char[] { '*', '?' };
@@ -759,12 +774,29 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Whitespace in search pattern returns nothing
-        public void WindowsSearchPatternWhitespace()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void WindowsSearchPatternWhitespace_NetFX()
         {
             Assert.Empty(GetEntries(TestDirectory, "           "));
             Assert.Empty(GetEntries(TestDirectory, "\n"));
             Assert.Empty(GetEntries(TestDirectory, " "));
             Assert.Empty(GetEntries(TestDirectory, "\t"));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void WindowsSearchPatternWhitespace()
+        {
+            // Trimming prevents finding actual files that can exist.
+            // We no longer trim proactively, and leave it to Windows.
+            Assert.Empty(GetEntries(TestDirectory, "           "));
+
+            // Illegal characters in path.
+            Assert.Throws<ArgumentException>(() => (GetEntries(TestDirectory, "\n")));
+            Assert.Empty(GetEntries(TestDirectory, " "));
+            // Illegal characters in path.
+            Assert.Throws<ArgumentException>(() => (GetEntries(TestDirectory, "\t")));
         }
 
         [Fact]

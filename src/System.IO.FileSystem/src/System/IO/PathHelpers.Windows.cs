@@ -8,9 +8,6 @@ namespace System.IO
 {
     internal static partial class PathHelpers
     {
-        // Trim trailing whitespace, tabs etc but don't be aggressive in removing everything that has UnicodeCategory of trailing space.
-        // string.WhitespaceChars will trim more aggressively than what the underlying FS does (for ex, NTFS, FAT).    
-        internal static readonly char[] TrimEndChars = { (char)0x9, (char)0xA, (char)0xB, (char)0xC, (char)0xD, (char)0x20, (char)0x85, (char)0xA0 };
         internal static readonly char[] TrimStartChars = { ' ' };
 
         internal static bool ShouldReviseDirectoryPathToCurrent(string path)
@@ -18,24 +15,6 @@ namespace System.IO
             // In situations where this method is invoked, "<DriveLetter>:" should be special-cased 
             // to instead go to the current directory.
             return path.Length == 2 && path[1] == ':';
-        }
-
-        // ".." can only be used if it is specified as a part of a valid File/Directory name. We disallow
-        //  the user being able to use it to move up directories. Here are some examples eg 
-        //    Valid: a..b  abc..d
-        //    Invalid: ..ab   ab..  ..   abc..d\abc..
-        //
-        internal static void CheckSearchPattern(string searchPattern)
-        {
-            for (int index = 0; (index = searchPattern.IndexOf("..", index, StringComparison.Ordinal)) != -1; index += 2)
-            {
-                // Terminal ".." or "..\". File and directory names cannot end in "..".
-                if (index + 2 == searchPattern.Length || 
-                    PathInternal.IsDirectorySeparator(searchPattern[index + 2]))
-                {
-                    throw new ArgumentException(SR.Arg_InvalidSearchPattern, nameof(searchPattern));
-                }
-            }
         }
 
         // this is a lightweight version of GetDirectoryName that doesn't renormalize
@@ -83,17 +62,13 @@ namespace System.IO
         {
             Debug.Assert(searchPattern != null);
 
-            // Win32 normalization trims only U+0020.
-            string tempSearchPattern = searchPattern.TrimEnd(PathHelpers.TrimEndChars);
-
             // Make this corner case more useful, like dir
-            if (tempSearchPattern.Equals("."))
+            if (searchPattern.Equals("."))
             {
-                tempSearchPattern = "*";
+                searchPattern = "*";
             }
 
-            CheckSearchPattern(tempSearchPattern);
-            return tempSearchPattern;
+            return searchPattern;
         }
 
         internal static string GetFullSearchString(string fullPath, string searchPattern)
@@ -118,5 +93,23 @@ namespace System.IO
             EndsInDirectorySeparator(path) ?
                 path.Substring(0, path.Length - 1) :
                 path;
+
+        /// <summary>
+        /// Returns true if the path is effectively empty for the current OS.
+        /// For unix, this is empty or null. For Windows, this is empty, null, or 
+        /// just spaces ((char)32).
+        /// </summary>
+        internal static bool IsEffectivelyEmpty(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return true;
+
+            foreach (char c in path)
+            {
+                if (c != ' ')
+                    return false;
+            }
+            return true;
+        }
     }
 }
