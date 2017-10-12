@@ -2706,6 +2706,7 @@ namespace System.Net.Sockets.Tests
             private int _port;
             private IPAddress _connectTo;
             private Socket _serverSocket;
+            public  Task _t;
 
             public SocketUdpClient(ITestOutputHelper output, Socket serverSocket, IPAddress connectTo, int port, bool redundant = true)
             {
@@ -2715,7 +2716,7 @@ namespace System.Net.Sockets.Tests
                 _port = port;
                 _serverSocket = serverSocket;
 
-                Task.Run(() => ClientSend(null, redundant));
+                _t = Task.Run(() => ClientSend(null, redundant));
             }
 
             private void ClientSend(object state, bool redundant)
@@ -2733,8 +2734,9 @@ namespace System.Net.Sockets.Tests
                         socket.SendToAsync(e);
                     }
                 }
-                catch (SocketException)
+                catch (SocketException e)
                 {
+                    Console.Error.WriteLine(e.ToString());
                     _serverSocket.Dispose(); // Cancels the test
                 }
             }
@@ -2755,10 +2757,14 @@ namespace System.Net.Sockets.Tests
         {
             using (Socket serverSocket = new Socket(SocketType.Dgram, ProtocolType.Udp))
             {
-                serverSocket.ReceiveTimeout = 500;
+                serverSocket.ReceiveTimeout = 1000;
                 int port = serverSocket.BindToAnonymousPort(listenOn);
 
                 SocketUdpClient client = new SocketUdpClient(_log, serverSocket, connectTo, port);
+                if (!client._t.Wait(TimeSpan.FromSeconds(3)))
+                {
+                    Console.Error.WriteLine("{0}: failed to complete sent to port {0} on time", port);
+                }
 
                 EndPoint receivedFrom = new IPEndPoint(connectTo, port);
                 int received = serverSocket.ReceiveFrom(new byte[1], ref receivedFrom);
