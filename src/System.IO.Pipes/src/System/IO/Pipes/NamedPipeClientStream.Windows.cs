@@ -33,30 +33,6 @@ namespace System.IO.Pipes
                 _pipeFlags |= (((int)_impersonationLevel - 1) << 16);
             }
 
-            if (!Interop.Kernel32.WaitNamedPipe(_normalizedPipePath, timeout))
-            {
-                int errorCode = Marshal.GetLastWin32Error();
-
-                // Server is not yet created
-                if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND)
-                {
-                    return false;
-                }
-
-                // The timeout has expired.
-                if (errorCode == Interop.Errors.ERROR_SUCCESS)
-                {
-                    if (cancellationToken.CanBeCanceled)
-                    {
-                        // It may not be real timeout.
-                        return false;
-                    }
-                    throw new TimeoutException();
-                }
-
-                throw Win32Marshal.GetExceptionForWin32Error(errorCode);
-            }
-
             // Pipe server should be free.  Let's try to connect to it.
             int access = 0;
             if ((PipeDirection.In & _direction) != 0)
@@ -79,14 +55,50 @@ namespace System.IO.Pipes
             {
                 int errorCode = Marshal.GetLastWin32Error();
 
-                // Handle the possible race condition of someone else connecting to the server 
-                // between our calls to WaitNamedPipe & CreateFile.
-                if (errorCode == Interop.Errors.ERROR_PIPE_BUSY)
+                if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND ||
+                    errorCode == Interop.Errors.ERROR_PIPE_BUSY)
                 {
-                    return false;
-                }
+                    // ERROR_PIPE_BUSY
+                    // Handle the possible race condition of someone else connecting to the server 
+                    // between our calls to WaitNamedPipe & CreateFile.
+                    
+                    // ERROR_FILE_NOT_FOUND
+                    // Server is not yet created
 
-                throw Win32Marshal.GetExceptionForWin32Error(errorCode);
+                    // Fallback to WaitNamedPipe
+                    if (!Interop.Kernel32.WaitNamedPipe(_normalizedPipePath, timeout))
+                    {
+                        int waitErrorCode = Marshal.GetLastWin32Error();
+
+                        // Server is not yet created
+                        if (waitErrorCode == Interop.Errors.ERROR_FILE_NOT_FOUND)
+                        {
+                            return false;
+                        }
+
+                        // The timeout has expired.
+                        if (waitErrorCode == Interop.Errors.ERROR_SUCCESS)
+                        {
+                            if (cancellationToken.CanBeCanceled)
+                            {
+                                // It may not be real timeout.
+                                return false;
+                            }
+                            throw new TimeoutException();
+                        }
+
+                        throw Win32Marshal.GetExceptionForWin32Error(waitErrorCode);
+                    }
+                    else
+                    {
+                        // We have not timeouted yet, but we need to update the timeout value.
+                        return false;
+                    }
+                }
+                else
+                {
+                    throw Win32Marshal.GetExceptionForWin32Error(errorCode);
+                }
             }
 
             // Success! 
