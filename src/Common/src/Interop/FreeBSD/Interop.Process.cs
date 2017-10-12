@@ -97,22 +97,22 @@ internal static partial class Interop
         {
             public timeval ru_utime;        /* user time used */
             public timeval ru_stime;        /* system time used */
-            public long    ru_maxrss;       /* max resident set size */
-            private long    ru_ixrss;       /* integral shared memory size */
-            private long    ru_idrss;       /* integral unshared data " */
-            private long    ru_isrss;       /* integral unshared stack " */
-            private long    ru_minflt;      /* page reclaims */
-            private long    ru_majflt;      /* page faults */
-            private long    ru_nswap;       /* swaps */
-            private long    ru_inblock;     /* block input operations */
-            private long    ru_oublock;     /* block output operations */
-            private long    ru_msgsnd;      /* messages sent */
-            private long    ru_msgrcv;      /* messages received */
-            private long    ru_nsignals;    /* signals received */
-            private long    ru_nvcsw;       /* voluntary context switches */
-            private long    ru_nivcsw;      /* involuntary " */
+            public long ru_maxrss;          /* max resident set size */
+            private long ru_ixrss;          /* integral shared memory size */
+            private long ru_idrss;          /* integral unshared data " */
+            private long ru_isrss;          /* integral unshared stack " */
+            private long ru_minflt;         /* page reclaims */
+            private long ru_majflt;         /* page faults */
+            private long ru_nswap;          /* swaps */
+            private long ru_inblock;        /* block input operations */
+            private long ru_oublock;        /* block output operations */
+            private long ru_msgsnd;         /* messages sent */
+            private long ru_msgrcv;         /* messages received */
+            private long ru_nsignals;       /* signals received */
+            private long ru_nvcsw;          /* voluntary context switches */
+            private long ru_nivcsw;         /* involuntary " */
         }
-        
+
         // From  sys/user.h
         [StructLayout(LayoutKind.Sequential)]
         public unsafe struct kinfo_proc
@@ -259,16 +259,16 @@ internal static partial class Interop
         /// <param name="pid">The PID of the process</param>
         public static unsafe string getProcPath(int pid)
         {
-            Span<int> name = stackalloc int[4];
-            byte* pBuffer = stackalloc byte[PATH_MAX];
-            int bytesLength = PATH_MAX;
+            Span<int> sysctlName = stackalloc int[4];
+            byte* pBuffer = null;
+            int bytesLength = 0;
 
-            name[0] = CTL_KERN;
-            name[1] = KERN_PROC;
-            name[2] = KERN_PROC_PATHNAME;
-            name[3] = pid;
+            sysctlName[0] = CTL_KERN;
+            sysctlName[1] = KERN_PROC;
+            sysctlName[2] = KERN_PROC_PATHNAME;
+            sysctlName[3] = pid;
 
-            int ret = Interop.Sys.Sysctl(name, ref pBuffer, ref bytesLength);
+            int ret = Interop.Sys.Sysctl(sysctlName, ref pBuffer, ref bytesLength);
             if (ret  != 0 ) {
                 return null;
             }
@@ -281,7 +281,7 @@ internal static partial class Interop
         /// <param name="pid">The PID of the process. If PID is 0, this will return all processes</param>
         public static unsafe kinfo_proc* getProcInfo(int pid, bool threads, out int count)
         {
-            int[] name;
+            Span<int> sysctlName = stackalloc int[4];
             int bytesLength = 0;
             byte* pBuffer = null;
             kinfo_proc* kinfo = null;
@@ -291,23 +291,22 @@ internal static partial class Interop
 
             if (pid == 0)
             {
-                name = new int[3];
                 // get all processes
-                name[2] = KERN_PROC_PROC;
+                sysctlName[3] = 0;
+                sysctlName[2] = KERN_PROC_PROC;
             }
             else
             {
                 // get specific process, possibly with threads
-                name = new int[4];
-                name[3] = pid;
-                name[2] = KERN_PROC_PID | (threads ? KERN_PROC_INC_THREAD : 0);
+                sysctlName[3] = pid;
+                sysctlName[2] = KERN_PROC_PID | (threads ? KERN_PROC_INC_THREAD : 0);
             }
-            name[1] = KERN_PROC;
-            name[0] = CTL_KERN;
+            sysctlName[1] = KERN_PROC;
+            sysctlName[0] = CTL_KERN;
 
             try
             {
-                ret = Interop.Sys.Sysctl(name, ref pBuffer, ref bytesLength);
+                ret = Interop.Sys.Sysctl(sysctlName, ref pBuffer, ref bytesLength);
                 if (ret != 0 ) {
                     throw new ArgumentOutOfRangeException(nameof(pid));
                 }

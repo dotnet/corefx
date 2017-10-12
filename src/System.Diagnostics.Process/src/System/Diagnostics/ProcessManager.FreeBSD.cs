@@ -67,7 +67,7 @@ namespace System.Diagnostics
             procInfo.SessionId = iinfo.SessionId;
             foreach (ThreadInfo ti in iinfo._threadInfoList)
             {
-                    procInfo._threadInfoList.Add(ti);
+              procInfo._threadInfoList.Add(ti);
             }
 
             return procInfo;

@@ -44,7 +44,7 @@ check_c_source_compiles(
     #include <${SOCKET_INCLUDES}>
     int main()
     {
-        struct in_pktinfo p = {};
+        struct in_pktinfo pktinfo;
         return 0;
     }
     "

@@ -49,5 +49,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL Linux AND NOT CLR_CMAKE_PLATFORM_ANDROID)
     target_link_libraries(System.Native rt)
 endif ()
 
+if (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+    target_link_libraries(System.Native pthread)
+endif ()
+
 install_library_and_symbols (System.Native)
 install (TARGETS System.Native-Static DESTINATION .)

@@ -33,7 +33,8 @@ namespace System.Diagnostics.Tests
         public void Modules_Get_ContainsHostFileName()
         {
             ProcessModuleCollection modules = Process.GetCurrentProcess().Modules;
-            try {
+            try
+            {
                 System.Console.WriteLine(modules.Cast<ProcessModule>());
             }
             catch(Exception e)

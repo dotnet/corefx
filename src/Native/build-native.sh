@@ -255,13 +255,9 @@ while :; do
             __BuildType=Release
             __CMakeArgs=RELEASE
             ;;
-        -osgroup*)
-             __BuildOS=`echo $1 | cut -d '=' -f2`
-             __OSGroupSet=1
-             ;;
-        --osgroup*)
+        --osgroup*||-osgroup*)
             # msbuild adds extra - for -OSGroup
-            __BuildOS=`echo $1 | cut -d '=' -f2`
+            __BuildOS=${1#*=}
             __OSGroupSet=1
             ;;
         freebsd)

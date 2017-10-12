@@ -10,7 +10,7 @@ using System.Text;
 using size_t = System.IntPtr;
 
 // This implements shim for sysctl calls.
-// They are available on BSD clones - FreeBSD, OSX and others.
+// They are available on BSD systems - FreeBSD, OSX and others.
 // Linux has sysctl() but it is deprecated as well as it is missing sysctlbyname()
 
 internal static partial class Interop
