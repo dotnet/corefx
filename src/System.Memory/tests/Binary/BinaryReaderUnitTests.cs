@@ -172,8 +172,9 @@ namespace System.Buffers.Binary.Tests
             TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<ulong>(_span));
             Assert.False(TryReadMachineEndian(span, out ulong ulongValue));
 
-            TestHelpers.AssertThrows<ArgumentException, byte>(span, (_span) => ReadMachineEndian<TestHelpers.TestValueTypeWithReference>(_span));
-            TestHelpers.AssertThrows<ArgumentException, byte>(span, (_span) => TryReadMachineEndian(_span, out TestHelpers.TestValueTypeWithReference stringValue));
+            Span<byte> largeSpan = new byte[100];
+            TestHelpers.AssertThrows<ArgumentException, byte>(largeSpan, (_span) => ReadMachineEndian<TestHelpers.TestValueTypeWithReference>(_span));
+            TestHelpers.AssertThrows<ArgumentException, byte>(largeSpan, (_span) => TryReadMachineEndian(_span, out TestHelpers.TestValueTypeWithReference stringValue));
         }
 
         [Fact]
@@ -198,6 +199,10 @@ namespace System.Buffers.Binary.Tests
             Assert.False(TryReadMachineEndian(span, out uint uintValue));
             TestHelpers.AssertThrows<ArgumentOutOfRangeException, byte>(span, (_span) => ReadMachineEndian<ulong>(_span));
             Assert.False(TryReadMachineEndian(span, out ulong ulongValue));
+
+            ReadOnlySpan<byte> largeSpan = new byte[100];
+            TestHelpers.AssertThrows<ArgumentException, byte>(largeSpan, (_span) => ReadMachineEndian<TestHelpers.TestValueTypeWithReference>(_span));
+            TestHelpers.AssertThrows<ArgumentException, byte>(largeSpan, (_span) => TryReadMachineEndian(_span, out TestHelpers.TestValueTypeWithReference stringValue));
         }
 
         [Fact]
