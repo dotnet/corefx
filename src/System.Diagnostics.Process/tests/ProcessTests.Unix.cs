@@ -228,15 +228,8 @@ namespace System.Diagnostics.Tests
         {
             string path = GetTestFilePath();
             File.Create(path).Dispose();
-            int mode;
-            if (PlatformDetection.IsFreeBSD)
-            {
-                mode = Convert.ToInt32("644", 8);
-            }
-            else
-            {
-                mode = 644;
-            }
+            int mode Convert.ToInt32("644", 8);
+
             Assert.Equal(0, chmod(path, mode));
 
             Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
@@ -248,15 +241,8 @@ namespace System.Diagnostics.Tests
         {
             string path = GetTestFilePath();
             File.Create(path).Dispose();
-            int mode;
-            if (PlatformDetection.IsFreeBSD)
-            {
-                mode = Convert.ToInt32("744", 8);
-            }
-            else
-            {
-                mode = 744;
-            }
+            int mode = Convert.ToInt32("744", 8);
+
             Assert.Equal(0, chmod(path, mode)); // execute permissions
 
             using (Process p = Process.Start(path))
