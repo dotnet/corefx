@@ -255,7 +255,7 @@ while :; do
             __BuildType=Release
             __CMakeArgs=RELEASE
             ;;
-        --osgroup*||-osgroup*)
+        --osgroup*|-osgroup*)
             # msbuild adds extra - for -OSGroup
             __BuildOS=${1#*=}
             __OSGroupSet=1
