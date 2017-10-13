@@ -27,8 +27,7 @@ namespace System
         public static Span<byte> AsBytes<T>(this Span<T> source)
             where T : struct
         {
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
+            SpanHelpers.ValidateTypeIsBlittable<T>();
 
             int newLength = checked(source.Length * Unsafe.SizeOf<T>());
             return new Span<byte>(Unsafe.As<Pinnable<byte>>(source.Pinnable), source.ByteOffset, newLength);
@@ -49,8 +48,7 @@ namespace System
         public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> source)
             where T : struct
         {
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
+            SpanHelpers.ValidateTypeIsBlittable<T>();
 
             int newLength = checked(source.Length * Unsafe.SizeOf<T>());
             return new ReadOnlySpan<byte>(Unsafe.As<Pinnable<byte>>(source.Pinnable), source.ByteOffset, newLength);
@@ -89,11 +87,8 @@ namespace System
             where TFrom : struct
             where TTo : struct
         {
-            if (SpanHelpers.IsReferenceOrContainsReferences<TFrom>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TFrom));
-
-            if (SpanHelpers.IsReferenceOrContainsReferences<TTo>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TTo));
+            SpanHelpers.ValidateTypeIsBlittable<TFrom>();
+            SpanHelpers.ValidateTypeIsBlittable<TTo>();
 
             int newLength = checked((int)((long)source.Length * Unsafe.SizeOf<TFrom>() / Unsafe.SizeOf<TTo>()));
             return new Span<TTo>(Unsafe.As<Pinnable<TTo>>(source.Pinnable), source.ByteOffset, newLength);
@@ -118,11 +113,8 @@ namespace System
             where TFrom : struct
             where TTo : struct
         {
-            if (SpanHelpers.IsReferenceOrContainsReferences<TFrom>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TFrom));
-
-            if (SpanHelpers.IsReferenceOrContainsReferences<TTo>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(TTo));
+            SpanHelpers.ValidateTypeIsBlittable<TFrom>();
+            SpanHelpers.ValidateTypeIsBlittable<TTo>();
 
             int newLength = checked((int)((long)source.Length * Unsafe.SizeOf<TFrom>() / Unsafe.SizeOf<TTo>()));
             return new ReadOnlySpan<TTo>(Unsafe.As<Pinnable<TTo>>(source.Pinnable), source.ByteOffset, newLength);

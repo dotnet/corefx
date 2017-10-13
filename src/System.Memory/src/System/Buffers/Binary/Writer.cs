@@ -16,17 +16,8 @@ namespace System.Buffers.Binary
         public static void WriteMachineEndian<T>(Span<byte> buffer, ref T value)
             where T : struct
         {
-#if IsPartialFacade
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
-            }
-#else
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
-            }
-#endif
+            SpanHelpers.ValidateTypeIsBlittable<T>();
+
             if ((uint)Unsafe.SizeOf<T>() > (uint)buffer.Length)
             {
                 throw new ArgumentOutOfRangeException();
@@ -42,17 +33,8 @@ namespace System.Buffers.Binary
         public static bool TryWriteMachineEndian<T>(Span<byte> buffer, ref T value)
             where T : struct
         {
-#if IsPartialFacade
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
-            }
-#else
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
-            }
-#endif
+            SpanHelpers.ValidateTypeIsBlittable<T>();
+            
             if (Unsafe.SizeOf<T>() > (uint)buffer.Length)
             {
                 return false;

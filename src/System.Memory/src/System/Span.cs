@@ -84,8 +84,8 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe Span(void* pointer, int length)
         {
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
+            SpanHelpers.ValidateTypeIsBlittable<T>();
+            
             if (length < 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 

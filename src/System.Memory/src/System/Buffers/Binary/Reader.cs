@@ -98,17 +98,8 @@ namespace System.Buffers.Binary
         public static T ReadMachineEndian<T>(ReadOnlySpan<byte> buffer)
             where T : struct
         {
-#if IsPartialFacade
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
-            }
-#else
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
-            }
-#endif
+            SpanHelpers.ValidateTypeIsBlittable<T>();
+
             if (Unsafe.SizeOf<T>() > buffer.Length)
             {
                 throw new ArgumentOutOfRangeException();
@@ -124,17 +115,8 @@ namespace System.Buffers.Binary
         public static bool TryReadMachineEndian<T>(ReadOnlySpan<byte> buffer, out T value)
             where T : struct
         {
-#if IsPartialFacade
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
-            }
-#else
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
-            }
-#endif
+            SpanHelpers.ValidateTypeIsBlittable<T>();
+
             if (Unsafe.SizeOf<T>() > (uint)buffer.Length)
             {
                 value = default;
