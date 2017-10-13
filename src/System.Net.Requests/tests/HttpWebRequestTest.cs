@@ -736,6 +736,7 @@ namespace System.Net.Tests
             Assert.Equal(HttpVersion.Version11, request.ProtocolVersion);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not allow HTTP/1.0 requests.")]
         [OuterLoop]
         [Theory]
         [InlineData(false)]
