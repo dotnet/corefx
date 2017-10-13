@@ -31,7 +31,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         // Used for updating blobs in BinaryFormatterTestData.cs
-        [Fact]
+        //[Fact]
         public void UpdateBlobs()
         {
             string testDataFilePath = GetTestDataFilePath();
@@ -71,7 +71,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
             SanityCheckBlob(obj, blobs);
 
-            foreach (string blob in blobs.Take(1))
+            foreach (string blob in blobs)
             {
                 if (isEqualityComparer)
                 {

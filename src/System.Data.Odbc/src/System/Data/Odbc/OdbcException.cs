@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Data.Common;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -38,7 +37,8 @@ namespace System.Data.Odbc
 
         private OdbcException(SerializationInfo si, StreamingContext sc) : base(si, sc)
         {
-            // Ignoring not deserializable input
+            // Ignoring ODBC32.RETCODE
+            _odbcErrors = (OdbcErrorCollection)si.GetValue("odbcErrors", typeof(OdbcErrorCollection));
             HResult = HResults.OdbcException;
         }
 
@@ -54,7 +54,7 @@ namespace System.Data.Odbc
         {
             base.GetObjectData(si, context);
             si.AddValue("odbcRetcode", (ODBC32.RETCODE)100, typeof(ODBC32.RETCODE)); // NO DATA
-            si.AddValue("odbcErrors", null); // Not specifying type to enable serialization of null value of non-serializable type
+            si.AddValue("odbcErrors", _odbcErrors, typeof(OdbcErrorCollection));
         }
 
         // mdac bug 62559 - if we don't have it return nothing (empty string)
@@ -62,7 +62,7 @@ namespace System.Data.Odbc
         {
             get
             {
-                if (Errors != null && 0 < Errors.Count)
+                if (0 < Errors.Count)
                 {
                     string source = Errors[0].Source;
                     return string.IsNullOrEmpty(source) ? "" : source; // base.Source;

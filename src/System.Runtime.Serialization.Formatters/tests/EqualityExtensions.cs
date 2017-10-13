@@ -16,6 +16,9 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security;
+using System.Security.Policy;
+using System.Threading;
 using Xunit;
 
 namespace System.Runtime.Serialization.Formatters.Tests
@@ -1043,6 +1046,54 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.Source == other.Source &&
                 // On Net Native we can't reflect on Exceptions and change its HResult
                 (PlatformDetection.IsNetNative ? true : @this.HResult == other.HResult) &&
+                @this.HelpLink == other.HelpLink &&
+                CheckEquals(@this.InnerException, other.InnerException);
+        }
+
+        public static bool IsEqual(this PolicyException @this, PolicyException other)
+        {
+            // PolicyException is stubbed out in Core therefore we are skipping some equality checks.
+
+            return @this != null &&
+                other != null &&
+                // On full framework, line number may be method body start
+                // On Net Native we can't reflect on Exceptions and change its StackTrace
+                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
+                (@this.StackTrace == other.StackTrace &&
+                @this.ToString() == other.ToString())) &&
+                @this.Data.CheckSequenceEquals(other.Data) &&
+                @this.Source == other.Source &&
+                @this.HelpLink == other.HelpLink &&
+                CheckEquals(@this.InnerException, other.InnerException);
+        }
+
+        public static bool IsEqual(this XmlSyntaxException @this, XmlSyntaxException other)
+        {
+            // XmlSyntaxException is stubbed out in Core therefore we are skipping some equality checks.
+
+            return @this != null &&
+                other != null &&
+                // On full framework, line number may be method body start
+                // On Net Native we can't reflect on Exceptions and change its StackTrace
+                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
+                (@this.StackTrace == other.StackTrace)) &&
+                @this.Data.CheckSequenceEquals(other.Data) &&
+                @this.Source == other.Source &&
+                @this.HelpLink == other.HelpLink;
+        }
+
+        public static bool IsEqual(this ThreadAbortException @this, ThreadAbortException other)
+        {
+            // PolicyException is stubbed out in Core therefore we are skipping some equality checks.
+
+            return @this != null &&
+                other != null &&
+                // On full framework, line number may be method body start
+                // On Net Native we can't reflect on Exceptions and change its StackTrace
+                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
+                (@this.StackTrace == other.StackTrace)) &&
+                @this.Data.CheckSequenceEquals(other.Data) &&
+                @this.Source == other.Source &&
                 @this.HelpLink == other.HelpLink &&
                 CheckEquals(@this.InnerException, other.InnerException);
         }
