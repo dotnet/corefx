@@ -118,7 +118,7 @@ namespace System.Management
 		internal static void ParseToken (ref string q, string token, string op, ref bool bTokenFound, ref string tokenValue)
 		{
 			if (bTokenFound)
-				throw new ArgumentException (RC.GetString("INVALID_QUERY_DUP_TOKEN"));	// Invalid query - duplicate token
+				throw new ArgumentException (SR.InvalidQueryDuplicatedToken);	// Invalid query - duplicate token
 
 			bTokenFound = true;
 			q = q.Remove (0, token.Length).TrimStart (null);
@@ -127,14 +127,14 @@ namespace System.Management
 			if (op != null)
 			{
 				if (0 != q.IndexOf(op, StringComparison.Ordinal))
-					throw new ArgumentException(RC.GetString("INVALID_QUERY"));	// Invalid query
+					throw new ArgumentException(SR.InvalidQuery);	// Invalid query
 
 				// Strip off the op and any leading WS
 				q = q.Remove(0, op.Length).TrimStart(null);
 			}
 
 			if (0 == q.Length)
-				throw new ArgumentException (RC.GetString("INVALID_QUERY_NULL_TOKEN"));		// Invalid query - token has no value
+				throw new ArgumentException (SR.InvalidQueryNullToken);		// Invalid query - token has no value
 			
 			// Next token should be the token value - look for terminating WS 
 			// or end of string
@@ -149,7 +149,7 @@ namespace System.Management
 		internal static void ParseToken (ref string q, string token, ref bool bTokenFound)
 		{
 			if (bTokenFound)
-				throw new ArgumentException (RC.GetString("INVALID_QUERY_DUP_TOKEN"));	// Invalid query - duplicate token
+				throw new ArgumentException (SR.InvalidQueryDuplicatedToken);	// Invalid query - duplicate token
 
 			bTokenFound = true;
 			q = q.Remove (0, token.Length).TrimStart (null);
@@ -675,7 +675,7 @@ namespace System.Management
 					if (p.IsClass && (p.NamespacePath.Length==0))
 						ClassName = queryOrClassName;
 					else
-						throw new ArgumentException (RC.GetString("INVALID_QUERY"),"queryOrClassName");
+						throw new ArgumentException (SR.InvalidQuery,"queryOrClassName");
 
 				}
 			}
@@ -749,7 +749,7 @@ namespace System.Management
 		public SelectQuery(bool isSchemaQuery, string condition) : base ()
 		{
 			if (isSchemaQuery == false)
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"), "isSchemaQuery");
+				throw new ArgumentException(SR.InvalidQuery, "isSchemaQuery");
 			
 			this.isSchemaQuery = true;
 			this.className = null;
@@ -1004,7 +1004,7 @@ namespace System.Management
 									break;
 								}
 								else //bad query
-									throw new ArgumentException(RC.GetString("INVALID_QUERY"));
+									throw new ArgumentException(SR.InvalidQuery);
 							}
 						} //while
 					}
@@ -1012,14 +1012,14 @@ namespace System.Management
 						q = q.Remove(0, 1).TrimStart(null);
 				}
 				else //select clause has to be there, otherwise the parsing fails
-					throw new ArgumentException(RC.GetString("INVALID_QUERY"));
+					throw new ArgumentException(SR.InvalidQuery);
 
 				//Find "from" clause, get the class name and remove the clause
 				keyword = "from "; bFound = false;
 				if ((q.Length >= keyword.Length) && (String.Compare(q, 0, keyword, 0, keyword.Length, StringComparison.OrdinalIgnoreCase) == 0)) //from clause found
 					ParseToken(ref q, keyword, null, ref bFound, ref className);
 				else //from clause has to be there, otherwise the parsing fails
-					throw new ArgumentException(RC.GetString("INVALID_QUERY"));
+					throw new ArgumentException(SR.InvalidQuery);
 
 				//Find "where" clause, get the condition out and remove the clause
 				keyword = "where ";
@@ -1036,13 +1036,13 @@ namespace System.Management
 				// Should start with "select"
 				if ((q.Length < keyword.Length) || 
 					(0 != String.Compare (q, 0, keyword, 0, keyword.Length, StringComparison.OrdinalIgnoreCase)))
-					throw new ArgumentException (RC.GetString("INVALID_QUERY"),"select");
+					throw new ArgumentException (SR.InvalidQuery,"select");
 
 				q = q.Remove (0, keyword.Length).TrimStart (null);
 
 				// Next should be a '*'
 				if (0 != q.IndexOf ('*', 0))
-					throw new ArgumentException (RC.GetString("INVALID_QUERY"),"*");
+					throw new ArgumentException (SR.InvalidQuery,"*");
 
 				q = q.Remove (0, 1).TrimStart (null);
 
@@ -1051,7 +1051,7 @@ namespace System.Management
 
 				if ((q.Length < keyword.Length) || 
 					(0 != String.Compare (q, 0, keyword, 0, keyword.Length, StringComparison.OrdinalIgnoreCase)))
-					throw new ArgumentException (RC.GetString("INVALID_QUERY"),"from");
+					throw new ArgumentException (SR.InvalidQuery,"from");
 
 				q = q.Remove (0, keyword.Length).TrimStart (null);
 
@@ -1060,7 +1060,7 @@ namespace System.Management
 
 				if ((q.Length < keyword.Length) || 
 					(0 != String.Compare (q, 0, keyword, 0, keyword.Length, StringComparison.OrdinalIgnoreCase)))
-					throw new ArgumentException (RC.GetString("INVALID_QUERY"),"meta_class");
+					throw new ArgumentException (SR.InvalidQuery,"meta_class");
 
 				q = q.Remove (0, keyword.Length).TrimStart (null);
 
@@ -1072,13 +1072,13 @@ namespace System.Management
 				
 					if ((q.Length < keyword.Length) || 
 						(0 != String.Compare (q, 0, keyword, 0, keyword.Length, StringComparison.OrdinalIgnoreCase)))
-						throw new ArgumentException (RC.GetString("INVALID_QUERY"),"where");
+						throw new ArgumentException (SR.InvalidQuery,"where");
 
 					q = q.Remove (0, keyword.Length);
 
 					// Must be some white space next
 					if ((0 == q.Length) || !Char.IsWhiteSpace (q[0]))
-						throw new ArgumentException(RC.GetString("INVALID_QUERY"));	// Invalid query
+						throw new ArgumentException(SR.InvalidQuery);	// Invalid query
 				
 					q = q.TrimStart(null);	// Remove the leading whitespace
 
@@ -1276,7 +1276,7 @@ namespace System.Management
                         isSchemaQuery = false;
                     }
                     else
-                        throw new ArgumentException (RC.GetString("INVALID_QUERY"),"queryOrSourceObject");
+                        throw new ArgumentException (SR.InvalidQuery,"queryOrSourceObject");
                 }
 			}
 		}
@@ -1349,7 +1349,7 @@ namespace System.Management
 			string thisRole) 
 		{
 			if (isSchemaQuery == false)
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"), "isSchemaQuery");
+				throw new ArgumentException(SR.InvalidQuery, "isSchemaQuery");
 
 			this.isSchemaQuery = true;
 			this.sourceObject = sourceObject;
@@ -1645,34 +1645,34 @@ namespace System.Management
 
 			//Find "associators" clause
 			if (0 != String.Compare(q, 0, tokenAssociators, 0, tokenAssociators.Length, StringComparison.OrdinalIgnoreCase))
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"),"associators");	// Invalid query
+				throw new ArgumentException(SR.InvalidQuery,"associators");	// Invalid query
 			
 			// Strip off the clause
 			q = q.Remove(0, tokenAssociators.Length);
 
 			// Must be some white space next
 			if ((0 == q.Length) || !Char.IsWhiteSpace (q[0]))
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"));	// Invalid query
+				throw new ArgumentException(SR.InvalidQuery);	// Invalid query
 			
 			q = q.TrimStart(null);	// Remove the leading whitespace
 
 			// Next token should be "of"
 			if (0 != String.Compare(q, 0, tokenOf, 0, tokenOf.Length, StringComparison.OrdinalIgnoreCase))
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"),"of");	// Invalid query
+				throw new ArgumentException(SR.InvalidQuery,"of");	// Invalid query
 			
 			// Strip off the clause and leading WS
 			q = q.Remove(0, tokenOf.Length).TrimStart (null);
 
 			// Next character should be "{"
 			if (0 != q.IndexOf('{'))
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"));	// Invalid query
+				throw new ArgumentException(SR.InvalidQuery);	// Invalid query
 
 			// Strip off the "{" and any leading WS
 			q = q.Remove(0, 1).TrimStart(null);
 
 			// Next item should be the source object
 			if (-1 == (i = q.IndexOf('}')))
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"));	// Invalid query
+				throw new ArgumentException(SR.InvalidQuery);	// Invalid query
 
 			tempSourceObject = q.Substring(0, i).TrimEnd(null);
 			q = q.Remove(0, i+1).TrimStart(null);
@@ -1682,13 +1682,13 @@ namespace System.Management
 			{
 				// Next should be the "where" clause
 				if (0 != String.Compare (q, 0, tokenWhere, 0, tokenWhere.Length, StringComparison.OrdinalIgnoreCase))
-					throw new ArgumentException(RC.GetString("INVALID_QUERY"),"where");	// Invalid query
+					throw new ArgumentException(SR.InvalidQuery,"where");	// Invalid query
 				
 				q = q.Remove (0, tokenWhere.Length);
 
 				// Must be some white space next
 				if ((0 == q.Length) || !Char.IsWhiteSpace (q[0]))
-					throw new ArgumentException(RC.GetString("INVALID_QUERY"));	// Invalid query
+					throw new ArgumentException(SR.InvalidQuery);	// Invalid query
 				
 				q = q.TrimStart(null);	// Remove the leading whitespace
 
@@ -1730,12 +1730,12 @@ namespace System.Management
 					else if (0 == q.Length)
 						break;		// done
 					else 
-						throw new ArgumentException(RC.GetString("INVALID_QUERY"));		// Unrecognized token
+						throw new ArgumentException(SR.InvalidQuery);		// Unrecognized token
 				}
 
 				//Can't have both classDefsOnly and schemaOnly
 				if (bSchemaOnlyFound && bClassDefsOnlyFound)
-					throw new ArgumentException(RC.GetString("INVALID_QUERY"));
+					throw new ArgumentException(SR.InvalidQuery);
 			}
 
 			// Getting here means we parsed successfully. Assign the values.
@@ -1902,7 +1902,7 @@ namespace System.Management
 						isSchemaQuery = false;
 					}
 					else
-						throw new ArgumentException (RC.GetString("INVALID_QUERY"),"queryOrSourceObject");
+						throw new ArgumentException (SR.InvalidQuery,"queryOrSourceObject");
 
 				}
 			}
@@ -1959,7 +1959,7 @@ namespace System.Management
 			string thisRole) 
 		{
 			if (isSchemaQuery == false)
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"), "isSchemaQuery");
+				throw new ArgumentException(SR.InvalidQuery, "isSchemaQuery");
 
 			this.isSchemaQuery = true;
 			this.sourceObject = sourceObject;
@@ -2160,34 +2160,34 @@ namespace System.Management
 
 			//Find "references" clause
 			if (0 != String.Compare(q, 0, tokenReferences, 0, tokenReferences.Length, StringComparison.OrdinalIgnoreCase))
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"),"references");	// Invalid query
+				throw new ArgumentException(SR.InvalidQuery,"references");	// Invalid query
 			
 			// Strip off the clause
 			q = q.Remove(0, tokenReferences.Length);
 
 			// Must be some white space next
 			if ((0 == q.Length) || !Char.IsWhiteSpace (q[0]))
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"));	// Invalid query
+				throw new ArgumentException(SR.InvalidQuery);	// Invalid query
 			
 			q = q.TrimStart(null);	// Remove the leading whitespace
 
 			// Next token should be "of"
 			if (0 != String.Compare(q, 0, tokenOf, 0, tokenOf.Length, StringComparison.OrdinalIgnoreCase))
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"),"of");	// Invalid query
+				throw new ArgumentException(SR.InvalidQuery,"of");	// Invalid query
 			
 			// Strip off the clause and leading WS
 			q = q.Remove(0, tokenOf.Length).TrimStart (null);
 
 			// Next character should be "{"
 			if (0 != q.IndexOf('{'))
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"));	// Invalid query
+				throw new ArgumentException(SR.InvalidQuery);	// Invalid query
 
 			// Strip off the "{" and any leading WS
 			q = q.Remove(0, 1).TrimStart(null);
 
 			// Next item should be the source object
 			if (-1 == (i = q.IndexOf('}')))
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"));	// Invalid query
+				throw new ArgumentException(SR.InvalidQuery);	// Invalid query
 
 			tempSourceObject = q.Substring(0, i).TrimEnd(null);
 			q = q.Remove(0, i+1).TrimStart(null);
@@ -2197,13 +2197,13 @@ namespace System.Management
 			{
 				// Next should be the "where" clause
 				if (0 != String.Compare (q, 0, tokenWhere, 0, tokenWhere.Length, StringComparison.OrdinalIgnoreCase))
-					throw new ArgumentException(RC.GetString("INVALID_QUERY"),"where");	// Invalid query
+					throw new ArgumentException(SR.InvalidQuery,"where");	// Invalid query
 				
 				q = q.Remove (0, tokenWhere.Length);
 
 				// Must be some white space next
 				if ((0 == q.Length) || !Char.IsWhiteSpace (q[0]))
-					throw new ArgumentException(RC.GetString("INVALID_QUERY"));	// Invalid query
+					throw new ArgumentException(SR.InvalidQuery);	// Invalid query
 				
 				q = q.TrimStart(null);	// Remove the leading whitespace
 
@@ -2236,12 +2236,12 @@ namespace System.Management
 					else if (0 == q.Length)
 						break;		// done
 					else 
-						throw new ArgumentException(RC.GetString("INVALID_QUERY"));		// Unrecognized token
+						throw new ArgumentException(SR.InvalidQuery);		// Unrecognized token
 				}
 
 				//Can't have both classDefsOnly and schemaOnly
 				if (tempClassDefsOnly && tempSchemaOnly)
-					throw new ArgumentException(RC.GetString("INVALID_QUERY"));
+					throw new ArgumentException(SR.InvalidQuery);
 
 			}
 
@@ -2487,7 +2487,7 @@ namespace System.Management
 						EventClassName = queryOrEventClassName;
 					}
 					else
-						throw new ArgumentException (RC.GetString("INVALID_QUERY"),"queryOrEventClassName");
+						throw new ArgumentException (SR.InvalidQuery,"queryOrEventClassName");
 				}
 			}
 		}
@@ -3028,17 +3028,17 @@ namespace System.Management
             //Find "select" clause and make sure it's a select *
 			string keyword = tokenSelect;
 			if ((q.Length < keyword.Length) || (0 != String.Compare (q, 0, keyword, 0, keyword.Length, StringComparison.OrdinalIgnoreCase)))
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"));
+				throw new ArgumentException(SR.InvalidQuery);
 			q =	q.Remove(0, keyword.Length).TrimStart(null);
 
 			if (!q.StartsWith("*", StringComparison.Ordinal)) 
-					throw new ArgumentException(RC.GetString("INVALID_QUERY"),"*");
+					throw new ArgumentException(SR.InvalidQuery,"*");
 			q = q.Remove(0, 1).TrimStart(null);
 
 			//Find "from" clause
 			keyword = "from ";
 			if ((q.Length < keyword.Length) || (0 != String.Compare (q, 0, keyword, 0, keyword.Length, StringComparison.OrdinalIgnoreCase)))
-				throw new ArgumentException(RC.GetString("INVALID_QUERY"),"from");
+				throw new ArgumentException(SR.InvalidQuery,"from");
 			ParseToken(ref q, keyword, null, ref bFound, ref eventClassName);
 
 			//Find "within" clause
@@ -3108,7 +3108,7 @@ namespace System.Management
 					q = q.Remove(0, keyword.Length);
 					
 					if (q.Length == 0) //bad query
-						throw new ArgumentException(RC.GetString("INVALID_QUERY"),"having");
+						throw new ArgumentException(SR.InvalidQuery,"having");
 
 					havingCondition = q;
 				}

@@ -2015,7 +2015,7 @@ namespace System.Management
                 if( evtGo.Set() == false )
                 {
                     reqList.RemoveAt(ndx);
-                    throw new ManagementException(RC.GetString("WORKER_THREAD_WAKEUP_FAILED"));
+                    throw new ManagementException(SR.WorkerThreadWakeupFailed);
                 }
             }
 

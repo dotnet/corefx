@@ -183,7 +183,9 @@ namespace System.Management
         // preven Fastprox.dll from unloading prematurely (WMI bugs # 2998 and # 4118 - URT bug # 90889)
         // BUG# 101254 is explicitly to add this fix.  Since this is fixed in WinXP, we only
         // hold onto a WbemContext if we are NOT running XP or later.
+#pragma warning disable 0414 // Kept for possible reflection, comment above for history
         private static WbemContext lockOnFastProx = null; // RemovedDuringPort System.Management.Instrumentation.WMICapabilities.IsWindowsXPOrHigher()?null:new WbemContext();
+#pragma warning restore 0414
 
         //
         // The wbemObject is changed from a field to a property. This is to avoid major code churn and simplify the solution to
