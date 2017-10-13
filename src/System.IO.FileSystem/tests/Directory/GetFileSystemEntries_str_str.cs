@@ -879,13 +879,9 @@ namespace System.IO.Tests
             // search pattern is valid but directory doesn't exist
             Assert.Throws<DirectoryNotFoundException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "abc..")));
 
-            // invalid search pattern trying to go up a directory with ..
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, ".."));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, @".." + Path.DirectorySeparatorChar));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "abc", "..")));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "..", "abc")));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..", "..ab ab.. .. abc..d", "abc")));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..", "..ab ab.. .. abc..d", "abc") + Path.DirectorySeparatorChar));
+            // Use GetTestFilePath to make sure we don't walk out of our directory
+            GetEntries(GetTestFilePath(), "..");
+            GetEntries(GetTestFilePath(), @".." + Path.DirectorySeparatorChar);
         }
 
         #endregion
