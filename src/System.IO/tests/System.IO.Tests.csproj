@@ -17,6 +17,7 @@
     <Compile Include="IndentedTextWriter.cs" />
     <Compile Include="BinaryReader\BinaryReaderTests.cs" />
     <Compile Include="MemoryStream\MemoryStream.GetBufferTests.cs" />
+    <Compile Include="StreamWriter\StreamWriter.WriteTests.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="Stream\Stream.cs" />
     <Compile Include="StreamReader\StreamReader.cs" />
     <Compile Include="StreamReader\StreamReader.StringCtorTests.cs" />
