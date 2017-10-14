@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using WbemClient_v1;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.ComponentModel.Design.Serialization;
 using System.Runtime.Versioning;
@@ -87,7 +88,6 @@ namespace System.Management
 
     internal static class WmiNetUtilsHelper
     {
-        internal static string myDllPath ;
         internal delegate int ResetSecurity(IntPtr hToken);
         internal delegate int SetSecurity([In][Out] ref bool pNeedtoReset, [In][Out] ref IntPtr pHandle);    
         internal delegate int BlessIWbemServices([MarshalAs(UnmanagedType.Interface)] IWbemServices pIUnknown, 
@@ -297,267 +297,267 @@ namespace System.Management
         internal static Initialize Initialize_f;
 
 
-        [ResourceExposure(ResourceScope.None), SuppressUnmanagedCodeSecurity, DllImport("kernel32.dll")] internal static extern IntPtr LoadLibrary(string fileName);
-        [ResourceExposure(ResourceScope.None), SuppressUnmanagedCodeSecurity, DllImport("kernel32.dll")] internal static extern IntPtr GetProcAddress(IntPtr hModule, string procname);
         static WmiNetUtilsHelper()
         {
-            myDllPath = @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\wminet_utils.dll"; // ToFix
             IntPtr procAddr = IntPtr.Zero;
             IntPtr loadLibrary = IntPtr.Zero;
-            loadLibrary =  LoadLibrary(myDllPath);
+            string installPath = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
+            string wminet_utilsPath = Path.Combine(installPath, "wminet_utils.dll");
+
+            loadLibrary =  Interop.Kernel32.LoadLibrary(wminet_utilsPath);
             if( loadLibrary != IntPtr.Zero)
             {
-                procAddr = GetProcAddress(loadLibrary, "ResetSecurity");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "ResetSecurity");
                 if( procAddr != IntPtr.Zero)
                 {
                     ResetSecurity_f  =(ResetSecurity) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(ResetSecurity));
                 }
-                procAddr = GetProcAddress(loadLibrary, "SetSecurity");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "SetSecurity");
                 if( procAddr != IntPtr.Zero)
                 {
                     SetSecurity_f  =(SetSecurity) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(SetSecurity));
                 }
-                procAddr = GetProcAddress(loadLibrary, "BlessIWbemServices");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "BlessIWbemServices");
                 if( procAddr != IntPtr.Zero)
                 {
                     BlessIWbemServices_f  =(BlessIWbemServices) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(BlessIWbemServices));
                 }
-                procAddr = GetProcAddress(loadLibrary, "BlessIWbemServicesObject");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "BlessIWbemServicesObject");
                 if( procAddr != IntPtr.Zero)
                 {
                     BlessIWbemServicesObject_f  =(BlessIWbemServicesObject) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(BlessIWbemServicesObject));
                 }
-                procAddr = GetProcAddress(loadLibrary, "GetPropertyHandle");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "GetPropertyHandle");
                 if( procAddr != IntPtr.Zero)
                 {
                      GetPropertyHandle_f27=(GetPropertyHandle) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(GetPropertyHandle));
                 }
-                procAddr = GetProcAddress(loadLibrary, "WritePropertyValue");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "WritePropertyValue");
                 if( procAddr != IntPtr.Zero)
                 {
                      WritePropertyValue_f28=(WritePropertyValue) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(WritePropertyValue));
                 }
-                procAddr = GetProcAddress(loadLibrary, "Clone");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "Clone");
                 if( procAddr != IntPtr.Zero)
                 {
                      Clone_f12=(Clone) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(Clone));
                 }   
-                procAddr = GetProcAddress(loadLibrary, "VerifyClientKey");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "VerifyClientKey");
                 if( procAddr != IntPtr.Zero)
                 {
                      VerifyClientKey_f  =(VerifyClientKey) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(VerifyClientKey));
                 }
-                procAddr = GetProcAddress(loadLibrary, "GetQualifierSet");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "GetQualifierSet");
                 if( procAddr != IntPtr.Zero)
                 {
                     GetQualifierSet_f  =(GetQualifierSet) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(GetQualifierSet));
                 }
-                procAddr = GetProcAddress(loadLibrary, "Get");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "Get");
                 if( procAddr != IntPtr.Zero)
                 {
                     Get_f  =(Get) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(Get));
                 }
-                procAddr = GetProcAddress(loadLibrary, "Put");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "Put");
                 if( procAddr != IntPtr.Zero)
                 {
                     Put_f  =(Put) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(Put));
                 }
-                procAddr = GetProcAddress(loadLibrary, "Delete");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "Delete");
                 if( procAddr != IntPtr.Zero)
                 {
                     Delete_f  =(Delete) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(Delete));
                 }
-                procAddr = GetProcAddress(loadLibrary, "GetNames");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "GetNames");
                 if( procAddr != IntPtr.Zero)
                 {
                     GetNames_f  =(GetNames) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(GetNames));
                 }
-                procAddr = GetProcAddress(loadLibrary, "BeginEnumeration");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "BeginEnumeration");
                 if( procAddr != IntPtr.Zero)
                 {
                     BeginEnumeration_f  =(BeginEnumeration) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(BeginEnumeration));
                 }
-                procAddr = GetProcAddress(loadLibrary, "Next");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "Next");
                 if( procAddr != IntPtr.Zero)
                 {
                     Next_f  =(Next) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(Next));
                 }
-                procAddr = GetProcAddress(loadLibrary, "EndEnumeration");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "EndEnumeration");
                 if( procAddr != IntPtr.Zero)
                 {
                     EndEnumeration_f  =(EndEnumeration) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(EndEnumeration));
                 }
-                procAddr = GetProcAddress(loadLibrary, "GetPropertyQualifierSet");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "GetPropertyQualifierSet");
                 if( procAddr != IntPtr.Zero)
                 {
                     GetPropertyQualifierSet_f  =(GetPropertyQualifierSet) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(GetPropertyQualifierSet));
                 }
-                procAddr = GetProcAddress(loadLibrary, "Clone");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "Clone");
                 if( procAddr != IntPtr.Zero)
                 {
                     Clone_f  =(Clone) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(Clone));
                 }
-                procAddr = GetProcAddress(loadLibrary, "GetObjectText");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "GetObjectText");
                 if( procAddr != IntPtr.Zero)
                 {
                     GetObjectText_f  =(GetObjectText) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(GetObjectText));
                 }
-                procAddr = GetProcAddress(loadLibrary, "SpawnDerivedClass");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "SpawnDerivedClass");
                 if( procAddr != IntPtr.Zero)
                 {
                     SpawnDerivedClass_f  =(SpawnDerivedClass) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(SpawnDerivedClass));
                 }
-                procAddr = GetProcAddress(loadLibrary, "SpawnInstance");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "SpawnInstance");
                 if( procAddr != IntPtr.Zero)
                 {
                     SpawnInstance_f  =(SpawnInstance) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(SpawnInstance));
                 }
-                procAddr = GetProcAddress(loadLibrary, "CompareTo");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "CompareTo");
                 if( procAddr != IntPtr.Zero)
                 {
                     CompareTo_f  =(CompareTo) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(CompareTo));
                 }
-                procAddr = GetProcAddress(loadLibrary, "GetPropertyOrigin");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "GetPropertyOrigin");
                 if( procAddr != IntPtr.Zero)
                 {
                     GetPropertyOrigin_f  =(GetPropertyOrigin) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(GetPropertyOrigin));
                 }
-                procAddr = GetProcAddress(loadLibrary, "InheritsFrom");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "InheritsFrom");
                 if( procAddr != IntPtr.Zero)
                 {
                     InheritsFrom_f  =(InheritsFrom) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(InheritsFrom));
                 }
-                procAddr = GetProcAddress(loadLibrary, "GetMethod");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "GetMethod");
                 if( procAddr != IntPtr.Zero)
                 {
                     GetMethod_f  =(GetMethod) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(GetMethod));
                 }
-                procAddr = GetProcAddress(loadLibrary, "PutMethod");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "PutMethod");
                 if( procAddr != IntPtr.Zero)
                 {
                     PutMethod_f  =(PutMethod) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(PutMethod));
                 }
-                procAddr = GetProcAddress(loadLibrary, "DeleteMethod");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "DeleteMethod");
                 if( procAddr != IntPtr.Zero)
                 {
                     DeleteMethod_f  =(DeleteMethod) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(DeleteMethod));
                 }
-                procAddr = GetProcAddress(loadLibrary, "BeginMethodEnumeration");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "BeginMethodEnumeration");
                 if( procAddr != IntPtr.Zero)
                 {
                     BeginMethodEnumeration_f  =(BeginMethodEnumeration) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(BeginMethodEnumeration));
                 }
-                procAddr = GetProcAddress(loadLibrary, "NextMethod");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "NextMethod");
                 if( procAddr != IntPtr.Zero)
                 {
                     NextMethod_f  =(NextMethod) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(NextMethod));
                 }
-                procAddr = GetProcAddress(loadLibrary, "EndMethodEnumeration");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "EndMethodEnumeration");
                 if( procAddr != IntPtr.Zero)
                 {
                     EndMethodEnumeration_f  =(EndMethodEnumeration) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(EndMethodEnumeration));
                 }
-                procAddr = GetProcAddress(loadLibrary, "GetMethodQualifierSet");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "GetMethodQualifierSet");
                 if( procAddr != IntPtr.Zero)
                 {
                     GetMethodQualifierSet_f  =(GetMethodQualifierSet) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(GetMethodQualifierSet));
                 }
-                procAddr = GetProcAddress(loadLibrary, "GetMethodOrigin");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "GetMethodOrigin");
                 if( procAddr != IntPtr.Zero)
                 {
                     GetMethodOrigin_f  =(GetMethodOrigin) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(GetMethodOrigin));
                 }
-                procAddr = GetProcAddress(loadLibrary, "QualifierSet_Get");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "QualifierSet_Get");
                 if( procAddr != IntPtr.Zero)
                 {
                      QualifierGet_f=(QualifierSet_Get) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(QualifierSet_Get));
                 }
-                procAddr = GetProcAddress(loadLibrary, "QualifierSet_Put");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "QualifierSet_Put");
                 if( procAddr != IntPtr.Zero)
                 {
                      QualifierPut_f=(QualifierSet_Put) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(QualifierSet_Put));
                 }
-                procAddr = GetProcAddress(loadLibrary, "QualifierSet_Delete");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "QualifierSet_Delete");
                 if( procAddr != IntPtr.Zero)
                 {
                      QualifierDelete_f=(QualifierSet_Delete) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(QualifierSet_Delete));
                 }
-                procAddr = GetProcAddress(loadLibrary, "QualifierSet_GetNames");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "QualifierSet_GetNames");
                 if( procAddr != IntPtr.Zero)
                 {
                      QualifierGetNames_f=(QualifierSet_GetNames) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(QualifierSet_GetNames));
                 }
-                procAddr = GetProcAddress(loadLibrary, "QualifierSet_BeginEnumeration");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "QualifierSet_BeginEnumeration");
                 if( procAddr != IntPtr.Zero)
                 {
                      QualifierBeginEnumeration_f=(QualifierSet_BeginEnumeration) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(QualifierSet_BeginEnumeration));
                 }
-                procAddr = GetProcAddress(loadLibrary, "QualifierSet_Next");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "QualifierSet_Next");
                 if( procAddr != IntPtr.Zero)
                 {
                      QualifierNext_f=(QualifierSet_Next) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(QualifierSet_Next));
                 }
-                procAddr = GetProcAddress(loadLibrary, "QualifierSet_EndEnumeration");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "QualifierSet_EndEnumeration");
                 if( procAddr != IntPtr.Zero)
                 {
                      QualifierEndEnumeration_f=(QualifierSet_EndEnumeration) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(QualifierSet_EndEnumeration));
                 }
-                procAddr = GetProcAddress(loadLibrary, "GetCurrentApartmentType");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "GetCurrentApartmentType");
                 if( procAddr != IntPtr.Zero)
                 {
                     GetCurrentApartmentType_f  =(GetCurrentApartmentType) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(GetCurrentApartmentType));
                 }
-                procAddr = GetProcAddress(loadLibrary, "GetDemultiplexedStub");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "GetDemultiplexedStub");
                 if( procAddr != IntPtr.Zero)
                 {
                      GetDemultiplexedStub_f =(GetDemultiplexedStub) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(GetDemultiplexedStub));
                 }         
-                procAddr = GetProcAddress(loadLibrary, "CreateInstanceEnumWmi");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "CreateInstanceEnumWmi");
                 if( procAddr != IntPtr.Zero)
                 {
                     CreateInstanceEnumWmi_f  =(CreateInstanceEnumWmi) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(CreateInstanceEnumWmi));
                 }
-                procAddr = GetProcAddress(loadLibrary, "CreateClassEnumWmi");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "CreateClassEnumWmi");
                 if( procAddr != IntPtr.Zero)
                 {
                     CreateClassEnumWmi_f  =(CreateClassEnumWmi) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(CreateClassEnumWmi));
                 }
-                procAddr = GetProcAddress(loadLibrary, "ExecQueryWmi");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "ExecQueryWmi");
                 if( procAddr != IntPtr.Zero)
                 {
                     ExecQueryWmi_f  =(ExecQueryWmi) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(ExecQueryWmi));
                 }
-                procAddr = GetProcAddress(loadLibrary, "ExecNotificationQueryWmi");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "ExecNotificationQueryWmi");
                 if( procAddr != IntPtr.Zero)
                 {
                     ExecNotificationQueryWmi_f  =(ExecNotificationQueryWmi) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(ExecNotificationQueryWmi));
                 }
-                procAddr = GetProcAddress(loadLibrary, "PutInstanceWmi");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "PutInstanceWmi");
                 if( procAddr != IntPtr.Zero)
                 {
                     PutInstanceWmi_f  =(PutInstanceWmi) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(PutInstanceWmi));
                 } 
-                procAddr = GetProcAddress(loadLibrary, "PutClassWmi");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "PutClassWmi");
                 if( procAddr != IntPtr.Zero)
                 {
                     PutClassWmi_f  =(PutClassWmi) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(PutClassWmi));
                 }
-                procAddr = GetProcAddress(loadLibrary, "CloneEnumWbemClassObject");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "CloneEnumWbemClassObject");
                 if( procAddr != IntPtr.Zero)
                 {
                     CloneEnumWbemClassObject_f  =(CloneEnumWbemClassObject) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(CloneEnumWbemClassObject));
                 }
-                procAddr = GetProcAddress(loadLibrary, "ConnectServerWmi");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "ConnectServerWmi");
                 if( procAddr != IntPtr.Zero)
                 {
                     ConnectServerWmi_f  =(ConnectServerWmi) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(ConnectServerWmi));
                 }
-                procAddr = GetProcAddress(loadLibrary, "GetErrorInfo");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "GetErrorInfo");
                 if( procAddr != IntPtr.Zero)
                 {
                     GetErrorInfo_f  =(GetErrorInfo) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(GetErrorInfo));
                 }
-                procAddr = GetProcAddress(loadLibrary, "Initialize");
+                procAddr = Interop.Kernel32.GetProcAddress(loadLibrary, "Initialize");
                 if( procAddr != IntPtr.Zero)
                 {
                     Initialize_f  =(Initialize) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(Initialize));
