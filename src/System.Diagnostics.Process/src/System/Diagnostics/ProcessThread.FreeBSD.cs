@@ -15,7 +15,7 @@ namespace System.Diagnostics
         {
             get
             {
-                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, Id);
+                Interop.Process.proc_stats stat = Interop.Process.GetThreadInfo(_processId, Id);
                 return Interop.Sys.GetThreadPriorityFromNiceValue((int)stat.nice);
             }
             set
@@ -27,7 +27,7 @@ namespace System.Diagnostics
         /// <summary>Returns the time the associated thread was started.</summary>
         public DateTime StartTime
         {
-            // kinfo_proc has one  antry per thread but ki_start seems to be same for 
+            // kinfo_proc has one  entry per thread but ki_start seems to be same for
             // all threads e.g. reflects process start. This may be re-visited later.
             get { throw new PlatformNotSupportedException(); }
         }
@@ -41,7 +41,7 @@ namespace System.Diagnostics
         {
             get
             {
-                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, Id);
+                Interop.Process.proc_stats stat = Interop.Process.GetThreadInfo(_processId, Id);
                 return Process.TicksToTimeSpan(stat.userTime + stat.systemTime);
             }
         }
@@ -54,7 +54,7 @@ namespace System.Diagnostics
         {
             get
             {
-                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, Id);
+                Interop.Process.proc_stats stat = Interop.Process.GetThreadInfo(_processId, Id);
                 return Process.TicksToTimeSpan(stat.userTime);
             }
         }
@@ -67,7 +67,7 @@ namespace System.Diagnostics
         {
             get
             {
-                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, Id);
+                Interop.Process.proc_stats stat = Interop.Process.GetThreadInfo(_processId, Id);
                 return Process.TicksToTimeSpan(stat.systemTime);
             }
 

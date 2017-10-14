@@ -363,7 +363,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsOSX)' == 'true'">
+    <Compile Include="System\Diagnostics\Process.BSD.cs" />
     <Compile Include="System\Diagnostics\Process.OSX.cs" />
+    <Compile Include="System\Diagnostics\ProcessManager.BSD.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.OSX.cs" />
     <Compile Include="System\Diagnostics\ProcessThread.OSX.cs" />
     <Compile Include="$(CommonPath)\Interop\OSX\Interop.libproc.cs">
@@ -393,7 +395,9 @@
     <Compile Include="System\Diagnostics\ProcessStartInfo.Uap.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsFreeBSD)' == 'true'">
+    <Compile Include="System\Diagnostics\Process.BSD.cs" />
     <Compile Include="System\Diagnostics\Process.FreeBSD.cs" />
+    <Compile Include="System\Diagnostics\ProcessManager.BSD.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.FreeBSD.cs" />
     <Compile Include="System\Diagnostics\ProcessThread.FreeBSD.cs" />
     <Compile Include="$(CommonPath)\Interop\BSD\System.Native\Interop.Sysctl.cs">
