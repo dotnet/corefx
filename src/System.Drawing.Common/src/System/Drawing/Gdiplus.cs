@@ -856,6 +856,14 @@ namespace System.Drawing
         [DllImport(ExternDll.Kernel32)]
         static internal extern void ZeroMemory(IntPtr destination, UIntPtr length);
 
+        static internal unsafe void ZeroMemory(byte* ptr, ulong length)
+        {
+            for (ulong i = 0; i < length; i++)
+            {
+                *ptr++ = 0;
+            }
+        }
+
         public const int ERROR_ACCESS_DENIED = 5;
         public const int ERROR_INVALID_PARAMETER = 87;
         public const int ERROR_PROC_NOT_FOUND = 127;

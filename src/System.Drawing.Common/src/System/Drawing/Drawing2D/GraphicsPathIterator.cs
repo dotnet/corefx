@@ -224,7 +224,7 @@ namespace System.Drawing.Drawing2D
 
                 if (resultCount < count)
                 {
-                    IntSafeNativeMethods.ZeroMemory((byte*)(checked((long)memoryPts + resultCount * size)), (ulong)((count - resultCount) * size));
+                    SafeNativeMethods.ZeroMemory((byte*)(checked((long)memoryPts + resultCount * size)), (ulong)((count - resultCount) * size));
                 }
 
                 points = SafeNativeMethods.Gdip.ConvertGPPOINTFArrayF(memoryPts, count);
