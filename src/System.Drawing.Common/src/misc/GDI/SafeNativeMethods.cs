@@ -39,5 +39,13 @@ namespace System.Drawing.Internal
             DbgUtil.AssertWin32(hRgn != IntPtr.Zero, "IntCreateRectRgn([x1={0}, y1={1}, x2={2}, y2={3}]) failed.", x1, y1, x2, y2);
             return hRgn;
         }
+
+        internal static unsafe void ZeroMemory(byte* ptr, ulong length)
+        {
+            for (ulong i = 0; i < length; i++)
+            {
+                *ptr++ = 0;
+            }
+        }
     }
 }
