@@ -32,7 +32,6 @@ namespace System.Diagnostics
             return processes.ToArray();
         }
 
-
         /// <summary>Gets an array of module infos for the specified process.</summary>
         /// <param name="processId">The ID of the process whose modules should be enumerated.</param>
         /// <returns>The array of modules.</returns>
@@ -44,7 +43,7 @@ namespace System.Diagnostics
             // and why MainModule exists.
             try
             {
-                string exePath = getProcPath(processId);
+                string exePath = GetProcPath(processId);
                 if (!string.IsNullOrEmpty(exePath))
                 {
                     return new ProcessModuleCollection(1)

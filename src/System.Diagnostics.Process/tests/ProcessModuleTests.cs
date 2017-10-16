@@ -33,16 +33,6 @@ namespace System.Diagnostics.Tests
         public void Modules_Get_ContainsHostFileName()
         {
             ProcessModuleCollection modules = Process.GetCurrentProcess().Modules;
-            try
-            {
-                System.Console.WriteLine(modules.Cast<ProcessModule>());
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine("GetModules failed: {0}", e.ToString());
-                throw;
-            }
-
             Assert.Contains(modules.Cast<ProcessModule>(), m => m.FileName.Contains(HostRunnerName));
         }
 

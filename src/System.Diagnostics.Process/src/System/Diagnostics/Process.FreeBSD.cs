@@ -15,7 +15,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveId);
-                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, 0);
+                Interop.Process.proc_stats stat = Interop.Process.GetThreadInfo(_processId, 0);
 
                 return  new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(stat.startTime);
             }
@@ -31,7 +31,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.HaveId);
-                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, 0);
+                Interop.Process.proc_stats stat = Interop.Process.GetThreadInfo(_processId, 0);
                 return Process.TicksToTimeSpan(stat.userTime + stat.systemTime);
             }
         }
@@ -46,7 +46,7 @@ namespace System.Diagnostics
             {
                 EnsureState(State.HaveId);
 
-                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, 0);
+                Interop.Process.proc_stats stat = Interop.Process.GetThreadInfo(_processId, 0);
                 return Process.TicksToTimeSpan(stat.userTime);
             }
         }
@@ -58,7 +58,7 @@ namespace System.Diagnostics
             {
                 EnsureState(State.HaveId);
 
-                Interop.Process.proc_stats stat = Interop.Process.getThreadInfo(_processId, 0);
+                Interop.Process.proc_stats stat = Interop.Process.GetThreadInfo(_processId, 0);
                 return Process.TicksToTimeSpan(stat.systemTime);
             }
         }
@@ -83,7 +83,7 @@ namespace System.Diagnostics
         /// <summary>Gets the path to the current executable, or null if it could not be retrieved.</summary>
         private static string GetExePath()
         {
-            return Interop.Process.getProcPath(Interop.Sys.GetPid());
+            return Interop.Process.GetProcPath(Interop.Sys.GetPid());
         }
 
         // ----------------------------------

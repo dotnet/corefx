@@ -228,7 +228,7 @@ namespace System.Diagnostics.Tests
         {
             string path = GetTestFilePath();
             File.Create(path).Dispose();
-            int mode Convert.ToInt32("644", 8);
+            int mode = Convert.ToInt32("644", 8);
 
             Assert.Equal(0, chmod(path, mode));
 

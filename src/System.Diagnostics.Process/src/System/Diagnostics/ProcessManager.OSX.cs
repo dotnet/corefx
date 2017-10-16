@@ -16,7 +16,7 @@ namespace System.Diagnostics
             return Interop.libproc.proc_listallpids();
         }
 
-        private static string getProcPath(int processId)
+        private static string GetProcPath(int processId)
         {
             return Interop.libproc.proc_pidpath(processId);
         }

@@ -13,12 +13,12 @@ namespace System.Diagnostics
         /// <summary>Gets the IDs of all processes on the current machine.</summary>
         public static int[] GetProcessIds()
         {
-            return Interop.Process.proc_listallpids();
+            return Interop.Process.ListAllPids();
         }
 
-        internal static string getProcPath(int processId)
+        internal static string GetProcPath(int processId)
         {
-            return Interop.Process.getProcPath(processId);
+            return Interop.Process.GetProcPath(processId);
         }
 
         private static ProcessInfo CreateProcessInfo(int pid)

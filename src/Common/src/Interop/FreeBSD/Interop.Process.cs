@@ -210,16 +210,16 @@ internal static partial class Interop
         /// Queries the OS for the list of all running processes and returns the PID for each
         /// </summary>
         /// <returns>Returns a list of PIDs corresponding to all running processes</returns>
-        internal static unsafe int[] proc_listallpids()
+        internal static unsafe int[] ListAllPids()
         {
-            int numProcesses=0;
+            int numProcesses = 0;
             int[] pids;
             kinfo_proc * entries = null;
             int idx;
 
             try
             {
-                entries = getProcInfo(0, false, out numProcesses);
+                entries = GetProcInfo(0, false, out numProcesses);
                 if (entries == null || numProcesses <= 0)
                 {
                     throw new Win32Exception(SR.CantGetAllPids);
@@ -227,9 +227,9 @@ internal static partial class Interop
 
                 Span<kinfo_proc>  list = new Span<kinfo_proc>(entries, numProcesses);
                 pids = new int[numProcesses];
-                idx=0;
+                idx = 0;
                 // walk through process list and skip kernel threads
-                for (int i=0; i < list.Length; i++)
+                for (int i = 0; i < list.Length; i++)
                 {
                     if (list[i].ki_ppid == 0)
                     {
@@ -257,7 +257,7 @@ internal static partial class Interop
         /// Gets executable name for process given it's PID
         /// </summary>
         /// <param name="pid">The PID of the process</param>
-        public static unsafe string getProcPath(int pid)
+        public static unsafe string GetProcPath(int pid)
         {
             Span<int> sysctlName = stackalloc int[4];
             byte* pBuffer = null;
@@ -279,7 +279,7 @@ internal static partial class Interop
         /// Gets information about process or thread(s)
         /// </summary>
         /// <param name="pid">The PID of the process. If PID is 0, this will return all processes</param>
-        public static unsafe kinfo_proc* getProcInfo(int pid, bool threads, out int count)
+        public static unsafe kinfo_proc* GetProcInfo(int pid, bool threads, out int count)
         {
             Span<int> sysctlName = stackalloc int[4];
             int bytesLength = 0;
@@ -351,7 +351,7 @@ internal static partial class Interop
 
             try
             {
-                kinfo = getProcInfo(pid, true, out count);
+                kinfo = GetProcInfo(pid, true, out count);
                 if (kinfo == null || count < 1)
                 {
                     throw new ArgumentOutOfRangeException(nameof(pid));
@@ -368,7 +368,7 @@ internal static partial class Interop
                 info.WorkingSet = kinfo->ki_rssize;
                 info.SessionId = kinfo ->ki_sid;
 
-                for(int i=0; i < process.Length; i++)
+                for(int i = 0; i < process.Length; i++)
                 {
                     var ti = new ThreadInfo()
                     {
@@ -406,7 +406,7 @@ internal static partial class Interop
 
             try
             {
-                info =  getProcInfo(pid, (tid == 0 ? false: true), out count);
+                info =  GetProcInfo(pid, (tid != 0), out count);
                 if (info != null && count >= 1)
                 {
                     if (tid == 0)
@@ -419,7 +419,7 @@ internal static partial class Interop
                     else
                     {
                         Span<kinfo_proc> list = new Span<kinfo_proc>(info, count);
-                        for(int i=0; i < list.Length; i++)
+                        for(int i = 0; i < list.Length; i++)
                         {
                             if (list[i].ki_tid == tid)
                             {
