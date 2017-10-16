@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System; 
 using Xunit;
 
 namespace System.Management.Tests
@@ -17,7 +16,7 @@ namespace System.Management.Tests
             scope.Connect();
             
             var searcher = new ManagementObjectSearcher(scope, query);
-            foreach(var result in searcher.Get())
+            foreach(ManagementBaseObject result in searcher.Get())
             {
                 Assert.True(!string.IsNullOrEmpty(result.GetPropertyValue("DeviceID").ToString()));
             }
