@@ -52,6 +52,12 @@ namespace System.Data.SqlClient
             base.GetObjectData(si, context);
             si.AddValue("Errors", null); // Not specifying type to enable serialization of null value of non-serializable type
             si.AddValue("ClientConnectionId", _clientConnectionId, typeof(Guid));
+
+            // Writing sqlerrors to base exception data table
+            for (int i = 0; i < Errors.Count; i++)
+            {
+                Data.Add("SqlError " + (i + 1), Errors[i].ToString());
+            }
         }
 
         // runtime will call even if private...

@@ -495,8 +495,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 return;
             }
 
-            // Exceptions in Net Native can't be reflected and therefore skipping blob sanity check
-            if (obj is Exception/* && PlatformDetection.IsNetNative*/)
+            // In most cases exceptions in Core have a different layout than in Desktop,
+            // therefore we are skipping the string comparison of the blobs.
+            if (obj is Exception)
             {
                 return;
             }
