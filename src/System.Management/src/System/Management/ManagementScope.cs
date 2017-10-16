@@ -2,18 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.ComponentModel;
-using System.Configuration;
 using System.Runtime.InteropServices;
-using System.Threading;
-using WbemClient_v1;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.ComponentModel.Design.Serialization;
-using System.Runtime.Versioning;
-using System.Runtime.Serialization;
 using System.Security;
 using System.Security.Permissions;
 using Microsoft.Win32;

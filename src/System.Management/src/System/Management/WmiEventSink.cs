@@ -5,11 +5,7 @@
 //#define USETLBIMP
 //#define USEIWOS
 
-using System;
-using WbemClient_v1;
 using System.Runtime.InteropServices;
-using System.Diagnostics;
-using System.Threading;
 #if USETLBIMP
 using WMISECLib;
 #endif

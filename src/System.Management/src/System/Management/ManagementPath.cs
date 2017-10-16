@@ -2,14 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
-using System.Collections;
 using System.ComponentModel;
-using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
-using WbemUtilities_v1;
-using WbemClient_v1;
 using System.Globalization;
 using System.Reflection;
 using System.ComponentModel.Design.Serialization;
