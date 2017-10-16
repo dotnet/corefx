@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -70,6 +71,15 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
 
             SanityCheckBlob(obj, blobs);
+
+            // SqlException isn't deserializable from Desktop --> Core.
+            // Therefore we remove the second blob which is the one from Desktop.
+            if (!PlatformDetection.IsFullFramework && obj is SqlException)
+            {
+                var tmpList = new List<string>(blobs);
+                tmpList.RemoveAt(1);
+                blobs = tmpList.ToArray();
+            }
 
             foreach (string blob in blobs)
             {

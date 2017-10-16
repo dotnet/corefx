@@ -1050,6 +1050,24 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 CheckEquals(@this.InnerException, other.InnerException);
         }
 
+        public static bool IsEqual(this SecurityException @this, SecurityException other)
+        {
+            // Name and ToString are different by design
+
+            return @this != null &&
+                other != null &&
+                // On full framework, line number may be method body start
+                // On Net Native we can't reflect on Exceptions and change its StackTrace
+                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
+                (@this.StackTrace == other.StackTrace)) &&
+                @this.Data.CheckSequenceEquals(other.Data) &&
+                @this.Source == other.Source &&
+                // On Net Native we can't reflect on Exceptions and change its HResult
+                (PlatformDetection.IsNetNative ? true : @this.HResult == other.HResult) &&
+                @this.HelpLink == other.HelpLink &&
+                CheckEquals(@this.InnerException, other.InnerException);
+        }
+
         public static bool IsEqual(this PolicyException @this, PolicyException other)
         {
             // PolicyException is stubbed out in Core therefore we are skipping some equality checks.
