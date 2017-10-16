@@ -3489,6 +3489,31 @@ namespace System.IO.Packaging.Tests
             tempGuidName.Delete();
         }
 
+        [Fact]
+        public void SetEmptyPropertyToNull()
+        {
+            using (var ms = new MemoryStream())
+            using (var package = Package.Open(ms, FileMode.Create))
+            {
+                package.PackageProperties.Category = null;
+                package.PackageProperties.ContentStatus = null;
+                package.PackageProperties.ContentType = null;
+                package.PackageProperties.Created = null;
+                package.PackageProperties.Creator = null;
+                package.PackageProperties.Description = null;
+                package.PackageProperties.Identifier = null;
+                package.PackageProperties.Keywords = null;
+                package.PackageProperties.Language = null;
+                package.PackageProperties.LastModifiedBy = null;
+                package.PackageProperties.LastPrinted = null;
+                package.PackageProperties.Modified = null;
+                package.PackageProperties.Revision = null;
+                package.PackageProperties.Subject = null;
+                package.PackageProperties.Title = null;
+                package.PackageProperties.Version = null;
+            }
+        }
+
         private const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
     }
 
