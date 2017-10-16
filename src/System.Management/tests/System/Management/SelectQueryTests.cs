@@ -9,16 +9,39 @@ namespace System.Management.Tests
     public class SelectQueryTests
     {
         [Fact]
-        public void Select_Win32_LogicalDisk()
+        public void Select_Win32_LogicalDisk_ClassName()
+        {
+            var query = new SelectQuery("Win32_LogicalDisk");
+            var scope = new ManagementScope($@"\\{Environment.MachineName}\root\cimv2");
+            scope.Connect();
+
+            using (var searcher = new ManagementObjectSearcher(scope, query))
+            using (var collection = searcher.Get())
+            {
+                Assert.True(collection.Count > 0);
+                foreach (ManagementBaseObject result in collection)
+                {
+                    Assert.True(result.Properties.Count > 1);
+                    Assert.True(!string.IsNullOrEmpty(result.Properties["DeviceID"].Value.ToString()));
+                }
+            }
+        }
+
+        [Fact]
+        public void Select_Win32_LogicalDisk_ClassName_Condition()
         {
             var query = new SelectQuery("Win32_LogicalDisk", "DriveType=3");
             var scope = new ManagementScope($@"\\{Environment.MachineName}\root\cimv2");
             scope.Connect();
-            
-            var searcher = new ManagementObjectSearcher(scope, query);
-            foreach(ManagementBaseObject result in searcher.Get())
+
+            using (var searcher = new ManagementObjectSearcher(scope, query))
+            using (var collection = searcher.Get())
             {
-                Assert.True(!string.IsNullOrEmpty(result.GetPropertyValue("DeviceID").ToString()));
+                Assert.True(collection.Count > 0);
+                foreach (ManagementBaseObject result in collection)
+                {
+                    Assert.True(!string.IsNullOrEmpty(result.GetPropertyValue("DeviceID").ToString()));
+                }
             }
         }
     }
