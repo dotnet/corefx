@@ -37,13 +37,6 @@ namespace System.IO.Compression
         /// developers should prefer using the constructor
         /// <code>public ZLibException(string message, string zlibErrorContext, ZLibNative.ErrorCode zlibErrorCode, string zlibErrorMessage)</code>.
         /// </summary>
-        public ZLibException() { }
-
-        /// <summary>
-        /// This constructor is provided in compliance with common NetFx design patterns;
-        /// developers should prefer using the constructor
-        /// <code>public ZLibException(string message, string zlibErrorContext, ZLibNative.ErrorCode zlibErrorCode, string zlibErrorMessage)</code>.
-        /// </summary>
         /// <param name="message">The error message that explains the reason for the exception.</param>
         public ZLibException(string message) : base(message) { }
 
@@ -55,23 +48,5 @@ namespace System.IO.Compression
         /// <param name="message">The error message that explains the reason for the exception.</param>
         /// <param name="inner">The exception that is the cause of the current exception, or a <code>null</code>.</param>
         public ZLibException(string message, Exception innerException) : base(message, innerException) { }
-
-        public string ZLibContext
-        {
-            [SecurityCritical]
-            get { return _zlibErrorContext; }
-        }
-
-        public int ZLibErrorCode
-        {
-            [SecurityCritical]
-            get { return (int)_zlibErrorCode; }
-        }
-
-        public string ZLibErrorMessage
-        {
-            [SecurityCritical]
-            get { return _zlibErrorMessage; }
-        }
     }
 }
