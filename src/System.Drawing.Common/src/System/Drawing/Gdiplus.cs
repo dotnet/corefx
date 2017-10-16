@@ -852,10 +852,7 @@ namespace System.Drawing
         {
             return IntGlobalAlloc(uFlags, new UIntPtr(dwBytes));
         }
-
-        [DllImport(ExternDll.Kernel32)]
-        static internal extern void ZeroMemory(IntPtr destination, UIntPtr length);
-
+        
         static internal unsafe void ZeroMemory(byte* ptr, ulong length)
         {
             for (ulong i = 0; i < length; i++)
