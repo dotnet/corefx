@@ -370,7 +370,6 @@ namespace System.Management
             }   
             catch (COMException e) 
             {
-                // BUGBUG : securityHandler.Reset()?
                 ManagementException.ThrowWithExtendedInfo(e);
             } 
             finally 
@@ -464,7 +463,6 @@ namespace System.Management
             } 
             catch (COMException e) 
             {
-                // BUGBUG : securityHandler.Reset()?
                 watcher.RemoveSink (sink);
                 ManagementException.ThrowWithExtendedInfo (e);
             } 

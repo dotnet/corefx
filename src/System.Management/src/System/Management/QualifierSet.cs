@@ -341,9 +341,6 @@ namespace System.Management
                 // If we got an error code back, assume there are NO qualifiers for this object/property/method
                 if(status < 0)
                 {
-                    // TODO: Should we look at specific error codes.  For example, if you ask
-                    // for the qualifier set on a system property, GetPropertyQualifierSet() returns
-                    // WBEM_E_SYSTEM_PROPERTY.
                     qualifierNames = new String[]{};
                 }
                 else

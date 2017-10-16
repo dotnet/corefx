@@ -181,9 +181,9 @@ namespace System.Management
     public class ManagementBaseObject : Component, ICloneable, ISerializable
     {
         // This field holds onto a WbemContext for the lifetime of the appdomain.  This should
-        // preven Fastprox.dll from unloading prematurely (WMI bugs # 2998 and # 4118 - URT bug # 90889)
-        // BUG# 101254 is explicitly to add this fix.  Since this is fixed in WinXP, we only
-        // hold onto a WbemContext if we are NOT running XP or later.
+        // prevent Fastprox.dll from unloading prematurely.
+        // Since this is fixed in WinXP, we only hold onto a WbemContext if we are NOT running XP or later.
+
 #pragma warning disable 0414 // Kept for possible reflection, comment above for history
         private static WbemContext lockOnFastProx = null; // RemovedDuringPort System.Management.Instrumentation.WMICapabilities.IsWindowsXPOrHigher()?null:new WbemContext();
 #pragma warning restore 0414
@@ -611,7 +611,6 @@ namespace System.Management
         ///    <para>The textual representation of the
         ///       object in the specified format.</para>
         /// </returns>
-        // TODO: What's the relationship to ISerializable if any ?
         public string GetText(TextFormat format)
         {
             string objText = null;
@@ -707,7 +706,7 @@ namespace System.Management
                 {
                     //we could wind up here if Initialize() throws (either here or inside CompareTo())
                     //Since we cannot throw from Equals() imprelemtation and it is invalid to assume
-                    //that two objects are different because they fail to initialize (this assumption causes bug 100527)
+                    //that two objects are different because they fail to initialize
                     //so, we can just compare these invalid paths "by value"
 
                     if (this is ManagementObject && obj is ManagementObject)

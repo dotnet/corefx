@@ -76,7 +76,7 @@ namespace System.Management
 							break;
 						}
 					}
-				} catch {}	// BUGBUG : why ignore error?
+				} catch {}
 			}
 			
 			return wbemContext;

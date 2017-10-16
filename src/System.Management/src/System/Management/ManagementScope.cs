@@ -60,7 +60,7 @@ namespace System.Management
               return ((int)s_switchesRegKey.GetValue(c_WMIDisableCOMSecurity, -1 /* default */) == 1);
            }
           
-           // swallow exceptions so that we don't crash the process if we can't read the switch value
+           // ignore exceptions so that we don't crash the process if we can't read the switch value
            catch (Exception e)
            {
                if (e is StackOverflowException ||
@@ -1083,7 +1083,7 @@ namespace System.Management
                     {
                         // The locator cannot be marshalled accross apartments, so we must create the locator
                         // and get the IWbemServices from an MTA thread
-                        if(!MTAHelper.IsNoContextMTA())  // Bug#110141 - Checking for MTA is not enough.  We need to make sure we are not in a COM+ Context
+                        if(!MTAHelper.IsNoContextMTA())
                         {
                             //
                             // [marioh, RAID: 111108]

@@ -154,7 +154,7 @@ namespace System.Management
             if(pWbemClassObject == IntPtr.Zero)
                 throw new ObjectDisposedException(name);
             int hr = WmiNetUtilsHelper.Get_f(4, pWbemClassObject, wszName, lFlags, ref pVal, ref pType, ref plFlavor);
-            // There is a BUG in WMI where some instances (events and out params from method invocations)
+            // In certain cases some instances (events and out params from method invocations)
             // do not have a __PATH property.  Unfortunately, GetNames says the object DOES have a __PATH
             // property.  Going under the assumption that __PATH should always exist, we make a slight fixup
             // if we detect a missing __PATH
@@ -208,8 +208,8 @@ namespace System.Management
         {
             if(pWbemClassObject == IntPtr.Zero)
                 throw new ObjectDisposedException(name);
-            pVal = null; // This is really an Out parameter - it will be overwritten TODO: Fix
-            strName = null;  // This is really an Out parameter - it will be overwritten TODO: Fix
+            pVal = null;
+            strName = null;
             int res = WmiNetUtilsHelper.Next_f(9, pWbemClassObject, lFlags, ref strName, ref pVal, ref pType, ref plFlavor);
             GC.KeepAlive ( this ) ;
             return res ;
@@ -360,7 +360,6 @@ namespace System.Management
             if(pWbemClassObject == IntPtr.Zero)
                 throw new ObjectDisposedException(name);
 
-            // TODO: Provide overload which optionally only gets the name param
             IntPtr pInSignature;
             IntPtr pOutSignature;
             int hResult = WmiNetUtilsHelper.NextMethod_f(23, pWbemClassObject, lFlags, out pstrName, out pInSignature, out pOutSignature);
@@ -1994,7 +1993,7 @@ namespace System.Management
         public static object CreateInMTA(Type type)
         {
             // If we are currently in the MTA, we can directly create the object
-            if(IsNoContextMTA())  // Bug#110141 - Checking for MTA is not enough.  We need to make sure we are not in a COM+ Context
+            if(IsNoContextMTA())
                 return Activator.CreateInstance(type);
 
             // We need to create the object in the MTA by using a worker thread
@@ -2095,7 +2094,6 @@ namespace System.Management
         static bool CanCallCoGetObjectContext = IsWindows2000OrHigher();
 
         // This method will tell us if the calling thread is in the MTA and we are not in a 'context'
-        // Added for Bug#110141
         public static bool IsNoContextMTA()
         {
             // If the runtime says we are not an MTA thread, we'll trust it and return false

@@ -49,7 +49,7 @@ internal class WmiEventSink : IWmiEventSource
         string path,
         string className)
     {
-        if(MTAHelper.IsNoContextMTA()) // Bug#110141 - Checking for MTA is not enough.  We need to make sure we are not in a COM+ Context
+        if(MTAHelper.IsNoContextMTA())
             return new WmiEventSink(watcher, context, scope, path, className);
 
         watcherParameter = watcher;
@@ -59,15 +59,11 @@ internal class WmiEventSink : IWmiEventSource
         classNameParameter = className;
 
         //
-        // [marioh, RAID: 111108]
         // Ensure we are able to trap exceptions from worker thread.
         //
         ThreadDispatch disp = new ThreadDispatch ( new ThreadDispatch.ThreadWorkerMethod ( HackToCreateWmiEventSink ) ) ;
         disp.Start ( ) ;
 
-//        Thread thread = new Thread(new ThreadStart(HackToCreateWmiEventSink));
-//        thread.Start(); // TODO: What if this throws an exception
-//        thread.Join();
         return wmiEventSinkNew;
     }
 
@@ -233,7 +229,6 @@ internal class WmiEventSink : IWmiEventSource
 
     internal void Cancel () 
     {
-        // BUGBUG : Throw exception on failure?
         try {
             scope.GetIWbemServices().CancelAsyncCall_((IWbemObjectSink) stub);
         } catch {}      
@@ -275,7 +270,7 @@ internal class WmiGetEventSink : WmiEventSink
         ManagementScope scope,
         ManagementObject managementObject)
     {
-        if(MTAHelper.IsNoContextMTA()) // Bug#110141 - Checking for MTA is not enough.  We need to make sure we are not in a COM+ Context
+        if(MTAHelper.IsNoContextMTA())
             return new WmiGetEventSink(watcher, context, scope, managementObject);
 
         watcherParameter = watcher;
@@ -284,15 +279,11 @@ internal class WmiGetEventSink : WmiEventSink
         managementObjectParameter = managementObject;
 
         //
-        // [marioh, RAID: 111108]
         // Ensure we are able to trap exceptions from worker thread.
         //
         ThreadDispatch disp = new ThreadDispatch ( new ThreadDispatch.ThreadWorkerMethod ( HackToCreateWmiGetEventSink ) ) ;
         disp.Start ( ) ;
 
-//      Thread thread = new Thread(new ThreadStart(HackToCreateWmiGetEventSink));
-//        thread.Start(); // TODO: What if this throws an exception
-//        thread.Join();
         return wmiGetEventSinkNew;
     }
 

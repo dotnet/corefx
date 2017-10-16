@@ -169,7 +169,6 @@ namespace System.Management
 
             lock (m_sinkCollection) 
             {
-                // TODO - the MemberwiseClone method should be used here
                 IDictionaryEnumerator sinkEnum = m_sinkCollection.GetEnumerator();
 
                 try 

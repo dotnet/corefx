@@ -2487,7 +2487,7 @@ namespace System.Management
                 // Ask it for the method parameters
                 status = wmiClass.GetMethod_(methodName, 0, out inParametersClass, out outParametersClass);
 
-                // bug#92427 - To ensure that all forms of invoke return the same error codes when
+                // To ensure that all forms of invoke return the same error codes when
                 // the method does not exist, we will map WBEM_E_NOT_FOUND to WBEM_E_METHOD_NOT_IMPLEMENTED.
                 if(status == (int)tag_WBEMSTATUS.WBEM_E_NOT_FOUND)
                     status = (int)tag_WBEMSTATUS.WBEM_E_METHOD_NOT_IMPLEMENTED;

@@ -3001,7 +3001,6 @@ namespace System.Management
 
 		}//BuildQuery
 
-		//TODO : Need to solidify this parsing....
 		/// <summary>
 		///  Parses the query string and sets the property values accordingly.
 		/// </summary>

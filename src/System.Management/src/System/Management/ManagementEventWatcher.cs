@@ -436,8 +436,7 @@ namespace System.Management
                             {
                                 //Convert results and put them in cache. Note that we may have timed out
                                 //in which case we might not have all the objects. If no object can be returned
-                                //we throw a timeout exception... - TODO: what should happen if there was a timeout
-                                //but at least some objects were returned ??
+                                //we throw a timeout exception.
                                 if (cachedCount == 0)
                                     ManagementException.ThrowWithExtendedInfo(ManagementStatus.Timedout);
 
@@ -657,12 +656,11 @@ namespace System.Management
                 this.isLocal = true;
             }
             
-            if(MTAHelper.IsNoContextMTA())  // Bug#110141 - Checking for MTA is not enough.  We need to make sure we are not in a COM+ Context
+            if(MTAHelper.IsNoContextMTA())
                 HackToCreateStubInMTA(this);
             else
             {
                 //
-                // [marioh, RAID: 111108]
                 // Ensure we are able to trap exceptions from worker thread.
                 //
                 ThreadDispatch disp = new ThreadDispatch ( new ThreadDispatch.ThreadWorkerMethodWithParam ( HackToCreateStubInMTA ) ) ;
@@ -718,32 +716,30 @@ namespace System.Management
                 Marshal.AddRef(pErrObj);
                 errObj = new IWbemClassObjectFreeThreaded(pErrObj);
             }
-#endif // TODO_ERROBJ_NEVER_USED
+#endif
 
             try 
             {
-
-
                 // Fire Stopped event
                 eventWatcher.FireStopped(new StoppedEventArgs(context, hResult));
 
                 //This handles cases in which WMI calls SetStatus to indicate a problem, for example
                 //a queue overflow due to slow client processing.
                 //Currently we just cancel the subscription in this case.
-                // BUG# 97657 - When you cancel a call with CancelAsyncCall, on Windows 2000,
+                // When you cancel a call with CancelAsyncCall, on Windows 2000,
                 // you get a SetStatus with WBEM_E_CALL_CANCELLED.  On Windows XP, you get
                 // a set status with WBEM_S_OPERATION_CANCELLED!!!
                 if (    hResult != (int)tag_WBEMSTATUS.WBEM_E_CALL_CANCELLED
                     && hResult != (int)tag_WBEMSTATUS.WBEM_S_OPERATION_CANCELLED)
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(Cancel2));// Cancel(); // BUG#118550 - On Win2k, we get a deadlock if we do a Cancel within a SetStatus
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(Cancel2)); // On Win2k, we get a deadlock if we do a Cancel within a SetStatus
             }
             catch
             {
             }
         }
 
-        // BUG#118550 - On Win2k, we get a deadlock if we do a Cancel within a SetStatus
-        // Instead of calling it from SetStatus, we use ThreadPoo.QueueUserWorkItem
+        // On Win2k, we get a deadlock if we do a Cancel within a SetStatus
+        // Instead of calling it from SetStatus, we use ThreadPool.QueueUserWorkItem
         void Cancel2(object o)
         {
             //

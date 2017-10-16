@@ -145,14 +145,11 @@ namespace System.Management
             {
                 if (isDisposed)
                     throw new ObjectDisposedException(name);
-                
-                
+
                 //
-                // [Whidbey RAID (marioh) : 27063]
-                // See bug for more detailed comment. We can not use foreach since it
-                // _always_ calls Dispose on the collection invalidating the IEnumWbemClassObject
-                // pointers.
-                // We fi this by doing a manual walk of the collection.
+                // We can not use foreach since it _always_ calls Dispose on the collection
+                // invalidating the IEnumWbemClassObject pointers.
+                // We prevent this by doing a manual walk of the collection.
                 //
                 int count = 0;
 
@@ -283,14 +280,13 @@ namespace System.Management
 
 
             //
-            // [Everett SP1 (marioh) : 149274]
-            // The crux of the problem with this bug is that we we do not clone the enumerator
-            // if its the first enumerator. If it is the first enumerator we pass the reference
+            // We do not clone the enumerator if its the first enumerator.
+            // If it is the first enumerator we pass the reference
             // to the enumerator implementation rather than a clone. If the enumerator is used 
             // from within a foreach statement in the client code, the foreach statement will
             // dec the ref count on the reference which also happens to be the reference to the
             // original enumerator causing subsequent uses of the collection to fail.
-            // The fix is to always clone the enumerator (assuming its a rewindable enumerator)
+            // To prevent this we always clone the enumerator (assuming its a rewindable enumerator)
             // to avoid invalidating the collection.
             //
             // If its a forward only enumerator we simply pass back the original enumerator (i.e.
@@ -323,12 +319,10 @@ namespace System.Management
 
                 if ((status & 0xfffff000) == 0x80041000)
                 {
-                    // BUGBUG : release callResult.
                     ManagementException.ThrowWithExtendedInfo((ManagementStatus)status);
                 }
                 else if ((status & 0x80000000) != 0)
                 {
-                    // BUGBUG : release callResult.
                     Marshal.ThrowExceptionForHR(status, WmiNetUtilsHelper.GetErrorInfo_f());
                 }
                 return new ManagementObjectEnumerator (this, enumWbemClone);
@@ -545,8 +539,6 @@ namespace System.Management
                         (int)tag_WBEM_TIMEOUT_TYPE.WBEM_INFINITE : (int)collectionObject.options.Timeout.TotalMilliseconds;
 
                     //Get the next [BLockSize] objects within the specified timeout
-                    // TODO - cannot use arrays of IWbemClassObject with a TLBIMP
-                    // generated wrapper
                     SecurityHandler securityHandler = collectionObject.scope.GetSecurityHandler();
 
                     //Because Interop doesn't support custom marshalling for arrays, we have to use
@@ -581,7 +573,6 @@ namespace System.Management
                     else
                     {
                         //If there was a timeout and no object can be returned we throw a timeout exception... 
-                        // - TODO: what should happen if there was a timeout but at least some objects were returned ??
                         if ((status == (int)tag_WBEMSTATUS.WBEM_S_TIMEDOUT) && (cachedCount == 0))
                             ManagementException.ThrowWithExtendedInfo((ManagementStatus)status);
 
@@ -633,7 +624,6 @@ namespace System.Management
                     } 
                     catch (COMException e) 
                     {
-                        // BUGBUG : securityHandler.Reset()?
                         ManagementException.ThrowWithExtendedInfo (e);
                     } 
                     finally 

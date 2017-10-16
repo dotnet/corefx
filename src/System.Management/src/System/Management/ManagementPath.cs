@@ -271,7 +271,6 @@ namespace System.Management
                 //For now we have to special-case the "root" namespace - 
                 //  this is because in the case of "root", the path parser cannot tell whether 
                 //  this is a namespace name or a class name
-                //TODO : fix this so that special-casing is not needed
                 if (String.Compare(path, "root", StringComparison.OrdinalIgnoreCase) == 0)
                     flags = flags | (uint) tag_WBEM_PATH_CREATE_FLAG.WBEMPATH_TREAT_SINGLE_IDENT_AS_NS;
 
@@ -298,11 +297,10 @@ namespace System.Management
 
             if (null != wbemPath)
             {
-                // TODO - due to a bug in the current WMI path
-                // parser, requesting the path from a parser which has
+                // Requesting the path from a parser which has
                 // been only given a relative path results in an incorrect
                 // value being returned (e.g. \\.\win32_logicaldisk). To work
-                // around this for now we check if there are any namespaces,
+                // around this we check if there are any namespaces,
                 // and if not ask for the relative path instead.
                 int flags = (int)tag_WBEM_GET_TEXT_FLAGS.WBEMPATH_GET_SERVER_TOO;
                 uint nCount = 0;
@@ -364,7 +362,7 @@ namespace System.Management
                         {
                             sbyte bSingleton = (setAsSingleton) ? (sbyte)(-1) : (sbyte)0;
                             status = keyList.MakeSingleton_(bSingleton);
-                            FireIdentifierChanged ();       // BUGBUG : RemoveAllKeys success?
+                            FireIdentifierChanged ();
                         }
                     }
                 }
@@ -792,11 +790,10 @@ namespace System.Management
 
             if (null != wbemPath)
             {
-                // TODO - due to a bug in the current WMI path
-                // parser, requesting the namespace path from a parser which has
+                // Requesting the namespace path from a parser which has
                 // been only given a relative path results in an incorrect
                 // value being returned (e.g. \\.\). To work
-                // around this for now we check if there are any namespaces,
+                // around this, check if there are any namespaces,
                 // and if not just return "".
                 uint nCount = 0;
                 int status = (int)ManagementStatus.NoError;
@@ -937,7 +934,7 @@ namespace System.Management
                     status = wmiPath.SetClassName_(value);
                 }
                 catch (COMException)
-                {       // BUGBUG : Change this?
+                {
                     throw new ArgumentOutOfRangeException ("value");
                 }
 

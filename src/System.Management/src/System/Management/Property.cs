@@ -8,7 +8,7 @@ using System.Globalization;
 
 namespace System.Management
 {
-    // Bug#808408 - We use this class to prevent the accidental returning of a boxed value type to a caller
+    // We use this class to prevent the accidental returning of a boxed value type to a caller
     // If we store a boxed value type in a private field, and return it to the caller through a public
     // property or method, the call can potentially change its value.  The GetSafeObject method does two things
     // 1) If the value is a primitive, we know that it will implement IConvertible.  IConvertible.ToType will
