@@ -139,7 +139,7 @@ namespace Microsoft.XmlSerializer.Generator
             bool hasDefault = defaultValue != null && defaultValue != DBNull.Value;
             if (hasDefault)
             {
-                WriteCheckDefault(source, defaultValue, nullable);
+                WriteCheckDefault(mapping, source, defaultValue, nullable);
                 Writer.WriteLine(" {");
                 Writer.Indent++;
             }
@@ -257,7 +257,7 @@ namespace Microsoft.XmlSerializer.Generator
                 }
                 else
                 {
-                    WriteCheckDefault(source, defaultValue, isNullable);
+                    WriteCheckDefault(mapping, source, defaultValue, isNullable);
                 }
                 Writer.WriteLine(" {");
                 Writer.Indent++;
@@ -1963,7 +1963,7 @@ namespace Microsoft.XmlSerializer.Generator
             Writer.WriteLine(");");
         }
 
-        private void WriteCheckDefault(string source, object value, bool isNullable)
+        private void WriteCheckDefault(TypeMapping mapping, string source, object value, bool isNullable)
         {
             Writer.Write("if (");
 
@@ -1983,7 +1983,8 @@ namespace Microsoft.XmlSerializer.Generator
             {
                 Writer.Write(source);
                 Writer.Write(" != ");
-                WriteValue(value);
+                Type type = Type.GetType(mapping.TypeDesc.Type.FullName);
+                WriteValue(type != null ? Convert.ChangeType(value, type) : value);
             }
             Writer.Write(")");
         }
