@@ -7,6 +7,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="System\Management\ManagementClassTests.cs" />
     <Compile Include="System\Management\ManagementObjectTests.cs" />
     <Compile Include="System\Management\SelectQueryTests.cs" />
   </ItemGroup>

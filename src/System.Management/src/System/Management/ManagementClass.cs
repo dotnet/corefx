@@ -9,32 +9,32 @@ using System.CodeDom;
 
 namespace System.Management
 {
-    /// <summary>
-    ///     <para>Defines the languages supported by the code generator.</para>
-    /// </summary>
-    public enum CodeLanguage
-    {
-        /// <summary>
-        ///    A value for generating C# code.
-        /// </summary>
-        CSharp,
-        /// <summary>
-        ///    <para>A value for generating JScript code.</para>
-        /// </summary>
-        JScript,
-        /// <summary>
-        ///    <para>A value for generating Visual Basic code.</para>
-        /// </summary>
-        VB,
-        /// <summary>
-        ///    <para>A value for generating Visual J# code.</para>
-        /// </summary>
-        VJSharp,
-        /// <summary>
-        ///    <para>A value for generating Managed C++ code.</para>
-        /// </summary>
-        Mcpp
-    };
+    ///// <summary>
+    /////     <para>Defines the languages supported by the code generator.</para>
+    ///// </summary>
+    //public enum CodeLanguage
+    //{
+    //    /// <summary>
+    //    ///    A value for generating C# code.
+    //    /// </summary>
+    //    CSharp,
+    //    /// <summary>
+    //    ///    <para>A value for generating JScript code.</para>
+    //    /// </summary>
+    //    JScript,
+    //    /// <summary>
+    //    ///    <para>A value for generating Visual Basic code.</para>
+    //    /// </summary>
+    //    VB,
+    //    /// <summary>
+    //    ///    <para>A value for generating Visual J# code.</para>
+    //    /// </summary>
+    //    VJSharp,
+    //    /// <summary>
+    //    ///    <para>A value for generating Managed C++ code.</para>
+    //    /// </summary>
+    //    Mcpp
+    //};
 
 	//CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//	
 	/// <summary>
@@ -1489,11 +1489,11 @@ namespace System.Management
 		/// </example>
 		public CodeTypeDeclaration GetStronglyTypedClassCode(bool includeSystemClassInClassDef, bool systemPropertyClass)
 		{
-			throw new PlatformNotSupportedException("TODO");
+			///throw new PlatformNotSupportedException("TODO");
 			// Ensure that the object is valid
-			///Get();
-			///ManagementClassGenerator classGen = new ManagementClassGenerator(this);
-			///return classGen.GenerateCode(includeSystemClassInClassDef,systemPropertyClass);
+			Get();
+			ManagementClassGenerator classGen = new ManagementClassGenerator(this);
+			return classGen.GenerateCode(includeSystemClassInClassDef,systemPropertyClass);
 		}
 		
 		
@@ -1518,11 +1518,10 @@ namespace System.Management
 		/// </example>
 		public bool GetStronglyTypedClassCode(CodeLanguage lang, String filePath,String classNamespace)
 		{
-			throw new PlatformNotSupportedException("TODO");
 			// Ensure that the object is valid
-			///Get();
-			///ManagementClassGenerator classGen = new ManagementClassGenerator(this);
-			///return classGen.GenerateCode(lang , filePath,classNamespace);
+			Get();
+			ManagementClassGenerator classGen = new ManagementClassGenerator(this);
+			return classGen.GenerateCode(lang , filePath,classNamespace);
 		}
 
 	}//ManagementClass
