@@ -37,8 +37,7 @@ namespace System.IO.Compression
         /// developers should prefer using the constructor
         /// <code>public ZLibException(string message, string zlibErrorContext, ZLibNative.ErrorCode zlibErrorCode, string zlibErrorMessage)</code>.
         /// </summary>
-        /// <param name="message">The error message that explains the reason for the exception.</param>
-        public ZLibException(string message) : base(message) { }
+        public ZLibException() { }
 
         /// <summary>
         /// This constructor is provided in compliance with common NetFx design patterns;
