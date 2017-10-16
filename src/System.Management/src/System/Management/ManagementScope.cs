@@ -301,8 +301,12 @@ namespace System.Management
         {
             IntPtr procAddr = IntPtr.Zero;
             IntPtr loadLibrary = IntPtr.Zero;
-            string installPath = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
-            string wminet_utilsPath = Path.Combine(installPath, "wminet_utils.dll");
+            string wminet_utilsPath = Path.Combine(
+                Environment.GetEnvironmentVariable("SystemRoot"),
+                "Microsoft.NET",
+                Environment.Is64BitProcess ? "Framework64" : "Framework",
+                "v4.0.30319",
+                "wminet_utils.dll");
 
             loadLibrary =  Interop.Kernel32.LoadLibrary(wminet_utilsPath);
             if( loadLibrary != IntPtr.Zero)
@@ -618,9 +622,6 @@ namespace System.Management
         internal bool IsDefaulted; //used to tell whether the current scope has been created from the default
         //scope or not - this information is used to tell whether it can be overridden
         //when a new path is set or not.
-
-        [ResourceExposure( ResourceScope.None),DllImport("rpcrt4.dll")]
-        static extern int RpcMgmtEnableIdleCleanup ( );        
 
         //Fires IdentifierChanged event
         private void FireIdentifierChanged()
