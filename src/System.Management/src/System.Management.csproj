@@ -57,20 +57,9 @@
     <Compile Include="System\Management\InteropClasses\WMIInterop.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="Microsoft.Win32.Registry" />
     <Reference Include="System.CodeDom" />
-    <Reference Include="System.Collections" />
-    <Reference Include="System.Collections.NonGeneric" />
-    <Reference Include="System.ComponentModel.TypeConverter" />
-    <Reference Include="System.IO.FileSystem.AccessControl" />
-    <Reference Include="System.Resources.ResourceManager" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Runtime.InteropServices" />
-    <Reference Include="System.Security.AccessControl" />
     <Reference Include="System.Security.Permissions" />
-    <Reference Include="System.Security.Principal.Windows" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
