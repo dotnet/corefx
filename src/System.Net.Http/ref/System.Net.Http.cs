@@ -165,7 +165,6 @@ namespace System.Net.Http
         public HttpRequestException() { }
         public HttpRequestException(string message) { }
         public HttpRequestException(string message, System.Exception inner) { }
-        protected HttpRequestException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public partial class HttpRequestMessage : System.IDisposable
     {
