@@ -59,7 +59,7 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        public SyndicationTextInput TextInput
+        internal SyndicationTextInput TextInput
         {
             get
             {
@@ -440,6 +440,16 @@ namespace System.ServiceModel.Syndication
         public Rss20FeedFormatter GetRss20Formatter(bool serializeExtensionsAsAtom)
         {
             return new Rss20FeedFormatter(this, serializeExtensionsAsAtom);
+        }
+
+        public void SaveAsAtom10(XmlWriter writer)
+        {
+            SaveAsAtom10Async(writer, CancellationToken.None).GetAwaiter().GetResult();
+        }
+
+        public void SaveAsRss20(XmlWriter writer)
+        {
+            SaveAsRss20Async(writer, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public Task SaveAsAtom10Async(XmlWriter writer, CancellationToken ct)

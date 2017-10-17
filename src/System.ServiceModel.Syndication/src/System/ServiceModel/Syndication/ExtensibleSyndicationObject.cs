@@ -104,12 +104,12 @@ namespace System.ServiceModel.Syndication
 
         internal void WriteAttributeExtensions(XmlWriter writer)
         {
-            WriteAttributeExtensionsAsync(writer).Wait();
+            WriteAttributeExtensionsAsync(writer).GetAwaiter().GetResult();
         }
 
         internal void WriteElementExtensions(XmlWriter writer)
         {
-            WriteElementExtensionsAsync(writer).Wait();
+            WriteElementExtensionsAsync(writer).GetAwaiter().GetResult();
         }
 
         internal async Task WriteAttributeExtensionsAsync(XmlWriter writer)

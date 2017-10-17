@@ -158,12 +158,12 @@ namespace System.ServiceModel.Syndication
 
         public override void ReadFrom(XmlReader reader)
         {
-            ReadFromAsync(reader, CancellationToken.None).Wait();
+            ReadFromAsync(reader, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public override void WriteTo(XmlWriter writer)
         {
-            WriteToAsync(writer, CancellationToken.None).Wait();
+            WriteToAsync(writer, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public override async Task WriteToAsync(XmlWriter writer, CancellationToken ct)
@@ -346,7 +346,7 @@ namespace System.ServiceModel.Syndication
 
                         if (notHandled)
                         {
-                            bool parsedExtension = _serializeExtensionsAsAtom && _atomSerializer.TryParseItemElementFromAsync(reader, result).Result;
+                            bool parsedExtension = _serializeExtensionsAsAtom && _atomSerializer.TryParseItemElementFromAsync(reader, result).GetAwaiter().GetResult();
 
                             if (!parsedExtension)
                             {
@@ -414,7 +414,7 @@ namespace System.ServiceModel.Syndication
 
         protected virtual SyndicationItem ReadItem(XmlReader reader, SyndicationFeed feed)
         {
-            return ReadItemAsync(reader, feed).Result;
+            return ReadItemAsync(reader, feed).GetAwaiter().GetResult();
         }
 
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification = "The out parameter is needed to enable implementations that read in items from the stream on demand")]
@@ -456,12 +456,12 @@ namespace System.ServiceModel.Syndication
 
         protected virtual void WriteItem(XmlWriter writer, SyndicationItem item, Uri feedBaseUri)
         {
-            WriteItemAsync(writer, item, feedBaseUri).Wait();
+            WriteItemAsync(writer, item, feedBaseUri).GetAwaiter().GetResult();
         }
 
         protected virtual void WriteItems(XmlWriter writer, IEnumerable<SyndicationItem> items, Uri feedBaseUri)
         {
-            WriteItemsAsync(writer, items, feedBaseUri).Wait();
+            WriteItemsAsync(writer, items, feedBaseUri).GetAwaiter().GetResult();
         }
 
         protected virtual async Task WriteItemAsync(XmlWriter writer, SyndicationItem item, Uri feedBaseUri)

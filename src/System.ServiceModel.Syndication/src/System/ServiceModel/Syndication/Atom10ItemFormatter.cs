@@ -102,12 +102,12 @@ namespace System.ServiceModel.Syndication
 
         public override void ReadFrom(XmlReader reader)
         {
-            ReadFromAsync(reader).Wait();
+            ReadFromAsync(reader).GetAwaiter().GetResult();
         }
 
         public override void WriteTo(XmlWriter writer)
         {
-            WriteToAsync(writer).Wait();
+            WriteToAsync(writer).GetAwaiter().GetResult();
         }
 
         public override Task ReadFromAsync(XmlReader reader)

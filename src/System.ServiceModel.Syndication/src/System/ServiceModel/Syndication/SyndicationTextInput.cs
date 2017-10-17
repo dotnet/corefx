@@ -4,7 +4,7 @@
 
 namespace System.ServiceModel.Syndication
 {
-    public class SyndicationTextInput
+    class SyndicationTextInput
     {
         public string Description;
         public string title;
