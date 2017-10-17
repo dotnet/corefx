@@ -129,6 +129,16 @@ namespace System.ServiceModel.Syndication
             WriteFeedAsync(writer).Wait();
         }
 
+        public override void ReadFrom(XmlReader reader)
+        {
+            ReadFromAsync(reader, CancellationToken.None).Wait();
+        }
+
+        public override void WriteTo(XmlWriter writer)
+        {
+            WriteToAsync(writer, CancellationToken.None).Wait();
+        }
+
         public override async Task ReadFromAsync(XmlReader reader, CancellationToken ct)
         {
             if (!CanRead(reader))
@@ -553,6 +563,19 @@ namespace System.ServiceModel.Syndication
             return SyndicationFeedFormatter.CreateFeedInstance(_feedType);
         }
 
+        protected virtual SyndicationItem ReadItem(XmlReader reader, SyndicationFeed feed)
+        {
+            return ReadItemAsync(reader, feed).Result;
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification = "The out parameter is needed to enable implementations that read in items from the stream on demand")]
+        protected virtual IEnumerable<SyndicationItem> ReadItems(XmlReader reader, SyndicationFeed feed, out bool areAllItemsRead)
+        {
+            IEnumerable<SyndicationItem> result = ReadItemsAsync(reader, feed).Result;
+            areAllItemsRead = true;
+            return result;
+        }
+
         protected virtual async Task<SyndicationItem> ReadItemAsync(XmlReader reader, SyndicationFeed feed)
         {
             if (feed == null)
@@ -593,6 +616,16 @@ namespace System.ServiceModel.Syndication
             }
 
             return items;
+        }
+
+        protected virtual void WriteItem(XmlWriter writer, SyndicationItem item, Uri feedBaseUri)
+        {
+            WriteItemAsync(writer, item, feedBaseUri).Wait();
+        }
+
+        protected virtual void WriteItems(XmlWriter writer, IEnumerable<SyndicationItem> items, Uri feedBaseUri)
+        {
+            WriteItemsAsync(writer, items, feedBaseUri).Wait();
         }
 
         protected virtual async Task WriteItemAsync(XmlWriter writer, SyndicationItem item, Uri feedBaseUri)
