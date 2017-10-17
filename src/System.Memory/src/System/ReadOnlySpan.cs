@@ -82,7 +82,6 @@ namespace System
         {
             if (SpanHelpers.IsReferenceOrContainsReferences<T>())
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
-            
             if (length < 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
