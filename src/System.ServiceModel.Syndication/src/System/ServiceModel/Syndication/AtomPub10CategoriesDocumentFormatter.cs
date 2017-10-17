@@ -6,13 +6,15 @@
 namespace System.ServiceModel.Syndication
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using System.Xml;
+    using System.Xml.Schema;
     using System.Xml.Serialization;
 
     [XmlRoot(ElementName = App10Constants.Categories, Namespace = App10Constants.Namespace)]
-    public class AtomPub10CategoriesDocumentFormatter : CategoriesDocumentFormatter
+    public class AtomPub10CategoriesDocumentFormatter : CategoriesDocumentFormatter, IXmlSerializable
     {
         private Type _inlineDocumentType;
         private int _maxExtensionSize;
@@ -90,29 +92,36 @@ namespace System.ServiceModel.Syndication
             return reader.IsStartElementAsync(App10Constants.Categories, App10Constants.Namespace);
         }
 
-        Task ReadXmlAsync(XmlReader reader)
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        void IXmlSerializable.ReadXml(XmlReader reader)
         {
             if (reader == null)
             {
                 throw new ArgumentNullException(nameof(reader));
             }
 
-            return ReadDocumentAsync(reader);
+            ReadDocumentAsync(XmlReaderWrapper.CreateFromReader(reader)).GetAwaiter().GetResult();
         }
 
-        private Task WriteXmlAsync(XmlWriter writer)
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        void IXmlSerializable.WriteXml(XmlWriter writer)
         {
             if (writer == null)
             {
                 throw new ArgumentNullException(nameof(writer));
             }
-
             if (Document == null)
             {
                 throw new InvalidOperationException(SR.DocumentFormatterDoesNotHaveDocument);
             }
 
-            return WriteDocumentAsync(writer);
+            WriteDocumentAsync(XmlWriterWrapper.CreateFromWriter(writer)).GetAwaiter().GetResult();
         }
 
         public override void ReadFrom(XmlReader reader)

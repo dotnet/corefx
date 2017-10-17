@@ -18,7 +18,7 @@ namespace System.ServiceModel.Syndication
 
 
     [XmlRoot(ElementName = Rss20Constants.RssTag, Namespace = Rss20Constants.Rss20Namespace)]
-    public class Rss20FeedFormatter : SyndicationFeedFormatter
+    public class Rss20FeedFormatter : SyndicationFeedFormatter, IXmlSerializable
     {
         private static readonly XmlQualifiedName s_rss20Domain = new XmlQualifiedName(Rss20Constants.DomainTag, string.Empty);
         private static readonly XmlQualifiedName s_rss20Length = new XmlQualifiedName(Rss20Constants.LengthTag, string.Empty);
@@ -134,6 +134,35 @@ namespace System.ServiceModel.Syndication
 
             return reader.IsStartElement(Rss20Constants.RssTag, Rss20Constants.Rss20Namespace);
         }
+
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            ReadFeedAsync(reader).GetAwaiter().GetResult();
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            WriteFeedAsync(writer).GetAwaiter().GetResult();
+        }
+
 
         public override Task ReadFromAsync(XmlReader reader, CancellationToken ct)
         {
@@ -484,6 +513,12 @@ namespace System.ServiceModel.Syndication
             {
                 await WriteItemAsync(writer, item, feedBaseUri);
             }
+        }
+
+        private Task ReadFeedAsync(XmlReader reader)
+        {
+            SetFeed(CreateFeedInstance());
+            return ReadXmlAsync(XmlReaderWrapper.CreateFromReader(reader), Feed);
         }
 
         private static string NormalizeTimeZone(string rfc822TimeZone, out bool isUtc)

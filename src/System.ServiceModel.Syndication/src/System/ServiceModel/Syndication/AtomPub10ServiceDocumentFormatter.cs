@@ -16,7 +16,7 @@ namespace System.ServiceModel.Syndication
     internal delegate ReferencedCategoriesDocument CreateReferencedCategoriesDelegate();
 
     [XmlRoot(ElementName = App10Constants.Service, Namespace = App10Constants.Namespace)]
-    public class AtomPub10ServiceDocumentFormatter : ServiceDocumentFormatter
+    public class AtomPub10ServiceDocumentFormatter : ServiceDocumentFormatter, IXmlSerializable
     {
         private Type _documentType;
         private int _maxExtensionSize;
@@ -71,14 +71,36 @@ namespace System.ServiceModel.Syndication
             return reader.IsStartElementAsync(App10Constants.Service, App10Constants.Namespace);
         }
 
-        Task ReadXml(XmlReader reader)
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        void IXmlSerializable.ReadXml(XmlReader reader)
         {
             if (reader == null)
             {
                 throw new ArgumentNullException(nameof(reader));
             }
 
-            return ReadDocumentAsync(reader);
+            ReadDocumentAsync(XmlReaderWrapper.CreateFromReader(reader)).GetAwaiter().GetResult();
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+            if (this.Document == null)
+            {
+                throw new InvalidOperationException(SR.DocumentFormatterDoesNotHaveDocument);
+            }
+
+            WriteDocumentAsync(XmlWriterWrapper.CreateFromWriter(writer)).GetAwaiter().GetResult();
         }
 
         public override void ReadFrom(XmlReader reader)
