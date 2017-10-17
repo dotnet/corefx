@@ -855,10 +855,8 @@ namespace System.Drawing
         
         static internal unsafe void ZeroMemory(byte* ptr, ulong length)
         {
-            for (ulong i = 0; i < length; i++)
-            {
-                *ptr++ = 0;
-            }
+            byte* end = ptr + length;
+            while (ptr != end) *ptr++ = 0;
         }
 
         public const int ERROR_ACCESS_DENIED = 5;
