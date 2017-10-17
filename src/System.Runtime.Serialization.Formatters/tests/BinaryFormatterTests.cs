@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
@@ -74,7 +75,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
             // SqlException isn't deserializable from Desktop --> Core.
             // Therefore we remove the second blob which is the one from Desktop.
-            if (!PlatformDetection.IsFullFramework && (obj is SqlException || obj is ReflectionTypeLoadException))
+            if (!PlatformDetection.IsFullFramework && (obj is SqlException || obj is ReflectionTypeLoadException || obj is LicenseException))
             {
                 var tmpList = new List<string>(blobs);
                 tmpList.RemoveAt(1);

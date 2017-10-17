@@ -73,8 +73,8 @@ namespace System.ComponentModel
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
-            info.AddValue("type", null);
-            info.AddValue("instance", null);
+            info.AddValue("type", null); // Type is not serializable.
+            info.AddValue("instance", _instance);
         }
     }
 }
