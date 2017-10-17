@@ -138,8 +138,11 @@ namespace System.IO
                 // normalize search criteria
                 _searchCriteria = GetNormalizedSearchCriteria(fullSearchString, _normalizedSearchPath);
 
-                // fix up user path
-                string searchPatternDirName = Path.GetDirectoryName(normalizedSearchPattern);
+                // We allow for user search patterns to include directory separators. If it does,
+                // move the directory part out of the search pattern.
+                string searchPatternDirName = PathHelpers.IsEffectivelyEmpty(normalizedSearchPattern)
+                        ? null
+                        : Path.GetDirectoryName(normalizedSearchPattern);
                 _userPath = string.IsNullOrEmpty(searchPatternDirName) ?
                     originalUserPath :
                     Path.Combine(originalUserPath, searchPatternDirName);

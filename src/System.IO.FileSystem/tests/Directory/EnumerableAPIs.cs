@@ -82,16 +82,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void Clone_Enumerator_Trimmed_SearchPattern()
-        {
-            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-            var enumerator1 = Directory.EnumerateFileSystemEntries(testDir.FullName, ((char)0xA).ToString());
-            var enumerator2 = enumerator1;
-            Assert.Empty(enumerator1.ToArray());
-            Assert.Empty(enumerator2.ToArray());
-        }
-
-        [Fact]
         public void Delete_Directory_After_Creating_Enumerable()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
