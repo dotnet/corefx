@@ -182,20 +182,5 @@ namespace System
         NotEqual: // Workaround for https://github.com/dotnet/coreclr/issues/13549
             return false;
         }
-
-        public static void ValidateTypeIsBlittable<T>()
-        {
-#if FEATURE_FASTSPAN
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
-            }
-#else
-            if (IsReferenceOrContainsReferences<T>())
-            {
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
-            }
-#endif
-        }
     }
 }
