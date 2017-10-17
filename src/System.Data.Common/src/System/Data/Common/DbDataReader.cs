@@ -56,7 +56,7 @@ namespace System.Data.Common
 
         public virtual DataTable GetSchemaTable()
         {
-            throw new NotSupportedException();
+            throw ADP.MethodNotImplemented();
         }
 
         public abstract bool GetBoolean(int ordinal);

@@ -331,6 +331,11 @@ namespace System.Data.Common
         //
         // DbConnection
         //
+        internal static Exception MethodNotImplemented([CallerMemberName] string methodName = "")
+        {
+            return NotImplemented.ByDesignWithMessage(methodName);
+        }
+
         private static string ConnectionStateMsg(ConnectionState state)
         {
             switch (state)
