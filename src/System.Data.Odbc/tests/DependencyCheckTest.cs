@@ -8,6 +8,7 @@ namespace System.Data.Odbc.Tests
 {
     public class DependencyCheckTest
     {
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.OdbcIsAvailable), nameof(Helpers.IsWindowsServerCore))] // https://github.com/dotnet/corefx/issues/20388
         [ConditionalFact(Helpers.OdbcNotAvailable)]
         public void OdbcConnection_OpenWhenOdbcNotInstalled_ThrowsException()
         {
