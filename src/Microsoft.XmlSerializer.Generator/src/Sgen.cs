@@ -79,7 +79,7 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "type"))
                     {
-                        if(value != string.Empty)
+                        if (value != string.Empty)
                         {
                             string[] typelist = value.Split(';');
                             foreach (var type in typelist)
