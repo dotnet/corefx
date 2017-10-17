@@ -148,6 +148,11 @@
       <Path>$(MSBuildThisFileDirectory)BuildToolsVersion.txt</Path>
       <PackageId>Microsoft.DotNet.BuildTools</PackageId>
     </UpdateStep>
+    <XmlUpdateStep Include="BuildTools">
+       <Path>$(MSBuildThisFileFullPath)</Path>
+       <ElementName>XunitNetcoreExtensionsVersion</ElementName>
+       <PackageId>Microsoft.xunit.netcore.extensions</PackageId>
+     </XmlUpdateStep>
   </ItemGroup>
 
   <PropertyGroup>
