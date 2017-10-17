@@ -36,6 +36,8 @@ namespace System.ServiceModel.Syndication
         { get; }
 
         public abstract bool CanRead(XmlReader reader);
+        public abstract void ReadFrom(System.Xml.XmlReader reader);
+        public abstract void WriteTo(System.Xml.XmlWriter writer);
         public abstract Task ReadFromAsync(XmlReader reader);
         public abstract Task WriteToAsync(XmlWriter writer);
 

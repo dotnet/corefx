@@ -81,6 +81,16 @@ namespace System.ServiceModel.Syndication
             return ReadDocumentAsync(reader);
         }
 
+        public override void ReadFrom(XmlReader reader)
+        {
+            ReadFromAsync(reader).GetAwaiter().GetResult();
+        }
+
+        public override void WriteTo(XmlWriter writer)
+        {
+            WriteToAsync(writer).GetAwaiter().GetResult();
+        }
+
         private Task WriteXml(XmlWriter writer)
         {
             if (writer == null)

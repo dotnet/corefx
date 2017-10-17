@@ -10,6 +10,7 @@ namespace System.ServiceModel.Syndication
     using System.Threading.Tasks;
     using System.Xml;
 
+    [DataContract]
     public abstract class CategoriesDocumentFormatter
     {
         private CategoriesDocument _document;
@@ -35,8 +36,10 @@ namespace System.ServiceModel.Syndication
         { get; }
 
         public abstract bool CanRead(XmlReader reader);
+        public abstract void ReadFrom(XmlReader reader);
+        public abstract void WriteTo(XmlWriter writer);
         public abstract Task ReadFromAsync(XmlReader reader);
-        public abstract Task WriteTo(XmlWriter writer);
+        public abstract Task WriteToAsync(XmlWriter writer);
 
         protected virtual InlineCategoriesDocument CreateInlineCategoriesDocument()
         {

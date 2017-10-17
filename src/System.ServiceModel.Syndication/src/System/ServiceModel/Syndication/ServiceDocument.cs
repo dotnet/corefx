@@ -68,6 +68,17 @@ namespace System.ServiceModel.Syndication
             }
         }
 
+        public static ServiceDocument Load(XmlReader reader)
+        {
+            return Load<ServiceDocument>(reader);
+        }
+
+        public static TServiceDocument Load<TServiceDocument>(XmlReader reader)
+            where TServiceDocument : ServiceDocument, new()
+        {
+            return LoadAsync<TServiceDocument>(reader).GetAwaiter().GetResult();
+        }
+
         public static async Task<TServiceDocument> LoadAsync<TServiceDocument>(XmlReader reader)
             where TServiceDocument : ServiceDocument, new()
         {
@@ -81,7 +92,12 @@ namespace System.ServiceModel.Syndication
             return new AtomPub10ServiceDocumentFormatter(this);
         }
 
-        public Task Save(XmlWriter writer)
+        public void Save(XmlWriter writer)
+        {
+            SaveAsync(writer).GetAwaiter().GetResult();
+        }
+
+        public Task SaveAsync(XmlWriter writer)
         {
             return new AtomPub10ServiceDocumentFormatter(this).WriteToAsync(writer);
         }

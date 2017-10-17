@@ -115,6 +115,16 @@ namespace System.ServiceModel.Syndication
             return WriteDocumentAsync(writer);
         }
 
+        public override void ReadFrom(XmlReader reader)
+        {
+            ReadFromAsync(reader).GetAwaiter().GetResult();
+        }
+
+        public override void WriteTo(XmlWriter writer)
+        {
+            WriteToAsync(writer).GetAwaiter().GetResult();
+        }
+
         public override async Task ReadFromAsync(XmlReader reader)
         {
             if (reader == null)
@@ -130,7 +140,7 @@ namespace System.ServiceModel.Syndication
             await ReadDocumentAsync(XmlReaderWrapper.CreateFromReader(reader));
         }
 
-        public override async Task WriteTo(XmlWriter writer)
+        public override async Task WriteToAsync(XmlWriter writer)
         {
             if (writer == null)
             {

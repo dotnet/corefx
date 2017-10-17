@@ -71,8 +71,10 @@ namespace System.ServiceModel.Syndication
         public override bool CanRead(System.Xml.XmlReader reader) { throw null; }
         protected override System.ServiceModel.Syndication.InlineCategoriesDocument CreateInlineCategoriesDocument() { throw null; }
         protected override System.ServiceModel.Syndication.ReferencedCategoriesDocument CreateReferencedCategoriesDocument() { throw null; }
+        public override void ReadFrom(System.Xml.XmlReader reader) { }
         public override System.Threading.Tasks.Task ReadFromAsync(System.Xml.XmlReader reader) { throw null; }
-        public override System.Threading.Tasks.Task WriteTo(System.Xml.XmlWriter writer) { throw null; }
+        public override void WriteTo(System.Xml.XmlWriter writer) { }
+        public override System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer) { throw null; }
     }
     public partial class AtomPub10ServiceDocumentFormatter : System.ServiceModel.Syndication.ServiceDocumentFormatter
     {
@@ -82,7 +84,9 @@ namespace System.ServiceModel.Syndication
         public override string Version { get { throw null; } }
         public override bool CanRead(System.Xml.XmlReader reader) { throw null; }
         protected override System.ServiceModel.Syndication.ServiceDocument CreateDocumentInstance() { throw null; }
+        public override void ReadFrom(System.Xml.XmlReader reader) { }
         public override System.Threading.Tasks.Task ReadFromAsync(System.Xml.XmlReader reader) { throw null; }
+        public override void WriteTo(System.Xml.XmlWriter writer) { }
         public override System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer) { throw null; }
     }
     public partial class AtomPub10ServiceDocumentFormatter<TServiceDocument> : System.ServiceModel.Syndication.AtomPub10ServiceDocumentFormatter where TServiceDocument : System.ServiceModel.Syndication.ServiceDocument, new()
@@ -102,6 +106,7 @@ namespace System.ServiceModel.Syndication
         public static System.ServiceModel.Syndication.InlineCategoriesDocument Create(System.Collections.ObjectModel.Collection<System.ServiceModel.Syndication.SyndicationCategory> categories, bool isFixed, string scheme) { throw null; }
         public static System.ServiceModel.Syndication.ReferencedCategoriesDocument Create(System.Uri linkToCategoriesDocument) { throw null; }
         public System.ServiceModel.Syndication.CategoriesDocumentFormatter GetFormatter() { throw null; }
+        public static System.ServiceModel.Syndication.CategoriesDocument Load(System.Xml.XmlReader reader) { throw null; }
         public static System.Threading.Tasks.Task<System.ServiceModel.Syndication.CategoriesDocument> LoadAsync(System.Xml.XmlReader reader) { throw null; }
         public void Save(System.Xml.XmlWriter writer) { }
         protected internal virtual bool TryParseAttribute(string name, string ns, string value, string version) { throw null; }
@@ -111,6 +116,7 @@ namespace System.ServiceModel.Syndication
         protected internal virtual void WriteElementExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, string version) { throw null; }
     }
+    [System.Runtime.Serialization.DataContractAttribute]
     public abstract partial class CategoriesDocumentFormatter
     {
         protected CategoriesDocumentFormatter() { }
@@ -120,9 +126,11 @@ namespace System.ServiceModel.Syndication
         public abstract bool CanRead(System.Xml.XmlReader reader);
         protected virtual System.ServiceModel.Syndication.InlineCategoriesDocument CreateInlineCategoriesDocument() { throw null; }
         protected virtual System.ServiceModel.Syndication.ReferencedCategoriesDocument CreateReferencedCategoriesDocument() { throw null; }
+        public abstract void ReadFrom(System.Xml.XmlReader reader);
         public abstract System.Threading.Tasks.Task ReadFromAsync(System.Xml.XmlReader reader);
         protected virtual void SetDocument(System.ServiceModel.Syndication.CategoriesDocument document) { }
-        public abstract System.Threading.Tasks.Task WriteTo(System.Xml.XmlWriter writer);
+        public abstract void WriteTo(System.Xml.XmlWriter writer);
+        public abstract System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer);
     }
     public partial class InlineCategoriesDocument : System.ServiceModel.Syndication.CategoriesDocument
     {
@@ -233,8 +241,11 @@ namespace System.ServiceModel.Syndication
         public System.Collections.ObjectModel.Collection<System.ServiceModel.Syndication.Workspace> Workspaces { get { throw null; } }
         protected internal virtual System.ServiceModel.Syndication.Workspace CreateWorkspace() { throw null; }
         public System.ServiceModel.Syndication.ServiceDocumentFormatter GetFormatter() { throw null; }
+        public static System.ServiceModel.Syndication.ServiceDocument Load(System.Xml.XmlReader reader) { throw null; }
         public static System.Threading.Tasks.Task<TServiceDocument> LoadAsync<TServiceDocument>(System.Xml.XmlReader reader) where TServiceDocument : System.ServiceModel.Syndication.ServiceDocument, new() { throw null; }
-        public System.Threading.Tasks.Task Save(System.Xml.XmlWriter writer) { throw null; }
+        public static TServiceDocument Load<TServiceDocument>(System.Xml.XmlReader reader) where TServiceDocument : System.ServiceModel.Syndication.ServiceDocument, new() { throw null; }
+        public void Save(System.Xml.XmlWriter writer) { }
+        public System.Threading.Tasks.Task SaveAsync(System.Xml.XmlWriter writer) { throw null; }
         protected internal virtual bool TryParseAttribute(string name, string ns, string value, string version) { throw null; }
         protected internal virtual bool TryParseElement(System.Xml.XmlReader reader, string version) { throw null; }
         protected internal virtual void WriteAttributeExtensions(System.Xml.XmlWriter writer, string version) { }
@@ -260,6 +271,7 @@ namespace System.ServiceModel.Syndication
         protected static void LoadElementExtensions(System.Xml.XmlReader reader, System.ServiceModel.Syndication.ResourceCollectionInfo collection, int maxExtensionSize) { }
         protected static void LoadElementExtensions(System.Xml.XmlReader reader, System.ServiceModel.Syndication.ServiceDocument document, int maxExtensionSize) { }
         protected static void LoadElementExtensions(System.Xml.XmlReader reader, System.ServiceModel.Syndication.Workspace workspace, int maxExtensionSize) { }
+        public abstract void ReadFrom(System.Xml.XmlReader reader);
         public abstract System.Threading.Tasks.Task ReadFromAsync(System.Xml.XmlReader reader);
         protected virtual void SetDocument(System.ServiceModel.Syndication.ServiceDocument document) { }
         protected static bool TryParseAttribute(string name, string ns, string value, System.ServiceModel.Syndication.CategoriesDocument categories, string version) { throw null; }
@@ -286,6 +298,7 @@ namespace System.ServiceModel.Syndication
         protected static System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.ResourceCollectionInfo collection, string version) { throw null; }
         protected static System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.ServiceDocument document, string version) { throw null; }
         protected static System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.Workspace workspace, string version) { throw null; }
+        public abstract void WriteTo(System.Xml.XmlWriter writer);
         public abstract System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer);
     }
     public partial class SyndicationCategory
@@ -336,10 +349,15 @@ namespace System.ServiceModel.Syndication
         public SyndicationElementExtension(System.Xml.XmlReader xmlReader) { }
         public string OuterName { get { throw null; } }
         public string OuterNamespace { get { throw null; } }
-        public System.Threading.Tasks.Task<TExtension> GetObject<TExtension>() { throw null; }
-        public System.Threading.Tasks.Task<TExtension> GetObject<TExtension>(System.Runtime.Serialization.XmlObjectSerializer serializer) { throw null; }
-        public System.Threading.Tasks.Task<TExtension> GetObject<TExtension>(System.Xml.Serialization.XmlSerializer serializer) { throw null; }
+        public System.Threading.Tasks.Task<TExtension> GetObjectAsync<TExtension>() { throw null; }
+        public System.Threading.Tasks.Task<TExtension> GetObjectAsync<TExtension>(System.Runtime.Serialization.XmlObjectSerializer serializer) { throw null; }
+        public System.Threading.Tasks.Task<TExtension> GetObjectAsync<TExtension>(System.Xml.Serialization.XmlSerializer serializer) { throw null; }
+        public TExtension GetObject<TExtension>() { throw null; }
+        public TExtension GetObject<TExtension>(System.Runtime.Serialization.XmlObjectSerializer serializer) { throw null; }
+        public TExtension GetObject<TExtension>(System.Xml.Serialization.XmlSerializer serializer) { throw null; }
+        public System.Xml.XmlReader GetReader() { throw null; }
         public System.Threading.Tasks.Task<System.Xml.XmlReader> GetReaderAsync() { throw null; }
+        public void WriteTo(System.Xml.XmlWriter writer) { }
         public System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer) { throw null; }
     }
     public sealed partial class SyndicationElementExtensionCollection : System.Collections.ObjectModel.Collection<System.ServiceModel.Syndication.SyndicationElementExtension>
@@ -350,13 +368,17 @@ namespace System.ServiceModel.Syndication
         public void Add(object xmlSerializerExtension, System.Xml.Serialization.XmlSerializer serializer) { }
         public void Add(string outerName, string outerNamespace, object dataContractExtension) { }
         public void Add(string outerName, string outerNamespace, object dataContractExtension, System.Runtime.Serialization.XmlObjectSerializer dataContractSerializer) { }
-        public void Add(System.Xml.XmlReader reader) { }
+        public void Add(System.Xml.XmlReader xmlReader) { }
         protected override void ClearItems() { }
-        public System.Threading.Tasks.Task<System.Xml.XmlReader> GetReaderAtElementExtensions() { throw null; }
+        public System.Xml.XmlReader GetReaderAtElementExtensions() { throw null; }
+        public System.Threading.Tasks.Task<System.Xml.XmlReader> GetReaderAtElementExtensionsAsync() { throw null; }
         protected override void InsertItem(int index, System.ServiceModel.Syndication.SyndicationElementExtension item) { }
-        public System.Threading.Tasks.Task<System.Collections.ObjectModel.Collection<TExtension>> ReadElementExtensions<TExtension>(string extensionName, string extensionNamespace) { throw null; }
-        public System.Threading.Tasks.Task<System.Collections.ObjectModel.Collection<TExtension>> ReadElementExtensions<TExtension>(string extensionName, string extensionNamespace, System.Runtime.Serialization.XmlObjectSerializer serializer) { throw null; }
-        public System.Threading.Tasks.Task<System.Collections.ObjectModel.Collection<TExtension>> ReadElementExtensions<TExtension>(string extensionName, string extensionNamespace, System.Xml.Serialization.XmlSerializer serializer) { throw null; }
+        public System.Threading.Tasks.Task<System.Collections.ObjectModel.Collection<TExtension>> ReadElementExtensionsAsync<TExtension>(string extensionName, string extensionNamespace) { throw null; }
+        public System.Threading.Tasks.Task<System.Collections.ObjectModel.Collection<TExtension>> ReadElementExtensionsAsync<TExtension>(string extensionName, string extensionNamespace, System.Runtime.Serialization.XmlObjectSerializer serializer) { throw null; }
+        public System.Threading.Tasks.Task<System.Collections.ObjectModel.Collection<TExtension>> ReadElementExtensionsAsync<TExtension>(string extensionName, string extensionNamespace, System.Xml.Serialization.XmlSerializer serializer) { throw null; }
+        public System.Collections.ObjectModel.Collection<TExtension> ReadElementExtensions<TExtension>(string extensionName, string extensionNamespace) { throw null; }
+        public System.Collections.ObjectModel.Collection<TExtension> ReadElementExtensions<TExtension>(string extensionName, string extensionNamespace, System.Runtime.Serialization.XmlObjectSerializer serializer) { throw null; }
+        public System.Collections.ObjectModel.Collection<TExtension> ReadElementExtensions<TExtension>(string extensionName, string extensionNamespace, System.Xml.Serialization.XmlSerializer serializer) { throw null; }
         protected override void RemoveItem(int index) { }
         protected override void SetItem(int index, System.ServiceModel.Syndication.SyndicationElementExtension item) { }
     }
@@ -679,10 +701,14 @@ namespace System.ServiceModel.Syndication
         public System.ServiceModel.Syndication.SyndicationElementExtension Extension { get { throw null; } }
         public override string Type { get { throw null; } }
         public override System.ServiceModel.Syndication.SyndicationContent Clone() { throw null; }
-        public System.Threading.Tasks.Task<System.Xml.XmlDictionaryReader> GetReaderAtContent() { throw null; }
-        public System.Threading.Tasks.Task<TContent> ReadContent<TContent>() { throw null; }
-        public System.Threading.Tasks.Task<TContent> ReadContent<TContent>(System.Runtime.Serialization.XmlObjectSerializer dataContractSerializer) { throw null; }
-        public System.Threading.Tasks.Task<TContent> ReadContent<TContent>(System.Xml.Serialization.XmlSerializer serializer) { throw null; }
+        public System.Xml.XmlDictionaryReader GetReaderAtContent() { throw null; }
+        public System.Threading.Tasks.Task<System.Xml.XmlDictionaryReader> GetReaderAtContentAsync() { throw null; }
+        public System.Threading.Tasks.Task<TContent> ReadContentAsync<TContent>() { throw null; }
+        public System.Threading.Tasks.Task<TContent> ReadContentAsync<TContent>(System.Runtime.Serialization.XmlObjectSerializer dataContractSerializer) { throw null; }
+        public System.Threading.Tasks.Task<TContent> ReadContentAsync<TContent>(System.Xml.Serialization.XmlSerializer serializer) { throw null; }
+        public TContent ReadContent<TContent>() { throw null; }
+        public TContent ReadContent<TContent>(System.Runtime.Serialization.XmlObjectSerializer dataContractSerializer) { throw null; }
+        public TContent ReadContent<TContent>(System.Xml.Serialization.XmlSerializer serializer) { throw null; }
         protected override void WriteContentsTo(System.Xml.XmlWriter writer) { }
     }
 }
