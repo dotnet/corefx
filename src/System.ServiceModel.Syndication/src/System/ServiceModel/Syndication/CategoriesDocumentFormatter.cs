@@ -34,7 +34,7 @@ namespace System.ServiceModel.Syndication
         public abstract string Version
         { get; }
 
-        public abstract Task<bool> CanReadAsync(XmlReader reader);
+        public abstract bool CanRead(XmlReader reader);
         public abstract Task ReadFromAsync(XmlReader reader);
         public abstract Task WriteTo(XmlWriter writer);
 

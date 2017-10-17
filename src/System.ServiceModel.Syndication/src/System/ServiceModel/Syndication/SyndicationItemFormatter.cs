@@ -43,6 +43,10 @@ namespace System.ServiceModel.Syndication
 
         public abstract bool CanRead(XmlReader reader);
 
+        public abstract void ReadFrom(XmlReader reader);
+
+        public abstract void WriteTo(XmlWriter writer);
+
         public abstract Task ReadFromAsync(XmlReader reader);
 
         public override string ToString()

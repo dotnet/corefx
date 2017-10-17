@@ -100,6 +100,16 @@ namespace System.ServiceModel.Syndication
             return reader.IsStartElement(Atom10Constants.EntryTag, Atom10Constants.Atom10Namespace);
         }
 
+        public override void ReadFrom(XmlReader reader)
+        {
+            ReadFromAsync(reader).Wait();
+        }
+
+        public override void WriteTo(XmlWriter writer)
+        {
+            WriteToAsync(writer).Wait();
+        }
+
         public override Task ReadFromAsync(XmlReader reader)
         {
             if (!CanRead(reader))

@@ -51,7 +51,9 @@ namespace System.ServiceModel.Syndication
         public override string Version { get { throw null; } }
         public override bool CanRead(System.Xml.XmlReader reader) { throw null; }
         protected override System.ServiceModel.Syndication.SyndicationItem CreateItemInstance() { throw null; }
+        public override void ReadFrom(System.Xml.XmlReader reader) { }
         public override System.Threading.Tasks.Task ReadFromAsync(System.Xml.XmlReader reader) { throw null; }
+        public override void WriteTo(System.Xml.XmlWriter writer) { }
         public override System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer) { throw null; }
     }
     public partial class Atom10ItemFormatter<TSyndicationItem> : System.ServiceModel.Syndication.Atom10ItemFormatter where TSyndicationItem : System.ServiceModel.Syndication.SyndicationItem, new()
@@ -66,7 +68,7 @@ namespace System.ServiceModel.Syndication
         public AtomPub10CategoriesDocumentFormatter(System.ServiceModel.Syndication.CategoriesDocument documentToWrite) { }
         public AtomPub10CategoriesDocumentFormatter(System.Type inlineDocumentType, System.Type referencedDocumentType) { }
         public override string Version { get { throw null; } }
-        public override System.Threading.Tasks.Task<bool> CanReadAsync(System.Xml.XmlReader reader) { throw null; }
+        public override bool CanRead(System.Xml.XmlReader reader) { throw null; }
         protected override System.ServiceModel.Syndication.InlineCategoriesDocument CreateInlineCategoriesDocument() { throw null; }
         protected override System.ServiceModel.Syndication.ReferencedCategoriesDocument CreateReferencedCategoriesDocument() { throw null; }
         public override System.Threading.Tasks.Task ReadFromAsync(System.Xml.XmlReader reader) { throw null; }
@@ -78,7 +80,7 @@ namespace System.ServiceModel.Syndication
         public AtomPub10ServiceDocumentFormatter(System.ServiceModel.Syndication.ServiceDocument documentToWrite) { }
         public AtomPub10ServiceDocumentFormatter(System.Type documentTypeToCreate) { }
         public override string Version { get { throw null; } }
-        public override System.Threading.Tasks.Task<bool> CanReadAsync(System.Xml.XmlReader reader) { throw null; }
+        public override bool CanRead(System.Xml.XmlReader reader) { throw null; }
         protected override System.ServiceModel.Syndication.ServiceDocument CreateDocumentInstance() { throw null; }
         public override System.Threading.Tasks.Task ReadFromAsync(System.Xml.XmlReader reader) { throw null; }
         public override System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer) { throw null; }
@@ -113,7 +115,7 @@ namespace System.ServiceModel.Syndication
         protected CategoriesDocumentFormatter(System.ServiceModel.Syndication.CategoriesDocument documentToWrite) { }
         public System.ServiceModel.Syndication.CategoriesDocument Document { get { throw null; } }
         public abstract string Version { get; }
-        public abstract System.Threading.Tasks.Task<bool> CanReadAsync(System.Xml.XmlReader reader);
+        public abstract bool CanRead(System.Xml.XmlReader reader);
         protected virtual System.ServiceModel.Syndication.InlineCategoriesDocument CreateInlineCategoriesDocument() { throw null; }
         protected virtual System.ServiceModel.Syndication.ReferencedCategoriesDocument CreateReferencedCategoriesDocument() { throw null; }
         public abstract System.Threading.Tasks.Task ReadFromAsync(System.Xml.XmlReader reader);
@@ -204,7 +206,9 @@ namespace System.ServiceModel.Syndication
         public override string Version { get { throw null; } }
         public override bool CanRead(System.Xml.XmlReader reader) { throw null; }
         protected override System.ServiceModel.Syndication.SyndicationItem CreateItemInstance() { throw null; }
+        public override void ReadFrom(System.Xml.XmlReader reader) { }
         public override System.Threading.Tasks.Task ReadFromAsync(System.Xml.XmlReader reader) { throw null; }
+        public override void WriteTo(System.Xml.XmlWriter writer) { }
         public override System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer) { throw null; }
     }
     public partial class Rss20ItemFormatter<TSyndicationItem> : System.ServiceModel.Syndication.Rss20ItemFormatter where TSyndicationItem : System.ServiceModel.Syndication.SyndicationItem, new()
@@ -239,7 +243,7 @@ namespace System.ServiceModel.Syndication
         protected ServiceDocumentFormatter(System.ServiceModel.Syndication.ServiceDocument documentToWrite) { }
         public System.ServiceModel.Syndication.ServiceDocument Document { get { throw null; } }
         public abstract string Version { get; }
-        public abstract System.Threading.Tasks.Task<bool> CanReadAsync(System.Xml.XmlReader reader);
+        public abstract bool CanRead(System.Xml.XmlReader reader);
         protected static System.ServiceModel.Syndication.SyndicationCategory CreateCategory(System.ServiceModel.Syndication.InlineCategoriesDocument inlineCategories) { throw null; }
         protected static System.ServiceModel.Syndication.ResourceCollectionInfo CreateCollection(System.ServiceModel.Syndication.Workspace workspace) { throw null; }
         protected virtual System.ServiceModel.Syndication.ServiceDocument CreateDocumentInstance() { throw null; }
@@ -518,6 +522,7 @@ namespace System.ServiceModel.Syndication
         protected static void LoadElementExtensions(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationItem item, int maxExtensionSize) { }
         protected static void LoadElementExtensions(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationLink link, int maxExtensionSize) { }
         protected static void LoadElementExtensions(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationPerson person, int maxExtensionSize) { }
+        public abstract void ReadFrom(System.Xml.XmlReader reader);
         public abstract System.Threading.Tasks.Task ReadFromAsync(System.Xml.XmlReader reader);
         protected internal virtual void SetItem(System.ServiceModel.Syndication.SyndicationItem item) { }
         public override string ToString() { throw null; }
@@ -538,6 +543,7 @@ namespace System.ServiceModel.Syndication
         protected static System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationItem item, string version) { throw null; }
         protected System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationLink link, string version) { throw null; }
         protected System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationPerson person, string version) { throw null; }
+        public abstract void WriteTo(System.Xml.XmlWriter writer);
         public abstract System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer);
     }
     public partial class SyndicationLink

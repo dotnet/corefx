@@ -113,14 +113,14 @@ namespace System.ServiceModel.Syndication
             return reader.IsStartElement(Rss20Constants.ItemTag, Rss20Constants.Rss20Namespace);
         }
 
-
-        private async Task WriteXml(XmlWriter writer)
+        public override void ReadFrom(XmlReader reader)
         {
-            if (writer == null)
-            {
-                throw new ArgumentNullException(nameof(writer));
-            }
-            await WriteItem(writer);
+            ReadFromAsync(reader).Wait();
+        }
+
+        public override void WriteTo(XmlWriter writer)
+        {
+            WriteToAsync(writer).Wait();
         }
 
         public override Task ReadFromAsync(XmlReader reader)

@@ -60,7 +60,7 @@ namespace System.ServiceModel.Syndication
             get { return App10Constants.Namespace; }
         }
 
-        public override Task<bool> CanReadAsync(XmlReader reader)
+        public override bool CanRead(XmlReader reader)
         {
             if (reader == null)
             {
@@ -106,7 +106,7 @@ namespace System.ServiceModel.Syndication
             reader = XmlReaderWrapper.CreateFromReader(reader);
             await reader.MoveToContentAsync();
 
-            if (!await CanReadAsync(reader))
+            if (!CanRead(reader))
             {
                 throw new XmlException(SR.Format(SR.UnknownDocumentXml, reader.LocalName, reader.NamespaceURI));
             }
