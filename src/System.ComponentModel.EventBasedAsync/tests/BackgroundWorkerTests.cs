@@ -88,10 +88,12 @@ namespace System.ComponentModel.EventBasedAsync.Tests
             stopwatch.Start();
             while (!isCompleted)
             {
-                if (stopwatch.Elapsed > TimeSpan.FromSeconds(10))
+                if (stopwatch.Elapsed > TimeSpan.FromSeconds(20))
                 {
-                    throw new Exception("The background worker never completed.");
+                    throw new Exception("The background worker did not complete in 20 sec.");
                 }
+
+                Thread.Sleep(50);
             }
         }
 
