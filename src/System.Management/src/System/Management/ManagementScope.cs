@@ -774,7 +774,6 @@ namespace System.Management
 
                 scopeTmp.wbemServices = null;
                 scopeTmp.options = null;
-                //                scopeTmp.securityHelper = null;                    // BUGBUG : should this allocate a new object?
             }
             else
             {
@@ -794,7 +793,6 @@ namespace System.Management
                 scopeTmp.wbemServices = scope.wbemServices;
                 if (scope.options != null)
                     scopeTmp.options = ConnectionOptions._Clone(scope.options, new IdentifierChangedEventHandler(scopeTmp.HandleIdentifierChange));
-                //                scopeTmp.securityHelper = scope.securityHelper;    // BUGBUG : should this allocate a new one?
             }
 
             return scopeTmp;
@@ -1086,7 +1084,6 @@ namespace System.Management
                         if(!MTAHelper.IsNoContextMTA())
                         {
                             //
-                            // [marioh, RAID: 111108]
                             // Ensure we are able to trap exceptions from worker thread.
                             //
                             ThreadDispatch disp = new ThreadDispatch ( new ThreadDispatch.ThreadWorkerMethodWithParam ( InitializeGuts ) ) ;
@@ -1155,7 +1152,6 @@ namespace System.Management
             } 
             catch (COMException e) 
             {
-                // BUGBUG : securityHandler.Reset()?
                 ManagementException.ThrowWithExtendedInfo (e);
             } 
 

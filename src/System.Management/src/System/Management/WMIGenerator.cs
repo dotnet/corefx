@@ -2004,7 +2004,7 @@ namespace System.Management
 
                     if(bZeroFieldInEnum == false)
                     {
-                        if( (System.Convert.ToInt64(BitMap[i],(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.UInt64))) == 0) )        // Bug No: 121987
+                        if( (System.Convert.ToInt64(BitMap[i],(IFormatProvider)CultureInfo.InvariantCulture.GetFormat(typeof(System.UInt64))) == 0) )
                         {
                             bZeroFieldInEnum = true;
                         }
@@ -3210,7 +3210,7 @@ namespace System.Management
 
                     cmie.Parameters.Add(new CodePrimitiveExpression(meth.Name));
                     cmie.Parameters.Add(new CodeVariableReferenceExpression(strInParams));
-                    cmie.Parameters.Add(new CodePrimitiveExpression(null));            // Bug NO: 108605
+                    cmie.Parameters.Add(new CodePrimitiveExpression(null));
 
                     cmis = new CodeExpressionStatement(cmie);
                     cis.TrueStatements.Add(cmis);
@@ -4656,7 +4656,7 @@ namespace System.Management
                     strType = "System.SByte";
                     break;
                 }
-                case CimType.UInt8: //TODO : is this fine???
+                case CimType.UInt8:
                 {
                     strType = "System.Byte";
                     break;
@@ -4772,7 +4772,7 @@ namespace System.Management
             bool retVal;
             switch(cType)
             {
-                case CimType.UInt8: //TODO : is this fine???
+                case CimType.UInt8:
                 case CimType.UInt16:
                 case CimType.UInt32:        // FIXX VB code generator cannot have Long enumerators
                 case CimType.SInt8:

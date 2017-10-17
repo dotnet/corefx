@@ -726,12 +726,9 @@ namespace System.Management
                 //This handles cases in which WMI calls SetStatus to indicate a problem, for example
                 //a queue overflow due to slow client processing.
                 //Currently we just cancel the subscription in this case.
-                // When you cancel a call with CancelAsyncCall, on Windows 2000,
-                // you get a SetStatus with WBEM_E_CALL_CANCELLED.  On Windows XP, you get
-                // a set status with WBEM_S_OPERATION_CANCELLED!!!
-                if (    hResult != (int)tag_WBEMSTATUS.WBEM_E_CALL_CANCELLED
+                if (hResult != (int)tag_WBEMSTATUS.WBEM_E_CALL_CANCELLED
                     && hResult != (int)tag_WBEMSTATUS.WBEM_S_OPERATION_CANCELLED)
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(Cancel2)); // On Win2k, we get a deadlock if we do a Cancel within a SetStatus
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(Cancel2));
             }
             catch
             {

@@ -1489,7 +1489,6 @@ namespace System.Management
 		/// </example>
 		public CodeTypeDeclaration GetStronglyTypedClassCode(bool includeSystemClassInClassDef, bool systemPropertyClass)
 		{
-			///throw new PlatformNotSupportedException("TODO");
 			// Ensure that the object is valid
 			Get();
 			ManagementClassGenerator classGen = new ManagementClassGenerator(this);
