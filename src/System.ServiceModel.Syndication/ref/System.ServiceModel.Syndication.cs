@@ -7,51 +7,7 @@
 
 namespace System.ServiceModel.Syndication
 {
-    public static partial class Atom10Constants
-    {
-        public const string AlternateTag = "alternate";
-        public const string Atom10Namespace = "http://www.w3.org/2005/Atom";
-        public const string Atom10Prefix = "a10";
-        public const string AtomMediaType = "application/atom+xml";
-        public const string AuthorTag = "author";
-        public const string CategoryTag = "category";
-        public const string ContentTag = "content";
-        public const string ContributorTag = "contributor";
-        public const string EmailTag = "email";
-        public const string EntryTag = "entry";
-        public const string FeedTag = "feed";
-        public const string GeneratorTag = "generator";
-        public const string HrefTag = "href";
-        public const string HtmlMediaType = "text/html";
-        public const string HtmlType = "html";
-        public const string IconTag = "icon";
-        public const string IdTag = "id";
-        public const string LabelTag = "label";
-        public const string LengthTag = "length";
-        public const string LinkTag = "link";
-        public const string LogoTag = "logo";
-        public const string NameTag = "name";
-        public const string PlaintextType = "text";
-        public const string PublishedTag = "published";
-        public const string RelativeTag = "rel";
-        public const string RightsTag = "rights";
-        public const string SchemeTag = "scheme";
-        public const string SelfTag = "self";
-        public const string SourceFeedTag = "source";
-        public const string SourceTag = "src";
-        public const string SpecificationLink = "http://atompub.org/2005/08/17/draft-ietf-atompub-format-11.html";
-        public const string SubtitleTag = "subtitle";
-        public const string SummaryTag = "summary";
-        public const string TermTag = "term";
-        public const string TitleTag = "title";
-        public const string TypeTag = "type";
-        public const string UpdatedTag = "updated";
-        public const string UriTag = "uri";
-        public const string XHtmlMediaType = "application/xhtml+xml";
-        public const string XHtmlType = "xhtml";
-        public const string XmlMediaType = "text/xml";
-    }
-    public partial class Atom10FeedFormatter : System.ServiceModel.Syndication.SyndicationFeedFormatter
+    public partial class Atom10FeedFormatter : System.ServiceModel.Syndication.SyndicationFeedFormatter, System.Xml.Serialization.IXmlSerializable
     {
         public Atom10FeedFormatter() { }
         public Atom10FeedFormatter(System.ServiceModel.Syndication.SyndicationFeed feedToWrite) { }
@@ -65,6 +21,9 @@ namespace System.ServiceModel.Syndication
         public override System.Threading.Tasks.Task ReadFromAsync(System.Xml.XmlReader reader, System.Threading.CancellationToken ct) { throw null; }
         protected virtual System.Threading.Tasks.Task<System.ServiceModel.Syndication.SyndicationItem> ReadItemAsync(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationFeed feed) { throw null; }
         protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<System.ServiceModel.Syndication.SyndicationItem>> ReadItemsAsync(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationFeed feed) { throw null; }
+        System.Xml.Schema.XmlSchema System.Xml.Serialization.IXmlSerializable.GetSchema() { throw null; }
+        void System.Xml.Serialization.IXmlSerializable.ReadXml(System.Xml.XmlReader reader) { }
+        void System.Xml.Serialization.IXmlSerializable.WriteXml(System.Xml.XmlWriter writer) { }
         protected virtual System.Threading.Tasks.Task WriteItemAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationItem item, System.Uri feedBaseUri) { throw null; }
         protected virtual System.Threading.Tasks.Task WriteItemsAsync(System.Xml.XmlWriter writer, System.Collections.Generic.IEnumerable<System.ServiceModel.Syndication.SyndicationItem> items, System.Uri feedBaseUri) { throw null; }
         public override System.Threading.Tasks.Task WriteToAsync(System.Xml.XmlWriter writer, System.Threading.CancellationToken ct) { throw null; }
@@ -312,7 +271,9 @@ namespace System.ServiceModel.Syndication
         public virtual System.ServiceModel.Syndication.SyndicationCategory Clone() { throw null; }
         protected internal virtual bool TryParseAttribute(string name, string ns, string value, string version) { throw null; }
         protected internal virtual bool TryParseElement(System.Xml.XmlReader reader, string version) { throw null; }
+        protected internal virtual void WriteAttributeExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual System.Threading.Tasks.Task WriteAttributeExtensionsAsync(System.Xml.XmlWriter writer, string version) { throw null; }
+        protected internal virtual void WriteElementExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, string version) { throw null; }
     }
     public abstract partial class SyndicationContent
@@ -419,7 +380,9 @@ namespace System.ServiceModel.Syndication
         public System.Threading.Tasks.Task SaveAsRss20Async(System.Xml.XmlWriter writer, System.Threading.CancellationToken ct) { throw null; }
         protected internal virtual bool TryParseAttribute(string name, string ns, string value, string version) { throw null; }
         protected internal virtual bool TryParseElement(System.Xml.XmlReader reader, string version) { throw null; }
+        protected internal virtual void WriteAttributeExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual System.Threading.Tasks.Task WriteAttributeExtensionsAsync(System.Xml.XmlWriter writer, string version) { throw null; }
+        protected internal virtual void WriteElementExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, string version) { throw null; }
     }
     [System.Runtime.Serialization.DataContractAttribute]
@@ -460,11 +423,21 @@ namespace System.ServiceModel.Syndication
         protected internal static bool TryParseElement(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationItem item, string version) { throw null; }
         protected internal static bool TryParseElement(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationLink link, string version) { throw null; }
         protected internal static bool TryParseElement(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationPerson person, string version) { throw null; }
-        protected internal static System.Threading.Tasks.Task WriteAttributeExtensions(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationLink link, string version) { throw null; }
+        protected internal static void WriteAttributeExtensions(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationCategory category, string version) { }
+        protected internal static void WriteAttributeExtensions(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationFeed feed, string version) { }
+        protected internal static void WriteAttributeExtensions(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationItem item, string version) { }
+        protected internal static void WriteAttributeExtensions(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationLink link, string version) { }
+        protected internal static void WriteAttributeExtensions(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationPerson person, string version) { }
         protected internal static System.Threading.Tasks.Task WriteAttributeExtensionsAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationCategory category, string version) { throw null; }
         protected internal static System.Threading.Tasks.Task WriteAttributeExtensionsAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationFeed feed, string version) { throw null; }
         protected internal static System.Threading.Tasks.Task WriteAttributeExtensionsAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationItem item, string version) { throw null; }
+        protected internal static System.Threading.Tasks.Task WriteAttributeExtensionsAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationLink link, string version) { throw null; }
         protected internal static System.Threading.Tasks.Task WriteAttributeExtensionsAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationPerson person, string version) { throw null; }
+        protected internal static void WriteElementExtensions(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationCategory category, string version) { }
+        protected internal static void WriteElementExtensions(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationFeed feed, string version) { }
+        protected internal static void WriteElementExtensions(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationItem item, string version) { }
+        protected internal static void WriteElementExtensions(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationLink link, string version) { }
+        protected internal static void WriteElementExtensions(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationPerson person, string version) { }
         protected internal static System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationCategory category, string version) { throw null; }
         protected internal static System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationFeed feed, string version) { throw null; }
         protected internal static System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, System.ServiceModel.Syndication.SyndicationItem item, string version) { throw null; }
@@ -509,7 +482,9 @@ namespace System.ServiceModel.Syndication
         protected internal virtual bool TryParseAttribute(string name, string ns, string value, string version) { throw null; }
         protected internal virtual bool TryParseContent(System.Xml.XmlReader reader, string contentType, string version, out System.ServiceModel.Syndication.SyndicationContent content) { content = default(System.ServiceModel.Syndication.SyndicationContent); throw null; }
         protected internal virtual bool TryParseElement(System.Xml.XmlReader reader, string version) { throw null; }
+        protected internal virtual void WriteAttributeExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual System.Threading.Tasks.Task WriteAttributeExtensionsAsync(System.Xml.XmlWriter writer, string version) { throw null; }
+        protected internal virtual void WriteElementExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, string version) { throw null; }
     }
     [System.Runtime.Serialization.DataContractAttribute]
@@ -573,7 +548,9 @@ namespace System.ServiceModel.Syndication
         public System.Uri GetAbsoluteUri() { throw null; }
         protected internal virtual bool TryParseAttribute(string name, string ns, string value, string version) { throw null; }
         protected internal virtual bool TryParseElement(System.Xml.XmlReader reader, string version) { throw null; }
+        protected internal virtual void WriteAttributeExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual System.Threading.Tasks.Task WriteAttributeExtensionsAsync(System.Xml.XmlWriter writer, string version) { throw null; }
+        protected internal virtual void WriteElementExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, string version) { throw null; }
     }
     public partial class SyndicationPerson
@@ -590,7 +567,9 @@ namespace System.ServiceModel.Syndication
         public virtual System.ServiceModel.Syndication.SyndicationPerson Clone() { throw null; }
         protected internal virtual bool TryParseAttribute(string name, string ns, string value, string version) { throw null; }
         protected internal virtual bool TryParseElement(System.Xml.XmlReader reader, string version) { throw null; }
+        protected internal virtual void WriteAttributeExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual System.Threading.Tasks.Task WriteAttributeExtensionsAsync(System.Xml.XmlWriter writer, string version) { throw null; }
+        protected internal virtual void WriteElementExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual System.Threading.Tasks.Task WriteElementExtensionsAsync(System.Xml.XmlWriter writer, string version) { throw null; }
     }
     public partial class SyndicationTextInput

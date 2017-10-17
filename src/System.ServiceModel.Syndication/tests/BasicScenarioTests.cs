@@ -631,11 +631,11 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.False(string.IsNullOrEmpty(name));
                 switch (name)
                 {
-                    case Atom10Constants.IdTag:
+                    case "id":
                         return "No id!";
-                    case Atom10Constants.NameTag:
+                    case "name":
                         return "new name";
-                    case Atom10Constants.TitleTag:
+                    case "title":
                         return "new title";
                     default:
                         return "Custom Text";

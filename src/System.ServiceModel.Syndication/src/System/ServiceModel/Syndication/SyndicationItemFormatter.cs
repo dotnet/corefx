@@ -187,7 +187,7 @@ namespace System.ServiceModel.Syndication
 
         protected static async Task WriteAttributeExtensionsAsync(XmlWriter writer, SyndicationLink link, string version)
         {
-            await SyndicationFeedFormatter.WriteAttributeExtensions(writer, link, version);
+            await SyndicationFeedFormatter.WriteAttributeExtensionsAsync(writer, link, version);
         }
 
         protected static async Task WriteAttributeExtensionsAsync(XmlWriter writer, SyndicationPerson person, string version)

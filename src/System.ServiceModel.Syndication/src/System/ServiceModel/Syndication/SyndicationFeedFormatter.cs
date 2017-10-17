@@ -286,6 +286,96 @@ namespace System.ServiceModel.Syndication
             return person.TryParseElement(reader, version);
         }
 
+        internal static protected void WriteAttributeExtensions(XmlWriter writer, SyndicationFeed feed, string version)
+        {
+            if (feed == null)
+            {
+                throw new ArgumentNullException(nameof(feed));
+            }
+            feed.WriteAttributeExtensions(writer, version);
+        }
+
+        internal static protected void WriteAttributeExtensions(XmlWriter writer, SyndicationItem item, string version)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+            item.WriteAttributeExtensions(writer, version);
+        }
+
+        internal static protected void WriteAttributeExtensions(XmlWriter writer, SyndicationCategory category, string version)
+        {
+            if (category == null)
+            {
+                throw new ArgumentNullException(nameof(category));
+            }
+            category.WriteAttributeExtensions(writer, version);
+        }
+
+        internal static protected void WriteAttributeExtensions(XmlWriter writer, SyndicationLink link, string version)
+        {
+            if (link == null)
+            {
+                throw new ArgumentNullException(nameof(link));
+            }
+            link.WriteAttributeExtensions(writer, version);
+        }
+
+        internal static protected void WriteAttributeExtensions(XmlWriter writer, SyndicationPerson person, string version)
+        {
+            if (person == null)
+            {
+                throw new ArgumentNullException(nameof(person));
+            }
+            person.WriteAttributeExtensions(writer, version);
+        }
+
+        internal static protected void WriteElementExtensions(XmlWriter writer, SyndicationFeed feed, string version)
+        {
+            if (feed == null)
+            {
+                throw new ArgumentNullException(nameof(feed));
+            }
+            feed.WriteElementExtensions(writer, version);
+        }
+
+        internal static protected void WriteElementExtensions(XmlWriter writer, SyndicationItem item, string version)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+            item.WriteElementExtensions(writer, version);
+        }
+
+        internal static protected void WriteElementExtensions(XmlWriter writer, SyndicationCategory category, string version)
+        {
+            if (category == null)
+            {
+                throw new ArgumentNullException(nameof(category));
+            }
+            category.WriteElementExtensions(writer, version);
+        }
+
+        internal static protected void WriteElementExtensions(XmlWriter writer, SyndicationLink link, string version)
+        {
+            if (link == null)
+            {
+                throw new ArgumentNullException(nameof(link));
+            }
+            link.WriteElementExtensions(writer, version);
+        }
+
+        internal static protected void WriteElementExtensions(XmlWriter writer, SyndicationPerson person, string version)
+        {
+            if (person == null)
+            {
+                throw new ArgumentNullException(nameof(person));
+            }
+            person.WriteElementExtensions(writer, version);
+        }
+
         internal static protected async Task WriteAttributeExtensionsAsync(XmlWriter writer, SyndicationFeed feed, string version)
         {
             if (feed == null)
@@ -313,7 +403,7 @@ namespace System.ServiceModel.Syndication
             return category.WriteAttributeExtensionsAsync(writer, version);
         }
 
-        internal static protected Task WriteAttributeExtensions(XmlWriter writer, SyndicationLink link, string version)
+        internal static protected Task WriteAttributeExtensionsAsync(XmlWriter writer, SyndicationLink link, string version)
         {
             if (link == null)
             {
