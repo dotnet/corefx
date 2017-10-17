@@ -99,14 +99,14 @@ namespace System.Buffers.Binary
             where T : struct
         {
 #if netstandard
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
-            }
-#else
             if (SpanHelpers.IsReferenceOrContainsReferences<T>())
             {
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
+            }
+#else
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
             }
 #endif
             if (Unsafe.SizeOf<T>() > buffer.Length)
@@ -125,14 +125,14 @@ namespace System.Buffers.Binary
             where T : struct
         {
 #if netstandard
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
-            }
-#else
             if (SpanHelpers.IsReferenceOrContainsReferences<T>())
             {
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
+            }
+#else
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
             }
 #endif
             if (Unsafe.SizeOf<T>() > (uint)buffer.Length)
