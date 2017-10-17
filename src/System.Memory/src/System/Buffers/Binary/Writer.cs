@@ -27,7 +27,6 @@ namespace System.Buffers.Binary
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             }
 #endif
-
             if ((uint)Unsafe.SizeOf<T>() > (uint)buffer.Length)
             {
                 throw new ArgumentOutOfRangeException();
@@ -54,7 +53,6 @@ namespace System.Buffers.Binary
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             }
 #endif
-            
             if (Unsafe.SizeOf<T>() > (uint)buffer.Length)
             {
                 return false;
