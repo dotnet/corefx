@@ -21,30 +21,6 @@ namespace System.Management
         );
     }
 
-#if USEIWOS
-    // The following is a manually defined wrapper for IWbemObjectSink
-    // since the size_is attribute cannot be dealt with by TlbImp.
-    [Guid("7c857801-7381-11cf-884d-00aa004b2e24"),
-     InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IWbemObjectSink
-    {
-        [PreserveSig]
-        void Indicate(
-            long lObjectCount,
-            [MarshalAs(UnmanagedType.Interface, SizeParamIndex=0)] IWbemClassObject [] apObjArray
-            );
-
-        [PreserveSig]
-        void SetStatus(
-            long lFlags,
-            int hResult,
-            [MarshalAs(UnmanagedType.BStr)] string strParam,
-            [MarshalAs(UnmanagedType.Interface)] IWbemClassObject pObjParam
-            );
-
-    };
-#endif
-
     //Class for calling GetErrorInfo from managed code
     class WbemErrorInfo
     {

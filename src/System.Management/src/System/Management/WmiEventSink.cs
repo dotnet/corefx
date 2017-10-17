@@ -2,24 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-//#define USETLBIMP
-//#define USEIWOS
-
 using System.Runtime.InteropServices;
-#if USETLBIMP
-using WMISECLib;
-#endif
 
 namespace System.Management
 {
 
-#if USETLBIMP
-internal class WmiEventSink : WMISECLib.IWmiEventSource
-#elif USEIWOS
-internal class WmiEventSink : IWbemObjectSink
-#else
 internal class WmiEventSink : IWmiEventSource
-#endif
 {
     private static int                      s_hash = 0;
     private int                             hash;
@@ -106,14 +94,8 @@ internal class WmiEventSink : IWmiEventSource
                     }
                 }
             }
-#if USETLBIMP
-            WmiNetUtilsHelper.GetDemultiplexedStub_f (this, this.isLocal, ref m_stub);
-#elif USEIWOS 
-            IUnsecuredApartment unsecApp = new UnsecuredApartment ();
-            unsecApp.CreateObjectStub (this, ref m_stub);
-#else
-        WmiNetUtilsHelper.GetDemultiplexedStub_f (this, this.isLocal, out stub);
-#endif
+
+            WmiNetUtilsHelper.GetDemultiplexedStub_f (this, this.isLocal, out stub);
             hash = Threading.Interlocked.Increment(ref s_hash);
         } catch {}
     }
@@ -132,18 +114,6 @@ internal class WmiEventSink : IWmiEventSource
         }
     }
 
-#if USEIWOS
-    public virtual void Indicate (long lNumObjects, IWbemClassObject [] objArray)
-    {
-        try {
-            for (long i = 0; i < lNumObjects; i++) {
-                ObjectReadyEventArgs args = new ObjectReadyEventArgs (m_context, 
-                    new WmiObject(m_services, objArray[i]));
-                watcher.FireObjectReady (args);
-            }
-        } catch {}
-    }
-#else
     public virtual void Indicate (IntPtr pIWbemClassObject)
     {
         Marshal.AddRef(pIWbemClassObject);
@@ -154,14 +124,9 @@ internal class WmiEventSink : IWmiEventSource
             watcher.FireObjectReady (args); 
         } catch {}
     }
-#endif
 
     public void SetStatus (
-#if USEIWOS
-                    long flags,
-#else
                     int flags, 
-#endif
                     int hResult, 
                     String message, 
                     IntPtr pErrorObj)
@@ -302,17 +267,6 @@ internal class WmiGetEventSink : WmiEventSink
         this.managementObject = managementObject;
     }
 
-#if USEIWOS
-    public override void Indicate (long lNumObjects, IWbemClassObject [] objArray)
-    {
-        try {
-            for (long i = 0; i < lNumObjects; i++) {
-                if (null != managementObject)
-                    managementObject.WmiObject = objArray[i];
-            }
-        } catch () {}
-    }
-#else
     public override void Indicate (IntPtr pIWbemClassObject)
     {
         Marshal.AddRef(pIWbemClassObject);
@@ -324,8 +278,6 @@ internal class WmiGetEventSink : WmiEventSink
             } catch {}
         }
     }
-#endif
-
 }
 
 
