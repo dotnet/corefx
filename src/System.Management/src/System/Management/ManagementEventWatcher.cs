@@ -419,7 +419,6 @@ namespace System.Management
                     {
                         if ((cachedCount - cacheIndex) == 0) //cache is empty - need to get more objects
                         {
-#if true
                             //Because Interop doesn't support custom marshalling for arrays, we have to use
                             //the "DoNotMarshal" objects in the interop and then convert to the "FreeThreaded"
                             //counterparts afterwards.
@@ -443,28 +442,6 @@ namespace System.Management
                                 for (int i = 0; i < cachedCount; i++)
                                     cachedObjects[i] = new IWbemClassObjectFreeThreaded(Marshal.GetIUnknownForObject(tempArray[i]));
                             }
-
-#else
-                            //This was workaround when using TLBIMP we couldn't pass in arrays...
-
-                            IWbemClassObjectFreeThreaded cachedObject = cachedObjects[0];
-                            int timeout = (ManagementOptions.InfiniteTimeout == options.Timeout)
-                                ? (int) tag_WBEM_TIMEOUT_TYPE.WBEM_INFINITE :
-                                (int) options.Timeout.TotalMilliseconds;
-                            status = scope.GetSecuredIEnumWbemClassObjectHandler(enumWbem).Next_(timeout, 1, out cachedObjects, out cachedCount);
-
-                            cacheIndex = 0;
-
-                            if (status >= 0)
-                            {
-                                //Create ManagementObject for result. Note that we may have timed out
-                                //in which case we won't have an object
-                                if (null == cachedObject)
-                                    ManagementException.ThrowWithExtendedInfo(ManagementStatus.Timedout);
-
-                                cachedObjects[0] = cachedObject;
-                            }
-#endif
                         }
 
                         if (status >= 0)
@@ -709,15 +686,6 @@ namespace System.Management
             String message, 
             IntPtr pErrObj)
         {
-#if TODO_ERROBJ_NEVER_USED
-            IWbemClassObjectFreeThreaded errObj = null;
-            if(pErrObj != IntPtr.Zero)
-            {
-                Marshal.AddRef(pErrObj);
-                errObj = new IWbemClassObjectFreeThreaded(pErrObj);
-            }
-#endif
-
             try 
             {
                 // Fire Stopped event

@@ -425,41 +425,6 @@ namespace System.Management
             {
                 if (null != md)
                 {
-#if USEPOOL
-                    Delegate[] delegateList = md.GetInvocationList ();
-
-                    if (null != delegateList)
-                    {
-                        int numDelegates = delegateList.Length;
-                        AutoResetEvent[] waitHandles = new AutoResetEvent [numDelegates];
-
-                        /*
-                         * For each target delegate, queue a request to the 
-                         * thread pool to handle the POST. We pass as state the 
-                         *  1) Target delegate
-                         *  2) Event args
-                         *  3) AutoResetEvent that the thread should signal to 
-                         *     indicate that it is done.
-                         */
-                        for (int i = 0; i < numDelegates; i++)
-                        {
-                            waitHandles [i] = new AutoResetEvent (false);
-                            ThreadPool.QueueUserWorkItem (
-                                    new WaitCallback (this.FireEventToDelegate),
-                                    new WmiEventState (delegateList[i], args, waitHandles[i]));
-                        }
-
-                        /*
-                         * We wait for all the delegates to signal that they are done.
-                         * This is because if we return from the IWbemObjectSink callback
-                         * before they are all done, it is possible that a delegate will
-                         * begin to process the next callback before the current callback
-                         * processing is done.
-                         */
-                        WaitHandle.WaitAll (waitHandles, 10000, true);
-                        }
-                    }
-#endif
                     foreach (Delegate d in md.GetInvocationList())
                     {
                         try 
@@ -476,31 +441,6 @@ namespace System.Management
             {
             }
         }
-
-#if USE_POOL
-        /// <summary>
-        /// This is the WaitCallback for firing an event from the thread pool
-        /// </summary>
-        /// <param name="state">Represents a WmiEventState object</param>
-        internal void FireEventToDelegate (object state)
-        {
-            if (state is WmiEventState)
-            {
-                WmiEventState oState = (WmiEventState) state;
-
-                try {
-                    oState.Delegate.DynamicInvoke (new object [] {this.sender, oState.Args});   
-                }
-                catch
-                {
-                }
-                finally {
-                    // Signal that we are done
-                    oState.AutoResetEvent.Set();
-                }
-            }
-        }
-#endif
     }
 
 }
