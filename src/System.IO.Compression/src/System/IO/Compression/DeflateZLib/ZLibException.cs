@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Security;
 using System.Runtime.Serialization;
-using ZErrorCode = System.IO.Compression.ZLibNative.ErrorCode;
 
 namespace System.IO.Compression
 {
@@ -17,7 +15,7 @@ namespace System.IO.Compression
     {
         private readonly string _zlibErrorContext = string.Empty;
         private readonly string _zlibErrorMessage = string.Empty;
-        private readonly ZErrorCode _zlibErrorCode = ZErrorCode.Ok;
+        private readonly ZLibNative.ErrorCode _zlibErrorCode = ZLibNative.ErrorCode.Ok;
 
         /// <summary>
         /// This is the preferred constructor to use.
@@ -30,7 +28,7 @@ namespace System.IO.Compression
         public ZLibException(string message, string zlibErrorContext, int zlibErrorCode, string zlibErrorMessage) : base(message)
         {
             _zlibErrorContext = zlibErrorContext;
-            _zlibErrorCode = (ZErrorCode)zlibErrorCode;
+            _zlibErrorCode = (ZLibNative.ErrorCode)zlibErrorCode;
             _zlibErrorMessage = zlibErrorMessage;
         }
 
