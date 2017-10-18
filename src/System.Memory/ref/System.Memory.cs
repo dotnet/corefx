@@ -128,7 +128,6 @@ namespace System
         public static ReadOnlyMemory<T> Empty { get { throw null; } }
         public ReadOnlyMemory(T[] array) { throw null;}
         public ReadOnlyMemory(T[] array, int start, int length) { throw null;}
-        internal ReadOnlyMemory(Buffers.OwnedMemory<T> owner, int index, int length) { throw null;}
         public bool IsEmpty { get { throw null; } }
         public int Length { get { throw null; } }
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
@@ -152,7 +151,6 @@ namespace System
         public static Memory<T> Empty { get { throw null; } }
         public Memory(T[] array) { throw null;}
         public Memory(T[] array, int start, int length) { throw null;}
-        internal Memory(Buffers.OwnedMemory<T> owner, int index, int length) { throw null;}
         public bool IsEmpty { get { throw null; } }
         public int Length { get { throw null; } }
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
@@ -178,7 +176,6 @@ namespace System.Buffers
     {
         public MemoryHandle(IRetainable owner, void* pinnedPointer = null,  System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle))  { throw null; }
         public void* PinnedPointer { get { throw null; } }
-        internal void AddOffset(int offset) { throw null; }
         public void Dispose() { throw null; }
     }
 
@@ -201,5 +198,82 @@ namespace System.Buffers
         public abstract bool Release();
         public abstract void Retain();
         protected internal abstract bool TryGetArray(out ArraySegment<T> arraySegment);
+    }
+}
+
+namespace System.Buffers.Binary
+{
+    public static class BinaryPrimitives
+    {
+        public static sbyte ReverseEndianness(sbyte value) { throw null; }
+        public static byte ReverseEndianness(byte value) { throw null; }
+        public static short ReverseEndianness(short value) { throw null; }
+        public static ushort ReverseEndianness(ushort value) { throw null; }
+        public static int ReverseEndianness(int value) { throw null; }
+        public static uint ReverseEndianness(uint value) { throw null; }
+        public static long ReverseEndianness(long value) { throw null; }
+        public static ulong ReverseEndianness(ulong value) { throw null; }
+
+        public static T ReadMachineEndian<T>(ReadOnlySpan<byte> buffer) where T : struct { throw null; }
+        public static bool TryReadMachineEndian<T>(ReadOnlySpan<byte> buffer, out T value) where T : struct { throw null; }
+
+        public static short ReadInt16LittleEndian(ReadOnlySpan<byte> buffer) { throw null; }
+        public static int ReadInt32LittleEndian(ReadOnlySpan<byte> buffer) { throw null; }
+        public static long ReadInt64LittleEndian(ReadOnlySpan<byte> buffer) { throw null; }
+        public static ushort ReadUInt16LittleEndian(ReadOnlySpan<byte> buffer) { throw null; }
+        public static uint ReadUInt32LittleEndian(ReadOnlySpan<byte> buffer) { throw null; }
+        public static ulong ReadUInt64LittleEndian(ReadOnlySpan<byte> buffer) { throw null; }
+
+        public static bool TryReadInt16LittleEndian(ReadOnlySpan<byte> buffer, out short value) { throw null; }
+        public static bool TryReadInt32LittleEndian(ReadOnlySpan<byte> buffer, out int value) { throw null; }
+        public static bool TryReadInt64LittleEndian(ReadOnlySpan<byte> buffer, out long value) { throw null; }
+        public static bool TryReadUInt16LittleEndian(ReadOnlySpan<byte> buffer, out ushort value) { throw null; }
+        public static bool TryReadUInt32LittleEndian(ReadOnlySpan<byte> buffer, out uint value) { throw null; }
+        public static bool TryReadUInt64LittleEndian(ReadOnlySpan<byte> buffer, out ulong value) { throw null; }
+
+        public static short ReadInt16BigEndian(ReadOnlySpan<byte> buffer) { throw null; }
+        public static int ReadInt32BigEndian(ReadOnlySpan<byte> buffer) { throw null; }
+        public static long ReadInt64BigEndian(ReadOnlySpan<byte> buffer) { throw null; }
+        public static ushort ReadUInt16BigEndian(ReadOnlySpan<byte> buffer) { throw null; }
+        public static uint ReadUInt32BigEndian(ReadOnlySpan<byte> buffer) { throw null; }
+        public static ulong ReadUInt64BigEndian(ReadOnlySpan<byte> buffer) { throw null; }
+
+        public static bool TryReadInt16BigEndian(ReadOnlySpan<byte> buffer, out short value) { throw null; }
+        public static bool TryReadInt32BigEndian(ReadOnlySpan<byte> buffer, out int value) { throw null; }
+        public static bool TryReadInt64BigEndian(ReadOnlySpan<byte> buffer, out long value) { throw null; }
+        public static bool TryReadUInt16BigEndian(ReadOnlySpan<byte> buffer, out ushort value) { throw null; }
+        public static bool TryReadUInt32BigEndian(ReadOnlySpan<byte> buffer, out uint value) { throw null; }
+        public static bool TryReadUInt64BigEndian(ReadOnlySpan<byte> buffer, out ulong value) { throw null; }
+
+        public static void WriteMachineEndian<T>(Span<byte> buffer, ref T value) where T : struct { throw null; }
+        public static bool TryWriteMachineEndian<T>(Span<byte> buffer, ref T value) where T : struct { throw null; }
+
+        public static void WriteInt16LittleEndian(Span<byte> buffer, short value) { throw null; }
+        public static void WriteInt32LittleEndian(Span<byte> buffer, int value) { throw null; }
+        public static void WriteInt64LittleEndian(Span<byte> buffer, long value) { throw null; }
+        public static void WriteUInt16LittleEndian(Span<byte> buffer, ushort value) { throw null; }
+        public static void WriteUInt32LittleEndian(Span<byte> buffer, uint value) { throw null; }
+        public static void WriteUInt64LittleEndian(Span<byte> buffer, ulong value) { throw null; }
+
+        public static bool TryWriteInt16LittleEndian(Span<byte> buffer, short value) { throw null; }
+        public static bool TryWriteInt32LittleEndian(Span<byte> buffer, int value) { throw null; }
+        public static bool TryWriteInt64LittleEndian(Span<byte> buffer, long value) { throw null; }
+        public static bool TryWriteUInt16LittleEndian(Span<byte> buffer, ushort value) { throw null; }
+        public static bool TryWriteUInt32LittleEndian(Span<byte> buffer, uint value) { throw null; }
+        public static bool TryWriteUInt64LittleEndian(Span<byte> buffer, ulong value) { throw null; }
+
+        public static void WriteInt16BigEndian(Span<byte> buffer, short value) { throw null; }
+        public static void WriteInt32BigEndian(Span<byte> buffer, int value) { throw null; }
+        public static void WriteInt64BigEndian(Span<byte> buffer, long value) { throw null; }
+        public static void WriteUInt16BigEndian(Span<byte> buffer, ushort value) { throw null; }
+        public static void WriteUInt32BigEndian(Span<byte> buffer, uint value) { throw null; }
+        public static void WriteUInt64BigEndian(Span<byte> buffer, ulong value) { throw null; }
+
+        public static bool TryWriteInt16BigEndian(Span<byte> buffer, short value) { throw null; }
+        public static bool TryWriteInt32BigEndian(Span<byte> buffer, int value) { throw null; }
+        public static bool TryWriteInt64BigEndian(Span<byte> buffer, long value) { throw null; }
+        public static bool TryWriteUInt16BigEndian(Span<byte> buffer, ushort value) { throw null; }
+        public static bool TryWriteUInt32BigEndian(Span<byte> buffer, uint value) { throw null; }
+        public static bool TryWriteUInt64BigEndian(Span<byte> buffer, ulong value) { throw null; }
     }
 }
