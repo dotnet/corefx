@@ -66,14 +66,6 @@ namespace System.Management
         private IEnumWbemClassObject enumWbem; //holds WMI enumerator for this collection
         private bool isDisposed = false;
 
-        //internal IWbemServices GetIWbemServices () {
-        //  return scope.GetIWbemServices ();
-        //}
-
-        //internal ConnectionOptions Connection {
-        //  get { return scope.Connection; }
-        //}
-
         //Constructor
         internal ManagementObjectCollection(
             ManagementScope scope,

@@ -517,11 +517,6 @@ namespace System.Management
 
 							for (int i = 0; i < length; i++)
 							{
-								//
-								// Removed below Initialize call since wbemObject is a property that will call Initialize ( true ) on
-								// its getter.
-								//
-								//((ManagementBaseObject)valArray.GetValue(i)).Initialize ( false ) ;
 								((IWbemClassObject_DoNotMarshal[])(wmiValue))[i] = (IWbemClassObject_DoNotMarshal)(Marshal.GetObjectForIUnknown(((ManagementBaseObject)valArray.GetValue(i)).wbemObject));
 							}
 							break;
@@ -592,16 +587,10 @@ namespace System.Management
 						case CimType.Object:
 							if (val is ManagementBaseObject)
 							{
-								//
-								// Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-								// its getter.
-								//
-								//((ManagementBaseObject)val).Initialize ( false ) ;
 								wmiValue = Marshal.GetObjectForIUnknown(((ManagementBaseObject) val).wbemObject);
 							}
 							else
 							{
-								//Debug.Assert(false, "Unhandled object type");
 								wmiValue = val;
 							}
 							break;
@@ -751,11 +740,6 @@ namespace System.Management
 
 								for (int i = 0; i < length; i++)
 								{
-									//
-									// Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-									// its getter.
-									//
-									//((ManagementBaseObject)valArray.GetValue(i)).Initialize ( false ) ;
 									((IWbemClassObject_DoNotMarshal[])(wmiValue))[i] = (IWbemClassObject_DoNotMarshal)(Marshal.GetObjectForIUnknown(((ManagementBaseObject)valArray.GetValue(i)).wbemObject));
 								}
 							}
@@ -838,11 +822,6 @@ namespace System.Management
 						if (val is ManagementBaseObject)
 						{
 							type = CimType.Object;
-							//
-							// Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-							// its getter.
-							//
-							//((ManagementBaseObject)val).Initialize ( false ) ;
 							wmiValue = Marshal.GetObjectForIUnknown(((ManagementBaseObject) val).wbemObject);
 						}
 					}

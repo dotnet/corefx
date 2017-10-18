@@ -35,7 +35,25 @@ namespace System.Management.Tests
             scope.Connect();
 
             using (var searcher = new ManagementObjectSearcher(scope, query))
-            using (var collection = searcher.Get())
+            using (ManagementObjectCollection collection = searcher.Get())
+            {
+                Assert.True(collection.Count > 0);
+                foreach (ManagementBaseObject result in collection)
+                {
+                    Assert.True(!string.IsNullOrEmpty(result.GetPropertyValue("DeviceID").ToString()));
+                }
+            }
+        }
+
+        [Fact]
+        public void Select_All_Win32_LogicalDisk_Wql()
+        {
+            var query = new SelectQuery("select * from Win32_LogicalDisk");
+            var scope = new ManagementScope(@"root\cimv2");
+            scope.Connect();
+
+            using (var searcher = new ManagementObjectSearcher(scope, query))
+            using (ManagementObjectCollection collection = searcher.Get())
             {
                 Assert.True(collection.Count > 0);
                 foreach (ManagementBaseObject result in collection)

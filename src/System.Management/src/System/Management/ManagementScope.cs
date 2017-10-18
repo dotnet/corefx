@@ -1089,17 +1089,6 @@ namespace System.Management
                             ThreadDispatch disp = new ThreadDispatch ( new ThreadDispatch.ThreadWorkerMethodWithParam ( InitializeGuts ) ) ;
                             disp.Parameter = this ;
                             disp.Start ( ) ;
-
-                            
-                            //                            statusFromMTA = 0;
-                            //                            Thread thread = new Thread(new ThreadStart(InitializeGuts));
-                            //                            thread.ApartmentState = ApartmentState.MTA;
-                            //                            thread.Start();
-                            //                            thread.Join();
-                            //                            if ((statusFromMTA & 0xfffff000) == 0x80041000)
-                            //                                ManagementException.ThrowWithExtendedInfo((ManagementStatus)statusFromMTA);
-                            //                            else if ((statusFromMTA & 0x80000000) != 0)
-                            //                                Marshal.ThrowExceptionForHR(statusFromMTA);
                         }
                         else
                             InitializeGuts(this);
@@ -1108,7 +1097,6 @@ namespace System.Management
             }
         }
 
-        //int statusFromMTA;
         void InitializeGuts(object o)
         {
             ManagementScope threadParam = (ManagementScope) o ;
@@ -1154,8 +1142,6 @@ namespace System.Management
             {
                 ManagementException.ThrowWithExtendedInfo (e);
             } 
-
-            //statusFromMTA = status;
 
             if ((status & 0xfffff000) == 0x80041000)
             {
@@ -1549,7 +1535,6 @@ namespace System.Management
         
         internal SecurityHandler (ManagementScope theScope) 
         {
-            //Initialize();
             this.scope = theScope;
             if (null != scope)
             {

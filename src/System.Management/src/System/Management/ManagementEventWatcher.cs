@@ -643,10 +643,6 @@ namespace System.Management
                 ThreadDispatch disp = new ThreadDispatch ( new ThreadDispatch.ThreadWorkerMethodWithParam ( HackToCreateStubInMTA ) ) ;
                 disp.Parameter = this ;
                 disp.Start ( ) ;
-                //            Thread thread = new Thread(new ThreadStart(HackToCreateStubInMTA));
-                //            thread.ApartmentState = ApartmentState.MTA;
-                //            thread.Start();
-                //            thread.Join();
             }
 
         }

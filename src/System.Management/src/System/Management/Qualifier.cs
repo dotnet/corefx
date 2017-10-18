@@ -112,9 +112,6 @@ namespace System.Management
 					{
 						Array valArray = (Array)qualVal;
 						int length = valArray.Length;
-						//If this is an object array, we cannot use GetElementType() to determine the type
-						//of the actual content. So we'll use the first element to type the array
-						//Type elementType = valArray.GetType().GetElementType();
 						Type elementType = (length > 0 ? valArray.GetValue(0).GetType() : null);
 
 						if (elementType == typeof(Int32))

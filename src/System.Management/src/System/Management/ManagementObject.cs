@@ -686,12 +686,6 @@ namespace System.Management
                     PutButNotGot = false;
                 }
             
-                //
-                // Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-                // its getter.
-                //
-                // Initialize ( ) ;
-
                 int status = wbemObject.Get_("__SERVER", 0, ref serverName, ref propertyType, ref propertyFlavor);
 
                 if (status >= 0)
@@ -1530,9 +1524,6 @@ namespace System.Management
                 }
 
                 newPath = GetPath(wbemCallResult);
-
-//                if (IsClass)
-//                    newPath.RelativePath = ClassName;
             } 
             finally
             {
@@ -2530,12 +2521,6 @@ namespace System.Management
                 Get();
                 PutButNotGot = false;
             }
-
-            //
-            // Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-            // its getter.
-            //
-            // Initialize ( ) ;
 
             IWbemClassObjectFreeThreaded theClone = null;
 

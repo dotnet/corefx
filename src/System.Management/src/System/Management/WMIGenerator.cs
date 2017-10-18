@@ -524,14 +524,12 @@ namespace System.Management
             //As we have finished the class definition, generate the class code NOW!!!!!
             cn.Types.Add (cc);
 
-            //throw new Exception("about to call GenerateCodeFromNamespace");
             try
             {
                 cp.GenerateCodeFromNamespace (cn, tw, new CodeGeneratorOptions());
             }
             finally
             {
-                //tw.Flush();
                 tw.Close();
             }
 
@@ -555,7 +553,6 @@ namespace System.Management
                 if (OriginalPath.Length != 0)
                 {
                     thePath = new ManagementPath(OriginalPath);
-                    //                classobj = new ManagementClass (OriginalPath);
                 }
                 else
                 {
@@ -564,7 +561,6 @@ namespace System.Management
                         thePath.Server = OriginalServer;
                     thePath.ClassName = OriginalClassName;
                     thePath.NamespacePath = OriginalNamespace;
-                    //                classobj = new ManagementClass (thePath);
 
                     /*
                         throw new Exception("OriginalServer is " + OriginalServer +
@@ -606,7 +602,6 @@ namespace System.Management
                 }
 
             }
-            //throw new Exception("classobj's path is " + classobj.Path.Path);                
             
             try
             {
@@ -878,7 +873,6 @@ namespace System.Management
             {
                 strNs = OriginalNamespace;
                 strNs = strNs.Replace ('\\','.');
-                //            strNs = "System.Management." + strNs;
                 strNs = strNs.ToUpper(CultureInfo.InvariantCulture);
             }
             else
@@ -925,17 +919,12 @@ namespace System.Management
 
             PrivateNamesUsed.Add ("GeneratedClassName", strClass);
             PrivateNamesUsed.Add("GeneratedNamespace",strNs);
-            //        PrivateNamesUsed.Add("ConverterClass",strClass+"Converter");
         }
 
 
 
         private void InitializeCodeTypeDeclaration(CodeLanguage lang)
         {
-            //Comment statement //Early Bound Managed Code Wrapper for WMI class <WMiClass>  
-            //ccs = new CodeCommentStatement (String.Format ("Early Bound Managed Code Wrapper for WMI class {0}",OriginalClassName));
-            //cg.GenerateCodeFromStatement (ccs, tw, new CodeGeneratorOptions());
-
             //Now add the import statements
             cn = new CodeNamespace(PrivateNamesUsed["GeneratedNamespace"].ToString());
             cn.Imports.Add (new CodeNamespaceImport("System"));
@@ -1179,7 +1168,7 @@ namespace System.Management
                     strPropName[j - i] = strPropTemp[j];
                 }
                                     
-                cmp.Name = (new string(strPropName)).ToUpper(CultureInfo.InvariantCulture); //ConvertToTitleCase(new string(strPropName));
+                cmp.Name = (new string(strPropName)).ToUpper(CultureInfo.InvariantCulture);
                 cmp.Attributes = MemberAttributes.Public | MemberAttributes.Final;
                 cmp.Type = ConvertCIMType(prop.Type,prop.IsArray);
 
@@ -1560,17 +1549,10 @@ namespace System.Management
                             cmp.SetStatements.Add(new CodeAssignStatement(cie,new CodeSnippetExpression("value"))); 
                         }
                     }
-                    /*
-                        if (((isEmbedded == false)
-                                && (AutoCommitProp == true)))
-                        {
-                            PrivateLateBoundObject.Put();
-                        }
-                    */
+
                     cmie = new CodeMethodInvokeExpression();
                     cmie.Method.TargetObject = new CodeVariableReferenceExpression(PrivateNamesUsed["LateBoundObject"].ToString());
                     cmie.Method.MethodName = "Put";
-
                         
                     cboe = new CodeBinaryOperatorExpression(new CodeVariableReferenceExpression(PrivateNamesUsed["AutoCommitProperty"].ToString()),
                         CodeBinaryOperatorType.ValueEquality,
@@ -1698,8 +1680,6 @@ namespace System.Management
                                     }
                                     catch(OverflowException)
                                     {
-                                        //                                    ValueMap.Add(Convert.ToInt64(strArray[i]));
-                                        //                                    bValueMapInt64 = true;
                                     }
                                 }
                             }
@@ -2122,8 +2102,6 @@ namespace System.Management
                     else
                     {
                         cmie = new CodeMethodInvokeExpression();
-                        //                    cmie.Method.TargetObject = new CodeCastExpression(((CodeTypeReference)arrKeyType[i]),new CodeVariableReferenceExpression("key"+arrKeys[i]));
-                        // Work Around
                         cmie.Method.TargetObject = new CodeCastExpression(new CodeTypeReference(((CodeTypeReference)arrKeyType[i]).BaseType + " "),new CodeVariableReferenceExpression("key"+arrKeys[i]));
                         cmie.Method.MethodName = "ToString";
 
@@ -2633,7 +2611,6 @@ namespace System.Management
         void GenarateConstructorWithLateBoundForEmbedded()
         {
             string strLateBoundObject = "theObject";
-            //        string LateBoundSystemProperties = "SystemProperties";
 
             cctor = new CodeConstructor();        
             cctor.Attributes = MemberAttributes.Public;
@@ -3020,7 +2997,6 @@ namespace System.Management
                             }
                             else
                             {
-                                //                                cis.TrueStatements.Add(new CodeAssignStatement(cie,new CodeVariableReferenceExpression(cpde.Name)));
                                 if(cpde.Type.ArrayRank == 0)
                                 {
                                     // Work around
@@ -3399,7 +3375,6 @@ namespace System.Management
                 null,
                 PublicNamesUsed["FilterFunction"].ToString()
                 );
-            //cmie.MethodName = PublicNamesUsed["FilterFunction"].ToString();
             cmie.Parameters.Add(new CodePrimitiveExpression(null));
             cmie.Parameters.Add(new CodePrimitiveExpression(null));
             cmie.Parameters.Add(new CodeVariableReferenceExpression(strSelectedProperties));
@@ -3590,7 +3565,6 @@ namespace System.Management
                 null,
                 PublicNamesUsed["FilterFunction"].ToString()
                 );
-            //cmie.MethodName = PublicNamesUsed["FilterFunction"].ToString();
             cmie.Parameters.Add(new CodeVariableReferenceExpression(PrivateNamesUsed["ScopeParam"].ToString()));
             cmie.Parameters.Add(new CodeVariableReferenceExpression(strCondition));
             cmie.Parameters.Add(new CodePrimitiveExpression(null));
@@ -3824,7 +3798,6 @@ namespace System.Management
                 }
             */
             cctor = new CodeConstructor();
-            //        cctor.Attributes = MemberAttributes.Assembly;
             cctor.Attributes = MemberAttributes.Public ;
             cpde = new CodeParameterDeclarationExpression();
             cpde.Name = baseTypeParam;
@@ -4303,7 +4276,6 @@ namespace System.Management
             ccc.BaseTypes.Add("ICollection");
             ccc.TypeAttributes =TypeAttributes.NestedPublic ;
 
-            //private ManagementObjectCollection objCollection;
             cf = new CodeMemberField();
             cf.Name = strObjectCollection;
             cf.Attributes = MemberAttributes.Private | MemberAttributes.Final;        
@@ -4316,7 +4288,6 @@ namespace System.Management
             //}
 
             cctor = new CodeConstructor();
-            //        cctor.Attributes = MemberAttributes.Assembly;
             cctor.Attributes = MemberAttributes.Public;
             cpde = new CodeParameterDeclarationExpression();
             cpde.Name = strobjCollection;
@@ -4339,7 +4310,6 @@ namespace System.Management
             cmp.Attributes = MemberAttributes.Public | MemberAttributes.Final | MemberAttributes.Override;
             cmp.Name = "Count";
             cmp.ImplementationTypes.Add("System.Collections.ICollection");
-            //cmp.ImplementsType = "ICollection";
             cmp.GetStatements.Add(new CodeMethodReturnStatement(new CodePropertyReferenceExpression(
                 new CodeVariableReferenceExpression(strObjectCollection),
                 "Count")));
@@ -4357,7 +4327,6 @@ namespace System.Management
             cmp.Attributes = MemberAttributes.Public | MemberAttributes.Final | MemberAttributes.Override;
             cmp.Name = "IsSynchronized";
             cmp.ImplementationTypes.Add("System.Collections.ICollection");
-            //cmp.ImplementsType = "ICollection";
             cmp.GetStatements.Add(new CodeMethodReturnStatement(new CodePropertyReferenceExpression(
                 new CodeVariableReferenceExpression(strObjectCollection),
                 "IsSynchronized")));
@@ -4374,7 +4343,6 @@ namespace System.Management
             cmp.Attributes = MemberAttributes.Public | MemberAttributes.Final | MemberAttributes.Override;
             cmp.Name = "SyncRoot";
             cmp.ImplementationTypes.Add("System.Collections.ICollection");
-            //cmp.ImplementsType = "ICollection";
             cmp.GetStatements.Add(new CodeMethodReturnStatement(new CodeThisReferenceExpression()));
             ccc.Members.Add(cmp);
 
@@ -4418,7 +4386,6 @@ namespace System.Management
             cmm.Statements.Add(new CodeVariableDeclarationStatement("System.Int32",strnCtr));
             cfls = new CodeIterationStatement();
 
-            //        cfls.InitStatement = new CodeVariableDeclarationStatement("Int32",strnCtr,new CodePrimitiveExpression(0));
             cfls.InitStatement = new CodeAssignStatement(new CodeVariableReferenceExpression(strnCtr),new CodePrimitiveExpression(0));
             cboe = new CodeBinaryOperatorExpression();
             cboe.Left = new CodeVariableReferenceExpression(strnCtr);
@@ -4439,9 +4406,6 @@ namespace System.Management
                 new CodeVariableReferenceExpression(strArray),
                 "GetValue",
                 new CodeVariableReferenceExpression(strnCtr));
-            //cmie1.MethodName = "GetValue";
-            //cmie1.TargetObject = new CodeVariableReferenceExpression(strArray);
-            //cmie1.Parameters.Add(new CodeVariableReferenceExpression(strnCtr));
 
             coce = new CodeObjectCreateExpression();
             coce.CreateType = new CodeTypeReference(PrivateNamesUsed["GeneratedClassName"].ToString());
@@ -4463,39 +4427,12 @@ namespace System.Management
             cmm.Attributes = MemberAttributes.Public | MemberAttributes.Final | MemberAttributes.Override;
             cmm.Name = "GetEnumerator";
             cmm.ImplementationTypes.Add("System.Collections.IEnumerable");
-            //        cmm.ReturnType = PrivateNamesUsed["EnumeratorClass"].ToString();
             cmm.ReturnType = new CodeTypeReference("System.Collections.IEnumerator");
             coce = new CodeObjectCreateExpression();
             coce.CreateType = new CodeTypeReference(PrivateNamesUsed["EnumeratorClass"].ToString());
             coce.Parameters.Add(new CodeMethodInvokeExpression(new CodeVariableReferenceExpression(strObjectCollection),"GetEnumerator"));
             cmm.Statements.Add(new CodeMethodReturnStatement(coce));
             ccc.Members.Add(cmm);
-
-            /*
-            //ZINA: commenting this out for now, since 
-            //"cmm.ImplementationTypes.Add("IEnumerable");"
-            //does not work, and therefore the function is ambiguous and
-            //does not compile.
-
-            //IEnumerator IEnumerable.GetEnumerator()
-            //{
-            //    return GetEnumerator ();
-            //}
-
-            cmm = new CodeMemberMethod();
-            cmm.Attributes = MemberAttributes.VTableMask;
-            cmm.Name = "GetEnumerator";
-            cmm.ReturnType = new CodeTypeReference("IEnumerator");
-            cmm.ImplementationTypes.Add("IEnumerable");
-            //cmm.ImplementsType = "IEnumerable";
-            cmie = new CodeMethodInvokeExpression(
-                        null,    //no TargetObject?
-                        "GetEnumerator"
-                        );
-
-            cmm.Statements.Add(new CodeMethodReturnStatement(cmie));
-            ccc.Members.Add(cmm);
-        */    
 
             //Now generate the Enumerator Class
             GenerateEnumeratorClass();
@@ -4532,7 +4469,6 @@ namespace System.Management
             //    ObjectEnumerator = objEnum;
             //}
             cctor = new CodeConstructor();
-            //        cctor.Attributes = MemberAttributes.Assembly;
             cctor.Attributes = MemberAttributes.Public;
             cpde = new CodeParameterDeclarationExpression();
             cpde.Name = strobjEnum;
@@ -4551,12 +4487,10 @@ namespace System.Management
             //}
 
             cmp = new CodeMemberProperty();
-            //        cmp.Type = PrivateNamesUsed["GeneratedClassName"].ToString();
             cmp.Type = new CodeTypeReference("System.Object");
             cmp.Attributes = MemberAttributes.Public | MemberAttributes.Final | MemberAttributes.Override;
             cmp.Name = "Current";
             cmp.ImplementationTypes.Add("System.Collections.IEnumerator");
-            //cmp.ImplementsType = "IEnumerator";
             coce = new CodeObjectCreateExpression();
             coce.CreateType = new CodeTypeReference(PrivateNamesUsed["GeneratedClassName"].ToString());
             coce.Parameters.Add(new CodeCastExpression(new CodeTypeReference(PublicNamesUsed["LateBoundClass"].ToString()),
@@ -4566,19 +4500,6 @@ namespace System.Management
             cmp.GetStatements.Add(new CodeMethodReturnStatement(coce));
             ecc.Members.Add(cmp);
 
-            /*        //object IEnumerator.Current {
-                    //get {
-                    //        return Current;
-                    //    }
-                    //}
-
-                    cmp = new CodeMemberProperty();
-                    cmp.Attributes = MemberAttributes.VTableMask;
-                    cmp.Type = "object";
-                    cmp.Name = "IEnumerator.Current";
-                    cmp.GetStatements.Add(new CodeMethodReturnStatement(new CodeVariableReferenceExpression("Current")));
-                    ecc.Members.Add(cmp);
-            */
             //public bool MoveNext ()
             //{
             //    return ObjectEnumerator.MoveNext();
@@ -4588,7 +4509,6 @@ namespace System.Management
             cmm.Attributes = MemberAttributes.Public | MemberAttributes.Final | MemberAttributes.Override;
             cmm.Name = "MoveNext";
             cmm.ImplementationTypes.Add("System.Collections.IEnumerator");
-            //cmm.ImplementsType = "IEnumerator";
             cmm.ReturnType = new CodeTypeReference("System.Boolean");
             cmie = new CodeMethodInvokeExpression(
                 new CodeVariableReferenceExpression(strObjectEnumerator),
@@ -4607,7 +4527,6 @@ namespace System.Management
             cmm.Attributes = MemberAttributes.Public | MemberAttributes.Final | MemberAttributes.Override;
             cmm.Name = "Reset";
             cmm.ImplementationTypes.Add("System.Collections.IEnumerator");
-            //cmm.ImplementsType = "IEnumerator";
             cmie = new CodeMethodInvokeExpression(
                 new CodeVariableReferenceExpression(strObjectEnumerator),
                 "Reset"
@@ -4943,11 +4862,6 @@ namespace System.Management
                         cp = new VBCodeProvider();
                         break;
             
-                    //case CodeLanguage.JScript:
-                        //strProvider = "JScript.NET.";
-                        //cp = new JScriptCodeProvider();
-                        //break;
-
                     case CodeLanguage.CSharp:
                         strProvider = "C#.";
                         cp= new CSharpCodeProvider() ;
@@ -5030,7 +4944,6 @@ namespace System.Management
 
                 case CodeLanguage.VB:
                 case CodeLanguage.JScript:
-                    //                bUnsignedSupported = false;
                     break;
 
                 default:
@@ -5399,16 +5312,6 @@ namespace System.Management
         }
 
         /// <summary>
-        /// Stub function to get a particular string by ID.
-        /// Later can be replaced by a a function call to get string
-        /// from string resource
-        /// </summary>
-        static string GetString(string strToGet)
-        {
-            return string.Empty; //RC.GetString(strToGet);
-        }
-
-        /// <summary>
         /// Generates code for ManagementClassName Property
         /// </summary>
         private void GenerateClassNameProperty()
@@ -5556,8 +5459,6 @@ namespace System.Management
 
             cis.FalseStatements.Add(new CodeMethodReturnStatement(new CodeMethodInvokeExpression(cmre,coce)));
             cmm.Statements.Add(cis);
-
-            //        cmm.Statements.Add(new CodeMethodReturnStatement(new CodePrimitiveExpression(false)));
         
             cc.Members.Add(cmm);
         }
@@ -5580,7 +5481,6 @@ namespace System.Management
             cmm.ReturnType = new CodeTypeReference("System.Boolean");
 
             cmm.Parameters.Add(new CodeParameterDeclarationExpression(new CodeTypeReference(PublicNamesUsed["BaseObjClass"].ToString()),strTempObj));
-
 
             CodeExpression[] parms = new CodeExpression[]
             {
@@ -5989,7 +5889,6 @@ namespace System.Management
                     else
                     {
                         cmie = new CodeMethodInvokeExpression();
-                        //                    cmie.Method.TargetObject = new CodeVariableReferenceExpression(PublicNamesUsed["DateConverter"].ToString());
                         cmie.Parameters.Add(param);
                         cmie.Method.MethodName = PrivateNamesUsed["ToDateTimeMethod"].ToString();
                         return cmie;
@@ -6006,12 +5905,10 @@ namespace System.Management
                         coce.Parameters.Add(new CodePrimitiveExpression(0));
                         coce.Parameters.Add(new CodePrimitiveExpression(0));
                         return coce;
-                        //new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("System.TimeSpan"),"MinValue");
                     }
                     else
                     {
                         cmie = new CodeMethodInvokeExpression();
-                        //                    cmie.Method.TargetObject = new CodeVariableReferenceExpression(PublicNamesUsed["DateConverter"].ToString());
                         cmie.Parameters.Add(param);
                         cmie.Method.MethodName = PrivateNamesUsed["ToTimeSpanMethod"].ToString();
                         return cmie;
@@ -6040,7 +5937,6 @@ namespace System.Management
 
                     CodeMethodInvokeExpression cmie1 = new CodeMethodInvokeExpression();
                     cmie1.Parameters.Add(new CodeCastExpression(new CodeTypeReference("System.DateTime"),beginingExpression));
-                    //                cmie1.Method.TargetObject = new CodeVariableReferenceExpression(PublicNamesUsed["DateConverter"].ToString());
                     cmie1.Method.MethodName = PrivateNamesUsed["ToDMTFDateTimeMethod"].ToString();
                     return cmie1;
                     
@@ -6048,7 +5944,6 @@ namespace System.Management
 
                     CodeMethodInvokeExpression cmie2 = new CodeMethodInvokeExpression();
                     cmie2.Parameters.Add(new CodeCastExpression(new CodeTypeReference("System.TimeSpan"),beginingExpression));
-                    //                cmie2.Method.TargetObject = new CodeVariableReferenceExpression(PublicNamesUsed["DateConverter"].ToString());
                     cmie2.Method.MethodName = PrivateNamesUsed["ToDMTFTimeIntervalMethod"].ToString();
                     return cmie2;
                 
@@ -6475,13 +6370,6 @@ namespace System.Management
             //String tempString = String.Empty ;
             cmmdt.Statements.Add(new CodeVariableDeclarationStatement(new CodeTypeReference("System.String"),tempStr,new CodeFieldReferenceExpression(
                 new CodeTypeReferenceExpression("System.String"),"Empty")));
-
-            /*
-                if (dmtf == null)
-                {
-                    throw new System.ArgumentOutOfRangeException();
-                }
-            */
 
             CodeBinaryOperatorExpression cboe = new CodeBinaryOperatorExpression();
             cboe.Left = new CodeVariableReferenceExpression(dmtf);

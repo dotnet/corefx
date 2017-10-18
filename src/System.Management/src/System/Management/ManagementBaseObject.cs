@@ -260,11 +260,7 @@ namespace System.Management
         {
             if(null == managementObject)
                 return IntPtr.Zero;
-            //
-            // Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-            // its getter.
-            //
-            //managementObject.Initialize ( ) ;
+
             return (IntPtr)managementObject.wbemObject;
         }
 
@@ -273,11 +269,6 @@ namespace System.Management
         [SecurityPermission(SecurityAction.LinkDemand, SerializationFormatter=true)]
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            //
-            // Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-            // its getter.
-            //
-            // Initialize (  ) ;
             info.AddValue("wbemObject", wbemObject, typeof(IWbemClassObjectFreeThreaded));
             info.AssemblyName = typeof(ManagementBaseObject).Assembly.FullName;
             info.FullTypeName = typeof(ManagementBaseObject).ToString();
@@ -325,11 +316,6 @@ namespace System.Management
         /// </returns>
         public virtual Object Clone()
         {
-            //
-            // Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-            // its getter.
-            //
-            // Initialize ( ) ;
             IWbemClassObjectFreeThreaded theClone = null;
 
             int status = wbemObject.Clone_(out theClone);
@@ -440,11 +426,6 @@ namespace System.Management
                 int propertyFlavor = 0;
                 int status = (int)ManagementStatus.NoError;
 
-                //
-                // Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-                // its getter.
-                //
-                // Initialize ( ) ;
                 status = wbemObject.Get_("__SERVER", 0, ref serverName, ref propertyType, ref propertyFlavor);
                 
                 if (status == (int)ManagementStatus.NoError)
@@ -685,12 +666,6 @@ namespace System.Management
             
             try 
             {
-                //
-                // Removed Initialize call since CompareTo calls Initialize.
-                // its getter.
-                // 
-                // Initialize ( ) ;
-
                 if (obj is ManagementBaseObject)
                 {
                     result = CompareTo ((ManagementBaseObject)obj, ComparisonSettings.IncludeAll);
@@ -735,8 +710,6 @@ namespace System.Management
         /// </returns>
         public override int GetHashCode()
         {
-            //            return base.GetHashCode();
-
             //This implementation has to match the Equals() implementation. In Equals(), we use
             //the WMI CompareTo() which compares values of properties, qualifiers etc.
             //Probably the closest we can get is to take the MOF representation of the object and get it's hash code.
@@ -778,22 +751,11 @@ namespace System.Management
             if (null == otherObject)
                 throw new ArgumentNullException ("otherObject");
 
-            //
-            // Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-            // its getter.
-            //
-            // Initialize ( ) ;
             bool result = false;
 
             if (null != wbemObject)
             {
                 int status = (int) ManagementStatus.NoError;
-
-                //
-                // Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-                // its getter.
-                //
-                //otherObject.Initialize ( false ) ;
 
                 status = wbemObject.CompareTo_((int) settings, otherObject.wbemObject);
 
@@ -814,11 +776,6 @@ namespace System.Management
         {
             get 
             {
-                //
-                // Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-                // its getter.
-                //
-                // Initialize ( ) ;
                 object val = null;
                 int dummy1 = 0, dummy2 = 0;
                 int status = (int)ManagementStatus.NoError;
@@ -862,11 +819,6 @@ namespace System.Management
         {
             get 
             {
-                //
-                // Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-                // its getter.
-                //
-                // Initialize ( ) ;
                 return _IsClass(wbemObject);
             }
         }

@@ -8,18 +8,30 @@ namespace System.Management.Tests
 {
     public class ManagementObjectTests
     {
+        private static string s_systemDriveId = Environment.GetEnvironmentVariable("SystemDrive");
+
         [Fact]
         public void Win32_LogicalDisk()
         {
-            var deviceId = Environment.GetEnvironmentVariable("SystemDrive");
-            using (ManagementObject obj = new ManagementObject(
-                $"Win32_LogicalDisk.DeviceID=\"{deviceId}\""))
+            using (ManagementObject obj = new ManagementObject($"Win32_LogicalDisk.DeviceID=\"{s_systemDriveId}\""))
             {
                 obj.Get();
                 Assert.True(obj.Properties.Count > 0);
                 Assert.True(ulong.Parse(obj["Size"].ToString()) > 0);
                 var classPath = obj.ClassPath.Path;
                 Assert.Equal($@"\\{Environment.MachineName}\root\cimv2:Win32_LogicalDisk", classPath);
+            }
+        }
+
+        [Fact]
+        public void GetRelated_For_Win32_LogicalDisk()
+        {
+            using (ManagementObject obj = new ManagementObject($"Win32_LogicalDisk.DeviceID=\"{s_systemDriveId}\""))
+            using (ManagementObjectCollection relatedCollection = obj.GetRelated())
+            {
+                Assert.True(relatedCollection.Count > 0);
+                foreach (ManagementObject related in relatedCollection)
+                    Assert.False(string.IsNullOrWhiteSpace(related.ClassPath.NamespacePath));
             }
         }
     }

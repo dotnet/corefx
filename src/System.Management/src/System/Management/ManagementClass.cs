@@ -9,33 +9,6 @@ using System.CodeDom;
 
 namespace System.Management
 {
-    ///// <summary>
-    /////     <para>Defines the languages supported by the code generator.</para>
-    ///// </summary>
-    //public enum CodeLanguage
-    //{
-    //    /// <summary>
-    //    ///    A value for generating C# code.
-    //    /// </summary>
-    //    CSharp,
-    //    /// <summary>
-    //    ///    <para>A value for generating JScript code.</para>
-    //    /// </summary>
-    //    JScript,
-    //    /// <summary>
-    //    ///    <para>A value for generating Visual Basic code.</para>
-    //    /// </summary>
-    //    VB,
-    //    /// <summary>
-    //    ///    <para>A value for generating Visual J# code.</para>
-    //    /// </summary>
-    //    VJSharp,
-    //    /// <summary>
-    //    ///    <para>A value for generating Managed C++ code.</para>
-    //    /// </summary>
-    //    Mcpp
-    //};
-
 	//CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//	
 	/// <summary>
 	///    <para> Represents a CIM management class from WMI. CIM (Common Information Model) classes 
@@ -364,11 +337,6 @@ namespace System.Management
 			{
 				StringCollection result = new StringCollection();
 
-				//
-				// Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-				// its getter.
-				//
-				// Initialize ( ) ;
 				int dummy1 = 0, dummy2 = 0;
 				object val = null;
 
@@ -868,17 +836,10 @@ namespace System.Management
 
 			if (PutButNotGot)
 			{
-				//Path = new ManagementPath(putPath);
 				Get();
 				PutButNotGot = false;
 			}
 				
-			//
-			// Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-			// its getter.
-			//
-			// Initialize ( ) ;
-
 			IWbemClassObjectFreeThreaded newWbemClass = null;
 			int status = this.wbemObject.SpawnDerivedClass_(0, out newWbemClass);
 				
@@ -938,16 +899,9 @@ namespace System.Management
 
 			if (PutButNotGot)
 			{
-				//Path = new ManagementPath(putPath);
 				Get();
 				PutButNotGot = false;
 			}
-
-			//
-			// Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-			// its getter.
-			//
-			// Initialize ( ) ;
 
 			IWbemClassObjectFreeThreaded newWbemInstance = null;
 			int status = this.wbemObject.SpawnInstance_(0, out newWbemInstance);
@@ -978,12 +932,6 @@ namespace System.Management
 		/// </remarks>
 		public override Object Clone()
 		{
-			//
-			// Removed Initialize call since wbemObject is a property that will call Initialize ( true ) on
-			// its getter.
-			//
-			// Initialize ( ) ;
-			
 			IWbemClassObjectFreeThreaded theClone = null;
 			int status = wbemObject.Clone_(out theClone);
 
