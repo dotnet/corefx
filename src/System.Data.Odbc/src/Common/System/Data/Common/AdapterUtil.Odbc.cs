@@ -211,6 +211,11 @@ namespace System.Data.Common
             return InvalidOperation(SR.GetString(SR.ADP_NoConnectionString));
         }
 
+        internal static Exception MethodNotImplemented([CallerMemberName] string methodName = "")
+        {
+            return System.NotImplemented.ByDesignWithMessage(methodName);
+        }
+
         //
         // : DbConnectionOptions, DataAccess, SqlClient
         //

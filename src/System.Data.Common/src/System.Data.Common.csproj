@@ -153,7 +153,6 @@
     <Compile Include="System\Data\Common\UInt64Storage.cs" />
     <Compile Include="System\Data\Common\AdapterSwitches.cs" />
     <Compile Include="System\Data\Common\AdapterUtil.Common.cs" />
-    <Compile Include="$(CommonPath)\System\NotImplemented.cs" />
     <Compile Include="$(CommonPath)\System\Data\Common\AdapterUtil.cs">
       <Link>System\Data\Common\AdapterUtil.cs</Link>
     </Compile>

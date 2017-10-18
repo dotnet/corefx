@@ -196,6 +196,11 @@ namespace System.Data.Common
             return InvalidOperation(SR.GetString(SR.ADP_NoConnectionString));
         }
 
+        internal static Exception MethodNotImplemented([CallerMemberName] string methodName = "")
+        {
+            return NotImplemented.ByDesignWithMessage(methodName);
+        }
+
         internal static Exception QueryFailed(string collectionName, Exception e)
         {
             return InvalidOperation(SR.GetString(SR.MDF_QueryFailed, collectionName), e);
