@@ -53,7 +53,7 @@ namespace System.Data.Odbc
         public override void GetObjectData(SerializationInfo si, StreamingContext context)
         {
             base.GetObjectData(si, context);
-            si.AddValue("odbcRetcode", (ODBC32.RETCODE)100, typeof(ODBC32.RETCODE)); // NO DATA
+            si.AddValue("odbcRetcode", default(ODBC32.RETCODE), typeof(ODBC32.RETCODE)); // Using default value of ODBC32.RETCODE
             si.AddValue("odbcErrors", _odbcErrors, typeof(OdbcErrorCollection));
         }
 
