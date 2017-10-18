@@ -56,7 +56,12 @@ namespace System.Data.SqlClient
             // Writing sqlerrors to base exception data table
             for (int i = 0; i < Errors.Count; i++)
             {
-                Data.Add("SqlError " + (i + 1), Errors[i].ToString());
+                string key = "SqlError " + (i + 1);
+                if (Data.Contains(key))
+                {
+                    Data.Remove(key);
+                }
+                Data.Add(key, Errors[i].ToString());
             }
         }
 
