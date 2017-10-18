@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.DirectoryServices.Tests;
 using System.Linq;
@@ -14,30 +15,27 @@ namespace System.DirectoryServices.AccountManagement.Tests
     {
         internal static bool IsLdapConfigurationExist => LdapConfiguration.Configuration != null;
         internal static bool IsActiveDirectoryServer => IsLdapConfigurationExist && LdapConfiguration.Configuration.IsActiveDirectoryServer;
+        internal static bool IsDomainJoinedClient => !Environment.MachineName.Equals(Environment.UserDomainName, StringComparison.OrdinalIgnoreCase);
 
         [ConditionalFact(nameof(IsActiveDirectoryServer))]
-        public void TestCurrentUse()
+        public void TestCurrentUser()
         {
             using (PrincipalContext context = DomainContext)
             using (UserPrincipal p = FindUser(LdapConfiguration.Configuration.UserNameWithNoDomain, context))
             {
                 Assert.NotNull(p);
                 Assert.Equal(LdapConfiguration.Configuration.UserNameWithNoDomain, p.Name);
+            }
+        }
 
-                using (UserPrincipal cu = UserPrincipal.Current)
-                {
-                    try
-                    {
-                        // UserPrincipal.Current get the context from the current thread.
-                        PrincipalContext pc = cu.Context;
-                        Assert.NotEqual(pc.Name, p.Context.Name);
-                    }
-                    catch
-                    {
-                        // ignore the exception here as UserPrincipal.Current.Context can throw for
-                        // non joined domain machines
-                    }
-                }
+        [ConditionalFact(nameof(IsActiveDirectoryServer), nameof(IsDomainJoinedClient))]
+        public void TestCurrentUserContext()
+        {
+            using (PrincipalContext context = DomainContext)
+            using (UserPrincipal p = FindUser(LdapConfiguration.Configuration.UserNameWithNoDomain, context))
+            using (UserPrincipal cu = UserPrincipal.Current)
+            {
+                Assert.NotEqual(cu.Context.Name, p.Context.Name);
             }
         }
 
@@ -67,24 +65,28 @@ namespace System.DirectoryServices.AccountManagement.Tests
         [ConditionalFact(nameof(IsActiveDirectoryServer))]
         public void TestAddingUser()
         {
-            DeleteUser("corefxtest1");
-            DeleteUser("corefxtest2");
-            DeleteUser("corefxtest3");
+            UserData u1 = UserData.GenerateUserData("CoreFxUser1");
+            UserData u2 = UserData.GenerateUserData("CoreFxUser2");
+            UserData u3 = UserData.GenerateUserData("CoreFxUser3");
+
+            DeleteUser(u1.Name);
+            DeleteUser(u2.Name);
+            DeleteUser(u3.Name);
 
             try
             {
                 using (PrincipalContext context = DomainContext)
-                using (UserPrincipal p1 = CreateUser(context, "corefxtest1", "netcore#1pass", "corefx1", "test1", "CoreFx Test User 1"))
-                using (UserPrincipal p2 = CreateUser(context, "corefxtest2", "netcore#2pass", "corefx2", "test2", "CoreFx Test User 2"))
-                using (UserPrincipal p3 = CreateUser(context, "corefxtest3", "netcore#3pass", "corefx3", "test3", "CoreFx Test User 3"))
+                using (UserPrincipal p1 = CreateUser(context, u1))
+                using (UserPrincipal p2 = CreateUser(context, u2))
+                using (UserPrincipal p3 = CreateUser(context, u3))
                 {
                     Assert.NotNull(p1);
                     Assert.NotNull(p2);
                     Assert.NotNull(p3);
 
-                    ValidateRecentAddedUser(context, "corefxtest1", "corefx1", "test1", "CoreFx Test User 1");
-                    ValidateRecentAddedUser(context, "corefxtest2", "corefx2", "test2", "CoreFx Test User 2");
-                    ValidateRecentAddedUser(context, "corefxtest3", "corefx3", "test3", "CoreFx Test User 3");
+                    ValidateRecentAddedUser(context, u1);
+                    ValidateRecentAddedUser(context, u2);
+                    ValidateRecentAddedUser(context, u3);
 
                     ValidateUserUsingPrincipal(context, p1);
                     ValidateUserUsingPrincipal(context, p2);
@@ -93,33 +95,37 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
             finally
             {
-                DeleteUser("corefxtest1");
-                DeleteUser("corefxtest2");
-                DeleteUser("corefxtest3");
+                DeleteUser(u1.Name);
+                DeleteUser(u2.Name);
+                DeleteUser(u3.Name);
             }
         }
 
         [ConditionalFact(nameof(IsActiveDirectoryServer))]
         public void TestAddingGroup()
         {
-            DeleteGroup("corefxgroup1");
-            DeleteGroup("corefxgroup2");
-            DeleteGroup("corefxgroup3");
+            GroupData gd1 = GroupData.GenerateGroupData("CoreFXGroup1");
+            GroupData gd2 = GroupData.GenerateGroupData("CoreFXGroup2");
+            GroupData gd3 = GroupData.GenerateGroupData("CoreFXGroup3");
+
+            DeleteGroup(gd1.Name);
+            DeleteGroup(gd2.Name);
+            DeleteGroup(gd3.Name);
 
             try
             {
                 using (PrincipalContext context = DomainContext)
-                using (GroupPrincipal p1 = CreateGroup(context, "corefxgroup1", "CoreFX Test Group 1", "CoreFX Group 1"))
-                using (GroupPrincipal p2 = CreateGroup(context, "corefxgroup2", "CoreFX Test Group 2", "CoreFX Group 2"))
-                using (GroupPrincipal p3 = CreateGroup(context, "corefxgroup3", "CoreFX Test Group 3", "CoreFX Group 3"))
+                using (GroupPrincipal p1 = CreateGroup(context, gd1))
+                using (GroupPrincipal p2 = CreateGroup(context, gd2))
+                using (GroupPrincipal p3 = CreateGroup(context, gd3))
                 {
                     Assert.NotNull(p1);
                     Assert.NotNull(p2);
                     Assert.NotNull(p3);
 
-                    ValidateRecentAddedGroup(context, "corefxgroup1", "CoreFX Test Group 1", "CoreFX Group 1");
-                    ValidateRecentAddedGroup(context, "corefxgroup2", "CoreFX Test Group 2", "CoreFX Group 2");
-                    ValidateRecentAddedGroup(context, "corefxgroup3", "CoreFX Test Group 3", "CoreFX Group 3");
+                    ValidateRecentAddedGroup(context, gd1);
+                    ValidateRecentAddedGroup(context, gd2);
+                    ValidateRecentAddedGroup(context, gd3);
 
                     ValidateGroupUsingPrincipal(context, p1);
                     ValidateGroupUsingPrincipal(context, p2);
@@ -128,26 +134,29 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
             finally
             {
-                DeleteGroup("corefxgroup1");
-                DeleteGroup("corefxgroup2");
-                DeleteGroup("corefxgroup3");
+                DeleteGroup(gd1.Name);
+                DeleteGroup(gd2.Name);
+                DeleteGroup(gd3.Name);
             }
         }
 
         [ConditionalFact(nameof(IsActiveDirectoryServer))]
         public void TestAddingUserToAGroup()
         {
-            DeleteUser("corefxchilduser1");
-            DeleteGroup("corefxgroupcontainer1");
+            UserData u1 = UserData.GenerateUserData("CoreFxUser4");
+            GroupData g1 = GroupData.GenerateGroupData("CoreFXGroup4");
+
+            DeleteUser(u1.Name);
+            DeleteGroup(g1.Name);
 
             try
             {
                 using (PrincipalContext context = DomainContext)
-                using (UserPrincipal user = CreateUser(context, "corefxchilduser1", "netcore#7pass", "corefxchilduser1", "testchild1", "CoreFx Test Child User 1"))
-                using (GroupPrincipal group = CreateGroup(context, "corefxgroupcontainer1", "CoreFX Group Container 1", "CoreFX Test Group Container 1"))
+                using (UserPrincipal user = CreateUser(context, u1))
+                using (GroupPrincipal group = CreateGroup(context, g1))
                 {
-                    Assert.Equal("corefxchilduser1", user.Name);
-                    Assert.Equal("corefxgroupcontainer1", group.Name);
+                    Assert.Equal(u1.Name, user.Name);
+                    Assert.Equal(g1.Name, group.Name);
 
                     // First, check the user is not in the group
 
@@ -174,55 +183,61 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
             finally
             {
-                DeleteUser("corefxchilduser1");
-                DeleteGroup("corefxgroupcontainer1");
+                DeleteUser(u1.Name);
+                DeleteGroup(g1.Name);
             }
         }
 
         [ConditionalFact(nameof(IsActiveDirectoryServer))]
         public void TestDeleteUserAndGroup()
         {
-            DeleteUser("corefxchilduser2");
-            DeleteGroup("corefxgroupcontainer2");
+            UserData u1 = UserData.GenerateUserData("CoreFxUser5");
+            GroupData g1 = GroupData.GenerateGroupData("CoreFXGroup5");
+
+            DeleteUser(u1.Name);
+            DeleteGroup(g1.Name);
 
             try
             {
                 using (PrincipalContext context = DomainContext)
                 {
-                    using (UserPrincipal up = FindUser("corefxchilduser2", context)) { Assert.Null(up); }
-                    using (GroupPrincipal gp = FindGroup("corefxgroupcontainer2", context)) { Assert.Null(gp); }
+                    using (UserPrincipal up = FindUser(u1.Name, context)) { Assert.Null(up); }
+                    using (GroupPrincipal gp = FindGroup(g1.Name, context)) { Assert.Null(gp); }
 
-                    using (UserPrincipal user = CreateUser(context, "corefxchilduser2", "netcore#8pass", "corefxchilduser2", "testchild2", "CoreFx Test Child User 2"))
-                    using (GroupPrincipal group = CreateGroup(context, "corefxgroupcontainer2", "CoreFX Group Container 2", "CoreFX Test Group Container 2"))
+                    using (UserPrincipal user = CreateUser(context, u1))
+                    using (GroupPrincipal group = CreateGroup(context, g1))
                     {
-                        using (UserPrincipal up = FindUser("corefxchilduser2", context))
+                        using (UserPrincipal up = FindUser(u1.Name, context))
                         {
                             Assert.NotNull(up);
                             up.Delete();
                         }
-                        using (GroupPrincipal gp = FindGroup("corefxgroupcontainer2", context))
+                        using (GroupPrincipal gp = FindGroup(g1.Name, context))
                         {
                             Assert.NotNull(gp);
                             gp.Delete();
                         }
                     }
 
-                    using (UserPrincipal up = FindUser("corefxchilduser2", context)) { Assert.Null(up); }
-                    using (GroupPrincipal gp = FindGroup("corefxgroupcontainer2", context)) { Assert.Null(gp); }
+                    using (UserPrincipal up = FindUser(u1.Name, context)) { Assert.Null(up); }
+                    using (GroupPrincipal gp = FindGroup(g1.Name, context)) { Assert.Null(gp); }
                 }
             }
             finally
             {
-                DeleteUser("corefxchilduser2");
-                DeleteGroup("corefxgroupcontainer2");
+                DeleteUser(u1.Name);
+                DeleteGroup(g1.Name);
             }
         }
 
         [ConditionalFact(nameof(IsActiveDirectoryServer))]
         public void TestNegativeCases()
         {
-            DeleteUser("corefxchilduser3");
-            DeleteGroup("corefxgroupcontainer3");
+            UserData u1 = UserData.GenerateUserData("CoreFxUser6");
+            GroupData g1 = GroupData.GenerateGroupData("CoreFXGroup6");
+
+            DeleteUser(u1.Name);
+            DeleteGroup(g1.Name);
 
             try
             {
@@ -235,11 +250,11 @@ namespace System.DirectoryServices.AccountManagement.Tests
 
                 using (PrincipalContext context = DomainContext)
                 {
-                    using (UserPrincipal user = CreateUser(context, "corefxchilduser3", "netcore#9pass", "corefxchilduser3", "testchild3", "CoreFx Test Child User 3"))
-                    using (GroupPrincipal group = CreateGroup(context, "corefxgroupcontainer3", "CoreFX Group Container 3", "CoreFX Test Group Container 3"))
+                    using (UserPrincipal user = CreateUser(context, u1))
+                    using (GroupPrincipal group = CreateGroup(context, g1))
                     {
-                        Assert.Throws<PrincipalExistsException>(() => CreateUser(context, "corefxchilduser3", "netcore#9pass", "corefxchilduser3", "testchild3", "CoreFx Test Child User 3"));
-                        Assert.Throws<PrincipalExistsException>(() => CreateGroup(context, "corefxgroupcontainer3", "CoreFX Group Container 3", "CoreFX Test Group Container 3"));
+                        Assert.Throws<PrincipalExistsException>(() => CreateUser(context, u1));
+                        Assert.Throws<PrincipalExistsException>(() => CreateGroup(context, g1));
 
                         group.Members.Add(context, IdentityType.Name, user.Name);
                         group.Save();
@@ -259,8 +274,8 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
             finally
             {
-                DeleteUser("corefxchilduser3");
-                DeleteGroup("corefxgroupcontainer3");
+                DeleteUser(u1.Name);
+                DeleteGroup(g1.Name);
             }
         }
 
@@ -295,58 +310,86 @@ namespace System.DirectoryServices.AccountManagement.Tests
         [ConditionalFact(nameof(IsActiveDirectoryServer))]
         public void TestUpdateUserAndGroupData()
         {
-            DeleteUser("corefxchilduser4");
-            DeleteGroup("corefxgroupcontainer4");
+            UserData u1 = UserData.GenerateUserData("CoreFxUser7");
+            GroupData g1 = GroupData.GenerateGroupData("CoreFXGroup7");
+
+            DeleteUser(u1.Name);
+            DeleteGroup(g1.Name);
 
             try
             {
                 using (PrincipalContext context = DomainContext)
-                using (UserPrincipal user = CreateUser(context, "corefxchilduser4", "netcore#5pass", "corefxchilduser4", "testchild4", "CoreFx Test Child User 4"))
-                using (GroupPrincipal group = CreateGroup(context, "corefxgroupcontainer4", "CoreFX Group Container 4", "CoreFX Test Group Container 4"))
+                using (UserPrincipal user = CreateUser(context, u1))
+                using (GroupPrincipal group = CreateGroup(context, g1))
                 {
-                    using (UserPrincipal up = FindUser("corefxchilduser4", context)) { Assert.Equal(user.DisplayName, up.DisplayName); }
-                    using (GroupPrincipal gp = FindGroup("corefxgroupcontainer4", context)) { Assert.Equal(group.DisplayName, gp.DisplayName); }
+                    using (UserPrincipal up = FindUser(u1.Name, context)) { Assert.Equal(user.DisplayName, up.DisplayName); }
+                    using (GroupPrincipal gp = FindGroup(g1.Name, context)) { Assert.Equal(group.DisplayName, gp.DisplayName); }
 
                     user.DisplayName = "Updated CoreFx Test Child User 4";
                     user.Save();
                     group.DisplayName = "Updated CoreFX Test Group Container 4";
                     group.Save();
 
-                    using (UserPrincipal up = FindUser("corefxchilduser4", context)) { Assert.Equal("Updated CoreFx Test Child User 4", up.DisplayName); }
-                    using (GroupPrincipal gp = FindGroup("corefxgroupcontainer4", context)) { Assert.Equal("Updated CoreFX Test Group Container 4", gp.DisplayName); }
+                    using (UserPrincipal up = FindUser(u1.Name, context)) { Assert.Equal("Updated CoreFx Test Child User 4", up.DisplayName); }
+                    using (GroupPrincipal gp = FindGroup(g1.Name, context)) { Assert.Equal("Updated CoreFX Test Group Container 4", gp.DisplayName); }
                 }
             }
             finally
             {
-                DeleteUser("corefxchilduser4");
-                DeleteGroup("corefxgroupcontainer4");
+                DeleteUser(u1.Name);
+                DeleteGroup(g1.Name);
             }
         }
 
-        private void ValidateRecentAddedUser(PrincipalContext context, string userName, string firstName, string lastName, string displayName)
+        [ConditionalFact(nameof(IsActiveDirectoryServer))]
+        public void TestCredentials()
         {
-            using (UserPrincipal p = FindUser(userName, context))
+            UserData u1 = UserData.GenerateUserData("CoreFxUser8");
+
+            DeleteUser(u1.Name);
+
+            try
             {
-                Assert.NotNull(p);
-                Assert.Equal(userName, p.Name);
-                Assert.Equal(firstName, p.GivenName);
-                Assert.Equal(lastName, p.Surname);
-                Assert.Equal(displayName, p.DisplayName);
-                Assert.True(p.DistinguishedName.IndexOf(userName, StringComparison.OrdinalIgnoreCase) >= 0);
-                Assert.Equal(userName, p.SamAccountName);
+                using (PrincipalContext context = DomainContext)
+                using (UserPrincipal p1 = CreateUser(context, u1))
+                {
+                    Assert.True(context.ValidateCredentials(u1.Name, u1.Password));
+                    Assert.True(context.ValidateCredentials(u1.Name, u1.Password, ContextOptions.ServerBind));
+
+                    Assert.Throws<System.DirectoryServices.Protocols.LdapException>(() => context.ValidateCredentials(u1.Name, "WrongPassword"));
+                    Assert.Throws<System.DirectoryServices.Protocols.LdapException>(() => context.ValidateCredentials("WrongUser", u1.Password));
+                }
+            }
+            finally
+            {
+                DeleteUser(u1.Name);
             }
         }
 
-        private void ValidateRecentAddedGroup(PrincipalContext context, string groupName, string description, string displayName)
+        private void ValidateRecentAddedUser(PrincipalContext context, UserData userData)
         {
-            using (GroupPrincipal p = FindGroup(groupName, context))
+            using (UserPrincipal p = FindUser(userData.Name, context))
             {
                 Assert.NotNull(p);
-                Assert.Equal(groupName, p.Name);
-                Assert.Equal(description, p.Description);
-                Assert.Equal(displayName, p.DisplayName);
-                Assert.Equal(groupName, p.SamAccountName);
-                Assert.True(p.DistinguishedName.IndexOf(groupName, StringComparison.OrdinalIgnoreCase) >= 0);
+                Assert.Equal(userData.Name, p.Name);
+                Assert.Equal(userData.FirstName, p.GivenName);
+                Assert.Equal(userData.LastName, p.Surname);
+                Assert.Equal(userData.DisplayName, p.DisplayName);
+                Assert.True(p.DistinguishedName.IndexOf(userData.Name, StringComparison.OrdinalIgnoreCase) >= 0);
+                Assert.Equal(userData.Name, p.SamAccountName);
+            }
+        }
+
+        private void ValidateRecentAddedGroup(PrincipalContext context, GroupData groupData)
+        {
+            using (GroupPrincipal p = FindGroup(groupData.Name, context))
+            {
+                Assert.NotNull(p);
+                Assert.Equal(groupData.Name, p.Name);
+                Assert.Equal(groupData.Description, p.Description);
+                Assert.Equal(groupData.DisplayName, p.DisplayName);
+                Assert.Equal(groupData.Name, p.SamAccountName);
+                Assert.True(p.DistinguishedName.IndexOf(groupData.Name, StringComparison.OrdinalIgnoreCase) >= 0);
             }
         }
 
@@ -386,23 +429,23 @@ namespace System.DirectoryServices.AccountManagement.Tests
             }
         }
 
-        private UserPrincipal CreateUser(PrincipalContext context, string userName, string password, string firstName, string lastName, string displayName)
+        private UserPrincipal CreateUser(PrincipalContext context, UserData userData)
         {
-            UserPrincipal user = new UserPrincipal(context, userName, password, true);
+            UserPrincipal user = new UserPrincipal(context, userData.Name, userData.Password, true);
 
             // assign some properties to the user principal
-            user.GivenName = firstName;
-            user.Surname = lastName;
-            user.DisplayName = displayName;
+            user.GivenName = userData.FirstName;
+            user.Surname = userData.LastName;
+            user.DisplayName = userData.DisplayName;
             user.Save();
             return user;
         }
 
-        private GroupPrincipal CreateGroup(PrincipalContext context, string groupName, string description, string displayName)
+        private GroupPrincipal CreateGroup(PrincipalContext context, GroupData groupData)
         {
-            GroupPrincipal group = new GroupPrincipal(context, groupName);
-            group.Description = description;
-            group.DisplayName = displayName;
+            GroupPrincipal group = new GroupPrincipal(context, groupData.Name);
+            group.Description = groupData.Description;
+            group.DisplayName = groupData.DisplayName;
             group.Save();
             return group;
         }
@@ -464,12 +507,42 @@ namespace System.DirectoryServices.AccountManagement.Tests
                                                         LdapConfiguration.Configuration.ServerName,
                                                         LdapConfiguration.Configuration.UserName,
                                                         LdapConfiguration.Configuration.Password);
+    }
 
-        private PrincipalContext MachineContext => new PrincipalContext(
-                                                        ContextType.Machine,
-                                                        LdapConfiguration.Configuration.ServerName,
-                                                        LdapConfiguration.Configuration.UserName,
-                                                        LdapConfiguration.Configuration.Password);
+    internal class UserData
+    {
+        internal static UserData GenerateUserData(string name)
+        {
+            UserData ud = new UserData();
+            ud.Name = name;
+            ud.Password = Guid.NewGuid().ToString() + "#1aZ";
+            ud.FirstName = "First " + name;
+            ud.LastName = "Last " + name;
+            ud.DisplayName = "Display " + name;
+            return ud;
+        }
+
+        internal string Name        { get; set; }
+        internal string Password    { get; set; }
+        internal string FirstName   { get; set; }
+        internal string LastName    { get; set; }
+        internal string DisplayName { get; set; }
+    }
+
+    internal class GroupData
+    {
+        internal static GroupData GenerateGroupData(string name)
+        {
+            GroupData gd = new GroupData();
+            gd.Name = name;
+            gd.Description = "Description " + name;
+            gd.DisplayName = "Display " + name;
+            return gd;
+        }
+
+        internal string Name        { get; set; }
+        internal string Description { get; set; }
+        internal string DisplayName { get; set; }
     }
 
     [DirectoryObjectClass("user")]
