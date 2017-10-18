@@ -9,6 +9,8 @@
     <!-- Although we have a netstandard configuration, we know we are not currently UAP compatible-->
     <UWPCompatible>false</UWPCompatible>
     <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsWindows)' != 'true'">true</GeneratePlatformNotSupportedAssembly>
+    <!-- When generating PNSE assembly disable CA1821 since finalizers are being generated empty -->
+    <NoWarn Condition="'$(TargetsWindows)' != 'true'">$(NoWarn);CA1821</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
