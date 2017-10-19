@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if FEATURE_SERIALIZATION
 using System.Runtime.Serialization;
+#endif
 
 namespace System.IO
 {
@@ -10,8 +12,10 @@ namespace System.IO
     /// The FileFormatException class is thrown when an input file or a data stream that is supposed to conform
     /// to a certain file format specification is malformed.
     /// </summary>
+#if FEATURE_SERIALIZATION
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("WindowsBase, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
+#endif
     public class FileFormatException : FormatException
     {
         /// <summary>
@@ -113,6 +117,7 @@ namespace System.IO
             _sourceUri = sourceUri;
         }
 
+#if FEATURE_SERIALIZATION
         protected FileFormatException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             string sourceUriString = info.GetString("SourceUri");
@@ -130,6 +135,7 @@ namespace System.IO
             base.GetObjectData(info, context);
             info.AddValue("SourceUri", SourceUri?.GetComponents(UriComponents.SerializationInfoString, UriFormat.SafeUnescaped), typeof(string));
         }
+#endif
 
         /// <summary>
         /// Returns the name of a file that caused this exception. This property may be equal to an empty string

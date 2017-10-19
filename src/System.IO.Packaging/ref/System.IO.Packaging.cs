@@ -17,8 +17,6 @@ namespace System.IO
         public FileFormatException(System.Uri sourceUri, System.Exception innerException) { }
         public FileFormatException(System.Uri sourceUri, string message) { }
         public FileFormatException(System.Uri sourceUri, string message, System.Exception innerException) { }
-        protected FileFormatException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public System.Uri SourceUri { get { throw null; } }
     }
 }
