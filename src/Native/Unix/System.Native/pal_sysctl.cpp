@@ -20,15 +20,6 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 
-#ifndef __linux__
-extern "C" int32_t SystemNative_SysctlByName(const char* name, void* value, size_t* len)
-{
-    void* newp = nullptr;
-    size_t newlen = 0;
-    return sysctlbyname(name, value, len, newp, newlen);
-}
-#endif
-
 extern "C" int32_t SystemNative_Sysctl(int* name, unsigned int namelen, void* value, size_t* len)
 {
     void* newp = nullptr;

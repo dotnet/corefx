@@ -8,7 +8,5 @@
 #include "pal_errno.h"
 
 
-extern "C" int32_t SystemNative_SysctlByName(const char* name, void* value, size_t* len);
-
 extern "C" int32_t SystemNative_Sysctl(int* name, unsigned int namelen, void* value, size_t* len);
 
