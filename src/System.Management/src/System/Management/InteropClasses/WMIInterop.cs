@@ -736,11 +736,10 @@ namespace System.Management
     ///[TypeLibTypeAttribute(0x0200)]
     [GuidAttribute("7C857801-7381-11CF-884D-00AA004B2E24")]
     [InterfaceTypeAttribute(0x0001)]
-    [System.Security.SuppressUnmanagedCodeSecurity]
     [ComImport]
     interface IWbemObjectSink
     {
-        [SuppressUnmanagedCodeSecurity, PreserveSig] int Indicate_([In] Int32 lObjectCount, [In][MarshalAs(UnmanagedType.LPArray)] IntPtr[] apObjArray);
+        [PreserveSig] int Indicate_([In] Int32 lObjectCount, [In][MarshalAs(UnmanagedType.LPArray)] IntPtr[] apObjArray);
         [PreserveSig] int SetStatus_([In] Int32 lFlags, [In][MarshalAs(UnmanagedType.Error)]  Int32   hResult, [In][MarshalAs(UnmanagedType.BStr)]  string   strParam, [In] IntPtr pObjParam);
     }
 
@@ -1913,7 +1912,7 @@ namespace System.Management
 
 
         // Import of CoGetObjectContext
-        [ResourceExposure( ResourceScope.None),SuppressUnmanagedCodeSecurity, DllImport("ole32.dll")]
+        [ResourceExposure( ResourceScope.None), DllImport("ole32.dll")]
         static extern int CoGetObjectContext([In] ref Guid riid, [Out] out IntPtr pUnk);
 
         // A variable that is initialized once to tell us if we are on

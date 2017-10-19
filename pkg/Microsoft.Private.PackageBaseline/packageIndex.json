@@ -2286,8 +2286,9 @@
       }
     },
     "System.Management": {
-      "InboxOn": {
-        "net45": "4.0.0.0"
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.5.0"
       }
     },
     "System.Management.Instrumentation": {
