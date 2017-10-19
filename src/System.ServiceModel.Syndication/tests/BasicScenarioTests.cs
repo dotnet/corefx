@@ -700,34 +700,27 @@ namespace System.ServiceModel.Syndication.Tests
             string filePath = @"brief-entry-noerror.xml";
             string serializeFilePath = Path.GetTempFileName();
 
-            XmlReader reader = null;
-            XmlWriter writer = null;
-
             try
             {
-                reader = XmlReader.Create(filePath, new XmlReaderSettings() { Async = true });
-                SyndicationItem feedObjct = await SyndicationItem.LoadAsync(reader);
-                reader.Close();
+                SyndicationItem feedObjct = null;
+                using (XmlReader reader = XmlReader.Create(filePath, new XmlReaderSettings() { Async = true }))
+                {
+                    feedObjct = await SyndicationItem.LoadAsync(reader);
+                    reader.Close();
+                }
 
-                writer = XmlWriter.Create(serializeFilePath, new XmlWriterSettings() { Async = true });
-                Atom10ItemFormatter atomformatter = new Atom10ItemFormatter(feedObjct);
-                await atomformatter.WriteToAsync(writer);
-                writer.Close();
-
+                using (XmlWriter writer = XmlWriter.Create(serializeFilePath, new XmlWriterSettings() { Async = true }))
+                {
+                    Atom10ItemFormatter atomformatter = new Atom10ItemFormatter(feedObjct);
+                    await atomformatter.WriteToAsync(writer);
+                    writer.Close();
+                }
                 // compare file filePath and serializeFilePath
                 XmlDiff diff = new XmlDiff();
                 Assert.True(diff.Compare(filePath, serializeFilePath));
             }
             finally
             {
-                if (reader != null)
-                {
-                    reader.Dispose();
-                }
-                if (writer != null)
-                {
-                    writer.Dispose();
-                }
                 File.Delete(serializeFilePath);
             }
         }
@@ -739,26 +732,20 @@ namespace System.ServiceModel.Syndication.Tests
             SyndicationItem item1 = new SyndicationItem("SyndicationFeed released for .net Core", "A lot of text describing the release of .net core feature", new Uri("http://Contoso.com/news/path"));
             string serializeFilePath = Path.GetTempFileName();
 
-            XmlWriter writer = null;
-
             try
             {
-                writer = XmlWriter.Create(serializeFilePath, new XmlWriterSettings() { Async = true });
-
-                Atom10ItemFormatter f = new Atom10ItemFormatter(item1);
-                Task task = f.WriteToAsync(writer);
-                Task.WhenAll(task);
-                writer.Close();
-
+                using (XmlWriter writer = XmlWriter.Create(serializeFilePath, new XmlWriterSettings()))
+                {
+                    Atom10ItemFormatter f = new Atom10ItemFormatter(item1);
+                    Task task = f.WriteToAsync(writer);
+                    Task.WhenAll(task);
+                    writer.Close();
+                }
                 //TODO:
                 // Check file content
             }
             finally
             {
-                if(writer !=null)
-                {
-                    writer.Dispose();
-                }
                 File.Delete(serializeFilePath);
             }
         }
@@ -770,71 +757,68 @@ namespace System.ServiceModel.Syndication.Tests
             SyndicationItem item1 = new SyndicationItem("SyndicationFeed released for .net Core", "A lot of text describing the release of .net core feature", new Uri("http://Contoso.com/news/path"));
             string serializeFilePath = Path.GetTempFileName();
 
-            XmlWriter writer = null;
-
             try
             {
-                writer = XmlWriter.Create(serializeFilePath, new XmlWriterSettings());
-                Atom10ItemFormatter f = new Atom10ItemFormatter(item1);
-                await f.WriteToAsync(writer);
-                writer.Close();
-
+                using (XmlWriter writer = XmlWriter.Create(serializeFilePath, new XmlWriterSettings()))
+                {
+                    Atom10ItemFormatter f = new Atom10ItemFormatter(item1);
+                    await f.WriteToAsync(writer);
+                    writer.Close();
+                }
                 //TODO:
                 // Check file content
             }
             finally
             {
-                if (writer != null)
-                {
-                    writer.Dispose();
-                }
                 File.Delete(serializeFilePath);
             }
         }
 
         [Fact]
-        public static async Task AtomFeedPositiveTest()
+        public static async Task AtomFeedPositiveTestAsync()
         {
-            string filePath = @"absolute_rel.xml";
-            string serializeFilePath = Path.GetTempFileName();
-            XmlReader reader = null;
-            XmlWriter writer = null;
+            string dataFile = @"atom_feeds.dat";
+            List<string> fileList = GetTestFilesForFeedTest(dataFile);
 
-            try
+            foreach (string file in fileList)
             {
-                reader = XmlReader.Create(filePath, new XmlReaderSettings());
-                CancellationToken ct = new CancellationToken();
-                SyndicationFeed feedObjct = await SyndicationFeed.LoadAsync(reader, ct);
+                string serializeFilePath = Path.GetTempFileName();
 
-                writer = XmlWriter.Create(serializeFilePath);
-                Atom10FeedFormatter f = new Atom10FeedFormatter(feedObjct);
-                await f.WriteToAsync(writer, ct);
-                writer.Close();
+                try
+                {
+                    SyndicationFeed feedObjct;
+                    CancellationToken ct = new CancellationToken();
 
-                CompareHelper ch = new CompareHelper();
-                ch.Diff = new XmlDiff()
-                {
-                    Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
-                };
-                ch.AllowableDifferences = GetAtomFeedPositiveTestAllowableDifferences();
-                Assert.True(ch.Compare(filePath, serializeFilePath));
-            }
-            finally
-            {
-                if (reader != null)
-                {
-                    reader.Dispose();
+                    using (XmlReader reader = XmlReader.Create(file, new XmlReaderSettings()))
+                    {
+                        feedObjct = await SyndicationFeed.LoadAsync(reader, ct);
+                        reader.Close();
+                    }
+
+                    using (XmlWriter writer = XmlWriter.Create(serializeFilePath))
+                    {
+                        Atom10FeedFormatter f = new Atom10FeedFormatter(feedObjct);
+                        await f.WriteToAsync(writer, ct);
+                        writer.Close();
+                    }
+
+                    CompareHelper ch = new CompareHelper();
+                    ch.Diff = new XmlDiff()
+                    {
+                        Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
+                    };
+                    ch.AllowableDifferences = GetAtomFeedPositiveTestAllowableDifferences();
+                    Assert.True(ch.Compare(file, serializeFilePath), $"File Name:{file}");
                 }
-                if (writer != null)
+                finally
                 {
-                    writer.Dispose();
+                    File.Delete(serializeFilePath);
                 }
-                File.Delete(serializeFilePath);
             }
         }
 
 
-        public static List<AllowableDifference> GetAtomFeedPositiveTestAllowableDifferences()
+        private static List<AllowableDifference> GetAtomFeedPositiveTestAllowableDifferences()
         {
             return new List<AllowableDifference>(new AllowableDifference[]
             {
@@ -892,6 +876,31 @@ namespace System.ServiceModel.Syndication.Tests
                 new AllowableDifference("<feed xml:base=\"http://example.org\" xmlns=\"http://www.w3.org/2005/Atom\">", "<feed xml:base=\"http://example.org/\" xmlns=\"http://www.w3.org/2005/Atom\">"),
                 new AllowableDifference("<link href=\"http://creativecommons.org/licenses/by-nc/2.5/\" xmlns:lic=\"http://web.resource.org/cc/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" rel=\"http://www.snellspace.com/atom/extensions/proposed/license\" rdf:resource=\"http://creativecommons.org/licenses/by-nc/2.5/\" type=\"text/html\" rdf:type=\"http://web.resource.org/cc/license\">", "<link xmlns:a=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" href=\"http://creativecommons.org/licenses/by-nc/2.5/\" rel=\"http://www.snellspace.com/atom/extensions/proposed/license\" a:resource=\"http://creativecommons.org/licenses/by-nc/2.5/\" type=\"text/html\" a:type=\"http://web.resource.org/cc/license\">"),
             });
+        }
+
+        private static List<string> GetTestFilesForFeedTest(string dataFile)
+        {
+            List<string> fileList = new List<string>();
+
+            string file;
+            using (StreamReader sr = new StreamReader(dataFile))
+            {
+                while(!string.IsNullOrEmpty(file = sr.ReadLine()))
+                {
+                    if (!file.StartsWith("#"))
+                    {
+                        if (File.Exists(file))
+                        {
+                            fileList.Add(Path.GetFullPath(file));
+                        }
+                        else
+                        {
+                            throw new FileNotFoundException("File not found!",file);
+                        }
+                    }
+                }
+            }
+            return fileList;
         }
     }
 }

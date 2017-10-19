@@ -13,6 +13,9 @@
     <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\*.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\AtomFeeds\*.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ReferenceFromRuntime Include="System.ServiceModel.Syndication">
@@ -20,6 +23,11 @@
            This is required so that we can stage the application with a custom runtimeconfig that lets it run on the test shared framework. -->
       <Private>true</Private>
     </ReferenceFromRuntime>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MsBuildThisFileDirectory)\TestFeeds\atom_feeds.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
