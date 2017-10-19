@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Management;
 using Xunit;
 
 namespace System.Management.Tests
 {
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WMI not supported via UAP")]
     public class SelectQueryTests
     {
         [Fact]
@@ -48,7 +50,7 @@ namespace System.Management.Tests
         [Fact]
         public void Select_All_Win32_LogicalDisk_Wql()
         {
-            var query = new SelectQuery("select * from Win32_LogicalDisk");
+            var query = new SelectQuery("select * from Win32_LogicalDisk");
             var scope = new ManagementScope(@"root\cimv2");
             scope.Connect();
 

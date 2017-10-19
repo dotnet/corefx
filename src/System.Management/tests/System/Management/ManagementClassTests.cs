@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.CodeDom;
+using System.Management;
 using Xunit;
 
 namespace System.Management.Tests
 {
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WMI not supported via UAP")]
     public class ManagementClassTests
     {
         [Theory]

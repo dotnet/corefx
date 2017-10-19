@@ -16,7 +16,6 @@ namespace WbemUtilities_v1 {}
 namespace System.Management
 {
     #region FreeThreadedInterfaces
-    [Serializable]
     sealed class IWbemClassObjectFreeThreaded : IDisposable, ISerializable
     {
         //
@@ -49,18 +48,12 @@ namespace System.Management
 
         public IWbemClassObjectFreeThreaded(SerializationInfo info, StreamingContext context)
         {
-            Byte[] rg = info.GetValue(SerializationBlobName, typeof(Byte[])) as Byte[];
-            if(null == rg)
-                throw new SerializationException();
-
-            DeserializeFromBlob(rg);
+            throw new PlatformNotSupportedException();
         }
 
-        //FXCop requests explicit demand of the SerializationFormatter permission
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter=true)]
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue(SerializationBlobName, SerializeToBlob());
+            throw new PlatformNotSupportedException();
         }
 
         public void Dispose()

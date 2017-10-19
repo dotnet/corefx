@@ -176,7 +176,6 @@ namespace System.Management
     ///       object. It serves as a base class to more specific management object classes.</para>
     /// </summary>
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    [Serializable]
     [ToolboxItem(false)]
     public class ManagementBaseObject : Component, ICloneable, ISerializable
     {
@@ -225,12 +224,7 @@ namespace System.Management
         /// <param name='context'>The destination (see <see cref='System.Runtime.Serialization.StreamingContext'/> ) for this serialization.</param>
         protected ManagementBaseObject(SerializationInfo info, StreamingContext context)
         {
-            _wbemObject = info.GetValue("wbemObject", typeof(IWbemClassObjectFreeThreaded)) as IWbemClassObjectFreeThreaded;
-            if (null == _wbemObject)
-                throw new SerializationException();
-            properties = null;
-            systemProperties = null;
-            qualifiers = null;
+            throw new PlatformNotSupportedException();
         }
 
         public new void Dispose()
@@ -265,18 +259,14 @@ namespace System.Management
         }
 
 
-        //FXCop requests explicit demand of the SerializationFormatter permission
-        [SecurityPermission(SecurityAction.LinkDemand, SerializationFormatter=true)]
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("wbemObject", wbemObject, typeof(IWbemClassObjectFreeThreaded));
-            info.AssemblyName = typeof(ManagementBaseObject).Assembly.FullName;
-            info.FullTypeName = typeof(ManagementBaseObject).ToString();
+            throw new PlatformNotSupportedException();
         }
 
         protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            ((ISerializable)this).GetObjectData ( info, context ) ;
+            throw new PlatformNotSupportedException();
         }
 
         // Factory

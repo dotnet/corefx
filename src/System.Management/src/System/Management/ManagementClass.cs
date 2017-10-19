@@ -47,14 +47,13 @@ namespace System.Management
 	///    </code>
 	/// </example>
 	//CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    [Serializable]
     public class ManagementClass : ManagementObject
 	{
 		private MethodDataCollection methods;
 		protected override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			base.GetObjectData ( info, context ) ;
-		}
+            throw new PlatformNotSupportedException();
+        }
 		/// <summary>
 		/// Internal factory for classes, used when deriving a class
 		/// or cloning a class. For these purposes we always mark
@@ -268,31 +267,34 @@ namespace System.Management
 		public ManagementClass(string scope, string path, ObjectGetOptions options)
 			: base (new ManagementScope(scope), new ManagementPath(path), options) {}
 
-		protected ManagementClass(SerializationInfo info, StreamingContext context) : base(info, context) {}
+		protected ManagementClass(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
-		/// <summary>
-		///    <para>Gets or sets the path of the WMI class to 
-		///       which the <see cref='System.Management.ManagementClass'/>
-		///       object is bound.</para>
-		/// </summary>
-		/// <value>
-		///    <para>The path of the object's class.</para>
-		/// </value>
-		/// <remarks>
-		///    <para> When the property is set to a new value, 
-		///       the <see cref='System.Management.ManagementClass'/>
-		///       object will be
-		///       disconnected from any previously-bound WMI class. Reconnect to the new WMI class path.</para>
-		/// </remarks>
-		/// <example>
-		///    <code lang='C#'>ManagementClass c = new ManagementClass(); 
-		/// c.Path = "Win32_Environment";
-		///    </code>
-		///    <code lang='VB'>Dim c As New ManagementClass()
-		/// c.Path = "Win32_Environment"
-		///    </code>
-		/// </example>
-		public override ManagementPath Path 
+        /// <summary>
+        ///    <para>Gets or sets the path of the WMI class to 
+        ///       which the <see cref='System.Management.ManagementClass'/>
+        ///       object is bound.</para>
+        /// </summary>
+        /// <value>
+        ///    <para>The path of the object's class.</para>
+        /// </value>
+        /// <remarks>
+        ///    <para> When the property is set to a new value, 
+        ///       the <see cref='System.Management.ManagementClass'/>
+        ///       object will be
+        ///       disconnected from any previously-bound WMI class. Reconnect to the new WMI class path.</para>
+        /// </remarks>
+        /// <example>
+        ///    <code lang='C#'>ManagementClass c = new ManagementClass(); 
+        /// c.Path = "Win32_Environment";
+        ///    </code>
+        ///    <code lang='VB'>Dim c As New ManagementClass()
+        /// c.Path = "Win32_Environment"
+        ///    </code>
+        /// </example>
+        public override ManagementPath Path 
 		{
 			get
 			{

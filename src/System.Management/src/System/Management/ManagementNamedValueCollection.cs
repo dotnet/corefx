@@ -49,13 +49,14 @@ namespace System.Management
 	/// <param name='context'>The destination (see <see cref='System.Runtime.Serialization.StreamingContext'/> ) for this serialization.</param>
         protected ManagementNamedValueCollection(SerializationInfo info, StreamingContext context) : base(info, context)
         {
+            throw new PlatformNotSupportedException();
         }
 
-		/// <summary>
-		///    <para>Internal method to return an IWbemContext representation
-		///    of the named value collection.</para>
-		/// </summary>
-		internal IWbemContext GetContext() 
+        /// <summary>
+        ///    <para>Internal method to return an IWbemContext representation
+        ///    of the named value collection.</para>
+        /// </summary>
+        internal IWbemContext GetContext() 
 		{
 			IWbemContext wbemContext = null;
 

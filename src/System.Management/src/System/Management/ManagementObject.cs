@@ -61,7 +61,6 @@ namespace System.Management
     ///    </code>
     /// </example>
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    [Serializable]
     public class ManagementObject : ManagementBaseObject, ICloneable
     {
         // constants
@@ -98,7 +97,7 @@ namespace System.Management
 
         protected override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            base.GetObjectData ( info, context ) ;
+            throw new PlatformNotSupportedException();
         }
 
         public new void Dispose()
