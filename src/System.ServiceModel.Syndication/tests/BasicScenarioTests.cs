@@ -783,7 +783,6 @@ namespace System.ServiceModel.Syndication.Tests
             foreach (string file in fileList)
             {
                 string serializeFilePath = Path.GetTempFileName();
-
                 try
                 {
                     SyndicationFeed feedObjct;
@@ -809,6 +808,13 @@ namespace System.ServiceModel.Syndication.Tests
                     };
                     ch.AllowableDifferences = GetAtomFeedPositiveTestAllowableDifferences();
                     Assert.True(ch.Compare(file, serializeFilePath), $"File Name:{file}");
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("------------------------------");
+                    Console.WriteLine($"Failed File Name:{file}");
+                    throw e;
                 }
                 finally
                 {
