@@ -7,6 +7,7 @@
     <CLSCompliant>false</CLSCompliant>
     <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">true</IsPartialFacadeAssembly>
+    <DefineConstants Condition="'$(IsPartialFacadeAssembly)' != 'true'">$(DefineConstants);netstandard</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)'=='netstandard1.1'">$(DefineConstants);netstandard11</DefineConstants>
   </PropertyGroup>
@@ -24,6 +25,12 @@
     <Compile Include="System\SpanExtensions.cs" />
     <Compile Include="System\SpanHelpers.T.cs" />
     <Compile Include="System\SpanHelpers.byte.cs" />
+    <Compile Include="System\Buffers\Binary\Reader.cs" />
+    <Compile Include="System\Buffers\Binary\ReaderBigEndian.cs" />
+    <Compile Include="System\Buffers\Binary\ReaderLittleEndian.cs" />
+    <Compile Include="System\Buffers\Binary\Writer.cs" />
+    <Compile Include="System\Buffers\Binary\WriterBigEndian.cs" />
+    <Compile Include="System\Buffers\Binary\WriterLittleEndian.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="System\ReadOnlySpan.cs" />
@@ -46,10 +53,10 @@
     <Reference Include="System.Reflection" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <Reference Condition="'$(TargetGroup)' != 'netstandard1.1'" Include="System.Numerics.Vectors" />
-    <Reference Condition="'$(TargetGroup)' != 'netstandard1.1'" Include="System.Runtime.CompilerServices.Unsafe" />
-    <ProjectReference Condition="'$(TargetGroup)' == 'netstandard1.1'" Include="..\..\System.Runtime.CompilerServices.Unsafe\ref\System.Runtime.CompilerServices.Unsafe.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
     <Compile Include="System\SpanExtensions.Fast.cs" />

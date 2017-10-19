@@ -1642,7 +1642,6 @@ namespace System
         public static Memory<T> Empty { get { throw null; } }
         public Memory(T[] array) { throw null;}
         public Memory(T[] array, int start, int length) { throw null;}
-        internal Memory(Buffers.OwnedMemory<T> owner, int index, int length) { throw null;}
         public bool IsEmpty { get { throw null; } }
         public int Length { get { throw null; } }
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
@@ -1866,7 +1865,6 @@ namespace System
         public static ReadOnlyMemory<T> Empty { get { throw null; } }
         public ReadOnlyMemory(T[] array) { throw null;}
         public ReadOnlyMemory(T[] array, int start, int length) { throw null;}
-        internal ReadOnlyMemory(Buffers.OwnedMemory<T> owner, int index, int length) { throw null;}
         public bool IsEmpty { get { throw null; } }
         public int Length { get { throw null; } }
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
@@ -2772,6 +2770,8 @@ namespace System
         public virtual bool IsEnum { get { throw null; } }
         public bool IsExplicitLayout { get { throw null; } }
         public virtual bool IsGenericParameter { get { throw null; } }
+        public virtual bool IsGenericTypeParameter { get { throw null; } }
+        public virtual bool IsGenericMethodParameter { get { throw null; } }
         public virtual bool IsGenericType { get { throw null; } }
         public virtual bool IsGenericTypeDefinition { get { throw null; } }
         public bool IsImport { get { throw null; } }
@@ -3841,7 +3841,6 @@ namespace System.Buffers
         public MemoryHandle(IRetainable owner, void* pinnedPointer = null,  System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle))  { throw null; }
         [System.CLSCompliantAttribute(false)]
         public void* PinnedPointer { get { throw null; } }
-        internal void AddOffset(int offset) { throw null; }
         public void Dispose() { throw null; }
     }
 
@@ -6365,6 +6364,8 @@ namespace System.Reflection
         protected override bool IsArrayImpl() { throw null; }
         protected override bool IsPrimitiveImpl() { throw null; }
         protected override bool IsByRefImpl() { throw null; }
+        public override bool IsGenericTypeParameter { get { throw null; } }
+        public override bool IsGenericMethodParameter { get { throw null; } }
         protected override bool IsPointerImpl() { throw null; }
         protected override bool IsValueTypeImpl() { throw null; }
         protected override bool IsCOMObjectImpl() { throw null; }
@@ -7592,6 +7593,7 @@ namespace System.Threading
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Threading.CancellationTokenRegistration other) { throw null; }
         public override int GetHashCode() { throw null; }
+        public CancellationToken Token { get { throw null; } }
         public static bool operator ==(System.Threading.CancellationTokenRegistration left, System.Threading.CancellationTokenRegistration right) { throw null; }
         public static bool operator !=(System.Threading.CancellationTokenRegistration left, System.Threading.CancellationTokenRegistration right) { throw null; }
     }
