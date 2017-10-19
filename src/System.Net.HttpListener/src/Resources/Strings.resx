@@ -372,6 +372,18 @@
   <data name="SSPIInvalidHandleType" xml:space="preserve">
     <value>'{0}' is not a supported handle type.</value>
   </data>
+  <data name="net_io_operation_aborted" xml:space="preserve">
+    <value>I/O operation aborted: '{0}'.</value>
+  </data>
+  <data name="net_invalid_path" xml:space="preserve">
+    <value>Invalid path.</value>
+  </data>
+  <data name="net_listener_auth_errors" xml:space="preserve">
+    <value>Authentication errors.</value>
+  </data>
+  <data name="net_listener_close" xml:space="preserve">
+    <value>Listener closed.</value>
+  </data>
   <data name="net_WebSockets_InvalidState" xml:space="preserve">
     <value>The WebSocket is in an invalid state ('{0}') for this operation. Valid states are: '{1}'</value>
   </data>
