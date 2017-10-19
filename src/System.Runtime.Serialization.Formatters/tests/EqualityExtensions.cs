@@ -29,6 +29,12 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             if (extendedType.IsGenericType)
             {
+                var x = typeof(EqualityExtensions).GetMethods()
+                    ?.Where(m =>
+                        m.Name == "IsEqual" &&
+                        m.GetParameters().Length == 2 &&
+                        m.IsGenericMethodDefinition);
+
                 MethodInfo method = typeof(EqualityExtensions).GetMethods()
                     ?.SingleOrDefault(m =>
                         m.Name == "IsEqual" &&
@@ -37,7 +43,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
                         m.IsGenericMethodDefinition);
 
                 // If extension method found, make it generic and return
-                return method?.MakeGenericMethod(extendedType.GenericTypeArguments[0]);
+                if (method != null)
+                    return method.MakeGenericMethod(extendedType.GenericTypeArguments[0]);
             }
 
             return typeof(EqualityExtensions).GetMethod("IsEqual", new[] { extendedType, extendedType });
