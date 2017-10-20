@@ -48,6 +48,7 @@
     <Compile Include="$(CommonTestPath)\System\Reflection\MockParameterInfo.cs">
       <Link>Common\System\Reflection\MockParameterInfo.cs</Link>
     </Compile>
+    <Compile Include="System\StringsMatchingNonRandomizedHashCode.cs" />
     <Compile Include="TimeZoneInfoTests.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\CriticalHandleZeroOrMinusOneIsInvalid.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="System\SByteTests.cs" />
     <Compile Include="System\SingleTests.cs" />
     <Compile Include="System\StackOverflowExceptionTests.cs" />
+    <Compile Include="System\StringGetHashCodeTests.cs" />
     <Compile Include="System\StringTests.cs" />
     <Compile Include="System\String.SplitTests.cs" />
     <Compile Include="System\SystemExceptionTests.cs" />
