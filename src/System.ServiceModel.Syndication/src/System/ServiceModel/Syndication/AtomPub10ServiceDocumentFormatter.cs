@@ -68,16 +68,14 @@ namespace System.ServiceModel.Syndication
             }
 
             reader = XmlReaderWrapper.CreateFromReader(reader);
-            return reader.IsStartElementAsync(App10Constants.Service, App10Constants.Namespace);
+            return reader.IsStartElement(App10Constants.Service, App10Constants.Namespace);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
         XmlSchema IXmlSerializable.GetSchema()
         {
             return null;
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
         void IXmlSerializable.ReadXml(XmlReader reader)
         {
             if (reader == null)
@@ -88,7 +86,6 @@ namespace System.ServiceModel.Syndication
             ReadDocumentAsync(XmlReaderWrapper.CreateFromReader(reader)).GetAwaiter().GetResult();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
         void IXmlSerializable.WriteXml(XmlWriter writer)
         {
             if (writer == null)

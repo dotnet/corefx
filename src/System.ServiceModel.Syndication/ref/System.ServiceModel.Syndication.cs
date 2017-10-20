@@ -193,7 +193,6 @@ namespace System.ServiceModel.Syndication
         public override string Version { get { throw null; } }
         public override bool CanRead(System.Xml.XmlReader reader) { throw null; }
         protected override System.ServiceModel.Syndication.SyndicationFeed CreateFeedInstance() { throw null; }
-        public static System.DateTimeOffset DefaultDateParser(string dateTimeString, string localName, string ns) { throw null; }
         public override void ReadFrom(System.Xml.XmlReader reader) { }
         public override System.Threading.Tasks.Task ReadFromAsync(System.Xml.XmlReader reader, System.Threading.CancellationToken ct) { throw null; }
         protected virtual System.ServiceModel.Syndication.SyndicationItem ReadItem(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationFeed feed) { throw null; }
@@ -461,9 +460,9 @@ namespace System.ServiceModel.Syndication
         protected SyndicationFeedFormatter() { }
         protected SyndicationFeedFormatter(System.ServiceModel.Syndication.SyndicationFeed feedToWrite) { }
         public System.Func<string, string, string, System.DateTimeOffset> DateTimeParser { get { throw null; } set { } }
+        public System.ServiceModel.Syndication.SyndicationFeed Feed { get { throw null; } }
         public System.Func<string, string, string, string> StringParser { get { throw null; } set { } }
         public System.Func<string, System.UriKind, string, string, System.Uri> UriParser { get { throw null; } set { } }
-        public System.ServiceModel.Syndication.SyndicationFeed Feed { get { throw null; } }
         public abstract string Version { get; }
         public abstract bool CanRead(System.Xml.XmlReader reader);
         protected internal static System.ServiceModel.Syndication.SyndicationCategory CreateCategory(System.ServiceModel.Syndication.SyndicationFeed feed) { throw null; }
