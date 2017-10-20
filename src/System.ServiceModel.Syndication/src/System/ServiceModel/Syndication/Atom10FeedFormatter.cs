@@ -41,12 +41,14 @@ namespace System.ServiceModel.Syndication
         {
             if (feedTypeToCreate == null)
             {
-                throw new ArgumentException(nameof(feedTypeToCreate));
+                throw new ArgumentNullException(nameof(feedTypeToCreate));
             }
+            
             if (!typeof(SyndicationFeed).IsAssignableFrom(feedTypeToCreate))
             {
                 throw new ArgumentException(SR.Format(SR.InvalidObjectTypePassed, nameof(feedTypeToCreate), nameof(SyndicationFeed)));
             }
+            
             _maxExtensionSize = int.MaxValue;
             _preserveAttributeExtensions = _preserveElementExtensions = true;
             _feedType = feedTypeToCreate;
@@ -283,16 +285,16 @@ namespace System.ServiceModel.Syndication
                         result.Contributors.Add(await ReadPersonFromAsync(reader, result));
                         break;
                     case Atom10Constants.GeneratorTag:
-                        result.Generator = StringParser(await reader.ReadElementStringAsync(),Atom10Constants.GeneratorTag,ns);
+                        result.Generator = StringParser(await reader.ReadElementStringAsync(), Atom10Constants.GeneratorTag,ns);
                         break;
                     case Atom10Constants.IdTag:
-                        result.Id = StringParser(await reader.ReadElementStringAsync(),Atom10Constants.IdTag,ns);
+                        result.Id = StringParser(await reader.ReadElementStringAsync(), Atom10Constants.IdTag,ns);
                         break;
                     case Atom10Constants.LinkTag:
                         result.Links.Add(await ReadLinkFromAsync(reader, result));
                         break;
                     case Atom10Constants.LogoTag:
-                        result.ImageUrl = UriParser(await reader.ReadElementStringAsync(), UriKind.RelativeOrAbsolute, Atom10Constants.LogoTag, ns);  //new Uri(await reader.ReadElementStringAsync(), UriKind.RelativeOrAbsolute);
+                        result.ImageUrl = UriParser(await reader.ReadElementStringAsync(), UriKind.RelativeOrAbsolute, Atom10Constants.LogoTag, ns);
                         break;
                     case Atom10Constants.RightsTag:
                         result.Copyright = await ReadTextContentFromAsync(reader, "//atom:feed/atom:rights[@type]");
@@ -1138,7 +1140,7 @@ namespace System.ServiceModel.Syndication
                                 break;
                         }
 
-                        if(notHandled && !TryParseElement(reader, result, Version))
+                        if (notHandled && !TryParseElement(reader, result, Version))
                         {
                             if (_preserveElementExtensions)
                             {

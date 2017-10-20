@@ -15,7 +15,7 @@ namespace System.ServiceModel.Syndication
 
         public static XmlReader CreateFromReader(XmlReader reader)
         {
-            if (reader is XmlReaderWrapper || reader.Settings.Async)
+            if (reader is XmlReaderWrapper || (reader.Settings != null && reader.Settings.Async))
             {
                 return reader;
             }

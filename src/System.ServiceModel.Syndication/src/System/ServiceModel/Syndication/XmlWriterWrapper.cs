@@ -13,7 +13,7 @@ namespace System.ServiceModel.Syndication
 
         public static XmlWriter CreateFromWriter(XmlWriter writer)
         {
-            if (writer is XmlWriterWrapper || writer.Settings.Async)
+            if (writer is XmlWriterWrapper || (writer.Settings != null && writer.Settings.Async))
             {
                 return writer;
             }
@@ -186,9 +186,9 @@ namespace System.ServiceModel.Syndication
                         if (reader.IsEmptyElement)
                         {
                             writer.WriteEndElement();
-                            break;
                         }
                         break;
+                        
                     case XmlNodeType.Text:
                         if (canReadChunk)
                         {

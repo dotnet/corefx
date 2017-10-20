@@ -166,7 +166,7 @@ namespace System.ServiceModel.Syndication
 
         public async Task<XmlReader> GetReaderAsync()
         {
-            await EnsureBuffer();
+            await EnsureBufferAsync();
             XmlReader reader = XmlReaderWrapper.CreateFromReader(_buffer.GetReader(0));
             int index = 0;
             reader.ReadStartElement(Rss20Constants.ExtensionWrapperTag);
@@ -204,7 +204,7 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        private async Task EnsureBuffer()
+        private async Task EnsureBufferAsync()
         {
             if (_buffer == null)
             {
