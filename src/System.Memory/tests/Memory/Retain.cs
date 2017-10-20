@@ -17,6 +17,10 @@ namespace System.MemoryTests
             Memory<int> memory = array;
             MemoryHandle handle = memory.Retain();
             Assert.False(handle.HasPointer);
+            unsafe
+            {
+                Assert.True(handle.Pointer == null);
+            }
             handle.Dispose();
         }
 
@@ -30,7 +34,6 @@ namespace System.MemoryTests
             unsafe
             {
                 int* pointer = (int*)handle.Pointer;
-                Assert.True(pointer != null);
 
                 GC.Collect();
 
@@ -78,6 +81,10 @@ namespace System.MemoryTests
             Memory<int> memory = owner.Memory;
             MemoryHandle handle = memory.Retain();
             Assert.False(handle.HasPointer);
+            unsafe
+            {
+                Assert.True(handle.Pointer == null);
+            }
             handle.Dispose();
         }
 
@@ -116,7 +123,6 @@ namespace System.MemoryTests
             unsafe
             {
                 int* pointer = (int*)handle.Pointer;
-                Assert.True(pointer != null);
 
                 GC.Collect();
 

@@ -17,6 +17,10 @@ namespace System.MemoryTests
             ReadOnlyMemory<int> memory = array;
             MemoryHandle handle = memory.Retain();
             Assert.False(handle.HasPointer);
+            unsafe
+            {
+                Assert.True(handle.Pointer == null);
+            }
             handle.Dispose();
         }
 
@@ -77,6 +81,10 @@ namespace System.MemoryTests
             ReadOnlyMemory<int> memory = owner.Memory;
             MemoryHandle handle = memory.Retain();
             Assert.False(handle.HasPointer);
+            unsafe
+            {
+                Assert.True(handle.Pointer == null);
+            }
             handle.Dispose();
         }
 
