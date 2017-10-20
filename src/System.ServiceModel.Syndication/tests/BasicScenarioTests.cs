@@ -729,20 +729,25 @@ namespace System.ServiceModel.Syndication.Tests
         [ActiveIssue(24572)]
         public static void AtomEntryPositiveTest_write()
         {
-            SyndicationItem item1 = new SyndicationItem("SyndicationFeed released for .net Core", "A lot of text describing the release of .net core feature", new Uri("http://Contoso.com/news/path"));
+            string filePath = @"AtomEntryTest.xml";
             string serializeFilePath = Path.GetTempFileName();
+
+            SyndicationItem item = new SyndicationItem("SyndicationFeed released for .net Core", "A lot of text describing the release of .net core feature", new Uri("http://contoso.com/news/path"));
+            item.Id = "uuid:43481a10-d881-40d1-adf2-99b438c57e21;id=1";
+            item.LastUpdatedTime = new DateTimeOffset(Convert.ToDateTime("2017-10-11T11:25:55Z"));
 
             try
             {
                 using (XmlWriter writer = XmlWriter.Create(serializeFilePath, new XmlWriterSettings()))
                 {
-                    Atom10ItemFormatter f = new Atom10ItemFormatter(item1);
+                    Atom10ItemFormatter f = new Atom10ItemFormatter(item);
                     Task task = f.WriteToAsync(writer);
                     Task.WhenAll(task);
                     writer.Close();
                 }
-                //TODO:
-                // Check file content
+                
+                XmlDiff diff = new XmlDiff();
+                Assert.True(diff.Compare(filePath, serializeFilePath));
             }
             finally
             {
@@ -754,19 +759,24 @@ namespace System.ServiceModel.Syndication.Tests
         [ActiveIssue(24604)]
         public static async Task AtomEntryPositiveTest_writeAsync()
         {
-            SyndicationItem item1 = new SyndicationItem("SyndicationFeed released for .net Core", "A lot of text describing the release of .net core feature", new Uri("http://Contoso.com/news/path"));
+            string filePath = @"AtomEntryTest.xml";
             string serializeFilePath = Path.GetTempFileName();
+
+            SyndicationItem item = new SyndicationItem("SyndicationFeed released for .net Core", "A lot of text describing the release of .net core feature", new Uri("http://contoso.com/news/path"));
+            item.Id = "uuid:43481a10-d881-40d1-adf2-99b438c57e21;id=1";
+            item.LastUpdatedTime = new DateTimeOffset(Convert.ToDateTime("2017-10-11T11:25:55Z"));
 
             try
             {
                 using (XmlWriter writer = XmlWriter.Create(serializeFilePath, new XmlWriterSettings()))
                 {
-                    Atom10ItemFormatter f = new Atom10ItemFormatter(item1);
+                    Atom10ItemFormatter f = new Atom10ItemFormatter(item);
                     await f.WriteToAsync(writer);
                     writer.Close();
                 }
-                //TODO:
-                // Check file content
+                
+                XmlDiff diff = new XmlDiff();
+                Assert.True(diff.Compare(filePath, serializeFilePath));
             }
             finally
             {
@@ -801,13 +811,15 @@ namespace System.ServiceModel.Syndication.Tests
                         writer.Close();
                     }
 
-                    CompareHelper ch = new CompareHelper();
-                    ch.Diff = new XmlDiff()
+                    CompareHelper ch = new CompareHelper
                     {
-                        Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
+                        Diff = new XmlDiff()
+                        {
+                            Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
+                        },
+                        AllowableDifferences = GetAtomFeedPositiveTestAllowableDifferences()
                     };
-                    ch.AllowableDifferences = GetAtomFeedPositiveTestAllowableDifferences();
-                    Assert.True(ch.Compare(file, serializeFilePath), $"File Name:{file}");
+                    Assert.True(ch.Compare(file, serializeFilePath), $"Failed File Name:{file}");
                 }
                 catch(Exception e)
                 {
