@@ -123,8 +123,9 @@ namespace System.Data.Odbc
         }
     }
 
-
-    internal static class ODBC32
+    // Class needs to be public to support serialization with type forwarding from Desktop to Core.
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+    public static class ODBC32
     {
         internal enum SQL_HANDLE : short
         {
