@@ -20,19 +20,24 @@ namespace System.Buffers
         /// Creates a new memory handle for the memory.
         /// </summary>
         /// <param name="retainable">reference to manually managed object</param>
-        /// <param name="pinnedPointer">pointer to the buffer, or null if the buffer is not pinned</param>
+        /// <param name="pointer">pointer to the buffer, or null if the buffer is not pinned</param>
         /// <param name="handle">handle used to pin array buffers</param>
-        public MemoryHandle(IRetainable retainable, void* pinnedPointer = null, GCHandle handle = default(GCHandle))
+        public MemoryHandle(IRetainable retainable, void* pointer = null, GCHandle handle = default(GCHandle))
         {
             _retainable = retainable;
-            _pointer = pinnedPointer;
+            _pointer = pointer;
             _handle = handle;
         }
 
         /// <summary>
         /// Returns the address of the pinned object, or null if the object is not pinned.
         /// </summary>
-        public void* PinnedPointer => _pointer;
+        public void* Pointer => _pointer;
+
+        /// <summary>
+        /// Returns whether the object has been pinned and hence contains a non-null pointer.
+        /// </summary>
+        public bool HasPointer => _pointer != null;
 
         /// <summary>
         /// Adds an offset to the pinned pointer.
