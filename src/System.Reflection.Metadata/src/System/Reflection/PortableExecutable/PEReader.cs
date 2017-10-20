@@ -690,11 +690,13 @@ namespace System.Reflection.PortableExecutable
 
             // First try .pdb file specified in CodeView data (we prefer .pdb file on disk over embedded PDB
             // since embedded PDB needs decompression which is less efficient than memory-mapping the file).
-            var codeViewEntry = entries.FirstOrDefault(e => e.IsPortableCodeView);
-            if (codeViewEntry.DataSize != 0 && 
-                TryOpenCodeViewPortablePdb(codeViewEntry, peImageDirectory, pdbFileStreamProvider, out pdbReaderProvider, out pdbPath, ref errorToReport))
+            foreach (var codeViewEntry in entries)
             {
-                return true;
+                if (codeViewEntry.IsPortableCodeView && codeViewEntry.DataSize != 0 && 
+                    TryOpenCodeViewPortablePdb(codeViewEntry, peImageDirectory, pdbFileStreamProvider, out pdbReaderProvider, out pdbPath, ref errorToReport))
+                {
+                    return true;
+                }
             }
 
             // if it failed try Embedded Portable PDB (if available):
