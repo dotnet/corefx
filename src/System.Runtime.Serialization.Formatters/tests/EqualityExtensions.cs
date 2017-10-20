@@ -14,6 +14,8 @@ using System.DirectoryServices.ActiveDirectory;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security;
@@ -1071,6 +1073,40 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 @this.Source == other.Source &&
                 // On Net Native we can't reflect on Exceptions and change its HResult
                 (PlatformDetection.IsNetNative ? true : @this.HResult == other.HResult) &&
+                @this.HelpLink == other.HelpLink &&
+                CheckEquals(@this.InnerException, other.InnerException);
+        }
+
+        public static bool IsEqual(this NetworkInformationException @this, NetworkInformationException other)
+        {
+            // NetworkInformationException has a different StackTrace and HResult on Unix and OSX.
+
+            return @this != null &&
+                other != null &&
+                // On full framework, line number may be method body start
+                // On Net Native we can't reflect on Exceptions and change its StackTrace
+                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
+                (@this.ToString() == other.ToString())) &&
+                @this.Data.CheckSequenceEquals(other.Data) &&
+                @this.Message == other.Message &&
+                @this.Source == other.Source &&
+                @this.HelpLink == other.HelpLink &&
+                CheckEquals(@this.InnerException, other.InnerException);
+        }
+
+        public static bool IsEqual(this SocketException @this, SocketException other)
+        {
+            // SocketException has a different StackTrace and HResult on Unix and OSX.
+
+            return @this != null &&
+                other != null &&
+                // On full framework, line number may be method body start
+                // On Net Native we can't reflect on Exceptions and change its StackTrace
+                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
+                (@this.ToString() == other.ToString())) &&
+                @this.Data.CheckSequenceEquals(other.Data) &&
+                @this.Message == other.Message &&
+                @this.Source == other.Source &&
                 @this.HelpLink == other.HelpLink &&
                 CheckEquals(@this.InnerException, other.InnerException);
         }
