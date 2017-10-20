@@ -42,6 +42,12 @@
     <TraceEventPackageVersion>1.0.3-alpha-experimental</TraceEventPackageVersion>
     <XunitNetcoreExtensionsVersion>1.0.1-prerelease-01616-05</XunitNetcoreExtensionsVersion>
   </PropertyGroup>
+  
+  <!-- Package versions used as toolsets -->
+  <PropertyGroup>
+    <FeedTasksPackage>Microsoft.DotNet.Build.Tasks.Feed</FeedTasksPackage>
+    <FeedTasksPackageVersion>1.0.0-prerelease-02119-0</FeedTasksPackageVersion>
+  </PropertyGroup>
 
   <!-- Package dependency verification/auto-upgrade configuration. -->
   <PropertyGroup>

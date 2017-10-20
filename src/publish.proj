@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <Import Project="$(ToolsDir)PublishContent.targets" />
   <Import Project="$(ToolsDir)versioning.targets" />
-  <UsingTask TaskName="PushToBlobFeed" AssemblyFile="$(ToolsDir)\Microsoft.DotNet.Build.Tasks.Feed\net46\Microsoft.DotNet.Build.Tasks.Feed.dll" />
+  <Import Project="$(PackagesDir)/$(FeedTasksPackage)/$(FeedTasksPackageVersion)/build/Publish.targets" />
 
   <PropertyGroup>
     <PublishPattern Condition="'$(PublishPattern)' == ''">$(PackageOutputRoot)\**\*.nupkg</PublishPattern>
@@ -24,12 +24,16 @@
     </PropertyGroup>
   </Target>
 
+  <ItemGroup>
+    <PackageReference Include="microsoft.dotnet.build.tasks.feed" Version="1.0.0-prerelease-02119-0" />
+  </ItemGroup>
+
   <Target Name="Build" DependsOnTargets="CreateContainerName">
     <!-- skip uploadToAzure when there are no nupkgs -->
     <CallTarget Targets="UploadToAzure" Condition="'@(_PackagesToPublish)' != ''" />
   </Target>  
   
-  <Target Name="FinalPublish" >
+  <Target Name="PublishToAzureBlobFeed" >
     <PropertyGroup>
       <PackageDownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(PackagesDir)AzureTransfer\$(ConfigurationGroup)</PackageDownloadDirectory>
       <FinalPublishPattern>$(PackageDownloadDirectory)\**\*.nupkg</FinalPublishPattern>
@@ -38,8 +42,8 @@
     <ItemGroup>
       <ItemsToPush Include="$(FinalPublishPattern)" Exclude="$(FinalSymbolsPackagesPattern)" />
     </ItemGroup>
-    <Error Text="ItemsToPush: '@(ItemsToPush)' is empty."  
-           Condition="'@(ItemsToPush)' == ''" /> 
+    <Error Condition="'@(ItemsToPush)'==''" Text="ItemsToPush is empty." />
+    <Message importance="high" text="KRTHIKDBUEG $(_TaskDir)" />
     <PushToBlobFeed ExpectedFeedUrl="$(ExpectedFeedUrl)"
                     AccountKey="$(AccountKey)"
                     ItemsToPush="@(ItemsToPush)"
