@@ -226,6 +226,11 @@ namespace System.Net.Security
 
                     ResetReadBuffer();
                     int readBytes = await FillBufferAsync(adapter, SecureChannel.ReadHeaderSize).ConfigureAwait(false);
+                    if(readBytes == 0)
+                    {
+                        return 0;
+                    }
+
                     int payloadBytes = _sslState.GetRemainingFrameSize(_internalBuffer, _internalOffset, readBytes);
                     if (payloadBytes < 0)
                     {
