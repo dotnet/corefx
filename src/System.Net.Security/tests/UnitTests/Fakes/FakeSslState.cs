@@ -284,7 +284,7 @@ namespace System.Net.Security
             throw new NotImplementedException();
         }
 
-        public ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
