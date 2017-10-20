@@ -472,10 +472,9 @@ namespace System.IO
             int i, n = 0;
             do
             {
-                i = ReadSpan(buffer);
-                buffer = buffer.Slice(i);
+                i = ReadSpan(buffer.Slice(n));
                 n += i;
-            } while (i > 0 && buffer.Length > 0);
+            } while (i > 0 && n < buffer.Length);
             return n;
         }
 

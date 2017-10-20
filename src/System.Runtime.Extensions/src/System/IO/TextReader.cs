@@ -306,10 +306,9 @@ namespace System.IO
             int n = 0, i;
             do
             {
-                i = await ReadAsyncInternal(buffer, cancellationToken).ConfigureAwait(false);
-                buffer = buffer.Slice(i);
+                i = await ReadAsyncInternal(buffer.Slice(n), cancellationToken).ConfigureAwait(false);
                 n += i;
-            } while (i > 0 && buffer.Length > 0);
+            } while (i > 0 && n < buffer.Length);
 
             return n;
         }
