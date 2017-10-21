@@ -22,6 +22,7 @@ namespace System.Memory.Tests
 
             foreach (var iteration in Benchmark.Iterations)
             {
+                int localInt = 0;
                 using (iteration.StartMeasurement())
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -29,10 +30,11 @@ namespace System.Memory.Tests
                         for (int j = 0; j < numberOfSlices; j++)
                         {
                             var span = memory.Slice(10, 1).Span;
-                            volatileInt ^= span[0];
+                            localInt ^= span[0];
                         }
                     }
                 }
+                volatileInt = localInt;
             }
         }
 
@@ -46,6 +48,7 @@ namespace System.Memory.Tests
 
             foreach (var iteration in Benchmark.Iterations)
             {
+                int localInt = 0;
                 using (iteration.StartMeasurement())
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
@@ -53,10 +56,11 @@ namespace System.Memory.Tests
                         for (int j = 0; j < numberOfSlices; j++)
                         {
                             var span = memory.Span.Slice(10, 1);
-                            volatileInt ^= span[0];
+                            localInt ^= span[0];
                         }
                     }
                 }
+                volatileInt = localInt;
             }
         }
 
