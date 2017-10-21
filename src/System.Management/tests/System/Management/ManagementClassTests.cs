@@ -11,7 +11,7 @@ namespace System.Management.Tests
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WMI not supported via UAP")]
     public class ManagementClassTests
     {
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(false, false)]
         [InlineData(false, true)]
         [InlineData(true, false)]
@@ -23,7 +23,7 @@ namespace System.Management.Tests
             Assert.Equal(systemPropertyClass ? "ManagementSystemProperties" : "LogicalDisk", classDom.Name);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void ClassMembers_For_Win32_LogicalDisk()
         {
             var managementClass = new ManagementClass(new ManagementPath("Win32_LogicalDisk"));
