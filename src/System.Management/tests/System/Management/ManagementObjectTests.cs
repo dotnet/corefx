@@ -12,7 +12,7 @@ namespace System.Management.Tests
     {
         private static string s_systemDriveId = Environment.GetEnvironmentVariable("SystemDrive");
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Win32_LogicalDisk()
         {
             using (ManagementObject obj = new ManagementObject($"Win32_LogicalDisk.DeviceID=\"{s_systemDriveId}\""))
@@ -25,7 +25,7 @@ namespace System.Management.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void GetRelated_For_Win32_LogicalDisk()
         {
             using (ManagementObject obj = new ManagementObject($"Win32_LogicalDisk.DeviceID=\"{s_systemDriveId}\""))

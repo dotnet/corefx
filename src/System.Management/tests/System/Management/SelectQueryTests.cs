@@ -10,7 +10,7 @@ namespace System.Management.Tests
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WMI not supported via UAP")]
     public class SelectQueryTests
     {
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Select_Win32_LogicalDisk_ClassName()
         {
             var query = new SelectQuery("Win32_LogicalDisk");
@@ -29,7 +29,7 @@ namespace System.Management.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Select_Win32_LogicalDisk_ClassName_Condition()
         {
             var query = new SelectQuery("Win32_LogicalDisk", "DriveType=3");
@@ -47,7 +47,7 @@ namespace System.Management.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Select_All_Win32_LogicalDisk_Wql()
         {
             var query = new SelectQuery("select * from Win32_LogicalDisk");
