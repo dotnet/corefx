@@ -102,7 +102,7 @@ internal static partial class Interop
                     if (sslAuthenticationOptions.IsServer)
                     {
                         byte[] protos = Interop.Ssl.ConvertAlpnProtocolListToByteArray(sslAuthenticationOptions.ApplicationProtocols);
-                        sslAuthenticationOptions.AlpnProtocolsHandle = GCHandle.Alloc(protos);
+                        sslAuthenticationOptions.AlpnProtocolsHandle = GCHandle.Alloc(protos, GCHandleType.Pinned);
                         Interop.Ssl.SslCtxSetAlpnSelectCb(innerContext, s_alpnServerCallback, GCHandle.ToIntPtr(sslAuthenticationOptions.AlpnProtocolsHandle));
                     }
                     else
@@ -332,14 +332,24 @@ internal static partial class Interop
 
         private static unsafe int AlpnServerSelectCallback(IntPtr ssl, out IntPtr outp, out byte outlen, IntPtr inp, uint inlen, IntPtr arg)
         {
+            outp = IntPtr.Zero;
+            outlen = 0;
+
+            if (arg == IntPtr.Zero)
+            {
+                return Interop.Ssl.SSL_TLSEXT_ERR_NOACK;
+            }
+
             GCHandle protocols = GCHandle.FromIntPtr(arg);
+            if (!protocols.IsAllocated || protocols.Target == null)
+            {
+                return Interop.Ssl.SSL_TLSEXT_ERR_NOACK;
+            }
+
             byte[] server = (byte[])protocols.Target;
 
-            fixed (byte* sp = server)
-            {
-                return Interop.Ssl.SslSelectNextProto(out outp, out outlen, (IntPtr)sp, (uint)server.Length, inp, inlen) == Interop.Ssl.OPENSSL_NPN_NEGOTIATED ?
+            return Interop.Ssl.SslSelectNextProto(out outp, out outlen, (IntPtr)protocols.AddrOfPinnedObject(), (uint)server.Length, inp, inlen) == Interop.Ssl.OPENSSL_NPN_NEGOTIATED ?
                     Interop.Ssl.SSL_TLSEXT_ERR_OK : Interop.Ssl.SSL_TLSEXT_ERR_NOACK;
-            }
         }
 
         private static void UpdateCAListFromRootStore(SafeSslContextHandle context)
