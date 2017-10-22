@@ -333,12 +333,19 @@ internal static partial class Interop
         private static unsafe int AlpnServerSelectCallback(IntPtr ssl, out IntPtr outp, out byte outlen, IntPtr inp, uint inlen, IntPtr arg)
         {
             GCHandle protocols = GCHandle.FromIntPtr(arg);
+            if(!protocols.IsAllocated || protocols.Target == null)
+            {
+                outp = IntPtr.Zero;
+                outlen = 0;
+                return Ssl.SSL_TLSEXT_ERR_NOACK;
+            }
+
             byte[] server = (byte[])protocols.Target;
 
             fixed (byte* sp = server)
             {
-                return Interop.Ssl.SslSelectNextProto(out outp, out outlen, (IntPtr)sp, (uint)server.Length, inp, inlen) == Interop.Ssl.OPENSSL_NPN_NEGOTIATED ?
-                    Interop.Ssl.SSL_TLSEXT_ERR_OK : Interop.Ssl.SSL_TLSEXT_ERR_NOACK;
+                return Ssl.SslSelectNextProto(out outp, out outlen, (IntPtr)sp, (uint)server.Length, inp, inlen) == Ssl.OPENSSL_NPN_NEGOTIATED ?
+                    Ssl.SSL_TLSEXT_ERR_OK : Ssl.SSL_TLSEXT_ERR_NOACK;
             }
         }
 
