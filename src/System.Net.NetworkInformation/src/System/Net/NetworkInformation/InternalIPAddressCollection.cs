@@ -15,6 +15,11 @@ namespace System.Net.NetworkInformation
             _addresses = new List<IPAddress>();
         }
 
+        internal InternalIPAddressCollection(List<IPAddress> addresses)
+        {
+            _addresses = addresses;
+        }
+
         public override void CopyTo(IPAddress[] array, int offset)
         {
             _addresses.CopyTo(array, offset);
