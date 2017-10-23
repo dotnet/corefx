@@ -1295,25 +1295,6 @@ namespace SerializationTypes
         }
     }
 
-    [XmlRoot("RootElement")]
-    public class TypeWithMismatchBetweenAttributeAndPropertyType
-    {
-        private int _intValue = 120;
-
-        [DefaultValue(true), XmlAttribute("IntValue")]
-        public int IntValue
-        {
-            get
-            {
-                return _intValue;
-            }
-            set
-            {
-                _intValue = value;
-            }
-        }
-    }
-
     public class Level
     {
         public string Name { get; set; }
