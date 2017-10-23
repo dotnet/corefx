@@ -13,8 +13,6 @@
     <DefineConstants Condition="'$(TargetsUnix)' == 'true'">$(DefineConstants);CORECLR;NETCORE</DefineConstants>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard'">SR.PlatformNotSupported_Drawing</GeneratePlatformNotSupportedAssemblyMessage>
-    <!-- Although we have a netstandard configuration, we know we are not currently UAP compatible-->
-    <UWPCompatible>false</UWPCompatible>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp2.0-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp2.0-Unix-Release|AnyCPU'" />
