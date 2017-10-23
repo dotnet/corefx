@@ -8,7 +8,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <!-- Default configurations to help VS understand the configurations -->
   <ItemGroup Condition="'$(DisableTests)' != 'true'">
     <Compile Include="Perf.BigInteger.cs" />
     <Compile Include="Perf.BigInteger.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />

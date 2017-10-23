@@ -10,7 +10,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <!-- Default configurations to help VS understand the configurations -->
   <ItemGroup Condition="'$(DisableTests)' != 'true'">
     <Compile Include="Vector2\Distance.cs" />
     <Compile Include="Vector2\GetHashCode.cs" />

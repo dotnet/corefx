@@ -9,7 +9,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <!-- Default configurations to help VS understand the configurations -->
   <ItemGroup>
     <Compile Include="Perf.Boolean.cs" />
     <Compile Include="Perf.Char.cs" />
