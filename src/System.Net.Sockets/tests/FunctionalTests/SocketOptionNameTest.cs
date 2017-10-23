@@ -284,6 +284,51 @@ namespace System.Net.Sockets.Tests
             ReuseAddress(exclusiveAddressUse, firstSocketReuseAddress, secondSocketReuseAddress, expectFailure);
         }
 
+        [Fact]
+        public void BindDuringTcpWait()
+        {
+            int port = 0;
+            using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                a.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                port = (a.LocalEndPoint as IPEndPoint).Port;
+                a.Listen(10);
+
+                // Connect a client
+                using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+                {
+                    client.Connect(new IPEndPoint(IPAddress.Loopback, port));
+                    using (Socket acceptedClient = a.Accept())
+                    { }
+                }
+            }
+
+            // Bind a socket to the same address we just used.
+            using (Socket b = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                b.Bind(new IPEndPoint(IPAddress.Loopback, port));
+            }
+        }
+
+        [Fact]
+        public void ExclusiveAddressUseTcp()
+        {
+            using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                // ExclusiveAddressUse defaults to true on Unix, on Windows it defaults to false.
+                a.ExclusiveAddressUse = true;
+
+                a.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                a.Listen(10);
+                int port = (a.LocalEndPoint as IPEndPoint).Port;
+
+                using (Socket b = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+                {
+                    Assert.ThrowsAny<SocketException>(() => b.Bind(new IPEndPoint(IPAddress.Loopback, port)));
+                }
+            }
+        }
+
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [PlatformSpecific(TestPlatforms.Windows)]  // SetIPProtectionLevel not supported on Unix

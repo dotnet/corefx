@@ -91,7 +91,7 @@ namespace System.Net.Sockets
             return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
         }
 
-        public static SocketError Bind(SafeCloseSocket handle, byte[] buffer, int nameLen)
+        public static SocketError Bind(SafeCloseSocket handle, ProtocolType socketProtocolType, byte[] buffer, int nameLen)
         {
             SocketError errorCode = Interop.Winsock.bind(handle, buffer, nameLen);
             return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
@@ -456,7 +456,7 @@ namespace System.Net.Sockets
             return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
         }
 
-        public static unsafe SocketError SetSockOpt(SafeCloseSocket handle, SocketOptionLevel optionLevel, SocketOptionName optionName, int optionValue)
+        public static unsafe SocketError SetSockOpt(SafeCloseSocket handle, ProtocolType socketProtocolType, SocketOptionLevel optionLevel, SocketOptionName optionName, int optionValue)
         {
             SocketError errorCode = Interop.Winsock.setsockopt(
                 handle,
@@ -467,7 +467,7 @@ namespace System.Net.Sockets
             return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
         }
 
-        public static SocketError SetSockOpt(SafeCloseSocket handle, SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue)
+        public static SocketError SetSockOpt(SafeCloseSocket handle, ProtocolType socketProtocolType, SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue)
         {
             SocketError errorCode = Interop.Winsock.setsockopt(
                 handle,
@@ -566,7 +566,7 @@ namespace System.Net.Sockets
             socket.SetSocketOption(optionLevel, SocketOptionName.IPProtectionLevel, protectionLevel);
         }
 
-        public static SocketError GetSockOpt(SafeCloseSocket handle, SocketOptionLevel optionLevel, SocketOptionName optionName, out int optionValue)
+        public static SocketError GetSockOpt(SafeCloseSocket handle, ProtocolType socketProtocolType, SocketOptionLevel optionLevel, SocketOptionName optionName, out int optionValue)
         {
             int optionLength = 4; // sizeof(int)
             SocketError errorCode = Interop.Winsock.getsockopt(
@@ -578,7 +578,7 @@ namespace System.Net.Sockets
             return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
         }
 
-        public static SocketError GetSockOpt(SafeCloseSocket handle, SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue, ref int optionLength)
+        public static SocketError GetSockOpt(SafeCloseSocket handle, ProtocolType socketProtocolType, SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue, ref int optionLength)
         {
             SocketError errorCode = Interop.Winsock.getsockopt(
                handle,

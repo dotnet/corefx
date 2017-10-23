@@ -360,7 +360,7 @@ extern "C" Error SystemNative_SendMessage(intptr_t socket, MessageHeader* messag
 
 extern "C" Error SystemNative_Accept(intptr_t socket, uint8_t* socketAddress, int32_t* socketAddressLen, intptr_t* acceptedSocket);
 
-extern "C" Error SystemNative_Bind(intptr_t socket, uint8_t* socketAddress, int32_t socketAddressLen);
+extern "C" Error SystemNative_Bind(intptr_t socket, int32_t protocolType, uint8_t* socketAddress, int32_t socketAddressLen);
 
 extern "C" Error SystemNative_Connect(intptr_t socket, uint8_t* socketAddress, int32_t socketAddressLen);
 
@@ -375,10 +375,10 @@ extern "C" Error SystemNative_Shutdown(intptr_t socket, int32_t socketShutdown);
 extern "C" Error SystemNative_GetSocketErrorOption(intptr_t socket, Error* error);
 
 extern "C" Error SystemNative_GetSockOpt(
-    intptr_t socket, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t* optionLen);
+    intptr_t socket, int32_t protocolType, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t* optionLen);
 
 extern "C" Error SystemNative_SetSockOpt(
-    intptr_t socket, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t optionLen);
+    intptr_t socket, int32_t protocolType, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t optionLen);
 
 extern "C" Error SystemNative_Socket(int32_t addressFamily, int32_t socketType, int32_t protocolType, intptr_t* createdSocket);
 

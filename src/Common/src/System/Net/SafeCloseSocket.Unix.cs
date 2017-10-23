@@ -323,7 +323,7 @@ namespace System.Net.Sockets
                     if (addressFamily == AddressFamily.InterNetworkV6)
                     {
                         int on = 1;
-                        error = Interop.Sys.SetSockOpt(fd, SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, (byte*)&on, sizeof(int));
+                        error = Interop.Sys.SetSockOpt(fd, protocolType, SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, (byte*)&on, sizeof(int));
                         if (error != Interop.Error.SUCCESS)
                         {
                             Interop.Sys.Close(fd);

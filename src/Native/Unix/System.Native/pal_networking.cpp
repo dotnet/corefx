@@ -1678,7 +1678,7 @@ extern "C" Error SystemNative_Accept(intptr_t socket, uint8_t* socketAddress, in
     return PAL_SUCCESS;
 }
 
-extern "C" Error SystemNative_Bind(intptr_t socket, uint8_t* socketAddress, int32_t socketAddressLen)
+extern "C" Error SystemNative_Bind(intptr_t socket, int32_t protocolType, uint8_t* socketAddress, int32_t socketAddressLen)
 {
     if (socketAddress == nullptr || socketAddressLen < 0)
     {
@@ -1686,6 +1686,14 @@ extern "C" Error SystemNative_Bind(intptr_t socket, uint8_t* socketAddress, int3
     }
 
     int fd = ToFileDescriptor(socket);
+
+    // On Windows, Bind during TCP_WAIT is allowed.
+    // On Unix, we set SO_REUSEADDR to get the same behavior.
+    if (protocolType == PAL_PT_TCP)
+    {
+        int optionValue = 1;
+        setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optionValue, sizeof(int));
+    }
 
     int err = bind(
         fd,
@@ -2036,7 +2044,7 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
 }
 
 extern "C" Error SystemNative_GetSockOpt(
-    intptr_t socket, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t* optionLen)
+    intptr_t socket, int32_t protocolType, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t* optionLen)
 {
     if (optionLen == nullptr || *optionLen < 0)
     {
@@ -2066,15 +2074,13 @@ extern "C" Error SystemNative_GetSockOpt(
         }
         else if (socketOptionName == PAL_SO_REUSEADDR)
         {
-            //
-            // On Windows, SO_REUSEADDR allows the address *and* port to be reused.  It's equivalent to 
-            // SO_REUSEADDR + SO_REUSEPORT other systems.  Se we only return "true" if both of those options are true.
-            //
+            // Return true when SO_REUSEADDR and SO_REUSEPORT are true.
+            // For TCP, we don't use SO_REUSEPORT (see SetSockOpt).
             auto optLen = static_cast<socklen_t>(*optionLen);
 
             int err = getsockopt(fd, SOL_SOCKET, SO_REUSEADDR, optionValue, &optLen);
 
-            if (err == 0 && *reinterpret_cast<uint32_t*>(optionValue) != 0)
+            if (err == 0 && protocolType != PAL_PT_TCP && *reinterpret_cast<uint32_t*>(optionValue) != 0)
             {
                 err = getsockopt(fd, SOL_SOCKET, SO_REUSEPORT, optionValue, &optLen);
             }
@@ -2120,7 +2126,7 @@ extern "C" Error SystemNative_GetSockOpt(
 }
 
 extern "C" Error
-SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t optionLen)
+SystemNative_SetSockOpt(intptr_t socket, int32_t protocolType, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t optionLen)
 {
     if (optionLen < 0 || optionValue == nullptr)
     {
@@ -2157,12 +2163,12 @@ SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t sock
         }
         else if (socketOptionName == PAL_SO_REUSEADDR)
         {
-            //
-            // On Windows, SO_REUSEADDR allows the address *and* port to be reused.  It's equivalent to 
-            // SO_REUSEADDR + SO_REUSEPORT other systems. 
-            //
+            // SO_REUSEPORT on Linux will do load-balancing accross multiple TCP sockets.
+            // This is different from Windows and BSD-Unix, so we won't set this for TCP.
+            // For UDP, we need to set SO_REUSEADDR and SO_REUSEPORT to support multicast use-cases
+            // where it is common to bind multiple sockets to the same address.
             int err = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, optionValue, static_cast<socklen_t>(optionLen));
-            if (err == 0)
+            if (err == 0 && protocolType != PAL_PT_TCP)
             {
                 err = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, optionValue, static_cast<socklen_t>(optionLen));
             }
