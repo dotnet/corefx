@@ -1530,7 +1530,7 @@ namespace System.Diagnostics.Tracing
                 m_traits = traits;
                 if (m_traits != null && m_traits.Length % 2 != 0)
                 {
-                    throw new ArgumentException(SR.TraitEven, nameof(traits));
+                    throw new ArgumentException(SR.EventSource_TraitEven, nameof(traits));
                 }
 
                 if (eventSourceGuid == Guid.Empty)
