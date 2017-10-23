@@ -55,6 +55,8 @@ namespace System.Collections.Concurrent.Tests
         }
 
         [Benchmark(InnerIterationCount = 1_000_000), MeasureGCAllocations]
+        [InlineData(false)]
+        [InlineData(true)]
         public void TryDequeue(bool exists)
         {
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
