@@ -334,17 +334,9 @@ internal static partial class Interop
         {
             outp = IntPtr.Zero;
             outlen = 0;
-
-            if (arg == IntPtr.Zero)
-            {
-                return Interop.Ssl.SSL_TLSEXT_ERR_NOACK;
-            }
-
+                        
             GCHandle protocols = GCHandle.FromIntPtr(arg);
-            if (!protocols.IsAllocated || protocols.Target == null)
-            {
-                return Interop.Ssl.SSL_TLSEXT_ERR_NOACK;
-            }
+            Debug.Assert(protocols.IsAllocated && protocols.Target != null);
 
             byte[] server = (byte[])protocols.Target;
 
