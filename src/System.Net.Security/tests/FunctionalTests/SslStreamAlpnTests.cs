@@ -204,8 +204,8 @@ namespace System.Net.Security.Tests
                     ServerCertificate = certificate,
                 };
 
-                Assert.ThrowsAsync<AuthenticationException>(() => { return client.AuthenticateAsClientAsync(clientOptions, CancellationToken.None); });
-                Assert.ThrowsAsync<AuthenticationException>(() => { return server.AuthenticateAsServerAsync(serverOptions, CancellationToken.None); });
+                Assert.ThrowsAsync<AuthenticationException>(async () => { await client.AuthenticateAsClientAsync(clientOptions, CancellationToken.None); });
+                Assert.ThrowsAsync<AuthenticationException>(async () => { await server.AuthenticateAsServerAsync(serverOptions, CancellationToken.None); });
             }
         }
 
