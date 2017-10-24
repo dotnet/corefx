@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.CodeDom;
+using System.IO;
 using System.Management;
 using Xunit;
 
@@ -16,11 +17,34 @@ namespace System.Management.Tests
         [InlineData(false, true)]
         [InlineData(true, false)]
         [InlineData(true, true)]
-        public void CodeTypeDeclaration_For_Win32_LogicalDisk(bool includeSystemClassInClassDef, bool systemPropertyClass)
+        public void Get_CodeTypeDeclaration_For_Win32_LogicalDisk(bool includeSystemClassInClassDef, bool systemPropertyClass)
         {
-            var managementClass = new ManagementClass(null, "Win32_LogicalDisk", null);
-            CodeTypeDeclaration classDom = managementClass.GetStronglyTypedClassCode(includeSystemClassInClassDef, systemPropertyClass);
-            Assert.Equal(systemPropertyClass ? "ManagementSystemProperties" : "LogicalDisk", classDom.Name);
+            using (var managementClass = new ManagementClass(null, "Win32_LogicalDisk", null))
+            {
+                CodeTypeDeclaration classDom = managementClass.GetStronglyTypedClassCode(includeSystemClassInClassDef, systemPropertyClass);
+                Assert.Equal(systemPropertyClass ? "ManagementSystemProperties" : "LogicalDisk", classDom.Name);
+            }
+        }
+
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [InlineData(CodeLanguage.CSharp)]
+        [InlineData(CodeLanguage.VB)]
+        public void Get_SourceFile_For_Win32_Processor(CodeLanguage lang)
+        {
+            var tempFilePath = Path.GetTempFileName();
+            var passed = false;
+            try 
+            {
+                using (var managementClass = new ManagementClass(null, "Win32_Processor", null))
+                    Assert.True(managementClass.GetStronglyTypedClassCode(lang, tempFilePath, "Wmi.Test.CoreFx"));
+
+                passed = true;
+            }
+            finally
+            {
+                if (passed && tempFilePath != null)
+                    File.Delete(tempFilePath);
+            }
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -41,6 +65,24 @@ namespace System.Management.Tests
             QualifierDataCollection qualifiers = managementClass.Qualifiers;
             foreach (QualifierData qualifier in qualifiers)
                 Assert.False(string.IsNullOrWhiteSpace(qualifier.Name));
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        public void EnumerateInstances_For_Win32_LogicalDisk()
+        {
+            using (var managementClass = new ManagementClass(new ManagementPath("Win32_LogicalDisk")))
+            using (ManagementObjectCollection instances = managementClass.GetInstances())
+            using (ManagementObjectCollection.ManagementObjectEnumerator instancesEnumerator = instances.GetEnumerator())
+            {
+                while (instancesEnumerator.MoveNext())
+                {
+                    ManagementObject instance = (ManagementObject)instancesEnumerator.Current;
+                    Assert.NotNull(instance);
+                    var clone = instance.Clone();
+                    Assert.NotNull(clone);
+                    Assert.False(ReferenceEquals(instance, clone));
+                }
+            }
         }
     }
 }

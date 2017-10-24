@@ -1831,10 +1831,10 @@ namespace System.Management
             lock(critSec)
             {
                 // Make sure worker thread is initialized
-        	    if(workerThreadInitialized == false)
+                if(workerThreadInitialized == false)
                 {
-	                InitWorkerThread();
-        	        workerThreadInitialized = true;
+                    InitWorkerThread();
+                    workerThreadInitialized = true;
                 }
 
                 ndx = reqList.Add(myReq);

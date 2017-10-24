@@ -13,7 +13,7 @@ namespace System.Management.Tests
         private static string s_systemDriveId = Environment.GetEnvironmentVariable("SystemDrive");
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        public void Win32_LogicalDisk()
+        public void Get_Win32_LogicalDisk()
         {
             using (ManagementObject obj = new ManagementObject($"Win32_LogicalDisk.DeviceID=\"{s_systemDriveId}\""))
             {
@@ -22,6 +22,10 @@ namespace System.Management.Tests
                 Assert.True(ulong.Parse(obj["Size"].ToString()) > 0);
                 var classPath = obj.ClassPath.Path;
                 Assert.Equal($@"\\{Environment.MachineName}\root\cimv2:Win32_LogicalDisk", classPath);
+
+                var clone = obj.Clone();
+                Assert.False(ReferenceEquals(clone, obj));
+                ((ManagementObject)clone).Dispose();
             }
         }
 
@@ -34,6 +38,17 @@ namespace System.Management.Tests
                 Assert.True(relatedCollection.Count > 0);
                 foreach (ManagementObject related in relatedCollection)
                     Assert.False(string.IsNullOrWhiteSpace(related.ClassPath.NamespacePath));
+            }
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [Trait("Inv", "true")]
+        public void Set_Property_Win32_ComputerSystem()
+        {
+            using (ManagementObject obj = new ManagementObject($"Win32_ComputerSystem.Name=\"{Environment.MachineName}\""))
+            {
+                obj.Get();
+                obj.SetPropertyValue("Workgroup", "WmiTests");
             }
         }
     }

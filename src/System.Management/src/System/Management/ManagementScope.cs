@@ -565,7 +565,7 @@ namespace System.Management
                     Initialize_f  =(Initialize) Marshal.GetDelegateForFunctionPointer(procAddr, typeof(Initialize));
                 }
 
-		Initialize_f(CompatSwitches.AllowIManagementObjectQI);
+        Initialize_f(CompatSwitches.AllowIManagementObjectQI);
             }
         }
 

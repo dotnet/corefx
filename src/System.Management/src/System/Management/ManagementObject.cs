@@ -711,7 +711,7 @@ namespace System.Management
                 classPath.Server = String.Empty;
                 classPath.NamespacePath = String.Empty;
                 classPath.ClassName = String.Empty;
-				
+                
                 // Some of these may throw if they are NULL
                 try 
                 {

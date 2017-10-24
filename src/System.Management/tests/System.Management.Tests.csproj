@@ -8,6 +8,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\Management\ManagementClassTests.cs" />
+    <Compile Include="System\Management\ManagementDateTimeConverterTests.cs" />
     <Compile Include="System\Management\ManagementObjectTests.cs" />
     <Compile Include="System\Management\SelectQueryTests.cs" />
   </ItemGroup>
