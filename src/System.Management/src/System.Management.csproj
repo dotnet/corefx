@@ -9,15 +9,17 @@
     <!-- Although we have a netstandard configuration, we know we are not currently UAP compatible-->
     <UWPCompatible>false</UWPCompatible>
     <IncludeDllSafeSearchPathAttribute>true</IncludeDllSafeSearchPathAttribute>
-    <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsWindows)' != 'true'">true</GeneratePlatformNotSupportedAssembly>
+    <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsWindows)' != 'true' or '$(TargetGroup)' == 'uap'">true</GeneratePlatformNotSupportedAssembly>
     <!-- When generating PNSE assembly disable CA1821 since finalizers are being generated empty -->
-    <NoWarn Condition="'$(TargetsWindows)' != 'true'">$(NoWarn);CA1821</NoWarn>
+    <NoWarn Condition="'$(TargetsWindows)' != 'true' or '$(TargetGroup)' == 'uap'">$(NoWarn);CA1821</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(TargetGroup)' != 'uap'">
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
