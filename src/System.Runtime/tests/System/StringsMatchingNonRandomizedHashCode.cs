@@ -2,12 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+
 namespace System.Tests
 {
     internal static class StringsMatchingNonRandomizedHashCode
     {
-        internal static readonly string[] Data = new string[102]
-        {
+        /// <summary>
+        /// A list of strings that all have the same hashcode (-1038491930) using the legacy non randomized string hash code algorithm
+        /// </summary>
+        internal static readonly IEnumerable<string> Data = new string[] {
             "95e85f8e-67a3-4367-974f-dd24d8bb2ca2",
             "eb3d6fe9-de64-43a9-8f58-bddea727b1ca",
             "9b9bc0c2-5d25-4292-880c-d54bb48c2f37",
