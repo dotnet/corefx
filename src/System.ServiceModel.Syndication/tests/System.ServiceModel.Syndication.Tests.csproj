@@ -4,8 +4,8 @@
   <PropertyGroup>
     <ProjectGuid>{A622B2C0-DD74-4218-9CF0-F9B2E52F4E91}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="$(MsBuildThisFileDirectory)\**\*.cs" />
     <Compile Remove="$(MsBuildThisFileDirectory)async\**\*.cs" />
