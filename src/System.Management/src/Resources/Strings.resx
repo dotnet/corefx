@@ -281,4 +281,7 @@
   <data name="UnableToCreateCodeGeneratorException" xml:space="preserve">
     <value>Unable to create code generator for '{0}'</value>
   </data>
+  <data name="PlatformNotSupported_SystemManagement" xml:space="preserve">
+    <value>System.Management currently is only supported for Windows desktop applications.</value>
+  </data>
 </root>

@@ -42,7 +42,6 @@ namespace System.Management.Tests
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [Trait("Inv", "true")]
         public void Set_Property_Win32_ComputerSystem()
         {
             using (ManagementObject obj = new ManagementObject($"Win32_ComputerSystem.Name=\"{Environment.MachineName}\""))
