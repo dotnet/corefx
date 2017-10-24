@@ -324,7 +324,8 @@ namespace System.Net.Sockets.Tests
 
                 using (Socket b = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
                 {
-                    Assert.ThrowsAny<SocketException>(() => b.Bind(new IPEndPoint(IPAddress.Loopback, port)));
+                    SocketException ex = Assert.ThrowsAny<SocketException>(() => b.Bind(new IPEndPoint(IPAddress.Loopback, port)));
+                    Assert.Equal(SocketError.AddressAlreadyInUse, ex.SocketErrorCode);
                 }
             }
         }
