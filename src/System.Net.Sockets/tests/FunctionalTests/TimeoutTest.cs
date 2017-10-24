@@ -127,7 +127,8 @@ namespace System.Net.Sockets.Tests
                 Assert.True(acceptedSocket.Connected);
 
                 // Try to ensure that the elapsed timeout is reasonably correct
-                Assert.InRange(elapsed, Timeout * 0.5, Timeout * 2);
+                // Sometimes test machines run slowly
+                Assert.InRange(elapsed, Timeout * 0.5, Timeout * 3);
             }
         }
     }
