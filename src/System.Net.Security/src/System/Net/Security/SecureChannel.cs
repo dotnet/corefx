@@ -183,6 +183,14 @@ namespace System.Net.Security
             _refreshCredentialNeeded = true;
         }
 
+        ~SecureChannel()
+        {
+            if(_sslAuthenticationOptions.AlpnProtocolsHandle.IsAllocated)
+            {
+                _sslAuthenticationOptions.AlpnProtocolsHandle.Free();
+            }
+        }
+
         internal void Close()
         {
             if (_sslAuthenticationOptions.AlpnProtocolsHandle.IsAllocated)
@@ -199,6 +207,8 @@ namespace System.Net.Security
             {
                 _credentialsHandle.Dispose();
             }
+
+            GC.SuppressFinalize(this);
         }
 
         //
