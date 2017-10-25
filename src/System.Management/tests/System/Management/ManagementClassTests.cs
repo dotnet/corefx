@@ -4,7 +4,6 @@
 
 using System.CodeDom;
 using System.IO;
-using System.Management;
 using Xunit;
 
 namespace System.Management.Tests
@@ -82,6 +81,27 @@ namespace System.Management.Tests
                     Assert.NotNull(clone);
                     Assert.False(ReferenceEquals(instance, clone));
                 }
+            }
+        }
+
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndNotNanoServer))]
+        public void Create_Delete_Namespace()
+        {
+            using (var rootNamespace = new ManagementClass("root:__namespace"))
+            using (ManagementObject newNamespace = rootNamespace.CreateInstance())
+            {
+                const string NewNameSpace = "CoreFx_Create_Delete_Namespace_Test";
+                newNamespace["Name"] = NewNameSpace;
+                newNamespace.Put();
+
+                ManagementObject targetNamespace = new ManagementObject($"root:__namespace.Name='{NewNameSpace}'");
+                Assert.Equal(NewNameSpace, targetNamespace["Name"]);
+
+                // If any of the steps below fail it is likely that the new namespace was not deleted, likely it will have to
+                // be deleted via a tool like wbemtest.
+                targetNamespace.Delete();
+                ManagementException managementException = Assert.Throws<ManagementException>(() => targetNamespace.Get());
+                Assert.Equal(ManagementStatus.NotFound, managementException.ErrorCode);
             }
         }
     }
