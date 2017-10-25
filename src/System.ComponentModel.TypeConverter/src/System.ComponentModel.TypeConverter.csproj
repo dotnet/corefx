@@ -169,7 +169,7 @@
     <Compile Include="System\ComponentModel\ListBindableAttribute.cs" />
     <Compile Include="System\ComponentModel\LookupBindingPropertiesAttribute.cs" />
     <Compile Include="System\ComponentModel\MarshalByValueComponent.cs">
-      <SubType>Component</SubType>
+        <SubType>Component</SubType>
     </Compile>
     <Compile Include="System\ComponentModel\MaskedTextProvider.cs" />
     <Compile Include="System\ComponentModel\MaskedTextResultHint.cs" />
@@ -265,6 +265,7 @@
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.TraceSource" />
     <Reference Include="System.Drawing.Primitives" />
+    <Reference Include="System.Globalization" />
     <Reference Include="System.IO.FileSystem" />
     <Reference Include="System.Linq" />
     <Reference Include="System.Net.Primitives" />
