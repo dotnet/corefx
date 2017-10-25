@@ -18,6 +18,43 @@ namespace System
             return binaryData;
         }
 
+        [Benchmark(InnerIterationCount = 20000000)]
+        public void GetTypeCode()
+        {
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
+            object value = "Hello World!";
+
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < innerIterationCount; i++)
+                    {
+                        Convert.GetTypeCode(value);
+                    }
+                }
+            }
+        }
+
+        [Benchmark(InnerIterationCount = 6000000)]
+        public void ChangeType()
+        {
+            int innerIterationCount = (int)Benchmark.InnerIterationCount;
+            object value = 1000;
+            Type type = typeof(string);
+
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < innerIterationCount; i++)
+                    {
+                        Convert.ChangeType(value, type);
+                    }
+                }
+            }
+        }
+
         [Benchmark(InnerIterationCount = 100000)]
         [InlineData(1024, Base64FormattingOptions.InsertLineBreaks)]
         [InlineData(1024, Base64FormattingOptions.None)]
@@ -60,75 +97,6 @@ namespace System
             }
         }
 
-        [Benchmark(InnerIterationCount = 380000000)]
-        public void ToBoolean_Byte()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-            byte value = 1;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToBoolean(value);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 10000000)]
-        public void ToBoolean_Decimal()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToBoolean(100.0m);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToBoolean_Double()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToBoolean(100.0);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToBoolean_Int()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToBoolean(100);
-                    }
-                }
-            }
-        }
-
         [Benchmark(InnerIterationCount = 5000000)]
         public void ToBoolean_String()
         {
@@ -146,161 +114,6 @@ namespace System
             }
         }
 
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToBoolean_Object()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToBoolean(null);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToBoolean_Single()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-            float value = 1;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToBoolean(value);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToByte_Char()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToByte('A');
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToByte_Boolean()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToByte(true);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 3000000)]
-        public void ToByte_Decimal()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToByte(1.0m);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToByte_Double()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToByte(1.0);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToByte_Int()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToByte(1);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToByte_Object()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToByte(null);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 50000000)]
-        public void ToByte_Single()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-            float value = 1.1f;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToByte(value);
-                    }
-                }
-            }
-        }
-
         [Benchmark(InnerIterationCount = 2000000)]
         public void ToByte_String()
         {
@@ -313,77 +126,6 @@ namespace System
                     for (int i = 0; i < innerIterationCount; i++)
                     {
                         Convert.ToByte("52");
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 400000000)]
-        public void ToChar_Byte()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-            byte value = 125;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToChar(value);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToChar_Int()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToChar(100);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToChar_Short()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-            short value = 12;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToChar(value);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToChar_Object()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-            object value = null;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToChar(value);
                     }
                 }
             }
@@ -429,92 +171,6 @@ namespace System
             }
         }
 
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToDateTime_DateTime()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-            var value = new DateTime(1999, 12, 31, 23, 59, 59);
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToDateTime(value);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToDecimal_Boolean()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToDecimal(true);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 5000000)]
-        public void ToDecimal_Double()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToDecimal(145d);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToDecimal_Int()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToDecimal(145);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 5000000)]
-        public void ToDecimal_Single()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToDecimal(145.1f);
-                    }
-                }
-            }
-        }
-
         [Benchmark(InnerIterationCount = 1000000)]
         public void ToDecimal_String()
         {
@@ -527,57 +183,6 @@ namespace System
                     for (int i = 0; i < innerIterationCount; i++)
                     {
                         Convert.ToDecimal("145");
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToDecimal_Object()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToDecimal(null);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToDouble_Boolean()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToDouble(true);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 10000000)]
-        public void ToDouble_Decimal()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToDouble(145m);
                     }
                 }
             }
@@ -600,108 +205,6 @@ namespace System
             }
         }
 
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToDouble_Object()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToDouble(null);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToInt16_Boolean()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt16(true);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 10000000)]
-        public void ToInt16_Decimal()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt16(145m);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 50000000)]
-        public void ToInt16_Double()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt16(145d);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToInt16_Int()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt16(145);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 50000000)]
-        public void ToInt16_Single()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt16(145.1f);
-                    }
-                }
-            }
-        }
-
         [Benchmark(InnerIterationCount = 3000000)]
         public void ToInt16_String()
         {
@@ -714,91 +217,6 @@ namespace System
                     for (int i = 0; i < innerIterationCount; i++)
                     {
                         Convert.ToInt16("145");
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToInt16_Object()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt16(null);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToInt32_Boolean()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt32(true);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 10000000)]
-        public void ToInt32_Decimal()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt32(145m);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 50000000)]
-        public void ToInt32_Double()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt32(145d);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 50000000)]
-        public void ToInt32_Single()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt32(145.1f);
                     }
                 }
             }
@@ -821,91 +239,6 @@ namespace System
             }
         }
 
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToInt32_Object()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt32(null);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToInt64_Boolean()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt64(true);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 10000000)]
-        public void ToInt64_Decimal()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt64(145m);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 400000000)]
-        public void ToInt64_Double()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt64(145d);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 400000000)]
-        public void ToInt64_Single()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt64(145.1f);
-                    }
-                }
-            }
-        }
-
         [Benchmark(InnerIterationCount = 3000000)]
         public void ToInt64_String()
         {
@@ -918,108 +251,6 @@ namespace System
                     for (int i = 0; i < innerIterationCount; i++)
                     {
                         Convert.ToInt64("145");
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToInt64_Object()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToInt64(null);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToUInt16_Boolean()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt16(true);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 10000000)]
-        public void ToUInt16_Decimal()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt16(145m);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 50000000)]
-        public void ToUInt16_Double()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt16(145d);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToUInt16_Int()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt16(145);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 50000000)]
-        public void ToUInt16_Single()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt16(145.1f);
                     }
                 }
             }
@@ -1042,108 +273,6 @@ namespace System
             }
         }
 
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToUInt16_Object()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt16(null);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToUInt32_Boolean()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt32(true);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 10000000)]
-        public void ToUInt32_Decimal()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt32(145m);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 50000000)]
-        public void ToUInt32_Double()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt32(145d);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToUInt32_Int()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt32(145);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 50000000)]
-        public void ToUInt32_Single()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt32(145.1f);
-                    }
-                }
-            }
-        }
-
         [Benchmark(InnerIterationCount = 3000000)]
         public void ToUInt32_String()
         {
@@ -1156,108 +285,6 @@ namespace System
                     for (int i = 0; i < innerIterationCount; i++)
                     {
                         Convert.ToUInt32("145");
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToUInt32_Object()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt32(null);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToUInt64_Boolean()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt64(true);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 10000000)]
-        public void ToUInt64_Decimal()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt64(145m);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 400000000)]
-        public void ToUInt64_Double()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt64(145d);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 400000000)]
-        public void ToUInt64_Int()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt64(145);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 400000000)]
-        public void ToUInt64_Single()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt64(145.1f);
                     }
                 }
             }
@@ -1280,126 +307,6 @@ namespace System
             }
         }
 
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToUInt64_Object()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToUInt64(null);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToSByte_Boolean()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToSByte(true);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToSByte_Byte()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-            byte value = 100;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToSByte(value);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 10000000)]
-        public void ToSByte_Decimal()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToSByte(100m);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToSByte_Double()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToSByte(100d);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToSByte_Int()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToSByte(100);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 50000000)]
-        public void ToSByte_Single()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToSByte(50.1f);
-                    }
-                }
-            }
-        }
-
         [Benchmark(InnerIterationCount = 3000000)]
         public void ToSByte_String()
         {
@@ -1417,91 +324,6 @@ namespace System
             }
         }
 
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToSByte_Object()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToSByte(null);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 500000000)]
-        public void ToSingle_Boolean()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToSingle(true);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 10000000)]
-        public void ToSingle_Decimal()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToSingle(100m);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 400000000)]
-        public void ToSingle_Double()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToSingle(100d);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 400000000)]
-        public void ToSingle_Single()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToSingle(50.1f);
-                    }
-                }
-            }
-        }
-
         [Benchmark(InnerIterationCount = 3000000)]
         public void ToSingle_String()
         {
@@ -1514,23 +336,6 @@ namespace System
                     for (int i = 0; i < innerIterationCount; i++)
                     {
                         Convert.ToSingle("100");
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 100000000)]
-        public void ToSingle_Object()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToSingle(null);
                     }
                 }
             }
@@ -1634,24 +439,6 @@ namespace System
                     for (int i = 0; i < innerIterationCount; i++)
                     {
                         Convert.ToString(50.1f);
-                    }
-                }
-            }
-        }
-
-        [Benchmark(InnerIterationCount = 7000000)]
-        public void ToString_Object()
-        {
-            int innerIterationCount = (int)Benchmark.InnerIterationCount;
-            Perf_Convert value = new Perf_Convert();
-
-            foreach (var iteration in Benchmark.Iterations)
-            {
-                using (iteration.StartMeasurement())
-                {
-                    for (int i = 0; i < innerIterationCount; i++)
-                    {
-                        Convert.ToString(value);
                     }
                 }
             }
