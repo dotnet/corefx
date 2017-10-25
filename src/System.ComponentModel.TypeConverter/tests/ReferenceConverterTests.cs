@@ -249,6 +249,9 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void GetReferenceConverterFromType()
         {
+            if (PlatformDetection.IsFullFramework)
+                return;
+
             ReferenceConverter converter = new ReferenceConverter(typeof(TestComponent));
             TypeConverter toConverter = TypeDescriptor.GetConverter(converter.GetType());
             Assert.Equal(converter.GetType(), toConverter.GetType());
