@@ -8,16 +8,13 @@
     <NoWarn>$(NoWarn);0649</NoWarn>
     <!-- Although we have a netstandard configuration, we know we are not currently UAP compatible-->
     <UWPCompatible>false</UWPCompatible>
-    <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsWindows)' != 'true'">true</GeneratePlatformNotSupportedAssembly>
+    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetsWindows)' != 'true' OR '$(TargetGroup)' == 'uap'">SR.DirectoryServices_PlatformNotSupported</GeneratePlatformNotSupportedAssemblyMessage>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetsWindows)' != 'true'">
-    <Compile Include="FxCopBaseline.AnyOS.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(TargetGroup)' == 'netstandard'">
     <Compile Include="System\DirectoryServices\ExternDll.cs" />
     <Compile Include="System\DirectoryServices\ActiveDirectorySecurity.cs" />
     <Compile Include="System\DirectoryServices\AdsVLV.cs" />
@@ -153,6 +150,11 @@
     <Reference Include="System.Security.AccessControl" />
     <Reference Include="System.Security.Permissions" />
     <Reference Include="System.Security.Principal.Windows" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
+    <Reference Include="System.Collections.Specialized" />
+    <Reference Include="System.ComponentModel.Primitives" />
+    <Reference Include="System.Resources.ResourceManager" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
