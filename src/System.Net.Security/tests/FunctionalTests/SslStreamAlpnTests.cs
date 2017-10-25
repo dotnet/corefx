@@ -61,7 +61,7 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        public async Task SslStream_StreamToStream_DuplicateOptions_Throws()
+        public void SslStream_StreamToStream_DuplicateOptions_Throws()
         {
             RemoteCertificateValidationCallback rCallback = (sender, certificate, chain, errors) => { return true; };
             LocalCertificateSelectionCallback lCallback = (sender, host, localCertificates, remoteCertificate, issuers) => { return null; };
@@ -84,7 +84,7 @@ namespace System.Net.Security.Tests
                 Task t1 = Assert.ThrowsAsync<InvalidOperationException>(() => client.AuthenticateAsClientAsync(clientOptions, CancellationToken.None));
                 Task t2 = Assert.ThrowsAsync<InvalidOperationException>(() => server.AuthenticateAsServerAsync(serverOptions, CancellationToken.None));
 
-                await Task.WhenAll(t1, t2);
+                Assert.True(Task.WaitAll(new[] { t1, t2 }, TestConfiguration.PassingTestTimeoutMilliseconds));
             }
         }
 
@@ -116,8 +116,9 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
+        [ActiveIssue(24853)]
         [PlatformSpecific(~TestPlatforms.OSX)]
-        public async Task SslStream_StreamToStream_Alpn_NonMatchingProtocols_Fail()
+        public void SslStream_StreamToStream_Alpn_NonMatchingProtocols_Fail()
         {
             VirtualNetwork network = new VirtualNetwork();
             using (var clientStream = new VirtualNetworkStream(network, false))
@@ -142,7 +143,7 @@ namespace System.Net.Security.Tests
                 Task t1 = Assert.ThrowsAsync<AuthenticationException>(() => client.AuthenticateAsClientAsync(clientOptions, CancellationToken.None));
                 Task t2 = Assert.ThrowsAsync<AuthenticationException>(() => server.AuthenticateAsServerAsync(serverOptions, CancellationToken.None));
 
-                await Task.WhenAll(t1, t2);
+                Assert.True(Task.WaitAll(new[] { t1, t2 }, TestConfiguration.PassingTestTimeoutMilliseconds));
             }
         }
 
