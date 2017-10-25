@@ -169,7 +169,7 @@
     <Compile Include="System\ComponentModel\ListBindableAttribute.cs" />
     <Compile Include="System\ComponentModel\LookupBindingPropertiesAttribute.cs" />
     <Compile Include="System\ComponentModel\MarshalByValueComponent.cs">
-        <SubType>Component</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="System\ComponentModel\MaskedTextProvider.cs" />
     <Compile Include="System\ComponentModel\MaskedTextResultHint.cs" />
