@@ -208,12 +208,5 @@ namespace System.ComponentModel.Tests
                 return base.GetCultureName(culture);
             }
         }
-
-        [Fact]
-        public void GetCultureInfoConverterFromType()
-        {
-            TypeConverter toConverter = TypeDescriptor.GetConverter(CultureInfo.CurrentCulture.GetType());
-            Assert.Equal(new CultureInfoConverter().GetType(), toConverter.GetType());
-        }
     }
 }

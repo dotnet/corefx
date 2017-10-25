@@ -137,7 +137,7 @@ namespace System.ComponentModel
             [typeof(ICollection)] = typeof(CollectionConverter),
             [typeof(Enum)] = typeof(EnumConverter),
             [s_intrinsicNullableKey] = typeof(NullableConverter),
-            [typeof(ReferenceConverter)] = typeof(ReferenceConverter),
+            [s_intrinsicReferenceKey] = typeof(ReferenceConverter),
         });
 
         private static Hashtable PropertyCache => LazyInitializer.EnsureInitialized(ref s_propertyCache, () => new Hashtable());
