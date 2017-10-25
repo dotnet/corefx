@@ -49,6 +49,7 @@ namespace System
         public static bool IsNotRedHat => !IsRedHat;
         public static bool IsRedHat69 => IsDistroAndVersion("rhel", "6.9") || IsDistroAndVersion("rhl", "6.9");
         public static bool IsNotRedHat69 => !IsRedHat69;
+        public static bool IsRedHat73 => IsDistroAndVersion("rhel", "7.3") || IsDistroAndVersion("rhl", "7.3");
 
         public static Version OSXKernelVersion { get; } = GetOSXKernelVersion();
 

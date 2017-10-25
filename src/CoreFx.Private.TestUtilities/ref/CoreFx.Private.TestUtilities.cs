@@ -74,6 +74,7 @@ namespace System
         public static bool IsNotRedHat { get { throw null; } }
         public static bool IsRedHat69 { get { throw null; } }
         public static bool IsNotRedHat69 { get { throw null; } }
+        public static bool IsRedHat73 { get { throw null; } }
         public static bool IsUap { get { throw null; } }
         public static Version ICUVersion { get { return null; } }
         public static bool IsUbuntu { get { throw null; } }
