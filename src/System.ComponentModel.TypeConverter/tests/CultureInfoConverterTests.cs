@@ -213,7 +213,7 @@ namespace System.ComponentModel.Tests
         public void GetCultureInfoConverterFromType()
         {
             TypeConverter toConverter = TypeDescriptor.GetConverter(CultureInfo.CurrentCulture.GetType());
-            Assert.Equal(new CultureInfoConverter().GetType().ToString(), toConverter.GetType().ToString());
+            Assert.Equal(new CultureInfoConverter().GetType(), toConverter.GetType());
         }
     }
 }
