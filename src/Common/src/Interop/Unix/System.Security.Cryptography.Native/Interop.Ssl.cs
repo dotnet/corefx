@@ -60,7 +60,7 @@ internal static partial class Interop
             int len;
             SslGetAlpnSelected(ssl, out protocol, out len);
 
-            if (len < 1)
+            if (len == 0)
                 return null;
 
             byte[] result = new byte[len];

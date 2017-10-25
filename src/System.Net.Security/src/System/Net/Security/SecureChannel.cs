@@ -189,6 +189,7 @@ namespace System.Net.Security
             {
                 _sslAuthenticationOptions.AlpnProtocolsHandle.Free();
             }
+
         }
 
         internal void Close()
