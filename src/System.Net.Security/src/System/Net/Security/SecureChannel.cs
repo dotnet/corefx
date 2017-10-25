@@ -185,11 +185,10 @@ namespace System.Net.Security
 
         ~SecureChannel()
         {
-            if(_sslAuthenticationOptions.AlpnProtocolsHandle.IsAllocated)
+            if (_sslAuthenticationOptions.AlpnProtocolsHandle.IsAllocated)
             {
                 _sslAuthenticationOptions.AlpnProtocolsHandle.Free();
             }
-
         }
 
         internal void Close()

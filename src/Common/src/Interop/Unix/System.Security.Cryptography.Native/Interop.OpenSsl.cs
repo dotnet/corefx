@@ -340,8 +340,8 @@ internal static partial class Interop
 
             byte[] server = (byte[])protocols.Target;
 
-            return Interop.Ssl.SslSelectNextProto(out outp, out outlen, (IntPtr)protocols.AddrOfPinnedObject(), (uint)server.Length, inp, inlen) == Interop.Ssl.OPENSSL_NPN_NEGOTIATED ?
-                    Interop.Ssl.SSL_TLSEXT_ERR_OK : Interop.Ssl.SSL_TLSEXT_ERR_NOACK;
+            return Ssl.SslSelectNextProto(out outp, out outlen, protocols.AddrOfPinnedObject(), (uint)server.Length, inp, inlen) == Ssl.OPENSSL_NPN_NEGOTIATED ?
+                    Ssl.SSL_TLSEXT_ERR_OK : Ssl.SSL_TLSEXT_ERR_NOACK;
         }
 
         private static void UpdateCAListFromRootStore(SafeSslContextHandle context)
