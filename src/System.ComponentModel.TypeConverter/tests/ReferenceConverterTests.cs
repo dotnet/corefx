@@ -245,5 +245,13 @@ namespace System.ComponentModel.Tests
             // 2 components + 1 null value
             Assert.Equal(3, values.Count);
         }
+
+        [Fact]
+        public void GetReferenceConverterFromType()
+        {
+            ReferenceConverter converter = new ReferenceConverter(typeof(TestComponent));
+            TypeConverter toConverter = TypeDescriptor.GetConverter(converter.GetType());
+            Assert.Equal(converter.GetType(), toConverter.GetType());
+        }
     }
 }
