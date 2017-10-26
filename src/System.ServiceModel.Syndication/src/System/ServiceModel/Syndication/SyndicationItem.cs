@@ -47,13 +47,13 @@ namespace System.ServiceModel.Syndication
         {
             if (title != null)
             {
-                this.Title = new TextSyndicationContent(title);
+                Title = new TextSyndicationContent(title);
             }
 
             _content = content;
             if (itemAlternateLink != null)
             {
-                this.Links.Add(SyndicationLink.CreateAlternateLink(itemAlternateLink));
+                Links.Add(SyndicationLink.CreateAlternateLink(itemAlternateLink));
             }
             _id = id;
             _lastUpdatedTime = lastUpdatedTime;
@@ -197,6 +197,17 @@ namespace System.ServiceModel.Syndication
             set { _title = value; }
         }
 
+        public static SyndicationItem Load(XmlReader reader)
+        {
+            return LoadAsync(reader).GetAwaiter().GetResult();
+        }
+
+        public static TSyndicationItem Load<TSyndicationItem>(XmlReader reader)
+            where TSyndicationItem : SyndicationItem, new()
+        {
+            return LoadAsync<TSyndicationItem>(reader).GetAwaiter().GetResult();
+        }
+
         public static Task<SyndicationItem> LoadAsync(XmlReader reader)
         {
             return LoadAsync<SyndicationItem>(reader);
@@ -218,7 +229,7 @@ namespace System.ServiceModel.Syndication
                 return rssSerializer.Item as TSyndicationItem;
             }
 
-            throw new XmlException(string.Format(SR.UnknownItemXml, reader.LocalName, reader.NamespaceURI));
+            throw new XmlException(SR.Format(SR.UnknownItemXml, reader.LocalName, reader.NamespaceURI));
         }
 
 
@@ -228,8 +239,8 @@ namespace System.ServiceModel.Syndication
             {
                 throw new ArgumentNullException(nameof(permalink));
             }
-            this.Id = permalink.AbsoluteUri;
-            this.Links.Add(SyndicationLink.CreateAlternateLink(permalink));
+            Id = permalink.AbsoluteUri;
+            Links.Add(SyndicationLink.CreateAlternateLink(permalink));
         }
 
         public virtual SyndicationItem Clone()
@@ -252,12 +263,22 @@ namespace System.ServiceModel.Syndication
             return new Rss20ItemFormatter(this, serializeExtensionsAsAtom);
         }
 
-        public Task SaveAsAtom10(XmlWriter writer)
+        public void SaveAsAtom10(XmlWriter writer)
+        {
+            SaveAsAtom10Async(writer).GetAwaiter().GetResult();
+        }
+
+        public void SaveAsRss20(XmlWriter writer)
+        {
+            SaveAsRss20Async(writer).GetAwaiter().GetResult();
+        }
+
+        public Task SaveAsAtom10Async(XmlWriter writer)
         {
             return GetAtom10Formatter().WriteToAsync(writer);
         }
 
-        public Task SaveAsRss20(XmlWriter writer)
+        public Task SaveAsRss20Async(XmlWriter writer)
         {
             return GetRss20Formatter().WriteToAsync(writer);
         }
@@ -291,6 +312,16 @@ namespace System.ServiceModel.Syndication
         protected internal virtual bool TryParseElement(XmlReader reader, string version)
         {
             return false;
+        }
+
+        protected internal virtual void WriteAttributeExtensions(XmlWriter writer, string version)
+        {
+            _extensions.WriteAttributeExtensions(writer);
+        }
+
+        protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
+        {
+            _extensions.WriteElementExtensions(writer);
         }
 
         protected internal virtual Task WriteAttributeExtensionsAsync(XmlWriter writer, string version)

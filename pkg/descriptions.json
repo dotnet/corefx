@@ -26,6 +26,19 @@
     ]
   },
   {
+    "Name": "Microsoft.Diagnostics.Tracing.EventSource.Redist",
+    "Description": "This package includes the class Microsoft.Diagnostics.Tracing.EventSource which enables firing ETW events from managed code. This is the \"runtime\" or \"redist\" EventSource package and should be referenced directly only by other NuGet packages that need the EventSource functionality. Application developers that need this functionality should instead reference the Microsoft.Diagnostics.Tracing.EventSource NuGet package which provides an enhanced developer experience.
+
+      This package enables defining a strongly typed specification of an ETW provider that can be called by managed code. The EventSource class is also included in the .NET Framework. This package provides a newer version that has more features. It is meant to be used as a stop gap until those features it contains are ported to System.Diagnostics.Tracing.EventSource.
+
+      For more details, have a look at http://msdn.microsoft.com/en-us/library/system.diagnostics.tracing.eventsource.aspx.
+
+",
+    "CommonTypes": [
+      "Microsoft.Diagnostics.Tracing.EventSource"
+    ]
+  },
+  {
     "Name": "Microsoft.NETCore",
     "Description": "Provides a set of packages that can be used when building portable libraries on .NETCore based platforms.",
     "CommonTypes": []
@@ -546,6 +559,13 @@
     ]
   },
   {
+    "Name": "System.Diagnostics.EventLog",
+    "Description": "Provides the System.Diagnostics.EventLog class, which allows the applications to use the windows event log service.",
+    "CommonTypes": [
+      "System.Diagnostics.EventLog"
+    ]
+  },
+  {
     "Name": "System.Diagnostics.Process",
     "Description": "Provides the System.Diagnostics.Process class, which allows interaction with local and remote processes.",
     "CommonTypes": [
@@ -925,6 +945,15 @@
       "System.Linq.Queryable",
       "System.Linq.EnumerableQuery<T>",
       "System.Linq.EnumerableQuery"
+    ]
+  },
+  {
+    "Name": "System.Management",
+    "Description": "Provides access to a rich set of management information and management events about the system, devices, and applications instrumented to the Windows Management Instrumentation (WMI) infrastructure.",
+    "CommonTypes": [
+      "System.Management.ManagementClass",
+      "System.Management.ManagementObject",
+      "System.Management.SelectQuery"
     ]
   },
   {
