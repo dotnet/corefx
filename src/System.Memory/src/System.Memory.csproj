@@ -25,12 +25,15 @@
     <Compile Include="System\SpanExtensions.cs" />
     <Compile Include="System\SpanHelpers.T.cs" />
     <Compile Include="System\SpanHelpers.byte.cs" />
+    <Compile Include="System\Buffers\OperationStatus.cs" />
     <Compile Include="System\Buffers\Binary\Reader.cs" />
     <Compile Include="System\Buffers\Binary\ReaderBigEndian.cs" />
     <Compile Include="System\Buffers\Binary\ReaderLittleEndian.cs" />
     <Compile Include="System\Buffers\Binary\Writer.cs" />
     <Compile Include="System\Buffers\Binary\WriterBigEndian.cs" />
     <Compile Include="System\Buffers\Binary\WriterLittleEndian.cs" />
+    <Compile Include="System\Buffers\Text\Base64Decoder.cs" />
+    <Compile Include="System\Buffers\Text\Base64Encoder.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="System\ReadOnlySpan.cs" />
