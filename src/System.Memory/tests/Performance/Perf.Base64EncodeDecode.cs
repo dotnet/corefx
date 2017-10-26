@@ -40,6 +40,25 @@ namespace System.Buffers.Text.Tests
         [InlineData(100)]
         [InlineData(1000)]
         [InlineData(1000 * 1000)]
+        private static void Base64EncodeDestinationTooSmall(int numberOfBytes)
+        {
+            Span<byte> source = new byte[numberOfBytes];
+            Base64TestHelper.InitalizeBytes(source);
+            Span<byte> destination = new byte[Base64.GetMaxEncodedToUtf8Length(numberOfBytes) - 1];
+
+            foreach (var iteration in Benchmark.Iterations) {
+                using (iteration.StartMeasurement()) {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                        Base64.EncodeToUtf8(source, destination, out int consumed, out int written);
+                }
+            }
+        }
+
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData(10)]
+        [InlineData(100)]
+        [InlineData(1000)]
+        [InlineData(1000 * 1000)]
         private static void Base64EncodeBaseline(int numberOfBytes)
         {
             var source = new byte[numberOfBytes];
@@ -76,6 +95,28 @@ namespace System.Buffers.Text.Tests
             Span<byte> backToEncoded = encoded.ToArray();
             Base64.EncodeToUtf8(source, encoded, out _, out _);
             Assert.True(backToEncoded.SequenceEqual(encoded));
+        }
+
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData(10)]
+        [InlineData(100)]
+        [InlineData(1000)]
+        [InlineData(1000 * 1000)]
+        private static void Base64DecodeDetinationTooSmall(int numberOfBytes)
+        {
+            Span<byte> source = new byte[numberOfBytes];
+            Base64TestHelper.InitalizeBytes(source);
+            Span<byte> encoded = new byte[Base64.GetMaxEncodedToUtf8Length(numberOfBytes)];
+            Base64.EncodeToUtf8(source, encoded, out _, out _);
+
+            source = source.Slice(0, source.Length - 1);
+
+            foreach (var iteration in Benchmark.Iterations) {
+                using (iteration.StartMeasurement()) {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                        Base64.DecodeFromUtf8(encoded, source, out int bytesConsumed, out int bytesWritten);
+                }
+            }
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]

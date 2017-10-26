@@ -46,15 +46,28 @@ namespace System.Buffers.Text
             // if isFinalBlock is false, padding characters are considered invalid
             int skipLastChunk = isFinalBlock ? 4 : 0;
 
-            while (sourceIndex < srcLength - skipLastChunk)
+            int maxSrcLength = 0;
+            if (destLength >= GetMaxDecodedFromUtf8Length(srcLength))
+            {
+                maxSrcLength = srcLength - skipLastChunk;
+            }
+            else
+            {
+                // This should never overflow since destLength here is less than int.MaxValue / 4 * 3 (i.e. 1610612733)
+                // Therefore, (destLength / 3) * 4 will always be less than 2147483641
+                maxSrcLength = (destLength / 3) * 4;
+            }
+
+            while (sourceIndex < maxSrcLength)
             {
                 int result = Decode(ref Unsafe.Add(ref srcBytes, sourceIndex), ref decodingMap);
                 if (result < 0) goto InvalidExit;
-                if (destIndex > destLength - 3) goto DestinationSmallExit;
                 WriteThreeLowOrderBytes(ref Unsafe.Add(ref destBytes, destIndex), result);
                 destIndex += 3;
                 sourceIndex += 4;
             }
+
+            if (maxSrcLength != srcLength - skipLastChunk) goto DestinationSmallExit;
 
             // If input is less than 4 bytes, srcLength == sourceIndex == 0
             // If input is not a multiple of 4, sourceIndex == srcLength != 0

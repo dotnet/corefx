@@ -36,40 +36,37 @@ namespace System.Buffers.Text
             int srcLength = bytes.Length;
             int destLength = utf8.Length;
 
+            int maxSrcLength = 0;
+            if (srcLength <= MaximumEncodeLength && destLength >= GetMaxEncodedToUtf8Length(srcLength))
+            {
+                maxSrcLength = srcLength - 2;
+            }
+            else
+            {
+                maxSrcLength = (destLength >> 2) * 3 - 2;
+            }
+
             int sourceIndex = 0;
             int destIndex = 0;
             int result = 0;
 
             ref byte encodingMap = ref s_encodingMap[0];
 
-            if (srcLength <= MaximumEncodeLength && destLength >= GetMaxEncodedToUtf8Length(srcLength))
+            while (sourceIndex < maxSrcLength)
             {
-                while (sourceIndex < srcLength - 2)
-                {
-                    result = Encode(ref Unsafe.Add(ref srcBytes, sourceIndex), ref encodingMap);
-                    Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, destIndex), result);
-                    destIndex += 4;
-                    sourceIndex += 3;
-                }
+                result = Encode(ref Unsafe.Add(ref srcBytes, sourceIndex), ref encodingMap);
+                Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, destIndex), result);
+                destIndex += 4;
+                sourceIndex += 3;
             }
-            else
-            {
-                while (sourceIndex < srcLength - 2)
-                {
-                    result = Encode(ref Unsafe.Add(ref srcBytes, sourceIndex), ref encodingMap);
-                    if (destIndex > destLength - 4) goto DestinationSmallExit;
-                    Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, destIndex), result);
-                    destIndex += 4;
-                    sourceIndex += 3;
-                }
-            }
+
+            if (maxSrcLength != srcLength - 2) goto DestinationSmallExit;
             
             if (isFinalBlock != true) goto NeedMoreDataExit;
 
             if (sourceIndex == srcLength - 1)
             {
                 result = EncodeAndPadTwo(ref Unsafe.Add(ref srcBytes, sourceIndex), ref encodingMap);
-                if (destIndex > destLength - 4) goto DestinationSmallExit;
                 Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, destIndex), result);
                 destIndex += 4;
                 sourceIndex += 1;
@@ -77,7 +74,6 @@ namespace System.Buffers.Text
             else if (sourceIndex == srcLength - 2)
             {
                 result = EncodeAndPadOne(ref Unsafe.Add(ref srcBytes, sourceIndex), ref encodingMap);
-                if (destIndex > destLength - 4) goto DestinationSmallExit;
                 Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, destIndex), result);
                 destIndex += 4;
                 sourceIndex += 2;
