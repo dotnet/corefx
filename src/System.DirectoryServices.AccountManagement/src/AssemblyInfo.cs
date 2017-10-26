@@ -4,7 +4,8 @@
 
 using System.Security;
 
-// We need this attributes to match netfx System.DirectoryServices.AccountManagement assembly attributes, if we don't do that we would get: 
+// We need this attributes because currently for testing we use the netstandard produced assembly as this is an inbox assembly with the same identity in full framework. Once we fix our infra to pickup the inbox assembly we need to delete this.
+// Since we have security attributes in the NS implementation, without this we would get an exception like the following:
 // TypeLoadException: Inheritance security rules violated while overriding member: {member} Security accessibility of the overriding method must match the security accessibility of the method being overriden.
 [assembly: AllowPartiallyTrustedCallers]
 [assembly: SecurityRules(SecurityRuleSet.Level1, SkipVerificationInFullTrust = true)]
