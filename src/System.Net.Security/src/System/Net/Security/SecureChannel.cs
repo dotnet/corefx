@@ -15,7 +15,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace System.Net.Security
 {
-    // SecureChannel - a wrapper on SSPI based functionality. 
+    // SecureChannel - a wrapper on SSPI based functionality.
     // Provides an additional abstraction layer over SSPI for SslStream.
     internal class SecureChannel
     {
@@ -122,14 +122,6 @@ namespace System.Net.Security
             }
         }
 
-        internal int HeaderSize
-        {
-            get
-            {
-                return _headerSize;
-            }
-        }
-
         internal int MaxDataSize
         {
             get
@@ -183,6 +175,14 @@ namespace System.Net.Security
             _refreshCredentialNeeded = true;
         }
 
+        ~SecureChannel()
+        {
+            if (_sslAuthenticationOptions.AlpnProtocolsHandle.IsAllocated)
+            {
+                _sslAuthenticationOptions.AlpnProtocolsHandle.Free();
+            }
+        }
+
         internal void Close()
         {
             if (_sslAuthenticationOptions.AlpnProtocolsHandle.IsAllocated)
@@ -199,6 +199,8 @@ namespace System.Net.Security
             {
                 _credentialsHandle.Dispose();
             }
+
+            GC.SuppressFinalize(this);
         }
 
         //
@@ -837,11 +839,6 @@ namespace System.Net.Security
             }
             finally
             {
-                if (_sslAuthenticationOptions.AlpnProtocolsHandle.IsAllocated)
-                {
-                    _sslAuthenticationOptions.AlpnProtocolsHandle.Free();
-                }
-
                 if (_refreshCredentialNeeded)
                 {
                     _refreshCredentialNeeded = false;
@@ -933,7 +930,7 @@ namespace System.Net.Security
             }
 
             byte[] writeBuffer = output;
-                        
+
             SecurityStatusPal secStatus = SslStreamPal.EncryptMessage(
                 _securityContext,
                 buffer,
