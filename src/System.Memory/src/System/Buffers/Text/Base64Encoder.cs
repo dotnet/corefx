@@ -136,24 +136,33 @@ namespace System.Buffers.Text
 
             var destinationIndex = encodedLength - 4;
             var sourceIndex = dataLength - leftover;
+            int result = 0;
 
+            ref byte bufferBytes = ref buffer.DangerousGetPinnableReference();
             // encode last pack to avoid conditional in the main loop
             if (leftover != 0)
             {
-                var sourceSlice = buffer.Slice(sourceIndex, leftover);
-                var desitnationSlice = buffer.Slice(destinationIndex, 4);
-                destinationIndex -= 4;
-                var result = EncodeToUtf8(sourceSlice, desitnationSlice, out _, out int tempWritten);
-                Debug.Assert(result == OperationStatus.Done);
+                if (leftover == 1)
+                {
+                    result = EncodeAndPadTwo(ref Unsafe.Add(ref bufferBytes, sourceIndex));
+                    Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferBytes, destinationIndex), result);
+                    destinationIndex -= 4;
+                }
+                else
+                {
+                    result = EncodeAndPadOne(ref Unsafe.Add(ref bufferBytes, sourceIndex));
+                    Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferBytes, destinationIndex), result);
+                    destinationIndex -= 4;
+                }
             }
 
-            for (int index = sourceIndex - 3; index >= 0; index -= 3)
+            sourceIndex -= 3;
+            while (sourceIndex >= 0)
             {
-                var sourceSlice = buffer.Slice(index, 3);
-                var desitnationSlice = buffer.Slice(destinationIndex, 4);
+                result = Encode(ref Unsafe.Add(ref bufferBytes, sourceIndex));
+                Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferBytes, destinationIndex), result);
                 destinationIndex -= 4;
-                var result = EncodeToUtf8(sourceSlice, desitnationSlice, out _, out int tempWritten);
-                Debug.Assert(result == OperationStatus.Done);
+                sourceIndex -= 3;
             }
 
             written = encodedLength;

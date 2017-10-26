@@ -169,18 +169,19 @@ namespace System.Buffers.Text
         /// </summary> 
         public static OperationStatus DecodeFromUtf8InPlace(Span<byte> buffer, out int written)
         {
+            int bufferLength = buffer.Length;
             int sourceIndex = 0;
             int destIndex = 0;
 
             // only decode input if it is a multiple of 4
-            if (buffer.Length % 4 != 0) goto InvalidExit;
-            if (buffer.Length == 0) goto DoneExit;
+            if (bufferLength != ((bufferLength >> 2) * 4)) goto InvalidExit;
+            if (bufferLength == 0) goto DoneExit;
 
             ref byte bufferBytes = ref buffer.DangerousGetPinnableReference();
 
             ref sbyte decodingMap = ref s_decodingMap[0];
 
-            while (sourceIndex < buffer.Length - 4)
+            while (sourceIndex < bufferLength - 4)
             {
                 int result = Decode(ref Unsafe.Add(ref bufferBytes, sourceIndex), ref decodingMap);
                 if (result < 0) goto InvalidExit;
@@ -189,10 +190,10 @@ namespace System.Buffers.Text
                 sourceIndex += 4;
             }
 
-            int i0 = Unsafe.Add(ref bufferBytes, buffer.Length - 4);
-            int i1 = Unsafe.Add(ref bufferBytes, buffer.Length - 3);
-            int i2 = Unsafe.Add(ref bufferBytes, buffer.Length - 2);
-            int i3 = Unsafe.Add(ref bufferBytes, buffer.Length - 1);
+            int i0 = Unsafe.Add(ref bufferBytes, bufferLength - 4);
+            int i1 = Unsafe.Add(ref bufferBytes, bufferLength - 3);
+            int i2 = Unsafe.Add(ref bufferBytes, bufferLength - 2);
+            int i3 = Unsafe.Add(ref bufferBytes, bufferLength - 1);
 
             i0 = Unsafe.Add(ref decodingMap, i0);
             i1 = Unsafe.Add(ref decodingMap, i1);

@@ -85,14 +85,14 @@ namespace System.Buffers.Text.Tests
         [InlineData(1000 * 1000)]
         private static void Base64DecodeBaseline(int numberOfBytes)
         {
-            var source = new byte[numberOfBytes];
-            Base64TestHelper.InitalizeBytes(source.AsSpan());
-            char[] encoded = Convert.ToBase64String(source).ToCharArray();
+            Span<byte> source = new byte[numberOfBytes];
+            Base64TestHelper.InitalizeBytes(source);
+            ReadOnlySpan<char> encoded = Convert.ToBase64String(source.ToArray()).ToCharArray();
 
             foreach (var iteration in Benchmark.Iterations) {
                 using (iteration.StartMeasurement()) {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                        Convert.FromBase64CharArray(encoded, 0, encoded.Length);
+                        Convert.TryFromBase64Chars(encoded, source, out int bytesWritten);
                 }
             }
         }
