@@ -491,7 +491,7 @@ namespace System.ServiceModel.Syndication.Tests
                         }
                         else
                         {
-                            throw new FileNotFoundException("File not found!",file);
+                            throw new FileNotFoundException($"File `{file}` was not found!");
                         }
                     }
                 }
