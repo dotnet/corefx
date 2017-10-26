@@ -29,8 +29,9 @@ namespace System.Diagnostics
             Action method,
             RemoteInvokeOptions options = null)
         {
-            if (options != null)
-                options.CheckExitCode = false;
+            // There's no exit code to check
+            options = options ?? new RemoteInvokeOptions();
+            options.CheckExitCode = false;
 
             return RemoteInvoke(GetMethodInfo(method), Array.Empty<string>(), options);
         }
