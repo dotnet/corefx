@@ -182,7 +182,6 @@ namespace System.Runtime.Caching
         // the dependency names and last-modified times.
         public abstract string UniqueId { get; }
 
-
         // Dispose must be called to release the ChangeMonitor.  In order to 
         // prevent derived classes from overriding Dispose, it is not an explicit 
         // interface implementation.

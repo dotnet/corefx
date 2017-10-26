@@ -165,7 +165,6 @@ namespace System.Runtime.Caching
             }
         }
 
-
         // private and internal
 
         internal MemoryCacheStore GetStore(MemoryCacheKey cacheKey)
@@ -192,8 +191,6 @@ namespace System.Runtime.Caching
             }
         }
 
-        [SecuritySafeCritical]
-        [SuppressMessage("Microsoft.Security", "CA2106:SecureAsserts", Justification = "Grandfathered suppression from original caching code checkin")]
         private void InitDisposableMembers(NameValueCollection config)
         {
             bool dispose = true;
@@ -342,7 +339,6 @@ namespace System.Runtime.Caching
             Init(null);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public MemoryCache(string name, NameValueCollection config = null)
         {
             if (name == null)
@@ -362,9 +358,7 @@ namespace System.Runtime.Caching
         }
 
         // ignoreConfigSection is used when redirecting ASP.NET cache into the MemoryCache.  This avoids infinite recursion
-        // due to the fact that the (ASP.NET) config system uses the cache, and the cache uses the
-        // config system.  This method could be made public, perhaps with CAS to prevent partial trust callers.
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
+        // due to the fact that the (ASP.NET) config system uses the cache, and the cache uses the config system.
         public MemoryCache(string name, NameValueCollection config, bool ignoreConfigSection)
         {
             if (name == null)
@@ -439,7 +433,6 @@ namespace System.Runtime.Caching
             return (entry != null) ? entry.Value : null;
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public override CacheEntryChangeMonitor CreateCacheEntryChangeMonitor(IEnumerable<String> keys, String regionName = null)
         {
             if (regionName != null)
@@ -496,8 +489,6 @@ namespace System.Runtime.Caching
             }
         }
 
-        [SecuritySafeCritical]
-        [SuppressMessage("Microsoft.Security", "CA2106:SecureAsserts", Justification = "Grandfathered suppression from original caching code checkin")]
         private void DisposeSafeCritical()
         {
             AppDomain appDomain = Thread.GetDomain();
@@ -600,7 +591,6 @@ namespace System.Runtime.Caching
         }
 
         //Existence check for a single item
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public override bool Contains(string key, string regionName = null)
         {
             return (GetInternal(key, regionName) != null);
@@ -612,7 +602,6 @@ namespace System.Runtime.Caching
             return (existingEntry == null || existingEntry.Value == null);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public override object AddOrGetExisting(string key, object value, DateTimeOffset absoluteExpiration, string regionName = null)
         {
             if (regionName != null)
@@ -633,7 +622,6 @@ namespace System.Runtime.Caching
             return new CacheItem(item.Key, AddOrGetExistingInternal(item.Key, item.Value, policy));
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public override object AddOrGetExisting(string key, object value, CacheItemPolicy policy, string regionName = null)
         {
             if (regionName != null)
@@ -643,20 +631,17 @@ namespace System.Runtime.Caching
             return AddOrGetExistingInternal(key, value, policy);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public override object Get(string key, string regionName = null)
         {
             return GetInternal(key, regionName);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public override CacheItem GetCacheItem(string key, string regionName = null)
         {
             object value = GetInternal(key, regionName);
             return (value != null) ? new CacheItem(key, value) : null;
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public override void Set(string key, object value, DateTimeOffset absoluteExpiration, string regionName = null)
         {
             if (regionName != null)
@@ -677,7 +662,6 @@ namespace System.Runtime.Caching
             Set(item.Key, item.Value, policy);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public override void Set(string key, object value, CacheItemPolicy policy, string regionName = null)
         {
             if (regionName != null)
@@ -798,13 +782,11 @@ namespace System.Runtime.Caching
             cacheEntry.ConfigureUpdateSentinel(sentinelStore, sentinelCacheEntry);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public override object Remove(string key, string regionName = null)
         {
             return Remove(key, CacheEntryRemovedReason.Removed, regionName);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public object Remove(string key, CacheEntryRemovedReason reason, string regionName = null)
         {
             if (regionName != null)
@@ -823,7 +805,6 @@ namespace System.Runtime.Caching
             return (entry != null) ? entry.Value : null;
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public override long GetCount(string regionName = null)
         {
             if (regionName != null)
@@ -851,7 +832,6 @@ namespace System.Runtime.Caching
             return _stats.GetLastSize();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public override IDictionary<string, object> GetValues(IEnumerable<String> keys, string regionName = null)
         {
             if (regionName != null)

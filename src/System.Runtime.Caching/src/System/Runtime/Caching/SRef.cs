@@ -27,7 +27,6 @@ namespace System.Runtime.Caching
         }
 
         internal long ApproximateSize {
-            [SecuritySafeCritical]
             get {
                 object o = s_type.InvokeMember("ApproximateSize",
                                                BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty,
@@ -39,7 +38,6 @@ namespace System.Runtime.Caching
             }
         }
 
-        [SecuritySafeCritical]
         internal void Dispose() {
             s_type.InvokeMember("Dispose",
                                 BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod,
@@ -99,7 +97,6 @@ namespace System.Runtime.Caching
         private GCHandle _handle;
         private T _t;
 
-        [SecuritySafeCritical]
         public GCHandleRef(T t)
         {
             _handle = GCHandle.Alloc(t);
@@ -107,7 +104,6 @@ namespace System.Runtime.Caching
 
         public T Target
         {
-            [SecuritySafeCritical]
             get
             {
                 try
@@ -126,7 +122,6 @@ namespace System.Runtime.Caching
             }
         }
 
-        [SecuritySafeCritical]
         public void Dispose()
         {
             Target.Dispose();

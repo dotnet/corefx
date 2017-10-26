@@ -81,11 +81,9 @@ namespace System.Runtime.Caching
             }
         }
     }
+
     [SuppressMessage("Microsoft.Portability", "CA1900:ValueTypeFieldsShouldBePortable", Justification = "Grandfathered suppression from original caching code checkin")]
     [StructLayout(LayoutKind.Explicit)]
-    [SecuritySafeCritical]
-
-
     internal struct ExpiresEntry
     {
         [FieldOffset(0)]
@@ -116,7 +114,7 @@ namespace System.Runtime.Caching
 
     internal sealed class ExpiresBucket
     {
-        internal const int NUM_ENTRIES = 127;
+        private const int NUM_ENTRIES = 127;
         private const int LENGTH_ENTRIES = 128;
 
         private const int MIN_PAGES_INCREMENT = 10;
@@ -207,7 +205,6 @@ namespace System.Runtime.Caching
             }
         }
 
-
         private int GetExpiresCount(DateTime utcExpires)
         {
             if (utcExpires < _utcMinExpires)
@@ -267,7 +264,6 @@ namespace System.Runtime.Caching
             return oldHead;
         }
 
-
         private void RemoveFromList(int pageIndex, ref ExpiresPageList list)
         {
             Dbg.Assert((list._head == -1) == (list._tail == -1), "(list._head == -1) == (list._tail == -1)");
@@ -298,40 +294,32 @@ namespace System.Runtime.Caching
             (_pages[(pageIndex)]._pageNext) = -1;
         }
 
-
         private void MoveToListHead(int pageIndex, ref ExpiresPageList list)
         {
             Dbg.Assert(list._head != -1, "list._head != -1");
             Dbg.Assert(list._tail != -1, "list._tail != -1");
 
-
             if (list._head == pageIndex)
                 return;
 
-
             RemoveFromList(pageIndex, ref list);
-
 
             AddToListHead(pageIndex, ref list);
         }
-
 
         private void MoveToListTail(int pageIndex, ref ExpiresPageList list)
         {
             Dbg.Assert(list._head != -1, "list._head != -1");
             Dbg.Assert(list._tail != -1, "list._tail != -1");
 
-
             if (list._tail == pageIndex)
+            {
                 return;
-
+            }
 
             RemoveFromList(pageIndex, ref list);
-
-
             AddToListTail(pageIndex, ref list);
         }
-
 
         private void UpdateMinEntries()
         {
@@ -347,8 +335,6 @@ namespace System.Runtime.Caching
 
                 _minEntriesInUse = (int)(capacity * MIN_LOAD_FACTOR);
 
-
-
                 if ((_minEntriesInUse - 1) > ((_cPagesInUse - 1) * NUM_ENTRIES))
                 {
                     _minEntriesInUse = -1;
@@ -356,21 +342,15 @@ namespace System.Runtime.Caching
             }
         }
 
-
         private void RemovePage(int pageIndex)
         {
             Dbg.Assert((((_pages[(pageIndex)]._entries))[0]._cFree) == NUM_ENTRIES, "FreeEntryCount(EntriesI(pageIndex)) == NUM_ENTRIES");
 
-
             RemoveFromList(pageIndex, ref _freeEntryList);
-
-
             AddToListHead(pageIndex, ref _freePageList);
-
 
             Dbg.Assert((_pages[(pageIndex)]._entries) != null, "EntriesI(pageIndex) != null");
             (_pages[(pageIndex)]._entries) = null;
-
 
             _cPagesInUse--;
             if (_cPagesInUse == 0)
@@ -383,16 +363,13 @@ namespace System.Runtime.Caching
             }
         }
 
-
         private ExpiresEntryRef GetFreeExpiresEntry()
         {
             Dbg.Assert(_freeEntryList._head >= 0, "_freeEntryList._head >= 0");
             int pageIndex = _freeEntryList._head;
 
-
             ExpiresEntry[] entries = (_pages[(pageIndex)]._entries);
             int entryIndex = ((entries)[0]._next).Index;
-
 
             ((entries)[0]._next) = entries[entryIndex]._next;
             ((entries)[0]._cFree)--;
@@ -403,7 +380,6 @@ namespace System.Runtime.Caching
             }
             return new ExpiresEntryRef(pageIndex, entryIndex);
         }
-
 
         private void AddExpiresEntryToFreeList(ExpiresEntryRef entryRef)
         {
@@ -429,13 +405,11 @@ namespace System.Runtime.Caching
             }
         }
 
-
         private void Expand()
         {
             Dbg.Assert(_cPagesInUse * NUM_ENTRIES == _cEntriesInUse, "_cPagesInUse * NUM_ENTRIES == _cEntriesInUse");
             Dbg.Assert(_freeEntryList._head == -1, "_freeEntryList._head == -1");
             Dbg.Assert(_freeEntryList._tail == -1, "_freeEntryList._tail == -1");
-
 
             if (_freePageList._head == -1)
             {
@@ -459,12 +433,10 @@ namespace System.Runtime.Caching
 
                 ExpiresPage[] newPages = new ExpiresPage[newLength];
 
-
                 for (int i = 0; i < oldLength; i++)
                 {
                     newPages[i] = _pages[i];
                 }
-
 
                 for (int i = oldLength; i < newPages.Length; i++)
                 {
@@ -475,21 +447,17 @@ namespace System.Runtime.Caching
                 newPages[oldLength]._pagePrev = -1;
                 newPages[newPages.Length - 1]._pageNext = -1;
 
-
                 _freePageList._head = oldLength;
                 _freePageList._tail = newPages.Length - 1;
 
                 _pages = newPages;
             }
 
-
             int pageIndex = RemoveFromListHead(ref _freePageList);
             AddToListHead(pageIndex, ref _freeEntryList);
 
-
             ExpiresEntry[] entries = new ExpiresEntry[LENGTH_ENTRIES];
             ((entries)[0]._cFree) = NUM_ENTRIES;
-
 
             for (int i = 0; i < entries.Length - 1; i++)
             {
@@ -499,12 +467,9 @@ namespace System.Runtime.Caching
 
             (_pages[(pageIndex)]._entries) = entries;
 
-
             _cPagesInUse++;
             UpdateMinEntries();
         }
-
-
 
         private void Reduce()
         {
@@ -514,7 +479,6 @@ namespace System.Runtime.Caching
             Dbg.Assert(_freeEntryList._head != -1, "_freeEntryList._head != -1");
             Dbg.Assert(_freeEntryList._tail != -1, "_freeEntryList._tail != -1");
             Dbg.Assert(_freeEntryList._head != _freeEntryList._tail, "_freeEntryList._head != _freeEntryList._tail");
-
 
             int meanFree = (int)(NUM_ENTRIES - (NUM_ENTRIES * MIN_LOAD_FACTOR));
             int pageIndexLast = _freeEntryList._tail;
@@ -526,8 +490,6 @@ namespace System.Runtime.Caching
             {
                 pageIndexNext = (_pages[(pageIndexCurrent)]._pageNext);
 
-
-
                 if ((((_pages[(pageIndexCurrent)]._entries))[0]._cFree) > meanFree)
                 {
                     MoveToListTail(pageIndexCurrent, ref _freeEntryList);
@@ -537,15 +499,13 @@ namespace System.Runtime.Caching
                     MoveToListHead(pageIndexCurrent, ref _freeEntryList);
                 }
 
-
                 if (pageIndexCurrent == pageIndexLast)
+                {
                     break;
-
+                }
 
                 pageIndexCurrent = pageIndexNext;
             }
-
-
 
             for (; ;)
             {
@@ -558,17 +518,14 @@ namespace System.Runtime.Caching
                 if (availableFreeEntries < (NUM_ENTRIES - ((entries)[0]._cFree)))
                     break;
 
-
                 for (int i = 1; i < entries.Length; i++)
                 {
                     if (entries[i]._cacheEntry == null)
                         continue;
 
-
                     Dbg.Assert(_freeEntryList._head != _freeEntryList._tail, "_freeEntryList._head != _freeEntryList._tail");
                     ExpiresEntryRef newRef = GetFreeExpiresEntry();
                     Dbg.Assert(newRef.PageIndex != _freeEntryList._tail, "newRef.PageIndex != _freeEntryList._tail");
-
 
                     MemoryCacheEntry cacheEntry = entries[i]._cacheEntry;
 
@@ -598,12 +555,10 @@ namespace System.Runtime.Caching
                 if (cacheEntry.ExpiresBucket != 0xff || !entryRef.IsInvalid)
                     return;
 
-
                 if (_freeEntryList._head == -1)
                 {
                     Expand();
                 }
-
 
                 ExpiresEntryRef freeRef = GetFreeExpiresEntry();
                 Dbg.Assert(cacheEntry.ExpiresBucket == 0xff, "cacheEntry.ExpiresBucket == 0xff");
@@ -611,12 +566,10 @@ namespace System.Runtime.Caching
                 cacheEntry.ExpiresBucket = _bucket;
                 cacheEntry.ExpiresEntryRef = freeRef;
 
-
                 ExpiresEntry[] entries = (_pages[(freeRef.PageIndex)]._entries);
                 int entryIndex = freeRef.Index;
                 entries[entryIndex]._cacheEntry = cacheEntry;
                 entries[entryIndex]._utcExpires = cacheEntry.UtcAbsExp;
-
 
                 AddCount(cacheEntry.UtcAbsExp);
 
@@ -628,7 +581,6 @@ namespace System.Runtime.Caching
                 }
             }
         }
-
 
         private void RemoveCacheEntryNoLock(MemoryCacheEntry cacheEntry)
         {
@@ -661,11 +613,9 @@ namespace System.Runtime.Caching
                         ",now=" + Dbg.FormatLocalDate(DateTime.Now) +
                         ",expires=" + cacheEntry.UtcAbsExp.ToLocalTime());
 
-
             Dbg.Validate("CacheValidateExpires", this);
             Dbg.Dump("CacheExpiresRemove", this);
         }
-
 
         internal void RemoveCacheEntry(MemoryCacheEntry cacheEntry)
         {
@@ -674,7 +624,6 @@ namespace System.Runtime.Caching
                 RemoveCacheEntryNoLock(cacheEntry);
             }
         }
-
 
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Grandfathered suppression from original caching code checkin")]
         internal void UtcUpdateCacheEntry(MemoryCacheEntry cacheEntry, DateTime utcExpires)
@@ -690,10 +639,8 @@ namespace System.Runtime.Caching
 
                 Dbg.Assert(cacheEntry == entries[entryIndex]._cacheEntry);
 
-
                 RemoveCount(entries[entryIndex]._utcExpires);
                 AddCount(utcExpires);
-
 
                 entries[entryIndex]._utcExpires = utcExpires;
 
@@ -703,7 +650,6 @@ namespace System.Runtime.Caching
                 Dbg.Trace("CacheExpiresUpdate", "Updated item " + cacheEntry.Key + " in bucket " + _bucket);
             }
         }
-
 
         internal int FlushExpiredItems(DateTime utcNow, bool useInsertBlock)
         {
@@ -729,7 +675,6 @@ namespace System.Runtime.Caching
                 lock (this)
                 {
                     Dbg.Assert(_blockReduce == false, "_blockReduce == false");
-
 
                     if (_cEntriesInUse == 0 || GetExpiresCount(utcNow) == 0)
                         return 0;
@@ -785,7 +730,6 @@ namespace System.Runtime.Caching
                         return 0;
                     }
 
-
                     _blockReduce = true;
                 }
             }
@@ -837,7 +781,6 @@ namespace System.Runtime.Caching
                         _cEntriesInFlush--;
                         AddExpiresEntryToFreeList(current);
 
-
                         current = next;
                     }
 
@@ -863,7 +806,6 @@ namespace System.Runtime.Caching
             return flushed;
         }
     }
-
 
     internal sealed class CacheExpires
     {
@@ -1005,7 +947,6 @@ namespace System.Runtime.Caching
                 _buckets[bucket].RemoveCacheEntry(cacheEntry);
             }
         }
-
 
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Grandfathered suppression from original caching code checkin")]
         internal void UtcUpdate(MemoryCacheEntry cacheEntry, DateTime utcNewExpires)

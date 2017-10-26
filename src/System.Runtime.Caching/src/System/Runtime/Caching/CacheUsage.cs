@@ -74,7 +74,6 @@ namespace System.Runtime.Caching
             }
         }
 
-
         internal int Ref2Index
         {
             get
@@ -85,7 +84,6 @@ namespace System.Runtime.Caching
             }
         }
 
-
         internal bool IsRef1
         {
             get
@@ -94,7 +92,6 @@ namespace System.Runtime.Caching
             }
         }
 
-
         internal bool IsRef2
         {
             get
@@ -102,7 +99,6 @@ namespace System.Runtime.Caching
                 return ((int)(sbyte)(_ref & ENTRY_MASK)) < 0;
             }
         }
-
 
         internal bool IsInvalid
         {
@@ -113,17 +109,14 @@ namespace System.Runtime.Caching
         }
     }
 
-
     internal struct UsageEntryLink
     {
         internal UsageEntryRef _next;
         internal UsageEntryRef _prev;
     }
+
     [SuppressMessage("Microsoft.Portability", "CA1900:ValueTypeFieldsShouldBePortable", Justification = "Grandfathered suppression from original caching code checkin")]
     [StructLayout(LayoutKind.Explicit)]
-    [SecuritySafeCritical]
-
-
     internal struct UsageEntry
     {
         [FieldOffset(0)]
@@ -149,7 +142,6 @@ namespace System.Runtime.Caching
         internal int _pagePrev;
     }
 
-
     internal struct UsagePageList
     {
         internal int _head;
@@ -158,7 +150,7 @@ namespace System.Runtime.Caching
 
     internal sealed class UsageBucket
     {
-        internal const int NUM_ENTRIES = 127;
+        private const int NUM_ENTRIES = 127;
         private const int LENGTH_ENTRIES = 128;
 
         private const int MIN_PAGES_INCREMENT = 10;
@@ -289,14 +281,10 @@ namespace System.Runtime.Caching
             Dbg.Assert(list._head != -1, "list._head != -1");
             Dbg.Assert(list._tail != -1, "list._tail != -1");
 
-
             if (list._head == pageIndex)
                 return;
 
-
             RemoveFromList(pageIndex, ref list);
-
-
             AddToListHead(pageIndex, ref list);
         }
 
@@ -304,7 +292,6 @@ namespace System.Runtime.Caching
         {
             Dbg.Assert(list._head != -1, "list._head != -1");
             Dbg.Assert(list._tail != -1, "list._tail != -1");
-
 
             if (list._tail == pageIndex)
                 return;
@@ -338,16 +325,11 @@ namespace System.Runtime.Caching
         {
             Dbg.Assert((((_pages[(pageIndex)]._entries))[0]._cFree) == NUM_ENTRIES, "FreeEntryCount(EntriesI(pageIndex)) == NUM_ENTRIES");
 
-
             RemoveFromList(pageIndex, ref _freeEntryList);
-
-
             AddToListHead(pageIndex, ref _freePageList);
-
 
             Dbg.Assert((_pages[(pageIndex)]._entries) != null, "EntriesI(pageIndex) != null");
             (_pages[(pageIndex)]._entries) = null;
-
 
             _cPagesInUse--;
             if (_cPagesInUse == 0)
@@ -365,10 +347,8 @@ namespace System.Runtime.Caching
             Dbg.Assert(_freeEntryList._head >= 0, "_freeEntryList._head >= 0");
             int pageIndex = _freeEntryList._head;
 
-
             UsageEntry[] entries = (_pages[(pageIndex)]._entries);
             int entryIndex = ((entries)[0]._ref1._next).Ref1Index;
-
 
             ((entries)[0]._ref1._next) = entries[entryIndex]._ref1._next;
             ((entries)[0]._cFree)--;
@@ -415,7 +395,6 @@ namespace System.Runtime.Caching
             Dbg.Assert(_freeEntryList._head == -1, "_freeEntryList._head == -1");
             Dbg.Assert(_freeEntryList._tail == -1, "_freeEntryList._tail == -1");
 
-
             if (_freePageList._head == -1)
             {
                 int oldLength;
@@ -438,12 +417,10 @@ namespace System.Runtime.Caching
 
                 UsagePage[] newPages = new UsagePage[newLength];
 
-
                 for (int i = 0; i < oldLength; i++)
                 {
                     newPages[i] = _pages[i];
                 }
-
 
                 for (int i = oldLength; i < newPages.Length; i++)
                 {
@@ -454,21 +431,17 @@ namespace System.Runtime.Caching
                 newPages[oldLength]._pagePrev = -1;
                 newPages[newPages.Length - 1]._pageNext = -1;
 
-
                 _freePageList._head = oldLength;
                 _freePageList._tail = newPages.Length - 1;
 
                 _pages = newPages;
             }
 
-
             int pageIndex = RemoveFromListHead(ref _freePageList);
             AddToListHead(pageIndex, ref _freeEntryList);
 
-
             UsageEntry[] entries = new UsageEntry[LENGTH_ENTRIES];
             ((entries)[0]._cFree) = NUM_ENTRIES;
-
 
             for (int i = 0; i < entries.Length - 1; i++)
             {
@@ -477,7 +450,6 @@ namespace System.Runtime.Caching
             entries[entries.Length - 1]._ref1._next = UsageEntryRef.INVALID;
 
             (_pages[(pageIndex)]._entries) = entries;
-
 
             _cPagesInUse++;
             UpdateMinEntries();
@@ -491,7 +463,6 @@ namespace System.Runtime.Caching
             Dbg.Assert(_freeEntryList._head != -1, "_freeEntryList._head != -1");
             Dbg.Assert(_freeEntryList._tail != -1, "_freeEntryList._tail != -1");
             Dbg.Assert(_freeEntryList._head != _freeEntryList._tail, "_freeEntryList._head != _freeEntryList._tail");
-
 
             int meanFree = (int)(NUM_ENTRIES - (NUM_ENTRIES * MIN_LOAD_FACTOR));
             int pageIndexLast = _freeEntryList._tail;
@@ -542,11 +513,9 @@ namespace System.Runtime.Caching
                     UsageEntryRef oldRef1 = new UsageEntryRef(_freeEntryList._tail, i);
                     UsageEntryRef oldRef2 = (new UsageEntryRef((oldRef1).PageIndex, -(oldRef1).Ref1Index));
 
-
                     MemoryCacheEntry cacheEntry = entries[i]._cacheEntry;
                     Dbg.Assert(cacheEntry.UsageEntryRef == oldRef1, "cacheEntry.UsageEntryRef == oldRef1");
                     cacheEntry.UsageEntryRef = newRef1;
-
 
                     UsageEntry[] newEntries = (_pages[(newRef1.PageIndex)]._entries);
                     newEntries[newRef1.Ref1Index] = entries[i];
@@ -565,7 +534,6 @@ namespace System.Runtime.Caching
                     { if ((prev).IsRef1) { (_pages[((prev).PageIndex)]._entries)[(prev).Ref1Index]._ref1._next = (newRef1); } else if ((prev).IsRef2) { (_pages[((prev).PageIndex)]._entries)[(prev).Ref2Index]._ref2._next = (newRef1); } else { _lastRefHead = (newRef1); } };
                     { if ((next).IsRef1) { (_pages[((next).PageIndex)]._entries)[(next).Ref1Index]._ref1._prev = (newRef1); } else if ((next).IsRef2) { (_pages[((next).PageIndex)]._entries)[(next).Ref2Index]._ref2._prev = (newRef1); } else { _lastRefTail = (newRef1); } };
 
-
                     prev = newEntries[newRef1.Ref1Index]._ref2._prev;
                     if (prev == oldRef1)
                     {
@@ -578,7 +546,6 @@ namespace System.Runtime.Caching
                     { if ((prev).IsRef1) { (_pages[((prev).PageIndex)]._entries)[(prev).Ref1Index]._ref1._next = (newRef2); } else if ((prev).IsRef2) { (_pages[((prev).PageIndex)]._entries)[(prev).Ref2Index]._ref2._next = (newRef2); } else { _lastRefHead = (newRef2); } };
                     { if ((next).IsRef1) { (_pages[((next).PageIndex)]._entries)[(next).Ref1Index]._ref1._prev = (newRef2); } else if ((next).IsRef2) { (_pages[((next).PageIndex)]._entries)[(next).Ref2Index]._ref2._prev = (newRef2); } else { _lastRefTail = (newRef2); } };
 
-
                     if (_addRef2Head == oldRef2)
                     {
                         _addRef2Head = newRef2;
@@ -590,7 +557,6 @@ namespace System.Runtime.Caching
                 Dbg.Validate("CacheValidateUsage", this);
             }
         }
-
 
         internal void AddCacheEntry(MemoryCacheEntry cacheEntry)
         {
@@ -656,13 +622,11 @@ namespace System.Runtime.Caching
             }
         }
 
-
         private void RemoveEntryFromLastRefList(UsageEntryRef entryRef)
         {
             Dbg.Assert(entryRef.IsRef1, "entryRef.IsRef1");
             UsageEntry[] entries = (_pages[(entryRef.PageIndex)]._entries);
             int entryIndex = entryRef.Ref1Index;
-
 
             UsageEntryRef prev = entries[entryIndex]._ref1._prev;
             UsageEntryRef next = entries[entryIndex]._ref1._next;
@@ -678,13 +642,11 @@ namespace System.Runtime.Caching
             { if ((prev).IsRef1) { (_pages[((prev).PageIndex)]._entries)[(prev).Ref1Index]._ref1._next = (next); } else if ((prev).IsRef2) { (_pages[((prev).PageIndex)]._entries)[(prev).Ref2Index]._ref2._next = (next); } else { _lastRefHead = (next); } };
             { if ((next).IsRef1) { (_pages[((next).PageIndex)]._entries)[(next).Ref1Index]._ref1._prev = (prev); } else if ((next).IsRef2) { (_pages[((next).PageIndex)]._entries)[(next).Ref2Index]._ref2._prev = (prev); } else { _lastRefTail = (prev); } };
 
-
             if (_addRef2Head == entryRef2)
             {
                 _addRef2Head = next;
             }
         }
-
 
         internal void RemoveCacheEntry(MemoryCacheEntry cacheEntry)
         {
@@ -716,7 +678,6 @@ namespace System.Runtime.Caching
             }
         }
 
-
         internal void UpdateCacheEntry(MemoryCacheEntry cacheEntry)
         {
             lock (this)
@@ -734,7 +695,6 @@ namespace System.Runtime.Caching
 
                 { if ((prev).IsRef1) { (_pages[((prev).PageIndex)]._entries)[(prev).Ref1Index]._ref1._next = (next); } else if ((prev).IsRef2) { (_pages[((prev).PageIndex)]._entries)[(prev).Ref2Index]._ref2._next = (next); } else { _lastRefHead = (next); } };
                 { if ((next).IsRef1) { (_pages[((next).PageIndex)]._entries)[(next).Ref1Index]._ref1._prev = (prev); } else if ((next).IsRef2) { (_pages[((next).PageIndex)]._entries)[(next).Ref2Index]._ref2._prev = (prev); } else { _lastRefTail = (prev); } };
-
 
                 if (_addRef2Head == entryRef2)
                 {
@@ -763,7 +723,6 @@ namespace System.Runtime.Caching
                 Dbg.Dump("CacheUsageUpdate", this);
             }
         }
-
 
         internal int FlushUnderUsedItems(int maxFlush, bool force)
         {

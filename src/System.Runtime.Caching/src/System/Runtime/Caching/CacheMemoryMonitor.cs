@@ -5,7 +5,7 @@
 using System;
 using System.Runtime.Caching.Configuration;
 using System.Runtime.Caching.Hosting;
-using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
 using System.Security;
 using System.Security.Permissions;
 using System.Threading;
@@ -51,7 +51,9 @@ namespace System.Runtime.Caching
             _cacheSizeSamples = new long[SAMPLE_COUNT];
             _cacheSizeSampleTimes = new DateTime[SAMPLE_COUNT];
             if (memoryCache.UseMemoryCacheManager)
+            {
                 InitMemoryCacheManager();   // This magic thing connects us to ObjectCacheHost magically. :/
+            }
             InitDisposableMembers(cacheMemoryLimitMegabytes);
         }
 
@@ -180,7 +182,7 @@ namespace System.Runtime.Caching
                 _cacheSizeSampleTimes[_idx] = DateTime.UtcNow;
                 // remember the sample value
                 _cacheSizeSamples[_idx] = sref.ApproximateSize;
-#if DBG
+#if DEBUG
                 Dbg.Trace("MemoryCacheStats", "SizedRef.ApproximateSize=" + _cacheSizeSamples[_idx]);
 #endif
                 IMemoryCacheManager memoryCacheManager = s_memoryCacheManager;
@@ -226,7 +228,7 @@ namespace System.Runtime.Caching
                 }
 
 #if PERF
-                SafeNativeMethods.OutputDebugString(String.Format("CacheMemoryMonitor.GetPercentToTrim: percent={0:N}, lastTrimPercent={1:N}\n",
+                Debug.WriteLine(String.Format("CacheMemoryMonitor.GetPercentToTrim: percent={0:N}, lastTrimPercent={1:N}\n",
                                                     percent,
                                                     lastTrimPercent));
 #endif
@@ -276,7 +278,6 @@ namespace System.Runtime.Caching
                         ", _pressureLow=" + _pressureLow);
         }
 
-        [SecuritySafeCritical]
         private static void InitMemoryCacheManager()
         {
             if (s_memoryCacheManager == null)

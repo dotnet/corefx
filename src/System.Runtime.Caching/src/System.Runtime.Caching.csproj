@@ -5,6 +5,7 @@
     <AssemblyName>System.Runtime.Caching</AssemblyName>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
     <ProjectGuid>{A7B6FB6E-F484-42D7-8A5E-F7D0DCC03829}</ProjectGuid>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
@@ -48,7 +49,6 @@
     <Compile Include="System\Runtime\Caching\PhysicalMemoryMonitor.cs" />
     <Compile Include="System\Runtime\Caching\SafeBitVector32.cs" />
     <Compile Include="System\Runtime\Caching\SRef.cs" />
-    <Compile Include="System\Runtime\Caching\UnsafeNativeMethods.cs" />
     <Compile Include="System\Runtime\Caching\Configuration\CachingSectionGroup.cs" />
     <Compile Include="System\Runtime\Caching\Configuration\ConfigUtil.cs" />
     <Compile Include="System\Runtime\Caching\Configuration\MemoryCacheElement.cs" />
@@ -59,6 +59,16 @@
     <Compile Include="System\Runtime\Caching\Hosting\IMemoryCacheManager.cs" />
     <Compile Include="System\Runtime\Caching\Resources\R.Designer.cs" />
     <Compile Include="System\Runtime\Caching\Resources\RH.cs" />
+
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GlobalMemoryStatusEx.cs">
+      <Link>Common\Interop\Windows\kernel32\Interop.GlobalMemoryStatusEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.MEMORY_BASIC_INFO.cs">
+      <Link>Common\Interop\Windows\kernel32\Interop.MEMORY_BASIC_INFO.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
   </ItemGroup>
  
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
@@ -67,38 +77,33 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
-    <Reference Include="mscorlib" />
-    <Reference Include="System"/>
-
-    <Reference Include="System.Private.Corelib"/>
-
-    <Reference Include="System.Configuration.ConfigurationManager" />
-    <Reference Include="System.IO" />
-    <Reference Include="System.IO.FileSystem.Watcher" />
-    <Reference Include="System.Collections.Generic" />
-
-
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="Microsoft.Win32.Registry" />
+    <Reference Include="System.Collections" />
     <Reference Include="System.Collections.Specialized" />
     <Reference Include="System.ComponentModel" />
     <Reference Include="System.ComponentModel.Primitives" />
     <Reference Include="System.ComponentModel.TypeConverter" />
+    <Reference Include="System.Configuration.ConfigurationManager" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Process" />
+    <Reference Include="System.Diagnostics.StackTrace" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.TraceSource" />
+    <Reference Include="System.IO" />
     <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.IO.FileSystem.Watcher" />
+    <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
-    <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Security.Permissions" />
     <Reference Include="System.Security.Principal.Windows" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.AccessControl" />
     <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Threading.ThreadPool" />
+    <Reference Include="System.Threading.Timer" />
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

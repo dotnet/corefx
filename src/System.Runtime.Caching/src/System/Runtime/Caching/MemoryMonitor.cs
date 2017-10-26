@@ -42,15 +42,14 @@ namespace System.Runtime.Caching
         private static long s_totalPhysical;
         private static long s_totalVirtual;
 
-        [SecuritySafeCritical]
         static MemoryMonitor()
         {
-            MEMORYSTATUSEX memoryStatusEx = new MEMORYSTATUSEX();
-            memoryStatusEx.Init();
-            if (UnsafeNativeMethods.GlobalMemoryStatusEx(ref memoryStatusEx) != 0)
+            Interop.Kernel32.MEMORYSTATUSEX memoryStatusEx;
+            memoryStatusEx.dwLength = (uint)Marshal.SizeOf(typeof(Interop.Kernel32.MEMORYSTATUSEX));
+            if (Interop.Kernel32.GlobalMemoryStatusEx(out memoryStatusEx) != 0)
             {
-                s_totalPhysical = memoryStatusEx.ullTotalPhys;
-                s_totalVirtual = memoryStatusEx.ullTotalVirtual;
+                s_totalPhysical = (long)memoryStatusEx.ullTotalPhys;
+                s_totalVirtual = (long)memoryStatusEx.ullTotalVirtual;
             }
         }
 
@@ -96,7 +95,7 @@ namespace System.Runtime.Caching
             _pressureTotal += pressure;
             _pressureHist[_i0] = pressure;
 
-#if DBG
+#if DEBUG
             Dbg.Trace("MemoryCacheStats", this.GetType().Name + ".Update: last=" + pressure
                         + ",high=" + PressureHigh
                         + ",low=" + PressureLow

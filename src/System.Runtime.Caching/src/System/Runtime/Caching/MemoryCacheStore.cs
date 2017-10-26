@@ -88,7 +88,6 @@ namespace System.Runtime.Caching
             _expires.EnableExpirationTimer(true);
         }
 
-
         private void RemoveFromCache(MemoryCacheEntry entry, CacheEntryRemovedReason reason, bool delayRelease = false)
         {
             // release outside of lock
@@ -160,7 +159,6 @@ namespace System.Runtime.Caching
         {
             _insertBlock.WaitOne(INSERT_BLOCK_WAIT, false);
         }
-
 
         // public/internal members
 
@@ -397,7 +395,7 @@ namespace System.Runtime.Caching
             }
             int trimmed = 0; // total number of entries trimmed
             int trimmedOrExpired = 0;
-#if DBG
+#if DEBUG
             int beginTotalCount = count;
 #endif
 
@@ -414,7 +412,7 @@ namespace System.Runtime.Caching
                 _perfCounters.IncrementBy(PerfCounterName.Trims, trimmed);
             }
 
-#if DBG
+#if DEBUG
             Dbg.Trace("MemoryCacheStore", "TrimInternal:"
                         + " beginTotalCount=" + beginTotalCount
                         + ", endTotalCount=" + count

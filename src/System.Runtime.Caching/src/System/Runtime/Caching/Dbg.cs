@@ -21,10 +21,9 @@ using System.Runtime.Versioning;
 
 namespace System.Runtime.Caching
 {
-    [SecuritySafeCritical]
     internal static class Dbg
     {
-#if DBG
+#if DEBUG
         static readonly DateTime MinValuePlusOneDay = DateTime.MinValue.AddDays(1);
         static readonly DateTime    MaxValueMinusOneDay = DateTime.MaxValue.AddDays(-1);
 #endif
@@ -36,36 +35,25 @@ namespace System.Runtime.Caching
         internal const string DATE_FORMAT = @"yyyy/MM/dd HH:mm:ss.ffff";
         internal const string TIME_FORMAT = @"HH:mm:ss:ffff";
 
-#if DBG
-        [SuppressUnmanagedCodeSecurity]
+#if DEBUG
         private static class NativeMethods {
-            [SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage", Justification = "Grandfathered suppression from original caching code checkin")]
             [DllImport("kernel32.dll")]
             internal extern static void DebugBreak();
 
-            [SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage", Justification = "Grandfathered suppression from original caching code checkin")]
             [DllImport("kernel32.dll")]
             internal extern static int GetCurrentProcessId();
 
-            [SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage", Justification = "Grandfathered suppression from original caching code checkin")]
             [DllImport("kernel32.dll")]
             internal extern static int GetCurrentThreadId();
 
-            [SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage", Justification = "Grandfathered suppression from original caching code checkin")]
             [DllImport("kernel32.dll", CharSet=CharSet.Auto, SetLastError=true)]
             internal extern static IntPtr GetCurrentProcess();
 
-            [SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage", Justification = "Grandfathered suppression from original caching code checkin")]
             [DllImport("kernel32.dll")]
             internal extern static bool IsDebuggerPresent();
 
-            [SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage", Justification = "Grandfathered suppression from original caching code checkin")]
             [DllImport("kernel32.dll", SetLastError=true)]
             internal extern static bool TerminateProcess(HandleRef processHandle, int exitCode);
-
-            [SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage", Justification = "Grandfathered suppression from original caching code checkin")]
-            [DllImport("kernel32.dll", CharSet=CharSet.Auto, BestFitMapping=false)]
-            internal extern static void OutputDebugString(string message);
 
             internal const int PM_NOREMOVE = 0x0000;
             internal const int PM_REMOVE = 0x0001;
@@ -81,8 +69,8 @@ namespace System.Runtime.Caching
                 internal int      pt_y;
             }
 
-            [DllImport("user32.dll", CharSet=CharSet.Auto)]
-            internal extern static bool PeekMessage([In, Out] ref MSG msg, HandleRef hwnd, int msgMin, int msgMax, int remove);
+            //[DllImport("user32.dll", CharSet=CharSet.Auto)]
+            //internal extern static bool PeekMessage([In, Out] ref MSG msg, HandleRef hwnd, int msgMin, int msgMax, int remove);
 
             internal const int 
                 MB_OK = 0x00000000,
@@ -132,9 +120,8 @@ namespace System.Runtime.Caching
                 IDCLOSE = 8,
                 IDHELP = 9;
 
-
-            [DllImport("user32.dll", CharSet=CharSet.Auto, BestFitMapping=false)]
-            internal extern static int MessageBox(HandleRef hWnd, string text, string caption, int type);
+            //[DllImport("user32.dll", CharSet=CharSet.Auto, BestFitMapping=false)]
+            //internal extern static int MessageBox(HandleRef hWnd, string text, string caption, int type);
 
             internal static readonly IntPtr HKEY_LOCAL_MACHINE = unchecked((IntPtr)(int)0x80000002);
 
@@ -147,7 +134,6 @@ namespace System.Runtime.Caching
             internal const int KEY_ENUMERATE_SUB_KEYS = 0x0008;
             internal const int KEY_NOTIFY             = 0x0010;
 
-
             internal const int KEY_READ               = ((STANDARD_RIGHTS_READ |
                                                                KEY_QUERY_VALUE |
                                                                KEY_ENUMERATE_SUB_KEYS |
@@ -158,12 +144,9 @@ namespace System.Runtime.Caching
             internal const int REG_NOTIFY_CHANGE_NAME       = 1;
             internal const int REG_NOTIFY_CHANGE_LAST_SET   = 4;
 
-
-            [SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage", Justification = "Grandfathered suppression from original caching code checkin")]
             [DllImport("advapi32.dll", CharSet=CharSet.Auto, BestFitMapping=false, SetLastError=true)]
             internal extern static int RegOpenKeyEx(IntPtr hKey, string lpSubKey, int ulOptions, int samDesired, out SafeRegistryHandle hkResult);
 
-            [SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage", Justification = "Grandfathered suppression from original caching code checkin")]
             [DllImport("advapi32.dll", ExactSpelling=true, SetLastError=true)]
             internal extern static int RegNotifyChangeKeyValue(SafeRegistryHandle hKey, bool watchSubTree, uint notifyFilter, SafeWaitHandle regEvent, bool async);
         }
@@ -291,8 +274,6 @@ namespace System.Runtime.Caching
             return StringComparer.OrdinalIgnoreCase.Equals(s1, s2);
         }
 
-        [RegistryPermission(SecurityAction.Assert, Unrestricted=true)]
-        [SuppressMessage("Microsoft.Security", "CA2106:SecureAsserts", Justification = "Grandfathered suppression from original caching code checkin")]
         private static void WriteTagsToRegistry() {
             try {
                 using (RegistryKey key = Registry.LocalMachine.CreateSubKey(s_regKeyName)) {
@@ -316,8 +297,6 @@ namespace System.Runtime.Caching
             s_monitor             = (GetTagValue(TAG_DEBUG_MONITOR) != TagValue.Disabled);
         }
 
-        [RegistryPermission(SecurityAction.Assert, Unrestricted=true)]
-        [SuppressMessage("Microsoft.Security", "CA2106:SecureAsserts", Justification = "Grandfathered suppression from original caching code checkin")]
         private static void ReadTagsFromRegistry() {
             lock (s_lock) {
                 try {
@@ -498,8 +477,6 @@ namespace System.Runtime.Caching
             }
         }
 
-        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
-        [SuppressMessage("Microsoft.Security", "CA2106:SecureAsserts", Justification = "Grandfathered suppression from original caching code checkin")]
         private static bool TraceBreak(string tagName, string message, Exception e, bool includePrefix) {
             EnsureInit();
 
@@ -567,14 +544,14 @@ namespace System.Runtime.Caching
 
             string traceMessage = string.Format(CultureInfo.InvariantCulture, traceFormat, idProcess, idThread, COMPONENT, tagName, message, suffix);
 
-            NativeMethods.OutputDebugString(traceMessage);
+            Debug.WriteLine(traceMessage);
 
             return doBreak;
         }
 
-        private class MBResult {
-            internal int Result;
-        }
+        //private class MBResult {
+        //    internal int Result;
+        //}
 
         [ResourceExposure(ResourceScope.None)]
         static bool DoAssert(string message) {
@@ -643,32 +620,34 @@ A=Exit process R=Debug I=Continue";
                 NativeMethods.GetCurrentProcessId(), NativeMethods.GetCurrentThreadId(),
                 trace.ToString());
 
-            MBResult mbResult = new MBResult();
+            //MBResult mbResult = new MBResult();
 
-            Thread thread = new Thread(
-                delegate() {
-                    for (int i = 0; i < 100; i++) {
-                        NativeMethods.MSG msg = new NativeMethods.MSG();
-                        NativeMethods.PeekMessage(ref msg, new HandleRef(mbResult, IntPtr.Zero), 0, 0, NativeMethods.PM_REMOVE);
-                    }
+            //Thread thread = new Thread(
+            //    delegate() {
+            //        for (int i = 0; i < 100; i++) {
+            //            NativeMethods.MSG msg = new NativeMethods.MSG();
+            //            NativeMethods.PeekMessage(ref msg, new HandleRef(mbResult, IntPtr.Zero), 0, 0, NativeMethods.PM_REMOVE);
+            //        }
 
-                    mbResult.Result = NativeMethods.MessageBox(new HandleRef(mbResult, IntPtr.Zero), dialogMessage, PRODUCT + " Assertion",                
-                        NativeMethods.MB_SERVICE_NOTIFICATION | 
-                        NativeMethods.MB_TOPMOST |
-                        NativeMethods.MB_ABORTRETRYIGNORE | 
-                        NativeMethods.MB_ICONEXCLAMATION);
-                }
-            );
+            //        mbResult.Result = NativeMethods.MessageBox(new HandleRef(mbResult, IntPtr.Zero), dialogMessage, PRODUCT + " Assertion",                
+            //            NativeMethods.MB_SERVICE_NOTIFICATION | 
+            //            NativeMethods.MB_TOPMOST |
+            //            NativeMethods.MB_ABORTRETRYIGNORE | 
+            //            NativeMethods.MB_ICONEXCLAMATION);
+            //    }
+            //);
 
-            thread.Start();
-            thread.Join();
+            //thread.Start();
+            //thread.Join();
 
-            if (mbResult.Result == NativeMethods.IDABORT) {
-                IntPtr currentProcess = NativeMethods.GetCurrentProcess();
-                NativeMethods.TerminateProcess(new HandleRef(mbResult, currentProcess), 1);
-            }
+            //if (mbResult.Result == NativeMethods.IDABORT) {
+            //    IntPtr currentProcess = NativeMethods.GetCurrentProcess();
+            //    NativeMethods.TerminateProcess(new HandleRef(mbResult, currentProcess), 1);
+            //}
 
-            return mbResult.Result == NativeMethods.IDRETRY;
+            //return mbResult.Result == NativeMethods.IDRETRY;
+            Debug.Fail(dialogMessage);
+            return true;
         }
 #endif
 
@@ -676,10 +655,10 @@ A=Exit process R=Debug I=Continue";
         // Sends the message to the debugger if the tag is enabled.
         // Also breaks into the debugger the value of the tag is 2 (TagValue.Break).
         //
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         internal static void Trace(string tagName, string message)
         {
-#if DBG
+#if DEBUG
             if (TraceBreak(tagName, message, null, true)) {
                 Break();
             }
@@ -690,10 +669,10 @@ A=Exit process R=Debug I=Continue";
         // Sends the message to the debugger if the tag is enabled.
         // Also breaks into the debugger the value of the tag is 2 (TagValue.Break).
         //
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         internal static void Trace(string tagName, string message, bool includePrefix)
         {
-#if DBG
+#if DEBUG
             if (TraceBreak(tagName, message, null, includePrefix)) {
                 Break();
             }
@@ -704,10 +683,10 @@ A=Exit process R=Debug I=Continue";
         // Sends the message to the debugger if the tag is enabled.
         // Also breaks into the debugger the value of the tag is 2 (TagValue.Break).
         //
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         internal static void Trace(string tagName, string message, Exception e)
         {
-#if DBG
+#if DEBUG
             if (TraceBreak(tagName, message, e, true)) {
                 Break();
             }
@@ -718,10 +697,10 @@ A=Exit process R=Debug I=Continue";
         // Sends the message to the debugger if the tag is enabled.
         // Also breaks into the debugger the value of the tag is 2 (TagValue.Break).
         //
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         internal static void Trace(string tagName, Exception e)
         {
-#if DBG
+#if DEBUG
             if (TraceBreak(tagName, null, e, true)) {
                 Break();
             }
@@ -732,23 +711,23 @@ A=Exit process R=Debug I=Continue";
         // Sends the message to the debugger if the tag is enabled.
         // Also breaks into the debugger the value of the tag is 2 (TagValue.Break).
         //
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         internal static void Trace(string tagName, string message, Exception e, bool includePrefix)
         {
-#if DBG
+#if DEBUG
             if (TraceBreak(tagName, message, e, includePrefix)) {
                 Break();
             }
 #endif
         }
 
-#if DBG
+#if DEBUG
 #endif
 
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         public static void TraceException(String tagName, Exception e)
         {
-#if DBG
+#if DEBUG
             if (TraceBreak(tagName, null, e, true)) {
                 Break();
             }
@@ -762,10 +741,10 @@ A=Exit process R=Debug I=Continue";
         //      * If the 'AssertBreak' tag is enabled, immediately break into the debugger
         //      * Else display a dialog box asking the user to Abort, Retry (break), or Ignore
         //
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         internal static void Assert(bool assertion, string message)
         {
-#if DBG
+#if DEBUG
             EnsureInit();
             if (assertion == false) {
                 if (DoAssert(message)) {
@@ -775,18 +754,17 @@ A=Exit process R=Debug I=Continue";
 #endif
         }
 
-
         //
         // If the assertion is false and the 'Assert' tag is enabled:
         //      * Send a message to the debugger.
         //      * If the 'AssertBreak' tag is enabled, immediately break into the debugger
         //      * Else display a dialog box asking the user to Abort, Retry (break), or Ignore
         //
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         [ResourceExposure(ResourceScope.None)]
         internal static void Assert(bool assertion)
         {
-#if DBG
+#if DEBUG
             EnsureInit();
             if (assertion == false) {
                 if (DoAssert(null)) {
@@ -799,11 +777,11 @@ A=Exit process R=Debug I=Continue";
         //
         // Like Assert, but the assertion is always considered to be false.
         //
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         [ResourceExposure(ResourceScope.None)]
         internal static void Fail(string message)
         {
-#if DBG
+#if DEBUG
             Assert(false, message);
 #endif
         }
@@ -816,7 +794,7 @@ A=Exit process R=Debug I=Continue";
         [ResourceExposure(ResourceScope.None)]
         internal static bool IsTagEnabled(string tagName)
         {
-#if DBG
+#if DEBUG
             EnsureInit();
             return GetTagValue(tagName) != TagValue.Disabled;
 #else
@@ -832,7 +810,7 @@ A=Exit process R=Debug I=Continue";
         [ResourceExposure(ResourceScope.None)]
         internal static bool IsTagPresent(string tagName)
         {
-#if DBG
+#if DEBUG
             EnsureInit();
             return FindMatchingTag(tagName, true) != null;
 #else
@@ -843,11 +821,11 @@ A=Exit process R=Debug I=Continue";
         //
         // Breaks into the debugger, or launches one if not yet attached.
         //
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         [ResourceExposure(ResourceScope.None)]
         internal static void Break()
         {
-#if DBG
+#if DEBUG
             if (NativeMethods.IsDebuggerPresent()) {
                 NativeMethods.DebugBreak();
             }
@@ -860,7 +838,6 @@ A=Exit process R=Debug I=Continue";
 #endif
         }
 
-
         //
         // Tells the debug system to always validate calls for a
         // particular tag. This is useful for temporarily enabling
@@ -868,25 +845,24 @@ A=Exit process R=Debug I=Continue";
         // may not have control over the debug tags that are enabled
         // on a particular machine.
         // 
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         internal static void AlwaysValidate(string tagName)
         {
-#if DBG
+#if DEBUG
             EnsureInit();
             s_tableAlwaysValidate[tagName] = tagName;
 #endif
         }
-
 
         //
         // Throws an exception if the assertion is not valid.
         // Use this function from a DebugValidate method where
         // you would otherwise use Assert.
         //
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         internal static void CheckValid(bool assertion, string message)
         {
-#if DBG
+#if DEBUG
             if (!assertion) {
                 throw new Exception(message);
             }
@@ -905,11 +881,11 @@ A=Exit process R=Debug I=Continue";
         // validate an object and have a failed validation caught in an assert.
         // Use Debug.Validate(tagName, obj) for that purpose.
         //
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         [ResourceExposure(ResourceScope.None)]
         internal static void Validate(Object obj)
         {
-#if DBG
+#if DEBUG
             Type        type;
             MethodInfo  mi;
 
@@ -936,11 +912,11 @@ A=Exit process R=Debug I=Continue";
         // the "Validate" tag is not disabled and the given 'tag' is enabled.
         // An Assertion is made if the validation fails.
         //
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         [ResourceExposure(ResourceScope.None)]
         internal static void Validate(string tagName, Object obj)
         {
-#if DBG
+#if DEBUG
             EnsureInit();
 
             if (    obj != null 
@@ -963,7 +939,7 @@ A=Exit process R=Debug I=Continue";
 #endif
         }
 
-#if DBG
+#if DEBUG
 
         //
         // Calls DebugDescription on an object to get its description.
@@ -983,8 +959,6 @@ A=Exit process R=Debug I=Continue";
         //
         // @return         The description.
         //
-        [ReflectionPermission(SecurityAction.Assert, Unrestricted=true)]
-        [SuppressMessage("Microsoft.Security", "CA2106:SecureAsserts", Justification = "Grandfathered suppression from original caching code checkin")]
         internal static string GetDescription(Object obj, string indent) {
             string      description;
             Type        type;
@@ -1016,7 +990,6 @@ A=Exit process R=Debug I=Continue";
         }
 #endif
 
-
         // 
         // Dumps an object to the debugger if the "Dump" tag is enabled,
         // or if the "Dump" tag is not present and the 'tag' is enabled.
@@ -1024,10 +997,10 @@ A=Exit process R=Debug I=Continue";
         // @param tagName  The tag to Dump with.
         // @param obj  The object to dump.
         // 
-        [Conditional("DBG")]
+        [Conditional("DEBUG")]
         internal static void Dump(string tagName, Object obj)
         {
-#if DBG
+#if DEBUG
             EnsureInit();
 
             string  description;
@@ -1057,7 +1030,7 @@ A=Exit process R=Debug I=Continue";
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Grandfathered suppression from original caching code checkin")]
         static internal string FormatLocalDate(DateTime localTime)
         {
-#if DBG
+#if DEBUG
             return localTime.ToString(DATE_FORMAT, CultureInfo.InvariantCulture);
 #else
             return string.Empty;

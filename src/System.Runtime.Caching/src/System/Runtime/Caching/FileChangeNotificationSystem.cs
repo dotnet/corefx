@@ -88,7 +88,6 @@ namespace System.Runtime.Caching
             _lock = new object();
         }
 
-        [SecuritySafeCritical]
         void IFileChangeNotificationSystem.StartMonitoring(string filePath, OnChangedCallback onChangedCallback, out Object state, out DateTimeOffset lastWriteTime, out long fileSize)
         {
             if (filePath == null)
@@ -139,7 +138,6 @@ namespace System.Runtime.Caching
             fileSize = (fileInfo.Exists) ? fileInfo.Length : -1;
         }
 
-        [SecuritySafeCritical]
         void IFileChangeNotificationSystem.StopMonitoring(string filePath, Object state)
         {
             if (filePath == null)

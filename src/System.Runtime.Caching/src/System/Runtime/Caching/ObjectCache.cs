@@ -24,11 +24,11 @@ namespace System.Runtime.Caching
 
         public static IServiceProvider Host
         {
-            [SecurityCritical]
             get
-            { return s_host; }
+            {
+                return s_host;
+            }
 
-            [SecurityCritical]
             set
             {
                 if (value == null)
@@ -54,7 +54,6 @@ namespace System.Runtime.Caching
             return ((IEnumerable<KeyValuePair<string, object>>)this).GetEnumerator();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public abstract CacheEntryChangeMonitor CreateCacheEntryChangeMonitor(IEnumerable<String> keys, String regionName = null);
 
         IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>.GetEnumerator()
@@ -65,11 +64,9 @@ namespace System.Runtime.Caching
         protected abstract IEnumerator<KeyValuePair<string, object>> GetEnumerator();
 
         //Existence check for a single item
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public abstract bool Contains(string key, string regionName = null);
 
         //The Add overloads are for adding an item without requiring the existing item to be returned.  This was requested for Velocity.
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public virtual bool Add(string key, object value, DateTimeOffset absoluteExpiration, string regionName = null)
         {
             return (AddOrGetExisting(key, value, absoluteExpiration, regionName) == null);
@@ -80,39 +77,31 @@ namespace System.Runtime.Caching
             return (AddOrGetExisting(item, policy) == null);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public virtual bool Add(string key, object value, CacheItemPolicy policy, string regionName = null)
         {
             return (AddOrGetExisting(key, value, policy, regionName) == null);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public abstract object AddOrGetExisting(string key, object value, DateTimeOffset absoluteExpiration, string regionName = null);
         public abstract CacheItem AddOrGetExisting(CacheItem value, CacheItemPolicy policy);
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public abstract object AddOrGetExisting(string key, object value, CacheItemPolicy policy, string regionName = null);
 
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", Justification = "The name best represents an operation on a cache")]
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public abstract object Get(string key, string regionName = null);
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public abstract CacheItem GetCacheItem(string key, string regionName = null);
 
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", Justification = "The name best represents an operation on a cache")]
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public abstract void Set(string key, object value, DateTimeOffset absoluteExpiration, string regionName = null);
 
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", Justification = "The name best represents an operation on a cache")]
         public abstract void Set(CacheItem item, CacheItemPolicy policy);
 
         [SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", Justification = "The name best represents an operation on a cache")]
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public abstract void Set(string key, object value, CacheItemPolicy policy, string regionName = null);
 
         //Get multiple items by keys
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public abstract IDictionary<string, object> GetValues(IEnumerable<String> keys, string regionName = null);
 
         public virtual IDictionary<string, object> GetValues(string regionName, params string[] keys)
@@ -120,10 +109,8 @@ namespace System.Runtime.Caching
             return GetValues(keys, regionName);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public abstract object Remove(string key, string regionName = null);
 
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "This is assembly is a special case approved by the NetFx API review board")]
         public abstract long GetCount(string regionName = null);
     }
 }

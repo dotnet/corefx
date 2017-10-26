@@ -87,8 +87,6 @@ namespace System.Runtime.Caching
             }
         }
 
-        [SecuritySafeCritical]
-        [SuppressMessage("Microsoft.Security", "CA2106:SecureAsserts", Justification = "Grandfathered suppression from original caching code checkin")]
         private static void InitFCN()
         {
             if (s_fcn == null)
@@ -144,7 +142,6 @@ namespace System.Runtime.Caching
             }
         }
 
-
         //
         // public and internal members
         //
@@ -170,7 +167,6 @@ namespace System.Runtime.Caching
             InitDisposableMembers();
         }
 
-        [SecuritySafeCritical]
         private static ReadOnlyCollection<string> SanitizeFilePathsList(IList<string> filePaths)
         {
             List<string> newList = new List<string>(filePaths.Count);

@@ -196,8 +196,6 @@ namespace System.Runtime.Caching
             _cacheMemoryMonitor.Update();
         }
 
-
-
         // public/internal
 
         internal long CacheMemoryLimit
@@ -236,7 +234,6 @@ namespace System.Runtime.Caching
             InitDisposableMembers();
         }
 
-        [SecuritySafeCritical]
         internal long CacheManagerThread(int minPercent)
         {
             if (Interlocked.Exchange(ref _inCacheManagerThread, 1) != 0)
@@ -247,7 +244,7 @@ namespace System.Runtime.Caching
                 {
                     return 0;
                 }
-#if DBG
+#if DEBUG
                 Dbg.Trace("MemoryCacheStats", "**BEG** CacheManagerThread " + DateTime.Now.ToString("T", CultureInfo.InvariantCulture));
 #endif
                 // The timer thread must always call Update so that the CacheManager
@@ -267,7 +264,7 @@ namespace System.Runtime.Caching
                     SetTrimStats(sw.Elapsed.Ticks, beginTotalCount, trimmedOrExpired);
                 }
 
-#if DBG
+#if DEBUG
                 Dbg.Trace("MemoryCacheStats", "**END** CacheManagerThread: "
                             + ", percent=" + percent
                             + ", beginTotalCount=" + beginTotalCount
@@ -276,7 +273,7 @@ namespace System.Runtime.Caching
 #endif
 
 #if PERF
-                SafeNativeMethods.OutputDebugString("CacheCommon.CacheManagerThread:"
+                Debug.WriteLine("CacheCommon.CacheManagerThread:"
                                                     + " minPercent= " + minPercent
                                                     + ", percent= " + percent
                                                     + ", beginTotalCount=" + beginTotalCount

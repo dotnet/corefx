@@ -4,6 +4,7 @@
 
 using System;
 using System.Runtime.Caching.Configuration;
+using System.Runtime.InteropServices;
 using System.Security;
 
 namespace System.Runtime.Caching
@@ -75,15 +76,16 @@ namespace System.Runtime.Caching
             InitHistory();
         }
 
-        [SecuritySafeCritical]
         protected override int GetCurrentPressure()
         {
-            MEMORYSTATUSEX memoryStatusEx = new MEMORYSTATUSEX();
-            memoryStatusEx.Init();
-            if (UnsafeNativeMethods.GlobalMemoryStatusEx(ref memoryStatusEx) == 0)
+            Interop.Kernel32.MEMORYSTATUSEX memoryStatusEx;
+            memoryStatusEx.dwLength = (uint)Marshal.SizeOf(typeof(Interop.Kernel32.MEMORYSTATUSEX));
+            if (Interop.Kernel32.GlobalMemoryStatusEx(out memoryStatusEx) != 0)
+            {
                 return 0;
+            }
 
-            int memoryLoad = memoryStatusEx.dwMemoryLoad;
+            int memoryLoad = (int)memoryStatusEx.dwMemoryLoad;
             return memoryLoad;
         }
 
@@ -103,7 +105,7 @@ namespace System.Runtime.Caching
                 }
 
 #if PERF
-                SafeNativeMethods.OutputDebugString(String.Format("PhysicalMemoryMonitor.GetPercentToTrim: percent={0:N}, lastTrimPercent={1:N}, secondsSinceTrim={2:N}\n",
+                Debug.WriteLine(String.Format("PhysicalMemoryMonitor.GetPercentToTrim: percent={0:N}, lastTrimPercent={1:N}, secondsSinceTrim={2:N}\n",
                                                     percent,
                                                     lastTrimPercent,
                                                     ticksSinceTrim/TimeSpan.TicksPerSecond));
@@ -122,7 +124,7 @@ namespace System.Runtime.Caching
             }
             _pressureHigh = Math.Max(3, physicalMemoryLimitPercentage);
             _pressureLow = Math.Max(1, _pressureHigh - 9);
-#if DBG
+#if DEBUG
             Dbg.Trace("MemoryCacheStats", "PhysicalMemoryMonitor.SetLimit: _pressureHigh=" + _pressureHigh +
                         ", _pressureLow=" + _pressureLow);
 #endif
