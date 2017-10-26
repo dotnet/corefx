@@ -2765,21 +2765,10 @@ namespace System.Net.Sockets.Tests
 
                 SocketUdpClient client = new SocketUdpClient(_log, serverSocket, connectTo, port, sendNow: false);
 
-                if (NetEventSource.IsEnabled)
-                {
-                    NetEventSource.Info(this, $"SRC:{connectTo} {port} DST:{serverSocket.LocalEndPoint}");
-                }
-
-                // wait for send to finish instead of spawning background task to avoid race condition
                 client.ClientSend();
 
                 EndPoint receivedFrom = new IPEndPoint(connectTo, port);
                 int received = serverSocket.ReceiveFrom(new byte[1], ref receivedFrom);
-
-                if (NetEventSource.IsEnabled)
-                {
-                    NetEventSource.Info(this, $"SRC:{connectTo} {port} DST:{serverSocket.LocalEndPoint} RECEIVED:{received}");
-                }
 
                 Assert.Equal(1, received);
                 Assert.Equal<Type>(receivedFrom.GetType(), typeof(IPEndPoint));
