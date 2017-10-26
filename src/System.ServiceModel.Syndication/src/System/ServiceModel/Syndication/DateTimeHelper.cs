@@ -4,11 +4,15 @@
 
 using System.Globalization;
 using System.Text;
+using System.Xml;
 
 namespace System.ServiceModel.Syndication
 {
     internal static class DateTimeHelper
     {
+        internal const string Rfc3339LocalDateTimeFormat = "yyyy-MM-ddTHH:mm:sszzz";
+        internal const string Rfc3339UTCDateTimeFormat = "yyyy-MM-ddTHH:mm:ssZ";
+
         public static Func<string, string, string, DateTimeOffset> CreateRss20DateTimeParser()
         {
             return (dateTimeString, localName, ns) =>
@@ -42,14 +46,41 @@ namespace System.ServiceModel.Syndication
         {
             return (dateTimeString, localName, ns) =>
             {
-                DateTimeOffset dto;
-                if (Rfc3339DateTimeParser(dateTimeString, out dto))
+                dateTimeString = dateTimeString.Trim();
+                if (dateTimeString.Length < 20)
                 {
-                    return dto;
+                    throw new XmlException(SR.ErrorParsingDateTime);
                 }
 
-                // Unable to parse - using a default date;
-                return new DateTimeOffset();
+                if (dateTimeString[19] == '.')
+                {
+                    // remove any fractional seconds, we choose to ignore them
+                    int i = 20;
+                    while (dateTimeString.Length > i && char.IsDigit(dateTimeString[i]))
+                    {
+                        ++i;
+                    }
+
+                    dateTimeString = dateTimeString.Substring(0, 19) + dateTimeString.Substring(i);
+                }
+
+                DateTimeOffset localTime;
+                if (DateTimeOffset.TryParseExact(dateTimeString, Rfc3339LocalDateTimeFormat,
+                    CultureInfo.InvariantCulture.DateTimeFormat,
+                    DateTimeStyles.None, out localTime))
+                {
+                    return localTime;
+                }
+
+                DateTimeOffset utcTime;
+                if (DateTimeOffset.TryParseExact(dateTimeString, Rfc3339UTCDateTimeFormat,
+                    CultureInfo.InvariantCulture.DateTimeFormat,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out utcTime))
+                {
+                    return utcTime;
+                }
+
+                throw new XmlException(SR.ErrorParsingDateTime);
             };
         }
 

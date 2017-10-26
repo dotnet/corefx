@@ -31,8 +31,6 @@ namespace System.ServiceModel.Syndication
         private static readonly XmlQualifiedName s_atom10Title = new XmlQualifiedName(Atom10Constants.TitleTag, string.Empty);
         private static readonly XmlQualifiedName s_atom10Type = new XmlQualifiedName(Atom10Constants.TypeTag, string.Empty);
         private static readonly UriGenerator s_idGenerator = new UriGenerator();
-        private const string Rfc3339LocalDateTimeFormat = "yyyy-MM-ddTHH:mm:sszzz";
-        private const string Rfc3339UTCDateTimeFormat = "yyyy-MM-ddTHH:mm:ssZ";
         private Type _feedType;
         private int _maxExtensionSize;
         private bool _preserveAttributeExtensions;
@@ -717,11 +715,11 @@ namespace System.ServiceModel.Syndication
         {
             if (dateTime.Offset == zeroOffset)
             {
-                return dateTime.ToUniversalTime().ToString(Rfc3339UTCDateTimeFormat, CultureInfo.InvariantCulture);
+                return dateTime.ToUniversalTime().ToString(DateTimeHelper.Rfc3339UTCDateTimeFormat, CultureInfo.InvariantCulture);
             }
             else
             {
-                return dateTime.ToString(Rfc3339LocalDateTimeFormat, CultureInfo.InvariantCulture);
+                return dateTime.ToString(DateTimeHelper.Rfc3339LocalDateTimeFormat, CultureInfo.InvariantCulture);
             }
         }
 
