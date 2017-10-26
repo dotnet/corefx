@@ -5,6 +5,11 @@
     <ProjectGuid>{4B93E684-0630-45F4-8F63-6C7788C9892F}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <!-- Temporary property to diagnose flaky crashing tests in Unix -->
+  <PropertyGroup Condition="'$(TargetsWindows)' != 'true'">
+    <XunitShowProgress>true</XunitShowProgress>
+    <XunitMaxThreads>1</XunitMaxThreads>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="BitmapTests.cs" />
     <Compile Include="BrushTests.cs" />
