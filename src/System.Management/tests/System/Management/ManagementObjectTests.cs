@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Threading;
 using Xunit;
 
 namespace System.Management.Tests
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WMI not supported via UAP")]
     public class ManagementObjectTests
     {
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -59,7 +57,6 @@ namespace System.Management.Tests
 
             object resultObj = processClass.InvokeMethod("Create", methodArgs);
 
-            Thread.Sleep(1000);
             var resultCode = (uint)resultObj;
             Assert.Equal(0u, resultCode);
 
@@ -71,7 +68,6 @@ namespace System.Management.Tests
             resultCode = (uint)resultObj;
             Assert.Equal(0u, resultCode);
 
-            Thread.Sleep(2000);
             ManagementException managementException = Assert.Throws<ManagementException>(() => process.Get());
             Assert.Equal(ManagementStatus.NotFound, managementException.ErrorCode);
         }

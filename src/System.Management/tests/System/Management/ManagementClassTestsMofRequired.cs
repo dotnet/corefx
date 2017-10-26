@@ -6,7 +6,6 @@ using Xunit;
 
 namespace System.Management.Tests
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WMI not supported via UAP")]
     [Collection("Mof Collection")]
     public class ManagementClassTestsMofRequired
     {
@@ -15,7 +14,7 @@ namespace System.Management.Tests
         {
             using (var newClass = new ManagementClass(WmiTestHelper.Namespace))
             {
-                const string NewClassName = "CoreFX_Create_Modify_Delete_Static_Class森鷗外";
+                const string NewClassName = "CoreFX_Create_Modify_Delete_Static_Class\uEE68\uD79D\u1659";
                 const string PropertyName = "Key";
                 const int PropertyValue = 10;
 

@@ -7,7 +7,6 @@ using Xunit;
 
 namespace System.Management.Tests
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WMI not supported via UAP")]
     [Collection("Mof Collection")]
     public class ManagementEventWatcherTests
     {
@@ -40,7 +39,7 @@ namespace System.Management.Tests
 
         [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndNotNanoServer))]
         [OuterLoop]
-        public void Receive_Events_ASync()
+        public void Receive_Events_Async()
         {
             ManagementEventWatcher watcher = null;
             var resetEvent = new ManualResetEvent(false);
@@ -54,7 +53,13 @@ namespace System.Management.Tests
                     Query,
                     new EventWatcherOptions(null, TimeSpan.FromSeconds(5), 1));
 
-                watcher.EventArrived += new EventArrivedEventHandler(EventArrived);
+                watcher.EventArrived += (object sender, EventArrivedEventArgs args) =>
+                {
+                    ManagementBaseObject newEvent = args.NewEvent;
+                    Assert.True(newEvent["TimerID"].ToString() == "MyEvent", $"Unexpected TimerID value {newEvent["TimerID"]}");
+                    resetEvent.Set();
+                };
+                
                 watcher.Start();
 
                 Assert.True(resetEvent.WaitOne(TimeSpan.FromSeconds(5), true), "Timeout waiting for receive event.");
@@ -63,13 +68,6 @@ namespace System.Management.Tests
             {
                 if (watcher != null)
                     watcher.Stop();
-            }
-
-            void EventArrived(object sender, EventArrivedEventArgs args)
-            {
-                ManagementBaseObject newEvent = args.NewEvent;
-                Assert.True(newEvent["TimerID"].ToString() == "MyEvent", $"Unexpected TimerID value {newEvent["TimerID"]}");
-                resetEvent.Set();
             }
         }
     }

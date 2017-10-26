@@ -6,7 +6,6 @@ using Xunit;
 
 namespace System.Management.Tests
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WMI not supported via UAP")]
     public class ManagementDateTimeConverterTests
     {
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]

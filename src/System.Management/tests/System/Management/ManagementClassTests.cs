@@ -8,7 +8,6 @@ using Xunit;
 
 namespace System.Management.Tests
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WMI not supported via UAP")]
     public class ManagementClassTests
     {
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -90,12 +89,12 @@ namespace System.Management.Tests
             using (var rootNamespace = new ManagementClass("root:__namespace"))
             using (ManagementObject newNamespace = rootNamespace.CreateInstance())
             {
-                const string NewNameSpace = "CoreFx_Create_Delete_Namespace_Test";
-                newNamespace["Name"] = NewNameSpace;
+                const string NewNamespace = "CoreFx_Create_Delete_Namespace_Test";
+                newNamespace["Name"] = NewNamespace;
                 newNamespace.Put();
 
-                ManagementObject targetNamespace = new ManagementObject($"root:__namespace.Name='{NewNameSpace}'");
-                Assert.Equal(NewNameSpace, targetNamespace["Name"]);
+                ManagementObject targetNamespace = new ManagementObject($"root:__namespace.Name='{NewNamespace}'");
+                Assert.Equal(NewNamespace, targetNamespace["Name"]);
 
                 // If any of the steps below fail it is likely that the new namespace was not deleted, likely it will have to
                 // be deleted via a tool like wbemtest.

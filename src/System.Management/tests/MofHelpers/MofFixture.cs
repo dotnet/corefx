@@ -43,7 +43,7 @@ namespace System.Management.Tests
 
         private string ExtractMofFromResourcesToFile(string mofResourceName)
         {
-            var mofFilePath = Path.Combine(Path.GetDirectoryName(_assembly.Location), mofResourceName);
+            var mofFilePath = Path.Combine(Path.GetTempPath(), mofResourceName);
             using (var mofStream = new StreamReader(_assembly.GetManifestResourceStream(mofResourceName)))
             {
                 string mofContent = mofStream.ReadToEnd();
