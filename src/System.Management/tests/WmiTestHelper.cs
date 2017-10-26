@@ -8,11 +8,13 @@ namespace System.Management.Tests
 {
     public static class WmiTestHelper
     {
-        private static readonly bool s_ElevatedAndNotNanoServer = AdminHelpers.IsProcessElevated() && PlatformDetection.IsNotWindowsNanoServer;
+        private static readonly bool s_isElevated = AdminHelpers.IsProcessElevated();
+        private static readonly bool s_isWmiSupported = PlatformDetection.IsWindows && PlatformDetection.IsNotWindowsNanoServer && !PlatformDetection.IsUap;
         private static readonly string s_systemDriveId = Path.GetPathRoot(Environment.GetEnvironmentVariable("SystemDrive"));
 
         public static string Namespace => "root/WmiEBvt";
         public static string SystemDriveId => s_systemDriveId;
-        public static bool IsElevatedAndNotNanoServer => s_ElevatedAndNotNanoServer;
+        public static bool IsWmiSupported => s_isWmiSupported;
+        public static bool IsElevatedAndSupportsWmi => s_isElevated && IsWmiSupported;
     }
 }

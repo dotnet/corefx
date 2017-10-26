@@ -9,7 +9,7 @@ namespace System.Management.Tests
     [Collection("Mof Collection")]
     public class ManagementObjectSearcherTestsMofRequired
     {
-        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndNotNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndSupportsWmi))]
         [OuterLoop]
         public void Static_Instances()
         {
@@ -27,7 +27,7 @@ namespace System.Management.Tests
             }
         }
 
-        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndNotNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndSupportsWmi))]
         [OuterLoop]
         public void Static_Related_Instances()
         {
@@ -44,7 +44,7 @@ namespace System.Management.Tests
             }
         }
 
-        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndNotNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndSupportsWmi))]
         [OuterLoop]
         public void Static_Relationship_Classes()
         {

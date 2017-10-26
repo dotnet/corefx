@@ -8,7 +8,7 @@ namespace System.Management.Tests
 {
     public class ManagementDateTimeConverterTests
     {
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsWmiSupported))]
         public void DateTime_RoundTrip()
         {
             var date = new DateTime(2002, 4, 8, 14, 18, 35, 978, DateTimeKind.Utc);
@@ -22,7 +22,7 @@ namespace System.Management.Tests
             Assert.Equal(dmtfDate, convertedDmtfDate);
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsWmiSupported))]
         public void TimeSpan_RoundTrip()
         {
             var timeSpan = new TimeSpan(10, 12, 25, 32, 123);

@@ -9,7 +9,7 @@ namespace System.Management.Tests
 {
     public class ManagementObjectSearcherTests
     {
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsWmiSupported))]
         public void Dynamic_Instances()
         {
             using (var searcher = new ManagementObjectSearcher())
@@ -24,7 +24,7 @@ namespace System.Management.Tests
             }
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsWmiSupported))]
         [OuterLoop]
         public void Related_Instances()
         {
@@ -45,7 +45,7 @@ namespace System.Management.Tests
             }
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsWmiSupported))]
         [OuterLoop]
         public void Relationship_Classes()
         {

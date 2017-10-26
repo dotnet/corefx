@@ -10,7 +10,7 @@ namespace System.Management.Tests
 {
     public class ManagementClassTests
     {
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(typeof(WmiTestHelper), nameof(WmiTestHelper.IsWmiSupported))]
         [InlineData(false, false)]
         [InlineData(false, true)]
         [InlineData(true, false)]
@@ -24,7 +24,7 @@ namespace System.Management.Tests
             }
         }
 
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(typeof(WmiTestHelper), nameof(WmiTestHelper.IsWmiSupported))]
         [InlineData(CodeLanguage.CSharp)]
         [InlineData(CodeLanguage.VB)]
         public void Get_SourceFile_For_Win32_Processor(CodeLanguage lang)
@@ -45,7 +45,7 @@ namespace System.Management.Tests
             }
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsWmiSupported))]
         public void ClassMembers_For_Win32_LogicalDisk()
         {
             var managementClass = new ManagementClass(new ManagementPath("Win32_LogicalDisk"));
@@ -65,7 +65,7 @@ namespace System.Management.Tests
                 Assert.False(string.IsNullOrWhiteSpace(qualifier.Name));
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsWmiSupported))]
         public void EnumerateInstances_For_Win32_LogicalDisk()
         {
             using (var managementClass = new ManagementClass(new ManagementPath("Win32_LogicalDisk")))
@@ -83,7 +83,7 @@ namespace System.Management.Tests
             }
         }
 
-        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndNotNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndSupportsWmi))]
         public void Create_Delete_Namespace()
         {
             using (var rootNamespace = new ManagementClass("root:__namespace"))

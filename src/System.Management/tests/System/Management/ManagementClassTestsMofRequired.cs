@@ -9,7 +9,7 @@ namespace System.Management.Tests
     [Collection("Mof Collection")]
     public class ManagementClassTestsMofRequired
     {
-        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndNotNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndSupportsWmi))]
         public void Create_Modify_Delete_Static_Class()
         {
             using (var newClass = new ManagementClass(WmiTestHelper.Namespace))
@@ -39,7 +39,7 @@ namespace System.Management.Tests
             }
         }
 
-        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndNotNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndSupportsWmi))]
         public void Create_Modify_Delete_Static_And_Instance()
         {
             using (var newClass = new ManagementClass(WmiTestHelper.Namespace))

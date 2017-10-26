@@ -12,7 +12,7 @@ namespace System.Management.Tests
     {
         private const string Query = "SELECT * FROM __TimerEvent WHERE TimerID = 'MyEvent'";
 
-        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndNotNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndSupportsWmi))]
         [OuterLoop]
         public void Receive_Events_Sync()
         {
@@ -37,7 +37,7 @@ namespace System.Management.Tests
             }
         }
 
-        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndNotNanoServer))]
+        [ConditionalFact(typeof(WmiTestHelper), nameof(WmiTestHelper.IsElevatedAndSupportsWmi))]
         [OuterLoop]
         public void Receive_Events_Async()
         {
