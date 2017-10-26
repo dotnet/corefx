@@ -43,7 +43,7 @@ namespace RemoteExecutorConsoleApp
             Type t = null;
             MethodInfo mi = null;
             object instance = null;
-            int exitCode = int.MaxValue;
+            int? exitCode = null;
             try
             {
                 // Create the test class if necessary
@@ -57,9 +57,15 @@ namespace RemoteExecutorConsoleApp
 
                 // Invoke the test
                 object result = mi.Invoke(instance, additionalArgs);
-                exitCode = result is Task<int> task ?
-                    task.GetAwaiter().GetResult() :
-                    (int)result;
+
+                if (result is Task<int> task)
+                {
+                    exitCode = task.GetAwaiter().GetResult();
+                }
+                else if (result is int exit)
+                {
+                    exitCode = exit;
+                }
             }
             catch (Exception exc)
             {
@@ -90,6 +96,9 @@ namespace RemoteExecutorConsoleApp
                 (instance as IDisposable)?.Dispose();
             }
 
+            if (!exitCode.HasValue)
+                exitCode = 0;
+
             // Environment.Exit not supported on .Net Native - don't even call it to avoid the nuisance exception.
             if (!RuntimeInformation.FrameworkDescription.StartsWith(".NET Native", StringComparison.OrdinalIgnoreCase))
             {
@@ -98,13 +107,13 @@ namespace RemoteExecutorConsoleApp
                 // end up keeping the process alive potentially indefinitely.
                 try
                 {
-                    Environment.Exit(exitCode);
+                    Environment.Exit(exitCode.Value);
                 }
                 catch (PlatformNotSupportedException)
                 {
                 }
             }
-            return exitCode;
+            return exitCode.Value;
         }
 
         private static MethodInfo GetMethod(this Type type, string methodName)
