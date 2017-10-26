@@ -43,7 +43,7 @@ namespace RemoteExecutorConsoleApp
             Type t = null;
             MethodInfo mi = null;
             object instance = null;
-            int? exitCode = null;
+            int exitCode = 0;
             try
             {
                 // Create the test class if necessary
@@ -96,9 +96,6 @@ namespace RemoteExecutorConsoleApp
                 (instance as IDisposable)?.Dispose();
             }
 
-            if (!exitCode.HasValue)
-                exitCode = 0;
-
             // Environment.Exit not supported on .Net Native - don't even call it to avoid the nuisance exception.
             if (!RuntimeInformation.FrameworkDescription.StartsWith(".NET Native", StringComparison.OrdinalIgnoreCase))
             {
@@ -107,13 +104,13 @@ namespace RemoteExecutorConsoleApp
                 // end up keeping the process alive potentially indefinitely.
                 try
                 {
-                    Environment.Exit(exitCode.Value);
+                    Environment.Exit(exitCode);
                 }
                 catch (PlatformNotSupportedException)
                 {
                 }
             }
-            return exitCode.Value;
+            return exitCode;
         }
 
         private static MethodInfo GetMethod(this Type type, string methodName)
