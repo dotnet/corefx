@@ -73,6 +73,27 @@ namespace System.Buffers.Text.Tests
         }
 
         [Fact]
+        [OuterLoop]
+        public void EncodeTooLargeSpan()
+        {
+            // int.MaxValue - (int.MaxValue % 4) => 2147483644, largest multiple of 4 less than int.MaxValue
+            // CLR default limit of 2 gigabytes (GB).
+            try
+            {
+                 // 1610612734, larger than MaximumEncodeLength, requires output buffer of size 2147483648 (which is > int.MaxValue)
+                Span<byte> source = new byte[(int.MaxValue >> 2) * 3 + 1];
+                Span<byte> encodedBytes = new byte[2000000000];
+                Assert.Equal(OperationStatus.DestinationTooSmall, Base64.EncodeToUtf8(source, encodedBytes, out int consumed, out int encodedBytesCount));
+                Assert.Equal((encodedBytes.Length >> 2) * 3, consumed); // encoding 1500000000 bytes fits into buffer of 2000000000 bytes 
+                Assert.Equal(encodedBytes.Length, encodedBytesCount);
+            }
+            catch (OutOfMemoryException)
+            {
+                // do nothing
+            }
+        }
+
+        [Fact]
         public void BasicEncodingWithFinalBlockFalse()
         {
             var rnd = new Random(42);
@@ -199,8 +220,12 @@ namespace System.Buffers.Text.Tests
             }
 
             // integer overflow
-            Assert.Throws<OverflowException>(() => Base64.GetMaxEncodedToUtf8Length(1610612734));
-            Assert.Throws<OverflowException>(() => Base64.GetMaxEncodedToUtf8Length(int.MaxValue));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Base64.GetMaxEncodedToUtf8Length(1610612734));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Base64.GetMaxEncodedToUtf8Length(int.MaxValue));
+
+            // negative input
+            Assert.Throws<ArgumentOutOfRangeException>(() => Base64.GetMaxEncodedToUtf8Length(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Base64.GetMaxEncodedToUtf8Length(int.MinValue));
         }
 
         [Fact]

@@ -79,7 +79,7 @@ namespace System.Buffers.Text
 
             i0 |= i1;
 
-            if (i3 != s_encodingPad)
+            if (i3 != EncodingPad)
             {
                 i2 = Unsafe.Add(ref decodingMap, i2);
                 i3 = Unsafe.Add(ref decodingMap, i3);
@@ -94,7 +94,7 @@ namespace System.Buffers.Text
                 WriteThreeLowOrderBytes(ref Unsafe.Add(ref destBytes, destIndex), i0);
                 destIndex += 3;
             }
-            else if (i2 != s_encodingPad)
+            else if (i2 != EncodingPad)
             {
                 i2 = Unsafe.Add(ref decodingMap, i2);
 
@@ -144,11 +144,16 @@ namespace System.Buffers.Text
 
         /// <summary>
         /// Returns the maximum length (in bytes) of the result if you were to deocde base 64 encoded text within a byte span of size "length".
-        /// </summary> 
+        /// </summary>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Thrown when the specified <paramref name="length"/> is less than 0.
+        /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetMaxDecodedFromUtf8Length(int length)
         {
-            Debug.Assert(length >= 0);
+            if (length < 0)
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
+
             return (length >> 2) * 3;
         }
 
@@ -203,7 +208,7 @@ namespace System.Buffers.Text
 
             i0 |= i1;
 
-            if (i3 != s_encodingPad)
+            if (i3 != EncodingPad)
             {
                 i2 = Unsafe.Add(ref decodingMap, i2);
                 i3 = Unsafe.Add(ref decodingMap, i3);
@@ -217,7 +222,7 @@ namespace System.Buffers.Text
                 WriteThreeLowOrderBytes(ref Unsafe.Add(ref bufferBytes, destIndex), i0);
                 destIndex += 3;
             }
-            else if (i2 != s_encodingPad)
+            else if (i2 != EncodingPad)
             {
                 i2 = Unsafe.Add(ref decodingMap, i2);
 

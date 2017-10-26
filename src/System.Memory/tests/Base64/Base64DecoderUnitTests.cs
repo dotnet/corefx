@@ -375,6 +375,10 @@ namespace System.Buffers.Text.Tests
             {
                 Assert.Equal(expectedOutput[i], Base64.GetMaxDecodedFromUtf8Length(lengthsNotMultipleOfFour[i]));
             }
+
+            // negative input
+            Assert.Throws<ArgumentOutOfRangeException>(() => Base64.GetMaxDecodedFromUtf8Length(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Base64.GetMaxDecodedFromUtf8Length(int.MinValue));
         }
 
         
