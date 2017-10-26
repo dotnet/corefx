@@ -93,7 +93,6 @@
     <Compile Include="System\DirectoryServices\AccountManagement\IdentityClaim.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\IdentityReference.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\UnknownPrincipal.cs" />
-    <Compile Include="AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.DirectoryServices" />
