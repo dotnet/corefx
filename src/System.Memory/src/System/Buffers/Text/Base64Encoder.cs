@@ -40,13 +40,26 @@ namespace System.Buffers.Text
             int destIndex = 0;
             int result = 0;
 
-            while (sourceIndex < srcLength - 2)
+            if (destLength >= GetMaxEncodedToUtf8Length(srcLength))
             {
-                result = Encode(ref Unsafe.Add(ref srcBytes, sourceIndex));
-                if (destIndex > destLength - 4) goto DestinationSmallExit;
-                Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, destIndex), result);
-                destIndex += 4;
-                sourceIndex += 3;
+                while (sourceIndex < srcLength - 2)
+                {
+                    result = Encode(ref Unsafe.Add(ref srcBytes, sourceIndex));
+                    Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, destIndex), result);
+                    destIndex += 4;
+                    sourceIndex += 3;
+                }
+            }
+            else
+            {
+                while (sourceIndex < srcLength - 2)
+                {
+                    result = Encode(ref Unsafe.Add(ref srcBytes, sourceIndex));
+                    if (destIndex > destLength - 4) goto DestinationSmallExit;
+                    Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, destIndex), result);
+                    destIndex += 4;
+                    sourceIndex += 3;
+                }
             }
             
             if (isFinalBlock != true) goto NeedMoreDataExit;
@@ -85,7 +98,10 @@ namespace System.Buffers.Text
 
         /// <summary>
         /// Returns the maximum length (in bytes) of the result if you were to encode binary data within a byte span of size "length".
-        /// </summary> 
+        /// </summary>
+        /// <exception cref="System.OverflowException">
+        /// Thrown when the specified <paramref name="length"/> is larger than 1610612733 (since encode inflates the data by 4/3).
+        /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetMaxEncodedToUtf8Length(int length)
         {
