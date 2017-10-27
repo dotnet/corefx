@@ -70,7 +70,7 @@ namespace System.ComponentModel.DataAnnotations
         Upload = 16,
         Url = 12,
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(2496), AllowMultiple = false)]
+    [System.AttributeUsageAttribute(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
     public partial class DataTypeAttribute : System.ComponentModel.DataAnnotations.ValidationAttribute
     {
         public DataTypeAttribute(System.ComponentModel.DataAnnotations.DataType dataType) { }
