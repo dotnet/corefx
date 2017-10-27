@@ -10,15 +10,15 @@ namespace System
     internal static partial class SpanHelpers
     {
         public static int IndexOf<T>(ref T searchSpace, int searchSpaceLength, ref T value, int valueLength)
-            where T : struct, IEquatable<T>
+            where T : IEquatable<T>
         {
+            if (typeof(T) == typeof(byte)) return IndexOf(ref Unsafe.As<T, byte>(ref searchSpace), searchSpaceLength, ref Unsafe.As<T, byte>(ref value), valueLength);
             Debug.Assert(searchSpaceLength >= 0);
             Debug.Assert(valueLength >= 0);
 
             if (valueLength == 0)
                 return 0;  // A zero-length sequence is always treated as "found" at the start of the search space.
 
-            T valueHead = value;
             ref T valueTail = ref Unsafe.Add(ref value, 1);
             int valueTailLength = valueLength - 1;
 
@@ -31,7 +31,7 @@ namespace System
                     break;  // The unsearched portion is now shorter than the sequence we're looking for. So it can't be there.
 
                 // Do a quick search for the first element of "value".
-                int relativeIndex = IndexOf(ref Unsafe.Add(ref searchSpace, index), valueHead, remainingSearchSpaceLength);
+                int relativeIndex = IndexOf(ref Unsafe.Add(ref searchSpace, index), ref value, remainingSearchSpaceLength);
                 if (relativeIndex == -1)
                     break;
                 index += relativeIndex;
@@ -45,9 +45,10 @@ namespace System
             return -1;
         }
 
-        public static unsafe int IndexOf<T>(ref T searchSpace, T value, int length)
-            where T : struct, IEquatable<T>
+        public static unsafe int IndexOf<T>(ref T searchSpace, ref T value, int length)
+            where T : IEquatable<T>
         {
+            if (typeof(T) == typeof(byte)) return IndexOf(ref Unsafe.As<T, byte>(ref searchSpace), ref Unsafe.As<T, byte>(ref value), length);
             Debug.Assert(length >= 0);
 
             IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
@@ -120,8 +121,9 @@ namespace System
         }
 
         public static bool SequenceEqual<T>(ref T first, ref T second, int length)
-            where T : struct, IEquatable<T>
+            where T : IEquatable<T>
         {
+            //if (typeof(T) == typeof(byte)) return SequenceEqual(ref Unsafe.As<T, byte>(ref first), ref Unsafe.As<T, byte>(ref second), length);
             Debug.Assert(length >= 0);
 
             if (Unsafe.AreSame(ref first, ref second))

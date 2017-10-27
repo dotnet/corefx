@@ -21,7 +21,6 @@ namespace System
             if (valueLength == 0)
                 return 0;  // A zero-length sequence is always treated as "found" at the start of the search space.
 
-            byte valueHead = value;
             ref byte valueTail = ref Unsafe.Add(ref value, 1);
             int valueTailLength = valueLength - 1;
 
@@ -34,7 +33,7 @@ namespace System
                     break;  // The unsearched portion is now shorter than the sequence we're looking for. So it can't be there.
 
                 // Do a quick search for the first element of "value".
-                int relativeIndex = IndexOf(ref Unsafe.Add(ref searchSpace, index), valueHead, remainingSearchSpaceLength);
+                int relativeIndex = IndexOf(ref Unsafe.Add(ref searchSpace, index), ref value, remainingSearchSpaceLength);
                 if (relativeIndex == -1)
                     break;
                 index += relativeIndex;
@@ -59,7 +58,7 @@ namespace System
             int index = -1;
             for (int i = 0; i < valueLength; i++)
             {
-                var tempIndex = IndexOf(ref searchSpace, Unsafe.Add(ref value, i), searchSpaceLength);
+                var tempIndex = IndexOf(ref searchSpace, ref Unsafe.Add(ref value, i), searchSpaceLength);
                 if (tempIndex != -1)
                 {
                     index = (index == -1 || index > tempIndex) ? tempIndex : index;
@@ -68,7 +67,7 @@ namespace System
             return index;
         }
 
-        public static unsafe int IndexOf(ref byte searchSpace, byte value, int length)
+        public static unsafe int IndexOf(ref byte searchSpace, ref byte value, int length)
         {
             Debug.Assert(length >= 0);
 
