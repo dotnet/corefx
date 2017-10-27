@@ -44,24 +44,6 @@ namespace System.ServiceModel.Syndication
         {
             return (dateTimeString, localName, ns) =>
             {
-                dateTimeString = dateTimeString.Trim();
-                if (dateTimeString.Length < 20)
-                {
-                    throw new FormatException(SR.ErrorParsingDateTime);
-                }
-
-                if (dateTimeString[19] == '.')
-                {
-                    // remove any fractional seconds, we choose to ignore them
-                    int i = 20;
-                    while (dateTimeString.Length > i && char.IsDigit(dateTimeString[i]))
-                    {
-                        ++i;
-                    }
-
-                    dateTimeString = dateTimeString.Substring(0, 19) + dateTimeString.Substring(i);
-                }
-
                 if (Rfc3339DateTimeParser(dateTimeString, out DateTimeOffset dto))
                 {
                     return dto;
@@ -73,6 +55,24 @@ namespace System.ServiceModel.Syndication
 
         private static bool Rfc3339DateTimeParser(string dateTimeString, out DateTimeOffset dto)
         {
+            dateTimeString = dateTimeString.Trim();
+            if (dateTimeString.Length < 20)
+            {
+                return false;
+            }
+
+            if (dateTimeString[19] == '.')
+            {
+                // remove any fractional seconds, we choose to ignore them
+                int i = 20;
+                while (dateTimeString.Length > i && char.IsDigit(dateTimeString[i]))
+                {
+                    ++i;
+                }
+
+                dateTimeString = dateTimeString.Substring(0, 19) + dateTimeString.Substring(i);
+            }
+
             return DateTimeOffset.TryParseExact(dateTimeString, Rfc3339DateTimeFormat,CultureInfo.InvariantCulture.DateTimeFormat,DateTimeStyles.None, out dto);
         }
 
