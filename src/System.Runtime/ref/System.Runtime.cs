@@ -323,7 +323,7 @@ namespace System
         int System.Collections.IStructuralEquatable.GetHashCode(System.Collections.IEqualityComparer comparer) { throw null; }
         public static bool TrueForAll<T>(T[] array, System.Predicate<T> match) { throw null; }
     }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    [System.Runtime.InteropServices.StructLay(outAttribute)(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct ArraySegment<T> : System.Collections.Generic.ICollection<T>, System.Collections.Generic.IEnumerable<T>, System.Collections.Generic.IList<T>, System.Collections.Generic.IReadOnlyCollection<T>, System.Collections.Generic.IReadOnlyList<T>, System.Collections.IEnumerable
     {
         public ArraySegment(T[] array) { throw null; }
@@ -6892,6 +6892,11 @@ namespace System.Runtime.InteropServices
         Auto = 3,
         Explicit = 2,
         Sequential = 0,
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited = false)]
+    public sealed partial class InAttribute : System.Attribute
+    {
+        public InAttribute() { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited = false)]
     public sealed partial class OutAttribute : System.Attribute
