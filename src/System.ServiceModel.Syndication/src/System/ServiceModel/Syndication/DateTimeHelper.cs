@@ -9,7 +9,7 @@ namespace System.ServiceModel.Syndication
 {
     internal static class DateTimeHelper
     {
-        internal const string Rfc3339DateTimeFormat = "yyyy-MM-ddTHH:mm:ssK";
+        private const string Rfc3339DateTimeFormat = "yyyy-MM-ddTHH:mm:ssK";
 
         public static Func<string, string, string, DateTimeOffset> CreateRss20DateTimeParser()
         {
@@ -62,10 +62,7 @@ namespace System.ServiceModel.Syndication
                     dateTimeString = dateTimeString.Substring(0, 19) + dateTimeString.Substring(i);
                 }
 
-                DateTimeOffset dto;
-                if (DateTimeOffset.TryParseExact(dateTimeString, Rfc3339DateTimeFormat,
-                    CultureInfo.InvariantCulture.DateTimeFormat,
-                    DateTimeStyles.None, out dto))
+                if (Rfc3339DateTimeParser(dateTimeString, out DateTimeOffset dto))
                 {
                     return dto;
                 }
@@ -76,8 +73,7 @@ namespace System.ServiceModel.Syndication
 
         private static bool Rfc3339DateTimeParser(string dateTimeString, out DateTimeOffset dto)
         {
-            // RFC3339 uses the W3C Profile of ISO 8601 so using the date time format string "O" will achieve this.
-            return DateTimeOffset.TryParseExact(dateTimeString, "O", null as IFormatProvider, DateTimeStyles.AllowWhiteSpaces, out dto);
+            return DateTimeOffset.TryParseExact(dateTimeString, Rfc3339DateTimeFormat,CultureInfo.InvariantCulture.DateTimeFormat,DateTimeStyles.None, out dto);
         }
 
         private static bool Rfc822DateTimeParser(string dateTimeString, out DateTimeOffset dto)
