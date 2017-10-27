@@ -70,7 +70,7 @@ namespace System.ComponentModel.DataAnnotations
         Upload = 16,
         Url = 12,
     }
-    [System.AttributeUsageAttribute(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(2496), AllowMultiple = false)]
     public partial class DataTypeAttribute : System.ComponentModel.DataAnnotations.ValidationAttribute
     {
         public DataTypeAttribute(System.ComponentModel.DataAnnotations.DataType dataType) { }
@@ -81,7 +81,7 @@ namespace System.ComponentModel.DataAnnotations
         public virtual string GetDataTypeName() { throw null; }
         public override bool IsValid(object value) { throw null; }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(2500), AllowMultiple = false)]
+    [System.AttributeUsageAttribute(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
     public sealed partial class DisplayAttribute : System.Attribute
     {
         public DisplayAttribute() { }
