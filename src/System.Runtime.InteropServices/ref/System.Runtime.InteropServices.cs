@@ -449,11 +449,6 @@ namespace System.Runtime.InteropServices
     {
         public ImportedFromTypeLibAttribute(String tlbFile) { }
         public String Value { get { throw null; } }
-    }         
-    [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited = false)]
-    public sealed partial class InAttribute : System.Attribute
-    {
-        public InAttribute() { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1024), Inherited = false)]
     public sealed partial class InterfaceTypeAttribute : System.Attribute
