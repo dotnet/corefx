@@ -52,7 +52,7 @@
 
   <Target Name="GenerateTestSharedFrameworkDepsFile">
     <MSBuild Targets="GenerateTestSharedFrameworkDepsFile"
-             Projects="$(MSBuildThisFileDirectory)\..\src.builds"
+             Projects="$(MSBuildThisFileDirectory)\..\dirs.proj"
              ContinueOnError="ErrorAndStop" />
   </Target>
 

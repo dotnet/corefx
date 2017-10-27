@@ -75,6 +75,8 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class ActiveDirectoryObjectNotFoundException : Exception, ISerializable
     {
         private Type _objectType;
@@ -94,7 +96,6 @@ namespace System.DirectoryServices.ActiveDirectory
 
         protected ActiveDirectoryObjectNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            throw new PlatformNotSupportedException();
         }
 
         public Type Type
@@ -113,13 +114,14 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        [SecurityPermissionAttribute(SecurityAction.LinkDemand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
             base.GetObjectData(serializationInfo, streamingContext);
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class ActiveDirectoryOperationException : Exception, ISerializable
     {
         private int _errorCode = 0;
@@ -142,7 +144,6 @@ namespace System.DirectoryServices.ActiveDirectory
 
         protected ActiveDirectoryOperationException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            throw new PlatformNotSupportedException();
         }
 
         public int ErrorCode
@@ -159,6 +160,8 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class ActiveDirectoryServerDownException : Exception, ISerializable
     {
         private int _errorCode = 0;
@@ -184,7 +187,6 @@ namespace System.DirectoryServices.ActiveDirectory
 
         protected ActiveDirectoryServerDownException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            throw new PlatformNotSupportedException();
         }
 
         public int ErrorCode
@@ -222,6 +224,8 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class ActiveDirectoryObjectExistsException : Exception
     {
         public ActiveDirectoryObjectExistsException(string message, Exception inner) : base(message, inner) { }
@@ -232,10 +236,11 @@ namespace System.DirectoryServices.ActiveDirectory
 
         protected ActiveDirectoryObjectExistsException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            throw new PlatformNotSupportedException();
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class SyncFromAllServersOperationException : ActiveDirectoryOperationException, ISerializable
     {
         private SyncFromAllServersErrorInformation[] _errors = null;
@@ -253,7 +258,6 @@ namespace System.DirectoryServices.ActiveDirectory
 
         protected SyncFromAllServersOperationException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            throw new PlatformNotSupportedException();
         }
 
         public SyncFromAllServersErrorInformation[] ErrorInformation
@@ -277,6 +281,8 @@ namespace System.DirectoryServices.ActiveDirectory
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class ForestTrustCollisionException : ActiveDirectoryOperationException, ISerializable
     {
         private ForestTrustRelationshipCollisionCollection _collisions = new ForestTrustRelationshipCollisionCollection();
@@ -294,7 +300,6 @@ namespace System.DirectoryServices.ActiveDirectory
 
         protected ForestTrustCollisionException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            throw new PlatformNotSupportedException();
         }
 
         public ForestTrustRelationshipCollisionCollection Collisions

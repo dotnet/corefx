@@ -8,11 +8,12 @@ namespace System.DirectoryServices.Protocols
     using System.Runtime.Serialization;
     using System.Security.Permissions;
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices.Protocols, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class DirectoryException : Exception
     {
         protected DirectoryException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            throw new PlatformNotSupportedException();
         }
 
         public DirectoryException(string message, Exception inner) : base(message, inner)
@@ -28,6 +29,8 @@ namespace System.DirectoryServices.Protocols
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices.Protocols, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class DirectoryOperationException : DirectoryException, ISerializable
     {
         internal DirectoryResponse response = null;
@@ -71,6 +74,8 @@ namespace System.DirectoryServices.Protocols
         }
     }
 
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices.Protocols, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class BerConversionException : DirectoryException
     {
         protected BerConversionException(SerializationInfo info, StreamingContext context) : base(info, context)

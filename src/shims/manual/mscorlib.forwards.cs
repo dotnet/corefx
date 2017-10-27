@@ -26,9 +26,8 @@
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Generic.ShortEnumEqualityComparer<>))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Generic.LongEnumEqualityComparer<>))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.ListDictionaryInternal))]
-#if netcoreapp
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.UnitySerializationHolder))]
-#endif
+[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Diagnostics.Contracts.ContractException))]
 
 // This is temporary as we are building the mscorlib shim against netfx461 which doesn't contain ValueTuples.
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple))]

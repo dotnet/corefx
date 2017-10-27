@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -58,6 +60,15 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
 
             SanityCheckBlob(obj, blobs);
+
+            // SqlException isn't deserializable from Desktop --> Core.
+            // Therefore we remove the second blob which is the one from Desktop.
+            if (!PlatformDetection.IsFullFramework && (obj is SqlException || obj is ReflectionTypeLoadException || obj is LicenseException))
+            {
+                var tmpList = new List<string>(blobs);
+                tmpList.RemoveAt(1);
+                blobs = tmpList.ToArray();
+            }
 
             foreach (string blob in blobs)
             {
@@ -478,7 +489,161 @@ namespace System.Runtime.Serialization.Formatters.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework fails when serializing arrays with non-zero lower bounds")]
         public void Roundtrip_ArrayContainingArrayAtNonZeroLowerBound()
         {
-            FormatterClone(Array.CreateInstance(typeof(uint[]), new[] { 5 }, new[] { 1 }));
+            BinaryFormatterHelpers.Clone(Array.CreateInstance(typeof(uint[]), new[] { 5 }, new[] { 1 }));
+        }
+
+        private static void CheckForAnyEquals(object obj, object deserializedObj)
+        {
+            Assert.True(EqualityExtensions.CheckEquals(obj, deserializedObj), "Error during equality check of type " + obj?.GetType()?.FullName);
+        }
+
+        private static void ValidateEqualityComparer(object obj)
+        {
+            Type objType = obj.GetType();
+            Assert.True(objType.IsGenericType, $"Type `{objType.FullName}` must be generic.");
+            Assert.Equal("System.Collections.Generic.ObjectEqualityComparer`1", objType.GetGenericTypeDefinition().FullName);
+            Assert.Equal(obj.GetType().GetGenericArguments()[0], objType.GetGenericArguments()[0]);
+        }
+
+        private static void SanityCheckBlob(object obj, string[] blobs)
+        {
+            // These types are unstable during serialization and produce different blobs.
+            if (obj is WeakReference<Point> ||
+                obj is Collections.Specialized.HybridDictionary ||
+                obj is TimeZoneInfo.AdjustmentRule)
+            {
+                return;
+            }
+
+            // In most cases exceptions in Core have a different layout than in Desktop,
+            // therefore we are skipping the string comparison of the blobs.
+            if (obj is Exception)
+            {
+                return;
+            }
+
+            // Check if runtime generated blob is the same as the stored one
+            int frameworkBlobNumber = PlatformDetection.IsFullFramework ? 1 : 0;
+            if (frameworkBlobNumber < blobs.Length)
+            {
+                string runtimeBlob = BinaryFormatterHelpers.ToBase64String(obj, FormatterAssemblyStyle.Full);
+
+                string storedComparableBlob = CreateComparableBlobInfo(blobs[frameworkBlobNumber]);
+                string runtimeComparableBlob = CreateComparableBlobInfo(runtimeBlob);
+
+                Assert.True(storedComparableBlob == runtimeComparableBlob,
+                    $"The stored blob for type {obj.GetType().FullName} is outdated and needs to be updated.{Environment.NewLine}{Environment.NewLine}" +
+                    $"-------------------- Stored blob ---------------------{Environment.NewLine}" +
+                    $"Encoded: {blobs[frameworkBlobNumber]}{Environment.NewLine}" +
+                    $"Decoded: {storedComparableBlob}{Environment.NewLine}{Environment.NewLine}" +
+                    $"--------------- Runtime generated blob ---------------{Environment.NewLine}" +
+                    $"Encoded: {runtimeBlob}{Environment.NewLine}" +
+                    $"Decoded: {runtimeComparableBlob}");
+            }
+        }
+
+        private static string GetTestDataFilePath()
+        {
+            string GetRepoRootPath()
+            {
+                var exeFile = new FileInfo(Assembly.GetExecutingAssembly().Location);
+
+                DirectoryInfo root = exeFile.Directory;
+                while (!Directory.Exists(Path.Combine(root.FullName, ".git")))
+                {
+                    if (root.Parent == null)
+                        return null;
+
+                    root = root.Parent;
+                }
+
+                return root.FullName;
+            }
+
+            // Get path to binary formatter test data
+            string repositoryRootPath = GetRepoRootPath();
+            Assert.NotNull(repositoryRootPath);
+            string testDataFilePath = Path.Combine(repositoryRootPath, "src", "System.Runtime.Serialization.Formatters", "tests", "BinaryFormatterTestData.cs");
+            Assert.True(File.Exists(testDataFilePath));
+
+            return testDataFilePath;
+        }
+
+        private static string CreateComparableBlobInfo(string base64Blob)
+        {
+            string lineSeparator = ((char)0x2028).ToString();
+            string paragraphSeparator = ((char)0x2029).ToString();
+
+            byte[] data = Convert.FromBase64String(base64Blob);
+            base64Blob = Encoding.UTF8.GetString(data);
+
+            return Regex.Replace(base64Blob, @"Version=\d.\d.\d.\d.", "Version=0.0.0.0", RegexOptions.Multiline)
+                .Replace("\r\n", string.Empty)
+                .Replace("\n", string.Empty)
+                .Replace("\r", string.Empty)
+                .Replace(lineSeparator, string.Empty)
+                .Replace(paragraphSeparator, string.Empty);
+        }
+
+        private static (int blobs, int foundBlobs, int updatedBlobs) UpdateCoreTypeBlobs(string testDataFilePath, string[] blobs)
+        {
+            // Replace existing test data blobs with updated ones
+            string[] testDataLines = File.ReadAllLines(testDataFilePath);
+            List<string> updatedTestDataLines = new List<string>();
+            int numberOfBlobs = 0;
+            int numberOfFoundBlobs = 0;
+            int numberOfUpdatedBlobs = 0;
+
+            for (int i = 0; i < testDataLines.Length; i++)
+            {
+                string testDataLine = testDataLines[i];
+                if (!testDataLine.Trim().StartsWith("yield") || numberOfBlobs >= blobs.Length)
+                {
+                    updatedTestDataLines.Add(testDataLine);
+                    continue;
+                }
+
+                string pattern = null;
+                string replacement = null;
+                if (PlatformDetection.IsFullFramework)
+                {
+                    pattern = ", \"AAEAAAD[^\"]+\"(?!,)";
+                    replacement = ", \"" + blobs[numberOfBlobs] + "\"";
+                }
+                else
+                {
+                    pattern = "\"AAEAAAD[^\"]+\",";
+                    replacement = "\"" + blobs[numberOfBlobs] + "\",";
+                }
+
+                Regex regex = new Regex(pattern);
+                Match match = regex.Match(testDataLine);
+                if (match.Success)
+                {
+                    numberOfFoundBlobs++;
+                }
+                string updatedLine = regex.Replace(testDataLine, replacement);
+                if (testDataLine != updatedLine)
+                {
+                    numberOfUpdatedBlobs++;
+                }
+                testDataLine = updatedLine;
+
+                updatedTestDataLines.Add(testDataLine);
+                numberOfBlobs++;
+            }
+
+            // Check if all blobs were recognized and write updates to file
+            Assert.Equal(numberOfBlobs, blobs.Length);
+            File.WriteAllLines(testDataFilePath, updatedTestDataLines);
+
+            return (numberOfBlobs, numberOfFoundBlobs, numberOfUpdatedBlobs);
+        }
+
+        private class DelegateBinder : SerializationBinder
+        {
+            public Func<string, string, Type> BindToTypeDelegate = null;
+            public override Type BindToType(string assemblyName, string typeName) => BindToTypeDelegate?.Invoke(assemblyName, typeName);
         }
     }
 }
