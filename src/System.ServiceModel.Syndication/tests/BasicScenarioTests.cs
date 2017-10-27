@@ -488,11 +488,6 @@ namespace System.ServiceModel.Syndication.Tests
                         file = file.Trim();
                         if (File.Exists(file))
                         {
-                            string filename = Path.GetFileName(Path.GetFullPath(file));
-                            if (!file.Equals(filename))
-                            {
-                                Assert.True(false, $"file: {file} - filename: {filename}");
-                            }
                             fileList.Add(Path.GetFullPath(file));
                         }
                         else
