@@ -55,6 +55,12 @@ namespace System
             where T : IEquatable<T>
         {
             int length = first.Length;
+            if (typeof(T) == typeof(byte))
+                return length == second.Length &&
+                SpanHelpers.SequenceEqual(
+                    ref Unsafe.As<T, byte>(ref first.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref second.DangerousGetPinnableReference()),
+                    length);
             return length == second.Length && SpanHelpers.SequenceEqual(ref first.DangerousGetPinnableReference(), ref second.DangerousGetPinnableReference(), length);
         }
 
@@ -173,6 +179,12 @@ namespace System
             where T : IEquatable<T>
         {
             int length = first.Length;
+            if (typeof(T) == typeof(byte))
+                return length == second.Length &&
+                SpanHelpers.SequenceEqual(
+                    ref Unsafe.As<T, byte>(ref first.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref second.DangerousGetPinnableReference()),
+                    length);
             return length == second.Length && SpanHelpers.SequenceEqual(ref first.DangerousGetPinnableReference(), ref second.DangerousGetPinnableReference(), length);
         }
 
@@ -184,6 +196,12 @@ namespace System
             where T : IEquatable<T>
         {
             int valueLength = value.Length;
+            if (typeof(T) == typeof(byte))
+                return valueLength <= span.Length && 
+                SpanHelpers.SequenceEqual(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    valueLength);
             return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref span.DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), valueLength);
         }
 
@@ -195,6 +213,12 @@ namespace System
             where T : IEquatable<T>
         {
             int valueLength = value.Length;
+            if (typeof(T) == typeof(byte))
+                return valueLength <= span.Length && 
+                SpanHelpers.SequenceEqual(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    valueLength);
             return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref span.DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), valueLength);
         }
 

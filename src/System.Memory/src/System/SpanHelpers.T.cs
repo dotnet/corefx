@@ -48,7 +48,6 @@ namespace System
         public static unsafe int IndexOf<T>(ref T searchSpace, T value, int length)
             where T : IEquatable<T>
         {
-            
             Debug.Assert(length >= 0);
 
             IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
@@ -123,7 +122,6 @@ namespace System
         public static bool SequenceEqual<T>(ref T first, ref T second, int length)
             where T : IEquatable<T>
         {
-            if (typeof(T) == typeof(byte)) return SequenceEqual(ref Unsafe.As<T, byte>(ref first), ref Unsafe.As<T, byte>(ref second), length);
             Debug.Assert(length >= 0);
 
             if (Unsafe.AreSame(ref first, ref second))
