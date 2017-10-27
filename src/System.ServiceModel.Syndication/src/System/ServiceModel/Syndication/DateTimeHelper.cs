@@ -4,14 +4,12 @@
 
 using System.Globalization;
 using System.Text;
-using System.Xml;
 
 namespace System.ServiceModel.Syndication
 {
     internal static class DateTimeHelper
     {
-        internal const string Rfc3339LocalDateTimeFormat = "yyyy-MM-ddTHH:mm:sszzz";
-        internal const string Rfc3339UTCDateTimeFormat = "yyyy-MM-ddTHH:mm:ssZ";
+        internal const string Rfc3339DateTimeFormat = "yyyy-MM-ddTHH:mm:ssK";
 
         public static Func<string, string, string, DateTimeOffset> CreateRss20DateTimeParser()
         {
@@ -49,7 +47,7 @@ namespace System.ServiceModel.Syndication
                 dateTimeString = dateTimeString.Trim();
                 if (dateTimeString.Length < 20)
                 {
-                    throw new XmlException(SR.ErrorParsingDateTime);
+                    throw new FormatException(SR.ErrorParsingDateTime);
                 }
 
                 if (dateTimeString[19] == '.')
@@ -64,23 +62,15 @@ namespace System.ServiceModel.Syndication
                     dateTimeString = dateTimeString.Substring(0, 19) + dateTimeString.Substring(i);
                 }
 
-                DateTimeOffset localTime;
-                if (DateTimeOffset.TryParseExact(dateTimeString, Rfc3339LocalDateTimeFormat,
+                DateTimeOffset dto;
+                if (DateTimeOffset.TryParseExact(dateTimeString, Rfc3339DateTimeFormat,
                     CultureInfo.InvariantCulture.DateTimeFormat,
-                    DateTimeStyles.None, out localTime))
+                    DateTimeStyles.None, out dto))
                 {
-                    return localTime;
+                    return dto;
                 }
 
-                DateTimeOffset utcTime;
-                if (DateTimeOffset.TryParseExact(dateTimeString, Rfc3339UTCDateTimeFormat,
-                    CultureInfo.InvariantCulture.DateTimeFormat,
-                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out utcTime))
-                {
-                    return utcTime;
-                }
-
-                throw new XmlException(SR.ErrorParsingDateTime);
+                throw new FormatException(SR.ErrorParsingDateTime);
             };
         }
 
