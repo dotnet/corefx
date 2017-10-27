@@ -21,7 +21,12 @@ namespace System
         public static int IndexOf<T>(this Span<T> span, T value)
             where T : IEquatable<T>
         {
-            return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), ref value, span.Length);
+            if (typeof(T) == typeof(byte)) 
+                return SpanHelpers.IndexOf(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()), 
+                    Unsafe.As<T, byte>(ref value), 
+                    span.Length);
+            return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
         }
 
         /// <summary>
@@ -33,6 +38,12 @@ namespace System
         public static int IndexOf<T>(this Span<T> span, ReadOnlySpan<T> value)
             where T : IEquatable<T>
         {
+            if (typeof(T) == typeof(byte)) 
+                return SpanHelpers.IndexOf(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()), 
+                    span.Length, 
+                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()), 
+                    value.Length);
             return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
         }
 
@@ -56,7 +67,12 @@ namespace System
         public static int IndexOf<T>(this ReadOnlySpan<T> span, T value)
             where T : IEquatable<T>
         {
-            return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), ref value, span.Length);
+            if (typeof(T) == typeof(byte)) 
+                return SpanHelpers.IndexOf(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()), 
+                    Unsafe.As<T, byte>(ref value), 
+                    span.Length);
+            return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
         }
 
         /// <summary>
@@ -68,6 +84,12 @@ namespace System
         public static int IndexOf<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
             where T : IEquatable<T>
         {
+            if (typeof(T) == typeof(byte)) 
+                return SpanHelpers.IndexOf(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()), 
+                    span.Length, 
+                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()), 
+                    value.Length);
             return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
         }
 
