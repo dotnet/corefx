@@ -824,13 +824,6 @@ namespace System.Xml
             return _nsMgr.LookupPrefix(ns);
         }
 
-        internal string LookupNamespace(string prefix)
-        {
-            if (prefix == null)
-                return null;
-            return _nsMgr.LookupNamespace(prefix);
-        }
-
         private string GetQualifiedNamePrefix(string namespaceUri, XmlDictionaryString xNs)
         {
             string prefix = _nsMgr.LookupPrefix(namespaceUri);
@@ -921,7 +914,7 @@ namespace System.Xml
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.XmlInvalidDeclaration)));
 
             // The only thing the text can legitimately contain is version, encoding, and standalone.
-            // We only support version 1.0, we can only write whatever encoding we were supplied, 
+            // We only support version 1.0, we can only write whatever encoding we were supplied,
             // and we don't support DTDs, so whatever values are supplied in the text argument are irrelevant.
             _writer.WriteDeclaration();
         }
@@ -950,18 +943,6 @@ namespace System.Xml
             FinishDocument();
             _writeState = WriteState.Start;
             _documentState = DocumentState.End;
-        }
-
-        protected int NamespaceBoundary
-        {
-            get
-            {
-                return _nsMgr.NamespaceBoundary;
-            }
-            set
-            {
-                _nsMgr.NamespaceBoundary = value;
-            }
         }
 
         public override void WriteEntityRef(string name)
