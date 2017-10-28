@@ -1836,7 +1836,6 @@ namespace System.Xml
             private int _attributeCount;
             private XmlSpace _space;
             private string _lang;
-            private int _namespaceBoundary;
             private int _nsTop;
             private Namespace _defaultNamespace;
 
@@ -1879,26 +1878,6 @@ namespace System.Xml
                 _space = XmlSpace.None;
                 _lang = null;
                 _lastNameSpace = null;
-                _namespaceBoundary = 0;
-            }
-
-            public int NamespaceBoundary
-            {
-                get
-                {
-                    return _namespaceBoundary;
-                }
-                set
-                {
-                    int i;
-                    for (i = 0; i < _nsCount; i++)
-                        if (_namespaces[i].Depth >= value)
-                            break;
-
-                    _nsTop = i;
-                    _namespaceBoundary = value;
-                    _lastNameSpace = null;
-                }
             }
 
             public void Close()
