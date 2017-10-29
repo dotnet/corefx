@@ -135,7 +135,7 @@ namespace System.Net.WebSockets
 
             state.RequestHandle.DetachCallback();
             state.RequestHandle = null;
-
+            
             // Unpin the state object if there are no more open handles that are wired to the callback.
             if (state.DecrementHandlesOpenWithCallback() == 0)
             {
@@ -356,6 +356,20 @@ namespace System.Net.WebSockets
                         "Error code: " + asyncResult.AsyncResult.dwError + " (" + innerException.Message + ")");
                     break;
             }
+        }
+
+        private static void OnWebSocketSecureFailure(WinHttpWebSocketState state, uint flags)
+        {
+            Debug.Assert(state != null, "OnWebSocketSecureFailure: state is null");
+
+            var innerException = WinHttpException.CreateExceptionUsingError(unchecked((int)Interop.WinHttp.ERROR_WINHTTP_SECURE_FAILURE));
+            var exception = new WebSocketException(WebSocketError.ConnectionClosedPrematurely, innerException);
+
+            // TODO (Issue 2509): handle SSL related exceptions.
+            state.UpdateState(WebSocketState.Aborted);
+
+            // TODO (Issue 2509): Create exception from WINHTTP_CALLBACK_STATUS_SECURE_FAILURE flags.
+            state.TcsUpgrade.TrySetException(exception);
         }
         #endregion
     }
