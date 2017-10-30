@@ -3,13 +3,17 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <Import Project="$(ToolsDir)PublishContent.targets" />
   <Import Project="$(ToolsDir)versioning.targets" />
+  <Import Project="$(PackagesDir)/$(FeedTasksPackage)/$(FeedTasksPackageVersion)/build/Publish.targets" />
 
   <PropertyGroup>
-    <PublishPattern Condition="'$(PublishPattern)' == ''">$(PackageOutputRoot)**\*.nupkg</PublishPattern>
+    <PublishPattern Condition="'$(PublishPattern)' == ''">$(PackageOutputRoot)\**\*.nupkg</PublishPattern>
+    <SymbolsPackagesPattern>$(PackageOutputRoot)\**\*.symbols.nupkg</SymbolsPackagesPattern>
   </PropertyGroup>
 
   <ItemGroup>
     <_PackagesToPublish Include="$(PublishPattern)" />
+    <_PackagesToPublish Remove="*.*" Condition="'$(PublishSymbols)' == 'true'" />
+    <_PackagesToPublish Include="$(SymbolsPackagesPattern)" Condition="'$(PublishSymbols)' == 'true'" />
   </ItemGroup>
   
   <Target Name="CreateContainerName"
@@ -20,8 +24,29 @@
     </PropertyGroup>
   </Target>
 
+  <ItemGroup>
+    <PackageReference Include="microsoft.dotnet.build.tasks.feed" Version="1.0.0-prerelease-02119-0" />
+  </ItemGroup>
+
   <Target Name="Build" DependsOnTargets="CreateContainerName">
     <!-- skip uploadToAzure when there are no nupkgs -->
     <CallTarget Targets="UploadToAzure" Condition="'@(_PackagesToPublish)' != ''" />
   </Target>  
+  
+  <Target Name="PublishToAzureBlobFeed" >
+    <PropertyGroup>
+      <PackageDownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(PackagesDir)AzureTransfer\$(ConfigurationGroup)</PackageDownloadDirectory>
+      <FinalPublishPattern>$(PackageDownloadDirectory)\**\*.nupkg</FinalPublishPattern>
+      <FinalSymbolsPackagesPattern>$(PackageDownloadDirectory)\**\*.symbols.nupkg</FinalSymbolsPackagesPattern>
+    </PropertyGroup>
+    <ItemGroup>
+      <ItemsToPush Include="$(FinalPublishPattern)" Exclude="$(FinalSymbolsPackagesPattern)" />
+    </ItemGroup>
+    <Error Condition="'@(ItemsToPush)'==''" Text="ItemsToPush is empty." />
+    <Message importance="high" text="KRTHIKDBUEG $(_TaskDir)" />
+    <PushToBlobFeed ExpectedFeedUrl="$(ExpectedFeedUrl)"
+                    AccountKey="$(AccountKey)"
+                    ItemsToPush="@(ItemsToPush)"
+                    Overwrite="$(PublishOverwrite)" />
+  </Target>
 </Project>
