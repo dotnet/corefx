@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -35,7 +37,19 @@ namespace System.Diagnostics.Tests
                     eventLog.Source = source;
                     eventLog.Clear();
                     Assert.Equal(0, eventLog.Entries.Count);
-                    eventLog.WriteEntry("Writing to event log.");
+                    bool entryWritten = true;
+                    while (entryWritten)
+                    {
+                        try
+                        {
+                            eventLog.WriteEntry("Writing to event log.");
+                            entryWritten = false;
+                        }
+                        catch (Win32Exception)
+                        {
+                            Thread.Sleep(100);
+                        }
+                    }
                     Assert.Equal(1, eventLog.Entries.Count);
                 }
             }
@@ -340,7 +354,20 @@ namespace System.Diagnostics.Tests
             using (EventLog eventlog = new EventLog("Security"))
             {
                 eventlog.Source = "Security";
-                EventLogEntry eventLogEntry = eventlog.Entries[0];
+                EventLogEntry eventLogEntry = null;
+                bool entryRetrieved = true;
+                while (entryRetrieved)
+                {
+                    try
+                    {
+                        eventLogEntry = eventlog.Entries[0];
+                        entryRetrieved = false;
+                    }
+                    catch (Win32Exception)
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
                 Assert.Contains("", eventLogEntry.Message);
             }
         }
