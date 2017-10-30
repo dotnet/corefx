@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
+using System.Threading;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -55,9 +57,22 @@ namespace System.Diagnostics.Tests
                 using (EventLog eventLog = new EventLog())
                 {
                     eventLog.Source = source;
-                    eventLog.WriteEntry(message);
-                    EventLogEntry entry = eventLog.Entries[eventLog.Entries.Count - 1];
-                    Assert.False(entry.Equals(null));
+                    bool entryWritten = true;
+                    while (entryWritten)
+                    {
+                        try
+                        {
+                            eventLog.WriteEntry(message);
+                            EventLogEntry entry = eventLog.Entries[eventLog.Entries.Count - 1];
+                            Assert.False(entry.Equals(null));
+                            entryWritten = false;
+                        }
+                        catch (Win32Exception)
+                        {
+                            Thread.Sleep(100);
+                            eventLog.Clear();
+                        }
+                    }
                 }
             }
             finally
@@ -79,12 +94,26 @@ namespace System.Diagnostics.Tests
                 using (EventLog eventLog = new EventLog())
                 {
                     eventLog.Source = source;
-                    eventLog.WriteEntry(message);
-                    EventLogEntry entry = eventLog.Entries[eventLog.Entries.Count - 1];
-                    Assert.True(entry.Equals(entry));
-                    eventLog.WriteEntry(message);
-                    EventLogEntry secondEntry = eventLog.Entries[eventLog.Entries.Count - 1];
-                    Assert.Equal(entry.Index + 1, secondEntry.Index);
+                    bool entryWritten = true;
+                    while (entryWritten)
+                    {
+                        try
+                        {
+                            eventLog.WriteEntry(message);
+                            EventLogEntry entry = eventLog.Entries[eventLog.Entries.Count - 1];
+                            Assert.True(entry.Equals(entry));
+                            eventLog.WriteEntry(message);
+                            EventLogEntry secondEntry = eventLog.Entries[eventLog.Entries.Count - 1];
+                            Assert.Equal(entry.Index + 1, secondEntry.Index);
+                            entryWritten = false;
+                        }
+                        catch (Win32Exception)
+                        {
+                            Thread.Sleep(100);
+                            eventLog.Clear();
+                        }
+                    }
+
                 }
             }
             finally
@@ -106,11 +135,24 @@ namespace System.Diagnostics.Tests
                 using (EventLog eventLog = new EventLog())
                 {
                     eventLog.Source = source;
-                    eventLog.WriteEntry(message);
-                    eventLog.WriteEntry(message);
-                    EventLogEntry entry = eventLog.Entries[eventLog.Entries.Count - 1];
-                    EventLogEntry secondEntry = eventLog.Entries[eventLog.Entries.Count - 2];
-                    Assert.False(entry.Equals(secondEntry));
+                    bool entryWritten = true;
+                    while (entryWritten)
+                    {
+                        try
+                        {
+                            eventLog.WriteEntry(message);
+                            eventLog.WriteEntry(message);
+                            EventLogEntry entry = eventLog.Entries[eventLog.Entries.Count - 1];
+                            EventLogEntry secondEntry = eventLog.Entries[eventLog.Entries.Count - 2];
+                            Assert.False(entry.Equals(secondEntry));
+                            entryWritten = false;
+                        }
+                        catch (Win32Exception)
+                        {
+                            Thread.Sleep(100);
+                            eventLog.Clear();
+                        }
+                    }
                 }
             }
             finally
