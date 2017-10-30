@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
+using System.Threading;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -394,7 +395,21 @@ namespace System.Diagnostics.Tests
     {
         internal static EventLogEntry LastOrDefault(this EventLogEntryCollection elec)
         {
-            return elec.Count > 0 ? elec[elec.Count - 1] : null;
+            bool entryRetrieved = true;
+            EventLogEntry eventLogEntry = null;
+            while (entryRetrieved)
+            {
+                try
+                {
+                    eventLogEntry = elec.Count > 0 ? elec[elec.Count - 1] : null;
+                    entryRetrieved = false;
+                }
+                catch (Win32Exception)
+                {
+                    Thread.Sleep(100);
+                }
+            }
+            return eventLogEntry;
         }
     }
 }
