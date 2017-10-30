@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 
 using PAL_TlsHandshakeState=Interop.AppleCrypto.PAL_TlsHandshakeState;
 using PAL_TlsIo=Interop.AppleCrypto.PAL_TlsIo;
@@ -98,7 +99,12 @@ namespace System.Net.Security
                     fixed (byte* offsetInput = &input[offset])
                     {
                         int written;
-                        PAL_TlsIo status = Interop.AppleCrypto.SslWrite(sslHandle, offsetInput, size, out written);
+                        PAL_TlsIo status;
+
+                        lock (sslHandle)
+                        {
+                            status = Interop.AppleCrypto.SslWrite(sslHandle, offsetInput, size, out written);
+                        }
 
                         if (status < 0)
                         {
@@ -154,7 +160,12 @@ namespace System.Net.Security
                     fixed (byte* offsetInput = &buffer[offset])
                     {
                         int written;
-                        PAL_TlsIo status = Interop.AppleCrypto.SslRead(sslHandle, offsetInput, count, out written);
+                        PAL_TlsIo status;
+
+                        lock (sslHandle)
+                        {
+                            status = Interop.AppleCrypto.SslRead(sslHandle, offsetInput, count, out written);
+                        }
 
                         if (status < 0)
                         {
@@ -256,7 +267,13 @@ namespace System.Net.Security
                     sslContext.Write(inputBuffer.token, inputBuffer.offset, inputBuffer.size);
                 }
 
-                SecurityStatusPal status = PerformHandshake(sslContext.SslContext);
+                SafeSslHandle sslHandle = sslContext.SslContext;
+                SecurityStatusPal status;
+
+                lock (sslHandle)
+                {
+                    status = PerformHandshake(sslHandle);
+                }
 
                 byte[] output = sslContext.ReadPendingWrites();
                 outputBuffer.offset = 0;
@@ -273,6 +290,8 @@ namespace System.Net.Security
 
         private static SecurityStatusPal PerformHandshake(SafeSslHandle sslHandle)
         {
+            Debug.Assert(Monitor.IsEntered(sslHandle));
+
             while (true)
             {
                 PAL_TlsHandshakeState handshakeState = Interop.AppleCrypto.SslHandshake(sslHandle);
@@ -317,7 +336,13 @@ namespace System.Net.Security
             SafeDeleteContext securityContext)
         {
             SafeDeleteSslContext sslContext = ((SafeDeleteSslContext)securityContext);
-            int osStatus = Interop.AppleCrypto.SslShutdown(sslContext.SslContext);
+            SafeSslHandle sslHandle = sslContext.SslContext;
+            int osStatus;
+
+            lock (sslHandle)
+            {
+                osStatus = Interop.AppleCrypto.SslShutdown(sslHandle);
+            }
 
             if (osStatus == 0)
             {
