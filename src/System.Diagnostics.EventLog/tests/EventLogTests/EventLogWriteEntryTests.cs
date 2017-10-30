@@ -26,17 +26,17 @@ namespace System.Diagnostics.Tests
                     if (data)
                     {
                         eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData);
-                        return EventLogEntryCollectionExtensions.LastOrDefault(eventLog.Entries);
+                        return eventLog.Entries.LastOrDefault();
                     }
                     else if (category)
                     {
                         eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId);
-                        return EventLogEntryCollectionExtensions.LastOrDefault(eventLog.Entries);
+                        return eventLog.Entries.LastOrDefault();
                     }
                     else
                     {
                         eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId);
-                        return EventLogEntryCollectionExtensions.LastOrDefault(eventLog.Entries);
+                        return eventLog.Entries.LastOrDefault();
                     }
                 }
                 else if (type)
@@ -48,7 +48,7 @@ namespace System.Diagnostics.Tests
                     eventLog.WriteEntry(message);
                 }
 
-                return EventLogEntryCollectionExtensions.LastOrDefault(eventLog.Entries);
+                return eventLog.Entries.LastOrDefault();
             }
         }
 
@@ -63,17 +63,17 @@ namespace System.Diagnostics.Tests
                     if (data)
                     {
                         EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData);
-                        return EventLogEntryCollectionExtensions.LastOrDefault(eventLog.Entries);
+                        return eventLog.Entries.LastOrDefault();
                     }
                     else if (category)
                     {
                         EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId);
-                        return EventLogEntryCollectionExtensions.LastOrDefault(eventLog.Entries);
+                        return eventLog.Entries.LastOrDefault();
                     }
                     else
                     {
                         EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId);
-                        return EventLogEntryCollectionExtensions.LastOrDefault(eventLog.Entries);
+                        return eventLog.Entries.LastOrDefault();
                     }
                 }
                 else if (type)
@@ -85,7 +85,7 @@ namespace System.Diagnostics.Tests
                     EventLog.WriteEntry(source, message);
                 }
 
-                return EventLogEntryCollectionExtensions.LastOrDefault(eventLog.Entries);
+                return eventLog.Entries.LastOrDefault();
             }
         }
 
@@ -99,7 +99,7 @@ namespace System.Diagnostics.Tests
             using (EventLog eventLog = new EventLog())
             {
                 eventLog.Source = source;
-                return EventLogEntryCollectionExtensions.LastOrDefault(eventLog.Entries);
+                return eventLog.Entries.LastOrDefault();
             }
         }
 
@@ -114,7 +114,7 @@ namespace System.Diagnostics.Tests
                 else
                     eventLog.WriteEvent(eventInstance, insertStringsSingleton);
 
-                return EventLogEntryCollectionExtensions.LastOrDefault(eventLog.Entries);
+                return eventLog.Entries.LastOrDefault();
             }
         }
 
@@ -390,7 +390,7 @@ namespace System.Diagnostics.Tests
         }
     }
 
-    internal static class EventLogEntryCollectionExtensions
+    internal static class eventLogEntries
     {
         internal static EventLogEntry LastOrDefault(this EventLogEntryCollection elec)
         {
