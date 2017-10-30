@@ -24,11 +24,39 @@ namespace System.Diagnostics.Tests
                 using (EventLog eventLog = new EventLog())
                 {
                     eventLog.Source = source;
-                    eventLog.WriteEntry(message);
-                    eventLog.WriteEntry("Further Testing");
+                    bool entryWritten = true;
+                    while (entryWritten)
+                    {
+                        try
+                        {
+                            eventLog.WriteEntry(message);
+                            eventLog.WriteEntry("Further Testing");
+                            entryWritten = false;
+                        }
+                        catch (Win32Exception)
+                        {
+                            Thread.Sleep(100);
+                            eventLog.Clear();
+                        }
+                    }
+
                     EventLogEntryCollection entryCollection = eventLog.Entries;
                     EventLogEntry[] entryCollectionCopied = new EventLogEntry[entryCollection.Count];
-                    entryCollection.CopyTo(entryCollectionCopied, 0);
+
+                    bool entryCopied = true;
+                    while (entryCopied)
+                    {
+                        try
+                        {
+                            entryCollection.CopyTo(entryCollectionCopied, 0);
+                            entryCopied = false;
+                        }
+                        catch (Win32Exception)
+                        {
+                            Thread.Sleep(100);
+                            eventLog.Clear();
+                        }
+                    }
 
                     int i = 0;
                     foreach (EventLogEntry entry in entryCollection)
