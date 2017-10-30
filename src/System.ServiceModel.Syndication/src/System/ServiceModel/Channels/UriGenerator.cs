@@ -6,7 +6,6 @@ namespace System.ServiceModel.Channels
 {
     using System.Threading;
     using System.Globalization;
-    using System.ServiceModel;
 
     internal class UriGenerator
     {
@@ -30,7 +29,7 @@ namespace System.ServiceModel.Channels
             //throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("scheme"));
 
             if (scheme.Length == 0)
-                throw new ArgumentException(string.Format(SR.UriGeneratorSchemeMustNotBeEmpty, "scheme"));
+                throw new ArgumentException(SR.Format(SR.UriGeneratorSchemeMustNotBeEmpty, "scheme"));
 
             _prefix = string.Concat(scheme, ":", Guid.NewGuid().ToString(), delimiter, "id=");
         }

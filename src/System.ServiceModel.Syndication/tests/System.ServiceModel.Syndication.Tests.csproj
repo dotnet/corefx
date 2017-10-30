@@ -7,19 +7,21 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="$(MsBuildThisFileDirectory)\**\*.cs" />
+    <Compile Include="$(MsBuildThisFileDirectory)**\*.cs" 
+             Exclude="$(MsBuildThisFileDirectory)async\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\*.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\AtomFeeds\*.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <ReferenceFromRuntime Include="System.ServiceModel.Syndication">
-      <!-- Copy this to our test output directory and run from there.
-           This is required so that we can stage the application with a custom runtimeconfig that lets it run on the test shared framework. -->
-      <Private>true</Private>
-    </ReferenceFromRuntime>
+    <None Include="$(MsBuildThisFileDirectory)\TestFeeds\atom_feeds.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

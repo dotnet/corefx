@@ -6,7 +6,6 @@ namespace System.ServiceModel.Syndication
 {
     using System;
     using System.Diagnostics;
-    using System.Runtime.CompilerServices;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
     using System.Xml;
@@ -108,26 +107,46 @@ namespace System.ServiceModel.Syndication
             return new XmlSyndicationContent(this);
         }
 
-        public async Task<XmlDictionaryReader> GetReaderAtContent()
+        public XmlDictionaryReader GetReaderAtContent()
         {
-            await EnsureContentBufferAsync();
-            return _contentBuffer.GetReader(0);
+            return GetReaderAtContentAsync().GetAwaiter().GetResult();
         }
 
-        public Task<TContent> ReadContent<TContent>()
+        public TContent ReadContent<TContent>()
         {
             return ReadContent<TContent>((DataContractSerializer)null);
         }
 
-        public async Task<TContent> ReadContent<TContent>(XmlObjectSerializer dataContractSerializer)
+        public TContent ReadContent<TContent>(XmlObjectSerializer dataContractSerializer)
+        {
+            return ReadContentAsync<TContent>(dataContractSerializer).GetAwaiter().GetResult();
+        }
+
+        public TContent ReadContent<TContent>(XmlSerializer serializer)
+        {
+            return ReadContentAsync<TContent>(serializer).GetAwaiter().GetResult();
+        }
+
+        public async Task<XmlDictionaryReader> GetReaderAtContentAsync()
+        {
+            await EnsureContentBufferAsync().ConfigureAwait(false);
+            return _contentBuffer.GetReader(0);
+        }
+
+        public Task<TContent> ReadContentAsync<TContent>()
+        {
+            return ReadContentAsync<TContent>((DataContractSerializer) null);
+        }
+
+        public async Task<TContent> ReadContentAsync<TContent>(XmlObjectSerializer dataContractSerializer)
         {
             if (dataContractSerializer == null)
             {
-                dataContractSerializer = new DataContractSerializer(typeof(TContent));
+                dataContractSerializer = new DataContractSerializer(typeof (TContent));
             }
             if (_extension != null)
             {
-                return await _extension.GetObject<TContent>(dataContractSerializer);
+                return await _extension.GetObjectAsync<TContent>(dataContractSerializer).ConfigureAwait(false);
             }
             else
             {
@@ -136,20 +155,20 @@ namespace System.ServiceModel.Syndication
                 {
                     // skip past the content element
                     reader.ReadStartElement();
-                    return (TContent)dataContractSerializer.ReadObject(reader, false);
+                    return (TContent) dataContractSerializer.ReadObject(reader, false);
                 }
             }
         }
 
-        public Task<TContent> ReadContent<TContent>(XmlSerializer serializer)
+        public Task<TContent> ReadContentAsync<TContent>(XmlSerializer serializer)
         {
             if (serializer == null)
             {
-                serializer = new XmlSerializer(typeof(TContent));
+                serializer = new XmlSerializer(typeof (TContent));
             }
             if (_extension != null)
             {
-                return _extension.GetObject<TContent>(serializer);
+                return _extension.GetObjectAsync<TContent>(serializer);
             }
             else
             {
@@ -158,7 +177,7 @@ namespace System.ServiceModel.Syndication
                 {
                     // skip past the content element
                     reader.ReadStartElement();
-                    return Task.FromResult((TContent)serializer.Deserialize(reader));
+                    return Task.FromResult((TContent) serializer.Deserialize(reader));
                     //return (TContent)serializer.Deserialize(reader);
                 }
             }
@@ -199,7 +218,7 @@ namespace System.ServiceModel.Syndication
                 XmlBuffer tmp = new XmlBuffer(int.MaxValue);
                 using (XmlDictionaryWriter writer = tmp.OpenSection(XmlDictionaryReaderQuotas.Max))
                 {
-                    await this.WriteToAsync(writer, Atom10Constants.ContentTag, Atom10Constants.Atom10Namespace);
+                    await WriteToAsync(writer, Atom10Constants.ContentTag, Atom10Constants.Atom10Namespace).ConfigureAwait(false);
                 }
                 tmp.CloseSection();
                 tmp.Close();

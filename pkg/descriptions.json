@@ -559,6 +559,20 @@
     ]
   },
   {
+    "Name": "System.Diagnostics.EventLog",
+    "Description": "Provides the System.Diagnostics.EventLog class, which allows the applications to use the windows event log service.",
+    "CommonTypes": [
+      "System.Diagnostics.EventLog"
+    ]
+  },
+  {
+    "Name": "System.Diagnostics.PerformanceCounter",
+    "Description": "Provides the System.Diagnostics.PerformanceCounter class, which allows access to Windows performance counters.",
+    "CommonTypes": [
+      "System.Diagnostics.PerformanceCounter"
+    ]
+  },
+  {
     "Name": "System.Diagnostics.Process",
     "Description": "Provides the System.Diagnostics.Process class, which allows interaction with local and remote processes.",
     "CommonTypes": [
@@ -938,6 +952,15 @@
       "System.Linq.Queryable",
       "System.Linq.EnumerableQuery<T>",
       "System.Linq.EnumerableQuery"
+    ]
+  },
+  {
+    "Name": "System.Management",
+    "Description": "Provides access to a rich set of management information and management events about the system, devices, and applications instrumented to the Windows Management Instrumentation (WMI) infrastructure.",
+    "CommonTypes": [
+      "System.Management.ManagementClass",
+      "System.Management.ManagementObject",
+      "System.Management.SelectQuery"
     ]
   },
   {
@@ -1870,6 +1893,14 @@
       "System.Security.AccessControl.SemaphoreAccessRule",
       "System.Security.AccessControl.SemaphoreAuditRule",
       "System.Security.AccessControl.SemaphoreSecurity"
+    ]
+  },
+  {
+    "Name": "System.Threading.Channels",
+    "Description": "Provides types for passing data between producers and consumers.",
+    "CommonTypes": [
+      "System.Threading.Channel",
+      "System.Threading.Channel<T>"
     ]
   },
   {

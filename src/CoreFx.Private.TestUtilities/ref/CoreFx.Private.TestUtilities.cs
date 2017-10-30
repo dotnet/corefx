@@ -50,6 +50,7 @@ namespace System
         public static bool IsInvokingStaticConstructorsSupported { get { throw null; } }
         public static bool IsMacOsHighSierraOrHigher { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public static bool IsNetBSD { get { throw null; } }
+        public static bool IsFreeBSD { get { throw null; } }
         public static bool IsNetCore { get { throw null; } }
         public static bool IsNetNative { get { throw null; } }
         public static bool IsNonZeroLowerBoundArraySupported { get { throw null; } }
@@ -127,6 +128,7 @@ namespace System.Diagnostics
         public const int SuccessExitCode = 42;
         protected static readonly string TestConsoleApp;
         protected RemoteExecutorTestBase() { }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action method, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<int> method, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, int> method, string arg, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, int> method, string arg1, string arg2, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }

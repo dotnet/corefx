@@ -22,8 +22,7 @@ namespace System.Net.Security
         private static AsyncProtocolCallback s_readFrameCallback = new AsyncProtocolCallback(ReadFrameCallback);
         private static AsyncCallback s_writeCallback = new AsyncCallback(WriteCallback);
 
-        private RemoteCertValidationCallback _certValidationDelegate;
-        private LocalCertSelectionCallback _certSelectionDelegate;
+        private SslAuthenticationOptions _sslAuthenticationOptions;
 
         private Stream _innerStream;
 
@@ -33,7 +32,6 @@ namespace System.Net.Security
         private SecureChannel _context;
 
         private bool _handshakeCompleted;
-        private bool _certValidationFailed;
         private bool _shutdown;
 
         private SecurityStatusPal _securityStatus;
@@ -70,31 +68,17 @@ namespace System.Net.Security
         private int _lockReadState;
         private object _queuedReadStateRequest;
 
-        private readonly EncryptionPolicy _encryptionPolicy;
-
         //
         //  The public Client and Server classes enforce the parameters rules before
         //  calling into this .ctor.
         //
-        internal SslState(Stream innerStream, RemoteCertValidationCallback certValidationCallback, LocalCertSelectionCallback certSelectionCallback, EncryptionPolicy encryptionPolicy)
+        internal SslState(Stream innerStream)
         {
             _innerStream = innerStream;
-            _certValidationDelegate = certValidationCallback;
-            _certSelectionDelegate = certSelectionCallback;
-            _encryptionPolicy = encryptionPolicy;
         }
 
-        internal void ValidateCreateContext(bool isServer, string targetHost, SslProtocols enabledSslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertRevocationStatus)
+        internal void ValidateCreateContext(SslClientAuthenticationOptions sslClientAuthenticationOptions)
         {
-            ValidateCreateContext(isServer, targetHost, enabledSslProtocols, serverCertificate, clientCertificates, remoteCertRequired,
-                                   checkCertRevocationStatus, !isServer);
-        }
-
-        internal void ValidateCreateContext(bool isServer, string targetHost, SslProtocols enabledSslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertRevocationStatus, bool checkCertName)
-        {
-            //
-            // We don't support SSL alerts right now, hence any exception is fatal and cannot be retried.
-            //
             if (_exception != null)
             {
                 _exception.Throw();
@@ -105,35 +89,75 @@ namespace System.Net.Security
                 throw new InvalidOperationException(SR.net_auth_reauth);
             }
 
-            if (Context != null && IsServer != isServer)
+            if (Context != null && IsServer)
             {
                 throw new InvalidOperationException(SR.net_auth_client_server);
             }
 
-            if (targetHost == null)
+            if (sslClientAuthenticationOptions.TargetHost == null)
             {
-                throw new ArgumentNullException(nameof(targetHost));
+                throw new ArgumentNullException(nameof(sslClientAuthenticationOptions.TargetHost));
             }
 
-            if (isServer && serverCertificate == null)
+            if (sslClientAuthenticationOptions.TargetHost.Length == 0)
             {
-                throw new ArgumentNullException(nameof(serverCertificate));
-            }
-
-            if (targetHost.Length == 0)
-            {
-                targetHost = "?" + Interlocked.Increment(ref s_uniqueNameInteger).ToString(NumberFormatInfo.InvariantInfo);
+                sslClientAuthenticationOptions.TargetHost = "?" + Interlocked.Increment(ref s_uniqueNameInteger).ToString(NumberFormatInfo.InvariantInfo);
             }
 
             _exception = null;
             try
             {
-                _context = new SecureChannel(targetHost, isServer, enabledSslProtocols, serverCertificate, clientCertificates, remoteCertRequired,
-                                                                 checkCertName, checkCertRevocationStatus, _encryptionPolicy, _certSelectionDelegate);
+                _sslAuthenticationOptions = new SslAuthenticationOptions(sslClientAuthenticationOptions);
+                _context = new SecureChannel(_sslAuthenticationOptions);
             }
             catch (Win32Exception e)
             {
                 throw new AuthenticationException(SR.net_auth_SSPI, e);
+            }
+        }
+
+        internal void ValidateCreateContext(SslServerAuthenticationOptions sslServerAuthenticationOptions)
+        {
+            if (_exception != null)
+            {
+                _exception.Throw();
+            }
+
+            if (Context != null && Context.IsValidContext)
+            {
+                throw new InvalidOperationException(SR.net_auth_reauth);
+            }
+
+            if (Context != null && !IsServer)
+            {
+                throw new InvalidOperationException(SR.net_auth_client_server);
+            }
+
+            if (sslServerAuthenticationOptions.ServerCertificate == null)
+            {
+                throw new ArgumentNullException(nameof(sslServerAuthenticationOptions.ServerCertificate));
+            }
+
+            _exception = null;
+            try
+            {
+                _sslAuthenticationOptions = new SslAuthenticationOptions(sslServerAuthenticationOptions);
+                _context = new SecureChannel(_sslAuthenticationOptions);
+            }
+            catch (Win32Exception e)
+            {
+                throw new AuthenticationException(SR.net_auth_SSPI, e);
+            }
+        }
+
+        internal SslApplicationProtocol NegotiatedApplicationProtocol
+        {
+            get
+            {
+                if (Context == null)
+                    return default;
+
+                return Context.NegotiatedApplicationProtocol;
             }
         }
 
@@ -173,14 +197,6 @@ namespace System.Net.Security
         }
 
         //
-        // SSL related properties
-        //
-        internal void SetCertValidationDelegate(RemoteCertValidationCallback certValidationCallback)
-        {
-            _certValidationDelegate = certValidationCallback;
-        }
-
-        //
         // This will return selected local cert for both client/server streams
         //
         internal X509Certificate LocalCertificate
@@ -209,20 +225,7 @@ namespace System.Net.Security
         {
             get
             {
-                return Context != null && Context.CheckCertRevocationStatus;
-            }
-        }
-
-        internal SecurityStatusPal LastSecurityStatus
-        {
-            get { return _securityStatus; }
-        }
-
-        internal bool IsCertValidationFailed
-        {
-            get
-            {
-                return _certValidationFailed;
+                return Context != null && Context.CheckCertRevocationStatus != X509RevocationMode.NoCheck;
             }
         }
 
@@ -387,14 +390,6 @@ namespace System.Net.Security
                 }
 
                 return _secureStream;
-            }
-        }
-
-        internal int HeaderSize
-        {
-            get
-            {
-                return Context.HeaderSize;
             }
         }
 
@@ -580,14 +575,15 @@ namespace System.Net.Security
                 // Not aync so the connection is completed at this point.
                 if (lazyResult == null && NetEventSource.IsEnabled)
                 {
-                    if (NetEventSource.IsEnabled) NetEventSource.Log.SspiSelectedCipherSuite(nameof(ProcessAuthentication),
-                        SslProtocol,
-                        CipherAlgorithm,
-                        CipherStrength,
-                        HashAlgorithm,
-                        HashStrength,
-                        KeyExchangeAlgorithm,
-                        KeyExchangeStrength);
+                    if (NetEventSource.IsEnabled)
+                        NetEventSource.Log.SspiSelectedCipherSuite(nameof(ProcessAuthentication),
+                                                                    SslProtocol,
+                                                                    CipherAlgorithm,
+                                                                    CipherStrength,
+                                                                    HashAlgorithm,
+                                                                    HashStrength,
+                                                                    KeyExchangeAlgorithm,
+                                                                    KeyExchangeStrength);
                 }
             }
             catch (Exception)
@@ -714,14 +710,15 @@ namespace System.Net.Security
             // Connection is completed at this point.
             if (NetEventSource.IsEnabled)
             {
-                if (NetEventSource.IsEnabled) NetEventSource.Log.SspiSelectedCipherSuite(nameof(EndProcessAuthentication),
-                    SslProtocol,
-                    CipherAlgorithm,
-                    CipherStrength,
-                    HashAlgorithm,
-                    HashStrength,
-                    KeyExchangeAlgorithm,
-                    KeyExchangeStrength);
+                if (NetEventSource.IsEnabled)
+                    NetEventSource.Log.SspiSelectedCipherSuite(nameof(EndProcessAuthentication),
+                                                                SslProtocol,
+                                                                CipherAlgorithm,
+                                                                CipherStrength,
+                                                                HashAlgorithm,
+                                                                HashStrength,
+                                                                KeyExchangeAlgorithm,
+                                                                KeyExchangeStrength);
             }
         }
 
@@ -1014,23 +1011,24 @@ namespace System.Net.Security
         //
         private bool CompleteHandshake(ref ProtocolToken alertToken)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Enter(this);
 
             Context.ProcessHandshakeSuccess();
 
-            if (!Context.VerifyRemoteCertificate(_certValidationDelegate, ref alertToken))
+            if (!Context.VerifyRemoteCertificate(_sslAuthenticationOptions.CertValidationDelegate, ref alertToken))
             {
                 _handshakeCompleted = false;
-                _certValidationFailed = true;
 
-                if (NetEventSource.IsEnabled) NetEventSource.Exit(this, false);
+                if (NetEventSource.IsEnabled)
+                    NetEventSource.Exit(this, false);
                 return false;
             }
 
-            _certValidationFailed = false;
             _handshakeCompleted = true;
 
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(this, true);
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Exit(this, true);
             return true;
         }
 
@@ -1088,7 +1086,8 @@ namespace System.Net.Security
 
         private static void PartialFrameCallback(AsyncProtocolRequest asyncRequest)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(null);
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Enter(null);
 
             // Async ONLY completion.
             SslState sslState = (SslState)asyncRequest.AsyncObject;
@@ -1112,7 +1111,8 @@ namespace System.Net.Security
         //
         private static void ReadFrameCallback(AsyncProtocolRequest asyncRequest)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(null);
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Enter(null);
 
             // Async ONLY completion.
             SslState sslState = (SslState)asyncRequest.AsyncObject;
@@ -1662,7 +1662,8 @@ namespace System.Net.Security
         // This is called from SslStream class too.
         internal int GetRemainingFrameSize(byte[] buffer, int offset, int dataSize)
         {
-            if (NetEventSource.IsEnabled) NetEventSource.Enter(this, buffer, offset, dataSize);
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Enter(this, buffer, offset, dataSize);
 
             int payloadSize = -1;
             switch (_Framing)
@@ -1702,7 +1703,8 @@ namespace System.Net.Security
                     break;
             }
 
-            if (NetEventSource.IsEnabled) NetEventSource.Exit(this, payloadSize);
+            if (NetEventSource.IsEnabled)
+                NetEventSource.Exit(this, payloadSize);
             return payloadSize;
         }
 
@@ -1824,7 +1826,7 @@ namespace System.Net.Security
 
         internal IAsyncResult BeginShutdown(AsyncCallback asyncCallback, object asyncState)
         {
-            CheckThrow(authSuccessCheck:true, shutdownCheck:true);
+            CheckThrow(authSuccessCheck: true, shutdownCheck: true);
 
             ProtocolToken message = Context.CreateShutdownToken();
             return TaskToApm.Begin(InnerStream.WriteAsync(message.Payload, 0, message.Payload.Length), asyncCallback, asyncState);
@@ -1832,7 +1834,7 @@ namespace System.Net.Security
 
         internal void EndShutdown(IAsyncResult result)
         {
-            CheckThrow(authSuccessCheck: true, shutdownCheck:true);
+            CheckThrow(authSuccessCheck: true, shutdownCheck: true);
 
             TaskToApm.End(result);
             _shutdown = true;
