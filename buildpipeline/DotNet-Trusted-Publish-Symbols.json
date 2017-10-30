@@ -46,6 +46,7 @@
       "alwaysRun": false,
       "displayName": "Extract symbol packages; if release branch, archive",
       "timeoutInMinutes": 0,
+      "condition": "and(succeeded(), eq(variables['PublishToMyGet'], 'True'))",
       "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "1.*",
@@ -127,6 +128,10 @@
     }
   ],
   "variables": {
+    "PublishToMyGet": {
+      "value": "False",
+      "allowOverride": true
+    },
     "system.debug": {
       "value": "false",
       "allowOverride": true

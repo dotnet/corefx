@@ -125,6 +125,7 @@
       "alwaysRun": false,
       "displayName": "packages -> dotnet.myget.org",
       "timeoutInMinutes": 0,
+      "condition": "and(succeeded(), eq(variables['PublishToMyGet'], 'True'))",
       "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "1.*",
@@ -145,6 +146,7 @@
       "alwaysRun": false,
       "displayName": "symbol packages -> dotnet.myget.org",
       "timeoutInMinutes": 0,
+      "condition": "and(succeeded(), eq(variables['PublishToMyGet'], 'True'))",
       "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "1.*",
@@ -165,6 +167,7 @@
       "alwaysRun": false,
       "displayName": "Update versions repository",
       "timeoutInMinutes": 0,
+      "condition": "and(succeeded(), eq(variables['PublishToMyGet'], 'True'))",
       "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "1.*",
@@ -258,6 +261,10 @@
     }
   ],
   "variables": {
+    "PublishToMyGet": {
+      "value": "False",
+      "allowOverride": true
+    },
     "system.debug": {
       "value": "false",
       "allowOverride": true
