@@ -478,7 +478,7 @@ namespace System.Diagnostics.Tests
         }
     }
 
-    internal static class eventLogEntries
+    internal static class EventLogEntryCollectionExtensions
     {
         internal static EventLogEntry LastOrDefault(this EventLogEntryCollection elec)
         {
