@@ -58,12 +58,25 @@ namespace System.Diagnostics.Tests
                         }
                     }
 
-                    int i = 0;
-                    foreach (EventLogEntry entry in entryCollection)
+                    bool entryRetrived = true;
+                    while (entryRetrived)
                     {
-                        Assert.Equal(entry.Message, entryCollectionCopied[i].Message);
-                        i += 1;
+                        try
+                        {
+                            int i = 0;
+                            foreach (EventLogEntry entry in entryCollection)
+                            {
+                                Assert.Equal(entry.Message, entryCollectionCopied[i].Message);
+                                i += 1;
+                            }
+                            entryRetrived = false;
+                        }
+                        catch (Win32Exception)
+                        {
+                            Thread.Sleep(100);
+                        }
                     }
+
                 }
             }
             finally
