@@ -141,7 +141,6 @@ namespace System.Diagnostics.Tests
                             eventLog.Clear();
                         }
                     }
-
                 }
             }
             finally
