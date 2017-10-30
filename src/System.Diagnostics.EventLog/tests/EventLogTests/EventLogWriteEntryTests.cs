@@ -49,7 +49,7 @@ namespace System.Diagnostics.Tests
                 {
                     if (PlatformDetection.IsWindows7)
                     {
-                        WriteEventWin7(typeof(EventLog), "WriteEntry", new Type[] { typeof(string) }, BindingFlags.Instance | BindingFlags.Public, new object[] { "A789541278" }, eventLog);
+                        WriteEventWin7<EventLog>(() => eventLog.WriteEntry(message));
                     }
                     else
                     {
@@ -127,7 +127,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        private void WriteEventWin7(Type type, string name, Type[] argumentTypes, BindingFlags flags, object[] argumentValues, EventLog eventLog, int retries = 3)
+        private void WriteEventWin71(Type type, string name, Type[] argumentTypes, BindingFlags flags, object[] argumentValues, EventLog eventLog, int retries = 3)
         {
             while (retries > 0)
             {
@@ -147,7 +147,26 @@ namespace System.Diagnostics.Tests
 
         }
 
-        [Fact]
+        static void WriteEventWin7<EventLog>(Action func)
+        {
+            int retries = 3;
+            while (retries > 0)
+            {
+                try
+                {
+                    func();
+                    break;
+                }
+                catch (Win32Exception)
+                {
+                    Thread.Sleep(100);
+                    retries--;
+                }
+            }
+            return;
+        }
+
+        //[Fact]
         public void dummyWrite()
         {
             string log = "DummyEntry";
@@ -157,7 +176,7 @@ namespace System.Diagnostics.Tests
                 EventLog.CreateEventSource(source, log);
                 EventLog eventLog = new EventLog();
                 eventLog.Source = source;
-                WriteEventWin7(typeof(EventLog), "WriteEntry", new Type[] { typeof(string) }, BindingFlags.Instance | BindingFlags.Public, new object[] { "A789541278" }, eventLog);
+                WriteEventWin71(typeof(EventLog), "WriteEntry", new Type[] { typeof(string) }, BindingFlags.Instance | BindingFlags.Public, new object[] { "A789541278" }, eventLog);
                 Console.WriteLine(eventLog.Entries[0].Message);
             }
             finally
