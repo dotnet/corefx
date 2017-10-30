@@ -129,11 +129,25 @@ namespace System.Diagnostics.Tests
             try
             {
                 EventLog.CreateEventSource(source, log);
-                EventLogEntry eventLogEntry;
-                if (sourceFlag)
-                    eventLogEntry = WriteLogEntry(source);
-                else
-                    eventLogEntry = WriteLogEntryWithSource(source);
+                EventLogEntry eventLogEntry = null;
+                bool entryWritten = true;
+
+                while (entryWritten)
+                {
+                    try
+                    {
+                        if (sourceFlag)
+                            eventLogEntry = WriteLogEntry(source);
+                        else
+                            eventLogEntry = WriteLogEntryWithSource(source);
+
+                        entryWritten = false;
+                    }
+                    catch (Win32Exception)
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
 
                 if (eventLogEntry != null)
                 {
@@ -160,12 +174,24 @@ namespace System.Diagnostics.Tests
             try
             {
                 EventLog.CreateEventSource(source, log);
-                EventLogEntry eventLogEntry;
-                if (sourceFlag)
-                    eventLogEntry = WriteLogEntry(source, type: true);
-                else
-                    eventLogEntry = WriteLogEntryWithSource(source, type: true);
+                EventLogEntry eventLogEntry = null;
+                bool entryWritten = true;
+                while (entryWritten)
+                {
+                    try
+                    {
+                        if (sourceFlag)
+                            eventLogEntry = WriteLogEntry(source, type: true);
+                        else
+                            eventLogEntry = WriteLogEntryWithSource(source, type: true);
 
+                        entryWritten = false;
+                    }
+                    catch (Win32Exception)
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
                 if (eventLogEntry != null)
                 {
                     Assert.Contains(message, eventLogEntry.Message);
@@ -189,11 +215,24 @@ namespace System.Diagnostics.Tests
             try
             {
                 EventLog.CreateEventSource(source, log);
-                EventLogEntry eventLogEntry;
-                if (sourceFlag)
-                    eventLogEntry = WriteLogEntry(source, type: true, instance: true);
-                else
-                    eventLogEntry = WriteLogEntryWithSource(source, type: true, instance: true);
+                EventLogEntry eventLogEntry = null;
+                bool entryWritten = true;
+                while (entryWritten)
+                {
+                    try
+                    {
+                        if (sourceFlag)
+                            eventLogEntry = WriteLogEntry(source, type: true, instance: true);
+                        else
+                            eventLogEntry = WriteLogEntryWithSource(source, type: true, instance: true);
+
+                        entryWritten = false;
+                    }
+                    catch (Win32Exception)
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
 
                 if (eventLogEntry != null)
                 {
@@ -218,12 +257,24 @@ namespace System.Diagnostics.Tests
             try
             {
                 EventLog.CreateEventSource(source, log);
-                EventLogEntry eventLogEntry;
-                if (sourceFlag)
-                    eventLogEntry = WriteLogEntry(source, type: true, instance: true, category: true);
-                else
-                    eventLogEntry = WriteLogEntryWithSource(source, type: true, instance: true, category: true);
+                EventLogEntry eventLogEntry = null;
+                bool entryWritten = true;
+                while (entryWritten)
+                {
+                    try
+                    {
+                        if (sourceFlag)
+                            eventLogEntry = WriteLogEntry(source, type: true, instance: true, category: true);
+                        else
+                            eventLogEntry = WriteLogEntryWithSource(source, type: true, instance: true, category: true);
 
+                        entryWritten = false;
+                    }
+                    catch (Win32Exception)
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
                 // There is some prefix string already attached to the message passed
                 // The description for Event ID '0' in Source 'SourceWriteEntryWithTypeIDAndCategory' cannot be found.  The local computer may not have the necessary registry information or message DLL files to display the message, or you may not have permission
                 // to access them.  The following information is part of the event:'EventLogWriteEntryTestsMessage'
@@ -253,12 +304,24 @@ namespace System.Diagnostics.Tests
             try
             {
                 EventLog.CreateEventSource(source, log);
-                EventLogEntry eventLogEntry;
-                if (sourceFlag)
-                    eventLogEntry = WriteLogEntry(source, type: true, instance: true, category: true, data: true);
-                else
-                    eventLogEntry = WriteLogEntryWithSource(source, type: true, instance: true, category: true, data: true);
+                EventLogEntry eventLogEntry = null;
+                bool entryWritten = true;
+                while (entryWritten)
+                {
+                    try
+                    {
+                        if (sourceFlag)
+                            eventLogEntry = WriteLogEntry(source, type: true, instance: true, category: true, data: true);
+                        else
+                            eventLogEntry = WriteLogEntryWithSource(source, type: true, instance: true, category: true, data: true);
 
+                        entryWritten = false;
+                    }
+                    catch (Win32Exception)
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
                 if (eventLogEntry != null)
                 {
                     Assert.Contains(message, eventLogEntry.Message);
@@ -309,15 +372,26 @@ namespace System.Diagnostics.Tests
             try
             {
                 EventLog.CreateEventSource(source, log);
-                EventLogEntry eventLogEntry;
-                if (SourceFlag)
-                    eventLogEntry = WriteLogEntryEventSource(source);
-                else
-                    eventLogEntry = WriteLogEntryEvent(source);
+                EventLogEntry eventLogEntry = null;
+                bool entryWritten = true;
+                while (entryWritten)
+                {
+                    try
+                    {
+                        if (SourceFlag)
+                            eventLogEntry = WriteLogEntryEventSource(source);
+                        else
+                            eventLogEntry = WriteLogEntryEvent(source);
 
+                        entryWritten = false;
+                    }
+                    catch (Win32Exception)
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
                 if (eventLogEntry != null)
                     Assert.All(insertStrings, message => eventLogEntry.Message.Contains(message));
-
             }
             finally
             {
@@ -336,11 +410,24 @@ namespace System.Diagnostics.Tests
             try
             {
                 EventLog.CreateEventSource(source, log);
-                EventLogEntry eventLogEntry;
-                if (SourceFlag)
-                    eventLogEntry = WriteLogEntryEventSource(source, data: true);
-                else
-                    eventLogEntry = WriteLogEntryEvent(source, data: true);
+                EventLogEntry eventLogEntry = null;
+                bool entryWritten = true;
+                while (entryWritten)
+                {
+                    try
+                    {
+                        if (SourceFlag)
+                            eventLogEntry = WriteLogEntryEventSource(source, data: true);
+                        else
+                            eventLogEntry = WriteLogEntryEvent(source, data: true);
+
+                        entryWritten = false;
+                    }
+                    catch (Win32Exception)
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
 
                 if (eventLogEntry != null)
                     Assert.Equal(rawData, eventLogEntry.Data);
