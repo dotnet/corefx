@@ -18,6 +18,11 @@ namespace System.Net.Http.Functional.Tests
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #16805")]
     public partial class HttpClientHandler_ServerCertificates_Test
     {
+        // TODO: https://github.com/dotnet/corefx/issues/7812
+        private static bool ClientSupportsDHECipherSuites => (!PlatformDetection.IsWindows || PlatformDetection.IsWindows10Version1607OrGreater);
+        private bool BackendSupportsCustomCertificateHandlingAndClientSupportsDHECipherSuites =>
+            (BackendSupportsCustomCertificateHandling && ClientSupportsDHECipherSuites);
+
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task NoCallback_ValidCertificate_CallbackNotCalled()
@@ -161,7 +166,7 @@ namespace System.Net.Http.Functional.Tests
         };
 
         [OuterLoop] // TODO: Issue #11345
-        [Theory]
+        [ConditionalTheory(nameof(ClientSupportsDHECipherSuites))]
         [MemberData(nameof(CertificateValidationServers))]
         public async Task NoCallback_BadCertificate_ThrowsException(string url)
         {
@@ -172,7 +177,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [Fact]
+        [ConditionalFact(nameof(ClientSupportsDHECipherSuites))]
         public async Task NoCallback_RevokedCertificate_NoRevocationChecking_Succeeds()
         {
             // On macOS (libcurl+darwinssl) we cannot turn revocation off.
@@ -217,6 +222,11 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(CertificateValidationServersAndExpectedPolicies))]
         public async Task UseCallback_BadCertificate_ExpectedPolicyErrors(string url, SslPolicyErrors expectedErrors)
         {
+            if (!BackendSupportsCustomCertificateHandlingAndClientSupportsDHECipherSuites)
+            {
+                return;
+            }
+
             var handler = new HttpClientHandler();
             using (var client = new HttpClient(handler))
             {
