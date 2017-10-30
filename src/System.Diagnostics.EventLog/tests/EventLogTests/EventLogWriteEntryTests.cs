@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
+using System.Reflection;
 using System.Threading;
 using Xunit;
 
@@ -46,7 +47,14 @@ namespace System.Diagnostics.Tests
                 }
                 else
                 {
-                    eventLog.WriteEntry(message);
+                    if (PlatformDetection.IsWindows7)
+                    {
+                        WriteEventWin7(typeof(EventLog), "WriteEntry", new Type[] { typeof(string) }, BindingFlags.Instance | BindingFlags.Public, new object[] { "A789541278" }, eventLog);
+                    }
+                    else
+                    {
+                        eventLog.WriteEntry(message);
+                    }
                 }
 
                 return eventLog.Entries.LastOrDefault();
@@ -116,6 +124,46 @@ namespace System.Diagnostics.Tests
                     eventLog.WriteEvent(eventInstance, insertStringsSingleton);
 
                 return eventLog.Entries.LastOrDefault();
+            }
+        }
+
+        private void WriteEventWin7(Type type, string name, Type[] argumentTypes, BindingFlags flags, object[] argumentValues, EventLog eventLog, int retries = 3)
+        {
+            while (retries > 0)
+            {
+                try
+                {
+                    MethodInfo methodInfo = type.GetMethod(name, flags, null, CallingConventions.Any, argumentTypes, null);
+                    methodInfo.Invoke(eventLog, argumentValues);
+                    break;
+                }
+                catch (Win32Exception)
+                {
+                    Thread.Sleep(100);
+                    retries--;
+                }
+            }
+            return;
+
+        }
+
+        [Fact]
+        public void dummyWrite()
+        {
+            string log = "DummyEntry";
+            string source = "Source" + nameof(dummyWrite);
+            try
+            {
+                EventLog.CreateEventSource(source, log);
+                EventLog eventLog = new EventLog();
+                eventLog.Source = source;
+                WriteEventWin7(typeof(EventLog), "WriteEntry", new Type[] { typeof(string) }, BindingFlags.Instance | BindingFlags.Public, new object[] { "A789541278" }, eventLog);
+                Console.WriteLine(eventLog.Entries[0].Message);
+            }
+            finally
+            {
+                EventLog.DeleteEventSource(source);
+                EventLog.Delete(log);
             }
         }
 
@@ -499,4 +547,5 @@ namespace System.Diagnostics.Tests
             return eventLogEntry;
         }
     }
+
 }
