@@ -7,6 +7,8 @@
     <NuGetDeploySourceItem>Reference</NuGetDeploySourceItem>
     <NugetRuntimeIdentifier>None</NugetRuntimeIdentifier>
     <RefOutputPath>$(RefPath)</RefOutputPath>
+    <TargetingPackPackageVersion>1.0.1</TargetingPackPackageVersion>
+    <TargetingPackPackageVersion Condition="'$(TargetGroup)' == 'net471'">1.0.0-preview</TargetingPackPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(NuGetTargetMoniker)' == '.NETFramework,Version=v4.6.3'">
     <!-- Missing 4.6.3 targeting pack, use 462 for now -->
@@ -21,7 +23,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="$(TargetingPackNugetPackageId)">
-      <Version>1.0.1</Version>
+      <Version>$(TargetingPackPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library" Condition="'$(TargetGroup)' == 'netfx'">
       <Version>$(NETStandardPackageVersion)</Version>
