@@ -76,7 +76,6 @@ namespace System.Diagnostics.Tests
                             Thread.Sleep(100);
                         }
                     }
-
                 }
             }
             finally
