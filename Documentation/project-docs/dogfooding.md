@@ -17,11 +17,38 @@ this experience. Make sure to consult this document often.
 To setup the SDK download the zip and extract it somewhere and add the root folder to your path or always fully
 qualify the path to dotnet in the root of this folder for all the instructions in this document.
 
-Note: Installer will put dotnet globally in your path which you might not want for dogfooding daily toolsets.
+Note: the installer will put dotnet globally in your path which you might not want for dogfooding daily toolsets.
 
-After setting up dotnet you can verify you are using the newer version by:
+After setting up dotnet you can verify you are using the newer version by executing `dotnet --info` -- the version should be greater than 2.2.0-*  (dotnet CLI is currently numbered 2.2.0-* not 2.1.0-* ). Here is an example output at the time of writing:
+```
+>dotnet.exe --info
+.NET Command Line Tools (2.2.0-preview1-007460)
 
-`dotnet --info` -- the version should be greater than 2.0.0-*
+Product Information:
+ Version:            2.2.0-preview1-007460
+ Commit SHA-1 hash:  173cc035e4
+
+Runtime Environment:
+ OS Name:     Windows
+ OS Version:  10.0.16299
+ OS Platform: Windows
+ RID:         win10-x64
+ Base Path:   F:\dotnet\sdk\2.2.0-preview1-007460\
+
+Microsoft .NET Core Shared Framework Host
+
+  Version  : 2.1.0-preview1-25825-07
+  Build    : 4c165c13bd390adf66f9af30a088d634d3f37a9d
+```
+
+2. Our nightly builds are uploaded to MyGet, not NuGet - so ensure the .NET Core MyGet feed is in your nuget configuration in case you need other packages from .NET Core that aren't included in the download. For example, on Windows you could edit %userprofile%\appdata\roaming\nuget\nuget.config to include this line:
+```xml
+<packageSources>
+    <add key="myget.dotnetcore" value="https://dotnet.myget.org/F/dotnet-core/api/v3/index.json" />
+    ...
+</packageSources>    
+```
+(Documentation for configuring feeds is [here](https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior).)
 
 ## Setup the project
 
@@ -117,6 +144,18 @@ $ dotnet publish
 $ bin\Debug\netcoreapp2.0\win7-x64\publish\App.exe
 ```
 
+### Using an isolated SDK
+
+It is possible to install the SDK in a completely isolated fashion, if you do not want to make global changes.
+
+1. Download the zip or tarball from https://github.com/dotnet/cli  (for example, https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x64.zip ) into a new folder.
+
+2. By default, the dotnet CLI will use the globally installed SDK if it matches the major/minor version you request and has a higher revision. To force it to use the locally installed SDK, you must set an environment variable `DOTNET_MULTILEVEL_LOOKUP=0` in your shell. You can use `dotnet --info` to verify what version of the Shared Framework it is using.
+
+3. If you are using a local copy of the dotnet CLI, take care that when you type `dotnet` you do not inadvertently pick up a different copy that you may have in your path. On Windows, for example, if you use a Developer Command Prompt, the global copy may be in the path, so use the fully qualified path to your local `dotnet`.
+
+After this point instructions are as above.
+
 ## Using your local CoreFx build
 
 To use your local built corefx packages you will need to be a self-contained application and so you will
@@ -161,7 +200,7 @@ as a reference to our nightly dotnet-core feed on myget:
 </configuration>
 
 ```
-Obviously **you need to update path in the XML to be the path to output directory for your build**.
+Obviously **you need to update the path in the XML to be the path to output directory for your build**.
 
 On Windows you also have the alternative of modifying the Nuget.Config
 at `%HOMEPATH%\AppData\Roaming\Nuget\Nuget.Config` (`~/.nuget/NuGet/NuGet.Config` on Linux) with the new location.
