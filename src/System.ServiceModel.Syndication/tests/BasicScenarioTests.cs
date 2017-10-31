@@ -414,6 +414,93 @@ namespace System.ServiceModel.Syndication.Tests
             }
         }
 
+        [Fact]
+        public static void RssEntryPositiveTest()
+        {
+            string filePath = @"RssEntry.xml";
+            string serializeFilePath = Path.GetTempFileName();
+
+            try
+            {
+                SyndicationItem feedObjct = null;
+                using (XmlReader reader = XmlReader.Create(filePath))
+                {
+                    Rss20ItemFormatter rss20ItemFormatter = new Rss20ItemFormatter();
+                    rss20ItemFormatter.ReadFrom(reader);
+                    feedObjct = rss20ItemFormatter.Item;
+                    reader.Close();
+                }
+
+                using (XmlWriter writer = XmlWriter.Create(serializeFilePath))
+                {
+                    Rss20ItemFormatter atomformatter = new Rss20ItemFormatter(feedObjct);
+                    atomformatter.WriteTo(writer);
+                    writer.Close();
+                }
+                // compare file filePath and serializeFilePath
+                XmlDiff diff = new XmlDiff()
+                {
+                    Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
+                };
+                Assert.True(diff.Compare(filePath, serializeFilePath));
+            }
+            finally
+            {
+                File.Delete(serializeFilePath);
+            }
+        }
+
+        [Fact]
+        public static void RssFeedPositiveTest()
+        {
+            string dataFile = @"rss_feeds.dat";
+            List<string> fileList = GetTestFilesForFeedTest(dataFile);
+
+            foreach (string file in fileList)
+            {
+                string serializeFilePath = Path.GetTempFileName();
+                try
+                {
+                    SyndicationFeed feedObjct;
+                    using (XmlReader reader = XmlReader.Create(file))
+                    {
+                        Rss20FeedFormatter formatter = new Rss20FeedFormatter();
+                        formatter.ReadFrom(reader);
+                        feedObjct = formatter.Feed;
+                        reader.Close();
+                    }
+
+                    using (XmlWriter writer = XmlWriter.Create(serializeFilePath))
+                    {
+                        Rss20FeedFormatter formatter = new Rss20FeedFormatter(feedObjct);
+                        formatter.WriteTo(writer);
+                        writer.Close();
+                    }
+
+                    CompareHelper ch = new CompareHelper
+                    {
+                        Diff = new XmlDiff()
+                        {
+                            Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
+                        },
+                        AllowableDifferences = GetRssFeedPositiveTestAllowableDifferences()
+                    };
+                    Assert.True(ch.Compare(file, serializeFilePath), $"Failed File Name:{file}");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("------------------------------");
+                    Console.WriteLine($"Failed File Name:{file}");
+                    throw e;
+                }
+                finally
+                {
+                    File.Delete(serializeFilePath);
+                }
+            }
+        }
+
         private static List<AllowableDifference> GetAtomFeedPositiveTestAllowableDifferences()
         {
             return new List<AllowableDifference>(new AllowableDifference[]
@@ -471,6 +558,16 @@ namespace System.ServiceModel.Syndication.Tests
                 new AllowableDifference("<xhtml:img src=\"http://example.com/image.jpg\">", "<xhtml:img src=\"http://example.com/image.jpg\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">"),
                 new AllowableDifference("<feed xml:base=\"http://example.org\" xmlns=\"http://www.w3.org/2005/Atom\">", "<feed xml:base=\"http://example.org/\" xmlns=\"http://www.w3.org/2005/Atom\">"),
                 new AllowableDifference("<link href=\"http://creativecommons.org/licenses/by-nc/2.5/\" xmlns:lic=\"http://web.resource.org/cc/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" rel=\"http://www.snellspace.com/atom/extensions/proposed/license\" rdf:resource=\"http://creativecommons.org/licenses/by-nc/2.5/\" type=\"text/html\" rdf:type=\"http://web.resource.org/cc/license\">", "<link xmlns:a=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" href=\"http://creativecommons.org/licenses/by-nc/2.5/\" rel=\"http://www.snellspace.com/atom/extensions/proposed/license\" a:resource=\"http://creativecommons.org/licenses/by-nc/2.5/\" type=\"text/html\" a:type=\"http://web.resource.org/cc/license\">"),
+            });
+        }
+
+        private static List<AllowableDifference> GetRssFeedPositiveTestAllowableDifferences()
+        {
+            return new List<AllowableDifference>(new AllowableDifference[]
+            {
+                new AllowableDifference("<rss version=\"2.0\">","<rss xmlns:a10=\"http://www.w3.org/2005/Atom\" version=\"2.0\">"),
+                new AllowableDifference("<content:encoded>", "<content:encoded xmlns:content=\"http://purl.org/rss/1.0/modules/content/\">"),
+                new AllowableDifference("Tue, 31 Dec 2002 14:20:20 GMT", "Tue, 31 Dec 2002 14:20:20 Z"),
             });
         }
 

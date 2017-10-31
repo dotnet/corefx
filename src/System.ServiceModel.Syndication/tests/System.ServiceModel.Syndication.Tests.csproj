@@ -7,8 +7,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="$(MsBuildThisFileDirectory)**\*.cs" 
-             Exclude="$(MsBuildThisFileDirectory)async\**\*.cs" />
+    <Compile Include="$(MsBuildThisFileDirectory)**\*.cs" Exclude="$(MsBuildThisFileDirectory)async\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\*.xml">
@@ -17,9 +16,15 @@
     <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\AtomFeeds\*.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+	<Content Include="$(MsBuildThisFileDirectory)\TestFeeds\RssFeeds\*.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MsBuildThisFileDirectory)\TestFeeds\atom_feeds.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+	<None Include="$(MsBuildThisFileDirectory)\TestFeeds\rss_feeds.dat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

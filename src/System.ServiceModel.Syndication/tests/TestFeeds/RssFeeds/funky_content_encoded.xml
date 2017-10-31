@@ -1,0 +1,19 @@
+<!--
+  Description:  Funky content
+  Expect:       !DuplicateDescriptionSemantics{element:content:encoded}
+-->
+
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<channel>
+<title>Duplicate semantics</title>
+<link>http://purl.org/rss/2.0/</link>
+<description>Funky content</description>
+<item>
+<title>Duplicate semantics</title>
+<link>http://purl/org/rss/2.0/?item</link>
+<guid isPermaLink="false">tag:example.com,2006:weblog.180</guid>
+<description>Foo</description>
+<content:encoded>Bar</content:encoded>
+</item>
+</channel>
+</rss>
