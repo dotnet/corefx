@@ -4,6 +4,7 @@
 
 using System.ComponentModel;
 using System.Threading;
+using Xunit;
 
 namespace System.Diagnostics.Tests
 {
@@ -12,32 +13,12 @@ namespace System.Diagnostics.Tests
         public static bool IsElevatedAndSupportsEventLogs { get => AdminHelpers.IsProcessElevated() && SupportsEventLogs; }
         public static bool SupportsEventLogs { get => PlatformDetection.IsNotWindowsNanoServer; }
 
-        public static void RetryAvailable(Action func)
+        public static void RetryOnWin7(Action func)
         {
-            if (!PlatformDetection.IsWindows7)
-            {
-                func();
-                return;
-            }
-
-            int retries = 3;
-            while (retries > 0)
-            {
-                try
-                {
-                    func();
-                    retries = -1;
-                }
-                catch (Win32Exception)
-                {
-                    Thread.Sleep(100);
-                    retries--;
-                }
-            }
-            return;
+            RetrieveOnWin7<object>(() => { func(); return null; });
         }
 
-        public static T RetrieveEntryOrMessage<T>(Func<T> func)
+        public static T RetrieveOnWin7<T>(Func<T> func)
         {
             T entry = default(T);
             if (!PlatformDetection.IsWindows7)
@@ -45,7 +26,10 @@ namespace System.Diagnostics.Tests
                 return func();
             }
 
-            int retries = 3;
+
+            // We are retrying on windows 7 because it throws win32exception while some operations like Writing,Retrieveing and Deleting log.
+            // So We just try to do the operation again in case of this exception 
+            int retries = 10;
             while (retries > 0)
             {
                 try
@@ -59,6 +43,8 @@ namespace System.Diagnostics.Tests
                     retries--;
                 }
             }
+
+            Assert.NotEqual(0, retries);
             return entry;
         }
     }

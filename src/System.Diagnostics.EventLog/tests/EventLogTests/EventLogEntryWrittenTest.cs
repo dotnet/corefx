@@ -32,7 +32,7 @@ namespace System.Diagnostics.Tests
                     });
                     eventLog.EnableRaisingEvents = waitOnEvent;
 
-                    Helpers.RetryAvailable(() => eventLog.WriteEntry(message, EventLogEntryType.Information));
+                    Helpers.RetryOnWin7(() => eventLog.WriteEntry(message, EventLogEntryType.Information));
 
                     if (waitOnEvent)
                     {
@@ -50,7 +50,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryAvailable(() => EventLog.Delete(log));
+                Helpers.RetryOnWin7(() => EventLog.Delete(log));
             }
         }
 
