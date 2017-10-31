@@ -8,16 +8,11 @@ this experience. Make sure to consult this document often.
 
 ## Install prerequisites
 
-1. Acquire the latest nightly .NET Core SDK 2.0
+1. Acquire the latest nightly .NET Core SDK 2.0 by downloading the zip or tarball listed in https://github.com/dotnet/cli/blob/master/README.md#installers-and-binaries (for example, https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x64.zip ) into a new folder.
 
-- [Win 64-bit Latest Zip](https://dotnetcli.azureedge.net/dotnet/Sdk/master/dotnet-dev-win-x64.latest.zip) [Installer](https://dotnetcli.azureedge.net/dotnet/Sdk/master/dotnet-dev-win-x64.latest.exe)
-- [macOS 64-bit Latest Tar](https://dotnetcli.azureedge.net/dotnet/Sdk/master/dotnet-dev-osx-x64.latest.tar.gz) [Installer](https://dotnetcli.azureedge.net/dotnet/Sdk/master/dotnet-dev-osx-x64.latest.pkg)
-- [Others](https://github.com/dotnet/cli/blob/master/README.md#installers-and-binaries)
+2. By default, the dotnet CLI will use the globally installed SDK if it matches the major/minor version you request and has a higher revision. To force it to use the locally installed SDK, you must set an environment variable `DOTNET_MULTILEVEL_LOOKUP=0` in your shell. You can use `dotnet --info` to verify what version of the Shared Framework it is using.
 
-To setup the SDK download the zip and extract it somewhere and add the root folder to your path or always fully
-qualify the path to dotnet in the root of this folder for all the instructions in this document.
-
-Note: the installer will put dotnet globally in your path which you might not want for dogfooding daily toolsets.
+3. Reminder: if you are using a local copy of the dotnet CLI, take care that when you type `dotnet` you do not inadvertently pick up a different copy that you may have in your path. On Windows, for example, if you use a Developer Command Prompt, a global copy may be in the path, so use the fully qualified path to your local `dotnet`.
 
 After setting up dotnet you can verify you are using the newer version by executing `dotnet --info` -- the version should be greater than 2.2.0-*  (dotnet CLI is currently numbered 2.2.0-* not 2.1.0-* ). Here is an example output at the time of writing:
 ```
@@ -41,7 +36,7 @@ Microsoft .NET Core Shared Framework Host
   Build    : 4c165c13bd390adf66f9af30a088d634d3f37a9d
 ```
 
-2. Our nightly builds are uploaded to MyGet, not NuGet - so ensure the .NET Core MyGet feed is in your nuget configuration in case you need other packages from .NET Core that aren't included in the download. For example, on Windows you could edit %userprofile%\appdata\roaming\nuget\nuget.config to include this line:
+2. Our nightly builds are uploaded to MyGet, not NuGet - so ensure the .NET Core MyGet feed is in your nuget configuration in case you need other packages from .NET Core that aren't included in the download. For example, on Windows you could edit %userprofile%\appdata\roaming\nuget\nuget.config or on Linux edit `~/.nuget/NuGet/NuGet.Config` to add this line:
 ```xml
 <packageSources>
     <add key="myget.dotnetcore" value="https://dotnet.myget.org/F/dotnet-core/api/v3/index.json" />
@@ -53,7 +48,7 @@ Microsoft .NET Core Shared Framework Host
 ## Setup the project
 
 1. Create a new project
-    - Create a new folder for your app
+    - Create a new folder for your app and change to that folder
     - Create project file by running `dotnet new console`
 
 2. Restore packages so that you're ready to play:
@@ -63,25 +58,6 @@ $ dotnet restore
 ```
 
 ## Consume the new build
-
-Edit your `Program.cs` to consume the new APIs, for example:
-
-```CSharp
-using System;
-using System.Net;
-
-class Program
-{
-    static void Main(string[] args)
-    {
-        WebUtility.HtmlDecode("&amp;", Console.Out);
-        Console.WriteLine();
-        Console.WriteLine("Hello World!");
-    }
-}
-```
-
-Run the bits:
 
 ```
 $ dotnet run
@@ -144,19 +120,7 @@ $ dotnet publish
 $ bin\Debug\netcoreapp2.0\win7-x64\publish\App.exe
 ```
 
-### Using an isolated SDK
-
-It is possible to install the SDK in a completely isolated fashion, if you do not want to make global changes.
-
-1. Download the zip or tarball from https://github.com/dotnet/cli  (for example, https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x64.zip ) into a new folder.
-
-2. By default, the dotnet CLI will use the globally installed SDK if it matches the major/minor version you request and has a higher revision. To force it to use the locally installed SDK, you must set an environment variable `DOTNET_MULTILEVEL_LOOKUP=0` in your shell. You can use `dotnet --info` to verify what version of the Shared Framework it is using.
-
-3. If you are using a local copy of the dotnet CLI, take care that when you type `dotnet` you do not inadvertently pick up a different copy that you may have in your path. On Windows, for example, if you use a Developer Command Prompt, the global copy may be in the path, so use the fully qualified path to your local `dotnet`.
-
-After this point instructions are as above.
-
-## Using your local CoreFx build
+## Alternative Advanced Scenario - Using your local CoreFx build
 
 To use your local built corefx packages you will need to be a self-contained application and so you will
 need to follow the "Self-contained" steps from above. Once you can successfully restore, build, publish,
@@ -256,24 +220,6 @@ Note that this can fix the problem if the package is actually compatible with ne
 that are not available in netcoreapp2.0)
 
 For final release, we are considering modifying NuGet behavior to automatically consume the non-netstandard asset if there is no netstandard available.
-
-
-## Creating a .NET Core 2.0 console application from Visual Studio 2017
-
-File > New > Project > Console App (.NET Core)
-
-By default, Visual Studio creates a netcoreapp1.1 application. After installing the prerequisites mentioned above, you will
-need to modify your .csproj to target netcoreapp2.0 and reference the nightly build of Microsoft.NETCore.APP
-
-```XML
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework> <!-- this line -->
-    <RuntimeFrameworkVersion>2.0.0-beta-xyz-00</RuntimeFrameworkVersion> <!-- this line -->
-  </PropertyGroup>
-```
-
-In a future update to Visual Studio, it will no longer be necessary to make this edit.
 
 ## Finding specific builds
 
