@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -41,8 +41,7 @@ namespace System.ComponentModel.Composition.Hosting
             InitializeCompositionScopeDefinition(catalog, children, null);
         }
 
-
-        /// <summary>
+/// <summary>
         /// Initializes a new instance of the <see cref="CompositionScopeDefinition"/> class.
         /// </summary>
         /// <param name="catalog">The catalog.</param>
@@ -57,8 +56,7 @@ namespace System.ComponentModel.Composition.Hosting
             InitializeCompositionScopeDefinition(catalog, children, publicSurface);
         }
 
-
-        /// <summary>
+/// <summary>
         /// Initializes a new instance of the <see cref="CompositionScopeDefinition"/> class.
         /// </summary>
         /// <param name="catalog">The catalog.</param>

@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -227,8 +227,7 @@ namespace System.ComponentModel.Composition.Hosting
             this._types = types.ToArray();
         }
 
-
-        public override IEnumerator<ComposablePartDefinition> GetEnumerator()
+public override IEnumerator<ComposablePartDefinition> GetEnumerator()
         {
             this.ThrowIfDisposed();
             return this.PartsInternal.GetEnumerator();

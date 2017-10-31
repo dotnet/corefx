@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -145,7 +145,6 @@ namespace System.ComponentModel.Composition.Hosting
             this._definitionOrigin = this;
         }
 #endif //FEATURE_REFLECTIONCONTEXT && FEATURE_REFLECTIONFILEIO
-
 
 //#if FEATURE_REFLECTIONFILEIO
         /// <summary>
@@ -524,8 +523,7 @@ namespace System.ComponentModel.Composition.Hosting
             get { return null; }
         }
 
-
-        /// <summary>
+/// <summary>
         ///     Returns a string representation of the assembly catalog.
         /// </summary>
         /// <returns>
@@ -536,8 +534,7 @@ namespace System.ComponentModel.Composition.Hosting
             return this.GetDisplayName();
         }
 
-
-        protected override void Dispose(bool disposing)
+protected override void Dispose(bool disposing)
         {                
             try
             {

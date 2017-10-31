@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -56,9 +56,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return genericArity;
         }
 
-
-
-        private static void TraverseGenericType(Type type, Action<Type> onType)
+private static void TraverseGenericType(Type type, Action<Type> onType)
         {
             if (type.IsGenericType)
             {
@@ -95,8 +93,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return genericSpecialization;
         }
 
-
-        public static IEnumerable<Type> CreateTypeSpecializations(this Type[] types, Type[] specializationTypes)
+public static IEnumerable<Type> CreateTypeSpecializations(this Type[] types, Type[] specializationTypes)
         {
             if (types == null)
             {

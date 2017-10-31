@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -35,8 +35,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
         }
 
-
-        public ImportType(Type type, ImportCardinality cardinality)
+public ImportType(Type type, ImportCardinality cardinality)
         {
             Assumes.NotNull(type);
 
@@ -106,8 +105,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return IsGenericDescendentOf(type.BaseType, baseGenericTypeDefinition);
         }
 
-
-        public static bool IsDescendentOf(Type type, Type baseType)
+public static bool IsDescendentOf(Type type, Type baseType)
         {
             Assumes.NotNull(type);
             Assumes.NotNull(baseType);
@@ -120,8 +118,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return IsGenericDescendentOf(type, baseType.GetGenericTypeDefinition());
         }
 
-
-        private void Initialize(Type type)
+private void Initialize(Type type)
         {
             if (!type.IsGenericType)
             {

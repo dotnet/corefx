@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -171,8 +171,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
         }
 
-
-        private Dictionary<LazyMemberInfo, MemberInfo[]> BuildMembersTable(List<LazyMemberInfo> members)
+private Dictionary<LazyMemberInfo, MemberInfo[]> BuildMembersTable(List<LazyMemberInfo> members)
         {
             Assumes.NotNull(members);
 
@@ -253,8 +252,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         }
 
-
-        private List<ImportDefinition> PopulateImports(List<LazyMemberInfo> members, List<Lazy<ParameterInfo>> parameters)
+private List<ImportDefinition> PopulateImports(List<LazyMemberInfo> members, List<Lazy<ParameterInfo>> parameters)
         {
             List<ImportDefinition> imports = new List<ImportDefinition>();
 
@@ -273,8 +271,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return imports;
         }
 
-
-        private ImportDefinition TranslateImport(ReflectionImportDefinition reflectionImport, List<LazyMemberInfo> members, List<Lazy<ParameterInfo>> parameters)
+private ImportDefinition TranslateImport(ReflectionImportDefinition reflectionImport, List<LazyMemberInfo> members, List<Lazy<ParameterInfo>> parameters)
         {
             bool isExportFactory = false;
             ContractBasedImportDefinition productImport = reflectionImport;
@@ -402,9 +399,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             LazyMemberInfo exportingMember = new LazyMemberInfo(capturedLazyMember.MemberType, () => GetAccessors(capturedLazyMember));
             Lazy<IDictionary<string, object>> lazyMetadata = new Lazy<IDictionary<string, object>>(() => this.TranslateExportMetadata(capturedReflectionExport));
 
-
-
-            export = new ReflectionMemberExportDefinition(
+export = new ReflectionMemberExportDefinition(
                 exportingMember,
                 new LazyExportDefinition(contractName, lazyMetadata),
                 ((ICompositionElement)reflectionExport).Origin);
@@ -501,8 +496,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return this._exports;
         }
 
-
-        public IEnumerable<ImportDefinition> GetImports()
+public IEnumerable<ImportDefinition> GetImports()
         {
             this.PopulateImportsAndExports();
             return this._imports;

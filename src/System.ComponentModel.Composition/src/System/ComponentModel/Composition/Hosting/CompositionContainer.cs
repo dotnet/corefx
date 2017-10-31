@@ -215,8 +215,7 @@ namespace System.ComponentModel.Composition.Hosting
                 this._disposableRootProvider = this._rootProvider as IDisposable;
             }
 
-
-            //Insert Composition Service
+//Insert Composition Service
             if(compositionOptions.HasFlag(CompositionOptions.ExportCompositionService))
             {
                 this.ComposeExportedValue<ICompositionService>(new CompositionServiceShim(this));

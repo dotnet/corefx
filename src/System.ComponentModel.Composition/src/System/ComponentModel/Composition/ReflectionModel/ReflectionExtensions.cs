@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -64,8 +64,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return reflectionMember;
         }
 
-
-        public static ReflectionProperty ToReflectionProperty(this PropertyInfo property)
+public static ReflectionProperty ToReflectionProperty(this PropertyInfo property)
         {
             Assumes.NotNull(property);
             return CreateReflectionProperty(property.GetGetMethod(true), property.GetSetMethod(true));

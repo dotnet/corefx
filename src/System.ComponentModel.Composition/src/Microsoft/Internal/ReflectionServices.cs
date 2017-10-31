@@ -144,8 +144,7 @@ namespace Microsoft.Internal
             }
         }
 
-
-        public static IEnumerable<FieldInfo> GetAllFields(this Type type)
+public static IEnumerable<FieldInfo> GetAllFields(this Type type)
         {
             IEnumerable<FieldInfo> declaredFields = type.GetDeclaredFields();
 

@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -111,8 +111,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-
-        internal static string GetTypeIdentityFromExport(this MemberInfo member, Type typeIdentityType)
+internal static string GetTypeIdentityFromExport(this MemberInfo member, Type typeIdentityType)
         {   
             if (typeIdentityType != null)
             {
@@ -148,8 +147,7 @@ namespace System.ComponentModel.Composition.Hosting
             return string.IsNullOrEmpty(export.ContractName);
         }
 
-
-        internal static Type GetContractTypeFromImport(this IAttributedImport import, ImportType importType)
+internal static Type GetContractTypeFromImport(this IAttributedImport import, ImportType importType)
         {
             if (import.ContractType != null)
             {

@@ -16,7 +16,6 @@ using Microsoft.Internal;
 using PermissionSet = System.Security.PermissionSet;
 using PermissionState = System.Security.Permissions.PermissionState;
 
-
 namespace System.ComponentModel.Composition
 {
     /// <summary>

@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -99,8 +99,7 @@ namespace System.ComponentModel.Composition.Hosting
             this._disableSilentRejection = compositionOptions.HasFlag(CompositionOptions.DisableSilentRejection);
         }
 
-
-        /// <summary>
+/// <summary>
         ///     Gets the composable part catalog that the provider users to 
         ///     produce exports.
         /// </summary>
@@ -368,9 +367,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-
-
-        private void OnExportsChangingInternal(object sender, ExportsChangeEventArgs e)
+private void OnExportsChangingInternal(object sender, ExportsChangeEventArgs e)
         {
             UpdateRejections(e.AddedExports.Concat(e.RemovedExports), e.AtomicComposition);
         }

@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -106,8 +106,7 @@ namespace System.ComponentModel.Composition
         {
         }
 
-
-        internal CompositionException(string message, Exception innerException, IEnumerable<CompositionError> errors)
+internal CompositionException(string message, Exception innerException, IEnumerable<CompositionError> errors)
             : base(message, innerException)
         {
             Requires.NullOrNotNullElements(errors, "errors");
@@ -147,8 +146,7 @@ namespace System.ComponentModel.Composition
             get { return _errors; }
         }
 
-
-        /// <summary>
+/// <summary>
         ///     Gets a message that describes the exception.
         /// </summary>
         /// <value>
@@ -171,8 +169,7 @@ namespace System.ComponentModel.Composition
             }
         }
 
-
-        public ReadOnlyCollection<Exception> RootCauses
+public ReadOnlyCollection<Exception> RootCauses
         {
             get
             {

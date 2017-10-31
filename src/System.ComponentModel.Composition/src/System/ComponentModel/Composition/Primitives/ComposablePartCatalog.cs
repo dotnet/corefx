@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -11,7 +11,6 @@ using System.Threading;
 using Microsoft.Internal;
 using Microsoft.Internal.Collections;
 using System.ComponentModel.Composition.Hosting;
-
 
 namespace System.ComponentModel.Composition.Primitives
 {
@@ -125,14 +124,12 @@ namespace System.ComponentModel.Composition.Primitives
             return exports ?? _EmptyExportsList;
         }
 
-
-        internal virtual IEnumerable<ComposablePartDefinition> GetCandidateParts(ImportDefinition definition)
+internal virtual IEnumerable<ComposablePartDefinition> GetCandidateParts(ImportDefinition definition)
         {
             return this;
         }
 
-
-        /// <summary>
+/// <summary>
         ///     Releases the unmanaged resources used by the <see cref="ComposablePartCatalog"/> and 
         ///     optionally releases the managed resources.
         /// </summary>

@@ -19,8 +19,7 @@ namespace Microsoft.Internal
         // Type.GetTypeFromHandle
         private static readonly MethodInfo _typeGetTypeFromHandleMethod = typeof(Type).GetMethod("GetTypeFromHandle");
 
-
-        // typeofs are pretty expensive, so we cache them statically
+// typeofs are pretty expensive, so we cache them statically
         private static readonly Type TypeType = typeof(System.Type);
         private static readonly Type StringType = typeof(System.String);
         private static readonly Type CharType = typeof(System.Char);
@@ -278,8 +277,7 @@ namespace Microsoft.Internal
             }
         }
 
-
-        private static void LoadNull(this ILGenerator ilGenerator)
+private static void LoadNull(this ILGenerator ilGenerator)
         {
             ilGenerator.Emit(OpCodes.Ldnull);
         }
@@ -297,8 +295,7 @@ namespace Microsoft.Internal
             }
         }
 
-
-        private static void LoadInt(this ILGenerator ilGenerator, int value)
+private static void LoadInt(this ILGenerator ilGenerator, int value)
         {
             Assumes.NotNull(ilGenerator);
             ilGenerator.Emit(OpCodes.Ldc_I4, value);

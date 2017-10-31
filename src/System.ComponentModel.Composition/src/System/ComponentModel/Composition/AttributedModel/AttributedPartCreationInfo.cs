@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -164,8 +164,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             return isArityMatched;
         }
 
-
-        string ICompositionElement.DisplayName
+string ICompositionElement.DisplayName
         {
             get { return this.GetDisplayName(); }
         }

@@ -373,9 +373,8 @@ namespace System.ComponentModel.Composition.Hosting
                         partManager.State = ImportState.Composed;
                         break;
                     }
- 
 
-                    // "ing" states which represent some sort of cycle
+// "ing" states which represent some sort of cycle
                     // These state should always return, error or not, instead of breaking
                     case ImportState.ImportsPreviewing:
                     {
@@ -689,8 +688,7 @@ namespace System.ComponentModel.Composition.Hosting
             return partManager;
         }
 
-
-        private EngineContext GetEngineContext(AtomicComposition atomicComposition)
+private EngineContext GetEngineContext(AtomicComposition atomicComposition)
         {
             Assumes.NotNull(atomicComposition);
 

@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -130,8 +130,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
         }
 
-
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+[SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public override ComposablePart CreatePart()
         {
             if (this.IsDisposalRequired)
@@ -300,10 +299,8 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     yield return GenericServices.Reorder(genericParameters, genericParametersOrder);
                 }
             }
-            
-            
-            
-        }
+
+}
 
         private static bool TryGetGenericTypeParameters(IEnumerable<object> genericParameters, out Type[] genericTypeParameters)
         {

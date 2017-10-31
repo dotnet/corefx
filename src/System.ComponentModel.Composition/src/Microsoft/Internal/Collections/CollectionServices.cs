@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -133,8 +133,7 @@ namespace Microsoft.Internal.Collections
             
         }
 
-        
-        private static List<T> FastAppendToListAllowNulls<T>(
+private static List<T> FastAppendToListAllowNulls<T>(
                     this List<T> source, T value)
         {
             if (source == null)
