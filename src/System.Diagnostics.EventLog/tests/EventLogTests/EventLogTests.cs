@@ -42,7 +42,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                EventLog.Delete(log);
+                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
             }
         }
 
@@ -69,7 +69,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                EventLog.Delete(log);
+                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
                 Assert.False(EventLog.Exists(log));
             }
         }
@@ -141,7 +141,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                EventLog.Delete(log);
+                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
             }
         }
 
@@ -180,7 +180,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                EventLog.Delete(log);
+                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
             }
         }
 
@@ -207,7 +207,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                EventLog.Delete(log);
+                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
             }
         }
 
@@ -267,7 +267,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                EventLog.Delete(log);
+                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
             }
         }
 
@@ -325,7 +325,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                EventLog.Delete(log);
+                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
             }
         }
 
@@ -340,7 +340,7 @@ namespace System.Diagnostics.Tests
             using (EventLog eventlog = new EventLog("Security"))
             {
                 eventlog.Source = "Security";
-                EventLogEntry eventLogEntry = null;
+                EventLogEntry eventLogEntry;
                 eventLogEntry = Helpers.RetrieveEntry<EventLog>(() => eventlog.Entries[0]);
                 Assert.Contains("", eventLogEntry.Message);
             }

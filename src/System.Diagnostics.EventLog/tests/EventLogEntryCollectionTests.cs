@@ -69,7 +69,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                EventLog.Delete(log);
+                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
             }
         }
 
@@ -93,7 +93,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                EventLog.Delete(log);
+                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
             }
         }
 
@@ -121,7 +121,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                EventLog.Delete(log);
+                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
             }
         }
 
@@ -147,7 +147,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                EventLog.Delete(log);
+                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
             }
         }
     }
