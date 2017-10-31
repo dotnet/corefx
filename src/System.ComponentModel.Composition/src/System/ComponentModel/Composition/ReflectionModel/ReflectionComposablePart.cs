@@ -14,7 +14,6 @@ using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
-    // This 
     internal class ReflectionComposablePart : ComposablePart, ICompositionElement
     {
         private readonly ReflectionComposablePartDefinition _definition;
