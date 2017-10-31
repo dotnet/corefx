@@ -25,27 +25,27 @@ namespace System.Diagnostics.Tests
                     EventLog.WriteEvent(source, eventInstance);
                     if (data)
                     {
-                        Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData));
+                        Helpers.RetryAvailable(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData));
                         return eventLog.Entries.LastOrDefault();
                     }
                     else if (category)
                     {
-                        Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId));
+                        Helpers.RetryAvailable(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId));
                         return eventLog.Entries.LastOrDefault();
                     }
                     else
                     {
-                        Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId));
+                        Helpers.RetryAvailable(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId));
                         return eventLog.Entries.LastOrDefault();
                     }
                 }
                 else if (type)
                 {
-                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning));
+                    Helpers.RetryAvailable(() => eventLog.WriteEntry(message, EventLogEntryType.Warning));
                 }
                 else
                 {
-                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message));
+                    Helpers.RetryAvailable(() => eventLog.WriteEntry(message));
                 }
 
                 return eventLog.Entries.LastOrDefault();
@@ -62,27 +62,27 @@ namespace System.Diagnostics.Tests
                     EventLog.WriteEvent(source, eventInstance);
                     if (data)
                     {
-                        Helpers.RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData));
+                        Helpers.RetryAvailable(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData));
                         return eventLog.Entries.LastOrDefault();
                     }
                     else if (category)
                     {
-                        Helpers.RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId));
+                        Helpers.RetryAvailable(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId));
                         return eventLog.Entries.LastOrDefault();
                     }
                     else
                     {
-                        Helpers.RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId));
+                        Helpers.RetryAvailable(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId));
                         return eventLog.Entries.LastOrDefault();
                     }
                 }
                 else if (type)
                 {
-                    Helpers.RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning));
+                    Helpers.RetryAvailable(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning));
                 }
                 else
                 {
-                    Helpers.RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message));
+                    Helpers.RetryAvailable(() => EventLog.WriteEntry(source, message));
                 }
 
                 return eventLog.Entries.LastOrDefault();
@@ -93,11 +93,11 @@ namespace System.Diagnostics.Tests
         {
             if (data)
             {
-                Helpers.RetryAvailable<EventLog>(() => EventLog.WriteEvent(source, eventInstance, rawData, insertStrings));
+                Helpers.RetryAvailable(() => EventLog.WriteEvent(source, eventInstance, rawData, insertStrings));
             }
             else
             {
-                Helpers.RetryAvailable<EventLog>(() => EventLog.WriteEvent(source, eventInstance, insertStrings));
+                Helpers.RetryAvailable(() => EventLog.WriteEvent(source, eventInstance, insertStrings));
             }
             using (EventLog eventLog = new EventLog())
             {
@@ -113,9 +113,9 @@ namespace System.Diagnostics.Tests
                 string[] insertStringsSingleton = { "ExtraText" };
                 eventLog.Source = source;
                 if (data)
-                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEvent(eventInstance, rawData, insertStringsSingleton));
+                    Helpers.RetryAvailable(() => eventLog.WriteEvent(eventInstance, rawData, insertStringsSingleton));
                 else
-                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEvent(eventInstance, insertStringsSingleton));
+                    Helpers.RetryAvailable(() => eventLog.WriteEvent(eventInstance, insertStringsSingleton));
 
                 return eventLog.Entries.LastOrDefault();
             }
@@ -149,7 +149,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
+                Helpers.RetryAvailable(() => EventLog.Delete(log));
             }
         }
 
@@ -178,7 +178,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
+                Helpers.RetryAvailable(() => EventLog.Delete(log));
             }
         }
 
@@ -207,7 +207,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
+                Helpers.RetryAvailable(() => EventLog.Delete(log));
             }
         }
 
@@ -242,7 +242,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
+                Helpers.RetryAvailable(() => EventLog.Delete(log));
             }
         }
 
@@ -271,7 +271,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
+                Helpers.RetryAvailable(() => EventLog.Delete(log));
             }
         }
 
@@ -324,7 +324,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
+                Helpers.RetryAvailable(() => EventLog.Delete(log));
             }
         }
 
@@ -351,7 +351,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryAvailable<EventLog>(() => EventLog.Delete(log));
+                Helpers.RetryAvailable(() => EventLog.Delete(log));
             }
         }
 
@@ -399,7 +399,7 @@ namespace System.Diagnostics.Tests
         internal static EventLogEntry LastOrDefault(this EventLogEntryCollection elec)
         {
             EventLogEntry eventLogEntry = null;
-            eventLogEntry = Helpers.RetrieveEntryFromCollection<EventLogEntryCollection>(() => elec.Count > 0 ? elec[elec.Count - 1] : null);
+            eventLogEntry = Helpers.RetrieveEntryOrMessage<EventLogEntry>(() => elec.Count > 0 ? elec[elec.Count - 1] : null);
             return eventLogEntry;
         }
     }

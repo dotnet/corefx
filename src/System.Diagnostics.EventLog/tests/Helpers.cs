@@ -12,32 +12,7 @@ namespace System.Diagnostics.Tests
         public static bool IsElevatedAndSupportsEventLogs { get => AdminHelpers.IsProcessElevated() && SupportsEventLogs; }
         public static bool SupportsEventLogs { get => PlatformDetection.IsNotWindowsNanoServer; }
 
-        public static void RetryAvailable<EventLog>(Action func)
-        {
-            if (!PlatformDetection.IsWindows7)
-            {
-                func();
-                return;
-            }
-
-            int retries = 3;
-            while (retries > 0)
-            {
-                try
-                {
-                    func();
-                    break;
-                }
-                catch (Win32Exception)
-                {
-                    Thread.Sleep(100);
-                    retries--;
-                }
-            }
-            return;
-        }
-
-        public static void CopyCollection<EventLogEntryCollection>(Action func)
+        public static void RetryAvailable(Action func)
         {
             if (!PlatformDetection.IsWindows7)
             {
@@ -87,9 +62,9 @@ namespace System.Diagnostics.Tests
             return eventLogEntry;
         }
 
-        public static EventLogEntry RetrieveEntryFromCollection<EventLog>(Func<EventLogEntry> func)
+        public static T RetrieveEntryOrMessage<T>(Func<T> func)
         {
-            EventLogEntry eventLogEntry = null;
+            T entry = default(T);
             if (!PlatformDetection.IsWindows7)
             {
                 return func();
@@ -100,7 +75,7 @@ namespace System.Diagnostics.Tests
             {
                 try
                 {
-                    eventLogEntry = func();
+                    entry = func();
                     break;
                 }
                 catch (Win32Exception)
@@ -109,32 +84,7 @@ namespace System.Diagnostics.Tests
                     retries--;
                 }
             }
-            return eventLogEntry;
-        }
-
-        public static string RetrieveMessage<EventLogEntry>(Func<string> func)
-        {
-            string message = null;
-            if (!PlatformDetection.IsWindows7)
-            {
-                return func();
-            }
-
-            int retries = 3;
-            while (retries > 0)
-            {
-                try
-                {
-                    message = func();
-                    break;
-                }
-                catch (Win32Exception)
-                {
-                    Thread.Sleep(100);
-                    retries--;
-                }
-            }
-            return message;
+            return entry;
         }
     }
 }
