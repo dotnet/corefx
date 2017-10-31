@@ -451,6 +451,7 @@ namespace System.ServiceModel.Syndication.Tests
         }
 
         [Fact]
+        [ActiveIssue(24971)]
         public static void RssFeedPositiveTest()
         {
             string dataFile = @"rss_feeds.dat";
