@@ -15,8 +15,7 @@ namespace Microsoft.Internal
     internal static partial class Requires
     {
         [DebuggerStepThrough]
-        [ContractArgumentValidator]
-        public static void NotNullOrNullElements<T>(IEnumerable<T> values, string parameterName)
+public static void NotNullOrNullElements<T>(IEnumerable<T> values, string parameterName)
             where T : class
         {
             NotNull(values, parameterName);
@@ -25,8 +24,7 @@ namespace Microsoft.Internal
         }
 
         [DebuggerStepThrough]
-        [ContractArgumentValidator]
-        public static void NullOrNotNullElements<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> values, string parameterName)
+public static void NullOrNotNullElements<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> values, string parameterName)
             where TKey : class
             where TValue : class
         {
@@ -35,8 +33,7 @@ namespace Microsoft.Internal
         }
 
         [DebuggerStepThrough]
-        [ContractArgumentValidator]
-        public static void NullOrNotNullElements<T>(IEnumerable<T> values, string parameterName)
+public static void NullOrNotNullElements<T>(IEnumerable<T> values, string parameterName)
             where T : class
         {
             NotNullElements(values, parameterName);
@@ -44,8 +41,7 @@ namespace Microsoft.Internal
         }
 
         [DebuggerStepThrough]
-        [ContractArgumentValidator]
-        private static void NotNullElements<T>(IEnumerable<T> values, string parameterName)
+private static void NotNullElements<T>(IEnumerable<T> values, string parameterName)
             where T : class
         {
             if (values != null && !Contract.ForAll(values, (value) => value != null))
@@ -79,8 +75,7 @@ namespace Microsoft.Internal
         }
 
         [DebuggerStepThrough]
-        [ContractArgumentValidator]
-        private static void NotNullElements<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> values, string parameterName)
+private static void NotNullElements<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> values, string parameterName)
             where TKey : class
             where TValue : class
         {
@@ -92,8 +87,7 @@ namespace Microsoft.Internal
         }
 
         [DebuggerStepThrough]
-        [ContractArgumentValidator]
-        public static void IsInMembertypeSet(MemberTypes value, string parameterName, MemberTypes enumFlagSet)
+public static void IsInMembertypeSet(MemberTypes value, string parameterName, MemberTypes enumFlagSet)
         {
             if ((value & enumFlagSet) != value || // Ensure the member is in the set
                 (value & (value - 1)) != 0) // Ensure that there is only one flag in the value (i.e. value is a power of 2).

@@ -866,8 +866,7 @@ private void OnExportsChangingInternal(object sender, ExportsChangeEventArgs e)
         }
 
         [DebuggerStepThrough]
-        [ContractArgumentValidator]
-        [SuppressMessage("Microsoft.Contracts", "CC1053", Justification = "Suppressing warning because this validator has no public contract")]
+[SuppressMessage("Microsoft.Contracts", "CC1053", Justification = "Suppressing warning because this validator has no public contract")]
         private void ThrowIfDisposed()
         {
             if (this._isDisposed)

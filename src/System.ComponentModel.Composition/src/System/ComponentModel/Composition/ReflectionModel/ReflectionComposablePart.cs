@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -50,9 +50,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         protected virtual void EnsureRunning()
         {
         }
-
-        [ContractArgumentValidator]
-        [SuppressMessage("Microsoft.Contracts", "CC1053")]
+[SuppressMessage("Microsoft.Contracts", "CC1053")]
         protected void RequiresRunning()
         {
             this.EnsureRunning();

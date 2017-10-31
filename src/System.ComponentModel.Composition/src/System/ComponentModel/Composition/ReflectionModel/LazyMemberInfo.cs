@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -135,9 +135,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             return !left.Equals(right);
         }
-
-        [ContractArgumentValidator]
-        private static void EnsureSupportedMemberType(MemberTypes memberType, string argument)
+private static void EnsureSupportedMemberType(MemberTypes memberType, string argument)
         {
             MemberTypes supportedTypes = MemberTypes.TypeInfo | MemberTypes.NestedType | MemberTypes.Constructor | MemberTypes.Field | MemberTypes.Method | MemberTypes.Property | MemberTypes.Event;
             Requires.IsInMembertypeSet(memberType, argument, supportedTypes);
