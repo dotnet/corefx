@@ -57,7 +57,7 @@ namespace System.Diagnostics.Tests
                 {
                     eventLog.Source = source;
                     Helpers.RetryAvailable(() => eventLog.WriteEntry(message));
-                    EventLogEntry entry = Helpers.RetrieveEntry<EventLog>(() => eventLog.Entries[eventLog.Entries.Count - 1]);
+                    EventLogEntry entry = Helpers.RetrieveEntryOrMessage(() => eventLog.Entries[eventLog.Entries.Count - 1]);
                     Assert.False(entry.Equals(null));
                 }
             }
@@ -81,11 +81,11 @@ namespace System.Diagnostics.Tests
                 {
                     eventLog.Source = source;
                     Helpers.RetryAvailable(() => eventLog.WriteEntry(message));
-                    EventLogEntry entry = Helpers.RetrieveEntry<EventLog>(() => eventLog.Entries[eventLog.Entries.Count - 1]);
+                    EventLogEntry entry = Helpers.RetrieveEntryOrMessage(() => eventLog.Entries[eventLog.Entries.Count - 1]);
                     Assert.True(entry.Equals(entry));
 
                     Helpers.RetryAvailable(() => eventLog.WriteEntry(message));
-                    EventLogEntry secondEntry = Helpers.RetrieveEntry<EventLog>(() => eventLog.Entries[eventLog.Entries.Count - 1]);
+                    EventLogEntry secondEntry = Helpers.RetrieveEntryOrMessage(() => eventLog.Entries[eventLog.Entries.Count - 1]);
                     Assert.Equal(entry.Index + 1, secondEntry.Index);
                 }
             }
@@ -110,8 +110,8 @@ namespace System.Diagnostics.Tests
                     eventLog.Source = source;
                     Helpers.RetryAvailable(() => eventLog.WriteEntry(message));
                     Helpers.RetryAvailable(() => eventLog.WriteEntry(message));
-                    EventLogEntry entry = Helpers.RetrieveEntry<EventLog>(() => eventLog.Entries[eventLog.Entries.Count - 1]);
-                    EventLogEntry secondEntry = Helpers.RetrieveEntry<EventLog>(() => eventLog.Entries[eventLog.Entries.Count - 2]);
+                    EventLogEntry entry = Helpers.RetrieveEntryOrMessage(() => eventLog.Entries[eventLog.Entries.Count - 1]);
+                    EventLogEntry secondEntry = Helpers.RetrieveEntryOrMessage(() => eventLog.Entries[eventLog.Entries.Count - 2]);
                     Assert.False(entry.Equals(secondEntry));
                 }
             }

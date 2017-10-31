@@ -26,7 +26,7 @@ namespace System.Diagnostics.Tests
                 try
                 {
                     func();
-                    break;
+                    retries = -1;
                 }
                 catch (Win32Exception)
                 {
@@ -35,31 +35,6 @@ namespace System.Diagnostics.Tests
                 }
             }
             return;
-        }
-
-        public static EventLogEntry RetrieveEntry<EventLog>(Func<EventLogEntry> func)
-        {
-            EventLogEntry eventLogEntry = null;
-            if (!PlatformDetection.IsWindows7)
-            {
-                return func();
-            }
-
-            int retries = 3;
-            while (retries > 0)
-            {
-                try
-                {
-                    eventLogEntry = func();
-                    break;
-                }
-                catch (Win32Exception)
-                {
-                    Thread.Sleep(100);
-                    retries--;
-                }
-            }
-            return eventLogEntry;
         }
 
         public static T RetrieveEntryOrMessage<T>(Func<T> func)
@@ -76,7 +51,7 @@ namespace System.Diagnostics.Tests
                 try
                 {
                     entry = func();
-                    break;
+                    retries = -1;
                 }
                 catch (Win32Exception)
                 {

@@ -341,7 +341,7 @@ namespace System.Diagnostics.Tests
             {
                 eventlog.Source = "Security";
                 EventLogEntry eventLogEntry;
-                eventLogEntry = Helpers.RetrieveEntry<EventLog>(() => eventlog.Entries[0]);
+                eventLogEntry = Helpers.RetrieveEntryOrMessage(() => eventlog.Entries[0]);
                 Assert.Contains("", eventLogEntry.Message);
             }
         }
