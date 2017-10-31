@@ -24,21 +24,8 @@ namespace System.Diagnostics.Tests
                 using (EventLog eventLog = new EventLog())
                 {
                     eventLog.Source = source;
-                    bool entryWritten = true;
-                    while (entryWritten)
-                    {
-                        try
-                        {
-                            eventLog.WriteEntry(message);
-                            eventLog.WriteEntry("Further Testing");
-                            entryWritten = false;
-                        }
-                        catch (Win32Exception)
-                        {
-                            Thread.Sleep(100);
-                            eventLog.Clear();
-                        }
-                    }
+                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message));
+                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry("Further Testing"));
 
                     EventLogEntryCollection entryCollection = eventLog.Entries;
                     EventLogEntry[] entryCollectionCopied = new EventLogEntry[entryCollection.Count];
@@ -76,6 +63,7 @@ namespace System.Diagnostics.Tests
                             Thread.Sleep(100);
                         }
                     }
+
                 }
             }
             finally
@@ -97,22 +85,9 @@ namespace System.Diagnostics.Tests
                 using (EventLog eventLog = new EventLog())
                 {
                     eventLog.Source = source;
-                    bool entryWritten = true;
-                    while (entryWritten)
-                    {
-                        try
-                        {
-                            eventLog.WriteEntry(message);
-                            EventLogEntry entry = eventLog.Entries[eventLog.Entries.Count - 1];
-                            Assert.False(entry.Equals(null));
-                            entryWritten = false;
-                        }
-                        catch (Win32Exception)
-                        {
-                            Thread.Sleep(100);
-                            eventLog.Clear();
-                        }
-                    }
+                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message));
+                    EventLogEntry entry = Helpers.RetrieveEntry<EventLog>(() => eventLog.Entries[eventLog.Entries.Count - 1]);
+                    Assert.False(entry.Equals(null));
                 }
             }
             finally
@@ -134,25 +109,13 @@ namespace System.Diagnostics.Tests
                 using (EventLog eventLog = new EventLog())
                 {
                     eventLog.Source = source;
-                    bool entryWritten = true;
-                    while (entryWritten)
-                    {
-                        try
-                        {
-                            eventLog.WriteEntry(message);
-                            EventLogEntry entry = eventLog.Entries[eventLog.Entries.Count - 1];
-                            Assert.True(entry.Equals(entry));
-                            eventLog.WriteEntry(message);
-                            EventLogEntry secondEntry = eventLog.Entries[eventLog.Entries.Count - 1];
-                            Assert.Equal(entry.Index + 1, secondEntry.Index);
-                            entryWritten = false;
-                        }
-                        catch (Win32Exception)
-                        {
-                            Thread.Sleep(100);
-                            eventLog.Clear();
-                        }
-                    }
+                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message));
+                    EventLogEntry entry = Helpers.RetrieveEntry<EventLog>(() => eventLog.Entries[eventLog.Entries.Count - 1]);
+                    Assert.True(entry.Equals(entry));
+
+                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message));
+                    EventLogEntry secondEntry = Helpers.RetrieveEntry<EventLog>(() => eventLog.Entries[eventLog.Entries.Count - 1]);
+                    Assert.Equal(entry.Index + 1, secondEntry.Index);
                 }
             }
             finally
@@ -174,24 +137,11 @@ namespace System.Diagnostics.Tests
                 using (EventLog eventLog = new EventLog())
                 {
                     eventLog.Source = source;
-                    bool entryWritten = true;
-                    while (entryWritten)
-                    {
-                        try
-                        {
-                            eventLog.WriteEntry(message);
-                            eventLog.WriteEntry(message);
-                            EventLogEntry entry = eventLog.Entries[eventLog.Entries.Count - 1];
-                            EventLogEntry secondEntry = eventLog.Entries[eventLog.Entries.Count - 2];
-                            Assert.False(entry.Equals(secondEntry));
-                            entryWritten = false;
-                        }
-                        catch (Win32Exception)
-                        {
-                            Thread.Sleep(100);
-                            eventLog.Clear();
-                        }
-                    }
+                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message));
+                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message));
+                    EventLogEntry entry = Helpers.RetrieveEntry<EventLog>(() => eventLog.Entries[eventLog.Entries.Count - 1]);
+                    EventLogEntry secondEntry = Helpers.RetrieveEntry<EventLog>(() => eventLog.Entries[eventLog.Entries.Count - 2]);
+                    Assert.False(entry.Equals(secondEntry));
                 }
             }
             finally
