@@ -15,7 +15,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
     {
         private class LifetimeContext
         {
-            static Type[] types = { typeof(ComposablePartDefinition) };
+            private static Type[] types = { typeof(ComposablePartDefinition) };
 
             public Tuple<T, Action> GetExportLifetimeContextFromExport<T>(Export export)
             {
