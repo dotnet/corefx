@@ -69,6 +69,11 @@
     "CommonTypes": []
   },
   {
+    "Name": "Microsoft.NETFramework.Compatibility.Shims",
+    "Description": "Includes .NET Framework shims in order for Microsoft.NETFramework.Compatibility to find all the necessary types when running in .NET Core",
+    "CommonTypes": []
+  },
+  {
     "Name": "Microsoft.NETCore.Runtime",
     "Description": "The .NET Core runtime.",
     "CommonTypes": []

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+
+  <PropertyGroup>
+    <PackageVersion>$(CompatibilityShimsPackageVersion)</PackageVersion>
+    <_ShimsLocationPath>$(BaseIntermediateOutputPath)shims/netcoreapp/facades/</_ShimsLocationPath>
+    <_PkgLibDir>/lib/netcoreapp2.0/</_PkgLibDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ShimsToInclude Include="mscorlib" />
+    <ShimsToInclude Include="System" />
+    <ShimsToInclude Include="System.Configuration" />
+    <ShimsToInclude Include="System.Core" />
+    <ShimsToInclude Include="System.Data" />
+    <ShimsToInclude Include="System.Drawing" />
+    <ShimsToInclude Include="System.Net" />
+    <ShimsToInclude Include="System.Security" />
+    <ShimsToInclude Include="System.ServiceModel.Web" />
+    <ShimsToInclude Include="System.ServiceProcess" />
+    <ShimsToInclude Include="System.Transactions" />
+    <ShimsToInclude Include="WindowsBase" />
+  </ItemGroup>
+
+  <Target Name="AddShimsToPackage"
+          BeforeTargets="GetPackageFiles">
+
+    <Error Text="Required facade: %(ShimsToInclude.Identity) was not found in $(_ShimsLocationPath)." Condition="!Exists('@(ShimsToInclude->'$(_ShimsLocationPath)%(Identity).dll')')" />
+
+    <ItemGroup>
+      <_ShimsPaths Include="@(ShimsToInclude->'$(_ShimsLocationPath)%(Identity).dll')">
+        <DllName>%(Identity).dll</DllName>
+      </_ShimsPaths>
+      <File Include="@(_ShimsPaths)">
+        <TargetPath>$(_PkgLibDir)%(_ShimsPaths.DllName)</TargetPath>
+        <SkipPackageFileCheck>true</SkipPackageFileCheck>
+      </File>
+    </ItemGroup>
+
+    <Message Importance="Normal" Text="Added: %(_ShimsPaths.Identity) to package." />
+  </Target>
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>

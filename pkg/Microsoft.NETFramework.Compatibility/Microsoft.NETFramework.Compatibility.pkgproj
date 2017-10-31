@@ -8,11 +8,8 @@
 
   <ItemDefinitionGroup>
     <LibraryPackage>
-      <Version>4.4.0</Version>
-    </LibraryPackage>
-    <PrereleaseLibraryPackage>
       <Version>4.5.0</Version>
-    </PrereleaseLibraryPackage>
+    </LibraryPackage>
   </ItemDefinitionGroup>
 
   <ItemGroup>
@@ -44,16 +41,20 @@
     <LibraryPackage Include="System.ServiceModel.Http" />
     <LibraryPackage Include="System.ServiceModel.NetTcp" />
     <LibraryPackage Include="System.ServiceModel.Security" />
-    <PrereleaseLibraryPackage Include="System.Data.Odbc" />
-    <PrereleaseLibraryPackage Include="System.Drawing.Common" />
-    <PrereleaseLibraryPackage Include="System.Diagnostics.EventLog" />
-    <PrereleaseLibraryPackage Include="System.Diagnostics.PerformanceCounter" />
-    <PrereleaseLibraryPackage Include="System.ServiceModel.Syndication" />
+    <LibraryPackage Include="System.Data.Odbc" />
+    <LibraryPackage Include="System.Drawing.Common" />
+    <LibraryPackage Include="System.Diagnostics.EventLog" />
+    <LibraryPackage Include="System.Diagnostics.PerformanceCounter" />
+    <LibraryPackage Include="System.ServiceModel.Syndication" />
   </ItemGroup>
 
   <ItemGroup>
     <Dependency Include="@(LibraryPackage)" />
-    <Dependency Include="@(PrereleaseLibraryPackage)" />
+
+    <!-- Include dependency to shims package -->
+    <Dependency Include="Microsoft.NETFramework.Compatibility.Shims">
+      <Version>$(CompatibilityShimsPackageVersion)</Version>
+    </Dependency>
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

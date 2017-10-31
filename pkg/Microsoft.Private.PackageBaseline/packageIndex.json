@@ -133,6 +133,9 @@
     "Microsoft.NETFramework.Compatibility": {
       "InboxOn": {}
     },
+    "Microsoft.NETFramework.Compatibility.Shims": {
+      "InboxOn": {}
+    },
     "Microsoft.Phone": {
       "InboxOn": {
         "wp8": "8.0.0.0"
