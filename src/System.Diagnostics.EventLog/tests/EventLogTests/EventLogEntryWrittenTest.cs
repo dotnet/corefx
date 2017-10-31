@@ -31,9 +31,7 @@ namespace System.Diagnostics.Tests
                         signal.Set();
                     });
                     eventLog.EnableRaisingEvents = waitOnEvent;
-
                     Helpers.RetryOnWin7(() => eventLog.WriteEntry(message, EventLogEntryType.Information));
-
                     if (waitOnEvent)
                     {
                         if (!signal.WaitOne(6000))
