@@ -70,7 +70,7 @@
   },
   {
     "Name": "Microsoft.NETFramework.Compatibility.Shims",
-    "Description": "Includes .NET Framework shims in order for Microsoft.NETFramework.Compatibility to find all the necessary types when running in .NET Core",
+    "Description": "Includes .NET Framework shims that type forward to .NET Core implementations in the Microsoft.NETFramework.Compatibility package.",
     "CommonTypes": []
   },
   {

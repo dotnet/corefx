@@ -9,36 +9,33 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ShimsToInclude Include="mscorlib" />
-    <ShimsToInclude Include="System" />
-    <ShimsToInclude Include="System.Configuration" />
-    <ShimsToInclude Include="System.Core" />
-    <ShimsToInclude Include="System.Data" />
-    <ShimsToInclude Include="System.Drawing" />
-    <ShimsToInclude Include="System.Net" />
-    <ShimsToInclude Include="System.Security" />
-    <ShimsToInclude Include="System.ServiceModel.Web" />
-    <ShimsToInclude Include="System.ServiceProcess" />
-    <ShimsToInclude Include="System.Transactions" />
-    <ShimsToInclude Include="WindowsBase" />
+    <ShimsToInclude Include="mscorlib.dll" />
+    <ShimsToInclude Include="System.dll" />
+    <ShimsToInclude Include="System.Configuration.dll" />
+    <ShimsToInclude Include="System.Core.dll" />
+    <ShimsToInclude Include="System.Data.dll" />
+    <ShimsToInclude Include="System.Drawing.dll" />
+    <ShimsToInclude Include="System.Net.dll" />
+    <ShimsToInclude Include="System.Security.dll" />
+    <ShimsToInclude Include="System.ServiceModel.Web.dll" />
+    <ShimsToInclude Include="System.ServiceProcess.dll" />
+    <ShimsToInclude Include="System.Transactions.dll" />
+    <ShimsToInclude Include="WindowsBase.dll" />
   </ItemGroup>
 
   <Target Name="AddShimsToPackage"
           BeforeTargets="GetPackageFiles">
 
-    <Error Text="Required facade: %(ShimsToInclude.Identity) was not found in $(_ShimsLocationPath)." Condition="!Exists('@(ShimsToInclude->'$(_ShimsLocationPath)%(Identity).dll')')" />
+    <Error Text="Required facade: %(ShimsToInclude.Identity) was not found in $(_ShimsLocationPath)." Condition="!Exists('@(ShimsToInclude->'$(_ShimsLocationPath)%(Identity)')')" />
 
     <ItemGroup>
-      <_ShimsPaths Include="@(ShimsToInclude->'$(_ShimsLocationPath)%(Identity).dll')">
-        <DllName>%(Identity).dll</DllName>
-      </_ShimsPaths>
-      <File Include="@(_ShimsPaths)">
-        <TargetPath>$(_PkgLibDir)%(_ShimsPaths.DllName)</TargetPath>
+      <File Include="@(ShimsToInclude->'$(_ShimsLocationPath)%(Identity)')">
+        <TargetPath>$(_PkgLibDir)%(ShimsToInclude.Identity)</TargetPath>
         <SkipPackageFileCheck>true</SkipPackageFileCheck>
       </File>
     </ItemGroup>
 
-    <Message Importance="Normal" Text="Added: %(_ShimsPaths.Identity) to package." />
+    <Message Importance="Low" Text="Added: %(ShimsToInclude.Identity) to package." />
   </Target>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
