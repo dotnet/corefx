@@ -285,6 +285,6 @@
     <value>System.Management currently is only supported for Windows desktop applications.</value>
   </data>
   <data name="PlatformNotSupported_FullFrameworkRequired" xml:space="preserve">
-    <value>The .NET Framework location was not found in the registry. System.Management requires native modules from the .NET Framework to operate.</value>
+    <value>Could not find an installation of .NET Framework v4.0.30319. System.Management requires native modules from the .NET Framework to operate.</value>
   </data>
 </root>
