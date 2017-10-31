@@ -11,7 +11,6 @@
 namespace System.ServiceModel.Syndication
 {
     using System;
-    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using System.Xml;
     using System.Xml.Schema;
@@ -120,6 +119,7 @@ namespace System.ServiceModel.Syndication
                 throw new ArgumentNullException(nameof(writer));
             }
 
+            writer = XmlWriterWrapper.CreateFromWriter(writer);
             WriteItemAsync(writer).GetAwaiter().GetResult();
         }
 
@@ -152,9 +152,9 @@ namespace System.ServiceModel.Syndication
 
             writer = XmlWriterWrapper.CreateFromWriter(writer);
 
-            await writer.WriteStartElementAsync(Atom10Constants.EntryTag, Atom10Constants.Atom10Namespace);
-            await WriteItemAsync(writer);
-            await writer.WriteEndElementAsync();
+            await writer.WriteStartElementAsync(Atom10Constants.EntryTag, Atom10Constants.Atom10Namespace).ConfigureAwait(false);
+            await WriteItemAsync(writer).ConfigureAwait(false);
+            await writer.WriteEndElementAsync().ConfigureAwait(false);
         }
 
         protected override SyndicationItem CreateItemInstance()

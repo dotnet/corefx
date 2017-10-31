@@ -566,6 +566,13 @@
     ]
   },
   {
+    "Name": "System.Diagnostics.PerformanceCounter",
+    "Description": "Provides the System.Diagnostics.PerformanceCounter class, which allows access to Windows performance counters.",
+    "CommonTypes": [
+      "System.Diagnostics.PerformanceCounter"
+    ]
+  },
+  {
     "Name": "System.Diagnostics.Process",
     "Description": "Provides the System.Diagnostics.Process class, which allows interaction with local and remote processes.",
     "CommonTypes": [
@@ -1886,6 +1893,14 @@
       "System.Security.AccessControl.SemaphoreAccessRule",
       "System.Security.AccessControl.SemaphoreAuditRule",
       "System.Security.AccessControl.SemaphoreSecurity"
+    ]
+  },
+  {
+    "Name": "System.Threading.Channels",
+    "Description": "Provides types for passing data between producers and consumers.",
+    "CommonTypes": [
+      "System.Threading.Channel",
+      "System.Threading.Channel<T>"
     ]
   },
   {
