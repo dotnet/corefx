@@ -98,20 +98,20 @@ namespace System.Buffers.Binary
         public static T ReadMachineEndian<T>(ReadOnlySpan<byte> buffer)
             where T : struct
         {
-#if IsPartialFacade
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+#if netstandard
+            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
             {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
+                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             }
 #else
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             }
 #endif
             if (Unsafe.SizeOf<T>() > buffer.Length)
             {
-                throw new ArgumentOutOfRangeException();
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
             }
             return Unsafe.ReadUnaligned<T>(ref buffer.DangerousGetPinnableReference());
         }
@@ -124,13 +124,13 @@ namespace System.Buffers.Binary
         public static bool TryReadMachineEndian<T>(ReadOnlySpan<byte> buffer, out T value)
             where T : struct
         {
-#if IsPartialFacade
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+#if netstandard
+            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
             {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
+                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             }
 #else
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             }

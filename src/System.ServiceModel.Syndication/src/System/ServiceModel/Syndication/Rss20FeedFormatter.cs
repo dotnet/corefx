@@ -7,7 +7,6 @@ namespace System.ServiceModel.Syndication
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Text;
     using System.Threading;
@@ -18,7 +17,7 @@ namespace System.ServiceModel.Syndication
 
 
     [XmlRoot(ElementName = Rss20Constants.RssTag, Namespace = Rss20Constants.Rss20Namespace)]
-    public class Rss20FeedFormatter : SyndicationFeedFormatter
+    public class Rss20FeedFormatter : SyndicationFeedFormatter, IXmlSerializable
     {
         private static readonly XmlQualifiedName s_rss20Domain = new XmlQualifiedName(Rss20Constants.DomainTag, string.Empty);
         private static readonly XmlQualifiedName s_rss20Length = new XmlQualifiedName(Rss20Constants.LengthTag, string.Empty);
@@ -35,61 +34,43 @@ namespace System.ServiceModel.Syndication
         private bool _preserveElementExtensions;
         private bool _serializeExtensionsAsAtom;
 
-        //Custom Parsers
-        //   value, localname , ns , result
-        public Func<string, string, string, string> StringParser { get; set; } = DefaultStringParser;
-        public Func<string, string, string, DateTimeOffset> DateParser { get; set; } = DefaultDateParser;
-        public Func<string, string, string, Uri> UriParser { get; set; } = DefaultUriParser;
-
-        static private string DefaultStringParser(string value, string localName, string ns)
+        private async Task<bool> OnReadImage(XmlReader reader, SyndicationFeed result)
         {
-            return value;
-        }
-
-        static private Uri DefaultUriParser(string value, string localName, string ns)
-        {
-            return new Uri(value, UriKind.RelativeOrAbsolute);
-        }
-
-        private async Task<bool> OnReadImage(XmlReaderWrapper reader, SyndicationFeed result)
-        {
-            await reader.ReadStartElementAsync();
+            await reader.ReadStartElementAsync().ConfigureAwait(false);
             string localName = string.Empty;
 
-            while (await reader.IsStartElementAsync())
+            while (await reader.IsStartElementAsync().ConfigureAwait(false))
             {
-                if (await reader.IsStartElementAsync(Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace))
+                if (await reader.IsStartElementAsync(Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false))
                 {
-                    result.ImageUrl = UriParser(await reader.ReadElementStringAsync(), Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace);
+                    result.ImageUrl = UriParser(await reader.ReadElementStringAsync().ConfigureAwait(false), UriKind.RelativeOrAbsolute, Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace);
                 }
-                else if (await reader.IsStartElementAsync(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace))
+                else if (await reader.IsStartElementAsync(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false))
                 {
-                    result.ImageLink = UriParser(await reader.ReadElementStringAsync(), Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace);
+                    result.ImageLink = UriParser(await reader.ReadElementStringAsync().ConfigureAwait(false), UriKind.RelativeOrAbsolute, Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace);
                 }
-                else if (await reader.IsStartElementAsync(Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace))
+                else if (await reader.IsStartElementAsync(Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false))
                 {
-                    result.ImageTitle = new TextSyndicationContent(StringParser(await reader.ReadElementStringAsync(), Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace));
+                    result.ImageTitle = new TextSyndicationContent(StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace));
                 }
             }
-            await reader.ReadEndElementAsync(); // image
+            await reader.ReadEndElementAsync().ConfigureAwait(false); // image
             return true;
         }
 
-        public Rss20FeedFormatter()
-            : this(typeof(SyndicationFeed))
+        public Rss20FeedFormatter() : this(typeof (SyndicationFeed))
         {
         }
 
-        public Rss20FeedFormatter(Type feedTypeToCreate)
-            : base()
+        public Rss20FeedFormatter(Type feedTypeToCreate) : base()
         {
             if (feedTypeToCreate == null)
             {
                 throw new ArgumentNullException(nameof(feedTypeToCreate));
             }
-            if (!typeof(SyndicationFeed).IsAssignableFrom(feedTypeToCreate))
+            if (!typeof (SyndicationFeed).IsAssignableFrom(feedTypeToCreate))
             {
-                throw new ArgumentException(string.Format(SR.InvalidObjectTypePassed, nameof(feedTypeToCreate), nameof(SyndicationFeed)));
+                throw new ArgumentException(SR.Format(SR.InvalidObjectTypePassed, nameof(feedTypeToCreate), nameof(SyndicationFeed)));
             }
             _serializeExtensionsAsAtom = true;
             _maxExtensionSize = int.MaxValue;
@@ -97,23 +78,23 @@ namespace System.ServiceModel.Syndication
             _preserveAttributeExtensions = true;
             _atomSerializer = new Atom10FeedFormatter(feedTypeToCreate);
             _feedType = feedTypeToCreate;
+            DateTimeParser = DateTimeHelper.CreateRss20DateTimeParser();
         }
 
-        public Rss20FeedFormatter(SyndicationFeed feedToWrite)
-            : this(feedToWrite, true)
+        public Rss20FeedFormatter(SyndicationFeed feedToWrite) : this(feedToWrite, true)
         {
         }
 
-        public Rss20FeedFormatter(SyndicationFeed feedToWrite, bool serializeExtensionsAsAtom)
-            : base(feedToWrite)
+        public Rss20FeedFormatter(SyndicationFeed feedToWrite, bool serializeExtensionsAsAtom) : base(feedToWrite)
         {
             // No need to check that the parameter passed is valid - it is checked by the c'tor of the base class
             _serializeExtensionsAsAtom = serializeExtensionsAsAtom;
             _maxExtensionSize = int.MaxValue;
             _preserveElementExtensions = true;
             _preserveAttributeExtensions = true;
-            _atomSerializer = new Atom10FeedFormatter(this.Feed);
+            _atomSerializer = new Atom10FeedFormatter(Feed);
             _feedType = feedToWrite.GetType();
+            DateTimeParser = DateTimeHelper.CreateRss20DateTimeParser();
         }
 
         public bool PreserveAttributeExtensions
@@ -141,10 +122,7 @@ namespace System.ServiceModel.Syndication
 
         protected Type FeedType
         {
-            get
-            {
-                return _feedType;
-            }
+            get { return _feedType; }
         }
 
         public override bool CanRead(XmlReader reader)
@@ -157,15 +135,41 @@ namespace System.ServiceModel.Syndication
             return reader.IsStartElement(Rss20Constants.RssTag, Rss20Constants.Rss20Namespace);
         }
 
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
+
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            ReadFeedAsync(reader).GetAwaiter().GetResult();
+        }
+
+        void IXmlSerializable.WriteXml(XmlWriter writer)
+        {
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            WriteFeedAsync(XmlWriterWrapper.CreateFromWriter(writer)).GetAwaiter().GetResult();
+        }
+
+
         public override Task ReadFromAsync(XmlReader reader, CancellationToken ct)
         {
             if (!CanRead(reader))
             {
-                throw new XmlException(string.Format(SR.UnknownFeedXml, reader.LocalName, reader.NamespaceURI));
+                throw new XmlException(SR.Format(SR.UnknownFeedXml, reader.LocalName, reader.NamespaceURI));
             }
 
             SetFeed(CreateFeedInstance());
-            return ReadXmlAsync(XmlReaderWrapper.CreateFromReader(reader), this.Feed);
+            return ReadXmlAsync(XmlReaderWrapper.CreateFromReader(reader), Feed);
         }
 
         private Task WriteXmlAsync(XmlWriter writer)
@@ -178,6 +182,16 @@ namespace System.ServiceModel.Syndication
             return WriteFeedAsync(writer);
         }
 
+        public override void ReadFrom(XmlReader reader)
+        {
+            ReadFromAsync(reader, CancellationToken.None).GetAwaiter().GetResult();
+        }
+
+        public override void WriteTo(XmlWriter writer)
+        {
+            WriteToAsync(writer, CancellationToken.None).GetAwaiter().GetResult();
+        }
+
         public override async Task WriteToAsync(XmlWriter writer, CancellationToken ct)
         {
             if (writer == null)
@@ -187,21 +201,21 @@ namespace System.ServiceModel.Syndication
 
             writer = XmlWriterWrapper.CreateFromWriter(writer);
 
-            await writer.WriteStartElementAsync(Rss20Constants.RssTag, Rss20Constants.Rss20Namespace);
-            await WriteFeedAsync(writer);
-            await writer.WriteEndElementAsync();
+            await writer.WriteStartElementAsync(Rss20Constants.RssTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false);
+            await WriteFeedAsync(writer).ConfigureAwait(false);
+            await writer.WriteEndElementAsync().ConfigureAwait(false);
         }
 
         protected internal override void SetFeed(SyndicationFeed feed)
         {
             base.SetFeed(feed);
-            _atomSerializer.SetFeed(this.Feed);
+            _atomSerializer.SetFeed(Feed);
         }
 
-        private async Task ReadItemFromAsync(XmlReaderWrapper reader, SyndicationItem result, Uri feedBaseUri)
+        private async Task ReadItemFromAsync(XmlReader reader, SyndicationItem result, Uri feedBaseUri)
         {
             result.BaseUri = feedBaseUri;
-            await reader.MoveToContentAsync();
+            await reader.MoveToContentAsync().ConfigureAwait(false);
             bool isEmpty = reader.IsEmptyElement;
             if (reader.HasAttributes)
             {
@@ -211,7 +225,7 @@ namespace System.ServiceModel.Syndication
                     string name = reader.LocalName;
                     if (name == "base" && ns == Atom10FeedFormatter.XmlNs)
                     {
-                        result.BaseUri = FeedUtils.CombineXmlBase(result.BaseUri, await reader.GetValueAsync());
+                        result.BaseUri = FeedUtils.CombineXmlBase(result.BaseUri, await reader.GetValueAsync().ConfigureAwait(false));
                         continue;
                     }
 
@@ -220,8 +234,8 @@ namespace System.ServiceModel.Syndication
                         continue;
                     }
 
-                    string val = await reader.GetValueAsync();
-                    if (!TryParseAttribute(name, ns, val, result, this.Version))
+                    string val = await reader.GetValueAsync().ConfigureAwait(false);
+                    if (!TryParseAttribute(name, ns, val, result, Version))
                     {
                         if (_preserveAttributeExtensions)
                         {
@@ -231,7 +245,7 @@ namespace System.ServiceModel.Syndication
                 }
             }
 
-            await reader.ReadStartElementAsync();
+            await reader.ReadStartElementAsync().ConfigureAwait(false);
 
             if (!isEmpty)
             {
@@ -241,110 +255,110 @@ namespace System.ServiceModel.Syndication
                 try
                 {
                     XmlBuffer buffer = null;
-                    while (await reader.IsStartElementAsync())
+                    while (await reader.IsStartElementAsync().ConfigureAwait(false))
                     {
                         bool notHandled = false;
-                        if (await reader.MoveToContentAsync() == XmlNodeType.Element && reader.NamespaceURI == Rss20Constants.Rss20Namespace)
+                        if (await reader.MoveToContentAsync().ConfigureAwait(false) == XmlNodeType.Element && reader.NamespaceURI == Rss20Constants.Rss20Namespace)
                         {
                             switch (reader.LocalName)
                             {
                                 case Rss20Constants.TitleTag:
-                                    result.Title = new TextSyndicationContent(StringParser(await reader.ReadElementStringAsync(), Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace));
+                                    result.Title = new TextSyndicationContent(StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace));
                                     break;
 
                                 case Rss20Constants.LinkTag:
-                                    result.Links.Add(await ReadAlternateLinkAsync(reader, result.BaseUri));
+                                    result.Links.Add(await ReadAlternateLinkAsync(reader, result.BaseUri).ConfigureAwait(false));
                                     readAlternateLink = true;
                                     break;
 
                                 case Rss20Constants.DescriptionTag:
-                                    result.Summary = new TextSyndicationContent(StringParser(await reader.ReadElementStringAsync(), Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace));
+                                    result.Summary = new TextSyndicationContent(StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace));
                                     break;
 
                                 case Rss20Constants.AuthorTag:
-                                    result.Authors.Add(await ReadPersonAsync(reader, result));
+                                    result.Authors.Add(await ReadPersonAsync(reader, result).ConfigureAwait(false));
                                     break;
 
                                 case Rss20Constants.CategoryTag:
-                                    result.Categories.Add(await ReadCategoryAsync(reader, result));
+                                    result.Categories.Add(await ReadCategoryAsync(reader, result).ConfigureAwait(false));
                                     break;
 
                                 case Rss20Constants.EnclosureTag:
-                                    result.Links.Add(await ReadMediaEnclosureAsync(reader, result.BaseUri));
+                                    result.Links.Add(await ReadMediaEnclosureAsync(reader, result.BaseUri).ConfigureAwait(false));
                                     break;
 
                                 case Rss20Constants.GuidTag:
+                                {
+                                    bool isPermalink = true;
+                                    string permalinkString = reader.GetAttribute(Rss20Constants.IsPermaLinkTag, Rss20Constants.Rss20Namespace);
+                                    if (permalinkString != null && permalinkString.Equals("false", StringComparison.OrdinalIgnoreCase))
                                     {
-                                        bool isPermalink = true;
-                                        string permalinkString = reader.GetAttribute(Rss20Constants.IsPermaLinkTag, Rss20Constants.Rss20Namespace);
-                                        if (permalinkString != null && permalinkString.Equals("false", StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            isPermalink = false;
-                                        }
-                                        string localName = reader.LocalName;
-                                        string namespaceUri = reader.NamespaceURI;
-                                        result.Id = StringParser(await reader.ReadElementStringAsync(), localName, namespaceUri);
-                                        if (isPermalink)
-                                        {
-                                            fallbackAlternateLink = result.Id;
-                                        }
-
-                                        break;
+                                        isPermalink = false;
                                     }
+                                    string localName = reader.LocalName;
+                                    string namespaceUri = reader.NamespaceURI;
+                                    result.Id = StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), localName, namespaceUri);
+                                    if (isPermalink)
+                                    {
+                                        fallbackAlternateLink = result.Id;
+                                    }
+
+                                    break;
+                                }
 
                                 case Rss20Constants.PubDateTag:
+                                {
+                                    bool canReadContent = !reader.IsEmptyElement;
+                                    await reader.ReadStartElementAsync().ConfigureAwait(false);
+                                    if (canReadContent)
                                     {
-                                        bool canReadContent = !reader.IsEmptyElement;
-                                        await reader.ReadStartElementAsync();
-                                        if (canReadContent)
+                                        string str = await reader.ReadStringAsync().ConfigureAwait(false);
+                                        if (!string.IsNullOrEmpty(str))
                                         {
-                                            string str = await reader.ReadStringAsync();
-                                            if (!string.IsNullOrEmpty(str))
-                                            {
-                                                result.PublishDate = DateParser(str, reader.LocalName, reader.NamespaceURI);
-                                            }
-
-                                            await reader.ReadEndElementAsync();
+                                            result.PublishDate = DateTimeParser(str, reader.LocalName, reader.NamespaceURI);
                                         }
 
-                                        break;
+                                        await reader.ReadEndElementAsync().ConfigureAwait(false);
                                     }
+
+                                    break;
+                                }
 
                                 case Rss20Constants.SourceTag:
+                                {
+                                    SyndicationFeed feed = new SyndicationFeed();
+                                    if (reader.HasAttributes)
                                     {
-                                        SyndicationFeed feed = new SyndicationFeed();
-                                        if (reader.HasAttributes)
+                                        while (reader.MoveToNextAttribute())
                                         {
-                                            while (reader.MoveToNextAttribute())
+                                            string ns = reader.NamespaceURI;
+                                            string name = reader.LocalName;
+                                            if (FeedUtils.IsXmlns(name, ns))
                                             {
-                                                string ns = reader.NamespaceURI;
-                                                string name = reader.LocalName;
-                                                if (FeedUtils.IsXmlns(name, ns))
+                                                continue;
+                                            }
+                                            string val = await reader.GetValueAsync().ConfigureAwait(false);
+                                            if (name == Rss20Constants.UrlTag && ns == Rss20Constants.Rss20Namespace)
+                                            {
+                                                feed.Links.Add(SyndicationLink.CreateSelfLink(UriParser(val, UriKind.RelativeOrAbsolute, Rss20Constants.UrlTag, ns)));
+                                            }
+                                            else if (!FeedUtils.IsXmlns(name, ns))
+                                            {
+                                                if (_preserveAttributeExtensions)
                                                 {
-                                                    continue;
-                                                }
-                                                string val = await reader.GetValueAsync();
-                                                if (name == Rss20Constants.UrlTag && ns == Rss20Constants.Rss20Namespace)
-                                                {
-                                                    feed.Links.Add(SyndicationLink.CreateSelfLink(UriParser(val, Rss20Constants.UrlTag, ns)));
-                                                }
-                                                else if (!FeedUtils.IsXmlns(name, ns))
-                                                {
-                                                    if (_preserveAttributeExtensions)
-                                                    {
-                                                        feed.AttributeExtensions.Add(new XmlQualifiedName(name, ns), val);
-                                                    }
+                                                    feed.AttributeExtensions.Add(new XmlQualifiedName(name, ns), val);
                                                 }
                                             }
                                         }
-                                        string localName = reader.LocalName;
-                                        string namespaceUri = reader.NamespaceURI;
-                                        string feedTitle = StringParser(await reader.ReadElementStringAsync(), localName, namespaceUri);
-                                        feed.Title = new TextSyndicationContent(feedTitle);
-                                        result.SourceFeed = feed;
-
-                                        break;
                                     }
+                                    string localName = reader.LocalName;
+                                    string namespaceUri = reader.NamespaceURI;
+                                    string feedTitle = StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), localName, namespaceUri);
+                                    feed.Title = new TextSyndicationContent(feedTitle);
+                                    result.SourceFeed = feed;
+
+                                    break;
+                                }
 
                                 default:
                                     notHandled = true;
@@ -358,29 +372,24 @@ namespace System.ServiceModel.Syndication
 
                         if (notHandled)
                         {
-                            bool parsedExtension = _serializeExtensionsAsAtom && _atomSerializer.TryParseItemElementFromAsync(reader, result).Result;
+                            bool parsedExtension = _serializeExtensionsAsAtom && _atomSerializer.TryParseItemElementFromAsync(reader, result).GetAwaiter().GetResult();
 
                             if (!parsedExtension)
                             {
-                                parsedExtension = TryParseElement(reader, result, this.Version);
+                                parsedExtension = TryParseElement(reader, result, Version);
                             }
 
                             if (!parsedExtension)
                             {
                                 if (_preserveElementExtensions)
                                 {
-                                    if (buffer == null)
-                                    {
-                                        buffer = new XmlBuffer(_maxExtensionSize);
-                                        extWriter = buffer.OpenSection(XmlDictionaryReaderQuotas.Max);
-                                        extWriter.WriteStartElement(Rss20Constants.ExtensionWrapperTag);
-                                    }
-
-                                    await XmlReaderWrapper.WriteNodeAsync(extWriter, reader, false);
+                                    var tuple = await SyndicationFeedFormatter.CreateBufferIfRequiredAndWriteNodeAsync(buffer, extWriter, reader, _maxExtensionSize).ConfigureAwait(false);
+                                    buffer = tuple.Item1;
+                                    extWriter = tuple.Item2;
                                 }
                                 else
                                 {
-                                    await reader.SkipAsync();
+                                    await reader.SkipAsync().ConfigureAwait(false);
                                 }
                             }
                         }
@@ -392,11 +401,11 @@ namespace System.ServiceModel.Syndication
                 {
                     if (extWriter != null)
                     {
-                        ((IDisposable)extWriter).Dispose();
+                        ((IDisposable) extWriter).Dispose();
                     }
                 }
 
-                await reader.ReadEndElementAsync(); // item
+                await reader.ReadEndElementAsync().ConfigureAwait(false); // item
 
                 if (!readAlternateLink && fallbackAlternateLink != null)
                 {
@@ -413,7 +422,7 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        internal Task ReadItemFromAsync(XmlReaderWrapper reader, SyndicationItem result)
+        internal Task ReadItemFromAsync(XmlReader reader, SyndicationItem result)
         {
             return ReadItemFromAsync(reader, result, null);
         }
@@ -429,6 +438,31 @@ namespace System.ServiceModel.Syndication
             return SyndicationFeedFormatter.CreateFeedInstance(_feedType);
         }
 
+        protected virtual SyndicationItem ReadItem(XmlReader reader, SyndicationFeed feed)
+        {
+            return ReadItemAsync(reader, feed).GetAwaiter().GetResult();
+        }
+
+        protected virtual IEnumerable<SyndicationItem> ReadItems(XmlReader reader, SyndicationFeed feed, out bool areAllItemsRead)
+        {
+            if (feed == null)
+            {
+                throw new ArgumentNullException(nameof(feed));
+            }
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            NullNotAllowedCollection<SyndicationItem> items = new NullNotAllowedCollection<SyndicationItem>();
+            while (reader.IsStartElement(Rss20Constants.ItemTag, Rss20Constants.Rss20Namespace))
+            {
+                items.Add(ReadItem(reader, feed));
+            }
+            areAllItemsRead = true;
+            return items;
+        }
+
         protected virtual async Task<SyndicationItem> ReadItemAsync(XmlReader reader, SyndicationFeed feed)
         {
             if (feed == null)
@@ -440,18 +474,28 @@ namespace System.ServiceModel.Syndication
                 throw new ArgumentNullException(nameof(reader));
             }
             SyndicationItem item = CreateItem(feed);
-            XmlReaderWrapper readerWrapper = XmlReaderWrapper.CreateFromReader(reader);
-            await ReadItemFromAsync(readerWrapper, item, feed.BaseUri); // delegate => ItemParser(reader,item,feed.BaseUri);//
+            reader = XmlReaderWrapper.CreateFromReader(reader);
+            await ReadItemFromAsync(reader, item, feed.BaseUri).ConfigureAwait(false);
             return item;
+        }
+
+        protected virtual void WriteItem(XmlWriter writer, SyndicationItem item, Uri feedBaseUri)
+        {
+            WriteItemAsync(writer, item, feedBaseUri).GetAwaiter().GetResult();
+        }
+
+        protected virtual void WriteItems(XmlWriter writer, IEnumerable<SyndicationItem> items, Uri feedBaseUri)
+        {
+            WriteItemsAsync(writer, items, feedBaseUri).GetAwaiter().GetResult();
         }
 
         protected virtual async Task WriteItemAsync(XmlWriter writer, SyndicationItem item, Uri feedBaseUri)
         {
             writer = XmlWriterWrapper.CreateFromWriter(writer);
 
-            await writer.WriteStartElementAsync(Rss20Constants.ItemTag, Rss20Constants.Rss20Namespace);
-            await WriteItemContentsAsync(writer, item, feedBaseUri);
-            await writer.WriteEndElementAsync();
+            await writer.WriteStartElementAsync(Rss20Constants.ItemTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false);
+            await WriteItemContentsAsync(writer, item, feedBaseUri).ConfigureAwait(false);
+            await writer.WriteEndElementAsync().ConfigureAwait(false);
         }
 
         protected virtual async Task WriteItemsAsync(XmlWriter writer, IEnumerable<SyndicationItem> items, Uri feedBaseUri)
@@ -463,8 +507,14 @@ namespace System.ServiceModel.Syndication
 
             foreach (SyndicationItem item in items)
             {
-                await this.WriteItemAsync(writer, item, feedBaseUri);
+                await WriteItemAsync(writer, item, feedBaseUri).ConfigureAwait(false);
             }
+        }
+
+        private Task ReadFeedAsync(XmlReader reader)
+        {
+            SetFeed(CreateFeedInstance());
+            return ReadXmlAsync(XmlReaderWrapper.CreateFromReader(reader), Feed);
         }
 
         private static string NormalizeTimeZone(string rfc822TimeZone, out bool isUtc)
@@ -552,15 +602,15 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        private async Task ReadSkipHoursAsync(XmlReaderWrapper reader, SyndicationFeed result)
+        private async Task ReadSkipHoursAsync(XmlReader reader, SyndicationFeed result)
         {
-            await reader.ReadStartElementAsync();
+            await reader.ReadStartElementAsync().ConfigureAwait(false);
 
-            while (await reader.IsStartElementAsync())
+            while (await reader.IsStartElementAsync().ConfigureAwait(false))
             {
                 if (reader.LocalName == Rss20Constants.HourTag)
                 {
-                    string val = StringParser(await reader.ReadElementStringAsync(), Rss20Constants.HourTag, Rss20Constants.Rss20Namespace);
+                    string val = StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), Rss20Constants.HourTag, Rss20Constants.Rss20Namespace);
                     int hour = int.Parse(val);
                     bool parsed = false;
                     parsed = int.TryParse(val, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out hour);
@@ -579,11 +629,11 @@ namespace System.ServiceModel.Syndication
                 }
                 else
                 {
-                    await reader.SkipAsync();
+                    await reader.SkipAsync().ConfigureAwait(false);
                 }
             }
 
-            await reader.ReadEndElementAsync();
+            await reader.ReadEndElementAsync().ConfigureAwait(false);
         }
 
 
@@ -597,15 +647,15 @@ namespace System.ServiceModel.Syndication
             return false;
         }
 
-        private async Task ReadSkipDaysAsync(XmlReaderWrapper reader, SyndicationFeed result)
+        private async Task ReadSkipDaysAsync(XmlReader reader, SyndicationFeed result)
         {
-            await reader.ReadStartElementAsync();
+            await reader.ReadStartElementAsync().ConfigureAwait(false);
 
-            while (await reader.IsStartElementAsync())
+            while (await reader.IsStartElementAsync().ConfigureAwait(false))
             {
                 if (reader.LocalName == Rss20Constants.DayTag)
                 {
-                    string day = StringParser(await reader.ReadElementStringAsync(), Rss20Constants.DayTag, Rss20Constants.Rss20Namespace);
+                    string day = StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), Rss20Constants.DayTag, Rss20Constants.Rss20Namespace);
 
                     //Check if the day is actually an accepted day.
                     if (checkDay(day))
@@ -615,11 +665,11 @@ namespace System.ServiceModel.Syndication
                 }
                 else
                 {
-                    await reader.SkipAsync();
+                    await reader.SkipAsync().ConfigureAwait(false);
                 }
             }
 
-            await reader.ReadEndElementAsync();
+            await reader.ReadEndElementAsync().ConfigureAwait(false);
         }
 
         internal static void RemoveExtraWhiteSpaceAtStart(StringBuilder stringBuilder)
@@ -685,7 +735,7 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        private async Task<SyndicationLink> ReadAlternateLinkAsync(XmlReaderWrapper reader, Uri baseUri)
+        private async Task<SyndicationLink> ReadAlternateLinkAsync(XmlReader reader, Uri baseUri)
         {
             SyndicationLink link = new SyndicationLink();
             link.BaseUri = baseUri;
@@ -696,31 +746,31 @@ namespace System.ServiceModel.Syndication
                 {
                     if (reader.LocalName == "base" && reader.NamespaceURI == Atom10FeedFormatter.XmlNs)
                     {
-                        link.BaseUri = FeedUtils.CombineXmlBase(link.BaseUri, await reader.GetValueAsync());
+                        link.BaseUri = FeedUtils.CombineXmlBase(link.BaseUri, await reader.GetValueAsync().ConfigureAwait(false));
                     }
                     else if (!FeedUtils.IsXmlns(reader.LocalName, reader.NamespaceURI))
                     {
-                        if (this.PreserveAttributeExtensions)
+                        if (PreserveAttributeExtensions)
                         {
-                            link.AttributeExtensions.Add(new XmlQualifiedName(reader.LocalName, reader.NamespaceURI), await reader.GetValueAsync());
+                            link.AttributeExtensions.Add(new XmlQualifiedName(reader.LocalName, reader.NamespaceURI), await reader.GetValueAsync().ConfigureAwait(false));
                         }
                     }
                 }
             }
             string localName = reader.LocalName;
             string namespaceUri = reader.NamespaceURI;
-            link.Uri = UriParser(await reader.ReadElementStringAsync(), localName, namespaceUri);//new Uri(uri, UriKind.RelativeOrAbsolute);
+            link.Uri = UriParser(await reader.ReadElementStringAsync().ConfigureAwait(false), UriKind.RelativeOrAbsolute, localName, namespaceUri);
             return link;
         }
 
-        private async Task<SyndicationCategory> ReadCategoryAsync(XmlReaderWrapper reader, SyndicationFeed feed)
+        private async Task<SyndicationCategory> ReadCategoryAsync(XmlReader reader, SyndicationFeed feed)
         {
             SyndicationCategory result = CreateCategory(feed);
-            await ReadCategoryAsync(reader, result);
+            await ReadCategoryAsync(reader, result).ConfigureAwait(false);
             return result;
         }
 
-        private async Task ReadCategoryAsync(XmlReaderWrapper reader, SyndicationCategory category)
+        private async Task ReadCategoryAsync(XmlReader reader, SyndicationCategory category)
         {
             bool isEmpty = reader.IsEmptyElement;
             if (reader.HasAttributes)
@@ -733,12 +783,12 @@ namespace System.ServiceModel.Syndication
                     {
                         continue;
                     }
-                    string val = await reader.GetValueAsync();
+                    string val = await reader.GetValueAsync().ConfigureAwait(false);
                     if (name == Rss20Constants.DomainTag && ns == Rss20Constants.Rss20Namespace)
                     {
                         category.Scheme = val;
                     }
-                    else if (!TryParseAttribute(name, ns, val, category, this.Version))
+                    else if (!TryParseAttribute(name, ns, val, category, Version))
                     {
                         if (_preserveAttributeExtensions)
                         {
@@ -748,24 +798,23 @@ namespace System.ServiceModel.Syndication
                 }
             }
 
-            await reader.ReadStartElementAsync(Rss20Constants.CategoryTag, Rss20Constants.Rss20Namespace);
+            await reader.ReadStartElementAsync(Rss20Constants.CategoryTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false);
 
             if (!isEmpty)
             {
-                category.Name = StringParser(await reader.ReadStringAsync(), reader.LocalName, Rss20Constants.Rss20Namespace);
-                await reader.ReadEndElementAsync();
+                category.Name = StringParser(await reader.ReadStringAsync().ConfigureAwait(false), reader.LocalName, Rss20Constants.Rss20Namespace);
+                await reader.ReadEndElementAsync().ConfigureAwait(false);
             }
         }
 
-        private async Task<SyndicationCategory> ReadCategoryAsync(XmlReaderWrapper reader, SyndicationItem item)
+        private async Task<SyndicationCategory> ReadCategoryAsync(XmlReader reader, SyndicationItem item)
         {
             SyndicationCategory result = CreateCategory(item);
-            await ReadCategoryAsync(reader, result);
+            await ReadCategoryAsync(reader, result).ConfigureAwait(false);
             return result;
         }
 
-
-        private async Task<SyndicationLink> ReadMediaEnclosureAsync(XmlReaderWrapper reader, Uri baseUri)
+        private async Task<SyndicationLink> ReadMediaEnclosureAsync(XmlReader reader, Uri baseUri)
         {
             SyndicationLink link = new SyndicationLink();
             link.BaseUri = baseUri;
@@ -779,14 +828,14 @@ namespace System.ServiceModel.Syndication
                     string name = reader.LocalName;
                     if (name == "base" && ns == Atom10FeedFormatter.XmlNs)
                     {
-                        link.BaseUri = FeedUtils.CombineXmlBase(link.BaseUri, await reader.GetValueAsync());
+                        link.BaseUri = FeedUtils.CombineXmlBase(link.BaseUri, await reader.GetValueAsync().ConfigureAwait(false));
                         continue;
                     }
                     if (FeedUtils.IsXmlns(name, ns))
                     {
                         continue;
                     }
-                    string val = await reader.GetValueAsync();
+                    string val = await reader.GetValueAsync().ConfigureAwait(false);
                     if (name == Rss20Constants.UrlTag && ns == Rss20Constants.Rss20Namespace)
                     {
                         link.Uri = new Uri(val, UriKind.RelativeOrAbsolute);
@@ -809,24 +858,24 @@ namespace System.ServiceModel.Syndication
                 }
             }
 
-            await reader.ReadStartElementAsync(Rss20Constants.EnclosureTag, Rss20Constants.Rss20Namespace);
+            await reader.ReadStartElementAsync(Rss20Constants.EnclosureTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false);
 
             if (!isEmptyElement)
             {
-                await reader.ReadEndElementAsync();
+                await reader.ReadEndElementAsync().ConfigureAwait(false);
             }
 
             return link;
         }
 
-        private async Task<SyndicationPerson> ReadPersonAsync(XmlReaderWrapper reader, SyndicationFeed feed)
+        private async Task<SyndicationPerson> ReadPersonAsync(XmlReader reader, SyndicationFeed feed)
         {
             SyndicationPerson result = CreatePerson(feed);
-            await ReadPersonAsync(reader, result);
+            await ReadPersonAsync(reader, result).ConfigureAwait(false);
             return result;
         }
 
-        private async Task ReadPersonAsync(XmlReaderWrapper reader, SyndicationPerson person)
+        private async Task ReadPersonAsync(XmlReader reader, SyndicationPerson person)
         {
             bool isEmpty = reader.IsEmptyElement;
             if (reader.HasAttributes)
@@ -839,8 +888,8 @@ namespace System.ServiceModel.Syndication
                     {
                         continue;
                     }
-                    string val = await reader.GetValueAsync();
-                    if (!TryParseAttribute(name, ns, val, person, this.Version))
+                    string val = await reader.GetValueAsync().ConfigureAwait(false);
+                    if (!TryParseAttribute(name, ns, val, person, Version))
                     {
                         if (_preserveAttributeExtensions)
                         {
@@ -850,19 +899,19 @@ namespace System.ServiceModel.Syndication
                 }
             }
 
-            await reader.ReadStartElementAsync();
+            await reader.ReadStartElementAsync().ConfigureAwait(false);
             if (!isEmpty)
             {
-                string email = StringParser(await reader.ReadStringAsync(), reader.LocalName, reader.NamespaceURI);
-                await reader.ReadEndElementAsync();
+                string email = StringParser(await reader.ReadStringAsync().ConfigureAwait(false), reader.LocalName, reader.NamespaceURI);
+                await reader.ReadEndElementAsync().ConfigureAwait(false);
                 person.Email = email;
             }
         }
 
-        private async Task<SyndicationPerson> ReadPersonAsync(XmlReaderWrapper reader, SyndicationItem item)
+        private async Task<SyndicationPerson> ReadPersonAsync(XmlReader reader, SyndicationItem item)
         {
             SyndicationPerson result = CreatePerson(item);
-            await ReadPersonAsync(reader, result);
+            await ReadPersonAsync(reader, result).ConfigureAwait(false);
             return result;
         }
 
@@ -872,18 +921,18 @@ namespace System.ServiceModel.Syndication
             return (textInput.Description != null && textInput.title != null && textInput.name != null && textInput.link != null);
         }
 
-        private async Task readTextInputTag(XmlReaderWrapper reader, SyndicationFeed result)
+        private async Task ReadTextInputTag(XmlReader reader, SyndicationFeed result)
         {
-            await reader.ReadStartElementAsync();
+            await reader.ReadStartElementAsync().ConfigureAwait(false);
 
             SyndicationTextInput textInput = new SyndicationTextInput();
             string val = String.Empty;
 
-            while (await reader.IsStartElementAsync())
+            while (await reader.IsStartElementAsync().ConfigureAwait(false))
             {
                 string name = reader.LocalName;
                 string namespaceUri = reader.NamespaceURI;
-                val = StringParser(await reader.ReadElementStringAsync(), name, Rss20Constants.Rss20Namespace);
+                val = StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), name, Rss20Constants.Rss20Namespace);
 
                 switch (name)
                 {
@@ -896,7 +945,7 @@ namespace System.ServiceModel.Syndication
                         break;
 
                     case Rss20Constants.LinkTag:
-                        textInput.link = new SyndicationLink(UriParser(val, name, namespaceUri));
+                        textInput.link = new SyndicationLink(UriParser(val, UriKind.RelativeOrAbsolute, name, namespaceUri));
                         break;
 
                     case Rss20Constants.NameTag:
@@ -914,18 +963,18 @@ namespace System.ServiceModel.Syndication
                 result.TextInput = textInput;
             }
 
-            await reader.ReadEndElementAsync();
+            await reader.ReadEndElementAsync().ConfigureAwait(false);
         }
 
-        private async Task ReadXmlAsync(XmlReaderWrapper reader, SyndicationFeed result)
+        private async Task ReadXmlAsync(XmlReader reader, SyndicationFeed result)
         {
             string baseUri = null;
-            await reader.MoveToContentAsync();
+            await reader.MoveToContentAsync().ConfigureAwait(false);
 
             string version = reader.GetAttribute(Rss20Constants.VersionTag, Rss20Constants.Rss20Namespace);
             if (version != Rss20Constants.Version)
             {
-                throw new NotSupportedException(FeedUtils.AddLineInfo(reader, (string.Format(SR.UnsupportedRssVersion, version))));
+                throw new NotSupportedException(FeedUtils.AddLineInfo(reader, (SR.Format(SR.UnsupportedRssVersion, version))));
             }
 
             if (reader.AttributeCount > 1)
@@ -937,8 +986,8 @@ namespace System.ServiceModel.Syndication
                 }
             }
 
-            await reader.ReadStartElementAsync();
-            await reader.MoveToContentAsync();
+            await reader.ReadStartElementAsync().ConfigureAwait(false);
+            await reader.MoveToContentAsync().ConfigureAwait(false);
 
             if (reader.HasAttributes)
             {
@@ -949,7 +998,7 @@ namespace System.ServiceModel.Syndication
 
                     if (name == "base" && ns == Atom10FeedFormatter.XmlNs)
                     {
-                        baseUri = await reader.GetValueAsync();
+                        baseUri = await reader.GetValueAsync().ConfigureAwait(false);
                         continue;
                     }
 
@@ -958,8 +1007,8 @@ namespace System.ServiceModel.Syndication
                         continue;
                     }
 
-                    string val = await reader.GetValueAsync();
-                    if (!TryParseAttribute(name, ns, val, result, this.Version))
+                    string val = await reader.GetValueAsync().ConfigureAwait(false);
+                    if (!TryParseAttribute(name, ns, val, result, Version))
                     {
                         if (_preserveAttributeExtensions)
                         {
@@ -975,7 +1024,7 @@ namespace System.ServiceModel.Syndication
             }
 
             bool areAllItemsRead = true;
-            await reader.ReadStartElementAsync(Rss20Constants.ChannelTag, Rss20Constants.Rss20Namespace);
+            await reader.ReadStartElementAsync(Rss20Constants.ChannelTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false);
 
             XmlBuffer buffer = null;
             XmlDictionaryWriter extWriter = null;
@@ -983,105 +1032,105 @@ namespace System.ServiceModel.Syndication
 
             try
             {
-                while (await reader.IsStartElementAsync())
+                while (await reader.IsStartElementAsync().ConfigureAwait(false))
                 {
                     bool notHandled = false;
-                    if (await reader.MoveToContentAsync() == XmlNodeType.Element && reader.NamespaceURI == Rss20Constants.Rss20Namespace)
+                    if (await reader.MoveToContentAsync().ConfigureAwait(false) == XmlNodeType.Element && reader.NamespaceURI == Rss20Constants.Rss20Namespace)
                     {
                         switch (reader.LocalName)
                         {
                             case Rss20Constants.TitleTag:
-                                result.Title = new TextSyndicationContent(StringParser(await reader.ReadElementStringAsync(), Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace));
+                                result.Title = new TextSyndicationContent(StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace));
                                 break;
 
                             case Rss20Constants.LinkTag:
-                                result.Links.Add(await ReadAlternateLinkAsync(reader, result.BaseUri));
+                                result.Links.Add(await ReadAlternateLinkAsync(reader, result.BaseUri).ConfigureAwait(false));
                                 break;
 
                             case Rss20Constants.DescriptionTag:
-                                result.Description = new TextSyndicationContent(StringParser(await reader.ReadElementStringAsync(), Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace));
+                                result.Description = new TextSyndicationContent(StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace));
                                 break;
 
                             case Rss20Constants.LanguageTag:
 
-                                result.Language = StringParser(await reader.ReadElementStringAsync(), Rss20Constants.LanguageTag, Rss20Constants.Rss20Namespace);
+                                result.Language = StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), Rss20Constants.LanguageTag, Rss20Constants.Rss20Namespace);
                                 break;
 
                             case Rss20Constants.CopyrightTag:
-                                result.Copyright = new TextSyndicationContent(StringParser(await reader.ReadElementStringAsync(), Rss20Constants.CopyrightTag, Rss20Constants.Rss20Namespace));
+                                result.Copyright = new TextSyndicationContent(StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), Rss20Constants.CopyrightTag, Rss20Constants.Rss20Namespace));
                                 break;
 
                             case Rss20Constants.ManagingEditorTag:
-                                result.Authors.Add(await ReadPersonAsync(reader, result));
+                                result.Authors.Add(await ReadPersonAsync(reader, result).ConfigureAwait(false));
                                 break;
 
                             case Rss20Constants.LastBuildDateTag:
+                            {
+                                bool canReadContent = !reader.IsEmptyElement;
+                                await reader.ReadStartElementAsync().ConfigureAwait(false);
+                                if (canReadContent)
                                 {
-                                    bool canReadContent = !reader.IsEmptyElement;
-                                    await reader.ReadStartElementAsync();
-                                    if (canReadContent)
+                                    string str = await reader.ReadStringAsync().ConfigureAwait(false);
+
+                                    if (!string.IsNullOrEmpty(str))
                                     {
-                                        string str = await reader.ReadStringAsync();
-
-                                        if (!string.IsNullOrEmpty(str))
-                                        {
-                                            result.LastUpdatedTime = DateParser(str, Rss20Constants.LastBuildDateTag, reader.NamespaceURI);
-                                        }
-
-                                        await reader.ReadEndElementAsync();
+                                        result.LastUpdatedTime = DateTimeParser(str, Rss20Constants.LastBuildDateTag, reader.NamespaceURI);
                                     }
 
-                                    break;
+                                    await reader.ReadEndElementAsync().ConfigureAwait(false);
                                 }
 
+                                break;
+                            }
+
                             case Rss20Constants.CategoryTag:
-                                result.Categories.Add(await ReadCategoryAsync(reader, result));
+                                result.Categories.Add(await ReadCategoryAsync(reader, result).ConfigureAwait(false));
                                 break;
 
                             case Rss20Constants.GeneratorTag:
-                                result.Generator = StringParser(await reader.ReadElementStringAsync(), Rss20Constants.GeneratorTag, Rss20Constants.Rss20Namespace);
+                                result.Generator = StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), Rss20Constants.GeneratorTag, Rss20Constants.Rss20Namespace);
                                 break;
 
                             case Rss20Constants.ImageTag:
-                                {
-                                    await OnReadImage(reader, result);
-                                    break;
-                                }
+                            {
+                                await OnReadImage(reader, result).ConfigureAwait(false);
+                                break;
+                            }
 
                             case Rss20Constants.ItemTag:
+                            {
+                                NullNotAllowedCollection<SyndicationItem> items = new NullNotAllowedCollection<SyndicationItem>();
+                                while (await reader.IsStartElementAsync(Rss20Constants.ItemTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false))
                                 {
-                                    NullNotAllowedCollection<SyndicationItem> items = new NullNotAllowedCollection<SyndicationItem>();
-                                    while (await reader.IsStartElementAsync(Rss20Constants.ItemTag, Rss20Constants.Rss20Namespace))
-                                    {
-                                        feedItems.Add(await ReadItemAsync(reader, result));
-                                    }
-
-
-                                    areAllItemsRead = true;
-                                    break;
+                                    feedItems.Add(await ReadItemAsync(reader, result).ConfigureAwait(false));
                                 }
+
+
+                                areAllItemsRead = true;
+                                break;
+                            }
 
                             //Optional tags
                             case Rss20Constants.DocumentationTag:
-                                result.Documentation = await ReadAlternateLinkAsync(reader, result.BaseUri);
+                                result.Documentation = await ReadAlternateLinkAsync(reader, result.BaseUri).ConfigureAwait(false);
                                 break;
 
                             case Rss20Constants.TimeToLiveTag:
-                                string value = StringParser(await reader.ReadElementStringAsync(), Rss20Constants.TimeToLiveTag, Rss20Constants.Rss20Namespace);
+                                string value = StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), Rss20Constants.TimeToLiveTag, Rss20Constants.Rss20Namespace);
                                 int timeToLive = int.Parse(value);
                                 result.TimeToLive = timeToLive;
                                 break;
 
                             case Rss20Constants.TextInputTag:
-                                await readTextInputTag(reader, result);
+                                await ReadTextInputTag(reader, result).ConfigureAwait(false);
                                 break;
 
                             case Rss20Constants.SkipHoursTag:
-                                await ReadSkipHoursAsync(reader, result);
+                                await ReadSkipHoursAsync(reader, result).ConfigureAwait(false);
                                 break;
 
                             case Rss20Constants.SkipDaysTag:
-                                await ReadSkipDaysAsync(reader, result);
+                                await ReadSkipDaysAsync(reader, result).ConfigureAwait(false);
                                 break;
 
                             default:
@@ -1096,29 +1145,24 @@ namespace System.ServiceModel.Syndication
 
                     if (notHandled)
                     {
-                        bool parsedExtension = _serializeExtensionsAsAtom && await _atomSerializer.TryParseFeedElementFromAsync(reader, result);
+                        bool parsedExtension = _serializeExtensionsAsAtom && await _atomSerializer.TryParseFeedElementFromAsync(reader, result).ConfigureAwait(false);
 
                         if (!parsedExtension)
                         {
-                            parsedExtension = TryParseElement(reader, result, this.Version);
+                            parsedExtension = TryParseElement(reader, result, Version);
                         }
 
                         if (!parsedExtension)
                         {
                             if (_preserveElementExtensions)
                             {
-                                if (buffer == null)
-                                {
-                                    buffer = new XmlBuffer(_maxExtensionSize);
-                                    extWriter = buffer.OpenSection(XmlDictionaryReaderQuotas.Max);
-                                    extWriter.WriteStartElement(Rss20Constants.ExtensionWrapperTag);
-                                }
-
-                                await XmlReaderWrapper.WriteNodeAsync(extWriter, reader, false);
+                                var tuple = await CreateBufferIfRequiredAndWriteNodeAsync(buffer, extWriter, reader, _maxExtensionSize).ConfigureAwait(false);
+                                buffer = tuple.Item1;
+                                extWriter = tuple.Item2;
                             }
                             else
                             {
-                                await reader.SkipAsync();
+                                await reader.SkipAsync().ConfigureAwait(false);
                             }
                         }
                     }
@@ -1145,27 +1189,27 @@ namespace System.ServiceModel.Syndication
             {
                 if (extWriter != null)
                 {
-                    ((IDisposable)extWriter).Dispose();
+                    ((IDisposable) extWriter).Dispose();
                 }
             }
             if (areAllItemsRead)
             {
-                await reader.ReadEndElementAsync(); // channel   
-                await reader.ReadEndElementAsync(); // rss
+                await reader.ReadEndElementAsync().ConfigureAwait(false); // channel   
+                await reader.ReadEndElementAsync().ConfigureAwait(false); // rss
             }
         }
 
         private async Task WriteAlternateLinkAsync(XmlWriter writer, SyndicationLink link, Uri baseUri)
         {
-            await writer.WriteStartElementAsync(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace);
+            await writer.WriteStartElementAsync(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false);
             Uri baseUriToWrite = FeedUtils.GetBaseUriToWrite(baseUri, link.BaseUri);
             if (baseUriToWrite != null)
             {
-                await writer.WriteAttributeStringAsync("xml", "base", Atom10FeedFormatter.XmlNs, FeedUtils.GetUriString(baseUriToWrite));
+                await writer.WriteAttributeStringAsync("xml", "base", Atom10FeedFormatter.XmlNs, FeedUtils.GetUriString(baseUriToWrite)).ConfigureAwait(false);
             }
-            await link.WriteAttributeExtensionsAsync(writer, SyndicationVersions.Rss20);
-            await writer.WriteStringAsync(FeedUtils.GetUriString(link.Uri));
-            await writer.WriteEndElementAsync();
+            await link.WriteAttributeExtensionsAsync(writer, SyndicationVersions.Rss20).ConfigureAwait(false);
+            await writer.WriteStringAsync(FeedUtils.GetUriString(link.Uri)).ConfigureAwait(false);
+            await writer.WriteEndElementAsync().ConfigureAwait(false);
         }
 
         private async Task WriteCategoryAsync(XmlWriter writer, SyndicationCategory category)
@@ -1174,180 +1218,180 @@ namespace System.ServiceModel.Syndication
             {
                 return;
             }
-            await writer.WriteStartElementAsync(Rss20Constants.CategoryTag, Rss20Constants.Rss20Namespace);
-            await WriteAttributeExtensionsAsync(writer, category, this.Version);
+            await writer.WriteStartElementAsync(Rss20Constants.CategoryTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false);
+            await WriteAttributeExtensionsAsync(writer, category, Version).ConfigureAwait(false);
             if (!string.IsNullOrEmpty(category.Scheme) && !category.AttributeExtensions.ContainsKey(s_rss20Domain))
             {
-                await writer.WriteAttributeStringAsync(Rss20Constants.DomainTag, Rss20Constants.Rss20Namespace, category.Scheme);
+                await writer.WriteAttributeStringAsync(Rss20Constants.DomainTag, Rss20Constants.Rss20Namespace, category.Scheme).ConfigureAwait(false);
             }
-            await writer.WriteStringAsync(category.Name);
-            await writer.WriteEndElementAsync();
+            await writer.WriteStringAsync(category.Name).ConfigureAwait(false);
+            await writer.WriteEndElementAsync().ConfigureAwait(false);
         }
 
         private async Task WriteFeedAsync(XmlWriter writer)
         {
-            if (this.Feed == null)
+            if (Feed == null)
             {
                 throw new InvalidOperationException(SR.FeedFormatterDoesNotHaveFeed);
             }
             if (_serializeExtensionsAsAtom)
             {
-                await writer.InternalWriteAttributeStringAsync("xmlns", Atom10Constants.Atom10Prefix, null, Atom10Constants.Atom10Namespace);
+                await writer.WriteAttributeStringAsync("xmlns", Atom10Constants.Atom10Prefix, null, Atom10Constants.Atom10Namespace).ConfigureAwait(false);
             }
-            await writer.WriteAttributeStringAsync(Rss20Constants.VersionTag, Rss20Constants.Version);
-            await writer.WriteStartElementAsync(Rss20Constants.ChannelTag, Rss20Constants.Rss20Namespace);
-            if (this.Feed.BaseUri != null)
+            await writer.WriteAttributeStringAsync(Rss20Constants.VersionTag, Rss20Constants.Version).ConfigureAwait(false);
+            await writer.WriteStartElementAsync(Rss20Constants.ChannelTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false);
+            if (Feed.BaseUri != null)
             {
-                await writer.InternalWriteAttributeStringAsync("xml", "base", Atom10FeedFormatter.XmlNs, FeedUtils.GetUriString(this.Feed.BaseUri));
+                await writer.WriteAttributeStringAsync("xml", "base", Atom10FeedFormatter.XmlNs, FeedUtils.GetUriString(Feed.BaseUri)).ConfigureAwait(false);
             }
-            await WriteAttributeExtensionsAsync(writer, this.Feed, this.Version);
-            string title = this.Feed.Title != null ? this.Feed.Title.Text : string.Empty;
-            await writer.WriteElementStringAsync(Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace, title);
+            await WriteAttributeExtensionsAsync(writer, Feed, Version).ConfigureAwait(false);
+            string title = Feed.Title != null ? Feed.Title.Text : string.Empty;
+            await writer.WriteElementStringAsync(Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace, title).ConfigureAwait(false);
 
             SyndicationLink alternateLink = null;
-            for (int i = 0; i < this.Feed.Links.Count; ++i)
+            for (int i = 0; i < Feed.Links.Count; ++i)
             {
-                if (this.Feed.Links[i].RelationshipType == Atom10Constants.AlternateTag)
+                if (Feed.Links[i].RelationshipType == Atom10Constants.AlternateTag)
                 {
-                    alternateLink = this.Feed.Links[i];
-                    await WriteAlternateLinkAsync(writer, alternateLink, this.Feed.BaseUri);
+                    alternateLink = Feed.Links[i];
+                    await WriteAlternateLinkAsync(writer, alternateLink, Feed.BaseUri).ConfigureAwait(false);
                     break;
                 }
             }
 
-            string description = this.Feed.Description != null ? this.Feed.Description.Text : string.Empty;
-            await writer.WriteElementStringAsync(Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace, description);
+            string description = Feed.Description != null ? Feed.Description.Text : string.Empty;
+            await writer.WriteElementStringAsync(Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace, description).ConfigureAwait(false);
 
-            if (this.Feed.Language != null)
+            if (Feed.Language != null)
             {
-                await writer.WriteElementStringAsync(Rss20Constants.LanguageTag, this.Feed.Language);
+                await writer.WriteElementStringAsync(Rss20Constants.LanguageTag, Feed.Language).ConfigureAwait(false);
             }
 
-            if (this.Feed.Copyright != null)
+            if (Feed.Copyright != null)
             {
-                await writer.WriteElementStringAsync(Rss20Constants.CopyrightTag, Rss20Constants.Rss20Namespace, this.Feed.Copyright.Text);
+                await writer.WriteElementStringAsync(Rss20Constants.CopyrightTag, Rss20Constants.Rss20Namespace, Feed.Copyright.Text).ConfigureAwait(false);
             }
 
             // if there's a single author with an email address, then serialize as the managingEditor
             // else serialize the authors as Atom extensions
-            if ((this.Feed.Authors.Count == 1) && (this.Feed.Authors[0].Email != null))
+            if ((Feed.Authors.Count == 1) && (Feed.Authors[0].Email != null))
             {
-                await WritePersonAsync(writer, Rss20Constants.ManagingEditorTag, this.Feed.Authors[0]);
+                await WritePersonAsync(writer, Rss20Constants.ManagingEditorTag, Feed.Authors[0]).ConfigureAwait(false);
             }
             else
             {
                 if (_serializeExtensionsAsAtom)
                 {
-                    await _atomSerializer.WriteFeedAuthorsToAsync(writer, this.Feed.Authors);
+                    await _atomSerializer.WriteFeedAuthorsToAsync(writer, Feed.Authors).ConfigureAwait(false);
                 }
             }
 
-            if (this.Feed.LastUpdatedTime > DateTimeOffset.MinValue)
+            if (Feed.LastUpdatedTime > DateTimeOffset.MinValue)
             {
-                await writer.WriteStartElementAsync(Rss20Constants.LastBuildDateTag);
-                await writer.WriteStringAsync(AsString(this.Feed.LastUpdatedTime));
-                await writer.WriteEndElementAsync();
+                await writer.WriteStartElementAsync(Rss20Constants.LastBuildDateTag).ConfigureAwait(false);
+                await writer.WriteStringAsync(AsString(Feed.LastUpdatedTime)).ConfigureAwait(false);
+                await writer.WriteEndElementAsync().ConfigureAwait(false);
             }
 
-            for (int i = 0; i < this.Feed.Categories.Count; ++i)
+            for (int i = 0; i < Feed.Categories.Count; ++i)
             {
-                await WriteCategoryAsync(writer, this.Feed.Categories[i]);
+                await WriteCategoryAsync(writer, Feed.Categories[i]).ConfigureAwait(false);
             }
 
-            if (!string.IsNullOrEmpty(this.Feed.Generator))
+            if (!string.IsNullOrEmpty(Feed.Generator))
             {
-                await writer.WriteElementStringAsync(Rss20Constants.GeneratorTag, this.Feed.Generator);
+                await writer.WriteElementStringAsync(Rss20Constants.GeneratorTag, Feed.Generator).ConfigureAwait(false);
             }
 
-            if (this.Feed.Contributors.Count > 0)
+            if (Feed.Contributors.Count > 0)
             {
                 if (_serializeExtensionsAsAtom)
                 {
-                    await _atomSerializer.WriteFeedContributorsToAsync(writer, this.Feed.Contributors);
+                    await _atomSerializer.WriteFeedContributorsToAsync(writer, Feed.Contributors).ConfigureAwait(false);
                 }
             }
 
-            if (this.Feed.ImageUrl != null)
+            if (Feed.ImageUrl != null)
             {
-                await writer.WriteStartElementAsync(Rss20Constants.ImageTag);
-                await writer.WriteElementStringAsync(Rss20Constants.UrlTag, FeedUtils.GetUriString(this.Feed.ImageUrl));
+                await writer.WriteStartElementAsync(Rss20Constants.ImageTag).ConfigureAwait(false);
+                await writer.WriteElementStringAsync(Rss20Constants.UrlTag, FeedUtils.GetUriString(Feed.ImageUrl)).ConfigureAwait(false);
 
                 string imageTitle = Feed.ImageTitle == null ? title : Feed.ImageTitle.Text;
-                await writer.WriteElementStringAsync(Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace, imageTitle);
+                await writer.WriteElementStringAsync(Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace, imageTitle).ConfigureAwait(false);
 
                 string imgAlternateLink = alternateLink != null ? FeedUtils.GetUriString(alternateLink.Uri) : string.Empty;
 
                 string imageLink = Feed.ImageLink == null ? imgAlternateLink : FeedUtils.GetUriString(Feed.ImageLink);
-                await writer.WriteElementStringAsync(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace, imageLink);
-                await writer.WriteEndElementAsync(); // image
+                await writer.WriteElementStringAsync(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace, imageLink).ConfigureAwait(false);
+                await writer.WriteEndElementAsync().ConfigureAwait(false); // image
             }
 
             //Optional spec items
             //time to live
-            if (this.Feed.TimeToLive != 0)
+            if (Feed.TimeToLive != 0)
             {
-                await writer.WriteElementStringAsync(Rss20Constants.TimeToLiveTag, this.Feed.TimeToLive.ToString());
+                await writer.WriteElementStringAsync(Rss20Constants.TimeToLiveTag, Feed.TimeToLive.ToString()).ConfigureAwait(false);
             }
 
             //skiphours
-            if (this.Feed.SkipHours.Count > 0)
+            if (Feed.SkipHours.Count > 0)
             {
-                await writer.WriteStartElementAsync(Rss20Constants.SkipHoursTag);
+                await writer.WriteStartElementAsync(Rss20Constants.SkipHoursTag).ConfigureAwait(false);
 
-                foreach (int hour in this.Feed.SkipHours)
+                foreach (int hour in Feed.SkipHours)
                 {
                     writer.WriteElementString(Rss20Constants.HourTag, hour.ToString());
                 }
 
-                await writer.WriteEndElementAsync();
+                await writer.WriteEndElementAsync().ConfigureAwait(false);
             }
 
             //skipDays
-            if (this.Feed.SkipDays.Count > 0)
+            if (Feed.SkipDays.Count > 0)
             {
-                await writer.WriteStartElementAsync(Rss20Constants.SkipDaysTag);
+                await writer.WriteStartElementAsync(Rss20Constants.SkipDaysTag).ConfigureAwait(false);
 
-                foreach (string day in this.Feed.SkipDays)
+                foreach (string day in Feed.SkipDays)
                 {
-                    await writer.WriteElementStringAsync(Rss20Constants.DayTag, day);
+                    await writer.WriteElementStringAsync(Rss20Constants.DayTag, day).ConfigureAwait(false);
                 }
 
-                await writer.WriteEndElementAsync();
+                await writer.WriteEndElementAsync().ConfigureAwait(false);
             }
 
             //textinput
-            if (this.Feed.TextInput != null)
+            if (Feed.TextInput != null)
             {
-                await writer.WriteStartElementAsync(Rss20Constants.TextInputTag);
+                await writer.WriteStartElementAsync(Rss20Constants.TextInputTag).ConfigureAwait(false);
 
-                await writer.WriteElementStringAsync(Rss20Constants.DescriptionTag, this.Feed.TextInput.Description);
-                await writer.WriteElementStringAsync(Rss20Constants.TitleTag, this.Feed.TextInput.title);
-                await writer.WriteElementStringAsync(Rss20Constants.LinkTag, this.Feed.TextInput.link.GetAbsoluteUri().ToString());
-                await writer.WriteElementStringAsync(Rss20Constants.NameTag, this.Feed.TextInput.name);
+                await writer.WriteElementStringAsync(Rss20Constants.DescriptionTag, Feed.TextInput.Description).ConfigureAwait(false);
+                await writer.WriteElementStringAsync(Rss20Constants.TitleTag, Feed.TextInput.title).ConfigureAwait(false);
+                await writer.WriteElementStringAsync(Rss20Constants.LinkTag, Feed.TextInput.link.GetAbsoluteUri().ToString()).ConfigureAwait(false);
+                await writer.WriteElementStringAsync(Rss20Constants.NameTag, Feed.TextInput.name).ConfigureAwait(false);
 
-                await writer.WriteEndElementAsync();
+                await writer.WriteEndElementAsync().ConfigureAwait(false);
             }
 
             if (_serializeExtensionsAsAtom)
             {
-                await _atomSerializer.WriteElementAsync(writer, Atom10Constants.IdTag, this.Feed.Id);
+                await _atomSerializer.WriteElementAsync(writer, Atom10Constants.IdTag, Feed.Id).ConfigureAwait(false);
 
                 // dont write out the 1st alternate link since that would have been written out anyway
                 bool isFirstAlternateLink = true;
-                for (int i = 0; i < this.Feed.Links.Count; ++i)
+                for (int i = 0; i < Feed.Links.Count; ++i)
                 {
-                    if (this.Feed.Links[i].RelationshipType == Atom10Constants.AlternateTag && isFirstAlternateLink)
+                    if (Feed.Links[i].RelationshipType == Atom10Constants.AlternateTag && isFirstAlternateLink)
                     {
                         isFirstAlternateLink = false;
                         continue;
                     }
-                    await _atomSerializer.WriteLinkAsync(writer, this.Feed.Links[i], this.Feed.BaseUri);
+                    await _atomSerializer.WriteLinkAsync(writer, Feed.Links[i], Feed.BaseUri).ConfigureAwait(false);
                 }
             }
 
-            await WriteElementExtensionsAsync(writer, this.Feed, this.Version);
-            await WriteItemsAsync(writer, this.Feed.Items, this.Feed.BaseUri);
-            await writer.WriteEndElementAsync(); // channel
+            await WriteElementExtensionsAsync(writer, Feed, Version).ConfigureAwait(false);
+            await WriteItemsAsync(writer, Feed.Items, Feed.BaseUri).ConfigureAwait(false);
+            await writer.WriteEndElementAsync().ConfigureAwait(false); // channel
         }
 
         private async Task WriteItemContentsAsync(XmlWriter writer, SyndicationItem item, Uri feedBaseUri)
@@ -1355,9 +1399,9 @@ namespace System.ServiceModel.Syndication
             Uri baseUriToWrite = FeedUtils.GetBaseUriToWrite(feedBaseUri, item.BaseUri);
             if (baseUriToWrite != null)
             {
-                await writer.InternalWriteAttributeStringAsync("xml", "base", Atom10FeedFormatter.XmlNs, FeedUtils.GetUriString(baseUriToWrite));
+                await writer.WriteAttributeStringAsync("xml", "base", Atom10FeedFormatter.XmlNs, FeedUtils.GetUriString(baseUriToWrite)).ConfigureAwait(false);
             }
-            await WriteAttributeExtensionsAsync(writer, item, this.Version);
+            await WriteAttributeExtensionsAsync(writer, item, Version).ConfigureAwait(false);
             string guid = item.Id ?? string.Empty;
             bool isPermalink = false;
             SyndicationLink firstAlternateLink = null;
@@ -1376,46 +1420,48 @@ namespace System.ServiceModel.Syndication
                     }
                 }
             }
+
             if (!string.IsNullOrEmpty(guid))
             {
-                await writer.WriteStartElementAsync(Rss20Constants.GuidTag);
+                await writer.WriteStartElementAsync(Rss20Constants.GuidTag).ConfigureAwait(false);
                 if (isPermalink)
                 {
-                    await writer.WriteAttributeStringAsync(Rss20Constants.IsPermaLinkTag, "true");
+                    await writer.WriteAttributeStringAsync(Rss20Constants.IsPermaLinkTag, "true").ConfigureAwait(false);
                 }
                 else
                 {
-                    await writer.WriteAttributeStringAsync(Rss20Constants.IsPermaLinkTag, "false");
+                    await writer.WriteAttributeStringAsync(Rss20Constants.IsPermaLinkTag, "false").ConfigureAwait(false);
                 }
-                await writer.WriteStringAsync(guid);
-                await writer.WriteEndElementAsync();
+                await writer.WriteStringAsync(guid).ConfigureAwait(false);
+                await writer.WriteEndElementAsync().ConfigureAwait(false);
             }
+
             if (firstAlternateLink != null)
             {
-                await WriteAlternateLinkAsync(writer, firstAlternateLink, (item.BaseUri != null ? item.BaseUri : feedBaseUri));
+                await WriteAlternateLinkAsync(writer, firstAlternateLink, (item.BaseUri != null ? item.BaseUri : feedBaseUri)).ConfigureAwait(false);
             }
 
             if (item.Authors.Count == 1 && !string.IsNullOrEmpty(item.Authors[0].Email))
             {
-                await WritePersonAsync(writer, Rss20Constants.AuthorTag, item.Authors[0]);
+                await WritePersonAsync(writer, Rss20Constants.AuthorTag, item.Authors[0]).ConfigureAwait(false);
             }
             else
             {
                 if (_serializeExtensionsAsAtom)
                 {
-                    await _atomSerializer.WriteItemAuthorsToAsync(writer, item.Authors);
+                    await _atomSerializer.WriteItemAuthorsToAsync(writer, item.Authors).ConfigureAwait(false);
                 }
             }
 
             for (int i = 0; i < item.Categories.Count; ++i)
             {
-                await WriteCategoryAsync(writer, item.Categories[i]);
+                await WriteCategoryAsync(writer, item.Categories[i]).ConfigureAwait(false);
             }
 
             bool serializedTitle = false;
             if (item.Title != null)
             {
-                await writer.WriteElementStringAsync(Rss20Constants.TitleTag, item.Title.Text);
+                await writer.WriteElementStringAsync(Rss20Constants.TitleTag, item.Title.Text).ConfigureAwait(false);
                 serializedTitle = true;
             }
 
@@ -1426,20 +1472,22 @@ namespace System.ServiceModel.Syndication
                 summary = (item.Content as TextSyndicationContent);
                 serializedContentAsDescription = (summary != null);
             }
+
             // the spec requires the wire to have a title or a description
             if (!serializedTitle && summary == null)
             {
                 summary = new TextSyndicationContent(string.Empty);
             }
+
             if (summary != null)
             {
-                await writer.WriteElementStringAsync(Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace, summary.Text);
+                await writer.WriteElementStringAsync(Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace, summary.Text).ConfigureAwait(false);
             }
 
             if (item.SourceFeed != null)
             {
-                await writer.WriteStartElementAsync(Rss20Constants.SourceTag, Rss20Constants.Rss20Namespace);
-                await WriteAttributeExtensionsAsync(writer, item.SourceFeed, this.Version);
+                await writer.WriteStartElementAsync(Rss20Constants.SourceTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false);
+                await WriteAttributeExtensionsAsync(writer, item.SourceFeed, Version).ConfigureAwait(false);
                 SyndicationLink selfLink = null;
                 for (int i = 0; i < item.SourceFeed.Links.Count; ++i)
                 {
@@ -1451,16 +1499,16 @@ namespace System.ServiceModel.Syndication
                 }
                 if (selfLink != null && !item.SourceFeed.AttributeExtensions.ContainsKey(s_rss20Url))
                 {
-                    await writer.WriteAttributeStringAsync(Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace, FeedUtils.GetUriString(selfLink.Uri));
+                    await writer.WriteAttributeStringAsync(Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace, FeedUtils.GetUriString(selfLink.Uri)).ConfigureAwait(false);
                 }
                 string title = (item.SourceFeed.Title != null) ? item.SourceFeed.Title.Text : string.Empty;
-                await writer.WriteStringAsync(title);
-                await writer.WriteEndElementAsync();
+                await writer.WriteStringAsync(title).ConfigureAwait(false);
+                await writer.WriteEndElementAsync().ConfigureAwait(false);
             }
 
             if (item.PublishDate > DateTimeOffset.MinValue)
             {
-                await writer.WriteElementStringAsync(Rss20Constants.PubDateTag, Rss20Constants.Rss20Namespace, AsString(item.PublishDate));
+                await writer.WriteElementStringAsync(Rss20Constants.PubDateTag, Rss20Constants.Rss20Namespace, AsString(item.PublishDate)).ConfigureAwait(false);
             }
 
             // serialize the enclosures
@@ -1474,7 +1522,7 @@ namespace System.ServiceModel.Syndication
                     if (firstEnclosureLink == null)
                     {
                         firstEnclosureLink = item.Links[i];
-                        await WriteMediaEnclosureAsync(writer, item.Links[i], item.BaseUri);
+                        await WriteMediaEnclosureAsync(writer, item.Links[i], item.BaseUri).ConfigureAwait(false);
                         continue;
                     }
                 }
@@ -1486,31 +1534,31 @@ namespace System.ServiceModel.Syndication
                         continue;
                     }
                 }
+
                 if (_serializeExtensionsAsAtom)
                 {
-                    await _atomSerializer.WriteLinkAsync(writer, item.Links[i], item.BaseUri);
+                    await _atomSerializer.WriteLinkAsync(writer, item.Links[i], item.BaseUri).ConfigureAwait(false);
                 }
             }
-
 
             if (item.LastUpdatedTime > DateTimeOffset.MinValue)
             {
                 if (_serializeExtensionsAsAtom)
                 {
-                    await _atomSerializer.WriteItemLastUpdatedTimeToAsync(writer, item.LastUpdatedTime);
+                    await _atomSerializer.WriteItemLastUpdatedTimeToAsync(writer, item.LastUpdatedTime).ConfigureAwait(false);
                 }
             }
 
             if (_serializeExtensionsAsAtom)
             {
-                await _atomSerializer.WriteContentToAsync(writer, Atom10Constants.RightsTag, item.Copyright);
+                await _atomSerializer.WriteContentToAsync(writer, Atom10Constants.RightsTag, item.Copyright).ConfigureAwait(false);
             }
 
             if (!serializedContentAsDescription)
             {
                 if (_serializeExtensionsAsAtom)
                 {
-                    await _atomSerializer.WriteContentToAsync(writer, Atom10Constants.ContentTag, item.Content);
+                    await _atomSerializer.WriteContentToAsync(writer, Atom10Constants.ContentTag, item.Content).ConfigureAwait(false);
                 }
             }
 
@@ -1518,105 +1566,47 @@ namespace System.ServiceModel.Syndication
             {
                 if (_serializeExtensionsAsAtom)
                 {
-                    await _atomSerializer.WriteItemContributorsToAsync(writer, item.Contributors);
+                    await _atomSerializer.WriteItemContributorsToAsync(writer, item.Contributors).ConfigureAwait(false);
                 }
             }
 
-            await WriteElementExtensionsAsync(writer, item, this.Version);
+            await WriteElementExtensionsAsync(writer, item, Version).ConfigureAwait(false);
         }
 
         private async Task WriteMediaEnclosureAsync(XmlWriter writer, SyndicationLink link, Uri baseUri)
         {
-            await writer.WriteStartElementAsync(Rss20Constants.EnclosureTag, Rss20Constants.Rss20Namespace);
+            await writer.WriteStartElementAsync(Rss20Constants.EnclosureTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false);
             Uri baseUriToWrite = FeedUtils.GetBaseUriToWrite(baseUri, link.BaseUri);
             if (baseUriToWrite != null)
             {
-                await writer.InternalWriteAttributeStringAsync("xml", "base", Atom10FeedFormatter.XmlNs, FeedUtils.GetUriString(baseUriToWrite));
+                await writer.WriteAttributeStringAsync("xml", "base", Atom10FeedFormatter.XmlNs, FeedUtils.GetUriString(baseUriToWrite)).ConfigureAwait(false);
             }
-            await link.WriteAttributeExtensionsAsync(writer, SyndicationVersions.Rss20);
+
+            await link.WriteAttributeExtensionsAsync(writer, SyndicationVersions.Rss20).ConfigureAwait(false);
             if (!link.AttributeExtensions.ContainsKey(s_rss20Url))
             {
-                await writer.WriteAttributeStringAsync(Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace, FeedUtils.GetUriString(link.Uri));
+                await writer.WriteAttributeStringAsync(Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace, FeedUtils.GetUriString(link.Uri)).ConfigureAwait(false);
             }
+
             if (link.MediaType != null && !link.AttributeExtensions.ContainsKey(s_rss20Type))
             {
-                await writer.WriteAttributeStringAsync(Rss20Constants.TypeTag, Rss20Constants.Rss20Namespace, link.MediaType);
+                await writer.WriteAttributeStringAsync(Rss20Constants.TypeTag, Rss20Constants.Rss20Namespace, link.MediaType).ConfigureAwait(false);
             }
+
             if (link.Length != 0 && !link.AttributeExtensions.ContainsKey(s_rss20Length))
             {
-                await writer.WriteAttributeStringAsync(Rss20Constants.LengthTag, Rss20Constants.Rss20Namespace, Convert.ToString(link.Length, CultureInfo.InvariantCulture));
+                await writer.WriteAttributeStringAsync(Rss20Constants.LengthTag, Rss20Constants.Rss20Namespace, Convert.ToString(link.Length, CultureInfo.InvariantCulture)).ConfigureAwait(false);
             }
-            await writer.WriteEndElementAsync();
+
+            await writer.WriteEndElementAsync().ConfigureAwait(false);
         }
 
         private async Task WritePersonAsync(XmlWriter writer, string elementTag, SyndicationPerson person)
         {
-            await writer.WriteStartElementAsync(elementTag, Rss20Constants.Rss20Namespace);
-            await WriteAttributeExtensionsAsync(writer, person, this.Version);
-            await writer.WriteStringAsync(person.Email);
-            await writer.WriteEndElementAsync();
-        }
-
-        private static bool OriginalDateParser(string dateTimeString, out DateTimeOffset dto)
-        {
-            StringBuilder dateTimeStringBuilder = new StringBuilder(dateTimeString.Trim());
-            if (dateTimeStringBuilder.Length < 18)
-            {
-                return false;
-            }
-
-            int timeZoneStartIndex;
-            for (timeZoneStartIndex = dateTimeStringBuilder.Length - 1; dateTimeStringBuilder[timeZoneStartIndex] != ' '; timeZoneStartIndex--) ;
-            timeZoneStartIndex++;
-
-            string timeZoneSuffix = dateTimeStringBuilder.ToString().Substring(timeZoneStartIndex);
-            dateTimeStringBuilder.Remove(timeZoneStartIndex, dateTimeStringBuilder.Length - timeZoneStartIndex);
-            bool isUtc;
-            dateTimeStringBuilder.Append(NormalizeTimeZone(timeZoneSuffix, out isUtc));
-            string wellFormattedString = dateTimeStringBuilder.ToString();
-
-            DateTimeOffset theTime;
-            string[] parseFormat =
-            {
-                "ddd, dd MMMM yyyy HH:mm:ss zzz",
-                "dd MMMM yyyy HH:mm:ss zzz",
-                "ddd, dd MMM yyyy HH:mm:ss zzz",
-                "dd MMM yyyy HH:mm:ss zzz",
-
-                "ddd, dd MMMM yyyy HH:mm zzz",
-                "dd MMMM yyyy HH:mm zzz",
-                "ddd, dd MMM yyyy HH:mm zzz",
-                "dd MMM yyyy HH:mm zzz"
-            };
-
-            if (DateTimeOffset.TryParseExact(wellFormattedString, parseFormat,
-                CultureInfo.InvariantCulture.DateTimeFormat,
-                (isUtc ? DateTimeStyles.AdjustToUniversal : DateTimeStyles.None), out theTime))
-            {
-                dto = theTime;
-                return true;
-            }
-
-            return false;
-        }
-
-        // Custom parsers
-        public static DateTimeOffset DefaultDateParser(string dateTimeString, string localName, string ns)
-        {
-            bool parsed = false;
-            DateTimeOffset dto;
-            parsed = DateTimeOffset.TryParse(dateTimeString, out dto);
-            if (parsed)
-                return dto;
-
-
-            //original parser here
-            parsed = OriginalDateParser(dateTimeString, out dto);
-            if (parsed)
-                return dto;
-
-            //Impossible to parse - using a default date;
-            return new DateTimeOffset();
+            await writer.WriteStartElementAsync(elementTag, Rss20Constants.Rss20Namespace).ConfigureAwait(false);
+            await WriteAttributeExtensionsAsync(writer, person, Version).ConfigureAwait(false);
+            await writer.WriteStringAsync(person.Email).ConfigureAwait(false);
+            await writer.WriteEndElementAsync().ConfigureAwait(false);
         }
     }
 
@@ -1629,10 +1619,12 @@ namespace System.ServiceModel.Syndication
             : base(typeof(TSyndicationFeed))
         {
         }
+
         public Rss20FeedFormatter(TSyndicationFeed feedToWrite)
             : base(feedToWrite)
         {
         }
+
         public Rss20FeedFormatter(TSyndicationFeed feedToWrite, bool serializeExtensionsAsAtom)
             : base(feedToWrite, serializeExtensionsAsAtom)
         {
@@ -1643,7 +1635,6 @@ namespace System.ServiceModel.Syndication
             return new TSyndicationFeed();
         }
     }
-
 
     internal class ItemParseOptions
     {

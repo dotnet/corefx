@@ -16,20 +16,20 @@ namespace System.Buffers.Binary
         public static void WriteMachineEndian<T>(Span<byte> buffer, ref T value)
             where T : struct
         {
-#if IsPartialFacade
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+#if netstandard
+            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
             {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
+                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             }
 #else
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             }
 #endif
             if ((uint)Unsafe.SizeOf<T>() > (uint)buffer.Length)
             {
-                throw new ArgumentOutOfRangeException();
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
             }
             Unsafe.WriteUnaligned<T>(ref buffer.DangerousGetPinnableReference(), value);
         }
@@ -42,13 +42,13 @@ namespace System.Buffers.Binary
         public static bool TryWriteMachineEndian<T>(Span<byte> buffer, ref T value)
             where T : struct
         {
-#if IsPartialFacade
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+#if netstandard
+            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
             {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidTypeWithPointersNotSupported, typeof(T)));
+                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             }
 #else
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
             }

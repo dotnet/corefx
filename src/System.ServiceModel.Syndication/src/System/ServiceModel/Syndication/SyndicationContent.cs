@@ -6,7 +6,6 @@ namespace System.ServiceModel.Syndication
 {
     using System;
     using System.Collections.Generic;
-    using System.Runtime.CompilerServices;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
     using System.Xml;
@@ -72,9 +71,9 @@ namespace System.ServiceModel.Syndication
             return new XmlSyndicationContent(Atom10Constants.XmlMediaType, dataContractObject, dataContractSerializer);
         }
 
-        public static XmlSyndicationContent CreateXmlContent(XmlReader XmlReaderWrapper)
+        public static XmlSyndicationContent CreateXmlContent(XmlReader xmlReader)
         {
-            return new XmlSyndicationContent(XmlReaderWrapper);
+            return new XmlSyndicationContent(xmlReader);
         }
 
         public static XmlSyndicationContent CreateXmlContent(object xmlSerializerObject, XmlSerializer serializer)
@@ -83,6 +82,11 @@ namespace System.ServiceModel.Syndication
         }
 
         public abstract SyndicationContent Clone();
+
+        public void WriteTo(XmlWriter writer, string outerElementName, string outerElementNamespace)
+        {
+            WriteToAsync(writer, outerElementName, outerElementNamespace).GetAwaiter().GetResult();
+        }
 
         public async Task WriteToAsync(XmlWriter writer, string outerElementName, string outerElementNamespace)
         {
@@ -97,8 +101,8 @@ namespace System.ServiceModel.Syndication
 
             writer = XmlWriterWrapper.CreateFromWriter(writer);
 
-            await writer.WriteStartElementAsync(outerElementName, outerElementNamespace);
-            await writer.WriteAttributeStringAsync(Atom10Constants.TypeTag, string.Empty, this.Type);
+            await writer.WriteStartElementAsync(outerElementName, outerElementNamespace).ConfigureAwait(false);
+            await writer.WriteAttributeStringAsync(Atom10Constants.TypeTag, string.Empty, Type).ConfigureAwait(false);
             if (_attributeExtensions != null)
             {
                 foreach (XmlQualifiedName key in _attributeExtensions.Keys)
@@ -110,12 +114,12 @@ namespace System.ServiceModel.Syndication
                     string attrValue;
                     if (_attributeExtensions.TryGetValue(key, out attrValue))
                     {
-                        await writer.WriteAttributeStringAsync(key.Name, key.Namespace, attrValue);
+                        await writer.WriteAttributeStringAsync(key.Name, key.Namespace, attrValue).ConfigureAwait(false);
                     }
                 }
             }
             WriteContentsTo(writer);
-            await writer.WriteEndElementAsync();
+            await writer.WriteEndElementAsync().ConfigureAwait(false);
         }
 
         internal void CopyAttributeExtensions(SyndicationContent source)
@@ -128,7 +132,7 @@ namespace System.ServiceModel.Syndication
             {
                 foreach (XmlQualifiedName key in source._attributeExtensions.Keys)
                 {
-                    this.AttributeExtensions.Add(key, source._attributeExtensions[key]);
+                    AttributeExtensions.Add(key, source._attributeExtensions[key]);
                 }
             }
         }
