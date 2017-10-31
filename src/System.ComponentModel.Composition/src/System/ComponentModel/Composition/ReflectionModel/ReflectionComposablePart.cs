@@ -27,15 +27,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public ReflectionComposablePart(ReflectionComposablePartDefinition definition)
         {
-            Requires.NotNull(definition, "definition");
+            Requires.NotNull(definition, nameof(definition));
 
             this._definition = definition;
         }
 
         public ReflectionComposablePart(ReflectionComposablePartDefinition definition, object attributedPart)
         {
-            Requires.NotNull(definition, "definition");
-            Requires.NotNull(attributedPart, "attributedPart");
+            Requires.NotNull(definition, nameof(definition));
+            Requires.NotNull(attributedPart, nameof(attributedPart));
 
             this._definition = definition;
 
@@ -169,7 +169,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             // access to _importValues
             // access to _initialCompositionComplete
             // access to _instance
-            Requires.NotNull(definition, "definition");
+            Requires.NotNull(definition, nameof(definition));
 
             ExportingMember member = null;
             lock (this._lock)
@@ -188,8 +188,8 @@ namespace System.ComponentModel.Composition.ReflectionModel
         public override void SetImport(ImportDefinition definition, IEnumerable<Export> exports)
         {
             this.RequiresRunning();
-            Requires.NotNull(definition, "definition");
-            Requires.NotNull(exports, "exports");;
+            Requires.NotNull(definition, nameof(definition));
+            Requires.NotNull(exports, nameof(exports));;
 
             ImportingItem item = GetImportingItemFromDefinition(definition);
             if (item == null)

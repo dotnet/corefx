@@ -67,7 +67,7 @@ namespace System.ComponentModel.Composition.Hosting
             ThrowIfCompleted();
             ThrowIfContainsInnerAtomicComposition();
 
-            Requires.NotNull(key, "key");
+            Requires.NotNull(key, nameof(key));
 
             SetValueInternal(key, value);
         }
@@ -83,7 +83,7 @@ namespace System.ComponentModel.Composition.Hosting
             ThrowIfDisposed();
             ThrowIfCompleted();
 
-            Requires.NotNull(key, "key");
+            Requires.NotNull(key, nameof(key));
 
             return TryGetValueInternal(key, localAtomicCompositionOnly, out value);
         }
@@ -94,7 +94,7 @@ namespace System.ComponentModel.Composition.Hosting
             ThrowIfCompleted();
             ThrowIfContainsInnerAtomicComposition();
 
-            Requires.NotNull(completeAction, "completeAction");
+            Requires.NotNull(completeAction, nameof(completeAction));
 
             if (this._completeActionList == null)
             {
@@ -109,7 +109,7 @@ namespace System.ComponentModel.Composition.Hosting
             ThrowIfCompleted();
             ThrowIfContainsInnerAtomicComposition();
 
-            Requires.NotNull(revertAction, "revertAction");
+            Requires.NotNull(revertAction, nameof(revertAction));
 
             if (this._revertActionList == null)
             {

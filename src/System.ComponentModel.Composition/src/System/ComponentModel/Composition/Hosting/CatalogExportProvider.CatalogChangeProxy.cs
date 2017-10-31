@@ -40,7 +40,7 @@ namespace System.ComponentModel.Composition.Hosting
             public override IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(
                 ImportDefinition definition)
             {
-                Requires.NotNull(definition, "definition");
+                Requires.NotNull(definition, nameof(definition));
 
                 var originalExports = this._originalCatalog.GetExports(definition);
                 var trimmedExports = originalExports.Where(partAndExport =>

@@ -33,7 +33,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <returns></returns>
         public FilteredCatalog IncludeDependencies(Func<ImportDefinition, bool> importFilter)
         {
-            Requires.NotNull(importFilter, "importFilter");
+            Requires.NotNull(importFilter, nameof(importFilter));
             this.ThrowIfDisposed();
 
             return Traverse(new DependenciesTraversal(this, importFilter));
@@ -56,7 +56,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <returns></returns>
         public FilteredCatalog IncludeDependents(Func<ImportDefinition, bool> importFilter)
         {
-            Requires.NotNull(importFilter, "importFilter");
+            Requires.NotNull(importFilter, nameof(importFilter));
             this.ThrowIfDisposed();
 
             return Traverse(new DependentsTraversal(this, importFilter));

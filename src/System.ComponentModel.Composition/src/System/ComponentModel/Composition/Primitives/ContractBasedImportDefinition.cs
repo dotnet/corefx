@@ -308,7 +308,7 @@ namespace System.ComponentModel.Composition.Primitives
         /// </exception>
         public override bool IsConstraintSatisfiedBy(ExportDefinition exportDefinition)
         {
-            Requires.NotNull(exportDefinition, "exportDefinition");
+            Requires.NotNull(exportDefinition, nameof(exportDefinition));
 
             if (!StringComparers.ContractName.Equals(this.ContractName, exportDefinition.ContractName))
             {

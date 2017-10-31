@@ -29,7 +29,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public ApplicationCatalog(ICompositionElement definitionOrigin)
         {
-            Requires.NotNull(definitionOrigin, "definitionOrigin");
+            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
             this._definitionOrigin = definitionOrigin;
         }
@@ -139,7 +139,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             this.ThrowIfDisposed();
 
-            Requires.NotNull(definition, "definition");
+            Requires.NotNull(definition, nameof(definition));
 
             return this.InnerCatalog.GetExports(definition);
         }

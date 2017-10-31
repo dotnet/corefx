@@ -42,8 +42,8 @@ namespace System.ComponentModel.Composition.Hosting
         public ComposablePartCatalogChangeEventArgs(IEnumerable<ComposablePartDefinition> addedDefinitions,
             IEnumerable<ComposablePartDefinition> removedDefinitions, AtomicComposition atomicComposition)
         {
-            Requires.NotNull(addedDefinitions, "addedDefinitions");
-            Requires.NotNull(removedDefinitions, "removedDefinitions");
+            Requires.NotNull(addedDefinitions, nameof(addedDefinitions));
+            Requires.NotNull(removedDefinitions, nameof(removedDefinitions));
 
             this._addedDefinitions = addedDefinitions.AsArray();
             this._removedDefinitions = removedDefinitions.AsArray();

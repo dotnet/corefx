@@ -48,7 +48,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public void SatisfyImportsOnce(ComposablePart part)
         {
-            Requires.NotNull(part, "part");
+            Requires.NotNull(part, nameof(part));
             Assumes.NotNull(this._compositionContainer);
             this._compositionContainer.SatisfyImportsOnce(part);
         }

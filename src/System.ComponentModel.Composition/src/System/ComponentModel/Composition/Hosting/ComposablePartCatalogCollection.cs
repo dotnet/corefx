@@ -46,7 +46,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public void Add(ComposablePartCatalog item)
         {
-            Requires.NotNull(item, "item");
+            Requires.NotNull(item, nameof(item));
 
             this.ThrowIfDisposed();
 
@@ -129,7 +129,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public bool Contains(ComposablePartCatalog item)
         {
-            Requires.NotNull(item, "item");
+            Requires.NotNull(item, nameof(item));
 
             this.ThrowIfDisposed();
 
@@ -174,7 +174,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public bool Remove(ComposablePartCatalog item)
         {
-            Requires.NotNull(item, "item");
+            Requires.NotNull(item, nameof(item));
 
             this.ThrowIfDisposed();
 

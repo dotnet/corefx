@@ -17,7 +17,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
     {
         public static Lazy<Type> GetPartType(ComposablePartDefinition partDefinition)
         {
-            Requires.NotNull(partDefinition, "partDefinition");
+            Requires.NotNull(partDefinition, nameof(partDefinition));
             Contract.Ensures(Contract.Result<Lazy<Type>>() != null);
 
             ReflectionComposablePartDefinition reflectionPartDefinition = partDefinition as ReflectionComposablePartDefinition;
@@ -31,7 +31,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public static bool IsDisposalRequired(ComposablePartDefinition partDefinition)
         {
-            Requires.NotNull(partDefinition, "partDefinition");
+            Requires.NotNull(partDefinition, nameof(partDefinition));
 
             ReflectionComposablePartDefinition reflectionPartDefinition = partDefinition as ReflectionComposablePartDefinition;
             if (reflectionPartDefinition == null)
@@ -44,7 +44,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public static LazyMemberInfo GetExportingMember(ExportDefinition exportDefinition)
         {
-            Requires.NotNull(exportDefinition, "exportDefinition");
+            Requires.NotNull(exportDefinition, nameof(exportDefinition));
 
             ReflectionMemberExportDefinition reflectionExportDefinition = exportDefinition as ReflectionMemberExportDefinition;
             if (reflectionExportDefinition == null)
@@ -59,7 +59,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public static LazyMemberInfo GetImportingMember(ImportDefinition importDefinition)
         {
-            Requires.NotNull(importDefinition, "importDefinition");
+            Requires.NotNull(importDefinition, nameof(importDefinition));
 
             ReflectionMemberImportDefinition reflectionMemberImportDefinition = importDefinition as ReflectionMemberImportDefinition;
             if (reflectionMemberImportDefinition == null)
@@ -74,7 +74,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public static Lazy<ParameterInfo> GetImportingParameter(ImportDefinition importDefinition)
         {
-            Requires.NotNull(importDefinition, "importDefinition");
+            Requires.NotNull(importDefinition, nameof(importDefinition));
             Contract.Ensures(Contract.Result<Lazy<ParameterInfo>>() != null);
 
             ReflectionParameterImportDefinition reflectionParameterImportDefinition = importDefinition as ReflectionParameterImportDefinition;
@@ -90,7 +90,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public static bool IsImportingParameter(ImportDefinition importDefinition)
         {
-            Requires.NotNull(importDefinition, "importDefinition");
+            Requires.NotNull(importDefinition, nameof(importDefinition));
 
             ReflectionImportDefinition reflectionImportDefinition = importDefinition as ReflectionImportDefinition;
             if (reflectionImportDefinition == null)
@@ -105,14 +105,14 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public static bool IsExportFactoryImportDefinition(ImportDefinition importDefinition)
         {
-            Requires.NotNull(importDefinition, "importDefinition");
+            Requires.NotNull(importDefinition, nameof(importDefinition));
 
             return (importDefinition is IPartCreatorImportDefinition);
         }
 
         public static ContractBasedImportDefinition GetExportFactoryProductImportDefinition(ImportDefinition importDefinition)
         {
-            Requires.NotNull(importDefinition, "importDefinition");
+            Requires.NotNull(importDefinition, nameof(importDefinition));
             Contract.Ensures(Contract.Result<ContractBasedImportDefinition>() != null);
 
             IPartCreatorImportDefinition partCreatorImportDefinition = importDefinition as IPartCreatorImportDefinition;
@@ -135,7 +135,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Lazy<IDictionary<string, object>> metadata,
             ICompositionElement origin)
         {
-            Requires.NotNull(partType, "partType");
+            Requires.NotNull(partType, nameof(partType));
             Contract.Ensures(Contract.Result<ComposablePartDefinition>() != null);
 
             return new ReflectionComposablePartDefinition(
@@ -280,7 +280,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             bool isExportFactory,
             ICompositionElement origin)
         {
-            Requires.NotNull(parameter, "parameter");
+            Requires.NotNull(parameter, nameof(parameter));
             Requires.NotNullOrEmpty(contractName, "contractName");
             Contract.Ensures(Contract.Result<ContractBasedImportDefinition>() != null);
 
@@ -315,7 +315,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public static bool TryMakeGenericPartDefinition(ComposablePartDefinition partDefinition, IEnumerable<Type> genericParameters, out ComposablePartDefinition specialization)
         {
-            Requires.NotNull(partDefinition, "partDefinition");
+            Requires.NotNull(partDefinition, nameof(partDefinition));
 
             specialization = null;
             ReflectionComposablePartDefinition reflectionPartDefinition = partDefinition as ReflectionComposablePartDefinition;

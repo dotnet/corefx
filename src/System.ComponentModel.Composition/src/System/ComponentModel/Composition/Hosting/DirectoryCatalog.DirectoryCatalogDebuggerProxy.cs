@@ -20,7 +20,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             public DirectoryCatalogDebuggerProxy(DirectoryCatalog catalog)
             {
-                Requires.NotNull(catalog, "catalog");
+                Requires.NotNull(catalog, nameof(catalog));
 
                 this._catalog = catalog;
             }

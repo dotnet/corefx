@@ -72,7 +72,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public CatalogExportProvider(ComposablePartCatalog catalog, CompositionOptions compositionOptions)
         {
-            Requires.NotNull(catalog, "catalog");
+            Requires.NotNull(catalog, nameof(catalog));
             if (compositionOptions > (CompositionOptions.DisableSilentRejection | CompositionOptions.IsThreadSafe | CompositionOptions.ExportCompositionService))
             {
                 throw new ArgumentOutOfRangeException("compositionOptions");
@@ -164,7 +164,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 this.ThrowIfDisposed();
 
-                Requires.NotNull(value, "value");
+                Requires.NotNull(value, nameof(value));
 
                 ImportEngine newImportEngine = null;
                 AggregateExportProvider aggregateExportProvider = null;

@@ -14,7 +14,7 @@ namespace System.ComponentModel.Composition
 
         public CompositionErrorDebuggerProxy(CompositionError error)
         {
-            Requires.NotNull(error, "error");
+            Requires.NotNull(error, nameof(error));
 
             this._error = error;
         }

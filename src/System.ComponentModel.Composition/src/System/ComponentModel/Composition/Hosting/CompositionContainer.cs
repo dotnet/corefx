@@ -391,7 +391,7 @@ namespace System.ComponentModel.Composition.Hosting
   
         public void Compose(CompositionBatch batch)
         {
-            Requires.NotNull(batch, "batch");
+            Requires.NotNull(batch, nameof(batch));
             this.ThrowIfDisposed();
 
             this._partExportProvider.Compose(batch);
@@ -419,7 +419,7 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Performance", "CA1822")]
         public void ReleaseExport(Export export)
         {
-            Requires.NotNull(export, "export");
+            Requires.NotNull(export, nameof(export));
 
             IDisposable dependency = export as IDisposable;
 
@@ -451,7 +451,7 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Performance", "CA1822")]
         public void ReleaseExport<T>(Lazy<T> export)
         {
-            Requires.NotNull(export, "export");
+            Requires.NotNull(export, nameof(export));
 
             IDisposable dependency = export as IDisposable;
 

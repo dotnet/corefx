@@ -18,7 +18,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <returns>The newly created <see cref="CompositionService"/> 
         public static CompositionService CreateCompositionService(this ComposablePartCatalog composablePartCatalog)
         {
-            Requires.NotNull(composablePartCatalog, "composablePartCatalog");
+            Requires.NotNull(composablePartCatalog, nameof(composablePartCatalog));
 
             return new CompositionService(composablePartCatalog);
         }

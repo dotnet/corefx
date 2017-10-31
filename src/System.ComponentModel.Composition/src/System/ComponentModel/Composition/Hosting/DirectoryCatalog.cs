@@ -184,7 +184,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             Requires.NotNullOrEmpty(path, "path");
             Requires.NotNullOrEmpty(searchPattern, "searchPattern");
-            Requires.NotNull(definitionOrigin, "definitionOrigin");
+            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
             this._definitionOrigin = definitionOrigin;
             this.Initialize(path, searchPattern);
@@ -331,7 +331,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             this.ThrowIfDisposed();
 
-            Requires.NotNull(definition, "definition");
+            Requires.NotNull(definition, nameof(definition));
 
             return this._catalogCollection.SelectMany(catalog => catalog.GetExports(definition));
         }

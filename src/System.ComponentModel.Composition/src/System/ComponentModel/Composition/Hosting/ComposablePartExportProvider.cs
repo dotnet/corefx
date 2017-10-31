@@ -141,7 +141,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 this.ThrowIfDisposed();
 
-                Requires.NotNull(value, "value");
+                Requires.NotNull(value, nameof(value));
                 using (this._lock.LockStateForWrite())
                 {
                     this.EnsureCanSet(this._sourceProvider);
@@ -237,7 +237,7 @@ namespace System.ComponentModel.Composition.Hosting
             this.ThrowIfDisposed();
             this.EnsureRunning();
 
-            Requires.NotNull(batch, "batch");
+            Requires.NotNull(batch, nameof(batch));
 
             // Quick exit test can be done prior to cloning since it's just an optimization, not a
             // change in behavior

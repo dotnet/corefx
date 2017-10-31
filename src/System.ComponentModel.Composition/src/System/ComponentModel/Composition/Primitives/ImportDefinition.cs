@@ -84,7 +84,7 @@ namespace System.ComponentModel.Composition.Primitives
         public ImportDefinition(Expression<Func<ExportDefinition, bool>> constraint, string contractName, ImportCardinality cardinality, bool isRecomposable, bool isPrerequisite)
             : this(contractName, cardinality, isRecomposable, isPrerequisite, MetadataServices.EmptyMetadata)
         {
-            Requires.NotNull(constraint, "constraint");
+            Requires.NotNull(constraint, nameof(constraint));
 
             this._constraint = constraint;
         }
@@ -93,7 +93,7 @@ namespace System.ComponentModel.Composition.Primitives
         public ImportDefinition(Expression<Func<ExportDefinition, bool>> constraint, string contractName, ImportCardinality cardinality, bool isRecomposable, bool isPrerequisite, IDictionary<string, object> metadata)
             : this(contractName, cardinality, isRecomposable, isPrerequisite, metadata)
         {
-            Requires.NotNull(constraint, "constraint");
+            Requires.NotNull(constraint, nameof(constraint));
 
             this._constraint = constraint;
         }
@@ -271,7 +271,7 @@ namespace System.ComponentModel.Composition.Primitives
         /// </exception>
         public virtual bool IsConstraintSatisfiedBy(ExportDefinition exportDefinition)
         {
-            Requires.NotNull(exportDefinition, "exportDefinition");
+            Requires.NotNull(exportDefinition, nameof(exportDefinition));
 
             if (this._compiledConstraint == null)
             {

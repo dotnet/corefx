@@ -20,7 +20,7 @@ namespace System.ComponentModel.Composition
 
         public CompositionExceptionDebuggerProxy(CompositionException exception)
         {
-            Requires.NotNull(exception, "exception");
+            Requires.NotNull(exception, nameof(exception));
 
             this._exception = exception;
         }

@@ -99,7 +99,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public IEnumerable<Export> GetExports(ImportDefinition definition, AtomicComposition atomicComposition)
         {
-            Requires.NotNull(definition, "definition");
+            Requires.NotNull(definition, nameof(definition));
             Contract.Ensures(Contract.Result<IEnumerable<Export>>() != null);
 
             IEnumerable<Export> exports;
@@ -143,7 +143,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public bool TryGetExports(ImportDefinition definition, AtomicComposition atomicComposition, out IEnumerable<Export> exports)
         {
-            Requires.NotNull(definition, "definition");
+            Requires.NotNull(definition, nameof(definition));
 
             exports = null;
             ExportCardinalityCheckResult result = this.TryGetExportsCore(definition, atomicComposition, out exports);

@@ -21,8 +21,8 @@ namespace System.ComponentModel.Composition.Hosting
         /// </returns>
         public static bool Exports(this ComposablePartDefinition part, string contractName)
         {
-            Requires.NotNull(part, "part");
-            Requires.NotNull(contractName, "contractName");
+            Requires.NotNull(part, nameof(part));
+            Requires.NotNull(contractName, nameof(contractName));
 
             foreach (ExportDefinition export in part.ExportDefinitions)
             {
@@ -44,8 +44,8 @@ namespace System.ComponentModel.Composition.Hosting
         /// </returns>
         public static bool Imports(this ComposablePartDefinition part, string contractName)
         {
-            Requires.NotNull(part, "part");
-            Requires.NotNull(contractName, "contractName");
+            Requires.NotNull(part, nameof(part));
+            Requires.NotNull(contractName, nameof(contractName));
 
             foreach (ImportDefinition import in part.ImportDefinitions)
             {
@@ -69,8 +69,8 @@ namespace System.ComponentModel.Composition.Hosting
         /// </returns>
         public static bool Imports(this ComposablePartDefinition part, string contractName, ImportCardinality importCardinality)
         {
-            Requires.NotNull(part, "part");
-            Requires.NotNull(contractName, "contractName");
+            Requires.NotNull(part, nameof(part));
+            Requires.NotNull(contractName, nameof(contractName));
 
             foreach (ImportDefinition import in part.ImportDefinitions)
             {
@@ -93,8 +93,8 @@ namespace System.ComponentModel.Composition.Hosting
         /// </returns>
         public static bool ContainsPartMetadataWithKey(this ComposablePartDefinition part, string key)
         {
-            Requires.NotNull(part, "part");
-            Requires.NotNull(key, "key");
+            Requires.NotNull(part, nameof(part));
+            Requires.NotNull(key, nameof(key));
 
             return part.Metadata.ContainsKey(key);
         }
@@ -111,8 +111,8 @@ namespace System.ComponentModel.Composition.Hosting
         /// </returns>
         public static bool ContainsPartMetadata<T>(this ComposablePartDefinition part, string key, T value)
         {
-            Requires.NotNull(part, "part");
-            Requires.NotNull(key, "key");
+            Requires.NotNull(part, nameof(part));
+            Requires.NotNull(key, nameof(key));
 
             object untypedValue = null;
             if (part.Metadata.TryGetValue(key, out untypedValue))
@@ -138,8 +138,8 @@ namespace System.ComponentModel.Composition.Hosting
         /// <returns></returns>
         public static FilteredCatalog Filter(this ComposablePartCatalog catalog, Func<ComposablePartDefinition, bool> filter)
         {
-            Requires.NotNull(catalog, "catalog");
-            Requires.NotNull(filter, "filter");
+            Requires.NotNull(catalog, nameof(catalog));
+            Requires.NotNull(filter, nameof(filter));
 
             return new FilteredCatalog(catalog, filter);
         }

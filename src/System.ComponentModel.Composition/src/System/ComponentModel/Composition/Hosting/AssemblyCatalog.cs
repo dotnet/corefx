@@ -133,7 +133,7 @@ namespace System.ComponentModel.Composition.Hosting
         public AssemblyCatalog(string codeBase, ICompositionElement definitionOrigin)
         {
             Requires.NotNullOrEmpty(codeBase, "codeBase");
-            Requires.NotNull(definitionOrigin, "definitionOrigin");
+            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
             this._definitionOrigin = definitionOrigin;
@@ -157,7 +157,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public AssemblyCatalog(Assembly assembly)
         {
-            Requires.NotNull(assembly, "assembly");
+            Requires.NotNull(assembly, nameof(assembly));
 
             InitializeAssemblyCatalog(assembly);
             this._definitionOrigin = this;
@@ -187,8 +187,8 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public AssemblyCatalog(Assembly assembly, ICompositionElement definitionOrigin)
         {
-            Requires.NotNull(assembly, "assembly");
-            Requires.NotNull(definitionOrigin, "definitionOrigin");
+            Requires.NotNull(assembly, nameof(assembly));
+            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
             InitializeAssemblyCatalog(assembly);
             this._definitionOrigin = definitionOrigin;

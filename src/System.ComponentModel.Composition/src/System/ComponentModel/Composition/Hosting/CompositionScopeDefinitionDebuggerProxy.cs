@@ -18,7 +18,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public CompositionScopeDefinitionDebuggerProxy(CompositionScopeDefinition compositionScopeDefinition) 
         {
-            Requires.NotNull(compositionScopeDefinition, "compositionScopeDefinition");
+            Requires.NotNull(compositionScopeDefinition, nameof(compositionScopeDefinition));
 
             this._compositionScopeDefinition = compositionScopeDefinition;
         }

@@ -102,7 +102,7 @@ namespace System.ComponentModel.Composition.Primitives
         {
             this.ThrowIfDisposed();
 
-            Requires.NotNull(definition, "definition");
+            Requires.NotNull(definition, nameof(definition));
             Contract.Ensures(Contract.Result<IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>>>() != null);
 
             List<Tuple<ComposablePartDefinition, ExportDefinition>> exports = null;

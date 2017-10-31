@@ -779,7 +779,7 @@ namespace System.ComponentModel.Composition.Hosting
         private IEnumerable<Export> GetExportsCore(Type type, Type metadataViewType, string contractName, ImportCardinality cardinality)
         {
             // Only 'type' cannot be null - the other parameters have sensible defaults.
-            Requires.NotNull(type, "type");
+            Requires.NotNull(type, nameof(type));
 
             if (string.IsNullOrEmpty(contractName))
             {

@@ -16,7 +16,7 @@ namespace System.ComponentModel.Composition.Primitives
 
         public CompositionElementDebuggerProxy(CompositionElement element) 
         {
-            Requires.NotNull(element, "element");
+            Requires.NotNull(element, nameof(element));
 
             this._element = element;
         }

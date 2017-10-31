@@ -75,7 +75,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public TypeCatalog(IEnumerable<Type> types)
         {
-            Requires.NotNull(types, "types");
+            Requires.NotNull(types, nameof(types));
 
             InitializeTypeCatalog(types);
 
@@ -102,8 +102,8 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public TypeCatalog(IEnumerable<Type> types, ICompositionElement definitionOrigin)
         {
-            Requires.NotNull(types, "types");
-            Requires.NotNull(definitionOrigin, "definitionOrigin");
+            Requires.NotNull(types, nameof(types));
+            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
             InitializeTypeCatalog(types);
 

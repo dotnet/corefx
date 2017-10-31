@@ -49,7 +49,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public ImportEngine(ExportProvider sourceProvider, CompositionOptions compositionOptions)
         {
-            Requires.NotNull(sourceProvider, "sourceProvider");
+            Requires.NotNull(sourceProvider, nameof(sourceProvider));
 
             this._compositionOptions = compositionOptions;
             this._sourceProvider = sourceProvider;
@@ -87,7 +87,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             this.ThrowIfDisposed();
 
-            Requires.NotNull(part, "part");
+            Requires.NotNull(part, nameof(part));
 
             // Do not do any previewing if SilentRejection is disabled.
             if (this._compositionOptions.HasFlag(CompositionOptions.DisableSilentRejection))
@@ -160,7 +160,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             this.ThrowIfDisposed();
 
-            Requires.NotNull(part, "part");
+            Requires.NotNull(part, nameof(part));
 
             // NOTE : the following two calls use the state lock
             PartManager partManager = this.GetPartManager(part, true);
@@ -197,7 +197,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             this.ThrowIfDisposed();
 
-            Requires.NotNull(part, "part");
+            Requires.NotNull(part, nameof(part));
 
             // NOTE : the following two calls use the state lock
             PartManager partManager = this.GetPartManager(part, true);
@@ -231,7 +231,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             this.ThrowIfDisposed();
 
-            Requires.NotNull(part, "part");
+            Requires.NotNull(part, nameof(part));
 
             using (this._lock.LockComposition())
             {

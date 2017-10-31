@@ -34,8 +34,8 @@ namespace System.ComponentModel.Composition.Hosting
 
         internal FilteredCatalog(ComposablePartCatalog catalog, Func<ComposablePartDefinition, bool> filter, FilteredCatalog complement)
         {
-            Requires.NotNull(catalog, "catalog");
-            Requires.NotNull(filter, "filter");
+            Requires.NotNull(catalog, nameof(catalog));
+            Requires.NotNull(filter, nameof(filter));
 
             this._innerCatalog = catalog;
             this._filter = (p) => filter.Invoke(p.GetGenericPartDefinition() ?? p);
@@ -156,7 +156,7 @@ namespace System.ComponentModel.Composition.Hosting
         public override IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(ImportDefinition definition)
         {
             this.ThrowIfDisposed();
-            Requires.NotNull(definition, "definition");
+            Requires.NotNull(definition, nameof(definition));
 
             var exports = new List<Tuple<ComposablePartDefinition, ExportDefinition>>();
             foreach(var export in this._innerCatalog.GetExports(definition))

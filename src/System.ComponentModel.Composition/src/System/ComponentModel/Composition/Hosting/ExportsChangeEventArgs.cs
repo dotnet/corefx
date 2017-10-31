@@ -45,8 +45,8 @@ namespace System.ComponentModel.Composition.Hosting
         public ExportsChangeEventArgs(IEnumerable<ExportDefinition> addedExports,
                 IEnumerable<ExportDefinition> removedExports, AtomicComposition atomicComposition)
         {
-            Requires.NotNull(addedExports, "addedExports");
-            Requires.NotNull(removedExports, "removedExports");
+            Requires.NotNull(addedExports, nameof(addedExports));
+            Requires.NotNull(removedExports, nameof(removedExports));
 
             this._addedExports = addedExports.AsArray();
             this._removedExports = removedExports.AsArray();

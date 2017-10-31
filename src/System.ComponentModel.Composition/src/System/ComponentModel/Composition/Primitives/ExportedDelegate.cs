@@ -19,7 +19,7 @@ namespace System.ComponentModel.Composition.Primitives
 
         public ExportedDelegate(object instance, MethodInfo method)
         {
-            Requires.NotNull(method, "method");
+            Requires.NotNull(method, nameof(method));
 
             this._instance = instance;
             this._method = method;
@@ -27,7 +27,7 @@ namespace System.ComponentModel.Composition.Primitives
 
         public virtual Delegate CreateDelegate(Type delegateType) 
         {
-            Requires.NotNull(delegateType, "delegateType");
+            Requires.NotNull(delegateType, nameof(delegateType));
 
             if (delegateType == typeof(Delegate) || delegateType == typeof(MulticastDelegate))
             {

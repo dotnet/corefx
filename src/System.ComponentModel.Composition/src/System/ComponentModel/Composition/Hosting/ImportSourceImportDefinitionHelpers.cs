@@ -86,7 +86,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             public override bool IsConstraintSatisfiedBy(ExportDefinition exportDefinition)
             {
-                Requires.NotNull(exportDefinition, "exportDefinition");
+                Requires.NotNull(exportDefinition, nameof(exportDefinition));
 
                 return this._sourceDefinition.IsConstraintSatisfiedBy(exportDefinition);
             }

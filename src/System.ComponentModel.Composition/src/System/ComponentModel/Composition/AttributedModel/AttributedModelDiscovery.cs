@@ -54,7 +54,7 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         public static ReflectionParameterImportDefinition CreateParameterImportDefinition(ParameterInfo parameter, ICompositionElement origin)
         {
-            Requires.NotNull(parameter, "parameter");
+            Requires.NotNull(parameter, nameof(parameter));
 
             ReflectionParameter reflectionParameter = parameter.ToReflectionParameter();
             IAttributedImport attributedImport = AttributedModelDiscovery.GetAttributedImport(reflectionParameter, parameter);
@@ -91,7 +91,7 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         public static ReflectionMemberImportDefinition CreateMemberImportDefinition(MemberInfo member, ICompositionElement origin)
         {
-            Requires.NotNull(member, "member");
+            Requires.NotNull(member, nameof(member));
 
             ReflectionWritableMember reflectionMember = member.ToReflectionWritableMember();
             IAttributedImport attributedImport = AttributedModelDiscovery.GetAttributedImport(reflectionMember, member);

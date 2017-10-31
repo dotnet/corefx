@@ -35,7 +35,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <param name="children">The children.</param>
         public CompositionScopeDefinition(ComposablePartCatalog catalog, IEnumerable<CompositionScopeDefinition> children)
         {
-            Requires.NotNull(catalog, "catalog");
+            Requires.NotNull(catalog, nameof(catalog));
             Requires.NullOrNotNullElements(children, "children");
 
             InitializeCompositionScopeDefinition(catalog, children, null);
@@ -49,7 +49,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <param name="publicSurface">The exports that can be used to create new scopes.</param>
         public CompositionScopeDefinition(ComposablePartCatalog catalog, IEnumerable<CompositionScopeDefinition> children, IEnumerable<ExportDefinition> publicSurface)
         {
-            Requires.NotNull(catalog, "catalog");
+            Requires.NotNull(catalog, nameof(catalog));
             Requires.NullOrNotNullElements(children, "children");
             Requires.NullOrNotNullElements(publicSurface, "publicSurface");
 

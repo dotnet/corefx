@@ -111,7 +111,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public void AddPart(ComposablePart part)
         {
-            Requires.NotNull(part, "part");
+            Requires.NotNull(part, nameof(part));
             lock (this._lock)
             {
                 if (this._copyNeededForAdd)
@@ -135,7 +135,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public void RemovePart(ComposablePart part)
         {
-            Requires.NotNull(part, "part");
+            Requires.NotNull(part, nameof(part));
             lock (this._lock)
             {
                 if (this._copyNeededForRemove)
@@ -165,7 +165,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </remarks>
         public ComposablePart AddExport(Export export)
         {
-            Requires.NotNull(export, "export");
+            Requires.NotNull(export, nameof(export));
             Contract.Ensures(Contract.Result<ComposablePart>() != null);
 
             ComposablePart part = new SingleExportComposablePart(export);

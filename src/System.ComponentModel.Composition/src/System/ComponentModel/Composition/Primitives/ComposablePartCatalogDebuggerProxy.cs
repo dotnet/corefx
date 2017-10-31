@@ -16,7 +16,7 @@ namespace System.ComponentModel.Composition.Primitives
 
         public ComposablePartCatalogDebuggerProxy(ComposablePartCatalog catalog) 
         {
-            Requires.NotNull(catalog, "catalog");
+            Requires.NotNull(catalog, nameof(catalog));
 
             this._catalog = catalog;
         }

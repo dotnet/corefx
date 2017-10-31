@@ -115,8 +115,8 @@ namespace System.ComponentModel.Composition.Primitives
         /// </exception>
         public Export(ExportDefinition definition, Func<object> exportedValueGetter)
         {
-            Requires.NotNull(definition, "definition");
-            Requires.NotNull(exportedValueGetter, "exportedValueGetter");
+            Requires.NotNull(definition, nameof(definition));
+            Requires.NotNull(exportedValueGetter, nameof(exportedValueGetter));
 
             this._definition = definition;
             this._exportedValueGetter = exportedValueGetter;

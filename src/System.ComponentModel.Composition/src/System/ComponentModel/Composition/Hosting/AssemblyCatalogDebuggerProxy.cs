@@ -18,7 +18,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public AssemblyCatalogDebuggerProxy(AssemblyCatalog catalog)
         {
-            Requires.NotNull(catalog, "catalog");
+            Requires.NotNull(catalog, nameof(catalog));
 
             this._catalog = catalog;
         }

@@ -40,7 +40,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             public override object GetExportedValue(ExportDefinition definition)
             {
-                Requires.NotNull(definition, "definition");
+                Requires.NotNull(definition, nameof(definition));
 
                 if (definition != _export.Definition)
                 {
@@ -52,7 +52,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             public override void SetImport(ImportDefinition definition, IEnumerable<Export> exports)
             {
-                Requires.NotNull(definition, "definition");
+                Requires.NotNull(definition, nameof(definition));
                 Requires.NotNullOrNullElements(exports, "exports");
 
                 throw ExceptionBuilder.CreateImportDefinitionNotOnThisComposablePart("definition");
