@@ -83,7 +83,6 @@ namespace System.ComponentModel.Composition
         /// <exception cref="InvalidCastException">
         ///     <paramref name="info"/> contains a value that cannot be cast to the correct type.
         /// </exception>
-        [System.Security.SecuritySafeCritical]
         protected ImportCardinalityMismatchException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
