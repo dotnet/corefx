@@ -37,6 +37,31 @@ namespace System.Diagnostics.Tests
             return;
         }
 
+        public static void CopyCollection<EventLogEntryCollection>(Action func)
+        {
+            if (!PlatformDetection.IsWindows7)
+            {
+                func();
+                return;
+            }
+
+            int retries = 3;
+            while (retries > 0)
+            {
+                try
+                {
+                    func();
+                    break;
+                }
+                catch (Win32Exception)
+                {
+                    Thread.Sleep(100);
+                    retries--;
+                }
+            }
+            return;
+        }
+
         public static EventLogEntry RetrieveEntry<EventLog>(Func<EventLogEntry> func)
         {
             EventLogEntry eventLogEntry = null;
@@ -60,6 +85,56 @@ namespace System.Diagnostics.Tests
                 }
             }
             return eventLogEntry;
+        }
+
+        public static EventLogEntry RetrieveEntryFromCollection<EventLog>(Func<EventLogEntry> func)
+        {
+            EventLogEntry eventLogEntry = null;
+            if (!PlatformDetection.IsWindows7)
+            {
+                return func();
+            }
+
+            int retries = 3;
+            while (retries > 0)
+            {
+                try
+                {
+                    eventLogEntry = func();
+                    break;
+                }
+                catch (Win32Exception)
+                {
+                    Thread.Sleep(100);
+                    retries--;
+                }
+            }
+            return eventLogEntry;
+        }
+
+        public static string RetrieveMessage<EventLogEntry>(Func<string> func)
+        {
+            string message = null;
+            if (!PlatformDetection.IsWindows7)
+            {
+                return func();
+            }
+
+            int retries = 3;
+            while (retries > 0)
+            {
+                try
+                {
+                    message = func();
+                    break;
+                }
+                catch (Win32Exception)
+                {
+                    Thread.Sleep(100);
+                    retries--;
+                }
+            }
+            return message;
         }
     }
 }

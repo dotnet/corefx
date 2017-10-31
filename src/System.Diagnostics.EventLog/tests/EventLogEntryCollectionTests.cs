@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
-using System.Threading;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -30,40 +28,13 @@ namespace System.Diagnostics.Tests
                     EventLogEntryCollection entryCollection = eventLog.Entries;
                     EventLogEntry[] entryCollectionCopied = new EventLogEntry[entryCollection.Count];
 
-                    bool entryCopied = true;
-                    while (entryCopied)
+                    Helpers.CopyCollection<EventLogEntryCollection>(() => entryCollection.CopyTo(entryCollectionCopied, 0));
+                    int i = 0;
+                    foreach (EventLogEntry entry in entryCollection)
                     {
-                        try
-                        {
-                            entryCollection.CopyTo(entryCollectionCopied, 0);
-                            entryCopied = false;
-                        }
-                        catch (Win32Exception)
-                        {
-                            Thread.Sleep(100);
-                            eventLog.Clear();
-                        }
+                        Assert.Equal(entry.Message, Helpers.RetrieveMessage<EventLogEntry>(() => entryCollectionCopied[i].Message));
+                        i += 1;
                     }
-
-                    bool entryRetrived = true;
-                    while (entryRetrived)
-                    {
-                        try
-                        {
-                            int i = 0;
-                            foreach (EventLogEntry entry in entryCollection)
-                            {
-                                Assert.Equal(entry.Message, entryCollectionCopied[i].Message);
-                                i += 1;
-                            }
-                            entryRetrived = false;
-                        }
-                        catch (Win32Exception)
-                        {
-                            Thread.Sleep(100);
-                        }
-                    }
-
                 }
             }
             finally
