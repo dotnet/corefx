@@ -22,7 +22,7 @@ namespace System.Diagnostics.Tests
                 eventLog.Source = source;
                 if (instance)
                 {
-                    EventLog.WriteEvent(source, eventInstance);
+                    Helpers.RetryAvailable(() => EventLog.WriteEvent(source, eventInstance));
                     if (data)
                     {
                         Helpers.RetryAvailable(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData));
@@ -59,7 +59,7 @@ namespace System.Diagnostics.Tests
                 eventLog.Source = source;
                 if (instance)
                 {
-                    EventLog.WriteEvent(source, eventInstance);
+                    Helpers.RetryAvailable(() => EventLog.WriteEvent(source, eventInstance));
                     if (data)
                     {
                         Helpers.RetryAvailable(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData));
