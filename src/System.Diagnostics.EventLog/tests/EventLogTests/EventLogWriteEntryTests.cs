@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
-using System.Reflection;
 using System.Threading;
 using Xunit;
 
@@ -27,34 +26,46 @@ namespace System.Diagnostics.Tests
                     EventLog.WriteEvent(source, eventInstance);
                     if (data)
                     {
-                        eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData);
+                        if (PlatformDetection.IsWindows7)
+                            RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData));
+                        else
+                            eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData);
+
                         return eventLog.Entries.LastOrDefault();
                     }
                     else if (category)
                     {
-                        eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId);
+                        if (PlatformDetection.IsWindows7)
+                            RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId));
+                        else
+                            eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId);
+
                         return eventLog.Entries.LastOrDefault();
                     }
                     else
                     {
-                        eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId);
+                        if (PlatformDetection.IsWindows7)
+                            RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId));
+                        else
+                            eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId);
+
                         return eventLog.Entries.LastOrDefault();
                     }
                 }
                 else if (type)
                 {
-                    eventLog.WriteEntry(message, EventLogEntryType.Warning);
+                    if (PlatformDetection.IsWindows7)
+                        RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning));
+                    else
+                        eventLog.WriteEntry(message, EventLogEntryType.Warning);
                 }
                 else
                 {
                     if (PlatformDetection.IsWindows7)
-                    {
-                        WriteEventWin7<EventLog>(() => eventLog.WriteEntry(message));
-                    }
+                        RetryAvailable<EventLog>(() => eventLog.WriteEntry(message));
                     else
-                    {
                         eventLog.WriteEntry(message);
-                    }
+
                 }
 
                 return eventLog.Entries.LastOrDefault();
@@ -71,27 +82,45 @@ namespace System.Diagnostics.Tests
                     EventLog.WriteEvent(source, eventInstance);
                     if (data)
                     {
-                        EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData);
+                        if (PlatformDetection.IsWindows7)
+                            RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData));
+                        else
+                            EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData);
+
                         return eventLog.Entries.LastOrDefault();
                     }
                     else if (category)
                     {
-                        EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId);
+                        if (PlatformDetection.IsWindows7)
+                            RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId));
+                        else
+                            EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId);
+
                         return eventLog.Entries.LastOrDefault();
                     }
                     else
                     {
-                        EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId);
+                        if (PlatformDetection.IsWindows7)
+                            RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId));
+                        else
+                            EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId);
+
                         return eventLog.Entries.LastOrDefault();
                     }
                 }
                 else if (type)
                 {
-                    EventLog.WriteEntry(source, message, EventLogEntryType.Warning);
+                    if (PlatformDetection.IsWindows7)
+                        RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning));
+                    else
+                        EventLog.WriteEntry(source, message, EventLogEntryType.Warning);
                 }
                 else
                 {
-                    EventLog.WriteEntry(source, message);
+                    if (PlatformDetection.IsWindows7)
+                        RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message));
+                    else
+                        EventLog.WriteEntry(source, message);
                 }
 
                 return eventLog.Entries.LastOrDefault();
@@ -101,10 +130,19 @@ namespace System.Diagnostics.Tests
         private EventLogEntry WriteLogEntryEventSource(string source, bool data = false)
         {
             if (data)
-                EventLog.WriteEvent(source, eventInstance, rawData, insertStrings);
+            {
+                if (PlatformDetection.IsWindows7)
+                    RetryAvailable<EventLog>(() => EventLog.WriteEvent(source, eventInstance, rawData, insertStrings));
+                else
+                    EventLog.WriteEvent(source, eventInstance, rawData, insertStrings);
+            }
             else
-                EventLog.WriteEvent(source, eventInstance, insertStrings);
-
+            {
+                if (PlatformDetection.IsWindows7)
+                    RetryAvailable<EventLog>(() => EventLog.WriteEvent(source, eventInstance, insertStrings));
+                else
+                    EventLog.WriteEvent(source, eventInstance, insertStrings);
+            }
             using (EventLog eventLog = new EventLog())
             {
                 eventLog.Source = source;
@@ -119,35 +157,22 @@ namespace System.Diagnostics.Tests
                 string[] insertStringsSingleton = { "ExtraText" };
                 eventLog.Source = source;
                 if (data)
-                    eventLog.WriteEvent(eventInstance, rawData, insertStringsSingleton);
+                {
+                    if (PlatformDetection.IsWindows7)
+                        RetryAvailable<EventLog>(() => eventLog.WriteEvent(eventInstance, rawData, insertStringsSingleton));
+                    else
+                        eventLog.WriteEvent(eventInstance, rawData, insertStringsSingleton);
+                }
                 else
+                {
                     eventLog.WriteEvent(eventInstance, insertStringsSingleton);
+                }
 
                 return eventLog.Entries.LastOrDefault();
             }
         }
 
-        private void WriteEventWin71(Type type, string name, Type[] argumentTypes, BindingFlags flags, object[] argumentValues, EventLog eventLog, int retries = 3)
-        {
-            while (retries > 0)
-            {
-                try
-                {
-                    MethodInfo methodInfo = type.GetMethod(name, flags, null, CallingConventions.Any, argumentTypes, null);
-                    methodInfo.Invoke(eventLog, argumentValues);
-                    break;
-                }
-                catch (Win32Exception)
-                {
-                    Thread.Sleep(100);
-                    retries--;
-                }
-            }
-            return;
-
-        }
-
-        static void WriteEventWin7<EventLog>(Action func)
+        static void RetryAvailable<EventLog>(Action func)
         {
             int retries = 3;
             while (retries > 0)
@@ -166,26 +191,6 @@ namespace System.Diagnostics.Tests
             return;
         }
 
-        //[Fact]
-        public void dummyWrite()
-        {
-            string log = "DummyEntry";
-            string source = "Source" + nameof(dummyWrite);
-            try
-            {
-                EventLog.CreateEventSource(source, log);
-                EventLog eventLog = new EventLog();
-                eventLog.Source = source;
-                WriteEventWin71(typeof(EventLog), "WriteEntry", new Type[] { typeof(string) }, BindingFlags.Instance | BindingFlags.Public, new object[] { "A789541278" }, eventLog);
-                Console.WriteLine(eventLog.Entries[0].Message);
-            }
-            finally
-            {
-                EventLog.DeleteEventSource(source);
-                EventLog.Delete(log);
-            }
-        }
-
         [ConditionalTheory(typeof(Helpers), nameof(Helpers.IsElevatedAndSupportsEventLogs))]
         [InlineData(false)]
         [InlineData(true)]
@@ -196,25 +201,12 @@ namespace System.Diagnostics.Tests
             try
             {
                 EventLog.CreateEventSource(source, log);
-                EventLogEntry eventLogEntry = null;
-                bool entryWritten = true;
+                EventLogEntry eventLogEntry;
 
-                while (entryWritten)
-                {
-                    try
-                    {
-                        if (sourceFlag)
-                            eventLogEntry = WriteLogEntry(source);
-                        else
-                            eventLogEntry = WriteLogEntryWithSource(source);
-
-                        entryWritten = false;
-                    }
-                    catch (Win32Exception)
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
+                if (sourceFlag)
+                    eventLogEntry = WriteLogEntry(source);
+                else
+                    eventLogEntry = WriteLogEntryWithSource(source);
 
                 if (eventLogEntry != null)
                 {
@@ -241,24 +233,12 @@ namespace System.Diagnostics.Tests
             try
             {
                 EventLog.CreateEventSource(source, log);
-                EventLogEntry eventLogEntry = null;
-                bool entryWritten = true;
-                while (entryWritten)
-                {
-                    try
-                    {
-                        if (sourceFlag)
-                            eventLogEntry = WriteLogEntry(source, type: true);
-                        else
-                            eventLogEntry = WriteLogEntryWithSource(source, type: true);
+                EventLogEntry eventLogEntry;
+                if (sourceFlag)
+                    eventLogEntry = WriteLogEntry(source, type: true);
+                else
+                    eventLogEntry = WriteLogEntryWithSource(source, type: true);
 
-                        entryWritten = false;
-                    }
-                    catch (Win32Exception)
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
                 if (eventLogEntry != null)
                 {
                     Assert.Contains(message, eventLogEntry.Message);
@@ -282,24 +262,11 @@ namespace System.Diagnostics.Tests
             try
             {
                 EventLog.CreateEventSource(source, log);
-                EventLogEntry eventLogEntry = null;
-                bool entryWritten = true;
-                while (entryWritten)
-                {
-                    try
-                    {
-                        if (sourceFlag)
-                            eventLogEntry = WriteLogEntry(source, type: true, instance: true);
-                        else
-                            eventLogEntry = WriteLogEntryWithSource(source, type: true, instance: true);
-
-                        entryWritten = false;
-                    }
-                    catch (Win32Exception)
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
+                EventLogEntry eventLogEntry;
+                if (sourceFlag)
+                    eventLogEntry = WriteLogEntry(source, type: true, instance: true);
+                else
+                    eventLogEntry = WriteLogEntryWithSource(source, type: true, instance: true);
 
                 if (eventLogEntry != null)
                 {
@@ -324,24 +291,12 @@ namespace System.Diagnostics.Tests
             try
             {
                 EventLog.CreateEventSource(source, log);
-                EventLogEntry eventLogEntry = null;
-                bool entryWritten = true;
-                while (entryWritten)
-                {
-                    try
-                    {
-                        if (sourceFlag)
-                            eventLogEntry = WriteLogEntry(source, type: true, instance: true, category: true);
-                        else
-                            eventLogEntry = WriteLogEntryWithSource(source, type: true, instance: true, category: true);
+                EventLogEntry eventLogEntry;
+                if (sourceFlag)
+                    eventLogEntry = WriteLogEntry(source, type: true, instance: true, category: true);
+                else
+                    eventLogEntry = WriteLogEntryWithSource(source, type: true, instance: true, category: true);
 
-                        entryWritten = false;
-                    }
-                    catch (Win32Exception)
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
                 // There is some prefix string already attached to the message passed
                 // The description for Event ID '0' in Source 'SourceWriteEntryWithTypeIDAndCategory' cannot be found.  The local computer may not have the necessary registry information or message DLL files to display the message, or you may not have permission
                 // to access them.  The following information is part of the event:'EventLogWriteEntryTestsMessage'
@@ -371,24 +326,12 @@ namespace System.Diagnostics.Tests
             try
             {
                 EventLog.CreateEventSource(source, log);
-                EventLogEntry eventLogEntry = null;
-                bool entryWritten = true;
-                while (entryWritten)
-                {
-                    try
-                    {
-                        if (sourceFlag)
-                            eventLogEntry = WriteLogEntry(source, type: true, instance: true, category: true, data: true);
-                        else
-                            eventLogEntry = WriteLogEntryWithSource(source, type: true, instance: true, category: true, data: true);
+                EventLogEntry eventLogEntry;
+                if (sourceFlag)
+                    eventLogEntry = WriteLogEntry(source, type: true, instance: true, category: true, data: true);
+                else
+                    eventLogEntry = WriteLogEntryWithSource(source, type: true, instance: true, category: true, data: true);
 
-                        entryWritten = false;
-                    }
-                    catch (Win32Exception)
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
                 if (eventLogEntry != null)
                 {
                     Assert.Contains(message, eventLogEntry.Message);
@@ -439,24 +382,12 @@ namespace System.Diagnostics.Tests
             try
             {
                 EventLog.CreateEventSource(source, log);
-                EventLogEntry eventLogEntry = null;
-                bool entryWritten = true;
-                while (entryWritten)
-                {
-                    try
-                    {
-                        if (SourceFlag)
-                            eventLogEntry = WriteLogEntryEventSource(source);
-                        else
-                            eventLogEntry = WriteLogEntryEvent(source);
+                EventLogEntry eventLogEntry;
+                if (SourceFlag)
+                    eventLogEntry = WriteLogEntryEventSource(source);
+                else
+                    eventLogEntry = WriteLogEntryEvent(source);
 
-                        entryWritten = false;
-                    }
-                    catch (Win32Exception)
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
                 if (eventLogEntry != null)
                     Assert.All(insertStrings, message => eventLogEntry.Message.Contains(message));
             }
@@ -477,24 +408,12 @@ namespace System.Diagnostics.Tests
             try
             {
                 EventLog.CreateEventSource(source, log);
-                EventLogEntry eventLogEntry = null;
-                bool entryWritten = true;
-                while (entryWritten)
-                {
-                    try
-                    {
-                        if (SourceFlag)
-                            eventLogEntry = WriteLogEntryEventSource(source, data: true);
-                        else
-                            eventLogEntry = WriteLogEntryEvent(source, data: true);
+                EventLogEntry eventLogEntry;
 
-                        entryWritten = false;
-                    }
-                    catch (Win32Exception)
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
+                if (SourceFlag)
+                    eventLogEntry = WriteLogEntryEventSource(source, data: true);
+                else
+                    eventLogEntry = WriteLogEntryEvent(source, data: true);
 
                 if (eventLogEntry != null)
                     Assert.Equal(rawData, eventLogEntry.Data);
