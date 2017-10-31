@@ -24,7 +24,7 @@ namespace System.ComponentModel.Composition
     [DebuggerDisplay("{Message}")]
     public class CompositionException : Exception
     {
-        const string ErrorsKey = "Errors";
+        private const string ErrorsKey = "Errors";
         private ReadOnlyCollection<CompositionError> _errors;
 
 #if FEATURE_SERIALIZATION

@@ -12,20 +12,20 @@ namespace System.ComponentModel.Composition
 {
     internal static class ContractNameServices
     {
-        const char NamespaceSeparator = '.';
-        const char ArrayOpeningBracket = '[';
-        const char ArrayClosingBracket = ']';
-        const char ArraySeparator = ',';
-        const char PointerSymbol = '*';
-        const char ReferenceSymbol = '&';
-        const char GenericArityBackQuote = '`';
-        const char NestedClassSeparator = '+';
-        const char ContractNameGenericOpeningBracket = '(';
-        const char ContractNameGenericClosingBracket = ')';
-        const char ContractNameGenericArgumentSeparator = ',';
-        const char CustomModifiersSeparator = ' ';
-        const char GenericFormatOpeningBracket = '{';
-        const char GenericFormatClosingBracket = '}';
+        private const char NamespaceSeparator = '.';
+        private const char ArrayOpeningBracket = '[';
+        private const char ArrayClosingBracket = ']';
+        private const char ArraySeparator = ',';
+        private const char PointerSymbol = '*';
+        private const char ReferenceSymbol = '&';
+        private const char GenericArityBackQuote = '`';
+        private const char NestedClassSeparator = '+';
+        private const char ContractNameGenericOpeningBracket = '(';
+        private const char ContractNameGenericClosingBracket = ')';
+        private const char ContractNameGenericArgumentSeparator = ',';
+        private const char CustomModifiersSeparator = ' ';
+        private const char GenericFormatOpeningBracket = '{';
+        private const char GenericFormatClosingBracket = '}';
 
         [ThreadStatic]
         private static Dictionary<Type, string> typeIdentityCache;
