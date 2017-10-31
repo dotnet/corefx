@@ -27,8 +27,6 @@ namespace System.ComponentModel.Composition.ReflectionModel
         }
 
         public ContractBasedImportDefinition ProductImportDefinition { get { return this._productImportDefinition; } }
-
-        [SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Precondition is being validated in the call to base")]  
         public override bool IsConstraintSatisfiedBy(ExportDefinition exportDefinition)
         {
             if (!base.IsConstraintSatisfiedBy(exportDefinition))
