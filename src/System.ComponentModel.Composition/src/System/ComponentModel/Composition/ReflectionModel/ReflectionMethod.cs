@@ -56,9 +56,6 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return SafeCreateExportedDelegate(instance, _method);
         }
 
-#if FEATURE_CAS_APTCA
-        [System.Security.SecuritySafeCritical]
-#endif //FEATURE_CAS_APTCA
         private static ExportedDelegate SafeCreateExportedDelegate(object instance, MethodInfo method)
         {
             // We demand member access in place of the [SecurityCritical] 

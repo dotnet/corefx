@@ -13,9 +13,6 @@ using System.Diagnostics.Contracts;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
-#if FEATURE_CAS_APTCA
-    [System.Security.SecurityCritical]
-#endif //FEATURE_CAS_APTCA
     public static class ReflectionModelServices
     {
         public static Lazy<Type> GetPartType(ComposablePartDefinition partDefinition)

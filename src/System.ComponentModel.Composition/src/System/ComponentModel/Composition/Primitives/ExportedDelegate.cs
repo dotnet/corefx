@@ -17,9 +17,6 @@ namespace System.ComponentModel.Composition.Primitives
 
         protected ExportedDelegate() { }
 
-#if FEATURE_CAS_APTCA
-        [System.Security.SecurityCritical]
-#endif //FEATURE_CAS_APTCA
         public ExportedDelegate(object instance, MethodInfo method)
         {
             Requires.NotNull(method, "method");

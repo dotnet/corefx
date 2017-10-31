@@ -61,9 +61,6 @@ namespace System.ComponentModel.Composition
     // }
     internal static class MetadataViewGenerator
     {
-#if FEATURE_CAS_APTCA
-        [SecuritySafeCritical]
-#endif //FEATURE_CAS_APTCA
         public delegate object MetadataViewFactory(IDictionary<string, object> metadata);
 
         public const string MetadataViewType       = "MetadataViewType";
@@ -76,21 +73,12 @@ namespace System.ComponentModel.Composition
         private static Lock _lock = new Lock();
         private static Dictionary<Type, MetadataViewFactory> _metadataViewFactories = new Dictionary<Type, MetadataViewFactory>();
         private static AssemblyName ProxyAssemblyName = new AssemblyName(string.Format(CultureInfo.InvariantCulture, "MetadataViewProxies_{0}", Guid.NewGuid()));
-#if FEATURE_CAS_APTCA
-        private static ModuleBuilder    criticalProxyModuleBuilder;
-#endif //FEATURE_CAS_APTCA
         private static ModuleBuilder    transparentProxyModuleBuilder;
 
         private static Type[] CtorArgumentTypes = new Type[] { typeof(IDictionary<string, object>) };
         private static MethodInfo _mdvDictionaryTryGet = CtorArgumentTypes[0].GetMethod("TryGetValue");
         private static readonly MethodInfo ObjectGetType = typeof(object).GetMethod("GetType", Type.EmptyTypes);
         private static readonly ConstructorInfo ObjectCtor = typeof(object).GetConstructor(Type.EmptyTypes);
-#if FEATURE_CAS_APTCA
-        private static CustomAttributeBuilder _securityCriticalBuilder = 
-            new CustomAttributeBuilder(typeof(SecurityCriticalAttribute).GetConstructor(Type.EmptyTypes), new object[0]);
-        private static CustomAttributeBuilder _securitySafeCriticalBuilder = 
-            new CustomAttributeBuilder(typeof(SecuritySafeCriticalAttribute).GetConstructor(Type.EmptyTypes), new object[0]);
-#endif //FEATURE_CAS_APTCA
 
         private static AssemblyBuilder CreateProxyAssemblyBuilder(ConstructorInfo constructorInfo)
         {
@@ -100,18 +88,6 @@ namespace System.ComponentModel.Composition
         // Must be called with _lock held
         private static ModuleBuilder GetProxyModuleBuilder(bool requiresCritical)
         {
-#if FEATURE_CAS_APTCA
-            if(requiresCritical)
-            {
-                // Needed a critical modulebuilder so find or make it
-                if (criticalProxyModuleBuilder == null)
-                {
-                    var assemblyBuilder = CreateProxyAssemblyBuilder(typeof(AllowPartiallyTrustedCallersAttribute).GetConstructor(Type.EmptyTypes));
-                    criticalProxyModuleBuilder = assemblyBuilder.DefineDynamicModule("MetadataViewProxiesModule");
-                }
-                return criticalProxyModuleBuilder;
-            }
-#endif //FEATURE_CAS_APTCA
             if (transparentProxyModuleBuilder == null)
             {
                 // make a new assemblybuilder and modulebuilder
@@ -209,9 +185,6 @@ namespace System.ComponentModel.Composition
             TypeBuilder proxyTypeBuilder;
             Type[] interfaces = { viewType };
             bool requiresCritical = false;
-#if FEATURE_CAS_APTCA
-            requiresCritical = !viewType.IsSecurityTransparent;
-#endif //FEATURE_CAS_APTCA
 
             var proxyModuleBuilder = GetProxyModuleBuilder(requiresCritical);
             proxyTypeBuilder = proxyModuleBuilder.DefineType(
@@ -219,12 +192,6 @@ namespace System.ComponentModel.Composition
                 TypeAttributes.Public,
                 typeof(object), 
                 interfaces);
-#if FEATURE_CAS_APTCA
-            if (requiresCritical)
-            {
-                proxyTypeBuilder.SetCustomAttribute(_securityCriticalBuilder);
-            }
-#endif //FEATURE_CAS_APTCA
             // Implement Constructor
             ConstructorBuilder proxyCtor = proxyTypeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, CtorArgumentTypes);
             ILGenerator proxyCtorIL = proxyCtor.GetILGenerator();
@@ -359,12 +326,6 @@ namespace System.ComponentModel.Composition
                         Type.EmptyTypes, null, null);
 
                     proxyTypeBuilder.DefineMethodOverride(getMethodBuilder, propertyInfo.GetGetMethod());
-#if FEATURE_CAS_APTCA
-                    if(!viewType.IsSecurityTransparent)
-                    {
-                        getMethodBuilder.SetCustomAttribute(_securityCriticalBuilder);
-                    }
-#endif //FEATURE_CAS_APTCA
                     ILGenerator getMethodIL = getMethodBuilder.GetILGenerator();
                     getMethodIL.Emit(OpCodes.Ldarg_0);
                     getMethodIL.Emit(OpCodes.Ldfld, proxyFieldBuilder);
@@ -409,9 +370,6 @@ namespace System.ComponentModel.Composition
             //    return new <ProxyClass>(dictionary);
             // }
             MethodBuilder factoryMethodBuilder = proxyTypeBuilder.DefineMethod(MetadataViewGenerator.MetadataViewFactoryName, MethodAttributes.Public | MethodAttributes.Static, typeof(object), CtorArgumentTypes);
-#if FEATURE_CAS_APTCA
-            factoryMethodBuilder.SetCustomAttribute(_securitySafeCriticalBuilder);
-#endif //FEATURE_CAS_APTCA
             ILGenerator factoryIL = factoryMethodBuilder.GetILGenerator();
             factoryIL.Emit(OpCodes.Ldarg_0);
             factoryIL.Emit(OpCodes.Newobj, proxyCtor);
