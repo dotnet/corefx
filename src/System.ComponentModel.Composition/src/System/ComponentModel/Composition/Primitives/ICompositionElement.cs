@@ -9,9 +9,6 @@ namespace System.ComponentModel.Composition.Primitives
     /// <summary>
     ///     Represents an element that participates in composition.
     /// </summary>
-#if CONTRACTS_FULL
-    [ContractClass(typeof(ICompositionElementContract))]
-#endif
     public interface ICompositionElement
     {
         /// <summary>

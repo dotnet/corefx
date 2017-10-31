@@ -13,9 +13,6 @@ namespace System.ComponentModel.Composition.Primitives
     ///     Defines the <see langword="abstract"/> base class for composable part definitions, which 
     ///     describe, and allow the creation of, <see cref="ComposablePart"/> objects.
     /// </summary>
-#if CONTRACTS_FULL
-    [ContractClass(typeof(ComposablePartDefinitionContract))]
-#endif
     public abstract class ComposablePartDefinition
     {
         static internal readonly IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> _EmptyExports = Enumerable.Empty<Tuple<ComposablePartDefinition, ExportDefinition>>();

@@ -11,9 +11,6 @@ namespace System.ComponentModel.Composition.Primitives
     ///     Defines the <see langword="abstract"/> base class for composable parts, which 
     ///     import and produce exported values.
     /// </summary>
-#if CONTRACTS_FULL
-    [ContractClass(typeof(ComposablePartContract))]
-#endif
     public abstract class ComposablePart
     {
         /// <summary>

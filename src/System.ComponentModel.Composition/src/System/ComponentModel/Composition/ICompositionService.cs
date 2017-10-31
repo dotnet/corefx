@@ -11,9 +11,6 @@ namespace System.ComponentModel.Composition
     /// <summary>
     ///     Provides methods for composing <see cref="ComposablePart"/> objects.
     /// </summary>
-#if CONTRACTS_FULL
-    [ContractClass(typeof(ICompositionServiceContract))]
-#endif
     public interface ICompositionService
     {
         /// <summary>
