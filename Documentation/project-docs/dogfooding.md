@@ -36,7 +36,7 @@ Microsoft .NET Core Shared Framework Host
   Build    : 4c165c13bd390adf66f9af30a088d634d3f37a9d
 ```
 
-4. Our nightly builds are uploaded to MyGet, not NuGet - so ensure the .NET Core MyGet feed is in your nuget configuration in case you need other packages from .NET Core that aren't included in the download. For example, on Windows you could edit %userprofile%\appdata\roaming\nuget\nuget.config or on Linux edit `~/.nuget/NuGet/NuGet.Config` to add this line:
+4. Our nightly builds are uploaded to MyGet, not NuGet - so ensure the .NET Core MyGet feed is in your nuget configuration in case you need other packages from .NET Core that aren't included in the download. For example, on Windows you could edit `%userprofile%\appdata\roaming\nuget\nuget.config` or on Linux edit `~/.nuget/NuGet/NuGet.Config` to add this line:
 ```xml
 <packageSources>
     <add key="myget.dotnetcore" value="https://dotnet.myget.org/F/dotnet-core/api/v3/index.json" />
@@ -87,8 +87,8 @@ runtime.
 ```XML
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <RuntimeFrameworkVersion>2.0.0-beta-xyz-00</RuntimeFrameworkVersion> <!-- this line -->
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <RuntimeFrameworkVersion>2.1.0-preview1-25825-07</RuntimeFrameworkVersion> <!-- modify build in this line -->
   </PropertyGroup>
 ```
 
@@ -108,8 +108,8 @@ make it self-contained
 ```XML
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <RuntimeFrameworkVersion>2.0.0-beta-xyz-00</RuntimeFrameworkVersion> <!-- pick nightly build -->
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <RuntimeFrameworkVersion>2.1.0-preview1-25825-07</RuntimeFrameworkVersion> <!-- modify build in this line -->
     <RuntimeIdentifier>win7-x64</RuntimeIdentifier> <!-- make self-contained -->
   </PropertyGroup>
 ```
@@ -117,7 +117,7 @@ make it self-contained
 ```
 $ dotnet restore
 $ dotnet publish
-$ bin\Debug\netcoreapp2.0\win7-x64\publish\App.exe
+$ bin\Debug\netcoreapp2.1\win7-x64\publish\App.exe
 ```
 
 ## Alternative Advanced Scenario - Using your local CoreFx build
@@ -216,8 +216,8 @@ incompatibility errors when trying to restore packages. You can resolve this iss
   <PackageTargetFallback>$(PackageTargetFallback);net45</PackageTargetFallback>
 ```
 
-Note that this can fix the problem if the package is actually compatible with netcoreapp2.0 (meaning it does not use types/APIs
-that are not available in netcoreapp2.0)
+Note that this can fix the problem if the package is actually compatible with netcoreapp2.x (meaning it does not use types/APIs
+that are not available in netcoreapp2.x)
 
 For final release, we are considering modifying NuGet behavior to automatically consume the non-netstandard asset if there is no netstandard available.
 
