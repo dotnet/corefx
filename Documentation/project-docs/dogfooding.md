@@ -36,7 +36,7 @@ Microsoft .NET Core Shared Framework Host
   Build    : 4c165c13bd390adf66f9af30a088d634d3f37a9d
 ```
 
-2. Our nightly builds are uploaded to MyGet, not NuGet - so ensure the .NET Core MyGet feed is in your nuget configuration in case you need other packages from .NET Core that aren't included in the download. For example, on Windows you could edit %userprofile%\appdata\roaming\nuget\nuget.config or on Linux edit `~/.nuget/NuGet/NuGet.Config` to add this line:
+4. Our nightly builds are uploaded to MyGet, not NuGet - so ensure the .NET Core MyGet feed is in your nuget configuration in case you need other packages from .NET Core that aren't included in the download. For example, on Windows you could edit %userprofile%\appdata\roaming\nuget\nuget.config or on Linux edit `~/.nuget/NuGet/NuGet.Config` to add this line:
 ```xml
 <packageSources>
     <add key="myget.dotnetcore" value="https://dotnet.myget.org/F/dotnet-core/api/v3/index.json" />
