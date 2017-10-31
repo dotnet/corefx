@@ -341,7 +341,7 @@ namespace System.Diagnostics.Tests
             {
                 eventlog.Source = "Security";
                 EventLogEntry eventLogEntry;
-                eventLogEntry = Helpers.RetrieveOnWin7(() => eventlog.Entries[0]);
+                eventLogEntry = Helpers.RetryOnWin7(() => eventlog.Entries[0]);
                 Assert.Contains("", eventLogEntry.Message);
             }
         }

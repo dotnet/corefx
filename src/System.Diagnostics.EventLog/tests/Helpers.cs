@@ -15,17 +15,16 @@ namespace System.Diagnostics.Tests
 
         public static void RetryOnWin7(Action func)
         {
-            RetrieveOnWin7<object>(() => { func(); return null; });
+            RetryOnWin7<object>(() => { func(); return null; });
         }
 
-        public static T RetrieveOnWin7<T>(Func<T> func)
+        public static T RetryOnWin7<T>(Func<T> func)
         {
             T entry = default(T);
             if (!PlatformDetection.IsWindows7)
             {
                 return func();
             }
-
 
             // We are retrying on windows 7 because it throws win32exception while some operations like Writing,Retrieveing and Deleting log.
             // So We just try to do the operation again in case of this exception 

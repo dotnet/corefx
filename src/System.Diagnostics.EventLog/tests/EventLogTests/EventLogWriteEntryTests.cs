@@ -398,7 +398,7 @@ namespace System.Diagnostics.Tests
     {
         internal static EventLogEntry LastOrDefault(this EventLogEntryCollection elec)
         {
-            return Helpers.RetrieveOnWin7(() => elec.Count > 0 ? elec[elec.Count - 1] : null);
+            return Helpers.RetryOnWin7(() => elec.Count > 0 ? elec[elec.Count - 1] : null);
         }
     }
 
