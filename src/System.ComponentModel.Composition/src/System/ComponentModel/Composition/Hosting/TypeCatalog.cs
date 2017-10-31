@@ -111,104 +111,6 @@ namespace System.ComponentModel.Composition.Hosting
             this._contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(this.CreateIndex, true);
         }
 
-#if FEATURE_REFLECTIONCONTEXT
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="TypeCatalog"/> class
-        ///     with the specified types.
-        /// </summary>
-        /// <param name="types">
-        ///     An <see cref="IEnumerable{T}"/> of attributed <see cref="Type"/> objects to add 
-        ///     to the <see cref="TypeCatalog"/>.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="types"/> is <see langword="null"/>.
-        /// </exception>
-        /// <param name="reflectionContext">
-        ///     The <see cref="ReflectionContext"/> a context used by the catalog when 
-        ///     interpreting the types to inject attributes into the type definition.
-        /// </param>
-        /// <exception cref="ArgumentException">
-        ///     <paramref name="types"/> contains an element that is <see langword="null"/>.
-        /// </exception>
-        public TypeCatalog(IEnumerable<Type> types, ReflectionContext reflectionContext)
-        {
-            Requires.NotNull(types, "types");
-            Requires.NotNull(reflectionContext, "reflectionContext");
-
-            InitializeTypeCatalog(types, reflectionContext);
-
-            this._definitionOrigin = this;
-            this._contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(this.CreateIndex, true);
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="TypeCatalog"/> class
-        ///     with the specified types.
-        /// </summary>
-        /// <param name="types">
-        ///     An <see cref="IEnumerable{T}"/> of attributed <see cref="Type"/> objects to add 
-        ///     to the <see cref="TypeCatalog"/>.
-        /// </param>
-        /// <param name="reflectionContext">
-        ///     The <see cref="ReflectionContext"/> a context used by the catalog when 
-        ///     interpreting the types to inject attributes into the type definition.
-        /// </param>
-        /// <param name="definitionOrigin">
-        ///     The <see cref="ICompositionElement"/> CompositionElement used by Diagnostics to identify the source for parts.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="types"/> is <see langword="null"/>.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        ///     <paramref name="types"/> contains an element that is <see langword="null"/>.
-        /// </exception>
-        public TypeCatalog(IEnumerable<Type> types, ReflectionContext reflectionContext, ICompositionElement definitionOrigin)
-        {
-            Requires.NotNull(types, "types");
-            Requires.NotNull(reflectionContext, "reflectionContext");
-            Requires.NotNull(definitionOrigin, "definitionOrigin");
-
-            InitializeTypeCatalog(types, reflectionContext);
-
-            this._definitionOrigin = definitionOrigin;
-            this._contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(this.CreateIndex, true);
-        }
-
-        private void InitializeTypeCatalog(IEnumerable<Type> types, ReflectionContext reflectionContext)
-        {
-            var typesList = new List<Type>();
-            foreach(var type in types)
-            {
-                if (type == null)
-                {
-                    throw ExceptionBuilder.CreateContainsNullElement("types");
-                }
-#if FEATURE_REFLECTIONONLY
-                if (type.Assembly.ReflectionOnly)
-                {
-                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ElementReflectionOnlyType, "types"), "types");
-                }
-#endif
-                var typeInfo = type.GetTypeInfo();
-                var lclType = (reflectionContext != null) ? reflectionContext.MapType(typeInfo) : typeInfo;
-                
-                // It is valid for the reflectionContext to delete types by mapping them to null
-                if(lclType != null)
-                {
-#if FEATURE_REFLECTIONONLY
-                    // The final mapped type may be activated so we check to see if it is in a reflect only assembly
-                    if (lclType.Assembly.ReflectionOnly)
-                    {
-                        throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ReflectionContextReturnsReflectionOnlyType, "reflectionContext"), "reflectionContext");
-                    }
-#endif
-                    typesList.Add(lclType);
-                }
-            }
-            this._types = typesList.ToArray();
-        }
-#endif //FEATURE_REFLECTIONCONTEXT
-
         private void InitializeTypeCatalog(IEnumerable<Type> types)
         {
             foreach(var type in types)
@@ -217,12 +119,6 @@ namespace System.ComponentModel.Composition.Hosting
                 {
                     throw ExceptionBuilder.CreateContainsNullElement("types");
                 }
-#if FEATURE_REFLECTIONONLY
-                else if (type.Assembly.ReflectionOnly)
-                {
-                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ElementReflectionOnlyType, "types"), "types");
-                }
-#endif //FEATURE_REFLECTIONONLY
             }
             this._types = types.ToArray();
         }

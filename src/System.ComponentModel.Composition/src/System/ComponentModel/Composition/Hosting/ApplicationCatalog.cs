@@ -24,9 +24,6 @@ namespace System.ComponentModel.Composition.Hosting
         private volatile AggregateCatalog _innerCatalog = null;
         private readonly object _thisLock = new object();
         private ICompositionElement _definitionOrigin = null;
-#if FEATURE_REFLECTIONCONTEXT
-        private ReflectionContext _reflectionContext = null;
-#endif
 
         public ApplicationCatalog() {}
 
@@ -37,34 +34,8 @@ namespace System.ComponentModel.Composition.Hosting
             this._definitionOrigin = definitionOrigin;
         }
 
-#if FEATURE_REFLECTIONCONTEXT
-        public ApplicationCatalog(ReflectionContext reflectionContext)
-        {
-            Requires.NotNull(reflectionContext, "reflectionContext");
-
-            this._reflectionContext = reflectionContext;
-        }
-
-        public ApplicationCatalog(ReflectionContext reflectionContext, ICompositionElement definitionOrigin)
-        {
-            Requires.NotNull(reflectionContext, "reflectionContext");
-            Requires.NotNull(definitionOrigin, "definitionOrigin");
-
-            this._reflectionContext = reflectionContext;
-            this._definitionOrigin = definitionOrigin;
-        }
-#endif
-
         internal ComposablePartCatalog CreateCatalog(string location, string pattern)
         {
-#if FEATURE_REFLECTIONCONTEXT
-            if(this._reflectionContext != null)
-            {
-                return (this._definitionOrigin != null)
-                    ? new DirectoryCatalog(location, pattern, this._reflectionContext, this._definitionOrigin)
-                    : new DirectoryCatalog(location, pattern, this._reflectionContext);
-            }
-#endif
             return (this._definitionOrigin != null)
                 ? new DirectoryCatalog(location, pattern, this._definitionOrigin)
                 : new DirectoryCatalog(location, pattern);

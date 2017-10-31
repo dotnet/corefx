@@ -34,16 +34,6 @@ namespace System.ComponentModel.Composition.Hosting
                 }
             }
 
-#if FEATURE_REFLECTIONCONTEXT
-            public ReflectionContext ReflectionContext
-            {
-                get
-                {
-                    return this._catalog._reflectionContext;
-                }
-            }
-#endif //FEATURE_REFLECTIONCONTEXT
-
             public string SearchPattern
             {
                 get { return this._catalog.SearchPattern; }
