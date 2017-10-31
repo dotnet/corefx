@@ -138,7 +138,6 @@ namespace System.ComponentModel.Composition
         {
             Assumes.NotNull(metadataViewFactory);
             // we are simulating the Activator.CreateInstance behavior by wrapping everything in a TargetInvocationException
-            ReflectionInvoke.DemandMemberAccessIfNeeded(metadataViewFactory.Method.DeclaringType);
             try
             {
                 return (TMetadataView)metadataViewFactory.Invoke(metadata);

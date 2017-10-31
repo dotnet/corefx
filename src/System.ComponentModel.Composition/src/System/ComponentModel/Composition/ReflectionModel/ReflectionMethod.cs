@@ -58,10 +58,6 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private static ExportedDelegate SafeCreateExportedDelegate(object instance, MethodInfo method)
         {
-            // We demand member access in place of the [SecurityCritical] 
-            // attribute on ExportDelegate constructor
-            ReflectionInvoke.DemandMemberAccessIfNeeded(method);
-
             return new ExportedDelegate(instance, method);
         }
     }
