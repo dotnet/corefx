@@ -26,46 +26,27 @@ namespace System.Diagnostics.Tests
                     EventLog.WriteEvent(source, eventInstance);
                     if (data)
                     {
-                        if (PlatformDetection.IsWindows7)
-                            RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData));
-                        else
-                            eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData);
-
+                        Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData));
                         return eventLog.Entries.LastOrDefault();
                     }
                     else if (category)
                     {
-                        if (PlatformDetection.IsWindows7)
-                            RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId));
-                        else
-                            eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId);
-
+                        Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId));
                         return eventLog.Entries.LastOrDefault();
                     }
                     else
                     {
-                        if (PlatformDetection.IsWindows7)
-                            RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId));
-                        else
-                            eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId);
-
+                        Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning, (int)eventInstance.InstanceId));
                         return eventLog.Entries.LastOrDefault();
                     }
                 }
                 else if (type)
                 {
-                    if (PlatformDetection.IsWindows7)
-                        RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning));
-                    else
-                        eventLog.WriteEntry(message, EventLogEntryType.Warning);
+                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Warning));
                 }
                 else
                 {
-                    if (PlatformDetection.IsWindows7)
-                        RetryAvailable<EventLog>(() => eventLog.WriteEntry(message));
-                    else
-                        eventLog.WriteEntry(message);
-
+                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message));
                 }
 
                 return eventLog.Entries.LastOrDefault();
@@ -82,45 +63,27 @@ namespace System.Diagnostics.Tests
                     EventLog.WriteEvent(source, eventInstance);
                     if (data)
                     {
-                        if (PlatformDetection.IsWindows7)
-                            RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData));
-                        else
-                            EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData);
-
+                        Helpers.RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId, rawData));
                         return eventLog.Entries.LastOrDefault();
                     }
                     else if (category)
                     {
-                        if (PlatformDetection.IsWindows7)
-                            RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId));
-                        else
-                            EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId);
-
+                        Helpers.RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId, (short)eventInstance.CategoryId));
                         return eventLog.Entries.LastOrDefault();
                     }
                     else
                     {
-                        if (PlatformDetection.IsWindows7)
-                            RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId));
-                        else
-                            EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId);
-
+                        Helpers.RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning, (int)eventInstance.InstanceId));
                         return eventLog.Entries.LastOrDefault();
                     }
                 }
                 else if (type)
                 {
-                    if (PlatformDetection.IsWindows7)
-                        RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning));
-                    else
-                        EventLog.WriteEntry(source, message, EventLogEntryType.Warning);
+                    Helpers.RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message, EventLogEntryType.Warning));
                 }
                 else
                 {
-                    if (PlatformDetection.IsWindows7)
-                        RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message));
-                    else
-                        EventLog.WriteEntry(source, message);
+                    Helpers.RetryAvailable<EventLog>(() => EventLog.WriteEntry(source, message));
                 }
 
                 return eventLog.Entries.LastOrDefault();
@@ -131,17 +94,11 @@ namespace System.Diagnostics.Tests
         {
             if (data)
             {
-                if (PlatformDetection.IsWindows7)
-                    RetryAvailable<EventLog>(() => EventLog.WriteEvent(source, eventInstance, rawData, insertStrings));
-                else
-                    EventLog.WriteEvent(source, eventInstance, rawData, insertStrings);
+                Helpers.RetryAvailable<EventLog>(() => EventLog.WriteEvent(source, eventInstance, rawData, insertStrings));
             }
             else
             {
-                if (PlatformDetection.IsWindows7)
-                    RetryAvailable<EventLog>(() => EventLog.WriteEvent(source, eventInstance, insertStrings));
-                else
-                    EventLog.WriteEvent(source, eventInstance, insertStrings);
+                Helpers.RetryAvailable<EventLog>(() => EventLog.WriteEvent(source, eventInstance, insertStrings));
             }
             using (EventLog eventLog = new EventLog())
             {
@@ -157,38 +114,12 @@ namespace System.Diagnostics.Tests
                 string[] insertStringsSingleton = { "ExtraText" };
                 eventLog.Source = source;
                 if (data)
-                {
-                    if (PlatformDetection.IsWindows7)
-                        RetryAvailable<EventLog>(() => eventLog.WriteEvent(eventInstance, rawData, insertStringsSingleton));
-                    else
-                        eventLog.WriteEvent(eventInstance, rawData, insertStringsSingleton);
-                }
+                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEvent(eventInstance, rawData, insertStringsSingleton));
                 else
-                {
-                    eventLog.WriteEvent(eventInstance, insertStringsSingleton);
-                }
+                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEvent(eventInstance, insertStringsSingleton));
 
                 return eventLog.Entries.LastOrDefault();
             }
-        }
-
-        static void RetryAvailable<EventLog>(Action func)
-        {
-            int retries = 3;
-            while (retries > 0)
-            {
-                try
-                {
-                    func();
-                    break;
-                }
-                catch (Win32Exception)
-                {
-                    Thread.Sleep(100);
-                    retries--;
-                }
-            }
-            return;
         }
 
         [ConditionalTheory(typeof(Helpers), nameof(Helpers.IsElevatedAndSupportsEventLogs))]

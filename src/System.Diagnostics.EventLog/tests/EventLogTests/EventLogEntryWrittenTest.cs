@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
 using System.Threading;
 using Xunit;
 
@@ -32,19 +31,9 @@ namespace System.Diagnostics.Tests
                         signal.Set();
                     });
                     eventLog.EnableRaisingEvents = waitOnEvent;
-                    bool entryWritten = true;
-                    while (entryWritten)
-                    {
-                        try
-                        {
-                            eventLog.WriteEntry(message, EventLogEntryType.Information);
-                            entryWritten = false;
-                        }
-                        catch (Win32Exception)
-                        {
-                            Thread.Sleep(100);
-                        }
-                    }                  
+
+                    Helpers.RetryAvailable<EventLog>(() => eventLog.WriteEntry(message, EventLogEntryType.Information));
+
                     if (waitOnEvent)
                     {
                         if (!signal.WaitOne(6000))
