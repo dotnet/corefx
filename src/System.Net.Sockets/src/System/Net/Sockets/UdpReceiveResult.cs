@@ -4,10 +4,17 @@
 
 namespace System.Net.Sockets
 {
+<<<<<<< HEAD
 	/// <summary>
 	/// Presents UDP receive result information from a call to the <see cref="UdpClient.ReceiveAsync"/> method
 	/// </summary>
 	public struct UdpReceiveResult : IEquatable<UdpReceiveResult> {
+=======
+    public struct UdpReceiveResult : IEquatable<UdpReceiveResult>
+    {
+        private byte[] _buffer;
+        private IPEndPoint _remoteEndPoint;
+>>>>>>> parent of 592946b219... Simplificate UdpReceiveResult
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="UdpReceiveResult"/> class
@@ -26,8 +33,8 @@ namespace System.Net.Sockets
                 throw new ArgumentNullException(nameof(remoteEndPoint));
             }
 
-            Buffer = buffer;
-            RemoteEndPoint = remoteEndPoint;
+            _buffer = buffer;
+            _remoteEndPoint = remoteEndPoint;
         }
 
 		/// <summary>
@@ -35,7 +42,10 @@ namespace System.Net.Sockets
 		/// </summary>
 		public byte[] Buffer
         {
-            get;
+            get
+            {
+                return _buffer;
+            }
         }
 
 		/// <summary>
@@ -43,15 +53,27 @@ namespace System.Net.Sockets
 		/// </summary>
 		public IPEndPoint RemoteEndPoint
         {
-            get;
+            get
+            {
+                return _remoteEndPoint;
+            }
         }
 
+<<<<<<< HEAD
 		/// <summary>
 		/// Returns a value that indicates whether this instance is equal to a specified object
 		/// </summary>
 		/// <param name="obj">The object to compare with this instance</param>
 		/// <returns>true if obj is an instance of <see cref="UdpReceiveResult"/> and equals the value of the instance; otherwise, false</returns>
 		public override bool Equals(object obj)
+=======
+        public override int GetHashCode()
+        {
+            return (_buffer != null) ? (_buffer.GetHashCode() ^ _remoteEndPoint.GetHashCode()) : 0;
+        }
+
+        public override bool Equals(object obj)
+>>>>>>> parent of 592946b219... Simplificate UdpReceiveResult
         {
             if (!(obj is UdpReceiveResult))
             {
@@ -68,7 +90,7 @@ namespace System.Net.Sockets
 		/// <returns>true if other is an instance of <see cref="UdpReceiveResult"/> and equals the value of the instance; otherwise, false</returns>
 		public bool Equals(UdpReceiveResult other)
         {
-            return object.Equals(Buffer, otherBuffer) && object.Equals(RemoteEndPoint, other.RemoteEndPoint);
+            return object.Equals(_buffer, other._buffer) && object.Equals(_remoteEndPoint, other._remoteEndPoint);
         }
 
 		/// <summary>
