@@ -497,34 +497,37 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
         internal static IDictionary<string, object> GetImportMetadata(Type type, IAttributedImport attributedImport)
         {
             Dictionary<string, object> metadata = null;
-            
-            //Prior to V4.5 MEF did not support ImportMetadata
-            if (type.IsGenericType)
-            {
-                metadata = new Dictionary<string, object>();
 
-                if (type.ContainsGenericParameters)
-                {
-                    metadata[CompositionConstants.GenericImportParametersOrderMetadataName] = GenericServices.GetGenericParametersOrder(type);
-                }
-                else
-                {
-                    metadata[CompositionConstants.GenericContractMetadataName] = ContractNameServices.GetTypeIdentity(type.GetGenericTypeDefinition());
-                    metadata[CompositionConstants.GenericParametersMetadataName] = type.GetGenericArguments();
-                }
-            }
-
-            // Default value is ImportSource.Any
-            if (attributedImport != null && attributedImport.Source != ImportSource.Any)
+            if (BinaryCompatibility.TargetsAtLeast_Desktop_V4_5)
             {
-                if (metadata == null)
+                //Prior to V4.5 MEF did not support ImportMetadata
+                if (type.IsGenericType)
                 {
                     metadata = new Dictionary<string, object>();
+                    
+                    if (type.ContainsGenericParameters)
+                    {
+                        metadata[CompositionConstants.GenericImportParametersOrderMetadataName] = GenericServices.GetGenericParametersOrder(type);
+                    }
+                    else
+                    {
+                        metadata[CompositionConstants.GenericContractMetadataName] = ContractNameServices.GetTypeIdentity(type.GetGenericTypeDefinition());
+                        metadata[CompositionConstants.GenericParametersMetadataName] = type.GetGenericArguments();
+                    }
                 }
-                metadata[CompositionConstants.ImportSourceMetadataName] = attributedImport.Source;
+    
+                // Default value is ImportSource.Any
+                if(attributedImport != null && attributedImport.Source != ImportSource.Any)
+                {
+                    if(metadata == null)
+                    {
+                        metadata = new Dictionary<string, object>();
+                    }
+                    metadata[CompositionConstants.ImportSourceMetadataName] = attributedImport.Source;
+                }
             }
 
-            if (metadata != null)
+            if(metadata != null)
             {
                 return metadata.AsReadOnly();
             }

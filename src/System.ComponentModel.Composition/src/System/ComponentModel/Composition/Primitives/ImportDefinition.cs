@@ -114,11 +114,14 @@ namespace System.ComponentModel.Composition.Primitives
             this._cardinality = cardinality;
             this._isRecomposable = isRecomposable;
             this._isPrerequisite = isPrerequisite;
-            
-            //Metadata on imports was added in 4.5, prior to that it was ignored.
-            if (metadata != null)
+
+            if (BinaryCompatibility.TargetsAtLeast_Desktop_V4_5)
             {
-                this._metadata = metadata;
+                //Metadata on imports was added in 4.5, prior to that it was ignored.
+                if (metadata != null)
+                {
+                    this._metadata = metadata;
+                }
             }
         }
 

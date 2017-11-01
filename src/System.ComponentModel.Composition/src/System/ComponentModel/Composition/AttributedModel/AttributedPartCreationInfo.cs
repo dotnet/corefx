@@ -99,6 +99,16 @@ namespace System.ComponentModel.Composition.AttributedModel
                 return false;
             }
 
+            if (!BinaryCompatibility.TargetsAtLeast_Desktop_V4_5)
+            {
+                //Generic parts were not discoverable prior to 4.5 of the Runtime
+                if(this._type.ContainsGenericParameters)
+                {
+                    CompositionTrace.DefinitionContainsNoExports(this._type);
+                    return false;
+                }
+            }
+
             // The part should have exports
             if (!HasExports())
             {
@@ -341,7 +351,7 @@ string ICompositionElement.DisplayName
             else if (IsExport(type))
             {
                 //Prior to V4.5 MEF did not support Open Generic Exports
-                if (!this._type.ContainsGenericParameters)
+                if (BinaryCompatibility.TargetsAtLeast_Desktop_V4_5 || !this._type.ContainsGenericParameters)
                 {
                     yield return type;
                 }
@@ -353,7 +363,7 @@ string ICompositionElement.DisplayName
                 if (IsExport(member))
                 {
                     //Prior to V4.5 MEF did not support Open Generic Exports
-                    if (!this._type.ContainsGenericParameters)
+                    if (BinaryCompatibility.TargetsAtLeast_Desktop_V4_5 || !this._type.ContainsGenericParameters)
                     {
                         yield return member;
                     }
@@ -366,7 +376,7 @@ string ICompositionElement.DisplayName
                 if (IsExport(member))
                 {
                     //Prior to V4.5 MEF did not support Open Generic Exports
-                    if (!this._type.ContainsGenericParameters)
+                    if (BinaryCompatibility.TargetsAtLeast_Desktop_V4_5 || !this._type.ContainsGenericParameters)
                     {
                         yield return member;
                     }
@@ -379,7 +389,7 @@ string ICompositionElement.DisplayName
                 if (IsExport(member))
                 {
                     //Prior to V4.5 MEF did not support Open Generic Exports
-                    if (!this._type.ContainsGenericParameters)
+                    if (BinaryCompatibility.TargetsAtLeast_Desktop_V4_5 || !this._type.ContainsGenericParameters)
                     {
                         yield return member;
                     }
@@ -416,7 +426,7 @@ string ICompositionElement.DisplayName
                 if (IsInheritedExport(currentType))
                 {
                     //Prior to V4.5 MEF did not support Open Generic Exports
-                    if (!currentType.ContainsGenericParameters)
+                    if (BinaryCompatibility.TargetsAtLeast_Desktop_V4_5 || !currentType.ContainsGenericParameters)
                     {
                         yield return currentType;
                     }
@@ -429,7 +439,7 @@ string ICompositionElement.DisplayName
                 if (IsInheritedExport(iface))
                 {
                     //Prior to V4.5 MEF did not support Open Generic Exports
-                    if (!iface.ContainsGenericParameters)
+                    if (BinaryCompatibility.TargetsAtLeast_Desktop_V4_5 || !iface.ContainsGenericParameters)
                     {
                         yield return iface;
                     }
@@ -512,7 +522,7 @@ string ICompositionElement.DisplayName
                 if (IsImport(member))
                 {
                     //Prior to V4.5 MEF did not support Open Generic Imports
-                    if (!member.ReflectedType.ContainsGenericParameters)
+                    if (BinaryCompatibility.TargetsAtLeast_Desktop_V4_5 || !member.ReflectedType.ContainsGenericParameters)
                     {
                         yield return member;
                     }
@@ -525,7 +535,7 @@ string ICompositionElement.DisplayName
                 if (IsImport(member))
                 {
                     //Prior to V4.5 MEF did not support Open Generic Imports
-                    if (!member.ReflectedType.ContainsGenericParameters)
+                    if (BinaryCompatibility.TargetsAtLeast_Desktop_V4_5 || !member.ReflectedType.ContainsGenericParameters)
                     {
                         yield return member;
                     }
