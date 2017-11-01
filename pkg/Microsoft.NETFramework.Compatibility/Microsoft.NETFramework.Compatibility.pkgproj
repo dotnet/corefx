@@ -38,7 +38,6 @@
     <PrereleaseLibraryPackage Include="System.IO.Ports" />
     <PrereleaseLibraryPackage Include="System.Management" />
     <PrereleaseLibraryPackage Include="System.Security.AccessControl" />
-    <PrereleaseLibraryPackage Include="System.Security.Cryptography.Cng" />
     <PrereleaseLibraryPackage Include="System.Security.Cryptography.Pkcs" />
     <PrereleaseLibraryPackage Include="System.Security.Cryptography.ProtectedData" />
     <PrereleaseLibraryPackage Include="System.Security.Cryptography.Xml" />
@@ -49,7 +48,8 @@
     <PrereleaseLibraryPackage Include="System.Text.Encoding.CodePages" />
     <PrereleaseLibraryPackage Include="System.Threading.AccessControl" />
 
-    <!-- Stable packages shipped from other repo -->
+    <!-- Stable packages shipped already for netcoreapp2.0 -->
+    <LibraryPackage Include="System.Security.Cryptography.Cng" />
     <LibraryPackage Include="System.ServiceModel.Primitives" />
     <LibraryPackage Include="System.ServiceModel.Duplex" />
     <LibraryPackage Include="System.ServiceModel.Http" />

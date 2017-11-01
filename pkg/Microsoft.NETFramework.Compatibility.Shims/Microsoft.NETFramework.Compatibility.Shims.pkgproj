@@ -33,6 +33,10 @@
         <TargetPath>$(_PkgLibDir)%(ShimsToInclude.Identity)</TargetPath>
         <SkipPackageFileCheck>true</SkipPackageFileCheck>
       </File>
+      <!-- Include placeholder to be netstandard2.0 compatible -->
+      <File Include="$(PlaceHolderFile)">
+        <TargetPath>/lib/netstandard2.0</TargetPath>
+      </File>
     </ItemGroup>
 
     <Message Importance="Low" Text="Added: %(ShimsToInclude.Identity) to package." />
