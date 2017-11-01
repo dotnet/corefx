@@ -48,8 +48,10 @@ namespace System.ServiceModel.Syndication.Tests
                 _diff = value;
             }
         }
-        public bool Compare(string source, string target)
+        public bool Compare(string source, string target, out string diffNode)
         {
+            diffNode = string.Empty;
+            StringBuilder stringBuilder = new StringBuilder();
             if (Diff.Compare(source, target))
             {
                 return true;
@@ -63,19 +65,28 @@ namespace System.ServiceModel.Syndication.Tests
 
                 if (attrFailures.Count == totalFailures.Count)
                 {
+                    //Check all different Nodes except allowable Nodes
                     bool allFailuresAllowed = true;
                     foreach (XmlNode node in attrFailures)
                     {
                         if (!IsAllowableFailure(node))
                         {
                             allFailuresAllowed = false;
+                            stringBuilder.AppendLine(node.InnerText);
                             break;
                         }
                     }
+                    diffNode = stringBuilder.ToString();
                     return allFailuresAllowed;
                 }
                 else
                 {
+                    //get all different Nodes
+                    foreach(XmlNode node in totalFailures)
+                    {
+                        stringBuilder.AppendLine(node.InnerText);
+                    }
+                    diffNode = stringBuilder.ToString();
                     return false;
                 }
             }

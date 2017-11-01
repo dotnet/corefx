@@ -311,20 +311,20 @@ namespace System.ServiceModel.Syndication.Tests
                 using (XmlReader reader = XmlReader.Create(filePath))
                 {
                     feedObjct = SyndicationItem.Load(reader);
-                    reader.Close();
                 }
 
                 using (XmlWriter writer = XmlWriter.Create(serializeFilePath))
                 {
                     Atom10ItemFormatter atomformatter = new Atom10ItemFormatter(feedObjct);
                     atomformatter.WriteTo(writer);
-                    writer.Close();
                 }
+
                 // compare file filePath and serializeFilePath
                 XmlDiff diff = new XmlDiff()
                 {
                     Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
                 };
+
                 Assert.True(diff.Compare(filePath, serializeFilePath));
             }
             finally
@@ -349,13 +349,13 @@ namespace System.ServiceModel.Syndication.Tests
                 {
                     Atom10ItemFormatter f = new Atom10ItemFormatter(item);
                     f.WriteTo(writer);
-                    writer.Close();
                 }
 
                 XmlDiff diff = new XmlDiff()
                 {
                     Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
                 };
+
                 Assert.True(diff.Compare(filePath, serializeFilePath));
             }
             finally
@@ -380,14 +380,12 @@ namespace System.ServiceModel.Syndication.Tests
                     using (XmlReader reader = XmlReader.Create(file))
                     {
                         feedObjct = SyndicationFeed.Load(reader);
-                        reader.Close();
                     }
 
                     using (XmlWriter writer = XmlWriter.Create(serializeFilePath))
                     {
                         Atom10FeedFormatter f = new Atom10FeedFormatter(feedObjct);
                         f.WriteTo(writer);
-                        writer.Close();
                     }
 
                     CompareHelper ch = new CompareHelper
@@ -398,14 +396,22 @@ namespace System.ServiceModel.Syndication.Tests
                         },
                         AllowableDifferences = GetAtomFeedPositiveTestAllowableDifferences()
                     };
-                    Assert.True(ch.Compare(file, serializeFilePath), $"Failed File Name:{file}");
+
+                    string diffNode = string.Empty;
+                    if(!ch.Compare(file, serializeFilePath,out diffNode))
+                    {
+                        //save the diff file for DeBug
+                        string diffFile = file + ".diff";
+                        File.Copy(serializeFilePath, diffFile,true);
+
+                        string errorMessage = $"File are differenf:{Environment.NewLine}Sourse:{file}{Environment.NewLine}Target:{diffFile}{Environment.NewLine}Different Nodes:{Environment.NewLine}{diffNode}";
+                        Assert.True(false, errorMessage);
+                    }
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine();
-                    Console.WriteLine("------------------------------");
-                    Console.WriteLine($"Failed File Name:{file}");
-                    throw e;
+                    Exception ex = new Exception($"Failed File Name:{file}", e);
+                    throw ex;
                 }
                 finally
                 {
@@ -437,6 +443,7 @@ namespace System.ServiceModel.Syndication.Tests
                     atomformatter.WriteTo(writer);
                     writer.Close();
                 }
+
                 // compare file filePath and serializeFilePath
                 XmlDiff diff = new XmlDiff()
                 {
@@ -486,14 +493,22 @@ namespace System.ServiceModel.Syndication.Tests
                         },
                         AllowableDifferences = GetRssFeedPositiveTestAllowableDifferences()
                     };
-                    Assert.True(ch.Compare(file, serializeFilePath), $"Failed File Name:{file}");
+
+                    string diffNode = string.Empty;
+                    if (!ch.Compare(file, serializeFilePath, out diffNode))
+                    {
+                        //save the diff file for DeBug
+                        string diffFile = file + ".diff";
+                        File.Copy(serializeFilePath, diffFile, true);
+
+                        string errorMessage = $"File are different:{Environment.NewLine}Source:{file}{Environment.NewLine}Target:{diffFile}{Environment.NewLine}Different Nodes:{Environment.NewLine}{diffNode}";
+                        Assert.True(false, errorMessage);
+                    }
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine();
-                    Console.WriteLine("------------------------------");
-                    Console.WriteLine($"Failed File Name:{file}");
-                    throw e;
+                    Exception ex = new Exception($"Failed File Name:{file}", e);
+                    throw ex;
                 }
                 finally
                 {

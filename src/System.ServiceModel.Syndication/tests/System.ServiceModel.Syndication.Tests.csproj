@@ -10,22 +10,58 @@
     <Compile Include="$(MsBuildThisFileDirectory)**\*.cs" Exclude="$(MsBuildThisFileDirectory)async\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\*.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="C:\code\corefx\src\System.ServiceModel.Syndication\tests\\TestFeeds\AtomDisjointItems.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="C:\code\corefx\src\System.ServiceModel.Syndication\tests\\TestFeeds\AtomEntryTest.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="C:\code\corefx\src\System.ServiceModel.Syndication\tests\\TestFeeds\atom_spec_example.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="C:\code\corefx\src\System.ServiceModel.Syndication\tests\\TestFeeds\brief-entry-noerror.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="C:\code\corefx\src\System.ServiceModel.Syndication\tests\\TestFeeds\example_feed_xml_atom.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="C:\code\corefx\src\System.ServiceModel.Syndication\tests\\TestFeeds\RssDisjointItems.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="C:\code\corefx\src\System.ServiceModel.Syndication\tests\\TestFeeds\RssEntry.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="C:\code\corefx\src\System.ServiceModel.Syndication\tests\\TestFeeds\RssFeedWithCustomImageName.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="C:\code\corefx\src\System.ServiceModel.Syndication\tests\\TestFeeds\rssSpecExample.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="C:\code\corefx\src\System.ServiceModel.Syndication\tests\\TestFeeds\rssSpecExampleWrongDateFormat.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="C:\code\corefx\src\System.ServiceModel.Syndication\tests\\TestFeeds\rssSpecExampleWrongSkipDays.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="C:\code\corefx\src\System.ServiceModel.Syndication\tests\\TestFeeds\SimpleAtomFeed.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="C:\code\corefx\src\System.ServiceModel.Syndication\tests\\TestFeeds\SimpleRssFeed.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\AtomFeeds\*.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-	<Content Include="$(MsBuildThisFileDirectory)\TestFeeds\RssFeeds\*.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\RssFeeds\*.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MsBuildThisFileDirectory)\TestFeeds\atom_feeds.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-	<None Include="$(MsBuildThisFileDirectory)\TestFeeds\rss_feeds.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Include="$(MsBuildThisFileDirectory)\TestFeeds\rss_feeds.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
