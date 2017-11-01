@@ -32,9 +32,9 @@ namespace System.ComponentModel.Composition.Hosting
         private volatile Assembly _assembly = null;
         private volatile ComposablePartCatalog _innerCatalog = null;
         private int _isDisposed = 0;
-        
+
         private ReflectionContext _reflectionContext = default(ReflectionContext);
-        
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
         ///     with the specified code base.
@@ -82,7 +82,7 @@ namespace System.ComponentModel.Composition.Hosting
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
             this._definitionOrigin = this;
         }
-        
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
         ///     with the specified code base.
@@ -196,7 +196,7 @@ namespace System.ComponentModel.Composition.Hosting
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
             this._definitionOrigin = definitionOrigin;
         }
-        
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
         ///     with the specified code base.
@@ -440,14 +440,14 @@ namespace System.ComponentModel.Composition.Hosting
                 if (this._innerCatalog == null)
                 {
                     var catalogReflectionContextAttribute = this._assembly.GetFirstAttribute<CatalogReflectionContextAttribute>();
-                    var assembly = (catalogReflectionContextAttribute != null) 
+                    var assembly = (catalogReflectionContextAttribute != null)
                         ? catalogReflectionContextAttribute.CreateReflectionContext().MapAssembly(this._assembly)
                         : this._assembly;
                     lock (this._thisLock)
                     {
                         if (this._innerCatalog == null)
                         {
-                            var catalog = (this._reflectionContext != null) 
+                            var catalog = (this._reflectionContext != null)
                                 ? new TypeCatalog(assembly.GetTypes(), this._reflectionContext, this._definitionOrigin)
                                 : new TypeCatalog(assembly.GetTypes(), this._definitionOrigin);
                             Thread.MemoryBarrier();
@@ -469,11 +469,11 @@ namespace System.ComponentModel.Composition.Hosting
         /// </value>
         public Assembly Assembly
         {
-            get 
+            get
             {
                 Contract.Ensures(Contract.Result<Assembly>() != null);
-                
-                return this._assembly; 
+
+                return this._assembly;
             }
         }
 
@@ -501,7 +501,7 @@ namespace System.ComponentModel.Composition.Hosting
             get { return null; }
         }
 
-/// <summary>
+        /// <summary>
         ///     Returns a string representation of the assembly catalog.
         /// </summary>
         /// <returns>
@@ -512,8 +512,8 @@ namespace System.ComponentModel.Composition.Hosting
             return this.GetDisplayName();
         }
 
-protected override void Dispose(bool disposing)
-        {                
+        protected override void Dispose(bool disposing)
+        {
             try
             {
                 if (Interlocked.CompareExchange(ref this._isDisposed, 1, 0) == 0)
@@ -550,7 +550,7 @@ protected override void Dispose(bool disposing)
         {
             return string.Format(CultureInfo.CurrentCulture,
                                 "{0} (Assembly=\"{1}\")",   // NOLOC
-                                GetType().Name, 
+                                GetType().Name,
                                 this.Assembly.FullName);
         }
 
