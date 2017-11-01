@@ -55,8 +55,8 @@ extensive-nowarn.xml
 generator-escaped-html.xml
 generator-no-text.xml
 generator_relative_ref.xml
-#icon_invalid_uri.xml    This operation is not supported for a relative URI.
-#icon_relative_ref.xml
+###icon_invalid_uri.xml    This operation is not supported for a relative URI.
+###icon_relative_ref.xml
 id-dot-segments.xml
 id-empty-fragment-id.xml
 id-empty-path.xml
@@ -83,8 +83,7 @@ invalid-xml-base.xml
 invalid-xml-lang.xml
 invalid_html.xml
 license-noerror.xml
-#link-extensions.xml
-#Generated result file is different 
+###link-extensions.xml    Generated result file is different 
 link-full-uri.xml
 link-href-relative.xml
 link-hreflang-invalid-language.xml

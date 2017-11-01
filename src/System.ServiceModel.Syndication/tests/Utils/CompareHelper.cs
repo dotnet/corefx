@@ -82,7 +82,7 @@ namespace System.ServiceModel.Syndication.Tests
                 else
                 {
                     //get all different Nodes
-                    foreach(XmlNode node in totalFailures)
+                    foreach (XmlNode node in totalFailures)
                     {
                         stringBuilder.AppendLine(node.InnerText);
                     }

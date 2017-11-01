@@ -398,20 +398,20 @@ namespace System.ServiceModel.Syndication.Tests
                     };
 
                     string diffNode = string.Empty;
-                    if(!ch.Compare(file, serializeFilePath,out diffNode))
+                    if (!ch.Compare(file, serializeFilePath, out diffNode))
                     {
                         //save the diff file for DeBug
                         string diffFile = file + ".diff";
-                        File.Copy(serializeFilePath, diffFile,true);
+                        File.Copy(serializeFilePath, diffFile, true);
 
-                        string errorMessage = $"File are differenf:{Environment.NewLine}Sourse:{file}{Environment.NewLine}Target:{diffFile}{Environment.NewLine}Different Nodes:{Environment.NewLine}{diffNode}";
+                        string errorMessage = $"Files are differenf:{Environment.NewLine}Sourse:{file}{Environment.NewLine}Target:{diffFile}{Environment.NewLine}Different Nodes:{Environment.NewLine}{diffNode}";
                         Assert.True(false, errorMessage);
                     }
                 }
                 catch (Exception e)
                 {
-                    Exception ex = new Exception($"Failed File Name:{file}", e);
-                    throw ex;
+                    Exception newEx = new Exception($"Failed File Name:{file}", e);
+                    throw newEx;
                 }
                 finally
                 {
@@ -501,14 +501,14 @@ namespace System.ServiceModel.Syndication.Tests
                         string diffFile = file + ".diff";
                         File.Copy(serializeFilePath, diffFile, true);
 
-                        string errorMessage = $"File are different:{Environment.NewLine}Source:{file}{Environment.NewLine}Target:{diffFile}{Environment.NewLine}Different Nodes:{Environment.NewLine}{diffNode}";
+                        string errorMessage = $"Files are different:{Environment.NewLine}Source:{file}{Environment.NewLine}Target:{diffFile}{Environment.NewLine}Different Nodes:{Environment.NewLine}{diffNode}";
                         Assert.True(false, errorMessage);
                     }
                 }
                 catch (Exception e)
                 {
-                    Exception ex = new Exception($"Failed File Name:{file}", e);
-                    throw ex;
+                    Exception newEx = new Exception($"Failed File Name:{file}", e);
+                    throw newEx;
                 }
                 finally
                 {
