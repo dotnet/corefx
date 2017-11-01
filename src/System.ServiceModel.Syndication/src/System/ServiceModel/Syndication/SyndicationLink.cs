@@ -6,7 +6,6 @@ namespace System.ServiceModel.Syndication
 {
     using System;
     using System.Collections.Generic;
-    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using System.Xml;
 
@@ -174,6 +173,16 @@ namespace System.ServiceModel.Syndication
         protected internal virtual bool TryParseElement(XmlReader reader, string version)
         {
             return false;
+        }
+
+        protected internal virtual void WriteAttributeExtensions(XmlWriter writer, string version)
+        {
+            _extensions.WriteAttributeExtensions(writer);
+        }
+
+        protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
+        {
+            _extensions.WriteElementExtensions(writer);
         }
 
         protected internal virtual Task WriteAttributeExtensionsAsync(XmlWriter writer, string version)

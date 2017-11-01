@@ -76,20 +76,16 @@ namespace System
     
     public static class SpanExtensions
     {
-        public static int IndexOf<T>(this Span<T> span, T value) where T:struct, IEquatable<T> { throw null; }
-        public static int IndexOf<T>(this Span<T> span, ReadOnlySpan<T> value) where T : struct, IEquatable<T> { throw null; }
-        public static int IndexOf(this Span<byte> span, byte value) { throw null; }
-        public static int IndexOf(this Span<byte> span, ReadOnlySpan<byte> value) { throw null; }
+        public static int IndexOf<T>(this Span<T> span, T value) where T : IEquatable<T> { throw null; }
+        public static int IndexOf<T>(this Span<T> span, ReadOnlySpan<T> value) where T : IEquatable<T> { throw null; }
 
         public static int IndexOfAny(this Span<byte> span, byte value0, byte value1) { throw null; }
         public static int IndexOfAny(this Span<byte> span, byte value0, byte value1, byte value2) { throw null; }
         public static int IndexOfAny(this Span<byte> span, ReadOnlySpan<byte> values) { throw null; }
 
-        public static bool SequenceEqual<T>(this Span<T> first, ReadOnlySpan<T> second) where T:struct, IEquatable<T> { throw null; }
-        public static bool SequenceEqual(this Span<byte> first, ReadOnlySpan<byte> second) { throw null; }
+        public static bool SequenceEqual<T>(this Span<T> first, ReadOnlySpan<T> second) where T : IEquatable<T> { throw null; }
         
-        public static bool StartsWith<T>(this Span<T> span, ReadOnlySpan<T> value) where T : struct, IEquatable<T> { throw null; }
-        public static bool StartsWith(this Span<byte> span, ReadOnlySpan<byte> value) { throw null; }
+        public static bool StartsWith<T>(this Span<T> span, ReadOnlySpan<T> value) where T : IEquatable<T> { throw null; }
 
         public static Span<byte> AsBytes<T>(this Span<T> source) where T : struct { throw null; }
 
@@ -103,20 +99,16 @@ namespace System
 
         public static void CopyTo<T>(this T[] array, Span<T> destination) { throw null; }
 
-        public static int IndexOf<T>(this ReadOnlySpan<T> span, T value) where T : struct, IEquatable<T> { throw null; }
-        public static int IndexOf<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value) where T : struct, IEquatable<T> { throw null; }
-        public static int IndexOf(this ReadOnlySpan<byte> span, byte value) { throw null; }
-        public static int IndexOf(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> value) { throw null; }
+        public static int IndexOf<T>(this ReadOnlySpan<T> span, T value) where T : IEquatable<T> { throw null; }
+        public static int IndexOf<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value) where T : IEquatable<T> { throw null; }
 
         public static int IndexOfAny(this ReadOnlySpan<byte> span, byte value0, byte value1) { throw null; }
         public static int IndexOfAny(this ReadOnlySpan<byte> span, byte value0, byte value1, byte value2) { throw null; }
         public static int IndexOfAny(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> values) { throw null; }
 
-        public static bool SequenceEqual<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second) where T : struct, IEquatable<T> { throw null; }
-        public static bool SequenceEqual(this ReadOnlySpan<byte> first, ReadOnlySpan<byte> second) { throw null; }
+        public static bool SequenceEqual<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second) where T : IEquatable<T> { throw null; }
 
-        public static bool StartsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value) where T : struct, IEquatable<T> { throw null; }
-        public static bool StartsWith(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> value) { throw null; }
+        public static bool StartsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value) where T : IEquatable<T> { throw null; }
 
         public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> source) where T : struct { throw null; }
         
@@ -174,8 +166,9 @@ namespace System.Buffers
 {
     public unsafe struct MemoryHandle : IDisposable 
     {
-        public MemoryHandle(IRetainable owner, void* pinnedPointer = null,  System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle))  { throw null; }
-        public void* PinnedPointer { get { throw null; } }
+        public MemoryHandle(IRetainable owner, void* pointer = null,  System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle))  { throw null; }
+        public void* Pointer { get { throw null; } }
+        public bool HasPointer { get { throw null; } }
         public void Dispose() { throw null; }
     }
 
@@ -198,6 +191,14 @@ namespace System.Buffers
         public abstract bool Release();
         public abstract void Retain();
         protected internal abstract bool TryGetArray(out ArraySegment<T> arraySegment);
+    }
+
+    public enum OperationStatus
+    {
+        Done,
+        DestinationTooSmall,
+        NeedMoreData,
+        InvalidData,
     }
 }
 
@@ -275,5 +276,18 @@ namespace System.Buffers.Binary
         public static bool TryWriteUInt16BigEndian(Span<byte> buffer, ushort value) { throw null; }
         public static bool TryWriteUInt32BigEndian(Span<byte> buffer, uint value) { throw null; }
         public static bool TryWriteUInt64BigEndian(Span<byte> buffer, ulong value) { throw null; }
+    }
+}
+
+namespace System.Buffers.Text
+{
+    public static class Base64
+    {
+        public static OperationStatus EncodeToUtf8(ReadOnlySpan<byte> bytes, Span<byte> utf8, out int consumed, out int written, bool isFinalBlock = true) { throw null; }
+        public static OperationStatus EncodeToUtf8InPlace(Span<byte> buffer, int dataLength, out int written) { throw null; }
+        public static int GetMaxEncodedToUtf8Length(int length) { throw null; }
+        public static OperationStatus DecodeFromUtf8(ReadOnlySpan<byte> utf8, Span<byte> bytes, out int consumed, out int written, bool isFinalBlock = true) { throw null; }
+        public static OperationStatus DecodeFromUtf8InPlace(Span<byte> buffer, out int written) { throw null; }
+        public static int GetMaxDecodedFromUtf8Length(int length) { throw null; }
     }
 }

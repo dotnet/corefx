@@ -5,7 +5,6 @@
 namespace System.ServiceModel.Syndication
 {
     using System;
-    using System.Collections.ObjectModel;
     using System.Collections.Generic;
     using System.Xml;
     using System.Threading.Tasks;
@@ -102,6 +101,16 @@ namespace System.ServiceModel.Syndication
             _elementExtensions = new SyndicationElementExtensionCollection(buffer);
         }
 
+        internal void WriteAttributeExtensions(XmlWriter writer)
+        {
+            WriteAttributeExtensionsAsync(writer).GetAwaiter().GetResult();
+        }
+
+        internal void WriteElementExtensions(XmlWriter writer)
+        {
+            WriteElementExtensionsAsync(writer).GetAwaiter().GetResult();
+        }
+
         internal async Task WriteAttributeExtensionsAsync(XmlWriter writer)
         {
             if (writer == null)
@@ -116,7 +125,7 @@ namespace System.ServiceModel.Syndication
                 foreach (XmlQualifiedName qname in _attributeExtensions.Keys)
                 {
                     string value = _attributeExtensions[qname];
-                    await writer.WriteAttributeStringAsync(qname.Name, qname.Namespace, value);
+                    await writer.WriteAttributeStringAsync(qname.Name, qname.Namespace, value).ConfigureAwait(false);
                 }
             }
         }
@@ -130,7 +139,7 @@ namespace System.ServiceModel.Syndication
 
             if (_elementExtensions != null)
             {
-                await _elementExtensions.WriteToAsync(writer);
+                await _elementExtensions.WriteToAsync(writer).ConfigureAwait(false);
             }
         }
 

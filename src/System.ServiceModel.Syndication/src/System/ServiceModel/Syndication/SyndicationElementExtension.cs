@@ -7,7 +7,6 @@ namespace System.ServiceModel.Syndication
     using System;
     using System.Diagnostics;
     using System.IO;
-    using System.Runtime.CompilerServices;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
     using System.Xml;
@@ -23,20 +22,20 @@ namespace System.ServiceModel.Syndication
         private string _outerName;
         private string _outerNamespace;
 
-        public SyndicationElementExtension(XmlReader reader)
+        public SyndicationElementExtension(XmlReader xmlReader)
         {
-            if (reader == null)
+            if (xmlReader == null)
             {
-                throw new ArgumentNullException(nameof(reader));
+                throw new ArgumentNullException(nameof(xmlReader));
             }
-            SyndicationFeedFormatter.MoveToStartElement(reader);
-            _outerName = reader.LocalName;
-            _outerNamespace = reader.NamespaceURI;
+            SyndicationFeedFormatter.MoveToStartElement(xmlReader);
+            _outerName = xmlReader.LocalName;
+            _outerNamespace = xmlReader.NamespaceURI;
             _buffer = new XmlBuffer(int.MaxValue);
             using (XmlDictionaryWriter writer = _buffer.OpenSection(XmlDictionaryReaderQuotas.Max))
             {
                 writer.WriteStartElement(Rss20Constants.ExtensionWrapperTag);
-                writer.WriteNode(reader, false);
+                writer.WriteNode(xmlReader, false);
                 writer.WriteEndElement();
             }
             _buffer.CloseSection();
@@ -125,12 +124,37 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        public Task<TExtension> GetObject<TExtension>()
+        public TExtension GetObject<TExtension>()
         {
             return GetObject<TExtension>(new DataContractSerializer(typeof(TExtension)));
         }
 
-        public async Task<TExtension> GetObject<TExtension>(XmlObjectSerializer serializer)
+        public TExtension GetObject<TExtension>(XmlObjectSerializer serializer)
+        {
+            return GetObjectAsync<TExtension>(serializer).GetAwaiter().GetResult();
+        }
+
+        public TExtension GetObject<TExtension>(XmlSerializer serializer)
+        {
+            return GetObjectAsync<TExtension>(serializer).GetAwaiter().GetResult();
+        }
+
+        public XmlReader GetReader()
+        {
+            return GetReaderAsync().GetAwaiter().GetResult();
+        }
+
+        public void WriteTo(XmlWriter writer)
+        {
+            WriteToAsync(writer).GetAwaiter().GetResult();
+        }
+
+        public Task<TExtension> GetObjectAsync<TExtension>()
+        {
+            return GetObjectAsync<TExtension>(new DataContractSerializer(typeof(TExtension)));
+        }
+
+        public async Task<TExtension> GetObjectAsync<TExtension>(XmlObjectSerializer serializer)
         {
             if (serializer == null)
             {
@@ -141,33 +165,33 @@ namespace System.ServiceModel.Syndication
                 return (TExtension)_extensionData;
             }
 
-            using (XmlReader reader = await GetReaderAsync())
+            using (XmlReader reader = await GetReaderAsync().ConfigureAwait(false))
             {
-                return (TExtension)serializer.ReadObject(reader, false);
+                return (TExtension) serializer.ReadObject(reader, false);
             }
         }
 
-        public async Task<TExtension> GetObject<TExtension>(XmlSerializer serializer)
+        public async Task<TExtension> GetObjectAsync<TExtension>(XmlSerializer serializer)
         {
             if (serializer == null)
             {
                 throw new ArgumentNullException(nameof(serializer));
             }
-            if (_extensionData != null && typeof(TExtension).IsAssignableFrom(_extensionData.GetType()))
+            if (_extensionData != null && typeof (TExtension).IsAssignableFrom(_extensionData.GetType()))
             {
-                return (TExtension)_extensionData;
+                return (TExtension) _extensionData;
             }
 
-            using (XmlReader reader = await GetReaderAsync())
+            using (XmlReader reader = await GetReaderAsync().ConfigureAwait(false))
             {
-                return (TExtension)serializer.Deserialize(reader);
+                return (TExtension) serializer.Deserialize(reader);
             }
         }
 
         public async Task<XmlReader> GetReaderAsync()
         {
-            await this.EnsureBuffer();
-            XmlReaderWrapper reader = XmlReaderWrapper.CreateFromReader(_buffer.GetReader(0));
+            await EnsureBufferAsync().ConfigureAwait(false);
+            XmlReader reader = XmlReaderWrapper.CreateFromReader(_buffer.GetReader(0));
             int index = 0;
             reader.ReadStartElement(Rss20Constants.ExtensionWrapperTag);
             while (reader.IsStartElement())
@@ -178,16 +202,11 @@ namespace System.ServiceModel.Syndication
                 }
                 ++index;
 
-                await reader.SkipAsync();
+                await reader.SkipAsync().ConfigureAwait(false);
             }
 
             return reader;
         }
-
-        //public Task<XmlReader> GetReader()
-        //{
-        //    return GetReaderAsync();
-        //}
 
         public async Task WriteToAsync(XmlWriter writer)
         {
@@ -202,14 +221,14 @@ namespace System.ServiceModel.Syndication
             else
             {
                 writer = XmlWriterWrapper.CreateFromWriter(writer);
-                using (XmlReader reader = await GetReaderAsync())
+                using (XmlReader reader = await GetReaderAsync().ConfigureAwait(false))
                 {
-                    await writer.WriteNodeAsync(reader, false);
+                    await writer.WriteNodeAsync(reader, false).ConfigureAwait(false);
                 }
             }
         }
 
-        private async Task EnsureBuffer()
+        private async Task EnsureBufferAsync()
         {
             if (_buffer == null)
             {
@@ -217,7 +236,7 @@ namespace System.ServiceModel.Syndication
                 using (XmlDictionaryWriter writer = _buffer.OpenSection(XmlDictionaryReaderQuotas.Max))
                 {
                     writer.WriteStartElement(Rss20Constants.ExtensionWrapperTag);
-                    await this.WriteToAsync(writer);
+                    await WriteToAsync(writer);
                     writer.WriteEndElement();
                 }
                 _buffer.CloseSection();
@@ -330,7 +349,7 @@ namespace System.ServiceModel.Syndication
                 {
                     using (XmlWriter writer = XmlWriter.Create(stream))
                     {
-                        this.WriteToAsync(writer);
+                        WriteToAsync(writer);
                     }
 
                     stream.Seek(0, SeekOrigin.Begin);
