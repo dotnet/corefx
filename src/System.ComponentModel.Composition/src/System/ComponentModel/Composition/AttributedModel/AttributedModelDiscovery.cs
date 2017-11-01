@@ -44,8 +44,7 @@ namespace System.ComponentModel.Composition.AttributedModel
 
             return new ReflectionComposablePart(definition, attributedPart);
         }
-
-#if FEATURE_REFLECTIONCONTEXT
+        
         public static ReflectionComposablePart CreatePart(object attributedPart, ReflectionContext reflectionContext)
         {
             Assumes.NotNull(attributedPart);
@@ -62,7 +61,6 @@ namespace System.ComponentModel.Composition.AttributedModel
 
             return CreatePart(definition, attributedPart);
         }
-#endif //FEATURE_REFLECTIONCONTEXT
 
         public static ReflectionComposablePart CreatePart(ComposablePartDefinition partDefinition, object attributedPart)
         {

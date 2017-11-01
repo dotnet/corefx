@@ -35,7 +35,6 @@ namespace System.ComponentModel.Composition
             return AttributedModelDiscovery.CreatePart(attributedPart);
         }
 
-#if FEATURE_REFLECTIONCONTEXT
         public static ComposablePart CreatePart(object attributedPart, ReflectionContext reflectionContext)
         {
             Requires.NotNull(attributedPart, "attributedPart");
@@ -44,7 +43,6 @@ namespace System.ComponentModel.Composition
 
             return AttributedModelDiscovery.CreatePart(attributedPart, reflectionContext);
         }
-#endif //FEATURE_REFLECTIONCONTEXT
 
         public static ComposablePart CreatePart(ComposablePartDefinition partDefinition, object attributedPart)
         {
@@ -200,8 +198,7 @@ namespace System.ComponentModel.Composition
 
             return part;
         }
-
-#if FEATURE_REFLECTIONCONTEXT
+        
         /// <summary>
         ///     Satisfies the imports of the specified attributed object exactly once and they will not
         ///     ever be recomposed.
@@ -231,7 +228,6 @@ namespace System.ComponentModel.Composition
 
             return part;
         }
-#endif //FEATURE_REFLECTIONCONTEXT
 
         /// <summary>
         /// Determines whether the specified part exports the specified contract.

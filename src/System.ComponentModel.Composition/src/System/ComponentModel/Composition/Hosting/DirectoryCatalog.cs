@@ -32,10 +32,8 @@ namespace System.ComponentModel.Composition.Hosting
         private string _fullPath;
         private string _searchPattern;
         private ReadOnlyCollection<string> _loadedFiles;
-
-#if FEATURE_REFLECTIONCONTEXT
+        
         private readonly ReflectionContext _reflectionContext = null;
-#endif //FEATURE_REFLECTIONCONTEXT
 
         /// <summary>
         ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files 
@@ -70,8 +68,7 @@ namespace System.ComponentModel.Composition.Hosting
             : this(path, "*.dll")
         {
         }
-
-#if FEATURE_REFLECTIONCONTEXT
+        
         /// <summary>
         ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files 
         ///     in the given directory path.
@@ -110,7 +107,6 @@ namespace System.ComponentModel.Composition.Hosting
             : this(path, "*.dll", reflectionContext)
         {
         }
-#endif //FEATURE_REFLECTIONCONTEXT
 
         /// <summary>
         ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files 
@@ -149,8 +145,7 @@ namespace System.ComponentModel.Composition.Hosting
             : this(path, "*.dll", definitionOrigin)
         {
         }
-
-#if FEATURE_REFLECTIONCONTEXT
+        
         /// <summary>
         ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the given searchPattern 
         ///     over the files in the given directory path.
@@ -193,7 +188,6 @@ namespace System.ComponentModel.Composition.Hosting
             : this(path, "*.dll", reflectionContext, definitionOrigin)
         {
         }
-#endif //FEATURE_REFLECTIONCONTEXT
 
         /// <summary>
         ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files 
@@ -280,8 +274,7 @@ namespace System.ComponentModel.Composition.Hosting
             this._definitionOrigin = definitionOrigin;
             this.Initialize(path, searchPattern);
         }
-
-#if FEATURE_REFLECTIONCONTEXT
+        
         /// <summary>
         ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the given searchPattern 
         ///     over the files in the given directory path.
@@ -386,7 +379,6 @@ namespace System.ComponentModel.Composition.Hosting
             this._definitionOrigin = definitionOrigin;
             this.Initialize(path, searchPattern);
         }
-#endif //FEATURE_REFLECTIONCONTEXT
 
         /// <summary>
         ///     Translated absolute path of the path passed into the constructor of <see cref="DirectoryCatalog"/>. 
@@ -675,13 +667,9 @@ namespace System.ComponentModel.Composition.Hosting
 
             try
             {
-#if FEATURE_REFLECTIONCONTEXT
                 return (this._reflectionContext != null)
                     ? new AssemblyCatalog(assemblyFilePath, this._reflectionContext, this)
                     : new AssemblyCatalog(assemblyFilePath, this);
-#else
-                return new AssemblyCatalog(assemblyFilePath, this);
-#endif //FEATURE_REFLECTIONCONTEXT
             }
             catch (FileNotFoundException ex)
             {   // Files should always exists but don't blow up here if they don't

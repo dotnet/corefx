@@ -32,10 +32,8 @@ namespace System.ComponentModel.Composition.Hosting
         private volatile Assembly _assembly = null;
         private volatile ComposablePartCatalog _innerCatalog = null;
         private int _isDisposed = 0;
-
-#if FEATURE_REFLECTIONCONTEXT
+        
         private ReflectionContext _reflectionContext = default(ReflectionContext);
-#endif //FEATURE_REFLECTIONCONTEXT
 
 #if FEATURE_REFLECTIONFILEIO
         /// <summary>
@@ -87,7 +85,7 @@ namespace System.ComponentModel.Composition.Hosting
         }
 #endif //FEATURE_REFLECTIONFILEIO
 
-#if FEATURE_REFLECTIONCONTEXT && FEATURE_REFLECTIONFILEIO
+#if FEATURE_REFLECTIONFILEIO
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
         ///     with the specified code base.
@@ -145,7 +143,7 @@ namespace System.ComponentModel.Composition.Hosting
             this._reflectionContext = reflectionContext;
             this._definitionOrigin = this;
         }
-#endif //FEATURE_REFLECTIONCONTEXT && FEATURE_REFLECTIONFILEIO
+#endif //FEATURE_REFLECTIONFILEIO
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
@@ -203,7 +201,7 @@ namespace System.ComponentModel.Composition.Hosting
             this._definitionOrigin = definitionOrigin;
         }
 
-#if FEATURE_REFLECTIONFILEIO && FEATURE_REFLECTIONCONTEXT
+#if FEATURE_REFLECTIONFILEIO
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
         ///     with the specified code base.
@@ -269,9 +267,8 @@ namespace System.ComponentModel.Composition.Hosting
             this._reflectionContext = reflectionContext;
             this._definitionOrigin = definitionOrigin;
         }
-#endif //FEATURE_REFLECTIONFILEIO && FEATURE_REFLECTIONCONTEXT
+#endif //FEATURE_REFLECTIONFILEIO
 
-#if FEATURE_REFLECTIONCONTEXT
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
         ///     with the specified assembly and reflection context.
@@ -345,7 +342,6 @@ namespace System.ComponentModel.Composition.Hosting
             this._reflectionContext = reflectionContext;
             this._definitionOrigin = definitionOrigin;
         }
-#endif //FEATURE_REFLECTIONCONTEXT
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
@@ -449,25 +445,17 @@ namespace System.ComponentModel.Composition.Hosting
 
                 if (this._innerCatalog == null)
                 {
-#if FEATURE_REFLECTIONCONTEXT
                     var catalogReflectionContextAttribute = this._assembly.GetFirstAttribute<CatalogReflectionContextAttribute>();
                     var assembly = (catalogReflectionContextAttribute != null) 
                         ? catalogReflectionContextAttribute.CreateReflectionContext().MapAssembly(this._assembly)
                         : this._assembly;
-#else
-                    var assembly = this._assembly;
-#endif //FEATURE_REFLECTIONCONTEXT
                     lock (this._thisLock)
                     {
                         if (this._innerCatalog == null)
                         {
-#if FEATURE_REFLECTIONCONTEXT
                             var catalog = (this._reflectionContext != null) 
                                 ? new TypeCatalog(assembly.GetTypes(), this._reflectionContext, this._definitionOrigin)
                                 : new TypeCatalog(assembly.GetTypes(), this._definitionOrigin);
-#else
-                            var catalog = new TypeCatalog(assembly.GetTypes(), this._definitionOrigin);
-#endif //FEATURE_REFLECTIONCONTEXT
                             Thread.MemoryBarrier();
                             this._innerCatalog = catalog;
                         }

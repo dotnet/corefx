@@ -111,8 +111,7 @@ namespace System.ComponentModel.Composition.Hosting
             this._definitionOrigin = definitionOrigin;
             this._contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(this.CreateIndex, true);
         }
-
-#if FEATURE_REFLECTIONCONTEXT
+        
         /// <summary>
         ///     Initializes a new instance of the <see cref="TypeCatalog"/> class
         ///     with the specified types.
@@ -204,7 +203,6 @@ namespace System.ComponentModel.Composition.Hosting
             }
             this._types = typesList.ToArray();
         }
-#endif //FEATURE_REFLECTIONCONTEXT
 
         private void InitializeTypeCatalog(IEnumerable<Type> types)
         {
