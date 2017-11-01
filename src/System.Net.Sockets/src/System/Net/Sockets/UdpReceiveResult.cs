@@ -6,8 +6,6 @@ namespace System.Net.Sockets
 {
     public struct UdpReceiveResult : IEquatable<UdpReceiveResult>
     {
-        private byte[] _buffer;
-        private IPEndPoint _remoteEndPoint;
 
         public UdpReceiveResult(byte[] buffer, IPEndPoint remoteEndPoint)
         {
@@ -21,29 +19,23 @@ namespace System.Net.Sockets
                 throw new ArgumentNullException(nameof(remoteEndPoint));
             }
 
-            _buffer = buffer;
-            _remoteEndPoint = remoteEndPoint;
+            Buffer = buffer;
+            RemoteEndPoint = remoteEndPoint;
         }
 
         public byte[] Buffer
         {
-            get
-            {
-                return _buffer;
-            }
+            get;
         }
 
         public IPEndPoint RemoteEndPoint
         {
-            get
-            {
-                return _remoteEndPoint;
-            }
+            get;
         }
 
         public override int GetHashCode()
         {
-            return (_buffer != null) ? (_buffer.GetHashCode() ^ _remoteEndPoint.GetHashCode()) : 0;
+            return Buffer.GetHashCode() ^ RemoteEndPoint.GetHashCode();
         }
 
         public override bool Equals(object obj)
@@ -58,7 +50,7 @@ namespace System.Net.Sockets
 
         public bool Equals(UdpReceiveResult other)
         {
-            return object.Equals(_buffer, other._buffer) && object.Equals(_remoteEndPoint, other._remoteEndPoint);
+            return object.Equals(Buffer, otherBuffer) && object.Equals(RemoteEndPoint, other.RemoteEndPoint);
         }
 
         public static bool operator ==(UdpReceiveResult left, UdpReceiveResult right)
