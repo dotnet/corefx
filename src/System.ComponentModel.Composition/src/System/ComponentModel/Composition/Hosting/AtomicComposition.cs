@@ -1,4 +1,4 @@
-// -----------------------------------------------------------------------
+﻿// -----------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // -----------------------------------------------------------------------
 using System;
@@ -329,7 +329,8 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         [DebuggerStepThrough]
-[SuppressMessage("Microsoft.Contracts", "CC1053", Justification = "Suppressing warning because this validator has no public contract")]
+        [ContractArgumentValidator]
+        [SuppressMessage("Microsoft.Contracts", "CC1053", Justification = "Suppressing warning because this validator has no public contract")]
         private void ThrowIfContainsInnerAtomicComposition()
         {
             if (this._containsInnerAtomicComposition)
@@ -339,7 +340,8 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         [DebuggerStepThrough]
-[SuppressMessage("Microsoft.Contracts", "CC1053", Justification = "Suppressing warning because this validator has no public contract")]
+        [ContractArgumentValidator]
+        [SuppressMessage("Microsoft.Contracts", "CC1053", Justification = "Suppressing warning because this validator has no public contract")]
         private void ThrowIfCompleted()
         {
             if (this._isCompleted)
@@ -349,7 +351,8 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         [DebuggerStepThrough]
-[SuppressMessage("Microsoft.Contracts", "CC1053", Justification = "Suppressing warning because this validator has no public contract")]
+        [ContractArgumentValidator]
+        [SuppressMessage("Microsoft.Contracts", "CC1053", Justification = "Suppressing warning because this validator has no public contract")]
         private void ThrowIfDisposed()
         {
             if (this._isDisposed)
