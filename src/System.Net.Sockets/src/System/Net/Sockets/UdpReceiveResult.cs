@@ -4,10 +4,17 @@
 
 namespace System.Net.Sockets
 {
-    public struct UdpReceiveResult : IEquatable<UdpReceiveResult>
-    {
+	/// <summary>
+	/// Presents UDP receive result information from a call to the <see cref="UdpClient.ReceiveAsync"/> method
+	/// </summary>
+	public struct UdpReceiveResult : IEquatable<UdpReceiveResult> {
 
-        public UdpReceiveResult(byte[] buffer, IPEndPoint remoteEndPoint)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="UdpReceiveResult"/> class
+		/// </summary>
+		/// <param name="buffer">A buffer for data to receive in the UDP packet</param>
+		/// <param name="remoteEndPoint">The remote endpoint of the UDP packet</param>
+		public UdpReceiveResult(byte[] buffer, IPEndPoint remoteEndPoint)
         {
             if (buffer == null)
             {
@@ -23,22 +30,28 @@ namespace System.Net.Sockets
             RemoteEndPoint = remoteEndPoint;
         }
 
-        public byte[] Buffer
+		/// <summary>
+		/// Gets a buffer with the data received in the UDP packet
+		/// </summary>
+		public byte[] Buffer
         {
             get;
         }
 
-        public IPEndPoint RemoteEndPoint
+		/// <summary>
+		/// Gets the remote endpoint from which the UDP packet was received
+		/// </summary>
+		public IPEndPoint RemoteEndPoint
         {
             get;
         }
 
-        public override int GetHashCode()
-        {
-            return Buffer.GetHashCode() ^ RemoteEndPoint.GetHashCode();
-        }
-
-        public override bool Equals(object obj)
+		/// <summary>
+		/// Returns a value that indicates whether this instance is equal to a specified object
+		/// </summary>
+		/// <param name="obj">The object to compare with this instance</param>
+		/// <returns>true if obj is an instance of <see cref="UdpReceiveResult"/> and equals the value of the instance; otherwise, false</returns>
+		public override bool Equals(object obj)
         {
             if (!(obj is UdpReceiveResult))
             {
@@ -48,17 +61,42 @@ namespace System.Net.Sockets
             return Equals((UdpReceiveResult)obj);
         }
 
-        public bool Equals(UdpReceiveResult other)
+		/// <summary>
+		/// Returns a value that indicates whether this instance is equal to a specified object
+		/// </summary>
+		/// <param name="other">The object to compare with this instance</param>
+		/// <returns>true if other is an instance of <see cref="UdpReceiveResult"/> and equals the value of the instance; otherwise, false</returns>
+		public bool Equals(UdpReceiveResult other)
         {
             return object.Equals(Buffer, otherBuffer) && object.Equals(RemoteEndPoint, other.RemoteEndPoint);
         }
 
-        public static bool operator ==(UdpReceiveResult left, UdpReceiveResult right)
+		/// <summary>
+		/// Returns the hash code for this instance.
+		/// </summary>
+		/// <returns>The hash code</returns>
+		public override int GetHashCode() {
+			return Buffer.GetHashCode() ^ RemoteEndPoint.GetHashCode();
+		}
+
+		/// <summary>
+		/// Tests whether two specified <see cref="UdpReceiveResult"/> instances are equivalent
+		/// </summary>
+		/// <param name="left">The <see cref="UdpReceiveResult"/> instance that is to the left of the equality operator</param>
+		/// <param name="right">The <see cref="UdpReceiveResult"/> instance that is to the right of the equality operator</param>
+		/// <returns>true if left and right are equal; otherwise, false</returns>
+		public static bool operator ==(UdpReceiveResult left, UdpReceiveResult right)
         {
             return left.Equals(right);
         }
 
-        public static bool operator !=(UdpReceiveResult left, UdpReceiveResult right)
+		/// <summary>
+		/// Tests whether two specified <see cref="UdpReceiveResult"/> instances are not equal
+		/// </summary>
+		/// <param name="left">The <see cref="UdpReceiveResult"/> instance that is to the left of the not equal operator</param>
+		/// <param name="right">The <see cref="UdpReceiveResult"/> instance that is to the right of the not equal operator</param>
+		/// <returns>true if left and right are unequal; otherwise, false</returns>
+		public static bool operator !=(UdpReceiveResult left, UdpReceiveResult right)
         {
             return !left.Equals(right);
         }
