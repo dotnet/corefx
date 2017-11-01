@@ -41,7 +41,7 @@
     <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Text.Encoding.Extensions" />
   </ItemGroup>
-  <ItemGroup Condition="$(TargetGroup.Contains('netcoreapp'))">
+  <ItemGroup>
     <Compile Include="Microsoft\Internal\AttributeServices.cs" />
     <Compile Include="Microsoft\Internal\Collections\CollectionServices.cs" />
     <Compile Include="Microsoft\Internal\Collections\CollectionServices.CollectionOfObject.cs" />
