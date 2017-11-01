@@ -49,6 +49,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         protected virtual void EnsureRunning()
         {
         }
+[SuppressMessage("Microsoft.Contracts", "CC1053")]
         protected void RequiresRunning()
         {
             this.EnsureRunning();

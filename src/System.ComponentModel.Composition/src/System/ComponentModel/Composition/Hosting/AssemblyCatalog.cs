@@ -82,6 +82,7 @@ namespace System.ComponentModel.Composition.Hosting
         }
 #endif //FEATURE_REFLECTIONFILEIO
 
+//#if FEATURE_REFLECTIONFILEIO
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
         ///     with the specified code base.
@@ -137,6 +138,7 @@ namespace System.ComponentModel.Composition.Hosting
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
             this._definitionOrigin = definitionOrigin;
         }
+//#endif //FEATURE_REFLECTIONFILEIO
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
@@ -223,6 +225,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///         <paramref name="definition"/>, return an empty <see cref="IEnumerable{T}"/>.
         ///     </note>
         /// </remarks>
+        [SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Precondition is being validated in the call to inner catalog")]  
         public override IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(ImportDefinition definition)
         {
             return this.InnerCatalog.GetExports(definition);
@@ -293,7 +296,7 @@ namespace System.ComponentModel.Composition.Hosting
             get { return null; }
         }
 
-        /// <summary>
+/// <summary>
         ///     Returns a string representation of the assembly catalog.
         /// </summary>
         /// <returns>
@@ -346,6 +349,7 @@ protected override void Dispose(bool disposing)
                                 this.Assembly.FullName);
         }
 
+//#if FEATURE_REFLECTIONFILEIO
         private static Assembly LoadAssembly(string codeBase)
         {
             Requires.NotNullOrEmpty(codeBase, "codeBase");
@@ -364,5 +368,6 @@ protected override void Dispose(bool disposing)
 
             return Assembly.Load(assemblyName);
         }
+//#endif //FEATURE_REFLECTIONFILEIO
     }
 }
