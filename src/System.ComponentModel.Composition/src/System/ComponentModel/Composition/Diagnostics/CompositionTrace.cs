@@ -37,7 +37,6 @@ namespace System.ComponentModel.Composition.Diagnostics
             }
         }
 
-
         internal static void AssemblyLoadFailed(DirectoryCatalog catalog, string fileName, Exception exception)
         {
             Assumes.NotNull(catalog, exception);
@@ -52,7 +51,6 @@ namespace System.ComponentModel.Composition.Diagnostics
                                                     exception.Message);
             }
         }
-
 
         internal static void DefinitionMarkedWithPartNotDiscoverableAttribute(Type type)
         {
