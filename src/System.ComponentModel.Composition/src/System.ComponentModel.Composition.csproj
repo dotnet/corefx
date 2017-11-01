@@ -59,6 +59,7 @@
     <Compile Include="Microsoft\Internal\ReflectionInvoke.cs" />
     <Compile Include="Microsoft\Internal\Requires.cs" />
     <Compile Include="System\ComponentModel\Composition\AttributedModelServices.cs" />
+    <Compile Include="System\ComponentModel\Composition\CatalogReflectionContextAttribute.cs" />
     <Compile Include="System\ComponentModel\Composition\ChangeRejectedException.cs" />
     <Compile Include="System\ComponentModel\Composition\CompositionContractMismatchException.cs" />
     <Compile Include="System\ComponentModel\Composition\CompositionError.cs" />

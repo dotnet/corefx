@@ -34,6 +34,17 @@ namespace System.ComponentModel.Composition
             return AttributedModelDiscovery.CreatePart(attributedPart);
         }
 
+#if FEATURE_REFLECTIONCONTEXT
+        public static ComposablePart CreatePart(object attributedPart, ReflectionContext reflectionContext)
+        {
+            Requires.NotNull(attributedPart, "attributedPart");
+            Requires.NotNull(reflectionContext, "reflectionContext");
+            Contract.Ensures(Contract.Result<ComposablePart>() != null);
+
+            return AttributedModelDiscovery.CreatePart(attributedPart, reflectionContext);
+        }
+#endif //FEATURE_REFLECTIONCONTEXT
+
         public static ComposablePart CreatePart(ComposablePartDefinition partDefinition, object attributedPart)
         {
             Requires.NotNull(partDefinition, nameof(partDefinition));
@@ -188,6 +199,38 @@ namespace System.ComponentModel.Composition
 
             return part;
         }
+
+#if FEATURE_REFLECTIONCONTEXT
+        /// <summary>
+        ///     Satisfies the imports of the specified attributed object exactly once and they will not
+        ///     ever be recomposed.
+        /// </summary>
+        /// <param name="part">
+        ///     The attributed object to set the imports.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="compositionService"/> or <paramref name="attributedPart"/>  or <paramref name="reflectionContext"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="CompositionException">
+        ///     An error occurred during composition. <see cref="CompositionException.Errors"/> will
+        ///     contain a collection of errors that occurred.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     The <see cref="ICompositionService"/> has been disposed of.
+        /// </exception>
+        public static ComposablePart SatisfyImportsOnce(this ICompositionService compositionService, object attributedPart, ReflectionContext reflectionContext)
+        {
+            Requires.NotNull(compositionService, "compositionService");
+            Requires.NotNull(attributedPart, "attributedPart");
+            Requires.NotNull(reflectionContext, "reflectionContext");
+            Contract.Ensures(Contract.Result<ComposablePart>() != null);
+
+            ComposablePart part = AttributedModelServices.CreatePart(attributedPart, reflectionContext);
+            compositionService.SatisfyImportsOnce(part);
+
+            return part;
+        }
+#endif //FEATURE_REFLECTIONCONTEXT
 
         /// <summary>
         /// Determines whether the specified part exports the specified contract.

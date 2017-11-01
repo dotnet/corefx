@@ -44,6 +44,27 @@ namespace System.ComponentModel.Composition.AttributedModel
             return new ReflectionComposablePart(definition, attributedPart);
         }
 
+#if FEATURE_REFLECTIONCONTEXT
+        public static ReflectionComposablePart CreatePart(object attributedPart, ReflectionContext reflectionContext)
+        {
+            Assumes.NotNull(attributedPart);
+            Assumes.NotNull(reflectionContext);
+
+            // If given an instance then we want to pass the default composition options because we treat it as a shared part
+            var mappedType = reflectionContext.MapType(IntrospectionExtensions.GetTypeInfo(attributedPart.GetType()));
+#if FEATURE_REFLECTIONONLY
+            if (mappedType.Assembly.ReflectionOnly)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ReflectionContextReturnsReflectionOnlyType, "reflectionContext"), "reflectionContext");
+            }
+#endif //FEATURE_REFLECTIONONLY
+
+            ReflectionComposablePartDefinition definition = AttributedModelDiscovery.CreatePartDefinition(mappedType, PartCreationPolicyAttribute.Shared, true, (ICompositionElement)null);
+
+            return CreatePart(definition, attributedPart);
+        }
+#endif //FEATURE_REFLECTIONCONTEXT
+
         public static ReflectionComposablePart CreatePart(ComposablePartDefinition partDefinition, object attributedPart)
         {
             Assumes.NotNull(partDefinition);
