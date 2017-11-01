@@ -184,25 +184,21 @@ namespace System.ComponentModel.Composition.Hosting
                 {
                     throw ExceptionBuilder.CreateContainsNullElement("types");
                 }
-#if FEATURE_REFLECTIONONLY
                 if (type.Assembly.ReflectionOnly)
                 {
                     throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ElementReflectionOnlyType, "types"), "types");
                 }
-#endif
                 var typeInfo = type.GetTypeInfo();
                 var lclType = (reflectionContext != null) ? reflectionContext.MapType(typeInfo) : typeInfo;
                 
                 // It is valid for the reflectionContext to delete types by mapping them to null
                 if(lclType != null)
                 {
-#if FEATURE_REFLECTIONONLY
                     // The final mapped type may be activated so we check to see if it is in a reflect only assembly
                     if (lclType.Assembly.ReflectionOnly)
                     {
                         throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ReflectionContextReturnsReflectionOnlyType, "reflectionContext"), "reflectionContext");
                     }
-#endif
                     typesList.Add(lclType);
                 }
             }
@@ -218,12 +214,10 @@ namespace System.ComponentModel.Composition.Hosting
                 {
                     throw ExceptionBuilder.CreateContainsNullElement("types");
                 }
-#if FEATURE_REFLECTIONONLY
                 else if (type.Assembly.ReflectionOnly)
                 {
                     throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ElementReflectionOnlyType, "types"), "types");
                 }
-#endif //FEATURE_REFLECTIONONLY
             }
             this._types = types.ToArray();
         }

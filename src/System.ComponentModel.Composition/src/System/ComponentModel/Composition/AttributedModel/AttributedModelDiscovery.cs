@@ -53,12 +53,10 @@ namespace System.ComponentModel.Composition.AttributedModel
 
             // If given an instance then we want to pass the default composition options because we treat it as a shared part
             var mappedType = reflectionContext.MapType(IntrospectionExtensions.GetTypeInfo(attributedPart.GetType()));
-#if FEATURE_REFLECTIONONLY
             if (mappedType.Assembly.ReflectionOnly)
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ReflectionContextReturnsReflectionOnlyType, "reflectionContext"), "reflectionContext");
             }
-#endif //FEATURE_REFLECTIONONLY
 
             ReflectionComposablePartDefinition definition = AttributedModelDiscovery.CreatePartDefinition(mappedType, PartCreationPolicyAttribute.Shared, true, (ICompositionElement)null);
 

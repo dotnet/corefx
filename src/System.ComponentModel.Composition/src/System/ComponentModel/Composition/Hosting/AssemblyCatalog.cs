@@ -403,12 +403,10 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void InitializeAssemblyCatalog(Assembly assembly)
         {
-#if FEATURE_REFLECTIONONLY
             if (assembly.ReflectionOnly)
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_AssemblyReflectionOnly, "assembly"), "assembly");
             }
-#endif //FEATURE_REFLECTIONONLY
             this._assembly = assembly;
         }
 
