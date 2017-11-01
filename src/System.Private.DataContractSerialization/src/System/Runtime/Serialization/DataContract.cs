@@ -97,7 +97,7 @@ namespace System.Runtime.Serialization
 
 #if uapaot
         // This method returns adapter types used to get DataContract from
-        // generated assembly.
+        // generated assembly. 
         private static Type GetDataContractAdapterTypeForGeneratedAssembly(Type type)
         {
             if (type == Globals.TypeOfDateTimeOffset)
@@ -1233,6 +1233,11 @@ namespace System.Runtime.Serialization
             {
                 get { return _ns; }
                 set { _ns = value; }
+            }
+
+            internal virtual bool CanContainReferences
+            {
+                get { return true; }
             }
 
             internal virtual bool IsPrimitive
