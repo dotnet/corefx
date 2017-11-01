@@ -43,7 +43,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Microsoft\Internal\AttributeServices.cs" />
-    <Compile Include="Microsoft\Internal\BinaryCompatibility.cs" />
     <Compile Include="Microsoft\Internal\Collections\CollectionServices.cs" />
     <Compile Include="Microsoft\Internal\Collections\CollectionServices.CollectionOfObject.cs" />
     <Compile Include="Microsoft\Internal\Collections\EnumerableCardinality.cs" />
