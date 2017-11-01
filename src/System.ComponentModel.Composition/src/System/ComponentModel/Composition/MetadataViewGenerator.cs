@@ -217,14 +217,12 @@ namespace System.ComponentModel.Composition
                 Type[] propertyTypeArguments = new Type[] { propertyInfo.PropertyType };
                 Type[] optionalModifiers = null;
                 Type[] requiredModifiers = null;
-
-#if FEATURE_ADVANCEDREFLECTION
+                
                 // PropertyInfo does not support GetOptionalCustomModifiers and GetRequiredCustomModifiers on Silverlight
                 optionalModifiers = propertyInfo.GetOptionalCustomModifiers();
                 requiredModifiers = propertyInfo.GetRequiredCustomModifiers();
                 Array.Reverse(optionalModifiers);
                 Array.Reverse(requiredModifiers);
-#endif //FEATURE_ADVANCEDREFLECTION
 
                 // Generate field
                 FieldBuilder proxyFieldBuilder = proxyTypeBuilder.DefineField(
