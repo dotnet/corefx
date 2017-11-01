@@ -165,7 +165,7 @@
       "alwaysRun": false,
       "displayName": "packages -> dotnet.myget.org",
       "timeoutInMinutes": 0,
-      "condition": "and(succeeded(), eq(variables['PublishToMyGet'], 'True'), eq(variables['PB_ConfigurationGroup'], 'Release'))",
+      "condition": "and(succeeded(), eq(variables['PB_PublishType'], 'myget'), eq(variables['PB_ConfigurationGroup'], 'Release'))",
       "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "1.*",
@@ -186,7 +186,7 @@
       "alwaysRun": false,
       "displayName": "packages -> Azure Feed",
       "timeoutInMinutes": 0,
-      "condition": "and(succeeded(), eq(variables['PublishToAzureFeed'], 'True'), eq(variables['PB_ConfigurationGroup'], 'Release'))",
+      "condition": "and(succeeded(), eq(variables['PB_PublishType'], 'blob'), eq(variables['PB_ConfigurationGroup'], 'Release'))",
       "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "1.*",
@@ -195,7 +195,7 @@
       "inputs": {
         "scriptType": "inlineScript",
         "scriptName": "",
-        "arguments": "-ConfigurationGroup $(PB_ConfigurationGroup) -OutputFeedUrl $(PB_AzureFeedUrl) -StorageAccountKey $(PB_PublishAccountKey)",
+        "arguments": "-ConfigurationGroup $(PB_ConfigurationGroup) -OutputFeedUrl $(PB_PublishBlobFeedUrl) -StorageAccountKey $(PB_PublishBlobFeedKey)",
         "workingFolder": "$(Pipeline.SourcesDirectory)",
         "inlineScript": "param($ConfigurationGroup, $OutputFeedUrl, $StorageAccountKey)\n msbuild src\\publish.proj /t:PublishToAzureBlobFeed /p:AccountKey=$StorageAccountKey /p:ExpectedFeedUrl=$OutputFeedUrl /p:ConfigurationGroup=$ConfigurationGroup ",
       }
@@ -206,7 +206,7 @@
       "alwaysRun": false,
       "displayName": "symbol packages -> dotnet.myget.org",
       "timeoutInMinutes": 0,
-      "condition": "and(succeeded(), eq(variables['PublishToMyGet'], 'True'), eq(variables['PB_ConfigurationGroup'], 'Release'))",
+      "condition": "and(succeeded(), eq(variables['PB_PublishType'], 'myget'), eq(variables['PB_ConfigurationGroup'], 'Release'))",
       "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "1.*",
@@ -227,7 +227,7 @@
       "alwaysRun": false,
       "displayName": "symbol packages -> Azure Feed",
       "timeoutInMinutes": 0,
-      "condition": "and(succeeded(), eq(variables['PublishToAzureFeed'], 'True'), eq(variables['PB_ConfigurationGroup'], 'Release'))",
+      "condition": "and(succeeded(), eq(variables['PB_PublishType'], 'blob'), eq(variables['PB_ConfigurationGroup'], 'Release'))",
       "task": {
         "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
         "versionSpec": "1.*",
@@ -236,7 +236,7 @@
       "inputs": {
         "scriptType": "inlineScript",
         "scriptName": "",
-        "arguments": "-ConfigurationGroup $(PB_ConfigurationGroup) -OutputFeedUrl $(PB_AzureSymbolFeedUrl) -StorageAccountKey $(PB_PublishAccountKey)",
+        "arguments": "-ConfigurationGroup $(PB_ConfigurationGroup) -OutputFeedUrl $(PB_PublishBlobFeedSymbolUrl) -StorageAccountKey $(PB_PublishBlobFeedKey)",
         "workingFolder": "$(Pipeline.SourcesDirectory)",
         "inlineScript": "param($ConfigurationGroup, $OutputFeedUrl, $StorageAccountKey)\n msbuild src\\publish.proj /t:PublishSymbolsToAzureBlobFeed /p:AccountKey=$StorageAccountKey /p:ExpectedFeedUrl=$OutputFeedUrl /p:ConfigurationGroup=$ConfigurationGroup /p:PublishSymbols=\"true\"",
         }
@@ -485,23 +485,19 @@
     "PB_ToolPackageSource": {
       "value": "https://www.myget.org/F/dagood-test-buildtools/api/v3/index.json"
     },
-    "PublishToMyGet": {
+    "PB_PublishType": {
+      "value": null,
+      "allowOverride": true
+    },
+    "PB_PublishBlobFeedUrl": {
       "value": "False",
       "allowOverride": true
     },
-    "PublishToAzureFeed": {
+    "PB_PublishBlobFeedSymbolUrl": {
       "value": "False",
       "allowOverride": true
     },
-    "PB_AzureFeedUrl": {
-      "value": "False",
-      "allowOverride": true
-    },
-    "PB_AzureSymbolFeedUrl": {
-      "value": "False",
-      "allowOverride": true
-    },
-    "PB_PublishAccountKey": {
+    "PB_PublishBlobFeedKey": {
       "value": null,
       "isSecret": true
     }
