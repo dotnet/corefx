@@ -4,17 +4,12 @@
 
 namespace System.Net.Sockets
 {
-<<<<<<< HEAD
 	/// <summary>
 	/// Presents UDP receive result information from a call to the <see cref="UdpClient.ReceiveAsync"/> method
 	/// </summary>
 	public struct UdpReceiveResult : IEquatable<UdpReceiveResult> {
-=======
-    public struct UdpReceiveResult : IEquatable<UdpReceiveResult>
-    {
         private byte[] _buffer;
         private IPEndPoint _remoteEndPoint;
->>>>>>> parent of 592946b219... Simplificate UdpReceiveResult
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="UdpReceiveResult"/> class
@@ -59,21 +54,21 @@ namespace System.Net.Sockets
             }
         }
 
-<<<<<<< HEAD
+		/// <summary>
+		/// Returns the hash code for this instance.
+		/// </summary>
+		/// <returns>The hash code</returns>
+		public override int GetHashCode()
+        {
+            return (_buffer != null) ? (_buffer.GetHashCode() ^ _remoteEndPoint.GetHashCode()) : 0;
+        }
+
 		/// <summary>
 		/// Returns a value that indicates whether this instance is equal to a specified object
 		/// </summary>
 		/// <param name="obj">The object to compare with this instance</param>
 		/// <returns>true if obj is an instance of <see cref="UdpReceiveResult"/> and equals the value of the instance; otherwise, false</returns>
 		public override bool Equals(object obj)
-=======
-        public override int GetHashCode()
-        {
-            return (_buffer != null) ? (_buffer.GetHashCode() ^ _remoteEndPoint.GetHashCode()) : 0;
-        }
-
-        public override bool Equals(object obj)
->>>>>>> parent of 592946b219... Simplificate UdpReceiveResult
         {
             if (!(obj is UdpReceiveResult))
             {
@@ -92,14 +87,6 @@ namespace System.Net.Sockets
         {
             return object.Equals(_buffer, other._buffer) && object.Equals(_remoteEndPoint, other._remoteEndPoint);
         }
-
-		/// <summary>
-		/// Returns the hash code for this instance.
-		/// </summary>
-		/// <returns>The hash code</returns>
-		public override int GetHashCode() {
-			return Buffer.GetHashCode() ^ RemoteEndPoint.GetHashCode();
-		}
 
 		/// <summary>
 		/// Tests whether two specified <see cref="UdpReceiveResult"/> instances are equivalent
