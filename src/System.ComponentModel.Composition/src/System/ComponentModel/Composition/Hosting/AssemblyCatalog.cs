@@ -437,7 +437,6 @@ namespace System.ComponentModel.Composition.Hosting
         ///         <paramref name="definition"/>, return an empty <see cref="IEnumerable{T}"/>.
         ///     </note>
         /// </remarks>
-        [SuppressMessage("Microsoft.Contracts", "CC1055", Justification = "Precondition is being validated in the call to inner catalog")]  
         public override IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(ImportDefinition definition)
         {
             return this.InnerCatalog.GetExports(definition);
