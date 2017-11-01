@@ -34,8 +34,7 @@ namespace System.ComponentModel.Composition.Hosting
         private int _isDisposed = 0;
         
         private ReflectionContext _reflectionContext = default(ReflectionContext);
-
-#if FEATURE_REFLECTIONFILEIO
+        
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
         ///     with the specified code base.
@@ -83,9 +82,7 @@ namespace System.ComponentModel.Composition.Hosting
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
             this._definitionOrigin = this;
         }
-#endif //FEATURE_REFLECTIONFILEIO
-
-#if FEATURE_REFLECTIONFILEIO
+        
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
         ///     with the specified code base.
@@ -143,7 +140,6 @@ namespace System.ComponentModel.Composition.Hosting
             this._reflectionContext = reflectionContext;
             this._definitionOrigin = this;
         }
-#endif //FEATURE_REFLECTIONFILEIO
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
@@ -200,8 +196,7 @@ namespace System.ComponentModel.Composition.Hosting
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
             this._definitionOrigin = definitionOrigin;
         }
-
-#if FEATURE_REFLECTIONFILEIO
+        
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
         ///     with the specified code base.
@@ -267,7 +262,6 @@ namespace System.ComponentModel.Composition.Hosting
             this._reflectionContext = reflectionContext;
             this._definitionOrigin = definitionOrigin;
         }
-#endif //FEATURE_REFLECTIONFILEIO
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
