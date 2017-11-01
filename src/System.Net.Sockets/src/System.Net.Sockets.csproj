@@ -30,7 +30,7 @@
     <Compile Include="System\Net\Sockets\SocketReceiveFromResult.cs" />
     <Compile Include="System\Net\Sockets\SocketReceiveMessageFromResult.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net471'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <Compile Include="System\Net\Sockets\SocketTaskExtensions.netfx.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx' And '$(TargetGroup)' != 'net471'">

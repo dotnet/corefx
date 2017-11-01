@@ -35,10 +35,12 @@
     <Compile Include="System\Runtime\Serialization\InvalidDataContractException.Serialization.cs" />
     <Compile Include="System.Runtime.Serialization.Primitives.TypeForwards.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+    <Compile Include="System\Runtime\Serialization\ISerializationSurrogateProvider.cs" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netfx' Or '$(TargetGroup)'=='net471'">
     <Reference Include="mscorlib" />
     <Reference Include="System.Runtime.Serialization" />
-    <Compile Include="System\Runtime\Serialization\ISerializationSurrogateProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Resources.ResourceManager" />

@@ -48,7 +48,7 @@
     <ProjectReference Include="..\..\System.Reflection.Metadata\src\System.Reflection.Metadata.csproj" />
     <ProjectReference Include="..\..\System.Collections.Immutable\src\System.Collections.Immutable.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'uapaot' And '$(TargetGroup)' != 'net471'">
     <Compile Include="System\Diagnostics\StackFrameExtensions.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net471'">
     <Reference Include="mscorlib" />
+    <Reference Include="System" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -16,8 +16,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
-  <ItemGroup>
-    <Compile Condition="'$(TargetGroup)' != 'net471'" Include="System\Data\Common\DbColumn.cs" />
+  <ItemGroup Condition="'$(TargetGroup)' != 'net471'" >
+    <Compile Include="System\Data\Common\DbColumn.cs" />
     <Compile Include="System\Data\Common\IDbColumnSchemaGenerator.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx' And '$(TargetGroup)' != 'net471'">
@@ -283,6 +283,8 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <Compile Include="System\Data\Common\DbDataReaderExtensions.Facade.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx' And '$(TargetGroup)' != 'net471'">
