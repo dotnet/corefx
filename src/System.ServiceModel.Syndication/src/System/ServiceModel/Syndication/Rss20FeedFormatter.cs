@@ -8,6 +8,7 @@ namespace System.ServiceModel.Syndication
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Globalization;
+    using System.Linq;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -1052,7 +1053,6 @@ namespace System.ServiceModel.Syndication
                                 break;
 
                             case Rss20Constants.LanguageTag:
-
                                 result.Language = StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), Rss20Constants.LanguageTag, Rss20Constants.Rss20Namespace);
                                 break;
 
@@ -1110,29 +1110,6 @@ namespace System.ServiceModel.Syndication
                                 break;
                             }
 
-                            //Optional tags
-                            case Rss20Constants.DocumentationTag:
-                                result.Documentation = await ReadAlternateLinkAsync(reader, result.BaseUri).ConfigureAwait(false);
-                                break;
-
-                            case Rss20Constants.TimeToLiveTag:
-                                string value = StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), Rss20Constants.TimeToLiveTag, Rss20Constants.Rss20Namespace);
-                                int timeToLive = int.Parse(value);
-                                result.TimeToLive = timeToLive;
-                                break;
-
-                            case Rss20Constants.TextInputTag:
-                                await ReadTextInputTag(reader, result).ConfigureAwait(false);
-                                break;
-
-                            case Rss20Constants.SkipHoursTag:
-                                await ReadSkipHoursAsync(reader, result).ConfigureAwait(false);
-                                break;
-
-                            case Rss20Constants.SkipDaysTag:
-                                await ReadSkipDaysAsync(reader, result).ConfigureAwait(false);
-                                break;
-
                             default:
                                 notHandled = true;
                                 break;
@@ -1176,6 +1153,11 @@ namespace System.ServiceModel.Syndication
                 //asign all read items to feed items.
                 result.Items = feedItems;
                 LoadElementExtensions(buffer, extWriter, result);
+
+                if (buffer != null)
+                {
+                    await ReadOptionalTasgAsync(buffer, result);
+                }
             }
             catch (FormatException e)
             {
@@ -1196,6 +1178,65 @@ namespace System.ServiceModel.Syndication
             {
                 await reader.ReadEndElementAsync().ConfigureAwait(false); // channel   
                 await reader.ReadEndElementAsync().ConfigureAwait(false); // rss
+            }
+        }
+
+        private async Task ReadOptionalTasgAsync(XmlBuffer buffer, SyndicationFeed result)
+        {
+            XmlReader reader = XmlReaderWrapper.CreateFromReader(buffer.GetReader(0));
+            try
+            {
+                reader.ReadStartElement(Rss20Constants.ExtensionWrapperTag);
+                while (reader.IsStartElement())
+                {
+                    if (await reader.MoveToContentAsync().ConfigureAwait(false) == XmlNodeType.Element && reader.NamespaceURI == Rss20Constants.Rss20Namespace)
+                    {
+                        switch (reader.LocalName)
+                        {
+                            case Rss20Constants.DocumentationTag:
+                                result.Documentation = await ReadAlternateLinkAsync(reader, result.BaseUri).ConfigureAwait(false);
+                                break;
+
+                            case Rss20Constants.TimeToLiveTag:
+                                string value = StringParser(await reader.ReadElementStringAsync().ConfigureAwait(false), Rss20Constants.TimeToLiveTag, Rss20Constants.Rss20Namespace);
+                                int timeToLive = int.Parse(value);
+                                result.TimeToLive = timeToLive;
+                                break;
+
+                            case Rss20Constants.TextInputTag:
+                                await ReadTextInputTag(reader, result).ConfigureAwait(false);
+                                break;
+
+                            case Rss20Constants.SkipHoursTag:
+                                await ReadSkipHoursAsync(reader, result).ConfigureAwait(false);
+                                break;
+
+                            case Rss20Constants.SkipDaysTag:
+                                await ReadSkipDaysAsync(reader, result).ConfigureAwait(false);
+                                break;
+
+                            default:
+                                await reader.SkipAsync().ConfigureAwait(false);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        await reader.SkipAsync().ConfigureAwait(false);
+                    }
+                }
+            }
+            catch (FormatException e)
+            {
+                throw new XmlException(FeedUtils.AddLineInfo(reader, SR.ErrorParsingFeed), e);
+            }
+            catch (ArgumentException e)
+            {
+                throw new XmlException(FeedUtils.AddLineInfo(reader, SR.ErrorParsingFeed), e);
+            }
+            finally
+            {
+                reader?.Dispose();
             }
         }
 
@@ -1327,14 +1368,20 @@ namespace System.ServiceModel.Syndication
             }
 
             //Optional spec items
+            // docs
+            if (Feed.Documentation != null && !IsElementInExtensions(Feed, Rss20Constants.DocumentationTag))
+            {
+                await writer.WriteElementStringAsync(Rss20Constants.DocumentationTag, Feed.Documentation.Uri.ToString()).ConfigureAwait(false);
+            }
+
             //time to live
-            if (Feed.TimeToLive != 0)
+            if (Feed.TimeToLive != 0 && !IsElementInExtensions(Feed, Rss20Constants.TimeToLiveTag))
             {
                 await writer.WriteElementStringAsync(Rss20Constants.TimeToLiveTag, Feed.TimeToLive.ToString()).ConfigureAwait(false);
             }
 
             //skiphours
-            if (Feed.SkipHours.Count > 0)
+            if (Feed.SkipHours.Count > 0 && !IsElementInExtensions(Feed, Rss20Constants.SkipHoursTag))
             {
                 await writer.WriteStartElementAsync(Rss20Constants.SkipHoursTag).ConfigureAwait(false);
 
@@ -1347,7 +1394,7 @@ namespace System.ServiceModel.Syndication
             }
 
             //skipDays
-            if (Feed.SkipDays.Count > 0)
+            if (Feed.SkipDays.Count > 0 && !IsElementInExtensions(Feed, Rss20Constants.SkipDaysTag))
             {
                 await writer.WriteStartElementAsync(Rss20Constants.SkipDaysTag).ConfigureAwait(false);
 
@@ -1360,7 +1407,7 @@ namespace System.ServiceModel.Syndication
             }
 
             //textinput
-            if (Feed.TextInput != null)
+            if (Feed.TextInput != null && !IsElementInExtensions(Feed, Rss20Constants.TextInputTag))
             {
                 await writer.WriteStartElementAsync(Rss20Constants.TextInputTag).ConfigureAwait(false);
 
@@ -1392,6 +1439,11 @@ namespace System.ServiceModel.Syndication
             await WriteElementExtensionsAsync(writer, Feed, Version).ConfigureAwait(false);
             await WriteItemsAsync(writer, Feed.Items, Feed.BaseUri).ConfigureAwait(false);
             await writer.WriteEndElementAsync().ConfigureAwait(false); // channel
+        }
+
+        private bool IsElementInExtensions(SyndicationFeed feed, string elementName)
+        {
+            return feed.ElementExtensions.Where(e => e.OuterName == elementName && e.OuterNamespace == Rss20Constants.Rss20Namespace).Count() != 0;
         }
 
         private async Task WriteItemContentsAsync(XmlWriter writer, SyndicationItem item, Uri feedBaseUri)
