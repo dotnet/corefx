@@ -359,11 +359,10 @@ namespace System
                 if ((uint)byteOffset < (uint)(first.Length * Unsafe.SizeOf<T>()) ||
                     (uint)byteOffset > (uint)-(second.Length * Unsafe.SizeOf<T>()))
                 {
-                    elementOffset = Math.DivRem((int)byteOffset, Unsafe.SizeOf<T>(), out int remainder);
-
-                    if (remainder != 0)
+                    if ((int)byteOffset % Unsafe.SizeOf<T>() != 0)
                         throw new ArgumentException("", nameof(second));
 
+                    elementOffset = (int)byteOffset / Unsafe.SizeOf<T>();
                     return true;
                 }
                 else
@@ -377,11 +376,10 @@ namespace System
                 if ((ulong)byteOffset < (ulong)((long)first.Length * Unsafe.SizeOf<T>()) ||
                     (ulong)byteOffset > (ulong)-((long)second.Length * Unsafe.SizeOf<T>()))
                 {
-                    elementOffset = (int)Math.DivRem((long)byteOffset, Unsafe.SizeOf<T>(), out long remainder);
-
-                    if (remainder != 0)
+                    if ((long)byteOffset % Unsafe.SizeOf<T>() != 0)
                         throw new ArgumentException("", nameof(second));
 
+                    elementOffset = (int)((long)byteOffset / Unsafe.SizeOf<T>());
                     return true;
                 }
                 else
