@@ -236,7 +236,7 @@ namespace System.Diagnostics.Tests
             Assert.NotNull(category);
 
             PerformanceCounterCategory pcc = new PerformanceCounterCategory(category);
-            PerformanceCounter[] counters = pcc.GetCounters();
+            PerformanceCounter[] counters = pcc.GetCounters();
 
             Assert.True(counters.Length > 0);
             PerformanceCounterCategory.Delete(category);
