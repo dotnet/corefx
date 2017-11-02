@@ -20,6 +20,9 @@ namespace System
     [DebuggerTypeProxy(typeof(MemoryDebugView<>))]
     public readonly struct Memory<T>
     {
+        // NOTE: With the current implementation, Memory<T> and ReadOnlyMemory<T> must have the same layout,
+        // as code uses Unsafe.As to cast between them.
+
         // The highest order bit of _index is used to discern whether _arrayOrOwnedMemory is an array or an owned memory
         // if (_index >> 31) == 1, object _arrayOrOwnedMemory is an OwnedMemory<T>
         // else, object _arrayOrOwnedMemory is a T[]
@@ -108,14 +111,8 @@ namespace System
         /// Defines an implicit conversion of a <see cref="Memory{T}"/> to a <see cref="ReadOnlyMemory{T}"/>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator ReadOnlyMemory<T>(Memory<T> memory)
-        {
-            if (memory._index < 0)
-                return new ReadOnlyMemory<T>((OwnedMemory<T>)memory._arrayOrOwnedMemory, memory._index & RemoveOwnedFlagBitMask, memory._length);
-            if (memory._arrayOrOwnedMemory != null)
-                return new ReadOnlyMemory<T>((T[])memory._arrayOrOwnedMemory, memory._index, memory._length);
-            return default;
-        }
+        public static implicit operator ReadOnlyMemory<T>(Memory<T> memory) =>
+            Unsafe.As<Memory<T>, ReadOnlyMemory<T>>(ref memory);
 
         /// <summary>
         /// Returns an empty <see cref="Memory{T}"/>
