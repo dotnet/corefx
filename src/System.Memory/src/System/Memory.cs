@@ -112,7 +112,9 @@ namespace System
         {
             if (memory._index < 0)
                 return new ReadOnlyMemory<T>((OwnedMemory<T>)memory._arrayOrOwnedMemory, memory._index & RemoveOwnedFlagBitMask, memory._length);
-            return new ReadOnlyMemory<T>((T[])memory._arrayOrOwnedMemory, memory._index, memory._length);
+            if (memory._arrayOrOwnedMemory != null)
+                return new ReadOnlyMemory<T>((T[])memory._arrayOrOwnedMemory, memory._index, memory._length);
+            return default;
         }
 
         /// <summary>
@@ -145,7 +147,9 @@ namespace System
 
             if (_index < 0)
                 return new Memory<T>((OwnedMemory<T>)_arrayOrOwnedMemory, (_index & RemoveOwnedFlagBitMask) + start, _length - start);
-            return new Memory<T>((T[])_arrayOrOwnedMemory, _index + start, _length - start);
+            if (_arrayOrOwnedMemory != null)
+                return new Memory<T>((T[])_arrayOrOwnedMemory, _index + start, _length - start);
+            return default;
         }
 
         /// <summary>
@@ -164,7 +168,9 @@ namespace System
                 
             if (_index < 0)
                 return new Memory<T>((OwnedMemory<T>)_arrayOrOwnedMemory, (_index & RemoveOwnedFlagBitMask) + start, length);
-            return new Memory<T>((T[])_arrayOrOwnedMemory, _index + start, length);
+            if (_arrayOrOwnedMemory != null)
+                return new Memory<T>((T[])_arrayOrOwnedMemory, _index + start, length);
+            return default;
         }
 
         /// <summary>
@@ -177,7 +183,9 @@ namespace System
             {
                 if (_index < 0)
                     return ((OwnedMemory<T>)_arrayOrOwnedMemory).Span.Slice(_index & RemoveOwnedFlagBitMask, _length);
-                return new Span<T>((T[])_arrayOrOwnedMemory, _index, _length);
+                if (_arrayOrOwnedMemory != null)
+                    return new Span<T>((T[])_arrayOrOwnedMemory, _index, _length);
+                return default;
             }
         }
 
@@ -187,7 +195,7 @@ namespace System
         /// </summary>
         public unsafe MemoryHandle Retain(bool pin = false)
         {
-            MemoryHandle memoryHandle;
+            MemoryHandle memoryHandle = default;
             if (pin)
             {
                 if (_index < 0)
@@ -195,7 +203,7 @@ namespace System
                     memoryHandle = ((OwnedMemory<T>)_arrayOrOwnedMemory).Pin();
                     memoryHandle.AddOffset((_index & RemoveOwnedFlagBitMask) * Unsafe.SizeOf<T>());
                 }
-                else
+                else if (_arrayOrOwnedMemory != null)
                 {
                     var array = (T[])_arrayOrOwnedMemory;
                     var handle = GCHandle.Alloc(array, GCHandleType.Pinned);
@@ -209,10 +217,6 @@ namespace System
                 {
                     ((OwnedMemory<T>)_arrayOrOwnedMemory).Retain();
                     memoryHandle = new MemoryHandle((OwnedMemory<T>)_arrayOrOwnedMemory);
-                }
-                else
-                {
-                    memoryHandle = new MemoryHandle(null);
                 }
             }
             return memoryHandle;
@@ -232,7 +236,7 @@ namespace System
                     return true;
                 }
             }
-            else
+            else if (_arrayOrOwnedMemory != null)
             {
                 arraySegment = new ArraySegment<T>((T[])_arrayOrOwnedMemory, _index, _length);
                 return true;
@@ -288,7 +292,7 @@ namespace System
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override int GetHashCode()
         {
-            return CombineHashCodes(_arrayOrOwnedMemory.GetHashCode(), (_index & RemoveOwnedFlagBitMask).GetHashCode(), _length.GetHashCode());
+            return CombineHashCodes(_arrayOrOwnedMemory == null ? 0 : _arrayOrOwnedMemory.GetHashCode(), (_index & RemoveOwnedFlagBitMask).GetHashCode(), _length.GetHashCode());
         }
 
         private static int CombineHashCodes(int left, int right)
