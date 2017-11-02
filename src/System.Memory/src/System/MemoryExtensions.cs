@@ -294,103 +294,102 @@ namespace System
 
         /// Determines whether two sequences overlap.
         /// </summary>
-        public static unsafe bool Overlaps<T>(this Span<T> first, ReadOnlySpan<T> second)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Overlaps<T>(this Span<T> first, ReadOnlySpan<T> second)
         {
-            if (second.IsEmpty)
-                return false;
-
-            ref T firstRef = ref first.DangerousGetPinnableReference();
-            ref T secondRef = ref second.DangerousGetPinnableReference();
-
-            IntPtr firstByteCount = Unsafe.ByteOffset(ref firstRef, ref Unsafe.Add(ref firstRef, first.Length));
-            IntPtr secondByteCount = Unsafe.ByteOffset(ref secondRef, ref Unsafe.Add(ref secondRef, second.Length));
-
-            IntPtr diff = Unsafe.ByteOffset(ref firstRef, ref secondRef);
-
-            return (sizeof(IntPtr) == sizeof(int))
-                ? (uint)diff < (uint)firstByteCount || (uint)diff > (uint)-(int)secondByteCount
-                : (ulong)diff < (ulong)firstByteCount || (ulong)diff > (ulong)-(long)secondByteCount;
+            return Overlaps((ReadOnlySpan<T>)first, second);
         }
 
         /// <summary>
         /// Determines whether two sequences overlap and outputs the element offset.
         /// </summary>
-        public static unsafe bool Overlaps<T>(this Span<T> first, ReadOnlySpan<T> second, out int elementOffset)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Overlaps<T>(this Span<T> first, ReadOnlySpan<T> second, out int elementOffset)
         {
-            if (second.IsEmpty)
-            {
-                elementOffset = 0;
-                return false;
-            }
-
-            ref T firstRef = ref first.DangerousGetPinnableReference();
-            ref T secondRef = ref second.DangerousGetPinnableReference();
-
-            IntPtr firstByteCount = Unsafe.ByteOffset(ref firstRef, ref Unsafe.Add(ref firstRef, first.Length));
-            IntPtr secondByteCount = Unsafe.ByteOffset(ref secondRef, ref Unsafe.Add(ref secondRef, second.Length));
-
-            IntPtr diff = Unsafe.ByteOffset(ref firstRef, ref secondRef);
-
-            bool overlaps = (sizeof(IntPtr) == sizeof(int))
-                ? (uint)diff < (uint)firstByteCount || (uint)diff > (uint)-(int)secondByteCount
-                : (ulong)diff < (ulong)firstByteCount || (ulong)diff > (ulong)-(long)secondByteCount;
-
-            elementOffset = (sizeof(IntPtr) == sizeof(int))
-                ? overlaps ? (int)diff / Unsafe.SizeOf<T>() : 0
-                : overlaps ? (int)((long)diff / Unsafe.SizeOf<T>()) : 0;
-
-            return overlaps;
+            return Overlaps((ReadOnlySpan<T>)first, second, out elementOffset);
         }
 
         /// <summary>
         /// Determines whether two sequences overlap.
         /// </summary>
-        public static unsafe bool Overlaps<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second)
+        public static bool Overlaps<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second)
         {
-            if (second.IsEmpty)
+            // note: the calculations below overflow if second.IsEmpty;
+            //       the case second.IsEmpty MUST be handled separately
+            if (first.IsEmpty || second.IsEmpty)
+            {
                 return false;
+            }
 
-            ref T firstRef = ref first.DangerousGetPinnableReference();
-            ref T secondRef = ref second.DangerousGetPinnableReference();
+            IntPtr byteOffset = Unsafe.ByteOffset(
+                ref first.DangerousGetPinnableReference(),
+                ref second.DangerousGetPinnableReference());
 
-            IntPtr firstByteCount = Unsafe.ByteOffset(ref firstRef, ref Unsafe.Add(ref firstRef, first.Length));
-            IntPtr secondByteCount = Unsafe.ByteOffset(ref secondRef, ref Unsafe.Add(ref secondRef, second.Length));
-
-            IntPtr diff = Unsafe.ByteOffset(ref firstRef, ref secondRef);
-
-            return (sizeof(IntPtr) == sizeof(int))
-                ? (uint)diff < (uint)firstByteCount || (uint)diff > (uint)-(int)secondByteCount
-                : (ulong)diff < (ulong)firstByteCount || (ulong)diff > (ulong)-(long)secondByteCount;
+            if (Unsafe.SizeOf<IntPtr>() == sizeof(int))
+            {
+                return (uint)byteOffset < (uint)(first.Length * Unsafe.SizeOf<T>()) ||
+                       (uint)byteOffset > (uint)-(second.Length * Unsafe.SizeOf<T>());
+            }
+            else
+            {
+                return (ulong)byteOffset < (ulong)((long)first.Length * Unsafe.SizeOf<T>()) ||
+                       (ulong)byteOffset > (ulong)-((long)second.Length * Unsafe.SizeOf<T>());
+            }
         }
 
         /// <summary>
         /// Determines whether two sequences overlap and outputs the element offset.
         /// </summary>
-        public static unsafe bool Overlaps<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second, out int elementOffset)
+        public static bool Overlaps<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second, out int elementOffset)
         {
-            if (second.IsEmpty)
+            // note: the calculations below overflow if second.IsEmpty;
+            //       the case second.IsEmpty MUST be handled separately
+            if (first.IsEmpty || second.IsEmpty)
             {
                 elementOffset = 0;
                 return false;
             }
 
-            ref T firstRef = ref first.DangerousGetPinnableReference();
-            ref T secondRef = ref second.DangerousGetPinnableReference();
+            IntPtr byteOffset = Unsafe.ByteOffset(
+                ref first.DangerousGetPinnableReference(),
+                ref second.DangerousGetPinnableReference());
 
-            IntPtr firstByteCount = Unsafe.ByteOffset(ref firstRef, ref Unsafe.Add(ref firstRef, first.Length));
-            IntPtr secondByteCount = Unsafe.ByteOffset(ref secondRef, ref Unsafe.Add(ref secondRef, second.Length));
+            if (Unsafe.SizeOf<IntPtr>() == sizeof(int))
+            {
+                if ((uint)byteOffset < (uint)(first.Length * Unsafe.SizeOf<T>()) ||
+                    (uint)byteOffset > (uint)-(second.Length * Unsafe.SizeOf<T>()))
+                {
+                    elementOffset = Math.DivRem((int)byteOffset, Unsafe.SizeOf<T>(), out int remainder);
 
-            IntPtr diff = Unsafe.ByteOffset(ref firstRef, ref secondRef);
+                    if (remainder != 0)
+                        throw new ArgumentException("", nameof(second));
 
-            bool overlaps = (sizeof(IntPtr) == sizeof(int))
-                ? (uint)diff < (uint)firstByteCount || (uint)diff > (uint)-(int)secondByteCount
-                : (ulong)diff < (ulong)firstByteCount || (ulong)diff > (ulong)-(long)secondByteCount;
+                    return true;
+                }
+                else
+                {
+                    elementOffset = 0;
+                    return false;
+                }
+            }
+            else
+            {
+                if ((ulong)byteOffset < (ulong)((long)first.Length * Unsafe.SizeOf<T>()) ||
+                    (ulong)byteOffset > (ulong)-((long)second.Length * Unsafe.SizeOf<T>()))
+                {
+                    elementOffset = (int)Math.DivRem((long)byteOffset, Unsafe.SizeOf<T>(), out long remainder);
 
-            elementOffset = (sizeof(IntPtr) == sizeof(int))
-                ? overlaps ? (int)diff / Unsafe.SizeOf<T>() : 0
-                : overlaps ? (int)((long)diff / Unsafe.SizeOf<T>()) : 0;
+                    if (remainder != 0)
+                        throw new ArgumentException("", nameof(second));
 
-            return overlaps;
+                    return true;
+                }
+                else
+                {
+                    elementOffset = 0;
+                    return false;
+                }
+            }
         }
     }
 }
