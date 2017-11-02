@@ -57,8 +57,6 @@ namespace System.Diagnostics.Tests
 
             var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.MultiInstance);
 
-            Assert.NotNull(category);
-
             using (PerformanceCounter counterSample = new PerformanceCounter(category, name, instance))
             {
                 Assert.Equal(name, counterSample.CounterName);
@@ -76,7 +74,6 @@ namespace System.Diagnostics.Tests
             var name = nameof(PerformanceCounter_CreateCounter_SetReadOnly) + "_Counter";
 
             var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.SingleInstance);
-            Assert.NotNull(category);
 
             using (PerformanceCounter counterSample = new PerformanceCounter(category, name))
             {
@@ -280,7 +277,6 @@ namespace System.Diagnostics.Tests
             var instance = name + "_Instance";
 
             var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.MultiInstance);
-            Assert.NotNull(category);
 
             using (PerformanceCounter counterSample = new PerformanceCounter(category, name, instance, false))
             {
@@ -295,7 +291,6 @@ namespace System.Diagnostics.Tests
         public static PerformanceCounter CreateCounterWithCategory(string name, bool readOnly, PerformanceCounterCategoryType categoryType )
         {
             var category = Helpers.CreateCategory(name, categoryType);
-            Assert.NotNull(category);
 
             PerformanceCounter counterSample = new PerformanceCounter(category, name, readOnly);
 

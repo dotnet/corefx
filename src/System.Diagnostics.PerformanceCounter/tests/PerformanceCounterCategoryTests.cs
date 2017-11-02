@@ -85,7 +85,6 @@ namespace System.Diagnostics.Tests
             var name = nameof(PerformanceCounterCategory_CategoryType_MultiInstance) + "_Counter";
 
             var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.MultiInstance);
-            Assert.NotNull(category);
 
             PerformanceCounterCategory pcc = new PerformanceCounterCategory(category);
 
@@ -99,7 +98,6 @@ namespace System.Diagnostics.Tests
             var name = nameof(PerformanceCounterCategory_CategoryType_SingleInstance) + "_Counter";
 
             var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.SingleInstance);
-            Assert.NotNull(category);
 
             PerformanceCounterCategory pcc = new PerformanceCounterCategory(category);
 
@@ -213,7 +211,6 @@ namespace System.Diagnostics.Tests
         {
             var name = nameof(PerformanceCounterCategory_DeleteCategory) + "_Counter";
             var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.SingleInstance);
-            Assert.NotNull(category);
 
             PerformanceCounterCategory.Delete(category);
 
@@ -233,7 +230,6 @@ namespace System.Diagnostics.Tests
         {
             var name = nameof(PerformanceCounterCategory_GetCounters) + "_Counter";
             var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.SingleInstance);
-            Assert.NotNull(category);
 
             PerformanceCounterCategory pcc = new PerformanceCounterCategory(category);
             PerformanceCounter[] counters = pcc.GetCounters();

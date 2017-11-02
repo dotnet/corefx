@@ -17,14 +17,8 @@ namespace System.Diagnostics.Tests
             DeleteCategory(name);
             PerformanceCounterCategory.Create(category, "description", categoryType, name, "counter description");
 
-            if (PerformanceCounterCategoryCreated(category))
-            {
-                return category;
-            }
-            else
-            {
-                return null;
-            }
+            Assert.True(PerformanceCounterCategoryCreated(category));
+            return category;
         }
 
         public static bool PerformanceCounterCategoryCreated(string category)
