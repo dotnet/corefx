@@ -6,6 +6,7 @@
     <RootNamespace>System.ComponentModel.Composition</RootNamespace>
     <AssemblyName>System.ComponentModel.Composition</AssemblyName>
     <DefineConstants>$(DefineConstants);FEATURE_TRACING</DefineConstants>
+    <RunApiCompat>false</RunApiCompat>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
