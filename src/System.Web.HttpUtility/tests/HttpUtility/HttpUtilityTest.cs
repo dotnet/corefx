@@ -748,6 +748,7 @@ namespace System.Web.Tests
         [InlineData("http://EXAMPLE.NET/défault.xxx?sdsd=sds", "http://EXAMPLE.NET/d%c3%a9fault.xxx?sdsd=sds")]
         [InlineData("file:///C/Users", "file:///C/Users")]
         [InlineData("mailto:user@example.net", "mailto:user@example.net")]
+        [InlineData("http://example\u200E.net/", "http://example%e2%80%8e.net/")]
         public void UrlPathEncode(string decoded, string encoded)
         {
             Assert.Equal(encoded, HttpUtility.UrlPathEncode(decoded));
