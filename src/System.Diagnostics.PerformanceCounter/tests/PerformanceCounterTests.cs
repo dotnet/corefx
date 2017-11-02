@@ -283,7 +283,7 @@ namespace System.Diagnostics.Tests
                 counterSample.RawValue = 10;
                 counterSample.Decrement();
 
-                Assert.Equal(9, counterSample.NextSample().RawValue);
+                Assert.Equal(9, counterSample.RawValue);
                 Helpers.DeleteCategory(name);
             }
         }
