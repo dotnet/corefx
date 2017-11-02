@@ -25,7 +25,7 @@ namespace System.SpanTests
         [Fact]
         public static unsafe void UnalignedOverlapThrows()
         {
-            Assert.Throws<ArgumentException>("second", () =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 byte* p = stackalloc byte[16];
 
