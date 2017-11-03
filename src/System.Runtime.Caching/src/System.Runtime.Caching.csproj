@@ -13,7 +13,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="System\Runtime\Caching\_shims.cs" />
     <Compile Include="System\Runtime\Caching\CacheEntryChangeMonitor.cs" />
@@ -59,7 +58,6 @@
     <Compile Include="System\Runtime\Caching\Hosting\IMemoryCacheManager.cs" />
     <Compile Include="System\Runtime\Caching\Resources\R.Designer.cs" />
     <Compile Include="System\Runtime\Caching\Resources\RH.cs" />
-
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GlobalMemoryStatusEx.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GlobalMemoryStatusEx.cs</Link>
     </Compile>
@@ -70,7 +68,6 @@
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="Microsoft.Win32.Registry" />
@@ -100,6 +97,5 @@
     <Reference Include="System.Threading.ThreadPool" />
     <Reference Include="System.Threading.Timer" />
   </ItemGroup>
-
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

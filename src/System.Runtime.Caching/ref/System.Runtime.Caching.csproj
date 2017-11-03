@@ -6,13 +6,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <PropertyGroup>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
     <ProjectGuid>{3B7A97BD-F4DC-4FF9-AB6D-3B714E5D9280}</ProjectGuid>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Runtime.Caching.cs" />
   </ItemGroup>
-
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
