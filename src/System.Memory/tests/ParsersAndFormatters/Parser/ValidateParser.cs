@@ -105,6 +105,30 @@ namespace System.Buffers.Text.Tests
                 return true;
             }
 
+            // Parsed floating points are constructed, not computed. Thus, we can do the exact compare.
+            if (typeof(T) == typeof(double))
+            {
+                double expectedDouble = (double)(object)expected;
+                double actualDouble = (double)(object)actual;
+
+                unsafe
+                {
+                    return *((ulong*)&expectedDouble) == *((ulong*)&actualDouble);
+                }
+            }
+
+            // Parsed floating points are constructed, not computed. Thus, we can do the exact compare.
+            if (typeof(T) == typeof(float))
+            {
+                float expectedSingle = (float)(object)expected;
+                float actualSingle = (float)(object)actual;
+
+                unsafe
+                {
+                    return *((uint*)&expectedSingle) == *((uint*)&actualSingle);
+                }
+            }
+
             return expected.Equals(actual);
         }
 
