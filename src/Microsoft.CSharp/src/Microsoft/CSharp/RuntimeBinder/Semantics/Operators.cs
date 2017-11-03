@@ -93,7 +93,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private ExprBinOp BindUserDefinedBinOp(ExpressionKind ek, BinOpArgInfo info)
         {
-            MethPropWithInst pmpwi = null;
+            MethPropWithInst pmpwi;
             if (info.pt1 <= PredefinedType.PT_ULONG && info.pt2 <= PredefinedType.PT_ULONG)
             {
                 return null;
@@ -442,10 +442,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(arg1 != null);
             Debug.Assert(arg2 != null);
 
-            EXPRFLAG flags = 0;
-
             BinOpArgInfo info = new BinOpArgInfo(arg1, arg2);
-            if (!GetBinopKindAndFlags(ek, out info.binopKind, out flags))
+            if (!GetBinopKindAndFlags(ek, out info.binopKind, out EXPRFLAG flags))
             {
                 // If we don't get the BinopKind and the flags, then we must have had some bad operator types.
 
@@ -455,7 +453,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             info.mask = (BinOpMask)(1 << (int)info.binopKind);
 
             List<BinOpFullSig> binopSignatures = new List<BinOpFullSig>();
-            int bestBinopSignature = -1;
 
             // First check if this is a user defined binop. If it is, return it.
             ExprBinOp exprUD = BindUserDefinedBinOp(ek, info);
@@ -480,6 +477,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // If we didn't, then its possible where we have x == null, where x is nullable, so try to bind
             // the null equality comparison. Otherwise, we had some ambiguity - we have a match, but its not exact.
 
+            int bestBinopSignature;
             if (exactMatch)
             {
                 Debug.Assert(binopSignatures.Count > 0);
@@ -565,15 +563,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // method so that we error report (ie divide by zero etc), and then we store in the resulting
             // binop that we have a lifted operator.
 
-            Expr pArgument1 = null;
-            Expr pArgument2 = null;
-            Expr nonLiftedArg1 = null;
-            Expr nonLiftedArg2 = null;
             Expr nonLiftedResult = null;
-            CType resultType = null;
+            CType resultType;
 
-            LiftArgument(arg1, bofs.Type1(), bofs.ConvertFirst(), out pArgument1, out nonLiftedArg1);
-            LiftArgument(arg2, bofs.Type2(), bofs.ConvertSecond(), out pArgument2, out nonLiftedArg2);
+            LiftArgument(arg1, bofs.Type1(), bofs.ConvertFirst(), out Expr pArgument1, out Expr nonLiftedArg1);
+            LiftArgument(arg2, bofs.Type2(), bofs.ConvertSecond(), out Expr pArgument2, out Expr nonLiftedArg2);
 
             // Now call the non-lifted method to generate errors, and stash the result.
             if (!nonLiftedArg1.isNull() && !nonLiftedArg2.isNull())
@@ -1250,8 +1244,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             List<UnaOpFullSig> pSignatures = new List<UnaOpFullSig>();
 
-            Expr pResult = null;
-            UnaryOperatorSignatureFindResult eResultOfSignatureFind = PopulateSignatureList(pArgument, unaryOpKind, unaryOpMask, ek, flags, pSignatures, out pResult);
+            UnaryOperatorSignatureFindResult eResultOfSignatureFind = PopulateSignatureList(pArgument, unaryOpKind, unaryOpMask, ek, flags, pSignatures, out Expr pResult);
 
             // nBestSignature is a 0-based index.
             int nBestSignature = pSignatures.Count - 1;
@@ -1601,10 +1594,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return BadOperatorTypesError(ek, arg, null, type);
             }
 
-            Expr pArgument = null;
-            Expr nonLiftedArg = null;
-
-            LiftArgument(arg, uofs.GetType(), uofs.Convert(), out pArgument, out nonLiftedArg);
+            LiftArgument(arg, uofs.GetType(), uofs.Convert(), out Expr pArgument, out Expr nonLiftedArg);
 
             // Now call the function with the non lifted arguments to report errors.
             Expr nonLiftedResult = uofs.pfn(ek, flags, nonLiftedArg);
