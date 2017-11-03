@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
+using System.Threading;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -398,8 +399,24 @@ namespace System.Diagnostics.Tests
     {
         internal static EventLogEntry LastOrDefault(this EventLogEntryCollection elec)
         {
-            return Helpers.RetryOnWin7(() => elec.Count > 0 ? elec[elec.Count - 1] : null);
+            if (!PlatformDetection.IsWindows7)
+                return Helpers.RetryOnWin7(() => elec.Count > 0 ? elec[elec.Count - 1] : null);
+
+            int retries = 0;
+            while (retries < 20 && PlatformDetection.IsWindows7)
+            {
+                try
+                {
+                    return Helpers.RetryOnWin7(() => elec.Count > 0 ? elec[elec.Count - 1] : null);
+                }
+                catch (ArgumentException)
+                {
+                    Thread.Sleep(100);
+                    retries++;
+                }
+            }
+            // on windows 7 the count is incremented but the entry is not added to the list
+            return null;
         }
     }
-
 }
