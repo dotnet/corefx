@@ -13,15 +13,15 @@ namespace System.Diagnostics.Tests
         public static bool IsElevatedAndSupportsEventLogs { get => AdminHelpers.IsProcessElevated() && SupportsEventLogs; }
         public static bool SupportsEventLogs { get => PlatformDetection.IsNotWindowsNanoServer; }
 
-        public static void RetryOnWin7(Action func)
+        public static void RetryOnWin7(Action func, bool tryOnAllPlatforms = true)
         {
             RetryOnWin7<object>(() => { func(); return null; });
         }
 
-        public static T RetryOnWin7<T>(Func<T> func)
+        public static T RetryOnWin7<T>(Func<T> func, bool tryOnAllPlatforms = true)
         {
             T entry = default(T);
-            if (!PlatformDetection.IsWindows7)
+            if (!PlatformDetection.IsWindows7 && tryOnAllPlatforms)
             {
                 return func();
             }
@@ -47,13 +47,16 @@ namespace System.Diagnostics.Tests
             return entry;
         }
 
-    }
-
-    internal static class EventLogExtentions
-    {
-        internal static int SafeCount(this EventLog eventLog)
+        public static void WaitForEventLog(EventLog eventLog, int entriesExpected)
         {
-            return Helpers.RetryOnWin7(() => eventLog.Entries.Count);
+            int tries = 0;
+            while (RetryOnWin7((() => eventLog.Entries.Count), false) < entriesExpected && tries < 20)
+            {
+                Thread.Sleep(100);
+                tries++;
+            }
+
+            Assert.Equal(entriesExpected, RetryOnWin7((() => eventLog.Entries.Count)));
         }
     }
 }
