@@ -120,7 +120,7 @@ struct NativeTcpConnectionInformation
 {
     IPEndPointInfo LocalEndPoint;
     IPEndPointInfo RemoteEndPoint;
-    TcpState State;
+    int32_t State;
 };
 
 struct NativeIPInterfaceStatistics

@@ -15,7 +15,7 @@ set(NATIVE_SOURCES
     pal_runtimeinformation.cpp
     pal_runtimeextensions.cpp
     pal_string.cpp
-    pal_tcpstate.cpp
+    pal_tcpstate.c
     pal_time.cpp
     pal_uid.cpp
     pal_datetime.cpp

@@ -551,7 +551,7 @@ endif()
 
 # If sys/cdefs is not included on Android, this check will fail because
 # __BEGIN_DECLS is not defined
-check_cxx_source_compiles(
+check_c_source_compiles(
     "
 #ifdef HAVE_SYS_CDEFS_H
     #include <sys/cdefs.h>
