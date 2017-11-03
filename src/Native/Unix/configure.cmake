@@ -209,7 +209,7 @@ check_c_source_compiles(
     "
     HAVE_GNU_STRERROR_R)
 
-check_cxx_source_compiles(
+check_c_source_compiles(
     "
     #include <dirent.h>
     int main(void)
@@ -249,7 +249,7 @@ check_struct_has_member(
     "sys/select.h"
     HAVE_PRIVATE_FDS_BITS)
 
-check_cxx_source_compiles(
+check_c_source_compiles(
     "
     #include <sys/sendfile.h>
     int main() { int i = sendfile(0, 0, 0, 0); return 0; }
@@ -443,7 +443,7 @@ check_cxx_source_compiles(
     IPV6MR_INTERFACE_UNSIGNED
 )
 
-check_cxx_source_compiles(
+check_c_source_compiles(
     "
     #include <sys/inotify.h>
 
@@ -458,7 +458,7 @@ check_cxx_source_compiles(
 
 set (CMAKE_REQUIRED_FLAGS ${PREVIOUS_CMAKE_REQUIRED_FLAGS})
 
-check_cxx_source_runs(
+check_c_source_runs(
     "
     #include <sys/mman.h>
     #include <fcntl.h>
@@ -497,7 +497,7 @@ check_prototype_definition(
     "sys/types.h;sys/event.h"
     KEVENT_REQUIRES_INT_PARAMS)
 
-check_cxx_source_compiles(
+check_c_source_compiles(
     "
     #include <stdlib.h>
     #include <unistd.h>
@@ -505,13 +505,12 @@ check_cxx_source_compiles(
 
     int main()
     {
-        char* path = strdup(\"abc\");
-        return mkstemps(path, 3);
+        return mkstemps(\"abc\", 3);
     }
     "
     HAVE_MKSTEMPS)
 
-check_cxx_source_compiles(
+check_c_source_compiles(
     "
     #include <stdlib.h>
     #include <unistd.h>
@@ -519,8 +518,7 @@ check_cxx_source_compiles(
 
     int main()
     {
-        char* path = strdup(\"abc\");
-        return mkstemp(path);
+        return mkstemp(\"abc\");
     }
     "
     HAVE_MKSTEMP)
@@ -714,7 +712,7 @@ endif()
 
 set (CMAKE_REQUIRED_LIBRARIES)
 
-check_cxx_source_compiles(
+check_c_source_compiles(
     "
     #include <sys/inotify.h>
     int main()

@@ -4,7 +4,7 @@ set(NATIVE_SOURCES
     pal_console.cpp
     pal_errno.c
     pal_interfaceaddresses.cpp
-    pal_io.cpp
+    pal_io.c
     pal_maphardwaretype.c
     pal_memory.c
     pal_mount.cpp

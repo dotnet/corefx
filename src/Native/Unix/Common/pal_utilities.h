@@ -148,6 +148,21 @@ inline void SafeStringCopy(char* destination, int32_t destinationSize, const cha
     }
 }
 
+#endif // __cplusplus
+
+/**
+* Converts an intptr_t to a file descriptor.
+* intptr_t is the type used to marshal file descriptors so we can use SafeHandles effectively.
+*/
+inline static int ToFileDescriptorUnchecked(intptr_t fd)
+{
+#ifdef __cplusplus
+    return static_cast<int>(fd);
+#else
+    return (int)fd;
+#endif // __cplusplus
+}
+
 /**
 * Converts an intptr_t to a file descriptor.
 * intptr_t is the type used to marshal file descriptors so we can use SafeHandles effectively.
@@ -156,17 +171,10 @@ inline static int ToFileDescriptor(intptr_t fd)
 {
     assert(0 <= fd && fd < sysconf(_SC_OPEN_MAX));
 
-    return static_cast<int>(fd);
+    return ToFileDescriptorUnchecked(fd);
 }
 
-/**
-* Converts an intptr_t to a file descriptor.
-* intptr_t is the type used to marshal file descriptors so we can use SafeHandles effectively.
-*/
-inline static int ToFileDescriptorUnchecked(intptr_t fd)
-{
-    return static_cast<int>(fd);
-}
+#ifdef __cplusplus
 
 /**
 * Checks if the IO operation was interupted and needs to be retried.

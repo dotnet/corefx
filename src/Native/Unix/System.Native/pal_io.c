@@ -2,11 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#include "pal_compiler.h"
 #include "pal_config.h"
 #include "pal_errno.h"
 #include "pal_io.h"
 #include "pal_utilities.h"
 #include "pal_safecrt.h"
+#include "pal_types.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -44,6 +46,8 @@
 #define fstat_ fstat
 #define lstat_ lstat
 #endif
+
+#ifdef static_assert
 
 // These numeric values are specified by POSIX.
 // Validate that our definitions match.
@@ -140,63 +144,65 @@ static_assert(PAL_IN_EXCL_UNLINK == IN_EXCL_UNLINK, "");
 static_assert(PAL_IN_ISDIR == IN_ISDIR, "");
 #endif // HAVE_INOTIFY
 
-static void ConvertFileStatus(const struct stat_& src, FileStatus* dst)
+#endif // static_assert
+
+static void ConvertFileStatus(const struct stat_* src, struct FileStatus* dst)
 {
-    dst->Dev = static_cast<int64_t>(src.st_dev);
-    dst->Ino = static_cast<int64_t>(src.st_ino);
+    dst->Dev = (int64_t)src->st_dev;
+    dst->Ino = (int64_t)src->st_ino;
     dst->Flags = FILESTATUS_FLAGS_NONE;
-    dst->Mode = static_cast<int32_t>(src.st_mode);
-    dst->Uid = src.st_uid;
-    dst->Gid = src.st_gid;
-    dst->Size = src.st_size;
-    dst->ATime = src.st_atime;
-    dst->MTime = src.st_mtime;
-    dst->CTime = src.st_ctime;
+    dst->Mode = (int32_t)src->st_mode;
+    dst->Uid = src->st_uid;
+    dst->Gid = src->st_gid;
+    dst->Size = src->st_size;
+    dst->ATime = src->st_atime;
+    dst->MTime = src->st_mtime;
+    dst->CTime = src->st_ctime;
 
 #if HAVE_STAT_BIRTHTIME
-    dst->BirthTime = src.st_birthtime;
+    dst->BirthTime = src->st_birthtime;
     dst->Flags |= FILESTATUS_FLAGS_HAS_BIRTHTIME;
 #else
     dst->BirthTime = 0;
 #endif
 }
 
-extern "C" int32_t SystemNative_Stat(const char* path, FileStatus* output)
+int32_t SystemNative_Stat(const char* path, struct FileStatus* output)
 {
     struct stat_ result;
     int ret;
-    while (CheckInterrupted(ret = stat_(path, &result)));
+    while ((ret = stat_(path, &result)) < 0 && errno == EINTR);
 
     if (ret == 0)
     {
-        ConvertFileStatus(result, output);
+        ConvertFileStatus(&result, output);
     }
 
     return ret;
 }
 
-extern "C" int32_t SystemNative_FStat(intptr_t fd, FileStatus* output)
+int32_t SystemNative_FStat(intptr_t fd, struct FileStatus* output)
 {
     struct stat_ result;
     int ret;
-    while (CheckInterrupted(ret = fstat_(ToFileDescriptor(fd), &result)));
+    while ((ret = fstat_(ToFileDescriptor(fd), &result)) < 0 && errno == EINTR);
 
     if (ret == 0)
     {
-        ConvertFileStatus(result, output);
+        ConvertFileStatus(&result, output);
     }
 
     return ret;
 }
 
-extern "C" int32_t SystemNative_LStat(const char* path, FileStatus* output)
+int32_t SystemNative_LStat(const char* path, struct FileStatus* output)
 {
     struct stat_ result;
     int ret = lstat_(path, &result);
 
     if (ret == 0)
     {
-        ConvertFileStatus(result, output);
+        ConvertFileStatus(&result, output);
     }
 
     return ret;
@@ -217,13 +223,13 @@ static int32_t ConvertOpenFlags(int32_t flags)
             ret = O_WRONLY;
             break;
         default:
-            assert_msg(false, "Unknown Open access mode", static_cast<int>(flags));
+            assert_msg(false, "Unknown Open access mode", (int)flags);
             return -1;
     }
 
     if (flags & ~(PAL_O_ACCESS_MODE_MASK | PAL_O_CLOEXEC | PAL_O_CREAT | PAL_O_EXCL | PAL_O_TRUNC | PAL_O_SYNC))
     {
-        assert_msg(false, "Unknown Open flag", static_cast<int>(flags));
+        assert_msg(false, "Unknown Open flag", (int)flags);
         return -1;
     }
 
@@ -242,7 +248,7 @@ static int32_t ConvertOpenFlags(int32_t flags)
     return ret;
 }
 
-extern "C" intptr_t SystemNative_Open(const char* path, int32_t flags, int32_t mode)
+intptr_t SystemNative_Open(const char* path, int32_t flags, int32_t mode)
 {
     flags = ConvertOpenFlags(flags);
     if (flags == -1)
@@ -252,30 +258,30 @@ extern "C" intptr_t SystemNative_Open(const char* path, int32_t flags, int32_t m
     }
 
     int result;
-    while (CheckInterrupted(result = open(path, flags, static_cast<mode_t>(mode))));
+    while ((result = open(path, flags, (mode_t)mode)) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" int32_t SystemNative_Close(intptr_t fd)
+int32_t SystemNative_Close(intptr_t fd)
 {
     return close(ToFileDescriptor(fd));
 }
 
-extern "C" intptr_t SystemNative_Dup(intptr_t oldfd)
+intptr_t SystemNative_Dup(intptr_t oldfd)
 {
     int result;
-    while (CheckInterrupted(result = fcntl(ToFileDescriptor(oldfd), F_DUPFD_CLOEXEC, 0)));
+    while ((result = fcntl(ToFileDescriptor(oldfd), F_DUPFD_CLOEXEC, 0)) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" int32_t SystemNative_Unlink(const char* path)
+int32_t SystemNative_Unlink(const char* path)
 {
     int32_t result;
-    while (CheckInterrupted(result = unlink(path)));
+    while ((result = unlink(path)) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" intptr_t SystemNative_ShmOpen(const char* name, int32_t flags, int32_t mode)
+intptr_t SystemNative_ShmOpen(const char* name, int32_t flags, int32_t mode)
 {
 #if HAVE_SHM_OPEN_THAT_WORKS_WELL_ENOUGH_WITH_MMAP
     flags = ConvertOpenFlags(flags);
@@ -285,7 +291,7 @@ extern "C" intptr_t SystemNative_ShmOpen(const char* name, int32_t flags, int32_
         return -1;
     }
 
-    return shm_open(name, flags, static_cast<mode_t>(mode));
+    return shm_open(name, flags, (mode_t)mode);
 #else
     (void)name, (void)flags, (void)mode;
     errno = ENOTSUP;
@@ -293,11 +299,11 @@ extern "C" intptr_t SystemNative_ShmOpen(const char* name, int32_t flags, int32_
 #endif
 }
 
-extern "C" int32_t SystemNative_ShmUnlink(const char* name)
+int32_t SystemNative_ShmUnlink(const char* name)
 {
 #if HAVE_SHM_OPEN_THAT_WORKS_WELL_ENOUGH_WITH_MMAP
     int32_t result;
-    while (CheckInterrupted(result = shm_unlink(name)));
+    while ((result = shm_unlink(name)) < 0 && errno == EINTR);
     return result;
 #else
     // Not supported on e.g. Android. Also, prevent a compiler error because name is unused
@@ -307,26 +313,26 @@ extern "C" int32_t SystemNative_ShmUnlink(const char* name)
 #endif
 }
 
-static void ConvertDirent(const dirent& entry, DirectoryEntry* outputEntry)
+static void ConvertDirent(const struct dirent* entry, struct DirectoryEntry* outputEntry)
 {
     // We use Marshal.PtrToStringAnsi on the managed side, which takes a pointer to
     // the start of the unmanaged string. Give the caller back a pointer to the
     // location of the start of the string that exists in their own byte buffer.
-    outputEntry->Name = entry.d_name;
-    outputEntry->InodeType = static_cast<NodeType>(entry.d_type);
+    outputEntry->Name = entry->d_name;
+    outputEntry->InodeType = (int32_t)entry->d_type;
 
 #if HAVE_DIRENT_NAME_LEN
-    outputEntry->NameLength = entry.d_namlen;
+    outputEntry->NameLength = entry->d_namlen;
 #else
     outputEntry->NameLength = -1; // sentinel value to mean we have to walk to find the first \0
 #endif
 }
 
-extern "C" int32_t SystemNative_GetDirentSize()
+int32_t SystemNative_GetDirentSize(void)
 {
     // dirent should be under 2k in size
-    static_assert(sizeof(dirent) < 2048, "");
-    return sizeof(dirent);
+    assert(sizeof(struct dirent) < 2048);
+    return sizeof(struct dirent);
 }
 
 // To reduce the number of string copies, this function calling pattern works as follows:
@@ -342,20 +348,20 @@ extern "C" int32_t SystemNative_GetDirentSize()
 //    and the value of d_namelen, if avalable, to copy the name from
 //    byte[] buffer into a managed string that the caller can use; this makes
 //    the 2nd and final strcpy.
-extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferSize, DirectoryEntry* outputEntry)
+int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferSize, struct DirectoryEntry* outputEntry)
 {
-    assert(buffer != nullptr);
-    assert(dir != nullptr);
-    assert(outputEntry != nullptr);
+    assert(buffer != NULL);
+    assert(dir != NULL);
+    assert(outputEntry != NULL);
 
-    if (bufferSize < static_cast<int32_t>(sizeof(dirent)))
+    if (bufferSize < (int32_t)sizeof(struct dirent))
     {
         assert(false && "Buffer size too small; use GetDirentSize to get required buffer size");
         return ERANGE;
     }
 
-    dirent* result = nullptr;
-    dirent* entry = static_cast<dirent*>(buffer);
+    struct dirent* result = NULL;
+    struct dirent* entry = (struct dirent*)buffer;
 #if HAVE_READDIR_R
     int error = readdir_r(dir, entry, &result);
 
@@ -363,14 +369,14 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
     if (error != 0)
     {
         assert(error > 0);
-        *outputEntry = {}; // managed out param must be initialized
+        memset(outputEntry, 0, sizeof(*outputEntry)); // managed out param must be initialized
         return error;
     }
 
     // 0 returned with null result -> end-of-stream
-    if (result == nullptr)
+    if (result == NULL)
     {
-        *outputEntry = {}; // managed out param must be initialized
+        memset(outputEntry, 0, sizeof(*outputEntry)); // managed out param must be initialized
         return -1;         // shim convention for end-of-stream
     }
 
@@ -381,7 +387,7 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
     result = readdir(dir);
 
     // 0 returned with null result -> end-of-stream
-    if (result == nullptr)
+    if (result == NULL)
     {
         *outputEntry = {}; // managed out param must be initialized
 
@@ -395,23 +401,23 @@ extern "C" int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferS
     }
 
     assert(result->d_reclen <= bufferSize);
-    memcpy_s(entry, sizeof(dirent), result, static_cast<size_t>(result->d_reclen));
+    memcpy_s(entry, sizeof(struct dirent), result, (size_t)result->d_reclen);
 #endif
-    ConvertDirent(*entry, outputEntry);
+    ConvertDirent(entry, outputEntry);
     return 0;
 }
 
-extern "C" DIR* SystemNative_OpenDir(const char* path)
+DIR* SystemNative_OpenDir(const char* path)
 {
     return opendir(path);
 }
 
-extern "C" int32_t SystemNative_CloseDir(DIR* dir)
+int32_t SystemNative_CloseDir(DIR* dir)
 {
     return closedir(dir);
 }
 
-extern "C" int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
+int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
 {
     switch (flags)
     {
@@ -421,7 +427,7 @@ extern "C" int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
             flags = O_CLOEXEC;
             break;
         default:
-            assert_msg(false, "Unknown pipe flag", static_cast<int>(flags));
+            assert_msg(false, "Unknown pipe flag", (int)flags);
             errno = EINVAL;
             return -1;
     }
@@ -429,18 +435,18 @@ extern "C" int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
     int32_t result;
 #if HAVE_PIPE2
     // If pipe2 is available, use it.  This will handle O_CLOEXEC if it was set.
-    while (CheckInterrupted(result = pipe2(pipeFds, flags)));
+    while ((result = pipe2(pipeFds, flags)) < 0 && errno == EINTR);
 #else
     // Otherwise, use pipe.
-    while (CheckInterrupted(result = pipe(pipeFds)));
+    while ((result = pipe(pipeFds)) < 0 && errno == EINTR);
 
     // Then, if O_CLOEXEC was specified, use fcntl to configure the file descriptors appropriately.
     if ((flags & O_CLOEXEC) != 0 && result == 0)
     {
-        while (CheckInterrupted(result = fcntl(pipeFds[0], F_SETFD, FD_CLOEXEC)));
+        while ((result = fcntl(pipeFds[0], F_SETFD, FD_CLOEXEC)) < 0 && errno == EINTR);
         if (result == 0)
         {
-            while (CheckInterrupted(result = fcntl(pipeFds[1], F_SETFD, FD_CLOEXEC)));
+            while ((result = fcntl(pipeFds[1], F_SETFD, FD_CLOEXEC)) < 0 && errno == EINTR);
         }
 
         if (result != 0)
@@ -455,14 +461,14 @@ extern "C" int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
     return result;
 }
 
-extern "C" int32_t SystemNative_FcntlSetCloseOnExec(intptr_t fd)
+int32_t SystemNative_FcntlSetCloseOnExec(intptr_t fd)
 {
     int result;
-    while (CheckInterrupted(result = fcntl(ToFileDescriptor(fd), F_SETFD, FD_CLOEXEC)));
+    while ((result = fcntl(ToFileDescriptor(fd), F_SETFD, FD_CLOEXEC)) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" int32_t SystemNative_FcntlCanGetSetPipeSz()
+int32_t SystemNative_FcntlCanGetSetPipeSz(void)
 {
 #if defined(F_GETPIPE_SZ) && defined(F_SETPIPE_SZ)
     return true;
@@ -471,11 +477,11 @@ extern "C" int32_t SystemNative_FcntlCanGetSetPipeSz()
 #endif
 }
 
-extern "C" int32_t SystemNative_FcntlGetPipeSz(intptr_t fd)
+int32_t SystemNative_FcntlGetPipeSz(intptr_t fd)
 {
 #ifdef F_GETPIPE_SZ
     int32_t result;
-    while (CheckInterrupted(result = fcntl(ToFileDescriptor(fd), F_GETPIPE_SZ)));
+    while ((result = fcntl(ToFileDescriptor(fd), F_GETPIPE_SZ)) < 0 && errno == EINTR);
     return result;
 #else
     (void)fd;
@@ -484,11 +490,11 @@ extern "C" int32_t SystemNative_FcntlGetPipeSz(intptr_t fd)
 #endif
 }
 
-extern "C" int32_t SystemNative_FcntlSetPipeSz(intptr_t fd, int32_t size)
+int32_t SystemNative_FcntlSetPipeSz(intptr_t fd, int32_t size)
 {
 #ifdef F_SETPIPE_SZ
     int32_t result;
-    while (CheckInterrupted(result = fcntl(ToFileDescriptor(fd), F_SETPIPE_SZ, size)));
+    while ((result = fcntl(ToFileDescriptor(fd), F_SETPIPE_SZ, size)) < 0 && errno == EINTR);
     return result;
 #else
     (void)fd, (void)size;
@@ -497,7 +503,7 @@ extern "C" int32_t SystemNative_FcntlSetPipeSz(intptr_t fd, int32_t size)
 #endif
 }
 
-extern "C" int32_t SystemNative_FcntlSetIsNonBlocking(intptr_t fd, int32_t isNonBlocking)
+int32_t SystemNative_FcntlSetIsNonBlocking(intptr_t fd, int32_t isNonBlocking)
 {
     int fileDescriptor = ToFileDescriptor(fd);
 
@@ -519,62 +525,62 @@ extern "C" int32_t SystemNative_FcntlSetIsNonBlocking(intptr_t fd, int32_t isNon
     return fcntl(fileDescriptor, F_SETFL, flags);
 }
 
-extern "C" int32_t SystemNative_MkDir(const char* path, int32_t mode)
+int32_t SystemNative_MkDir(const char* path, int32_t mode)
 {
     int32_t result;
-    while (CheckInterrupted(result = mkdir(path, static_cast<mode_t>(mode))));
+    while ((result = mkdir(path, (mode_t)mode)) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" int32_t SystemNative_ChMod(const char* path, int32_t mode)
+int32_t SystemNative_ChMod(const char* path, int32_t mode)
 {
     int32_t result;
-    while (CheckInterrupted(result = chmod(path, static_cast<mode_t>(mode))));
+    while ((result = chmod(path, (mode_t)mode)) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" int32_t SystemNative_FChMod(intptr_t fd, int32_t mode)
+int32_t SystemNative_FChMod(intptr_t fd, int32_t mode)
 {
     int32_t result;
-    while (CheckInterrupted(result = fchmod(ToFileDescriptor(fd), static_cast<mode_t>(mode))));
+    while ((result = fchmod(ToFileDescriptor(fd), (mode_t)mode)) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" int32_t SystemNative_FSync(intptr_t fd)
+int32_t SystemNative_FSync(intptr_t fd)
 {
     int32_t result;
-    while (CheckInterrupted(result = fsync(ToFileDescriptor(fd))));
+    while ((result = fsync(ToFileDescriptor(fd))) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" int32_t SystemNative_FLock(intptr_t fd, LockOperations operation)
+int32_t SystemNative_FLock(intptr_t fd, int32_t operation)
 {
     int32_t result;
-    while (CheckInterrupted(result = flock(ToFileDescriptor(fd), operation)));
+    while ((result = flock(ToFileDescriptor(fd), operation)) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" int32_t SystemNative_ChDir(const char* path)
+int32_t SystemNative_ChDir(const char* path)
 {
     int32_t result;
-    while (CheckInterrupted(result = chdir(path)));
+    while ((result = chdir(path)) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" int32_t SystemNative_Access(const char* path, AccessMode mode)
+int32_t SystemNative_Access(const char* path, int32_t mode)
 {
     return access(path, mode);
 }
 
-extern "C" int32_t SystemNative_FnMatch(const char* pattern, const char* path, FnMatchFlags flags)
+int32_t SystemNative_FnMatch(const char* pattern, const char* path, int32_t flags)
 {
     return fnmatch(pattern, path, flags);
 }
 
-extern "C" int64_t SystemNative_LSeek(intptr_t fd, int64_t offset, SeekWhence whence)
+int64_t SystemNative_LSeek(intptr_t fd, int64_t offset, int32_t whence)
 {
     int64_t result;
-    while (CheckInterrupted(
+    while ((
         result =
 #if HAVE_LSEEK64
             lseek64(
@@ -583,28 +589,28 @@ extern "C" int64_t SystemNative_LSeek(intptr_t fd, int64_t offset, SeekWhence wh
 #endif
                  ToFileDescriptor(fd),
                  offset,
-                 whence)));
+                 whence)) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" int32_t SystemNative_Link(const char* source, const char* linkTarget)
+int32_t SystemNative_Link(const char* source, const char* linkTarget)
 {
     int32_t result;
-    while (CheckInterrupted(result = link(source, linkTarget)));
+    while ((result = link(source, linkTarget)) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" intptr_t SystemNative_MksTemps(char* pathTemplate, int32_t suffixLength)
+intptr_t SystemNative_MksTemps(char* pathTemplate, int32_t suffixLength)
 {
     intptr_t result;
 #if HAVE_MKSTEMPS
-    while (CheckInterrupted(result = mkstemps(pathTemplate, suffixLength)));
+    while ((result = mkstemps(pathTemplate, suffixLength)) < 0 && errno == EINTR);
 #elif HAVE_MKSTEMP
     // mkstemps is not available bionic/Android, but mkstemp is
     // mkstemp doesn't allow the suffix that msktemps does allow, so we'll need to
-    // remove that before passing pathTemplate to mkstemp
+    // remove that before passisng pathTemplate to mkstemp
 
-    int32_t pathTemplateLength = static_cast<int32_t>(strlen(pathTemplate));
+    int32_t pathTemplateLength = (int32_t)strlen(pathTemplate);
 
     // pathTemplate must include at least XXXXXX (6 characters) which are not part of
     // the suffix
@@ -626,7 +632,7 @@ extern "C" intptr_t SystemNative_MksTemps(char* pathTemplate, int32_t suffixLeng
         pathTemplate[firstSuffixIndex] = 0;
     }
 
-    while (CheckInterrupted(result = mkstemp(pathTemplate)));
+    while ((result = mkstemp(pathTemplate)) < 0 && errno == EINTR);
 
     // Reset the first char of the suffix back to its original value, if there is a suffix
     if (suffixLength > 0)
@@ -646,7 +652,7 @@ static int32_t ConvertMMapProtection(int32_t protection)
 
     if (protection & ~(PAL_PROT_READ | PAL_PROT_WRITE | PAL_PROT_EXEC))
     {
-        assert_msg(false, "Unknown protection", static_cast<int>(protection));
+        assert_msg(false, "Unknown protection", (int)protection);
         return -1;
     }
 
@@ -666,7 +672,7 @@ static int32_t ConvertMMapFlags(int32_t flags)
 {
     if (flags & ~(PAL_MAP_SHARED | PAL_MAP_PRIVATE | PAL_MAP_ANONYMOUS))
     {
-        assert_msg(false, "Unknown MMap flag", static_cast<int>(flags));
+        assert_msg(false, "Unknown MMap flag", (int)flags);
         return -1;
     }
 
@@ -686,7 +692,7 @@ static int32_t ConvertMSyncFlags(int32_t flags)
 {
     if (flags & ~(PAL_MS_SYNC | PAL_MS_ASYNC | PAL_MS_INVALIDATE))
     {
-        assert_msg(false, "Unknown MSync flag", static_cast<int>(flags));
+        assert_msg(false, "Unknown MSync flag", (int)flags);
         return -1;
     }
 
@@ -702,7 +708,7 @@ static int32_t ConvertMSyncFlags(int32_t flags)
     return ret;
 }
 
-extern "C" void* SystemNative_MMap(void* address,
+void* SystemNative_MMap(void* address,
                       uint64_t length,
                       int32_t protection, // bitwise OR of PAL_PROT_*
                       int32_t flags,      // bitwise OR of PAL_MAP_*, but PRIVATE and SHARED are mutually exclusive.
@@ -712,7 +718,7 @@ extern "C" void* SystemNative_MMap(void* address,
     if (length > SIZE_MAX)
     {
         errno = ERANGE;
-        return nullptr;
+        return NULL;
     }
 
     protection = ConvertMMapProtection(protection);
@@ -721,7 +727,7 @@ extern "C" void* SystemNative_MMap(void* address,
     if (flags == -1 || protection == -1)
     {
         errno = EINVAL;
-        return nullptr;
+        return NULL;
     }
 
     // Use ToFileDescriptorUnchecked to allow -1 to be passed for the file descriptor, since managed code explicitly uses -1
@@ -732,7 +738,7 @@ extern "C" void* SystemNative_MMap(void* address,
         mmap(
 #endif
             address,
-            static_cast<size_t>(length),
+            (size_t)length,
             protection,
             flags,
             ToFileDescriptorUnchecked(fd),
@@ -740,14 +746,14 @@ extern "C" void* SystemNative_MMap(void* address,
 
     if (ret == MAP_FAILED)
     {
-        return nullptr;
+        return NULL;
     }
 
-    assert(ret != nullptr);
+    assert(ret != NULL);
     return ret;
 }
 
-extern "C" int32_t SystemNative_MUnmap(void* address, uint64_t length)
+int32_t SystemNative_MUnmap(void* address, uint64_t length)
 {
     if (length > SIZE_MAX)
     {
@@ -755,10 +761,10 @@ extern "C" int32_t SystemNative_MUnmap(void* address, uint64_t length)
         return -1;
     }
 
-    return munmap(address, static_cast<size_t>(length));
+    return munmap(address, (size_t)length);
 }
 
-extern "C" int32_t SystemNative_MAdvise(void* address, uint64_t length, MemoryAdvice advice)
+int32_t SystemNative_MAdvise(void* address, uint64_t length, int32_t advice)
 {
     if (length > SIZE_MAX)
     {
@@ -770,7 +776,7 @@ extern "C" int32_t SystemNative_MAdvise(void* address, uint64_t length, MemoryAd
     {
         case PAL_MADV_DONTFORK:
 #ifdef MADV_DONTFORK
-            return madvise(address, static_cast<size_t>(length), MADV_DONTFORK);
+            return madvise(address, (size_t)length, MADV_DONTFORK);
 #else
             (void)address, (void)length, (void)advice;
             errno = ENOTSUP;
@@ -778,12 +784,12 @@ extern "C" int32_t SystemNative_MAdvise(void* address, uint64_t length, MemoryAd
 #endif
     }
 
-    assert_msg(false, "Unknown MemoryAdvice", static_cast<int>(advice));
+    assert_msg(false, "Unknown MemoryAdvice", (int)advice);
     errno = EINVAL;
     return -1;
 }
 
-extern "C" int32_t SystemNative_MLock(void* address, uint64_t length)
+int32_t SystemNative_MLock(void* address, uint64_t length)
 {
     if (length > SIZE_MAX)
     {
@@ -791,10 +797,10 @@ extern "C" int32_t SystemNative_MLock(void* address, uint64_t length)
         return -1;
     }
 
-    return mlock(address, static_cast<size_t>(length));
+    return mlock(address, (size_t)length);
 }
 
-extern "C" int32_t SystemNative_MUnlock(void* address, uint64_t length)
+int32_t SystemNative_MUnlock(void* address, uint64_t length)
 {
     if (length > SIZE_MAX)
     {
@@ -802,10 +808,10 @@ extern "C" int32_t SystemNative_MUnlock(void* address, uint64_t length)
         return -1;
     }
 
-    return munlock(address, static_cast<size_t>(length));
+    return munlock(address, (size_t)length);
 }
 
-extern "C" int32_t SystemNative_MProtect(void* address, uint64_t length, int32_t protection)
+int32_t SystemNative_MProtect(void* address, uint64_t length, int32_t protection)
 {
     if (length > SIZE_MAX)
     {
@@ -820,10 +826,10 @@ extern "C" int32_t SystemNative_MProtect(void* address, uint64_t length, int32_t
         return -1;
     }
 
-    return mprotect(address, static_cast<size_t>(length), protection);
+    return mprotect(address, (size_t)length, protection);
 }
 
-extern "C" int32_t SystemNative_MSync(void* address, uint64_t length, int32_t flags)
+int32_t SystemNative_MSync(void* address, uint64_t length, int32_t flags)
 {
     if (length > SIZE_MAX)
     {
@@ -838,10 +844,10 @@ extern "C" int32_t SystemNative_MSync(void* address, uint64_t length, int32_t fl
         return -1;
     }
 
-    return msync(address, static_cast<size_t>(length), flags);
+    return msync(address, (size_t)length, flags);
 }
 
-extern "C" int64_t SystemNative_SysConf(SysConfName name)
+int64_t SystemNative_SysConf(int32_t name)
 {
     switch (name)
     {
@@ -853,15 +859,15 @@ extern "C" int64_t SystemNative_SysConf(SysConfName name)
             return sysconf(_SC_NPROCESSORS_ONLN);
     }
 
-    assert_msg(false, "Unknown SysConf name", static_cast<int>(name));
+    assert_msg(false, "Unknown SysConf name", (int)name);
     errno = EINVAL;
     return -1;
 }
 
-extern "C" int32_t SystemNative_FTruncate(intptr_t fd, int64_t length)
+int32_t SystemNative_FTruncate(intptr_t fd, int64_t length)
 {
     int32_t result;
-    while (CheckInterrupted(
+    while ((
         result =
 #if HAVE_FTRUNCATE64
         ftruncate64(
@@ -869,13 +875,13 @@ extern "C" int32_t SystemNative_FTruncate(intptr_t fd, int64_t length)
         ftruncate(
 #endif
             ToFileDescriptor(fd),
-            length)));
+            length)) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" Error SystemNative_Poll(PollEvent* pollEvents, uint32_t eventCount, int32_t milliseconds, uint32_t* triggered)
+int32_t SystemNative_Poll(struct PollEvent* pollEvents, uint32_t eventCount, int32_t milliseconds, uint32_t* triggered)
 {
-    if (pollEvents == nullptr || triggered == nullptr)
+    if (pollEvents == NULL || triggered == NULL)
     {
         return Error_EFAULT;
     }
@@ -886,26 +892,29 @@ extern "C" Error SystemNative_Poll(PollEvent* pollEvents, uint32_t eventCount, i
     }
 
     size_t bufferSize;
-    if (!multiply_s(sizeof(pollfd), static_cast<size_t>(eventCount), &bufferSize))
+    if (!multiply_s(sizeof(struct pollfd), (size_t)eventCount, &bufferSize))
     {
-        return static_cast<Error>(SystemNative_ConvertErrorPlatformToPal(EOVERFLOW));        
+        return SystemNative_ConvertErrorPlatformToPal(EOVERFLOW);
     }
 
-    bool useStackBuffer = bufferSize <= 2048;
-    pollfd* pollfds = reinterpret_cast<pollfd*>(useStackBuffer ? alloca(bufferSize) : malloc(bufferSize));
-    if (pollfds == nullptr)
+
+    int useStackBuffer = bufferSize <= 2048;
+    struct pollfd* pollfds = (struct pollfd*)(useStackBuffer ? alloca(bufferSize) : malloc(bufferSize));
+    if (pollfds == NULL)
     {
         return Error_ENOMEM;
     }
 
     for (uint32_t i = 0; i < eventCount; i++)
     {
-        const PollEvent& event = pollEvents[i];
-        pollfds[i] = { .fd = event.FileDescriptor, .events = event.Events, .revents = 0 };
+        const struct PollEvent* event = &pollEvents[i];
+        pollfds[i].fd = event->FileDescriptor;
+        pollfds[i].events = event->Events;
+        pollfds[i].revents = 0;
     }
 
     int rv;
-    while (CheckInterrupted(rv = poll(pollfds, static_cast<nfds_t>(eventCount), milliseconds)));
+    while ((rv = poll(pollfds, (nfds_t)eventCount, milliseconds)) < 0 && errno == EINTR);
 
     if (rv < 0)
     {
@@ -915,19 +924,19 @@ extern "C" Error SystemNative_Poll(PollEvent* pollEvents, uint32_t eventCount, i
         }
 
         *triggered = 0;
-        return static_cast<Error>(SystemNative_ConvertErrorPlatformToPal(errno));
+        return SystemNative_ConvertErrorPlatformToPal(errno);
     }
 
     for (uint32_t i = 0; i < eventCount; i++)
     {
-        const pollfd& pfd = pollfds[i];
-        assert(pfd.fd == pollEvents[i].FileDescriptor);
-        assert(pfd.events == pollEvents[i].Events);
+        const struct pollfd* pfd = &pollfds[i];
+        assert(pfd->fd == pollEvents[i].FileDescriptor);
+        assert(pfd->events == pollEvents[i].Events);
 
-        pollEvents[i].TriggeredEvents = static_cast<PollEvents>(pfd.revents);
+        pollEvents[i].TriggeredEvents = (int16_t)pfd->revents;
     }
 
-    *triggered = static_cast<uint32_t>(rv);
+    *triggered = (uint32_t)rv;
 
     if (!useStackBuffer)
     {
@@ -937,11 +946,11 @@ extern "C" Error SystemNative_Poll(PollEvent* pollEvents, uint32_t eventCount, i
     return Error_SUCCESS;
 }
 
-extern "C" int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_t length, FileAdvice advice)
+int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_t length, int32_t advice)
 {
 #if HAVE_POSIX_ADVISE
     int32_t result;
-    while (CheckInterrupted(
+    while ((
         result =
 #if HAVE_POSIX_FADVISE64
             posix_fadvise64(
@@ -951,7 +960,7 @@ extern "C" int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_
                 ToFileDescriptor(fd),
                 offset,
                 length,
-                advice)));
+                advice)) < 0 && errno == EINTR);
     return result;
 #else
     // Not supported on this platform. Caller can ignore this failure since it's just a hint.
@@ -960,20 +969,20 @@ extern "C" int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_
 #endif
 }
 
-extern "C" char* SystemNative_GetLine(FILE* stream)
+char* SystemNative_GetLine(FILE* stream)
 {
-    assert(stream != nullptr);
+    assert(stream != NULL);
 
-    char* lineptr = nullptr;
+    char* lineptr = NULL;
     size_t n = 0;
     ssize_t length = getline(&lineptr, &n, stream);
     
-    return length >= 0 ? lineptr : nullptr;
+    return length >= 0 ? lineptr : NULL;
 }
 
-extern "C" int32_t SystemNative_Read(intptr_t fd, void* buffer, int32_t bufferSize)
+int32_t SystemNative_Read(intptr_t fd, void* buffer, int32_t bufferSize)
 {
-    assert(buffer != nullptr || bufferSize == 0);
+    assert(buffer != NULL || bufferSize == 0);
     assert(bufferSize >= 0);
 
     if (bufferSize < 0)
@@ -983,15 +992,15 @@ extern "C" int32_t SystemNative_Read(intptr_t fd, void* buffer, int32_t bufferSi
     }
 
     ssize_t count;
-    while (CheckInterrupted(count = read(ToFileDescriptor(fd), buffer, UnsignedCast(bufferSize))));
+    while ((count = read(ToFileDescriptor(fd), buffer, (uint32_t)bufferSize)) < 0 && errno == EINTR);
 
     assert(count >= -1 && count <= bufferSize);
-    return static_cast<int32_t>(count);
+    return (int32_t)count;
 }
 
-extern "C" int32_t SystemNative_ReadLink(const char* path, char* buffer, int32_t bufferSize)
+int32_t SystemNative_ReadLink(const char* path, char* buffer, int32_t bufferSize)
 {
-    assert(buffer != nullptr || bufferSize == 0);
+    assert(buffer != NULL || bufferSize == 0);
     assert(bufferSize >= 0);
 
     if (bufferSize < 0)
@@ -1000,33 +1009,33 @@ extern "C" int32_t SystemNative_ReadLink(const char* path, char* buffer, int32_t
         return -1;
     }
 
-    ssize_t count = readlink(path, buffer, static_cast<size_t>(bufferSize));
+    ssize_t count = readlink(path, buffer, (size_t)bufferSize);
     assert(count >= -1 && count <= bufferSize);
-    return static_cast<int32_t>(count);
+    return (int32_t)count;
 }
 
-extern "C" int32_t SystemNative_Rename(const char* oldPath, const char* newPath)
+int32_t SystemNative_Rename(const char* oldPath, const char* newPath)
 {
     int32_t result;
-    while (CheckInterrupted(result = rename(oldPath, newPath)));
+    while ((result = rename(oldPath, newPath)) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" int32_t SystemNative_RmDir(const char* path)
+int32_t SystemNative_RmDir(const char* path)
 {
     int32_t result;
-    while (CheckInterrupted(result = rmdir(path)));
+    while ((result = rmdir(path)) < 0 && errno == EINTR);
     return result;
 }
 
-extern "C" void SystemNative_Sync()
+void SystemNative_Sync(void)
 {
     sync();
 }
 
-extern "C" int32_t SystemNative_Write(intptr_t fd, const void* buffer, int32_t bufferSize)
+int32_t SystemNative_Write(intptr_t fd, const void* buffer, int32_t bufferSize)
 {
-    assert(buffer != nullptr || bufferSize == 0);
+    assert(buffer != NULL || bufferSize == 0);
     assert(bufferSize >= 0);
 
     if (bufferSize < 0)
@@ -1036,10 +1045,10 @@ extern "C" int32_t SystemNative_Write(intptr_t fd, const void* buffer, int32_t b
     }
 
     ssize_t count;
-    while (CheckInterrupted(count = write(ToFileDescriptor(fd), buffer, UnsignedCast(bufferSize))));
+    while ((count = write(ToFileDescriptor(fd), buffer, (uint32_t)bufferSize)) < 0 && errno == EINTR);
 
     assert(count >= -1 && count <= bufferSize);
-    return static_cast<int32_t>(count);
+    return (int32_t)count;
 }
 
 #if !HAVE_FCOPYFILE
@@ -1048,8 +1057,8 @@ static int32_t CopyFile_ReadWrite(int inFd, int outFd)
 {
     // Allocate a buffer
     const int BufferLength = 80 * 1024 * sizeof(char);
-    char* buffer = reinterpret_cast<char*>(malloc(BufferLength));
-    if (buffer == nullptr)
+    char* buffer = (char*)malloc(BufferLength);
+    if (buffer == NULL)
     {
         return -1;
     }
@@ -1059,7 +1068,7 @@ static int32_t CopyFile_ReadWrite(int inFd, int outFd)
     {
         // Read up to what will fit in our buffer.  We're done if we get back 0 bytes.
         ssize_t bytesRead;
-        while (CheckInterrupted(bytesRead = read(inFd, buffer, BufferLength)));
+        while ((bytesRead = read(inFd, buffer, BufferLength)) < 0 && errno == EINTR);
         if (bytesRead == -1)
         {
             int tmp = errno;
@@ -1078,7 +1087,7 @@ static int32_t CopyFile_ReadWrite(int inFd, int outFd)
         while (bytesRead > 0)
         {
             ssize_t bytesWritten;
-            while (CheckInterrupted(bytesWritten = write(outFd, buffer + offset, static_cast<size_t>(bytesRead))));
+            while ((bytesWritten = write(outFd, buffer + offset, (size_t)bytesRead)) < 0 && errno == EINTR);
             if (bytesWritten == -1)
             {
                 int tmp = errno;
@@ -1097,7 +1106,7 @@ static int32_t CopyFile_ReadWrite(int inFd, int outFd)
 }
 #endif // !HAVE_FCOPYFILE
 
-extern "C" int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd)
+int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd)
 {
     int inFd = ToFileDescriptor(sourceFd);
     int outFd = ToFileDescriptor(destinationFd);
@@ -1106,7 +1115,7 @@ extern "C" int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destination
     // If fcopyfile is available (OS X), try to use it, as the whole copy
     // can be performed in the kernel, without lots of unnecessary copying.
     // Copy data and metadata.
-    return fcopyfile(inFd, outFd, nullptr, COPYFILE_ALL) == 0 ? 0 : -1;
+    return fcopyfile(inFd, outFd, NULL, COPYFILE_ALL) == 0 ? 0 : -1;
 #else
     // Get the stats on the source file.
     int ret;
@@ -1115,24 +1124,23 @@ extern "C" int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destination
 #if HAVE_SENDFILE_4
     // If sendfile is available (Linux), try to use it, as the whole copy
     // can be performed in the kernel, without lots of unnecessary copying.
-    while (CheckInterrupted(ret = fstat_(inFd, &sourceStat)));
+    while ((ret = fstat_(inFd, &sourceStat)) < 0 && errno == EINTR);
     if (ret != 0)
     {
         return -1;
     }
 
 
-    // We use `auto' here to adapt the type of `size' depending on the running platform.
     // On 32-bit, if you use 64-bit offsets, the last argument of `sendfile' will be a
     // `size_t' a 32-bit integer while the `st_size' field of the stat structure will be off64_t.
     // So `size' will have to be `uint64_t'. In all other cases, it will be `size_t'.
-    auto size = UnsignedCast(sourceStat.st_size);
+    uint64_t size = (uint64_t)sourceStat.st_size;
 
     // Note that per man page for large files, you have to iterate until the
     // whole file is copied (Linux has a limit of 0x7ffff000 bytes copied).
     while (size > 0)
     {
-        ssize_t sent = sendfile(outFd, inFd, nullptr, (size >= SSIZE_MAX ? SSIZE_MAX : static_cast<size_t>(size)));
+        ssize_t sent = sendfile(outFd, inFd, NULL, (size >= SSIZE_MAX ? SSIZE_MAX : (size_t)size));
         if (sent < 0)
         {
             if (errno != EINVAL && errno != ENOSYS)
@@ -1146,8 +1154,8 @@ extern "C" int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destination
         }
         else
         {
-            assert(UnsignedCast(sent) <= size);
-            size -= UnsignedCast(sent);
+            assert((size_t)sent <= size);
+            size -= (size_t)sent;
         }
     }
     if (size == 0)
@@ -1169,7 +1177,7 @@ extern "C" int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destination
     // from the source file.  First copy the file times.
     // If futimes nor futimes are available on this platform, file times will
     // not be copied over.
-    while (CheckInterrupted(ret = fstat_(inFd, &sourceStat)));
+    while ((ret = fstat_(inFd, &sourceStat)) < 0 && errno == EINTR);
     if (ret == 0)
     {
 #if HAVE_FUTIMES
@@ -1178,16 +1186,16 @@ extern "C" int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destination
         origTimes[0].tv_usec = 0;
         origTimes[1].tv_sec = sourceStat.st_mtime;
         origTimes[1].tv_usec = 0;
-        while (CheckInterrupted(ret = futimes(outFd, origTimes)));
+        while ((ret = futimes(outFd, origTimes)) < 0 && errno == EINTR);
 #elif HAVE_FUTIMENS
         // futimes is not a POSIX function, and not available on Android,
         // but futimens is
         struct timespec origTimes[2];
-        origTimes[0].tv_sec = static_cast<time_t>(sourceStat.st_atime);
+        origTimes[0].tv_sec = (time_t)sourceStat.st_atime;
         origTimes[0].tv_nsec = 0;
-        origTimes[1].tv_sec = static_cast<time_t>(sourceStat.st_mtime);
+        origTimes[1].tv_sec = (time_t)sourceStat.st_mtime;
         origTimes[1].tv_nsec = 0;
-        while (CheckInterrupted(ret = futimens(outFd, origTimes)));
+        while ((ret = futimens(outFd, origTimes)) < 0 && errno == EINTR);
 #endif
     }
     if (ret != 0)
@@ -1196,7 +1204,7 @@ extern "C" int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destination
     }
 
     // Then copy permissions.
-    while (CheckInterrupted(ret = fchmod(outFd, sourceStat.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO))));
+    while ((ret = fchmod(outFd, sourceStat.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO))) < 0 && errno == EINTR);
     if (ret != 0)
     {
         return -1;
@@ -1206,7 +1214,7 @@ extern "C" int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destination
 #endif // HAVE_FCOPYFILE
 }
 
-extern "C" intptr_t SystemNative_INotifyInit()
+intptr_t SystemNative_INotifyInit(void)
 {
 #if HAVE_INOTIFY
     return inotify_init();
@@ -1216,14 +1224,14 @@ extern "C" intptr_t SystemNative_INotifyInit()
 #endif
 }
 
-extern "C" int32_t SystemNative_INotifyAddWatch(intptr_t fd, const char* pathName, uint32_t mask)
+int32_t SystemNative_INotifyAddWatch(intptr_t fd, const char* pathName, uint32_t mask)
 {
     assert(fd >= 0);
-    assert(pathName != nullptr);
+    assert(pathName != NULL);
 
 #if HAVE_INOTIFY
 #if !HAVE_IN_EXCL_UNLINK
-    mask &= ~static_cast<uint32_t>(PAL_IN_EXCL_UNLINK);
+    mask &= ~((uint32_t)PAL_IN_EXCL_UNLINK);
 #endif
     return inotify_add_watch(ToFileDescriptor(fd), pathName, mask);
 #else
@@ -1233,7 +1241,7 @@ extern "C" int32_t SystemNative_INotifyAddWatch(intptr_t fd, const char* pathNam
 #endif
 }
 
-extern "C" int32_t SystemNative_INotifyRemoveWatch(intptr_t fd, int32_t wd)
+int32_t SystemNative_INotifyRemoveWatch(intptr_t fd, int32_t wd)
 {
     assert(fd >= 0);
     assert(wd >= 0);
@@ -1242,7 +1250,7 @@ extern "C" int32_t SystemNative_INotifyRemoveWatch(intptr_t fd, int32_t wd)
     return inotify_rm_watch(
         ToFileDescriptor(fd),
 #if INOTIFY_RM_WATCH_WD_UNSIGNED
-        static_cast<uint32_t>(wd));
+        (uint32_t)wd);
 #else
         wd);
 #endif
@@ -1253,7 +1261,7 @@ extern "C" int32_t SystemNative_INotifyRemoveWatch(intptr_t fd, int32_t wd)
 #endif
 }
 
-extern "C" int32_t SystemNative_GetPeerID(intptr_t socket, uid_t* euid)
+int32_t SystemNative_GetPeerID(intptr_t socket, uid_t* euid)
 {
     int fd = ToFileDescriptor(socket);
 #ifdef SO_PEERCRED
@@ -1276,13 +1284,13 @@ extern "C" int32_t SystemNative_GetPeerID(intptr_t socket, uid_t* euid)
 #endif
 }
 
-extern "C" char* SystemNative_RealPath(const char* path)
+char* SystemNative_RealPath(const char* path)
 {
-    assert(path != nullptr);
-    return realpath(path, nullptr);
+    assert(path != NULL);
+    return realpath(path, NULL);
 }
 
-extern "C" int32_t SystemNative_LockFileRegion(intptr_t fd, int64_t offset, int64_t length, int16_t lockType)
+int32_t SystemNative_LockFileRegion(intptr_t fd, int64_t offset, int64_t length, int16_t lockType)
 {
     if (offset < 0 || length < 0) 
     {
@@ -1302,6 +1310,6 @@ extern "C" int32_t SystemNative_LockFileRegion(intptr_t fd, int64_t offset, int6
     lockArgs.l_len = length;
 
     int32_t ret;
-    while (CheckInterrupted(ret = fcntl (ToFileDescriptor(fd), F_SETLK, &lockArgs)));
+    while ((ret = fcntl (ToFileDescriptor(fd), F_SETLK, &lockArgs)) < 0 && errno == EINTR);
     return ret;
 }
