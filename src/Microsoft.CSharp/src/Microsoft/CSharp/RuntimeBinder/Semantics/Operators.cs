@@ -1669,20 +1669,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /*
             Handles standard binary floating point (float, double) based operators.
         */
-        private ExprOperator BindRealBinOp(ExpressionKind ek, EXPRFLAG flags, Expr arg1, Expr arg2)
+        private ExprOperator BindRealBinOp(ExpressionKind ek, EXPRFLAG _, Expr arg1, Expr arg2)
         {
             Debug.Assert(arg1.Type.isPredefined() && arg2.Type.isPredefined() && arg1.Type.getPredefType() == arg2.Type.getPredefType());
-            return bindFloatOp(ek, flags, arg1, arg2);
+            return bindFloatOp(ek, arg1, arg2);
         }
 
 
         /*
             Handles standard unary floating point (float, double) based operators.
         */
-        private ExprOperator BindRealUnaOp(ExpressionKind ek, EXPRFLAG flags, Expr arg)
+        private ExprOperator BindRealUnaOp(ExpressionKind ek, EXPRFLAG _, Expr arg)
         {
             Debug.Assert(arg.Type.isPredefined());
-            return bindFloatOp(ek, flags, arg, null);
+            return bindFloatOp(ek, arg, null);
         }
 
 
@@ -2409,7 +2409,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
           will be a constant also. op2 can be null for a unary operator. The operands are assumed
           to be already converted to the correct type.
          */
-        private ExprOperator bindFloatOp(ExpressionKind kind, EXPRFLAG flags, Expr op1, Expr op2)
+        private ExprOperator bindFloatOp(ExpressionKind kind, Expr op1, Expr op2)
         {
             //Debug.Assert(kind.isRelational() || kind.isArithmetic());
             Debug.Assert(op2 == null || op1.Type == op2.Type);
@@ -2419,8 +2419,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType typeDest = kind.IsRelational() ? GetPredefindType(PredefinedType.PT_BOOL) : op1.Type;
 
             ExprOperator exprRes = GetExprFactory().CreateOperator(kind, typeDest, op1, op2);
-            flags = ~EXPRFLAG.EXF_CHECKOVERFLOW;
-            exprRes.Flags &= flags;
+            exprRes.Flags &= ~EXPRFLAG.EXF_CHECKOVERFLOW;
 
             return exprRes;
         }
