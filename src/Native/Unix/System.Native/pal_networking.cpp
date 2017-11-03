@@ -149,9 +149,9 @@ const int OffsetOfIovecLen = offsetof(iovec, iov_len);
 
 // We require that IOVector have the same layout as iovec.
 static_assert(sizeof(IOVector) == sizeof(iovec), "");
-static_assert(sizeof(decltype(IOVector::Base)) == sizeof(decltype(iovec::iov_base)), "");
+static_assert(sizeof_member(IOVector, Base) == sizeof_member(iovec, iov_base), "");
 static_assert(OffsetOfIOVectorBase == OffsetOfIovecBase, "");
-static_assert(sizeof(decltype(IOVector::Count)) == sizeof(decltype(iovec::iov_len)), "");
+static_assert(sizeof_member(IOVector, Count) == sizeof_member(iovec, iov_len), "");
 static_assert(OffsetOfIOVectorCount == OffsetOfIovecLen, "");
 
 template <typename T>
@@ -1436,7 +1436,7 @@ extern "C" Error SystemNative_SetIPv6MulticastOption(intptr_t socket, int32_t mu
 static int32_t GetMaxLingerTime()
 {
     static volatile int32_t MaxLingerTime = -1;
-    static_assert(sizeof(xsocket::so_linger) == 2, "");
+    static_assert(sizeof_member(xsocket, so_linger) == 2, "");
 
     // OS X does not define the linger time in seconds by default, but in ticks.
     // Furthermore, when SO_LINGER_SEC is used, the value is simply scaled by
@@ -1465,7 +1465,7 @@ constexpr int32_t GetMaxLingerTime()
     // 65535 (the maximum time for winsock) and the maximum signed value that
     // will fit in linger::l_linger.
 
-    return Min(65535U, (1U << (sizeof(linger::l_linger) * 8 - 1)) - 1);
+    return Min(65535U, (1U << (sizeof_member(linger, l_linger) * 8 - 1)) - 1);
 }
 #endif
 

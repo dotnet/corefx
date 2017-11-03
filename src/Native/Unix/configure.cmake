@@ -1,5 +1,7 @@
 include(CheckCXXSourceCompiles)
 include(CheckCXXSourceRuns)
+include(CheckCSourceCompiles)
+include(CheckCSourceRuns)
 include(CheckFunctionExists)
 include(CheckIncludeFiles)
 include(CheckPrototypeDefinition)
@@ -95,8 +97,9 @@ check_function_exists(
     stat64
     HAVE_STAT64)
 
-check_function_exists(
+check_symbol_exists(
     pipe2
+    unistd.h
     HAVE_PIPE2)
 
 check_function_exists(

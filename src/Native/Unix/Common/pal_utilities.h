@@ -38,6 +38,14 @@
 #define assert_msg(cond, msg, val)
 #endif // DEBUG
 
+#ifdef __cplusplus
+#define sizeof_member(type,member) sizeof(type::member)
+#else
+#define sizeof_member(type,member) sizeof(((type*)NULL)->member)
+#endif
+
+#ifdef __cplusplus
+
 /**
  * ResultOf<T> is shorthand for typename std::result_of<T>::type.
  * Equivalent to C++14 std::result_of_t.

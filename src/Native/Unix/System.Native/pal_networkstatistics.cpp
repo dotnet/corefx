@@ -306,15 +306,15 @@ extern "C" int32_t SystemNative_GetActiveTcpConnectionInfos(NativeTcpConnectionI
         bool isIpv4 = (vflag & INP_IPV4) == INP_IPV4;
         if (isIpv4)
         {
-            memcpy_s(&ntci->LocalEndPoint.AddressBytes, sizeof(IPEndPointInfo::AddressBytes), &in_pcb.inp_laddr.s_addr, 4);
-            memcpy_s(&ntci->RemoteEndPoint.AddressBytes, sizeof(IPEndPointInfo::AddressBytes), &in_pcb.inp_faddr.s_addr, 4);
+            memcpy_s(&ntci->LocalEndPoint.AddressBytes, sizeof_member(IPEndPointInfo, AddressBytes), &in_pcb.inp_laddr.s_addr, 4);
+            memcpy_s(&ntci->RemoteEndPoint.AddressBytes, sizeof_member(IPEndPointInfo, AddressBytes), &in_pcb.inp_faddr.s_addr, 4);
             ntci->LocalEndPoint.NumAddressBytes = 4;
             ntci->RemoteEndPoint.NumAddressBytes = 4;
         }
         else
         {
-            memcpy_s(&ntci->LocalEndPoint.AddressBytes, sizeof(IPEndPointInfo::AddressBytes), &in_pcb.in6p_laddr.s6_addr, 16);
-            memcpy_s(&ntci->RemoteEndPoint.AddressBytes, sizeof(IPEndPointInfo::AddressBytes), &in_pcb.in6p_faddr.s6_addr, 16);
+            memcpy_s(&ntci->LocalEndPoint.AddressBytes, sizeof_member(IPEndPointInfo, AddressBytes), &in_pcb.in6p_laddr.s6_addr, 16);
+            memcpy_s(&ntci->RemoteEndPoint.AddressBytes, sizeof_member(IPEndPointInfo, AddressBytes), &in_pcb.in6p_faddr.s6_addr, 16);
             ntci->LocalEndPoint.NumAddressBytes = 16;
             ntci->RemoteEndPoint.NumAddressBytes = 16;
         }
@@ -399,12 +399,12 @@ extern "C" int32_t SystemNative_GetActiveUdpListeners(IPEndPointInfo* infos, int
         bool isIpv4 = (vflag & INP_IPV4) == INP_IPV4;
         if (isIpv4)
         {
-            memcpy_s(iepi->AddressBytes, sizeof(IPEndPointInfo::AddressBytes), &in_pcb.inp_laddr.s_addr, 4);
+            memcpy_s(iepi->AddressBytes, sizeof_member(IPEndPointInfo, AddressBytes), &in_pcb.inp_laddr.s_addr, 4);
             iepi->NumAddressBytes = 4;
         }
         else
         {
-            memcpy_s(iepi->AddressBytes, sizeof(IPEndPointInfo::AddressBytes), &in_pcb.in6p_laddr.s6_addr, 16);
+            memcpy_s(iepi->AddressBytes, sizeof_member(IPEndPointInfo, AddressBytes), &in_pcb.in6p_laddr.s6_addr, 16);
             iepi->NumAddressBytes = 16;
         }
 
