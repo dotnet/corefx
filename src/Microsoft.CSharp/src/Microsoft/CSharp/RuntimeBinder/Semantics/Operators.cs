@@ -1721,7 +1721,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(ek == ExpressionKind.Add || ek == ExpressionKind.Subtract);
             ConstVal cv;
-            Expr pExprResult = null;
+            Expr pExprResult;
 
             if (type.isEnumType() && type.fundType() > FUNDTYPE.FT_LASTINTEGRAL)
             {
@@ -1752,22 +1752,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case FUNDTYPE.FT_U2:
                     typeTmp = GetPredefindType(PredefinedType.PT_INT);
                     cv = ConstVal.Get(1);
-                    pExprResult = LScalar(ek, flags, exprVal, type, cv, pExprResult, typeTmp);
+                    pExprResult = LScalar(ek, flags, exprVal, type, cv, typeTmp);
                     break;
                 case FUNDTYPE.FT_I4:
                 case FUNDTYPE.FT_U4:
                     cv = ConstVal.Get(1);
-                    pExprResult = LScalar(ek, flags, exprVal, type, cv, pExprResult, typeTmp);
+                    pExprResult = LScalar(ek, flags, exprVal, type, cv, typeTmp);
                     break;
                 case FUNDTYPE.FT_I8:
                 case FUNDTYPE.FT_U8:
                     cv = ConstVal.Get((long)1);
-                    pExprResult = LScalar(ek, flags, exprVal, type, cv, pExprResult, typeTmp);
+                    pExprResult = LScalar(ek, flags, exprVal, type, cv, typeTmp);
                     break;
                 case FUNDTYPE.FT_R4:
                 case FUNDTYPE.FT_R8:
                     cv = ConstVal.Get(1.0);
-                    pExprResult = LScalar(ek, flags, exprVal, type, cv, pExprResult, typeTmp);
+                    pExprResult = LScalar(ek, flags, exprVal, type, cv, typeTmp);
                     break;
             }
             Debug.Assert(pExprResult != null);
@@ -1775,20 +1775,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return pExprResult;
         }
 
-        private Expr LScalar(ExpressionKind ek, EXPRFLAG flags, Expr exprVal, CType type, ConstVal cv, Expr pExprResult, CType typeTmp)
+        private Expr LScalar(ExpressionKind ek, EXPRFLAG flags, Expr exprVal, CType type, ConstVal cv, CType typeTmp)
         {
             CType typeOne = type;
             if (typeOne.isEnumType())
             {
                 typeOne = typeOne.underlyingEnumType();
             }
-            pExprResult = GetExprFactory().CreateBinop(ek, typeTmp, exprVal, GetExprFactory().CreateConstant(typeOne, cv));
+
+            ExprBinOp pExprResult = GetExprFactory().CreateBinop(ek, typeTmp, exprVal, GetExprFactory().CreateConstant(typeOne, cv));
             pExprResult.Flags |= flags;
-            if (typeTmp != type)
-            {
-                pExprResult = mustCast(pExprResult, type, CONVERTTYPE.NOUDC);
-            }
-            return pExprResult;
+            return typeTmp != type ? mustCast(pExprResult, type, CONVERTTYPE.NOUDC) : pExprResult;
         }
 
         private ExprMulti BindNonliftedIncOp(ExpressionKind ek, EXPRFLAG flags, Expr arg, UnaOpFullSig uofs)
@@ -2088,8 +2085,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         */
         private Expr BindEnumBinOp(ExpressionKind ek, EXPRFLAG flags, Expr arg1, Expr arg2)
         {
-            AggregateType typeEnum = null;
-            AggregateType typeDst = GetEnumBinOpType(ek, arg1.Type, arg2.Type, out typeEnum);
+            AggregateType typeDst = GetEnumBinOpType(ek, arg1.Type, arg2.Type, out AggregateType typeEnum);
 
             Debug.Assert(typeEnum != null);
             PredefinedType ptOp;
