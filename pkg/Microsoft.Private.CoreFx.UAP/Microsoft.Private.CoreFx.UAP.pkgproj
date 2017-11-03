@@ -30,7 +30,6 @@
     <!-- Exclude shims from the closure verification -->
     <ExcludeFromClosure Include="mscorlib" />
     <ExcludeFromClosure Include="System" />
-    <ExcludeFromClosure Include="System.ComponentModel.Composition" />
     <ExcludeFromClosure Include="System.Configuration" />
     <ExcludeFromClosure Include="System.Core" />
     <ExcludeFromClosure Include="System.Data" />
