@@ -1,20 +1,22 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//------------------------------------------------------------
 
 namespace System.ServiceModel.Syndication
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Threading.Tasks;
     using System.Xml;
+    using System.Collections.ObjectModel;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Runtime.Serialization;
+    using System.Xml.Serialization;
+    using System.Runtime.CompilerServices;
 
     public abstract class CategoriesDocument : IExtensibleSyndicationObject
     {
-        private Uri _baseUri;
-        private ExtensibleSyndicationObject _extensions = new ExtensibleSyndicationObject();
-        private string _language;
+        Uri baseUri;
+        ExtensibleSyndicationObject extensions = new ExtensibleSyndicationObject();
+        string language;
 
         internal CategoriesDocument()
         {
@@ -24,28 +26,28 @@ namespace System.ServiceModel.Syndication
         {
             get
             {
-                return _extensions.AttributeExtensions;
+                return this.extensions.AttributeExtensions;
             }
         }
 
         public Uri BaseUri
         {
-            get { return _baseUri; }
-            set { _baseUri = value; }
+            get { return this.baseUri; }
+            set { this.baseUri = value; }
         }
 
         public SyndicationElementExtensionCollection ElementExtensions
         {
             get
             {
-                return _extensions.ElementExtensions;
+                return this.extensions.ElementExtensions;
             }
         }
 
         public string Language
         {
-            get { return _language; }
-            set { _language = value; }
+            get { return this.language; }
+            set { this.language = value; }
         }
 
         internal abstract bool IsInline
@@ -70,13 +72,8 @@ namespace System.ServiceModel.Syndication
 
         public static CategoriesDocument Load(XmlReader reader)
         {
-            return LoadAsync(reader).GetAwaiter().GetResult();
-        }
-
-        public static async Task<CategoriesDocument> LoadAsync(XmlReader reader)
-        {
             AtomPub10CategoriesDocumentFormatter formatter = new AtomPub10CategoriesDocumentFormatter();
-            await formatter.ReadFromAsync(reader).ConfigureAwait(false);
+            formatter.ReadFrom(reader);
             return formatter.Document;
         }
 
@@ -87,7 +84,7 @@ namespace System.ServiceModel.Syndication
 
         public void Save(XmlWriter writer)
         {
-            GetFormatter().WriteTo(writer);
+            this.GetFormatter().WriteTo(writer);
         }
 
         protected internal virtual bool TryParseAttribute(string name, string ns, string value, string version)
@@ -102,32 +99,22 @@ namespace System.ServiceModel.Syndication
 
         protected internal virtual void WriteAttributeExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteAttributeExtensions(writer);
+            this.extensions.WriteAttributeExtensions(writer);
         }
 
         protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteElementExtensions(writer);
-        }
-
-        protected internal virtual Task WriteAttributeExtensionsAsync(XmlWriter writer, string version)
-        {
-            return _extensions.WriteAttributeExtensionsAsync(writer);
-        }
-
-        protected internal virtual Task WriteElementExtensionsAsync(XmlWriter writer, string version)
-        {
-            return _extensions.WriteElementExtensionsAsync(writer);
+            this.extensions.WriteElementExtensions(writer);
         }
 
         internal void LoadElementExtensions(XmlReader readerOverUnparsedExtensions, int maxExtensionSize)
         {
-            _extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
+            this.extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
         }
 
         internal void LoadElementExtensions(XmlBuffer buffer)
         {
-            _extensions.LoadElementExtensions(buffer);
+            this.extensions.LoadElementExtensions(buffer);
         }
     }
 }

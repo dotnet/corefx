@@ -1,18 +1,20 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//------------------------------------------------------------
 
 namespace System.ServiceModel.Syndication
 {
-    using System;
+    using System.Collections.ObjectModel;
     using System.Runtime.Serialization;
-    using System.Threading.Tasks;
+    using System.Xml.Serialization;
+    using System.Collections.Generic;
     using System.Xml;
+    using System.Runtime.CompilerServices;
 
     [DataContract]
     public abstract class CategoriesDocumentFormatter
     {
-        private CategoriesDocument _document;
+        CategoriesDocument document;
 
         protected CategoriesDocumentFormatter()
         {
@@ -21,14 +23,14 @@ namespace System.ServiceModel.Syndication
         {
             if (documentToWrite == null)
             {
-                throw new ArgumentNullException(nameof(documentToWrite));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("documentToWrite");
             }
-            _document = documentToWrite;
+            this.document = documentToWrite;
         }
 
         public CategoriesDocument Document
         {
-            get { return _document; }
+            get { return this.document; }
         }
 
         public abstract string Version
@@ -37,15 +39,6 @@ namespace System.ServiceModel.Syndication
         public abstract bool CanRead(XmlReader reader);
         public abstract void ReadFrom(XmlReader reader);
         public abstract void WriteTo(XmlWriter writer);
-        public virtual Task ReadFromAsync(XmlReader reader)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual Task WriteToAsync(XmlWriter writer)
-        {
-            throw new NotImplementedException();
-        }
 
         protected virtual InlineCategoriesDocument CreateInlineCategoriesDocument()
         {
@@ -59,7 +52,7 @@ namespace System.ServiceModel.Syndication
 
         protected virtual void SetDocument(CategoriesDocument document)
         {
-            _document = document;
+            this.document = document;
         }
     }
 }

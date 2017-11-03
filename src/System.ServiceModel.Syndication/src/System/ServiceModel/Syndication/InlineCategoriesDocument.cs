@@ -1,17 +1,22 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//------------------------------------------------------------
 
 namespace System.ServiceModel.Syndication
 {
-    using System.Collections.Generic;
+    using System.Xml;
     using System.Collections.ObjectModel;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Runtime.Serialization;
+    using System.Xml.Serialization;
+    using System.Runtime.CompilerServices;
 
     public class InlineCategoriesDocument : CategoriesDocument
     {
-        private Collection<SyndicationCategory> _categories;
-        private bool _isFixed;
-        private string _scheme;
+        Collection<SyndicationCategory> categories;
+        bool isFixed;
+        string scheme;
 
         public InlineCategoriesDocument()
         {
@@ -26,38 +31,38 @@ namespace System.ServiceModel.Syndication
         {
             if (categories != null)
             {
-                _categories = new NullNotAllowedCollection<SyndicationCategory>();
+                this.categories = new NullNotAllowedCollection<SyndicationCategory>();
                 foreach (SyndicationCategory category in categories)
                 {
-                    _categories.Add(category);
+                    this.categories.Add(category);
                 }
             }
-            _isFixed = isFixed;
-            _scheme = scheme;
+            this.isFixed = isFixed;
+            this.scheme = scheme;
         }
 
         public Collection<SyndicationCategory> Categories
         {
             get
             {
-                if (_categories == null)
+                if (this.categories == null)
                 {
-                    _categories = new NullNotAllowedCollection<SyndicationCategory>();
+                    this.categories = new NullNotAllowedCollection<SyndicationCategory>();
                 }
-                return _categories;
+                return this.categories;
             }
         }
 
         public bool IsFixed
         {
-            get { return _isFixed; }
-            set { _isFixed = value; }
+            get { return this.isFixed; }
+            set { this.isFixed = value; }
         }
 
         public string Scheme
         {
-            get { return _scheme; }
-            set { _scheme = value; }
+            get { return this.scheme; }
+            set { this.scheme = value; }
         }
 
         internal override bool IsInline

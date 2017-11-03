@@ -1,21 +1,22 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//------------------------------------------------------------
 
 namespace System.ServiceModel.Syndication
 {
-    using System;
-    using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Threading.Tasks;
+    using System.Runtime.Serialization;
+    using System.Xml.Serialization;
+    using System.Collections.Generic;
     using System.Xml;
+    using System.Runtime.CompilerServices;
 
     public class Workspace : IExtensibleSyndicationObject
     {
-        private Uri _baseUri;
-        private Collection<ResourceCollectionInfo> _collections;
-        private ExtensibleSyndicationObject _extensions = new ExtensibleSyndicationObject();
-        private TextSyndicationContent _title;
+        Uri baseUri;
+        Collection<ResourceCollectionInfo> collections;
+        ExtensibleSyndicationObject extensions = new ExtensibleSyndicationObject();
+        TextSyndicationContent title;
 
         public Workspace()
         {
@@ -28,13 +29,13 @@ namespace System.ServiceModel.Syndication
 
         public Workspace(TextSyndicationContent title, IEnumerable<ResourceCollectionInfo> collections)
         {
-            _title = title;
+            this.title = title;
             if (collections != null)
             {
-                _collections = new NullNotAllowedCollection<ResourceCollectionInfo>();
+                this.collections = new NullNotAllowedCollection<ResourceCollectionInfo>();
                 foreach (ResourceCollectionInfo collection in collections)
                 {
-                    _collections.Add(collection);
+                    this.collections.Add(collection);
                 }
             }
         }
@@ -43,25 +44,25 @@ namespace System.ServiceModel.Syndication
         {
             get
             {
-                return _extensions.AttributeExtensions;
+                return this.extensions.AttributeExtensions;
             }
         }
 
         public Uri BaseUri
         {
-            get { return _baseUri; }
-            set { _baseUri = value; }
+            get { return this.baseUri; }
+            set { this.baseUri = value; }
         }
 
         public Collection<ResourceCollectionInfo> Collections
         {
             get
             {
-                if (_collections == null)
+                if (this.collections == null)
                 {
-                    _collections = new NullNotAllowedCollection<ResourceCollectionInfo>();
+                    this.collections = new NullNotAllowedCollection<ResourceCollectionInfo>();
                 }
-                return _collections;
+                return this.collections;
             }
         }
 
@@ -69,14 +70,14 @@ namespace System.ServiceModel.Syndication
         {
             get
             {
-                return _extensions.ElementExtensions;
+                return this.extensions.ElementExtensions;
             }
         }
 
         public TextSyndicationContent Title
         {
-            get { return _title; }
-            set { _title = value; }
+            get { return this.title; }
+            set { this.title = value; }
         }
 
         protected internal virtual ResourceCollectionInfo CreateResourceCollection()
@@ -96,32 +97,22 @@ namespace System.ServiceModel.Syndication
 
         protected internal virtual void WriteAttributeExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteAttributeExtensions(writer);
+            this.extensions.WriteAttributeExtensions(writer);
         }
 
         protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteElementExtensions(writer);
-        }
-
-        protected internal virtual Task WriteAttributeExtensionsAsync(XmlWriter writer, string version)
-        {
-            return _extensions.WriteAttributeExtensionsAsync(writer);
-        }
-
-        protected internal virtual Task WriteElementExtensionsAsync(XmlWriter writer, string version)
-        {
-            return _extensions.WriteElementExtensionsAsync(writer);
+            this.extensions.WriteElementExtensions(writer);
         }
 
         internal void LoadElementExtensions(XmlReader readerOverUnparsedExtensions, int maxExtensionSize)
         {
-            _extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
+            this.extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
         }
 
         internal void LoadElementExtensions(XmlBuffer buffer)
         {
-            _extensions.LoadElementExtensions(buffer);
+            this.extensions.LoadElementExtensions(buffer);
         }
     }
 }

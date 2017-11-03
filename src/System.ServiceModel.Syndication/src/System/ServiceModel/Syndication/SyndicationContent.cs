@@ -1,19 +1,21 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//------------------------------------------------------------
 
 namespace System.ServiceModel.Syndication
 {
     using System;
     using System.Collections.Generic;
-    using System.Runtime.Serialization;
-    using System.Threading.Tasks;
+    using System.Text;
     using System.Xml;
     using System.Xml.Serialization;
+    using System.Runtime.Serialization;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Runtime.CompilerServices;
 
     public abstract class SyndicationContent
     {
-        private Dictionary<XmlQualifiedName, string> _attributeExtensions;
+        Dictionary<XmlQualifiedName, string> attributeExtensions;
 
         protected SyndicationContent()
         {
@@ -28,11 +30,11 @@ namespace System.ServiceModel.Syndication
         {
             get
             {
-                if (_attributeExtensions == null)
+                if (this.attributeExtensions == null)
                 {
-                    _attributeExtensions = new Dictionary<XmlQualifiedName, string>();
+                    this.attributeExtensions = new Dictionary<XmlQualifiedName, string>();
                 }
-                return _attributeExtensions;
+                return this.attributeExtensions;
             }
         }
 
@@ -63,7 +65,7 @@ namespace System.ServiceModel.Syndication
 
         public static XmlSyndicationContent CreateXmlContent(object dataContractObject)
         {
-            return new XmlSyndicationContent(Atom10Constants.XmlMediaType, dataContractObject, (DataContractSerializer)null);
+            return new XmlSyndicationContent(Atom10Constants.XmlMediaType, dataContractObject, (DataContractSerializer) null);
         }
 
         public static XmlSyndicationContent CreateXmlContent(object dataContractObject, XmlObjectSerializer dataContractSerializer)
@@ -85,54 +87,46 @@ namespace System.ServiceModel.Syndication
 
         public void WriteTo(XmlWriter writer, string outerElementName, string outerElementNamespace)
         {
-            WriteToAsync(writer, outerElementName, outerElementNamespace).GetAwaiter().GetResult();
-        }
-
-        public async Task WriteToAsync(XmlWriter writer, string outerElementName, string outerElementNamespace)
-        {
             if (writer == null)
             {
-                throw new ArgumentNullException(nameof(writer));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("writer");
             }
             if (string.IsNullOrEmpty(outerElementName))
             {
-                throw new ArgumentException(SR.OuterElementNameNotSpecified);
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgument(SR.Format(SR.OuterElementNameNotSpecified));
             }
-
-            writer = XmlWriterWrapper.CreateFromWriter(writer);
-
-            await writer.WriteStartElementAsync(outerElementName, outerElementNamespace).ConfigureAwait(false);
-            await writer.WriteAttributeStringAsync(Atom10Constants.TypeTag, string.Empty, Type).ConfigureAwait(false);
-            if (_attributeExtensions != null)
+            writer.WriteStartElement(outerElementName, outerElementNamespace);
+            writer.WriteAttributeString(Atom10Constants.TypeTag, string.Empty, this.Type);
+            if (this.attributeExtensions != null)
             {
-                foreach (XmlQualifiedName key in _attributeExtensions.Keys)
+                foreach (XmlQualifiedName key in this.attributeExtensions.Keys)
                 {
                     if (key.Name == Atom10Constants.TypeTag && key.Namespace == string.Empty)
                     {
                         continue;
                     }
                     string attrValue;
-                    if (_attributeExtensions.TryGetValue(key, out attrValue))
+                    if (this.attributeExtensions.TryGetValue(key, out attrValue))
                     {
-                        await writer.WriteAttributeStringAsync(key.Name, key.Namespace, attrValue).ConfigureAwait(false);
+                        writer.WriteAttributeString(key.Name, key.Namespace, attrValue);
                     }
                 }
             }
             WriteContentsTo(writer);
-            await writer.WriteEndElementAsync().ConfigureAwait(false);
+            writer.WriteEndElement();
         }
 
         internal void CopyAttributeExtensions(SyndicationContent source)
         {
             if (source == null)
             {
-                throw new ArgumentNullException(nameof(source));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("source");
             }
-            if (source._attributeExtensions != null)
+            if (source.attributeExtensions != null)
             {
-                foreach (XmlQualifiedName key in source._attributeExtensions.Keys)
+                foreach (XmlQualifiedName key in source.attributeExtensions.Keys)
                 {
-                    AttributeExtensions.Add(key, source._attributeExtensions[key]);
+                    this.AttributeExtensions.Add(key, source.attributeExtensions[key]);
                 }
             }
         }

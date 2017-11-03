@@ -1,22 +1,23 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//------------------------------------------------------------
 
 namespace System.ServiceModel.Syndication
 {
-    using System;
     using System.Collections.ObjectModel;
-    using System.Globalization;
     using System.Xml;
+    using System.Xml.Serialization;
+    using System.Runtime.Serialization;
+    using System.Globalization;
 
-    internal static class FeedUtils
+    static class FeedUtils
     {
         public static string AddLineInfo(XmlReader reader, string error)
         {
             IXmlLineInfo lineInfo = reader as IXmlLineInfo;
             if (lineInfo != null && lineInfo.HasLineInfo())
             {
-                error = string.Format(CultureInfo.InvariantCulture, "{0} {1}", SR.Format(SR.ErrorInLine, lineInfo.LineNumber, lineInfo.LinePosition), error);
+                error = String.Format(CultureInfo.InvariantCulture, "{0} {1}", SR.Format(SR.ErrorInLine, lineInfo.LineNumber, lineInfo.LinePosition), SR.Format(error));
             }
             return error;
         }
@@ -78,13 +79,11 @@ namespace System.ServiceModel.Syndication
             {
                 return rootBase;
             }
-
             Uri newBaseUri = new Uri(newBase, UriKind.RelativeOrAbsolute);
             if (rootBase == null || newBaseUri.IsAbsoluteUri)
             {
                 return newBaseUri;
             }
-
             return new Uri(rootBase, newBase);
         }
 

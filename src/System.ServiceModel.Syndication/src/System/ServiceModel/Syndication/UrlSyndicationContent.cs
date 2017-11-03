@@ -1,26 +1,26 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//------------------------------------------------------------
 
 namespace System.ServiceModel.Syndication
 {
-    using System;
     using System.Xml;
+    using System.Runtime.CompilerServices;
 
     // NOTE: This class implements Clone so if you add any members, please update the copy ctor
     public class UrlSyndicationContent : SyndicationContent
     {
-        private string _mediaType;
-        private Uri _url;
+        string mediaType;
+        Uri url;
 
         public UrlSyndicationContent(Uri url, string mediaType) : base()
         {
             if (url == null)
             {
-                throw new ArgumentNullException(nameof(url));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("url");
             }
-            _url = url;
-            _mediaType = mediaType;
+            this.url = url;
+            this.mediaType = mediaType;
         }
 
         protected UrlSyndicationContent(UrlSyndicationContent source)
@@ -28,20 +28,20 @@ namespace System.ServiceModel.Syndication
         {
             if (source == null)
             {
-                throw new ArgumentNullException(nameof(source));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("source");
             }
-            _url = source._url;
-            _mediaType = source._mediaType;
+            this.url = source.url;
+            this.mediaType = source.mediaType;
         }
 
         public override string Type
         {
-            get { return _mediaType; }
+            get { return this.mediaType; }
         }
 
         public Uri Url
         {
-            get { return _url; }
+            get { return this.url; }
         }
 
         public override SyndicationContent Clone()
@@ -51,7 +51,7 @@ namespace System.ServiceModel.Syndication
 
         protected override void WriteContentsTo(XmlWriter writer)
         {
-            writer.WriteAttributeString(Atom10Constants.SourceTag, string.Empty, FeedUtils.GetUriString(_url));
+            writer.WriteAttributeString(Atom10Constants.SourceTag, string.Empty, FeedUtils.GetUriString(this.url));
         }
     }
 }

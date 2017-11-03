@@ -1,21 +1,25 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//------------------------------------------------------------
 
 namespace System.ServiceModel.Syndication
 {
     using System;
+    using System.Collections.ObjectModel;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using System.Xml;
+    using System.Runtime.Serialization;
+    using System.Xml.Serialization;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Runtime.CompilerServices;
 
     // NOTE: This class implements Clone so if you add any members, please update the copy ctor
     public class SyndicationPerson : IExtensibleSyndicationObject
     {
-        private string _email;
-        private ExtensibleSyndicationObject _extensions = new ExtensibleSyndicationObject();
-        private string _name;
-        private string _uri;
+        string email;
+        ExtensibleSyndicationObject extensions = new ExtensibleSyndicationObject();
+        string name;
+        string uri;
 
         public SyndicationPerson()
             : this((string)null)
@@ -27,51 +31,53 @@ namespace System.ServiceModel.Syndication
         {
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "2#", Justification = "The Uri represents a unique category and not a network location")]
         public SyndicationPerson(string email, string name, string uri)
         {
-            _name = name;
-            _email = email;
-            _uri = uri;
+            this.name = name;
+            this.email = email;
+            this.uri = uri;
         }
 
         protected SyndicationPerson(SyndicationPerson source)
         {
             if (source == null)
             {
-                throw new ArgumentNullException(nameof(source));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("source");
             }
-            _email = source._email;
-            _name = source._name;
-            _uri = source._uri;
-            _extensions = source._extensions.Clone();
+            this.email = source.email;
+            this.name = source.name;
+            this.uri = source.uri;
+            this.extensions = source.extensions.Clone();
         }
 
         public Dictionary<XmlQualifiedName, string> AttributeExtensions
         {
-            get { return _extensions.AttributeExtensions; }
+            get { return this.extensions.AttributeExtensions; }
         }
 
         public SyndicationElementExtensionCollection ElementExtensions
         {
-            get { return _extensions.ElementExtensions; }
+            get { return this.extensions.ElementExtensions; }
         }
 
         public string Email
         {
-            get { return _email; }
-            set { _email = value; }
+            get { return email; }
+            set { email = value; }
         }
 
         public string Name
         {
-            get { return _name; }
-            set { _name = value; }
+            get { return name; }
+            set { name = value; }
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Scope = "property", Justification = "The Uri represents a unique category and not a network location")]
         public string Uri
         {
-            get { return _uri; }
-            set { _uri = value; }
+            get { return uri; }
+            set { uri = value; }
         }
 
         public virtual SyndicationPerson Clone()
@@ -91,32 +97,22 @@ namespace System.ServiceModel.Syndication
 
         protected internal virtual void WriteAttributeExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteAttributeExtensions(writer);
+            this.extensions.WriteAttributeExtensions(writer);
         }
 
         protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteElementExtensions(writer);
-        }
-
-        protected internal virtual Task WriteAttributeExtensionsAsync(XmlWriter writer, string version)
-        {
-            return _extensions.WriteAttributeExtensionsAsync(writer);
-        }
-
-        protected internal virtual Task WriteElementExtensionsAsync(XmlWriter writer, string version)
-        {
-            return _extensions.WriteElementExtensionsAsync(writer);
+            this.extensions.WriteElementExtensions(writer);
         }
 
         internal void LoadElementExtensions(XmlReader readerOverUnparsedExtensions, int maxExtensionSize)
         {
-            _extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
+            this.extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
         }
 
         internal void LoadElementExtensions(XmlBuffer buffer)
         {
-            _extensions.LoadElementExtensions(buffer);
+            this.extensions.LoadElementExtensions(buffer);
         }
     }
 }

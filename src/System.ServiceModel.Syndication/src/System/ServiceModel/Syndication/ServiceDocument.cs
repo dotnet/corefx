@@ -1,21 +1,22 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//------------------------------------------------------------
 
 namespace System.ServiceModel.Syndication
 {
-    using System;
-    using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Threading.Tasks;
+    using System.Runtime.Serialization;
+    using System.Xml.Serialization;
+    using System.Collections.Generic;
     using System.Xml;
+    using System.Runtime.CompilerServices;
 
     public class ServiceDocument : IExtensibleSyndicationObject
     {
-        private Uri _baseUri;
-        private ExtensibleSyndicationObject _extensions = new ExtensibleSyndicationObject();
-        private string _language;
-        private Collection<Workspace> _workspaces;
+        Uri baseUri;
+        ExtensibleSyndicationObject extensions = new ExtensibleSyndicationObject();
+        string language;
+        Collection<Workspace> workspaces;
 
         public ServiceDocument() : this(null)
         {
@@ -25,45 +26,45 @@ namespace System.ServiceModel.Syndication
         {
             if (workspaces != null)
             {
-                _workspaces = new NullNotAllowedCollection<Workspace>();
+                this.workspaces = new NullNotAllowedCollection<Workspace>();
                 foreach (Workspace workspace in workspaces)
                 {
-                    _workspaces.Add(workspace);
+                    this.workspaces.Add(workspace);
                 }
             }
         }
 
         public Dictionary<XmlQualifiedName, string> AttributeExtensions
         {
-            get { return _extensions.AttributeExtensions; }
+            get { return this.extensions.AttributeExtensions; }
         }
 
         public Uri BaseUri
         {
-            get { return _baseUri; }
-            set { _baseUri = value; }
+            get { return this.baseUri; }
+            set { this.baseUri = value; }
         }
 
         public SyndicationElementExtensionCollection ElementExtensions
         {
-            get { return _extensions.ElementExtensions; }
+            get { return this.extensions.ElementExtensions; }
         }
 
         public string Language
         {
-            get { return _language; }
-            set { _language = value; }
+            get { return this.language; }
+            set { this.language = value; }
         }
 
         public Collection<Workspace> Workspaces
         {
             get
             {
-                if (_workspaces == null)
+                if (this.workspaces == null)
                 {
-                    _workspaces = new NullNotAllowedCollection<Workspace>();
+                    this.workspaces = new NullNotAllowedCollection<Workspace>();
                 }
-                return _workspaces;
+                return this.workspaces;
             }
         }
 
@@ -73,17 +74,11 @@ namespace System.ServiceModel.Syndication
         }
 
         public static TServiceDocument Load<TServiceDocument>(XmlReader reader)
-            where TServiceDocument : ServiceDocument, new()
-        {
-            return LoadAsync<TServiceDocument>(reader).GetAwaiter().GetResult();
-        }
-
-        public static async Task<TServiceDocument> LoadAsync<TServiceDocument>(XmlReader reader)
-            where TServiceDocument : ServiceDocument, new()
+            where TServiceDocument : ServiceDocument, new ()
         {
             AtomPub10ServiceDocumentFormatter<TServiceDocument> formatter = new AtomPub10ServiceDocumentFormatter<TServiceDocument>();
-            await formatter.ReadFromAsync(reader).ConfigureAwait(false);
-            return (TServiceDocument)(object)formatter.Document;
+            formatter.ReadFrom(reader);
+            return (TServiceDocument)(object) formatter.Document;
         }
 
         public ServiceDocumentFormatter GetFormatter()
@@ -93,12 +88,7 @@ namespace System.ServiceModel.Syndication
 
         public void Save(XmlWriter writer)
         {
-            SaveAsync(writer).GetAwaiter().GetResult();
-        }
-
-        public Task SaveAsync(XmlWriter writer)
-        {
-            return new AtomPub10ServiceDocumentFormatter(this).WriteToAsync(writer);
+            new AtomPub10ServiceDocumentFormatter(this).WriteTo(writer);
         }
 
         protected internal virtual Workspace CreateWorkspace()
@@ -118,32 +108,22 @@ namespace System.ServiceModel.Syndication
 
         protected internal virtual void WriteAttributeExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteAttributeExtensions(writer);
+            this.extensions.WriteAttributeExtensions(writer);
         }
 
         protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteElementExtensions(writer);
-        }
-
-        protected internal virtual Task WriteAttributeExtensionsAsync(XmlWriter writer, string version)
-        {
-            return _extensions.WriteAttributeExtensionsAsync(writer);
-        }
-
-        protected internal virtual Task WriteElementExtensionsAsync(XmlWriter writer, string version)
-        {
-            return _extensions.WriteElementExtensionsAsync(writer);
+            this.extensions.WriteElementExtensions(writer);
         }
 
         internal void LoadElementExtensions(XmlReader readerOverUnparsedExtensions, int maxExtensionSize)
         {
-            _extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
+            this.extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
         }
 
         internal void LoadElementExtensions(XmlBuffer buffer)
         {
-            _extensions.LoadElementExtensions(buffer);
+            this.extensions.LoadElementExtensions(buffer);
         }
     }
 }

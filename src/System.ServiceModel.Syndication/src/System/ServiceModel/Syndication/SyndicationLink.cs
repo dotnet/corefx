@@ -1,24 +1,26 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//------------------------------------------------------------
 
 namespace System.ServiceModel.Syndication
 {
-    using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using System.Xml;
+    using System.Collections.ObjectModel;
+    using System.Xml.Serialization;
+    using System.Runtime.Serialization;
+    using System.Runtime.CompilerServices;
 
     // NOTE: This class implements Clone so if you add any members, please update the copy ctor
     public class SyndicationLink : IExtensibleSyndicationObject
     {
-        private Uri _baseUri;
-        private ExtensibleSyndicationObject _extensions = new ExtensibleSyndicationObject();
-        private long _length;
-        private string _mediaType;
-        private string _relationshipType;
-        private string _title;
-        private Uri _uri;
+        Uri baseUri;
+        ExtensibleSyndicationObject extensions = new ExtensibleSyndicationObject();
+        long length;
+        string mediaType;
+        string relationshipType;
+        string title;
+        Uri uri;
 
         public SyndicationLink(Uri uri)
             : this(uri, null, null, null, 0)
@@ -29,14 +31,14 @@ namespace System.ServiceModel.Syndication
         {
             if (length < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(length));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("length"));
             }
-            _baseUri = null;
-            _uri = uri;
-            _title = title;
-            _relationshipType = relationshipType;
-            _mediaType = mediaType;
-            _length = length;
+            this.baseUri = null;
+            this.uri = uri;
+            this.title = title;
+            this.relationshipType = relationshipType;
+            this.mediaType = mediaType;
+            this.length = length;
         }
 
         public SyndicationLink()
@@ -48,68 +50,68 @@ namespace System.ServiceModel.Syndication
         {
             if (source == null)
             {
-                throw new ArgumentNullException(nameof(source));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("source");
             }
-            _length = source._length;
-            _mediaType = source._mediaType;
-            _relationshipType = source._relationshipType;
-            _title = source._title;
-            _baseUri = source._baseUri;
-            _uri = source._uri;
-            _extensions = source._extensions.Clone();
+            this.length = source.length;
+            this.mediaType = source.mediaType;
+            this.relationshipType = source.relationshipType;
+            this.title = source.title;
+            this.baseUri = source.baseUri;
+            this.uri = source.uri;
+            this.extensions = source.extensions.Clone();
         }
 
         public Dictionary<XmlQualifiedName, string> AttributeExtensions
         {
-            get { return _extensions.AttributeExtensions; }
+            get { return this.extensions.AttributeExtensions; }
         }
 
         public Uri BaseUri
         {
-            get { return _baseUri; }
-            set { _baseUri = value; }
+            get { return this.baseUri; }
+            set { this.baseUri = value; }
         }
 
         public SyndicationElementExtensionCollection ElementExtensions
         {
-            get { return _extensions.ElementExtensions; }
+            get { return this.extensions.ElementExtensions; }
         }
 
         public long Length
         {
-            get { return _length; }
+            get { return this.length; }
             set
             {
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("value"));
                 }
-                _length = value;
+                this.length = value;
             }
         }
 
         public string MediaType
         {
-            get { return _mediaType; }
-            set { _mediaType = value; }
+            get { return mediaType; }
+            set { mediaType = value; }
         }
 
         public string RelationshipType
         {
-            get { return _relationshipType; }
-            set { _relationshipType = value; }
+            get { return relationshipType; }
+            set { relationshipType = value; }
         }
 
         public string Title
         {
-            get { return _title; }
-            set { _title = value; }
+            get { return title; }
+            set { title = value; }
         }
 
         public Uri Uri
         {
-            get { return _uri; }
-            set { _uri = value; }
+            get { return uri; }
+            set { this.uri = value; }
         }
 
         public static SyndicationLink CreateAlternateLink(Uri uri)
@@ -144,15 +146,15 @@ namespace System.ServiceModel.Syndication
 
         public Uri GetAbsoluteUri()
         {
-            if (_uri != null)
+            if (this.uri != null)
             {
-                if (_uri.IsAbsoluteUri)
+                if (this.uri.IsAbsoluteUri)
                 {
-                    return _uri;
+                    return this.uri;
                 }
-                else if (_baseUri != null)
+                else if (this.baseUri != null)
                 {
-                    return new Uri(_baseUri, _uri);
+                    return new Uri(this.baseUri, this.uri);
                 }
                 else
                 {
@@ -177,32 +179,22 @@ namespace System.ServiceModel.Syndication
 
         protected internal virtual void WriteAttributeExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteAttributeExtensions(writer);
+            this.extensions.WriteAttributeExtensions(writer);
         }
 
         protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteElementExtensions(writer);
-        }
-
-        protected internal virtual Task WriteAttributeExtensionsAsync(XmlWriter writer, string version)
-        {
-            return _extensions.WriteAttributeExtensionsAsync(writer);
-        }
-
-        protected internal virtual Task WriteElementExtensionsAsync(XmlWriter writer, string version)
-        {
-            return _extensions.WriteElementExtensionsAsync(writer);
+            this.extensions.WriteElementExtensions(writer);
         }
 
         internal void LoadElementExtensions(XmlReader readerOverUnparsedExtensions, int maxExtensionSize)
         {
-            _extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
+            this.extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
         }
 
         internal void LoadElementExtensions(XmlBuffer buffer)
         {
-            _extensions.LoadElementExtensions(buffer);
+            this.extensions.LoadElementExtensions(buffer);
         }
     }
 }

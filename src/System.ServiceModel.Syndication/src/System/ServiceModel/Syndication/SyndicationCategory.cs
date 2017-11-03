@@ -1,24 +1,27 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//------------------------------------------------------------
 
 namespace System.ServiceModel.Syndication
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
     using System.Xml;
+    using System.Collections.ObjectModel;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Runtime.Serialization;
+    using System.Xml.Serialization;
+    using System.Runtime.CompilerServices;
 
     // NOTE: This class implements Clone so if you add any members, please update the copy ctor
     public class SyndicationCategory : IExtensibleSyndicationObject
     {
-        private ExtensibleSyndicationObject _extensions = new ExtensibleSyndicationObject();
-        private string _label;
-        private string _name;
-        private string _scheme;
+        ExtensibleSyndicationObject extensions = new ExtensibleSyndicationObject();
+        string label;
+        string name;
+        string scheme;
 
         public SyndicationCategory()
-            : this((string)null)
+            : this((string) null)
         {
         }
 
@@ -29,49 +32,49 @@ namespace System.ServiceModel.Syndication
 
         public SyndicationCategory(string name, string scheme, string label)
         {
-            _name = name;
-            _scheme = scheme;
-            _label = label;
+            this.name = name;
+            this.scheme = scheme;
+            this.label = label;
         }
 
         protected SyndicationCategory(SyndicationCategory source)
         {
             if (source == null)
             {
-                throw new ArgumentNullException(nameof(source));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("source");
             }
-            _label = source._label;
-            _name = source._name;
-            _scheme = source._scheme;
-            _extensions = source._extensions.Clone();
+            this.label = source.label;
+            this.name = source.name;
+            this.scheme = source.scheme;
+            this.extensions = source.extensions.Clone();
         }
 
         public Dictionary<XmlQualifiedName, string> AttributeExtensions
         {
-            get { return _extensions.AttributeExtensions; }
+            get { return this.extensions.AttributeExtensions; }
         }
 
         public SyndicationElementExtensionCollection ElementExtensions
         {
-            get { return _extensions.ElementExtensions; }
+            get { return this.extensions.ElementExtensions; }
         }
 
         public string Label
         {
-            get { return _label; }
-            set { _label = value; }
+            get { return this.label; }
+            set { this.label = value; }
         }
 
         public string Name
         {
-            get { return _name; }
-            set { _name = value; }
+            get { return this.name; }
+            set { this.name = value; }
         }
 
         public string Scheme
         {
-            get { return _scheme; }
-            set { _scheme = value; }
+            get { return this.scheme; }
+            set { this.scheme = value; }
         }
 
         public virtual SyndicationCategory Clone()
@@ -91,32 +94,23 @@ namespace System.ServiceModel.Syndication
 
         protected internal virtual void WriteAttributeExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteAttributeExtensions(writer);
+            this.extensions.WriteAttributeExtensions(writer);
         }
 
         protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteElementExtensions(writer);
-        }
-
-        protected internal virtual Task WriteAttributeExtensionsAsync(XmlWriter writer, string version)
-        {
-            return _extensions.WriteAttributeExtensionsAsync(writer);
-        }
-
-        protected internal virtual Task WriteElementExtensionsAsync(XmlWriter writer, string version)
-        {
-            return _extensions.WriteElementExtensionsAsync(writer);
+            this.extensions.WriteElementExtensions(writer);
         }
 
         internal void LoadElementExtensions(XmlReader readerOverUnparsedExtensions, int maxExtensionSize)
         {
-            _extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
+            this.extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
         }
 
         internal void LoadElementExtensions(XmlBuffer buffer)
         {
-            _extensions.LoadElementExtensions(buffer);
+            this.extensions.LoadElementExtensions(buffer);
         }
     }
+
 }

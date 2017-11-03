@@ -1,24 +1,25 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//------------------------------------------------------------
 
 namespace System.ServiceModel.Syndication
 {
-    using System;
-    using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Threading.Tasks;
+    using System.Runtime.Serialization;
+    using System.Xml.Serialization;
+    using System.Collections.Generic;
     using System.Xml;
+    using System.Runtime.CompilerServices;
 
     public class ResourceCollectionInfo : IExtensibleSyndicationObject
     {
-        private static IEnumerable<string> s_singleEmptyAccept;
-        private Collection<string> _accepts;
-        private Uri _baseUri;
-        private Collection<CategoriesDocument> _categories;
-        private ExtensibleSyndicationObject _extensions = new ExtensibleSyndicationObject();
-        private Uri _link;
-        private TextSyndicationContent _title;
+        static IEnumerable<string> singleEmptyAccept;
+        Collection<string> accepts;
+        Uri baseUri;
+        Collection<CategoriesDocument> categories;
+        ExtensibleSyndicationObject extensions = new ExtensibleSyndicationObject();
+        Uri link;
+        TextSyndicationContent title;
 
         public ResourceCollectionInfo()
         {
@@ -43,28 +44,28 @@ namespace System.ServiceModel.Syndication
         {
             if (title == null)
             {
-                throw new ArgumentNullException(nameof(title));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("title");
             }
             if (link == null)
             {
-                throw new ArgumentNullException(nameof(link));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("link");
             }
-            _title = title;
-            _link = link;
+            this.title = title;
+            this.link = link;
             if (categories != null)
             {
-                _categories = new NullNotAllowedCollection<CategoriesDocument>();
+                this.categories = new NullNotAllowedCollection<CategoriesDocument>();
                 foreach (CategoriesDocument category in categories)
                 {
-                    _categories.Add(category);
+                    this.categories.Add(category);
                 }
             }
             if (accepts != null)
             {
-                _accepts = new NullNotAllowedCollection<string>();
+                this.accepts = new NullNotAllowedCollection<string>();
                 foreach (string accept in accepts)
                 {
-                    _accepts.Add(accept);
+                    this.accepts.Add(accept);
                 }
             }
         }
@@ -73,11 +74,11 @@ namespace System.ServiceModel.Syndication
         {
             get
             {
-                if (_accepts == null)
+                if (this.accepts == null)
                 {
-                    _accepts = new NullNotAllowedCollection<string>();
+                    this.accepts = new NullNotAllowedCollection<string>();
                 }
-                return _accepts;
+                return this.accepts;
             }
         }
 
@@ -85,25 +86,25 @@ namespace System.ServiceModel.Syndication
         {
             get
             {
-                return _extensions.AttributeExtensions;
+                return this.extensions.AttributeExtensions;
             }
         }
 
         public Uri BaseUri
         {
-            get { return _baseUri; }
-            set { _baseUri = value; }
+            get { return this.baseUri; }
+            set { this.baseUri = value; }
         }
 
         public Collection<CategoriesDocument> Categories
         {
             get
             {
-                if (_categories == null)
+                if (this.categories == null)
                 {
-                    _categories = new NullNotAllowedCollection<CategoriesDocument>();
+                    this.categories = new NullNotAllowedCollection<CategoriesDocument>();
                 }
-                return _categories;
+                return this.categories;
             }
         }
 
@@ -111,20 +112,20 @@ namespace System.ServiceModel.Syndication
         {
             get
             {
-                return _extensions.ElementExtensions;
+                return this.extensions.ElementExtensions;
             }
         }
 
         public Uri Link
         {
-            get { return _link; }
-            set { _link = value; }
+            get { return this.link; }
+            set { this.link = value; }
         }
 
         public TextSyndicationContent Title
         {
-            get { return _title; }
-            set { _title = value; }
+            get { return this.title; }
+            set { this.title = value; }
         }
 
         protected internal virtual InlineCategoriesDocument CreateInlineCategoriesDocument()
@@ -149,43 +150,33 @@ namespace System.ServiceModel.Syndication
 
         protected internal virtual void WriteAttributeExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteAttributeExtensions(writer);
+            this.extensions.WriteAttributeExtensions(writer);
         }
 
         protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
         {
-            _extensions.WriteElementExtensions(writer);
-        }
-
-        protected internal virtual Task WriteAttributeExtensionsAsync(XmlWriter writer, string version)
-        {
-            return _extensions.WriteAttributeExtensionsAsync(writer);
-        }
-
-        protected internal virtual Task WriteElementExtensionsAsync(XmlWriter writer, string version)
-        {
-            return _extensions.WriteElementExtensionsAsync(writer);
+            this.extensions.WriteElementExtensions(writer);
         }
 
         internal void LoadElementExtensions(XmlReader readerOverUnparsedExtensions, int maxExtensionSize)
         {
-            _extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
+            this.extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
         }
 
         internal void LoadElementExtensions(XmlBuffer buffer)
         {
-            _extensions.LoadElementExtensions(buffer);
+            this.extensions.LoadElementExtensions(buffer);
         }
 
-        private static IEnumerable<string> CreateSingleEmptyAccept()
+        static IEnumerable<string> CreateSingleEmptyAccept()
         {
-            if (s_singleEmptyAccept == null)
+            if (singleEmptyAccept == null)
             {
                 List<string> tmp = new List<string>(1);
                 tmp.Add(string.Empty);
-                s_singleEmptyAccept = tmp.AsReadOnly();
+                singleEmptyAccept = tmp.AsReadOnly();
             }
-            return s_singleEmptyAccept;
+            return singleEmptyAccept;
         }
     }
 }

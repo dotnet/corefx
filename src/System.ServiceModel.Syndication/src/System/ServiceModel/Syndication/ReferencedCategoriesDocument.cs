@@ -1,14 +1,20 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+//------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//------------------------------------------------------------
 
 namespace System.ServiceModel.Syndication
 {
-    using System;
+    using System.Xml;
+    using System.Collections.ObjectModel;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Runtime.Serialization;
+    using System.Xml.Serialization;
+    using System.Runtime.CompilerServices;
 
     public class ReferencedCategoriesDocument : CategoriesDocument
     {
-        private Uri _link;
+        Uri link;
 
         public ReferencedCategoriesDocument()
         {
@@ -19,15 +25,15 @@ namespace System.ServiceModel.Syndication
         {
             if (link == null)
             {
-                throw new ArgumentNullException(nameof(link));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("link");
             }
-            _link = link;
+            this.link = link;
         }
 
         public Uri Link
         {
-            get { return _link; }
-            set { _link = value; }
+            get { return this.link; }
+            set { this.link = value; }
         }
 
         internal override bool IsInline

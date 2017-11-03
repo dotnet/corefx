@@ -246,60 +246,6 @@ namespace System.ServiceModel.Syndication.Tests
         }
 
         [Fact]
-        public static void SyndicationFeed_Rss_TestDisjointItems()
-        {
-            using (XmlReader reader = XmlReader.Create(@"RssDisjointItems.xml"))
-            {
-                // *** EXECUTE *** \\
-                SyndicationFeed sf = SyndicationFeed.Load(reader);
-
-                // *** ASSERT *** \\
-                int count = 0;
-                foreach (SyndicationItem item in sf.Items)
-                {
-                    count++;
-                }
-
-                Assert.True(count == 2);
-            }
-        }
-
-
-        [Fact]
-        public static void SyndicationFeed_Atom_TestDisjointItems()
-        {
-            using (XmlReader reader = XmlReader.Create(@"AtomDisjointItems.xml"))
-            {
-                // *** EXECUTE *** \\
-                SyndicationFeed sf = SyndicationFeed.Load(reader);
-
-                // *** ASSERT *** \\
-                int count = 0;
-                foreach (SyndicationItem item in sf.Items)
-                {
-                    count++;
-                }
-
-                Assert.True(count == 2);
-            }
-        }
-
-        [Fact]
-        public static void SyndicationFeed_Rss_WrongDateFormat()
-        {
-            // *** SETUP *** \\
-            Rss20FeedFormatter rssformatter = new Rss20FeedFormatter();
-
-            XmlReader reader = XmlReader.Create(@"rssSpecExampleWrongDateFormat.xml");
-
-            // *** EXECUTE *** \\
-            SyndicationFeed res = SyndicationFeed.Load(reader);
-
-            // *** ASSERT *** \\
-            Assert.True(!res.LastUpdatedTime.Equals(new DateTimeOffset()));
-        }
-
-        [Fact]
         public static void AtomEntryPositiveTest()
         {
             string filePath = @"brief-entry-noerror.xml";
@@ -373,6 +319,7 @@ namespace System.ServiceModel.Syndication.Tests
             foreach (string file in fileList)
             {
                 string serializeFilePath = Path.GetTempFileName();
+                bool toDeletedFile = true;
                 try
                 {
                     SyndicationFeed feedObjct;
@@ -398,7 +345,12 @@ namespace System.ServiceModel.Syndication.Tests
                         },
                         AllowableDifferences = GetAtomFeedPositiveTestAllowableDifferences()
                     };
-                    Assert.True(ch.Compare(file, serializeFilePath), $"Failed File Name:{file}");
+
+                    if (!ch.Compare(file, serializeFilePath))
+                    {
+                        toDeletedFile = false;
+                        Assert.True(false, $"The generated file was different from the baseline file{Environment.NewLine}Baseline: {file}{Environment.NewLine}Actual: {serializeFilePath}");
+                    }
                 }
                 catch (Exception e)
                 {
@@ -409,7 +361,8 @@ namespace System.ServiceModel.Syndication.Tests
                 }
                 finally
                 {
-                    File.Delete(serializeFilePath);
+                    if (toDeletedFile)
+                        File.Delete(serializeFilePath);
                 }
             }
         }
