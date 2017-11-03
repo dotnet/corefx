@@ -583,7 +583,7 @@ extern "C" int32_t SystemNative_FTruncate(intptr_t fd, int64_t length);
  * Examines one or more file descriptors for the specified state(s) and blocks until the state(s) occur or the timeout
  * ellapses.
  *
- * Returns an error or PAL_SUCCESS. `triggered` is set to the number of ready descriptors if any. The number of
+ * Returns an error or Error_SUCCESS. `triggered` is set to the number of ready descriptors if any. The number of
  * triggered descriptors may be zero in the event of a timeout.
  */
 extern "C" Error SystemNative_Poll(PollEvent* pollEvents, uint32_t eventCount, int32_t milliseconds, uint32_t* triggered);

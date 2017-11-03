@@ -2,7 +2,7 @@ project(System.Native)
 
 set(NATIVE_SOURCES
     pal_console.cpp
-    pal_errno.cpp
+    pal_errno.c
     pal_interfaceaddresses.cpp
     pal_io.cpp
     pal_maphardwaretype.c

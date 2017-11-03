@@ -877,25 +877,25 @@ extern "C" Error SystemNative_Poll(PollEvent* pollEvents, uint32_t eventCount, i
 {
     if (pollEvents == nullptr || triggered == nullptr)
     {
-        return PAL_EFAULT;
+        return Error_EFAULT;
     }
 
     if (milliseconds < -1)
     {
-        return PAL_EINVAL;
+        return Error_EINVAL;
     }
 
     size_t bufferSize;
     if (!multiply_s(sizeof(pollfd), static_cast<size_t>(eventCount), &bufferSize))
     {
-        return SystemNative_ConvertErrorPlatformToPal(EOVERFLOW);        
+        return static_cast<Error>(SystemNative_ConvertErrorPlatformToPal(EOVERFLOW));        
     }
 
     bool useStackBuffer = bufferSize <= 2048;
     pollfd* pollfds = reinterpret_cast<pollfd*>(useStackBuffer ? alloca(bufferSize) : malloc(bufferSize));
     if (pollfds == nullptr)
     {
-        return PAL_ENOMEM;
+        return Error_ENOMEM;
     }
 
     for (uint32_t i = 0; i < eventCount; i++)
@@ -915,7 +915,7 @@ extern "C" Error SystemNative_Poll(PollEvent* pollEvents, uint32_t eventCount, i
         }
 
         *triggered = 0;
-        return SystemNative_ConvertErrorPlatformToPal(errno);
+        return static_cast<Error>(SystemNative_ConvertErrorPlatformToPal(errno));
     }
 
     for (uint32_t i = 0; i < eventCount; i++)
@@ -934,7 +934,7 @@ extern "C" Error SystemNative_Poll(PollEvent* pollEvents, uint32_t eventCount, i
         free(pollfds);
     }
 
-    return PAL_SUCCESS;
+    return Error_SUCCESS;
 }
 
 extern "C" int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_t length, FileAdvice advice)

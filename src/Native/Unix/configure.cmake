@@ -197,7 +197,7 @@ check_type_size(
 set(CMAKE_EXTRA_INCLUDE_FILES) # reset CMAKE_EXTRA_INCLUDE_FILES
 # /statfs
 
-check_cxx_source_compiles(
+check_c_source_compiles(
     "
     #include <string.h>
     int main()

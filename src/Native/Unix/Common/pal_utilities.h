@@ -9,12 +9,16 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <limits>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
-#include <type_traits>
 #include <unistd.h>
+
+#ifdef __cplusplus
+#include <limits>
+#include <type_traits>
+#endif
 
 #ifdef DEBUG
 #define assert_err(cond, msg, err) do \
@@ -173,3 +177,5 @@ static inline bool CheckInterrupted(TInt result)
 {
     return result < 0 && errno == EINTR;
 }
+
+#endif // __cplusplus
