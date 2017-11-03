@@ -455,6 +455,25 @@ namespace System.Buffers.Text.Tests
 
                 // Excercise the 20-digit lookahead inside the rounding logic inside the Number->Decimal converter.
                 yield return "0.222222222222222222222222222255000000000000000000000000000000000000";
+
+                // Code coverage for MutableDecimal.DecAdd()
+                yield return "4611686018427387903.752";
+
+                // Code coverage: "round X where {Epsilon > X >= 2.470328229206232730000000E-324} up to Epsilon"
+                yield return "2.470328229206232730000000E-324";
+
+                // Code coverage: underflow
+                yield return "2.470328229206232730000000E-325";
+
+                yield return "3.402823E+38"; //Single.MaxValue
+                yield return "3.402824E+38"; //Just over Single.MaxValue
+                yield return "-3.402823E+38"; //Single.MinValue
+                yield return "-3.402824E+38"; //Just under Single.MinValue
+
+                yield return "1.79769313486232E+308";   //Double.MaxValue
+                yield return "1.79769313486233E+308";   //Just over Double.MaxValue
+                yield return "-1.79769313486232E+308";  //Double.MinValue
+                yield return "-1.79769313486233E+308";  //Just under Double.MinValue
             }
         }
 
