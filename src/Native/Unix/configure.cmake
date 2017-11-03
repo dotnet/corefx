@@ -529,7 +529,7 @@ if (NOT HAVE_MKSTEMPS AND NOT HAVE_MKSTEMP)
     message(FATAL_ERROR "Cannot find mkstemp nor mkstemp on this platform.")
 endif()
 
-check_cxx_source_compiles(
+check_c_source_compiles(
     "
     #include <sys/types.h>
     #include <sys/socketvar.h>

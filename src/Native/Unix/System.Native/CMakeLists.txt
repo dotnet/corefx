@@ -9,7 +9,7 @@ set(NATIVE_SOURCES
     pal_memory.cpp
     pal_mount.cpp
     pal_networking.cpp
-    pal_networkstatistics.cpp
+    pal_networkstatistics.c
     pal_process.cpp
     pal_random.cpp
     pal_runtimeinformation.cpp
