@@ -27,22 +27,26 @@ public static class HashCodeTests
     public static void HashCode_Add(uint expected, params uint[] vector)
     {
         var hc = new HashCode();
-        for (var i = 0; i < vector.Length; i++)
+        for (int i = 0; i < vector.Length; i++)
             hc.Add(vector[i]);
 
-        Assert.Equal(expected, unchecked((uint)hc.ToHashCode()));
+        Assert.Equal(expected, (uint)hc.ToHashCode());
     }
+#   endif
 
     [Fact]
     public static void HashCode_Add_Generic()
     {
         var hc = new HashCode();
         hc.Add(1);
-        hc.Add(100.2);
+        hc.Add(new ConstHashCodeType());
 
-        Assert.Equal(-273013950, hc.ToHashCode());
+        var expected = new HashCode();
+        expected.Add(1);
+        expected.Add(ConstComparer.ConstantValue);
+
+        Assert.Equal(expected.ToHashCode(), hc.ToHashCode());
     }
-#   endif
 
     [Fact]
     public static void HashCode_Add_GenericEqualityComparer()
@@ -52,16 +56,16 @@ public static class HashCodeTests
         hc.Add("Hello", new ConstComparer());
 
         var expected = new HashCode();
-        hc.Add(1);
-        hc.Add(ConstComparer.ConstantValue);
+        expected.Add(1);
+        expected.Add(ConstComparer.ConstantValue);
 
-        Assert.NotEqual(expected.ToHashCode(), hc.ToHashCode());
+        Assert.Equal(expected.ToHashCode(), hc.ToHashCode());
     }
 
     [Fact]
     public static void HashCode_Combine()
     {
-        var hcs = new[]
+        var hcs = new int[]
         {
             HashCode.Combine(1),
             HashCode.Combine(1, 2),
@@ -82,8 +86,8 @@ public static class HashCodeTests
             HashCode.Combine(2, 3, 4, 5, 6, 7, 8, 9),
         };
 
-        for (var i = 0; i < hcs.Length; i++)
-            for (var j = 0; j < hcs.Length; j++)
+        for (int i = 0; i < hcs.Length; i++)
+            for (int j = 0; j < hcs.Length; j++)
             {
                 if (i == j) continue;
                 Assert.NotEqual(hcs[i], hcs[j]);
@@ -188,5 +192,10 @@ public static class HashCodeTests
 
         public bool Equals(string x, string y) => false;
         public int GetHashCode(string obj) => ConstantValue;
+    }
+
+    public class ConstHashCodeType
+    {
+        public override int GetHashCode() => ConstComparer.ConstantValue;
     }
 }

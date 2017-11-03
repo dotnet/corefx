@@ -3676,13 +3676,8 @@ namespace System
         public bool TryGetTarget(out T target) { throw null; }
     }
 
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Auto)]
     public partial struct HashCode
     {
-        private uint _v1, _v2, _v3, _v4;
-        private uint _queue1, _queue2, _queue3;
-        private uint _length;
-
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int Combine<T1>(T1 value1) { throw null; }
 
