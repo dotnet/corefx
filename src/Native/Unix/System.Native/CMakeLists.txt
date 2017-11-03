@@ -6,7 +6,7 @@ set(NATIVE_SOURCES
     pal_interfaceaddresses.cpp
     pal_io.cpp
     pal_maphardwaretype.c
-    pal_memory.cpp
+    pal_memory.c
     pal_mount.cpp
     pal_networking.cpp
     pal_networkstatistics.c
