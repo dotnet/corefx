@@ -10,24 +10,26 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed partial class ExpressionBinder
     {
-        private static readonly ErrorCode[] s_ReadOnlyErrors =
-        {
-            ErrorCode.ERR_AssgReadonly,
-            ErrorCode.ERR_AssgReadonlyStatic,
-            ErrorCode.ERR_AssgReadonly2,
-            ErrorCode.ERR_AssgReadonlyStatic2
-        };
-
-        private RuntimeBinderException ReportReadOnlyError(ExprField field, CheckLvalueKind kind, bool isNested)
+        private RuntimeBinderException ReportReadOnlyError(ExprField field, bool isNested)
         {
             Debug.Assert(field != null);
 
-            bool isStatic = field.FieldWithType.Field().isStatic;
+            FieldWithType fieldWithType = field.FieldWithType;
+            bool isStatic = fieldWithType.Field().isStatic;
+            ErrArg[] args;
+            ErrorCode err;
+            if (isNested)
+            {
+                args = new ErrArg[]{ fieldWithType };
+                err = isStatic ? ErrorCode.ERR_AssgReadonlyStatic2 : ErrorCode.ERR_AssgReadonly2;
+            }
+            else
+            {
+                args = Array.Empty<ErrArg>();
+                err = isStatic ? ErrorCode.ERR_AssgReadonlyStatic : ErrorCode.ERR_AssgReadonly;
+            }
 
-            int index = (isNested ? 2 : 0) + (isStatic ? 1 : 0);
-            ErrorCode err = s_ReadOnlyErrors[index];
-
-            return ErrorContext.Error(err, isNested ? new ErrArg[]{field.FieldWithType} : Array.Empty<ErrArg>());
+            return ErrorContext.Error(err, args);
         }
 
         // Return true if we actually report a failure.
@@ -57,7 +59,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     if (field.FieldWithType.Field().isReadOnly)
                     {
-                        throw ReportReadOnlyError(field, kind, isNested);
+                        throw ReportReadOnlyError(field, isNested);
                     }
                     if (!field.FieldWithType.Field().isStatic)
                     {
