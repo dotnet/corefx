@@ -46,5 +46,14 @@ namespace System.Diagnostics.Tests
             Assert.NotEqual(0, retries);
             return entry;
         }
+
+    }
+
+    internal static class EventLogExtentions
+    {
+        internal static int SafeCount(this EventLog eventLog)
+        {
+            return Helpers.RetryOnWin7(() => eventLog.Entries.Count);
+        }
     }
 }

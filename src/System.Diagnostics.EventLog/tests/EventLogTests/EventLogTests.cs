@@ -34,9 +34,9 @@ namespace System.Diagnostics.Tests
                 {
                     eventLog.Source = source;
                     eventLog.Clear();
-                    Assert.Equal(0, eventLog.Entries.Count);
+                    Assert.Equal(0, eventLog.SafeCount());
                     Helpers.RetryOnWin7(() => eventLog.WriteEntry("Writing to event log."));
-                    Assert.Equal(1, eventLog.Entries.Count);
+                    Assert.Equal(1, eventLog.SafeCount());
                 }
             }
             finally
@@ -51,7 +51,7 @@ namespace System.Diagnostics.Tests
         {
             using (EventLog eventLog = new EventLog("Application"))
             {
-                Assert.InRange(eventLog.Entries.Count, 1, Int32.MaxValue);
+                Assert.InRange(eventLog.SafeCount(), 1, Int32.MaxValue);
             }
         }
 
