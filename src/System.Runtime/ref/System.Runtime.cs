@@ -3675,58 +3675,55 @@ namespace System
         public void SetTarget(T target) { }
         public bool TryGetTarget(out T target) { throw null; }
     }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Explicit, Size = 8 * 8)]
+
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Auto)]
     public partial struct HashCode
     {
-        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("Performance critical for inlining across NGen images.")]
-        public int ToHashCode() { throw null; }
-
-#pragma warning disable 0809
-        [System.ObsoleteAttribute("Use ToHashCode to retrieve the computed hash code.", error: true)]
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
-        public override int GetHashCode() { throw null; }
-#pragma warning restore 0809
+        private uint _v1, _v2, _v3, _v4;
+        private uint _queue1, _queue2, _queue3;
+        private uint _length;
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("Performance critical for inlining across NGen images.")]
-        public void Add<T>(T value) { }
-
-        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("Performance critical for inlining across NGen images.")]
-        public void Add<T>(T value, System.Collections.Generic.IEqualityComparer<T> comparer) { }
-
-        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("Performance critical for inlining across NGen images.")]
         public static int Combine<T1>(T1 value1) { throw null; }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("Performance critical for inlining across NGen images.")]
         public static int Combine<T1, T2>(T1 value1, T2 value2) { throw null; }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("Performance critical for inlining across NGen images.")]
         public static int Combine<T1, T2, T3>(T1 value1, T2 value2, T3 value3) { throw null; }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("Performance critical for inlining across NGen images.")]
         public static int Combine<T1, T2, T3, T4>(T1 value1, T2 value2, T3 value3, T4 value4) { throw null; }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("Performance critical for inlining across NGen images.")]
         public static int Combine<T1, T2, T3, T4, T5>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5) { throw null; }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("Performance critical for inlining across NGen images.")]
         public static int Combine<T1, T2, T3, T4, T5, T6>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6) { throw null; }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("Performance critical for inlining across NGen images.")]
         public static int Combine<T1, T2, T3, T4, T5, T6, T7>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7) { throw null; }
 
         [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [System.Runtime.TargetedPatchingOptOutAttribute("Performance critical for inlining across NGen images.")]
         public static int Combine<T1, T2, T3, T4, T5, T6, T7, T8>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8) { throw null; }
+
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public void Add<T>(T value) { }
+
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public void Add<T>(T value, System.Collections.Generic.IEqualityComparer<T> comparer) { }
+
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public int ToHashCode() { throw null; }
+
+#       pragma warning disable 0809
+
+        [System.ObsoleteAttribute("Use ToHashCode to retrieve the computed hash code.", error: true)]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+        public override int GetHashCode() { throw null; }
+
+#       pragma warning restore 0809
+
     }
 }
 

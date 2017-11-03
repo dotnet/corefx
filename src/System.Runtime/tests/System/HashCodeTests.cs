@@ -7,6 +7,8 @@ using Xunit;
 
 public static class HashCodeTests
 {
+
+#   if SYSTEM_HASHCODE_TESTVECTORS
     [Theory]
     [InlineData(0x02cc5d05U)]
     [InlineData(0xa3643705U, 0x64636261U)]
@@ -40,6 +42,7 @@ public static class HashCodeTests
 
         Assert.Equal(-273013950, hc.ToHashCode());
     }
+#   endif
 
     [Fact]
     public static void HashCode_Add_GenericEqualityComparer()
@@ -48,7 +51,11 @@ public static class HashCodeTests
         hc.Add(1);
         hc.Add("Hello", new ConstComparer());
 
-        Assert.NotEqual(-1844029331, hc.ToHashCode());
+        var expected = new HashCode();
+        hc.Add(1);
+        hc.Add(ConstComparer.ConstantValue);
+
+        Assert.NotEqual(expected.ToHashCode(), hc.ToHashCode());
     }
 
     [Fact]
@@ -83,9 +90,103 @@ public static class HashCodeTests
             }
     }
 
+    [Fact]
+    public static void HashCode_Combine_Add_1()
+    {
+        var hc = new HashCode();
+        hc.Add(1);
+        Assert.Equal(hc.ToHashCode(), HashCode.Combine(1));
+    }
+
+    [Fact]
+    public static void HashCode_Combine_Add_2()
+    {
+        var hc = new HashCode();
+        hc.Add(1);
+        hc.Add(2);
+        Assert.Equal(hc.ToHashCode(), HashCode.Combine(1, 2));
+    }
+
+    [Fact]
+    public static void HashCode_Combine_Add_3()
+    {
+        var hc = new HashCode();
+        hc.Add(1);
+        hc.Add(2);
+        hc.Add(3);
+        Assert.Equal(hc.ToHashCode(), HashCode.Combine(1, 2, 3));
+    }
+
+    [Fact]
+    public static void HashCode_Combine_Add_4()
+    {
+        var hc = new HashCode();
+        hc.Add(1);
+        hc.Add(2);
+        hc.Add(3);
+        hc.Add(4);
+        Assert.Equal(hc.ToHashCode(), HashCode.Combine(1, 2, 3, 4));
+    }
+
+    [Fact]
+    public static void HashCode_Combine_Add_5()
+    {
+        var hc = new HashCode();
+        hc.Add(1);
+        hc.Add(2);
+        hc.Add(3);
+        hc.Add(4);
+        hc.Add(5);
+        Assert.Equal(hc.ToHashCode(), HashCode.Combine(1, 2, 3, 4, 5));
+    }
+
+    [Fact]
+    public static void HashCode_Combine_Add_6()
+    {
+        var hc = new HashCode();
+        hc.Add(1);
+        hc.Add(2);
+        hc.Add(3);
+        hc.Add(4);
+        hc.Add(5);
+        hc.Add(6);
+        Assert.Equal(hc.ToHashCode(), HashCode.Combine(1, 2, 3, 4, 5, 6));
+    }
+
+    [Fact]
+    public static void HashCode_Combine_Add_7()
+    {
+        var hc = new HashCode();
+        hc.Add(1);
+        hc.Add(2);
+        hc.Add(3);
+        hc.Add(4);
+        hc.Add(5);
+        hc.Add(6);
+        hc.Add(7);
+        Assert.Equal(hc.ToHashCode(), HashCode.Combine(1, 2, 3, 4, 5, 6, 7));
+    }
+
+    [Fact]
+    public static void HashCode_Combine_Add_8()
+    {
+        var hc = new HashCode();
+        hc.Add(1);
+        hc.Add(2);
+        hc.Add(3);
+        hc.Add(4);
+        hc.Add(5);
+        hc.Add(6);
+        hc.Add(7);
+        hc.Add(8);
+        Assert.Equal(hc.ToHashCode(), HashCode.Combine(1, 2, 3, 4, 5, 6, 7, 8));
+    }
+
     public class ConstComparer : System.Collections.Generic.IEqualityComparer<string>
     {
+        public const int ConstantValue = 1234;
+
         public bool Equals(string x, string y) => false;
-        public int GetHashCode(string obj) => 1;
+        public int GetHashCode(string obj) => ConstantValue;
     }
 }
