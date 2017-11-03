@@ -28,7 +28,7 @@ namespace System.Diagnostics.Tests
 
             // We are retrying on windows 7 because it throws win32exception while some operations like Writing,Retrieveing and Deleting log.
             // So We just try to do the operation again in case of this exception 
-            int retries = 10;
+            int retries = 20;
             while (retries > 0)
             {
                 try
