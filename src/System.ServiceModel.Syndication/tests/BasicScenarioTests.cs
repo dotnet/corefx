@@ -311,6 +311,14 @@ namespace System.ServiceModel.Syndication.Tests
         }
 
         [Fact]
+        [ActiveIssue(25058)]
+        public static void AtomFeedPositiveTest_WsFeedIcon()
+        {
+            string file = "ws-feed-icon.xml";
+            AtomFeedPositiveTest(file);
+        }
+
+        [Fact]
         public static void AtomFeedPositiveTest()
         {
             string dataFile = @"atom_feeds.dat";
@@ -318,52 +326,57 @@ namespace System.ServiceModel.Syndication.Tests
 
             foreach (string file in fileList)
             {
-                string serializeFilePath = Path.GetTempFileName();
-                bool toDeletedFile = true;
-                try
+                AtomFeedPositiveTest(file);
+            }
+        }
+
+        private static void AtomFeedPositiveTest(string file)
+        {
+            string serializeFilePath = Path.GetTempFileName();
+            bool toDeletedFile = true;
+            try
+            {
+                SyndicationFeed feedObjct;
+
+                using (XmlReader reader = XmlReader.Create(file))
                 {
-                    SyndicationFeed feedObjct;
-
-                    using (XmlReader reader = XmlReader.Create(file))
-                    {
-                        feedObjct = SyndicationFeed.Load(reader);
-                        reader.Close();
-                    }
-
-                    using (XmlWriter writer = XmlWriter.Create(serializeFilePath))
-                    {
-                        Atom10FeedFormatter f = new Atom10FeedFormatter(feedObjct);
-                        f.WriteTo(writer);
-                        writer.Close();
-                    }
-
-                    CompareHelper ch = new CompareHelper
-                    {
-                        Diff = new XmlDiff()
-                        {
-                            Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
-                        },
-                        AllowableDifferences = GetAtomFeedPositiveTestAllowableDifferences()
-                    };
-
-                    if (!ch.Compare(file, serializeFilePath))
-                    {
-                        toDeletedFile = false;
-                        Assert.True(false, $"The generated file was different from the baseline file{Environment.NewLine}Baseline: {file}{Environment.NewLine}Actual: {serializeFilePath}");
-                    }
+                    feedObjct = SyndicationFeed.Load(reader);
+                    reader.Close();
                 }
-                catch (Exception e)
+
+                using (XmlWriter writer = XmlWriter.Create(serializeFilePath))
                 {
-                    Console.WriteLine();
-                    Console.WriteLine("------------------------------");
-                    Console.WriteLine($"Failed File Name:{file}");
-                    throw e;
+                    Atom10FeedFormatter f = new Atom10FeedFormatter(feedObjct);
+                    f.WriteTo(writer);
+                    writer.Close();
                 }
-                finally
+
+                CompareHelper ch = new CompareHelper
                 {
-                    if (toDeletedFile)
-                        File.Delete(serializeFilePath);
+                    Diff = new XmlDiff()
+                    {
+                        Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
+                    },
+                    AllowableDifferences = GetAtomFeedPositiveTestAllowableDifferences()
+                };
+
+                if (!ch.Compare(file, serializeFilePath))
+                {
+                    toDeletedFile = false;
+                    Assert.True(false, $"The generated file was different from the baseline file{Environment.NewLine}Baseline: {file}{Environment.NewLine}Actual: {serializeFilePath}");
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine();
+                Console.WriteLine("------------------------------");
+                Console.WriteLine($"Failed File Name:{file}");
+                throw e;
+            }
+            finally
+            {
+                if (toDeletedFile)
+                    File.Delete(serializeFilePath);
             }
         }
 
