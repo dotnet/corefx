@@ -444,4 +444,7 @@
   <data name="InvalidOperation_RevertAndCompleteActionsMustNotThrow" xml:space="preserve">
     <value>AtomicComposition encountered an unexpected Exception, review InnerException for details.</value>
   </data>
+  <data name="PlatformNotSupported_ComponentModel_Composition" xml:space="preserve">
+    <value>System.ComponentModel.Composition APIs are not supported on this platform.</value>
+  </data>
 </root>

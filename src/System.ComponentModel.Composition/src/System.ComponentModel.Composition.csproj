@@ -8,6 +8,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_TRACING</DefineConstants>
     <!-- Workaround for issue buildtools #1784 -->
     <RunApiCompat>false</RunApiCompat>
+    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard'">SR.PlatformNotSupported_ComponentModel_Composition</GeneratePlatformNotSupportedAssemblyMessage>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
