@@ -11,12 +11,12 @@ namespace System.Tests
 {
     public class StringGetHashCodeTests : RemoteExecutorTestBase
     {
-        [Fact]
         /// <summary>
         /// Ensure that string hash codes are randomized by getting the hash code for the same string in two processes
         /// and confirming it is different (modulo possible values of int).
         /// If the legacy hash codes are being returned, it will not be different.
         /// </summary>
+        [Fact]
         public void GetHashCode_UseSameStringInTwoProcesses_ReturnsDifferentHashCodes()
         {
             const string abc = "same string in different processes";
@@ -40,11 +40,10 @@ namespace System.Tests
             Assert.NotEqual(parentHashCode, childHashCode);
         }
 
-        [Fact]
-
         /// <summary>
         /// Ensure that dictionary changes its comparer to randomized after it encounters more than 100 collisions on a single hash bucket
         /// </summary>
+        [Fact]
         public void AddToDictionaryWithNonRandomizedStringComparer_PassHashCollisionThreshold_SwitchesComparerToRandomized()
         {
             var dict = new Dictionary<string, int>();
