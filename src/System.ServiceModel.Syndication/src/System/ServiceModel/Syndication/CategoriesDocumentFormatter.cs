@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 //------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
@@ -14,7 +18,7 @@ namespace System.ServiceModel.Syndication
     [DataContract]
     public abstract class CategoriesDocumentFormatter
     {
-        CategoriesDocument document;
+        private CategoriesDocument _document;
 
         protected CategoriesDocumentFormatter()
         {
@@ -25,12 +29,12 @@ namespace System.ServiceModel.Syndication
             {
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("documentToWrite");
             }
-            this.document = documentToWrite;
+            _document = documentToWrite;
         }
 
         public CategoriesDocument Document
         {
-            get { return this.document; }
+            get { return _document; }
         }
 
         public abstract string Version
@@ -52,7 +56,7 @@ namespace System.ServiceModel.Syndication
 
         protected virtual void SetDocument(CategoriesDocument document)
         {
-            this.document = document;
+            _document = document;
         }
     }
 }

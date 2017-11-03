@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 //------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
@@ -15,13 +19,13 @@ namespace System.ServiceModel.Syndication
     // NOTE: This class implements Clone so if you add any members, please update the copy ctor
     public class SyndicationCategory : IExtensibleSyndicationObject
     {
-        ExtensibleSyndicationObject extensions = new ExtensibleSyndicationObject();
-        string label;
-        string name;
-        string scheme;
+        private ExtensibleSyndicationObject _extensions = new ExtensibleSyndicationObject();
+        private string _label;
+        private string _name;
+        private string _scheme;
 
         public SyndicationCategory()
-            : this((string) null)
+            : this((string)null)
         {
         }
 
@@ -32,9 +36,9 @@ namespace System.ServiceModel.Syndication
 
         public SyndicationCategory(string name, string scheme, string label)
         {
-            this.name = name;
-            this.scheme = scheme;
-            this.label = label;
+            _name = name;
+            _scheme = scheme;
+            _label = label;
         }
 
         protected SyndicationCategory(SyndicationCategory source)
@@ -43,38 +47,38 @@ namespace System.ServiceModel.Syndication
             {
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("source");
             }
-            this.label = source.label;
-            this.name = source.name;
-            this.scheme = source.scheme;
-            this.extensions = source.extensions.Clone();
+            _label = source._label;
+            _name = source._name;
+            _scheme = source._scheme;
+            _extensions = source._extensions.Clone();
         }
 
         public Dictionary<XmlQualifiedName, string> AttributeExtensions
         {
-            get { return this.extensions.AttributeExtensions; }
+            get { return _extensions.AttributeExtensions; }
         }
 
         public SyndicationElementExtensionCollection ElementExtensions
         {
-            get { return this.extensions.ElementExtensions; }
+            get { return _extensions.ElementExtensions; }
         }
 
         public string Label
         {
-            get { return this.label; }
-            set { this.label = value; }
+            get { return _label; }
+            set { _label = value; }
         }
 
         public string Name
         {
-            get { return this.name; }
-            set { this.name = value; }
+            get { return _name; }
+            set { _name = value; }
         }
 
         public string Scheme
         {
-            get { return this.scheme; }
-            set { this.scheme = value; }
+            get { return _scheme; }
+            set { _scheme = value; }
         }
 
         public virtual SyndicationCategory Clone()
@@ -94,23 +98,22 @@ namespace System.ServiceModel.Syndication
 
         protected internal virtual void WriteAttributeExtensions(XmlWriter writer, string version)
         {
-            this.extensions.WriteAttributeExtensions(writer);
+            _extensions.WriteAttributeExtensions(writer);
         }
 
         protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
         {
-            this.extensions.WriteElementExtensions(writer);
+            _extensions.WriteElementExtensions(writer);
         }
 
         internal void LoadElementExtensions(XmlReader readerOverUnparsedExtensions, int maxExtensionSize)
         {
-            this.extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
+            _extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
         }
 
         internal void LoadElementExtensions(XmlBuffer buffer)
         {
-            this.extensions.LoadElementExtensions(buffer);
+            _extensions.LoadElementExtensions(buffer);
         }
     }
-
 }

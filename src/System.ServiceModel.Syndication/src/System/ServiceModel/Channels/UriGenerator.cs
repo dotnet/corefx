@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 //------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
@@ -7,10 +11,10 @@ namespace System.ServiceModel.Channels
     using System.Threading;
     using System.Globalization;
 
-    class UriGenerator
+    internal class UriGenerator
     {
-        long id;
-        string prefix;
+        private long _id;
+        private string _prefix;
 
         public UriGenerator()
             : this("uuid")
@@ -30,13 +34,13 @@ namespace System.ServiceModel.Channels
             if (scheme.Length == 0)
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.UriGeneratorSchemeMustNotBeEmpty), "scheme"));
 
-            prefix = string.Concat(scheme, ":", Guid.NewGuid().ToString(), delimiter, "id=");
+            _prefix = string.Concat(scheme, ":", Guid.NewGuid().ToString(), delimiter, "id=");
         }
 
         public string Next()
         {
-            long nextId = Interlocked.Increment(ref id);
-            return prefix + nextId.ToString(CultureInfo.InvariantCulture);
+            long nextId = Interlocked.Increment(ref _id);
+            return _prefix + nextId.ToString(CultureInfo.InvariantCulture);
         }
     }
 }

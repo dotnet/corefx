@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 //------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
@@ -10,8 +14,8 @@ namespace System.ServiceModel.Syndication
     // NOTE: This class implements Clone so if you add any members, please update the copy ctor
     public class UrlSyndicationContent : SyndicationContent
     {
-        string mediaType;
-        Uri url;
+        private string _mediaType;
+        private Uri _url;
 
         public UrlSyndicationContent(Uri url, string mediaType) : base()
         {
@@ -19,8 +23,8 @@ namespace System.ServiceModel.Syndication
             {
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("url");
             }
-            this.url = url;
-            this.mediaType = mediaType;
+            _url = url;
+            _mediaType = mediaType;
         }
 
         protected UrlSyndicationContent(UrlSyndicationContent source)
@@ -30,18 +34,18 @@ namespace System.ServiceModel.Syndication
             {
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("source");
             }
-            this.url = source.url;
-            this.mediaType = source.mediaType;
+            _url = source._url;
+            _mediaType = source._mediaType;
         }
 
         public override string Type
         {
-            get { return this.mediaType; }
+            get { return _mediaType; }
         }
 
         public Uri Url
         {
-            get { return this.url; }
+            get { return _url; }
         }
 
         public override SyndicationContent Clone()
@@ -51,7 +55,7 @@ namespace System.ServiceModel.Syndication
 
         protected override void WriteContentsTo(XmlWriter writer)
         {
-            writer.WriteAttributeString(Atom10Constants.SourceTag, string.Empty, FeedUtils.GetUriString(this.url));
+            writer.WriteAttributeString(Atom10Constants.SourceTag, string.Empty, FeedUtils.GetUriString(_url));
         }
     }
 }

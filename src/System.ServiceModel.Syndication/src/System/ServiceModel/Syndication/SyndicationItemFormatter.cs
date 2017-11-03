@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 //------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
@@ -18,11 +22,11 @@ namespace System.ServiceModel.Syndication
     [DataContract]
     public abstract class SyndicationItemFormatter
     {
-        SyndicationItem item;
+        private SyndicationItem _item;
 
         protected SyndicationItemFormatter()
         {
-            this.item = null;
+            _item = null;
         }
 
         protected SyndicationItemFormatter(SyndicationItem itemToWrite)
@@ -31,14 +35,14 @@ namespace System.ServiceModel.Syndication
             {
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("itemToWrite");
             }
-            this.item = itemToWrite;
+            _item = itemToWrite;
         }
 
         public SyndicationItem Item
         {
             get
             {
-                return this.item;
+                return _item;
             }
         }
 
@@ -62,7 +66,7 @@ namespace System.ServiceModel.Syndication
             {
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("item");
             }
-            this.item = item;
+            _item = item;
         }
 
         internal static void CreateBufferIfRequiredAndWriteNode(ref XmlBuffer buffer, ref XmlDictionaryWriter extWriter, XmlDictionaryReader reader, int maxExtensionSize)

@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 //------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
@@ -18,11 +22,11 @@ namespace System.ServiceModel.Syndication
     [XmlRoot(ElementName = Rss20Constants.ItemTag, Namespace = Rss20Constants.Rss20Namespace)]
     public class Rss20ItemFormatter : SyndicationItemFormatter, IXmlSerializable
     {
-        Rss20FeedFormatter feedSerializer;
-        Type itemType;
-        bool preserveAttributeExtensions;
-        bool preserveElementExtensions;
-        bool serializeExtensionsAsAtom;
+        private Rss20FeedFormatter _feedSerializer;
+        private Type _itemType;
+        private bool _preserveAttributeExtensions;
+        private bool _preserveElementExtensions;
+        private bool _serializeExtensionsAsAtom;
 
         public Rss20ItemFormatter()
             : this(typeof(SyndicationItem))
@@ -41,11 +45,11 @@ namespace System.ServiceModel.Syndication
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgument("itemTypeToCreate",
                     SR.Format(SR.InvalidObjectTypePassed, "itemTypeToCreate", "SyndicationItem"));
             }
-            this.feedSerializer = new Rss20FeedFormatter();
-            this.feedSerializer.PreserveAttributeExtensions = this.preserveAttributeExtensions = true;
-            this.feedSerializer.PreserveElementExtensions = this.preserveElementExtensions = true;
-            this.feedSerializer.SerializeExtensionsAsAtom = this.serializeExtensionsAsAtom = true;
-            this.itemType = itemTypeToCreate;
+            _feedSerializer = new Rss20FeedFormatter();
+            _feedSerializer.PreserveAttributeExtensions = _preserveAttributeExtensions = true;
+            _feedSerializer.PreserveElementExtensions = _preserveElementExtensions = true;
+            _feedSerializer.SerializeExtensionsAsAtom = _serializeExtensionsAsAtom = true;
+            _itemType = itemTypeToCreate;
         }
 
         public Rss20ItemFormatter(SyndicationItem itemToWrite)
@@ -57,40 +61,40 @@ namespace System.ServiceModel.Syndication
             : base(itemToWrite)
         {
             // No need to check that the parameter passed is valid - it is checked by the c'tor of the base class
-            this.feedSerializer = new Rss20FeedFormatter();
-            this.feedSerializer.PreserveAttributeExtensions = this.preserveAttributeExtensions = true;
-            this.feedSerializer.PreserveElementExtensions = this.preserveElementExtensions = true;
-            this.feedSerializer.SerializeExtensionsAsAtom = this.serializeExtensionsAsAtom = serializeExtensionsAsAtom;
-            this.itemType = itemToWrite.GetType();
+            _feedSerializer = new Rss20FeedFormatter();
+            _feedSerializer.PreserveAttributeExtensions = _preserveAttributeExtensions = true;
+            _feedSerializer.PreserveElementExtensions = _preserveElementExtensions = true;
+            _feedSerializer.SerializeExtensionsAsAtom = _serializeExtensionsAsAtom = serializeExtensionsAsAtom;
+            _itemType = itemToWrite.GetType();
         }
 
         public bool PreserveAttributeExtensions
         {
-            get { return this.preserveAttributeExtensions; }
+            get { return _preserveAttributeExtensions; }
             set
             {
-                this.preserveAttributeExtensions = value;
-                this.feedSerializer.PreserveAttributeExtensions = value;
+                _preserveAttributeExtensions = value;
+                _feedSerializer.PreserveAttributeExtensions = value;
             }
         }
 
         public bool PreserveElementExtensions
         {
-            get { return this.preserveElementExtensions; }
+            get { return _preserveElementExtensions; }
             set
             {
-                this.preserveElementExtensions = value;
-                this.feedSerializer.PreserveElementExtensions = value;
+                _preserveElementExtensions = value;
+                _feedSerializer.PreserveElementExtensions = value;
             }
         }
 
         public bool SerializeExtensionsAsAtom
         {
-            get { return this.serializeExtensionsAsAtom; }
+            get { return _serializeExtensionsAsAtom; }
             set
             {
-                this.serializeExtensionsAsAtom = value;
-                this.feedSerializer.SerializeExtensionsAsAtom = value;
+                _serializeExtensionsAsAtom = value;
+                _feedSerializer.SerializeExtensionsAsAtom = value;
             }
         }
 
@@ -103,7 +107,7 @@ namespace System.ServiceModel.Syndication
         {
             get
             {
-                return this.itemType;
+                return _itemType;
             }
         }
 
@@ -172,29 +176,29 @@ namespace System.ServiceModel.Syndication
 
         protected override SyndicationItem CreateItemInstance()
         {
-            return SyndicationItemFormatter.CreateItemInstance(this.itemType);
+            return SyndicationItemFormatter.CreateItemInstance(_itemType);
         }
 
-        void ReadItem(XmlReader reader)
+        private void ReadItem(XmlReader reader)
         {
             SetItem(CreateItemInstance());
-            feedSerializer.ReadItemFrom(XmlDictionaryReader.CreateDictionaryReader(reader), this.Item);
+            _feedSerializer.ReadItemFrom(XmlDictionaryReader.CreateDictionaryReader(reader), this.Item);
         }
 
-        void WriteItem(XmlWriter writer)
+        private void WriteItem(XmlWriter writer)
         {
             if (this.Item == null)
             {
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.ItemFormatterDoesNotHaveItem)));
             }
             XmlDictionaryWriter w = XmlDictionaryWriter.CreateDictionaryWriter(writer);
-            feedSerializer.WriteItemContents(w, this.Item);
+            _feedSerializer.WriteItemContents(w, this.Item);
         }
     }
 
     [XmlRoot(ElementName = Rss20Constants.ItemTag, Namespace = Rss20Constants.Rss20Namespace)]
     public class Rss20ItemFormatter<TSyndicationItem> : Rss20ItemFormatter, IXmlSerializable
-        where TSyndicationItem : SyndicationItem, new ()
+        where TSyndicationItem : SyndicationItem, new()
     {
         public Rss20ItemFormatter()
             : base(typeof(TSyndicationItem))

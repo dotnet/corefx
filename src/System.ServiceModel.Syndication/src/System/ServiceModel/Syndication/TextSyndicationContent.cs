@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 //------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
@@ -15,8 +19,8 @@ namespace System.ServiceModel.Syndication
     // NOTE: This class implements Clone so if you add any members, please update the copy ctor
     public class TextSyndicationContent : SyndicationContent
     {
-        string text;
-        TextSyndicationContentKind textKind;
+        private string _text;
+        private TextSyndicationContentKind _textKind;
 
         public TextSyndicationContent(string text) : this(text, TextSyndicationContentKind.Plaintext)
         {
@@ -28,8 +32,8 @@ namespace System.ServiceModel.Syndication
             {
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("textKind"));
             }
-            this.text = text;
-            this.textKind = textKind;
+            _text = text;
+            _textKind = textKind;
         }
 
         protected TextSyndicationContent(TextSyndicationContent source)
@@ -39,20 +43,20 @@ namespace System.ServiceModel.Syndication
             {
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("source");
             }
-            this.text = source.text;
-            this.textKind = source.textKind;
+            _text = source._text;
+            _textKind = source._textKind;
         }
 
         public string Text
         {
-            get { return this.text; }
+            get { return _text; }
         }
 
         public override string Type
         {
             get
             {
-                switch (this.textKind)
+                switch (_textKind)
                 {
                     case TextSyndicationContentKind.Html:
                         return Atom10Constants.HtmlType;
@@ -71,8 +75,8 @@ namespace System.ServiceModel.Syndication
 
         protected override void WriteContentsTo(XmlWriter writer)
         {
-            string val = this.text ?? string.Empty;
-            if (this.textKind == TextSyndicationContentKind.XHtml)
+            string val = _text ?? string.Empty;
+            if (_textKind == TextSyndicationContentKind.XHtml)
             {
                 writer.WriteRaw(val);
             }

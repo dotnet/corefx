@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 //------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
@@ -18,10 +22,10 @@ namespace System.ServiceModel.Syndication
     [XmlRoot(ElementName = Atom10Constants.EntryTag, Namespace = Atom10Constants.Atom10Namespace)]
     public class Atom10ItemFormatter : SyndicationItemFormatter, IXmlSerializable
     {
-        Atom10FeedFormatter feedSerializer;
-        Type itemType;
-        bool preserveAttributeExtensions;
-        bool preserveElementExtensions;
+        private Atom10FeedFormatter _feedSerializer;
+        private Type _itemType;
+        private bool _preserveAttributeExtensions;
+        private bool _preserveElementExtensions;
 
         public Atom10ItemFormatter()
             : this(typeof(SyndicationItem))
@@ -40,39 +44,39 @@ namespace System.ServiceModel.Syndication
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgument("itemTypeToCreate",
                     SR.Format(SR.InvalidObjectTypePassed, "itemTypeToCreate", "SyndicationItem"));
             }
-            this.feedSerializer = new Atom10FeedFormatter();
-            this.feedSerializer.PreserveAttributeExtensions = this.preserveAttributeExtensions = true;
-            this.feedSerializer.PreserveElementExtensions = this.preserveElementExtensions = true;
-            this.itemType = itemTypeToCreate;
+            _feedSerializer = new Atom10FeedFormatter();
+            _feedSerializer.PreserveAttributeExtensions = _preserveAttributeExtensions = true;
+            _feedSerializer.PreserveElementExtensions = _preserveElementExtensions = true;
+            _itemType = itemTypeToCreate;
         }
 
         public Atom10ItemFormatter(SyndicationItem itemToWrite)
             : base(itemToWrite)
         {
             // No need to check that the parameter passed is valid - it is checked by the c'tor of the base class
-            this.feedSerializer = new Atom10FeedFormatter();
-            this.feedSerializer.PreserveAttributeExtensions = this.preserveAttributeExtensions = true;
-            this.feedSerializer.PreserveElementExtensions = this.preserveElementExtensions = true;
-            this.itemType = itemToWrite.GetType();
+            _feedSerializer = new Atom10FeedFormatter();
+            _feedSerializer.PreserveAttributeExtensions = _preserveAttributeExtensions = true;
+            _feedSerializer.PreserveElementExtensions = _preserveElementExtensions = true;
+            _itemType = itemToWrite.GetType();
         }
 
         public bool PreserveAttributeExtensions
         {
-            get { return this.preserveAttributeExtensions; }
+            get { return _preserveAttributeExtensions; }
             set
             {
-                this.preserveAttributeExtensions = value;
-                this.feedSerializer.PreserveAttributeExtensions = value;
+                _preserveAttributeExtensions = value;
+                _feedSerializer.PreserveAttributeExtensions = value;
             }
         }
 
         public bool PreserveElementExtensions
         {
-            get { return this.preserveElementExtensions; }
+            get { return _preserveElementExtensions; }
             set
             {
-                this.preserveElementExtensions = value;
-                this.feedSerializer.PreserveElementExtensions = value;
+                _preserveElementExtensions = value;
+                _feedSerializer.PreserveElementExtensions = value;
             }
         }
 
@@ -85,7 +89,7 @@ namespace System.ServiceModel.Syndication
         {
             get
             {
-                return this.itemType;
+                return _itemType;
             }
         }
 
@@ -154,29 +158,29 @@ namespace System.ServiceModel.Syndication
 
         protected override SyndicationItem CreateItemInstance()
         {
-            return SyndicationItemFormatter.CreateItemInstance(this.itemType);
+            return SyndicationItemFormatter.CreateItemInstance(_itemType);
         }
 
-        void ReadItem(XmlReader reader)
+        private void ReadItem(XmlReader reader)
         {
             SetItem(CreateItemInstance());
-            feedSerializer.ReadItemFrom(XmlDictionaryReader.CreateDictionaryReader(reader), this.Item);
+            _feedSerializer.ReadItemFrom(XmlDictionaryReader.CreateDictionaryReader(reader), this.Item);
         }
 
-        void WriteItem(XmlWriter writer)
+        private void WriteItem(XmlWriter writer)
         {
             if (this.Item == null)
             {
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.ItemFormatterDoesNotHaveItem)));
             }
             XmlDictionaryWriter w = XmlDictionaryWriter.CreateDictionaryWriter(writer);
-            feedSerializer.WriteItemContents(w, this.Item);
+            _feedSerializer.WriteItemContents(w, this.Item);
         }
     }
 
     [XmlRoot(ElementName = Atom10Constants.EntryTag, Namespace = Atom10Constants.Atom10Namespace)]
     public class Atom10ItemFormatter<TSyndicationItem> : Atom10ItemFormatter
-        where TSyndicationItem : SyndicationItem, new ()
+        where TSyndicationItem : SyndicationItem, new()
     {
         // constructors
         public Atom10ItemFormatter()

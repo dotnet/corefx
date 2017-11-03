@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 //------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
@@ -14,9 +18,9 @@ namespace System.ServiceModel.Syndication
 
     public class InlineCategoriesDocument : CategoriesDocument
     {
-        Collection<SyndicationCategory> categories;
-        bool isFixed;
-        string scheme;
+        private Collection<SyndicationCategory> _categories;
+        private bool _isFixed;
+        private string _scheme;
 
         public InlineCategoriesDocument()
         {
@@ -31,38 +35,38 @@ namespace System.ServiceModel.Syndication
         {
             if (categories != null)
             {
-                this.categories = new NullNotAllowedCollection<SyndicationCategory>();
+                _categories = new NullNotAllowedCollection<SyndicationCategory>();
                 foreach (SyndicationCategory category in categories)
                 {
-                    this.categories.Add(category);
+                    _categories.Add(category);
                 }
             }
-            this.isFixed = isFixed;
-            this.scheme = scheme;
+            _isFixed = isFixed;
+            _scheme = scheme;
         }
 
         public Collection<SyndicationCategory> Categories
         {
             get
             {
-                if (this.categories == null)
+                if (_categories == null)
                 {
-                    this.categories = new NullNotAllowedCollection<SyndicationCategory>();
+                    _categories = new NullNotAllowedCollection<SyndicationCategory>();
                 }
-                return this.categories;
+                return _categories;
             }
         }
 
         public bool IsFixed
         {
-            get { return this.isFixed; }
-            set { this.isFixed = value; }
+            get { return _isFixed; }
+            set { _isFixed = value; }
         }
 
         public string Scheme
         {
-            get { return this.scheme; }
-            set { this.scheme = value; }
+            get { return _scheme; }
+            set { _scheme = value; }
         }
 
         internal override bool IsInline

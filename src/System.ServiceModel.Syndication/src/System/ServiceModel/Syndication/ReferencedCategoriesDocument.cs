@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 //------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
@@ -14,7 +18,7 @@ namespace System.ServiceModel.Syndication
 
     public class ReferencedCategoriesDocument : CategoriesDocument
     {
-        Uri link;
+        private Uri _link;
 
         public ReferencedCategoriesDocument()
         {
@@ -27,13 +31,13 @@ namespace System.ServiceModel.Syndication
             {
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("link");
             }
-            this.link = link;
+            _link = link;
         }
 
         public Uri Link
         {
-            get { return this.link; }
-            set { this.link = value; }
+            get { return _link; }
+            set { _link = value; }
         }
 
         internal override bool IsInline
