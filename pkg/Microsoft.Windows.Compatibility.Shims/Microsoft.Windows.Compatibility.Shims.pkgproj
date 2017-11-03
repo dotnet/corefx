@@ -5,7 +5,6 @@
   <PropertyGroup>
     <PackageVersion>$(CompatibilityShimsPackageVersion)</PackageVersion>
     <_ShimsLocationPath>$(BaseIntermediateOutputPath)shims/netcoreapp/facades/</_ShimsLocationPath>
-    <_PkgLibDir>/lib/netcoreapp2.0/</_PkgLibDir>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,7 +29,7 @@
 
     <ItemGroup>
       <File Include="@(ShimsToInclude->'$(_ShimsLocationPath)%(Identity)')">
-        <TargetPath>$(_PkgLibDir)%(ShimsToInclude.Identity)</TargetPath>
+        <TargetPath>/lib/netcoreapp2.0</TargetPath>
         <SkipPackageFileCheck>true</SkipPackageFileCheck>
       </File>
       <!-- Include placeholder to be netstandard2.0 compatible -->

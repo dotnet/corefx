@@ -62,7 +62,7 @@
     <Dependency Include="@(PrereleaseLibraryPackage)" />
 
     <!-- Include dependency to shims package -->
-    <Dependency Include="Microsoft.NETFramework.Compatibility.Shims">
+    <Dependency Include="Microsoft.Windows.Compatibility.Shims">
       <Version>$(CompatibilityShimsPackageVersion)</Version>
     </Dependency>
   </ItemGroup>
