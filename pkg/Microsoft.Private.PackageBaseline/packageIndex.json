@@ -807,7 +807,6 @@
     },
     "System.ComponentModel.Composition": {
       "InboxOn": {
-        "netcoreapp2.0": "4.0.0.0",
         "net45": "4.0.0.0",
         "netstandard2.0": "4.0.0.0",
         "monoandroid10": "Any",
