@@ -154,6 +154,7 @@ namespace System.Data.Common.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public void CanBeFinalized()
         {
             FinalizingCommand.CreateAndRelease();

@@ -70,12 +70,14 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public void CopyTo_Throws()
         {
             ValidateCopyToThrows((collection, array, index) => collection.CopyTo(array, index));
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public void CopyTo_NonGeneric_Throws()
         {
             ValidateCopyToThrows((collection, array, index) => ((ICollection)collection).CopyTo(array, index), c =>
