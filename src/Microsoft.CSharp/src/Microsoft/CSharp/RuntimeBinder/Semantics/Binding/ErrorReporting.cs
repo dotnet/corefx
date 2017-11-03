@@ -118,7 +118,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 // everything else
-                if (pObject != null && !pObject.isLvalue() && (expr is ExprField || (!isNested && expr is ExprProperty)))
+                if (pObject != null && !pObject.isLvalue() && (expr is ExprField || !isNested))
                 {
                     Debug.Assert(pObject.Type.isStructOrEnum());
                     expr = pObject;
