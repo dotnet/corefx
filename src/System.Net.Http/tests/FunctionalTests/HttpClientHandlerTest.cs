@@ -1000,11 +1000,17 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(22187, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(HeaderWithEmptyValueAndUris))]
         public async Task GetAsync_RequestHeadersAddCustomHeaders_HeaderAndEmptyValueSent(string name, string value, Uri uri)
         {
+            if (PlatformDetection.IsWindows && !PlatformDetection.IsWindows10Version1709OrGreater)
+            {
+                // Skip this test if running on Windows but on a release prior to Windows 10 Fall Creators Update.
+                _output.WriteLine("Skipping test due to Windows 10 version prior to Version 1709.");
+                return;
+            }
+
             using (HttpClient client = CreateHttpClient())
             {
                 _output.WriteLine($"name={name}, value={value}");
