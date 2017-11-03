@@ -12,13 +12,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         private static readonly ErrorCode[] s_ReadOnlyErrors =
         {
-            ErrorCode.ERR_RefReadonly,
             ErrorCode.ERR_AssgReadonly,
-            ErrorCode.ERR_RefReadonlyStatic,
             ErrorCode.ERR_AssgReadonlyStatic,
-            ErrorCode.ERR_RefReadonly2,
             ErrorCode.ERR_AssgReadonly2,
-            ErrorCode.ERR_RefReadonlyStatic2,
             ErrorCode.ERR_AssgReadonlyStatic2
         };
 
@@ -28,7 +24,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             bool isStatic = field.FieldWithType.Field().isStatic;
 
-            int index = (isNested ? 4 : 0) + (isStatic ? 2 : 0) + (kind == CheckLvalueKind.OutParameter ? 0 : 1);
+            int index = (isNested ? 2 : 0) + (isStatic ? 1 : 0);
             ErrorCode err = s_ReadOnlyErrors[index];
 
             return ErrorContext.Error(err, isNested ? new ErrArg[]{field.FieldWithType} : Array.Empty<ErrArg>());
