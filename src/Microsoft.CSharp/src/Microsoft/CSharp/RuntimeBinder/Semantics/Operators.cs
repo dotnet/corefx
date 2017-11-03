@@ -1721,7 +1721,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(ek == ExpressionKind.Add || ek == ExpressionKind.Subtract);
             ConstVal cv;
-            Expr pExprResult;
 
             if (type.isEnumType() && type.fundType() > FUNDTYPE.FT_LASTINTEGRAL)
             {
@@ -1729,50 +1728,52 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 type = GetPredefindType(PredefinedType.PT_INT);
             }
 
-            FUNDTYPE ft = type.fundType();
-            CType typeTmp = type;
-
-            switch (ft)
+            switch (type.fundType())
             {
                 default:
+                    Debug.Assert(type.isPredefType(PredefinedType.PT_DECIMAL));
+                    PREDEFMETH predefMeth;
+                    if (ek == ExpressionKind.Add)
                     {
-                        Debug.Assert(type.isPredefType(PredefinedType.PT_DECIMAL));
-                        ek = ek == ExpressionKind.Add ? ExpressionKind.DecimalInc : ExpressionKind.DecimalDec;
-                        PREDEFMETH predefMeth = ek == ExpressionKind.DecimalInc ? PREDEFMETH.PM_DECIMAL_OPINCREMENT : PREDEFMETH.PM_DECIMAL_OPDECREMENT;
-                        pExprResult = CreateUnaryOpForPredefMethodCall(ek, predefMeth, type, exprVal);
+                        ek = ExpressionKind.DecimalInc;
+                        predefMeth = PREDEFMETH.PM_DECIMAL_OPINCREMENT;
                     }
-                    break;
+                    else
+                    {
+                        ek = ExpressionKind.DecimalDec;
+                        predefMeth = PREDEFMETH.PM_DECIMAL_OPDECREMENT;
+                    }
+
+                    return CreateUnaryOpForPredefMethodCall(ek, predefMeth, type, exprVal);
+
                 case FUNDTYPE.FT_PTR:
-                    cv = ConstVal.Get(1);
-                    pExprResult = BindPtrBinOp(ek, flags, exprVal, GetExprFactory().CreateConstant(GetPredefindType(PredefinedType.PT_INT), cv));
-                    break;
+                    return BindPtrBinOp(ek, flags, exprVal, GetExprFactory().CreateConstant(GetPredefindType(PredefinedType.PT_INT), ConstVal.Get(1)));
+
                 case FUNDTYPE.FT_I1:
                 case FUNDTYPE.FT_I2:
                 case FUNDTYPE.FT_U1:
                 case FUNDTYPE.FT_U2:
-                    typeTmp = GetPredefindType(PredefinedType.PT_INT);
+                    type = GetPredefindType(PredefinedType.PT_INT);
                     cv = ConstVal.Get(1);
-                    pExprResult = LScalar(ek, flags, exprVal, type, cv, typeTmp);
                     break;
+
                 case FUNDTYPE.FT_I4:
                 case FUNDTYPE.FT_U4:
                     cv = ConstVal.Get(1);
-                    pExprResult = LScalar(ek, flags, exprVal, type, cv, typeTmp);
                     break;
+
                 case FUNDTYPE.FT_I8:
                 case FUNDTYPE.FT_U8:
                     cv = ConstVal.Get((long)1);
-                    pExprResult = LScalar(ek, flags, exprVal, type, cv, typeTmp);
                     break;
+
                 case FUNDTYPE.FT_R4:
                 case FUNDTYPE.FT_R8:
                     cv = ConstVal.Get(1.0);
-                    pExprResult = LScalar(ek, flags, exprVal, type, cv, typeTmp);
                     break;
             }
-            Debug.Assert(pExprResult != null);
-            Debug.Assert(!(pExprResult.Type is NullableType));
-            return pExprResult;
+
+            return LScalar(ek, flags, exprVal, type, cv, type);
         }
 
         private Expr LScalar(ExpressionKind ek, EXPRFLAG flags, Expr exprVal, CType type, ConstVal cv, CType typeTmp)
