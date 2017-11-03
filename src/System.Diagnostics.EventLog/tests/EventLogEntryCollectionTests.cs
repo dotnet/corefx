@@ -95,7 +95,7 @@ namespace System.Diagnostics.Tests
                 {
                     eventLog.Source = source;
                     Helpers.RetryOnWin7(() => eventLog.WriteEntry(message));
-                    WaitForEventLog(eventLog, 1);
+                    WaitForEventLog(eventLog, 1);  //There is latency between writing and getting the entry
                     EventLogEntry entry = Helpers.RetryOnWin7(() => eventLog.Entries[eventLog.Entries.Count - 1]);
                     Assert.True(entry.Equals(entry));
 
