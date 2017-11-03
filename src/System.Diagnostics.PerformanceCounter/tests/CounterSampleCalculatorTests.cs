@@ -31,23 +31,6 @@ namespace System.Diagnostics.Tests
             Assert.True(Math.Abs(dateTimeVal - counterVal) < .05);
         }
 
-        [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
-        public static void CounterSampleCalculator_CounterTimer()
-        {
-            var name = nameof(CounterSampleCalculator_CounterTimer) + "_Counter";
-
-            PerformanceCounter counterSample = CreateCounter(name, PerformanceCounterType.CounterTimer);
-
-            counterSample.RawValue = 0;
-            counterSample.NextValue();
-
-            var val = RunScenario(counterSample);
-
-            DeleteCategory(name);
-
-            Assert.True(val > 0);
-        }
-
         public static PerformanceCounter CreateCounter(string name, PerformanceCounterType counterType)
         {
             var category = name + "_Category";
@@ -65,19 +48,6 @@ namespace System.Diagnostics.Tests
             Assert.True(Helpers.PerformanceCounterCategoryCreated(category));
 
             return new PerformanceCounter(category, name, false);
-        }
-
-        public static float RunScenario(PerformanceCounter counter)
-        {
-            Random r = new Random(-55);
-            for (int i = 0; i < 50; i++)
-            {
-                int randomValue = r.Next(1, 100000);
-                counter.IncrementBy(randomValue);
-                System.Threading.Thread.Sleep(50);
-            }
-
-            return counter.NextValue();
         }
 
         public static void DeleteCategory(string name)
