@@ -34,10 +34,7 @@ namespace System.DirectoryServices.Protocols
     public class DirectoryOperationException : DirectoryException, ISerializable
     {
         internal DirectoryResponse response = null;
-        protected DirectoryOperationException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-            throw new PlatformNotSupportedException();
-        }
+        protected DirectoryOperationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
         public DirectoryOperationException() : base() { }
 
@@ -78,10 +75,7 @@ namespace System.DirectoryServices.Protocols
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.DirectoryServices.Protocols, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class BerConversionException : DirectoryException
     {
-        protected BerConversionException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-            throw new PlatformNotSupportedException();
-        }
+        protected BerConversionException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
         public BerConversionException() : base(String.Format(CultureInfo.CurrentCulture, SR.BerConversionError))
         {
