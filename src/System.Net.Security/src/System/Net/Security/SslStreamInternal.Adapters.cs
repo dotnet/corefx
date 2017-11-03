@@ -21,7 +21,7 @@ namespace System.Net.Security
             ValueTask<int> LockAsync(Memory<byte> buffer);
         }
 
-        private struct SslReadAsync : ISslReadAdapter
+        private readonly struct SslReadAsync : ISslReadAdapter
         {
             private readonly SslState _sslState;
             private readonly CancellationToken _cancellationToken;
@@ -37,7 +37,7 @@ namespace System.Net.Security
             public ValueTask<int> LockAsync(Memory<byte> buffer) => _sslState.CheckEnqueueReadAsync(buffer);
         }
 
-        private struct SslReadSync : ISslReadAdapter
+        private readonly struct SslReadSync : ISslReadAdapter
         {
             private readonly SslState _sslState;
 
@@ -48,7 +48,7 @@ namespace System.Net.Security
             public ValueTask<int> LockAsync(Memory<byte> buffer) => new ValueTask<int>(_sslState.CheckEnqueueRead(buffer));
         }
 
-        private struct SslWriteAsync : ISslWriteAdapter
+        private readonly struct SslWriteAsync : ISslWriteAdapter
         {
             private readonly SslState _sslState;
             private readonly CancellationToken _cancellationToken;
@@ -65,7 +65,6 @@ namespace System.Net.Security
         }
 
         private readonly struct SslWriteSync : ISslWriteAdapter
-        private struct SslWriteSync : ISslWriteAdapter
         {
             private readonly SslState _sslState;
 
