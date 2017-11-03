@@ -158,7 +158,7 @@ namespace System.Runtime.Caching
             }
             if (filePaths.Count == 0)
             {
-                throw new ArgumentException(RH.Format(R.Empty_collection, "filePaths"));
+                throw new ArgumentException(RH.Format(SR.Empty_collection, "filePaths"));
             }
 
             _filePaths = SanitizeFilePathsList(filePaths);
@@ -175,7 +175,7 @@ namespace System.Runtime.Caching
             {
                 if (String.IsNullOrEmpty(path))
                 {
-                    throw new ArgumentException(RH.Format(R.Collection_contains_null_or_empty_string, "filePaths"));
+                    throw new ArgumentException(RH.Format(SR.Collection_contains_null_or_empty_string, "filePaths"));
                 }
                 else
                 {

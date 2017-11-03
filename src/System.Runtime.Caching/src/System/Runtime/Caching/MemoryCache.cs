@@ -247,20 +247,20 @@ namespace System.Runtime.Caching
             if (policy.AbsoluteExpiration != ObjectCache.InfiniteAbsoluteExpiration
                 && policy.SlidingExpiration != ObjectCache.NoSlidingExpiration)
             {
-                throw new ArgumentException(R.Invalid_expiration_combination, "policy");
+                throw new ArgumentException(SR.Invalid_expiration_combination, "policy");
             }
             if (policy.SlidingExpiration < ObjectCache.NoSlidingExpiration || s_oneYear < policy.SlidingExpiration)
             {
-                throw new ArgumentOutOfRangeException("policy", RH.Format(R.Argument_out_of_range, "SlidingExpiration", ObjectCache.NoSlidingExpiration, s_oneYear));
+                throw new ArgumentOutOfRangeException("policy", RH.Format(SR.Argument_out_of_range, "SlidingExpiration", ObjectCache.NoSlidingExpiration, s_oneYear));
             }
             if (policy.RemovedCallback != null
                 && policy.UpdateCallback != null)
             {
-                throw new ArgumentException(R.Invalid_callback_combination, "policy");
+                throw new ArgumentException(SR.Invalid_callback_combination, "policy");
             }
             if (policy.Priority != CacheItemPriority.Default && policy.Priority != CacheItemPriority.NotRemovable)
             {
-                throw new ArgumentOutOfRangeException("policy", RH.Format(R.Argument_out_of_range, "Priority", CacheItemPriority.Default, CacheItemPriority.NotRemovable));
+                throw new ArgumentOutOfRangeException("policy", RH.Format(SR.Argument_out_of_range, "Priority", CacheItemPriority.Default, CacheItemPriority.NotRemovable));
             }
         }
 
@@ -347,11 +347,11 @@ namespace System.Runtime.Caching
             }
             if (name == String.Empty)
             {
-                throw new ArgumentException(R.Empty_string_invalid, "name");
+                throw new ArgumentException(SR.Empty_string_invalid, "name");
             }
             if (String.Equals(name, "default", StringComparison.OrdinalIgnoreCase))
             {
-                throw new ArgumentException(R.Default_is_reserved, "name");
+                throw new ArgumentException(SR.Default_is_reserved, "name");
             }
             _name = name;
             Init(config);
@@ -367,11 +367,11 @@ namespace System.Runtime.Caching
             }
             if (name == String.Empty)
             {
-                throw new ArgumentException(R.Empty_string_invalid, "name");
+                throw new ArgumentException(SR.Empty_string_invalid, "name");
             }
             if (String.Equals(name, "default", StringComparison.OrdinalIgnoreCase))
             {
-                throw new ArgumentException(R.Default_is_reserved, "name");
+                throw new ArgumentException(SR.Default_is_reserved, "name");
             }
             _name = name;
             _configLess = ignoreConfigSection;
@@ -405,7 +405,7 @@ namespace System.Runtime.Caching
                 ValidatePolicy(policy);
                 if (policy.UpdateCallback != null)
                 {
-                    throw new ArgumentException(R.Update_callback_must_be_null, "policy");
+                    throw new ArgumentException(SR.Update_callback_must_be_null, "policy");
                 }
                 absExp = policy.AbsoluteExpiration;
                 slidingExp = policy.SlidingExpiration;
@@ -437,7 +437,7 @@ namespace System.Runtime.Caching
         {
             if (regionName != null)
             {
-                throw new NotSupportedException(R.RegionName_not_supported);
+                throw new NotSupportedException(SR.RegionName_not_supported);
             }
             if (keys == null)
             {
@@ -446,14 +446,14 @@ namespace System.Runtime.Caching
             List<String> keysClone = new List<String>(keys);
             if (keysClone.Count == 0)
             {
-                throw new ArgumentException(RH.Format(R.Empty_collection, "keys"));
+                throw new ArgumentException(RH.Format(SR.Empty_collection, "keys"));
             }
 
             foreach (string key in keysClone)
             {
                 if (key == null)
                 {
-                    throw new ArgumentException(RH.Format(R.Collection_contains_null_element, "keys"));
+                    throw new ArgumentException(RH.Format(SR.Collection_contains_null_element, "keys"));
                 }
             }
 
@@ -506,7 +506,7 @@ namespace System.Runtime.Caching
         {
             if (regionName != null)
             {
-                throw new NotSupportedException(R.RegionName_not_supported);
+                throw new NotSupportedException(SR.RegionName_not_supported);
             }
             if (key == null)
             {
@@ -606,7 +606,7 @@ namespace System.Runtime.Caching
         {
             if (regionName != null)
             {
-                throw new NotSupportedException(R.RegionName_not_supported);
+                throw new NotSupportedException(SR.RegionName_not_supported);
             }
             CacheItemPolicy policy = new CacheItemPolicy();
             policy.AbsoluteExpiration = absoluteExpiration;
@@ -626,7 +626,7 @@ namespace System.Runtime.Caching
         {
             if (regionName != null)
             {
-                throw new NotSupportedException(R.RegionName_not_supported);
+                throw new NotSupportedException(SR.RegionName_not_supported);
             }
             return AddOrGetExistingInternal(key, value, policy);
         }
@@ -646,7 +646,7 @@ namespace System.Runtime.Caching
         {
             if (regionName != null)
             {
-                throw new NotSupportedException(R.RegionName_not_supported);
+                throw new NotSupportedException(SR.RegionName_not_supported);
             }
             CacheItemPolicy policy = new CacheItemPolicy();
             policy.AbsoluteExpiration = absoluteExpiration;
@@ -666,7 +666,7 @@ namespace System.Runtime.Caching
         {
             if (regionName != null)
             {
-                throw new NotSupportedException(R.RegionName_not_supported);
+                throw new NotSupportedException(SR.RegionName_not_supported);
             }
             if (key == null)
             {
@@ -725,7 +725,7 @@ namespace System.Runtime.Caching
                 && absoluteExpiration == ObjectCache.InfiniteAbsoluteExpiration
                 && slidingExpiration == ObjectCache.NoSlidingExpiration)
             {
-                throw new ArgumentException(R.Invalid_argument_combination);
+                throw new ArgumentException(SR.Invalid_argument_combination);
             }
             if (onUpdateCallback == null)
             {
@@ -791,7 +791,7 @@ namespace System.Runtime.Caching
         {
             if (regionName != null)
             {
-                throw new NotSupportedException(R.RegionName_not_supported);
+                throw new NotSupportedException(SR.RegionName_not_supported);
             }
             if (key == null)
             {
@@ -809,7 +809,7 @@ namespace System.Runtime.Caching
         {
             if (regionName != null)
             {
-                throw new NotSupportedException(R.RegionName_not_supported);
+                throw new NotSupportedException(SR.RegionName_not_supported);
             }
             long count = 0;
             if (!IsDisposed)
@@ -826,7 +826,7 @@ namespace System.Runtime.Caching
         {
             if (regionName != null)
             {
-                throw new NotSupportedException(R.RegionName_not_supported);
+                throw new NotSupportedException(SR.RegionName_not_supported);
             }
 
             return _stats.GetLastSize();
@@ -836,7 +836,7 @@ namespace System.Runtime.Caching
         {
             if (regionName != null)
             {
-                throw new NotSupportedException(R.RegionName_not_supported);
+                throw new NotSupportedException(SR.RegionName_not_supported);
             }
             if (keys == null)
             {
@@ -849,7 +849,7 @@ namespace System.Runtime.Caching
                 {
                     if (key == null)
                     {
-                        throw new ArgumentException(RH.Format(R.Collection_contains_null_element, "keys"));
+                        throw new ArgumentException(RH.Format(SR.Collection_contains_null_element, "keys"));
                     }
                     object value = GetInternal(key, null);
                     if (value != null)

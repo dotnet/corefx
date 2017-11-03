@@ -37,7 +37,7 @@ namespace System.Runtime.Caching
                 }
                 if (Interlocked.CompareExchange(ref s_host, value, null) != null)
                 {
-                    throw new InvalidOperationException(R.Property_already_set);
+                    throw new InvalidOperationException(SR.Property_already_set);
                 }
             }
         }

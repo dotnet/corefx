@@ -7,7 +7,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- Although we have a netstandard configuration, we know we are not currently UAP compatible-->
     <UWPCompatible>false</UWPCompatible>
-    <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsWindows)' != 'true'">true</GeneratePlatformNotSupportedAssembly>
+    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetsWindows)' != 'true'">SR.PlatformNotSupported_Caching</GeneratePlatformNotSupportedAssemblyMessage>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
@@ -56,7 +56,6 @@
     <Compile Include="System\Runtime\Caching\Hosting\IApplicationIdentifier.cs" />
     <Compile Include="System\Runtime\Caching\Hosting\IFileChangeNotificationSystem.cs" />
     <Compile Include="System\Runtime\Caching\Hosting\IMemoryCacheManager.cs" />
-    <Compile Include="System\Runtime\Caching\Resources\R.Designer.cs" />
     <Compile Include="System\Runtime\Caching\Resources\RH.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GlobalMemoryStatusEx.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GlobalMemoryStatusEx.cs</Link>

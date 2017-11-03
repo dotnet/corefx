@@ -210,7 +210,7 @@ namespace System.Runtime.Caching
             Dbg.Assert(_flags[CHANGED], "It is critical that CHANGED is set before INITIALIZED is checked below.");
             if (!_flags[INITIALIZED])
             {
-                throw new InvalidOperationException(R.Init_not_complete);
+                throw new InvalidOperationException(SR.Init_not_complete);
             }
 
             DisposeHelper();
@@ -230,7 +230,7 @@ namespace System.Runtime.Caching
 
             if (Interlocked.CompareExchange(ref _onChangedCallback, onChangedCallback, null) != null)
             {
-                throw new InvalidOperationException(R.Method_already_invoked);
+                throw new InvalidOperationException(SR.Method_already_invoked);
             }
 
             // if it already changed, raise the event now.

@@ -151,7 +151,7 @@ namespace System.Runtime.Caching
             FileChangeEventTarget target = state as FileChangeEventTarget;
             if (target == null)
             {
-                throw new ArgumentException(R.Invalid_state, "state");
+                throw new ArgumentException(SR.Invalid_state, "state");
             }
             string dir = Path.GetDirectoryName(filePath);
             DirectoryMonitor dirMon = _dirMonitors[dir] as DirectoryMonitor;
