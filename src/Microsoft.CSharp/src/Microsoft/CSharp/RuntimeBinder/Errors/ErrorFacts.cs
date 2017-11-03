@@ -188,12 +188,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_BadDelArgTypes:
                     codeStr = SR.BadDelArgTypes;
                     break;
-                case ErrorCode.ERR_AssgReadonlyLocal:
-                    codeStr = SR.AssgReadonlyLocal;
-                    break;
-                case ErrorCode.ERR_RefReadonlyLocal:
-                    codeStr = SR.RefReadonlyLocal;
-                    break;
                 case ErrorCode.ERR_ReturnNotLValue:
                     codeStr = SR.ReturnNotLValue;
                     break;

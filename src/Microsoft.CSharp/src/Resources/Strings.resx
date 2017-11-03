@@ -271,12 +271,6 @@
   <data name="BadDelArgTypes" xml:space="preserve">
     <value>Delegate '{0}' has some invalid arguments</value>
   </data>
-  <data name="AssgReadonlyLocal" xml:space="preserve">
-    <value>Cannot assign to '{0}' because it is read-only</value>
-  </data>
-  <data name="RefReadonlyLocal" xml:space="preserve">
-    <value>Cannot pass '{0}' as a ref or out argument because it is read-only</value>
-  </data>
   <data name="ReturnNotLValue" xml:space="preserve">
     <value>Cannot modify the return value of '{0}' because it is not a variable</value>
   </data>

@@ -64,8 +64,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         ERR_BindToBogusProp1 = 1546,
         ERR_BadDelArgCount = 1593,
         ERR_BadDelArgTypes = 1594,
-        ERR_AssgReadonlyLocal = 1604,
-        ERR_RefReadonlyLocal = 1605,
         ERR_ReturnNotLValue = 1612,
         ERR_AssgReadonly2 = 1648,
         ERR_RefReadonly2 = 1649,

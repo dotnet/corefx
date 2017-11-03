@@ -1135,6 +1135,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
+            Debug.Assert(!(expr is ExprLocal));
+
             switch (expr.Kind)
             {
                 case ExpressionKind.Property:
