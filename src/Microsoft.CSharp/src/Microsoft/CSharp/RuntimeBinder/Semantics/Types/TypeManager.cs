@@ -22,7 +22,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private SymbolTable _symbolTable;
 
         // Special types
-        private readonly MethodGroupType _typeMethGrp;
         private readonly ArgumentListType _argListType;
         private readonly ErrorType _errorType;
 
@@ -36,7 +35,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // special types with their own symbol kind.
             _errorType = _typeFactory.CreateError(null, null);
-            _typeMethGrp = _typeFactory.CreateMethodGroup();
             _argListType = _typeFactory.CreateArgList();
 
             _stvcMethod = new StdTypeVarColl();
@@ -305,11 +303,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             return pError;
-        }
-
-        public MethodGroupType GetMethGrpType()
-        {
-            return _typeMethGrp;
         }
 
         public ArgumentListType GetArgListType()

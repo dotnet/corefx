@@ -34,7 +34,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             new ExprProperty(type, optionalObjectThrough, arguments, memberGroup, property, setMethod);
 
         public ExprMemberGroup CreateMemGroup(EXPRFLAG flags, Name name, TypeArray typeArgs, SYMKIND symKind, CType parentType, MethodOrPropertySymbol memberSymbol, Expr obj, CMemberLookupResults memberLookupResults) => 
-            new ExprMemberGroup(Types.GetMethGrpType(), flags, name, typeArgs, symKind, parentType, memberSymbol, obj, memberLookupResults);
+            new ExprMemberGroup(MethodGroupType.Instance, flags, name, typeArgs, symKind, parentType, memberSymbol, obj, memberLookupResults);
 
         public ExprMemberGroup CreateMemGroup(Expr obj, MethPropWithInst method)
         {
