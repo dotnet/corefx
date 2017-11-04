@@ -485,9 +485,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
 
                 case TypeKind.TK_TypeParameterType:
-                    if (null == pType.GetName())
+                    TypeParameterType tpType = (TypeParameterType)pType;
+                    Name name = tpType.Name;
+                    if (name == null)
                     {
-                        var tpType = (TypeParameterType)pType;
                         // It's a standard type variable.
                         if (tpType.IsMethodTypeParameter())
                         {
@@ -498,7 +499,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
                     else
                     {
-                        ErrAppendName(pType.GetName());
+                        ErrAppendName(name);
                     }
                     break;
 

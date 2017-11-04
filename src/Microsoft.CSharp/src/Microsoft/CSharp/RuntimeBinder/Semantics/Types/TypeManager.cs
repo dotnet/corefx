@@ -37,7 +37,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _typeTable = new TypeTable();
 
             // special types with their own symbol kind.
-            _errorType = _typeFactory.CreateError(null, null, null);
+            _errorType = _typeFactory.CreateError(null, null);
             _voidType = _typeFactory.CreateVoid();
             _nullType = _typeFactory.CreateNull();
             _typeMethGrp = _typeFactory.CreateMethodGroup();
@@ -131,7 +131,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pArray == null)
             {
                 // No existing array symbol. Create a new one.
-                pArray = _typeFactory.CreateArray(name, elementType, args, isSZArray);
+                pArray = _typeFactory.CreateArray(elementType, args, isSZArray);
                 pArray.InitFromParent();
 
                 _typeTable.InsertArray(name, elementType, pArray);
@@ -166,7 +166,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pAggregate == null)
             {
                 pAggregate = _typeFactory.CreateAggregateType(
-                          name,
                           agg,
                           typeArgs,
                           atsOuter
@@ -244,9 +243,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pPointer == null)
             {
                 // No existing type. Create a new one.
-                Name namePtr = NameManager.GetPredefinedName(PredefinedName.PN_PTR);
-
-                pPointer = _typeFactory.CreatePointer(namePtr, baseType);
+                pPointer = _typeFactory.CreatePointer(baseType);
                 pPointer.InitFromParent();
 
                 _typeTable.InsertPointer(baseType, pPointer);
@@ -272,9 +269,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             NullableType pNullableType = _typeTable.LookupNullable(pUnderlyingType);
             if (pNullableType == null)
             {
-                Name pName = NameManager.GetPredefinedName(PredefinedName.PN_NUB);
-
-                pNullableType = _typeFactory.CreateNullable(pName, pUnderlyingType, _BSymmgr, this);
+                pNullableType = _typeFactory.CreateNullable(pUnderlyingType, _BSymmgr, this);
                 pNullableType.InitFromParent();
 
                 _typeTable.InsertNullable(pUnderlyingType, pNullableType);
@@ -297,7 +292,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pParamModifier == null)
             {
                 // No existing parammod symbol. Create a new one.
-                pParamModifier = _typeFactory.CreateParameterModifier(name, paramType);
+                pParamModifier = _typeFactory.CreateParameterModifier(paramType);
                 pParamModifier.isOut = isOut;
                 pParamModifier.InitFromParent();
 
@@ -331,7 +326,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pError == null)
             {
                 // No existing error symbol. Create a new one.
-                pError = _typeFactory.CreateError(name, nameText, typeArgs);
+                pError = _typeFactory.CreateError(nameText, typeArgs);
                 pError.SetErrors(true);
                 _typeTable.InsertError(name, pError);
             }
@@ -493,7 +488,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_TypeParameterType:
                     {
-                        TypeParameterSymbol tvs = ((TypeParameterType)type).GetTypeParameterSymbol();
+                        TypeParameterSymbol tvs = ((TypeParameterType)type).TypeParameterSymbol;
                         int index = tvs.GetIndexInTotalParameters();
                         if (tvs.IsMethodTypeParameter())
                         {
@@ -653,7 +648,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_TypeParameterType:
                     { // BLOCK
-                        TypeParameterSymbol tvs = ((TypeParameterType)typeSrc).GetTypeParameterSymbol();
+                        TypeParameterSymbol tvs = ((TypeParameterType)typeSrc).TypeParameterSymbol;
                         int index = tvs.GetIndexInTotalParameters();
 
                         if (tvs.IsMethodTypeParameter())
