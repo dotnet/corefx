@@ -250,7 +250,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             AggregateType atsDest = (AggregateType)pDest;
-            AggregateSymbol aggDest = atsDest.getAggregate();
+            AggregateSymbol aggDest = atsDest.OwningAggregate;
             if (!aggDest.isPredefAgg(PredefinedType.PT_G_ILIST) &&
                 !aggDest.isPredefAgg(PredefinedType.PT_G_ICOLLECTION) &&
                 !aggDest.isPredefAgg(PredefinedType.PT_G_IENUMERABLE) &&
@@ -461,8 +461,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return true;
             }
-            AggregateSymbol pAggSym = pSource.getAggregate();
-            if (pAggSym != pDest.getAggregate())
+            AggregateSymbol pAggSym = pSource.OwningAggregate;
+            if (pAggSym != pDest.OwningAggregate)
             {
                 return false;
             }
@@ -608,7 +608,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     foreach (AggregateType iface in derived.GetIfacesAll().Items)
                     {
-                        if (iface.getAggregate() == @base)
+                        if (iface.OwningAggregate == @base)
                             return true;
                     }
                     derived = derived.GetBaseAgg();
@@ -621,7 +621,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             while (derived.GetBaseClass() != null)
             {
-                derived = derived.GetBaseClass().getAggregate();
+                derived = derived.GetBaseClass().OwningAggregate;
                 if (derived == @base)
                     return true;
             }

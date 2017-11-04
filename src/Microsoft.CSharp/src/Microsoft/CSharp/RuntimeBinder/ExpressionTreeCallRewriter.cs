@@ -900,7 +900,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                     if (pExpr.Type.isEnumType())
                     {
-                        underlyingType = underlyingType.getAggregate().GetUnderlyingType();
+                        underlyingType = ((AggregateType)underlyingType).OwningAggregate.GetUnderlyingType();
                     }
 
                     switch (Type.GetTypeCode(underlyingType.AssociatedSystemType))

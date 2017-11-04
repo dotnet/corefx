@@ -133,9 +133,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Loop through symbols.
             Symbol symCur = null;
-            for (symCur = GetSymbolLoader().LookupAggMember(_name, typeCur.getAggregate(), symbmask_t.MASK_ALL);
+            for (symCur = GetSymbolLoader().LookupAggMember(_name, typeCur.OwningAggregate, symbmask_t.MASK_ALL);
                  symCur != null;
-                 symCur = GetSymbolLoader().LookupNextSym(symCur, typeCur.getAggregate(), symbmask_t.MASK_ALL))
+                 symCur = GetSymbolLoader().LookupNextSym(symCur, typeCur.OwningAggregate, symbmask_t.MASK_ALL))
             {
                 // Check for arity.
                 switch (symCur.getKind())

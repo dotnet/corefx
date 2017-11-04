@@ -460,7 +460,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                         // Check for a predefined class with a special "nice" name for
                         // error reported.
-                        string text = PredefinedTypes.GetNiceName(pAggType.getAggregate());
+                        string text = PredefinedTypes.GetNiceName(pAggType.OwningAggregate);
                         if (text != null)
                         {
                             // Found a nice name.
@@ -476,9 +476,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                             else
                             {
                                 // In a namespace.
-                                ErrAppendParentSym(pAggType.getAggregate(), pctx);
+                                ErrAppendParentSym(pAggType.OwningAggregate, pctx);
                             }
-                            ErrAppendName(pAggType.getAggregate().name);
+                            ErrAppendName(pAggType.OwningAggregate.name);
                         }
                         ErrAppendTypeParameters(pAggType.TypeArgsThis, pctx, true);
                         break;

@@ -1229,7 +1229,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         _pGroup.Name == NameManager.GetPredefinedName(PredefinedName.PN_INVOKE))
                 {
                     Debug.Assert(!_results.GetBestResult() || _results.GetBestResult().MethProp().getClass().IsDelegate());
-                    Debug.Assert(!_results.GetBestResult() || _results.GetBestResult().GetType().getAggregate().IsDelegate());
+                    Debug.Assert(!_results.GetBestResult() || _results.GetBestResult().GetType().OwningAggregate.IsDelegate());
                     bUseDelegateErrors = true;
                     nameErr = _pGroup.OptionalObject.Type.getAggregate().name;
                 }

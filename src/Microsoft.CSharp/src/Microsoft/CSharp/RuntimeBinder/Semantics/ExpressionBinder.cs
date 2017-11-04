@@ -551,7 +551,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         internal Expr BindToField(Expr pOptionalObject, FieldWithType fwt, BindingFlag bindFlags)
         {
-            Debug.Assert(fwt.GetType() != null && fwt.Field().getClass() == fwt.GetType().getAggregate());
+            Debug.Assert(fwt.GetType() != null && fwt.Field().getClass() == fwt.GetType().OwningAggregate);
 
             CType pFieldType = GetTypes().SubstType(fwt.Field().GetType(), fwt.GetType());
             if (pOptionalObject != null && !pOptionalObject.IsOK)
@@ -611,7 +611,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         getOrCreateMethodName.Text, null, fieldType.AssociatedSystemType);
                 MethodSymbol getOrCreateMethod =
                     GetSymbolLoader()
-                        .LookupAggMember(getOrCreateMethodName, fieldType.getAggregate(), symbmask_t.MASK_MethodSymbol)
+                        .LookupAggMember(getOrCreateMethodName, fieldType.OwningAggregate, symbmask_t.MASK_MethodSymbol)
                          as MethodSymbol;
 
                 MethPropWithInst getOrCreatempwi = new MethPropWithInst(getOrCreateMethod, fieldType);
@@ -650,11 +650,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(pwt.Sym != null &&
                     pwt.Sym is PropertySymbol &&
                     pwt.GetType() != null &&
-                    pwt.Prop().getClass() == pwt.GetType().getAggregate());
+                    pwt.Prop().getClass() == pwt.GetType().OwningAggregate);
             Debug.Assert(pwt.Prop().Params.Count == 0 || pwt.Prop() is IndexerSymbol);
             Debug.Assert(pOtherType == null ||
                     !(pwt.Prop() is IndexerSymbol) &&
-                    pOtherType.getAggregate() == pwt.Prop().RetType.getAggregate());
+                    pOtherType.OwningAggregate == pwt.Prop().RetType.getAggregate());
 
             bool fConstrained;
             MethWithType mwtGet;
@@ -769,20 +769,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Name pName = ekName(ek);
             Debug.Assert(pName != null);
 
-            CType typeSrc = arg.Type;
+            CType typeSrc = arg.Type.StripNubs();
 
-        LAgain:
-            switch (typeSrc.TypeKind)
+            if (typeSrc is AggregateType atsCur)
             {
-                case TypeKind.TK_NullableType:
-                    typeSrc = typeSrc.StripNubs();
-                    goto LAgain;
-                case TypeKind.TK_AggregateType:
-                    if (!typeSrc.isClassType() && !typeSrc.isStructType() || ((AggregateType)typeSrc).getAggregate().IsSkipUDOps())
-                        return null;
-                    break;
-                default:
+                AggregateSymbol agg = atsCur.OwningAggregate;
+                if (!agg.IsClass() && !agg.IsStruct() || agg.IsSkipUDOps())
+                {
                     return null;
+                }
+            }
+            else
+            {
+                return null;
             }
 
             ArgInfos info = new ArgInfos();
@@ -792,14 +791,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             List<CandidateFunctionMember> methFirstList = new List<CandidateFunctionMember>();
             MethodSymbol methCur = null;
-            AggregateType atsCur = (AggregateType)typeSrc;
 
             for (; ;)
             {
                 // Find the next operator.
                 methCur = methCur == null
-                    ? GetSymbolLoader().LookupAggMember(pName, atsCur.getAggregate(), symbmask_t.MASK_MethodSymbol) as MethodSymbol
-                    : GetSymbolLoader().LookupNextSym(methCur, atsCur.getAggregate(), symbmask_t.MASK_MethodSymbol) as MethodSymbol;
+                    ? GetSymbolLoader().LookupAggMember(pName, atsCur.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol
+                    : GetSymbolLoader().LookupNextSym(methCur, atsCur.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol;
 
                 if (methCur == null)
                 {
@@ -1250,7 +1248,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private Expr AdjustMemberObject(SymWithType swt, Expr pObject, out bool pfConstrained)
         {
             // Assert that the type is present and is an instantiation of the member's parent.
-            Debug.Assert(swt.GetType() != null && swt.GetType().getAggregate() == swt.Sym.parent as AggregateSymbol);
+            Debug.Assert(swt.GetType() != null && swt.GetType().OwningAggregate == swt.Sym.parent as AggregateSymbol);
             bool bIsMatchingStatic = IsMatchingStatic(swt, pObject);
             pfConstrained = false;
 
@@ -1304,7 +1302,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (typeObj is TypeParameterType || typeObj is AggregateType)
             {
                 AggregateSymbol aggCalled = swt.Sym.parent as AggregateSymbol;
-                Debug.Assert(swt.GetType().getAggregate() == aggCalled);
+                Debug.Assert(swt.GetType().OwningAggregate == aggCalled);
 
                 // If we're invoking code on a struct-valued field, mark the struct as assigned (to
                 // avoid warning CS0649).
@@ -1421,11 +1419,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             symbmask_t mask = pswt.Sym.mask();
 
             // Search for an override version of the method.
-            while (atsObj != null && atsObj.getAggregate() != pswt.Sym.parent)
+            while (atsObj != null && atsObj.OwningAggregate != pswt.Sym.parent)
             {
-                for (Symbol symT = symbolLoader.LookupAggMember(pswt.Sym.name, atsObj.getAggregate(), mask);
+                for (Symbol symT = symbolLoader.LookupAggMember(pswt.Sym.name, atsObj.OwningAggregate, mask);
                      symT != null;
-                     symT = symbolLoader.LookupNextSym(symT, atsObj.getAggregate(), mask))
+                     symT = symbolLoader.LookupNextSym(symT, atsObj.OwningAggregate, mask))
                 {
                     if (symT.IsOverride() && (symT.SymBaseVirtual() == pswt.Sym || symT.SymBaseVirtual() == pswt.Sym.SymBaseVirtual()))
                     {

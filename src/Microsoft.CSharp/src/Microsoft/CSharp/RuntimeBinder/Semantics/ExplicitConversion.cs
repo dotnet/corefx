@@ -247,9 +247,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 AggregateSymbol aggIReadOnlyList = GetSymbolLoader().GetPredefAgg(PredefinedType.PT_G_IREADONLYLIST);
 
                 if ((aggIList == null ||
-                    !GetSymbolLoader().IsBaseAggregate(aggIList, aggDest.getAggregate())) &&
+                    !GetSymbolLoader().IsBaseAggregate(aggIList, aggDest.OwningAggregate)) &&
                     (aggIReadOnlyList == null ||
-                    !GetSymbolLoader().IsBaseAggregate(aggIReadOnlyList, aggDest.getAggregate())))
+                    !GetSymbolLoader().IsBaseAggregate(aggIReadOnlyList, aggDest.OwningAggregate)))
                 {
                     return false;
                 }
@@ -288,9 +288,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 AggregateSymbol aggIReadOnlyList = GetSymbolLoader().GetPredefAgg(PredefinedType.PT_G_IREADONLYLIST);
 
                 if ((aggIList == null ||
-                    !GetSymbolLoader().IsBaseAggregate(aggIList, aggSrc.getAggregate())) &&
+                    !GetSymbolLoader().IsBaseAggregate(aggIList, aggSrc.OwningAggregate)) &&
                     (aggIReadOnlyList == null ||
-                    !GetSymbolLoader().IsBaseAggregate(aggIReadOnlyList, aggSrc.getAggregate())))
+                    !GetSymbolLoader().IsBaseAggregate(aggIReadOnlyList, aggSrc.OwningAggregate)))
                 {
                     return false;
                 }
@@ -412,7 +412,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return AggCastResult.Failure;
                 }
 
-                AggregateSymbol aggDest = aggTypeDest.getAggregate();
+                AggregateSymbol aggDest = aggTypeDest.OwningAggregate;
                 if (aggDest.isPredefAgg(PredefinedType.PT_DECIMAL))
                 {
                     return bindExplicitConversionFromEnumToDecimal(aggTypeDest);
@@ -542,7 +542,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_typeSrc != null);
                 Debug.Assert(aggTypeDest != null);
 
-                AggregateSymbol aggDest = aggTypeDest.getAggregate();
+                AggregateSymbol aggDest = aggTypeDest.OwningAggregate;
                 if (!aggDest.IsEnum())
                 {
                     return AggCastResult.Failure;
@@ -598,7 +598,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return AggCastResult.Failure;
                 }
 
-                AggregateSymbol aggDest = aggTypeDest.getAggregate();
+                AggregateSymbol aggDest = aggTypeDest.OwningAggregate;
 
                 Debug.Assert(_typeSrc.isPredefined() && aggDest.IsPredefined());
 
@@ -672,8 +672,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return AggCastResult.Failure;
                 }
 
-                AggregateSymbol aggSrc = atSrc.getAggregate();
-                AggregateSymbol aggDest = aggTypeDest.getAggregate();
+                AggregateSymbol aggSrc = atSrc.OwningAggregate;
+                AggregateSymbol aggDest = aggTypeDest.OwningAggregate;
 
                 if (GetSymbolLoader().HasBaseConversion(aggTypeDest, atSrc))
                 {

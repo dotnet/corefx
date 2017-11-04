@@ -71,7 +71,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Ensure that invariant here.
 
             TypeArray pCheckedOuterTypeArgs = outerTypeArgs;
-            TypeManager pTypeManager = getAggregate().GetTypeManager();
+            TypeManager pTypeManager = OwningAggregate.GetTypeManager();
             TypeArgsAll = pTypeManager.ConcatenateTypeArrays(pCheckedOuterTypeArgs, TypeArgsThis);
         }
 
@@ -90,7 +90,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public AggregateType GetBaseClass()
         {
             return _baseType ??
-                (_baseType = getAggregate().GetTypeManager().SubstType(getAggregate().GetBaseClass(), TypeArgsAll) as AggregateType);
+                (_baseType = OwningAggregate.GetTypeManager().SubstType(OwningAggregate.GetBaseClass(), TypeArgsAll) as AggregateType);
         }
 
         public IEnumerable<AggregateType> TypeHierarchy
@@ -105,7 +105,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         yield return iface;
                     }
 
-                    yield return getAggregate().GetTypeManager().ObjectAggregateType;
+                    yield return OwningAggregate.GetTypeManager().ObjectAggregateType;
                 }
                 else
                 {
@@ -122,9 +122,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public TypeArray TypeArgsAll { get; }         // includes args from outer types
 
         public TypeArray GetIfacesAll() => _ifacesAll
-            ?? (_ifacesAll = getAggregate()
+            ?? (_ifacesAll = OwningAggregate
             .GetTypeManager()
-            .SubstTypeArray(getAggregate().GetIfacesAll(), TypeArgsAll));
+            .SubstTypeArray(OwningAggregate.GetIfacesAll(), TypeArgsAll));
 
         public TypeArray GetWinRTCollectionIfacesAll(SymbolLoader pSymbolLoader)
         {
@@ -151,25 +151,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public TypeArray GetDelegateParameters(SymbolLoader pSymbolLoader)
         {
             Debug.Assert(isDelegateType());
-            MethodSymbol invoke = pSymbolLoader.LookupInvokeMeth(getAggregate());
+            MethodSymbol invoke = pSymbolLoader.LookupInvokeMeth(OwningAggregate);
             if (invoke == null || !invoke.isInvoke())
             {
                 // This can happen if the delegate is internal to another assembly. 
                 return null;
             }
-            return getAggregate().GetTypeManager().SubstTypeArray(invoke.Params, this);
+            return OwningAggregate.GetTypeManager().SubstTypeArray(invoke.Params, this);
         }
 
         public CType GetDelegateReturnType(SymbolLoader pSymbolLoader)
         {
             Debug.Assert(isDelegateType());
-            MethodSymbol invoke = pSymbolLoader.LookupInvokeMeth(getAggregate());
+            MethodSymbol invoke = pSymbolLoader.LookupInvokeMeth(OwningAggregate);
             if (invoke == null || !invoke.isInvoke())
             {
                 // This can happen if the delegate is internal to another assembly. 
                 return null;
             }
-            return getAggregate().GetTypeManager().SubstType(invoke.RetType, this);
+            return OwningAggregate.GetTypeManager().SubstType(invoke.RetType, this);
         }
     }
 }
