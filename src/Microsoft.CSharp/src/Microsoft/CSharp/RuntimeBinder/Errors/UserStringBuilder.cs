@@ -507,14 +507,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     ErrorType err = (ErrorType)pType;
                     if (err.HasParent)
                     {
-                        Debug.Assert(err.nameText != null && err.typeArgs != null);
-                        ErrAppendName(err.nameText);
-                        ErrAppendTypeParameters(err.typeArgs, pctx, true);
+                        Debug.Assert(err.NameText != null && err.TypeArgs != null);
+                        ErrAppendName(err.NameText);
+                        ErrAppendTypeParameters(err.TypeArgs, pctx, true);
                     }
                     else
                     {
                         // Load the string "<error>".
-                        Debug.Assert(null == err.typeArgs);
+                        Debug.Assert(null == err.TypeArgs);
                         ErrAppendId(MessageID.ERRORSYM);
                     }
                     break;

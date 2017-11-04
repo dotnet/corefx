@@ -25,15 +25,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ArgumentListType CreateArgList() => new ArgumentListType();
 
-        public ErrorType CreateError(
-            Name nameText,
-            TypeArray typeArgs)
-        {
-            ErrorType e = new ErrorType();
-            e.nameText = nameText;
-            e.typeArgs = typeArgs;
-            return e;
-        }
+        public ErrorType CreateError(Name nameText, TypeArray typeArgs) => new ErrorType(nameText, typeArgs);
 
         // Derived types - parent is base type
         public ArrayType CreateArray(CType pElementType, int rank, bool isSZArray)

@@ -15,19 +15,23 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class ErrorType : CType
     {
-        public ErrorType()
+        public ErrorType(Name nameText,
+            TypeArray typeArgs)
             : base(TypeKind.TK_ErrorType)
         {
+            NameText = nameText;
+            TypeArgs = typeArgs;
         }
 
-        public Name nameText;
-        public TypeArray typeArgs;
+        public Name NameText { get; }
+
+        public TypeArray TypeArgs { get; }
 
         // ErrorTypes are always either the per-TypeManager singleton ErrorType
         // that has a null nameText and no namespace parent, or else have a
         // non-null nameText and have the root namespace as the namespace parent,
         // so checking that nameText isn't null is equivalent to checking if the
         // type has a parent.
-        public bool HasParent => nameText != null;
+        public bool HasParent => NameText != null;
     }
 }

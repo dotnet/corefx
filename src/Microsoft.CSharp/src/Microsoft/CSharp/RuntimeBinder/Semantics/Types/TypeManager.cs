@@ -304,8 +304,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             else
             {
-                Debug.Assert(pError.nameText == nameText);
-                Debug.Assert(pError.typeArgs == typeArgs);
+                Debug.Assert(pError.NameText == nameText);
+                Debug.Assert(pError.TypeArgs == typeArgs);
             }
 
             return pError;
@@ -447,11 +447,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     ErrorType err = (ErrorType)type;
                     if (err.HasParent)
                     {
-                        Debug.Assert(err.nameText != null && err.typeArgs != null);
-                        TypeArray typeArgs = SubstTypeArray(err.typeArgs, pctx);
-                        if (typeArgs != err.typeArgs)
+                        Debug.Assert(err.NameText != null && err.TypeArgs != null);
+                        TypeArray typeArgs = SubstTypeArray(err.TypeArgs, pctx);
+                        if (typeArgs != err.TypeArgs)
                         {
-                            return GetErrorType(err.nameText, typeArgs);
+                            return GetErrorType(err.NameText, typeArgs);
                         }
                     }
 
@@ -598,19 +598,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return false;
 
                 {
-                    Debug.Assert(errSrc.nameText != null && errSrc.typeArgs != null);
-                    Debug.Assert(errDst.nameText != null && errDst.typeArgs != null);
+                    Debug.Assert(errSrc.NameText != null && errSrc.TypeArgs != null);
+                    Debug.Assert(errDst.NameText != null && errDst.TypeArgs != null);
 
-                    if (errSrc.nameText != errDst.nameText || errSrc.typeArgs.Count != errDst.typeArgs.Count
+                    if (errSrc.NameText != errDst.NameText || errSrc.TypeArgs.Count != errDst.TypeArgs.Count
                         || errSrc.HasParent != errDst.HasParent)
                     {
                         return false;
                     }
 
                     // All the args must unify.
-                    for (int i = 0; i < errSrc.typeArgs.Count; i++)
+                    for (int i = 0; i < errSrc.TypeArgs.Count; i++)
                     {
-                        if (!SubstEqualTypesCore(errDst.typeArgs[i], errSrc.typeArgs[i], pctx))
+                        if (!SubstEqualTypesCore(errDst.TypeArgs[i], errSrc.TypeArgs[i], pctx))
                             return false;
                     }
                 }
@@ -702,11 +702,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     ErrorType err = (ErrorType)type;
                     if (err.HasParent)
                     {
-                        Debug.Assert(err.nameText != null && err.typeArgs != null);
+                        Debug.Assert(err.NameText != null && err.TypeArgs != null);
 
-                        for (int i = 0; i < err.typeArgs.Count; i++)
+                        for (int i = 0; i < err.TypeArgs.Count; i++)
                         {
-                            if (TypeContainsType(err.typeArgs[i], typeFind))
+                            if (TypeContainsType(err.TypeArgs[i], typeFind))
                                 return true;
                         }
                     }
@@ -757,11 +757,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     ErrorType err = (ErrorType)type;
                     if (err.HasParent)
                     {
-                        Debug.Assert(err.nameText != null && err.typeArgs != null);
+                        Debug.Assert(err.NameText != null && err.TypeArgs != null);
 
-                        for (int i = 0; i < err.typeArgs.Count; i++)
+                        for (int i = 0; i < err.TypeArgs.Count; i++)
                         {
-                            if (TypeContainsTyVars(err.typeArgs[i], typeVars))
+                            if (TypeContainsTyVars(err.TypeArgs[i], typeVars))
                             {
                                 return true;
                             }
