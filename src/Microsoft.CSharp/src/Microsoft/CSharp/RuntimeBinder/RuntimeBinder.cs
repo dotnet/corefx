@@ -494,7 +494,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 Debug.Assert(ctype is ParameterModifierType);
                 ctype = _semanticChecker.GetTypeManager()
-                    .GetParameterModifier(((ParameterModifierType)ctype).GetParameterType(), true);
+                    .GetParameterModifier(((ParameterModifierType)ctype).ParameterType, true);
             }
 
             // If we can convert, do that. If not, cast it.

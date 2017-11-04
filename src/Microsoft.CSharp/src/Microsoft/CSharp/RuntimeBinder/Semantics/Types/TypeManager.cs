@@ -292,8 +292,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pParamModifier == null)
             {
                 // No existing parammod symbol. Create a new one.
-                pParamModifier = _typeFactory.CreateParameterModifier(paramType);
-                pParamModifier.isOut = isOut;
+                pParamModifier = _typeFactory.CreateParameterModifier(paramType, isOut);
                 pParamModifier.InitFromParent();
 
                 _typeTable.InsertParameterModifier(name, paramType, pParamModifier);
@@ -303,7 +302,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(pParamModifier.HasErrors() == paramType.HasErrors());
             }
 
-            Debug.Assert(pParamModifier.GetParameterType() == paramType);
+            Debug.Assert(pParamModifier.ParameterType == paramType);
 
             return pParamModifier;
         }
@@ -446,8 +445,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_ParameterModifierType:
                     ParameterModifierType mod = (ParameterModifierType)type;
-                    typeDst = SubstTypeCore(typeSrc = mod.GetParameterType(), pctx);
-                    return (typeDst == typeSrc) ? type : GetParameterModifier(typeDst, mod.isOut);
+                    typeDst = SubstTypeCore(typeSrc = mod.ParameterType, pctx);
+                    return (typeDst == typeSrc) ? type : GetParameterModifier(typeDst, mod.IsOut);
 
                 case TypeKind.TK_ArrayType:
                     var arr = (ArrayType)type;
@@ -588,7 +587,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_ParameterModifierType:
                     if (!(typeDst is ParameterModifierType modDest) ||
                         ((pctx.grfst & SubstTypeFlags.NoRefOutDifference) == 0 &&
-                         modDest.isOut != ((ParameterModifierType)typeSrc).isOut))
+                         modDest.IsOut != ((ParameterModifierType)typeSrc).IsOut))
                         return false;
                     goto LCheckBases;
 

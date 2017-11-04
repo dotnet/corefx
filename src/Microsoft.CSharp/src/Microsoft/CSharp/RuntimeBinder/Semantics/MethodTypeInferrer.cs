@@ -380,12 +380,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 bool wasOutOrRef = false;
                 if (pDest is ParameterModifierType modDest)
                 {
-                    pDest = modDest.GetParameterType();
+                    pDest = modDest.ParameterType;
                     wasOutOrRef = true;
                 }
                 if (pSource is ParameterModifierType modSource)
                 {
-                    pSource = modSource.GetParameterType();
+                    pSource = modSource.ParameterType;
                 }
                 // If the argument is a TYPEORNAMESPACEERROR and the pSource is an
                 // error CType, then we want to set it to the generic error CType 
@@ -554,7 +554,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CType pDest = _pMethodFormalParameterTypes[iArg];
                 if (pDest is ParameterModifierType modDest)
                 {
-                    pDest = modDest.GetParameterType();
+                    pDest = modDest.ParameterType;
                 }
                 Expr pExpr = _pMethodArguments.prgexpr[iArg];
                 if (HasUnfixedParamInOutputType(pExpr, pDest) &&
@@ -563,7 +563,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     CType pSource = _pMethodArguments.types[iArg];
                     if (pSource is ParameterModifierType modSource)
                     {
-                        pSource = modSource.GetParameterType();
+                        pSource = modSource.ParameterType;
                     }
                     OutputTypeInference(pExpr, pSource, pDest);
                 }
@@ -773,7 +773,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CType pDest = _pMethodFormalParameterTypes[iArg];
                 if (pDest is ParameterModifierType modDest)
                 {
-                    pDest = modDest.GetParameterType();
+                    pDest = modDest.ParameterType;
                 }
 
                 Expr pExpr = _pMethodArguments.prgexpr[iArg];
@@ -2109,11 +2109,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CType pSource = _pMethodArguments.types[iArg];
                 if (pDest is ParameterModifierType modDest)
                 {
-                    pDest = modDest.GetParameterType();
+                    pDest = modDest.ParameterType;
                 }
                 if (pSource is ParameterModifierType modSource)
                 {
-                    pSource = modSource.GetParameterType();
+                    pSource = modSource.ParameterType;
                 }
 
                 LowerBoundInference(pSource, pDest);
