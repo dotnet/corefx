@@ -67,8 +67,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 case TypeKind.TK_ArrayType:
                     ArrayType a = (ArrayType)src;
-                    Type elementType = a.GetElementType().AssociatedSystemType;
-                    result = a.IsSZArray ? elementType.MakeArrayType() : elementType.MakeArrayType(a.rank);
+                    Type elementType = a.ElementType.AssociatedSystemType;
+                    result = a.IsSZArray ? elementType.MakeArrayType() : elementType.MakeArrayType(a.Rank);
                     break;
 
                 case TypeKind.TK_NullableType:
@@ -158,7 +158,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (TypeKind)
             {
                 case TypeKind.TK_ArrayType:
-                    return ((ArrayType)this).GetElementType();
+                    return ((ArrayType)this).ElementType;
 
                 case TypeKind.TK_PointerType:
                     return ((PointerType)this).GetReferentType();
@@ -424,7 +424,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             // Pointer types are the only unsafe types.
             // Note that generics may not be instantiated with pointer types
-            return this is PointerType || this is ArrayType arr && arr.GetElementType().isUnsafe();
+            return this is PointerType || this is ArrayType arr && arr.ElementType.isUnsafe();
         }
         public bool isPredefType(PredefinedType pt)
         {

@@ -141,8 +141,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(pArray.HasErrors() == elementType.HasErrors());
             }
 
-            Debug.Assert(pArray.rank == args);
-            Debug.Assert(pArray.GetElementType() == elementType);
+            Debug.Assert(pArray.Rank == args);
+            Debug.Assert(pArray.ElementType == elementType);
 
             return pArray;
         }
@@ -451,8 +451,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_ArrayType:
                     var arr = (ArrayType)type;
-                    typeDst = SubstTypeCore(typeSrc = arr.GetElementType(), pctx);
-                    return (typeDst == typeSrc) ? type : GetArray(typeDst, arr.rank, arr.IsSZArray);
+                    typeDst = SubstTypeCore(typeSrc = arr.ElementType, pctx);
+                    return (typeDst == typeSrc) ? type : GetArray(typeDst, arr.Rank, arr.IsSZArray);
 
                 case TypeKind.TK_PointerType:
                     typeDst = SubstTypeCore(typeSrc = ((PointerType)type).GetReferentType(), pctx);
@@ -581,7 +581,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_ArrayType:
                     ArrayType arrSrc = (ArrayType)typeSrc;
-                    if (!(typeDst is ArrayType arrDst) || arrDst.rank != arrSrc.rank || arrDst.IsSZArray != arrSrc.IsSZArray)
+                    if (!(typeDst is ArrayType arrDst) || arrDst.Rank != arrSrc.Rank || arrDst.IsSZArray != arrSrc.IsSZArray)
                         return false;
                     goto LCheckBases;
 
@@ -1088,7 +1088,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // we should create a new array type that has an accessible element type for which a
             // conversion exists.
 
-            CType elementType = typeSrc.GetElementType();
+            CType elementType = typeSrc.ElementType;
             if (!elementType.IsRefType())
             {
                 // Covariant array conversions exist for reference types only.
@@ -1098,7 +1098,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType intermediateType;
             if (GetBestAccessibleType(semanticChecker, bindingContext, elementType, out intermediateType))
             {
-                typeDst = this.GetArray(intermediateType, typeSrc.rank, typeSrc.IsSZArray);
+                typeDst = this.GetArray(intermediateType, typeSrc.Rank, typeSrc.IsSZArray);
 
                 Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
                 return true;

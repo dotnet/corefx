@@ -199,8 +199,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // * S and T differ only in element type. In other words, S and T have the same number of dimensions.
             // * Both SE and TE are reference types.
             // * An implicit reference conversion exists from SE to TE.
-            return (pSource.rank == pDest.rank) && pSource.IsSZArray == pDest.IsSZArray &&
-                HasImplicitReferenceConversion(pSource.GetElementType(), pDest.GetElementType());
+            return (pSource.Rank == pDest.Rank) && pSource.IsSZArray == pDest.IsSZArray &&
+                HasImplicitReferenceConversion(pSource.ElementType, pDest.ElementType);
         }
 
         public bool HasIdentityOrImplicitReferenceConversion(CType pSource, CType pDest)
@@ -262,7 +262,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(atsDest.GetTypeArgsAll().Count == 1);
 
-            CType pSourceElement = pSource.GetElementType();
+            CType pSourceElement = pSource.ElementType;
             CType pDestTypeArgument = atsDest.GetTypeArgsAll()[0];
             return HasIdentityOrImplicitReferenceConversion(pSourceElement, pDestTypeArgument);
         }

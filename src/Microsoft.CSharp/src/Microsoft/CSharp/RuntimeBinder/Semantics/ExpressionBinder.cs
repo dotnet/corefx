@@ -411,7 +411,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             ArrayType pArrayType = pOp1.Type as ArrayType;
             Debug.Assert(pArrayType != null);
-            CType elementType = pArrayType.GetElementType();
+            CType elementType = pArrayType.ElementType;
             checkUnsafe(elementType); // added to the binder so we don't bind to pointer ops
             // Check the rank of the array against the number of indices provided, and
             // convert the indexes to ints
@@ -1606,7 +1606,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return;
             }
 
-            CType elementType = subArr.GetElementType();
+            CType elementType = subArr.ElementType;
 
             // Use an EK_ARRINIT even in the empty case so empty param arrays in attributes work.
             ExprArrayInit exprArrayInit = GetExprFactory().CreateArrayInit(substitutedArrayType, null, null, new[] { 0 }, 1);
@@ -1775,7 +1775,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // At this point, we have an array sym.
-            elementType = arr.GetElementType();
+            elementType = arr.ElementType;
 
             for (int itype = @params.Count - 1; itype < count; itype++)
             {
