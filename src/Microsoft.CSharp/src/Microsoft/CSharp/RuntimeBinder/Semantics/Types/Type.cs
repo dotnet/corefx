@@ -79,7 +79,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_PointerType:
                     PointerType p = (PointerType)src;
-                    Type referentType = p.GetReferentType().AssociatedSystemType;
+                    Type referentType = p.ReferentType.AssociatedSystemType;
                     result = referentType.MakePointerType();
                     break;
 
@@ -161,7 +161,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return ((ArrayType)this).ElementType;
 
                 case TypeKind.TK_PointerType:
-                    return ((PointerType)this).GetReferentType();
+                    return ((PointerType)this).ReferentType;
 
                 case TypeKind.TK_ParameterModifierType:
                     return ((ParameterModifierType)this).GetParameterType();

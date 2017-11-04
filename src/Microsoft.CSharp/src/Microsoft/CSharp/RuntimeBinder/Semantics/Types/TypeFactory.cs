@@ -49,12 +49,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ArrayType CreateArray(CType pElementType, int rank, bool isSZArray)
             => new ArrayType(pElementType, rank, isSZArray);
 
-        public PointerType CreatePointer(CType pReferentType)
-        {
-            PointerType type = new PointerType();
-            type.SetReferentType(pReferentType);
-            return type;
-        }
+        public PointerType CreatePointer(CType pReferentType) => new PointerType(pReferentType);
 
         public ParameterModifierType CreateParameterModifier(CType pParameterType)
         {
