@@ -218,7 +218,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return expr;
         }
 
-        public ExprConstant CreateNull() => CreateConstant(Types.GetNullType(), default(ConstVal));
+        public ExprConstant CreateNull() => CreateConstant(NullType.Instance, default);
 
         public void AppendItemToList(
             Expr newItem,

@@ -10,7 +10,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class NullType : CType
     {
-        public NullType()
+        public static readonly NullType Instance = new NullType();
+
+        private NullType()
             : base(TypeKind.TK_NullType)
         {
         }
