@@ -46,6 +46,11 @@ namespace System.Diagnostics.Tests
                     Thread.Sleep(100);
                     retries--;
                 }
+                catch (ArgumentException)
+                {
+                    Thread.Sleep(100);
+                    retries--;
+                }
             }
 
             Assert.NotEqual(0, retries);
