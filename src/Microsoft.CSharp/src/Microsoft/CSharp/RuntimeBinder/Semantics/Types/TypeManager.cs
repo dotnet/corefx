@@ -17,7 +17,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private BSYMMGR _BSymmgr;
         private PredefinedTypes _predefTypes;
 
-        private readonly TypeFactory _typeFactory;
         private readonly TypeTable _typeTable;
         private SymbolTable _symbolTable;
 
@@ -26,7 +25,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeManager(BSYMMGR bsymmgr, PredefinedTypes predefTypes)
         {
-            _typeFactory = new TypeFactory();
             _typeTable = new TypeTable();
 
             _stvcMethod = new StdTypeVarColl();
@@ -115,7 +113,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pArray == null)
             {
                 // No existing array symbol. Create a new one.
-                pArray = _typeFactory.CreateArray(elementType, args, isSZArray);
+                pArray = new ArrayType(elementType, args, isSZArray);
                 _typeTable.InsertArray(name, elementType, pArray);
             }
 
@@ -143,11 +141,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType pAggregate = _typeTable.LookupAggregate(name, agg);
             if (pAggregate == null)
             {
-                pAggregate = _typeFactory.CreateAggregateType(
-                          agg,
-                          typeArgs,
-                          atsOuter
-                      );
+                pAggregate = new AggregateType(agg, typeArgs, atsOuter);
 
                 Debug.Assert(!pAggregate.fConstraintsChecked && !pAggregate.fConstraintError);
 
@@ -217,7 +211,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pPointer == null)
             {
                 // No existing type. Create a new one.
-                pPointer = _typeFactory.CreatePointer(baseType);
+                pPointer = new PointerType(baseType);
                 _typeTable.InsertPointer(baseType, pPointer);
             }
 
@@ -237,7 +231,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             NullableType pNullableType = _typeTable.LookupNullable(pUnderlyingType);
             if (pNullableType == null)
             {
-                pNullableType = _typeFactory.CreateNullable(pUnderlyingType, _BSymmgr, this);
+                pNullableType = new NullableType(pUnderlyingType, _BSymmgr, this);
                 _typeTable.InsertNullable(pUnderlyingType, pNullableType);
             }
 
@@ -258,7 +252,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pParamModifier == null)
             {
                 // No existing parammod symbol. Create a new one.
-                pParamModifier = _typeFactory.CreateParameterModifier(paramType, isOut);
+                pParamModifier = new ParameterModifierType(paramType, isOut);
                 _typeTable.InsertParameterModifier(name, paramType, pParamModifier);
             }
 
@@ -285,7 +279,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pError == null)
             {
                 // No existing error symbol. Create a new one.
-                pError = _typeFactory.CreateError(nameText, typeArgs);
+                pError = new ErrorType(nameText, typeArgs);
                 _typeTable.InsertError(name, pError);
             }
             else
@@ -837,7 +831,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             TypeParameterType pTypeParameter = _typeTable.LookupTypeParameter(pSymbol);
             if (pTypeParameter == null)
             {
-                pTypeParameter = _typeFactory.CreateTypeParameter(pSymbol);
+                pTypeParameter = new TypeParameterType(pSymbol);
                 _typeTable.InsertTypeParameter(pSymbol, pTypeParameter);
             }
 
