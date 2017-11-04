@@ -523,8 +523,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 if ((_typeDest is ArrayType ||
                      (_typeDest is AggregateType aggDest && aggDest.isInterfaceType() &&
-                      aggDest.GetTypeArgsAll().Count == 1 &&
-                      (aggDest.GetTypeArgsAll()[0] != ((ArrayType)_typeSrc).ElementType ||
+                      aggDest.TypeArgsAll.Count == 1 &&
+                      (aggDest.TypeArgsAll[0] != ((ArrayType)_typeSrc).ElementType ||
                        0 != (_flags & CONVERTTYPE.FORCECAST))))
                     &&
                     (0 != (_flags & CONVERTTYPE.FORCECAST) ||

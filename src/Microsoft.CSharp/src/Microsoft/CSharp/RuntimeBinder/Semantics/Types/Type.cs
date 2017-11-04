@@ -112,8 +112,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private static Type CalculateAssociatedSystemTypeForAggregate(AggregateType aggtype)
         {
-            AggregateSymbol agg = aggtype.GetOwningAggregate();
-            TypeArray typeArgs = aggtype.GetTypeArgsAll();
+            AggregateSymbol agg = aggtype.OwningAggregate;
+            TypeArray typeArgs = aggtype.TypeArgsAll;
 
             List<Type> list = new List<Type>();
 
@@ -307,7 +307,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public AggregateSymbol getAggregate()
         {
             Debug.Assert(this is AggregateType);
-            return ((AggregateType)this).GetOwningAggregate();
+            return ((AggregateType)this).OwningAggregate;
         }
 
         public virtual CType StripNubs() => this;
@@ -440,7 +440,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (isPredefType(PredefinedType.PT_G_EXPRESSION))
             {
-                return ((AggregateType)this).GetTypeArgsThis()[0];
+                return ((AggregateType)this).TypeArgsThis[0];
             }
 
             return this;

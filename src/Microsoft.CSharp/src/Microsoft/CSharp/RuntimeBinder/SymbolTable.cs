@@ -723,7 +723,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                             // This will happen for nullable<T> for instance.
                             if (ctype is AggregateType cat)
                             {
-                                next = cat.GetOwningAggregate();
+                                next = cat.OwningAggregate;
                             }
                             else
                             {
