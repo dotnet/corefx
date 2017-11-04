@@ -22,7 +22,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private SymbolTable _symbolTable;
 
         // Special types
-        private readonly ArgumentListType _argListType;
         private readonly ErrorType _errorType;
 
         private readonly StdTypeVarColl _stvcMethod;
@@ -35,7 +34,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // special types with their own symbol kind.
             _errorType = _typeFactory.CreateError(null, null);
-            _argListType = _typeFactory.CreateArgList();
 
             _stvcMethod = new StdTypeVarColl();
             _stvcClass = new StdTypeVarColl();
@@ -303,11 +301,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             return pError;
-        }
-
-        public ArgumentListType GetArgListType()
-        {
-            return _argListType;
         }
 
         public ErrorType GetErrorSym()

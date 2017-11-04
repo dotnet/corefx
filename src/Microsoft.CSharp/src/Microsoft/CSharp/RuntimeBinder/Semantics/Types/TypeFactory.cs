@@ -16,9 +16,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // TypeParameter
         public TypeParameterType CreateTypeParameter(TypeParameterSymbol pSymbol) => new TypeParameterType(pSymbol);
 
-        // Primitives
-        public ArgumentListType CreateArgList() => new ArgumentListType();
-
         public ErrorType CreateError(Name nameText, TypeArray typeArgs) => new ErrorType(nameText, typeArgs);
 
         // Derived types - parent is base type

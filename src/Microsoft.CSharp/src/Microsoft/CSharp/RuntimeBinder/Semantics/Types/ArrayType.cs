@@ -19,7 +19,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         // rank of the array. zero means unknown rank int [?].
-        public int Rank;
+        public int Rank { get; }
 
         public bool IsSZArray { get; }
 

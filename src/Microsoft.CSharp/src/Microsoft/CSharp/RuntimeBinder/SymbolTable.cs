@@ -1844,7 +1844,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             if (mi != null && (mi.CallingConvention & CallingConventions.VarArgs) == CallingConventions.VarArgs)
             {
-                types.Add(_typeManager.GetArgListType());
+                types.Add(ArgumentListType.Instance);
             }
 
             return _bsymmgr.AllocParams(types.Count, types.ToArray());
