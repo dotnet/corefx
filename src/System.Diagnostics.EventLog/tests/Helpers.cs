@@ -18,7 +18,7 @@ namespace System.Diagnostics.Tests
             RetryOnWin7<object>(() => { func(); return null; });
         }
 
-        public static T RetryOnWin7<T>(Func<T> func, bool tryOnAllPlatforms = true)
+        public static T RetryOnWin7<T>(Func<T> func)
         {
             if (!PlatformDetection.IsWindows7)
             {

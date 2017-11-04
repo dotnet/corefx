@@ -416,6 +416,7 @@ namespace System.Diagnostics.Tests
                 }
             }
             // on windows 7 the count is incremented but the entry is not added to the list
+            Assert.NotEqual(20, retries);
             return null;
         }
     }
