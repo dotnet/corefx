@@ -7,8 +7,13 @@ using Xunit;
 
 public static class HashCodeTests
 {
-
 #   if SYSTEM_HASHCODE_TESTVECTORS
+    // These test vectors were created using https://asecuritysite.com/encryption/xxHash
+    // 1. Find the hash for "".
+    // 2. Find the hash for "abcd". ASCII "abcd" and bit convert to uint.
+    // 3. Find the hash for "abcd1234". ASCII [ "abcd", "1234"] and bit convert to 2 uints.
+    // n. Continue until "abcd0123efgh4567ijkl8901mnop2345qrst6789uvwx0123yzab".
+
     [Theory]
     [InlineData(0x02cc5d05U)]
     [InlineData(0xa3643705U, 0x64636261U)]
