@@ -12,8 +12,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal abstract class CType
     {
-        private bool _fHasErrors;  // Whether anyituents have errors. This is immutable.
-
         protected CType(TypeKind kind)
         {
             TypeKind = kind;
@@ -172,22 +170,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 default:
                     return null;
             }
-        }
-
-        public void InitFromParent()
-        {
-            Debug.Assert(!(this is AggregateType));
-            Debug.Assert(!(this is ErrorType));
-            _fHasErrors = GetBaseOrParameterOrElementType().HasErrors();
-        }
-
-        public bool HasErrors()
-        {
-            return _fHasErrors;
-        }
-        public void SetErrors(bool fHasErrors)
-        {
-            _fHasErrors = fHasErrors;
         }
 
         ////////////////////////////////////////////////////////////////////////////////

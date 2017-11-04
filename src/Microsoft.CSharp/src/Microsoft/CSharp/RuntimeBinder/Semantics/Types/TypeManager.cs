@@ -43,8 +43,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _typeMethGrp = _typeFactory.CreateMethodGroup();
             _argListType = _typeFactory.CreateArgList();
 
-            _errorType.SetErrors(true);
-
             _stvcMethod = new StdTypeVarColl();
             _stvcClass = new StdTypeVarColl();
             _BSymmgr = bsymmgr;
@@ -132,13 +130,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // No existing array symbol. Create a new one.
                 pArray = _typeFactory.CreateArray(elementType, args, isSZArray);
-                pArray.InitFromParent();
-
                 _typeTable.InsertArray(name, elementType, pArray);
-            }
-            else
-            {
-                Debug.Assert(pArray.HasErrors() == elementType.HasErrors());
             }
 
             Debug.Assert(pArray.Rank == args);
@@ -173,7 +165,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 Debug.Assert(!pAggregate.fConstraintsChecked && !pAggregate.fConstraintError);
 
-                pAggregate.SetErrors(false);
                 _typeTable.InsertAggregate(name, agg, pAggregate);
 
                 // If we have a generic type definition, then we need to set the
@@ -202,10 +193,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                     agg.SetBaseClass(oldBaseType);
                 }
-            }
-            else
-            {
-                Debug.Assert(!pAggregate.HasErrors());
             }
 
             Debug.Assert(pAggregate.getAggregate() == agg);
@@ -244,13 +231,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // No existing type. Create a new one.
                 pPointer = _typeFactory.CreatePointer(baseType);
-                pPointer.InitFromParent();
-
                 _typeTable.InsertPointer(baseType, pPointer);
-            }
-            else
-            {
-                Debug.Assert(pPointer.HasErrors() == baseType.HasErrors());
             }
 
             Debug.Assert(pPointer.ReferentType == baseType);
@@ -270,8 +251,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pNullableType == null)
             {
                 pNullableType = _typeFactory.CreateNullable(pUnderlyingType, _BSymmgr, this);
-                pNullableType.InitFromParent();
-
                 _typeTable.InsertNullable(pUnderlyingType, pNullableType);
             }
 
@@ -293,13 +272,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // No existing parammod symbol. Create a new one.
                 pParamModifier = _typeFactory.CreateParameterModifier(paramType, isOut);
-                pParamModifier.InitFromParent();
-
                 _typeTable.InsertParameterModifier(name, paramType, pParamModifier);
-            }
-            else
-            {
-                Debug.Assert(pParamModifier.HasErrors() == paramType.HasErrors());
             }
 
             Debug.Assert(pParamModifier.ParameterType == paramType);
@@ -326,12 +299,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // No existing error symbol. Create a new one.
                 pError = _typeFactory.CreateError(nameText, typeArgs);
-                pError.SetErrors(true);
                 _typeTable.InsertError(name, pError);
             }
             else
             {
-                Debug.Assert(pError.HasErrors());
                 Debug.Assert(pError.nameText == nameText);
                 Debug.Assert(pError.typeArgs == typeArgs);
             }
