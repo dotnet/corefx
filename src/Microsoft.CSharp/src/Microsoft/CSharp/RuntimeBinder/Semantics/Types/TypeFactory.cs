@@ -55,12 +55,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             => new ParameterModifierType(pParameterType, isOut);
 
         public NullableType CreateNullable(CType pUnderlyingType, BSYMMGR symmgr, TypeManager typeManager)
-        {
-            NullableType type = new NullableType();
-            type.SetUnderlyingType(pUnderlyingType);
-            type.symmgr = symmgr;
-            type.typeManager = typeManager;
-            return type;
-        }
+            => new NullableType(pUnderlyingType, symmgr, typeManager);
     }
 }

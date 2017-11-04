@@ -525,7 +525,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (pSource is NullableType nubSource)
             {
-                return HasImplicitBoxingConversion(nubSource.GetUnderlyingType(), pDest);
+                return HasImplicitBoxingConversion(nubSource.UnderlyingType, pDest);
             }
 
             // A boxing conversion exists from any non-nullable value type to object,

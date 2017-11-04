@@ -323,7 +323,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         ***************************************************************************************************/
         public static bool FWrappingConv(CType typeSrc, CType typeDst)
         {
-            return typeDst is NullableType nubDst && typeSrc == nubDst.GetUnderlyingType();
+            return typeDst is NullableType nubDst && typeSrc == nubDst.UnderlyingType;
         }
 
         /***************************************************************************************************

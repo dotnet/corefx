@@ -73,7 +73,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_NullableType:
                     NullableType n = (NullableType)src;
-                    Type underlyingType = n.GetUnderlyingType().AssociatedSystemType;
+                    Type underlyingType = n.UnderlyingType.AssociatedSystemType;
                     result = typeof(Nullable<>).MakeGenericType(underlyingType);
                     break;
 
@@ -167,7 +167,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return ((ParameterModifierType)this).ParameterType;
 
                 case TypeKind.TK_NullableType:
-                    return ((NullableType)this).GetUnderlyingType();
+                    return ((NullableType)this).UnderlyingType;
 
                 default:
                     return null;

@@ -18,28 +18,33 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         private AggregateType ats;
 
-        public NullableType()
+        public NullableType(CType underlyingType, BSYMMGR symmgr, TypeManager typeManager)
             : base(TypeKind.TK_NullableType)
         {
+            UnderlyingType = underlyingType;
+            SymbolManager = symmgr;
+            TypeManager = typeManager;
         }
 
-        public BSYMMGR symmgr;
-        public TypeManager typeManager;
+        public CType UnderlyingType { get; }
+
+        private BSYMMGR SymbolManager { get; }
+
+        private TypeManager TypeManager { get; }
 
         public AggregateType GetAts()
         {
             if (ats == null)
             {
-                AggregateSymbol aggNullable = typeManager.GetNullable();
-                CType typePar = GetUnderlyingType();
+                AggregateSymbol aggNullable = TypeManager.GetNullable();
+                CType typePar = UnderlyingType;
                 CType[] typeParArray = { typePar };
-                TypeArray ta = symmgr.AllocParams(1, typeParArray);
-                ats = typeManager.GetAggregate(aggNullable, ta);
+                TypeArray ta = SymbolManager.AllocParams(1, typeParArray);
+                ats = TypeManager.GetAggregate(aggNullable, ta);
             }
 
             return ats;
         }
-        public CType GetUnderlyingType() { return UnderlyingType; }
 
         public override CType StripNubs() => UnderlyingType;
 
@@ -48,9 +53,5 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             wasNullable = true;
             return UnderlyingType;
         }
-
-        public void SetUnderlyingType(CType pType) { UnderlyingType = pType; }
-
-        public CType UnderlyingType;
     }
 }
