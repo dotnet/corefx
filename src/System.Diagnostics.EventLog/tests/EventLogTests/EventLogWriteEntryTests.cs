@@ -403,7 +403,7 @@ namespace System.Diagnostics.Tests
                 return Helpers.RetryOnWin7(() => elec.Count > 0 ? elec[elec.Count - 1] : null);
 
             int retries = 0;
-            while (retries < 20 && PlatformDetection.IsWindows7)
+            while (retries < 20)
             {
                 try
                 {
