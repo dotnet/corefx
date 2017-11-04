@@ -941,7 +941,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (grp.Name == null)
             {
-                ExprCall rval = GetExprFactory().CreateCall(0, GetTypes().GetErrorSym(), args, grp, null);
+                ExprCall rval = GetExprFactory().CreateCall(0, ErrorType.Parentless, args, grp, null);
                 rval.SetError();
                 return rval;
             }
@@ -1732,7 +1732,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else
                 {
-                    prgtype[iarg] = GetTypes().GetErrorSym();
+                    prgtype[iarg] = ErrorType.Parentless;
                 }
                 argInfo.prgexpr.Add(arg);
             }

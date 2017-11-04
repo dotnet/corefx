@@ -21,9 +21,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private readonly TypeTable _typeTable;
         private SymbolTable _symbolTable;
 
-        // Special types
-        private readonly ErrorType _errorType;
-
         private readonly StdTypeVarColl _stvcMethod;
         private readonly StdTypeVarColl _stvcClass;
 
@@ -31,9 +28,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             _typeFactory = new TypeFactory();
             _typeTable = new TypeTable();
-
-            // special types with their own symbol kind.
-            _errorType = _typeFactory.CreateError(null, null);
 
             _stvcMethod = new StdTypeVarColl();
             _stvcClass = new StdTypeVarColl();
@@ -301,11 +295,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             return pError;
-        }
-
-        public ErrorType GetErrorSym()
-        {
-            return _errorType;
         }
 
         public AggregateSymbol GetNullable() => GetPredefAgg(PredefinedType.PT_G_OPTIONAL);
