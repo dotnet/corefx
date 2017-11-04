@@ -452,7 +452,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 pctx = null;
             }
 
-            switch (pType.GetTypeKind())
+            switch (pType.TypeKind)
             {
                 case TypeKind.TK_AggregateType:
                     {

@@ -15,6 +15,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class ErrorType : CType
     {
+        public ErrorType()
+            : base(TypeKind.TK_ErrorType)
+        {
+        }
+
         public Name nameText;
         public TypeArray typeArgs;
 

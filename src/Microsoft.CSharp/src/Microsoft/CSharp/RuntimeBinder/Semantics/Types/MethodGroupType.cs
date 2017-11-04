@@ -10,5 +10,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // ----------------------------------------------------------------------------
 
     internal sealed class MethodGroupType : CType
-    { };
+    {
+        public MethodGroupType()
+            : base(TypeKind.TK_MethodGroupType)
+        {
+        }
+    }
 }

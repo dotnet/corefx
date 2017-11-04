@@ -2509,7 +2509,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             for (; ;)
             {
-                switch (type.GetTypeKind())
+                switch (type.TypeKind)
                 {
                     case TypeKind.TK_NullableType:
                         type = type.StripNubs();

@@ -23,7 +23,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.SetTypeArgsThis(typeArgsThis);
             type.SetName(name);
 
-            type.SetTypeKind(TypeKind.TK_AggregateType);
             return type;
         }
 
@@ -35,39 +34,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.SetName(pSymbol.name);
             Debug.Assert(pSymbol.GetTypeParameterType() == null);
             pSymbol.SetTypeParameterType(type);
-
-            type.SetTypeKind(TypeKind.TK_TypeParameterType);
             return type;
         }
 
         // Primitives
-        public VoidType CreateVoid()
-        {
-            VoidType type = new VoidType();
-            type.SetTypeKind(TypeKind.TK_VoidType);
-            return type;
-        }
+        public VoidType CreateVoid() => new VoidType();
 
-        public NullType CreateNull()
-        {
-            NullType type = new NullType();
-            type.SetTypeKind(TypeKind.TK_NullType);
-            return type;
-        }
+        public NullType CreateNull() => new NullType();
 
-        public MethodGroupType CreateMethodGroup()
-        {
-            MethodGroupType type = new MethodGroupType();
-            type.SetTypeKind(TypeKind.TK_MethodGroupType);
-            return type;
-        }
+        public MethodGroupType CreateMethodGroup() => new MethodGroupType();
 
-        public ArgumentListType CreateArgList()
-        {
-            ArgumentListType type = new ArgumentListType();
-            type.SetTypeKind(TypeKind.TK_ArgumentListType);
-            return type;
-        }
+        public ArgumentListType CreateArgList() => new ArgumentListType();
 
         public ErrorType CreateError(
             Name name,
@@ -78,8 +55,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             e.SetName(name);
             e.nameText = nameText;
             e.typeArgs = typeArgs;
-
-            e.SetTypeKind(TypeKind.TK_ErrorType);
             return e;
         }
 
@@ -92,8 +67,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.rank = rank;
             type.IsSZArray = isSZArray;
             type.SetElementType(pElementType);
-
-            type.SetTypeKind(TypeKind.TK_ArrayType);
             return type;
         }
 
@@ -102,8 +75,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             PointerType type = new PointerType();
             type.SetName(name);
             type.SetReferentType(pReferentType);
-
-            type.SetTypeKind(TypeKind.TK_PointerType);
             return type;
         }
 
@@ -112,8 +83,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             ParameterModifierType type = new ParameterModifierType();
             type.SetName(name);
             type.SetParameterType(pParameterType);
-
-            type.SetTypeKind(TypeKind.TK_ParameterModifierType);
             return type;
         }
 
@@ -124,8 +93,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.SetUnderlyingType(pUnderlyingType);
             type.symmgr = symmgr;
             type.typeManager = typeManager;
-
-            type.SetTypeKind(TypeKind.TK_NullableType);
             return type;
         }
     }

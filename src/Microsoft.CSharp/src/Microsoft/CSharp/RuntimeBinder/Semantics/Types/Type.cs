@@ -12,10 +12,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal abstract class CType
     {
-        private TypeKind _typeKind;
         private Name _pName;
 
         private bool _fHasErrors;  // Whether anyituents have errors. This is immutable.
+
+        protected CType(TypeKind kind)
+        {
+            TypeKind = kind;
+        }
 
         public bool IsWindowsRuntimeType()
         {
@@ -61,7 +65,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Type result = null;
 
-            switch (src.GetTypeKind())
+            switch (src.TypeKind)
             {
                 case TypeKind.TK_ArrayType:
                     ArrayType a = (ArrayType)src;
@@ -106,7 +110,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
             }
 
-            Debug.Assert(result != null || src.GetTypeKind() == TypeKind.TK_AggregateType);
+            Debug.Assert(result != null || src.TypeKind == TypeKind.TK_AggregateType);
             return result;
         }
 
@@ -146,8 +150,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return uninstantiatedType;
         }
 
-        public TypeKind GetTypeKind() { return _typeKind; }
-        public void SetTypeKind(TypeKind kind) { _typeKind = kind; }
+        public TypeKind TypeKind { get; }
 
         public Name GetName() { return _pName; }
         public void SetName(Name pName) { _pName = pName; }
@@ -157,7 +160,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // need this type of thing - strongly typed handling of TypeArrays would be much better.
         public CType GetBaseOrParameterOrElementType()
         {
-            switch (GetTypeKind())
+            switch (TypeKind)
             {
                 case TypeKind.TK_ArrayType:
                     return ((ArrayType)this).GetElementType();
@@ -201,7 +204,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // struct/value type
         public FUNDTYPE fundType()
         {
-            switch (GetTypeKind())
+            switch (TypeKind)
             {
                 case TypeKind.TK_AggregateType:
                     {
@@ -298,7 +301,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             for (CType type = this; ;)
             {
-                switch (type.GetTypeKind())
+                switch (type.TypeKind)
                 {
                     default:
                         return type;
@@ -469,7 +472,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // These check for AGGTYPESYMs, TYVARSYMs and others as appropriate.
         public bool IsValType()
         {
-            switch (GetTypeKind())
+            switch (TypeKind)
             {
                 case TypeKind.TK_TypeParameterType:
                     return ((TypeParameterType)this).IsValueType();
@@ -483,7 +486,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public bool IsNonNubValType()
         {
-            switch (GetTypeKind())
+            switch (TypeKind)
             {
                 case TypeKind.TK_TypeParameterType:
                     return ((TypeParameterType)this).IsNonNullableValueType();
@@ -497,7 +500,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public bool IsRefType()
         {
-            switch (GetTypeKind())
+            switch (TypeKind)
             {
                 case TypeKind.TK_ArrayType:
                 case TypeKind.TK_NullType:

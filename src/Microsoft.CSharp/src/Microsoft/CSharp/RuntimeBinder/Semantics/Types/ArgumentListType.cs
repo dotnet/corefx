@@ -10,5 +10,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // ----------------------------------------------------------------------------
 
     internal sealed class ArgumentListType : CType
-    { };
+    {
+        public ArgumentListType()
+            : base(TypeKind.TK_ArgumentListType)
+        {
+        }
+    }
 }
