@@ -8,7 +8,7 @@ set(NATIVE_SOURCES
     pal_maphardwaretype.c
     pal_memory.c
     pal_mount.cpp
-    pal_networking.cpp
+    pal_networking.c
     pal_networkstatistics.c
     pal_process.cpp
     pal_random.cpp
