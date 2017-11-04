@@ -1616,7 +1616,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 methodSymbol.isOperator = false;
                 methodSymbol.swtSlot = null;
                 methodSymbol.isVarargs = false;
-                methodSymbol.RetType = _typeManager.GetVoid();
+                methodSymbol.RetType = VoidType.Instance;
             }
 
             methodSymbol.modOptCount = GetCountOfModOpts(parameters);

@@ -320,7 +320,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return classTyVars[index];
                     }
                 case (MethodSignatureEnum)PredefinedType.PT_VOID:
-                    return GetTypeManager().GetVoid();
+                    return VoidType.Instance;
                 default:
                     {
                         Debug.Assert(current >= 0 && (int)current < (int)PredefinedType.PT_COUNT);

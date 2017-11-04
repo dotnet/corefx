@@ -17,8 +17,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public TypeParameterType CreateTypeParameter(TypeParameterSymbol pSymbol) => new TypeParameterType(pSymbol);
 
         // Primitives
-        public VoidType CreateVoid() => new VoidType();
-
         public NullType CreateNull() => new NullType();
 
         public MethodGroupType CreateMethodGroup() => new MethodGroupType();

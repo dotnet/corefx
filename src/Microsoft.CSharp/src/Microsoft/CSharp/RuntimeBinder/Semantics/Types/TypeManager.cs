@@ -22,7 +22,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private SymbolTable _symbolTable;
 
         // Special types
-        private readonly VoidType _voidType;
         private readonly NullType _nullType;
         private readonly MethodGroupType _typeMethGrp;
         private readonly ArgumentListType _argListType;
@@ -38,7 +37,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // special types with their own symbol kind.
             _errorType = _typeFactory.CreateError(null, null);
-            _voidType = _typeFactory.CreateVoid();
             _nullType = _typeFactory.CreateNull();
             _typeMethGrp = _typeFactory.CreateMethodGroup();
             _argListType = _typeFactory.CreateArgList();
@@ -309,11 +307,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             return pError;
-        }
-
-        public VoidType GetVoid()
-        {
-            return _voidType;
         }
 
         public NullType GetNullType()
