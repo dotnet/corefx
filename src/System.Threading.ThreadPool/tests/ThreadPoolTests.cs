@@ -194,6 +194,47 @@ namespace System.Threading.ThreadPools.Tests
         }
 
         [Fact]
+        private static void SetMinThreadsTo0Test()
+        {
+            int minw, minc, maxw, maxc;
+            ThreadPool.GetMinThreads(out minw, out minc);
+            ThreadPool.GetMaxThreads(out maxw, out maxc);
+            void ResetThreadCounts()
+            {
+                Assert.True(ThreadPool.SetMaxThreads(maxw, maxc));
+                Assert.True(ThreadPool.SetMinThreads(minw, minc));
+            }
+
+            try
+            {
+                Assert.True(ThreadPool.SetMinThreads(0, minc));
+                Assert.True(ThreadPool.SetMaxThreads(1, maxc));
+
+                int count = 0;
+                var done = new ManualResetEvent(false);
+                WaitCallback callback = null;
+                callback = state =>
+                {
+                    ++count;
+                    if (count > 100)
+                    {
+                        done.Set();
+                    }
+                    else
+                    {
+                        ThreadPool.QueueUserWorkItem(callback);
+                    }
+                };
+                ThreadPool.QueueUserWorkItem(callback);
+                done.WaitOne(ThreadTestHelpers.UnexpectedTimeoutMilliseconds);
+            }
+            finally
+            {
+                ResetThreadCounts();
+            }
+        }
+
+        [Fact]
         public static void QueueRegisterPositiveAndFlowTest()
         {
             var asyncLocal = new AsyncLocal<int>();
