@@ -11,7 +11,6 @@ namespace System.Tests
 {
     public class SetEnvironmentVariable
     {
-        private const int MAX_VAR_LENGTH_ALLOWED = 32767;
         private const string NullString = "\u0000";
 
         internal static bool IsSupportedTarget(EnvironmentVariableTarget target)
@@ -31,9 +30,53 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentException>("variable", () => Environment.SetEnvironmentVariable(string.Empty, "test"));
             AssertExtensions.Throws<ArgumentException>("variable", () => Environment.SetEnvironmentVariable(NullString, "test"));
             AssertExtensions.Throws<ArgumentException>("variable", null, () => Environment.SetEnvironmentVariable("Variable=Something", "test"));
+        }
 
-            string varWithLenLongerThanAllowed = new string('c', MAX_VAR_LENGTH_ALLOWED + 1);
-            AssertExtensions.Throws<ArgumentException>("variable", null, () => Environment.SetEnvironmentVariable(varWithLenLongerThanAllowed, "test"));
+        [Fact]
+        public void AllowAnyVariableLengths()
+        {
+            // longer than 32767
+            string longVar = new string('c', 40000);
+            string val = "test";
+
+            try
+            {
+                Environment.SetEnvironmentVariable(longVar, val);
+                Assert.Equal(val, Environment.GetEnvironmentVariable(longVar));
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(longVar, null);
+            }
+        }
+
+        [Fact]
+        public void AllowAnyVariableValueLengths()
+        {
+            string var = "Test_SetEnvironmentVariable_AllowAnyVariableValueLengths";
+            // longer than 32767
+            string longVal = new string('c', 40000);
+
+            try
+            {
+                Environment.SetEnvironmentVariable(var, longVal);
+                Assert.Equal(longVal, Environment.GetEnvironmentVariable(var));
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(var, null);
+            }
+        }
+
+        [Fact]
+        public void EnvironmentVariableTooLarge_Throws()
+        {
+            string var = "Test_SetEnvironmentVariable_EnvironmentVariableTooLarge_Throws";
+
+            // string slightly less than 2 GiB so the constructor doesn't fail
+            string longVal = new string('c', 1024 * 1024 * 1024 - 64);
+
+            Assert.ThrowsAny<OutOfMemoryException>(() => Environment.SetEnvironmentVariable(var, longVal));
         }
 
         private static void ExecuteAgainstTarget(
