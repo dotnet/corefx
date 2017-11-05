@@ -135,7 +135,7 @@ namespace System.SpanTests
         //
         // The following tests were all generated with by this (otherwise unused) method:
         //
-        private static void GenerateOverlapsTests()
+        private static string GenerateOverlapsTests()
         {
             const int count = 4;
             string result = "";
@@ -155,6 +155,8 @@ namespace System.SpanTests
                     }
                 }
             }
+
+            return result;
         }
 
         //
