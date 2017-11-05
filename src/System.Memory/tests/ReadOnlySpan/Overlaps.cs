@@ -4,6 +4,116 @@ namespace System.SpanTests
 {
     public static partial class ReadOnlySpanTests
     {
+        private static void DoubleEachElementForwards(ReadOnlySpan<int> source, Span<int> destination)
+        {
+            if (source.Length != destination.Length)
+                throw new ArgumentException();
+
+            // This loop below moves forwards, so if there is an overlap and destination starts
+            // after source then the loop will overwrite unread data without making a copy first.
+
+            if (source.Overlaps(destination, out int elementOffset) && elementOffset > 0)
+                source = source.ToArray();
+
+            for (int i = 0; i < source.Length; i++)
+                destination[i] = 2 * source[i];
+        }
+
+        [Fact]
+        public static void TestAlignedForwards()
+        {
+            for (int i = 0; i < 14; i++)
+            {
+                int[] a = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+
+                ReadOnlySpan<int> source = a.AsReadOnlySpan().Slice(7, 5);
+
+                Span<int> expected = new int[a.Length].AsSpan().Slice(i, 5);
+                Span<int> actual = a.AsSpan().Slice(i, 5);
+
+                DoubleEachElementForwards(source, expected);
+                DoubleEachElementForwards(source, actual);
+
+                Assert.Equal(expected.ToArray(), actual.ToArray());
+            }
+        }
+
+        [Fact]
+        public static void TestUnalignedForwards()
+        {
+            for (int i = 0; i < 14; i++)
+            {
+                int[] a = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+
+                ReadOnlySpan<int> source = a.AsReadOnlySpan().AsBytes()
+                    .Slice(7 * sizeof(int) + 2, 5 * sizeof(int))
+                    .NonPortableCast<byte, int>();
+
+                Span<int> expected = new int[a.Length].AsSpan().Slice(i, 5);
+                Span<int> actual = a.AsSpan().Slice(i, 5);
+
+                DoubleEachElementForwards(source, expected);
+                DoubleEachElementForwards(source, actual);
+
+                Assert.Equal(expected.ToArray(), actual.ToArray());
+            }
+        }
+
+        private static void DoubleEachElementBackwards(ReadOnlySpan<int> source, Span<int> destination)
+        {
+            if (source.Length != destination.Length)
+                throw new ArgumentException();
+
+            // This loop below moves backwards, so if there is an overlap and destination starts
+            // before source then the loop will overwrite unread data without making a copy first.
+
+            if (source.Overlaps(destination, out int elementOffset) && elementOffset < 0)
+                source = source.ToArray();
+
+            for (int i = source.Length - 1; i >= 0; i--)
+                destination[i] = 2 * source[i];
+        }
+
+        [Fact]
+        public static void TestAlignedBackwards()
+        {
+            for (int i = 0; i < 14; i++)
+            {
+                int[] a = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+
+                ReadOnlySpan<int> source = a.AsReadOnlySpan().Slice(7, 5);
+
+                Span<int> expected = new int[a.Length].AsSpan().Slice(i, 5);
+                Span<int> actual = a.AsSpan().Slice(i, 5);
+
+                DoubleEachElementBackwards(source, expected);
+                DoubleEachElementBackwards(source, actual);
+
+                Assert.Equal(expected.ToArray(), actual.ToArray());
+            }
+        }
+
+        [Fact]
+        public static void TestUnalignedBackwards()
+        {
+            for (int i = 0; i < 14; i++)
+            {
+                int[] a = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+
+                ReadOnlySpan<int> source = a.AsReadOnlySpan().AsBytes()
+                    .Slice(7 * sizeof(int) + 2, 5 * sizeof(int))
+                    .NonPortableCast<byte, int>();
+
+                Span<int> expected = new int[a.Length].AsSpan().Slice(i, 5);
+                Span<int> actual = a.AsSpan().Slice(i, 5);
+
+                DoubleEachElementBackwards(source, expected);
+                DoubleEachElementBackwards(source, actual);
+
+                Assert.Equal(expected.ToArray(), actual.ToArray());
+            }
+        }
+
         [Fact]
         public static void SizeOf1Overlaps()
         {
@@ -20,20 +130,6 @@ namespace System.SpanTests
 
             Assert.True(a.AsReadOnlySpan().Slice(0, 12).Overlaps(a.AsReadOnlySpan().Slice(8, 8), out int elementOffset));
             Assert.Equal(8, elementOffset);
-        }
-
-        [Fact]
-        public static unsafe void UnalignedOverlapThrows()
-        {
-            Assert.Throws<ArgumentException>("second", () =>
-            {
-                byte* p = stackalloc byte[16];
-
-                ReadOnlySpan<int> first = new ReadOnlySpan<int>(p + 0, 2 * sizeof(int));
-                ReadOnlySpan<int> second = new ReadOnlySpan<int>(p + 7, 2 * sizeof(int));
-
-                first.Overlaps(second, out int elementOffset);
-            });
         }
 
         //
