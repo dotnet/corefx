@@ -292,7 +292,8 @@ namespace System
             array.CopyTo(destination.Span);
         }
 
-        /// Determines whether two sequences overlap.
+        /// <summary>
+        /// Determines whether two sequences overlap in memory.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Overlaps<T>(this Span<T> first, ReadOnlySpan<T> second)
@@ -301,7 +302,7 @@ namespace System
         }
 
         /// <summary>
-        /// Determines whether two sequences overlap and outputs the element offset.
+        /// Determines whether two sequences overlap in memory and outputs the element offset.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Overlaps<T>(this Span<T> first, ReadOnlySpan<T> second, out int elementOffset)
@@ -310,12 +311,14 @@ namespace System
         }
 
         /// <summary>
-        /// Determines whether two sequences overlap.
+        /// Determines whether two sequences overlap in memory.
         /// </summary>
+        /// <remarks>
+        /// Two sequences overlap if they have positions in common and neither is empty.
+        /// Empty sequences do not overlap with any other sequence.
+        /// </remarks>
         public static bool Overlaps<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second)
         {
-            // note: the calculations below overflow if second.IsEmpty;
-            //       the case second.IsEmpty MUST be handled separately
             if (first.IsEmpty || second.IsEmpty)
             {
                 return false;
@@ -338,12 +341,20 @@ namespace System
         }
 
         /// <summary>
-        /// Determines whether two sequences overlap and outputs the element offset.
+        /// Determines whether two sequences overlap in memory and outputs the element offset.
         /// </summary>
+        /// <remarks>
+        /// Two sequences overlap if they have positions in common and neither is empty.
+        /// Empty sequences do not overlap with any other sequence. If the sequences
+        /// overlap, `elementOffset` is the number of elements by which the second sequence
+        /// is offset from the first sequence (i.e., second minus first). The number is
+        /// rounded away from zero if it is not a whole number, which can happen when
+        /// casting a sequence of a smaller type to a sequence of a larger type. If the
+        /// sequences do not overlap, `elementOffset` is meaningless and arbitrarily set to
+        /// zero.
+        /// </remarks>
         public static bool Overlaps<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second, out int elementOffset)
         {
-            // note: the calculations below overflow if second.IsEmpty;
-            //       the case second.IsEmpty MUST be handled separately
             if (first.IsEmpty || second.IsEmpty)
             {
                 elementOffset = 0;

@@ -63,7 +63,6 @@ namespace System
         internal static void ThrowObjectDisposedException_MemoryDisposed(string objectName) { throw CreateObjectDisposedException_MemoryDisposed(objectName); }
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateObjectDisposedException_MemoryDisposed(string objectName) { return new ObjectDisposedException(objectName, SR.MemoryDisposed); }
-<<<<<<< HEAD
 
         internal static void ThrowFormatException_BadFormatSpecifier() { throw CreateFormatException_BadFormatSpecifier(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -93,8 +92,6 @@ namespace System
         internal static void ThrowArgumentException_OverlapAlignmentMismatch() { throw CreateArgumentException_OverlapAlignmentMismatch(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentException_OverlapAlignmentMismatch() { return new ArgumentException(SR.Argument_OverlapAlignmentMismatch); }
-=======
->>>>>>> Revert "Add exception message"
     }
 
     internal enum ExceptionArgument
