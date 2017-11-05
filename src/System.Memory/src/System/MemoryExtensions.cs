@@ -360,7 +360,7 @@ namespace System
                     (uint)byteOffset > (uint)-(second.Length * Unsafe.SizeOf<T>()))
                 {
                     if ((int)byteOffset % Unsafe.SizeOf<T>() != 0)
-                        ThrowHelper.ThrowArgumentException_OverlapAlignmentMismatch();
+                        throw new ArgumentException("", nameof(second));
 
                     elementOffset = (int)byteOffset / Unsafe.SizeOf<T>();
                     return true;
@@ -377,7 +377,7 @@ namespace System
                     (ulong)byteOffset > (ulong)-((long)second.Length * Unsafe.SizeOf<T>()))
                 {
                     if ((long)byteOffset % Unsafe.SizeOf<T>() != 0)
-                        ThrowHelper.ThrowArgumentException_OverlapAlignmentMismatch();
+                        throw new ArgumentException("", nameof(second));
 
                     elementOffset = (int)((long)byteOffset / Unsafe.SizeOf<T>());
                     return true;
