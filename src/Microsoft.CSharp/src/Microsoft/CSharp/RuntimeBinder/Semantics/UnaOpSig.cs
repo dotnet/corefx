@@ -68,13 +68,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // This is a unary operator, so the second argument should be neither lifted nor converted.
                 Debug.Assert((_grflt & LiftFlags.Lift2) == 0);
                 Debug.Assert((_grflt & LiftFlags.Convert2) == 0);
-                if (_grflt == LiftFlags.None)
-                {
-                    return false;
-                }
-                // We can't both convert and lift.
-                Debug.Assert(((_grflt & LiftFlags.Lift1) == 0) || ((_grflt & LiftFlags.Convert1) == 0));
-                return true;
+                return (_grflt & LiftFlags.Lift1) != 0;
             }
             public bool Convert()
             {
