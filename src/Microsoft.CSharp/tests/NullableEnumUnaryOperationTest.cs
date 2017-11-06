@@ -15,7 +15,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
 
         public static IEnumerable<object[]> Int32NullableEnums() => Int32Enums().Append(new object[] {null});
 
-        [Theory, MemberData(nameof(Int32NullableEnums))]
+        [Theory, MemberData(nameof(Int32NullableEnums)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "25067 is not fixed in NetFX")]
         public void ComplementInt32NullableEnum(StringComparison? value)
         {
             CSharpArgumentInfo x = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null);
