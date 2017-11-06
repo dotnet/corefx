@@ -62,7 +62,7 @@ namespace System.Diagnostics.Tests
             int tries = 0;
             while (RetryOnAllPlatforms((() => eventLog.Entries.Count)) < entriesExpected && tries < 20)
             {
-                Thread.Sleep(100);
+                Thread.Sleep(100 * (Math.Min(tries, 10)));
                 tries++;
             }
 
