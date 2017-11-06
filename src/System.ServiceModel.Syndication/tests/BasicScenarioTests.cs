@@ -222,13 +222,13 @@ namespace System.ServiceModel.Syndication.Tests
                 File.Delete(AtomPath);
             }
         }
-        
+
         [Fact]
         public static void SyndicationFeed_Load_Rss()
         {
             XmlReaderSettings setting = new XmlReaderSettings();
             using (XmlReader reader = XmlReader.Create(@"rssSpecExample.xml", setting))
-            { 
+            {
                 SyndicationFeed rss = SyndicationFeed.Load(reader);
                 Assert.True(rss.Items != null);
             }
@@ -504,7 +504,7 @@ namespace System.ServiceModel.Syndication.Tests
             string file;
             using (StreamReader sr = new StreamReader(dataFile))
             {
-                while(!string.IsNullOrEmpty(file = sr.ReadLine()))
+                while (!string.IsNullOrEmpty(file = sr.ReadLine()))
                 {
                     if (!file.StartsWith("#"))
                     {

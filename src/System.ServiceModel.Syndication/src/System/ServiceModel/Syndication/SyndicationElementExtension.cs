@@ -2,16 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.IO;
+using System.Runtime;
+using System.Runtime.Serialization;
+using System.Xml;
+using System.Xml.Serialization;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
+
 namespace System.ServiceModel.Syndication
 {
-    using System.IO;
-    using System.Runtime;
-    using System.Runtime.Serialization;
-    using System.Xml;
-    using System.Xml.Serialization;
-    using System.Runtime.CompilerServices;
-    using System.Diagnostics;
-
     public class SyndicationElementExtension
     {
         private XmlBuffer _buffer;

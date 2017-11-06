@@ -2,19 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Text;
+using System.Xml;
+using System.Xml.Serialization;
+using System.Diagnostics.CodeAnalysis;
+using System.Xml.Schema;
+using System.Runtime.CompilerServices;
+
 namespace System.ServiceModel.Syndication
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Globalization;
-    using System.Text;
-    using System.Xml;
-    using System.Xml.Serialization;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Xml.Schema;
-    using System.Runtime.CompilerServices;
-
     [XmlRoot(ElementName = Atom10Constants.EntryTag, Namespace = Atom10Constants.Atom10Namespace)]
     public class Atom10ItemFormatter : SyndicationItemFormatter, IXmlSerializable
     {

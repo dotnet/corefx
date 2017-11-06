@@ -2,19 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.ObjectModel;
+using System.Runtime.Serialization;
+using System.Xml.Serialization;
+using System.Collections.Generic;
+using System.Xml;
+using System.Xml.Schema;
+using System.ServiceModel.Channels;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+
 namespace System.ServiceModel.Syndication
 {
-    using System.Collections.ObjectModel;
-    using System.Runtime.Serialization;
-    using System.Xml.Serialization;
-    using System.Collections.Generic;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.ServiceModel.Channels;
-    using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Runtime.CompilerServices;
-
     internal delegate InlineCategoriesDocument CreateInlineCategoriesDelegate();
     internal delegate ReferencedCategoriesDocument CreateReferencedCategoriesDelegate();
 

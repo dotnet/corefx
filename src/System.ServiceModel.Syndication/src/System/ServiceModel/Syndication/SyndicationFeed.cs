@@ -2,20 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Text;
+using System.Xml;
+using System.Runtime.Serialization;
+using System.Globalization;
+using System.Xml.Serialization;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+
 namespace System.ServiceModel.Syndication
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Text;
-    using System.Xml;
-    using System.Runtime.Serialization;
-    using System.Globalization;
-    using System.Xml.Serialization;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Runtime.CompilerServices;
-
-
     // NOTE: This class implements Clone so if you add any members, please update the copy ctor
     public class SyndicationFeed : IExtensibleSyndicationObject
     {
