@@ -1340,6 +1340,30 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (uofs.isLifted())
             {
+                if (uofs.Convert())
+                {
+                    // If both lifted and converting this is a nullable enum
+                    // so convert to the nullable of the enum's underlying type,
+                    // perform the operation, then convert back.
+                    Debug.Assert(pArgument.Type is NullableType);
+                    // Only ~, ++ and -- can happen on nullable enums.
+                    // ++ and -- result in boxing and unboxing which removes the nullability.
+                    Debug.Assert(ek == ExpressionKind.BitwiseNot);
+                    NullableType nullableEnumType = (NullableType)pArgument.Type;
+                    Debug.Assert(nullableEnumType.UnderlyingType.isEnumType());
+                    bindSimpleCast(
+                        pArgument,
+                        GetExprFactory()
+                            .CreateClass(
+                                GetSymbolLoader()
+                                    .GetTypeManager()
+                                    .GetNullable(nullableEnumType.UnderlyingType.underlyingEnumType())),
+                        out Expr toUnderlyingEnum);
+                    Expr doOp = BindStandardUnaryOperator(op, toUnderlyingEnum);
+                    bindSimpleCast(doOp, GetExprFactory().CreateClass(nullableEnumType), out Expr castBack);
+                    return castBack;
+                }
+
                 return BindLiftedStandardUnop(ek, flags, pArgument, uofs);
             }
 
@@ -1381,12 +1405,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                         if (typeSig is NullableType nubTypeSig)
                         {
-                            if (nubTypeSig.GetUnderlyingType() != pRawType)
-                            {
-                                typeSig = GetSymbolLoader().GetTypeManager().GetNullable(pRawType);
-                            }
-                            liftFlags = LiftFlags.Lift1;
+                            typeSig = pRawType;
+                            liftFlags = LiftFlags.Lift1 | LiftFlags.Convert1;
                         }
+
                         if (unaryOpKind == UnaOpKind.Tilde)
                         {
                             pSignatures.Add(new UnaOpFullSig(
