@@ -15,15 +15,15 @@ namespace System.Buffers.Text
         private static bool TryFormatInt64N(long value, byte precision, Span<byte> buffer, out int bytesWritten)
         {
             int digitCount = FormattingHelpers.CountDigits(value);
-            int groupSeperators = (int)FormattingHelpers.DivMod(digitCount, Utf8Constants.GroupSize, out long firstGroup);
+            int groupSeparators = (int)FormattingHelpers.DivMod(digitCount, Utf8Constants.GroupSize, out long firstGroup);
             if (firstGroup == 0)
             {
                 firstGroup = 3;
-                groupSeperators--;
+                groupSeparators--;
             }
 
             int trailingZeros = (precision == StandardFormat.NoPrecision) ? 2 : precision;
-            int idx = (int)((value >> 63) & 1) + digitCount + groupSeperators;
+            int idx = (int)((value >> 63) & 1) + digitCount + groupSeparators;
 
             bytesWritten = idx;
             if (trailingZeros > 0)

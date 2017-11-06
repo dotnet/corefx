@@ -33,7 +33,7 @@ namespace System.Buffers.Text
             // long.MaxValue, we are guaranteed to need to write 3 more digits here before the set
             // of trailing zeros.
 
-            bytesWritten += 4; // 3 digits + group seperator
+            bytesWritten += 4; // 3 digits + group separator
             if (precision > 0)
                 bytesWritten += precision + 1; // +1 for period.
 

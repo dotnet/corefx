@@ -19,7 +19,7 @@ namespace System.Buffers.Text.Tests
         [InlineData(12837467L)] // standard format
         [InlineData(-9223372036854775808L)] // min value
         [InlineData(9223372036854775807L)] // max value
-        private static void ParserInt64(long value)
+        private static void FormatterInt64(long value)
         {
             byte[] utf8ByteArray = new byte[40];
             Span<byte> utf8ByteSpan = utf8ByteArray;
@@ -41,7 +41,7 @@ namespace System.Buffers.Text.Tests
         [InlineData(12837467LU)] // standard format
         [InlineData(0LU)] // min value
         [InlineData(18446744073709551615LU)] // max value
-        private static void ParserUInt64(ulong value)
+        private static void FormatterUInt64(ulong value)
         {
             byte[] utf8ByteArray = new byte[40];
             Span<byte> utf8ByteSpan = utf8ByteArray;
@@ -60,7 +60,7 @@ namespace System.Buffers.Text.Tests
         }
 
         [Benchmark(InnerIterationCount = InnerCount)]
-        private static void ParserDateTimeOffsetNow()
+        private static void FormatterDateTimeOffsetNow()
         {
             DateTimeOffset value = new DateTimeOffset(year: 2017, month: 12, day: 30, hour: 3, minute: 45, second: 22, millisecond: 950, offset: new TimeSpan(hours: -8, minutes: 0, seconds: 0));
 

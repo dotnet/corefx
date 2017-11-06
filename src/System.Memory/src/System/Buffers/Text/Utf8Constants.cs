@@ -17,7 +17,7 @@ namespace System.Buffers.Text
 
         public const byte Separator = (byte)',';
 
-        // Invariant formatting uses groups of 3 for each number group seperated by commas.
+        // Invariant formatting uses groups of 3 for each number group separated by commas.
         //   ex. 1,234,567,890
         public const int GroupSize = 3;
 

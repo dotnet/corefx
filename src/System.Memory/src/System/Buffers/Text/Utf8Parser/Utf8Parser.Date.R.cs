@@ -33,13 +33,13 @@ namespace System.Buffers.Text
                 uint dowString = (dow0 << 24) | (dow1 << 16) | (dow2 << 8) | comma;
                 switch (dowString)
                 {
-                    case 0x53554E2c: dayOfWeek = DayOfWeek.Sunday; break;
-                    case 0x4d4f4e2c: dayOfWeek = DayOfWeek.Monday; break;
-                    case 0x5455452c: dayOfWeek = DayOfWeek.Tuesday; break;
-                    case 0x5745442c: dayOfWeek = DayOfWeek.Wednesday; break;
-                    case 0x5448552c: dayOfWeek = DayOfWeek.Thursday; break;
-                    case 0x4652492c: dayOfWeek = DayOfWeek.Friday; break;
-                    case 0x5341542c: dayOfWeek = DayOfWeek.Saturday; break;
+                    case 0x53554E2c /* 'SUN,' */: dayOfWeek = DayOfWeek.Sunday; break;
+                    case 0x4d4f4e2c /* 'MON,' */: dayOfWeek = DayOfWeek.Monday; break;
+                    case 0x5455452c /* 'TUE,' */: dayOfWeek = DayOfWeek.Tuesday; break;
+                    case 0x5745442c /* 'WED,' */: dayOfWeek = DayOfWeek.Wednesday; break;
+                    case 0x5448552c /* 'THU,' */: dayOfWeek = DayOfWeek.Thursday; break;
+                    case 0x4652492c /* 'FRI,' */: dayOfWeek = DayOfWeek.Friday; break;
+                    case 0x5341542c /* 'SAT,' */: dayOfWeek = DayOfWeek.Saturday; break;
                     default:
                         bytesConsumed = 0;
                         dateTimeOffset = default;
@@ -85,18 +85,18 @@ namespace System.Buffers.Text
                 uint monthString = (mon0 << 24) | (mon1 << 16) | (mon2 << 8) | space;
                 switch (monthString)
                 {
-                    case 0x4a414e20: month = 1; break; // 'JAN'
-                    case 0x46454220: month = 2; break; // 'FEB'
-                    case 0x4d415220: month = 3; break; // 'MAR'
-                    case 0x41505220: month = 4; break; // 'APR'
-                    case 0x4d415920: month = 5; break; // 'MAY'
-                    case 0x4a554e20: month = 6; break; // 'JUN'
-                    case 0x4a554c20: month = 7; break; // 'JUL'
-                    case 0x41554720: month = 8; break; // 'AUG'
-                    case 0x53455020: month = 9; break; // 'SEP'
-                    case 0x4f435420: month = 10; break; // 'OCT'
-                    case 0x4e4f5620: month = 11; break; // 'NOV'
-                    case 0x44454320: month = 12; break; // 'DEC'
+                    case 0x4a414e20 /* 'JAN ' */ : month = 1; break;
+                    case 0x46454220 /* 'FEB ' */ : month = 2; break;
+                    case 0x4d415220 /* 'MAR ' */ : month = 3; break;
+                    case 0x41505220 /* 'APR ' */ : month = 4; break;
+                    case 0x4d415920 /* 'MAY ' */ : month = 5; break;
+                    case 0x4a554e20 /* 'JUN ' */ : month = 6; break;
+                    case 0x4a554c20 /* 'JUL ' */ : month = 7; break;
+                    case 0x41554720 /* 'AUG ' */ : month = 8; break;
+                    case 0x53455020 /* 'SEP ' */ : month = 9; break;
+                    case 0x4f435420 /* 'OCT ' */ : month = 10; break;
+                    case 0x4e4f5620 /* 'NOV ' */ : month = 11; break;
+                    case 0x44454320 /* 'DEC ' */ : month = 12; break;
                     default:
                         bytesConsumed = 0;
                         dateTimeOffset = default;
