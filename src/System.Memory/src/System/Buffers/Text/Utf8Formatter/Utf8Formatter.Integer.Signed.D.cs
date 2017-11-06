@@ -34,13 +34,20 @@ namespace System.Buffers.Text
             {
                 Unsafe.Add(ref utf8Bytes, idx++) = Utf8Constants.Minus;
 
-                // Abs(long.MinValue) == long.MaxValue + 1, so we need to re-route to unsigned to handle value
+                // Abs(long.MinValue) == long.MaxValue + 1, so we need to handle this specially.
                 if (value == long.MinValue)
                 {
-                    bool success = TryFormatUInt64D((ulong)long.MaxValue + 1, precision, buffer.Slice(1), out bytesWritten);
-                    Debug.Assert(success, "TryFormatInt64D already did a full buffer length check so this subcall should never have failed.");
+                    if (precision != StandardFormat.NoPrecision)
+                    {
+                        int leadingZeros = (int)precision - 19;
+                        while (leadingZeros-- > 0)
+                            Unsafe.Add(ref utf8Bytes, idx++) = (byte)'0';
+                    }
 
-                    bytesWritten += 1; // Add the minus sign
+                    Unsafe.Add(ref utf8Bytes, idx++) = (byte)'9';
+                    idx += FormattingHelpers.WriteDigits(223372036854775808L, 18, ref utf8Bytes, idx);
+
+                    bytesWritten = idx;
                     return true;
                 }
 

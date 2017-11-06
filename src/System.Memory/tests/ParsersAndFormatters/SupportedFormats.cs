@@ -106,7 +106,7 @@ namespace System.Buffers.Text.Tests
             {
                 yield return new SupportedFormat('G', supportsPrecision: false) { IsDefault = true };
                 yield return new SupportedFormat('R', supportsPrecision: false);
-                yield return new SupportedFormat('l', supportsPrecision: false) { ParseSynonymFor = 'R' };
+                yield return new SupportedFormat('l', supportsPrecision: false);
                 yield return new SupportedFormat('O', supportsPrecision: false);
             }
         }

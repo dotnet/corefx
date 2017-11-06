@@ -77,6 +77,11 @@ namespace System.Buffers.Text.Tests
                     yield return bad;
                 }
 
+                foreach (ParserTestData<DateTimeOffset> bad in GenerateCorruptedDateTimeText("tue, 03 jan 2017 08:08:05 gmt", 'l'))
+                {
+                    yield return bad;
+                }
+
                 foreach (ParserTestData<DateTimeOffset> bad in GenerateCorruptedDateTimeText("2017-01-12T10:30:45.7680000-08:00", 'O'))
                 {
                     yield return bad;
@@ -144,6 +149,11 @@ namespace System.Buffers.Text.Tests
                         yield return new ParserTestData<DateTimeOffset>(text, expectedDto, 'R', pseudoDateTime.ExpectSuccess);
                     }
 
+                    if ((text = pseudoDateTime.LFormatString) != null)
+                    {
+                        yield return new ParserTestData<DateTimeOffset>(text, expectedDto, 'l', pseudoDateTime.ExpectSuccess);
+                    }
+
                     if ((text = pseudoDateTime.OFormatStringZ) != null)
                     {
                         yield return new ParserTestData<DateTimeOffset>(text, expectedDto, 'O', pseudoDateTime.ExpectSuccess);
@@ -191,6 +201,20 @@ namespace System.Buffers.Text.Tests
                     if (!(formatSymbol == 'O' && truncatedLength == 27)) // Chopping off the offset entirely leaves you with a good string...
                     {
                         yield return new ParserTestData<DateTimeOffset>(goodText.Substring(0, truncatedLength), default, formatSymbol, expectedSuccess: false);
+                    }
+                }
+            }
+
+            // 'R' and 'l' are case-sensitive. Flip the case of each letter
+            if (formatSymbol == 'R' || formatSymbol == 'l')
+            {
+                for (int i = 0; i < goodText.Length; i++)
+                {
+                    char[] bad = (char[])(goodText.ToCharArray().Clone());
+                    if (char.IsLetter(goodText[i]))
+                    {
+                        bad[i] = (char)(goodText[i] ^ 0x20u);
+                        yield return new ParserTestData<DateTimeOffset>(new string(bad), default, formatSymbol, expectedSuccess: false);
                     }
                 }
             }

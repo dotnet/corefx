@@ -109,6 +109,8 @@ namespace System.Buffers.Text.Tests
             }
         }
 
+        public string LFormatString => RFormatString?.ToLowerInvariant();
+
         public string OFormatStringNoOffset
         {
             get

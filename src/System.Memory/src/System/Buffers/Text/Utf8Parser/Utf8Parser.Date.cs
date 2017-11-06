@@ -35,9 +35,19 @@ namespace System.Buffers.Text
             switch (standardFormat)
             {
                 case 'R':
+                    {
+                        if (!TryParseDateTimeOffsetR(text, NoFlipCase, out DateTimeOffset dateTimeOffset, out bytesConsumed))
+                        {
+                            value = default;
+                            return false;
+                        }
+                        value = dateTimeOffset.DateTime;  // (returns a DateTimeKind.Unspecified to match DateTime.ParseExact(). Maybe better to return UtcDateTime instead?)
+                        return true;
+                    }
+
                 case 'l':
                     {
-                        if (!TryParseDateTimeOffsetR(text, out DateTimeOffset dateTimeOffset, out bytesConsumed))
+                        if (!TryParseDateTimeOffsetR(text, FlipCase, out DateTimeOffset dateTimeOffset, out bytesConsumed))
                         {
                             value = default;
                             return false;
@@ -115,8 +125,10 @@ namespace System.Buffers.Text
             switch (standardFormat)
             {
                 case 'R':
+                    return TryParseDateTimeOffsetR(text, NoFlipCase, out value, out bytesConsumed);
+
                 case 'l':
-                    return TryParseDateTimeOffsetR(text, out value, out bytesConsumed);
+                    return TryParseDateTimeOffsetR(text, FlipCase, out value, out bytesConsumed);
 
                 case 'O':
                     return TryParseDateTimeOffsetO(text, out value, out bytesConsumed, out _);
@@ -131,5 +143,8 @@ namespace System.Buffers.Text
                     throw new FormatException(SR.Argument_BadFormatSpecifier);
             }
         }
+
+        private const uint FlipCase = 0x00000020u;  // XOR mask to flip the case of a letter.
+        private const uint NoFlipCase = 0x00000000u;
     }
 }
