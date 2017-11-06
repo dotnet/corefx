@@ -57,7 +57,7 @@ namespace System.Diagnostics.Tests
 
             var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.MultiInstance);
 
-            using (PerformanceCounter counterSample = new PerformanceCounter(category, name, instance))
+            using (PerformanceCounter counterSample = Helpers.RetryOnAllPlatforms(() => new PerformanceCounter(category, name, instance)))
             {
                 Assert.Equal(name, counterSample.CounterName);
                 Assert.Equal(category, counterSample.CategoryName);
@@ -75,7 +75,7 @@ namespace System.Diagnostics.Tests
 
             var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.SingleInstance);
 
-            using (PerformanceCounter counterSample = new PerformanceCounter(category, name))
+            using (PerformanceCounter counterSample = Helpers.RetryOnAllPlatforms(() => new PerformanceCounter(category, name)))
             {
                 counterSample.ReadOnly = false;
 

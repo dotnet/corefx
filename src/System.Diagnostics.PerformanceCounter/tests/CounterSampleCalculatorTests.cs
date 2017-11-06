@@ -21,14 +21,14 @@ namespace System.Diagnostics.Tests
 
             counterSample.RawValue = Stopwatch.GetTimestamp();
             DateTime Start = DateTime.Now;
-            counterSample.NextValue();
+            Helpers.RetryOnAllPlatforms(() =>counterSample.NextValue());
 
             System.Threading.Thread.Sleep(500);
 
             var counterVal = counterSample.NextValue();
             var dateTimeVal = DateTime.Now.Subtract(Start).TotalSeconds;
             DeleteCategory(name);
-            Assert.True(Math.Abs(dateTimeVal - counterVal) < .05);
+            Assert.True(Math.Abs(dateTimeVal - counterVal) < .3);
         }
 
         public static PerformanceCounter CreateCounter(string name, PerformanceCounterType counterType)
