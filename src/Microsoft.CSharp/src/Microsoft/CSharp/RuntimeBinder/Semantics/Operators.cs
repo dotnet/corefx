@@ -564,7 +564,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // binop that we have a lifted operator.
 
             Expr nonLiftedResult = null;
-            CType resultType;
 
             LiftArgument(arg1, bofs.Type1(), bofs.ConvertFirst(), out Expr pArgument1, out Expr nonLiftedArg1);
             LiftArgument(arg2, bofs.Type2(), bofs.ConvertSecond(), out Expr pArgument2, out Expr nonLiftedArg2);
@@ -578,22 +577,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // Check if we have a comparison. If so, set the result type to bool.
+            CType resultType;
             if (info.binopKind == BinOpKind.Compare || info.binopKind == BinOpKind.Equal)
             {
                 resultType = GetPredefindType(PredefinedType.PT_BOOL);
             }
             else
             {
-                if (bofs.fnkind == BinOpFuncKind.EnumBinOp)
+                resultType = bofs.fnkind == BinOpFuncKind.EnumBinOp
+                    ? GetEnumBinOpType(ek, nonLiftedArg1.Type, nonLiftedArg2.Type, out _)
+                    : pArgument1.Type;
+
+                if (!(resultType is NullableType))
                 {
-                    AggregateType enumType;
-                    resultType = GetEnumBinOpType(ek, nonLiftedArg1.Type, nonLiftedArg2.Type, out enumType);
+                    resultType = GetSymbolLoader().GetTypeManager().GetNullable(resultType);
                 }
-                else
-                {
-                    resultType = pArgument1.Type;
-                }
-                resultType = resultType is NullableType ? resultType : GetSymbolLoader().GetTypeManager().GetNullable(resultType);
             }
 
             ExprBinOp exprRes = GetExprFactory().CreateBinop(ek, resultType, pArgument1, pArgument2);
