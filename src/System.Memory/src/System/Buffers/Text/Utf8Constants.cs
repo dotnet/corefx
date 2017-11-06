@@ -27,13 +27,10 @@ namespace System.Buffers.Text
         public static readonly byte[] s_false = { (byte)'f', (byte)'a', (byte)'l', (byte)'s', (byte)'e' };
 
         public static readonly TimeSpan NullUtcOffset = TimeSpan.MinValue;  // Utc offsets must range from -14:00 to 14:00 so this is never a valid offset.
-        public const int Rfc1123DateStringLength = 29;
 
-        public const int DateTimeGFormatStringLength = 19;
-        public const int DateTimeOffsetDefaultStringLength = 26;
-        public const int DateTimeMaxUtcOffsetHours = 14;
+        public const int DateTimeMaxUtcOffsetHours = 14; // The UTC offset portion of a TimeSpan or DateTime can be no more than 14 hours and no less than -14 hours.
 
-        public const int DateTimeNumFractionDigits = 7;
-        public const int MaxDateTimeFraction = 9999999;
+        public const int DateTimeNumFractionDigits = 7;  // TimeSpan and DateTime formats allow exactly up to many digits for specifying the fraction after the seconds.
+        public const int MaxDateTimeFraction = 9999999;  // ... and hence, the largest fraction expressible is this.
     }
 }

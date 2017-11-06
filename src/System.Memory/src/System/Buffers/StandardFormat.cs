@@ -11,12 +11,12 @@ namespace System.Buffers
     public readonly struct StandardFormat : IEquatable<StandardFormat>
     {
         /// <summary>
-        /// The maximum valid precision value.
+        /// Precision values for format that don't use a precision, or for when the precision is to be unspecified.
         /// </summary>
         public const byte NoPrecision = byte.MaxValue;
 
         /// <summary>
-        /// Precision values for format that don't use a precision, or for when the precision is to be unspecified.
+        /// The maximum valid precision value.
         /// </summary>
         public const byte MaxPrecision = 99;
 
@@ -46,7 +46,7 @@ namespace System.Buffers
         /// <summary>
         /// Create a StandardFormat.
         /// </summary>
-        /// <param name="symbol">A type-specific formatting characeter such as 'G', 'D' or 'X'</param>
+        /// <param name="symbol">A type-specific formatting character such as 'G', 'D' or 'X'</param>
         /// <param name="precision">An optional precision ranging from 0..9 or the special value NoPrecision (the default)</param>
         public StandardFormat(char symbol, byte precision = NoPrecision)
         {

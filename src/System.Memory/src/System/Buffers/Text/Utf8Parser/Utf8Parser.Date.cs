@@ -9,7 +9,7 @@ namespace System.Buffers.Text
     public static partial class Utf8Parser
     {
         /// <summary>
-        /// Parses a Byte at the start of a Utf8 string.
+        /// Parses a DateTime at the start of a Utf8 string.
         /// </summary>
         /// <param name="text">The Utf8 string to parse</param>
         /// <param name="value">Receives the parsed value</param>
@@ -100,7 +100,7 @@ namespace System.Buffers.Text
         }
 
         /// <summary>
-        /// Parses a SByte at the start of a Utf8 string.
+        /// Parses a DateTimeOffset at the start of a Utf8 string.
         /// </summary>
         /// <param name="text">The Utf8 string to parse</param>
         /// <param name="value">Receives the parsed value</param>

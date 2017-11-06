@@ -17,7 +17,7 @@ namespace System.Buffers.Text
         //
         private static bool TryParseDateTimeOffsetR(ReadOnlySpan<byte> text, uint caseFlipXorMask, out DateTimeOffset dateTimeOffset, out int bytesConsumed)
         {
-            if (text.Length < Utf8Constants.Rfc1123DateStringLength)
+            if (text.Length < 29)
             {
                 bytesConsumed = 0;
                 dateTimeOffset = default;
@@ -216,7 +216,7 @@ namespace System.Buffers.Text
                 return false;
             }
 
-            bytesConsumed = Utf8Constants.Rfc1123DateStringLength;
+            bytesConsumed = 29;
             return true;
         }
     }

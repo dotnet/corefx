@@ -17,7 +17,7 @@ namespace System.Buffers.Text
         //
         private static bool TryFormatDateTimeL(DateTime value, Span<byte> buffer, out int bytesWritten)
         {
-            bytesWritten = Utf8Constants.Rfc1123DateStringLength;
+            bytesWritten = 29;
             if (buffer.Length < bytesWritten)
             {
                 bytesWritten = 0;
