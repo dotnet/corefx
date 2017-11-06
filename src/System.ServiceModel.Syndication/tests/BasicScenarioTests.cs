@@ -246,6 +246,63 @@ namespace System.ServiceModel.Syndication.Tests
         }
 
         [Fact]
+        [ActiveIssue(25080)]
+        public static void SyndicationFeed_Rss_TestDisjointItems()
+        {
+            using (XmlReader reader = XmlReader.Create(@"RssDisjointItems.xml"))
+            {
+                // *** EXECUTE *** \\
+                SyndicationFeed sf = SyndicationFeed.Load(reader);
+
+                // *** ASSERT *** \\
+                int count = 0;
+                foreach (SyndicationItem item in sf.Items)
+                {
+                    count++;
+                }
+
+                Assert.True(count == 2);
+            }
+        }
+
+
+        [Fact]
+        [ActiveIssue(25080)]
+        public static void SyndicationFeed_Atom_TestDisjointItems()
+        {
+            using (XmlReader reader = XmlReader.Create(@"AtomDisjointItems.xml"))
+            {
+                // *** EXECUTE *** \\
+                SyndicationFeed sf = SyndicationFeed.Load(reader);
+
+                // *** ASSERT *** \\
+                int count = 0;
+                foreach (SyndicationItem item in sf.Items)
+                {
+                    count++;
+                }
+
+                Assert.True(count == 2);
+            }
+        }
+
+        [Fact]
+        [ActiveIssue(25080)]
+        public static void SyndicationFeed_Rss_WrongDateFormat()
+        {
+            // *** SETUP *** \\
+            Rss20FeedFormatter rssformatter = new Rss20FeedFormatter();
+
+            XmlReader reader = XmlReader.Create(@"rssSpecExampleWrongDateFormat.xml");
+
+            // *** EXECUTE *** \\
+            SyndicationFeed res = SyndicationFeed.Load(reader);
+
+            // *** ASSERT *** \\
+            Assert.True(!res.LastUpdatedTime.Equals(new DateTimeOffset()));
+        }
+
+        [Fact]
         public static void AtomEntryPositiveTest()
         {
             string filePath = @"brief-entry-noerror.xml";
