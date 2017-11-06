@@ -56,7 +56,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return ErrorContext.Error(err, isNested ? new ErrArg[]{field.FieldWithType} : Array.Empty<ErrArg>());
         }
 
-        // Return true if we actually report a failure.
         private void TryReportLvalueFailure(Expr expr, CheckLvalueKind kind)
         {
             Debug.Assert(expr != null);
