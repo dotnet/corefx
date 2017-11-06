@@ -69,7 +69,7 @@ namespace System.Buffers.Text
                 idx -= 3;
                 v = FormattingHelpers.DivMod(v, 1000, out long groupValue);
                 FormattingHelpers.WriteDigits(groupValue, 3, ref utf8Bytes, idx);
-                Unsafe.Add(ref utf8Bytes, --idx) = Utf8Constants.Seperator;
+                Unsafe.Add(ref utf8Bytes, --idx) = Utf8Constants.Separator;
             }
 
             // Write the first group of digits.

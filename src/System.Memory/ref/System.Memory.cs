@@ -279,9 +279,9 @@ namespace System.Buffers.Binary
     }
 }
 
-namespace System.Buffers.Text
+namespace System.Buffers
 {
-    public struct StandardFormat : IEquatable<StandardFormat>
+    public readonly struct StandardFormat : IEquatable<StandardFormat>
     {
         public const byte MaxPrecision = (byte)99;
         public const byte NoPrecision = (byte)255;
@@ -299,6 +299,20 @@ namespace System.Buffers.Text
         public static bool operator ==(StandardFormat left, StandardFormat right) => throw null;
         public static bool operator !=(StandardFormat left, StandardFormat right) => throw null;
     }
+}
+
+namespace System.Buffers.Text
+{
+    public static class Base64
+    {
+        public static OperationStatus EncodeToUtf8(ReadOnlySpan<byte> bytes, Span<byte> utf8, out int consumed, out int written, bool isFinalBlock = true) { throw null; }
+        public static OperationStatus EncodeToUtf8InPlace(Span<byte> buffer, int dataLength, out int written) { throw null; }
+        public static int GetMaxEncodedToUtf8Length(int length) { throw null; }
+        public static OperationStatus DecodeFromUtf8(ReadOnlySpan<byte> utf8, Span<byte> bytes, out int consumed, out int written, bool isFinalBlock = true) { throw null; }
+        public static OperationStatus DecodeFromUtf8InPlace(Span<byte> buffer, out int written) { throw null; }
+        public static int GetMaxDecodedFromUtf8Length(int length) { throw null; }
+    }
+
     public static class Utf8Formatter
     {
         public static bool TryFormat(bool value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
@@ -336,19 +350,6 @@ namespace System.Buffers.Text
         public static bool TryParse(ReadOnlySpan<byte> text, out ushort value, out int bytesConsumed, char standardFormat = default) => throw null;
         public static bool TryParse(ReadOnlySpan<byte> text, out uint value, out int bytesConsumed, char standardFormat = default) => throw null;
         public static bool TryParse(ReadOnlySpan<byte> text, out ulong value, out int bytesConsumed, char standardFormat = default) => throw null;
-    }
-}
-
-namespace System.Buffers.Text
-{
-    public static class Base64
-    {
-        public static OperationStatus EncodeToUtf8(ReadOnlySpan<byte> bytes, Span<byte> utf8, out int consumed, out int written, bool isFinalBlock = true) { throw null; }
-        public static OperationStatus EncodeToUtf8InPlace(Span<byte> buffer, int dataLength, out int written) { throw null; }
-        public static int GetMaxEncodedToUtf8Length(int length) { throw null; }
-        public static OperationStatus DecodeFromUtf8(ReadOnlySpan<byte> utf8, Span<byte> bytes, out int consumed, out int written, bool isFinalBlock = true) { throw null; }
-        public static OperationStatus DecodeFromUtf8InPlace(Span<byte> buffer, out int written) { throw null; }
-        public static int GetMaxDecodedFromUtf8Length(int length) { throw null; }
     }
 }
 

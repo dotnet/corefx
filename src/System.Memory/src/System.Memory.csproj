@@ -39,7 +39,7 @@
 
   <!-- Utf8 Formatter/Parser -->
   <ItemGroup>
-    <Compile Include="System\Buffers\Text\StandardFormat.cs" />
+    <Compile Include="System\Buffers\StandardFormat.cs" />
     <Compile Include="System\Buffers\Text\Utf8Constants.cs" />
     <Compile Include="System\Buffers\Text\Utf8Formatter\FormattingHelpers.cs" />
     <Compile Include="System\Buffers\Text\Utf8Formatter\Utf8Formatter.Boolean.cs" />

@@ -15,7 +15,7 @@ namespace System.Buffers.Text
         public const byte Space = (byte)' ';
         public const byte Hyphen = (byte)'-';
 
-        public const byte Seperator = (byte)',';
+        public const byte Separator = (byte)',';
 
         // Invariant formatting uses groups of 3 for each number group seperated by commas.
         //   ex. 1,234,567,890

@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Buffers.Text
+namespace System.Buffers
 {
     /// <summary>
     /// Represents a standard formatting string without using an actual String. A StandardFormat consists of a character (such as 'G', 'D' or 'X')
     /// and an optional precision ranging from 0..99, or the special value NoPrecision.
     /// </summary>
-    public struct StandardFormat : IEquatable<StandardFormat>
+    public readonly struct StandardFormat : IEquatable<StandardFormat>
     {
         /// <summary>
         /// The maximum valid precision value.

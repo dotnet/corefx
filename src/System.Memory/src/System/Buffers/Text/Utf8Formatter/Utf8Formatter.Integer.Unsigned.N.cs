@@ -46,7 +46,7 @@ namespace System.Buffers.Text
             ref byte utf8Bytes = ref buffer.DangerousGetPinnableReference();
 
             // Write the last group
-            Unsafe.Add(ref utf8Bytes, idx++) = Utf8Constants.Seperator;
+            Unsafe.Add(ref utf8Bytes, idx++) = Utf8Constants.Separator;
             idx += FormattingHelpers.WriteDigits(lastGroup, 3, ref utf8Bytes, idx);
 
             // Write out the trailing zeros
