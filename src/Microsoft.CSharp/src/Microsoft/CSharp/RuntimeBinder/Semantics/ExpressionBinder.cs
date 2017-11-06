@@ -502,10 +502,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             pObject = AdjustMemberObject(mwi, pObject, out fConstrained);
             pMemGroup.OptionalObject = pObject;
 
-            CType pReturnType =
-                (flags & (MemLookFlags.Ctor | MemLookFlags.NewObj)) == (MemLookFlags.Ctor | MemLookFlags.NewObj)
-                    ? mwi.Ats
-                    : GetTypes().SubstType(mwi.Meth().RetType, mwi.GetType(), mwi.TypeArgs);
+            CType pReturnType;
+            if ((flags & (MemLookFlags.Ctor | MemLookFlags.NewObj)) == (MemLookFlags.Ctor | MemLookFlags.NewObj))
+            {
+                pReturnType = mwi.Ats;
+            }
+            else
+            {
+                pReturnType = GetTypes().SubstType(mwi.Meth().RetType, mwi.GetType(), mwi.TypeArgs);
+            }
 
             ExprCall pResult = GetExprFactory().CreateCall(0, pReturnType, pArguments, pMemGroup, mwi);
 
