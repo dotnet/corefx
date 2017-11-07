@@ -500,7 +500,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             bool fConstrained;
             Expr pObject = pMemGroup.OptionalObject;
             CType callingObjectType = pObject?.Type;
-            PostBindMethod(ref mwi, pObject);
+            PostBindMethod(ref mwi);
             pObject = AdjustMemberObject(mwi, pObject, out fConstrained);
             pMemGroup.OptionalObject = pObject;
 
@@ -1187,7 +1187,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        private void PostBindMethod(ref MethWithInst pMWI, Expr pObject)
+        private void PostBindMethod(ref MethWithInst pMWI)
         {
             if (pMWI.Meth().RetType != null)
             {
