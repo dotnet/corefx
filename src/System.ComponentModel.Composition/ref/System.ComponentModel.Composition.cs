@@ -226,6 +226,8 @@ namespace System.ComponentModel.Composition.Hosting
     public partial class ApplicationCatalog : System.ComponentModel.Composition.Primitives.ComposablePartCatalog, System.ComponentModel.Composition.Primitives.ICompositionElement
     {
         public ApplicationCatalog() { }
+        public ApplicationCatalog(System.Reflection.ReflectionContext reflectionContext) { }
+        public ApplicationCatalog(System.Reflection.ReflectionContext reflectionContext, System.ComponentModel.Composition.Primitives.ICompositionElement definitionOrigin) { }
         public ApplicationCatalog(System.ComponentModel.Composition.Primitives.ICompositionElement definitionOrigin) { }
         string System.ComponentModel.Composition.Primitives.ICompositionElement.DisplayName { get { throw null; } }
         System.ComponentModel.Composition.Primitives.ICompositionElement System.ComponentModel.Composition.Primitives.ICompositionElement.Origin { get { throw null; } }
