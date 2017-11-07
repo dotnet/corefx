@@ -74,7 +74,9 @@ namespace System.Diagnostics.Tests
                 tries++;
             }
 
-            Console.WriteLine("{0} milliseconds", stopwatch.ElapsedMilliseconds);
+            if (stopwatch.ElapsedMilliseconds > 5000)
+                Console.WriteLine($"{stopwatch.ElapsedMilliseconds } milliseconds");
+
             Assert.Equal(entriesExpected, RetryOnWin7((() => eventLog.Entries.Count)));
         }
     }
