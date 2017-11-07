@@ -127,6 +127,9 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslAddExtraChainCert")]
         internal static extern bool SslAddExtraChainCert(SafeSslHandle ssl, SafeX509Handle x509);
 
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslSetTlsExtHostName")]
+        private static extern int SslSetTlsExtHostName(SafeSslHandle ssl);
+
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslGetClientCAList")]
         private static extern SafeSharedX509NameStackHandle SslGetClientCAList_private(SafeSslHandle ssl);
 

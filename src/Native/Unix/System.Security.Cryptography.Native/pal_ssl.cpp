@@ -573,3 +573,8 @@ extern "C" void CryptoNative_SslGet0AlpnSelected(SSL* ssl, const uint8_t** proto
         *len = 0;
     }
 }
+
+extern "C" int32_t CryptoNative_SslSetTlsExtHostName(SSL *ssl, const char *name)
+{
+    return int SSL_set_tlsext_host_name(ssl, name);
+}
