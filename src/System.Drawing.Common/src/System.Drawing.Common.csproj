@@ -328,11 +328,11 @@
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libdl\Interop.dlopen.cs">
-      <Link>Common\Interop\Unix\libdl\Interop.dlopen.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.DlOpen.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.DlOpen.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\libdl\Interop.dlsym.cs">
-      <Link>Common\Interop\Unix\libdl\Interop.dlsym.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.DlSym.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.DlSym.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Runtime\InteropServices\FunctionWrapper.Unix.cs">
       <Link>Common\System\Runtime\InteropServices\FunctionWrapper.Unix.cs</Link>
