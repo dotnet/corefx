@@ -17,6 +17,7 @@ namespace System.ComponentModel.Composition
         public static void ComposeParts(this System.ComponentModel.Composition.Hosting.CompositionContainer container, params object[] attributedParts) { }
         public static System.ComponentModel.Composition.Primitives.ComposablePart CreatePart(System.ComponentModel.Composition.Primitives.ComposablePartDefinition partDefinition, object attributedPart) { throw null; }
         public static System.ComponentModel.Composition.Primitives.ComposablePart CreatePart(object attributedPart) { throw null; }
+        public static System.ComponentModel.Composition.Primitives.ComposablePart CreatePart(object attributedPart, System.Reflection.ReflectionContext reflectionContext) { throw null; }
         public static System.ComponentModel.Composition.Primitives.ComposablePartDefinition CreatePartDefinition(System.Type type, System.ComponentModel.Composition.Primitives.ICompositionElement origin) { throw null; }
         public static System.ComponentModel.Composition.Primitives.ComposablePartDefinition CreatePartDefinition(System.Type type, System.ComponentModel.Composition.Primitives.ICompositionElement origin, bool ensureIsDiscoverable) { throw null; }
         public static bool Exports(this System.ComponentModel.Composition.Primitives.ComposablePartDefinition part, System.Type contractType) { throw null; }
@@ -30,7 +31,15 @@ namespace System.ComponentModel.Composition
         public static bool Imports<T>(this System.ComponentModel.Composition.Primitives.ComposablePartDefinition part) { throw null; }
         public static bool Imports<T>(this System.ComponentModel.Composition.Primitives.ComposablePartDefinition part, System.ComponentModel.Composition.Primitives.ImportCardinality importCardinality) { throw null; }
         public static System.ComponentModel.Composition.Primitives.ComposablePart SatisfyImportsOnce(this System.ComponentModel.Composition.ICompositionService compositionService, object attributedPart) { throw null; }
+        public static System.ComponentModel.Composition.Primitives.ComposablePart SatisfyImportsOnce(this System.ComponentModel.Composition.ICompositionService compositionService, object attributedPart, System.Reflection.ReflectionContext reflectionContext) { throw null; }
     }
+
+    public partial class CatalogReflectionContextAttribute : Attribute
+    {
+        public CatalogReflectionContextAttribute(Type reflectionContextType) { }
+        public System.Reflection.ReflectionContext CreateReflectionContext() { throw null; }
+    }
+
     public partial class ChangeRejectedException : System.ComponentModel.Composition.CompositionException
     {
         public ChangeRejectedException() { }
@@ -44,6 +53,7 @@ namespace System.ComponentModel.Composition
         public CompositionContractMismatchException() { }
         public CompositionContractMismatchException(string message) { }
         public CompositionContractMismatchException(string message, System.Exception innerException) { }
+        protected CompositionContractMismatchException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public partial class CompositionError
     {
@@ -131,6 +141,7 @@ namespace System.ComponentModel.Composition
         public ImportCardinalityMismatchException() { }
         public ImportCardinalityMismatchException(string message) { }
         public ImportCardinalityMismatchException(string message, System.Exception innerException) { }
+        protected ImportCardinalityMismatchException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     [System.AttributeUsageAttribute(AttributeTargets.Constructor, AllowMultiple=false, Inherited=false)]
     public partial class ImportingConstructorAttribute : System.Attribute
@@ -240,6 +251,11 @@ namespace System.ComponentModel.Composition.Hosting
     {
         public AssemblyCatalog(System.Reflection.Assembly assembly) { }
         public AssemblyCatalog(System.Reflection.Assembly assembly, System.ComponentModel.Composition.Primitives.ICompositionElement definitionOrigin) { }
+        public AssemblyCatalog(System.Reflection.Assembly assembly, System.Reflection.ReflectionContext reflectionContext) { }
+        public AssemblyCatalog(System.Reflection.Assembly assembly, System.Reflection.ReflectionContext reflectionContext, System.ComponentModel.Composition.Primitives.ICompositionElement definitionOrigin) { }
+        public AssemblyCatalog(string codeBase) { }
+        public AssemblyCatalog(string codeBase, System.Reflection.ReflectionContext reflectionContext) { }
+        public AssemblyCatalog(string codeBase, System.Reflection.ReflectionContext reflectionContext, System.ComponentModel.Composition.Primitives.ICompositionElement definitionOrigin) { }
         public AssemblyCatalog(string codeBase, System.ComponentModel.Composition.Primitives.ICompositionElement definitionOrigin) { }
         public System.Reflection.Assembly Assembly { get { throw null; } }
         string System.ComponentModel.Composition.Primitives.ICompositionElement.DisplayName { get { throw null; } }
@@ -368,8 +384,12 @@ namespace System.ComponentModel.Composition.Hosting
     {
         public DirectoryCatalog(string path) { }
         public DirectoryCatalog(string path, System.ComponentModel.Composition.Primitives.ICompositionElement definitionOrigin) { }
+        public DirectoryCatalog(string path, System.Reflection.ReflectionContext reflectionContext) { }
+        public DirectoryCatalog(string path, System.Reflection.ReflectionContext reflectionContext, System.ComponentModel.Composition.Primitives.ICompositionElement definitionOrigin) { }
         public DirectoryCatalog(string path, string searchPattern) { }
         public DirectoryCatalog(string path, string searchPattern, System.ComponentModel.Composition.Primitives.ICompositionElement definitionOrigin) { }
+        public DirectoryCatalog(string path, string searchPattern, System.Reflection.ReflectionContext reflectionContext) { }
+        public DirectoryCatalog(string path, string searchPattern, System.Reflection.ReflectionContext reflectionContext, System.ComponentModel.Composition.Primitives.ICompositionElement definitionOrigin) { }
         public string FullPath { get { throw null; } }
         public System.Collections.ObjectModel.ReadOnlyCollection<string> LoadedFiles { get { throw null; } }
         public string Path { get { throw null; } }
@@ -467,6 +487,8 @@ namespace System.ComponentModel.Composition.Hosting
     {
         public TypeCatalog(System.Collections.Generic.IEnumerable<System.Type> types) { }
         public TypeCatalog(System.Collections.Generic.IEnumerable<System.Type> types, System.ComponentModel.Composition.Primitives.ICompositionElement definitionOrigin) { }
+        public TypeCatalog(System.Collections.Generic.IEnumerable<Type> types, System.Reflection.ReflectionContext reflectionContext) { }
+        public TypeCatalog(System.Collections.Generic.IEnumerable<Type> types, System.Reflection.ReflectionContext reflectionContext, System.ComponentModel.Composition.Primitives.ICompositionElement definitionOrigin) { }
         public TypeCatalog(params System.Type[] types) { }
         string System.ComponentModel.Composition.Primitives.ICompositionElement.DisplayName { get { throw null; } }
         System.ComponentModel.Composition.Primitives.ICompositionElement System.ComponentModel.Composition.Primitives.ICompositionElement.Origin { get { throw null; } }
@@ -514,6 +536,8 @@ namespace System.ComponentModel.Composition.Primitives
         public ComposablePartException(string message, System.ComponentModel.Composition.Primitives.ICompositionElement element) { }
         public ComposablePartException(string message, System.ComponentModel.Composition.Primitives.ICompositionElement element, System.Exception innerException) { }
         public ComposablePartException(string message, System.Exception innerException) { }
+        protected ComposablePartException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public System.ComponentModel.Composition.Primitives.ICompositionElement Element { get { throw null; } }
     }
     public partial class ContractBasedImportDefinition : System.ComponentModel.Composition.Primitives.ImportDefinition
