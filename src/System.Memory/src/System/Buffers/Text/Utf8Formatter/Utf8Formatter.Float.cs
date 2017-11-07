@@ -90,12 +90,7 @@ namespace System.Buffers.Text
                     return ThrowHelper.TryFormatThrowFormatException(out bytesWritten);
             }
 
-            string formatString;
-            if (format.Precision == StandardFormat.NoPrecision)
-                formatString = format.Symbol.ToString();
-            else
-                formatString = format.Symbol.ToString() + format.Precision;
-
+            string formatString = format.ToString();
             string utf16Text = value.ToString(formatString, CultureInfo.InvariantCulture);
             int length = utf16Text.Length;
             if (length > buffer.Length)

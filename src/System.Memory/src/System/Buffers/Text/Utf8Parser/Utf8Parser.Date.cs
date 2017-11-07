@@ -80,13 +80,12 @@ namespace System.Buffers.Text
                             case DateTimeKind.Utc:
                                 value = dateTimeOffset.UtcDateTime;
                                 break;
-                            case DateTimeKind.Unspecified:
+                            default:
+                                Debug.Assert(kind == DateTimeKind.Unspecified);
                                 value = dateTimeOffset.DateTime;
                                 break;
-                            default:
-                                Debug.Assert(false, "Unexpected DateTimeKind: " + kind);
-                                throw new InvalidOperationException();
                         }
+
                         return true;
                     }
 

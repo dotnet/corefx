@@ -113,7 +113,10 @@ namespace System.Buffers.Text.Tests
 
                 unsafe
                 {
-                    return *((ulong*)&expectedDouble) == *((ulong*)&actualDouble);
+                    if (*((ulong*)&expectedDouble) != *((ulong*)&actualDouble))
+                        return false;
+
+                    return true;
                 }
             }
 
@@ -125,7 +128,10 @@ namespace System.Buffers.Text.Tests
 
                 unsafe
                 {
-                    return *((uint*)&expectedSingle) == *((uint*)&actualSingle);
+                    if (*((uint*)&expectedSingle) != *((uint*)&actualSingle))
+                        return false;
+
+                    return true;
                 }
             }
 

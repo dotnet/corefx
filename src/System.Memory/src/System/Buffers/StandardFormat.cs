@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace System.Buffers
 {
     /// <summary>
@@ -51,9 +53,9 @@ namespace System.Buffers
         public StandardFormat(char symbol, byte precision = NoPrecision)
         {
             if (precision != NoPrecision && precision > MaxPrecision)
-                throw new ArgumentOutOfRangeException(nameof(precision));
+                ThrowHelper.ThrowArgumentOutOfRangeException_PrecisionTooLarge();
             if (symbol != (byte)symbol)
-                throw new ArgumentOutOfRangeException(nameof(symbol));
+                ThrowHelper.ThrowArgumentOutOfRangeException_SymbolDoesNotFit();
 
             _format = (byte)symbol;
             _precision = precision;
@@ -69,31 +71,39 @@ namespace System.Buffers
         /// </summary>
         public static StandardFormat Parse(ReadOnlySpan<char> format)
         {
-            return Parse(new string(format.ToArray()));
+            if (format.Length == 0)
+                return default;
+
+            char symbol = format[0];
+            byte precision;
+            if (format.Length == 1)
+            {
+                precision = NoPrecision;
+            }
+            else
+            {
+                uint parsedPrecision = 0;
+                for (int srcIndex = 1; srcIndex < format.Length; srcIndex++)
+                {
+                    uint digit = format[srcIndex] - 48u; // '0'
+                    if (digit > 9)
+                        throw new FormatException(SR.Format(SR.Argument_CannotParsePrecision, MaxPrecision));
+
+                    parsedPrecision = parsedPrecision * 10 + digit;
+                    if (parsedPrecision > MaxPrecision)
+                        throw new FormatException(SR.Format(SR.Argument_PrecisionTooLarge, MaxPrecision));
+                }
+
+                precision = (byte)parsedPrecision;
+            }
+
+            return new StandardFormat(symbol, precision);
         }
 
         /// <summary>
         /// Converts a classic .NET format string into a StandardFormat
         /// </summary>
-        public static StandardFormat Parse(string format)
-        {
-            if (string.IsNullOrEmpty(format))
-                return default;
-
-            char specifier = format[0];
-            byte precision = NoPrecision;
-
-            if (format.Length > 1)
-            {
-                if (!byte.TryParse(format.Substring(1), out precision))
-                    throw new FormatException("format");
-
-                if (precision > MaxPrecision)
-                    throw new FormatException("precision");
-            }
-
-            return new StandardFormat(specifier, precision);
-        }
+        public static StandardFormat Parse(string format) => format == null ? default : Parse(SpanExtensions.AsReadOnlySpan(format));  //@todo: Change back to extension syntax once the ambiguous reference with CoreLib is eliminated.
 
         /// <summary>
         /// Returns true if both the Symbol and Precision are equal.
@@ -109,6 +119,47 @@ namespace System.Buffers
         /// Returns true if both the Symbol and Precision are equal.
         /// </summary>
         public bool Equals(StandardFormat other) => _format == other._format && _precision == other._precision;
+
+        /// <summary>
+        /// Returns the format in classic .NET format.
+        /// </summary>
+        public override string ToString()
+        {
+            unsafe
+            {
+                const int MaxLength = 4;
+                char* pBuffer = stackalloc char[MaxLength];
+
+                int dstIndex = 0;
+                char symbol = Symbol;
+                if (symbol != default)
+                {
+                    pBuffer[dstIndex++] = symbol;
+
+                    byte precision = Precision;
+                    if (precision != NoPrecision)
+                    {
+                        if (precision >= 100)
+                        {
+                            pBuffer[dstIndex++] = (char)('0' + (precision / 100) % 10);
+                            precision = (byte)(precision % 100);
+                        }
+
+                        if (precision >= 10)
+                        {
+                            pBuffer[dstIndex++] = (char)('0' + (precision / 10) % 10);
+                            precision = (byte)(precision % 10);
+                        }
+
+                        pBuffer[dstIndex++] = (char)('0' + precision);
+                    }
+                }
+
+                Debug.Assert(dstIndex <= MaxLength);
+
+                return new string(pBuffer, startIndex: 0, length: dstIndex);
+            }
+        }
 
         /// <summary>
         /// Returns true if both the Symbol and Precision are equal.

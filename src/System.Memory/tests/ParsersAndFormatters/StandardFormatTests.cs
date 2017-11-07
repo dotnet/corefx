@@ -139,6 +139,38 @@ namespace System.Buffers.Text.Tests
                 yield return new object[] { new StandardFormat('A', 3), new StandardFormat('A', StandardFormat.NoPrecision), false };
             }
         }
+
+        [Theory]
+        [InlineData("G4", 'G', 4)]
+        [InlineData("n0", 'n', 0)]
+        [InlineData("d", 'd', StandardFormat.NoPrecision)]
+        [InlineData("x99", 'x', StandardFormat.MaxPrecision)]
+        [InlineData("", default(char), default(byte))]
+        public static void StandardFormatToString(string expected, char symbol, byte precision)
+        {
+            StandardFormat format = new StandardFormat(symbol, precision);
+            string actual = format.ToString();
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public static void StandardFormatToStringOversizedPrecision()
+        {
+            // Code coverage: Precision of 100 is not legal but ToString() isn't allowed to throw an exception for that.
+            // Make sure it doesn't.
+
+            const byte BadPrecision = 100;
+
+            StandardFormat format = default;
+            unsafe
+            {
+                // We're aiming for the Precision field but we don't know where it is so nuke 'em all.
+                new Span<byte>(&format, sizeof(StandardFormat)).Fill(BadPrecision);
+            }
+
+            string s = format.ToString();
+            Assert.NotNull(s);
+        }
     }
 }
 
