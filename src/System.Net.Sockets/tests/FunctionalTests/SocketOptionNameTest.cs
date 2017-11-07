@@ -285,6 +285,42 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // Windows defaults are different
+        public void ExclusiveAddress_Default_Unix()
+        {
+            using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                Assert.Equal(1, (int)a.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse));
+                Assert.Equal(true, a.ExclusiveAddressUse);
+                Assert.Equal(0, (int)a.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress));
+            }
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(0)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // Unix does not have separate options for ExclusiveAddressUse and ReuseAddress.
+        public void SettingExclusiveAddress_SetsReuseAddress(int value)
+        {
+            using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                a.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, value);
+
+                Assert.Equal(value, (int)a.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse));
+                Assert.Equal(value == 1 ? 0 : 1, (int)a.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress));
+            }
+
+            // SettingReuseAddress_SetsExclusiveAddress
+            using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                a.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, value);
+
+                Assert.Equal(value, (int)a.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress));
+                Assert.Equal(value == 1 ? 0 : 1, (int)a.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse));
+            }
+        }
+
+        [Fact]
         public void BindDuringTcpWait()
         {
             int port = 0;
