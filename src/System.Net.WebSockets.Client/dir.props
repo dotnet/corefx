@@ -2,7 +2,7 @@
   <Import Project="..\dir.props" />
   <PropertyGroup>
     <AssemblyVersion>4.0.1.1</AssemblyVersion>
-    <PackageVersion>4.3.1</PackageVersion>
+    <PackageVersion>4.3.2</PackageVersion>
   </PropertyGroup>
 </Project>
 
