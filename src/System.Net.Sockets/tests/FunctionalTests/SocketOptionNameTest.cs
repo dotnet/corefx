@@ -321,7 +321,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        public void BindDuringTcpWait()
+        public void BindDuringTcpWait_Succeeds()
         {
             int port = 0;
             using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -334,8 +334,8 @@ namespace System.Net.Sockets.Tests
                 using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
                 {
                     client.Connect(new IPEndPoint(IPAddress.Loopback, port));
-                    using (Socket acceptedClient = a.Accept())
-                    { }
+                    // accept socket and close it with zero linger time.
+                    a.Accept().Close(0);
                 }
             }
 
