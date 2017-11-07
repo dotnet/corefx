@@ -33,7 +33,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ACCESSERROR CheckAccess2(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
         {
             Debug.Assert(symCheck != null);
-            Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.getAggregate());
+            Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.OwningAggregate);
             Debug.Assert(typeThru == null ||
                    typeThru is AggregateType ||
                    typeThru is TypeParameterType ||
@@ -72,7 +72,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(atsCheck != null);
 
             // Substitute on the CType.
-            if (atsCheck.GetTypeArgsAll().Count > 0)
+            if (atsCheck.TypeArgsAll.Count > 0)
             {
                 CType = SymbolLoader.GetTypeManager().SubstType(CType, atsCheck);
             }
@@ -94,15 +94,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             do
             {
-                if (ACCESSERROR.ACCESSERROR_NOERROR != CheckAccessCore(ats.GetOwningAggregate(), ats.outerType, symWhere, null))
+                if (ACCESSERROR.ACCESSERROR_NOERROR != CheckAccessCore(ats.OwningAggregate, ats.OuterType, symWhere, null))
                 {
                     return false;
                 }
 
-                ats = ats.outerType;
+                ats = ats.OuterType;
             } while(ats != null);
 
-            TypeArray typeArgs = ((AggregateType)type).GetTypeArgsAll();
+            TypeArray typeArgs = ((AggregateType)type).TypeArgsAll;
             for (int i = 0; i < typeArgs.Count; i++)
             {
                 if (!CheckTypeAccess(typeArgs[i], symWhere))
@@ -142,7 +142,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private ACCESSERROR CheckAccessCore(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
         {
             Debug.Assert(symCheck != null);
-            Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.getAggregate());
+            Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.OwningAggregate);
             Debug.Assert(typeThru == null ||
                    typeThru is AggregateType ||
                    typeThru is TypeParameterType ||
@@ -257,7 +257,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // agg or a CType derived from an instantiation of agg. In this case
                     // all that matters is that agg is in the base AggregateSymbol chain of atsThru. The
                     // actual AGGTYPESYMs involved don't matter.
-                    if (atsThru == null || atsThru.getAggregate().FindBaseAgg(agg))
+                    if (atsThru == null || atsThru.OwningAggregate.FindBaseAgg(agg))
                     {
                         return ACCESSERROR.ACCESSERROR_NOERROR;
                     }

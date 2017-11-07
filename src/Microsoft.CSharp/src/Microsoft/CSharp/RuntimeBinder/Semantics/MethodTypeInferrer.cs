@@ -187,7 +187,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         continue;
                     }
 
-                    Name pErrorTypeName = err.nameText;
+                    Name pErrorTypeName = err.NameText;
                     if (pErrorTypeName != null)
                     {
                         continue;
@@ -195,7 +195,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 _pFixedResults[iParam] = GetTypeManager().GetErrorType(
-                                        ((TypeParameterType)_pMethodTypeParameters[iParam]).GetName(),
+                                        ((TypeParameterType)_pMethodTypeParameters[iParam]).Name,
                                         BSYMMGR.EmptyTypeArray());
             }
             return GetGlobalSymbols().AllocParams(_pMethodTypeParameters.Count, _pFixedResults);
@@ -380,12 +380,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 bool wasOutOrRef = false;
                 if (pDest is ParameterModifierType modDest)
                 {
-                    pDest = modDest.GetParameterType();
+                    pDest = modDest.ParameterType;
                     wasOutOrRef = true;
                 }
                 if (pSource is ParameterModifierType modSource)
                 {
-                    pSource = modSource.GetParameterType();
+                    pSource = modSource.ParameterType;
                 }
                 // If the argument is a TYPEORNAMESPACEERROR and the pSource is an
                 // error CType, then we want to set it to the generic error CType 
@@ -554,7 +554,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CType pDest = _pMethodFormalParameterTypes[iArg];
                 if (pDest is ParameterModifierType modDest)
                 {
-                    pDest = modDest.GetParameterType();
+                    pDest = modDest.ParameterType;
                 }
                 Expr pExpr = _pMethodArguments.prgexpr[iArg];
                 if (HasUnfixedParamInOutputType(pExpr, pDest) &&
@@ -563,7 +563,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     CType pSource = _pMethodArguments.types[iArg];
                     if (pSource is ParameterModifierType modSource)
                     {
-                        pSource = modSource.GetParameterType();
+                        pSource = modSource.ParameterType;
                     }
                     OutputTypeInference(pExpr, pSource, pDest);
                 }
@@ -773,7 +773,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CType pDest = _pMethodFormalParameterTypes[iArg];
                 if (pDest is ParameterModifierType modDest)
                 {
-                    pDest = modDest.GetParameterType();
+                    pDest = modDest.ParameterType;
                 }
 
                 Expr pExpr = _pMethodArguments.prgexpr[iArg];
@@ -1175,12 +1175,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            if (pArraySource.rank != pArrayDest.rank || pArraySource.IsSZArray != pArrayDest.IsSZArray)
+            if (pArraySource.Rank != pArrayDest.Rank || pArraySource.IsSZArray != pArrayDest.IsSZArray)
             {
                 return false;
             }
 
-            ExactInference(pArraySource.GetElementType(), pArrayDest.GetElementType());
+            ExactInference(pArraySource.ElementType, pArrayDest.ElementType);
             return true;
         }
 
@@ -1195,7 +1195,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            ExactInference(nubSource.GetUnderlyingType(), nubDest.GetUnderlyingType());
+            ExactInference(nubSource.UnderlyingType, nubDest.UnderlyingType);
             return true;
         }
 
@@ -1208,7 +1208,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   is made from each Ui to the corresponding Vi.
 
             if (!(pSource is AggregateType pConstructedSource) || !(pDest is AggregateType pConstructedDest)
-                || pConstructedSource.GetOwningAggregate() != pConstructedDest.GetOwningAggregate())
+                || pConstructedSource.OwningAggregate != pConstructedDest.OwningAggregate)
             {
                 return false;
             }
@@ -1225,10 +1225,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
-            Debug.Assert(pSource.GetOwningAggregate() == pDest.GetOwningAggregate());
+            Debug.Assert(pSource.OwningAggregate == pDest.OwningAggregate);
 
-            TypeArray pSourceArgs = pSource.GetTypeArgsAll();
-            TypeArray pDestArgs = pDest.GetTypeArgsAll();
+            TypeArray pSourceArgs = pSource.TypeArgsAll;
+            TypeArray pDestArgs = pDest.TypeArgsAll;
 
             Debug.Assert(pSourceArgs != null);
             Debug.Assert(pDestArgs != null);
@@ -1354,16 +1354,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            CType pElementSource = pArraySource.GetElementType();
+            CType pElementSource = pArraySource.ElementType;
             CType pElementDest;
 
             if (pDest is ArrayType pArrayDest)
             {
-                if (pArrayDest.rank != pArraySource.rank || pArrayDest.IsSZArray != pArraySource.IsSZArray)
+                if (pArrayDest.Rank != pArraySource.Rank || pArrayDest.IsSZArray != pArraySource.IsSZArray)
                 {
                     return false;
                 }
-                pElementDest = pArrayDest.GetElementType();
+                pElementDest = pArrayDest.ElementType;
             }
             else if (pDest.isPredefType(PredefinedType.PT_G_IENUMERABLE) ||
                 pDest.isPredefType(PredefinedType.PT_G_ICOLLECTION) ||
@@ -1376,7 +1376,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
                 AggregateType pAggregateDest = (AggregateType)pDest;
-                pElementDest = pAggregateDest.GetTypeArgsThis()[0];
+                pElementDest = pAggregateDest.TypeArgsThis[0];
             }
             else
             {
@@ -1424,7 +1424,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            TypeArray pDestArgs = pConstructedDest.GetTypeArgsAll();
+            TypeArray pDestArgs = pConstructedDest.TypeArgsAll;
             if (pDestArgs.Count == 0)
             {
                 return false;
@@ -1439,8 +1439,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   lower bound inference or upper bound inference
             // SPEC:   is made from each Ui to the corresponding Vi.
 
-            if (pSource is AggregateType aggSource &&
-                aggSource.GetOwningAggregate() == pConstructedDest.GetOwningAggregate())
+            if (pSource is AggregateType aggSource && aggSource.OwningAggregate == pConstructedDest.OwningAggregate)
             {
                 if (aggSource.isInterfaceType() || aggSource.isDelegateType())
                 {
@@ -1501,18 +1500,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (pSource.isClassType())
             {
-                pSourceBase = (pSource as AggregateType).GetBaseClass();
+                pSourceBase = ((AggregateType)pSource).GetBaseClass();
             }
 
             while (pSourceBase != null)
             {
-                if (pSourceBase.GetOwningAggregate() == pDest.GetOwningAggregate())
+                if (pSourceBase.OwningAggregate == pDest.OwningAggregate)
                 {
                     ExactTypeArgumentInference(pSourceBase, pDest);
                     return true;
                 }
+
                 pSourceBase = pSourceBase.GetBaseClass();
             }
+
             return false;
         }
 
@@ -1544,7 +1545,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType pInterface = null;
             foreach (AggregateType pCurrent in interfaces)
             {
-                if (pCurrent.GetOwningAggregate() == pDest.GetOwningAggregate())
+                if (pCurrent.OwningAggregate == pDest.OwningAggregate)
                 {
                     if (pInterface == null)
                     {
@@ -1581,11 +1582,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
-            Debug.Assert(pSource.GetOwningAggregate() == pDest.GetOwningAggregate());
+            Debug.Assert(pSource.OwningAggregate == pDest.OwningAggregate);
 
-            TypeArray pTypeParams = pSource.GetOwningAggregate().GetTypeVarsAll();
-            TypeArray pSourceArgs = pSource.GetTypeArgsAll();
-            TypeArray pDestArgs = pDest.GetTypeArgsAll();
+            TypeArray pTypeParams = pSource.OwningAggregate.GetTypeVarsAll();
+            TypeArray pSourceArgs = pSource.TypeArgsAll;
+            TypeArray pDestArgs = pDest.TypeArgsAll;
 
             Debug.Assert(pTypeParams != null);
             Debug.Assert(pSourceArgs != null);
@@ -1695,16 +1696,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            CType pElementDest = pArrayDest.GetElementType();
+            CType pElementDest = pArrayDest.ElementType;
             CType pElementSource;
 
             if (pSource is ArrayType pArraySource)
             {
-                if (pArrayDest.rank != pArraySource.rank || pArrayDest.IsSZArray != pArraySource.IsSZArray)
+                if (pArrayDest.Rank != pArraySource.Rank || pArrayDest.IsSZArray != pArraySource.IsSZArray)
                 {
                     return false;
                 }
-                pElementSource = pArraySource.GetElementType();
+                pElementSource = pArraySource.ElementType;
             }
             else if (pSource.isPredefType(PredefinedType.PT_G_IENUMERABLE) ||
                 pSource.isPredefType(PredefinedType.PT_G_ICOLLECTION) ||
@@ -1717,7 +1718,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
                 AggregateType pAggregateSource = (AggregateType)pSource;
-                pElementSource = pAggregateSource.GetTypeArgsThis()[0];
+                pElementSource = pAggregateSource.TypeArgsThis[0];
             }
             else
             {
@@ -1744,7 +1745,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            TypeArray pSourceArgs = pConstructedSource.GetTypeArgsAll();
+            TypeArray pSourceArgs = pConstructedSource.TypeArgsAll;
             if (pSourceArgs.Count == 0)
             {
                 return false;
@@ -1755,8 +1756,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   lower bound inference or upper bound inference
             // SPEC:   is made from each Ui to the corresponding Vi.
 
-            if (pDest is AggregateType aggDest &&
-                pConstructedSource.GetOwningAggregate() == aggDest.GetOwningAggregate())
+            if (pDest is AggregateType aggDest && pConstructedSource.OwningAggregate == aggDest.OwningAggregate)
             {
                 if (aggDest.isInterfaceType() || aggDest.isDelegateType())
                 {
@@ -1807,13 +1807,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             while (pDestBase != null)
             {
-                if (pDestBase.GetOwningAggregate() == pSource.GetOwningAggregate())
+                if (pDestBase.OwningAggregate == pSource.OwningAggregate)
                 {
                     ExactTypeArgumentInference(pSource, pDestBase);
                     return true;
                 }
+
                 pDestBase = pDestBase.GetBaseClass();
             }
+
             return false;
         }
 
@@ -1841,7 +1843,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType pInterface = null;
             foreach (AggregateType pCurrent in interfaces)
             {
-                if (pCurrent.GetOwningAggregate() == pSource.GetOwningAggregate())
+                if (pCurrent.OwningAggregate == pSource.OwningAggregate)
                 {
                     if (pInterface == null)
                     {
@@ -1878,11 +1880,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
-            Debug.Assert(pSource.GetOwningAggregate() == pDest.GetOwningAggregate());
+            Debug.Assert(pSource.OwningAggregate == pDest.OwningAggregate);
 
-            TypeArray pTypeParams = pSource.GetOwningAggregate().GetTypeVarsAll();
-            TypeArray pSourceArgs = pSource.GetTypeArgsAll();
-            TypeArray pDestArgs = pDest.GetTypeArgsAll();
+            TypeArray pTypeParams = pSource.OwningAggregate.GetTypeVarsAll();
+            TypeArray pSourceArgs = pSource.TypeArgsAll;
+            TypeArray pDestArgs = pDest.TypeArgsAll;
 
             Debug.Assert(pTypeParams != null);
             Debug.Assert(pSourceArgs != null);
@@ -2109,11 +2111,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CType pSource = _pMethodArguments.types[iArg];
                 if (pDest is ParameterModifierType modDest)
                 {
-                    pDest = modDest.GetParameterType();
+                    pDest = modDest.ParameterType;
                 }
                 if (pSource is ParameterModifierType modSource)
                 {
-                    pSource = modSource.GetParameterType();
+                    pSource = modSource.ParameterType;
                 }
 
                 LowerBoundInference(pSource, pDest);

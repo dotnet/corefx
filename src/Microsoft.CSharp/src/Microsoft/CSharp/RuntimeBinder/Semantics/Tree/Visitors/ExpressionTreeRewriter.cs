@@ -344,7 +344,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(expr != null);
             // POSSIBLE ERROR: Multi-d should be an error?
-            Expr pTypeOf = CreateTypeOf(((ArrayType)expr.Type).GetElementType());
+            Expr pTypeOf = CreateTypeOf(((ArrayType)expr.Type).ElementType);
             Expr args = GenerateArgsList(expr.OptionalArguments);
             Expr Params = GenerateParamsArray(args, PredefinedType.PT_EXPRESSION);
             return GenerateCall(PREDEFMETH.PM_EXPRESSION_NEWARRAYINIT, pTypeOf, Params);
@@ -1080,9 +1080,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType aatype2 = orig2.Type;
             // Is the operator even a candidate for lifting?
             if (!(fptype1 is AggregateType fat1)
-                || !fat1.getAggregate().IsValueType()
+                || !fat1.OwningAggregate.IsValueType()
                 || !(fptype2 is AggregateType fat2)
-                || !fat2.getAggregate().IsValueType())
+                || !fat2.OwningAggregate.IsValueType())
             {
                 return;
             }
@@ -1105,7 +1105,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         private bool IsNullableValueType(CType pType) =>
-            pType is NullableType && pType.StripNubs() is AggregateType agg && agg.getAggregate().IsValueType();
+            pType is NullableType && pType.StripNubs() is AggregateType agg && agg.OwningAggregate.IsValueType();
 
         private bool IsNullableValueAccess(Expr pExpr, Expr pObject)
         {

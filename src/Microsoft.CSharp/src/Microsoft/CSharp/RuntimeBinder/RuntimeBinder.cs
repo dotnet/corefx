@@ -268,7 +268,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             if (t != null)
             {
-                AggregateSymbol agg = ((AggregateType)_symbolTable.GetCTypeFromType(t)).GetOwningAggregate();
+                AggregateSymbol agg = ((AggregateType)_symbolTable.GetCTypeFromType(t)).OwningAggregate;
                 bindingContext.ContextForMemberLookup = _semanticChecker.GetGlobalSymbolFactory().CreateAggregateDecl(agg, null);
             }
             else
@@ -494,7 +494,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 Debug.Assert(ctype is ParameterModifierType);
                 ctype = _semanticChecker.GetTypeManager()
-                    .GetParameterModifier(((ParameterModifierType)ctype).GetParameterType(), true);
+                    .GetParameterModifier(((ParameterModifierType)ctype).ParameterType, true);
             }
 
             // If we can convert, do that. If not, cast it.
@@ -667,7 +667,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             bool bIsConstructor = name == NameManager.GetPredefinedName(PredefinedName.PN_CTOR);
             foreach(AggregateType t in callingType.TypeHierarchy)
             {
-                if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask) && distinctCallingTypes.Add(t))
+                if (_symbolTable.AggregateContainsMethod(t.OwningAggregate, Name, mask) && distinctCallingTypes.Add(t))
                 {
                     callingTypes.Add(t);
                 }
@@ -687,7 +687,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 foreach (AggregateType t in callingType.GetWinRTCollectionIfacesAll(SymbolLoader).Items)
                 {
-                    if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask) && distinctCallingTypes.Add(t))
+                    if (_symbolTable.AggregateContainsMethod(t.OwningAggregate, Name, mask) && distinctCallingTypes.Add(t))
                     {
                         callingTypes.Add(t);
                     }

@@ -109,7 +109,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 BetterType nParam = BetterType.Neither;
 
             LAgain:
-                if (type1.GetTypeKind() != type2.GetTypeKind())
+                if (type1.TypeKind != type2.TypeKind)
                 {
                     if (type1 is TypeParameterType)
                     {
@@ -122,7 +122,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else
                 {
-                    switch (type1.GetTypeKind())
+                    switch (type1.TypeKind)
                     {
                         default:
                             Debug.Assert(false, "Bad kind in CompareTypes");
@@ -140,7 +140,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             goto LAgain;
 
                         case TypeKind.TK_AggregateType:
-                            nParam = CompareTypes(((AggregateType)type1).GetTypeArgsAll(), ((AggregateType)type2).GetTypeArgsAll());
+                            nParam = CompareTypes(((AggregateType)type1).TypeArgsAll, ((AggregateType)type2).TypeArgsAll);
                             break;
                     }
                 }

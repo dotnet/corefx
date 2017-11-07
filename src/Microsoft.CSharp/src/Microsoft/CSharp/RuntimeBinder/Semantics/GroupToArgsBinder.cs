@@ -688,7 +688,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return method;
                 }
 
-                for (AggregateSymbol pAggregate = agg.GetOwningAggregate();
+                for (AggregateSymbol pAggregate = agg.OwningAggregate;
                         pAggregate?.GetBaseAgg() != null;
                         pAggregate = pAggregate.GetBaseAgg())
                 {
@@ -965,7 +965,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                     inferenceSucceeded = MethodTypeInferrer.Infer(
                                 _pExprBinder, GetSymbolLoader(),
-                                methSym, _pCurrentType.GetTypeArgsAll(), _pCurrentParameters,
+                                methSym, _pCurrentType.TypeArgsAll, _pCurrentParameters,
                                 _pArguments, out _pCurrentTypeArgs);
 
                     if (!inferenceSucceeded)
@@ -1052,8 +1052,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 // (think ErrorType != ErrorType)
                                 // See if they just differ in out / ref.
                                 CType argStripped = _pArguments.types[ivar] is ParameterModifierType modArg ?
-                                    modArg.GetParameterType() : _pArguments.types[ivar];
-                                CType varStripped = var is ParameterModifierType modVar ? modVar.GetParameterType() : var;
+                                    modArg.ParameterType : _pArguments.types[ivar];
+                                CType varStripped = var is ParameterModifierType modVar ? modVar.ParameterType : var;
 
                                 if (argStripped == varStripped)
                                 {
@@ -1154,7 +1154,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
 
-                TypeArray typeVars = varAgg.GetTypeArgsAll();
+                TypeArray typeVars = varAgg.TypeArgsAll;
                 for (int i = 0; i < typeVars.Count; i++)
                 {
                     CType type = typeVars[i];
@@ -1229,7 +1229,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         _pGroup.Name == NameManager.GetPredefinedName(PredefinedName.PN_INVOKE))
                 {
                     Debug.Assert(!_results.GetBestResult() || _results.GetBestResult().MethProp().getClass().IsDelegate());
-                    Debug.Assert(!_results.GetBestResult() || _results.GetBestResult().GetType().getAggregate().IsDelegate());
+                    Debug.Assert(!_results.GetBestResult() || _results.GetBestResult().GetType().OwningAggregate.IsDelegate());
                     bUseDelegateErrors = true;
                     nameErr = _pGroup.OptionalObject.Type.getAggregate().name;
                 }
@@ -1272,9 +1272,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     // Give a better message for delegate invoke.
                     return _pGroup.OptionalObject != null && _pGroup.OptionalObject.Type is AggregateType agg
-                           && agg.GetOwningAggregate().IsDelegate()
+                           && agg.OwningAggregate.IsDelegate()
                         ? GetErrorContext().Error(
-                            ErrorCode.ERR_BadNamedArgumentForDelegateInvoke, agg.GetOwningAggregate().name,
+                            ErrorCode.ERR_BadNamedArgumentForDelegateInvoke, agg.OwningAggregate.name,
                             _pInvalidSpecifiedName)
                         : GetErrorContext().Error(ErrorCode.ERR_BadNamedArgument, _pGroup.Name, _pInvalidSpecifiedName);
                 }

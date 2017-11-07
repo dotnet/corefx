@@ -89,7 +89,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_exprSrc == null || _typeSrc == _exprSrc.Type);    // type of source should be correct if source supplied
                 Debug.Assert(!_needsExprDest || _exprSrc != null);           // need source expr to create dest expr
 
-                switch (_typeDest.GetTypeKind())
+                switch (_typeDest.TypeKind)
                 {
                     case TypeKind.TK_ErrorType:
                         Debug.Assert(((ErrorType)_typeDest).HasParent);
@@ -164,10 +164,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 FUNDTYPE ftDest = _typeDest.fundType();
                 Debug.Assert(ftDest != FUNDTYPE.FT_NONE || _typeDest is ParameterModifierType);
 
-                switch (_typeSrc.GetTypeKind())
+                switch (_typeSrc.TypeKind)
                 {
                     default:
-                        Debug.Fail($"Bad type symbol kind: {_typeSrc.GetTypeKind()}");
+                        Debug.Fail($"Bad type symbol kind: {_typeSrc.TypeKind}");
                         break;
                     case TypeKind.TK_VoidType:
                     case TypeKind.TK_ErrorType:
@@ -293,7 +293,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 AggregateType atsDst = nubDst.GetAts();
 
                 // Check for the unboxing conversion. This takes precedence over the wrapping conversions.
-                if (GetSymbolLoader().HasBaseConversion(nubDst.GetUnderlyingType(), _typeSrc) && !CConversions.FWrappingConv(_typeSrc, nubDst))
+                if (GetSymbolLoader().HasBaseConversion(nubDst.UnderlyingType, _typeSrc) && !CConversions.FWrappingConv(_typeSrc, nubDst))
                 {
                     // These should be different! Fix the caller if typeSrc is an AggregateType of Nullable.
                     Debug.Assert(atsDst != _typeSrc);
@@ -476,7 +476,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return true;
                 }
-                if (GetSymbolLoader().HasBaseConversion(nubSrc.GetUnderlyingType(), _typeDest) && !CConversions.FUnwrappingConv(nubSrc, _typeDest))
+                if (GetSymbolLoader().HasBaseConversion(nubSrc.UnderlyingType, _typeDest) && !CConversions.FUnwrappingConv(nubSrc, _typeDest))
                 {
                     if (_needsExprDest)
                     {
@@ -523,8 +523,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 if ((_typeDest is ArrayType ||
                      (_typeDest is AggregateType aggDest && aggDest.isInterfaceType() &&
-                      aggDest.GetTypeArgsAll().Count == 1 &&
-                      ((aggDest.GetTypeArgsAll()[0] != ((ArrayType)_typeSrc).GetElementType()) ||
+                      aggDest.TypeArgsAll.Count == 1 &&
+                      (aggDest.TypeArgsAll[0] != ((ArrayType)_typeSrc).ElementType ||
                        0 != (_flags & CONVERTTYPE.FORCECAST))))
                     &&
                     (0 != (_flags & CONVERTTYPE.FORCECAST) ||
@@ -549,7 +549,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //
                 // * From any pointer-type to the type void*.
 
-                if (_typeDest is PointerType ptDest && ptDest.GetReferentType() == _binder.getVoidType())
+                if (_typeDest is PointerType ptDest && ptDest.ReferentType == VoidType.Instance)
                 {
                     if (_needsExprDest)
                         _binder.bindSimpleCast(_exprSrc, _exprTypeDest, out _exprDest);
@@ -565,7 +565,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // below. They could be relevant if we had user-defined conversions on
                 // generic types.
 
-                AggregateSymbol aggSrc = aggTypeSrc.getAggregate();
+                AggregateSymbol aggSrc = aggTypeSrc.OwningAggregate;
                 if (aggSrc.IsEnum())
                 {
                     return bindImplicitConversionFromEnum(aggTypeSrc);
@@ -608,7 +608,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
                 EXPRFLAG flags = 0x00;
-                if (pSource.getAggregate().IsStruct() && _typeDest.fundType() == FUNDTYPE.FT_REF)
+                if (pSource.OwningAggregate.IsStruct() && _typeDest.fundType() == FUNDTYPE.FT_REF)
                 {
                     flags = EXPRFLAG.EXF_BOX | EXPRFLAG.EXF_CANTBENULL;
                 }
@@ -666,7 +666,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // Note: Don't use GetConst here since the conversion only applies to bona-fide compile time constants.
                 if (
-                    aggTypeSrc.getAggregate().GetPredefType() != PredefinedType.PT_BOOL &&
+                    aggTypeSrc.OwningAggregate.GetPredefType() != PredefinedType.PT_BOOL &&
                     _exprSrc != null &&
                     _exprSrc.IsZero() &&
                     _exprSrc.Type.isNumericType() &&
@@ -689,7 +689,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             private bool bindImplicitConversionBetweenSimpleTypes(AggregateType aggTypeSrc)
             {
-                AggregateSymbol aggSrc = aggTypeSrc.getAggregate();
+                AggregateSymbol aggSrc = aggTypeSrc.OwningAggregate;
                 Debug.Assert(aggSrc.getThisType().isSimpleType());
                 Debug.Assert(_typeDest.isSimpleType());
 

@@ -109,7 +109,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                    typeSym is ArrayType ||
                    typeSym is NullableType);
 
-            switch (typeSym.GetTypeKind())
+            switch (typeSym.TypeKind)
             {
                 case TypeKind.TK_AggregateType:
                     return (AggregateType)typeSym;
@@ -199,8 +199,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // * S and T differ only in element type. In other words, S and T have the same number of dimensions.
             // * Both SE and TE are reference types.
             // * An implicit reference conversion exists from SE to TE.
-            return (pSource.rank == pDest.rank) && pSource.IsSZArray == pDest.IsSZArray &&
-                HasImplicitReferenceConversion(pSource.GetElementType(), pDest.GetElementType());
+            return (pSource.Rank == pDest.Rank) && pSource.IsSZArray == pDest.IsSZArray &&
+                HasImplicitReferenceConversion(pSource.ElementType, pDest.ElementType);
         }
 
         public bool HasIdentityOrImplicitReferenceConversion(CType pSource, CType pDest)
@@ -250,7 +250,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             AggregateType atsDest = (AggregateType)pDest;
-            AggregateSymbol aggDest = atsDest.getAggregate();
+            AggregateSymbol aggDest = atsDest.OwningAggregate;
             if (!aggDest.isPredefAgg(PredefinedType.PT_G_ILIST) &&
                 !aggDest.isPredefAgg(PredefinedType.PT_G_ICOLLECTION) &&
                 !aggDest.isPredefAgg(PredefinedType.PT_G_IENUMERABLE) &&
@@ -260,10 +260,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            Debug.Assert(atsDest.GetTypeArgsAll().Count == 1);
+            Debug.Assert(atsDest.TypeArgsAll.Count == 1);
 
-            CType pSourceElement = pSource.GetElementType();
-            CType pDestTypeArgument = atsDest.GetTypeArgsAll()[0];
+            CType pSourceElement = pSource.ElementType;
+            CType pDestTypeArgument = atsDest.TypeArgsAll[0];
             return HasIdentityOrImplicitReferenceConversion(pSourceElement, pDestTypeArgument);
         }
 
@@ -284,10 +284,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 if (pDest is AggregateType aggDest)
                 {
-                    switch (aggSource.GetOwningAggregate().AggKind())
+                    switch (aggSource.OwningAggregate.AggKind())
                     {
                         case AggKindEnum.Class:
-                            switch (aggDest.GetOwningAggregate().AggKind())
+                            switch (aggDest.OwningAggregate.AggKind())
                             {
                                 case AggKindEnum.Class:
                                     // * From any class type S to any class type T provided S is derived from T.
@@ -461,15 +461,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return true;
             }
-            AggregateSymbol pAggSym = pSource.getAggregate();
-            if (pAggSym != pDest.getAggregate())
+            AggregateSymbol pAggSym = pSource.OwningAggregate;
+            if (pAggSym != pDest.OwningAggregate)
             {
                 return false;
             }
 
             TypeArray pTypeParams = pAggSym.GetTypeVarsAll();
-            TypeArray pSourceArgs = pSource.GetTypeArgsAll();
-            TypeArray pDestArgs = pDest.GetTypeArgsAll();
+            TypeArray pSourceArgs = pSource.TypeArgsAll;
+            TypeArray pDestArgs = pDest.TypeArgsAll;
 
             Debug.Assert(pTypeParams.Count == pSourceArgs.Count);
             Debug.Assert(pTypeParams.Count == pDestArgs.Count);
@@ -525,7 +525,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (pSource is NullableType nubSource)
             {
-                return HasImplicitBoxingConversion(nubSource.GetUnderlyingType(), pDest);
+                return HasImplicitBoxingConversion(nubSource.UnderlyingType, pDest);
             }
 
             // A boxing conversion exists from any non-nullable value type to object,
@@ -608,7 +608,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     foreach (AggregateType iface in derived.GetIfacesAll().Items)
                     {
-                        if (iface.getAggregate() == @base)
+                        if (iface.OwningAggregate == @base)
                             return true;
                     }
                     derived = derived.GetBaseAgg();
@@ -621,7 +621,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             while (derived.GetBaseClass() != null)
             {
-                derived = derived.GetBaseClass().getAggregate();
+                derived = derived.GetBaseClass().OwningAggregate;
                 if (derived == @base)
                     return true;
             }

@@ -10,27 +10,35 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class ArrayType : CType
     {
-        // rank of the array. zero means unknown rank int [?].
-        public int rank;
-
-        public bool IsSZArray { get; set; }
-
-        public CType GetElementType() { return _pElementType; }
-        public void SetElementType(CType pType) { _pElementType = pType; }
-
-        // Returns the first non-array type in the parent chain.
-        public CType GetBaseElementType()
+        public ArrayType(CType elementType, int rank, bool isSZArray)
+            : base(TypeKind.TK_ArrayType)
         {
-            CType type = GetElementType();
-            while (type is ArrayType arr)
-            {
-                type = arr.GetElementType();
-            }
-
-            return type;
+            ElementType = elementType;
+            Rank = rank;
+            IsSZArray = isSZArray;
         }
 
-        private CType _pElementType;
+        // rank of the array. zero means unknown rank int [?].
+        public int Rank { get; }
+
+        public bool IsSZArray { get; }
+
+        public CType ElementType { get; }
+
+        // Returns the first non-array type in the parent chain.
+        public CType BaseElementType
+        {
+            get
+            {
+                CType type = ElementType;
+                while (type is ArrayType arr)
+                {
+                    type = arr.ElementType;
+                }
+
+                return type;
+            }
+        }
     }
 }
 

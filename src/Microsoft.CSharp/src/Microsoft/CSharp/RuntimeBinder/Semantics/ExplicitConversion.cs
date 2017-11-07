@@ -132,10 +132,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // But it failed, and so we know that the constant is not in range
 
-                switch (_typeDest.GetTypeKind())
+                switch (_typeDest.TypeKind)
                 {
                     default:
-                        Debug.Fail($"Bad type kind: {_typeDest.GetTypeKind()}");
+                        Debug.Fail($"Bad type kind: {_typeDest.TypeKind}");
                         return false;
 
                     case TypeKind.TK_VoidType:
@@ -238,7 +238,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_typeDest != null);
 
                 if (!(_typeSrc is ArrayType arrSrc) || !arrSrc.IsSZArray || !(_typeDest is AggregateType aggDest)
-                    || !aggDest.isInterfaceType() || aggDest.GetTypeArgsAll().Count != 1)
+                    || !aggDest.isInterfaceType() || aggDest.TypeArgsAll.Count != 1)
                 {
                     return false;
                 }
@@ -247,15 +247,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 AggregateSymbol aggIReadOnlyList = GetSymbolLoader().GetPredefAgg(PredefinedType.PT_G_IREADONLYLIST);
 
                 if ((aggIList == null ||
-                    !GetSymbolLoader().IsBaseAggregate(aggIList, aggDest.getAggregate())) &&
+                    !GetSymbolLoader().IsBaseAggregate(aggIList, aggDest.OwningAggregate)) &&
                     (aggIReadOnlyList == null ||
-                    !GetSymbolLoader().IsBaseAggregate(aggIReadOnlyList, aggDest.getAggregate())))
+                    !GetSymbolLoader().IsBaseAggregate(aggIReadOnlyList, aggDest.OwningAggregate)))
                 {
                     return false;
                 }
 
-                CType typeArr = arrSrc.GetElementType();
-                CType typeLst = aggDest.GetTypeArgsAll()[0];
+                CType typeArr = arrSrc.ElementType;
+                CType typeLst = aggDest.TypeArgsAll[0];
 
                 if (!CConversions.FExpRefConv(GetSymbolLoader(), typeArr, typeLst))
                 {
@@ -279,7 +279,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //   are the same type or there is an implicit or explicit reference conversion from S to T.
 
                 if (!arrayDest.IsSZArray || !(_typeSrc is AggregateType aggSrc) || !aggSrc.isInterfaceType() ||
-                    aggSrc.GetTypeArgsAll().Count != 1)
+                    aggSrc.TypeArgsAll.Count != 1)
                 {
                     return false;
                 }
@@ -288,15 +288,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 AggregateSymbol aggIReadOnlyList = GetSymbolLoader().GetPredefAgg(PredefinedType.PT_G_IREADONLYLIST);
 
                 if ((aggIList == null ||
-                    !GetSymbolLoader().IsBaseAggregate(aggIList, aggSrc.getAggregate())) &&
+                    !GetSymbolLoader().IsBaseAggregate(aggIList, aggSrc.OwningAggregate)) &&
                     (aggIReadOnlyList == null ||
-                    !GetSymbolLoader().IsBaseAggregate(aggIReadOnlyList, aggSrc.getAggregate())))
+                    !GetSymbolLoader().IsBaseAggregate(aggIReadOnlyList, aggSrc.OwningAggregate)))
                 {
                     return false;
                 }
 
-                CType typeArr = arrayDest.GetElementType();
-                CType typeLst = aggSrc.GetTypeArgsAll()[0];
+                CType typeArr = arrayDest.ElementType;
+                CType typeLst = aggSrc.TypeArgsAll[0];
 
                 Debug.Assert(!typeArr.IsNeverSameType());
                 if (typeArr != typeLst && !CConversions.FExpRefConv(GetSymbolLoader(), typeArr, typeLst))
@@ -322,12 +322,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //
                 //   * An explicit reference conversion exists from SE to TE.
 
-                if (arraySrc.rank != arrayDest.rank || arraySrc.IsSZArray != arrayDest.IsSZArray)
+                if (arraySrc.Rank != arrayDest.Rank || arraySrc.IsSZArray != arrayDest.IsSZArray)
                 {
                     return false;  // Ranks do not match.
                 }
 
-                if (CConversions.FExpRefConv(GetSymbolLoader(), arraySrc.GetElementType(), arrayDest.GetElementType()))
+                if (CConversions.FExpRefConv(GetSymbolLoader(), arraySrc.ElementType, arrayDest.ElementType))
                 {
                     if (_needsExprDest)
                         _binder.bindSimpleCast(_exprSrc, _exprTypeDest, out _exprDest, EXPRFLAG.EXF_REFCHECK);
@@ -412,7 +412,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return AggCastResult.Failure;
                 }
 
-                AggregateSymbol aggDest = aggTypeDest.getAggregate();
+                AggregateSymbol aggDest = aggTypeDest.OwningAggregate;
                 if (aggDest.isPredefAgg(PredefinedType.PT_DECIMAL))
                 {
                     return bindExplicitConversionFromEnumToDecimal(aggTypeDest);
@@ -542,7 +542,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_typeSrc != null);
                 Debug.Assert(aggTypeDest != null);
 
-                AggregateSymbol aggDest = aggTypeDest.getAggregate();
+                AggregateSymbol aggDest = aggTypeDest.OwningAggregate;
                 if (!aggDest.IsEnum())
                 {
                     return AggCastResult.Failure;
@@ -598,7 +598,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return AggCastResult.Failure;
                 }
 
-                AggregateSymbol aggDest = aggTypeDest.getAggregate();
+                AggregateSymbol aggDest = aggTypeDest.OwningAggregate;
 
                 Debug.Assert(_typeSrc.isPredefined() && aggDest.IsPredefined());
 
@@ -672,8 +672,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return AggCastResult.Failure;
                 }
 
-                AggregateSymbol aggSrc = atSrc.getAggregate();
-                AggregateSymbol aggDest = aggTypeDest.getAggregate();
+                AggregateSymbol aggSrc = atSrc.OwningAggregate;
+                AggregateSymbol aggDest = aggTypeDest.OwningAggregate;
 
                 if (GetSymbolLoader().HasBaseConversion(aggTypeDest, atSrc))
                 {

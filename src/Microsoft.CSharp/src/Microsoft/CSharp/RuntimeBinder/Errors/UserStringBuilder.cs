@@ -452,7 +452,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 pctx = null;
             }
 
-            switch (pType.GetTypeKind())
+            switch (pType.TypeKind)
             {
                 case TypeKind.TK_AggregateType:
                     {
@@ -460,7 +460,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                         // Check for a predefined class with a special "nice" name for
                         // error reported.
-                        string text = PredefinedTypes.GetNiceName(pAggType.getAggregate());
+                        string text = PredefinedTypes.GetNiceName(pAggType.OwningAggregate);
                         if (text != null)
                         {
                             // Found a nice name.
@@ -468,26 +468,27 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         }
                         else
                         {
-                            if (pAggType.outerType != null)
+                            if (pAggType.OuterType != null)
                             {
-                                ErrAppendType(pAggType.outerType, pctx);
+                                ErrAppendType(pAggType.OuterType, pctx);
                                 ErrAppendChar('.');
                             }
                             else
                             {
                                 // In a namespace.
-                                ErrAppendParentSym(pAggType.getAggregate(), pctx);
+                                ErrAppendParentSym(pAggType.OwningAggregate, pctx);
                             }
-                            ErrAppendName(pAggType.getAggregate().name);
+                            ErrAppendName(pAggType.OwningAggregate.name);
                         }
-                        ErrAppendTypeParameters(pAggType.GetTypeArgsThis(), pctx, true);
+                        ErrAppendTypeParameters(pAggType.TypeArgsThis, pctx, true);
                         break;
                     }
 
                 case TypeKind.TK_TypeParameterType:
-                    if (null == pType.GetName())
+                    TypeParameterType tpType = (TypeParameterType)pType;
+                    Name name = tpType.Name;
+                    if (name == null)
                     {
-                        var tpType = (TypeParameterType)pType;
                         // It's a standard type variable.
                         if (tpType.IsMethodTypeParameter())
                         {
@@ -498,7 +499,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
                     else
                     {
-                        ErrAppendName(pType.GetName());
+                        ErrAppendName(name);
                     }
                     break;
 
@@ -506,14 +507,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     ErrorType err = (ErrorType)pType;
                     if (err.HasParent)
                     {
-                        Debug.Assert(err.nameText != null && err.typeArgs != null);
-                        ErrAppendName(err.nameText);
-                        ErrAppendTypeParameters(err.typeArgs, pctx, true);
+                        Debug.Assert(err.NameText != null && err.TypeArgs != null);
+                        ErrAppendName(err.NameText);
+                        ErrAppendTypeParameters(err.TypeArgs, pctx, true);
                     }
                     else
                     {
                         // Load the string "<error>".
-                        Debug.Assert(null == err.typeArgs);
+                        Debug.Assert(null == err.TypeArgs);
                         ErrAppendId(MessageID.ERRORSYM);
                     }
                     break;
@@ -533,7 +534,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                 case TypeKind.TK_ArrayType:
                     {
-                        CType elementType = ((ArrayType)pType).GetBaseElementType();
+                        CType elementType = ((ArrayType)pType).BaseElementType;
 
                         if (null == elementType)
                         {
@@ -545,9 +546,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                         for (elementType = pType;
                                 elementType is ArrayType arrType;
-                                elementType = arrType.GetElementType())
+                                elementType = arrType.ElementType)
                         {
-                            int rank = arrType.rank;
+                            int rank = arrType.Rank;
 
                             // Add [] with (rank-1) commas inside
                             ErrAppendChar('[');
@@ -580,15 +581,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case TypeKind.TK_ParameterModifierType:
                     ParameterModifierType mod = (ParameterModifierType)pType;
                     // add ref or out
-                    ErrAppendString(mod.isOut ? "out " : "ref ");
+                    ErrAppendString(mod.IsOut ? "out " : "ref ");
 
                     // add base type name
-                    ErrAppendType(mod.GetParameterType(), pctx);
+                    ErrAppendType(mod.ParameterType, pctx);
                     break;
 
                 case TypeKind.TK_PointerType:
                     // Generate the base type.
-                    ErrAppendType(((PointerType)pType).GetReferentType(), pctx);
+                    ErrAppendType(((PointerType)pType).ReferentType, pctx);
                     {
                         // add the trailing *
                         ErrAppendChar('*');
@@ -596,7 +597,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
 
                 case TypeKind.TK_NullableType:
-                    ErrAppendType(((NullableType)pType).GetUnderlyingType(), pctx);
+                    ErrAppendType(((NullableType)pType).UnderlyingType, pctx);
                     ErrAppendChar('?');
                     break;
 

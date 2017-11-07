@@ -15,11 +15,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class ParameterModifierType : CType
     {
-        public bool isOut;            // True for out parameter, false for ref parameter.
+        public ParameterModifierType(CType parameterType, bool isOut)
+            : base(TypeKind.TK_ParameterModifierType)
+        {
+            ParameterType = parameterType;
+            IsOut = isOut;
+        }
 
-        public CType GetParameterType() { return _pParameterType; }
-        public void SetParameterType(CType pType) { _pParameterType = pType; }
+        public bool IsOut { get; }         // True for out parameter, false for ref parameter.
 
-        private CType _pParameterType;
+        public CType ParameterType { get; }
     }
 }
