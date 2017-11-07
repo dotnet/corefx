@@ -8,6 +8,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 
+using AllocationHelper = System.SpanTests.AllocationHelper;
+
 using Xunit;
 
 namespace System.Buffers.Text.Tests
@@ -16,8 +18,15 @@ namespace System.Buffers.Text.Tests
     {
         private const int TwoGiB = int.MaxValue;
 
+        //
+        // NOTE: TestParser2GiBOverflow test is constrained to run on Windows and MacOSX because it causes
+        //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
+        //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
+        //       time the memory is accessed which triggers the full memory allocation.        
+        //
         [Fact]
         [OuterLoop]
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         public static void TestParser2GiBOverflow()
         {
             if (IntPtr.Size < 8)
@@ -26,7 +35,8 @@ namespace System.Buffers.Text.Tests
             IntPtr pMemory;
             try
             {
-                pMemory = Marshal.AllocHGlobal(int.MaxValue);
+                if (!AllocationHelper.TryAllocNative(size: new IntPtr(int.MaxValue), out pMemory))
+                    return;
             }
             catch (OutOfMemoryException)
             {
@@ -39,7 +49,7 @@ namespace System.Buffers.Text.Tests
             }
             finally
             {
-                Marshal.FreeHGlobal(pMemory);
+                AllocationHelper.ReleaseNative(ref pMemory);
             }
         }
 

@@ -87,7 +87,7 @@ namespace System.Buffers.Text
                     break;
 
                 default:
-                    throw new FormatException(SR.Argument_BadFormatSpecifier);
+                    return ThrowHelper.TryFormatThrowFormatException(out bytesWritten);
             }
 
             string formatString;

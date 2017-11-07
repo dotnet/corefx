@@ -106,7 +106,7 @@ namespace System.Buffers.Text
                     }
 
                 default:
-                    throw new FormatException(SR.Argument_BadFormatSpecifier);
+                    return ThrowHelper.TryFormatThrowFormatException(out bytesWritten);
             }
         }
     }

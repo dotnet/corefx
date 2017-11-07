@@ -72,7 +72,7 @@ namespace System.Buffers.Text
                     break;
 
                 default:
-                    throw new FormatException(SR.Argument_BadFormatSpecifier);
+                    return ThrowHelper.TryFormatThrowFormatException(out bytesWritten);
             }
 
 
@@ -130,10 +130,17 @@ namespace System.Buffers.Text
             FormattingHelpers.WriteHexByte(bytes[15], ref utf8Bytes, idx + 10);
             idx += 12;
 
-            if (bookEnds && format.Symbol == 'B')
-                Unsafe.Add(ref utf8Bytes, idx++) = CloseBrace;
-            else if (bookEnds && format.Symbol == 'P')
-                Unsafe.Add(ref utf8Bytes, idx++) = CloseParen;
+            if (bookEnds)
+            {
+                if (format.Symbol == 'B')
+                {
+                    Unsafe.Add(ref utf8Bytes, idx++) = CloseBrace;
+                }
+                else if (format.Symbol == 'P')
+                {
+                    Unsafe.Add(ref utf8Bytes, idx++) = CloseParen;
+                }
+            }
 
             return true;
         }

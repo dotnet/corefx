@@ -54,6 +54,31 @@ namespace System
         internal static void ThrowObjectDisposedException_MemoryDisposed(string objectName) { throw CreateObjectDisposedException_MemoryDisposed(objectName); }
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateObjectDisposedException_MemoryDisposed(string objectName) { return new ObjectDisposedException(objectName, SR.MemoryDisposed); }
+
+        internal static void ThrowFormatException_BadFormatSpecifier() { throw CreateFormatException_BadFormatSpecifier(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateFormatException_BadFormatSpecifier() { return new FormatException(SR.Argument_BadFormatSpecifier); }
+
+        //
+        // Enable use of ThrowHelper from TryFormat() routines without introducing dozens of non-code-coveraged "bytesWritten = 0; return false" boilerplate.
+        //
+        public static bool TryFormatThrowFormatException(out int bytesWritten)
+        {
+            bytesWritten = 0;
+            ThrowHelper.ThrowFormatException_BadFormatSpecifier();
+            return false;
+        }
+
+        //
+        // Enable use of ThrowHelper from TryParse() routines without introducing dozens of non-code-coveraged "value= default; bytesConsumed = 0; return false" boilerplate.
+        //
+        public static bool TryParseThrowFormatException<T>(out T value, out int bytesConsumed)
+        {
+            value = default;
+            bytesConsumed = 0;
+            ThrowHelper.ThrowFormatException_BadFormatSpecifier();
+            return false;
+        }
     }
 
     internal enum ExceptionArgument

@@ -10,6 +10,7 @@
   <ItemGroup>
     <Compile Include="AllocationHelper.cs" />
     <Compile Include="TInt.cs" />
+    <Compile Include="TestException.cs" />
     <Compile Include="TestHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -128,7 +129,6 @@
     <Compile Include="ParsersAndFormatters\StandardFormatTests.cs" />
     <Compile Include="ParsersAndFormatters\SupportedFormats.cs" />
     <Compile Include="ParsersAndFormatters\TestData.cs" />
-    <Compile Include="ParsersAndFormatters\TestException.cs" />
     <Compile Include="ParsersAndFormatters\TestUtils.cs" />
   </ItemGroup>
   <ItemGroup>

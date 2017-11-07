@@ -41,7 +41,7 @@ namespace System.Buffers.Text
                 case 'N':
                     return TryParseGuidN(text, out value, out bytesConsumed);
                 default:
-                    throw new FormatException(SR.Argument_BadFormatSpecifier);
+                    return ThrowHelper.TryParseThrowFormatException(out value, out bytesConsumed);
             }
         }
 

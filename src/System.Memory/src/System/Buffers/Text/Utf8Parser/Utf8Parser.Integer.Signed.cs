@@ -53,7 +53,7 @@ namespace System.Buffers.Text
                     return TryParseByteX(text, out Unsafe.As<sbyte, byte>(ref value), out bytesConsumed);
 
                 default:
-                    throw new FormatException(SR.Argument_BadFormatSpecifier);
+                    return ThrowHelper.TryParseThrowFormatException(out value, out bytesConsumed);
             }
         }
 
@@ -99,7 +99,7 @@ namespace System.Buffers.Text
                     return TryParseUInt16X(text, out Unsafe.As<short, ushort>(ref value), out bytesConsumed);
 
                 default:
-                    throw new FormatException(SR.Argument_BadFormatSpecifier);
+                    return ThrowHelper.TryParseThrowFormatException(out value, out bytesConsumed);
             }
         }
 
@@ -145,7 +145,7 @@ namespace System.Buffers.Text
                     return TryParseUInt32X(text, out Unsafe.As<int, uint>(ref value), out bytesConsumed);
 
                 default:
-                    throw new FormatException(SR.Argument_BadFormatSpecifier);
+                    return ThrowHelper.TryParseThrowFormatException(out value, out bytesConsumed);
             }
         }
 
@@ -191,7 +191,7 @@ namespace System.Buffers.Text
                     return TryParseUInt64X(text, out Unsafe.As<long, ulong>(ref value), out bytesConsumed);
 
                 default:
-                    throw new FormatException(SR.Argument_BadFormatSpecifier);
+                    return ThrowHelper.TryParseThrowFormatException(out value, out bytesConsumed);
             }
         }
     }

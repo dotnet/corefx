@@ -38,7 +38,7 @@ namespace System.Buffers.Text
             }
             else
             {
-                throw new FormatException(SR.Argument_BadFormatSpecifier);
+                return ThrowHelper.TryFormatThrowFormatException(out bytesWritten);
             }
 
             if (!result.TryCopyTo(buffer))

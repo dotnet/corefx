@@ -28,7 +28,7 @@ namespace System.Buffers.Text
         public static bool TryParse(ReadOnlySpan<byte> text, out bool value, out int bytesConsumed, char standardFormat = default)
         {
             if (!(standardFormat == default(char) || standardFormat == 'G' || standardFormat == 'l'))
-                throw new FormatException(SR.Argument_BadFormatSpecifier);
+                return ThrowHelper.TryParseThrowFormatException(out value, out bytesConsumed);
 
             if (text.Length >= 4)
             {

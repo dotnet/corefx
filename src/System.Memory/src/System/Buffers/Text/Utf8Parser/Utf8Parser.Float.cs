@@ -95,7 +95,7 @@ namespace System.Buffers.Text
                     break;
 
                 default:
-                    throw new FormatException(SR.Argument_BadFormatSpecifier);
+                    return ThrowHelper.TryParseThrowFormatException(out value, out bytesConsumed);
             }
 
             NumberBuffer number = default;

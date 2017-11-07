@@ -19,8 +19,8 @@ namespace System.Buffers.Text
         {
             if (format.IsDefault)
             {
-                // Officially, the default is "G" but "G without a precision is equivalent to "D" so that's why we're calling the "D" helper.
-                return TryFormatUInt64D(value, format.Precision, buffer, out bytesWritten);
+                // Officially, the default is "G" but "G without a precision is equivalent to "D" and so that's why we're using "D" (eliminates an unnecessary HasPrecision check)
+                format = 'D';
             }
 
             switch (format.Symbol)
@@ -46,7 +46,7 @@ namespace System.Buffers.Text
                     return TryFormatUInt64X(value, format.Precision, false, buffer, out bytesWritten);
 
                 default:
-                    throw new FormatException(SR.Argument_BadFormatSpecifier);
+                    return ThrowHelper.TryFormatThrowFormatException(out bytesWritten);
             }
         }
     }
