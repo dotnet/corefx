@@ -21,13 +21,13 @@ namespace System.Diagnostics.Tests
 
             counterSample.RawValue = Stopwatch.GetTimestamp();
             DateTime Start = DateTime.Now;
-            Helpers.RetryOnAllPlatforms(() =>counterSample.NextValue());
+            Helpers.RetryOnAllPlatforms(() => counterSample.NextValue());
 
             System.Threading.Thread.Sleep(500);
 
-            var counterVal = counterSample.NextValue();
+            var counterVal = Helpers.RetryOnAllPlatforms(() => counterSample.NextValue());
             var dateTimeVal = DateTime.Now.Subtract(Start).TotalSeconds;
-            DeleteCategory(name);
+            Helpers.DeleteCategory(name);
             Assert.True(Math.Abs(dateTimeVal - counterVal) < .3);
         }
 
@@ -42,21 +42,12 @@ namespace System.Diagnostics.Tests
             ccd.CounterName = name;
             ccdc.Add(ccd);
 
-            DeleteCategory(name);
+            Helpers.DeleteCategory(name);
             PerformanceCounterCategory.Create(category, "description", PerformanceCounterCategoryType.SingleInstance, ccdc);
 
             Assert.True(Helpers.PerformanceCounterCategoryCreated(category));
 
             return new PerformanceCounter(category, name, false);
-        }
-
-        public static void DeleteCategory(string name)
-        {
-            var category = name + "_Category";
-            if (PerformanceCounterCategory.Exists(category))
-            {
-                PerformanceCounterCategory.Delete(category);
-            }
         }
     }
 }
