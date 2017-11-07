@@ -69,7 +69,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Linux)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void EnvironmentVariableTooLarge_Throws()
         {
             // string slightly less than 2 GiB so the constructor doesn't fail
