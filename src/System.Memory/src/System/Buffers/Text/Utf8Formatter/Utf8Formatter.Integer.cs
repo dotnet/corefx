@@ -16,7 +16,7 @@ namespace System.Buffers.Text
         /// Formats a Byte as a UTF8 string.
         /// </summary>
         /// <param name="value">Value to format</param>
-        /// <param name="buffer">Buffer to receive UTF8 string</param>
+        /// <param name="buffer">Buffer to write the UTF8-formatted value to</param>
         /// <param name="bytesWritten">Receives the length of the formatted text in bytes</param>
         /// <param name="format">The standard format to use</param>
         /// <returns>
@@ -40,7 +40,7 @@ namespace System.Buffers.Text
         /// Formats an SByte as a UTF8 string.
         /// </summary>
         /// <param name="value">Value to format</param>
-        /// <param name="buffer">Buffer to receive UTF8 string</param>
+        /// <param name="buffer">Buffer to write the UTF8-formatted value to</param>
         /// <param name="bytesWritten">Receives the length of the formatted text in bytes</param>
         /// <param name="format">The standard format to use</param>
         /// <returns>
@@ -64,7 +64,7 @@ namespace System.Buffers.Text
         /// Formats a Unt16 as a UTF8 string.
         /// </summary>
         /// <param name="value">Value to format</param>
-        /// <param name="buffer">Buffer to receive UTF8 string</param>
+        /// <param name="buffer">Buffer to write the UTF8-formatted value to</param>
         /// <param name="bytesWritten">Receives the length of the formatted text in bytes</param>
         /// <param name="format">The standard format to use</param>
         /// <returns>
@@ -88,7 +88,7 @@ namespace System.Buffers.Text
         /// Formats an Int16 as a UTF8 string.
         /// </summary>
         /// <param name="value">Value to format</param>
-        /// <param name="buffer">Buffer to receive UTF8 string</param>
+        /// <param name="buffer">Buffer to write the UTF8-formatted value to</param>
         /// <param name="bytesWritten">Receives the length of the formatted text in bytes</param>
         /// <param name="format">The standard format to use</param>
         /// <returns>
@@ -112,7 +112,7 @@ namespace System.Buffers.Text
         /// Formats a UInt32 as a UTF8 string.
         /// </summary>
         /// <param name="value">Value to format</param>
-        /// <param name="buffer">Buffer to receive UTF8 string</param>
+        /// <param name="buffer">Buffer to write the UTF8-formatted value to</param>
         /// <param name="bytesWritten">Receives the length of the formatted text in bytes</param>
         /// <param name="format">The standard format to use</param>
         /// <returns>
@@ -136,7 +136,7 @@ namespace System.Buffers.Text
         /// Formats an Int32 as a UTF8 string.
         /// </summary>
         /// <param name="value">Value to format</param>
-        /// <param name="buffer">Buffer to receive UTF8 string</param>
+        /// <param name="buffer">Buffer to write the UTF8-formatted value to</param>
         /// <param name="bytesWritten">Receives the length of the formatted text in bytes</param>
         /// <param name="format">The standard format to use</param>
         /// <returns>
@@ -160,7 +160,7 @@ namespace System.Buffers.Text
         /// Formats a UInt64 as a UTF8 string.
         /// </summary>
         /// <param name="value">Value to format</param>
-        /// <param name="buffer">Buffer to receive UTF8 string</param>
+        /// <param name="buffer">Buffer to write the UTF8-formatted value to</param>
         /// <param name="bytesWritten">Receives the length of the formatted text in bytes</param>
         /// <param name="format">The standard format to use</param>
         /// <returns>
@@ -184,7 +184,7 @@ namespace System.Buffers.Text
         /// Formats an Int64 as a UTF8 string.
         /// </summary>
         /// <param name="value">Value to format</param>
-        /// <param name="buffer">Buffer to receive UTF8 string</param>
+        /// <param name="buffer">Buffer to write the UTF8-formatted value to</param>
         /// <param name="bytesWritten">Receives the length of the formatted text in bytes</param>
         /// <param name="format">The standard format to use</param>
         /// <returns>
