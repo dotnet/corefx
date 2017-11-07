@@ -60,6 +60,7 @@ namespace System.Diagnostics.Tests
         public static void WaitForEventLog(EventLog eventLog, int entriesExpected)
         {
             int tries = 1;
+            Stopwatch stopwatch = Stopwatch.StartNew();
             while (RetryOnAllPlatforms((() => eventLog.Entries.Count)) < entriesExpected && tries <= 50)
             {
                 if (tries == 50)
@@ -73,6 +74,7 @@ namespace System.Diagnostics.Tests
                 tries++;
             }
 
+            Console.WriteLine("{0} milliseconds", stopwatch.ElapsedMilliseconds);
             Assert.Equal(entriesExpected, RetryOnWin7((() => eventLog.Entries.Count)));
         }
     }
