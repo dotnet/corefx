@@ -25,6 +25,7 @@ namespace System.CodeDom.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         [Fact]
         public void Compilation_NotSupported()
         {
