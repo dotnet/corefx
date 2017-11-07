@@ -88,7 +88,7 @@ namespace System.Diagnostics.Tests
 
             PerformanceCounterCategory pcc = Helpers.RetryOnAllPlatforms(() => new PerformanceCounterCategory(category));
 
-            Assert.Equal(PerformanceCounterCategoryType.MultiInstance, pcc.CategoryType);
+            Assert.Equal(PerformanceCounterCategoryType.MultiInstance, Helpers.RetryOnAllPlatforms(() => pcc.CategoryType));
             PerformanceCounterCategory.Delete(category);
         }
 
