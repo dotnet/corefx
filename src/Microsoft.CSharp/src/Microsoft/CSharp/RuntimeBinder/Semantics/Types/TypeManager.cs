@@ -418,20 +418,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return taSrc;
         }
 
-        private TypeArray SubstTypeArray(TypeArray taSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth, SubstTypeFlags grfst)
+        public TypeArray SubstTypeArray(TypeArray taSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth)
             => taSrc == null || taSrc.Count == 0
             ? taSrc
-            : SubstTypeArray(taSrc, new SubstContext(typeArgsCls, typeArgsMeth, grfst));
+            : SubstTypeArray(taSrc, new SubstContext(typeArgsCls, typeArgsMeth, SubstTypeFlags.NormNone));
 
-        public TypeArray SubstTypeArray(TypeArray taSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth)
-        {
-            return this.SubstTypeArray(taSrc, typeArgsCls, typeArgsMeth, SubstTypeFlags.NormNone);
-        }
-
-        public TypeArray SubstTypeArray(TypeArray taSrc, TypeArray typeArgsCls)
-        {
-            return this.SubstTypeArray(taSrc, typeArgsCls, (TypeArray)null, SubstTypeFlags.NormNone);
-        }
+        public TypeArray SubstTypeArray(TypeArray taSrc, TypeArray typeArgsCls) => SubstTypeArray(taSrc, typeArgsCls, null);
 
         private CType SubstTypeCore(CType type, SubstContext pctx)
         {
