@@ -43,7 +43,7 @@ namespace System.Diagnostics.Tests
         {
             using (PerformanceCounter counterSample = new PerformanceCounter("Processor", "Interrupts/sec", "0", "."))
             {
-                Assert.Equal(0, counterSample.NextValue());
+                Assert.Equal(0, Helpers.RetryOnAllPlatforms(() => counterSample.NextValue()));
 
                 Assert.True(counterSample.RawValue > 0);
             }
@@ -150,10 +150,10 @@ namespace System.Diagnostics.Tests
         {
             using (PerformanceCounter counterSample = new PerformanceCounter("Processor", "Interrupts/sec", "0", "."))
             {
-                counterSample.NextValue();
+                Helpers.RetryOnAllPlatforms(() => counterSample.NextValue());
                 System.Threading.Thread.Sleep(30);
 
-                Assert.True(counterSample.NextValue() > 0);
+                Assert.True(Helpers.RetryOnAllPlatforms(() => counterSample.NextValue()) > 0);
             }
         }
 
@@ -187,7 +187,7 @@ namespace System.Diagnostics.Tests
             using (PerformanceCounter counterSample = CreateCounterWithCategory(name, false, PerformanceCounterCategoryType.SingleInstance))
             {
                 counterSample.RawValue = 10;
-                counterSample.Decrement();
+                Helpers.RetryOnAllPlatforms(() => counterSample.Decrement());
 
                 Assert.Equal(9, counterSample.RawValue);
                 Helpers.DeleteCategory(name);
@@ -201,9 +201,9 @@ namespace System.Diagnostics.Tests
             using (PerformanceCounter counterSample = CreateCounterWithCategory(name, false, PerformanceCounterCategoryType.SingleInstance))
             {
                 counterSample.RawValue = 10;
-                counterSample.Increment();
+                Helpers.RetryOnAllPlatforms(() => counterSample.Increment());
 
-                Assert.Equal(11, counterSample.NextSample().RawValue);
+                Assert.Equal(11, Helpers.RetryOnAllPlatforms(() => counterSample.NextSample().RawValue));
                 Helpers.DeleteCategory(name);
             }
         }
@@ -215,7 +215,7 @@ namespace System.Diagnostics.Tests
             using (PerformanceCounter counterSample = CreateCounterWithCategory(name, false, PerformanceCounterCategoryType.SingleInstance))
             {
                 counterSample.RawValue = 10;
-                counterSample.IncrementBy(2);
+                Helpers.RetryOnAllPlatforms(() => counterSample.IncrementBy(2));
 
                 Assert.Equal(12, counterSample.RawValue);
                 Helpers.DeleteCategory(name);
@@ -281,7 +281,7 @@ namespace System.Diagnostics.Tests
             using (PerformanceCounter counterSample = new PerformanceCounter(category, name, instance, false))
             {
                 counterSample.RawValue = 10;
-                counterSample.Decrement();
+                Helpers.RetryOnAllPlatforms(() => counterSample.Decrement());
 
                 Assert.Equal(9, counterSample.RawValue);
                 Helpers.DeleteCategory(name);

@@ -86,7 +86,7 @@ namespace System.Diagnostics.Tests
 
             var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.MultiInstance);
 
-            PerformanceCounterCategory pcc = new PerformanceCounterCategory(category);
+            PerformanceCounterCategory pcc = Helpers.RetryOnAllPlatforms(() => new PerformanceCounterCategory(category));
 
             Assert.Equal(PerformanceCounterCategoryType.MultiInstance, pcc.CategoryType);
             PerformanceCounterCategory.Delete(category);
@@ -99,7 +99,7 @@ namespace System.Diagnostics.Tests
 
             var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.SingleInstance);
 
-            PerformanceCounterCategory pcc = new PerformanceCounterCategory(category);
+            PerformanceCounterCategory pcc = Helpers.RetryOnAllPlatforms(() => new PerformanceCounterCategory(category));
 
             Assert.Equal(PerformanceCounterCategoryType.SingleInstance, pcc.CategoryType);
             PerformanceCounterCategory.Delete(category);
@@ -171,7 +171,7 @@ namespace System.Diagnostics.Tests
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
         public static void PerformanceCounterCategory_CounterExists_InterruptsPerSec()
         {
-            PerformanceCounterCategory pcc = new PerformanceCounterCategory("Processor");
+            PerformanceCounterCategory pcc = Helpers.RetryOnAllPlatforms(() => new PerformanceCounterCategory("Processor"));
 
             Assert.True(pcc.CounterExists("Interrupts/sec"));
         }
@@ -231,7 +231,7 @@ namespace System.Diagnostics.Tests
             var name = nameof(PerformanceCounterCategory_GetCounters) + "_Counter";
             var category = Helpers.CreateCategory(name, PerformanceCounterCategoryType.SingleInstance);
 
-            PerformanceCounterCategory pcc = new PerformanceCounterCategory(category);
+            PerformanceCounterCategory pcc = Helpers.RetryOnAllPlatforms(() => new PerformanceCounterCategory(category));
             PerformanceCounter[] counters = pcc.GetCounters();
 
             Assert.True(counters.Length > 0);
@@ -271,7 +271,7 @@ namespace System.Diagnostics.Tests
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
         public static void PerformanceCounterCategory_InstanceExists_Static()
         {
-            PerformanceCounterCategory pcc = new PerformanceCounterCategory("Processor");
+            PerformanceCounterCategory pcc = Helpers.RetryOnAllPlatforms(() => new PerformanceCounterCategory("Processor"));
 
             string[] instances = pcc.GetInstanceNames();
             Assert.True(instances.Length > 0);
@@ -294,7 +294,7 @@ namespace System.Diagnostics.Tests
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
         public static void PerformanceCounterCategory_ReadCategory()
         {
-            PerformanceCounterCategory pcc = new PerformanceCounterCategory("Processor");
+            PerformanceCounterCategory pcc = Helpers.RetryOnAllPlatforms(() => new PerformanceCounterCategory("Processor"));
 
             InstanceDataCollectionCollection idColCol = pcc.ReadCategory();
 
