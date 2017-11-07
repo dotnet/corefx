@@ -8,6 +8,7 @@
     <NugetRuntimeIdentifier Condition="'$(TargetGroup)' == 'uap'">win10-$(ArchGroup)</NugetRuntimeIdentifier>
     <NugetRuntimeIdentifier Condition="'$(TargetGroup)' == 'uapaot'">win10-$(ArchGroup)-aot</NugetRuntimeIdentifier>
     <RidSpecificAssets>true</RidSpecificAssets>
+    <NoWarn>$(NoWarn);NU1603;NU1605</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)' == 'uapaot'">
     <!-- System.Private.* can't be on the ILCInputFolder since ilc.exe needs to use the matching one from its toolchain. -->
@@ -25,22 +26,22 @@
 
   <ItemGroup Condition="'$(TargetGroup)'!='uapaot'">
     <PackageReference Include="Microsoft.NETCore.Platforms">
-      <Version>$(PlatformPackageVersion)</Version>
+      <Version>$(MicrosoftNETCorePlatformsPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.Runtime.CoreCLR">
-      <Version>$(CoreClrPackageVersion)</Version>
+      <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.TestHost">
-      <Version>$(CoreClrPackageVersion)</Version>
+      <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="runtime.native.System.Data.SqlClient.sni">
-      <Version>4.4.0</Version>
+      <Version>$(RuntimeNativeSystemDataSqlClientSniPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.DotNetHost">
-      <Version>2.0.1-servicing-25615-03</Version>
+      <Version>$(MicrosoftNETCoreDotNetHostPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.DotNetHostPolicy">
-      <Version>2.0.1-servicing-25615-03</Version>
+      <Version>$(MicrosoftNETCoreDotNetHostPolicyPackageVersion)</Version>
     </PackageReference>
   </ItemGroup>
 

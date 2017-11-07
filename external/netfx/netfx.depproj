@@ -26,7 +26,7 @@
       <Version>$(TargetingPackPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library" Condition="'$(TargetGroup)' == 'netfx'">
-      <Version>$(NETStandardPackageVersion)</Version>
+      <Version>$(NETStandardLibraryPackageVersion)</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -42,12 +42,14 @@
   <Target Name="FilterNETStandardShims" BeforeTargets="FilterNugetPackages"
           Condition="'$(RefOutputPath)' == '$(NetFxRefPath)'">
     <PropertyGroup>
-      <_NETStandardRefFolder>$(PackagesDir)$(NETStandardPackageId.ToLower())\$(NETStandardPackageVersion)\build\netstandard2.0\ref</_NETStandardRefFolder>
+      <_NETStandardRefFolder>$(PackagesDir)$(NETStandardLibraryPackageId.ToLower())\$(NETStandardLibraryPackageVersion)\build\netstandard2.0\ref</_NETStandardRefFolder>
     </PropertyGroup>
     <ItemGroup>
       <_excludeForNetFx Include="@(NetFxReference);netstandard" />
-      <_netstandardShimAssemblies Include="$(_NETStandardRefFolder)\*.dll" Exclude="@(_excludeForNetFx->'$(_NETStandardRefFolder)\%(Identity).dll')" />
-      <FileToExclude Include="@(_netstandardShimAssemblies->'%(FileName)')" />
+      <_allnetstandardAssemblies Include="$(_NETStandardRefFolder)\*.dll" />
+      <_netstandardAssemblyFileNames Include="@(_allnetstandardAssemblies->'%(Filename)')" Exclude="@(_excludeForNetFx)" />
+      <_netstandardShimAssemblies Include="@(_netstandardAssemblyFileNames->'$(_NETStandardRefFolder)\%(Identity).dll')" />
+      <FileToExclude Include="@(_netstandardAssemblyFileNames)" />
     </ItemGroup>
   </Target>
 
@@ -56,8 +58,8 @@
     <ItemGroup>
       <Reference Include="@(_netstandardShimAssemblies)">
         <Private>False</Private>
-        <NuGetPackageId>$(NETStandardPackageId)</NuGetPackageId>
-        <NuGetPackageVersion>$(NETStandardPackageVersion)</NuGetPackageVersion>
+        <NuGetPackageId>$(NETStandardLibraryPackageId)</NuGetPackageId>
+        <NuGetPackageVersion>$(NETStandardLibraryPackageVersion)</NuGetPackageVersion>
       </Reference>
     </ItemGroup>
   </Target>
