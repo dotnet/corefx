@@ -62,7 +62,7 @@ namespace System.Diagnostics.Tests
                 Assert.Equal(name, counterSample.CounterName);
                 Assert.Equal(category, counterSample.CategoryName);
                 Assert.Equal(instance, counterSample.InstanceName);
-                Assert.Equal("counter description", counterSample.CounterHelp);
+                Assert.Equal("counter description",  Helpers.RetryOnAllPlatforms(() => counterSample.CounterHelp));
                 Assert.True(counterSample.ReadOnly);
                 Helpers.DeleteCategory(name);
             }
@@ -292,7 +292,7 @@ namespace System.Diagnostics.Tests
         {
             var category = Helpers.CreateCategory(name, categoryType);
 
-            PerformanceCounter counterSample = new PerformanceCounter(category, name, readOnly);
+            PerformanceCounter counterSample =  Helpers.RetryOnAllPlatforms(() => new PerformanceCounter(category, name, readOnly));
 
             return counterSample;
         }
