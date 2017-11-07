@@ -2074,12 +2074,17 @@ extern "C" Error SystemNative_GetSockOpt(
                 return SystemNative_ConvertErrorPlatformToPal(errno);
             }
 
+            int value = *reinterpret_cast<int32_t*>(optionValue);
+
+            // macOS returns non-zero values other than 1.
+            value = value == 0 ? 0 : 1;
+
             // PAL_SO_EXCLUSIVEADDRUSE is inverse of PAL_SO_REUSEADDR (see comment in SystemNative_SetSockOpt).
             if (socketOptionName == PAL_SO_EXCLUSIVEADDRUSE)
             {
-                int value = *reinterpret_cast<int32_t*>(optionValue);
-                *reinterpret_cast<int32_t*>(optionValue) = value != 0 ? 0 : 1;
+                value = value == 0 ? 1 : 0;
             }
+            *reinterpret_cast<int32_t*>(optionValue) = value;
 
             return PAL_SUCCESS;
         }
