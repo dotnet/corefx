@@ -55,8 +55,8 @@ extensive-nowarn.xml
 generator-escaped-html.xml
 generator-no-text.xml
 generator_relative_ref.xml
-###icon_invalid_uri.xml    This operation is not supported for a relative URI.
-###icon_relative_ref.xml
+icon_invalid_uri.xml
+icon_relative_ref.xml
 id-dot-segments.xml
 id-empty-fragment-id.xml
 id-empty-path.xml
@@ -119,8 +119,8 @@ multiple-categories.xml
 multiple-contributors-entry.xml
 multiple-contributors-source.xml
 multiple-contributors.xml
-###multiple-icons-source.xml   This operation is not supported for a relative URI.
-###multiple-icons.xml          This operation is not supported for a relative URI.
+multiple-icons-source.xml
+multiple-icons.xml
 multiple-related-matching.xml
 no-content-or-alternate.xml
 no-content-or-summary.xml

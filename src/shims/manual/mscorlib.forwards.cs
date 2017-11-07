@@ -11,12 +11,10 @@
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Generic.GenericEqualityComparer<>))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Generic.NullableEqualityComparer<>))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Generic.ObjectEqualityComparer<>))]
+// This is required for back-compatibility with .NET Core 2.0 as we exposed the NonRandomizedStringEqualityComparer inside the serialization blob
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Generic.NonRandomizedStringEqualityComparer))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Generic.ByteEqualityComparer))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Generic.EnumEqualityComparer<>))]
-[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Generic.SByteEnumEqualityComparer<>))]
-[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Generic.ShortEnumEqualityComparer<>))]
-[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Generic.LongEnumEqualityComparer<>))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.ListDictionaryInternal))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.CultureAwareComparer))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.OrdinalComparer))]

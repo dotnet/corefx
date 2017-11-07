@@ -12,6 +12,18 @@ using Xunit;
 
 namespace System.ServiceModel.Syndication.Tests
 {
+    enum FeedFormatterType
+    {
+        Atom10FeedFormatter,
+        Rss20FeedFormatter
+    }
+
+    enum SyndicationItemFormatterType
+    {
+        Atom10ItemFormatter,
+        Rss20ItemFormatter
+    }
+
     public static class BasicScenarioTests
     {
         [Fact]
@@ -222,13 +234,13 @@ namespace System.ServiceModel.Syndication.Tests
                 File.Delete(AtomPath);
             }
         }
-        
+
         [Fact]
         public static void SyndicationFeed_Load_Rss()
         {
             XmlReaderSettings setting = new XmlReaderSettings();
             using (XmlReader reader = XmlReader.Create(@"rssSpecExample.xml", setting))
-            { 
+            {
                 SyndicationFeed rss = SyndicationFeed.Load(reader);
                 Assert.True(rss.Items != null);
             }
@@ -246,6 +258,7 @@ namespace System.ServiceModel.Syndication.Tests
         }
 
         [Fact]
+        [ActiveIssue(25080)]
         public static void SyndicationFeed_Rss_TestDisjointItems()
         {
             using (XmlReader reader = XmlReader.Create(@"RssDisjointItems.xml"))
@@ -266,6 +279,7 @@ namespace System.ServiceModel.Syndication.Tests
 
 
         [Fact]
+        [ActiveIssue(25080)]
         public static void SyndicationFeed_Atom_TestDisjointItems()
         {
             using (XmlReader reader = XmlReader.Create(@"AtomDisjointItems.xml"))
@@ -285,6 +299,7 @@ namespace System.ServiceModel.Syndication.Tests
         }
 
         [Fact]
+        [ActiveIssue(25080)]
         public static void SyndicationFeed_Rss_WrongDateFormat()
         {
             // *** SETUP *** \\
@@ -302,35 +317,8 @@ namespace System.ServiceModel.Syndication.Tests
         [Fact]
         public static void AtomEntryPositiveTest()
         {
-            string filePath = @"brief-entry-noerror.xml";
-            string serializeFilePath = Path.GetTempFileName();
-
-            try
-            {
-                SyndicationItem feedObjct = null;
-                using (XmlReader reader = XmlReader.Create(filePath))
-                {
-                    feedObjct = SyndicationItem.Load(reader);
-                }
-
-                using (XmlWriter writer = XmlWriter.Create(serializeFilePath))
-                {
-                    Atom10ItemFormatter atomformatter = new Atom10ItemFormatter(feedObjct);
-                    atomformatter.WriteTo(writer);
-                }
-
-                // compare file filePath and serializeFilePath
-                XmlDiff diff = new XmlDiff()
-                {
-                    Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
-                };
-
-                Assert.True(diff.Compare(filePath, serializeFilePath));
-            }
-            finally
-            {
-                File.Delete(serializeFilePath);
-            }
+            string file = @"brief-entry-noerror.xml";
+            EntryPositiveTest(file, SyndicationItemFormatterType.Atom10ItemFormatter);
         }
 
         [Fact]
@@ -345,10 +333,15 @@ namespace System.ServiceModel.Syndication.Tests
 
             try
             {
-                using (XmlWriter writer = XmlWriter.Create(serializeFilePath))
+                using (FileStream fileStream = new FileStream(serializeFilePath, FileMode.OpenOrCreate))
                 {
+                    XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(fileStream);
+
                     Atom10ItemFormatter f = new Atom10ItemFormatter(item);
                     f.WriteTo(writer);
+
+                    writer.Flush();
+                    writer.Close();
                 }
 
                 XmlDiff diff = new XmlDiff()
@@ -369,78 +362,68 @@ namespace System.ServiceModel.Syndication.Tests
         {
             string dataFile = @"atom_feeds.dat";
             List<string> fileList = GetTestFilesForFeedTest(dataFile);
+            List<AllowableDifference> allowableDifferences = GetAtomFeedPositiveTestAllowableDifferences();
 
             foreach (string file in fileList)
             {
-                string serializeFilePath = Path.GetTempFileName();
-                try
-                {
-                    SyndicationFeed feedObjct;
-
-                    using (XmlReader reader = XmlReader.Create(file))
-                    {
-                        feedObjct = SyndicationFeed.Load(reader);
-                    }
-
-                    using (XmlWriter writer = XmlWriter.Create(serializeFilePath))
-                    {
-                        Atom10FeedFormatter f = new Atom10FeedFormatter(feedObjct);
-                        f.WriteTo(writer);
-                    }
-
-                    CompareHelper ch = new CompareHelper
-                    {
-                        Diff = new XmlDiff()
-                        {
-                            Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
-                        },
-                        AllowableDifferences = GetAtomFeedPositiveTestAllowableDifferences()
-                    };
-
-                    string diffNode = string.Empty;
-                    if (!ch.Compare(file, serializeFilePath, out diffNode))
-                    {
-                        //save the diff file for DeBug
-                        string diffFile = file + ".diff";
-                        File.Copy(serializeFilePath, diffFile, true);
-
-                        string errorMessage = $"Files are differenf:{Environment.NewLine}Sourse:{file}{Environment.NewLine}Target:{diffFile}{Environment.NewLine}Different Nodes:{Environment.NewLine}{diffNode}";
-                        Assert.True(false, errorMessage);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Exception newEx = new Exception($"Failed File Name:{file}", e);
-                    throw newEx;
-                }
-                finally
-                {
-                    File.Delete(serializeFilePath);
-                }
+                FeedPositiveTest(file, FeedFormatterType.Atom10FeedFormatter, allowableDifferences);
             }
         }
 
         [Fact]
         public static void RssEntryPositiveTest()
         {
-            string filePath = @"RssEntry.xml";
-            string serializeFilePath = Path.GetTempFileName();
+            string file = @"RssEntry.xml";
+            EntryPositiveTest(file, SyndicationItemFormatterType.Rss20ItemFormatter);
+        }
 
+        [Fact]
+        public static void RssFeedPositiveTest()
+        {
+            string dataFile = @"rss_feeds.dat";
+            List<string> fileList = GetTestFilesForFeedTest(dataFile);
+            List<AllowableDifference> allowableDifferences = GetRssFeedPositiveTestAllowableDifferences();
+
+            foreach (string file in fileList)
+            {
+                FeedPositiveTest(file, FeedFormatterType.Rss20FeedFormatter, allowableDifferences);
+            }
+        }
+
+        private static void EntryPositiveTest(string file, SyndicationItemFormatterType syndicationItemFormatterType)
+        {
+
+            string serializeFilePath = Path.GetTempFileName();
             try
             {
                 SyndicationItem feedObjct = null;
-                using (XmlReader reader = XmlReader.Create(filePath))
+                using (FileStream fileStream = new FileStream(file, FileMode.Open, FileAccess.Read))
                 {
-                    Rss20ItemFormatter rss20ItemFormatter = new Rss20ItemFormatter();
-                    rss20ItemFormatter.ReadFrom(reader);
-                    feedObjct = rss20ItemFormatter.Item;
+                    XmlReader reader = XmlDictionaryReader.CreateTextReader(fileStream, XmlDictionaryReaderQuotas.Max);
+                    feedObjct = SyndicationItem.Load(reader);
                     reader.Close();
                 }
 
-                using (XmlWriter writer = XmlWriter.Create(serializeFilePath))
+                using (FileStream fileStream = new FileStream(serializeFilePath, FileMode.OpenOrCreate))
                 {
-                    Rss20ItemFormatter atomformatter = new Rss20ItemFormatter(feedObjct);
-                    atomformatter.WriteTo(writer);
+                    XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(fileStream);
+                    SyndicationItemFormatter formatter = null;
+
+                    if (syndicationItemFormatterType == SyndicationItemFormatterType.Atom10ItemFormatter)
+                    {
+                        formatter = new Atom10ItemFormatter(feedObjct);
+                    }
+                    else if (syndicationItemFormatterType == SyndicationItemFormatterType.Rss20ItemFormatter)
+                    {
+                        formatter = new Rss20ItemFormatter(feedObjct);
+                    }
+                    else
+                    {
+                        throw new ArgumentOutOfRangeException("syndicationItemFormatterType");
+                    }
+
+                    formatter.WriteTo(writer);
+                    writer.Flush();
                     writer.Close();
                 }
 
@@ -449,7 +432,13 @@ namespace System.ServiceModel.Syndication.Tests
                 {
                     Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
                 };
-                Assert.True(diff.Compare(filePath, serializeFilePath));
+
+                Assert.True(diff.Compare(file, serializeFilePath));
+            }
+            catch(Exception e)
+            {
+                Exception newEx = new Exception($"Failed File Name:{file}", e);
+                throw newEx;
             }
             finally
             {
@@ -457,60 +446,71 @@ namespace System.ServiceModel.Syndication.Tests
             }
         }
 
-        [Fact]
-        [ActiveIssue(24971)]
-        public static void RssFeedPositiveTest()
+        private static void FeedPositiveTest(string file, FeedFormatterType feedFormatterType, List<AllowableDifference> allowableDifferences = null)
         {
-            string dataFile = @"rss_feeds.dat";
-            List<string> fileList = GetTestFilesForFeedTest(dataFile);
+            string serializeFilePath = Path.GetTempFileName();
+            bool toDeletedFile = true;
 
-            foreach (string file in fileList)
+            try
             {
-                string serializeFilePath = Path.GetTempFileName();
-                try
+                SyndicationFeed feedObjct;
+                
+                using (FileStream fileStream = new FileStream(file, FileMode.Open, FileAccess.Read))
                 {
-                    SyndicationFeed feedObjct;
-                    using (XmlReader reader = XmlReader.Create(file))
-                    {
-                        Rss20FeedFormatter formatter = new Rss20FeedFormatter();
-                        formatter.ReadFrom(reader);
-                        feedObjct = formatter.Feed;
-                        reader.Close();
-                    }
+                   XmlReader reader = XmlDictionaryReader.CreateTextReader(fileStream, XmlDictionaryReaderQuotas.Max);
 
-                    using (XmlWriter writer = XmlWriter.Create(serializeFilePath))
-                    {
-                        Rss20FeedFormatter formatter = new Rss20FeedFormatter(feedObjct);
-                        formatter.WriteTo(writer);
-                        writer.Close();
-                    }
-
-                    CompareHelper ch = new CompareHelper
-                    {
-                        Diff = new XmlDiff()
-                        {
-                            Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
-                        },
-                        AllowableDifferences = GetRssFeedPositiveTestAllowableDifferences()
-                    };
-
-                    string diffNode = string.Empty;
-                    if (!ch.Compare(file, serializeFilePath, out diffNode))
-                    {
-                        //save the diff file for DeBug
-                        string diffFile = file + ".diff";
-                        File.Copy(serializeFilePath, diffFile, true);
-
-                        string errorMessage = $"Files are different:{Environment.NewLine}Source:{file}{Environment.NewLine}Target:{diffFile}{Environment.NewLine}Different Nodes:{Environment.NewLine}{diffNode}";
-                        Assert.True(false, errorMessage);
-                    }
+                   feedObjct = SyndicationFeed.Load(reader);
                 }
-                catch (Exception e)
+
+                using (FileStream fileStream = new FileStream(serializeFilePath, FileMode.OpenOrCreate))
                 {
-                    Exception newEx = new Exception($"Failed File Name:{file}", e);
-                    throw newEx;
+                    XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(fileStream);
+
+                    SyndicationFeedFormatter formatter = null;
+                    if (feedFormatterType == FeedFormatterType.Atom10FeedFormatter)
+                    {
+                        formatter = new Atom10FeedFormatter(feedObjct);
+                    }
+                    else if (feedFormatterType == FeedFormatterType.Rss20FeedFormatter)
+                    {
+                        formatter = new Rss20FeedFormatter(feedObjct);
+                    }
+                    else
+                    {
+                        throw new ArgumentOutOfRangeException("feedFormatterType");
+                    }
+
+                    formatter.WriteTo(writer);
+                    writer.Flush();
+                    writer.Close();
                 }
-                finally
+
+                CompareHelper ch = new CompareHelper
+                {
+                    Diff = new XmlDiff()
+                    {
+                        Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
+                    },
+                    AllowableDifferences = allowableDifferences
+                };
+
+                string diffNode = string.Empty;
+                if (!ch.Compare(file, serializeFilePath, out diffNode))
+                {
+                    toDeletedFile = false;
+
+                    string errorMessage = $"The generated file was different from the baseline file:{Environment.NewLine}Baseline: {file}{Environment.NewLine}Actual: {serializeFilePath}{Environment.NewLine}Different Nodes:{Environment.NewLine}{diffNode}";
+                    Assert.True(false, errorMessage);
+                }
+            }
+            catch (Exception e)
+            {
+                Exception newEx = new Exception($"Failed File Name:{file}", e);
+                throw newEx;
+            }
+            finally
+            {
+                if (toDeletedFile)
                 {
                     File.Delete(serializeFilePath);
                 }
@@ -594,7 +594,7 @@ namespace System.ServiceModel.Syndication.Tests
             string file;
             using (StreamReader sr = new StreamReader(dataFile))
             {
-                while(!string.IsNullOrEmpty(file = sr.ReadLine()))
+                while (!string.IsNullOrEmpty(file = sr.ReadLine()))
                 {
                     if (!file.StartsWith("#"))
                     {
@@ -612,5 +612,6 @@ namespace System.ServiceModel.Syndication.Tests
             }
             return fileList;
         }
+
     }
 }
