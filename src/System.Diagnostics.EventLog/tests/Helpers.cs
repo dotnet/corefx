@@ -59,8 +59,8 @@ namespace System.Diagnostics.Tests
 
         public static void WaitForEventLog(EventLog eventLog, int entriesExpected)
         {
-            int tries = 0;
-            while (RetryOnAllPlatforms((() => eventLog.Entries.Count)) < entriesExpected && tries < 51)
+            int tries = 1;
+            while (RetryOnAllPlatforms((() => eventLog.Entries.Count)) < entriesExpected && tries <= 50)
             {
                 if (tries == 50)
                 {
@@ -69,8 +69,8 @@ namespace System.Diagnostics.Tests
                 else
                 {
                     Thread.Sleep(100 * (tries));
-                    tries++;
                 }
+                tries++;
             }
 
             Assert.Equal(entriesExpected, RetryOnWin7((() => eventLog.Entries.Count)));
