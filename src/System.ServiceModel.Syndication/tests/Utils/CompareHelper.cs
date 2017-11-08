@@ -52,14 +52,14 @@ namespace System.ServiceModel.Syndication.Tests
         {
             diffNode = string.Empty;
             StringBuilder stringBuilder = new StringBuilder();
-            if (Diff.Compare(source, target))
+            if (_diff.Compare(source, target))
             {
                 return true;
             }
             else
             {
                 XmlDocument diffDoc = new XmlDocument();
-                diffDoc.LoadXml(Diff.ToXml());
+                diffDoc.LoadXml(_diff.ToXml());
                 XmlNodeList totalFailures = diffDoc.SelectNodes("/Root/Node/Diff[@DiffType]");
                 XmlNodeList attrFailures = diffDoc.SelectNodes("/Root/Node/Diff[@DiffType=6]|/Root/Node/Diff[@DiffType=5]|/Root/Node/Diff[@DiffType=1]");
 

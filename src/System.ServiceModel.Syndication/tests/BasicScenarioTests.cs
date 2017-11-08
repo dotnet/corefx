@@ -12,18 +12,6 @@ using Xunit;
 
 namespace System.ServiceModel.Syndication.Tests
 {
-    enum FeedFormatterType
-    {
-        Atom10FeedFormatter,
-        Rss20FeedFormatter
-    }
-
-    enum SyndicationItemFormatterType
-    {
-        Atom10ItemFormatter,
-        Rss20ItemFormatter
-    }
-
     public static class BasicScenarioTests
     {
         [Fact]
@@ -318,14 +306,15 @@ namespace System.ServiceModel.Syndication.Tests
         public static void AtomEntryPositiveTest()
         {
             string file = @"brief-entry-noerror.xml";
-            EntryPositiveTest(file, SyndicationItemFormatterType.Atom10ItemFormatter);
+            ReadWriteSyndicationItem(file, (itemObject) => new Atom10ItemFormatter(itemObject));
         }
 
         [Fact]
         public static void AtomEntryPositiveTest_write()
         {
-            string filePath = @"AtomEntryTest.xml";
+            string file = @"AtomEntryTest.xml";
             string serializeFilePath = Path.GetTempFileName();
+            bool toDeletedFile = true;
 
             SyndicationItem item = new SyndicationItem("SyndicationFeed released for .net Core", "A lot of text describing the release of .net core feature", new Uri("http://contoso.com/news/path"));
             item.Id = "uuid:43481a10-d881-40d1-adf2-99b438c57e21;id=1";
@@ -335,25 +324,35 @@ namespace System.ServiceModel.Syndication.Tests
             {
                 using (FileStream fileStream = new FileStream(serializeFilePath, FileMode.OpenOrCreate))
                 {
-                    XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(fileStream);
-
-                    Atom10ItemFormatter f = new Atom10ItemFormatter(item);
-                    f.WriteTo(writer);
-
-                    writer.Flush();
-                    writer.Close();
+                    using (XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(fileStream))
+                    {
+                        Atom10ItemFormatter f = new Atom10ItemFormatter(item);
+                        f.WriteTo(writer);
+                    }
                 }
 
-                XmlDiff diff = new XmlDiff()
+                CompareHelper ch = new CompareHelper
                 {
-                    Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
+                    Diff = new XmlDiff()
+                    {
+                        Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
+                    }
                 };
 
-                Assert.True(diff.Compare(filePath, serializeFilePath));
+                string diffNode = string.Empty;
+                if (!ch.Compare(file, serializeFilePath, out diffNode))
+                {
+                    toDeletedFile = false;
+                    string errorMessage = $"The generated file was different from the baseline file:{Environment.NewLine}Baseline: {file}{Environment.NewLine}Actual: {serializeFilePath}{Environment.NewLine}Different Nodes:{Environment.NewLine}{diffNode}";
+                    Assert.True(false, errorMessage);
+                }
             }
             finally
             {
-                File.Delete(serializeFilePath);
+                if (toDeletedFile)
+                {
+                    File.Delete(serializeFilePath);
+                }
             }
         }
 
@@ -366,7 +365,7 @@ namespace System.ServiceModel.Syndication.Tests
 
             foreach (string file in fileList)
             {
-                FeedPositiveTest(file, FeedFormatterType.Atom10FeedFormatter, allowableDifferences);
+                ReadWriteSyndicationFeed(file, (feedObject) => new Atom10FeedFormatter(feedObject), allowableDifferences);
             }
         }
 
@@ -374,7 +373,7 @@ namespace System.ServiceModel.Syndication.Tests
         public static void RssEntryPositiveTest()
         {
             string file = @"RssEntry.xml";
-            EntryPositiveTest(file, SyndicationItemFormatterType.Rss20ItemFormatter);
+            ReadWriteSyndicationItem(file, (itemObject) => new Rss20ItemFormatter(itemObject));
         }
 
         [Fact]
@@ -386,67 +385,67 @@ namespace System.ServiceModel.Syndication.Tests
 
             foreach (string file in fileList)
             {
-                FeedPositiveTest(file, FeedFormatterType.Rss20FeedFormatter, allowableDifferences);
+                ReadWriteSyndicationFeed(file, (feedObject) => new Rss20FeedFormatter(feedObject), allowableDifferences);
             }
         }
 
-        private static void EntryPositiveTest(string file, SyndicationItemFormatterType syndicationItemFormatterType)
+        private static void ReadWriteSyndicationItem(string file, Func<SyndicationItem, SyndicationItemFormatter> itemFormatter)
         {
-
             string serializeFilePath = Path.GetTempFileName();
+            bool toDeletedFile = true;
+
             try
             {
-                SyndicationItem feedObjct = null;
+                SyndicationItem itemObjct = null;
                 using (FileStream fileStream = new FileStream(file, FileMode.Open, FileAccess.Read))
                 {
-                    XmlReader reader = XmlDictionaryReader.CreateTextReader(fileStream, XmlDictionaryReaderQuotas.Max);
-                    feedObjct = SyndicationItem.Load(reader);
-                    reader.Close();
+                    using (XmlReader reader = XmlDictionaryReader.CreateTextReader(fileStream, XmlDictionaryReaderQuotas.Max))
+                    {
+                        itemObjct = SyndicationItem.Load(reader);
+                    }
                 }
 
                 using (FileStream fileStream = new FileStream(serializeFilePath, FileMode.OpenOrCreate))
                 {
-                    XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(fileStream);
-                    SyndicationItemFormatter formatter = null;
-
-                    if (syndicationItemFormatterType == SyndicationItemFormatterType.Atom10ItemFormatter)
+                    using (XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(fileStream))
                     {
-                        formatter = new Atom10ItemFormatter(feedObjct);
+                        SyndicationItemFormatter formatter = itemFormatter(itemObjct);
+                        formatter.WriteTo(writer);
                     }
-                    else if (syndicationItemFormatterType == SyndicationItemFormatterType.Rss20ItemFormatter)
-                    {
-                        formatter = new Rss20ItemFormatter(feedObjct);
-                    }
-                    else
-                    {
-                        throw new ArgumentOutOfRangeException("syndicationItemFormatterType");
-                    }
-
-                    formatter.WriteTo(writer);
-                    writer.Flush();
-                    writer.Close();
                 }
 
                 // compare file filePath and serializeFilePath
-                XmlDiff diff = new XmlDiff()
+                CompareHelper ch = new CompareHelper
                 {
-                    Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
+                    Diff = new XmlDiff()
+                    {
+                        Option = XmlDiffOption.IgnoreComments | XmlDiffOption.IgnorePrefix | XmlDiffOption.IgnoreWhitespace | XmlDiffOption.IgnoreChildOrder | XmlDiffOption.IgnoreAttributeOrder
+                    }
                 };
 
-                Assert.True(diff.Compare(file, serializeFilePath));
+                string diffNode = string.Empty;
+                if (!ch.Compare(file, serializeFilePath, out diffNode))
+                {
+                    toDeletedFile = false;
+                    string errorMessage = $"The generated file was different from the baseline file:{Environment.NewLine}Baseline: {file}{Environment.NewLine}Actual: {serializeFilePath}{Environment.NewLine}Different Nodes:{Environment.NewLine}{diffNode}";
+                    Assert.True(false, errorMessage);
+                }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                Exception newEx = new Exception($"Failed File Name:{file}", e);
+                Exception newEx = new Exception($"Failed File Name: {file}", e);
                 throw newEx;
             }
             finally
             {
-                File.Delete(serializeFilePath);
+                if (toDeletedFile)
+                {
+                    File.Delete(serializeFilePath);
+                }
             }
         }
 
-        private static void FeedPositiveTest(string file, FeedFormatterType feedFormatterType, List<AllowableDifference> allowableDifferences = null)
+        private static void ReadWriteSyndicationFeed(string file, Func<SyndicationFeed, SyndicationFeedFormatter> feedFormatter, List<AllowableDifference> allowableDifferences = null)
         {
             string serializeFilePath = Path.GetTempFileName();
             bool toDeletedFile = true;
@@ -454,35 +453,21 @@ namespace System.ServiceModel.Syndication.Tests
             try
             {
                 SyndicationFeed feedObjct;
-                
                 using (FileStream fileStream = new FileStream(file, FileMode.Open, FileAccess.Read))
                 {
-                   XmlReader reader = XmlDictionaryReader.CreateTextReader(fileStream, XmlDictionaryReaderQuotas.Max);
-
-                   feedObjct = SyndicationFeed.Load(reader);
+                    using (XmlReader reader = XmlDictionaryReader.CreateTextReader(fileStream, XmlDictionaryReaderQuotas.Max))
+                    {
+                        feedObjct = SyndicationFeed.Load(reader);
+                    }
                 }
 
                 using (FileStream fileStream = new FileStream(serializeFilePath, FileMode.OpenOrCreate))
                 {
-                    XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(fileStream);
-
-                    SyndicationFeedFormatter formatter = null;
-                    if (feedFormatterType == FeedFormatterType.Atom10FeedFormatter)
+                    using (XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(fileStream))
                     {
-                        formatter = new Atom10FeedFormatter(feedObjct);
+                        SyndicationFeedFormatter formatter = feedFormatter(feedObjct);
+                        formatter.WriteTo(writer);
                     }
-                    else if (feedFormatterType == FeedFormatterType.Rss20FeedFormatter)
-                    {
-                        formatter = new Rss20FeedFormatter(feedObjct);
-                    }
-                    else
-                    {
-                        throw new ArgumentOutOfRangeException("feedFormatterType");
-                    }
-
-                    formatter.WriteTo(writer);
-                    writer.Flush();
-                    writer.Close();
                 }
 
                 CompareHelper ch = new CompareHelper
@@ -498,14 +483,13 @@ namespace System.ServiceModel.Syndication.Tests
                 if (!ch.Compare(file, serializeFilePath, out diffNode))
                 {
                     toDeletedFile = false;
-
                     string errorMessage = $"The generated file was different from the baseline file:{Environment.NewLine}Baseline: {file}{Environment.NewLine}Actual: {serializeFilePath}{Environment.NewLine}Different Nodes:{Environment.NewLine}{diffNode}";
                     Assert.True(false, errorMessage);
                 }
             }
             catch (Exception e)
             {
-                Exception newEx = new Exception($"Failed File Name:{file}", e);
+                Exception newEx = new Exception($"Failed File Name: {file}", e);
                 throw newEx;
             }
             finally
