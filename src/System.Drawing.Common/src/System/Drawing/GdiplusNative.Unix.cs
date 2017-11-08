@@ -22,11 +22,12 @@ namespace System.Drawing
 
             private static IntPtr LoadNativeLibrary()
             {
-                string libraryName = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "libgdiplus.dylib" : "libgdiplus.so";
+                string libraryName = null;
 
                 IntPtr lib = IntPtr.Zero;
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
+                    libraryName = "libgdiplus.dylib";
                     lib = Interop.Libdl.dlopen(libraryName, Interop.Libdl.RTLD_NOW);
                 }
                 else
@@ -35,6 +36,7 @@ namespace System.Drawing
                     // The mono project, where libgdiplus originated, allowed both of the names below to be used, via
                     // a global configuration setting. We prefer the "unversioned" shared object name, and fallback to
                     // the name suffixed with ".0".
+                    libraryName = "libgdiplus.so";
                     lib = Interop.Libdl.dlopen(libraryName, Interop.Libdl.RTLD_NOW);
                     if (lib == IntPtr.Zero)
                     {
