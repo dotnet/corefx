@@ -10,6 +10,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.DlOpen.cs">
+      <Link>Common\Interop\Unix\System.Native\Interop.DlOpen.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
+      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+    </Compile>
     <Compile Include="BitmapTests.cs" />
     <Compile Include="BrushTests.cs" />
     <Compile Include="BrushesTests.cs" />

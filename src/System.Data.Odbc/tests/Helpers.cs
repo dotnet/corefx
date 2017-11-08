@@ -17,10 +17,10 @@ namespace System.Data.Odbc.Tests
         private static bool CheckOdbcIsAvailable() => 
             PlatformDetection.IsWindows ? 
                 !PlatformDetection.IsWindowsNanoServer && (!PlatformDetection.IsWindowsServerCore || Environment.Is64BitProcess ) :
-                Interop.Libdl.dlopen((
+                Interop.Sys.DlOpen((
                     PlatformDetection.IsOSX ?
                         "libodbc.2.dylib" : 
                         "libodbc.so.2"
-                ), Interop.Libdl.RTLD_NOW) != IntPtr.Zero;
+                ), Interop.Sys.DlOpenFlags.RTLD_NOW) != IntPtr.Zero;
     }
 }

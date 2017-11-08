@@ -13,9 +13,7 @@ internal static partial class Interop
         internal enum DlOpenFlags : int
         {
             RTLD_LAZY = 1,
-            RTLD_NOW = 2,
-            RTLD_GLOBAL = 4,
-            RTLD_LOCAL = 8
+            RTLD_NOW = 2
         }
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_DlOpen")]

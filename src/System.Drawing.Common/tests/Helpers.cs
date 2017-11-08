@@ -30,14 +30,14 @@ namespace System.Drawing
                 IntPtr nativeLib;
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    nativeLib = dlopen("libgdiplus.dylib", RTLD_NOW);
+                    nativeLib = Interop.Sys.DlOpen("libgdiplus.dylib", Interop.Sys.DlOpenFlags.RTLD_NOW);
                 }
                 else
                 {
-                    nativeLib = dlopen("libgdiplus.so", RTLD_NOW);
+                    nativeLib = Interop.Sys.DlOpen("libgdiplus.so", Interop.Sys.DlOpenFlags.RTLD_NOW);
                     if (nativeLib == IntPtr.Zero)
                     {
-                        nativeLib = dlopen("libgdiplus.so.0", RTLD_NOW);
+                        nativeLib = Interop.Sys.DlOpen("libgdiplus.so.0", Interop.Sys.DlOpenFlags.RTLD_NOW);
                     }
                 }
 
@@ -91,10 +91,6 @@ namespace System.Drawing
         {
             return PrinterSettings.InstalledPrinters.Count > 0;
         }
-
-        [DllImport("libdl")]
-        private static extern IntPtr dlopen(string libName, int flags);
-        public const int RTLD_NOW = 0x002;
 
         public static string GetTestBitmapPath(string fileName) => GetTestPath("bitmaps", fileName);
         public static string GetTestFontPath(string fileName) => GetTestPath("fonts", fileName);
