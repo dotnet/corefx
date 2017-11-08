@@ -318,7 +318,8 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.Mono)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void ExecutionContextTest()
         {
             ThreadTestHelpers.RunTestInBackgroundThread(

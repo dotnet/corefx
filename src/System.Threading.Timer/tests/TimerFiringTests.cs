@@ -188,7 +188,6 @@ public partial class TimerFiringTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
     public void Timer_Dispose_WaitHandle()
     {
         int tickCount = 0;
