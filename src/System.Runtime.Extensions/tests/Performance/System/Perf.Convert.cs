@@ -11,7 +11,7 @@ namespace System
     {
         private byte[] InitializeBinaryDataCollection(int size)
         {
-            var random = new Random();
+            var random = new Random(30000);
             byte[] binaryData = new byte[size];
             random.NextBytes(binaryData);
 
