@@ -52,10 +52,7 @@ namespace System.Drawing
                     {
                         var searchPath = Path.Combine(searchDirectory, libraryName);
 
-                        if (File.Exists(searchPath))
-                        {
-                            lib = Interop.Libdl.dlopen(searchPath, Interop.Libdl.RTLD_NOW);
-                        }
+                        lib = Interop.Libdl.dlopen(searchPath, Interop.Libdl.RTLD_NOW);
 
                         if (lib != IntPtr.Zero)
                         {
