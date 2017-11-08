@@ -154,7 +154,7 @@ namespace System.Data.Common.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "GC has different behavior on Mono")]
         public void CanBeFinalized()
         {
             FinalizingCommand.CreateAndRelease();
