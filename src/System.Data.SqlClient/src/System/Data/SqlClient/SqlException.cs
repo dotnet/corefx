@@ -89,37 +89,37 @@ namespace System.Data.SqlClient
 
         public byte Class
         {
-            get { return Errors.Count > 0 ? this.Errors[0].Class : default; }
+            get { return Errors.Count > 0 ? this.Errors[0].Class : default(byte); }
         }
 
         public int LineNumber
         {
-            get { return Errors.Count > 0 ? Errors[0].LineNumber : default; }
+            get { return Errors.Count > 0 ? Errors[0].LineNumber : default(int); }
         }
 
         public int Number
         {
-            get { return Errors.Count > 0 ? Errors[0].Number : default; }
+            get { return Errors.Count > 0 ? Errors[0].Number : default(int); }
         }
 
         public string Procedure
         {
-            get { return Errors.Count > 0 ? Errors[0].Procedure : default; }
+            get { return Errors.Count > 0 ? Errors[0].Procedure : default(string); }
         }
 
         public string Server
         {
-            get { return Errors.Count > 0 ? Errors[0].Server : default; }
+            get { return Errors.Count > 0 ? Errors[0].Server : default(string); }
         }
 
         public byte State
         {
-            get { return Errors.Count > 0 ? Errors[0].State : default; }
+            get { return Errors.Count > 0 ? Errors[0].State : default(byte); }
         }
 
         override public string Source
         {
-            get { return Errors.Count > 0 ? Errors[0].Source : default; }
+            get { return Errors.Count > 0 ? Errors[0].Source : default(string); }
         }
 
         public override string ToString()

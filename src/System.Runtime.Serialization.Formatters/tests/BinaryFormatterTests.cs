@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.SqlClient;
@@ -157,7 +158,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             object o = new object();
             object[] arr = new[] { o, o, o, o, o };
-            object[] result = FormatterClone(arr);
+            object[] result = BinaryFormatterHelpers.Clone(arr);
 
             Assert.Equal(arr.Length, result.Length);
             Assert.NotSame(arr, result);
@@ -166,13 +167,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
             {
                 Assert.Same(result[0], result[i]);
             }
-        }
-
-        [Theory]
-        [MemberData(nameof(SerializableExceptions_MemberData))]
-        public void Roundtrip_Exceptions(Exception expected)
-        {
-            BinaryFormatterHelpers.AssertRoundtrips(expected);
         }
 
         [Theory]
@@ -196,9 +190,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             var p = new NonSerializablePair<int, string>() { Value1 = 1, Value2 = "2" };
             Assert.False(p.GetType().IsSerializable);
-            Assert.Throws<SerializationException>(() => FormatterClone(p));
+            Assert.Throws<SerializationException>(() => BinaryFormatterHelpers.Clone(p));
 
-            NonSerializablePair<int, string> result = FormatterClone(p, new NonSerializablePairSurrogate());
+            NonSerializablePair<int, string> result = BinaryFormatterHelpers.Clone(p, new NonSerializablePairSurrogate());
             Assert.NotSame(p, result);
             Assert.Equal(p.Value1, result.Value1);
             Assert.Equal(p.Value2, result.Value2);
@@ -381,7 +375,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public void ObjectReference_RealObjectSerialized()
         {
             var obj = new ObjRefReturnsObj { Real = 42 };
-            object real = FormatterClone<object>(obj);
+            object real = BinaryFormatterHelpers.Clone<object>(obj);
             Assert.Equal(42, real);
         }
 
@@ -496,8 +490,10 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             // These types are unstable during serialization and produce different blobs.
             if (obj is WeakReference<Point> ||
-                obj is Collections.Specialized.HybridDictionary ||
-                obj is TimeZoneInfo.AdjustmentRule)
+                obj is System.Collections.Specialized.HybridDictionary ||
+                obj is System.TimeZoneInfo.AdjustmentRule ||
+                obj is System.Net.CookieContainer ||
+                obj is SortedList)
             {
                 return;
             }

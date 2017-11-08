@@ -74,11 +74,6 @@ namespace System.ComponentModel
             info.AddValue(nameof(NativeErrorCode), NativeErrorCode);
         }
 
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-        }
-
         /// <devdoc>
         ///    <para>Represents the Win32 error code associated with this exception. This 
         ///       field is read-only.</para>
