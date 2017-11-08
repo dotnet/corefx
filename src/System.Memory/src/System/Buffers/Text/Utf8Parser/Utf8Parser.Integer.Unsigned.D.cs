@@ -9,225 +9,276 @@ namespace System.Buffers.Text
         private static bool TryParseByteD(ReadOnlySpan<byte> text, out byte value, out int bytesConsumed)
         {
             if (text.Length < 1)
+                goto FalseExit;
+
+            int index = 0;
+            uint digit = text[index] - 48u; // '0'
+            uint answer = 0;
+
+            if (digit <= 9)
             {
-                bytesConsumed = 0;
-                value = default;
-                return false;
+                if (digit == 0)
+                {
+                    do
+                    {
+                        index++;
+                        if ((uint)index >= (uint)text.Length)
+                            goto Done;
+                        digit = text[index];
+                    } while (digit == '0');
+
+                    digit = digit - 48u; // '0'
+                    if (digit > 9)
+                        goto Done;
+                }
+
+                answer = digit;
+                index++;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                index++;
+                answer = 10 * answer + digit;
+
+                // Potential overflow
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                answer = 10 * answer + digit;
+                if (answer > byte.MaxValue)
+                    goto FalseExit; // Overflow
+                index++;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                if (!ParserHelpers.IsDigit(text[index]))
+                    goto Done;
+
+                // Guaranteed overflow
+                goto FalseExit;
             }
 
-            // Parse the first digit separately. If invalid here, we need to return false.
-            uint firstDigit = text[0] - 48u; // '0'
-            if (firstDigit > 9)
-            {
-                bytesConsumed = 0;
-                value = default;
-                return false;
-            }
-            uint parsedValue = firstDigit;
+FalseExit:
+            bytesConsumed = default;
+            value = default;
+            return false;
 
-            if (text.Length < ParserHelpers.ByteOverflowLength)
-            {
-                // Length is less than Parsers.ByteOverflowLength; overflow is not possible
-                for (int index = 1; index < text.Length; index++)
-                {
-                    uint nextDigit = text[index] - 48u; // '0'
-                    if (nextDigit > 9)
-                    {
-                        bytesConsumed = index;
-                        value = (byte)(parsedValue);
-                        return true;
-                    }
-                    parsedValue = parsedValue * 10 + nextDigit;
-                }
-            }
-            else
-            {
-                // Length is greater than Parsers.ByteOverflowLength; overflow is only possible after Parsers.ByteOverflowLength
-                // digits. There may be no overflow after Parsers.ByteOverflowLength if there are leading zeroes.
-                for (int index = 1; index < ParserHelpers.ByteOverflowLength - 1; index++)
-                {
-                    uint nextDigit = text[index] - 48u; // '0'
-                    if (nextDigit > 9)
-                    {
-                        bytesConsumed = index;
-                        value = (byte)(parsedValue);
-                        return true;
-                    }
-                    parsedValue = parsedValue * 10 + nextDigit;
-                }
-                for (int index = ParserHelpers.ByteOverflowLength - 1; index < text.Length; index++)
-                {
-                    uint nextDigit = text[index] - 48u; // '0'
-                    if (nextDigit > 9)
-                    {
-                        bytesConsumed = index;
-                        value = (byte)(parsedValue);
-                        return true;
-                    }
-                    // If parsedValue > (byte.MaxValue / 10), any more appended digits will cause overflow.
-                    // if parsedValue == (byte.MaxValue / 10), any nextDigit greater than 5 implies overflow.
-                    if (parsedValue > byte.MaxValue / 10 || (parsedValue == byte.MaxValue / 10 && nextDigit > 5))
-                    {
-                        bytesConsumed = 0;
-                        value = default;
-                        return false;
-                    }
-                    parsedValue = parsedValue * 10 + nextDigit;
-                }
-            }
-
-            bytesConsumed = text.Length;
-            value = (byte)(parsedValue);
+Done:
+            bytesConsumed = index;
+            value = (byte)answer;
             return true;
         }
 
         private static bool TryParseUInt16D(ReadOnlySpan<byte> text, out ushort value, out int bytesConsumed)
         {
             if (text.Length < 1)
+                goto FalseExit;
+
+            int index = 0;
+            uint digit = text[index] - 48u; // '0'
+            uint answer = 0;
+
+            if (digit <= 9)
             {
-                bytesConsumed = 0;
-                value = default;
-                return false;
+                if (digit == 0)
+                {
+                    do
+                    {
+                        index++;
+                        if ((uint)index >= (uint)text.Length)
+                            goto Done;
+                        digit = text[index];
+                    } while (digit == '0');
+
+                    digit = digit - 48u; // '0'
+                    if (digit > 9)
+                        goto Done;
+                }
+
+                answer = digit;
+                index++;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                index++;
+                answer = 10 * answer + digit;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                index++;
+                answer = 10 * answer + digit;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                index++;
+                answer = 10 * answer + digit;
+
+                // Potential overflow
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                answer = 10 * answer + digit;
+                if (answer > ushort.MaxValue)
+                    goto FalseExit; // Overflow
+                index++;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                if (!ParserHelpers.IsDigit(text[index]))
+                    goto Done;
+
+                // Guaranteed overflow
+                goto FalseExit;
             }
 
-            // Parse the first digit separately. If invalid here, we need to return false.
-            uint firstDigit = text[0] - 48u; // '0'
-            if (firstDigit > 9)
-            {
-                bytesConsumed = 0;
-                value = default;
-                return false;
-            }
-            uint parsedValue = firstDigit;
+FalseExit:
+            bytesConsumed = default;
+            value = default;
+            return false;
 
-            if (text.Length < ParserHelpers.Int16OverflowLength)
-            {
-                // Length is less than Parsers.Int16OverflowLength; overflow is not possible
-                for (int index = 1; index < text.Length; index++)
-                {
-                    uint nextDigit = text[index] - 48u; // '0'
-                    if (nextDigit > 9)
-                    {
-                        bytesConsumed = index;
-                        value = (ushort)(parsedValue);
-                        return true;
-                    }
-                    parsedValue = parsedValue * 10 + nextDigit;
-                }
-            }
-            else
-            {
-                // Length is greater than Parsers.Int16OverflowLength; overflow is only possible after Parsers.Int16OverflowLength
-                // digits. There may be no overflow after Parsers.Int16OverflowLength if there are leading zeroes.
-                for (int index = 1; index < ParserHelpers.Int16OverflowLength - 1; index++)
-                {
-                    uint nextDigit = text[index] - 48u; // '0'
-                    if (nextDigit > 9)
-                    {
-                        bytesConsumed = index;
-                        value = (ushort)(parsedValue);
-                        return true;
-                    }
-                    parsedValue = parsedValue * 10 + nextDigit;
-                }
-                for (int index = ParserHelpers.Int16OverflowLength - 1; index < text.Length; index++)
-                {
-                    uint nextDigit = text[index] - 48u; // '0'
-                    if (nextDigit > 9)
-                    {
-                        bytesConsumed = index;
-                        value = (ushort)(parsedValue);
-                        return true;
-                    }
-                    // If parsedValue > (ushort.MaxValue / 10), any more appended digits will cause overflow.
-                    // if parsedValue == (ushort.MaxValue / 10), any nextDigit greater than 5 implies overflow.
-                    if (parsedValue > ushort.MaxValue / 10 || (parsedValue == ushort.MaxValue / 10 && nextDigit > 5))
-                    {
-                        bytesConsumed = 0;
-                        value = default;
-                        return false;
-                    }
-                    parsedValue = parsedValue * 10 + nextDigit;
-                }
-            }
-
-            bytesConsumed = text.Length;
-            value = (ushort)(parsedValue);
+Done:
+            bytesConsumed = index;
+            value = (ushort)answer;
             return true;
         }
 
         private static bool TryParseUInt32D(ReadOnlySpan<byte> text, out uint value, out int bytesConsumed)
         {
             if (text.Length < 1)
+                goto FalseExit;
+
+            int index = 0;
+            uint digit = text[index] - 48u; // '0'
+            uint answer = 0;
+
+            if (digit <= 9)
             {
-                bytesConsumed = 0;
-                value = default;
-                return false;
+                if (digit == 0)
+                {
+                    do
+                    {
+                        index++;
+                        if ((uint)index >= (uint)text.Length)
+                            goto Done;
+                        digit = text[index];
+                    } while (digit == '0');
+
+                    digit = digit - 48u; // '0'
+                    if (digit > 9)
+                        goto Done;
+                }
+
+                answer = digit;
+                index++;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                index++;
+                answer = 10 * answer + digit;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                index++;
+                answer = 10 * answer + digit;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                index++;
+                answer = 10 * answer + digit;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                index++;
+                answer = 10 * answer + digit;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                index++;
+                answer = 10 * answer + digit;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                index++;
+                answer = 10 * answer + digit;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                index++;
+                answer = 10 * answer + digit;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                index++;
+                answer = 10 * answer + digit;
+
+                // Potential overflow
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                digit = text[index] - 48u; // '0';
+                if (digit > 9)
+                    goto Done;
+                if (answer > uint.MaxValue / 10 || (answer == uint.MaxValue / 10 && digit > 5))
+                    goto FalseExit; // Overflow
+                answer = 10 * answer + digit;
+                index++;
+
+                if ((uint)index >= (uint)text.Length)
+                    goto Done;
+                if (!ParserHelpers.IsDigit(text[index]))
+                    goto Done;
+
+                // Guaranteed overflow
+                goto FalseExit;
             }
 
-            // Parse the first digit separately. If invalid here, we need to return false.
-            uint firstDigit = text[0] - 48u; // '0'
-            if (firstDigit > 9)
-            {
-                bytesConsumed = 0;
-                value = default;
-                return false;
-            }
-            uint parsedValue = firstDigit;
+FalseExit:
+            bytesConsumed = default;
+            value = default;
+            return false;
 
-            if (text.Length < ParserHelpers.Int32OverflowLength)
-            {
-                // Length is less than Parsers.Int32OverflowLength; overflow is not possible
-                for (int index = 1; index < text.Length; index++)
-                {
-                    uint nextDigit = text[index] - 48u; // '0'
-                    if (nextDigit > 9)
-                    {
-                        bytesConsumed = index;
-                        value = parsedValue;
-                        return true;
-                    }
-                    parsedValue = parsedValue * 10 + nextDigit;
-                }
-            }
-            else
-            {
-                // Length is greater than Parsers.Int32OverflowLength; overflow is only possible after Parsers.Int32OverflowLength
-                // digits. There may be no overflow after Parsers.Int32OverflowLength if there are leading zeroes.
-                for (int index = 1; index < ParserHelpers.Int32OverflowLength - 1; index++)
-                {
-                    uint nextDigit = text[index] - 48u; // '0'
-                    if (nextDigit > 9)
-                    {
-                        bytesConsumed = index;
-                        value = parsedValue;
-                        return true;
-                    }
-                    parsedValue = parsedValue * 10 + nextDigit;
-                }
-                for (int index = ParserHelpers.Int32OverflowLength - 1; index < text.Length; index++)
-                {
-                    uint nextDigit = text[index] - 48u; // '0'
-                    if (nextDigit > 9)
-                    {
-                        bytesConsumed = index;
-                        value = parsedValue;
-                        return true;
-                    }
-                    // If parsedValue > (uint.MaxValue / 10), any more appended digits will cause overflow.
-                    // if parsedValue == (uint.MaxValue / 10), any nextDigit greater than 5 implies overflow.
-                    if (parsedValue > uint.MaxValue / 10 || (parsedValue == uint.MaxValue / 10 && nextDigit > 5))
-                    {
-                        bytesConsumed = 0;
-                        value = default;
-                        return false;
-                    }
-                    parsedValue = parsedValue * 10 + nextDigit;
-                }
-            }
-
-            bytesConsumed = text.Length;
-            value = parsedValue;
+Done:
+            bytesConsumed = index;
+            value = answer;
             return true;
         }
 
