@@ -83,7 +83,7 @@ invalid-xml-base.xml
 invalid-xml-lang.xml
 invalid_html.xml
 license-noerror.xml
-###link-extensions.xml    Generated result file is different 
+link-extensions.xml
 link-full-uri.xml
 link-href-relative.xml
 link-hreflang-invalid-language.xml
@@ -126,7 +126,7 @@ no-content-or-alternate.xml
 no-content-or-summary.xml
 no-name.xml
 prefixed-namespace.xml
-###rdf-extensions.xml    Generated result file is different.
+rdf-extensions.xml
 rel-colon.xml
 related-same-rel-type-hreflang.xml
 relative-ref.xml
