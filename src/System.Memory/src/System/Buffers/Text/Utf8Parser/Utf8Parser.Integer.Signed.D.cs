@@ -66,13 +66,13 @@ namespace System.Buffers.Text
                 digit = text[index] - 48u; // '0';
                 if (digit > 9)
                     goto Done;
+                index++;
                 answer = 10 * answer + digit;
 
                 // if sign < 0, (-1 * sign + 1) / 2 = 1
                 // else, (-1 * sign + 1) / 2 = 0
                 if (answer > (uint)sbyte.MaxValue + (-1 * sign + 1) / 2)
                     goto FalseExit; // Overflow
-                index++;
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
                 if (!ParserHelpers.IsDigit(text[index]))
@@ -169,13 +169,13 @@ Done:
                 digit = text[index] - 48u; // '0';
                 if (digit > 9)
                     goto Done;
+                index++;
                 answer = 10 * answer + digit;
 
                 // if sign < 0, (-1 * sign + 1) / 2 = 1
                 // else, (-1 * sign + 1) / 2 = 0
                 if ((uint)answer > (uint)short.MaxValue + (-1 * sign + 1) / 2)
                     goto FalseExit; // Overflow
-                index++;
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
                 if (!ParserHelpers.IsDigit(text[index]))
@@ -312,9 +312,9 @@ Done:
                 digit = text[index] - 48u; // '0';
                 if (digit > 9)
                     goto Done;
+                index++;
                 if (answer > int.MaxValue / 10)
                     goto FalseExit; // Will overflow our accumulator (and hence, the value)
-                index++;
                 answer = 10 * answer + digit;
 
                 // if sign < 0, (-1 * sign + 1) / 2 = 1

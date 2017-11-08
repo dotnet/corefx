@@ -49,10 +49,10 @@ namespace System.Buffers.Text
                 digit = text[index] - 48u; // '0';
                 if (digit > 9)
                     goto Done;
+                index++;
                 answer = 10 * answer + digit;
                 if (answer > byte.MaxValue)
                     goto FalseExit; // Overflow
-                index++;
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
@@ -133,10 +133,10 @@ Done:
                 digit = text[index] - 48u; // '0';
                 if (digit > 9)
                     goto Done;
+                index++;
                 answer = 10 * answer + digit;
                 if (answer > ushort.MaxValue)
                     goto FalseExit; // Overflow
-                index++;
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
@@ -257,10 +257,10 @@ Done:
                 digit = text[index] - 48u; // '0';
                 if (digit > 9)
                     goto Done;
+                index++;
                 if (answer > uint.MaxValue / 10 || (answer == uint.MaxValue / 10 && digit > 5))
                     goto FalseExit; // Overflow
                 answer = 10 * answer + digit;
-                index++;
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
