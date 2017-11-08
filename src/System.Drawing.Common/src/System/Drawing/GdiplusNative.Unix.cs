@@ -22,7 +22,7 @@ namespace System.Drawing
 
             private static IntPtr LoadNativeLibrary()
             {
-                string libraryName = null;
+                string libraryName;
 
                 IntPtr lib = IntPtr.Zero;
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
