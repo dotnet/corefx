@@ -117,7 +117,7 @@ namespace System
         /// <summary>
         /// Returns an empty <see cref="Memory{T}"/>
         /// </summary>
-        public static Memory<T> Empty { get; } = SpanHelpers.PerTypeValues<T>.EmptyArray;
+        public static Memory<T> Empty => default;
 
         /// <summary>
         /// The number of items in the memory.
