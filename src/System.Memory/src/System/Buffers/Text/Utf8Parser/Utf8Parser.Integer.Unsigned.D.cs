@@ -12,46 +12,44 @@ namespace System.Buffers.Text
                 goto FalseExit;
 
             int index = 0;
-            uint digit = text[index] - 48u; // '0'
-            uint answer = 0;
+            int num = text[index];
+            int answer = 0;
 
-            if (digit <= 9)
+            if (ParserHelpers.IsDigit(num))
             {
-                if (digit == 0)
+                if (num == '0')
                 {
                     do
                     {
                         index++;
                         if ((uint)index >= (uint)text.Length)
                             goto Done;
-                        digit = text[index];
-                    } while (digit == '0');
-
-                    digit = digit - 48u; // '0'
-                    if (digit > 9)
+                        num = text[index];
+                    } while (num == '0');
+                    if (!ParserHelpers.IsDigit(num))
                         goto Done;
                 }
 
-                answer = digit;
+                answer = num - '0';
                 index++;
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                answer = 10 * answer + digit;
+                answer = 10 * answer + num - '0';
 
                 // Potential overflow
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                answer = 10 * answer + digit;
-                if (answer > byte.MaxValue)
+                answer = answer * 10 + num - '0';
+                if ((uint)answer > byte.MaxValue)
                     goto FalseExit; // Overflow
 
                 if ((uint)index >= (uint)text.Length)
@@ -80,62 +78,60 @@ Done:
                 goto FalseExit;
 
             int index = 0;
-            uint digit = text[index] - 48u; // '0'
-            uint answer = 0;
+            int num = text[index];
+            int answer = 0;
 
-            if (digit <= 9)
+            if (ParserHelpers.IsDigit(num))
             {
-                if (digit == 0)
+                if (num == '0')
                 {
                     do
                     {
                         index++;
                         if ((uint)index >= (uint)text.Length)
                             goto Done;
-                        digit = text[index];
-                    } while (digit == '0');
-
-                    digit = digit - 48u; // '0'
-                    if (digit > 9)
+                        num = text[index];
+                    } while (num == '0');
+                    if (!ParserHelpers.IsDigit(num))
                         goto Done;
                 }
 
-                answer = digit;
+                answer = num - '0';
                 index++;
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                answer = 10 * answer + digit;
+                answer = 10 * answer + num - '0';
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                answer = 10 * answer + digit;
+                answer = 10 * answer + num - '0';
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                answer = 10 * answer + digit;
+                answer = 10 * answer + num - '0';
 
                 // Potential overflow
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                answer = 10 * answer + digit;
-                if (answer > ushort.MaxValue)
+                answer = answer * 10 + num - '0';
+                if ((uint)answer > ushort.MaxValue)
                     goto FalseExit; // Overflow
 
                 if ((uint)index >= (uint)text.Length)
@@ -164,103 +160,101 @@ Done:
                 goto FalseExit;
 
             int index = 0;
-            uint digit = text[index] - 48u; // '0'
-            uint answer = 0;
+            int num = text[index];
+            int answer = 0;
 
-            if (digit <= 9)
+            if (ParserHelpers.IsDigit(num))
             {
-                if (digit == 0)
+                if (num == '0')
                 {
                     do
                     {
                         index++;
                         if ((uint)index >= (uint)text.Length)
                             goto Done;
-                        digit = text[index];
-                    } while (digit == '0');
-
-                    digit = digit - 48u; // '0'
-                    if (digit > 9)
+                        num = text[index];
+                    } while (num == '0');
+                    if (!ParserHelpers.IsDigit(num))
                         goto Done;
                 }
 
-                answer = digit;
+                answer = num - '0';
                 index++;
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                answer = 10 * answer + digit;
+                answer = 10 * answer + num - '0';
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                answer = 10 * answer + digit;
+                answer = 10 * answer + num - '0';
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                answer = 10 * answer + digit;
+                answer = 10 * answer + num - '0';
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                answer = 10 * answer + digit;
+                answer = 10 * answer + num - '0';
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                answer = 10 * answer + digit;
+                answer = 10 * answer + num - '0';
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                answer = 10 * answer + digit;
+                answer = 10 * answer + num - '0';
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                answer = 10 * answer + digit;
+                answer = 10 * answer + num - '0';
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                answer = 10 * answer + digit;
+                answer = 10 * answer + num - '0';
 
                 // Potential overflow
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
-                digit = text[index] - 48u; // '0';
-                if (digit > 9)
+                num = text[index];
+                if (!ParserHelpers.IsDigit(num))
                     goto Done;
                 index++;
-                if (answer > uint.MaxValue / 10 || (answer == uint.MaxValue / 10 && digit > 5))
+                if (((uint)answer) > uint.MaxValue / 10 || (((uint)answer) == uint.MaxValue / 10 && num > '5'))
                     goto FalseExit; // Overflow
-                answer = 10 * answer + digit;
+                answer = answer * 10 + num - '0';
 
                 if ((uint)index >= (uint)text.Length)
                     goto Done;
@@ -278,7 +272,7 @@ FalseExit:
 
 Done:
             bytesConsumed = index;
-            value = answer;
+            value = (uint)answer;
             return true;
         }
 
