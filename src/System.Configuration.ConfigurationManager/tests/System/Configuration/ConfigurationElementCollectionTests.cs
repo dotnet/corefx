@@ -49,7 +49,7 @@ namespace System.ConfigurationTests
         [Fact]
         public void NullComparerThrows()
         {
-            Assert.Equal("comparer", Assert.Throws<ArgumentNullException>(() => new SimpleCollection(null)).ParamName);
+            AssertExtensions.Throws<ArgumentNullException>("comparer", () => new SimpleCollection(null));
         }
 
         [Fact]

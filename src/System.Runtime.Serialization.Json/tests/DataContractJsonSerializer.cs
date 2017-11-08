@@ -232,17 +232,41 @@ public static partial class DataContractJsonSerializerTests
 
         var testStrings = new[]
         {
-            new { value = "\u0008", baseline = "\\b" }, // BACKSPACE
-            new { value = "\u000C", baseline = "\\f" }, // FORM FEED (FF)
-            new { value = "\u000A", baseline = "\\n" }, // LINE FEED (LF)
-            new { value = "\u000D", baseline = "\\r" }, // CARRIAGE RETURN (CR)
-            new { value = "\u0009", baseline = "\\t" }, // HORIZONTAL TABULATION
-            new { value = "\u0022", baseline = "\\\"" }, // QUOTATION MARK
-            new { value = "\u005C", baseline = "\\\\" }, // REVERSE SOLIDUS
             new { value = "\u0000", baseline = "\\u0000" }, // NULL
+            new { value = "\u0001", baseline = "\\u0001" },
+            new { value = "\u0002", baseline = "\\u0002" },
+            new { value = "\u0003", baseline = "\\u0003" },
+            new { value = "\u0004", baseline = "\\u0004" },
+            new { value = "\u0005", baseline = "\\u0005" },
+            new { value = "\u0006", baseline = "\\u0006" },
+            new { value = "\u0007", baseline = "\\u0007" },
+            new { value = "\u0008", baseline = "\\b" }, // BACKSPACE
+            new { value = "\u0009", baseline = "\\t" }, // HORIZONTAL TABULATION
+            new { value = "\u000A", baseline = "\\n" }, // LINE FEED (LF)
             new { value = "\u000B", baseline = "\\u000b" }, // LINE TABULATION
+            new { value = "\u000C", baseline = "\\f" }, // FORM FEED (FF)
+            new { value = "\u000D", baseline = "\\r" }, // CARRIAGE RETURN (CR)
+            new { value = "\u000E", baseline = "\\u000e" },
             new { value = "\u000F", baseline = "\\u000f" }, // SHIFT IN
+            new { value = "\u0010", baseline = "\\u0010" },
+            new { value = "\u0011", baseline = "\\u0011" },
+            new { value = "\u0012", baseline = "\\u0012" },
+            new { value = "\u0013", baseline = "\\u0013" },
+            new { value = "\u0014", baseline = "\\u0014" },
+            new { value = "\u0015", baseline = "\\u0015" },
+            new { value = "\u0016", baseline = "\\u0016" },
+            new { value = "\u0017", baseline = "\\u0017" },
+            new { value = "\u0018", baseline = "\\u0018" },
+            new { value = "\u0019", baseline = "\\u0019" },
+            new { value = "\u001A", baseline = "\\u001a" },
+            new { value = "\u001B", baseline = "\\u001b" },
+            new { value = "\u001C", baseline = "\\u001c" },
+            new { value = "\u001D", baseline = "\\u001d" },
+            new { value = "\u001E", baseline = "\\u001e" },
+            new { value = "\u001F", baseline = "\\u001f" },
+            new { value = "\u0022", baseline = "\\\"" }, // QUOTATION MARK
             new { value = "\u0027", baseline = "'" },
+            new { value = "\u005C", baseline = "\\\\" }, // REVERSE SOLIDUS
         };
 
         foreach (var pair in testStrings)
@@ -444,7 +468,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_GetOonlyDictionary_UseSimpleDictionaryFormat()
     {
         var x = new TypeWithDictionaryGenericMembers();
@@ -469,6 +492,30 @@ public static partial class DataContractJsonSerializerTests
         Assert.True(y.RO2.Count == 2);
         Assert.True(y.RO2[true] == 'a');
         Assert.True(y.RO2[false] == 'b');
+    }
+
+
+    [Fact]
+    public static void DCJS_Dictionary_UseSimpleDictionaryFormat_VariousKeyTypes()
+    {
+        DCJS_Dictionary_UseSimpleDictionaryFormat((int)1, 1);
+        DCJS_Dictionary_UseSimpleDictionaryFormat((uint)1, 1);
+        DCJS_Dictionary_UseSimpleDictionaryFormat((short)1, 1);
+        DCJS_Dictionary_UseSimpleDictionaryFormat((long)1, 1);
+        DCJS_Dictionary_UseSimpleDictionaryFormat((byte)1, 1);
+        DCJS_Dictionary_UseSimpleDictionaryFormat((double)1.0, 1);
+        DCJS_Dictionary_UseSimpleDictionaryFormat((float)1.0, 1);
+        DCJS_Dictionary_UseSimpleDictionaryFormat((char)'a', 1);
+    }
+
+    private static void DCJS_Dictionary_UseSimpleDictionaryFormat<T>(T key, int value)
+    {
+        var settings = new DataContractJsonSerializerSettings { UseSimpleDictionaryFormat = true };
+        var dict = new Dictionary<T, int>() { { key, 1 } };
+        var actual = SerializeAndDeserialize(dict, string.Empty, settings, skipStringCompare: true);
+        Assert.NotNull(actual);
+        Assert.Equal(dict.Count, actual.Count);
+        Assert.Equal(dict[key], actual[key]);
     }
 
     [Fact]
@@ -1504,7 +1551,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_GenericQueue()
     {
         Queue<int> value = new Queue<int>();
@@ -1518,7 +1564,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_GenericStack()
     {
         var value = new Stack<int>();
@@ -1534,7 +1579,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_Queue()
     {
         var value = new Queue();
@@ -1549,7 +1593,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_Stack()
     {
         var value = new Stack();
@@ -1565,7 +1608,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_SortedList()
     {
         var value = new SortedList();
@@ -1578,7 +1620,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_SystemVersion()
     {
         Version value = new Version(1, 2, 3, 4);
@@ -1689,7 +1730,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_ReadOnlyCollection()
     {
         List<string> list = new List<string>() { "Foo", "Bar" };
@@ -1701,7 +1741,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_ReadOnlyDictionary()
     {
         var dict = new Dictionary<string, int>();
@@ -2447,7 +2486,7 @@ public static partial class DataContractJsonSerializerTests
                 },
             };
             var original = DateTime.Now;
-            Assert.Throws<ArgumentException>(() => SerializeAndDeserialize(original, null, dcjsSettings, null, true));
+            AssertExtensions.Throws<ArgumentException>("style", () => SerializeAndDeserialize(original, null, dcjsSettings, null, true));
         }
     }
 
@@ -2702,11 +2741,6 @@ public static partial class DataContractJsonSerializerTests
         Assert.Equal(4, actual2["a4"]);
     }
 
-#if ReflectionOnly
-    [ActiveIssue(18373)]
-#else
-    [ActiveIssue("dotnet/corefx #20481", TargetFrameworkMonikers.UapAot)]
-#endif
     [Fact]
     public static void DCJS_VerifyDictionaryFormat()
     {
@@ -2764,7 +2798,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #20483", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_VerifyIndentation()
     {
         var testClass = new TestClass()
@@ -2862,7 +2895,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [ActiveIssue("dotnet/corefx #20478", TargetFrameworkMonikers.UapAot)]
     public static void DCJS_ReadOnlyDictionaryCausingDuplicateInvalidDataContract()
     {
         var dict = new Dictionary<string, int>();
@@ -2874,6 +2906,32 @@ public static partial class DataContractJsonSerializerTests
         Assert.StrictEqual(value["Foo"], deserializedValue["Foo"]);
         Assert.StrictEqual(value["Bar"], deserializedValue["Bar"]);
     }
+
+    [Fact]
+    public static void DCJS_InvalidDataContract_Write_Invalid_Types_Throws()
+    {
+        foreach (NativeJsonTestData td in NativeJsonTestData.Json_InvalidTypes)
+        {
+            Assert.Throws<InvalidDataContractException>(() =>
+            {
+                object o = td.Instantiate();
+                DataContractJsonSerializer dcs = new DataContractJsonSerializer(o.GetType());
+                MemoryStream ms = new MemoryStream();
+                dcs.WriteObject(ms, o);
+            });
+        }
+    }
+
+    [Fact]
+    public static void DCJS_ValidateExceptionOnUnspecifiedRootSerializationType()
+    {
+        var value = new UnspecifiedRootSerializationType();
+        string baseline = "{\"MyIntProperty\":0,\"MyStringProperty\":null}";
+        var actual = SerializeAndDeserialize(value, baseline);
+        
+        Assert.Equal(value.MyIntProperty, actual.MyIntProperty);
+        Assert.Equal(value.MyStringProperty, actual.MyStringProperty);
+    } 
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null, bool skipStringCompare = false)
     {

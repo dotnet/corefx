@@ -9,38 +9,52 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <CoreFxCurrentRef>02d899e8f3e71a4f5afbd1412aeac387e12ce973</CoreFxCurrentRef>
-    <CoreClrCurrentRef>1621e635efcf0a895866e654db357eb3d44ad650</CoreClrCurrentRef>
-    <CoreSetupCurrentRef>82fc1fc68bfa1d55e43913b188868879f31de8e7</CoreSetupCurrentRef>
-    <ExternalCurrentRef>5a0606fccb09fce4b47545ae9896139acca547f5</ExternalCurrentRef>
-    <ProjectNTfsCurrentRef>02d899e8f3e71a4f5afbd1412aeac387e12ce973</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>02d899e8f3e71a4f5afbd1412aeac387e12ce973</ProjectNTfsTestILCCurrentRef>
-    <SniCurrentRef>97059fa979a3c8fb8b9fba127c526f15e48c9dde</SniCurrentRef>
-    <StandardCurrentRef>02d899e8f3e71a4f5afbd1412aeac387e12ce973</StandardCurrentRef>
+    <CoreFxCurrentRef>f5e312bcdc7adf0d2fa2eef716d03c4bcc9075b9</CoreFxCurrentRef>
+    <CoreClrCurrentRef>4dd4bc933ecb18df77beb65afe79b118cae240d4</CoreClrCurrentRef>
+    <CoreSetupCurrentRef>fb19e768da6b850633e172611d595b744d4a72bb</CoreSetupCurrentRef>
+    <ExternalCurrentRef>96dc7805f5df4a70a55783964ce69dcd91bfca80</ExternalCurrentRef>
+    <ProjectNTfsCurrentRef>fb19e768da6b850633e172611d595b744d4a72bb</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>fb19e768da6b850633e172611d595b744d4a72bb</ProjectNTfsTestILCCurrentRef>
+    <SniCurrentRef>8bd1ec5fac9f0eec34ff6b34b1d878b4359e02dd</SniCurrentRef>
+    <StandardCurrentRef>6298244e25cf84d91e3cda9627315f2425274624</StandardCurrentRef>
+    <BuildToolsCurrentRef>a2b323a39e7ab7e92d87334260328cc042ed6a78</BuildToolsCurrentRef>
   </PropertyGroup>
 
-  <!-- Auto-upgraded properties for each build info dependency. -->
+  <!-- Product dependency versions. -->
   <PropertyGroup>
-    <PlatformPackageVersion>2.1.0-preview1-25324-02</PlatformPackageVersion>
-    <CoreFxExpectedPrerelease>preview1-25406-02</CoreFxExpectedPrerelease>
-    <CoreClrPackageVersion>2.1.0-preview1-25407-01</CoreClrPackageVersion>
-    <ExternalExpectedPrerelease>beta-25322-00</ExternalExpectedPrerelease>
-    <ProjectNTfsExpectedPrerelease>beta-25406-00</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>beta-25406-00</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25406-00</ProjectNTfsTestILCPackageVersion>
-    <NETStandardPackageVersion>2.1.0-preview1-25406-01</NETStandardPackageVersion>
-    <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
-    <MicrosoftNETCoreAppPackageVersion>2.1.0-preview1-25405-02</MicrosoftNETCoreAppPackageVersion>
-    <!-- Use the SNI runtime package -->
-    <SniPackageVersion>4.4.0-preview2-25312-01</SniPackageVersion>
+    <NETStandardLibraryPackageVersion>2.0.1</NETStandardLibraryPackageVersion>
+    <NETStandardLibraryPackageId>NETStandard.Library</NETStandardLibraryPackageId>
+
+    <!-- SNI runtime package -->
+    <RuntimeWinX64RuntimeNativeSystemDataSqlClientSniPackageVersion>4.4.0</RuntimeWinX64RuntimeNativeSystemDataSqlClientSniPackageVersion>
   </PropertyGroup>
 
-  <!-- Full package version strings that are used in other parts of the build. -->
+  <!-- Tests/infrastructure dependency versions. -->
   <PropertyGroup>
+    <CoreFxExpectedPrerelease>preview1-25906-03</CoreFxExpectedPrerelease>
+    <MicrosoftNETCorePlatformsPackageVersion>2.1.0-preview1-25906-03</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.0-preview1-25901-06</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <ProjectNTfsExpectedPrerelease>beta-25907-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>beta-25907-00</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25907-00</ProjectNTfsTestILCPackageVersion>
+    <MicrosoftNETCoreDotNetHostPackageVersion>2.0.1-servicing-25615-03</MicrosoftNETCoreDotNetHostPackageVersion>
+    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>2.0.1-servicing-25615-03</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>2.1.0-preview1-25906-02</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.1.0-preview1-25906-02</MicrosoftDotNetPlatformAbstractionsPackageVersion>
+
+    <!-- CoreFX-built SNI identity package -->
+    <RuntimeNativeSystemDataSqlClientSniPackageVersion>4.4.0</RuntimeNativeSystemDataSqlClientSniPackageVersion>
+
     <AppXRunnerVersion>1.0.3-prerelease-00921-01</AppXRunnerVersion>
     <XunitPerfAnalysisPackageVersion>1.0.0-beta-build0007</XunitPerfAnalysisPackageVersion>
     <TraceEventPackageVersion>1.0.3-alpha-experimental</TraceEventPackageVersion>
-    <XunitNetcoreExtensionsVersion>1.0.1-prerelease-01630-02</XunitNetcoreExtensionsVersion>
+    <XunitNetcoreExtensionsVersion>1.0.1-prerelease-02203-01</XunitNetcoreExtensionsVersion>
+  </PropertyGroup>
+
+  <!-- Package versions used as toolsets -->
+  <PropertyGroup>
+    <FeedTasksPackage>Microsoft.DotNet.Build.Tasks.Feed</FeedTasksPackage>
+    <FeedTasksPackageVersion>1.0.0-prerelease-02203-01</FeedTasksPackageVersion>
   </PropertyGroup>
 
   <!-- Package dependency verification/auto-upgrade configuration. -->
@@ -72,7 +86,7 @@
       <CurrentRef>$(SniCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="Standard">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)standard/$(DependencyBranch)</BuildInfoPath>
+      <BuildInfoPath>$(BaseDotNetBuildInfo)standard/release/2.0.0</BuildInfoPath>
       <CurrentRef>$(StandardCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="ProjectNTfs">
@@ -82,6 +96,10 @@
     <RemoteDependencyBuildInfo Include="ProjectNTfsTestILC">
       <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs-testilc/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(ProjectNTfsTestILCCurrentRef)</CurrentRef>
+    </RemoteDependencyBuildInfo>
+    <RemoteDependencyBuildInfo Include="BuildTools">
+      <BuildInfoPath>$(BaseDotNetBuildInfo)buildtools/$(DependencyBranch)</BuildInfoPath>
+      <CurrentRef>$(BuildToolsCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
 
     <DependencyBuildInfo Include="@(RemoteDependencyBuildInfo)">
@@ -95,23 +113,18 @@
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreFx">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>PlatformPackageVersion</ElementName>
+      <ElementName>MicrosoftNETCorePlatformsPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.Platforms</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreClr">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>CoreClrPackageVersion</ElementName>
+      <ElementName>MicrosoftNETCoreRuntimeCoreCLRPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.Runtime.CoreCLR</PackageId>
-    </XmlUpdateStep>
-    <XmlUpdateStep Include="External">
-      <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>ExternalExpectedPrerelease</ElementName>
-      <BuildInfoName>External</BuildInfoName>
     </XmlUpdateStep>
     <XmlUpdateStep Include="Standard">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>NETStandardPackageVersion</ElementName>
-      <PackageId>$(NETStandardPackageId)</PackageId>
+      <ElementName>NETStandardLibraryPackageVersion</ElementName>
+      <PackageId>$(NETStandardLibraryPackageId)</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="ProjectNTfs">
       <Path>$(MSBuildThisFileFullPath)</Path>
@@ -130,7 +143,7 @@
     </XmlUpdateStep>
     <XmlUpdateStep Include="Sni">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>SniPackageVersion</ElementName>
+      <ElementName>RuntimeWinX64RuntimeNativeSystemDataSqlClientSniPackageVersion</ElementName>
       <PackageId>runtime.win-x64.runtime.native.System.Data.SqlClient.sni</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreSetup">
@@ -138,10 +151,31 @@
       <ElementName>MicrosoftNETCoreAppPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.App</PackageId>
     </XmlUpdateStep>
+    <XmlUpdateStep Include="CoreSetup">
+      <Path>$(MSBuildThisFileFullPath)</Path>
+      <ElementName>MicrosoftDotNetPlatformAbstractionsPackageVersion</ElementName>
+      <PackageId>Microsoft.DotNet.PlatformAbstractions</PackageId>
+    </XmlUpdateStep>
+    <UpdateStep Include="BuildTools">
+      <UpdaterType>File</UpdaterType>
+      <Path>$(MSBuildThisFileDirectory)BuildToolsVersion.txt</Path>
+      <PackageId>Microsoft.DotNet.BuildTools</PackageId>
+    </UpdateStep>
+    <XmlUpdateStep Include="BuildTools">
+       <Path>$(MSBuildThisFileFullPath)</Path>
+       <ElementName>XunitNetcoreExtensionsVersion</ElementName>
+       <PackageId>Microsoft.xunit.netcore.extensions</PackageId>
+     </XmlUpdateStep>
+     <XmlUpdateStep Include="BuildTools">
+       <Path>$(MSBuildThisFileFullPath)</Path>
+       <ElementName>FeedTasksPackageVersion</ElementName>
+       <PackageId>$(FeedTasksPackage)</PackageId>
+     </XmlUpdateStep>
   </ItemGroup>
 
   <PropertyGroup>
     <XUnitPackageVersion>2.3.0-beta1-build3642</XUnitPackageVersion>
+    <CompatibilityShimsPackageVersion>2.0.0</CompatibilityShimsPackageVersion>
   </PropertyGroup>
 
   <!-- Set up dependencies on packages that aren't found in a BuildInfo. -->
@@ -157,7 +191,7 @@
     </StaticDependency>
 
     <StaticDependency Include="Microsoft.TargetingPack.Private.WinRT">
-      <Version>1.0.3</Version>
+      <Version>1.0.5</Version>
     </StaticDependency>
 
     <XUnitDependency Include="xunit"/>
@@ -192,4 +226,17 @@
     <!-- project.json files to update -->
     <ProjectJsonFiles Include="$(MSBuildThisFileDirectory)external\**\optional.json" />
   </ItemGroup>
+
+  <!-- Override isolated build dependency versions with versions from Repo API. -->
+  <Import Project="$(DotNetPackageVersionPropsPath)"
+          Condition="'$(DotNetPackageVersionPropsPath)' != ''" />
+
+  <!--
+    Map PackageVersion properties that don't match the Repo API naming conventions. This must be
+    defined after the DotNetPackageVersionPropsPath Import so overrides apply correctly.
+  -->
+  <PropertyGroup>
+    <!-- Backward compatibility for BuildTools usage. -->
+    <PlatformPackageVersion>$(MicrosoftNETCorePlatformsPackageVersion)</PlatformPackageVersion>
+  </PropertyGroup>
 </Project>

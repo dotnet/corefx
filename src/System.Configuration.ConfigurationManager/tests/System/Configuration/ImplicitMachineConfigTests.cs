@@ -10,7 +10,7 @@ namespace System.ConfigurationTests
 {
     public class ImplicitMachineConfigTests
     {
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp))]
         public void RuntimeAppSettingsAccessible()
         {
             var appSettings = ConfigurationManager.AppSettings;
@@ -33,7 +33,7 @@ namespace System.ConfigurationTests
         {
             // ConfigurationFileMap checks for existence in the constructor
             string missingFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".config");
-            Assert.Throws<ArgumentException>(() => new ConfigurationFileMap(missingFile));
+            AssertExtensions.Throws<ArgumentException>("machineConfigFilename", () => new ConfigurationFileMap(missingFile));
         }
 
         [Fact]

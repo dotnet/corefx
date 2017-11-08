@@ -42,6 +42,9 @@ namespace System.Data.SqlClient.SNI
         internal static string GetLocalDBConnectionString(string localDbInstance) =>
             Instance.LoadUserInstanceDll() ? Instance.GetConnectionString(localDbInstance) : null;
 
+        internal static IntPtr GetProcAddress(string functionName) =>
+            Instance.LoadUserInstanceDll() ? Interop.Kernel32.GetProcAddress(LocalDB.Instance._sqlUserInstanceLibraryHandle, functionName) : IntPtr.Zero;
+
         private string GetConnectionString(string localDbInstance)
         {
             StringBuilder localDBConnectionString = new StringBuilder(MAX_LOCAL_DB_CONNECTION_STRING_SIZE + 1);
@@ -149,7 +152,7 @@ namespace System.Data.SqlClient.SNI
         }
 
         /// <summary>
-        /// Retireves the part of the sqlUserInstance.dll from the registry
+        /// Retrieves the part of the sqlUserInstance.dll from the registry
         /// </summary>
         /// <param name="errorState">In case the dll path is not found, the error is set here.</param>
         /// <returns></returns>

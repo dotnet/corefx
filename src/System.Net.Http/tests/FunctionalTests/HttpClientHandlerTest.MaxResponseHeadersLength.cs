@@ -3,9 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,36 +12,28 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
-    public class HttpClientHandler_MaxResponseHeadersLength_Test : RemoteExecutorTestBase
+    public class HttpClientHandler_MaxResponseHeadersLength_Test : HttpClientTestBase
     {
-        [Fact]
-        public void Default_MaxResponseHeadersLength()
-        {
-            using (var handler = new HttpClientHandler())
-            {
-                Assert.Equal(64, handler.MaxResponseHeadersLength);
-            }
-        }
-
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
         public void InvalidValue_ThrowsException(int invalidValue)
         {
-            using (var handler = new HttpClientHandler())
+            using (HttpClientHandler handler = CreateHttpClientHandler())
             {
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => handler.MaxResponseHeadersLength = invalidValue);
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
         [Theory]
         [InlineData(1)]
         [InlineData(65)]
         [InlineData(int.MaxValue)]
         public void ValidValue_SetGet_Roundtrips(int validValue)
         {
-            using (var handler = new HttpClientHandler())
+            using (HttpClientHandler handler = CreateHttpClientHandler())
             {
                 handler.MaxResponseHeadersLength = validValue;
                 Assert.Equal(validValue, handler.MaxResponseHeadersLength);
@@ -54,7 +43,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task SetAfterUse_Throws()
         {
-            using (var handler = new HttpClientHandler())
+            using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {
                 handler.MaxResponseHeadersLength = int.MaxValue;
@@ -63,15 +52,17 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(ResponseWithManyHeadersData))]
         public async Task ThresholdExceeded_ThrowsException(string responseHeaders, int maxResponseHeadersLength, bool shouldSucceed)
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
-                using (var handler = new HttpClientHandler() { MaxResponseHeadersLength = maxResponseHeadersLength })
+                using (HttpClientHandler handler = CreateHttpClientHandler())
                 using (var client = new HttpClient(handler))
                 {
+                    handler.MaxResponseHeadersLength = maxResponseHeadersLength;
                     Task<HttpResponseMessage> getAsync = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
 
                     await LoopbackServer.AcceptSocketAsync(server, async (s, serverStream, reader, writer) =>

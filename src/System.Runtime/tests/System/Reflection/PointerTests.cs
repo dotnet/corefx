@@ -37,7 +37,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void Box_NonPointerType()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("ptr", () =>
             {
                 Pointer.Box((void*)0, typeof(int));
             });
@@ -46,7 +46,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void Unbox_Null()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("ptr", () =>
             {
                 Pointer.Unbox(null);
             });
@@ -55,7 +55,7 @@ namespace System.Reflection.Tests
         [Fact]
         public void Unbox_NotPointer()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("ptr", () =>
             {
                 Pointer.Unbox(new object());
             });
@@ -82,7 +82,6 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Pointers through Invoke not implemented: https://github.com/dotnet/corert/issues/2113")]
         public void PointerFieldSetValue(int value)
         {
             var obj = new PointerHolder();
@@ -93,7 +92,6 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Pointers through Invoke not implemented: https://github.com/dotnet/corert/issues/2113")]
         public void IntPtrFieldSetValue(int value)
         {
             var obj = new PointerHolder();
@@ -104,12 +102,11 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Pointers through Invoke not implemented: https://github.com/dotnet/corert/issues/2113")]
         public void PointerFieldSetValue_InvalidType(int value)
         {
             var obj = new PointerHolder();
             FieldInfo field = typeof(PointerHolder).GetField("field");
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 field.SetValue(obj, Pointer.Box(unchecked((void*)value), typeof(long*)));
             });
@@ -117,7 +114,6 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Issue https://github.com/dotnet/corefx/issues/17450")]
         public void PointerFieldGetValue(int value)
         {
             var obj = new PointerHolder();
@@ -158,7 +154,7 @@ namespace System.Reflection.Tests
         {
             var obj = new PointerHolder();
             PropertyInfo property = typeof(PointerHolder).GetProperty("Property");
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 property.SetValue(obj, Pointer.Box(unchecked((void*)value), typeof(long*)));
             });
@@ -205,7 +201,7 @@ namespace System.Reflection.Tests
         {
             var obj = new PointerHolder();
             MethodInfo method = typeof(PointerHolder).GetMethod("Method");
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 method.Invoke(obj, new[] { Pointer.Box(unchecked((void*)value), typeof(long*)), value });
             });

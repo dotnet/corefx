@@ -7,12 +7,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+#if USE_MDT_EVENTSOURCE
+using Microsoft.Diagnostics.Tracing;
+#else
 using System.Diagnostics.Tracing;
+#endif
 using Xunit;
 using System.Reflection;
 
-//using Mdt = MdtEventSources;
-using Sdt = SdtEventSources;
+using SdtEventSources;
 using System.Diagnostics;
 using System.Threading;
 using System.Text.RegularExpressions;
@@ -30,14 +33,14 @@ namespace BasicEventSourceTests
         {
             using (var es = new SdtEventSources.DontPollute.EventSource())
             {
-                using (var el = new LoudListener())
+                using (var el = new LoudListener(es))
                 {
                     int i = 12;
                     es.EventWrite(i);
 
-                    Assert.Equal(1, LoudListener.LastEvent.EventId);
-                    Assert.Equal(1, LoudListener.LastEvent.Payload.Count);
-                    Assert.Equal(i, LoudListener.LastEvent.Payload[0]);
+                    Assert.Equal(1, LoudListener.t_lastEvent.EventId);
+                    Assert.Equal(1, LoudListener.t_lastEvent.Payload.Count);
+                    Assert.Equal(i, LoudListener.t_lastEvent.Payload[0]);
                 }
             }
         }

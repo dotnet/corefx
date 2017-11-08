@@ -18,7 +18,7 @@ namespace System.Data.SqlTypes
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [XmlSchemaProvider("GetXsdType")]
-    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, PublicKeyToken=b77a5c561934e089")]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public struct SqlDouble : INullable, IComparable, IXmlSerializable
     {
         private bool m_fNotNull; // false if null. Do not rename (binary serialization)
@@ -34,8 +34,14 @@ namespace System.Data.SqlTypes
 
         public SqlDouble(double value)
         {
+#if !netfx
+            if (!double.IsFinite(value))
+#else
             if (double.IsInfinity(value) || double.IsNaN(value))
+#endif
+            {
                 throw new OverflowException(SQLResource.ArithOverflowMessage);
+            }
             else
             {
                 m_value = value;

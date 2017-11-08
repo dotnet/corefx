@@ -50,11 +50,6 @@ namespace System.Data.Common
                 return caught;
             }
         }
-        internal static void TraceExceptionWithoutRethrow(Exception e)
-        {
-            Debug.Assert(ADP.IsCatchableExceptionType(e), "Invalid exception type, should have been re-thrown!");
-            TraceException("<comm.ADP.TraceException|ERR|CATCH> '%ls'\n", e);
-        }
 
         //
         // COM+ exceptions
@@ -311,6 +306,10 @@ namespace System.Data.Common
         {
             return InvalidOperation(SR.GetString(SR.ADP_UninitializedParameterSize, index.ToString(CultureInfo.InvariantCulture), dataType.Name));
         }
+        internal static InvalidOperationException QuotePrefixNotSet(string method)
+        {
+            return InvalidOperation(SR.GetString(SR.ADP_QuotePrefixNotSet, method));
+        }
 
         //
         // : ConnectionUtil
@@ -549,7 +548,6 @@ namespace System.Data.Common
             return Argument(SR.GetString(SR.MDF_UnsupportedVersion, collectionName));
         }
 
-
         // global constant strings
         internal const string BeginTransaction = "BeginTransaction";
         internal const string ChangeDatabase = "ChangeDatabase";
@@ -565,6 +563,8 @@ namespace System.Data.Common
         internal const string ParameterName = "ParameterName";
         internal const string Prepare = "Prepare";
         internal const string RollbackTransaction = "RollbackTransaction";
+        internal const string QuoteIdentifier = "QuoteIdentifier";
+        internal const string UnquoteIdentifier = "UnquoteIdentifier";
 
         internal const int DecimalMaxPrecision = 29;
         internal const int DecimalMaxPrecision28 = 28;  // there are some cases in Odbc where we need that ...
@@ -575,11 +575,6 @@ namespace System.Data.Common
 
         internal static readonly IntPtr PtrZero = new IntPtr(0); // IntPtr.Zero
         internal static readonly int PtrSize = IntPtr.Size;
-
-        internal static bool CompareInsensitiveInvariant(string strvalue, string strconst)
-        {
-            return (0 == CultureInfo.InvariantCulture.CompareInfo.Compare(strvalue, strconst, CompareOptions.IgnoreCase));
-        }
 
         internal static Delegate FindBuilder(MulticastDelegate mcd)
         { // V1.2.3300
@@ -676,11 +671,6 @@ namespace System.Data.Common
             }
             Debug.Assert(8 == ADP.PtrSize, "8 != IntPtr.Size"); // MDAC 73747
             return (IntPtr)checked(pbase.ToInt64() + offset);
-        }
-
-        internal static bool IsEmptyArray(string[] array)
-        {
-            return ((null == array) || (0 == array.Length));
         }
     }
 }

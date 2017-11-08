@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 namespace System.IO.Tests
 {
@@ -119,6 +121,36 @@ namespace System.IO.Tests
         public void Unix_NonExistentPath_Nop()
         {
             Delete(Path.Combine(TestDirectory, GetTestFileName(), "C"));
+        }
+
+        [Fact]
+        [OuterLoop("Needs sudo access")]
+        [PlatformSpecific(TestPlatforms.Linux)]
+        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
+        public void Unix_NonExistentPath_ReadOnlyVolume()
+        {
+            if (PlatformDetection.IsRedHatFamily6)
+                return; // [ActiveIssue(https://github.com/dotnet/corefx/issues/21920)]
+
+            ReadOnly_FileSystemHelper(readOnlyDirectory =>
+            {
+                Delete(Path.Combine(readOnlyDirectory, "DoesNotExist"));
+            });
+        }
+
+        [Fact]
+        [OuterLoop("Needs sudo access")]
+        [PlatformSpecific(TestPlatforms.Linux)]
+        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
+        public void Unix_ExistingDirectory_ReadOnlyVolume()
+        {
+            if (PlatformDetection.IsRedHatFamily6)
+                return; // [ActiveIssue(https://github.com/dotnet/corefx/issues/21920)]
+
+            ReadOnly_FileSystemHelper(readOnlyDirectory =>
+            {
+                Assert.Throws<IOException>(() => Delete(Path.Combine(readOnlyDirectory, "subdir")));
+            }, subDirectoryName: "subdir");
         }
 
         [Fact]

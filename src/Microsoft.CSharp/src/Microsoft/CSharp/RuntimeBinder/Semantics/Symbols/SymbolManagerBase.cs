@@ -11,36 +11,16 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal struct AidContainer
-    {
-        internal static readonly AidContainer NullAidContainer = default(AidContainer);
-
-        private object _value;
-
-        public AidContainer(FileRecord file)
-        {
-            _value = file;
-        }
-    }
-
     internal sealed class BSYMMGR
     {
-        private HashSet<KAID> bsetGlobalAssemblies; // Assemblies in the global alias.
-
         // Special nullable members.
         public PropertySymbol propNubValue;
         public MethodSymbol methNubCtor;
 
         private readonly SymFactory _symFactory;
-        private readonly MiscSymFactory _miscSymFactory;
 
         private readonly NamespaceSymbol _rootNS;         // The "root" (unnamed) namespace.
 
-        // Map from aids to INFILESYMs and EXTERNALIASSYMs
-        private List<AidContainer> ssetAssembly;
-        // Map from aids to MODULESYMs and OUTFILESYMs
-
-        private NameManager m_nameTable;
         private SYMTBL tableGlobal;
 
         // The hash table for type arrays.
@@ -48,55 +28,36 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private static readonly TypeArray s_taEmpty = new TypeArray(Array.Empty<CType>());
 
-        public BSYMMGR(NameManager nameMgr, TypeManager typeManager)
+        public BSYMMGR()
         {
-            this.m_nameTable = nameMgr;
             this.tableGlobal = new SYMTBL();
             _symFactory = new SymFactory(this.tableGlobal);
-            _miscSymFactory = new MiscSymFactory(this.tableGlobal);
 
-            this.ssetAssembly = new List<AidContainer>();
-
-            InputFile infileUnres = new InputFile();
-            infileUnres.SetAssemblyID(KAID.kaidUnresolved);
-
-            ssetAssembly.Add(new AidContainer(infileUnres));
-            this.bsetGlobalAssemblies = new HashSet<KAID>();
-            this.bsetGlobalAssemblies.Add(KAID.kaidThisAssembly);
             this.tableTypeArrays = new Dictionary<TypeArrayKey, TypeArray>();
-            _rootNS = _symFactory.CreateNamespace(m_nameTable.Lookup(""), null);
-            GetNsAid(_rootNS, KAID.kaidGlobal);
-        }
+            _rootNS = _symFactory.CreateNamespace(NameManager.Lookup(""), null);
+            GetNsAid(_rootNS);
 
-        public void Init()
-        {
-            /*
-            tableTypeArrays.Init(&this->GetPageHeap(), this->getAlloc());
-            tableNameToSym.Init(this);
-            nsToExtensionMethods.Init(this);
+            ////////////////////////////////////////////////////////////////////////////////
+            // Build the data structures needed to make FPreLoad fast. Make sure the 
+            // namespaces are created. Compute and sort hashes of the NamespaceSymbol * value and type
+            // name (sans arity indicator).
 
-            // Some root symbols.
-            Name* emptyName = m_nameTable->AddString(L"");
-            rootNS = symFactory.CreateNamespace(emptyName, NULL);  // Root namespace
-            nsaGlobal = GetNsAid(rootNS, kaidGlobal);
-
-            m_infileUnres.name = emptyName;
-            m_infileUnres.isSource = false;
-            m_infileUnres.idLocalAssembly = mdTokenNil;
-            m_infileUnres.SetAssemblyID(kaidUnresolved, allocGlobal);
-
-            size_t isym;
-            isym = ssetAssembly.Add(&m_infileUnres);
-            ASSERT(isym == 0);
-             */
-
-            InitPreLoad();
-        }
-
-
-        public NameManager GetNameManager()
-        {
-            return m_nameTable;
+            for (int i = 0; i < (int)PredefinedType.PT_COUNT; ++i)
+            {
+                NamespaceSymbol ns = GetRootNS();
+                string name = PredefinedTypeFacts.GetName((PredefinedType)i);
+                int start = 0;
+                while (start < name.Length)
+                {
+                    int iDot = name.IndexOf('.', start);
+                    if (iDot == -1)
+                        break;
+                    string sub = (iDot > start) ? name.Substring(start, iDot - start) : name.Substring(start);
+                    Name nm = NameManager.Add(sub);
+                    ns = LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol ?? _symFactory.CreateNamespace(nm, ns);
+                    start += sub.Length + 1;
+                }
+            }
         }
 
         public SYMTBL GetSymbolTable()
@@ -109,20 +70,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return s_taEmpty;
         }
 
-        public AssemblyQualifiedNamespaceSymbol GetRootNsAid(KAID aid)
+        public AssemblyQualifiedNamespaceSymbol GetRootNsAid()
         {
-            return GetNsAid(_rootNS, aid);
+            return GetNsAid(_rootNS);
         }
 
         public NamespaceSymbol GetRootNS()
         {
             return _rootNS;
-        }
-
-        public KAID AidAlloc(InputFile sym)
-        {
-            ssetAssembly.Add(new AidContainer(sym));
-            return (KAID)(ssetAssembly.Count - 1 + KAID.kaidUnresolved);
         }
 
         public BetterType CompareTypes(TypeArray ta1, TypeArray ta2)
@@ -148,11 +103,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             LAgain:
                 if (type1.GetTypeKind() != type2.GetTypeKind())
                 {
-                    if (type1.IsTypeParameterType())
+                    if (type1 is TypeParameterType)
                     {
                         nParam = BetterType.Right;
                     }
-                    else if (type2.IsTypeParameterType())
+                    else if (type2 is TypeParameterType)
                     {
                         nParam = BetterType.Left;
                     }
@@ -177,7 +132,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             goto LAgain;
 
                         case TypeKind.TK_AggregateType:
-                            nParam = CompareTypes(type1.AsAggregateType().GetTypeArgsAll(), type2.AsAggregateType().GetTypeArgsAll());
+                            nParam = CompareTypes(((AggregateType)type1).GetTypeArgsAll(), ((AggregateType)type2).GetTypeArgsAll());
                             break;
                     }
                 }
@@ -203,11 +158,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return _symFactory;
         }
 
-        public MiscSymFactory GetMiscSymFactory()
-        {
-            return _miscSymFactory;
-        }
-
         ////////////////////////////////////////////////////////////////////////////////
         // Build the data structures needed to make FPreLoad fast. Make sure the 
         // namespaces are created. Compute and sort hashes of the NamespaceSymbol * value and type
@@ -225,16 +175,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     int iDot = name.IndexOf('.', start);
                     if (iDot == -1) break;
                     string sub = (iDot > start) ? name.Substring(start, iDot - start) : name.Substring(start);
-                    Name nm = this.GetNameManager().Add(sub);
-                    NamespaceSymbol sym = this.LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol).AsNamespaceSymbol();
-                    if (sym == null)
-                    {
-                        ns = _symFactory.CreateNamespace(nm, ns);
-                    }
-                    else
-                    {
-                        ns = sym;
-                    }
+                    Name nm = NameManager.Add(sub);
+                    ns = LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol ?? _symFactory.CreateNamespace(nm, ns);
                     start += sub.Length + 1;
                 }
             }
@@ -275,25 +217,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Note: this won't produce the same names as the native logic
             if (u2 != null)
             {
-                return this.m_nameTable.Add(string.Format(CultureInfo.InvariantCulture, "{0:X}-{1:X}", u1.GetHashCode(), u2.GetHashCode()));
+                return NameManager.Add(string.Format(CultureInfo.InvariantCulture, "{0:X}-{1:X}", u1.GetHashCode(), u2.GetHashCode()));
             }
             else
             {
-                return this.m_nameTable.Add(string.Format(CultureInfo.InvariantCulture, "{0:X}", u1.GetHashCode()));
+                return NameManager.Add(string.Format(CultureInfo.InvariantCulture, "{0:X}", u1.GetHashCode()));
             }
         }
 
-        private AssemblyQualifiedNamespaceSymbol GetNsAid(NamespaceSymbol ns, KAID aid)
+        private AssemblyQualifiedNamespaceSymbol GetNsAid(NamespaceSymbol ns)
         {
-            Name name = GetNameFromPtrs(aid, 0);
+            Name name = GetNameFromPtrs(0, 0);
             Debug.Assert(name != null);
 
-            AssemblyQualifiedNamespaceSymbol nsa = LookupGlobalSymCore(name, ns, symbmask_t.MASK_AssemblyQualifiedNamespaceSymbol).AsAssemblyQualifiedNamespaceSymbol();
-            if (nsa == null)
-            {
+            AssemblyQualifiedNamespaceSymbol nsa = LookupGlobalSymCore(name, ns, symbmask_t.MASK_AssemblyQualifiedNamespaceSymbol) as AssemblyQualifiedNamespaceSymbol
                 // Create a new one.
-                nsa = _symFactory.CreateNamespaceAid(name, ns, aid);
-            }
+                ?? _symFactory.CreateNamespaceAid(name, ns);
 
             Debug.Assert(nsa.GetNS() == ns);
 
@@ -309,7 +248,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // 2) Make it so parameter lists can be compared by a simple pointer comparison
         // 3) Allow us to associate a token with each signature for faster metadata emit
 
-        private struct TypeArrayKey : IEquatable<TypeArrayKey>
+        private readonly struct TypeArrayKey : IEquatable<TypeArrayKey>
         {
             private readonly CType[] _types;
             private readonly int _hashCode;

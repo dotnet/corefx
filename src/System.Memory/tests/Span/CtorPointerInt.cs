@@ -20,8 +20,8 @@ namespace System.SpanTests
                 fixed (int *pa = a)
                 {
                     Span<int> span = new Span<int>(pa, 3);
-                    span.Validate<int>(90, 91, 92);
-                    Assert.True(Unsafe.AreSame<int>(ref Unsafe.AsRef<int>(pa), ref span.DangerousGetPinnableReference()));
+                    span.Validate(90, 91, 92);
+                    Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>(pa), ref span.DangerousGetPinnableReference()));
                 }
             }
         }
@@ -32,8 +32,8 @@ namespace System.SpanTests
             unsafe
             {
                 Span<int> span = new Span<int>((void*)null, 0);
-                span.Validate<int>();
-                Assert.True(Unsafe.AreSame<int>(ref Unsafe.AsRef<int>((void*)null), ref span.DangerousGetPinnableReference()));
+                span.Validate();
+                Assert.True(Unsafe.AreSame(ref Unsafe.AsRef<int>((void*)null), ref span.DangerousGetPinnableReference()));
             }
         }
 
@@ -58,8 +58,8 @@ namespace System.SpanTests
             {
                 new Span<int>((void*)null, 0);
                 new Span<int?>((void*)null, 0);
-                Assert.Throws<ArgumentException>(() => new Span<object>((void*)null, 0).DontBox());
-                Assert.Throws<ArgumentException>(() => new Span<StructWithReferences>((void*)null, 0).DontBox());
+                AssertExtensions.Throws<ArgumentException>(null, () => new Span<object>((void*)null, 0).DontBox());
+                AssertExtensions.Throws<ArgumentException>(null, () => new Span<StructWithReferences>((void*)null, 0).DontBox());
             }
         }
 

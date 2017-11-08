@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace System.Collections.Immutable.Tests
@@ -263,7 +264,7 @@ namespace System.Collections.Immutable.Tests
             // Now check where collisions have conflicting values.
             map = ImmutableDictionary.Create<string, string>()
               .Add("a", "1").Add("A", "2").Add("b", "3");
-            Assert.Throws<ArgumentException>(null, () => map.WithComparers(StringComparer.OrdinalIgnoreCase));
+            AssertExtensions.Throws<ArgumentException>(null, () => map.WithComparers(StringComparer.OrdinalIgnoreCase));
 
             // Force all values to be considered equal.
             map = map.WithComparers(StringComparer.OrdinalIgnoreCase, EverythingEqual<string>.Default);
@@ -279,7 +280,7 @@ namespace System.Collections.Immutable.Tests
         {
             var map = ImmutableDictionary.Create<string, string>()
                 .Add("firstKey", "1").Add("secondKey", "2");
-            var exception = Assert.Throws<ArgumentException>(null, () => map.Add("firstKey", "3"));
+            var exception = AssertExtensions.Throws<ArgumentException>(null, () => map.Add("firstKey", "3"));
 
             if (!PlatformDetection.IsNetNative) //.Net Native toolchain removes exception messages.
             {
@@ -350,10 +351,23 @@ namespace System.Collections.Immutable.Tests
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableDictionary.Create<int, int>());
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(ImmutableDictionary.Create<string, int>());
+            ImmutableDictionary<string, int> dict = ImmutableDictionary.Create<string, int>().Add("One", 1).Add("Two", 2);
+            DebuggerAttributeInfo info = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(dict);
 
             object rootNode = DebuggerAttributes.GetFieldValue(ImmutableDictionary.Create<string, string>(), "_root");
             DebuggerAttributes.ValidateDebuggerDisplayReferences(rootNode);
+            PropertyInfo itemProperty = info.Properties.Single(pr => pr.GetCustomAttribute<DebuggerBrowsableAttribute>().State == DebuggerBrowsableState.RootHidden);
+            KeyValuePair<string, int>[] items = itemProperty.GetValue(info.Instance) as KeyValuePair<string, int>[];
+            Assert.Equal(dict, items);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
+        public static void TestDebuggerAttributes_Null()
+        {
+            Type proxyType = DebuggerAttributes.GetProxyType(ImmutableHashSet.Create<string>());
+            TargetInvocationException tie = Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(proxyType, (object)null));
+            Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
         [Fact]

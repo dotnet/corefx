@@ -37,10 +37,10 @@ namespace System.Collections
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class ArrayList : IList, ICloneable
     {
-        private Object[] _items;
+        private Object[] _items; // Do not rename (binary serialization)
         [ContractPublicPropertyName("Count")]
-        private int _size;
-        private int _version;
+        private int _size; // Do not rename (binary serialization)
+        private int _version; // Do not rename (binary serialization)
         [NonSerialized]
         private Object _syncRoot;
 
@@ -633,7 +633,6 @@ namespace System.Collections
             Contract.Ensures(Count >= 0);
 
             int index = IndexOf(obj);
-            Debug.Assert(index >= 0 || !(obj is Int32), "You passed an Int32 to Remove that wasn't in the ArrayList." + Environment.NewLine + "Did you mean RemoveAt?  int: " + obj + "  Count: " + Count);
             if (index >= 0)
                 RemoveAt(index);
         }

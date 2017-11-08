@@ -2759,7 +2759,7 @@ namespace System.Linq.Expressions.Tests
         public static void UnreadableArray()
         {
             Expression array = Expression.Property(null, typeof(Unreadable<int[]>), nameof(Unreadable<int>.WriteOnly));
-            Assert.Throws<ArgumentException>(() => Expression.ArrayIndex(array, Expression.Constant(0)));
+            AssertExtensions.Throws<ArgumentException>("array", () => Expression.ArrayIndex(array, Expression.Constant(0)));
         }
 
         [Fact]
@@ -2770,7 +2770,7 @@ namespace System.Linq.Expressions.Tests
             AssertExtensions.Throws<ArgumentException>("index", () => Expression.ArrayIndex(array, index));
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
         [ClassData(typeof(CompilationTypes))]
         public static void NonZeroBasedOneDimensionalArrayIndex(bool useInterpreter)
         {
@@ -2791,7 +2791,7 @@ namespace System.Linq.Expressions.Tests
             Assert.True(testValues());
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
         [ClassData(typeof(CompilationTypes))]
         public static void NonZeroBasedOneDimensionalArrayIndexMethod(bool useInterpreter)
         {

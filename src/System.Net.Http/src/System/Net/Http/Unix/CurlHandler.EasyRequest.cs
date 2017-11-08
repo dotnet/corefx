@@ -344,7 +344,7 @@ namespace System.Net.Http
             {
                 // Reset cookies in case we redirect.  Below we'll set new cookies for the
                 // new location if we have any.
-                if (_handler._useCookie)
+                if (_handler._useCookies)
                 {
                     SetCurlOption(CURLoption.CURLOPT_COOKIE, IntPtr.Zero);
                 }
@@ -366,7 +366,7 @@ namespace System.Net.Http
                     SetProxyOptions(newUri);
 
                     // Set up new cookies
-                    if (_handler._useCookie)
+                    if (_handler._useCookies)
                     {
                         SetCookieOption(newUri);
                     }
@@ -685,7 +685,7 @@ namespace System.Net.Http
 
             internal void SetCookieOption(Uri uri)
             {
-                if (!_handler._useCookie)
+                if (!_handler._useCookies)
                 {
                     return;
                 }
@@ -732,9 +732,8 @@ namespace System.Net.Http
                 }
 
                 // Since libcurl adds an Expect header if it sees enough post data, we need to explicitly block
-                // it if caller specifically does not want to set the header
-                if (_requestMessage.Headers.ExpectContinue.HasValue &&
-                    !_requestMessage.Headers.ExpectContinue.Value)
+                // it unless the caller has explicitly opted-in to it.
+                if (!_requestMessage.Headers.ExpectContinue.GetValueOrDefault())
                 {
                     ThrowOOMIfFalse(Interop.Http.SListAppend(slist, NoExpect));
                 }
@@ -764,7 +763,7 @@ namespace System.Net.Http
             }
 
             internal bool ServerCertificateValidationCallbackAcceptsAll => ReferenceEquals(
-                _handler.ServerCertificateValidationCallback,
+                _handler.ServerCertificateCustomValidationCallback,
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator);
 
             internal void SetCurlCallbacks(

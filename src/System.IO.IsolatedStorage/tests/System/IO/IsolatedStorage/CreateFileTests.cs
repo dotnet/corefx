@@ -54,11 +54,11 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.CreateFile("\0bad"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.CreateFile("\0bad"));
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         [ActiveIssue("dotnet/corefx #18268", TargetFrameworkMonikers.NetFramework)]
         public void CreateFile_Existence(PresetScopes scope)
         {

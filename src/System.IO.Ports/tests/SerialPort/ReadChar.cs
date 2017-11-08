@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO.PortsTests;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Legacy.Support;
 using Xunit;
 
@@ -292,8 +293,7 @@ namespace System.IO.Ports.Tests
                 char[] charXmitBuffer = TCSupport.GetRandomChars(512, TCSupport.CharacterOptions.None);
                 char[] charRcvBuffer = new char[charXmitBuffer.Length];
                 ASyncRead asyncRead = new ASyncRead(com1);
-                Thread asyncReadThread =
-                    new Thread(asyncRead.Read);
+                var asyncReadTask = new Task(asyncRead.Read);
 
 
                 Debug.WriteLine(
@@ -308,7 +308,7 @@ namespace System.IO.Ports.Tests
                 if (!com2.IsOpen) //This is necessary since com1 and com2 might be the same port if we are using a loopback
                     com2.Open();
 
-                asyncReadThread.Start();
+                asyncReadTask.Start();
                 asyncRead.ReadStartedEvent.WaitOne();
                 //This only tells us that the thread has started to execute code in the method
                 Thread.Sleep(2000); //We need to wait to guarentee that we are executing code in SerialPort
@@ -335,6 +335,8 @@ namespace System.IO.Ports.Tests
                     Assert.Equal(receivedLength, charXmitBuffer.Length);
                     Assert.Equal(charXmitBuffer, charRcvBuffer);
                 }
+
+                TCSupport.WaitForTaskCompletion(asyncReadTask);
             }
         }
 
@@ -436,7 +438,7 @@ namespace System.IO.Ports.Tests
                     5000, "Err_91818aheid BytesToRead");
 
                 // We expect this to fail, because it can't read a surrogate
-                Assert.Throws<ArgumentException>(() => com1.ReadChar());
+                AssertExtensions.Throws<ArgumentException>(null, () => com1.ReadChar());
 
                 int result = com1.Read(charRcvBuffer, 0, 2);
 

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Security;
 using System.Net.Test.Common;
 using System.Runtime.InteropServices;
@@ -47,10 +48,15 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        internal static bool BackendSupportsCustomCertificateHandling
+        internal bool BackendSupportsCustomCertificateHandling
         {
             get
             {
+                if (UseManagedHandler)
+                {
+                    return true;
+                }
+
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     return false;
@@ -61,8 +67,6 @@ namespace System.Net.Http.Functional.Tests
                 return (CurlSslVersionDescription()?.StartsWith("OpenSSL") ?? false);
             }
         }
-
-        private static bool BackendDoesNotSupportCustomCertificateHandling => !BackendSupportsCustomCertificateHandling;
 
         [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetSslVersionDescription")]
         private static extern string CurlSslVersionDescription();

@@ -9,22 +9,6 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Transactions;
 
-namespace System
-{
-    internal static partial class SR
-    {
-        internal static string GetString(string value)
-        {
-            return value;
-        }
-
-        internal static string GetString(string format, params object[] args)
-        {
-            return SR.Format(format, args);
-        }
-    }
-}
-
 namespace System.Data.Common
 {
     internal static partial class ADP
@@ -45,12 +29,6 @@ namespace System.Data.Common
             {
                 return caught;
             }
-        }
-
-        internal static void TraceExceptionWithoutRethrow(Exception e)
-        {
-            Debug.Assert(ADP.IsCatchableExceptionType(e), "Invalid exception type, should have been re-thrown!");
-            TraceException("<comm.ADP.TraceException|ERR|CATCH> '%ls'\n", e);
         }
 
         //
@@ -334,12 +312,7 @@ namespace System.Data.Common
             return InvalidOperation(SR.GetString(SR.ADP_NonSequentialColumnAccess, badCol.ToString(CultureInfo.InvariantCulture), currCol.ToString(CultureInfo.InvariantCulture)));
         }
 
-        internal static bool CompareInsensitiveInvariant(string strvalue, string strconst)
-        {
-            return (0 == CultureInfo.InvariantCulture.CompareInfo.Compare(strvalue, strconst, CompareOptions.IgnoreCase));
-        }
-
-        static internal Exception InvalidXmlInvalidValue(string collectionName, string columnName)
+        internal static Exception InvalidXmlInvalidValue(string collectionName, string columnName)
         {
             return Argument(SR.GetString(SR.MDF_InvalidXmlInvalidValue, collectionName, columnName));
         }
@@ -422,6 +395,14 @@ namespace System.Data.Common
         {
             return InvalidOperation(SR.GetString(SR.ADP_ConnectionAlreadyOpen, ADP.ConnectionStateMsg(state)));
         }
+        internal static Exception TransactionPresent()
+        {
+            return InvalidOperation(SR.GetString(SR.ADP_TransactionPresent));
+        }
+        internal static Exception LocalTransactionPresent()
+        {
+            return InvalidOperation(SR.GetString(SR.ADP_LocalTransactionPresent));
+        }
         internal static Exception OpenConnectionPropertySet(string property, ConnectionState state)
         {
             return InvalidOperation(SR.GetString(SR.ADP_OpenConnectionPropertySet, property, ADP.ConnectionStateMsg(state)));
@@ -487,11 +468,6 @@ namespace System.Data.Common
         internal static ArgumentException UnknownDataType(Type dataType)
         {
             return Argument(SR.GetString(SR.ADP_UnknownDataType, dataType.FullName));
-        }
-
-        internal static bool IsEmptyArray(string[] array)
-        {
-            return (array == null || array.Length == 0);
         }
 
         internal static ArgumentException DbTypeNotSupported(DbType type, Type enumtype)
@@ -745,11 +721,6 @@ namespace System.Data.Common
             }
         }
 
-        internal static Exception AmbientTransactionIsNotSupported()
-        {
-            return new NotSupportedException(SR.AmbientTransactionsNotSupported);
-        }
-
         private static Version s_systemDataVersion;
 
         internal static Version GetAssemblyVersion()
@@ -801,7 +772,7 @@ namespace System.Data.Common
             return false;
         }
 
-        static internal ArgumentOutOfRangeException InvalidDataRowVersion(DataRowVersion value)
+        internal static ArgumentOutOfRangeException InvalidDataRowVersion(DataRowVersion value)
         {
 #if DEBUG
             switch (value)
@@ -815,6 +786,72 @@ namespace System.Data.Common
             }
 #endif
             return InvalidEnumerationValue(typeof(DataRowVersion), (int)value);
+        }
+
+        internal static ArgumentException SingleValuedProperty(string propertyName, string value)
+        {
+            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_SingleValuedProperty, propertyName, value));
+            TraceExceptionAsReturnValue(e);
+            return e;
+        }
+
+        internal static ArgumentException DoubleValuedProperty(string propertyName, string value1, string value2)
+        {
+            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_DoubleValuedProperty, propertyName, value1, value2));
+            TraceExceptionAsReturnValue(e);
+            return e;
+        }
+
+        internal static ArgumentException InvalidPrefixSuffix()
+        {
+            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_InvalidPrefixSuffix));
+            TraceExceptionAsReturnValue(e);
+            return e;
+        }
+
+        internal static ArgumentOutOfRangeException InvalidCommandBehavior(CommandBehavior value)
+        {
+            Debug.Assert((0 > (int)value) || ((int)value > 0x3F), "valid CommandType " + value.ToString());
+
+            return InvalidEnumerationValue(typeof(CommandBehavior), (int)value);
+        }
+
+        internal static void ValidateCommandBehavior(CommandBehavior value)
+        {
+            if (((int)value < 0) || (0x3F < (int)value))
+            {
+                throw InvalidCommandBehavior(value);
+            }
+        }
+
+        internal static ArgumentOutOfRangeException NotSupportedCommandBehavior(CommandBehavior value, string method)
+        {
+            return NotSupportedEnumerationValue(typeof(CommandBehavior), value.ToString(), method);
+        }
+
+        internal static ArgumentException BadParameterName(string parameterName)
+        {
+            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_BadParameterName, parameterName));
+            TraceExceptionAsReturnValue(e);
+            return e;
+        }
+
+        internal static Exception DeriveParametersNotSupported(IDbCommand value)
+        {
+            return DataAdapter(SR.GetString(SR.ADP_DeriveParametersNotSupported, value.GetType().Name, value.CommandType.ToString()));
+        }
+
+        internal static Exception NoStoredProcedureExists(string sproc)
+        {
+            return InvalidOperation(SR.GetString(SR.ADP_NoStoredProcedureExists, sproc));
+        }
+
+        //
+        // DbProviderException
+        //
+        internal static InvalidOperationException TransactionCompletedButNotDisposed()
+        {
+            return Provider(SR.GetString(SR.ADP_TransactionCompletedButNotDisposed));
         }
     }
 }

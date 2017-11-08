@@ -5,7 +5,6 @@
     <ProjectGuid>{DC683D60-34EC-4D85-B6E0-E97FDB37A583}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <ItemGroup>
@@ -13,9 +12,6 @@
     <Compile Include="JsonObjectTests.cs" />
     <Compile Include="JsonPrimitiveTests.cs" />
     <Compile Include="JsonValueTests.cs" />
-    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
-      <Link>Common\System\AssertExtensions.cs</Link>
-    </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

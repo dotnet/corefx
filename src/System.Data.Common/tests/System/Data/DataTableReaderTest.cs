@@ -275,7 +275,7 @@ namespace System.Data.Tests
         [Fact]
         public void NoTablesTest()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 DataTableReader reader = new DataTableReader(new DataTable[] { });
                 try
@@ -729,7 +729,7 @@ namespace System.Data.Tests
             Assert.Equal("col_int*5", schemaTable.Rows[11]["Expression"]);
             Assert.True((bool)schemaTable.Rows[11]["IsReadOnly"]);
 
-            // if expression depends on a external col, then set Expression as null..
+            // if expression depends on an external col, then set Expression as null..
             Assert.Equal("col_expression_ext", schemaTable.Rows[12]["ColumnName"]);
             Assert.Equal(DBNull.Value, schemaTable.Rows[12]["Expression"]);
             Assert.True((bool)schemaTable.Rows[12]["IsReadOnly"]);

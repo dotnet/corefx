@@ -12,6 +12,19 @@ namespace System.Net.Http
 {
     internal partial class CurlHandler : HttpMessageHandler
     {
+        static partial void UseSingletonMultiAgent(ref bool result)
+        {
+            // Some backends other than OpenSSL need locks initialized in order to use them in a
+            // multithreaded context, which would happen with multiple HttpClients and thus multiple
+            // MultiAgents. Since we don't currently have the ability to do so initialization, instead we
+            // restrict all HttpClients to use the same MultiAgent instance in this case.  We know LibreSSL
+            // is in this camp, so we currently special-case it.
+            string curlSslVersion = Interop.Http.GetSslVersionDescription();
+            result =
+                !string.IsNullOrEmpty(curlSslVersion) &&
+                curlSslVersion.StartsWith(Interop.Http.LibreSslDescription, StringComparison.OrdinalIgnoreCase);
+        }
+
         private static class SslProvider
         {
             internal static void SetSslOptions(EasyRequest easy, ClientCertificateOption clientCertOption)
@@ -49,7 +62,7 @@ namespace System.Net.Http
                             CurlSslVersionDescription));
                 }
 
-                if (easy._handler.ServerCertificateValidationCallback != null)
+                if (easy._handler.ServerCertificateCustomValidationCallback != null)
                 {
                     // libcurl (as of 7.49.1) does not have any callback which can be registered which fires
                     // between the time that a TLS/SSL handshake has offered up the server certificate and the
@@ -78,7 +91,12 @@ namespace System.Net.Http
                     {
                         EventSourceTrace("Warning: Disabling peer verification per {0}", nameof(HttpClientHandler.DangerousAcceptAnyServerCertificateValidator), easy: easy);
                         easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_SSL_VERIFYPEER, 0); // don't verify the peer
-                        // Don't set CURLOPT_SSL_VERIFHOST to 0; doing so disables SNI.
+
+                        // Don't set CURLOPT_SSL_VERIFHOST to 0; doing so disables SNI with SecureTransport backend.
+                        if (!CurlSslVersionDescription.Equals(Interop.Http.SecureTransportDescription))
+                        {
+                            easy.SetCurlOption(Interop.Http.CURLoption.CURLOPT_SSL_VERIFYHOST, 0); // don't verify the hostname
+                        }
                     }
                     else
                     {

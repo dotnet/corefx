@@ -88,6 +88,8 @@ namespace System.Json.Tests
                 Assert.Equal(4, value.Count);
                 Assert.Equal(JsonType.Array, value.JsonType);
                 Assert.Equal("[1, 2, 3, null]", value.ToString());
+                ((JsonArray) value).Add(null);
+                Assert.Equal("[1, 2, 3, null, null]", value.ToString());
             });
         }
         
@@ -177,16 +179,16 @@ namespace System.Json.Tests
         [InlineData("{\"\\z\"}")]
         public void Parse_InvalidInput_ThrowsArgumentException(string value)
         {
-            Assert.Throws<ArgumentException>(null, () => JsonValue.Parse(value));
+            AssertExtensions.Throws<ArgumentException>(null, () => JsonValue.Parse(value));
 
             using (StringReader textReader = new StringReader(value))
             {
-                Assert.Throws<ArgumentException>(null, () => JsonValue.Load(textReader));
+                AssertExtensions.Throws<ArgumentException>(null, () => JsonValue.Load(textReader));
             }
 
             using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(value)))
             {
-                Assert.Throws<ArgumentException>(null, () => JsonValue.Load(stream));
+                AssertExtensions.Throws<ArgumentException>(null, () => JsonValue.Load(stream));
             }
         }
 

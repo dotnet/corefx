@@ -3,14 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace System.IO.Tests
 {
-    public class MemoryStreamTests
+    public partial class MemoryStreamTests
     {
         [Fact]
         public static void MemoryStream_Write_BeyondCapacity()
@@ -127,8 +124,8 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentNullException>(() => ms2.Read(null, 0, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => ms2.Read(new byte[] { 1 }, -1, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => ms2.Read(new byte[] { 1 }, 0, -1));
-            Assert.Throws<ArgumentException>(() => ms2.Read(new byte[] { 1 }, 2, 0));
-            Assert.Throws<ArgumentException>(() => ms2.Read(new byte[] { 1 }, 0, 2));
+            AssertExtensions.Throws<ArgumentException>(null, () => ms2.Read(new byte[] { 1 }, 2, 0));
+            AssertExtensions.Throws<ArgumentException>(null, () => ms2.Read(new byte[] { 1 }, 0, 2));
 
             ms2.Dispose();
 
@@ -204,7 +201,7 @@ namespace System.IO.Tests
             using (memoryStream = new MemoryStream())
             {
                 AssertExtensions.Throws<ArgumentNullException>("destination", () => memoryStream.CopyTo(destination: null));
-                
+
                 // Validate the destination parameter first.
                 AssertExtensions.Throws<ArgumentNullException>("destination", () => memoryStream.CopyTo(destination: null, bufferSize: 0));
                 AssertExtensions.Throws<ArgumentNullException>("destination", () => memoryStream.CopyTo(destination: null, bufferSize: -1));
@@ -263,7 +260,7 @@ namespace System.IO.Tests
             var stream2 = new MemoryStream(data2) { Position = 1 };
 
             yield return new object[] { stream2, new byte[] { 0xf3, 0xf0 } };
-            
+
             // Stream is positioned after end of data
             var data3 = data2;
             var stream3 = new MemoryStream(data3) { Position = data3.Length + 1 };

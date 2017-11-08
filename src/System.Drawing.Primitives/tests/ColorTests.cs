@@ -11,7 +11,7 @@ namespace System.Drawing.Primitives.Tests
 {
     public partial class ColorTests
     {
-        public static IEnumerable<object[]> NamedArgbValues =>
+        public static readonly IEnumerable<object[]> NamedArgbValues =
             new[]
             {
                 new object[] {"Transparent", 0, 255, 255, 255},
@@ -157,9 +157,10 @@ namespace System.Drawing.Primitives.Tests
                 new object[] {"YellowGreen", 255, 154, 205, 50},
             };
 
-        public static IEnumerable<object[]> ColorNames => typeof(Color).GetProperties()
+        public static readonly IEnumerable<object[]> ColorNames = typeof(Color).GetProperties()
                 .Where(p => p.PropertyType == typeof(Color))
-                .Select(p => new object[] { p.Name} );
+                .Select(p => new object[] { p.Name })
+                .ToArray();
 
         private Color? GetColorByProperty(string name)
         {
@@ -298,11 +299,11 @@ namespace System.Drawing.Primitives.Tests
         [MemberData(nameof(InvalidValues))]
         public void FromArgb_InvalidAlpha(int alpha)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(alpha, Color.Red);
             });
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(alpha, 0, 0, 0);
             });
@@ -312,11 +313,11 @@ namespace System.Drawing.Primitives.Tests
         [MemberData(nameof(InvalidValues))]
         public void FromArgb_InvalidRed(int red)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(red, 0, 0);
             });
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(0, red, 0, 0);
             });
@@ -326,11 +327,11 @@ namespace System.Drawing.Primitives.Tests
         [MemberData(nameof(InvalidValues))]
         public void FromArgb_InvalidGreen(int green)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(0, green, 0);
             });
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(0, 0, green, 0);
             });
@@ -340,11 +341,11 @@ namespace System.Drawing.Primitives.Tests
         [MemberData(nameof(InvalidValues))]
         public void FromArgb_InvalidBlue(int blue)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(0, 0, blue);
             });
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(0, 0, 0, blue);
             });

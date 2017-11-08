@@ -10,7 +10,6 @@
     <!-- TODO: RE-ENABLE THIS -->
     <EnablePInvokeAnalyzer>false</EnablePInvokeAnalyzer>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
@@ -154,7 +153,6 @@
     <Compile Include="System\ComponentModel\INestedSite.cs" />
     <Compile Include="System\ComponentModel\InstallerTypeAttribute.cs" />
     <Compile Include="System\ComponentModel\InstanceCreationEditor.cs" />
-    <Compile Include="System\ComponentModel\InvalidEnumArgumentException.cs" />
     <Compile Include="System\ComponentModel\ISupportInitializeNotification.cs" />
     <Compile Include="System\ComponentModel\License.cs" />
     <Compile Include="System\ComponentModel\LicenseContext.cs" />
@@ -266,6 +264,7 @@
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.TraceSource" />
     <Reference Include="System.Drawing.Primitives" />
+    <Reference Include="System.Globalization" />
     <Reference Include="System.IO.FileSystem" />
     <Reference Include="System.Linq" />
     <Reference Include="System.Net.Primitives" />

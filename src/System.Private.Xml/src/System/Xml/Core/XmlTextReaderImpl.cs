@@ -452,6 +452,7 @@ namespace System.Xml
         }
         internal XmlTextReaderImpl(string url, Stream input, XmlNameTable nt) : this(nt)
         {
+            ConvertAbsoluteUnixPathToAbsoluteUri(ref url, resolver: null);
             _namespaceManager = new XmlNamespaceManager(nt);
             if (url == null || url.Length == 0)
             {
@@ -478,6 +479,7 @@ namespace System.Xml
         }
         internal XmlTextReaderImpl(string url, TextReader input, XmlNameTable nt) : this(nt)
         {
+            ConvertAbsoluteUnixPathToAbsoluteUri(ref url, resolver: null);
             _namespaceManager = new XmlNamespaceManager(nt);
             _reportedBaseUri = (url != null) ? url : string.Empty;
             InitTextReaderInput(_reportedBaseUri, input);
@@ -670,6 +672,7 @@ namespace System.Xml
                                     XmlParserContext context, bool closeInput)
             : this(settings.GetXmlResolver(), settings, context)
         {
+            ConvertAbsoluteUnixPathToAbsoluteUri(ref baseUriStr, settings.GetXmlResolver());
             // get BaseUri from XmlParserContext
             if (context != null)
             {
@@ -735,6 +738,7 @@ namespace System.Xml
         internal XmlTextReaderImpl(TextReader input, XmlReaderSettings settings, string baseUriStr, XmlParserContext context)
             : this(settings.GetXmlResolver(), settings, context)
         {
+            ConvertAbsoluteUnixPathToAbsoluteUri(ref baseUriStr, settings.GetXmlResolver());
             // get BaseUri from XmlParserContext
             if (context != null)
             {
@@ -2910,21 +2914,8 @@ namespace System.Xml
             }
             SetupEncoding(encoding);
 
-            // eat preamble 
-            byte[] preamble = _ps.encoding.GetPreamble();
-            int preambleLen = preamble.Length;
-            int i;
-            for (i = 0; i < preambleLen && i < _ps.bytesUsed; i++)
-            {
-                if (_ps.bytes[i] != preamble[i])
-                {
-                    break;
-                }
-            }
-            if (i == preambleLen)
-            {
-                _ps.bytePos = preambleLen;
-            }
+            // eat preamble
+            EatPreamble();
 
             _documentStartBytePos = _ps.bytePos;
 
@@ -3218,6 +3209,24 @@ namespace System.Xml
                         _ps.decoder = encoding.GetDecoder();
                         break;
                 }
+            }
+        }
+
+        private void EatPreamble()
+        {
+            ReadOnlySpan<byte> preamble = _ps.encoding.Preamble;
+            int preambleLen = preamble.Length;
+            int i;
+            for (i = 0; i < preambleLen && i < _ps.bytesUsed; i++)
+            {
+                if (_ps.bytes[i] != preamble[i])
+                {
+                    break;
+                }
+            }
+            if (i == preambleLen)
+            {
+                _ps.bytePos = preambleLen;
             }
         }
 
@@ -9577,7 +9586,7 @@ namespace System.Xml
 
         /// <summary>
         /// This method should be called every time the reader is about to consume some number of
-        ///   characters from the input. It will count it agains the security counters and
+        ///   characters from the input. It will count it against the security counters and
         ///   may throw if some of the security limits are exceeded.
         /// </summary>
         /// <param name="characters">Number of characters to be consumed.</param>
@@ -9811,6 +9820,8 @@ namespace System.Xml
         {
             Buffer.BlockCopy(src, srcOffset, dst, dstOffset, count);
         }
+
+        static partial void ConvertAbsoluteUnixPathToAbsoluteUri(ref string url, XmlResolver resolver);
     }
 }
 

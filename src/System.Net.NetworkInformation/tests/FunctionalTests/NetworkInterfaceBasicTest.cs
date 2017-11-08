@@ -20,8 +20,7 @@ namespace System.Net.NetworkInformation.Tests
             _log = TestLogging.GetInstance();
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20014", TargetFrameworkMonikers.Uap)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         public void BasicTest_GetNetworkInterfaces_AtLeastOne()
         {
             Assert.NotEqual<int>(0, NetworkInterface.GetAllNetworkInterfaces().Length);
@@ -29,7 +28,6 @@ namespace System.Net.NetworkInformation.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Not all APIs are supported on Linux and OSX
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20014", TargetFrameworkMonikers.Uap)]
         public void BasicTest_AccessInstanceProperties_NoExceptions()
         {
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
@@ -53,7 +51,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [PlatformSpecific(TestPlatforms.Linux)]  // Some APIs are not supported on Linux
         public void BasicTest_AccessInstanceProperties_NoExceptions_Linux()
         {
@@ -111,9 +109,8 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [Trait("IPv4", "true")]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20014", TargetFrameworkMonikers.Uap)]
         public void BasicTest_StaticLoopbackIndex_MatchesLoopbackNetworkInterface()
         {
             Assert.True(Capability.IPv4Support());
@@ -134,9 +131,8 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [Trait("IPv4", "true")]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20014", TargetFrameworkMonikers.Uap)]
         public void BasicTest_StaticLoopbackIndex_ExceptionIfV4NotSupported()
         {
             Assert.True(Capability.IPv4Support());
@@ -144,9 +140,8 @@ namespace System.Net.NetworkInformation.Tests
             _log.WriteLine("Loopback IPv4 index: " + NetworkInterface.LoopbackInterfaceIndex);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [Trait("IPv6", "true")]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20014", TargetFrameworkMonikers.Uap)]
         public void BasicTest_StaticIPv6LoopbackIndex_MatchesLoopbackNetworkInterface()
         {
             Assert.True(Capability.IPv6Support());
@@ -169,9 +164,8 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [Trait("IPv6", "true")]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20014", TargetFrameworkMonikers.Uap)]
         public void BasicTest_StaticIPv6LoopbackIndex_ExceptionIfV6NotSupported()
         {
             Assert.True(Capability.IPv6Support());
@@ -180,7 +174,6 @@ namespace System.Net.NetworkInformation.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Not all APIs are supported on Linux and OSX
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20014", TargetFrameworkMonikers.Uap)]
         public void BasicTest_GetIPInterfaceStatistics_Success()
         {
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
@@ -203,7 +196,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [PlatformSpecific(TestPlatforms.Linux)]  // Some APIs are not supported on Linux
         public void BasicTest_GetIPInterfaceStatistics_Success_Linux()
         {
@@ -251,17 +244,16 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         public void BasicTest_GetIsNetworkAvailable_Success()
         {
             Assert.True(NetworkInterface.GetIsNetworkAvailable());
         }
 
-        [ConditionalTheory(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         [PlatformSpecific(~TestPlatforms.OSX)]
         [InlineData(false)]
         [InlineData(true)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "https://github.com/dotnet/corefx/issues/19314")]
         public async Task NetworkInterface_LoopbackInterfaceIndex_MatchesReceivedPackets(bool ipv6)
         {
             using (var client = new Socket(SocketType.Dgram, ProtocolType.Udp))

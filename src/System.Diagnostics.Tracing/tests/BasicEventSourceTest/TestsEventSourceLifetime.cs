@@ -8,7 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+#if USE_MDT_EVENTSOURCE
+using Microsoft.Diagnostics.Tracing;
+#else
 using System.Diagnostics.Tracing;
+#endif
 using System.Reflection;
 
 namespace BasicEventSourceTests
@@ -21,7 +25,7 @@ namespace BasicEventSourceTests
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // non-Windows EventSources don't have lifetime
-        [ActiveIssue(20837,TargetFrameworkMonikers.UapAot)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Test requires private reflection.")]
         public void Test_EventSource_Lifetime()
         {
             TestUtilities.CheckNoEventSourcesRunning("Start");

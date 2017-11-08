@@ -12,14 +12,15 @@
   <ItemGroup>
     <Compile Include="$(TestSourceFolder)..\..\..\System.Runtime.Serialization.Xml\tests\Utils.cs" />
     <Compile Include="$(TestSourceFolder)..\..\..\System.Runtime.Serialization.Xml\tests\SerializationTypes.cs" />
+    <Compile Include="$(TestSourceFolder)..\..\..\System.Runtime.Serialization.Xml\tests\SerializationTypes.RuntimeOnly.cs" />
     <Compile Include="$(TestSourceFolder)..\DataContractJsonSerializer.cs" />
-    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
-      <Link>CommonTest\System\PlatformDetection.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
     <Compile Include="$(TestSourceFolder)..\DataContractJsonSerializer.CoreCLR.cs" />
     <Compile Include="$(TestSourceFolder)..\..\..\System.Runtime.Serialization.Xml\tests\SerializationTypes.CoreCLR.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='uapaot'">
+    <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

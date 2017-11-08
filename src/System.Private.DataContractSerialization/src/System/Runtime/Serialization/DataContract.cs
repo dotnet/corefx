@@ -2181,7 +2181,7 @@ namespace System.Runtime.Serialization
             else if (nameToDataContractTable.TryGetValue(dataContract.StableName, out alreadyExistingContract))
             {
                 // Don't throw duplicate if its a KeyValuePair<K,T> as it could have been added by Dictionary<K,T>
-                if (alreadyExistingContract.UnderlyingType != DataContractCriticalHelper.GetDataContractAdapterType(type) &&
+                if (DataContractCriticalHelper.GetDataContractAdapterType(alreadyExistingContract.UnderlyingType) != DataContractCriticalHelper.GetDataContractAdapterType(type) &&
                     !(alreadyExistingContract is ClassDataContract && ((ClassDataContract)alreadyExistingContract).IsKeyValuePairAdapter))
                     throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.DupContractInKnownTypes, type, alreadyExistingContract.UnderlyingType, dataContract.StableName.Namespace, dataContract.StableName.Name)));
                 return;
@@ -2293,7 +2293,7 @@ namespace System.Runtime.Serialization
             {
                 string internalsVisibleAttributeAssemblyName = internalsVisibleAttribute.AssemblyName;
 
-                if (Regex.IsMatch(internalsVisibleAttributeAssemblyName, Globals.SimpleSRSInternalsVisiblePattern) ||
+                if (internalsVisibleAttributeAssemblyName.Trim().Equals("System.Runtime.Serialization") ||
                     Regex.IsMatch(internalsVisibleAttributeAssemblyName, Globals.FullSRSInternalsVisiblePattern))
                 {
                     return true;

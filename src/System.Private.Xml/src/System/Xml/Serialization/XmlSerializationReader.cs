@@ -24,7 +24,11 @@ namespace System.Xml.Serialization
     using System.Xml.Serialization.Configuration;
 
     ///<internalonly/>
+#if XMLSERIALIZERGENERATOR
+    internal abstract class XmlSerializationReader : XmlSerializationGeneratedCode
+#else
     public abstract class XmlSerializationReader : XmlSerializationGeneratedCode
+#endif
     {
         private XmlReader _r;
         private XmlCountingReader _countingReader;
@@ -119,7 +123,7 @@ namespace System.Xml.Serialization
 
         protected abstract void InitIDs();
 
-#if uap
+#if FEATURE_SERIALIZATION_UAPAOT
         // this method must be called before any generated deserialization methods are called
         internal void Init(XmlReader r, XmlDeserializationEvents events, string encodingStyle)
         {

@@ -69,8 +69,8 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.CopyFile("\0bad", "bar"));
-                Assert.Throws<ArgumentException>(() => isf.CopyFile("foo", "\0bad"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.CopyFile("\0bad", "bar"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.CopyFile("foo", "\0bad"));
             }
         }
 
@@ -83,7 +83,7 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void CopyFile_CopyOver(PresetScopes scope)
         {
@@ -100,7 +100,7 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void CopyFile_CopiesFile(PresetScopes scope)
         {

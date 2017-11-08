@@ -262,7 +262,7 @@ namespace System.Data.Tests
 
             Assert.Equal(dv[2][0], "9");
 
-            //This should not throw a System.Data.VersionNotFoundException: "There is no Proposed data to accces"
+            //This should not throw a System.Data.VersionNotFoundException: "There is no proposed data to access"
             Assert.Equal(dv[1][0], "7");
         }
 
@@ -477,7 +477,7 @@ namespace System.Data.Tests
         [Fact]
         public void Find_1()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 /* since the sort key is not specified. Must raise a ArgumentException */
                 int sIndex = _dataView.Find("abc");
@@ -512,7 +512,7 @@ namespace System.Data.Tests
         [Fact]
         public void Find_3()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 _dataView.Sort = "itemID, itemName";
                 /* expecting order key count mismatch */
@@ -586,7 +586,7 @@ namespace System.Data.Tests
         [Fact]
         public void FindRowsWithoutSort()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 DataTable dt = new DataTable("table");
                 dt.Columns.Add("col1");
@@ -605,7 +605,7 @@ namespace System.Data.Tests
         [Fact]
         public void FindRowsInconsistentKeyLength()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 DataTable dt = new DataTable("table");
                 dt.Columns.Add("col1");

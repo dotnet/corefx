@@ -46,15 +46,10 @@ namespace System.Xml.Xsl
     public sealed class XslCompiledTransform
     {
         // Reader settings used when creating XmlReader from inputUri
-        private static readonly XmlReaderSettings s_readerSettings = null;
+        private static readonly XmlReaderSettings s_readerSettings = new XmlReaderSettings();
 
         // Version for GeneratedCodeAttribute
-        private readonly string _version = typeof(XslCompiledTransform).Assembly.GetName().Version.ToString();
-
-        static XslCompiledTransform()
-        {
-            s_readerSettings = new XmlReaderSettings();
-        }
+        private static readonly Version s_version = typeof(XslCompiledTransform).Assembly.GetName().Version;
 
         // Options of compilation
         private bool _enableDebug = false;
@@ -64,7 +59,7 @@ namespace System.Xml.Xsl
         private XmlWriterSettings _outputSettings = null;
         private QilExpression _qil = null;
 
-#if !uap
+#if FEATURE_COMPILED_XSL
         // Executable command for the compiled stylesheet
         private XmlILCommand _command = null;
 #endif
@@ -84,7 +79,7 @@ namespace System.Xml.Xsl
             _compilerErrorColl = null;
             _outputSettings = null;
             _qil = null;
-#if !uap
+#if FEATURE_COMPILED_XSL
             _command = null;
 #endif
         }
@@ -201,7 +196,7 @@ namespace System.Xml.Xsl
 
         private void CompileQilToMsil(XsltSettings settings)
         {
-#if !uap
+#if FEATURE_COMPILED_XSL
             _command = new XmlILGenerator().Generate(_qil, /*typeBuilder:*/null);
             _outputSettings = _command.StaticData.DefaultWriterSettings;
             _qil = null;
@@ -216,7 +211,7 @@ namespace System.Xml.Xsl
 
         public void Load(Type compiledStylesheet)
         {
-#if !uap
+#if FEATURE_COMPILED_XSL
             Reset();
             if (compiledStylesheet == null)
                 throw new ArgumentNullException(nameof(compiledStylesheet));
@@ -227,9 +222,9 @@ namespace System.Xml.Xsl
             // If GeneratedCodeAttribute is not there, it is not a compiled stylesheet class
             if (generatedCodeAttr != null && generatedCodeAttr.Tool == typeof(XslCompiledTransform).FullName)
             {
-                if (new Version(_version).CompareTo(new Version(generatedCodeAttr.Version)) < 0)
+                if (s_version < Version.Parse(generatedCodeAttr.Version))
                 {
-                    throw new ArgumentException(SR.Format(SR.Xslt_IncompatibleCompiledStylesheetVersion, generatedCodeAttr.Version, _version), nameof(compiledStylesheet));
+                    throw new ArgumentException(SR.Format(SR.Xslt_IncompatibleCompiledStylesheetVersion, generatedCodeAttr.Version, s_version), nameof(compiledStylesheet));
                 }
 
                 FieldInfo fldData = compiledStylesheet.GetField(XmlQueryStaticData.DataFieldName, BindingFlags.Static | BindingFlags.NonPublic);
@@ -263,7 +258,7 @@ namespace System.Xml.Xsl
 
         public void Load(MethodInfo executeMethod, byte[] queryData, Type[] earlyBoundTypes)
         {
-#if !uap
+#if FEATURE_COMPILED_XSL
             Reset();
 
             if (executeMethod == null)
@@ -431,7 +426,7 @@ namespace System.Xml.Xsl
         // It's OK to suppress the SxS warning.
         public void Transform(XmlReader input, XsltArgumentList arguments, XmlWriter results, XmlResolver documentResolver)
         {
-#if !uap
+#if FEATURE_COMPILED_XSL
             CheckArguments(input, results);
             CheckCommand();
             _command.Execute((object)input, documentResolver, arguments, results);
@@ -444,7 +439,7 @@ namespace System.Xml.Xsl
         // It's OK to suppress the SxS warning.
         public void Transform(IXPathNavigable input, XsltArgumentList arguments, XmlWriter results, XmlResolver documentResolver)
         {
-#if !uap
+#if FEATURE_COMPILED_XSL
             CheckArguments(input, results);
             CheckCommand();
             _command.Execute((object)input.CreateNavigator(), documentResolver, arguments, results);
@@ -477,7 +472,7 @@ namespace System.Xml.Xsl
 
         private void CheckCommand()
         {
-#if !uap
+#if FEATURE_COMPILED_XSL
             if (_command == null)
             {
                 throw new InvalidOperationException(SR.Xslt_NoStylesheetLoaded);
@@ -516,7 +511,7 @@ namespace System.Xml.Xsl
             CompileQilToMsil(settings);
         }
 
-#if !uap
+#if FEATURE_COMPILED_XSL
         private void Transform(string inputUri, XsltArgumentList arguments, XmlWriter results, XmlResolver documentResolver)
         {
             _command.Execute(inputUri, documentResolver, arguments, results);

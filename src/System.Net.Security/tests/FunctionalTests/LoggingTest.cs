@@ -12,7 +12,8 @@ namespace System.Net.Security.Tests
     public class LoggingTest : RemoteExecutorTestBase
     {
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot, "NetEventSource is only part of .NET Core")] //"https://github.com/dotnet/corefx/issues/19379"
+        [ActiveIssue(20470, TargetFrameworkMonikers.UapAot)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetEventSource is only part of .NET Core.")]
         public void EventSource_ExistsWithCorrectId()
         {
             Type esType = typeof(SslStream).Assembly.GetType("System.Net.NetEventSource", throwOnError: true, ignoreCase: false);
@@ -25,7 +26,8 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetEventSource is only part of .NET Core")]
+        [ActiveIssue(20470, TargetFrameworkMonikers.UapAot)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetEventSource is only part of .NET Core.")]
         public void EventSource_EventsRaisedAsExpected()
         {
             RemoteInvoke(() =>

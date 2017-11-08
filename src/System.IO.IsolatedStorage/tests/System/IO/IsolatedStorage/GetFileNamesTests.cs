@@ -57,11 +57,11 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.GetFileNames("\0bad"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.GetFileNames("\0bad"));
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void GetFileNames_GetsFileNames(PresetScopes scope)
         {

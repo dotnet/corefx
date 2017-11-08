@@ -50,7 +50,6 @@ namespace System.Data.Tests.SqlTypes
 
         public SqlDateTimeTest()
         {
-            CultureInfo.CurrentCulture = new CultureInfo("en-US");
             _test1 = new SqlDateTime(2002, 10, 19, 9, 40, 0);
             _test2 = new SqlDateTime(2003, 11, 20, 10, 50, 1);
             _test3 = new SqlDateTime(2003, 11, 20, 10, 50, 1);
@@ -226,7 +225,6 @@ namespace System.Data.Tests.SqlTypes
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/19202", TargetFrameworkMonikers.UapAot)]
         public void GetTypeTest()
         {
             Assert.Equal("System.Data.SqlTypes.SqlDateTime", _test1.GetType().ToString());

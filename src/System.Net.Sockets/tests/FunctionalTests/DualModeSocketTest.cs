@@ -269,7 +269,7 @@ namespace System.Net.Sockets.Tests
                 int port;
                 using (SocketServer server = new SocketServer(_log, IPAddress.Loopback, false, out port))
                 {
-                    Assert.Throws<ArgumentException>(() =>
+                    AssertExtensions.Throws<ArgumentException>("addresses", () =>
                     {
                         socket.Connect(new IPAddress[] { IPAddress.Loopback }, port);
                     });
@@ -552,13 +552,13 @@ namespace System.Net.Sockets.Tests
             DualModeConnectAsync_IPEndPointToHost_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Loopback, false);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/982
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         public void ConnectAsyncV4IPEndPointToV6Host_Fails()
         {
             DualModeConnectAsync_IPEndPointToHost_Fails_Helper(IPAddress.Loopback, IPAddress.IPv6Loopback);
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/982
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         public void ConnectAsyncV6IPEndPointToV4Host_Fails()
         {
             DualModeConnectAsync_IPEndPointToHost_Fails_Helper(IPAddress.IPv6Loopback, IPAddress.Loopback);
@@ -710,7 +710,7 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void Socket_BindDnsEndPoint_Throws()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
             {
                 using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
                 {
@@ -1056,6 +1056,7 @@ namespace System.Net.Sockets.Tests
         }
     }
 
+    [OuterLoop] // https://github.com/dotnet/corefx/issues/17681
     [Trait("IPv4", "true")]
     [Trait("IPv6", "true")]
     public class DualModeConnectionlessSendTo : DualModeBase
@@ -1081,7 +1082,7 @@ namespace System.Net.Sockets.Tests
         {
             using (Socket socket = new Socket(SocketType.Dgram, ProtocolType.Udp))
             {
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     socket.SendTo(new byte[1], new DnsEndPoint("localhost", UnusedPort));
                 });
@@ -1156,6 +1157,7 @@ namespace System.Net.Sockets.Tests
         #endregion SendTo Sync
     }
 
+    [OuterLoop] // https://github.com/dotnet/corefx/issues/17681
     [Trait("IPv4", "true")]
     [Trait("IPv6", "true")]
     public class DualModeConnectionlessBeginSendTo : DualModeBase
@@ -1182,7 +1184,7 @@ namespace System.Net.Sockets.Tests
         {
             using (Socket socket = new Socket(SocketType.Dgram, ProtocolType.Udp))
             {
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     socket.BeginSendTo(new byte[1], 0, 1, SocketFlags.None, new DnsEndPoint("localhost", UnusedPort), null, null);
                 });
@@ -1257,6 +1259,7 @@ namespace System.Net.Sockets.Tests
         #endregion SendTo Begin/End
     }
 
+    [OuterLoop] // https://github.com/dotnet/corefx/issues/17681
     [Trait("IPv4", "true")]
     [Trait("IPv6", "true")]
     public class DualModeConnectionlessSendToAsync : DualModeBase
@@ -1302,7 +1305,7 @@ namespace System.Net.Sockets.Tests
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
                 args.RemoteEndPoint = new DnsEndPoint("localhost", UnusedPort);
                 args.SetBuffer(new byte[1], 0, 1);
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     socket.SendToAsync(args);
                 });
@@ -1395,6 +1398,7 @@ namespace System.Net.Sockets.Tests
         #endregion SendTo Async/Event
     }
 
+    [OuterLoop] // https://github.com/dotnet/corefx/issues/17681
     [Trait("IPv4", "true")]
     [Trait("IPv6", "true")]
     public class DualModeConnectionlessReceiveFrom : DualModeBase
@@ -1410,7 +1414,7 @@ namespace System.Net.Sockets.Tests
                 socket.DualMode = false;
 
                 EndPoint receivedFrom = new IPEndPoint(IPAddress.Loopback, UnusedPort);
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     int received = socket.ReceiveFrom(new byte[1], ref receivedFrom);
                 });
@@ -1426,7 +1430,7 @@ namespace System.Net.Sockets.Tests
             {
                 int port = socket.BindToAnonymousPort(IPAddress.IPv6Loopback);
                 EndPoint receivedFrom = new DnsEndPoint("localhost", port, AddressFamily.InterNetworkV6);
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     int received = socket.ReceiveFrom(new byte[1], ref receivedFrom);
                 });
@@ -1525,6 +1529,7 @@ namespace System.Net.Sockets.Tests
         }
     }
 
+    [OuterLoop] // https://github.com/dotnet/corefx/issues/17681
     [Trait("IPv4", "true")]
     [Trait("IPv6", "true")]
     public class DualModeConnectionlessBeginReceiveFrom : DualModeBase
@@ -1540,7 +1545,7 @@ namespace System.Net.Sockets.Tests
                 socket.DualMode = false;
 
                 EndPoint receivedFrom = new IPEndPoint(IPAddress.Loopback, UnusedPort);
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     socket.BeginReceiveFrom(new byte[1], 0, 1, SocketFlags.None, ref receivedFrom, null, null);
                 });
@@ -1557,7 +1562,7 @@ namespace System.Net.Sockets.Tests
                 int port = socket.BindToAnonymousPort(IPAddress.IPv6Loopback);
                 EndPoint receivedFrom = new DnsEndPoint("localhost", port, AddressFamily.InterNetworkV6);
 
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     socket.BeginReceiveFrom(new byte[1], 0, 1, SocketFlags.None, ref receivedFrom, null, null);
                 });
@@ -1673,6 +1678,7 @@ namespace System.Net.Sockets.Tests
         #endregion ReceiveFrom Begin/End
     }
 
+    [OuterLoop] // https://github.com/dotnet/corefx/issues/17681
     [Trait("IPv4", "true")]
     [Trait("IPv6", "true")]
     public class DualModeConnectionlessReceiveFromAsync : DualModeBase
@@ -1689,7 +1695,7 @@ namespace System.Net.Sockets.Tests
                 args.RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, UnusedPort);
                 args.SetBuffer(new byte[1], 0, 1);
 
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("RemoteEndPoint", () =>
                 {
                     socket.ReceiveFromAsync(args);
                 });
@@ -1708,7 +1714,7 @@ namespace System.Net.Sockets.Tests
                 args.RemoteEndPoint = new DnsEndPoint("localhost", port, AddressFamily.InterNetworkV6);
                 args.SetBuffer(new byte[1], 0, 1);
 
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     socket.ReceiveFromAsync(args);
                 });
@@ -1835,6 +1841,7 @@ namespace System.Net.Sockets.Tests
         }
     }
 
+    [OuterLoop] // https://github.com/dotnet/corefx/issues/17681
     [Trait("IPv4", "true")]
     [Trait("IPv6", "true")]
     public class DualModeConnectionlessReceiveMessageFrom : DualModeBase
@@ -1885,7 +1892,7 @@ namespace System.Net.Sockets.Tests
                 EndPoint receivedFrom = new IPEndPoint(IPAddress.Loopback, UnusedPort);
                 SocketFlags socketFlags = SocketFlags.None;
                 IPPacketInformation ipPacketInformation;
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     int received = socket.ReceiveMessageFrom(new byte[1], 0, 1, ref socketFlags, ref receivedFrom, out ipPacketInformation);
                 });
@@ -1904,7 +1911,7 @@ namespace System.Net.Sockets.Tests
                 SocketFlags socketFlags = SocketFlags.None;
                 IPPacketInformation ipPacketInformation;
 
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     int received = socket.ReceiveMessageFrom(new byte[1], 0, 1, ref socketFlags, ref receivedFrom, out ipPacketInformation);
                 });
@@ -2060,7 +2067,7 @@ namespace System.Net.Sockets.Tests
                 EndPoint receivedFrom = new IPEndPoint(IPAddress.Loopback, UnusedPort);
                 SocketFlags socketFlags = SocketFlags.None;
 
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     socket.BeginReceiveMessageFrom(new byte[1], 0, 1, socketFlags, ref receivedFrom, null, null);
                 });
@@ -2078,7 +2085,7 @@ namespace System.Net.Sockets.Tests
 
                 EndPoint receivedFrom = new DnsEndPoint("localhost", port, AddressFamily.InterNetworkV6);
                 SocketFlags socketFlags = SocketFlags.None;
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     socket.BeginReceiveMessageFrom(new byte[1], 0, 1, socketFlags, ref receivedFrom, null, null);
                 });
@@ -2158,7 +2165,7 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(TestPlatforms.Linux)]  // Read the comment above
         public void BeginReceiveMessageFromV4BoundToSpecificV6_NotReceived_Linux()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
             {
                 BeginReceiveMessageFrom_Helper(IPAddress.IPv6Loopback, IPAddress.Loopback, expectedToTimeout: true);
             });
@@ -2233,7 +2240,7 @@ namespace System.Net.Sockets.Tests
                 args.RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, UnusedPort);
                 args.SetBuffer(new byte[1], 0, 1);
 
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("RemoteEndPoint", () =>
                 {
                     socket.ReceiveMessageFromAsync(args);
                 });
@@ -2253,7 +2260,7 @@ namespace System.Net.Sockets.Tests
                 args.RemoteEndPoint = new DnsEndPoint("localhost", port, AddressFamily.InterNetworkV6);
                 args.SetBuffer(new byte[1], 0, 1);
 
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
                     socket.ReceiveMessageFromAsync(args);
                 });
@@ -2333,7 +2340,7 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(TestPlatforms.Linux)]  // Read the comment above
         public void ReceiveMessageFromAsyncV4BoundToSpecificV6_NotReceived_Linux()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
             {
                 ReceiveFrom_Helper(IPAddress.IPv6Loopback, IPAddress.Loopback);
             });
@@ -2700,7 +2707,7 @@ namespace System.Net.Sockets.Tests
             private IPAddress _connectTo;
             private Socket _serverSocket;
 
-            public SocketUdpClient(ITestOutputHelper output, Socket serverSocket, IPAddress connectTo, int port, bool redundant = true)
+            public SocketUdpClient(ITestOutputHelper output, Socket serverSocket, IPAddress connectTo, int port, bool redundant = true, bool sendNow = true)
             {
                 _output = output;
 
@@ -2708,14 +2715,18 @@ namespace System.Net.Sockets.Tests
                 _port = port;
                 _serverSocket = serverSocket;
 
-                Task.Run(() => ClientSend(null, redundant));
+                if (sendNow)
+                {
+                    Task.Run(() => ClientSend(redundant));
+                }
             }
 
-            private void ClientSend(object state, bool redundant)
+            public void ClientSend(bool redundant = true, int timeout = 3)
             {
                 try
                 {
                     Socket socket = new Socket(_connectTo.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+                    socket.SendTimeout = timeout * 1000;
 
                     for (int i = 0; i < (redundant ? TestSettings.UDPRedundancy : 1); i++)
                     {
@@ -2726,8 +2737,9 @@ namespace System.Net.Sockets.Tests
                         socket.SendToAsync(e);
                     }
                 }
-                catch (SocketException)
+                catch (SocketException e)
                 {
+                    _output.WriteLine("Send to {0} {1} failed: {2}", _connectTo, _port, e.ToString());
                     _serverSocket.Dispose(); // Cancels the test
                 }
             }
@@ -2748,10 +2760,12 @@ namespace System.Net.Sockets.Tests
         {
             using (Socket serverSocket = new Socket(SocketType.Dgram, ProtocolType.Udp))
             {
-                serverSocket.ReceiveTimeout = 500;
+                serverSocket.ReceiveTimeout = 1000;
                 int port = serverSocket.BindToAnonymousPort(listenOn);
 
-                SocketUdpClient client = new SocketUdpClient(_log, serverSocket, connectTo, port);
+                SocketUdpClient client = new SocketUdpClient(_log, serverSocket, connectTo, port, sendNow: false);
+
+                client.ClientSend();
 
                 EndPoint receivedFrom = new IPEndPoint(connectTo, port);
                 int received = serverSocket.ReceiveFrom(new byte[1], ref receivedFrom);

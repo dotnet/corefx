@@ -19,6 +19,8 @@ namespace System.Collections.Concurrent.Tests
         protected override bool ResetImplemented => false;
         protected override IProducerConsumerCollection<int> CreateOracle(IEnumerable<int> collection) => new QueueOracle(collection);
 
+        protected override string CopyToNoLengthParamName => null;
+
         [Fact]
         public void Concurrent_Enqueue_TryDequeue_AllItemsReceived()
         {
@@ -104,7 +106,7 @@ namespace System.Collections.Concurrent.Tests
 
             for (int i = 0; i < consumers; i++)
             {
-                tasks.Add(Task.Run(() =>
+                tasks.Add(Task.Factory.StartNew(() =>
                 {
                     while (Volatile.Read(ref remainingItems) > 0)
                     {
@@ -115,18 +117,18 @@ namespace System.Collections.Concurrent.Tests
                             Interlocked.Decrement(ref remainingItems);
                         }
                     }
-                }));
+                }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default));
             }
 
             for (int i = 0; i < producers; i++)
             {
-                tasks.Add(Task.Run(() =>
+                tasks.Add(Task.Factory.StartNew(() =>
                 {
                     for (int item = 1; item <= itemsPerProducer; item++)
                     {
                         cq.Enqueue(item);
                     }
-                }));
+                }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default));
             }
 
             Task.WaitAll(tasks.ToArray());

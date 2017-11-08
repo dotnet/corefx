@@ -7,7 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+#if USE_MDT_EVENTSOURCE
+using Microsoft.Diagnostics.Tracing;
+#else
 using System.Diagnostics.Tracing;
+#endif
 using Xunit;
 #if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
 using Microsoft.Diagnostics.Tracing.Session;
@@ -22,7 +26,6 @@ namespace BasicEventSourceTests
         /// 
         /// </summary>
         [Fact]
-        [ActiveIssue(20744,TargetFrameworkMonikers.UapAot)]
         public void Test_Write_Fuzzy()
         {
             using (var logger = new EventSource("EventSourceName"))

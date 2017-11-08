@@ -258,7 +258,11 @@ namespace System.Net.Http
 
                     throw WinHttpException.CreateExceptionUsingError(lastError);
                 }
-                
+
+                // Get any additional certificates sent from the remote server during the TLS/SSL handshake.
+                X509Certificate2Collection remoteCertificateStore =
+                    UnmanagedCertificateContext.GetRemoteCertificatesFromStoreContext(certHandle);
+
                 // Create a managed wrapper around the certificate handle. Since this results in duplicating
                 // the handle, we will close the original handle after creating the wrapper.
                 var serverCertificate = new X509Certificate2(certHandle);
@@ -266,26 +270,28 @@ namespace System.Net.Http
 
                 X509Chain chain = null;
                 SslPolicyErrors sslPolicyErrors;
+                bool result = false;
 
                 try
                 {
                     WinHttpCertificateHelper.BuildChain(
                         serverCertificate,
+                        remoteCertificateStore,
                         state.RequestMessage.RequestUri.Host,
                         state.CheckCertificateRevocationList,
                         out chain,
                         out sslPolicyErrors);
 
-                    bool result = state.ServerCertificateValidationCallback(
+                    result = state.ServerCertificateValidationCallback(
                         state.RequestMessage,
                         serverCertificate,
                         chain,
                         sslPolicyErrors);
-                    if (!result)
-                    {
-                        throw WinHttpException.CreateExceptionUsingError(
-                            (int)Interop.WinHttp.ERROR_WINHTTP_SECURE_FAILURE);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    throw WinHttpException.CreateExceptionUsingError(
+                        (int)Interop.WinHttp.ERROR_WINHTTP_SECURE_FAILURE, ex);
                 }
                 finally
                 {
@@ -295,6 +301,12 @@ namespace System.Net.Http
                     }
 
                     serverCertificate.Dispose();
+                }
+
+                if (!result)
+                {
+                    throw WinHttpException.CreateExceptionUsingError(
+                        (int)Interop.WinHttp.ERROR_WINHTTP_SECURE_FAILURE);
                 }
             }
         }
@@ -350,7 +362,7 @@ namespace System.Net.Http
                     {
                         // TODO: Issue #2165. We need to pass in the cancellation token from the
                         // user's ReadAsync() call into the TrySetCanceled().
-                        Debug.WriteLine("RequestCallback: QUERY_DATA_AVAILABLE - ERROR_WINHTTP_OPERATION_CANCELLED");
+                        WinHttpTraceHelper.Trace("RequestCallback: QUERY_DATA_AVAILABLE - ERROR_WINHTTP_OPERATION_CANCELLED");
                         state.LifecycleAwaitable.SetCanceled();
                     }
                     else
@@ -365,7 +377,7 @@ namespace System.Net.Http
                     {
                         // TODO: Issue #2165. We need to pass in the cancellation token from the
                         // user's ReadAsync() call into the TrySetCanceled().
-                        Debug.WriteLine("RequestCallback: API_READ_DATA - ERROR_WINHTTP_OPERATION_CANCELLED");
+                        WinHttpTraceHelper.Trace("RequestCallback: API_READ_DATA - ERROR_WINHTTP_OPERATION_CANCELLED");
                         state.LifecycleAwaitable.SetCanceled();
                     }
                     else
@@ -379,7 +391,7 @@ namespace System.Net.Http
                     {
                         // TODO: Issue #2165. We need to pass in the cancellation token from the
                         // user's WriteAsync() call into the TrySetCanceled().
-                        Debug.WriteLine("RequestCallback: API_WRITE_DATA - ERROR_WINHTTP_OPERATION_CANCELLED");
+                        WinHttpTraceHelper.Trace("RequestCallback: API_WRITE_DATA - ERROR_WINHTTP_OPERATION_CANCELLED");
                         state.TcsInternalWriteDataToRequestStream.TrySetCanceled();
                     }
                     else

@@ -8,10 +8,8 @@ namespace System.Linq
 {
     public static partial class Enumerable
     {
-        public static bool SequenceEqual<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second)
-        {
-            return SequenceEqual(first, second, null);
-        }
+        public static bool SequenceEqual<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second) =>
+            SequenceEqual(first, second, null);
 
         public static bool SequenceEqual<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
         {
@@ -30,13 +28,25 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(second));
             }
 
-            ICollection<TSource> firstCol = first as ICollection<TSource>;
-            if (firstCol != null)
+            if (first is ICollection<TSource> firstCol && second is ICollection<TSource> secondCol)
             {
-                ICollection<TSource> secondCol = second as ICollection<TSource>;
-                if (secondCol != null && firstCol.Count != secondCol.Count)
+                if (firstCol.Count != secondCol.Count)
                 {
                     return false;
+                }
+
+                if (firstCol is IList<TSource> firstList && secondCol is IList<TSource> secondList)
+                {
+                    int count = firstCol.Count;
+                    for (int i = 0; i < count; i++)
+                    {
+                        if (!comparer.Equals(firstList[i], secondList[i]))
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
                 }
             }
 

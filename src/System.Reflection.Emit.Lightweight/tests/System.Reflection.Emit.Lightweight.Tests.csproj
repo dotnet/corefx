@@ -4,7 +4,6 @@
   <PropertyGroup>
     <ProjectGuid>{C338DCF7-FB75-407B-A2ED-117FBF3AAA18}</ProjectGuid>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <ItemGroup>
@@ -15,9 +14,6 @@
     <Compile Include="DynamicMethodInitLocals.cs" />
     <Compile Include="DynamicMethodToString.cs" />
     <Compile Include="Utilities.cs" />
-    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
-      <Link>Common\System\AssertExtensions.cs</Link>
-    </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

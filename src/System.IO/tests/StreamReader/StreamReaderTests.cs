@@ -40,33 +40,7 @@ namespace System.IO.Tests
 
         protected Tuple<char[], StreamReader> GetCharArrayStream()
         {
-            var chArr = new char[]{
-                char.MinValue
-                ,char.MaxValue
-                ,'\t'
-                ,' '
-                ,'$'
-                ,'@'
-                ,'#'
-                ,'\0'
-                ,'\v'
-                ,'\''
-                ,'\u3190'
-                ,'\uC3A0'
-                ,'A'
-                ,'5'
-                ,'\r'
-                ,'\uFE70'
-                ,'-'
-                ,';'
-                ,'\r'
-                ,'\n'
-                ,'T'
-                ,'3'
-                ,'\n'
-                ,'K'
-                ,'\u00E6'
-            };
+            var chArr = TestDataProvider.CharData;
             var ms = CreateStream();
             var sw = new StreamWriter(ms);
 
@@ -195,14 +169,14 @@ namespace System.IO.Tests
         public void ArgumentOutOfRangeOnNegativCount()
         {
             var sr = GetCharArrayStream().Item2;
-            Assert.Throws<ArgumentException>(() => sr.Read(new char[0], 0, 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => sr.Read(new char[0], 0, 1));
         }
 
         [Fact]
         public void ArgumentExceptionOffsetAndCount()
         {
             var sr = GetCharArrayStream().Item2;
-            Assert.Throws<ArgumentException>(() => sr.Read(new char[0], 2, 0));
+            AssertExtensions.Throws<ArgumentException>(null, () => sr.Read(new char[0], 2, 0));
         }
 
         [Fact]
