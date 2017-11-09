@@ -167,6 +167,7 @@ namespace System.Threading.ThreadPools.Tests
             try
             {
                 Assert.True(ThreadPool.SetMinThreads(0, 0));
+                VerifyMinThreads(1, 1);
                 Assert.False(ThreadPool.SetMaxThreads(0, 1));
                 Assert.False(ThreadPool.SetMaxThreads(1, 0));
                 VerifyMaxThreads(maxw, maxc);
@@ -194,6 +195,7 @@ namespace System.Threading.ThreadPools.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Triggers an assertion failure.")]
         private static void SetMinThreadsTo0Test()
         {
             int minw, minc, maxw, maxc;
