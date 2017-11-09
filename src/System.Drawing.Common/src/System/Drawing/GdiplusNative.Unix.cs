@@ -54,34 +54,22 @@ namespace System.Drawing
 
             private static void InitializeSystemContext()
             {
-                if (Environment.GetEnvironmentVariable("not_supported_MONO_MWF_USE_NEW_X11_BACKEND") != null || Environment.GetEnvironmentVariable("MONO_MWF_MAC_FORCE_X11") != null)
+                if (Environment.GetEnvironmentVariable("SYSTEM_DRAWING_COMMON_FORCE_X11") != null)
                 {
                     UseX11Drawable = true;
                 }
                 else
                 {
-                    IntPtr buf = Marshal.AllocHGlobal(8192);
-                    // This is kind of a hack but gets us sysname from uname (struct utsname *name) on
-                    // linux and darwin
-                    if (uname(buf) != 0)
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
-                        // WTH: We couldn't detect the OS; lets default to X11
-                        UseX11Drawable = true;
+                        UseCarbonDrawable = true;
                     }
                     else
                     {
-                        string os = Marshal.PtrToStringAnsi(buf);
-                        if (os == "Darwin")
-                            UseCarbonDrawable = true;
-                        else
-                            UseX11Drawable = true;
+                        UseX11Drawable = true;
                     }
-                    Marshal.FreeHGlobal(buf);
                 }
             }
-
-            [DllImport("libc")]
-            static extern int uname(IntPtr buf);
 
             private static void LoadFunctionPointers()
             {
