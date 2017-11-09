@@ -285,7 +285,7 @@ namespace System.ServiceModel.Syndication.Tests
         }
 
         [Fact]
-        [ActiveIssue(25080)]
+        [ActiveIssue(25156)]
         public static void SyndicationFeed_Rss_WrongDateFormat()
         {
             // *** SETUP *** \\
