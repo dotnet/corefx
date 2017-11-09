@@ -54,7 +54,7 @@ namespace System.ComponentModel.Composition.Hosting
                 }
             }
 
-private void AddToImportersIndex(string contractName, ComposablePartDefinition part)
+            private void AddToImportersIndex(string contractName, ComposablePartDefinition part)
             {
                 List<ComposablePartDefinition> parts = null;
                 if (!this._importersIndex.TryGetValue(contractName, out parts))

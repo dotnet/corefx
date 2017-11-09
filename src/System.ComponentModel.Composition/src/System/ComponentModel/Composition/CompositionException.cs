@@ -107,8 +107,8 @@ namespace System.ComponentModel.Composition
         {
         }
 
-internal CompositionException(string message, Exception innerException, IEnumerable<CompositionError> errors)
-            : base(message, innerException)
+        internal CompositionException(string message, Exception innerException, IEnumerable<CompositionError> errors)
+                    : base(message, innerException)
         {
             Requires.NullOrNotNullElements(errors, "errors");
 #if FEATURE_SERIALIZATION
@@ -147,7 +147,7 @@ internal CompositionException(string message, Exception innerException, IEnumera
             get { return _errors; }
         }
 
-/// <summary>
+        /// <summary>
         ///     Gets a message that describes the exception.
         /// </summary>
         /// <value>
@@ -170,7 +170,7 @@ internal CompositionException(string message, Exception innerException, IEnumera
             }
         }
 
-public ReadOnlyCollection<Exception> RootCauses
+        public ReadOnlyCollection<Exception> RootCauses
         {
             get
             {
@@ -231,7 +231,7 @@ public ReadOnlyCollection<Exception> RootCauses
             {
                 Assumes.IsTrue(errorsCount == 1);
                 Assumes.IsTrue(pathCount == 1);
-                
+
                 // The composition produced a single composition error. The root cause is provided below.
                 writer.AppendFormat(
                      CultureInfo.CurrentCulture,

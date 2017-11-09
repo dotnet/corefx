@@ -19,7 +19,7 @@ namespace Microsoft.Internal
         // Type.GetTypeFromHandle
         private static readonly MethodInfo _typeGetTypeFromHandleMethod = typeof(Type).GetMethod("GetTypeFromHandle");
 
-// typeofs are pretty expensive, so we cache them statically
+        // typeofs are pretty expensive, so we cache them statically
         private static readonly Type TypeType = typeof(System.Type);
         private static readonly Type StringType = typeof(System.String);
         private static readonly Type CharType = typeof(System.Char);
@@ -54,7 +54,7 @@ namespace Microsoft.Internal
 
             return ctorIL;
         }
-        
+
         /// Generates the code that loads the supplied value on the stack
         /// This is not as simple as it seems, as different instructions need to be generated depending
         /// on its type.
@@ -112,7 +112,7 @@ namespace Microsoft.Internal
             else if (GenerationServices.IEnumerableType.IsAssignableFrom(valueType))
             {
                 // NOTE : strings and dictionaries are also enumerables, but we have already handled those
-                ilGenerator.LoadEnumerable((IEnumerable) rawValue);
+                ilGenerator.LoadEnumerable((IEnumerable)rawValue);
             }
             else if (
                 (valueType == GenerationServices.CharType) ||
@@ -244,7 +244,7 @@ namespace Microsoft.Internal
             ilGenerator.LoadInt(enumerable.Cast<object>().Count());
             ilGenerator.Emit(OpCodes.Newarr, elementType);
             ilGenerator.Emit(OpCodes.Stloc, generatedArrayLocal);
-            
+
             int index = 0;
             foreach (object value in enumerable)
             {
@@ -277,7 +277,7 @@ namespace Microsoft.Internal
             }
         }
 
-private static void LoadNull(this ILGenerator ilGenerator)
+        private static void LoadNull(this ILGenerator ilGenerator)
         {
             ilGenerator.Emit(OpCodes.Ldnull);
         }
@@ -295,7 +295,7 @@ private static void LoadNull(this ILGenerator ilGenerator)
             }
         }
 
-private static void LoadInt(this ILGenerator ilGenerator, int value)
+        private static void LoadInt(this ILGenerator ilGenerator, int value)
         {
             Assumes.NotNull(ilGenerator);
             ilGenerator.Emit(OpCodes.Ldc_I4, value);

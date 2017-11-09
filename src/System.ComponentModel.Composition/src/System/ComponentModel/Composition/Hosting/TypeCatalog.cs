@@ -111,7 +111,7 @@ namespace System.ComponentModel.Composition.Hosting
             this._definitionOrigin = definitionOrigin;
             this._contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(this.CreateIndex, true);
         }
-        
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="TypeCatalog"/> class
         ///     with the specified types.
@@ -177,7 +177,7 @@ namespace System.ComponentModel.Composition.Hosting
         private void InitializeTypeCatalog(IEnumerable<Type> types, ReflectionContext reflectionContext)
         {
             var typesList = new List<Type>();
-            foreach(var type in types)
+            foreach (var type in types)
             {
                 if (type == null)
                 {
@@ -189,9 +189,9 @@ namespace System.ComponentModel.Composition.Hosting
                 }
                 var typeInfo = type.GetTypeInfo();
                 var lclType = (reflectionContext != null) ? reflectionContext.MapType(typeInfo) : typeInfo;
-                
+
                 // It is valid for the reflectionContext to delete types by mapping them to null
-                if(lclType != null)
+                if (lclType != null)
                 {
                     // The final mapped type may be activated so we check to see if it is in a reflect only assembly
                     if (lclType.Assembly.ReflectionOnly)
@@ -206,7 +206,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void InitializeTypeCatalog(IEnumerable<Type> types)
         {
-            foreach(var type in types)
+            foreach (var type in types)
             {
                 if (type == null)
                 {
@@ -220,7 +220,7 @@ namespace System.ComponentModel.Composition.Hosting
             this._types = types.ToArray();
         }
 
-public override IEnumerator<ComposablePartDefinition> GetEnumerator()
+        public override IEnumerator<ComposablePartDefinition> GetEnumerator()
         {
             this.ThrowIfDisposed();
             return this.PartsInternal.GetEnumerator();

@@ -57,11 +57,11 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return genericArity;
         }
 
-private static void TraverseGenericType(Type type, Action<Type> onType)
+        private static void TraverseGenericType(Type type, Action<Type> onType)
         {
             if (type.IsGenericType)
             {
-                foreach(Type genericArgument in type.GetGenericArguments())
+                foreach (Type genericArgument in type.GetGenericArguments())
                 {
                     TraverseGenericType(genericArgument, onType);
                 }
@@ -94,7 +94,7 @@ private static void TraverseGenericType(Type type, Action<Type> onType)
             return genericSpecialization;
         }
 
-public static IEnumerable<Type> CreateTypeSpecializations(this Type[] types, Type[] specializationTypes)
+        public static IEnumerable<Type> CreateTypeSpecializations(this Type[] types, Type[] specializationTypes)
         {
             if (types == null)
             {

@@ -24,7 +24,7 @@ namespace System.ComponentModel.Composition.Hosting
         private class InnerCatalogExportProvider : ExportProvider
         {
             private CatalogExportProvider _outerExportProvider;
-            
+
             public InnerCatalogExportProvider(CatalogExportProvider outerExportProvider)
             {
                 Assumes.NotNull(outerExportProvider);
@@ -95,12 +95,12 @@ namespace System.ComponentModel.Composition.Hosting
             else
             {
                 this._innerExportProvider = new InnerCatalogExportProvider(this);
-            }            
+            }
             this._lock = new CompositionLock(compositionOptions.HasFlag(CompositionOptions.IsThreadSafe));
             this._disableSilentRejection = compositionOptions.HasFlag(CompositionOptions.DisableSilentRejection);
         }
 
-/// <summary>
+        /// <summary>
         ///     Gets the composable part catalog that the provider users to 
         ///     produce exports.
         /// </summary>
@@ -150,7 +150,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     This property must be set before accessing any methods on the 
         ///     <see cref="CatalogExportProvider"/>.
         /// </remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification="EnsureCanSet ensures that the property is set only once, Dispose is not required")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "EnsureCanSet ensures that the property is set only once, Dispose is not required")]
         public ExportProvider SourceProvider
         {
             get
@@ -322,7 +322,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             this.ThrowIfDisposed();
             this.EnsureRunning();
-            
+
             // Use the version of the catalog appropriate to this atomicComposition
             ComposablePartCatalog currentCatalog = atomicComposition.GetValueAllowNull(this._catalog);
 
@@ -368,7 +368,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-private void OnExportsChangingInternal(object sender, ExportsChangeEventArgs e)
+        private void OnExportsChangingInternal(object sender, ExportsChangeEventArgs e)
         {
             UpdateRejections(e.AddedExports.Concat(e.RemovedExports), e.AtomicComposition);
         }
@@ -565,18 +565,18 @@ private void OnExportsChangingInternal(object sender, ExportsChangeEventArgs e)
         {
             Assumes.NotNull(catalogPart);
 
-            if(this._isDisposed)
+            if (this._isDisposed)
                 return;
-                
+
             ImportEngine importEngine = null;
             using (this._lock.LockStateForWrite())
             {
-                if(this._isDisposed) 
+                if (this._isDisposed)
                     return;
 
                 importEngine = this._importEngine;
             }
-            if(importEngine != null)
+            if (importEngine != null)
             {
                 importEngine.ReleaseImports(catalogPart.Part, atomicComposition);
             }
@@ -594,12 +594,12 @@ private void OnExportsChangingInternal(object sender, ExportsChangeEventArgs e)
                 atomicComposition.AddCompleteActionAllowNull(() =>
                 {
                     bool removed = false;
-                    
-                    if(this._isDisposed) 
+
+                    if (this._isDisposed)
                         return;
                     using (this._lock.LockStateForWrite())
                     {
-                        if(this._isDisposed)
+                        if (this._isDisposed)
                             return;
 
                         removed = this._partsToDispose.Remove(diposablePart);
@@ -844,7 +844,7 @@ private void OnExportsChangingInternal(object sender, ExportsChangeEventArgs e)
                         {
                             using (this._lock.LockStateForWrite())
                             {
-                                this._rejectedParts.Remove(capturedPartDefinition);                                
+                                this._rejectedParts.Remove(capturedPartDefinition);
                             }
 
                             CompositionTrace.PartDefinitionResurrected(capturedPartDefinition);

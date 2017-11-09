@@ -108,7 +108,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-private void FreezeInnerCatalog()
+        private void FreezeInnerCatalog()
         {
             INotifyComposablePartCatalogChanged innerNotifyCatalog = this._innerCatalog as INotifyComposablePartCatalogChanged;
             if (innerNotifyCatalog != null)

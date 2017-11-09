@@ -46,7 +46,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 PropertyInfo property = member as PropertyInfo;
                 Assumes.NotNull(property);
 
-                MemberInfo[] accessors = new MemberInfo[] { property.GetGetMethod(true), property.GetSetMethod(true)};
+                MemberInfo[] accessors = new MemberInfo[] { property.GetGetMethod(true), property.GetSetMethod(true) };
                 return new LazyMemberInfo(MemberTypes.Property, accessors);
             }
             else
@@ -65,7 +65,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return reflectionMember;
         }
 
-public static ReflectionProperty ToReflectionProperty(this PropertyInfo property)
+        public static ReflectionProperty ToReflectionProperty(this PropertyInfo property)
         {
             Assumes.NotNull(property);
             return CreateReflectionProperty(property.GetGetMethod(true), property.GetSetMethod(true));

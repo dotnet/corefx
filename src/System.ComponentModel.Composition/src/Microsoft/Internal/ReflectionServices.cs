@@ -66,7 +66,7 @@ namespace Microsoft.Internal
         public static string GetDisplayName(this MemberInfo member)
         {
             Assumes.NotNull(member);
-  
+
             switch (member.MemberType)
             {
                 case MemberTypes.TypeInfo:
@@ -75,7 +75,7 @@ namespace Microsoft.Internal
                     return AttributedModelServices.GetTypeIdentity(((Type)member));
             }
 
-            return GetDisplayName(member.DeclaringType, member.Name);            
+            return GetDisplayName(member.DeclaringType, member.Name);
         }
 
         internal static bool TryGetGenericInterfaceType(Type instanceType, Type targetOpenInterfaceType, out Type targetClosedInterfaceType)
@@ -145,7 +145,7 @@ namespace Microsoft.Internal
             }
         }
 
-public static IEnumerable<FieldInfo> GetAllFields(this Type type)
+        public static IEnumerable<FieldInfo> GetAllFields(this Type type)
         {
             IEnumerable<FieldInfo> declaredFields = type.GetDeclaredFields();
 

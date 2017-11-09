@@ -127,15 +127,14 @@ namespace Microsoft.Internal.Collections
                     return source;
                 }
             }
-            
+
             // last resort - nothing is null, need to append
             source.AddRange(second);
             return source;
-            
+
         }
 
-private static List<T> FastAppendToListAllowNulls<T>(
-                    this List<T> source, T value)
+        private static List<T> FastAppendToListAllowNulls<T>(this List<T> source, T value)
         {
             if (source == null)
             {
@@ -160,10 +159,10 @@ private static List<T> FastAppendToListAllowNulls<T>(
             }
             return source;
         }
- 
+
         public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
         {
-            foreach(T t in source)
+            foreach (T t in source)
             {
                 action.Invoke(t);
             }
@@ -266,9 +265,9 @@ private static List<T> FastAppendToListAllowNulls<T>(
                 return false;
             }
 
-            for(int i=0; i< thisArray.Length; i++)
+            for (int i = 0; i < thisArray.Length; i++)
             {
-                if (!thisArray[i].Equals( thatArray[i]))
+                if (!thisArray[i].Equals(thatArray[i]))
                 {
                     return false;
                 }
