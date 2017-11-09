@@ -180,10 +180,8 @@ namespace Microsoft.Internal.Collections
                 {
                     case 0:
                         return EnumerableCardinality.Zero;
-
                     case 1:
                         return EnumerableCardinality.One;
-
                     default:
                         return EnumerableCardinality.TwoOrMore;
                 }
