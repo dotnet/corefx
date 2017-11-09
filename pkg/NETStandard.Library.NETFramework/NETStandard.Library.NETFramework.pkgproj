@@ -54,8 +54,11 @@
       <!-- don't include shims for anything from the targeting pack or built explicitly -->
       <_excludeShimsLib Include="@(_netFxReference);@(_libFileNames)"/>
 
+      <_netstandardrefs Include="$(NETStandardPackageRefPath)\*.dll" />
+      <_netstandardrefsfiles Include="@(_netstandardrefs->'%(Filename)')" Exclude="@(_excludeShimsLib)" />
+
       <!-- fill in with netstandard.dll-based shims -->
-      <LibFile Include="$(NETStandardPackageRefPath)\*.dll" Exclude="@(_excludeShimsLib->'$(NETStandardPackageRefPath)\%(Identity).dll')">
+      <LibFile Include="@(_netstandardrefsfiles->'$(NETStandardPackageRefPath)\%(Identity).dll')">
         <TargetFramework>$(TargetFramework)</TargetFramework>
       </LibFile>
     </ItemGroup>
@@ -85,8 +88,8 @@
       <!-- ApplyBaseline doesn't handle NuGet versions, so workaround that by
            adding after we've baselined.
            https://github.com/dotnet/buildtools/issues/1432 -->
-      <Dependency Include="$(NETStandardPackageId)">
-        <Version>$(NETStandardPackageVersion)</Version>
+      <Dependency Include="$(NETStandardLibraryPackageId)">
+        <Version>$(NETStandardLibraryPackageVersion)</Version>
         <TargetFramework>$(TargetFramework)</TargetFramework>
       </Dependency>
     </ItemGroup>

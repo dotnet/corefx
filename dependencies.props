@@ -19,24 +19,30 @@
     <StandardCurrentRef>549ba26b2ed7c341a287c63b494e38496319802c</StandardCurrentRef>
   </PropertyGroup>
 
-  <!-- Auto-upgraded properties for each build info dependency. -->
+  <!-- Product dependency versions. -->
   <PropertyGroup>
-    <PlatformPackageVersion>2.0.0</PlatformPackageVersion>
+    <NETStandardLibraryPackageVersion>2.0.1</NETStandardLibraryPackageVersion>
+    <NETStandardLibraryPackageId>NETStandard.Library</NETStandardLibraryPackageId>
+
+    <!-- SNI runtime package -->
+    <RuntimeWinX64RuntimeNativeSystemDataSqlClientSniPackageVersion>4.4.0</RuntimeWinX64RuntimeNativeSystemDataSqlClientSniPackageVersion>
+  </PropertyGroup>
+
+  <!-- Tests/infrastructure dependency versions. -->
+  <PropertyGroup>
     <CoreFxExpectedPrerelease>servicing-25902-01</CoreFxExpectedPrerelease>
-    <CoreClrPackageVersion>2.0.4-servicing-25902-03</CoreClrPackageVersion>
-    <ExternalExpectedPrerelease>beta-25307-00</ExternalExpectedPrerelease>
+    <MicrosoftNETCorePlatformsPackageVersion>2.0.0</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.0.4-servicing-25902-03</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <ProjectNTfsExpectedPrerelease>beta-25317-00</ProjectNTfsExpectedPrerelease>
     <ProjectNTfsTestILCExpectedPrerelease>beta-25317-00</ProjectNTfsTestILCExpectedPrerelease>
     <ProjectNTfsTestILCPackageVersion>1.0.0-beta-25317-00</ProjectNTfsTestILCPackageVersion>
-    <NETStandardPackageVersion>2.0.1</NETStandardPackageVersion>
-    <NETStandardPackageId>NETStandard.Library</NETStandardPackageId>
+    <MicrosoftNETCoreDotNetHostPackageVersion>2.0.1-servicing-25615-03</MicrosoftNETCoreDotNetHostPackageVersion>
+    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>2.0.1-servicing-25615-03</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
     <MicrosoftNETCoreAppPackageVersion>2.0.0-preview2-25317-03</MicrosoftNETCoreAppPackageVersion>
-    <!-- Use the SNI runtime package -->
-    <SniPackageVersion>4.4.0</SniPackageVersion>
-  </PropertyGroup>
 
-  <!-- Full package version strings that are used in other parts of the build. -->
-  <PropertyGroup>
+    <!-- CoreFX-built SNI identity package -->
+    <RuntimeNativeSystemDataSqlClientSniPackageVersion>4.4.0</RuntimeNativeSystemDataSqlClientSniPackageVersion>
+
     <AppXRunnerVersion>1.0.3-prerelease-00921-01</AppXRunnerVersion>
     <XunitPerfAnalysisPackageVersion>1.0.0-beta-build0007</XunitPerfAnalysisPackageVersion>
     <TraceEventPackageVersion>1.0.3-alpha-experimental</TraceEventPackageVersion>
@@ -96,25 +102,20 @@
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreFx">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>PlatformPackageVersion</ElementName>
+      <ElementName>MicrosoftNETCorePlatformsPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.Platforms</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreClr">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>CoreClrPackageVersion</ElementName>
+      <ElementName>MicrosoftNETCoreRuntimeCoreCLRPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.Runtime.CoreCLR</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="Standard">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>NETStandardPackageVersion</ElementName>
-      <PackageId>$(NETStandardPackageId)</PackageId>
+      <ElementName>NETStandardLibraryPackageVersion</ElementName>
+      <PackageId>$(NETStandardLibraryPackageId)</PackageId>
     </XmlUpdateStep>
 <!--
-    <XmlUpdateStep Include="External">
-      <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>ExternalExpectedPrerelease</ElementName>
-      <BuildInfoName>External</BuildInfoName>
-    </XmlUpdateStep>
     <XmlUpdateStep Include="ProjectNTfs">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>ProjectNTfsExpectedPrerelease</ElementName>
@@ -132,7 +133,7 @@
     </XmlUpdateStep>
     <XmlUpdateStep Include="Sni">
       <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>SniPackageVersion</ElementName>
+      <ElementName>RuntimeWinX64RuntimeNativeSystemDataSqlClientSniPackageVersion</ElementName>
       <PackageId>runtime.win-x64.runtime.native.System.Data.SqlClient.sni</PackageId>
     </XmlUpdateStep>
     <XmlUpdateStep Include="CoreSetup">
@@ -195,4 +196,17 @@
     <!-- project.json files to update -->
     <ProjectJsonFiles Include="$(MSBuildThisFileDirectory)external\**\optional.json" />
   </ItemGroup>
+
+  <!-- Override isolated build dependency versions with versions from Repo API. -->
+  <Import Project="$(DotNetPackageVersionPropsPath)"
+          Condition="'$(DotNetPackageVersionPropsPath)' != ''" />
+
+  <!--
+    Map PackageVersion properties that don't match the Repo API naming conventions. This must be
+    defined after the DotNetPackageVersionPropsPath Import so overrides apply correctly.
+  -->
+  <PropertyGroup>
+    <!-- Backward compatibility for BuildTools usage. -->
+    <PlatformPackageVersion>$(MicrosoftNETCorePlatformsPackageVersion)</PlatformPackageVersion>
+  </PropertyGroup>
 </Project>
