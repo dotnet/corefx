@@ -50,6 +50,19 @@ int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
         const BIGNUM *x, const BIGNUM *y, BN_CTX *ctx);
 #endif
 
+#if !HAVE_OPENSSL_ALPN
+#undef HAVE_OPENSSL_ALPN
+#define HAVE_OPENSSL_ALPN 1
+int SSL_CTX_set_alpn_protos(SSL_CTX* ctx, const unsigned char* protos, unsigned int protos_len);
+void SSL_CTX_set_alpn_select_cb(SSL_CTX* ctx, int (*cb) (SSL *ssl,
+                                            const unsigned char **out,
+                                            unsigned char *outlen,
+                                            const unsigned char *in,
+                                            unsigned int inlen,
+                                            void *arg), void *arg);
+void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsigned int* len);
+#endif
+
 #define API_EXISTS(fn) (fn != nullptr)
 
 // List of all functions from the libssl that are used in the System.Security.Cryptography.Native.
@@ -251,6 +264,8 @@ int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
     PER_FUNCTION_BLOCK(SSL_CTX_ctrl, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_free, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_new, true) \
+    PER_FUNCTION_BLOCK(SSL_CTX_set_alpn_protos, false) \
+    PER_FUNCTION_BLOCK(SSL_CTX_set_alpn_select_cb, false) \
     PER_FUNCTION_BLOCK(SSL_CTX_set_cert_verify_callback, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_set_cipher_list, true) \
     PER_FUNCTION_BLOCK(SSL_CTX_set_client_CA_list, true) \
@@ -270,6 +285,7 @@ int EC_POINT_set_affine_coordinates_GF2m(const EC_GROUP *group, EC_POINT *p,
     PER_FUNCTION_BLOCK(SSL_get_peer_finished, true) \
     PER_FUNCTION_BLOCK(SSL_get_SSL_CTX, true) \
     PER_FUNCTION_BLOCK(SSL_get_version, true) \
+    PER_FUNCTION_BLOCK(SSL_get0_alpn_selected, false) \
     PER_FUNCTION_BLOCK(SSL_library_init, true) \
     PER_FUNCTION_BLOCK(SSL_load_error_strings, true) \
     PER_FUNCTION_BLOCK(SSL_new, true) \
@@ -541,6 +557,8 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_CTX_ctrl SSL_CTX_ctrl_ptr
 #define SSL_CTX_free SSL_CTX_free_ptr
 #define SSL_CTX_new SSL_CTX_new_ptr
+#define SSL_CTX_set_alpn_protos SSL_CTX_set_alpn_protos_ptr
+#define SSL_CTX_set_alpn_select_cb SSL_CTX_set_alpn_select_cb_ptr
 #define SSL_CTX_set_cert_verify_callback SSL_CTX_set_cert_verify_callback_ptr
 #define SSL_CTX_set_cipher_list SSL_CTX_set_cipher_list_ptr
 #define SSL_CTX_set_client_CA_list SSL_CTX_set_client_CA_list_ptr
@@ -560,6 +578,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_get_peer_finished SSL_get_peer_finished_ptr
 #define SSL_get_SSL_CTX SSL_get_SSL_CTX_ptr
 #define SSL_get_version SSL_get_version_ptr
+#define SSL_get0_alpn_selected SSL_get0_alpn_selected_ptr
 #define SSL_library_init SSL_library_init_ptr
 #define SSL_load_error_strings SSL_load_error_strings_ptr
 #define SSL_new SSL_new_ptr

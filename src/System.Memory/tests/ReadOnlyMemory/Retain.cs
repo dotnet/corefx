@@ -16,10 +16,10 @@ namespace System.MemoryTests
             int[] array = { 1, 2, 3, 4, 5 };
             ReadOnlyMemory<int> memory = array;
             MemoryHandle handle = memory.Retain();
+            Assert.False(handle.HasPointer);
             unsafe
             {
-                int* pointer = (int*)handle.PinnedPointer;
-                Assert.True(pointer == null);
+                Assert.True(handle.Pointer == null);
             }
             handle.Dispose();
         }
@@ -30,10 +30,10 @@ namespace System.MemoryTests
             int[] array = { 1, 2, 3, 4, 5 };
             ReadOnlyMemory<int> memory = array;
             MemoryHandle handle = memory.Retain(pin: true);
+            Assert.True(handle.HasPointer);
             unsafe
             {
-                int* pointer = (int*)handle.PinnedPointer;
-                Assert.True(pointer != null);
+                int* pointer = (int*)handle.Pointer;
 
                 GC.Collect();
 
@@ -46,16 +46,44 @@ namespace System.MemoryTests
         }
 
         [Fact]
+        public static void MemoryRetainWithPinningAndSlice()
+        {
+            int[] array = { 1, 2, 3, 4, 5 };
+            ReadOnlyMemory<int> memory = array;
+            memory = memory.Slice(1);
+            MemoryHandle handle = memory.Retain(pin: true);
+            ReadOnlySpan<int> span = memory.Span;
+            Assert.True(handle.HasPointer);
+            unsafe
+            {
+                int* pointer = (int*)handle.Pointer;
+
+                GC.Collect();
+
+                for (int i = 0; i < memory.Length; i++)
+                {
+                    Assert.Equal(array[i + 1], pointer[i]);
+                }
+
+                for (int i = 0; i < memory.Length; i++)
+                {
+                    Assert.Equal(array[i + 1], span[i]);
+                }
+            }
+            handle.Dispose();
+        }
+
+        [Fact]
         public static void OwnedMemoryRetainWithoutPinning()
         {
             int[] array = { 1, 2, 3, 4, 5 };
             OwnedMemory<int> owner = new CustomMemoryForTest<int>(array);
-            ReadOnlyMemory<int> memory = owner.AsMemory;
+            ReadOnlyMemory<int> memory = owner.Memory;
             MemoryHandle handle = memory.Retain();
+            Assert.False(handle.HasPointer);
             unsafe
             {
-                int* pointer = (int*)handle.PinnedPointer;
-                Assert.True(pointer == null);
+                Assert.True(handle.Pointer == null);
             }
             handle.Dispose();
         }
@@ -65,18 +93,46 @@ namespace System.MemoryTests
         {
             int[] array = { 1, 2, 3, 4, 5 };
             OwnedMemory<int> owner = new CustomMemoryForTest<int>(array);
-            ReadOnlyMemory<int> memory = owner.AsMemory;
+            ReadOnlyMemory<int> memory = owner.Memory;
             MemoryHandle handle = memory.Retain(pin: true);
+            Assert.True(handle.HasPointer);
             unsafe
             {
-                int* pointer = (int*)handle.PinnedPointer;
-                Assert.True(pointer != null);
+                int* pointer = (int*)handle.Pointer;
 
                 GC.Collect();
 
                 for (int i = 0; i < memory.Length; i++)
                 {
                     Assert.Equal(array[i], pointer[i]);
+                }
+            }
+            handle.Dispose();
+        }
+
+        [Fact]
+        public static void OwnedMemoryRetainWithPinningAndSlice()
+        {
+            int[] array = { 1, 2, 3, 4, 5 };
+            OwnedMemory<int> owner = new CustomMemoryForTest<int>(array);
+            ReadOnlyMemory<int> memory = owner.Memory.Slice(1);
+            MemoryHandle handle = memory.Retain(pin: true);
+            ReadOnlySpan<int> span = memory.Span;
+            Assert.True(handle.HasPointer);
+            unsafe
+            {
+                int* pointer = (int*)handle.Pointer;
+
+                GC.Collect();
+
+                for (int i = 0; i < memory.Length; i++)
+                {
+                    Assert.Equal(array[i + 1], pointer[i]);
+                }
+
+                for (int i = 0; i < memory.Length; i++)
+                {
+                    Assert.Equal(array[i + 1], span[i]);
                 }
             }
             handle.Dispose();

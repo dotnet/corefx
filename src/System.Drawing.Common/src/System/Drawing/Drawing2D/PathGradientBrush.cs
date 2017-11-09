@@ -339,30 +339,36 @@ namespace System.Drawing.Drawing2D
 
         public void SetSigmaBellShape(float focus, float scale)
         {
-            if (focus < 0 || focus > 1 || scale < 0 || scale > 1)
+            if (focus < 0 || focus > 1)
             {
-                throw new ArgumentException(SR.Format(SR.GdiplusInvalidParameter));
+                throw new ArgumentException(SR.Format(SR.GdiplusInvalidParameter), nameof(focus));
+            }
+
+            if (scale < 0 || scale > 1)
+            {
+                throw new ArgumentException(SR.Format(SR.GdiplusInvalidParameter), nameof(scale));
             }
 
             int status = SafeNativeMethods.Gdip.GdipSetPathGradientSigmaBlend(new HandleRef(this, NativeBrush), focus, scale);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
+            SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
         public void SetBlendTriangularShape(float focus) => SetBlendTriangularShape(focus, (float)1.0);
 
         public void SetBlendTriangularShape(float focus, float scale)
         {
-            if (focus < 0 || focus > 1 || scale < 0 || scale > 1)
+            if (focus < 0 || focus > 1)
             {
-                throw new ArgumentException(SR.Format(SR.GdiplusInvalidParameter));
+                throw new ArgumentException(SR.Format(SR.GdiplusInvalidParameter), nameof(focus));
+            }
+
+            if (scale < 0 || scale > 1)
+            {
+                throw new ArgumentException(SR.Format(SR.GdiplusInvalidParameter), nameof(scale));
             }
 
             int status = SafeNativeMethods.Gdip.GdipSetPathGradientLinearBlend(new HandleRef(this, NativeBrush), focus, scale);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
+            SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
         public ColorBlend InterpolationColors
@@ -450,21 +456,19 @@ namespace System.Drawing.Drawing2D
                 Matrix matrix = new Matrix();
 
                 int status = SafeNativeMethods.Gdip.GdipGetPathGradientTransform(new HandleRef(this, NativeBrush), new HandleRef(matrix, matrix.nativeMatrix));
-
-                if (status != SafeNativeMethods.Gdip.Ok)
-                    throw SafeNativeMethods.Gdip.StatusException(status);
+                SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return matrix;
             }
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("matrix");
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
 
                 int status = SafeNativeMethods.Gdip.GdipSetPathGradientTransform(new HandleRef(this, NativeBrush), new HandleRef(value, value.nativeMatrix));
-
-                if (status != SafeNativeMethods.Gdip.Ok)
-                    throw SafeNativeMethods.Gdip.StatusException(status);
+                SafeNativeMethods.Gdip.CheckStatus(status);
             }
         }
 
@@ -481,14 +485,21 @@ namespace System.Drawing.Drawing2D
         public void MultiplyTransform(Matrix matrix, MatrixOrder order)
         {
             if (matrix == null)
-                throw new ArgumentNullException("matrix");
+            {
+                throw new ArgumentNullException(nameof(matrix));
+            }
+
+            // Multiplying the transform by a disposed matrix is a nop in GDI+, but throws
+            // with the libgdiplus backend. Simulate a nop for compatability with GDI+.
+            if (matrix.nativeMatrix == IntPtr.Zero)
+            {
+                return;
+            }
 
             int status = SafeNativeMethods.Gdip.GdipMultiplyPathGradientTransform(new HandleRef(this, NativeBrush),
                                                 new HandleRef(matrix, matrix.nativeMatrix),
                                                 order);
-
-            if (status != SafeNativeMethods.Gdip.Ok)
-                throw SafeNativeMethods.Gdip.StatusException(status);
+            SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
         public void TranslateTransform(float dx, float dy) => TranslateTransform(dx, dy, MatrixOrder.Prepend);

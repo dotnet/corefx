@@ -4,15 +4,28 @@
   <PropertyGroup>
     <ProjectGuid>{F3E72F35-0351-4D67-2209-725BCAD807BA}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="DependencyCheckTest.cs" />
+    <Compile Include="Helpers.cs" />
     <Compile Include="IntegrationTestBase.cs" />
     <Compile Include="CommandBuilderTests.cs" />
     <Compile Include="ReaderTests.cs" />
     <Compile Include="SmokeTest.cs" />
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
+      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libdl\Interop.dlopen.cs">
+      <Link>Common\Interop\Unix\libdl\Interop.dlopen.cs</Link>
+    </Compile>
+    <Compile Include="TestCommon\DataTestUtility.cs" />
+    <Compile Include="TestCommon\CheckConnStrSetupFactAttribute.cs" />
+    <Compile Include="OdbcParameterTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="ConnectionStrings.Windows.cs" />

@@ -14,7 +14,7 @@ namespace System
 {
     public static partial class PlatformDetection
     {
-        public static Version OSXKernelVersion => throw new PlatformNotSupportedException();
+        public static Version OSXVersion => throw new PlatformNotSupportedException();
         public static bool IsSuperUser => throw new PlatformNotSupportedException();
         public static bool IsOpenSUSE => false;
         public static bool IsUbuntu => false;
@@ -24,30 +24,26 @@ namespace System
         public static bool IsUbuntu1604 => false;
         public static bool IsUbuntu1704 => false;
         public static bool IsUbuntu1710 => false;
-        public static bool IsCentos7 => false;
         public static bool IsTizen => false;
-        public static bool IsNotFedoraOrRedHatOrCentos => true;
+        public static bool IsNotFedoraOrRedHatFamily => true;
         public static bool IsFedora => false;
         public static bool IsWindowsNanoServer => (IsNotWindowsIoTCore && GetInstallationType().Equals("Nano Server", StringComparison.OrdinalIgnoreCase));
         public static bool IsWindowsServerCore => GetInstallationType().Equals("Server Core", StringComparison.OrdinalIgnoreCase);
         public static int WindowsVersion => GetWindowsVersion();
         public static bool IsMacOsHighSierraOrHigher { get; } = false;
         public static Version ICUVersion => new Version(0, 0, 0, 0);
-        public static bool IsRedHat => false;
-        public static bool IsNotRedHat => true;
-        public static bool IsRedHat69 => false;
-        public static bool IsNotRedHat69 => true;
+        public static bool IsRedHatFamily => false;
+        public static bool IsNotRedHatFamily => true;
+        public static bool IsRedHatFamily6 => false;
+        public static bool IsRedHatFamily7 => false;
+        public static bool IsNotRedHatFamily6 => true;
 
         public static bool IsWindows10Version1607OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
         public static bool IsWindows10Version1703OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 15063;
-        public static bool IsWindows10InsiderPreviewBuild16215OrGreater => 
-            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 16215;
-        public static bool IsWindows10Version16251OrGreater => 
-            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 16251;
-        public static bool IsWindowsRedStone2 => // Creators Update version 
-            GetWindowsVersion() == 10 && (GetWindowsBuildNumber() / 1000) == 15; // any build with 15xxx. e.g 15063
+        public static bool IsWindows10Version1709OrGreater => 
+            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 16299;
 
         // Windows OneCoreUAP SKU doesn't have httpapi.dll
         public static bool IsNotOneCoreUAP =>  
