@@ -1109,7 +1109,6 @@ namespace System.Net.Http
                     sendRequestContentTask.GetAwaiter().GetResult();
                 }
             }
-            Debug.Assert(_writeOffset == 0, "Everything in write buffer should have been flushed.");
 
             ReturnConnectionToPoolCore();
         }
@@ -1117,6 +1116,7 @@ namespace System.Net.Http
         private void ReturnConnectionToPoolCore()
         {
             Debug.Assert(_sendRequestContentTask == null || _sendRequestContentTask.IsCompleted);
+            Debug.Assert(_writeOffset == 0, "Everything in write buffer should have been flushed.");
 
             if (NetEventSource.IsEnabled)
             {
