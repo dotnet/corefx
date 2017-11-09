@@ -373,7 +373,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
 
             public void Add(object item, Type itemType)
             {
-                this._containsNulls |= (item == null);
+                _containsNulls |= (item == null);
 
                 // if we've been passed typeof(object), we basically have no type inmformation
                 if (itemType == ObjectType)
@@ -396,57 +396,57 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
                 // only try to call this if we got a meaningful type
                 if (itemType != null)
                 {
-                    this.InferArrayType(itemType);
+                    InferArrayType(itemType);
                 }
 
-                this._innerList.Add(item);
+                _innerList.Add(item);
             }
 
             private void InferArrayType(Type itemType)
             {
                 Assumes.NotNull(itemType);
 
-                if (this._arrayType == null)
+                if (_arrayType == null)
                 {
                     // this is the first typed element we've been given, it sets the type of the array
-                    this._arrayType = itemType;
+                    _arrayType = itemType;
                 }
                 else
                 {
                     // if there's a disagreement on the array type, we flip to Object
                     // NOTE : we can try to do better in the future to find common base class, but given that we support very limited set of types
                     // in metadata right now, it's a moot point
-                    if (this._arrayType != itemType)
+                    if (_arrayType != itemType)
                     {
-                        this._arrayType = ObjectType;
+                        _arrayType = ObjectType;
                     }
                 }
             }
 
             public Array ToArray()
             {
-                if (this._arrayType == null)
+                if (_arrayType == null)
                 {
                     // if the array type has not been set, assume Object 
-                    this._arrayType = ObjectType;
+                    _arrayType = ObjectType;
                 }
-                else if (this._containsNulls && this._arrayType.IsValueType)
+                else if (_containsNulls && _arrayType.IsValueType)
                 {
                     // if the array type is a value type and we have seen nulls, then assume Object
-                    this._arrayType = ObjectType;
+                    _arrayType = ObjectType;
                 }
 
-                Array array = Array.CreateInstance(this._arrayType, this._innerList.Count);
+                Array array = Array.CreateInstance(_arrayType, _innerList.Count);
 
                 for(int i = 0; i < array.Length; i++)
                 {
-                    array.SetValue(this._innerList[i], i);
+                    array.SetValue(_innerList[i], i);
                 }
                 return array;
             }
         }
 
-        //UNDONE: Need to add these warnings somewhere...Dev10:472538 should address this.
+        //UNDONE: Need to add these warnings somewhere...Dev10:472538 should address 
         //internal static CompositionResult MatchRequiredMetadata(this IDictionary<string, object> metadata, IEnumerable<string> requiredMetadata, string contractName)
         //{
         //    Assumes.IsTrue(metadata != null);

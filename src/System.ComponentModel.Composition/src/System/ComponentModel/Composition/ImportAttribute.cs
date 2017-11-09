@@ -92,8 +92,8 @@ namespace System.ComponentModel.Composition
 
         public ImportAttribute(string contractName, Type contractType)
         {
-            this.ContractName = contractName;
-            this.ContractType = contractType;
+            ContractName = contractName;
+            ContractType = contractType;
         }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace System.ComponentModel.Composition
         {
             get
             {
-                if (this.AllowDefault == true)
+                if (AllowDefault == true)
                 {
                     return ImportCardinality.ZeroOrOne;
                 }

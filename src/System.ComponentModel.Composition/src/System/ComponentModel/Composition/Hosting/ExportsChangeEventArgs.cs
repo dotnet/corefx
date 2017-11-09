@@ -49,9 +49,9 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNull(addedExports, nameof(addedExports));
             Requires.NotNull(removedExports, nameof(removedExports));
 
-            this._addedExports = addedExports.AsArray();
-            this._removedExports = removedExports.AsArray();
-            this.AtomicComposition = atomicComposition;
+            _addedExports = addedExports.AsArray();
+            _removedExports = removedExports.AsArray();
+            AtomicComposition = atomicComposition;
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 Contract.Ensures(Contract.Result<IEnumerable<ExportDefinition>>() != null);
 
-                return this._addedExports;
+                return _addedExports;
             }
         }
 
@@ -84,7 +84,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 Contract.Ensures(Contract.Result<IEnumerable<ExportDefinition>>() != null);
 
-                return this._removedExports;
+                return _removedExports;
             }
         }
 
@@ -99,15 +99,15 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                if (this._changedContractNames == null)
+                if (_changedContractNames == null)
                 {
-                    this._changedContractNames = this.AddedExports
-                        .Concat(this.RemovedExports)
+                    _changedContractNames = AddedExports
+                        .Concat(RemovedExports)
                         .Select(export => export.ContractName)
                         .Distinct()
                         .ToArray();
                 }
-                return this._changedContractNames;
+                return _changedContractNames;
             }
         }
 

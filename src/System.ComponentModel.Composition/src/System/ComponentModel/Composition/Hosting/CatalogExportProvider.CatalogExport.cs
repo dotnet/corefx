@@ -21,16 +21,16 @@ namespace System.ComponentModel.Composition.Hosting
             public CatalogExport(CatalogExportProvider catalogExportProvider,
                 ComposablePartDefinition partDefinition, ExportDefinition definition)
             {
-                this._catalogExportProvider = catalogExportProvider;
-                this._partDefinition = partDefinition;
-                this._definition = definition;
+                _catalogExportProvider = catalogExportProvider;
+                _partDefinition = partDefinition;
+                _definition = definition;
             }
 
             public override ExportDefinition Definition
             {
                 get
                 {
-                    return this._definition;
+                    return _definition;
                 }
             }
 
@@ -44,22 +44,22 @@ namespace System.ComponentModel.Composition.Hosting
 
             protected CatalogPart GetPartCore()
             {
-                return this._catalogExportProvider.GetComposablePart(this._partDefinition, this.IsSharedPart);
+                return _catalogExportProvider.GetComposablePart(_partDefinition, IsSharedPart);
             }
 
             protected void DisposePartCore(CatalogPart part, object value)
             {
-                this._catalogExportProvider.DisposePart(value, part, null);
+                _catalogExportProvider.DisposePart(value, part, null);
             }
 
             protected virtual CatalogPart GetPart()
             {
-                return this.GetPartCore();
+                return GetPartCore();
             }
 
             protected override object GetExportedValueCore()
             {
-                return this._catalogExportProvider.GetExportedValue(this.GetPart(), this._definition, this.IsSharedPart);
+                return _catalogExportProvider.GetExportedValue(GetPart(), _definition, IsSharedPart);
             }
 
             [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
@@ -129,27 +129,27 @@ namespace System.ComponentModel.Composition.Hosting
             protected override CatalogPart GetPart()
             {
                 // we need to ensure that the part gets created only once, as the export contract requires that the same value be returned on subsequent calls
-                if (this._part == null)
+                if (_part == null)
                 {
-                    CatalogPart part = this.GetPartCore();
+                    CatalogPart part = GetPartCore();
 
-                    lock (this._lock)
+                    lock (_lock)
                     {
-                        if (this._part == null)
+                        if (_part == null)
                         {
                             Thread.MemoryBarrier();
-                            this._part = part;
+                            _part = part;
                             part = null;
                         }
                     }
 
                     if (part != null)
                     {
-                        this.DisposePartCore(part, null);
+                        DisposePartCore(part, null);
                     }
                 }
 
-                return this._part;
+                return _part;
             }
 
             protected override bool IsSharedPart
@@ -162,10 +162,10 @@ namespace System.ComponentModel.Composition.Hosting
 
             void IDisposable.Dispose()
             {
-                if (this._part != null)
+                if (_part != null)
                 {
-                    this.DisposePartCore(this._part, this.Value);
-                    this._part = null;
+                    DisposePartCore(_part, Value);
+                    _part = null;
                 }
             }
         }

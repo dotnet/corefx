@@ -18,17 +18,17 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             Assumes.NotNull(parameter);
 
-            this._parameter = parameter;
+            _parameter = parameter;
         }
 
         public ParameterInfo UnderlyingParameter
         {
-            get { return this._parameter; }
+            get { return _parameter; }
         }
 
         public override string Name
         {
-            get { return this.UnderlyingParameter.Name; }
+            get { return UnderlyingParameter.Name; }
         }
 
         public override string GetDisplayName()
@@ -36,13 +36,13 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return string.Format(
                 CultureInfo.CurrentCulture,
                 "{0} (Parameter=\"{1}\")",  // NOLOC
-                this.UnderlyingParameter.Member.GetDisplayName(),
-                this.UnderlyingParameter.Name);
+                UnderlyingParameter.Member.GetDisplayName(),
+                UnderlyingParameter.Name);
         }
 
         public override Type ReturnType
         {
-            get { return this.UnderlyingParameter.ParameterType; }
+            get { return UnderlyingParameter.ParameterType; }
         }
 
         public override ReflectionItemType ItemType

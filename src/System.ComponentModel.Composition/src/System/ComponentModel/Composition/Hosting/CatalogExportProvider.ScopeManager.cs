@@ -19,8 +19,8 @@ namespace System.ComponentModel.Composition.Hosting
                 Assumes.NotNull(catalogExportProvider);
                 Assumes.NotNull(scopeDefinition);
 
-                this._scopeDefinition = scopeDefinition;
-                this._catalogExportProvider = catalogExportProvider;
+                _scopeDefinition = scopeDefinition;
+                _catalogExportProvider = catalogExportProvider;
             }
 
             protected override IEnumerable<Export> GetExportsCore(ImportDefinition definition, AtomicComposition atomicComposition)
@@ -34,7 +34,7 @@ namespace System.ComponentModel.Composition.Hosting
                 }
 
                 // go through the catalogs and see if there's anything there of interest
-                foreach (CompositionScopeDefinition childCatalog in this._scopeDefinition.Children)
+                foreach (CompositionScopeDefinition childCatalog in _scopeDefinition.Children)
                 {
                     foreach (var partDefinitionAndExportDefinition in childCatalog.GetExportsFromPublicSurface(queryImport))
                     {
@@ -42,9 +42,9 @@ namespace System.ComponentModel.Composition.Hosting
                         // if the rejetecion is enabled and atomic composition is present, we will actually have to do the work, if not - we just use what we have
                         bool isChildPartRejected = false;
 
-                        if (this._catalogExportProvider.EnsureRejection(atomicComposition))
+                        if (_catalogExportProvider.EnsureRejection(atomicComposition))
                         {
-                            using (var container = this.CreateChildContainer(childCatalog))
+                            using (var container = CreateChildContainer(childCatalog))
                             {
                                 // We create a nested AtomicComposition() because the container will be Disposed and 
                                 // the RevertActions need to operate before we Dispose the child container
@@ -58,7 +58,7 @@ namespace System.ComponentModel.Composition.Hosting
                         // If the child part has not been rejected, we will add it to the result set.
                         if (!isChildPartRejected)
                         {
-                            exports.Add(this.CreateScopeExport(childCatalog, partDefinitionAndExportDefinition.Item1, partDefinitionAndExportDefinition.Item2));
+                            exports.Add(CreateScopeExport(childCatalog, partDefinitionAndExportDefinition.Item1, partDefinitionAndExportDefinition.Item2));
                         }
                     }
                 }
@@ -73,7 +73,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             internal CompositionContainer CreateChildContainer(ComposablePartCatalog childCatalog)
             {
-                return new CompositionContainer(childCatalog, this._catalogExportProvider._compositionOptions, this._catalogExportProvider._sourceProvider);
+                return new CompositionContainer(childCatalog, _catalogExportProvider._compositionOptions, _catalogExportProvider._sourceProvider);
             }
 
             private static ImportDefinition TranslateImport(ImportDefinition definition)

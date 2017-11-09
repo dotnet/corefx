@@ -21,7 +21,7 @@ namespace System.ComponentModel.Composition
         /// </summary>
         public PartCreationPolicyAttribute(CreationPolicy creationPolicy)
         {
-            this.CreationPolicy = creationPolicy;
+            CreationPolicy = creationPolicy;
         }
 
         /// <summary>

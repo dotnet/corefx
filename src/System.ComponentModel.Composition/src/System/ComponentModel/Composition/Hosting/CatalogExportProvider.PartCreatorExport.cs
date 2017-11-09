@@ -19,12 +19,12 @@ namespace System.ComponentModel.Composition.Hosting
             public PartCreatorExport(CatalogExportProvider catalogExportProvider, ComposablePartDefinition partDefinition, ExportDefinition exportDefinition) : 
                 base(partDefinition, exportDefinition)
             {
-                this._catalogExportProvider = catalogExportProvider;
+                _catalogExportProvider = catalogExportProvider;
             }
 
             public override Export CreateExportProduct()
             {
-                return new NonSharedCatalogExport(this._catalogExportProvider, this.UnderlyingPartDefinition, this.UnderlyingExportDefinition);
+                return new NonSharedCatalogExport(_catalogExportProvider, UnderlyingPartDefinition, UnderlyingExportDefinition);
             }
         }
     }

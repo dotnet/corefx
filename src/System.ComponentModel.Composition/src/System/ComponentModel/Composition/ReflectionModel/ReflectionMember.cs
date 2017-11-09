@@ -18,17 +18,17 @@ namespace System.ComponentModel.Composition.ReflectionModel
         
         public Type DeclaringType
         {
-            get { return this.UnderlyingMember.DeclaringType; }
+            get { return UnderlyingMember.DeclaringType; }
         }
 
         public override string Name
         {
-            get { return this.UnderlyingMember.Name; }
+            get { return UnderlyingMember.Name; }
         }
 
         public override string GetDisplayName()
         {
-            return this.UnderlyingMember.GetDisplayName();
+            return UnderlyingMember.GetDisplayName();
         }
 
         public abstract bool RequiresInstance

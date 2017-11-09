@@ -32,18 +32,18 @@ namespace System.ComponentModel.Composition
 
         internal CompositionResult(T value, IEnumerable<CompositionError> errors)
         {
-            this._errors = errors;
-            this._value = value;
+            _errors = errors;
+            _value = value;
         }
 
         public bool Succeeded
         {
-            get { return this._errors == null || !this._errors.FastAny(); }
+            get { return _errors == null || !_errors.FastAny(); }
         }
 
         public IEnumerable<CompositionError> Errors
         {
-            get { return this._errors ?? Enumerable.Empty<CompositionError>(); }
+            get { return _errors ?? Enumerable.Empty<CompositionError>(); }
         }
 
         /// <summary>
@@ -55,25 +55,25 @@ namespace System.ComponentModel.Composition
             {
                 ThrowOnErrors();
 
-                return this._value; 
+                return _value; 
             }
         }
 
         internal CompositionResult<TValue> ToResult<TValue>()
         {
-            return new CompositionResult<TValue>(this._errors);
+            return new CompositionResult<TValue>(_errors);
         }
 
         internal CompositionResult ToResult()
         {
-            return new CompositionResult(this._errors);
+            return new CompositionResult(_errors);
         }
 
         private void ThrowOnErrors()
         {
-            if (!this.Succeeded)
+            if (!Succeeded)
             {
-                throw new CompositionException(this._errors);
+                throw new CompositionException(_errors);
             }
         }
     }

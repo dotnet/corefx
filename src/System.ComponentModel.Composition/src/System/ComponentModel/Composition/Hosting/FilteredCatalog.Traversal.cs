@@ -23,7 +23,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <returns></returns>
         public FilteredCatalog IncludeDependencies()
         {
-            return this.IncludeDependencies(i => i.Cardinality == ImportCardinality.ExactlyOne);
+            return IncludeDependencies(i => i.Cardinality == ImportCardinality.ExactlyOne);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace System.ComponentModel.Composition.Hosting
         public FilteredCatalog IncludeDependencies(Func<ImportDefinition, bool> importFilter)
         {
             Requires.NotNull(importFilter, nameof(importFilter));
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
 
             return Traverse(new DependenciesTraversal(this, importFilter));
         }
@@ -46,7 +46,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <returns></returns>
         public FilteredCatalog IncludeDependents()
         {
-            return this.IncludeDependents(i => i.Cardinality == ImportCardinality.ExactlyOne);
+            return IncludeDependents(i => i.Cardinality == ImportCardinality.ExactlyOne);
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace System.ComponentModel.Composition.Hosting
         public FilteredCatalog IncludeDependents(Func<ImportDefinition, bool> importFilter)
         {
             Requires.NotNull(importFilter, nameof(importFilter));
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
 
             return Traverse(new DependentsTraversal(this, importFilter));
         }
@@ -70,17 +70,17 @@ namespace System.ComponentModel.Composition.Hosting
             // we make sure that the underlyiong catalog cannot change while we are doing the trasversal
             // After thaty traversal is done, the freeze is lifted, and the catalog is free to change, but the changes 
             // cannot affect partitioning 
-            this.FreezeInnerCatalog();
+            FreezeInnerCatalog();
 
             try
             {
                 traversal.Initialize();
-                var traversalClosure = GetTraversalClosure(this._innerCatalog.Where(this._filter), traversal);
-                return new FilteredCatalog(this._innerCatalog, p => traversalClosure.Contains(p));
+                var traversalClosure = GetTraversalClosure(_innerCatalog.Where(_filter), traversal);
+                return new FilteredCatalog(_innerCatalog, p => traversalClosure.Contains(p));
             }
             finally
             {
-                this.UnfreezeInnerCatalog();
+                UnfreezeInnerCatalog();
             }
         }
 
@@ -110,7 +110,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void FreezeInnerCatalog()
         {
-            INotifyComposablePartCatalogChanged innerNotifyCatalog = this._innerCatalog as INotifyComposablePartCatalogChanged;
+            INotifyComposablePartCatalogChanged innerNotifyCatalog = _innerCatalog as INotifyComposablePartCatalogChanged;
             if (innerNotifyCatalog != null)
             {
                 innerNotifyCatalog.Changing += ThrowOnRecomposition;
@@ -119,7 +119,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void UnfreezeInnerCatalog()
         {
-            INotifyComposablePartCatalogChanged innerNotifyCatalog = this._innerCatalog as INotifyComposablePartCatalogChanged;
+            INotifyComposablePartCatalogChanged innerNotifyCatalog = _innerCatalog as INotifyComposablePartCatalogChanged;
             if (innerNotifyCatalog != null)
             {
                 innerNotifyCatalog.Changing -= ThrowOnRecomposition;

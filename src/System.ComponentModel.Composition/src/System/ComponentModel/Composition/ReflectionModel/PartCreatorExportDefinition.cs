@@ -17,7 +17,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         public PartCreatorExportDefinition(ExportDefinition productDefinition)
             : base()
         {
-            this._productDefinition = productDefinition;
+            _productDefinition = productDefinition;
         }
 
         public override string ContractName
@@ -32,15 +32,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             get
             {
-                if (this._metadata == null)
+                if (_metadata == null)
                 {
-                    var metadata = new Dictionary<string, object>(this._productDefinition.Metadata);
+                    var metadata = new Dictionary<string, object>(_productDefinition.Metadata);
                     metadata[CompositionConstants.ExportTypeIdentityMetadataName] = CompositionConstants.PartCreatorTypeIdentity;
-                    metadata[CompositionConstants.ProductDefinitionMetadataName] = this._productDefinition;
+                    metadata[CompositionConstants.ProductDefinitionMetadataName] = _productDefinition;
 
-                    this._metadata = metadata.AsReadOnly();
+                    _metadata = metadata.AsReadOnly();
                 }
-                return this._metadata;
+                return _metadata;
             }
         }
 

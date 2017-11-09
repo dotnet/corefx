@@ -22,12 +22,12 @@ namespace System.ComponentModel.Composition
             {
                 Assumes.NotNull(disposable);
 
-                this._disposable = disposable;
+                _disposable = disposable;
             }
 
             void IDisposable.Dispose()
             {
-                this._disposable.Dispose();
+                _disposable.Dispose();
             }
         }
 
@@ -40,12 +40,12 @@ namespace System.ComponentModel.Composition
             {
                 Assumes.NotNull(disposable);
 
-                this._disposable = disposable;
+                _disposable = disposable;
             }
 
             void IDisposable.Dispose()
             {
-                this._disposable.Dispose();
+                _disposable.Dispose();
             }
         }
     }

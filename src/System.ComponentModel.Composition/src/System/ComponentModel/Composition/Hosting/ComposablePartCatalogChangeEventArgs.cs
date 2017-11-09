@@ -46,9 +46,9 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNull(addedDefinitions, nameof(addedDefinitions));
             Requires.NotNull(removedDefinitions, nameof(removedDefinitions));
 
-            this._addedDefinitions = addedDefinitions.AsArray();
-            this._removedDefinitions = removedDefinitions.AsArray();
-            this.AtomicComposition = atomicComposition;
+            _addedDefinitions = addedDefinitions.AsArray();
+            _removedDefinitions = removedDefinitions.AsArray();
+            AtomicComposition = atomicComposition;
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 Contract.Ensures(Contract.Result<IEnumerable<ComposablePartDefinition>>() != null);
 
-                return this._addedDefinitions;
+                return _addedDefinitions;
             }
         }
 
@@ -81,7 +81,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 Contract.Ensures(Contract.Result<IEnumerable<ComposablePartDefinition>>() != null);
                 
-                return this._removedDefinitions;
+                return _removedDefinitions;
             }
         }
 

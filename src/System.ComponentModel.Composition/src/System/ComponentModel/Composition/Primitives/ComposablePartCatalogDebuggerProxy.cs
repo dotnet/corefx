@@ -19,7 +19,7 @@ namespace System.ComponentModel.Composition.Primitives
         {
             Requires.NotNull(catalog, nameof(catalog));
 
-            this._catalog = catalog;
+            _catalog = catalog;
         }
 
         public ReadOnlyCollection<ComposablePartDefinition> Parts
@@ -28,7 +28,7 @@ namespace System.ComponentModel.Composition.Primitives
             // the current value of the underlying catalog is respected.
             // We use ReadOnlyCollection as arrays do not have the 
             // appropriate debugger display attributes applied to them.
-            get { return this._catalog.Parts.ToReadOnlyCollection(); }
+            get { return _catalog.Parts.ToReadOnlyCollection(); }
         }
     }
 }

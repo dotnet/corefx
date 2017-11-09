@@ -349,30 +349,30 @@ internal class ReflectionPartCreationInfo : IReflectionPartCreationInfo
         {
             Assumes.NotNull(partType);
 
-            this._partType = partType;
-            this._isDisposalRequired = isDisposalRequired;
-            this._imports = imports;
-            this._exports = exports;
-            this._metadata = metadata;
-            this._origin = origin;
+            _partType = partType;
+            _isDisposalRequired = isDisposalRequired;
+            _imports = imports;
+            _exports = exports;
+            _metadata = metadata;
+            _origin = origin;
         }
 
         public Type GetPartType()
         {
-            return this._partType.GetNotNullValue("type");
+            return _partType.GetNotNullValue("type");
         }
 
         public Lazy<Type> GetLazyPartType()
         {
-            return this._partType;
+            return _partType;
         }
 
         public ConstructorInfo GetConstructor()
         {
-            if (this._constructor == null)
+            if (_constructor == null)
             {
                 ConstructorInfo[] constructors = null;
-                constructors = this.GetImports()
+                constructors = GetImports()
                     .OfType<ReflectionParameterImportDefinition>()
                     .Select(parameterImport => parameterImport.ImportingLazyParameter.Value.Member)
                     .OfType<ConstructorInfo>()
@@ -381,21 +381,21 @@ internal class ReflectionPartCreationInfo : IReflectionPartCreationInfo
 
                 if (constructors.Length == 1)
                 {
-                    this._constructor = constructors[0];
+                    _constructor = constructors[0];
                 }
                 else if (constructors.Length == 0)
                 {
-                    this._constructor = this.GetPartType().GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null);
+                    _constructor = GetPartType().GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null);
                 }
             }
-            return this._constructor;
+            return _constructor;
         }
 
         public bool IsDisposalRequired
         {
             get
             {
-                return this._isDisposalRequired;
+                return _isDisposalRequired;
             }
         }
 
@@ -409,17 +409,17 @@ internal class ReflectionPartCreationInfo : IReflectionPartCreationInfo
 
         public IDictionary<string, object> GetMetadata()
         {
-            return (this._metadata != null) ? this._metadata.Value : null;
+            return (_metadata != null) ? _metadata.Value : null;
         }
 
         public IEnumerable<ExportDefinition> GetExports()
         {
-            if (this._exports == null)
+            if (_exports == null)
             {
                 yield break;
             }
 
-            IEnumerable<ExportDefinition> exports = this._exports.Value;
+            IEnumerable<ExportDefinition> exports = _exports.Value;
 
             if (exports == null)
             {
@@ -440,12 +440,12 @@ internal class ReflectionPartCreationInfo : IReflectionPartCreationInfo
 
         public IEnumerable<ImportDefinition> GetImports()
         {
-            if (this._imports == null)
+            if (_imports == null)
             {
                 yield break;
             }
 
-            IEnumerable<ImportDefinition> imports = this._imports.Value;
+            IEnumerable<ImportDefinition> imports = _imports.Value;
 
             if (imports == null)
             {
@@ -466,12 +466,12 @@ internal class ReflectionPartCreationInfo : IReflectionPartCreationInfo
 
         public string DisplayName
         {
-            get { return this.GetPartType().GetDisplayName(); }
+            get { return GetPartType().GetDisplayName(); }
         }
 
         public ICompositionElement Origin
         {
-            get { return this._origin; }
+            get { return _origin; }
         }
     }
 
@@ -482,14 +482,14 @@ internal class ReflectionPartCreationInfo : IReflectionPartCreationInfo
         public LazyExportDefinition(string contractName, Lazy<IDictionary<string, object>> metadata)
             : base(contractName, (IDictionary<string, object>)null)
         {
-            this._metadata = metadata;
+            _metadata = metadata;
         }
 
         public override IDictionary<string, object> Metadata
         {
             get
             {
-                return this._metadata.Value ?? MetadataServices.EmptyMetadata;
+                return _metadata.Value ?? MetadataServices.EmptyMetadata;
             }
         }
     }

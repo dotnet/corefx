@@ -119,8 +119,8 @@ namespace System.ComponentModel.Composition
         /// </remarks>
         public ExportAttribute(string contractName, Type contractType)
         {
-            this.ContractName = contractName;
-            this.ContractType = contractType;
+            ContractName = contractName;
+            ContractType = contractType;
         }
 
         /// <summary>

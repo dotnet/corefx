@@ -41,20 +41,20 @@ namespace System.ComponentModel.Composition.Hosting
 
         public CompositionLock(bool isThreadSafe)
         {
-            this._isThreadSafe = isThreadSafe;
+            _isThreadSafe = isThreadSafe;
             if (isThreadSafe)
             {
-                this._stateLock = new Lock();
+                _stateLock = new Lock();
             }
         }
 
         public void Dispose()
         {
-            if (this._isThreadSafe)
+            if (_isThreadSafe)
             {
-                if (Interlocked.CompareExchange(ref this._isDisposed, 1, 0) == 0)
+                if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
                 {
-                    this._stateLock.Dispose();
+                    _stateLock.Dispose();
                 }
             }
         }
@@ -63,14 +63,14 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                return this._isThreadSafe;
+                return _isThreadSafe;
             }
         }
 
         private void EnterCompositionLock()
         {
 #pragma warning disable 618
-            if (this._isThreadSafe)
+            if (_isThreadSafe)
             {
                 Monitor.Enter(_compositionLock);
             }
@@ -79,7 +79,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void ExitCompositionLock()
         {
-            if (this._isThreadSafe)
+            if (_isThreadSafe)
             {
                 Monitor.Exit(_compositionLock);
             }
@@ -87,7 +87,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public IDisposable LockComposition()
         {
-            if (this._isThreadSafe)
+            if (_isThreadSafe)
             {
                 return new CompositionLockHolder(this);
             }
@@ -99,9 +99,9 @@ namespace System.ComponentModel.Composition.Hosting
 
         public IDisposable LockStateForRead()
         {
-            if (this._isThreadSafe)
+            if (_isThreadSafe)
             {
-                return new ReadLock(this._stateLock);
+                return new ReadLock(_stateLock);
             }
             else
             {
@@ -111,9 +111,9 @@ namespace System.ComponentModel.Composition.Hosting
 
         public IDisposable LockStateForWrite()
         {
-            if (this._isThreadSafe)
+            if (_isThreadSafe)
             {
-                return new WriteLock(this._stateLock);
+                return new WriteLock(_stateLock);
             }
             else
             {
@@ -129,17 +129,17 @@ namespace System.ComponentModel.Composition.Hosting
 
             public CompositionLockHolder(CompositionLock @lock)
             {
-                this._lock = @lock;
+                _lock = @lock;
 
-                this._isDisposed = 0;
-                this._lock.EnterCompositionLock();
+                _isDisposed = 0;
+                _lock.EnterCompositionLock();
             }
 
             public void Dispose()
             {
-                if (Interlocked.CompareExchange(ref this._isDisposed, 1, 0) == 0)
+                if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
                 {
-                    this._lock.ExitCompositionLock();
+                    _lock.ExitCompositionLock();
                 }
             }
         }

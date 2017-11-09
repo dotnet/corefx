@@ -104,7 +104,7 @@ namespace System.ComponentModel.Composition.Hosting
             Contract.Ensures(Contract.Result<IEnumerable<Export>>() != null);
 
             IEnumerable<Export> exports;
-            ExportCardinalityCheckResult result = this.TryGetExportsCore(definition, atomicComposition, out exports);
+            ExportCardinalityCheckResult result = TryGetExportsCore(definition, atomicComposition, out exports);
             switch(result)
             {
                 case ExportCardinalityCheckResult.Match:
@@ -147,7 +147,7 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNull(definition, nameof(definition));
 
             exports = null;
-            ExportCardinalityCheckResult result = this.TryGetExportsCore(definition, atomicComposition, out exports);
+            ExportCardinalityCheckResult result = TryGetExportsCore(definition, atomicComposition, out exports);
             return (result == ExportCardinalityCheckResult.Match);
         }
     
@@ -182,7 +182,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </param>
         protected virtual void OnExportsChanged(ExportsChangeEventArgs e)
         {
-            EventHandler<ExportsChangeEventArgs> changedEvent = this.ExportsChanged;
+            EventHandler<ExportsChangeEventArgs> changedEvent = ExportsChanged;
             if (changedEvent != null)
             {
                 CompositionResult result = CompositionServices.TryFire(changedEvent, this, e);
@@ -198,7 +198,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </param>
         protected virtual void OnExportsChanging(ExportsChangeEventArgs e)
         {
-            EventHandler<ExportsChangeEventArgs> changingEvent = this.ExportsChanging;
+            EventHandler<ExportsChangeEventArgs> changingEvent = ExportsChanging;
             if (changingEvent != null)
             {
                 CompositionResult result = CompositionServices.TryFire(changingEvent, this, e);
@@ -210,7 +210,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             Assumes.NotNull(definition);
 
-            exports = this.GetExportsCore(definition, atomicComposition);
+            exports = GetExportsCore(definition, atomicComposition);
 
             var checkResult = ExportServices.CheckCardinality(definition, exports);
 

@@ -112,7 +112,7 @@ namespace System.ComponentModel.Composition.Primitives
             List<Tuple<ComposablePartDefinition, ExportDefinition>> multipleExports = null;
             Tuple<ComposablePartDefinition, ExportDefinition> singleExport = null;
             bool matchesFound = false;
-            foreach (var export in this.ExportDefinitions)
+            foreach (var export in ExportDefinitions)
             {
                 if (definition.IsConstraintSatisfiedBy(export))
                 {

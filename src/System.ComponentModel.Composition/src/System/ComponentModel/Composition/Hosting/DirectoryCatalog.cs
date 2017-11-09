@@ -227,8 +227,8 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNullOrEmpty(path, "path");
             Requires.NotNullOrEmpty(searchPattern, "searchPattern");
 
-            this._definitionOrigin = this;
-            this.Initialize(path, searchPattern);
+            _definitionOrigin = this;
+            Initialize(path, searchPattern);
         }
 
         /// <summary>
@@ -271,8 +271,8 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNullOrEmpty(searchPattern, "searchPattern");
             Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
-            this._definitionOrigin = definitionOrigin;
-            this.Initialize(path, searchPattern);
+            _definitionOrigin = definitionOrigin;
+            Initialize(path, searchPattern);
         }
         
         /// <summary>
@@ -320,9 +320,9 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNullOrEmpty(searchPattern, "searchPattern");
             Requires.NotNull(reflectionContext, "reflectionContext");
 
-            this._reflectionContext = reflectionContext;
-            this._definitionOrigin = this;
-            this.Initialize(path, searchPattern);
+            _reflectionContext = reflectionContext;
+            _definitionOrigin = this;
+            Initialize(path, searchPattern);
         }
 
         /// <summary>
@@ -375,9 +375,9 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNull(reflectionContext, "reflectionContext");
             Requires.NotNull(definitionOrigin, "definitionOrigin");
 
-            this._reflectionContext = reflectionContext;
-            this._definitionOrigin = definitionOrigin;
-            this.Initialize(path, searchPattern);
+            _reflectionContext = reflectionContext;
+            _definitionOrigin = definitionOrigin;
+            Initialize(path, searchPattern);
         }
 
         /// <summary>
@@ -389,7 +389,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 Contract.Ensures(Contract.Result<string>() != null);
                 
-                return this._fullPath;
+                return _fullPath;
             }
         }
 
@@ -402,9 +402,9 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 Contract.Ensures(Contract.Result<ReadOnlyCollection<string>>() != null);
 
-                using (new ReadLock(this._thisLock))
+                using (new ReadLock(_thisLock))
                 {
-                    return this._loadedFiles;
+                    return _loadedFiles;
                 }
             }
         }
@@ -418,7 +418,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 Contract.Ensures(Contract.Result<string>() != null);
                 
-                return this._path;
+                return _path;
             }
         }
 
@@ -429,7 +429,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                return this._searchPattern;
+                return _searchPattern;
             }
         }
 
@@ -453,22 +453,22 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 if (disposing)
                 {
-                    if (!this._isDisposed)
+                    if (!_isDisposed)
                     {
                         bool disposeLock = false;
                         ComposablePartCatalogCollection catalogs = null;
 
                         try
                         {
-                            using (new WriteLock(this._thisLock))
+                            using (new WriteLock(_thisLock))
                             {
-                                if (!this._isDisposed)
+                                if (!_isDisposed)
                                 {
                                     disposeLock = true;
-                                    catalogs = this._catalogCollection;
-                                    this._catalogCollection = null;
-                                    this._assemblyCatalogs = null;
-                                    this._isDisposed = true;
+                                    catalogs = _catalogCollection;
+                                    _catalogCollection = null;
+                                    _assemblyCatalogs = null;
+                                    _isDisposed = true;
                                 }
                             }
                         }
@@ -481,7 +481,7 @@ namespace System.ComponentModel.Composition.Hosting
 
                             if (disposeLock)
                             {
-                                this._thisLock.Dispose();
+                                _thisLock.Dispose();
                             }
                         }
                     }
@@ -495,7 +495,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public override IEnumerator<ComposablePartDefinition> GetEnumerator()
         {
-            return this._catalogCollection.SelectMany(catalog => catalog as IEnumerable<ComposablePartDefinition>).GetEnumerator();
+            return _catalogCollection.SelectMany(catalog => catalog as IEnumerable<ComposablePartDefinition>).GetEnumerator();
         }
 
         /// <summary>
@@ -519,11 +519,11 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public override IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(ImportDefinition definition)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
 
             Requires.NotNull(definition, nameof(definition));
 
-            return this._catalogCollection.SelectMany(catalog => catalog.GetExports(definition));
+            return _catalogCollection.SelectMany(catalog => catalog.GetExports(definition));
         }
 
         /// <summary>
@@ -534,7 +534,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </param>
         protected virtual void OnChanged(ComposablePartCatalogChangeEventArgs e)
         {
-            EventHandler<ComposablePartCatalogChangeEventArgs> changedEvent = this.Changed;
+            EventHandler<ComposablePartCatalogChangeEventArgs> changedEvent = Changed;
             if (changedEvent != null)
             {
                 changedEvent(this, e);
@@ -549,7 +549,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </param>
         protected virtual void OnChanging(ComposablePartCatalogChangeEventArgs e)
         {
-            EventHandler<ComposablePartCatalogChangeEventArgs> changingEvent = this.Changing;
+            EventHandler<ComposablePartCatalogChangeEventArgs> changingEvent = Changing;
             if (changingEvent != null)
             {
                 changingEvent(this, e);
@@ -571,8 +571,8 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public void Refresh()
         {
-            this.ThrowIfDisposed();
-            Assumes.NotNull(this._loadedFiles);
+            ThrowIfDisposed();
+            Assumes.NotNull(_loadedFiles);
 
             List<Tuple<string, AssemblyCatalog>> catalogsToAdd;
             List<Tuple<string, AssemblyCatalog>> catalogsToRemove;
@@ -584,15 +584,15 @@ namespace System.ComponentModel.Composition.Hosting
 
             while (true)
             {
-                afterFiles = this.GetFiles();
+                afterFiles = GetFiles();
 
-                using (new ReadLock(this._thisLock))
+                using (new ReadLock(_thisLock))
                 {
-                    changeReferenceObject = this._loadedFiles;
-                    beforeFiles = this._loadedFiles.ToArray();
+                    changeReferenceObject = _loadedFiles;
+                    beforeFiles = _loadedFiles.ToArray();
                 }
 
-                this.DiffChanges(beforeFiles, afterFiles, out catalogsToAdd, out catalogsToRemove);
+                DiffChanges(beforeFiles, afterFiles, out catalogsToAdd, out catalogsToRemove);
 
                 // Don't go any further if there's no work to do
                 if (catalogsToAdd.Count == 0 && catalogsToRemove.Count == 0)
@@ -612,12 +612,12 @@ namespace System.ComponentModel.Composition.Hosting
                 using (var atomicComposition = new AtomicComposition())
                 {
                     var changingArgs = new ComposablePartCatalogChangeEventArgs(addedDefinitions, removedDefinitions, atomicComposition);
-                    this.OnChanging(changingArgs);
+                    OnChanging(changingArgs);
 
                     // if the change went through then write the catalog changes
-                    using (new WriteLock(this._thisLock))
+                    using (new WriteLock(_thisLock))
                     {
-                        if (changeReferenceObject != this._loadedFiles)
+                        if (changeReferenceObject != _loadedFiles)
                         {
                             // Someone updated the list while we were diffing so we need to try the diff again
                             continue;
@@ -625,17 +625,17 @@ namespace System.ComponentModel.Composition.Hosting
 
                         foreach (var catalogToAdd in catalogsToAdd)
                         {
-                            this._assemblyCatalogs.Add(catalogToAdd.Item1, catalogToAdd.Item2);
-                            this._catalogCollection.Add(catalogToAdd.Item2);
+                            _assemblyCatalogs.Add(catalogToAdd.Item1, catalogToAdd.Item2);
+                            _catalogCollection.Add(catalogToAdd.Item2);
                         }
 
                         foreach (var catalogToRemove in catalogsToRemove)
                         {
-                            this._assemblyCatalogs.Remove(catalogToRemove.Item1);
-                            this._catalogCollection.Remove(catalogToRemove.Item2);
+                            _assemblyCatalogs.Remove(catalogToRemove.Item1);
+                            _catalogCollection.Remove(catalogToRemove.Item2);
                         }
 
-                        this._loadedFiles = afterFiles.ToReadOnlyCollection();
+                        _loadedFiles = afterFiles.ToReadOnlyCollection();
 
                         // Lastly complete any changes added to the atomicComposition during the change event
                         atomicComposition.Complete();
@@ -647,7 +647,7 @@ namespace System.ComponentModel.Composition.Hosting
             }   // while (true)
 
             var changedArgs = new ComposablePartCatalogChangeEventArgs(addedDefinitions, removedDefinitions, null);
-            this.OnChanged(changedArgs);
+            OnChanged(changedArgs);
         }
 
         /// <summary>
@@ -667,8 +667,8 @@ namespace System.ComponentModel.Composition.Hosting
 
             try
             {
-                return (this._reflectionContext != null)
-                    ? new AssemblyCatalog(assemblyFilePath, this._reflectionContext, this)
+                return (_reflectionContext != null)
+                    ? new AssemblyCatalog(assemblyFilePath, _reflectionContext, this)
                     : new AssemblyCatalog(assemblyFilePath, this);
             }
             catch (FileNotFoundException ex)
@@ -712,12 +712,12 @@ namespace System.ComponentModel.Composition.Hosting
             }
 
             IEnumerable<string> filesToRemove = beforeFiles.Except(afterFiles);
-            using (new ReadLock(this._thisLock))
+            using (new ReadLock(_thisLock))
             {
                 foreach (string file in filesToRemove)
                 {
                     AssemblyCatalog catalog;
-                    if (this._assemblyCatalogs.TryGetValue(file, out catalog))
+                    if (_assemblyCatalogs.TryGetValue(file, out catalog))
                     {
                         catalogsToRemove.Add(new Tuple<string, AssemblyCatalog>(file, catalog));
                     }
@@ -729,13 +729,13 @@ namespace System.ComponentModel.Composition.Hosting
         {
             return string.Format(CultureInfo.CurrentCulture,
                                 "{0} (Path=\"{1}\")",   // NOLOC
-                                this.GetType().Name,
-                                this._path);
+                                GetType().Name,
+                                _path);
         }
 
         private string[] GetFiles()
         {
-            string[] files = Directory.GetFiles(this._fullPath, this._searchPattern);
+            string[] files = Directory.GetFiles(_fullPath, _searchPattern);
             return Array.ConvertAll<string, string>(files, (file) => file.ToUpperInvariant());
         }
 
@@ -751,23 +751,23 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void Initialize(string path, string searchPattern)
         {
-            this._path = path;
-            this._fullPath = GetFullPath(path);
-            this._searchPattern = searchPattern;
-            this._assemblyCatalogs = new Dictionary<string, AssemblyCatalog>();
-            this._catalogCollection = new ComposablePartCatalogCollection(null, null, null);
+            _path = path;
+            _fullPath = GetFullPath(path);
+            _searchPattern = searchPattern;
+            _assemblyCatalogs = new Dictionary<string, AssemblyCatalog>();
+            _catalogCollection = new ComposablePartCatalogCollection(null, null, null);
 
-            this._loadedFiles = GetFiles().ToReadOnlyCollection();
+            _loadedFiles = GetFiles().ToReadOnlyCollection();
 
-            foreach (string file in this._loadedFiles)
+            foreach (string file in _loadedFiles)
             {
                 AssemblyCatalog assemblyCatalog = null;
                 assemblyCatalog = CreateAssemblyCatalogGuarded(file);
 
                 if (assemblyCatalog != null)
                 {
-                    this._assemblyCatalogs.Add(file, assemblyCatalog);
-                    this._catalogCollection.Add(assemblyCatalog);
+                    _assemblyCatalogs.Add(file, assemblyCatalog);
+                    _catalogCollection.Add(assemblyCatalog);
                 }
             }
         }
@@ -775,7 +775,7 @@ namespace System.ComponentModel.Composition.Hosting
         [DebuggerStepThrough]
         private void ThrowIfDisposed()
         {
-            if (this._isDisposed)
+            if (_isDisposed)
             {
                 throw ExceptionBuilder.CreateObjectDisposed(this);
             }
@@ -790,7 +790,7 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes")]
         string ICompositionElement.DisplayName
         {
-            get { return this.GetDisplayName(); }
+            get { return GetDisplayName(); }
         }
 
         /// <summary>

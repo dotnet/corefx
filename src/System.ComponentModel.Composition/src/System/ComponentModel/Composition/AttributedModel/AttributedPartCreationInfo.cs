@@ -32,53 +32,53 @@ namespace System.ComponentModel.Composition.AttributedModel
         {
             Assumes.NotNull(type);
             
-            this._type = type;
-            this._ignoreConstructorImports = ignoreConstructorImports;
-            this._partCreationPolicy = partCreationPolicy;
-            this._origin = origin;
+            _type = type;
+            _ignoreConstructorImports = ignoreConstructorImports;
+            _partCreationPolicy = partCreationPolicy;
+            _origin = origin;
         }
 
         public Type GetPartType()
         {
-            return this._type;
+            return _type;
         }
 
         public Lazy<Type> GetLazyPartType()
         {
-            return new Lazy<Type>(this.GetPartType, LazyThreadSafetyMode.PublicationOnly);
+            return new Lazy<Type>(GetPartType, LazyThreadSafetyMode.PublicationOnly);
         }
 
         public ConstructorInfo GetConstructor()
         {
-            if (this._constructor == null && !this._ignoreConstructorImports)
+            if (_constructor == null && !_ignoreConstructorImports)
             {
-                this._constructor = SelectPartConstructor(this._type);
+                _constructor = SelectPartConstructor(_type);
             }
-            return this._constructor;
+            return _constructor;
         }
 
         public IDictionary<string, object> GetMetadata()
         {
-            return this._type.GetPartMetadataForType(this.CreationPolicy);
+            return _type.GetPartMetadataForType(CreationPolicy);
         }
 
         public IEnumerable<ExportDefinition> GetExports()
         {
             DiscoverExportsAndImports();
-            return this._exports;
+            return _exports;
         }
 
         public IEnumerable<ImportDefinition> GetImports()
         {
             DiscoverExportsAndImports();
-            return this._imports;
+            return _imports;
         }
 
         public bool IsDisposalRequired
         {
             get
             {
-                return typeof(IDisposable).IsAssignableFrom(this.GetPartType());
+                return typeof(IDisposable).IsAssignableFrom(GetPartType());
             }
         }
 
@@ -93,16 +93,16 @@ namespace System.ComponentModel.Composition.AttributedModel
         public bool IsPartDiscoverable()
         {
             // The part should not be marked with the "NonDiscoverable"
-            if (this._type.IsAttributeDefined<PartNotDiscoverableAttribute>())
+            if (_type.IsAttributeDefined<PartNotDiscoverableAttribute>())
             {
-                CompositionTrace.DefinitionMarkedWithPartNotDiscoverableAttribute(this._type);
+                CompositionTrace.DefinitionMarkedWithPartNotDiscoverableAttribute(_type);
                 return false;
             }
 
             // The part should have exports
             if (!HasExports())
             {
-                CompositionTrace.DefinitionContainsNoExports(this._type);
+                CompositionTrace.DefinitionContainsNoExports(_type);
                 return false;
             }
 
@@ -119,19 +119,19 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         private bool HasExports()
         {
-            return GetExportMembers(this._type).Any() ||
-                   GetInheritedExports(this._type).Any();
+            return GetExportMembers(_type).Any() ||
+                   GetInheritedExports(_type).Any();
         }
 
         private bool AllExportsHaveMatchingArity()
         {
             bool isArityMatched = true;
-            if (this._type.ContainsGenericParameters)
+            if (_type.ContainsGenericParameters)
             {
-                int partGenericArity = this._type.GetPureGenericArity();
+                int partGenericArity = _type.GetPureGenericArity();
 
                 // each member should have the same arity
-                foreach (MemberInfo member in GetExportMembers(this._type).Concat(GetInheritedExports(this._type)))
+                foreach (MemberInfo member in GetExportMembers(_type).Concat(GetInheritedExports(_type)))
                 {
                     if (member.MemberType == MemberTypes.Method)
                     {
@@ -139,7 +139,7 @@ namespace System.ComponentModel.Composition.AttributedModel
                         if (((MethodInfo)member).ContainsGenericParameters)
                         {
                             isArityMatched = false;
-                            CompositionTrace.DefinitionMismatchedExportArity(this._type, member);
+                            CompositionTrace.DefinitionMismatchedExportArity(_type, member);
                             continue;
                         }
                     }
@@ -147,7 +147,7 @@ namespace System.ComponentModel.Composition.AttributedModel
                     if (member.GetDefaultTypeFromMember().GetPureGenericArity() != partGenericArity)
                     {
                         isArityMatched = false;
-                        CompositionTrace.DefinitionMismatchedExportArity(this._type, member);
+                        CompositionTrace.DefinitionMismatchedExportArity(_type, member);
                     }
                 }
             }
@@ -157,12 +157,12 @@ namespace System.ComponentModel.Composition.AttributedModel
 
 string ICompositionElement.DisplayName
         {
-            get { return this.GetDisplayName(); }
+            get { return GetDisplayName(); }
         }
 
         ICompositionElement ICompositionElement.Origin
         {
-            get { return this._origin; }
+            get { return _origin; }
         }
 
         public override string ToString()
@@ -172,19 +172,19 @@ string ICompositionElement.DisplayName
 
         private string GetDisplayName()
         {
-            return this.GetPartType().GetDisplayName();
+            return GetPartType().GetDisplayName();
         }
 
         private CreationPolicy CreationPolicy
         {
             get
             {
-                if (this._partCreationPolicy == null)
+                if (_partCreationPolicy == null)
                 {
-                    this._partCreationPolicy = this._type.GetFirstAttribute<PartCreationPolicyAttribute>() ?? PartCreationPolicyAttribute.Default;
+                    _partCreationPolicy = _type.GetFirstAttribute<PartCreationPolicyAttribute>() ?? PartCreationPolicyAttribute.Default;
                 }
 
-                return this._partCreationPolicy.CreationPolicy;
+                return _partCreationPolicy.CreationPolicy;
             }
         }
 
@@ -250,37 +250,37 @@ string ICompositionElement.DisplayName
             // NOTE : in most cases both of these will be null or not null at the same time
             // the only situation when that is not the case is when there was a failure during the previous discovery
             // and one of them ended up not being set. In that case we will force the discovery again so that the same exception is thrown.
-            if ((this._exports != null) && (this._imports != null))
+            if ((_exports != null) && (_imports != null))
             {
                 return;
             }
 
-            this._exports = GetExportDefinitions();
-            this._imports = GetImportDefinitions();
+            _exports = GetExportDefinitions();
+            _imports = GetImportDefinitions();
         }
 
         private IEnumerable<ExportDefinition> GetExportDefinitions()
         {
             List<ExportDefinition> exports = new List<ExportDefinition>();
 
-            this._contractNamesOnNonInterfaces = new HashSet<string>();
+            _contractNamesOnNonInterfaces = new HashSet<string>();
 
             // GetExportMembers should only contain the type itself along with the members declared on it, 
             // it should not contain any base types, members on base types or interfaces on the type.
-            foreach (MemberInfo member in GetExportMembers(this._type))
+            foreach (MemberInfo member in GetExportMembers(_type))
             {
                 foreach (ExportAttribute exportAttribute in member.GetAttributes<ExportAttribute>())
                 {
-                    var attributedExportDefinition = this.CreateExportDefinition(member, exportAttribute);
+                    var attributedExportDefinition = CreateExportDefinition(member, exportAttribute);
 
                     if (exportAttribute.GetType() == CompositionServices.InheritedExportAttributeType)
                     {
                         // Any InheritedExports on the type itself are contributed during this pass 
                         // and we need to do the book keeping for those.
-                        if (!this._contractNamesOnNonInterfaces.Contains(attributedExportDefinition.ContractName))
+                        if (!_contractNamesOnNonInterfaces.Contains(attributedExportDefinition.ContractName))
                         {
                             exports.Add(new ReflectionMemberExportDefinition(member.ToLazyMember(), attributedExportDefinition, this));
-                            this._contractNamesOnNonInterfaces.Add(attributedExportDefinition.ContractName);
+                            _contractNamesOnNonInterfaces.Add(attributedExportDefinition.ContractName);
                         }
                     }
                     else
@@ -296,25 +296,25 @@ string ICompositionElement.DisplayName
             // the same contract name. Therefore ensure that we always return the types
             // in the hiearchy from most derived to the lowest base type, followed
             // by all the interfaces that this type implements.
-            foreach (Type type in GetInheritedExports(this._type))
+            foreach (Type type in GetInheritedExports(_type))
             {
                 foreach (InheritedExportAttribute exportAttribute in type.GetAttributes<InheritedExportAttribute>())
                 {
-                    var attributedExportDefinition = this.CreateExportDefinition(type, exportAttribute);
+                    var attributedExportDefinition = CreateExportDefinition(type, exportAttribute);
 
-                    if (!this._contractNamesOnNonInterfaces.Contains(attributedExportDefinition.ContractName))
+                    if (!_contractNamesOnNonInterfaces.Contains(attributedExportDefinition.ContractName))
                     {
                         exports.Add(new ReflectionMemberExportDefinition(type.ToLazyMember(), attributedExportDefinition, this));
 
                         if (!type.IsInterface)
                         {
-                            this._contractNamesOnNonInterfaces.Add(attributedExportDefinition.ContractName);
+                            _contractNamesOnNonInterfaces.Add(attributedExportDefinition.ContractName);
                         }
                     }
                 }
             }
 
-            this._contractNamesOnNonInterfaces = null; // No need to hold this state around any longer
+            _contractNamesOnNonInterfaces = null; // No need to hold this state around any longer
 
             return exports;
         }
@@ -427,13 +427,13 @@ string ICompositionElement.DisplayName
         {
             List<ImportDefinition> imports = new List<ImportDefinition>();
 
-            foreach (MemberInfo member in GetImportMembers(this._type))
+            foreach (MemberInfo member in GetImportMembers(_type))
             {
                 ReflectionMemberImportDefinition importDefinition = AttributedModelDiscovery.CreateMemberImportDefinition(member, this);
                 imports.Add(importDefinition);
             }
 
-            var constructor = this.GetConstructor();
+            var constructor = GetConstructor();
 
             if (constructor != null)
             {

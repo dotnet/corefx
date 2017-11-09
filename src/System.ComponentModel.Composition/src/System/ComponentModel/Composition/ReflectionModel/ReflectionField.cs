@@ -17,17 +17,17 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             Assumes.NotNull(field);
 
-            this._field = field;
+            _field = field;
         }
 
         public FieldInfo UndelyingField
         {
-            get { return this._field; }
+            get { return _field; }
         }
 
         public override MemberInfo UnderlyingMember
         {
-            get { return this.UndelyingField; }
+            get { return UndelyingField; }
         }
 
         public override bool CanRead
@@ -37,17 +37,17 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public override bool CanWrite
         {
-            get { return !this.UndelyingField.IsInitOnly; }
+            get { return !UndelyingField.IsInitOnly; }
         }
 
         public override bool RequiresInstance
         {
-            get { return !this.UndelyingField.IsStatic; }
+            get { return !UndelyingField.IsStatic; }
         }
 
         public override Type ReturnType
         {
-            get { return this.UndelyingField.FieldType; }
+            get { return UndelyingField.FieldType; }
         }
 
         public override ReflectionItemType ItemType
@@ -57,12 +57,12 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public override object GetValue(object instance)
         {
-            return this.UndelyingField.SafeGetValue(instance);
+            return UndelyingField.SafeGetValue(instance);
         }
 
         public override void SetValue(object instance, object value)
         {
-            this.UndelyingField.SafeSetValue(instance, value);
+            UndelyingField.SafeSetValue(instance, value);
         }
     }
 }

@@ -28,8 +28,8 @@ namespace System.ComponentModel.Composition
         /// </param>
         public PartMetadataAttribute(string name, object value)
         {
-            this.Name = name ?? string.Empty;
-            this.Value = value;
+            Name = name ?? string.Empty;
+            Value = value;
         }
 
         /// <summary>

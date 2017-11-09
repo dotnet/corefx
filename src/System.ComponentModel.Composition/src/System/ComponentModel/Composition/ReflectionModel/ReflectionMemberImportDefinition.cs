@@ -33,18 +33,18 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             Assumes.NotNull(contractName);
 
-            this._importingLazyMember = importingLazyMember;
+            _importingLazyMember = importingLazyMember;
         }
 
         public override ImportingItem ToImportingItem()
         {
-            ReflectionWritableMember member = this.ImportingLazyMember.ToReflectionWriteableMember();
-            return new ImportingMember(this, member, new ImportType(member.ReturnType, this.Cardinality));
+            ReflectionWritableMember member = ImportingLazyMember.ToReflectionWriteableMember();
+            return new ImportingMember(this, member, new ImportType(member.ReturnType, Cardinality));
         }
 
         public LazyMemberInfo ImportingLazyMember
         {
-            get { return this._importingLazyMember; } 
+            get { return _importingLazyMember; } 
         }
 
         protected override string GetDisplayName()
@@ -52,8 +52,8 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return string.Format(
                 CultureInfo.CurrentCulture,
                 "{0} (ContractName=\"{1}\")",    // NOLOC
-                this.ImportingLazyMember.ToReflectionMember().GetDisplayName(),
-                this.ContractName);
+                ImportingLazyMember.ToReflectionMember().GetDisplayName(),
+                ContractName);
         }
     }
 }

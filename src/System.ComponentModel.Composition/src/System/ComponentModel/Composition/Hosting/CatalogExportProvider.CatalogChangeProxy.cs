@@ -28,14 +28,14 @@ namespace System.ComponentModel.Composition.Hosting
                 IEnumerable<ComposablePartDefinition> addedParts,
                 IEnumerable<ComposablePartDefinition> removedParts)
             {
-                this._originalCatalog = originalCatalog;
-                this._addedParts = new List<ComposablePartDefinition>(addedParts);
-                this._removedParts = new HashSet<ComposablePartDefinition>(removedParts);
+                _originalCatalog = originalCatalog;
+                _addedParts = new List<ComposablePartDefinition>(addedParts);
+                _removedParts = new HashSet<ComposablePartDefinition>(removedParts);
             }
 
             public override IEnumerator<ComposablePartDefinition> GetEnumerator()
             {
-                return this._originalCatalog.Concat(this._addedParts).Except(this._removedParts).GetEnumerator();
+                return _originalCatalog.Concat(_addedParts).Except(_removedParts).GetEnumerator();
             }
 
             public override IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(
@@ -43,12 +43,12 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 Requires.NotNull(definition, nameof(definition));
 
-                var originalExports = this._originalCatalog.GetExports(definition);
+                var originalExports = _originalCatalog.GetExports(definition);
                 var trimmedExports = originalExports.Where(partAndExport =>
-                    !this._removedParts.Contains(partAndExport.Item1));
+                    !_removedParts.Contains(partAndExport.Item1));
 
                 var addedExports = new List<Tuple<ComposablePartDefinition, ExportDefinition>>();
-                foreach (var part in this._addedParts)
+                foreach (var part in _addedParts)
                 {
                     foreach (var export in part.ExportDefinitions)
                     {

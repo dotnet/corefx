@@ -23,23 +23,23 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             Assumes.NotNull(definition);
 
-            this._definition = definition;
-            this._importType = importType;
+            _definition = definition;
+            _importType = importType;
         }
 
         public ContractBasedImportDefinition Definition
         {
-            get { return this._definition; }
+            get { return _definition; }
         }
 
         public ImportType ImportType
         {
-            get { return this._importType; }
+            get { return _importType; }
         }
 
         public object CastExportsToImportType(Export[] exports)
         {
-            if (this.Definition.Cardinality == ImportCardinality.ZeroOrMore)
+            if (Definition.Cardinality == ImportCardinality.ZeroOrMore)
             {
                 return CastExportsToCollectionImportType(exports);
             }
@@ -55,7 +55,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
             // Element type could be null if the actually import type of the member is not a collection
             // This particular case will end up failing when we set the member.
-            Type elementType = this.ImportType.ElementType ?? typeof(object);
+            Type elementType = ImportType.ElementType ?? typeof(object);
 
             Array array = Array.CreateInstance(elementType, exports.Length);
 
@@ -79,14 +79,14 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 return null;
             }
 
-            return CastSingleExportToImportType(this.ImportType.ActualType, exports[0]);
+            return CastSingleExportToImportType(ImportType.ActualType, exports[0]);
         }
 
         private object CastSingleExportToImportType(Type type, Export export)
         {
-            if (this.ImportType.CastExport != null)
+            if (ImportType.CastExport != null)
             {
-                return this.ImportType.CastExport(export);
+                return ImportType.CastExport(export);
             }
 
             return Cast(type, export);
@@ -104,7 +104,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                         SR.ReflectionModel_ImportNotAssignableFromExport,
                         export.ToElement().DisplayName,
                         type.FullName),
-                    this.Definition.ToElement());
+                    Definition.ToElement());
             }
 
             return result;

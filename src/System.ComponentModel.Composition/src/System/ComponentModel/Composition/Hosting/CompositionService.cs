@@ -24,24 +24,24 @@ namespace System.ComponentModel.Composition.Hosting
         internal CompositionService(ComposablePartCatalog composablePartCatalog)
         {
             Assumes.NotNull(composablePartCatalog);
-            this._notifyCatalog = composablePartCatalog as INotifyComposablePartCatalogChanged;
+            _notifyCatalog = composablePartCatalog as INotifyComposablePartCatalogChanged;
             try
             {
-                if(this._notifyCatalog != null)
+                if(_notifyCatalog != null)
                 {
-                    this._notifyCatalog.Changing += this.OnCatalogChanging;
+                    _notifyCatalog.Changing += OnCatalogChanging;
                 }
 
                 var compositionOptions = CompositionOptions.DisableSilentRejection | CompositionOptions.IsThreadSafe | CompositionOptions.ExportCompositionService;
                 var compositionContainer = new CompositionContainer(composablePartCatalog, compositionOptions);
     
-                this._compositionContainer = compositionContainer;
+                _compositionContainer = compositionContainer;
             }
             catch
             {
-                if(this._notifyCatalog != null)
+                if(_notifyCatalog != null)
                 {
-                    this._notifyCatalog.Changing -= this.OnCatalogChanging;
+                    _notifyCatalog.Changing -= OnCatalogChanging;
                 }
                 throw;
             }
@@ -50,20 +50,20 @@ namespace System.ComponentModel.Composition.Hosting
         public void SatisfyImportsOnce(ComposablePart part)
         {
             Requires.NotNull(part, nameof(part));
-            Assumes.NotNull(this._compositionContainer);
-            this._compositionContainer.SatisfyImportsOnce(part);
+            Assumes.NotNull(_compositionContainer);
+            _compositionContainer.SatisfyImportsOnce(part);
         }
 
         public void Dispose()
         {
-            Assumes.NotNull(this._compositionContainer);
+            Assumes.NotNull(_compositionContainer);
             
             // Delegates are cool there is no concern if you try to remove an item from them and they don't exist
-            if (this._notifyCatalog != null)
+            if (_notifyCatalog != null)
             {
-                this._notifyCatalog.Changing -= this.OnCatalogChanging;
+                _notifyCatalog.Changing -= OnCatalogChanging;
             }
-            this._compositionContainer.Dispose();
+            _compositionContainer.Dispose();
         }
 
         private void OnCatalogChanging(object sender, ComposablePartCatalogChangeEventArgs e)

@@ -23,7 +23,7 @@ namespace System.ComponentModel.Composition
         {
             Requires.NotNull(exception, nameof(exception));
 
-            this._exception = exception;
+            _exception = exception;
         }
 
         public Exception InnerException 

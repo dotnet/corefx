@@ -28,56 +28,56 @@ namespace System.ComponentModel.Composition.Hosting
 
             public EngineContext(ImportEngine importEngine, EngineContext parentEngineContext)
             {
-                this._importEngine = importEngine;
-                this._parentEngineContext = parentEngineContext;
+                _importEngine = importEngine;
+                _parentEngineContext = parentEngineContext;
             }
 
             public void AddPartManager(PartManager part)
             {
                 Assumes.NotNull(part);
-                if (!this._removedPartManagers.Remove(part))
+                if (!_removedPartManagers.Remove(part))
                 {
-                    this._addedPartManagers.Add(part);
+                    _addedPartManagers.Add(part);
                 }
             }
 
             public void RemovePartManager(PartManager part)
             {
                 Assumes.NotNull(part);
-                if (!this._addedPartManagers.Remove(part))
+                if (!_addedPartManagers.Remove(part))
                 {
-                    this._removedPartManagers.Add(part);
+                    _removedPartManagers.Add(part);
                 }
             }
 
             public IEnumerable<PartManager> GetAddedPartManagers()
             {
-                if (this._parentEngineContext != null)
+                if (_parentEngineContext != null)
                 {
-                    return this._addedPartManagers.ConcatAllowingNull(this._parentEngineContext.GetAddedPartManagers());
+                    return _addedPartManagers.ConcatAllowingNull(_parentEngineContext.GetAddedPartManagers());
                 }
-                return this._addedPartManagers;
+                return _addedPartManagers;
             }
 
             public IEnumerable<PartManager> GetRemovedPartManagers()
             {
-                if (this._parentEngineContext != null)
+                if (_parentEngineContext != null)
                 {
-                    return this._removedPartManagers.ConcatAllowingNull(this._parentEngineContext.GetRemovedPartManagers());
+                    return _removedPartManagers.ConcatAllowingNull(_parentEngineContext.GetRemovedPartManagers());
                 }
-                return this._removedPartManagers;
+                return _removedPartManagers;
             }
 
             public void Complete()
             {
-                foreach (var partManager in this._addedPartManagers)
+                foreach (var partManager in _addedPartManagers)
                 {
-                    this._importEngine.StartSatisfyingImports(partManager, null);
+                    _importEngine.StartSatisfyingImports(partManager, null);
                 }
 
-                foreach (var partManager in this._removedPartManagers)
+                foreach (var partManager in _removedPartManagers)
                 {
-                    this._importEngine.StopSatisfyingImports(partManager, null);
+                    _importEngine.StopSatisfyingImports(partManager, null);
                 }
             }
         }

@@ -37,7 +37,7 @@ namespace System.ComponentModel.Composition
             {
                 CompositionException exception = obj as CompositionException;
 
-                exception._errors = new ReadOnlyCollection<CompositionError>(this._errors);
+                exception._errors = new ReadOnlyCollection<CompositionError>(_errors);
             }
         }
 #endif
@@ -115,9 +115,9 @@ namespace System.ComponentModel.Composition
             SerializeObjectState += delegate(object exception, SafeSerializationEventArgs eventArgs)
             {
                 var data = new CompositionExceptionData();
-                if(this._errors != null)
+                if(_errors != null)
                 {
-                    data._errors = this._errors.Select(error => new CompositionError(
+                    data._errors = _errors.Select(error => new CompositionError(
                         error.Id, 
                         error.Description,
                         error.Element.ToSerializableElement(),
@@ -158,7 +158,7 @@ namespace System.ComponentModel.Composition
         {
             get
             {
-                if (this.Errors.Count == 0)
+                if (Errors.Count == 0)
                 {   // If there are no errors, then we simply return base.Message, 
                     // which will either use the default Exception message, or if 
                     // one was specified; the user supplied message.
@@ -177,7 +177,7 @@ namespace System.ComponentModel.Composition
                 var errors = new List<Exception>();
 
                 // In here return a collection of all of the exceptions in the Errors collection
-                foreach (var error in this.Errors)
+                foreach (var error in Errors)
                 {
                     if (error.Exception != null)
                     {
@@ -203,7 +203,7 @@ namespace System.ComponentModel.Composition
 
             StringBuilder writer = new StringBuilder();
 
-            WriteHeader(writer, this.Errors.Count, paths.Count());
+            WriteHeader(writer, Errors.Count, paths.Count());
             WritePaths(writer, paths);
 
             return writer.ToString();

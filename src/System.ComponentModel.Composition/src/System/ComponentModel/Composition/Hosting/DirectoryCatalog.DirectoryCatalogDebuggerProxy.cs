@@ -23,14 +23,14 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 Requires.NotNull(catalog, nameof(catalog));
 
-                this._catalog = catalog;
+                _catalog = catalog;
             }
 
             public ReadOnlyCollection<Assembly> Assemblies
             {
                 get
                 {
-                    return this._catalog._assemblyCatalogs.Values.Select(catalog => catalog.Assembly)
+                    return _catalog._assemblyCatalogs.Values.Select(catalog => catalog.Assembly)
                                                                  .ToReadOnlyCollection();
                 }
             }
@@ -39,28 +39,28 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 get
                 {
-                    return this._catalog._reflectionContext;
+                    return _catalog._reflectionContext;
                 }
             }
 
             public string SearchPattern
             {
-                get { return this._catalog.SearchPattern; }
+                get { return _catalog.SearchPattern; }
             }
 
             public string Path
             {
-                get { return this._catalog._path; }
+                get { return _catalog._path; }
             }
 
             public string FullPath
             {
-                get { return this._catalog._fullPath; }
+                get { return _catalog._fullPath; }
             }
 
             public ReadOnlyCollection<string> LoadedFiles
             {
-                get { return this._catalog._loadedFiles; }
+                get { return _catalog._loadedFiles; }
             }
 
             public ReadOnlyCollection<ComposablePartDefinition> Parts
@@ -69,7 +69,7 @@ namespace System.ComponentModel.Composition.Hosting
                 // the current value of the underlying catalog is respected.
                 // We use ReadOnlyCollection as arrays do not have the 
                 // appropriate debugger display attributes applied to them.
-                get { return this._catalog.Parts.ToReadOnlyCollection(); }
+                get { return _catalog.Parts.ToReadOnlyCollection(); }
             }
         }
     }

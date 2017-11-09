@@ -21,30 +21,30 @@ namespace System.ComponentModel.Composition.Hosting
 
             public FactoryExport(ComposablePartDefinition partDefinition, ExportDefinition exportDefinition)
             {
-                this._partDefinition = partDefinition;
-                this._exportDefinition = exportDefinition;
-                this._factoryExportDefinition = new PartCreatorExportDefinition(this._exportDefinition);
+                _partDefinition = partDefinition;
+                _exportDefinition = exportDefinition;
+                _factoryExportDefinition = new PartCreatorExportDefinition(_exportDefinition);
             }
 
             public override ExportDefinition Definition
             {
-                get { return this._factoryExportDefinition; }
+                get { return _factoryExportDefinition; }
             }
 
             protected override object GetExportedValueCore()
             {
-                if (this._factoryExportPartDefinition == null)
+                if (_factoryExportPartDefinition == null)
                 {
-                    this._factoryExportPartDefinition = new FactoryExportPartDefinition(this);
+                    _factoryExportPartDefinition = new FactoryExportPartDefinition(this);
                 }
-                return this._factoryExportPartDefinition;
+                return _factoryExportPartDefinition;
             }
 
             protected ComposablePartDefinition UnderlyingPartDefinition
             {
                 get
                 {
-                    return this._partDefinition;
+                    return _partDefinition;
                 }
             }
 
@@ -52,7 +52,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 get
                 {
-                    return this._exportDefinition;
+                    return _exportDefinition;
                 }
             }
 
@@ -64,12 +64,12 @@ namespace System.ComponentModel.Composition.Hosting
 
                 public FactoryExportPartDefinition(FactoryExport FactoryExport)
                 {
-                    this._FactoryExport = FactoryExport;
+                    _FactoryExport = FactoryExport;
                 }
 
                 public override IEnumerable<ExportDefinition> ExportDefinitions
                 {
-                    get { return new ExportDefinition[] { this._FactoryExport.Definition }; }
+                    get { return new ExportDefinition[] { _FactoryExport.Definition }; }
                 }
 
                 public override IEnumerable<ImportDefinition> ImportDefinitions
@@ -79,12 +79,12 @@ namespace System.ComponentModel.Composition.Hosting
 
                 public ExportDefinition FactoryExportDefinition
                 {
-                    get { return this._FactoryExport.Definition; }
+                    get { return _FactoryExport.Definition; }
                 }
 
                 public Export CreateProductExport()
                 {
-                    return this._FactoryExport.CreateExportProduct();
+                    return _FactoryExport.CreateExportProduct();
                 }
 
                 public override ComposablePart CreatePart()
@@ -100,28 +100,28 @@ namespace System.ComponentModel.Composition.Hosting
 
                 public FactoryExportPart(FactoryExportPartDefinition definition)
                 {
-                    this._definition = definition;
-                    this._export = definition.CreateProductExport();
+                    _definition = definition;
+                    _export = definition.CreateProductExport();
                 }
 
                 public override IEnumerable<ExportDefinition> ExportDefinitions
                 {
-                    get { return this._definition.ExportDefinitions; }
+                    get { return _definition.ExportDefinitions; }
                 }
 
                 public override IEnumerable<ImportDefinition> ImportDefinitions
                 {
-                    get { return this._definition.ImportDefinitions; }
+                    get { return _definition.ImportDefinitions; }
                 }
 
                 public override object GetExportedValue(ExportDefinition definition)
                 {
-                    if (definition != this._definition.FactoryExportDefinition)
+                    if (definition != _definition.FactoryExportDefinition)
                     {
                         throw ExceptionBuilder.CreateExportDefinitionNotOnThisComposablePart("definition");
                     }
 
-                    return this._export.Value;
+                    return _export.Value;
                 }
 
                 public override void SetImport(ImportDefinition definition, IEnumerable<Export> exports)
@@ -131,7 +131,7 @@ namespace System.ComponentModel.Composition.Hosting
 
                 public void Dispose()
                 {
-                    IDisposable disposable = this._export as IDisposable;
+                    IDisposable disposable = _export as IDisposable;
 
                     if (disposable != null)
                     {

@@ -87,7 +87,7 @@ namespace System.ComponentModel.Composition.Primitives
         {
             Requires.NotNull(constraint, nameof(constraint));
 
-            this._constraint = constraint;
+            _constraint = constraint;
         }
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
@@ -96,7 +96,7 @@ namespace System.ComponentModel.Composition.Primitives
         {
             Requires.NotNull(constraint, nameof(constraint));
 
-            this._constraint = constraint;
+            _constraint = constraint;
         }
 
         internal ImportDefinition(string contractName, ImportCardinality cardinality, bool isRecomposable, bool isPrerequisite, IDictionary<string, object> metadata)
@@ -110,15 +110,15 @@ namespace System.ComponentModel.Composition.Primitives
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_InvalidEnum, "cardinality", cardinality, typeof(ImportCardinality).Name), "cardinality");
             }
 
-            this._contractName = contractName ?? EmptyContractName;
-            this._cardinality = cardinality;
-            this._isRecomposable = isRecomposable;
-            this._isPrerequisite = isPrerequisite;
+            _contractName = contractName ?? EmptyContractName;
+            _cardinality = cardinality;
+            _isRecomposable = isRecomposable;
+            _isPrerequisite = isPrerequisite;
             
             //Metadata on imports was added in 4.5, prior to that it was ignored.
             if (metadata != null)
             {
-                this._metadata = metadata;
+                _metadata = metadata;
             }
         }
 
@@ -137,7 +137,7 @@ namespace System.ComponentModel.Composition.Primitives
             {
                 Contract.Ensures(Contract.Result<string>() != null);
 
-                return this._contractName; 
+                return _contractName; 
             }
         }
 
@@ -182,7 +182,7 @@ namespace System.ComponentModel.Composition.Primitives
         /// </value>
         public virtual ImportCardinality Cardinality
         {
-            get { return this._cardinality; }
+            get { return _cardinality; }
         }
 
         /// <summary>
@@ -209,9 +209,9 @@ namespace System.ComponentModel.Composition.Primitives
             {
                 Contract.Ensures(Contract.Result<Expression<Func<ExportDefinition, bool>>>() != null);
                 
-                if (this._constraint != null)
+                if (_constraint != null)
                 {
-                    return this._constraint;
+                    return _constraint;
                 }
 
                 throw ExceptionBuilder.CreateNotOverriddenByDerived("Constraint");
@@ -229,7 +229,7 @@ namespace System.ComponentModel.Composition.Primitives
         /// </value>
         public virtual bool IsPrerequisite
         {
-            get { return this._isPrerequisite; }
+            get { return _isPrerequisite; }
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace System.ComponentModel.Composition.Primitives
         /// </value>
         public virtual bool IsRecomposable
         {
-            get { return this._isRecomposable; }
+            get { return _isRecomposable; }
         }
 
         /// <summary>
@@ -271,12 +271,12 @@ namespace System.ComponentModel.Composition.Primitives
         {
             Requires.NotNull(exportDefinition, nameof(exportDefinition));
 
-            if (this._compiledConstraint == null)
+            if (_compiledConstraint == null)
             {
-                this._compiledConstraint = this.Constraint.Compile();
+                _compiledConstraint = Constraint.Compile();
             }
 
-            return this._compiledConstraint.Invoke(exportDefinition);
+            return _compiledConstraint.Invoke(exportDefinition);
         }
 
         /// <summary>
@@ -287,7 +287,7 @@ namespace System.ComponentModel.Composition.Primitives
         /// </returns>
         public override string ToString()
         {
-            return this.Constraint.Body.ToString();
+            return Constraint.Body.ToString();
         }
     }
 }

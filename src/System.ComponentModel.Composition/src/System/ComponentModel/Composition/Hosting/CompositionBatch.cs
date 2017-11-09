@@ -36,7 +36,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <param name="partsToRemove">The parts to remove.</param>
         public CompositionBatch(IEnumerable<ComposablePart> partsToAdd, IEnumerable<ComposablePart> partsToRemove)
         {
-            this._partsToAdd = new List<ComposablePart>();
+            _partsToAdd = new List<ComposablePart>();
             if (partsToAdd != null)
             {
                 foreach (var part in partsToAdd)
@@ -45,12 +45,12 @@ namespace System.ComponentModel.Composition.Hosting
                     {
                         throw ExceptionBuilder.CreateContainsNullElement("partsToAdd");
                     }
-                    this._partsToAdd.Add(part);
+                    _partsToAdd.Add(part);
                 }
             }
-            this._readOnlyPartsToAdd = this._partsToAdd.AsReadOnly();
+            _readOnlyPartsToAdd = _partsToAdd.AsReadOnly();
 
-            this._partsToRemove = new List<ComposablePart>();
+            _partsToRemove = new List<ComposablePart>();
             if (partsToRemove != null)
             {
                 foreach (var part in partsToRemove)
@@ -59,10 +59,10 @@ namespace System.ComponentModel.Composition.Hosting
                     {
                         throw ExceptionBuilder.CreateContainsNullElement("partsToRemove");
                     }
-                    this._partsToRemove.Add(part);
+                    _partsToRemove.Add(part);
                 }
             }
-            this._readOnlyPartsToRemove = this._partsToRemove.AsReadOnly();
+            _readOnlyPartsToRemove = _partsToRemove.AsReadOnly();
         }
 
         /// <summary>
@@ -75,10 +75,10 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 Contract.Ensures(Contract.Result<ReadOnlyCollection<ComposablePart>>() != null);
 
-                lock (this._lock)
+                lock (_lock)
                 {
-                    this._copyNeededForAdd = true;
-                    return this._readOnlyPartsToAdd;
+                    _copyNeededForAdd = true;
+                    return _readOnlyPartsToAdd;
                 }
             }
         }
@@ -93,10 +93,10 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 Contract.Ensures(Contract.Result <ReadOnlyCollection<ComposablePart>>() != null);
 
-                lock (this._lock)
+                lock (_lock)
                 {
-                    this._copyNeededForRemove = true;
-                    return this._readOnlyPartsToRemove;
+                    _copyNeededForRemove = true;
+                    return _readOnlyPartsToRemove;
                 }
             }
         }
@@ -113,15 +113,15 @@ namespace System.ComponentModel.Composition.Hosting
         public void AddPart(ComposablePart part)
         {
             Requires.NotNull(part, nameof(part));
-            lock (this._lock)
+            lock (_lock)
             {
-                if (this._copyNeededForAdd)
+                if (_copyNeededForAdd)
                 {
-                    this._partsToAdd = new List<ComposablePart>(this._partsToAdd);
-                    this._readOnlyPartsToAdd = this._partsToAdd.AsReadOnly();
-                    this._copyNeededForAdd = false;
+                    _partsToAdd = new List<ComposablePart>(_partsToAdd);
+                    _readOnlyPartsToAdd = _partsToAdd.AsReadOnly();
+                    _copyNeededForAdd = false;
                 }
-                this._partsToAdd.Add(part);
+                _partsToAdd.Add(part);
             }
         }
 
@@ -137,15 +137,15 @@ namespace System.ComponentModel.Composition.Hosting
         public void RemovePart(ComposablePart part)
         {
             Requires.NotNull(part, nameof(part));
-            lock (this._lock)
+            lock (_lock)
             {
-                if (this._copyNeededForRemove)
+                if (_copyNeededForRemove)
                 {
-                    this._partsToRemove = new List<ComposablePart>(this._partsToRemove);
-                    this._readOnlyPartsToRemove = this._partsToRemove.AsReadOnly();
-                    this._copyNeededForRemove = false;
+                    _partsToRemove = new List<ComposablePart>(_partsToRemove);
+                    _readOnlyPartsToRemove = _partsToRemove.AsReadOnly();
+                    _copyNeededForRemove = false;
                 }
-                this._partsToRemove.Add(part);
+                _partsToRemove.Add(part);
             }
         }
 
@@ -171,7 +171,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             ComposablePart part = new SingleExportComposablePart(export);
 
-            this.AddPart(part);
+            AddPart(part);
 
             return part;
         }

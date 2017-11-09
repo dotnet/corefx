@@ -39,16 +39,16 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Assumes.NotNull(specialization);
             Assumes.NotNull(originalPart);
 
-            this._originalPartCreationInfo = originalPartCreationInfo;
-            this._originalPart = originalPart;
-            this._specialization = specialization;
-            this._specializationIdentities = new string[this._specialization.Length];
-            for (int i = 0; i < this._specialization.Length; i++)
+            _originalPartCreationInfo = originalPartCreationInfo;
+            _originalPart = originalPart;
+            _specialization = specialization;
+            _specializationIdentities = new string[_specialization.Length];
+            for (int i = 0; i < _specialization.Length; i++)
             {
-                this._specializationIdentities[i] = AttributedModelServices.GetTypeIdentity(this._specialization[i]);
+                _specializationIdentities[i] = AttributedModelServices.GetTypeIdentity(_specialization[i]);
             }
-            this._lazyPartType = new Lazy<Type>(
-                () => this._originalPartCreationInfo.GetPartType().MakeGenericType(specialization),
+            _lazyPartType = new Lazy<Type>(
+                () => _originalPartCreationInfo.GetPartType().MakeGenericType(specialization),
                 LazyThreadSafetyMode.PublicationOnly);
 
         }
@@ -57,29 +57,29 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             get
             {
-                return this._originalPart;
+                return _originalPart;
             }
         }
 
         public Type GetPartType()
         {
-            return this._lazyPartType.Value;
+            return _lazyPartType.Value;
         }
 
         public Lazy<Type> GetLazyPartType()
         {
-            return this._lazyPartType;
+            return _lazyPartType;
         }
 
         public ConstructorInfo GetConstructor()
         {
-            if (this._constructor == null)
+            if (_constructor == null)
             {
-                ConstructorInfo genericConstuctor = this._originalPartCreationInfo.GetConstructor();
+                ConstructorInfo genericConstuctor = _originalPartCreationInfo.GetConstructor();
                 ConstructorInfo result = null;
                 if (genericConstuctor != null)
                 {
-                    foreach (ConstructorInfo constructor in this.GetPartType().GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+                    foreach (ConstructorInfo constructor in GetPartType().GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
                     {
                         if (constructor.MetadataToken == genericConstuctor.MetadataToken)
                         {
@@ -90,21 +90,21 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 }
 
                 Thread.MemoryBarrier();
-                lock (this._lock)
+                lock (_lock)
                 {
-                    if (this._constructor == null)
+                    if (_constructor == null)
                     {
-                        this._constructor = result;
+                        _constructor = result;
                     }
                 }
             }
 
-            return this._constructor;
+            return _constructor;
         }
 
         public IDictionary<string, object> GetMetadata()
         {
-            var originalMetadata = new Dictionary<string, object>(this._originalPartCreationInfo.GetMetadata(), StringComparers.MetadataKeyNames);
+            var originalMetadata = new Dictionary<string, object>(_originalPartCreationInfo.GetMetadata(), StringComparers.MetadataKeyNames);
             originalMetadata.Remove(CompositionConstants.IsGenericPartMetadataName);
             originalMetadata.Remove(CompositionConstants.GenericPartArityMetadataName);
             originalMetadata.Remove(CompositionConstants.GenericParameterConstraintsMetadataName);
@@ -115,37 +115,37 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private MemberInfo[] GetAccessors(LazyMemberInfo originalLazyMember)
         {
-            this.BuildTables();
-            Assumes.NotNull(this._membersTable);
+            BuildTables();
+            Assumes.NotNull(_membersTable);
 
-            return this._membersTable[originalLazyMember];
+            return _membersTable[originalLazyMember];
         }
 
         private ParameterInfo GetParameter(Lazy<ParameterInfo> originalParameter)
         {
-            this.BuildTables();
-            Assumes.NotNull(this._parametersTable);
+            BuildTables();
+            Assumes.NotNull(_parametersTable);
 
-            return this._parametersTable[originalParameter];
+            return _parametersTable[originalParameter];
         }
 
         private void BuildTables()
         {
-            if (this._membersTable != null)
+            if (_membersTable != null)
             {
                 return;
             }
 
-            this.PopulateImportsAndExports();
+            PopulateImportsAndExports();
 
             List<LazyMemberInfo> members = null;
             List<Lazy<ParameterInfo>> parameters = null;
-            lock (this._lock)
+            lock (_lock)
             {
-                if (this._membersTable == null)
+                if (_membersTable == null)
                 {
-                    members = this._members;
-                    parameters = this._parameters;
+                    members = _members;
+                    parameters = _parameters;
 
                     Assumes.NotNull(members);
                 }
@@ -154,20 +154,20 @@ namespace System.ComponentModel.Composition.ReflectionModel
             //
             // Get all members that can be of interest and extract their MetadataTokens
             //
-            Dictionary<LazyMemberInfo, MemberInfo[]> membersTable = this.BuildMembersTable(members);
-            Dictionary<Lazy<ParameterInfo>, ParameterInfo> parametersTable = this.BuildParametersTable(parameters);
+            Dictionary<LazyMemberInfo, MemberInfo[]> membersTable = BuildMembersTable(members);
+            Dictionary<Lazy<ParameterInfo>, ParameterInfo> parametersTable = BuildParametersTable(parameters);
 
-            lock (this._lock)
+            lock (_lock)
             {
-                if (this._membersTable == null)
+                if (_membersTable == null)
                 {
-                    this._membersTable = membersTable;
-                    this._parametersTable = parametersTable;
+                    _membersTable = membersTable;
+                    _parametersTable = parametersTable;
 
                     Thread.MemoryBarrier();
 
-                    this._parameters = null;
-                    this._members = null;
+                    _parameters = null;
+                    _members = null;
                 }
             }
         }
@@ -179,7 +179,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Dictionary<LazyMemberInfo, MemberInfo[]> membersTable = new Dictionary<LazyMemberInfo, MemberInfo[]>();
             Dictionary<int, MemberInfo> specializedPartMembers = new Dictionary<int, MemberInfo>();
 
-            Type closedGenericPartType = this.GetPartType();
+            Type closedGenericPartType = GetPartType();
 
             specializedPartMembers[closedGenericPartType.MetadataToken] = closedGenericPartType;
             foreach (MethodInfo method in closedGenericPartType.GetAllMethods())
@@ -239,7 +239,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             {
                 Dictionary<Lazy<ParameterInfo>, ParameterInfo> parametersTable = new Dictionary<Lazy<ParameterInfo>, ParameterInfo>();
                 // GENTODO - error case
-                ParameterInfo[] constructorParameters = this.GetConstructor().GetParameters();
+                ParameterInfo[] constructorParameters = GetConstructor().GetParameters();
                 foreach (var lazyParameter in parameters)
                 {
                     parametersTable[lazyParameter] = constructorParameters[lazyParameter.Value.Position];
@@ -257,7 +257,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             List<ImportDefinition> imports = new List<ImportDefinition>();
 
-            foreach (ImportDefinition originalImport in this._originalPartCreationInfo.GetImports())
+            foreach (ImportDefinition originalImport in _originalPartCreationInfo.GetImports())
             {
                 ReflectionImportDefinition reflectionImport = originalImport as ReflectionImportDefinition;
                 if (reflectionImport == null)
@@ -266,7 +266,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     continue;
                 }
 
-                imports.Add(this.TranslateImport(reflectionImport, members, parameters));
+                imports.Add(TranslateImport(reflectionImport, members, parameters));
             }
 
             return imports;
@@ -284,9 +284,9 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 isExportFactory = true;
             }
 
-            string contractName = this.Translate(productImport.ContractName);
-            string requiredTypeIdentity = this.Translate(productImport.RequiredTypeIdentity);
-            IDictionary<string, object> metadata = this.TranslateImportMetadata(productImport);
+            string contractName = Translate(productImport.ContractName);
+            string requiredTypeIdentity = Translate(productImport.RequiredTypeIdentity);
+            IDictionary<string, object> metadata = TranslateImportMetadata(productImport);
 
             ReflectionMemberImportDefinition memberImport = reflectionImport as ReflectionMemberImportDefinition;
             ImportDefinition import = null;
@@ -373,7 +373,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             List<ExportDefinition> exports = new List<ExportDefinition>();
 
-            foreach (ExportDefinition originalExport in this._originalPartCreationInfo.GetExports())
+            foreach (ExportDefinition originalExport in _originalPartCreationInfo.GetExports())
             {
                 ReflectionMemberExportDefinition reflectionExport = originalExport as ReflectionMemberExportDefinition;
                 if (reflectionExport == null)
@@ -382,7 +382,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     continue;
                 }
 
-                exports.Add(this.TranslateExpot(reflectionExport, members));
+                exports.Add(TranslateExpot(reflectionExport, members));
             }
 
             return exports;
@@ -395,10 +395,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
             var capturedLazyMember = lazyMember;
             var capturedReflectionExport = reflectionExport;
 
-            string contractName = this.Translate(reflectionExport.ContractName, reflectionExport.Metadata.GetValue<int[]>(CompositionConstants.GenericExportParametersOrderMetadataName));
+            string contractName = Translate(reflectionExport.ContractName, reflectionExport.Metadata.GetValue<int[]>(CompositionConstants.GenericExportParametersOrderMetadataName));
 
             LazyMemberInfo exportingMember = new LazyMemberInfo(capturedLazyMember.MemberType, () => GetAccessors(capturedLazyMember));
-            Lazy<IDictionary<string, object>> lazyMetadata = new Lazy<IDictionary<string, object>>(() => this.TranslateExportMetadata(capturedReflectionExport));
+            Lazy<IDictionary<string, object>> lazyMetadata = new Lazy<IDictionary<string, object>>(() => TranslateExportMetadata(capturedReflectionExport));
 
             export = new ReflectionMemberExportDefinition(
                             exportingMember,
@@ -414,7 +414,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             if (genericParametersOrder != null)
             {
-                string[] specializationIdentities = GenericServices.Reorder(this._specializationIdentities, genericParametersOrder);
+                string[] specializationIdentities = GenericServices.Reorder(_specializationIdentities, genericParametersOrder);
                 return string.Format(CultureInfo.InvariantCulture, originalValue, specializationIdentities);
             }
             else
@@ -425,7 +425,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private string Translate(string originalValue)
         {
-            return string.Format(CultureInfo.InvariantCulture, originalValue, this._specializationIdentities);
+            return string.Format(CultureInfo.InvariantCulture, originalValue, _specializationIdentities);
         }
 
         private IDictionary<string, object> TranslateImportMetadata(ContractBasedImportDefinition originalImport)
@@ -436,8 +436,8 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 Dictionary<string, object> metadata = new Dictionary<string, object>(originalImport.Metadata, StringComparers.MetadataKeyNames);
 
                 // Get the newly re-qualified name of the generic contract and the subset of applicable types from the specialization
-                metadata[CompositionConstants.GenericContractMetadataName] = GenericServices.GetGenericName(originalImport.ContractName, importParametersOrder, this._specialization.Length);
-                metadata[CompositionConstants.GenericParametersMetadataName] = GenericServices.Reorder(this._specialization, importParametersOrder);
+                metadata[CompositionConstants.GenericContractMetadataName] = GenericServices.GetGenericName(originalImport.ContractName, importParametersOrder, _specialization.Length);
+                metadata[CompositionConstants.GenericParametersMetadataName] = GenericServices.Reorder(_specialization, importParametersOrder);
                 metadata.Remove(CompositionConstants.GenericImportParametersOrderMetadataName);
 
                 return metadata.AsReadOnly();
@@ -455,7 +455,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             string exportTypeIdentity = originalExport.Metadata.GetValue<string>(CompositionConstants.ExportTypeIdentityMetadataName);
             if (!string.IsNullOrEmpty(exportTypeIdentity))
             {
-                metadata[CompositionConstants.ExportTypeIdentityMetadataName] = this.Translate(exportTypeIdentity, originalExport.Metadata.GetValue<int[]>(CompositionConstants.GenericExportParametersOrderMetadataName));
+                metadata[CompositionConstants.ExportTypeIdentityMetadataName] = Translate(exportTypeIdentity, originalExport.Metadata.GetValue<int[]>(CompositionConstants.GenericExportParametersOrderMetadataName));
             }
             metadata.Remove(CompositionConstants.GenericExportParametersOrderMetadataName);
 
@@ -464,28 +464,28 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private void PopulateImportsAndExports()
         {
-            if ((this._exports == null) || (this._imports == null))
+            if ((_exports == null) || (_imports == null))
             {
                 List<LazyMemberInfo> members = new List<LazyMemberInfo>();
                 List<Lazy<ParameterInfo>> parameters = new List<Lazy<ParameterInfo>>();
 
                 // we are very careful to not call any 3rd party code in either of these
-                var exports = this.PopulateExports(members);
-                var imports = this.PopulateImports(members, parameters);
+                var exports = PopulateExports(members);
+                var imports = PopulateImports(members, parameters);
                 Thread.MemoryBarrier();
 
-                lock (this._lock)
+                lock (_lock)
                 {
-                    if ((this._exports == null) || (this._imports == null))
+                    if ((_exports == null) || (_imports == null))
                     {
-                        this._members = members;
+                        _members = members;
                         if (parameters.Count > 0)
                         {
-                            this._parameters = parameters;
+                            _parameters = parameters;
                         }
 
-                        this._exports = exports;
-                        this._imports = imports;
+                        _exports = exports;
+                        _imports = imports;
                     }
                 }
             }
@@ -493,19 +493,19 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public IEnumerable<ExportDefinition> GetExports()
         {
-            this.PopulateImportsAndExports();
-            return this._exports;
+            PopulateImportsAndExports();
+            return _exports;
         }
 
         public IEnumerable<ImportDefinition> GetImports()
         {
-            this.PopulateImportsAndExports();
-            return this._imports;
+            PopulateImportsAndExports();
+            return _imports;
         }
 
         public bool IsDisposalRequired
         {
-            get { return this._originalPartCreationInfo.IsDisposalRequired; }
+            get { return _originalPartCreationInfo.IsDisposalRequired; }
         }
 
         public bool IsIdentityComparison
@@ -518,12 +518,12 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public string DisplayName
         {
-            get { return this.Translate(this._originalPartCreationInfo.DisplayName); }
+            get { return Translate(_originalPartCreationInfo.DisplayName); }
         }
 
         public ICompositionElement Origin
         {
-            get { return this._originalPartCreationInfo.Origin; }
+            get { return _originalPartCreationInfo.Origin; }
         }
 
         public override bool Equals(object obj)
@@ -534,13 +534,13 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 return false;
             }
 
-            return (this._originalPartCreationInfo.Equals(that._originalPartCreationInfo)) &&
-                (this._specialization.IsArrayEqual(that._specialization));
+            return (_originalPartCreationInfo.Equals(that._originalPartCreationInfo)) &&
+                (_specialization.IsArrayEqual(that._specialization));
         }
 
         public override int GetHashCode()
         {
-            return this._originalPartCreationInfo.GetHashCode();
+            return _originalPartCreationInfo.GetHashCode();
         }
 
         public static bool CanSpecialize(IDictionary<string, object> partMetadata, Type[] specialization)

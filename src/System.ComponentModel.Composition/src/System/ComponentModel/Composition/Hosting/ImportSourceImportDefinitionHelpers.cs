@@ -38,13 +38,13 @@ namespace System.ComponentModel.Composition.Hosting
             public NonImportSourceImportDefinition(ContractBasedImportDefinition sourceDefinition)
             {
                 Assumes.NotNull(sourceDefinition);
-                this._sourceDefinition = sourceDefinition;
-                this._metadata = null;
+                _sourceDefinition = sourceDefinition;
+                _metadata = null;
             }
 
             public override string ContractName
             {
-                get { return this._sourceDefinition.ContractName; }
+                get { return _sourceDefinition.ContractName; }
             }
 
             public override IDictionary<string, object> Metadata
@@ -53,12 +53,12 @@ namespace System.ComponentModel.Composition.Hosting
                 {
                     Contract.Ensures(Contract.Result<IDictionary<string, object>>() != null);
 
-                    var reply = this._metadata;
+                    var reply = _metadata;
                     if(reply == null)
                     {
-                        reply = new Dictionary<string, object> (this._sourceDefinition.Metadata);
+                        reply = new Dictionary<string, object> (_sourceDefinition.Metadata);
                         reply.Remove(CompositionConstants.ImportSourceMetadataName);
-                        this._metadata = reply;
+                        _metadata = reply;
                     }
 
                     return reply;
@@ -67,52 +67,52 @@ namespace System.ComponentModel.Composition.Hosting
 
             public override ImportCardinality Cardinality
             {
-                get { return this._sourceDefinition.Cardinality; }
+                get { return _sourceDefinition.Cardinality; }
             }
 
             public override Expression<Func<ExportDefinition, bool>> Constraint
             {
-                get { return this._sourceDefinition.Constraint; }
+                get { return _sourceDefinition.Constraint; }
             }
 
             public override bool IsPrerequisite
             {
-                get { return this._sourceDefinition.IsPrerequisite; }
+                get { return _sourceDefinition.IsPrerequisite; }
             }
 
             public override bool IsRecomposable
             {
-                get { return this._sourceDefinition.IsRecomposable; }
+                get { return _sourceDefinition.IsRecomposable; }
             }
 
             public override bool IsConstraintSatisfiedBy(ExportDefinition exportDefinition)
             {
                 Requires.NotNull(exportDefinition, nameof(exportDefinition));
 
-                return this._sourceDefinition.IsConstraintSatisfiedBy(exportDefinition);
+                return _sourceDefinition.IsConstraintSatisfiedBy(exportDefinition);
             }
 
             public override string ToString()
             {
-                return this._sourceDefinition.ToString();
+                return _sourceDefinition.ToString();
             }
 
             public override string RequiredTypeIdentity
             {
-                get { return this._sourceDefinition.RequiredTypeIdentity; }
+                get { return _sourceDefinition.RequiredTypeIdentity; }
             }
 
             public override IEnumerable<KeyValuePair<string, Type>> RequiredMetadata
             {
                 get
                 {
-                    return this._sourceDefinition.RequiredMetadata;
+                    return _sourceDefinition.RequiredMetadata;
                 }
             }
 
             public override CreationPolicy RequiredCreationPolicy
             {
-                get { return this._sourceDefinition.RequiredCreationPolicy; }
+                get { return _sourceDefinition.RequiredCreationPolicy; }
             }
         }
     }

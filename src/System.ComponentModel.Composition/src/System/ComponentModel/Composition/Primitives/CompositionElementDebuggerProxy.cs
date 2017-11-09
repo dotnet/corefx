@@ -19,22 +19,22 @@ namespace System.ComponentModel.Composition.Primitives
         {
             Requires.NotNull(element, nameof(element));
 
-            this._element = element;
+            _element = element;
         }
 
         public string DisplayName
         {
-            get { return this._element.DisplayName; }
+            get { return _element.DisplayName; }
         }
 
         public ICompositionElement Origin
         {
-            get { return this._element.Origin; }
+            get { return _element.Origin; }
         }
 
         public object UnderlyingObject
         {
-            get { return this._element.UnderlyingObject; }
+            get { return _element.UnderlyingObject; }
         }
     }
 }

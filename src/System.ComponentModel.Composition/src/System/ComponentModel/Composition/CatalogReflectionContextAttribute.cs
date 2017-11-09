@@ -29,14 +29,14 @@ namespace System.ComponentModel.Composition
         {
             Requires.NotNull(reflectionContextType, "reflectionContextType");
 
-            this._reflectionContextType = reflectionContextType;
+            _reflectionContextType = reflectionContextType;
         }
 
         public ReflectionContext CreateReflectionContext()
         {
-            Assumes.NotNull<Type>(this._reflectionContextType);
+            Assumes.NotNull<Type>(_reflectionContextType);
 
-            if (!this._reflectionContextType.IsPublic)
+            if (!_reflectionContextType.IsPublic)
             {
                 new PermissionSet(PermissionState.Unrestricted).Demand();
             }
@@ -44,7 +44,7 @@ namespace System.ComponentModel.Composition
             ReflectionContext reflectionContext = null;
             try
             {
-                reflectionContext = (ReflectionContext)Activator.CreateInstance(this._reflectionContextType);
+                reflectionContext = (ReflectionContext)Activator.CreateInstance(_reflectionContextType);
             }
             catch (InvalidCastException invalidCastException)
             {

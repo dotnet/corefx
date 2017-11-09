@@ -41,17 +41,17 @@ namespace Microsoft.Internal.Collections
 
             public CollectionOfObjectList(IList list)
             {
-                this._list = list;
+                _list = list;
             }
 
             public void Add(object item)
             {
-                this._list.Add(item);
+                _list.Add(item);
             }
 
             public void Clear()
             {
-                this._list.Clear();
+                _list.Clear();
             }
 
             public bool Contains(object item)
@@ -71,7 +71,7 @@ namespace Microsoft.Internal.Collections
 
             public bool IsReadOnly
             {
-                get { return this._list.IsReadOnly; }
+                get { return _list.IsReadOnly; }
             }
 
             public bool Remove(object item)
@@ -96,17 +96,17 @@ namespace Microsoft.Internal.Collections
 
             public CollectionOfObject(object collectionOfT)
             {
-                this._collectionOfT = (ICollection<T>)collectionOfT;
+                _collectionOfT = (ICollection<T>)collectionOfT;
             }
 
             public void Add(object item)
             {
-                this._collectionOfT.Add((T) item);
+                _collectionOfT.Add((T) item);
             }
 
             public void Clear()
             {
-                this._collectionOfT.Clear();
+                _collectionOfT.Clear();
             }
 
             public bool Contains(object item)
@@ -126,7 +126,7 @@ namespace Microsoft.Internal.Collections
 
             public bool IsReadOnly
             {
-                get { return this._collectionOfT.IsReadOnly; }
+                get { return _collectionOfT.IsReadOnly; }
             }
 
             public bool Remove(object item)

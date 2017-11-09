@@ -57,18 +57,18 @@ namespace System.ComponentModel.Composition.Primitives
         {
             get
             {
-                this.ThrowIfDisposed();
-                if(this._queryableParts == null)
+                ThrowIfDisposed();
+                if(_queryableParts == null)
                 {
                     // Guarantee one time only set _queryableParts
                     var p = this.AsQueryable();
                     // NOTE : According to http://msdn.microsoft.com/en-us/library/4bw5ewxy.aspx, the warning is bogus when used with Interlocked API.
 #pragma warning disable 420
-                    Interlocked.CompareExchange(ref this._queryableParts, p, null);
+                    Interlocked.CompareExchange(ref _queryableParts, p, null);
 #pragma warning restore 420
-                    Assumes.NotNull(this._queryableParts);
+                    Assumes.NotNull(_queryableParts);
                 }
-                return this._queryableParts;
+                return _queryableParts;
             }
         }
 
@@ -101,13 +101,13 @@ namespace System.ComponentModel.Composition.Primitives
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public virtual IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(ImportDefinition definition)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
 
             Requires.NotNull(definition, nameof(definition));
             Contract.Ensures(Contract.Result<IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>>>() != null);
 
             List<Tuple<ComposablePartDefinition, ExportDefinition>> exports = null;
-            var candidateParts = this.GetCandidateParts(definition);
+            var candidateParts = GetCandidateParts(definition);
             if (candidateParts != null)
             {
                 foreach (var part in candidateParts)
@@ -146,13 +146,13 @@ internal virtual IEnumerable<ComposablePartDefinition> GetCandidateParts(ImportD
 
         protected virtual void Dispose(bool disposing) 
         {
-            this._isDisposed = true;
+            _isDisposed = true;
         }
 
         [DebuggerStepThrough]
         private void ThrowIfDisposed()
         {
-            if (this._isDisposed)
+            if (_isDisposed)
             {
                 throw ExceptionBuilder.CreateObjectDisposed(this);
             }
@@ -170,8 +170,8 @@ internal virtual IEnumerable<ComposablePartDefinition> GetCandidateParts(ImportD
         //
         public virtual IEnumerator<ComposablePartDefinition> GetEnumerator()
         {
-            var parts = this.Parts;
-            if(object.ReferenceEquals(parts, this._queryableParts))
+            var parts = Parts;
+            if(object.ReferenceEquals(parts, _queryableParts))
             {
                 return Enumerable.Empty<ComposablePartDefinition>().GetEnumerator();
             }
@@ -180,7 +180,7 @@ internal virtual IEnumerable<ComposablePartDefinition> GetCandidateParts(ImportD
 
         Collections.IEnumerator Collections.IEnumerable.GetEnumerator()
         {
-            return this.GetEnumerator();
+            return GetEnumerator();
         }
     }
 }

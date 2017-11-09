@@ -26,40 +26,40 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             Assumes.IsTrue(getMethod != null || setMethod != null);
 
-            this._getMethod = getMethod;
-            this._setMethod = setMethod;
+            _getMethod = getMethod;
+            _setMethod = setMethod;
         }
 
         public override MemberInfo UnderlyingMember
         {
-            get { return this.UnderlyingGetMethod ?? this.UnderlyingSetMethod; }
+            get { return UnderlyingGetMethod ?? UnderlyingSetMethod; }
         }
 
         public override bool CanRead
         {
-            get { return this.UnderlyingGetMethod != null; }
+            get { return UnderlyingGetMethod != null; }
         }
 
         public override bool CanWrite
         {
-            get { return this.UnderlyingSetMethod != null; }
+            get { return UnderlyingSetMethod != null; }
         }
 
         public MethodInfo UnderlyingGetMethod
         {
-            get { return this._getMethod; }
+            get { return _getMethod; }
         }
 
         public MethodInfo UnderlyingSetMethod
         {
-            get { return this._setMethod; }
+            get { return _setMethod; }
         }
 
         public override string Name
         {
             get
             {
-                MethodInfo method = this.UnderlyingGetMethod ?? this.UnderlyingSetMethod;
+                MethodInfo method = UnderlyingGetMethod ?? UnderlyingSetMethod;
 
                 string name = method.Name;
 
@@ -72,14 +72,14 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public override string GetDisplayName()
         {
-            return ReflectionServices.GetDisplayName(this.DeclaringType, this.Name);
+            return ReflectionServices.GetDisplayName(DeclaringType, Name);
         }
 
         public override bool RequiresInstance
         {
             get
             {
-                MethodInfo method = this.UnderlyingGetMethod ?? this.UnderlyingSetMethod;
+                MethodInfo method = UnderlyingGetMethod ?? UnderlyingSetMethod;
 
                 return !method.IsStatic;
             }
@@ -89,12 +89,12 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             get
             {
-                if (this.UnderlyingGetMethod != null)
+                if (UnderlyingGetMethod != null)
                 {
-                    return this.UnderlyingGetMethod.ReturnType;
+                    return UnderlyingGetMethod.ReturnType;
                 }
 
-                ParameterInfo[] parameters = this.UnderlyingSetMethod.GetParameters();
+                ParameterInfo[] parameters = UnderlyingSetMethod.GetParameters();
 
                 Assumes.IsTrue(parameters.Length > 0);
 
@@ -109,16 +109,16 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public override object GetValue(object instance)
         {
-            Assumes.NotNull(this._getMethod);
+            Assumes.NotNull(_getMethod);
 
-            return this.UnderlyingGetMethod.SafeInvoke(instance);
+            return UnderlyingGetMethod.SafeInvoke(instance);
         }
 
         public override void SetValue(object instance, object value)
         {
-            Assumes.NotNull(this._setMethod);
+            Assumes.NotNull(_setMethod);
 
-            this.UnderlyingSetMethod.SafeInvoke(instance, value);
+            UnderlyingSetMethod.SafeInvoke(instance, value);
         }
 
     }

@@ -169,14 +169,14 @@ namespace System.ComponentModel.Composition.Primitives
         {
             Requires.NotNullOrEmpty(contractName, "contractName");
 
-            this._requiredTypeIdentity = requiredTypeIdentity;
+            _requiredTypeIdentity = requiredTypeIdentity;
 
             if (requiredMetadata != null)
             {
-                this._requiredMetadata = requiredMetadata;
+                _requiredMetadata = requiredMetadata;
             }
 
-            this._requiredCreationPolicy = requiredCreationPolicy;
+            _requiredCreationPolicy = requiredCreationPolicy;
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace System.ComponentModel.Composition.Primitives
         /// </value>
         public virtual string RequiredTypeIdentity
         {
-            get { return this._requiredTypeIdentity; }
+            get { return _requiredTypeIdentity; }
         }
 
         /// <summary>
@@ -216,17 +216,17 @@ namespace System.ComponentModel.Composition.Primitives
                 Contract.Ensures(Contract.Result<IEnumerable<KeyValuePair<string, Type>>>() != null);
                 
                 // NOTE : unlike other arguments, we validate this one as late as possible, because its validation may lead to type loading
-                this.ValidateRequiredMetadata();
+                ValidateRequiredMetadata();
 
-                return this._requiredMetadata;
+                return _requiredMetadata;
             }
         }
 
         private void ValidateRequiredMetadata()
         {
-            if (!this._isRequiredMetadataValidated)
+            if (!_isRequiredMetadataValidated)
             {
-                foreach (KeyValuePair<string, Type> metadataItem in this._requiredMetadata)
+                foreach (KeyValuePair<string, Type> metadataItem in _requiredMetadata)
                 {
                     if ((metadataItem.Key == null) || (metadataItem.Value == null))
                     {
@@ -234,7 +234,7 @@ namespace System.ComponentModel.Composition.Primitives
                             string.Format(CultureInfo.CurrentCulture, SR.Argument_NullElement, "requiredMetadata"));
                     }
                 }
-                this._isRequiredMetadataValidated = true;
+                _isRequiredMetadataValidated = true;
             }
         }
 
@@ -254,7 +254,7 @@ namespace System.ComponentModel.Composition.Primitives
         /// </value>
         public virtual CreationPolicy RequiredCreationPolicy
         {
-            get { return this._requiredCreationPolicy; }
+            get { return _requiredCreationPolicy; }
         }
 
         /// <summary>
@@ -278,12 +278,12 @@ namespace System.ComponentModel.Composition.Primitives
         {   
             get
             {
-                if (this._constraint == null)
+                if (_constraint == null)
                 {
-                    this._constraint = ConstraintServices.CreateConstraint(this.ContractName, this.RequiredTypeIdentity, this.RequiredMetadata, this.RequiredCreationPolicy);
+                    _constraint = ConstraintServices.CreateConstraint(ContractName, RequiredTypeIdentity, RequiredMetadata, RequiredCreationPolicy);
                 }
 
-                return this._constraint;
+                return _constraint;
             }
         }
 
@@ -311,7 +311,7 @@ namespace System.ComponentModel.Composition.Primitives
         {
             Requires.NotNull(exportDefinition, nameof(exportDefinition));
 
-            if (!StringComparers.ContractName.Equals(this.ContractName, exportDefinition.ContractName))
+            if (!StringComparers.ContractName.Equals(ContractName, exportDefinition.ContractName))
             {
                 return false;
             }
@@ -321,17 +321,17 @@ namespace System.ComponentModel.Composition.Primitives
 
         private bool MatchRequiredMetadata(ExportDefinition definition)
         {
-            if (!string.IsNullOrEmpty(this.RequiredTypeIdentity))
+            if (!string.IsNullOrEmpty(RequiredTypeIdentity))
             {
                 string exportTypeIdentity = definition.Metadata.GetValue<string>(CompositionConstants.ExportTypeIdentityMetadataName);
 
-                if (!StringComparers.ContractName.Equals(this.RequiredTypeIdentity, exportTypeIdentity))
+                if (!StringComparers.ContractName.Equals(RequiredTypeIdentity, exportTypeIdentity))
                 {
                     return false;
                 }
             }
 
-            foreach (KeyValuePair<string, Type> metadataItem in this.RequiredMetadata)
+            foreach (KeyValuePair<string, Type> metadataItem in RequiredMetadata)
             {
                 string metadataKey = metadataItem.Key;
                 Type metadataValueType = metadataItem.Value;
@@ -363,31 +363,31 @@ namespace System.ComponentModel.Composition.Primitives
                 }
             }
 
-            if (this.RequiredCreationPolicy == CreationPolicy.Any)
+            if (RequiredCreationPolicy == CreationPolicy.Any)
             {
                 return true;
             }
 
             CreationPolicy exportPolicy = definition.Metadata.GetValue<CreationPolicy>(CompositionConstants.PartCreationPolicyMetadataName);
             return exportPolicy == CreationPolicy.Any ||
-                   exportPolicy == this.RequiredCreationPolicy;
+                   exportPolicy == RequiredCreationPolicy;
         }
 
         public override string ToString()
         {
             var sb = new StringBuilder();
 
-            sb.Append(string.Format("\n\tContractName\t{0}", this.ContractName));
-            sb.Append(string.Format("\n\tRequiredTypeIdentity\t{0}", this.RequiredTypeIdentity));
-            if(this._requiredCreationPolicy != CreationPolicy.Any)
+            sb.Append(string.Format("\n\tContractName\t{0}", ContractName));
+            sb.Append(string.Format("\n\tRequiredTypeIdentity\t{0}", RequiredTypeIdentity));
+            if(_requiredCreationPolicy != CreationPolicy.Any)
             {
-                sb.Append(string.Format("\n\tRequiredCreationPolicy\t{0}", this.RequiredCreationPolicy));
+                sb.Append(string.Format("\n\tRequiredCreationPolicy\t{0}", RequiredCreationPolicy));
             }
 
-            if(this._requiredMetadata.Count() > 0)
+            if(_requiredMetadata.Count() > 0)
             {
                 sb.Append(string.Format("\n\tRequiredMetadata"));
-                foreach (KeyValuePair<string, Type> metadataItem in this._requiredMetadata)
+                foreach (KeyValuePair<string, Type> metadataItem in _requiredMetadata)
                 {
                     sb.Append(string.Format("\n\t\t{0}\t({1})", metadataItem.Key, metadataItem.Value));
                 }

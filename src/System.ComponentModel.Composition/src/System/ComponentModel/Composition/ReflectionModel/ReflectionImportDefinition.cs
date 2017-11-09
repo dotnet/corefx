@@ -29,17 +29,17 @@ namespace System.ComponentModel.Composition.ReflectionModel
             ICompositionElement origin)
             : base(contractName, requiredTypeIdentity, requiredMetadata, cardinality, isRecomposable, isPrerequisite, requiredCreationPolicy, metadata)
         {
-            this._origin = origin;
+            _origin = origin;
         }
 
         string ICompositionElement.DisplayName
         {
-            get { return this.GetDisplayName(); }
+            get { return GetDisplayName(); }
         }
 
         ICompositionElement ICompositionElement.Origin
         {
-            get { return this._origin; }
+            get { return _origin; }
         }
 
         public abstract ImportingItem ToImportingItem();

@@ -30,25 +30,25 @@ namespace System.ComponentModel.Composition.Hosting
                 Assumes.NotNull(catalog);
                 Assumes.NotNull(importFilter);
 
-                this._parts = catalog._innerCatalog;
-                this._importFilter = importFilter;
+                _parts = catalog._innerCatalog;
+                _importFilter = importFilter;
             }
 
             public void Initialize()
             {
-                this.BuildImportersIndex();
+                BuildImportersIndex();
             }
 
             private void BuildImportersIndex()
             {
-                this._importersIndex = new Dictionary<string, List<ComposablePartDefinition>>();
-                foreach (ComposablePartDefinition part in this._parts)
+                _importersIndex = new Dictionary<string, List<ComposablePartDefinition>>();
+                foreach (ComposablePartDefinition part in _parts)
                 {
                     foreach (var import in part.ImportDefinitions)
                     {
                         foreach (var contractName in import.GetCandidateContractNames(part))
                         {
-                            this.AddToImportersIndex(contractName, part);
+                            AddToImportersIndex(contractName, part);
                         }
                     }
                 }
@@ -57,10 +57,10 @@ namespace System.ComponentModel.Composition.Hosting
             private void AddToImportersIndex(string contractName, ComposablePartDefinition part)
             {
                 List<ComposablePartDefinition> parts = null;
-                if (!this._importersIndex.TryGetValue(contractName, out parts))
+                if (!_importersIndex.TryGetValue(contractName, out parts))
                 {
                     parts = new List<ComposablePartDefinition>();
-                    this._importersIndex.Add(contractName, parts);
+                    _importersIndex.Add(contractName, parts);
                 }
                 parts.Add(part);
             }
@@ -75,12 +75,12 @@ namespace System.ComponentModel.Composition.Hosting
                 {
                     // Find all parts that we know will import each export
                     List<ComposablePartDefinition> candidateReachableParts = null;
-                    if (this._importersIndex.TryGetValue(export.ContractName, out candidateReachableParts))
+                    if (_importersIndex.TryGetValue(export.ContractName, out candidateReachableParts))
                     {
                         // find if they actually match
                         foreach (var candidateReachablePart in candidateReachableParts)
                         {
-                            foreach (ImportDefinition import in candidateReachablePart.ImportDefinitions.Where(this._importFilter))
+                            foreach (ImportDefinition import in candidateReachablePart.ImportDefinitions.Where(_importFilter))
                             {
                                 if (import.IsImportDependentOnPart(part, export, part.IsGeneric() != candidateReachablePart.IsGeneric()))
                                 {

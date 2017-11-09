@@ -15,23 +15,23 @@ namespace System.ComponentModel.Composition
 
         public ExportLifetimeContext(T value, Action disposeAction)
         {
-            this._value = value;
-            this._disposeAction = disposeAction;
+            _value = value;
+            _disposeAction = disposeAction;
         }
 
         public T Value
         {
             get
             {
-                return this._value;
+                return _value;
             }
         }
 
         public void Dispose()
         {
-            if (this._disposeAction != null)
+            if (_disposeAction != null)
             {
-                this._disposeAction.Invoke();
+                _disposeAction.Invoke();
             }
         }
     }

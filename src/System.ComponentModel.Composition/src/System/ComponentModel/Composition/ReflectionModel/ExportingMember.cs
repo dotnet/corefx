@@ -23,8 +23,8 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             Assumes.NotNull(definition, member);
 
-            this._definition = definition;
-            this._member = member;
+            _definition = definition;
+            _member = member;
         }
 
         public bool RequiresInstance
@@ -39,14 +39,14 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public object GetExportedValue(object instance, object @lock)
         {
-            this.EnsureReadable();
+            EnsureReadable();
 
-            if (!this._isValueCached)
+            if (!_isValueCached)
             {
                 object exportedValue;
                 try
                 {
-                    exportedValue = this._member.GetValue(instance);
+                    exportedValue = _member.GetValue(instance);
                 }
                 catch (TargetInvocationException exception)
                 {   // Member threw an exception. Avoid letting this 
@@ -56,7 +56,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     throw new ComposablePartException(
                         String.Format(CultureInfo.CurrentCulture,
                             SR.ReflectionModel_ExportThrewException,
-                            this._member.GetDisplayName()),
+                            _member.GetDisplayName()),
                         Definition.ToElement(),
                         exception.InnerException);
                 }
@@ -68,35 +68,35 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     throw new ComposablePartException(
                         String.Format(CultureInfo.CurrentCulture,
                         SR.ExportNotValidOnIndexers,
-                        this._member.GetDisplayName()),
+                        _member.GetDisplayName()),
                         Definition.ToElement(),
                         exception.InnerException);
                 }
 
                 lock (@lock)
                 {
-                    if (!this._isValueCached)
+                    if (!_isValueCached)
                     {
-                        this._cachedValue = exportedValue;
+                        _cachedValue = exportedValue;
                         Thread.MemoryBarrier();
 
-                        this._isValueCached = true;
+                        _isValueCached = true;
                     }
                 }
             }
 
-            return this._cachedValue;
+            return _cachedValue;
         }
 
         private void EnsureReadable()
         {
-            if (!this._member.CanRead)
+            if (!_member.CanRead)
             {   // Property does not have a getter
 
                 throw new ComposablePartException(
                     String.Format(CultureInfo.CurrentCulture, 
                         SR.ReflectionModel_ExportNotReadable,
-                        this._member.GetDisplayName()),
+                        _member.GetDisplayName()),
                     Definition.ToElement());
             }
         }

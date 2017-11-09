@@ -40,42 +40,42 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             Assumes.NotNull(type);
 
-            this._type = type;
+            _type = type;
             Type contractType = type;
 
             if (cardinality == ImportCardinality.ZeroOrMore)
             {
-                this._isAssignableCollectionType = IsTypeAssignableCollectionType(type);
+                _isAssignableCollectionType = IsTypeAssignableCollectionType(type);
                 contractType = CheckForCollection(type);
             }
 
             // This sets contract type, metadata and the cast function
-            this._isOpenGeneric = type.ContainsGenericParameters;
+            _isOpenGeneric = type.ContainsGenericParameters;
             Initialize(contractType);
         }
 
         public bool IsAssignableCollectionType
         {
-            get { return this._isAssignableCollectionType; }
+            get { return _isAssignableCollectionType; }
         }
 
         public Type ElementType { get; private set; }
 
         public Type ActualType
         {
-            get { return this._type; }
+            get { return _type; }
         }
 
         public bool IsPartCreator { get; private set; }
 
-        public Type ContractType { get { return this._contractType; } }
+        public Type ContractType { get { return _contractType; } }
 
         public Func<Export, object> CastExport
         {
             get
             {
-                Assumes.IsTrue(!this._isOpenGeneric);
-                return this._castSingleValue;
+                Assumes.IsTrue(!_isOpenGeneric);
+                return _castSingleValue;
             }
         }
 
@@ -83,10 +83,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private Type CheckForCollection(Type type)
         {
-            this.ElementType = CollectionServices.GetEnumerableElementType(type);
-            if (this.ElementType != null)
+            ElementType = CollectionServices.GetEnumerableElementType(type);
+            if (ElementType != null)
             {
-                return this.ElementType;
+                return ElementType;
             }
             return type;
         }
@@ -124,7 +124,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             if (!type.IsGenericType)
             {
                 // no cast function, the original type is the contract type
-                this._contractType = type;
+                _contractType = type;
                 return;
             }
 
@@ -132,26 +132,26 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Type genericType = type.GetGenericTypeDefinition().UnderlyingSystemType;
 
             // Look up the cast function
-            if (!CastSingleValueCache.TryGetValue(type, out this._castSingleValue))
+            if (!CastSingleValueCache.TryGetValue(type, out _castSingleValue))
             {
-                if (!TryGetCastFunction(genericType, this._isOpenGeneric, arguments, out this._castSingleValue))
+                if (!TryGetCastFunction(genericType, _isOpenGeneric, arguments, out _castSingleValue))
                 {
                     // in this case, even though the type is generic, it's nothing we have recognized,
                     // thereforeit's the same as the non-generic case
-                    this._contractType = type;
+                    _contractType = type;
                     return;
                 }
 
-                CastSingleValueCache.Add(type, this._castSingleValue);
+                CastSingleValueCache.Add(type, _castSingleValue);
             }
 
             // we have found the cast function, which means, that we have found either Lazy of EF
             // in this case the contract is always argument[0] and the metadata view is always argument[1]
-            this.IsPartCreator = !IsLazyGenericType(genericType) && (genericType != null);
-            this._contractType = arguments[0];
+            IsPartCreator = !IsLazyGenericType(genericType) && (genericType != null);
+            _contractType = arguments[0];
             if (arguments.Length == 2)
             {
-                this.MetadataViewType = arguments[1];
+                MetadataViewType = arguments[1];
             }
         }
 

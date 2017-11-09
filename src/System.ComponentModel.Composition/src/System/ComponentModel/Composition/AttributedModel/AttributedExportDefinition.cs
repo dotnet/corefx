@@ -34,41 +34,41 @@ namespace System.ComponentModel.Composition.AttributedModel
             Assumes.NotNull(member);
             Assumes.NotNull(exportAttribute);
 
-            this._partCreationInfo = partCreationInfo;
-            this._member = member;
-            this._exportAttribute = exportAttribute;
-            this._typeIdentityType = typeIdentityType;
+            _partCreationInfo = partCreationInfo;
+            _member = member;
+            _exportAttribute = exportAttribute;
+            _typeIdentityType = typeIdentityType;
         }
 
         public override IDictionary<string, object> Metadata
         {
             get
             {
-                if (this._metadata == null)
+                if (_metadata == null)
                 {
                     IDictionary<string, object> metadata;
-                    this._member.TryExportMetadataForMember(out metadata);
+                    _member.TryExportMetadataForMember(out metadata);
 
-                    string typeIdentity = this._exportAttribute.IsContractNameSameAsTypeIdentity() ? 
-                        this.ContractName : 
-                        this._member.GetTypeIdentityFromExport(this._typeIdentityType);
+                    string typeIdentity = _exportAttribute.IsContractNameSameAsTypeIdentity() ? 
+                        ContractName : 
+                        _member.GetTypeIdentityFromExport(_typeIdentityType);
 
                     metadata.Add(CompositionConstants.ExportTypeIdentityMetadataName, typeIdentity);
 
-                    var partMetadata = this._partCreationInfo.GetMetadata();
+                    var partMetadata = _partCreationInfo.GetMetadata();
                     if (partMetadata != null && partMetadata.ContainsKey(CompositionConstants.PartCreationPolicyMetadataName))
                     {
                         metadata.Add(CompositionConstants.PartCreationPolicyMetadataName, partMetadata[CompositionConstants.PartCreationPolicyMetadataName]);
                     }
 
-                    if ((this._typeIdentityType != null) && (this._member.MemberType != MemberTypes.Method) && this._typeIdentityType.ContainsGenericParameters)
+                    if ((_typeIdentityType != null) && (_member.MemberType != MemberTypes.Method) && _typeIdentityType.ContainsGenericParameters)
                     {
-                        metadata.Add(CompositionConstants.GenericExportParametersOrderMetadataName, GenericServices.GetGenericParametersOrder(this._typeIdentityType));
+                        metadata.Add(CompositionConstants.GenericExportParametersOrderMetadataName, GenericServices.GetGenericParametersOrder(_typeIdentityType));
                     }
 
-                    this._metadata = metadata;
+                    _metadata = metadata;
                 }
-                return this._metadata;
+                return _metadata;
             }
         }
     }

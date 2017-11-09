@@ -21,8 +21,8 @@ namespace System.ComponentModel.Composition.Hosting
             internal ScopeFactoryExport(ScopeManager scopeManager, CompositionScopeDefinition catalog, ComposablePartDefinition partDefinition, ExportDefinition exportDefinition) :
                 base(partDefinition, exportDefinition)
             {
-                this._scopeManager = scopeManager;
-                this._catalog = catalog;
+                _scopeManager = scopeManager;
+                _catalog = catalog;
             }
 
             public override Export CreateExportProduct()
@@ -39,31 +39,31 @@ namespace System.ComponentModel.Composition.Hosting
 
                 public ScopeCatalogExport(ScopeFactoryExport scopeFactoryExport)
                 {
-                    this._scopeFactoryExport = scopeFactoryExport;
+                    _scopeFactoryExport = scopeFactoryExport;
                 }
 
                 public override ExportDefinition Definition
                 {
                     get
                     {
-                        return this._scopeFactoryExport.UnderlyingExportDefinition;
+                        return _scopeFactoryExport.UnderlyingExportDefinition;
                     }
                 }
 
                 protected override object GetExportedValueCore()
                 {
-                    if (this._export == null)
+                    if (_export == null)
                     {
-                        var childContainer = this._scopeFactoryExport._scopeManager.CreateChildContainer(this._scopeFactoryExport._catalog);
+                        var childContainer = _scopeFactoryExport._scopeManager.CreateChildContainer(_scopeFactoryExport._catalog);
 
-                        var export = childContainer.CatalogExportProvider.CreateExport(this._scopeFactoryExport.UnderlyingPartDefinition, this._scopeFactoryExport.UnderlyingExportDefinition, false, CreationPolicy.Any);
-                        lock (this._lock)
+                        var export = childContainer.CatalogExportProvider.CreateExport(_scopeFactoryExport.UnderlyingPartDefinition, _scopeFactoryExport.UnderlyingExportDefinition, false, CreationPolicy.Any);
+                        lock (_lock)
                         {
-                            if (this._export == null)
+                            if (_export == null)
                             {
-                                this._childContainer = childContainer;
+                                _childContainer = childContainer;
                                 Thread.MemoryBarrier();
-                                this._export = export;
+                                _export = export;
 
                                 childContainer = null;
                                 export = null;
@@ -75,7 +75,7 @@ namespace System.ComponentModel.Composition.Hosting
                         }
                     }
 
-                    return this._export.Value;
+                    return _export.Value;
                 }
 
                 public void Dispose()
@@ -83,16 +83,16 @@ namespace System.ComponentModel.Composition.Hosting
                     CompositionContainer childContainer = null;
                     Export export = null;
 
-                    if (this._export != null)
+                    if (_export != null)
                     {
-                        lock (this._lock)
+                        lock (_lock)
                         {
-                            export = this._export;
-                            childContainer = this._childContainer;
+                            export = _export;
+                            childContainer = _childContainer;
 
-                            this._childContainer = null;
+                            _childContainer = null;
                             Thread.MemoryBarrier();
-                            this._export = null;
+                            _export = null;
                         }
                     }
 

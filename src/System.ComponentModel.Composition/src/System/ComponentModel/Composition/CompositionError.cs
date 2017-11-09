@@ -166,7 +166,7 @@ namespace System.ComponentModel.Composition
         /// </returns>
         public override string ToString()
         {
-            return this.Description;
+            return Description;
         }
 
         internal static CompositionError Create(CompositionErrorId id, string format, params object[] parameters)

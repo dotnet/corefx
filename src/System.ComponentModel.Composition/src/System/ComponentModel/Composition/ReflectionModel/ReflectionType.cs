@@ -18,12 +18,12 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             Assumes.NotNull(type);
 
-            this._type = type;
+            _type = type;
         }
 
         public override MemberInfo UnderlyingMember
         {
-            get { return this._type; }
+            get { return _type; }
         }
 
         public override bool CanRead
@@ -38,7 +38,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public override Type ReturnType
         {
-            get { return this._type; }
+            get { return _type; }
         }
 
         public override ReflectionItemType ItemType

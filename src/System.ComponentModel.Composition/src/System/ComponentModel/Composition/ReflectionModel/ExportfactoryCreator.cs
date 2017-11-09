@@ -23,7 +23,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             Assumes.NotNull(exportFactoryType);
 
-            this._exportFactoryType = exportFactoryType;
+            _exportFactoryType = exportFactoryType;
         }
 
         public Func<Export, object> CreateStronglyTypedExportFactoryFactory(Type exportType, Type metadataViewType)
@@ -46,7 +46,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         private object CreateStronglyTypedExportFactoryOfT<T>(Export export)
         {
             Type[] typeArgs = { typeof(T) };
-            Type constructed = this._exportFactoryType.MakeGenericType(typeArgs);
+            Type constructed = _exportFactoryType.MakeGenericType(typeArgs);
 
             var lifetimeContext = new LifetimeContext();
 
@@ -61,7 +61,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         private object CreateStronglyTypedExportFactoryOfTM<T, M>(Export export)
         {
             Type[] typeArgs = { typeof(T), typeof(M) };
-            Type constructed = this._exportFactoryType.MakeGenericType(typeArgs);
+            Type constructed = _exportFactoryType.MakeGenericType(typeArgs);
 
             var lifetimeContext = new LifetimeContext();
 

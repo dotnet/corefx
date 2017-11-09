@@ -24,23 +24,23 @@ namespace System.ComponentModel.Composition.Hosting
                 Assumes.NotNull(catalog);
                 Assumes.NotNull(importFilter);
 
-                this._parts = catalog._innerCatalog;
-                this._importFilter = importFilter;
+                _parts = catalog._innerCatalog;
+                _importFilter = importFilter;
             }
 
             public void Initialize()
             {
-                this.BuildExportersIndex();
+                BuildExportersIndex();
             }
 
             private void BuildExportersIndex()
             {
-                this._exportersIndex = new Dictionary<string, List<ComposablePartDefinition>>();
-                foreach (ComposablePartDefinition part in this._parts)
+                _exportersIndex = new Dictionary<string, List<ComposablePartDefinition>>();
+                foreach (ComposablePartDefinition part in _parts)
                 {
                     foreach (var export in part.ExportDefinitions)
                     {
-                        this.AddToExportersIndex(export.ContractName, part);
+                        AddToExportersIndex(export.ContractName, part);
                     }
                 }
             }
@@ -48,10 +48,10 @@ namespace System.ComponentModel.Composition.Hosting
             private void AddToExportersIndex(string contractName, ComposablePartDefinition part)
             {
                 List<ComposablePartDefinition> parts = null;
-                if (!this._exportersIndex.TryGetValue(contractName, out parts))
+                if (!_exportersIndex.TryGetValue(contractName, out parts))
                 {
                     parts = new List<ComposablePartDefinition>();
-                    this._exportersIndex.Add(contractName, parts);
+                    _exportersIndex.Add(contractName, parts);
                 }
                 parts.Add(part);
             }
@@ -62,13 +62,13 @@ namespace System.ComponentModel.Composition.Hosting
                 List<ComposablePartDefinition> reachablePartList = null;
 
                 // Go through all part imports
-                foreach (ImportDefinition import in part.ImportDefinitions.Where(this._importFilter))
+                foreach (ImportDefinition import in part.ImportDefinitions.Where(_importFilter))
                 {
                     // Find all parts that we know will import each export
                     List<ComposablePartDefinition> candidateReachableParts = null;
                     foreach (var contractName in import.GetCandidateContractNames(part))
                     {
-                        if (this._exportersIndex.TryGetValue(contractName, out candidateReachableParts))
+                        if (_exportersIndex.TryGetValue(contractName, out candidateReachableParts))
                         {
                             // find if they actually match
                             foreach (var candidateReachablePart in candidateReachableParts)

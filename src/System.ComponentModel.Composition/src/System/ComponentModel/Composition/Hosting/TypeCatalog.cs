@@ -80,8 +80,8 @@ namespace System.ComponentModel.Composition.Hosting
 
             InitializeTypeCatalog(types);
 
-            this._definitionOrigin = this;
-            this._contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(this.CreateIndex, true);
+            _definitionOrigin = this;
+            _contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(CreateIndex, true);
         }
 
         /// <summary>
@@ -108,8 +108,8 @@ namespace System.ComponentModel.Composition.Hosting
 
             InitializeTypeCatalog(types);
 
-            this._definitionOrigin = definitionOrigin;
-            this._contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(this.CreateIndex, true);
+            _definitionOrigin = definitionOrigin;
+            _contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(CreateIndex, true);
         }
 
         /// <summary>
@@ -137,8 +137,8 @@ namespace System.ComponentModel.Composition.Hosting
 
             InitializeTypeCatalog(types, reflectionContext);
 
-            this._definitionOrigin = this;
-            this._contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(this.CreateIndex, true);
+            _definitionOrigin = this;
+            _contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(CreateIndex, true);
         }
 
         /// <summary>
@@ -170,8 +170,8 @@ namespace System.ComponentModel.Composition.Hosting
 
             InitializeTypeCatalog(types, reflectionContext);
 
-            this._definitionOrigin = definitionOrigin;
-            this._contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(this.CreateIndex, true);
+            _definitionOrigin = definitionOrigin;
+            _contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(CreateIndex, true);
         }
 
         private void InitializeTypeCatalog(IEnumerable<Type> types, ReflectionContext reflectionContext)
@@ -201,7 +201,7 @@ namespace System.ComponentModel.Composition.Hosting
                     typesList.Add(lclType);
                 }
             }
-            this._types = typesList.ToArray();
+            _types = typesList.ToArray();
         }
 
         private void InitializeTypeCatalog(IEnumerable<Type> types)
@@ -217,13 +217,13 @@ namespace System.ComponentModel.Composition.Hosting
                     throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ElementReflectionOnlyType, "types"), "types");
                 }
             }
-            this._types = types.ToArray();
+            _types = types.ToArray();
         }
 
         public override IEnumerator<ComposablePartDefinition> GetEnumerator()
         {
-            this.ThrowIfDisposed();
-            return this.PartsInternal.GetEnumerator();
+            ThrowIfDisposed();
+            return PartsInternal.GetEnumerator();
         }
 
         /// <summary>
@@ -235,7 +235,7 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes")]
         string ICompositionElement.DisplayName
         {
-            get { return this.GetDisplayName(); }
+            get { return GetDisplayName(); }
         }
 
         /// <summary>
@@ -254,16 +254,16 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                if (this._parts == null)
+                if (_parts == null)
                 {
-                    lock (this._thisLock)
+                    lock (_thisLock)
                     {
-                        if (this._parts == null)
+                        if (_parts == null)
                         {
-                            Assumes.NotNull(this._types);
+                            Assumes.NotNull(_types);
 
                             var collection = new List<ComposablePartDefinition>();
-                            foreach (Type type in this._types)
+                            foreach (Type type in _types)
                             {
                                 var definition = AttributedModelDiscovery.CreatePartDefinitionIfDiscoverable(type, _definitionOrigin);
                                 if (definition != null)
@@ -273,13 +273,13 @@ namespace System.ComponentModel.Composition.Hosting
                             }
                             Thread.MemoryBarrier();
 
-                            this._types = null;
-                            this._parts = collection;
+                            _types = null;
+                            _parts = collection;
                         }
                     }
                 }
 
-                return this._parts;
+                return _parts;
             }
         }
 
@@ -290,13 +290,13 @@ namespace System.ComponentModel.Composition.Hosting
             string contractName = definition.ContractName;
             if (string.IsNullOrEmpty(contractName))
             {
-                return this.PartsInternal;
+                return PartsInternal;
             }
 
             string genericContractName = definition.Metadata.GetValue<string>(CompositionConstants.GenericContractMetadataName);
 
-            List<ComposablePartDefinition> nonGenericMatches = this.GetCandidateParts(contractName);
-            List<ComposablePartDefinition> genericMatches = this.GetCandidateParts(genericContractName);
+            List<ComposablePartDefinition> nonGenericMatches = GetCandidateParts(contractName);
+            List<ComposablePartDefinition> genericMatches = GetCandidateParts(genericContractName);
 
             return nonGenericMatches.ConcatAllowingNull(genericMatches);
         }
@@ -309,7 +309,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
 
             List<ComposablePartDefinition> contractCandidateParts = null;
-            this._contractPartIndex.Value.TryGetValue(contractName, out contractCandidateParts);
+            _contractPartIndex.Value.TryGetValue(contractName, out contractCandidateParts);
             return contractCandidateParts;
         }
 
@@ -317,7 +317,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             Dictionary<string, List<ComposablePartDefinition>> index = new Dictionary<string, List<ComposablePartDefinition>>(StringComparers.ContractName);
 
-            foreach (var part in this.PartsInternal)
+            foreach (var part in PartsInternal)
             {
                 foreach (string contractName in part.ExportDefinitions.Select(export => export.ContractName).Distinct())
                 {
@@ -341,14 +341,14 @@ namespace System.ComponentModel.Composition.Hosting
         /// </returns>
         public override string ToString()
         {
-            return this.GetDisplayName();
+            return GetDisplayName();
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                this._isDisposed = true;
+                _isDisposed = true;
             }
 
             base.Dispose(disposing);
@@ -358,13 +358,13 @@ namespace System.ComponentModel.Composition.Hosting
         {
             return String.Format(CultureInfo.CurrentCulture,
                                 SR.TypeCatalog_DisplayNameFormat,
-                                this.GetType().Name,
-                                this.GetTypesDisplay());
+                                GetType().Name,
+                                GetTypesDisplay());
         }
 
         private string GetTypesDisplay()
         {
-            int count = this.PartsInternal.Count();
+            int count = PartsInternal.Count();
             if (count == 0)
             {
                 return SR.TypeCatalog_Empty;
@@ -372,7 +372,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             const int displayCount = 2;
             StringBuilder builder = new StringBuilder();
-            foreach (ReflectionComposablePartDefinition definition in this.PartsInternal.Take(displayCount))
+            foreach (ReflectionComposablePartDefinition definition in PartsInternal.Take(displayCount))
             {
                 if (builder.Length > 0)
                 {
@@ -396,7 +396,7 @@ namespace System.ComponentModel.Composition.Hosting
         [DebuggerStepThrough]
         private void ThrowIfDisposed()
         {
-            if (this._isDisposed)
+            if (_isDisposed)
             {
                 throw ExceptionBuilder.CreateObjectDisposed(this);
             }

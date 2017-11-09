@@ -30,7 +30,7 @@ namespace System.ComponentModel.Composition
         /// </remarks>
         public MetadataViewImplementationAttribute(Type implementationType)
         {
-            this.ImplementationType = implementationType;
+            ImplementationType = implementationType;
         }
 
         /// <summary>

@@ -46,8 +46,8 @@ namespace System.ComponentModel.Composition.Hosting
                 throw new ArgumentOutOfRangeException("compositionOptions");
             }
 
-            this._compositionOptions = compositionOptions;
-            this._lock = new CompositionLock(compositionOptions.HasFlag(CompositionOptions.IsThreadSafe));
+            _compositionOptions = compositionOptions;
+            _lock = new CompositionLock(compositionOptions.HasFlag(CompositionOptions.IsThreadSafe));
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -67,21 +67,21 @@ namespace System.ComponentModel.Composition.Hosting
         {
             if (disposing)
             {
-                if (!this._isDisposed)
+                if (!_isDisposed)
                 {
                     bool disposeLock = false;
                     ImportEngine importEngine = null;
                     try
                     {
-                        using (this._lock.LockStateForWrite())
+                        using (_lock.LockStateForWrite())
                         {
-                            if (!this._isDisposed)
+                            if (!_isDisposed)
                             {
-                                importEngine = this._importEngine;
-                                this._importEngine = null;
+                                importEngine = _importEngine;
+                                _importEngine = null;
 
-                                this._sourceProvider = null;
-                                this._isDisposed = true;
+                                _sourceProvider = null;
+                                _isDisposed = true;
                                 disposeLock = true;
                             }
                         }
@@ -95,7 +95,7 @@ namespace System.ComponentModel.Composition.Hosting
 
                         if (disposeLock)
                         {
-                            this._lock.Dispose();
+                            _lock.Dispose();
                         }
                     }
                 }
@@ -134,19 +134,19 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                this.ThrowIfDisposed();
+                ThrowIfDisposed();
 
-                return this._sourceProvider;
+                return _sourceProvider;
             }
             set
             {
-                this.ThrowIfDisposed();
+                ThrowIfDisposed();
 
                 Requires.NotNull(value, nameof(value));
-                using (this._lock.LockStateForWrite())
+                using (_lock.LockStateForWrite())
                 {
-                    this.EnsureCanSet(this._sourceProvider);
-                    this._sourceProvider = value;
+                    EnsureCanSet(_sourceProvider);
+                    _sourceProvider = value;
                 }
             }
         }
@@ -155,16 +155,16 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                if (this._importEngine == null)
+                if (_importEngine == null)
                 {
-                    Assumes.NotNull(this._sourceProvider);
-                    ImportEngine importEngine = new ImportEngine(this._sourceProvider, this._compositionOptions);
-                    using (this._lock.LockStateForWrite())
+                    Assumes.NotNull(_sourceProvider);
+                    ImportEngine importEngine = new ImportEngine(_sourceProvider, _compositionOptions);
+                    using (_lock.LockStateForWrite())
                     {
-                        if (this._importEngine == null)
+                        if (_importEngine == null)
                         {
                             Thread.MemoryBarrier();
-                            this._importEngine = importEngine;
+                            _importEngine = importEngine;
                             importEngine = null;
                         }
                     }
@@ -176,7 +176,7 @@ namespace System.ComponentModel.Composition.Hosting
                     }
                 }
 
-                return this._importEngine;
+                return _importEngine;
             }
         }
 
@@ -201,17 +201,17 @@ namespace System.ComponentModel.Composition.Hosting
         /// </remarks>
         protected override IEnumerable<Export> GetExportsCore(ImportDefinition definition, AtomicComposition atomicComposition)
         {
-            this.ThrowIfDisposed();
-            this.EnsureRunning();
+            ThrowIfDisposed();
+            EnsureRunning();
 
             // Determine whether there is a composition atomicComposition-specific list of parts to use,
             // failing that use the usual list.  We never change the list of parts in place,
             // but rather copy, change and write a new list atomically.  Therefore all we need
             // to do here is to read the _parts member.
             List<ComposablePart> parts = null;
-            using (this._lock.LockStateForRead())
+            using (_lock.LockStateForRead())
             {
-                parts = atomicComposition.GetValueAllowNull(this, this._parts);
+                parts = atomicComposition.GetValueAllowNull(this, _parts);
             }
 
             if (parts.Count == 0)
@@ -226,7 +226,7 @@ namespace System.ComponentModel.Composition.Hosting
                 {
                     if (definition.IsConstraintSatisfiedBy(exportDefinition))
                     {
-                        exports.Add(this.CreateExport(part, exportDefinition));
+                        exports.Add(CreateExport(part, exportDefinition));
                     }
                 }
             }
@@ -235,8 +235,8 @@ namespace System.ComponentModel.Composition.Hosting
 
         public void Compose(CompositionBatch batch)
         {
-            this.ThrowIfDisposed();
-            this.EnsureRunning();
+            ThrowIfDisposed();
+            EnsureRunning();
 
             Requires.NotNull(batch, nameof(batch));
 
@@ -258,12 +258,12 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 // Don't allow reentrant calls to compose during previewing to prevent
                 // corrupted state.
-                if (this._currentlyComposing)
+                if (_currentlyComposing)
                 {
                     throw new InvalidOperationException(SR.ReentrantCompose);
                 }
 
-                this._currentlyComposing = true;
+                _currentlyComposing = true;
 
                 try
                 {
@@ -273,7 +273,7 @@ namespace System.ComponentModel.Composition.Hosting
                     // Recompose any existing imports effected by the these changes first so that
                     // adapters, resurrected parts, etc. can all play their role in satisfying
                     // imports for added parts
-                    this.Recompose(batch, atomicComposition);
+                    Recompose(batch, atomicComposition);
 
                     // Ensure that required imports can be satisfied
                     foreach (ComposablePart part in batch.PartsToAdd)
@@ -281,7 +281,7 @@ namespace System.ComponentModel.Composition.Hosting
                         // collect the result of previewing all the adds in the batch
                         try
                         {
-                            this.ImportEngine.PreviewImports(part, atomicComposition);
+                            ImportEngine.PreviewImports(part, atomicComposition);
                         }
                         catch (ChangeRejectedException ex)
                         {
@@ -292,16 +292,16 @@ namespace System.ComponentModel.Composition.Hosting
                     result.ThrowOnErrors(atomicComposition);
 
                     // Complete the new parts since they passed previewing.`
-                    using (this._lock.LockStateForWrite())
+                    using (_lock.LockStateForWrite())
                     {
-                        this._parts = newParts;
+                        _parts = newParts;
                     }
 
                     atomicComposition.Complete();
                 }
                 finally
                 {
-                    this._currentlyComposing = false;
+                    _currentlyComposing = false;
                 }
             }
 
@@ -310,7 +310,7 @@ namespace System.ComponentModel.Composition.Hosting
             foreach (ComposablePart part in batch.PartsToAdd)
             {
                 result = result.MergeResult(CompositionServices.TryInvoke(() =>
-                    this.ImportEngine.SatisfyImports(part)));
+                    ImportEngine.SatisfyImports(part)));
             }
 
             // return errors
@@ -325,9 +325,9 @@ namespace System.ComponentModel.Composition.Hosting
             // This is an OK thing to do as this is the only method that can modify the List AND Compose can
             // only be executed on one thread at a time - thus two different threads cannot tramp over each other
             List<ComposablePart> parts = null;
-            using (this._lock.LockStateForRead())
+            using (_lock.LockStateForRead())
             {
-                parts = this._parts.ToList(); // this copies the list
+                parts = _parts.ToList(); // this copies the list
             }
 
             foreach (ComposablePart part in batch.PartsToAdd)
@@ -364,7 +364,7 @@ namespace System.ComponentModel.Composition.Hosting
             // Unregister any removed component parts
             foreach (ComposablePart part in batch.PartsToRemove)
             {
-                this.ImportEngine.ReleaseImports(part, atomicComposition);
+                ImportEngine.ReleaseImports(part, atomicComposition);
             }
 
             // Recompose any imports effected by the these changes (the changes are
@@ -378,10 +378,10 @@ namespace System.ComponentModel.Composition.Hosting
                 batch.PartsToRemove.SelectMany(part => part.ExportDefinitions).ToArray() :
                 new ExportDefinition[0];
 
-            this.OnExportsChanging(
+            OnExportsChanging(
                 new ExportsChangeEventArgs(addedExports, removedExports, atomicComposition));
 
-            atomicComposition.AddCompleteAction(() => this.OnExportsChanged(
+            atomicComposition.AddCompleteAction(() => OnExportsChanged(
                 new ExportsChangeEventArgs(addedExports, removedExports, null)));
         }
 
@@ -392,25 +392,25 @@ namespace System.ComponentModel.Composition.Hosting
 
         private object GetExportedValue(ComposablePart part, ExportDefinition export)
         {
-            this.ThrowIfDisposed();
-            this.EnsureRunning();
+            ThrowIfDisposed();
+            EnsureRunning();
 
-            return CompositionServices.GetExportedValueFromComposedPart(this.ImportEngine, part, export);
+            return CompositionServices.GetExportedValueFromComposedPart(ImportEngine, part, export);
         }
 
         [DebuggerStepThrough]
         private void ThrowIfDisposed()
         {
-            if (this._isDisposed)
+            if (_isDisposed)
             {
-                throw new ObjectDisposedException(this.GetType().Name);
+                throw new ObjectDisposedException(GetType().Name);
             }
         }
 
         [DebuggerStepThrough]
         private void EnsureCanRun()
         {
-            if (this._sourceProvider == null)
+            if (_sourceProvider == null)
             {
                 throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, SR.ObjectMustBeInitialized, "SourceProvider")); // NOLOC
             }
@@ -419,14 +419,14 @@ namespace System.ComponentModel.Composition.Hosting
         [DebuggerStepThrough]
         private void EnsureRunning()
         {
-            if (!this._isRunning)
+            if (!_isRunning)
             {
-                using (this._lock.LockStateForWrite())
+                using (_lock.LockStateForWrite())
                 {
-                    if (!this._isRunning)
+                    if (!_isRunning)
                     {
-                        this.EnsureCanRun();
-                        this._isRunning = true;
+                        EnsureCanRun();
+                        _isRunning = true;
                     }
                 }
             }
@@ -436,7 +436,7 @@ namespace System.ComponentModel.Composition.Hosting
         private void EnsureCanSet<T>(T currentValue)
             where T : class
         {
-            if ((this._isRunning) || (currentValue != null))
+            if ((_isRunning) || (currentValue != null))
             {
                 throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, SR.ObjectAlreadyInitialized));
             }

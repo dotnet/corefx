@@ -19,17 +19,17 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             Assumes.NotNull(method);
 
-            this._method = method;
+            _method = method;
         }
 
         public MethodInfo UnderlyingMethod
         {
-            get { return this._method; }
+            get { return _method; }
         }
 
         public override MemberInfo UnderlyingMember
         {
-            get { return this.UnderlyingMethod; }
+            get { return UnderlyingMethod; }
         }
 
         public override bool CanRead
@@ -39,12 +39,12 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public override bool RequiresInstance
         {
-            get { return !this.UnderlyingMethod.IsStatic; }
+            get { return !UnderlyingMethod.IsStatic; }
         }
 
         public override Type ReturnType
         {
-            get { return this.UnderlyingMethod.ReturnType; }
+            get { return UnderlyingMethod.ReturnType; }
         }
 
         public override ReflectionItemType ItemType

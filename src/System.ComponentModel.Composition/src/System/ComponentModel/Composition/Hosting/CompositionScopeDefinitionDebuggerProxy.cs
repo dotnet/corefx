@@ -21,19 +21,19 @@ namespace System.ComponentModel.Composition.Hosting
         {
             Requires.NotNull(compositionScopeDefinition, nameof(compositionScopeDefinition));
 
-            this._compositionScopeDefinition = compositionScopeDefinition;
+            _compositionScopeDefinition = compositionScopeDefinition;
         }
 
         public ReadOnlyCollection<ComposablePartDefinition> Parts
         {
-            get { return this._compositionScopeDefinition.Parts.ToReadOnlyCollection(); }
+            get { return _compositionScopeDefinition.Parts.ToReadOnlyCollection(); }
         }
         
         public IEnumerable<ExportDefinition> PublicSurface
         {
             get
             {
-                return this._compositionScopeDefinition.PublicSurface.ToReadOnlyCollection();
+                return _compositionScopeDefinition.PublicSurface.ToReadOnlyCollection();
             }
         } 
 
@@ -41,7 +41,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                return this._compositionScopeDefinition.Children.ToReadOnlyCollection();
+                return _compositionScopeDefinition.Children.ToReadOnlyCollection();
             }
         }
 

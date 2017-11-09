@@ -22,22 +22,22 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Requires.NotNull(member, nameof(member));
             EnsureSupportedMemberType(member.MemberType, "member");
 
-            this._accessorsCreator = null;
-            this._memberType = member.MemberType;
+            _accessorsCreator = null;
+            _memberType = member.MemberType;
             
-            switch(this._memberType)
+            switch(_memberType)
             {
                 case MemberTypes.Property:
                     PropertyInfo property = (PropertyInfo)member;
                     Assumes.NotNull(property);
-                    this._accessors = new MemberInfo[] { property.GetGetMethod(true), property.GetSetMethod(true) };
+                    _accessors = new MemberInfo[] { property.GetGetMethod(true), property.GetSetMethod(true) };
                     break;
                 case MemberTypes.Event:
                     EventInfo event_ = (EventInfo)member;
-                    this._accessors = new MemberInfo[] { event_.GetRaiseMethod(true), event_.GetAddMethod(true), event_.GetRemoveMethod(true) };
+                    _accessors = new MemberInfo[] { event_.GetRaiseMethod(true), event_.GetAddMethod(true), event_.GetRemoveMethod(true) };
                     break;
                 default:
-                    this._accessors = new MemberInfo[] { member };
+                    _accessors = new MemberInfo[] { member };
                     break;
             }
         }
@@ -53,9 +53,9 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 throw new ArgumentException(errorMessage, "accessors");
             }
 
-            this._memberType = memberType;
-            this._accessors = accessors;
-            this._accessorsCreator = null;
+            _memberType = memberType;
+            _accessors = accessors;
+            _accessorsCreator = null;
         }
 
         public LazyMemberInfo(MemberTypes memberType, Func<MemberInfo[]> accessorsCreator)
@@ -63,45 +63,45 @@ namespace System.ComponentModel.Composition.ReflectionModel
             EnsureSupportedMemberType(memberType, "memberType");
             Requires.NotNull(accessorsCreator, nameof(accessorsCreator));
 
-            this._memberType = memberType;
-            this._accessors = null;
-            this._accessorsCreator = accessorsCreator;
+            _memberType = memberType;
+            _accessors = null;
+            _accessorsCreator = accessorsCreator;
         }
 
         public MemberTypes MemberType
         {
-            get { return this._memberType; }
+            get { return _memberType; }
         }
 
         public MemberInfo[] GetAccessors()
         {
-            if ((this._accessors == null) && (this._accessorsCreator != null))
+            if ((_accessors == null) && (_accessorsCreator != null))
             {
-                MemberInfo[] accessors = this._accessorsCreator.Invoke();
+                MemberInfo[] accessors = _accessorsCreator.Invoke();
 
                 string errorMessage;
-                if (!LazyMemberInfo.AreAccessorsValid(this.MemberType, accessors, out errorMessage))
+                if (!LazyMemberInfo.AreAccessorsValid(MemberType, accessors, out errorMessage))
                 {
                     throw new InvalidOperationException(errorMessage);
                 }
 
-                this._accessors = accessors;
+                _accessors = accessors;
             }
 
-            return this._accessors;
+            return _accessors;
         }
 
         public override int GetHashCode()
         {
-            if (this._accessorsCreator != null)
+            if (_accessorsCreator != null)
             {
-                return this.MemberType.GetHashCode() ^ this._accessorsCreator.GetHashCode();
+                return MemberType.GetHashCode() ^ _accessorsCreator.GetHashCode();
             }
             else
             {
-                Assumes.NotNull(this._accessors);
-                Assumes.NotNull(this._accessors[0]);
-                return this.MemberType.GetHashCode() ^ this._accessors[0].GetHashCode();
+                Assumes.NotNull(_accessors);
+                Assumes.NotNull(_accessors[0]);
+                return MemberType.GetHashCode() ^ _accessors[0].GetHashCode();
             }
         }
 
@@ -110,21 +110,21 @@ namespace System.ComponentModel.Composition.ReflectionModel
             LazyMemberInfo that = (LazyMemberInfo)obj;
 
             // Difefrent member types mean different members
-            if (this._memberType != that._memberType)
+            if (_memberType != that._memberType)
             {
                 return false;
             }
 
             // if any of the lazy memebers create accessors in a delay-loaded fashion, we simply compare the creators
-            if ((this._accessorsCreator != null) || (that._accessorsCreator != null))
+            if ((_accessorsCreator != null) || (that._accessorsCreator != null))
             {
-                return object.Equals(this._accessorsCreator, that._accessorsCreator);
+                return object.Equals(_accessorsCreator, that._accessorsCreator);
             }
 
             // we are dealing with explicitly passed accessors in both cases
-            Assumes.NotNull(this._accessors);
+            Assumes.NotNull(_accessors);
             Assumes.NotNull(that._accessors);
-            return this._accessors.SequenceEqual(that._accessors);
+            return _accessors.SequenceEqual(that._accessors);
         }
 
         public static bool operator ==(LazyMemberInfo left, LazyMemberInfo right)

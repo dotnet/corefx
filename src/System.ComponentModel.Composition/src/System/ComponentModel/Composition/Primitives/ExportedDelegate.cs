@@ -22,8 +22,8 @@ namespace System.ComponentModel.Composition.Primitives
         {
             Requires.NotNull(method, nameof(method));
 
-            this._instance = instance;
-            this._method = method;
+            _instance = instance;
+            _method = method;
         }
 
         public virtual Delegate CreateDelegate(Type delegateType) 
@@ -32,11 +32,11 @@ namespace System.ComponentModel.Composition.Primitives
 
             if (delegateType == typeof(Delegate) || delegateType == typeof(MulticastDelegate))
             {
-                delegateType = this.CreateStandardDelegateType();
+                delegateType = CreateStandardDelegateType();
             }
             try
             { 
-                return this._method.CreateDelegate(delegateType, this._instance);
+                return _method.CreateDelegate(delegateType, _instance);
             }
             catch(ArgumentException)
             {
@@ -47,11 +47,11 @@ namespace System.ComponentModel.Composition.Primitives
 
         private Type CreateStandardDelegateType()
         {
-            ParameterInfo[] parameters = this._method.GetParameters();
+            ParameterInfo[] parameters = _method.GetParameters();
 
             // This array should contains a lit of all argument types, and the last one is the return type (could be void)
             Type[] parameterTypes = new Type[parameters.Length + 1];
-            parameterTypes[parameters.Length] = this._method.ReturnType;
+            parameterTypes[parameters.Length] = _method.ReturnType;
             for (int i = 0; i < parameters.Length; i++ )
             {
                 parameterTypes[i] = parameters[i].ParameterType;

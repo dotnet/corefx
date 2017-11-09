@@ -28,52 +28,52 @@ namespace System.ComponentModel.Composition.ReflectionModel
         public ReflectionComposablePartDefinition(IReflectionPartCreationInfo creationInfo)
         {
             Assumes.NotNull(creationInfo);
-            this._creationInfo = creationInfo;
+            _creationInfo = creationInfo;
         }
 
         public Type GetPartType()
         {
-            return this._creationInfo.GetPartType();
+            return _creationInfo.GetPartType();
         }
 
         public Lazy<Type> GetLazyPartType()
         {
-            return this._creationInfo.GetLazyPartType();
+            return _creationInfo.GetLazyPartType();
         }
 
         public ConstructorInfo GetConstructor()
         {
-            if (this._constructor == null)
+            if (_constructor == null)
             {
-                ConstructorInfo constructor = this._creationInfo.GetConstructor();
-                lock (this._lock)
+                ConstructorInfo constructor = _creationInfo.GetConstructor();
+                lock (_lock)
                 {
-                    if (this._constructor == null)
+                    if (_constructor == null)
                     {
-                        this._constructor = constructor;
+                        _constructor = constructor;
                     }
                 }
             }
 
-            return this._constructor;
+            return _constructor;
         }
 
         private ExportDefinition[] ExportDefinitionsInternal
         {
             get
             {
-                if (this._exports == null)
+                if (_exports == null)
                 {
-                    ExportDefinition[] exports = this._creationInfo.GetExports().ToArray();
-                    lock (this._lock)
+                    ExportDefinition[] exports = _creationInfo.GetExports().ToArray();
+                    lock (_lock)
                     {
-                        if (this._exports == null)
+                        if (_exports == null)
                         {
-                            this._exports = exports;
+                            _exports = exports;
                         }
                     }
                 }
-                return this._exports;
+                return _exports;
             }
         }
 
@@ -81,7 +81,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             get
             {
-                return this.ExportDefinitionsInternal;
+                return ExportDefinitionsInternal;
             }
         }
 
@@ -89,18 +89,18 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             get
             {
-                if (this._imports == null)
+                if (_imports == null)
                 {
-                    ImportDefinition[] imports = this._creationInfo.GetImports().ToArray();
-                    lock (this._lock)
+                    ImportDefinition[] imports = _creationInfo.GetImports().ToArray();
+                    lock (_lock)
                     {
-                        if (this._imports == null)
+                        if (_imports == null)
                         {
-                            this._imports = imports;
+                            _imports = imports;
                         }
                     }
                 }
-                return this._imports;
+                return _imports;
             }
         }
 
@@ -108,18 +108,18 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             get
             {
-                if (this._metadata == null)
+                if (_metadata == null)
                 {
-                    IDictionary<string, object> metadata = this._creationInfo.GetMetadata().AsReadOnly();
-                    lock (this._lock)
+                    IDictionary<string, object> metadata = _creationInfo.GetMetadata().AsReadOnly();
+                    lock (_lock)
                     {
-                        if (this._metadata == null)
+                        if (_metadata == null)
                         {
-                            this._metadata = metadata;
+                            _metadata = metadata;
                         }
                     }
                 }
-                return this._metadata;
+                return _metadata;
             }
         }
 
@@ -127,14 +127,14 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             get
             {
-                return this._creationInfo.IsDisposalRequired;
+                return _creationInfo.IsDisposalRequired;
             }
         }
 
 [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public override ComposablePart CreatePart()
         {
-            if (this.IsDisposalRequired)
+            if (IsDisposalRequired)
             {
                 return new DisposableReflectionComposablePart(this);
             }
@@ -146,7 +146,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         internal override ComposablePartDefinition GetGenericPartDefinition()
         {
-            GenericSpecializationPartCreationInfo genericCreationInfo = this._creationInfo as GenericSpecializationPartCreationInfo;
+            GenericSpecializationPartCreationInfo genericCreationInfo = _creationInfo as GenericSpecializationPartCreationInfo;
             if (genericCreationInfo != null)
             {
                 return genericCreationInfo.OriginalPart;
@@ -177,9 +177,9 @@ namespace System.ComponentModel.Composition.ReflectionModel
                         ComposablePartDefinition previousPart = null;
 
                         // go through all orders of generic parameters that part exports allows
-                        foreach (Type[] candidateParameters in this.GetCandidateParameters(genericTypeParameters))
+                        foreach (Type[] candidateParameters in GetCandidateParameters(genericTypeParameters))
                         {
-                            if (this.TryMakeGenericPartDefinition(candidateParameters, out candidatePart))
+                            if (TryMakeGenericPartDefinition(candidateParameters, out candidatePart))
                             {
                                 bool alreadyProcessed = false;
                                 if(candidates == null)
@@ -238,7 +238,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
             else
             {
-                return this.TryGetNonGenericExports(definition, out singleMatch, out multipleMatches);
+                return TryGetNonGenericExports(definition, out singleMatch, out multipleMatches);
             }
         }
 
@@ -252,7 +252,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Tuple<ComposablePartDefinition, ExportDefinition> singleExport = null;
             bool matchesFound = false;
 
-            foreach (var export in this.ExportDefinitionsInternal)
+            foreach (var export in ExportDefinitionsInternal)
             {
                 if (definition.IsConstraintSatisfiedBy(export))
                 {
@@ -292,7 +292,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         private IEnumerable<Type[]> GetCandidateParameters(Type[] genericParameters)
         {
             // we iterate over all exports and find only generic ones. Assuming the arity matches, we reorder the original parameters
-            foreach (ExportDefinition export in this.ExportDefinitionsInternal)
+            foreach (ExportDefinition export in ExportDefinitionsInternal)
             {
                 var genericParametersOrder = export.Metadata.GetValue<int[]>(CompositionConstants.GenericExportParametersOrderMetadataName);
                 if ((genericParametersOrder != null) && (genericParametersOrder.Length == genericParameters.Length))
@@ -326,33 +326,33 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             genericPartDefinition = null;
 
-            if (!GenericSpecializationPartCreationInfo.CanSpecialize(this.Metadata, genericTypeParameters))
+            if (!GenericSpecializationPartCreationInfo.CanSpecialize(Metadata, genericTypeParameters))
             {
                 return false;
             }
 
-            genericPartDefinition = new ReflectionComposablePartDefinition(new GenericSpecializationPartCreationInfo(this._creationInfo, this, genericTypeParameters));
+            genericPartDefinition = new ReflectionComposablePartDefinition(new GenericSpecializationPartCreationInfo(_creationInfo, this, genericTypeParameters));
             return true;
         }
 
         string ICompositionElement.DisplayName
         {
-            get { return this._creationInfo.DisplayName; }
+            get { return _creationInfo.DisplayName; }
         }
 
         ICompositionElement ICompositionElement.Origin
         {
-            get { return this._creationInfo.Origin; }
+            get { return _creationInfo.Origin; }
         }
 
         public override string ToString()
         {
-            return this._creationInfo.DisplayName;
+            return _creationInfo.DisplayName;
         }
 
         public override bool Equals(object obj)
         {
-            if (this._creationInfo.IsIdentityComparison)
+            if (_creationInfo.IsIdentityComparison)
             {
                 return object.ReferenceEquals(this, obj);
             }
@@ -364,19 +364,19 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     return false;
                 }
 
-                return this._creationInfo.Equals(that._creationInfo);
+                return _creationInfo.Equals(that._creationInfo);
             }
         }
 
         public override int GetHashCode()
         {
-            if (this._creationInfo.IsIdentityComparison)
+            if (_creationInfo.IsIdentityComparison)
             {
                 return base.GetHashCode();
             }
             else
             {
-                return this._creationInfo.GetHashCode();
+                return _creationInfo.GetHashCode();
             }
         }
     }

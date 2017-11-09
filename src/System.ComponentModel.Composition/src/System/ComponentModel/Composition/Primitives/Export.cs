@@ -119,8 +119,8 @@ namespace System.ComponentModel.Composition.Primitives
             Requires.NotNull(definition, nameof(definition));
             Requires.NotNull(exportedValueGetter, nameof(exportedValueGetter));
 
-            this._definition = definition;
-            this._exportedValueGetter = exportedValueGetter;
+            _definition = definition;
+            _exportedValueGetter = exportedValueGetter;
         }
 
         /// <summary>
@@ -203,17 +203,17 @@ namespace System.ComponentModel.Composition.Primitives
             {
                 // NOTE : the logic below guarantees that the value will be set exactly once. It DOES NOT, however, guarantee that GetExportedValueCore() will be executed
                 // more than once, as locking would be required for that. The said locking is problematic, as we can't reliable call 3rd party code under a lock.
-                if (this._exportedValue == Export._EmptyValue)
+                if (_exportedValue == Export._EmptyValue)
                 {
-                    object exportedValue = this.GetExportedValueCore();
+                    object exportedValue = GetExportedValueCore();
 
                     // NOTE : According to http://msdn.microsoft.com/en-us/library/4bw5ewxy.aspx, the warning is bogus when used with Interlocked API.
 #pragma warning disable 420
-                    Interlocked.CompareExchange(ref this._exportedValue, exportedValue, Export._EmptyValue);
+                    Interlocked.CompareExchange(ref _exportedValue, exportedValue, Export._EmptyValue);
 #pragma warning restore 420
                 }
 
-                return this._exportedValue;
+                return _exportedValue;
             }
         }
 
@@ -243,9 +243,9 @@ namespace System.ComponentModel.Composition.Primitives
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         protected virtual object GetExportedValueCore()
         {
-            if (this._exportedValueGetter != null)
+            if (_exportedValueGetter != null)
             {
-                return this._exportedValueGetter.Invoke();
+                return _exportedValueGetter.Invoke();
             }
 
             throw ExceptionBuilder.CreateNotOverriddenByDerived("GetExportedValueCore");

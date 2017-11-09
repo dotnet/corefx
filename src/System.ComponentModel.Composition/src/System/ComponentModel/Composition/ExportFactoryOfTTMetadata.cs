@@ -14,12 +14,12 @@ namespace System.ComponentModel.Composition
         public ExportFactory(Func<Tuple<T, Action>> exportLifetimeContextCreator, TMetadata metadata)
             : base(exportLifetimeContextCreator)
         {
-            this._metadata = metadata;
+            _metadata = metadata;
         }
 
         public TMetadata Metadata
         {
-            get { return this._metadata; }
+            get { return _metadata; }
         }
     }
 }

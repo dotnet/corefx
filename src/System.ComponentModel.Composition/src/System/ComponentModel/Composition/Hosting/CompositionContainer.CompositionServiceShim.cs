@@ -20,12 +20,12 @@ namespace System.ComponentModel.Composition.Hosting
             public CompositionServiceShim(CompositionContainer innerContainer)
             {
                 Assumes.NotNull(innerContainer);
-                this._innerContainer = innerContainer;
+                _innerContainer = innerContainer;
             }
 
             void ICompositionService.SatisfyImportsOnce(ComposablePart part)
             {
-                this._innerContainer.SatisfyImportsOnce(part);
+                _innerContainer.SatisfyImportsOnce(part);
             }
         }
     }

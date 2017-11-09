@@ -24,10 +24,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 productImportDefinition.RequiredMetadata, productImportDefinition.Cardinality, productImportDefinition.IsRecomposable, false, productImportDefinition.RequiredCreationPolicy, MetadataServices.EmptyMetadata, origin)
         {
             Assumes.NotNull(productImportDefinition);
-            this._productImportDefinition = productImportDefinition;
+            _productImportDefinition = productImportDefinition;
         }
 
-        public ContractBasedImportDefinition ProductImportDefinition { get { return this._productImportDefinition; } }
+        public ContractBasedImportDefinition ProductImportDefinition { get { return _productImportDefinition; } }
         public override bool IsConstraintSatisfiedBy(ExportDefinition exportDefinition)
         {
             if (!base.IsConstraintSatisfiedBy(exportDefinition))
@@ -35,14 +35,14 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 return false;
             }
 
-            return PartCreatorExportDefinition.IsProductConstraintSatisfiedBy(this._productImportDefinition, exportDefinition);
+            return PartCreatorExportDefinition.IsProductConstraintSatisfiedBy(_productImportDefinition, exportDefinition);
         }
 
         public override Expression<Func<ExportDefinition, bool>> Constraint
         {
             get
             {
-                return ConstraintServices.CreatePartCreatorConstraint(base.Constraint, this._productImportDefinition);
+                return ConstraintServices.CreatePartCreatorConstraint(base.Constraint, _productImportDefinition);
             }
         }
 
@@ -50,7 +50,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             StringBuilder sb = new StringBuilder();
             
-            sb.Append(string.Format("\n\tExportFactory of: {0}", this.ProductImportDefinition.ToString()));
+            sb.Append(string.Format("\n\tExportFactory of: {0}", ProductImportDefinition.ToString()));
             
             return sb.ToString();
         }

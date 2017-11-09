@@ -21,7 +21,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 Assumes.NotNull(export);
 
-                this._export = export;
+                _export = export;
             }
 
             public override IDictionary<string, object> Metadata

@@ -31,14 +31,14 @@ namespace System.ComponentModel.Composition.Hosting
         {
             Requires.NotNull(definitionOrigin, "definitionOrigin");
 
-            this._definitionOrigin = definitionOrigin;
+            _definitionOrigin = definitionOrigin;
         }
         
         public ApplicationCatalog(ReflectionContext reflectionContext)
         {
             Requires.NotNull(reflectionContext, "reflectionContext");
 
-            this._reflectionContext = reflectionContext;
+            _reflectionContext = reflectionContext;
         }
 
         public ApplicationCatalog(ReflectionContext reflectionContext, ICompositionElement definitionOrigin)
@@ -46,20 +46,20 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNull(reflectionContext, "reflectionContext");
             Requires.NotNull(definitionOrigin, "definitionOrigin");
 
-            this._reflectionContext = reflectionContext;
-            this._definitionOrigin = definitionOrigin;
+            _reflectionContext = reflectionContext;
+            _definitionOrigin = definitionOrigin;
         }
 
         internal ComposablePartCatalog CreateCatalog(string location, string pattern)
         {
-            if(this._reflectionContext != null)
+            if(_reflectionContext != null)
             {
-                return (this._definitionOrigin != null)
-                    ? new DirectoryCatalog(location, pattern, this._reflectionContext, this._definitionOrigin)
-                    : new DirectoryCatalog(location, pattern, this._reflectionContext);
+                return (_definitionOrigin != null)
+                    ? new DirectoryCatalog(location, pattern, _reflectionContext, _definitionOrigin)
+                    : new DirectoryCatalog(location, pattern, _reflectionContext);
             }
-            return (this._definitionOrigin != null)
-                ? new DirectoryCatalog(location, pattern, this._definitionOrigin)
+            return (_definitionOrigin != null)
+                ? new DirectoryCatalog(location, pattern, _definitionOrigin)
                 : new DirectoryCatalog(location, pattern);
         }
 
@@ -70,11 +70,11 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                if(this._innerCatalog == null)
+                if(_innerCatalog == null)
                 {
-                    lock(this._thisLock)
+                    lock(_thisLock)
                     {
-                        if(this._innerCatalog == null)
+                        if(_innerCatalog == null)
                         {
                             var location = AppDomain.CurrentDomain.BaseDirectory;
                             Assumes.NotNull(location);
@@ -97,12 +97,12 @@ namespace System.ComponentModel.Composition.Hosting
                                 }
                             }
                             var innerCatalog = new AggregateCatalog(catalogs);
-                            this._innerCatalog = innerCatalog;
+                            _innerCatalog = innerCatalog;
                         }
                     }
                 }
 
-                return this._innerCatalog;
+                return _innerCatalog;
             }
         }
 
@@ -110,14 +110,14 @@ namespace System.ComponentModel.Composition.Hosting
         {
             try
             {
-                if (!this._isDisposed)
+                if (!_isDisposed)
                 {
                     IDisposable innerCatalog = null;
-                    lock (this._thisLock)
+                    lock (_thisLock)
                     {
-                        innerCatalog = this._innerCatalog as IDisposable;
-                        this._innerCatalog = null;
-                        this._isDisposed = true;
+                        innerCatalog = _innerCatalog as IDisposable;
+                        _innerCatalog = null;
+                        _isDisposed = true;
                     }
                     if(innerCatalog != null)
                     {
@@ -133,9 +133,9 @@ namespace System.ComponentModel.Composition.Hosting
 
         public override IEnumerator<ComposablePartDefinition> GetEnumerator()
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
 
-            return this.InnerCatalog.GetEnumerator();
+            return InnerCatalog.GetEnumerator();
         }
 
         /// <summary>
@@ -159,11 +159,11 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public override IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(ImportDefinition definition)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
 
             Requires.NotNull(definition, "definition");
 
-            return this.InnerCatalog.GetExports(definition);
+            return InnerCatalog.GetExports(definition);
         }
 
         [DebuggerStepThrough]
@@ -171,7 +171,7 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Contracts", "CC1053", Justification = "Suppressing warning because this validator has no public contract")]
         private void ThrowIfDisposed()
         {
-            if (this._isDisposed)
+            if (_isDisposed)
             {
                 throw ExceptionBuilder.CreateObjectDisposed(this);
             }
@@ -181,7 +181,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             return string.Format(CultureInfo.CurrentCulture,
                                 "{0} (Path=\"{1}\") (PrivateProbingPath=\"{2}\")",   // NOLOC
-                                this.GetType().Name,
+                                GetType().Name,
                                 AppDomain.CurrentDomain.BaseDirectory, 
                                 AppDomain.CurrentDomain.RelativeSearchPath);
         }
@@ -206,7 +206,7 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes")]
         string ICompositionElement.DisplayName
         {
-            get { return this.GetDisplayName(); }
+            get { return GetDisplayName(); }
         }
 
         /// <summary>

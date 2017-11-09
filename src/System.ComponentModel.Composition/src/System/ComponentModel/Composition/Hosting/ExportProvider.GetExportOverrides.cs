@@ -63,7 +63,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public Lazy<T> GetExport<T>()
         {
-            return this.GetExport<T>((string)null);
+            return GetExport<T>((string)null);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public Lazy<T> GetExport<T>(string contractName)
         {
-            return this.GetExportCore<T>(contractName);
+            return GetExportCore<T>(contractName);
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public Lazy<T, TMetadataView> GetExport<T, TMetadataView>()
         {
-            return this.GetExport<T, TMetadataView>((string)null);
+            return GetExport<T, TMetadataView>((string)null);
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public Lazy<T, TMetadataView> GetExport<T, TMetadataView>(string contractName)
         {
-            return this.GetExportCore<T, TMetadataView>(contractName);
+            return GetExportCore<T, TMetadataView>(contractName);
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Design", "CA1006")]
         public IEnumerable<Lazy<object, object>> GetExports(Type type, Type metadataViewType, string contractName)
         {
-            IEnumerable<Export> exports = this.GetExportsCore(type, metadataViewType, contractName, ImportCardinality.ZeroOrMore);
+            IEnumerable<Export> exports = GetExportsCore(type, metadataViewType, contractName, ImportCardinality.ZeroOrMore);
             Collection<Lazy<object, object>> result = new Collection<Lazy<object, object>>();
 
             Func<Export, Lazy<object, object>> typedExportFactory = ExportServices.CreateSemiStronglyTypedLazyFactory(type, metadataViewType);
@@ -313,7 +313,7 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Design", "CA1006")]
         public IEnumerable<Lazy<T>> GetExports<T>()
         {
-            return this.GetExports<T>((string)null);
+            return GetExports<T>((string)null);
         }
 
         /// <summary>
@@ -355,7 +355,7 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Design", "CA1006")]
         public IEnumerable<Lazy<T>> GetExports<T>(string contractName)
         {
-            return this.GetExportsCore<T>(contractName);
+            return GetExportsCore<T>(contractName);
         }
 
         /// <summary>
@@ -394,7 +394,7 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Design", "CA1006")]
         public IEnumerable<Lazy<T, TMetadataView>> GetExports<T, TMetadataView>()
         {
-            return this.GetExports<T, TMetadataView>((string)null);
+            return GetExports<T, TMetadataView>((string)null);
         }
 
         /// <summary>
@@ -437,7 +437,7 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Design", "CA1006")]
         public IEnumerable<Lazy<T, TMetadataView>> GetExports<T, TMetadataView>(string contractName)
         {
-            return this.GetExportsCore<T, TMetadataView>(contractName);
+            return GetExportsCore<T, TMetadataView>(contractName);
         }
 
         /// <summary>
@@ -485,7 +485,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public T GetExportedValue<T>()
         {
-            return this.GetExportedValue<T>((string)null);
+            return GetExportedValue<T>((string)null);
         }
 
         /// <summary>
@@ -535,7 +535,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public T GetExportedValue<T>(string contractName)
         {
-            return this.GetExportedValueCore<T>(contractName, ImportCardinality.ExactlyOne);
+            return GetExportedValueCore<T>(contractName, ImportCardinality.ExactlyOne);
         }
 
         /// <summary>
@@ -585,7 +585,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public T GetExportedValueOrDefault<T>()
         {
-            return this.GetExportedValueOrDefault<T>((string)null);
+            return GetExportedValueOrDefault<T>((string)null);
         }
 
         /// <summary>
@@ -635,7 +635,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public T GetExportedValueOrDefault<T>(string contractName)
         {
-            return this.GetExportedValueCore<T>(contractName, ImportCardinality.ZeroOrOne);
+            return GetExportedValueCore<T>(contractName, ImportCardinality.ZeroOrOne);
         }
 
         /// <summary>
@@ -674,7 +674,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public IEnumerable<T> GetExportedValues<T>()
         {
-            return this.GetExportedValues<T>((string)null);
+            return GetExportedValues<T>((string)null);
         }
 
         /// <summary>
@@ -715,12 +715,12 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public IEnumerable<T> GetExportedValues<T>(string contractName)
         {
-            return this.GetExportedValuesCore<T>(contractName);
+            return GetExportedValuesCore<T>(contractName);
         }
 
         private IEnumerable<T> GetExportedValuesCore<T>(string contractName)
         {
-            IEnumerable<Export> exports = this.GetExportsCore(typeof(T), (Type)null, contractName, ImportCardinality.ZeroOrMore);
+            IEnumerable<Export> exports = GetExportsCore(typeof(T), (Type)null, contractName, ImportCardinality.ZeroOrMore);
 
             Collection<T> result = new Collection<T>();
             foreach (Export export in exports)
@@ -734,14 +734,14 @@ namespace System.ComponentModel.Composition.Hosting
         {
             Assumes.IsTrue(cardinality.IsAtMostOne());
 
-            Export export = this.GetExportsCore(typeof(T), (Type)null, contractName, cardinality).SingleOrDefault();
+            Export export = GetExportsCore(typeof(T), (Type)null, contractName, cardinality).SingleOrDefault();
 
             return (export != null) ? ExportServices.GetCastedExportedValue<T>(export) : default(T);
         }
 
         private IEnumerable<Lazy<T>> GetExportsCore<T>(string contractName)
         {
-            IEnumerable<Export> exports = this.GetExportsCore(typeof(T), (Type)null, contractName, ImportCardinality.ZeroOrMore);
+            IEnumerable<Export> exports = GetExportsCore(typeof(T), (Type)null, contractName, ImportCardinality.ZeroOrMore);
 
             Collection<Lazy<T>> result = new Collection<Lazy<T>>();
             foreach (Export export in exports)
@@ -753,7 +753,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private IEnumerable<Lazy<T, TMetadataView>> GetExportsCore<T, TMetadataView>(string contractName)
         {
-            IEnumerable<Export> exports = this.GetExportsCore(typeof(T), typeof(TMetadataView), contractName, ImportCardinality.ZeroOrMore);
+            IEnumerable<Export> exports = GetExportsCore(typeof(T), typeof(TMetadataView), contractName, ImportCardinality.ZeroOrMore);
 
             Collection<Lazy<T, TMetadataView>> result = new Collection<Lazy<T, TMetadataView>>();
             foreach (Export export in exports)
@@ -765,14 +765,14 @@ namespace System.ComponentModel.Composition.Hosting
 
         private Lazy<T, TMetadataView> GetExportCore<T, TMetadataView>(string contractName)
         {
-            Export export = this.GetExportsCore(typeof(T), typeof(TMetadataView), contractName, ImportCardinality.ExactlyOne).SingleOrDefault();
+            Export export = GetExportsCore(typeof(T), typeof(TMetadataView), contractName, ImportCardinality.ExactlyOne).SingleOrDefault();
 
             return (export != null) ? ExportServices.CreateStronglyTypedLazyOfTM<T, TMetadataView>(export) : null;
         }
 
         private Lazy<T> GetExportCore<T>(string contractName)
         {
-            Export export = this.GetExportsCore(typeof(T), null, contractName, ImportCardinality.ExactlyOne).SingleOrDefault();
+            Export export = GetExportsCore(typeof(T), null, contractName, ImportCardinality.ExactlyOne).SingleOrDefault();
 
             return (export != null) ? ExportServices.CreateStronglyTypedLazyOfT<T>(export) : null;
         }
@@ -798,7 +798,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
 
             ImportDefinition importDefinition = BuildImportDefinition(type, metadataViewType, contractName, cardinality);
-            return this.GetExports(importDefinition, null);
+            return GetExports(importDefinition, null);
         }
 
         private static ImportDefinition BuildImportDefinition(Type type, Type metadataViewType, string contractName, ImportCardinality cardinality)

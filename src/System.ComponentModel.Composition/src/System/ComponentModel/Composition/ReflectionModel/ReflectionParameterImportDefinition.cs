@@ -30,28 +30,28 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             Assumes.NotNull(importingLazyParameter);
 
-            this._importingLazyParameter = importingLazyParameter;
+            _importingLazyParameter = importingLazyParameter;
         }
 
         public override ImportingItem ToImportingItem()
         {
-            return new ImportingParameter(this, new ImportType(this.ImportingLazyParameter.GetNotNullValue("parameter").ParameterType, this.Cardinality));
+            return new ImportingParameter(this, new ImportType(ImportingLazyParameter.GetNotNullValue("parameter").ParameterType, Cardinality));
         }
 
         public Lazy<ParameterInfo> ImportingLazyParameter
         {
-            get { return this._importingLazyParameter; }
+            get { return _importingLazyParameter; }
         }
 
         protected override string GetDisplayName()
         {
-            ParameterInfo parameter = this.ImportingLazyParameter.GetNotNullValue("parameter");
+            ParameterInfo parameter = ImportingLazyParameter.GetNotNullValue("parameter");
             return string.Format(
                 CultureInfo.CurrentCulture,
                 "{0} (Parameter=\"{1}\", ContractName=\"{2}\")",  // NOLOC
                 parameter.Member.GetDisplayName(),
                 parameter.Name,                
-                this.ContractName);
+                ContractName);
         }
     }
 }

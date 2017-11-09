@@ -19,12 +19,12 @@ namespace System.ComponentModel.Composition
                 throw new ArgumentNullException("exportLifetimeContextCreator");
             }
 
-            this._exportLifetimeContextCreator = exportLifetimeContextCreator;
+            _exportLifetimeContextCreator = exportLifetimeContextCreator;
         }
 
         public ExportLifetimeContext<T> CreateExport()
         {
-            Tuple<T, Action> untypedLifetimeContext = this._exportLifetimeContextCreator.Invoke();
+            Tuple<T, Action> untypedLifetimeContext = _exportLifetimeContextCreator.Invoke();
             return new ExportLifetimeContext<T>(untypedLifetimeContext.Item1, untypedLifetimeContext.Item2);
         }
     }

@@ -57,8 +57,8 @@ namespace System.ComponentModel.Composition.Hosting
             // the innermost scope, and thereby optimize the query path
             if (outerAtomicComposition != null)
             {
-                this._outerAtomicComposition = outerAtomicComposition;
-                this._outerAtomicComposition.ContainsInnerAtomicComposition = true;
+                _outerAtomicComposition = outerAtomicComposition;
+                _outerAtomicComposition.ContainsInnerAtomicComposition = true;
             }
         }
 
@@ -97,11 +97,11 @@ namespace System.ComponentModel.Composition.Hosting
 
             Requires.NotNull(completeAction, nameof(completeAction));
 
-            if (this._completeActionList == null)
+            if (_completeActionList == null)
             {
-                this._completeActionList = new List<Action>();
+                _completeActionList = new List<Action>();
             }
-            this._completeActionList.Add(completeAction);
+            _completeActionList.Add(completeAction);
         }
 
         public void AddRevertAction(Action revertAction)
@@ -112,11 +112,11 @@ namespace System.ComponentModel.Composition.Hosting
 
             Requires.NotNull(revertAction, nameof(revertAction));
 
-            if (this._revertActionList == null)
+            if (_revertActionList == null)
             {
-                this._revertActionList = new List<Action>();
+                _revertActionList = new List<Action>();
             }
-            this._revertActionList.Add(revertAction);
+            _revertActionList.Add(revertAction);
         }
 
         public void Complete()
@@ -124,7 +124,7 @@ namespace System.ComponentModel.Composition.Hosting
             ThrowIfDisposed();
             ThrowIfCompleted();
 
-            if (this._outerAtomicComposition == null)
+            if (_outerAtomicComposition == null)
             {   // Execute all the complete actions
                 FinalComplete();
             }
@@ -133,7 +133,7 @@ namespace System.ComponentModel.Composition.Hosting
                 CopyComplete();
             }
 
-            this._isCompleted = true;
+            _isCompleted = true;
         }
 
         public void Dispose()
@@ -145,26 +145,26 @@ namespace System.ComponentModel.Composition.Hosting
         protected virtual void Dispose(bool disposing)
         {
             ThrowIfDisposed();
-            this._isDisposed = true;
+            _isDisposed = true;
 
-            if (this._outerAtomicComposition != null)
+            if (_outerAtomicComposition != null)
             {
-                this._outerAtomicComposition.ContainsInnerAtomicComposition = false;
+                _outerAtomicComposition.ContainsInnerAtomicComposition = false;
             }
 
             // Revert is always immediate and involves forgetting information and
             // exceuting any appropriate revert actions
-            if (!this._isCompleted)
+            if (!_isCompleted)
             {
-                if (this._revertActionList != null)
+                if (_revertActionList != null)
                 {
                     List<Exception> exceptions = null;
 
                     // Execute the revert actions in reverse order to ensure
                     // everything incrementally rollsback its state.
-                    for (int i = this._revertActionList.Count - 1; i >= 0; i--)
+                    for (int i = _revertActionList.Count - 1; i >= 0; i--)
                     {
-                        Action action = this._revertActionList[i];
+                        Action action = _revertActionList[i];
                         try
                         {
                             action();
@@ -186,7 +186,7 @@ namespace System.ComponentModel.Composition.Hosting
                             exceptions.Add(e);
                         }
                     }
-                    this._revertActionList = null;
+                    _revertActionList = null;
                     if(exceptions != null)
                     {
                         throw new InvalidOperationException(SR.InvalidOperation_RevertAndCompleteActionsMustNotThrow, new AggregateException(exceptions));
@@ -198,11 +198,11 @@ namespace System.ComponentModel.Composition.Hosting
         private void FinalComplete()
         {
             // Completeting the outer most scope is easy, just execute all the actions
-            if (this._completeActionList != null)
+            if (_completeActionList != null)
             {
                 List<Exception> exceptions = null;
 
-                foreach (Action action in this._completeActionList)
+                foreach (Action action in _completeActionList)
                 {
                     try
                     {
@@ -224,7 +224,7 @@ namespace System.ComponentModel.Composition.Hosting
                         exceptions.Add(e);
                     }
                 }
-                this._completeActionList = null;
+                _completeActionList = null;
                 if(exceptions != null)
                 {
                     throw new InvalidOperationException(SR.InvalidOperation_RevertAndCompleteActionsMustNotThrow, new AggregateException(exceptions));
@@ -234,35 +234,35 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void CopyComplete()
         {
-            Assumes.NotNull(this._outerAtomicComposition);
+            Assumes.NotNull(_outerAtomicComposition);
 
-            this._outerAtomicComposition.ContainsInnerAtomicComposition = false;
+            _outerAtomicComposition.ContainsInnerAtomicComposition = false;
 
             // Inner scopes are much odder, because completeting them means coalescing them into the
             // outer scope - the complete or revert actions are deferred until the outermost scope completes
             // or any intermediate rolls back
-            if (this._completeActionList != null)
+            if (_completeActionList != null)
             {
-                foreach (Action action in this._completeActionList)
+                foreach (Action action in _completeActionList)
                 {
-                    this._outerAtomicComposition.AddCompleteAction(action);
+                    _outerAtomicComposition.AddCompleteAction(action);
                 }
             }
 
-            if (this._revertActionList != null)
+            if (_revertActionList != null)
             {
-                foreach (Action action in this._revertActionList)
+                foreach (Action action in _revertActionList)
                 {
-                    this._outerAtomicComposition.AddRevertAction(action);
+                    _outerAtomicComposition.AddRevertAction(action);
                 }
             }
 
             // We can copy over existing atomicComposition entries because they're either already chained or
             // overwrite by design and can now be completed or rolled back together
-            for (var index = 0; index < this._valueCount; index++)
+            for (var index = 0; index < _valueCount; index++)
             {
-                this._outerAtomicComposition.SetValueInternal(
-                    this._values[index].Key, this._values[index].Value);
+                _outerAtomicComposition.SetValueInternal(
+                    _values[index].Key, _values[index].Value);
             }
         }
 
@@ -270,30 +270,30 @@ namespace System.ComponentModel.Composition.Hosting
         {
             set
             {
-                if (value == true && this._containsInnerAtomicComposition == true)
+                if (value == true && _containsInnerAtomicComposition == true)
                 {
                     throw new InvalidOperationException(SR.AtomicComposition_AlreadyNested);
                 }
-                this._containsInnerAtomicComposition = value;
+                _containsInnerAtomicComposition = value;
             }
         }
 
         private bool TryGetValueInternal<T>(object key, bool localAtomicCompositionOnly, out T value) 
         {
-            for (var index = 0; index < this._valueCount; index++)
+            for (var index = 0; index < _valueCount; index++)
             {
-                if (this._values[index].Key == key)
+                if (_values[index].Key == key)
                 {
-                    value = (T)this._values[index].Value;
+                    value = (T)_values[index].Value;
                     return true;
                 }
             }
 
             // If there's no atomicComposition available then recurse until we hit the outermost
             // scope, where upon we go ahead and return null
-            if (!localAtomicCompositionOnly && this._outerAtomicComposition != null)
+            if (!localAtomicCompositionOnly && _outerAtomicComposition != null)
             {
-                return this._outerAtomicComposition.TryGetValueInternal<T>(key, localAtomicCompositionOnly, out value);
+                return _outerAtomicComposition.TryGetValueInternal<T>(key, localAtomicCompositionOnly, out value);
             }
 
             value = default(T);
@@ -303,36 +303,36 @@ namespace System.ComponentModel.Composition.Hosting
         private void SetValueInternal(object key, object value)
         {
             // Handle overwrites quickly
-            for (var index = 0; index < this._valueCount; index++)
+            for (var index = 0; index < _valueCount; index++)
             {
-                if (this._values[index].Key == key)
+                if (_values[index].Key == key)
                 {
-                    this._values[index] = new KeyValuePair<object,object>(key, value);
+                    _values[index] = new KeyValuePair<object,object>(key, value);
                     return;
                 }
             }
 
             // Expand storage when needed
-            if (this._values == null || this._valueCount == this._values.Length)
+            if (_values == null || _valueCount == _values.Length)
             {
-                var newQueries = new KeyValuePair<object, object>[this._valueCount == 0 ? 5 : this._valueCount * 2];
-                if (this._values != null)
+                var newQueries = new KeyValuePair<object, object>[_valueCount == 0 ? 5 : _valueCount * 2];
+                if (_values != null)
                 {
-                    Array.Copy(this._values, newQueries, this._valueCount);
+                    Array.Copy(_values, newQueries, _valueCount);
                 }
-                this._values = newQueries;
+                _values = newQueries;
             }
 
             // Store a new entry
-            this._values[_valueCount] = new KeyValuePair<object, object>(key, value);
-            this._valueCount++;
+            _values[_valueCount] = new KeyValuePair<object, object>(key, value);
+            _valueCount++;
             return;
         }
 
         [DebuggerStepThrough]
         private void ThrowIfContainsInnerAtomicComposition()
         {
-            if (this._containsInnerAtomicComposition)
+            if (_containsInnerAtomicComposition)
             {
                 throw new InvalidOperationException(SR.AtomicComposition_PartOfAnotherAtomicComposition);
             }
@@ -341,7 +341,7 @@ namespace System.ComponentModel.Composition.Hosting
         [DebuggerStepThrough]
         private void ThrowIfCompleted()
         {
-            if (this._isCompleted)
+            if (_isCompleted)
             {
                 throw new InvalidOperationException(SR.AtomicComposition_AlreadyCompleted);
             }
@@ -350,7 +350,7 @@ namespace System.ComponentModel.Composition.Hosting
         [DebuggerStepThrough]
         private void ThrowIfDisposed()
         {
-            if (this._isDisposed)
+            if (_isDisposed)
             {
                 throw ExceptionBuilder.CreateObjectDisposed(this);
             }

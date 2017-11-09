@@ -38,15 +38,15 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNull(catalog, nameof(catalog));
             Requires.NotNull(filter, nameof(filter));
 
-            this._innerCatalog = catalog;
-            this._filter = (p) => filter.Invoke(p.GetGenericPartDefinition() ?? p);
-            this._complement = complement;
+            _innerCatalog = catalog;
+            _filter = (p) => filter.Invoke(p.GetGenericPartDefinition() ?? p);
+            _complement = complement;
 
-            INotifyComposablePartCatalogChanged notifyCatalog = this._innerCatalog as INotifyComposablePartCatalogChanged;
+            INotifyComposablePartCatalogChanged notifyCatalog = _innerCatalog as INotifyComposablePartCatalogChanged;
             if (notifyCatalog != null)
             {
-                notifyCatalog.Changed += this.OnChangedInternal;
-                notifyCatalog.Changing += this.OnChangingInternal;
+                notifyCatalog.Changed += OnChangedInternal;
+                notifyCatalog.Changing += OnChangingInternal;
             }
         }
 
@@ -60,18 +60,18 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 if (disposing)
                 {
-                    if(!this._isDisposed)
+                    if(!_isDisposed)
                     {
                         INotifyComposablePartCatalogChanged notifyCatalog = null;
                         try
                         {
-                            lock (this._lock)
+                            lock (_lock)
                             {
-                                if (!this._isDisposed)
+                                if (!_isDisposed)
                                 {
-                                    this._isDisposed = true;
-                                    notifyCatalog = this._innerCatalog as INotifyComposablePartCatalogChanged;
-                                    this._innerCatalog = null;
+                                    _isDisposed = true;
+                                    notifyCatalog = _innerCatalog as INotifyComposablePartCatalogChanged;
+                                    _innerCatalog = null;
                                 }
                             }
                         }
@@ -79,8 +79,8 @@ namespace System.ComponentModel.Composition.Hosting
                         {
                             if (notifyCatalog != null)
                             {
-                                notifyCatalog.Changed -= this.OnChangedInternal;
-                                notifyCatalog.Changing -= this.OnChangingInternal;
+                                notifyCatalog.Changed -= OnChangedInternal;
+                                notifyCatalog.Changing -= OnChangingInternal;
                             }
                         }
                     }
@@ -94,7 +94,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public override IEnumerator<ComposablePartDefinition> GetEnumerator()
         {
-            return this._innerCatalog.Where(this._filter).GetEnumerator();
+            return _innerCatalog.Where(_filter).GetEnumerator();
         }
 
         /// <summary>
@@ -105,17 +105,17 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                this.ThrowIfDisposed();
+                ThrowIfDisposed();
 
-                if (this._complement == null)
+                if (_complement == null)
                 {
-                    FilteredCatalog complement = new FilteredCatalog(this._innerCatalog, p => !this._filter(p), this);
-                    lock (this._lock)
+                    FilteredCatalog complement = new FilteredCatalog(_innerCatalog, p => !_filter(p), this);
+                    lock (_lock)
                     {
-                        if (this._complement == null)
+                        if (_complement == null)
                         {
                             Thread.MemoryBarrier();
-                            this._complement = complement;
+                            _complement = complement;
                             complement = null;
                         }
                     }
@@ -126,7 +126,7 @@ namespace System.ComponentModel.Composition.Hosting
                     }
                 }
 
-                return this._complement;
+                return _complement;
             }
         }
 
@@ -156,13 +156,13 @@ namespace System.ComponentModel.Composition.Hosting
         /// </remarks>
         public override IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(ImportDefinition definition)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             Requires.NotNull(definition, nameof(definition));
 
             var exports = new List<Tuple<ComposablePartDefinition, ExportDefinition>>();
-            foreach(var export in this._innerCatalog.GetExports(definition))
+            foreach(var export in _innerCatalog.GetExports(definition))
             {
-                if (this._filter(export.Item1))
+                if (_filter(export.Item1))
                 {
                     exports.Add(export);
                 }
@@ -187,7 +187,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <param name="e">The <see cref="System.ComponentModel.Composition.Hosting.ComposablePartCatalogChangeEventArgs"/> instance containing the event data.</param>
         protected virtual void OnChanged(ComposablePartCatalogChangeEventArgs e)
         {
-            EventHandler<ComposablePartCatalogChangeEventArgs> changedEvent = this.Changed;
+            EventHandler<ComposablePartCatalogChangeEventArgs> changedEvent = Changed;
             if (changedEvent != null)
             {
                 changedEvent.Invoke(this, e);
@@ -200,7 +200,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <param name="e">The <see cref="System.ComponentModel.Composition.Hosting.ComposablePartCatalogChangeEventArgs"/> instance containing the event data.</param>
         protected virtual void OnChanging(ComposablePartCatalogChangeEventArgs e)
         {
-            EventHandler<ComposablePartCatalogChangeEventArgs> changingEvent = this.Changing;
+            EventHandler<ComposablePartCatalogChangeEventArgs> changingEvent = Changing;
             if (changingEvent != null)
             {
                 changingEvent.Invoke(this, e);
@@ -212,7 +212,7 @@ namespace System.ComponentModel.Composition.Hosting
             var processedArgs = ProcessEventArgs(e);
             if (processedArgs != null)
             {
-                this.OnChanged(this.ProcessEventArgs(processedArgs));
+                OnChanged(ProcessEventArgs(processedArgs));
             }
         }
 
@@ -221,7 +221,7 @@ namespace System.ComponentModel.Composition.Hosting
             var processedArgs = ProcessEventArgs(e);
             if (processedArgs != null)
             {
-                this.OnChanging(this.ProcessEventArgs(processedArgs));
+                OnChanging(ProcessEventArgs(processedArgs));
             }
         }
 
@@ -229,8 +229,8 @@ namespace System.ComponentModel.Composition.Hosting
         {
             // the constructor for ComposablePartCatalogChangeEventArgs takes a snapshot of the arguments, so we don't have to
             var result = new ComposablePartCatalogChangeEventArgs(
-                e.AddedDefinitions.Where(this._filter),
-                e.RemovedDefinitions.Where(this._filter),
+                e.AddedDefinitions.Where(_filter),
+                e.RemovedDefinitions.Where(_filter),
                 e.AtomicComposition);
 
             // Only fire if we need to
@@ -247,7 +247,7 @@ namespace System.ComponentModel.Composition.Hosting
         [DebuggerStepThrough]
         private void ThrowIfDisposed()
         {
-            if (this._isDisposed)
+            if (_isDisposed)
             {
                 throw ExceptionBuilder.CreateObjectDisposed(this);
             }

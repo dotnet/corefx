@@ -64,21 +64,21 @@ namespace System.ComponentModel.Composition.Hosting
         /// <param name="children">The children.</param>
         private void InitializeCompositionScopeDefinition(ComposablePartCatalog catalog, IEnumerable<CompositionScopeDefinition> children, IEnumerable<ExportDefinition> publicSurface)
         {
-            this._catalog = catalog;
+            _catalog = catalog;
             if (children != null)
             {
-                this._children = children.ToArray();
+                _children = children.ToArray();
             }
             if(publicSurface != null)
             {
-                this._publicSurface = publicSurface;
+                _publicSurface = publicSurface;
             }
 
-            INotifyComposablePartCatalogChanged notifyCatalog = this._catalog as INotifyComposablePartCatalogChanged;
+            INotifyComposablePartCatalogChanged notifyCatalog = _catalog as INotifyComposablePartCatalogChanged;
             if (notifyCatalog != null)
             {
-                notifyCatalog.Changed += this.OnChangedInternal;
-                notifyCatalog.Changing += this.OnChangingInternal;
+                notifyCatalog.Changed += OnChangedInternal;
+                notifyCatalog.Changing += OnChangingInternal;
             }
         }
 
@@ -94,14 +94,14 @@ namespace System.ComponentModel.Composition.Hosting
                 {
                     // NOTE : According to http://msdn.microsoft.com/en-us/library/4bw5ewxy.aspx, the warning is bogus when used with Interlocked API.
 #pragma warning disable 420
-                    if (Interlocked.CompareExchange(ref this._isDisposed, 1, 0) == 0)
+                    if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
 #pragma warning restore 420
                     {
-                        INotifyComposablePartCatalogChanged notifyCatalog = this._catalog as INotifyComposablePartCatalogChanged;
+                        INotifyComposablePartCatalogChanged notifyCatalog = _catalog as INotifyComposablePartCatalogChanged;
                         if (notifyCatalog != null)
                         {
-                            notifyCatalog.Changed -= this.OnChangedInternal;
-                            notifyCatalog.Changing -= this.OnChangingInternal;
+                            notifyCatalog.Changed -= OnChangedInternal;
+                            notifyCatalog.Changing -= OnChangingInternal;
                         }
                     }
                 }
@@ -120,9 +120,9 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                this.ThrowIfDisposed();
+                ThrowIfDisposed();
 
-                return this._children;
+                return _children;
             }
         }
 
@@ -142,13 +142,13 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                this.ThrowIfDisposed();
-                if(this._publicSurface == null)
+                ThrowIfDisposed();
+                if(_publicSurface == null)
                 {
                     return this.SelectMany( (p) => p.ExportDefinitions );
                 }
 
-                return this._publicSurface;
+                return _publicSurface;
             }
         } 
 
@@ -158,7 +158,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <value>The children.</value>
         public override IEnumerator<ComposablePartDefinition> GetEnumerator()
         {
-            return this._catalog.GetEnumerator();
+            return _catalog.GetEnumerator();
         }
 
         /// <summary>
@@ -187,9 +187,9 @@ namespace System.ComponentModel.Composition.Hosting
         /// </remarks>
         public override IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(ImportDefinition definition)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
 
-            return this._catalog.GetExports(definition);
+            return _catalog.GetExports(definition);
         }
 
         internal IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExportsFromPublicSurface(ImportDefinition definition)
@@ -198,11 +198,11 @@ namespace System.ComponentModel.Composition.Hosting
 
             var exports = new List<Tuple<ComposablePartDefinition, ExportDefinition>>();
 
-            foreach(var exportDefinition in this.PublicSurface)
+            foreach(var exportDefinition in PublicSurface)
             {
                 if (definition.IsConstraintSatisfiedBy(exportDefinition))
                 {
-                    foreach (var export in this.GetExports(definition))
+                    foreach (var export in GetExports(definition))
                     {
                         if(export.Item2 == exportDefinition)
                         {
@@ -231,7 +231,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <param name="e">The <see cref="System.ComponentModel.Composition.Hosting.ComposablePartCatalogChangeEventArgs"/> instance containing the event data.</param>
         protected virtual void OnChanged(ComposablePartCatalogChangeEventArgs e)
         {
-            EventHandler<ComposablePartCatalogChangeEventArgs> changedEvent = this.Changed;
+            EventHandler<ComposablePartCatalogChangeEventArgs> changedEvent = Changed;
             if (changedEvent != null)
             {
                 changedEvent.Invoke(this, e);
@@ -244,7 +244,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <param name="e">The <see cref="System.ComponentModel.Composition.Hosting.ComposablePartCatalogChangeEventArgs"/> instance containing the event data.</param>
         protected virtual void OnChanging(ComposablePartCatalogChangeEventArgs e)
         {
-            EventHandler<ComposablePartCatalogChangeEventArgs> changingEvent = this.Changing;
+            EventHandler<ComposablePartCatalogChangeEventArgs> changingEvent = Changing;
             if (changingEvent != null)
             {
                 changingEvent.Invoke(this, e);
@@ -253,18 +253,18 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void OnChangedInternal(object sender, ComposablePartCatalogChangeEventArgs e)
         {
-            this.OnChanged(e);
+            OnChanged(e);
         }
 
         private void OnChangingInternal(object sender, ComposablePartCatalogChangeEventArgs e)
         {
-            this.OnChanging(e);
+            OnChanging(e);
         }
 
         [DebuggerStepThrough]
         private void ThrowIfDisposed()
         {
-            if (this._isDisposed == 1)
+            if (_isDisposed == 1)
             {
                 throw ExceptionBuilder.CreateObjectDisposed(this);
             }

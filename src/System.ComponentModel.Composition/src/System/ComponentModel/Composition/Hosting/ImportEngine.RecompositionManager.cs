@@ -28,17 +28,17 @@ namespace System.ComponentModel.Composition.Hosting
 
             public void AddPartToIndex(PartManager partManager)
             {
-                this._partsToIndex.Add(partManager);
+                _partsToIndex.Add(partManager);
             }
 
             public void AddPartToUnindex(PartManager partManager)
             {
-                this._partsToUnindex.Add(partManager);
+                _partsToUnindex.Add(partManager);
             }
 
             public IEnumerable<PartManager> GetAffectedParts(IEnumerable<string> changedContractNames)
             {
-                this.UpdateImportIndex();
+                UpdateImportIndex();
 
                 List<PartManager> parts = new List<PartManager>();
 
@@ -75,7 +75,7 @@ namespace System.ComponentModel.Composition.Hosting
             public IEnumerable<PartManager> GetPartsImporting(string contractName)
             {
                 WeakReferenceCollection<PartManager> partManagerList;
-                if (!this._partManagerIndex.TryGetValue(contractName, out partManagerList))
+                if (!_partManagerIndex.TryGetValue(contractName, out partManagerList))
                 {
                     return Enumerable.Empty<PartManager>();
                 }
@@ -88,10 +88,10 @@ namespace System.ComponentModel.Composition.Hosting
                 foreach (string contractName in partManager.GetImportedContractNames())
                 {
                     WeakReferenceCollection<PartManager> indexEntries;
-                    if (!this._partManagerIndex.TryGetValue(contractName, out indexEntries))
+                    if (!_partManagerIndex.TryGetValue(contractName, out indexEntries))
                     {
                         indexEntries = new WeakReferenceCollection<PartManager>();
-                        this._partManagerIndex.Add(contractName, indexEntries);
+                        _partManagerIndex.Add(contractName, indexEntries);
                     }
 
                     if (!indexEntries.Contains(partManager))
@@ -106,14 +106,14 @@ namespace System.ComponentModel.Composition.Hosting
                 foreach (string contractName in partManager.GetImportedContractNames())
                 {
                     WeakReferenceCollection<PartManager> indexEntries;
-                    if (this._partManagerIndex.TryGetValue(contractName, out indexEntries))
+                    if (_partManagerIndex.TryGetValue(contractName, out indexEntries))
                     {
                         indexEntries.Remove(partManager);
                         var aliveItems = indexEntries.AliveItemsToList();
 
                         if (aliveItems.Count == 0)
                         {
-                            this._partManagerIndex.Remove(contractName);
+                            _partManagerIndex.Remove(contractName);
                         }
                     }
                 }
@@ -121,11 +121,11 @@ namespace System.ComponentModel.Composition.Hosting
 
             private void UpdateImportIndex()
             {
-                var partsToIndex = this._partsToIndex.AliveItemsToList();
-                this._partsToIndex.Clear();
+                var partsToIndex = _partsToIndex.AliveItemsToList();
+                _partsToIndex.Clear();
 
-                var partsToUnindex = this._partsToUnindex.AliveItemsToList();
-                this._partsToUnindex.Clear();
+                var partsToUnindex = _partsToUnindex.AliveItemsToList();
+                _partsToUnindex.Clear();
 
                 if (partsToIndex.Count == 0 && partsToUnindex.Count == 0)
                 {

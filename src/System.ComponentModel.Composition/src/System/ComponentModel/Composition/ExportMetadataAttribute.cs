@@ -29,8 +29,8 @@ namespace System.ComponentModel.Composition
         /// </param>
         public ExportMetadataAttribute(string name, object value)
         {
-            this.Name = name ?? string.Empty;
-            this.Value = value;
+            Name = name ?? string.Empty;
+            Value = value;
         }
 
         /// <summary>

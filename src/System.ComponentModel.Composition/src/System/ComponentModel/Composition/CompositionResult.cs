@@ -23,22 +23,22 @@ namespace System.ComponentModel.Composition
 
         public CompositionResult(IEnumerable<CompositionError> errors)
         {
-            this._errors = errors;
+            _errors = errors;
         }
 
         public bool Succeeded
         {
-            get { return this._errors == null || !this._errors.FastAny(); }
+            get { return _errors == null || !_errors.FastAny(); }
         }
 
         public IEnumerable<CompositionError> Errors
         {
-            get { return this._errors ?? Enumerable.Empty<CompositionError>(); }
+            get { return _errors ?? Enumerable.Empty<CompositionError>(); }
         }
 
         public CompositionResult MergeResult(CompositionResult result)
         {
-            if (this.Succeeded)
+            if (Succeeded)
             {
                 return result;
             }
@@ -56,12 +56,12 @@ namespace System.ComponentModel.Composition
 
         public CompositionResult MergeErrors(IEnumerable<CompositionError> errors)
         {
-            return new CompositionResult(this._errors.ConcatAllowingNull(errors));
+            return new CompositionResult(_errors.ConcatAllowingNull(errors));
         }
 
         public CompositionResult<T> ToResult<T>(T value)
         {
-            return new CompositionResult<T>(value, this._errors); 
+            return new CompositionResult<T>(value, _errors); 
         }
 
         public void ThrowOnErrors()
@@ -71,15 +71,15 @@ namespace System.ComponentModel.Composition
 
         public void ThrowOnErrors(AtomicComposition atomicComposition)
         {
-            if (!this.Succeeded)
+            if (!Succeeded)
             {
                 if (atomicComposition == null)
                 {
-                    throw new CompositionException(this._errors);
+                    throw new CompositionException(_errors);
                 }
                 else
                 {
-                    throw new ChangeRejectedException(this._errors);
+                    throw new ChangeRejectedException(_errors);
                 }
             }
         }

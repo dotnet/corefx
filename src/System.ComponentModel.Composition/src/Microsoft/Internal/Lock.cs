@@ -16,29 +16,29 @@ namespace Microsoft.Internal
         private int _isDisposed = 0;
         public void EnterReadLock()
         {
-            this._thisLock.EnterReadLock();
+            _thisLock.EnterReadLock();
         }
 
         public void EnterWriteLock()
         {
-            this._thisLock.EnterWriteLock();
+            _thisLock.EnterWriteLock();
         }
 
         public void ExitReadLock()
         {
-            this._thisLock.ExitReadLock();
+            _thisLock.ExitReadLock();
         }
 
         public void ExitWriteLock()
         {
-            this._thisLock.ExitWriteLock();
+            _thisLock.ExitWriteLock();
         }
 
         public void Dispose()
         {
-            if (Interlocked.CompareExchange(ref this._isDisposed, 1, 0) == 0)
+            if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
             {
-                this._thisLock.Dispose();
+                _thisLock.Dispose();
             }
         }
     }

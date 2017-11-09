@@ -21,23 +21,23 @@ namespace System.ComponentModel.Composition.Primitives
 #if FEATURE_SERIALIZATION
             Assumes.IsTrue(origin == null || origin.GetType().IsSerializable);
 #endif
-            this._displayName = displayName ?? string.Empty;
-            this._origin = origin;
+            _displayName = displayName ?? string.Empty;
+            _origin = origin;
         }
 
         public string DisplayName
         {
-            get { return this._displayName; }
+            get { return _displayName; }
         }
 
         public ICompositionElement Origin
         {
-            get { return this._origin; }
+            get { return _origin; }
         }
 
         public override string ToString()
         {
-            return this.DisplayName;
+            return DisplayName;
         }
 
         public static ICompositionElement FromICompositionElement(ICompositionElement element)

@@ -19,7 +19,7 @@ namespace System.ComponentModel.Composition.Primitives
         public CompositionElement(object underlyingObject)
             : base(underlyingObject.ToString(), UnknownOrigin)
         {
-            this._underlyingObject = underlyingObject;
+            _underlyingObject = underlyingObject;
         }
 
         public object UnderlyingObject

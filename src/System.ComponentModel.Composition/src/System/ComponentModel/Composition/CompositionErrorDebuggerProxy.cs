@@ -17,22 +17,22 @@ namespace System.ComponentModel.Composition
         {
             Requires.NotNull(error, nameof(error));
 
-            this._error = error;
+            _error = error;
         }
 
         public string Description
         {
-            get { return this._error.Description; }
+            get { return _error.Description; }
         }
 
         public Exception Exception
         {
-            get { return this._error.Exception; }
+            get { return _error.Exception; }
         }
 
         public ICompositionElement Element
         {
-            get { return this._error.Element; }
+            get { return _error.Element; }
         }
     }
 }

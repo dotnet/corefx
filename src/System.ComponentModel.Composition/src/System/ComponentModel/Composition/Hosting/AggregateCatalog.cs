@@ -69,7 +69,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             Requires.NullOrNotNullElements(catalogs, "catalogs");
 
-            this._catalogs = new ComposablePartCatalogCollection(catalogs, this.OnChanged, this.OnChanging);
+            _catalogs = new ComposablePartCatalogCollection(catalogs, OnChanged, OnChanging);
         }
 
         /// <summary>
@@ -79,11 +79,11 @@ namespace System.ComponentModel.Composition.Hosting
         {
             add
             {
-                this._catalogs.Changed += value;
+                _catalogs.Changed += value;
             }
             remove
             {
-                this._catalogs.Changed -= value;
+                _catalogs.Changed -= value;
             }
         }
 
@@ -94,11 +94,11 @@ namespace System.ComponentModel.Composition.Hosting
         {
             add
             {
-                this._catalogs.Changing += value;
+                _catalogs.Changing += value;
             }
             remove
             {
-                this._catalogs.Changing -= value;
+                _catalogs.Changing -= value;
             }
         }
 
@@ -123,7 +123,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public override IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(ImportDefinition definition)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
 
             Requires.NotNull(definition, nameof(definition));
 
@@ -132,7 +132,7 @@ namespace System.ComponentModel.Composition.Hosting
             IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> result = null;
             List<Tuple<ComposablePartDefinition, ExportDefinition>> aggregateResult = null;
 
-            foreach (var catalog in this._catalogs)
+            foreach (var catalog in _catalogs)
             {
                 var catalogExports = catalog.GetExports(definition);
                 if (catalogExports != ComposablePartCatalog._EmptyExportsList)
@@ -171,10 +171,10 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                this.ThrowIfDisposed();
+                ThrowIfDisposed();
                 Contract.Ensures(Contract.Result<ICollection<ComposablePartCatalog>>() != null);
 
-                return this._catalogs;
+                return _catalogs;
             }
         }
 
@@ -186,10 +186,10 @@ namespace System.ComponentModel.Composition.Hosting
                 {
                     // NOTE : According to http://msdn.microsoft.com/en-us/library/4bw5ewxy.aspx, the warning is bogus when used with Interlocked API.
 #pragma warning disable 420
-                    if (Interlocked.CompareExchange(ref this._isDisposed, 1, 0) == 0)
+                    if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
 #pragma warning restore 420
                     {
-                        this._catalogs.Dispose();
+                        _catalogs.Dispose();
                     }
                 }
             }
@@ -201,7 +201,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public override IEnumerator<ComposablePartDefinition> GetEnumerator()
         {
-            return this._catalogs.SelectMany(catalog => catalog).GetEnumerator();
+            return _catalogs.SelectMany(catalog => catalog).GetEnumerator();
         }
 
         /// <summary>
@@ -212,7 +212,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </param>
         protected virtual void OnChanged(ComposablePartCatalogChangeEventArgs e)
         {
-            this._catalogs.OnChanged(this, e);
+            _catalogs.OnChanged(this, e);
         }
 
         /// <summary>
@@ -223,13 +223,13 @@ namespace System.ComponentModel.Composition.Hosting
         /// </param>
         protected virtual void OnChanging(ComposablePartCatalogChangeEventArgs e)
         {
-            this._catalogs.OnChanging(this, e);
+            _catalogs.OnChanging(this, e);
         }
 
         [DebuggerStepThrough]
         private void ThrowIfDisposed()
         {
-            if (this._isDisposed == 1)
+            if (_isDisposed == 1)
             {
                 throw ExceptionBuilder.CreateObjectDisposed(this);
             }

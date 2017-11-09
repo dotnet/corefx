@@ -92,8 +92,8 @@ namespace System.ComponentModel.Composition
 
         public ImportManyAttribute(string contractName, Type contractType)
         {
-            this.ContractName = contractName;
-            this.ContractType = contractType;
+            ContractName = contractName;
+            ContractType = contractType;
         }
 
         /// <summary>

@@ -134,7 +134,7 @@ namespace System.ComponentModel.Composition.Primitives
         /// </returns>
         public override string ToString()
         {
-            return this.ContractName;
+            return ContractName;
         }
     }
 }

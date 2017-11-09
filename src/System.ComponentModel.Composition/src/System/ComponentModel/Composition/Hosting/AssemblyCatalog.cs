@@ -80,7 +80,7 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNullOrEmpty(codeBase, "codeBase");
 
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
-            this._definitionOrigin = this;
+            _definitionOrigin = this;
         }
 
         /// <summary>
@@ -137,8 +137,8 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNull(reflectionContext, "reflectionContext");
 
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
-            this._reflectionContext = reflectionContext;
-            this._definitionOrigin = this;
+            _reflectionContext = reflectionContext;
+            _definitionOrigin = this;
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
-            this._definitionOrigin = definitionOrigin;
+            _definitionOrigin = definitionOrigin;
         }
 
         /// <summary>
@@ -259,8 +259,8 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNull(definitionOrigin, "definitionOrigin");
 
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
-            this._reflectionContext = reflectionContext;
-            this._definitionOrigin = definitionOrigin;
+            _reflectionContext = reflectionContext;
+            _definitionOrigin = definitionOrigin;
         }
 
         /// <summary>
@@ -292,8 +292,8 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNull(reflectionContext, "reflectionContext");
 
             InitializeAssemblyCatalog(assembly);
-            this._reflectionContext = reflectionContext;
-            this._definitionOrigin = this;
+            _reflectionContext = reflectionContext;
+            _definitionOrigin = this;
         }
 
         /// <summary>
@@ -333,8 +333,8 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNull(definitionOrigin, "definitionOrigin");
 
             InitializeAssemblyCatalog(assembly);
-            this._reflectionContext = reflectionContext;
-            this._definitionOrigin = definitionOrigin;
+            _reflectionContext = reflectionContext;
+            _definitionOrigin = definitionOrigin;
         }
 
         /// <summary>
@@ -357,7 +357,7 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNull(assembly, nameof(assembly));
 
             InitializeAssemblyCatalog(assembly);
-            this._definitionOrigin = this;
+            _definitionOrigin = this;
         }
 
         /// <summary>
@@ -388,7 +388,7 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
             InitializeAssemblyCatalog(assembly);
-            this._definitionOrigin = definitionOrigin;
+            _definitionOrigin = definitionOrigin;
         }
 
         private void InitializeAssemblyCatalog(Assembly assembly)
@@ -397,7 +397,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_AssemblyReflectionOnly, "assembly"), "assembly");
             }
-            this._assembly = assembly;
+            _assembly = assembly;
         }
 
         /// <summary>
@@ -428,34 +428,34 @@ namespace System.ComponentModel.Composition.Hosting
         /// </remarks>
         public override IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(ImportDefinition definition)
         {
-            return this.InnerCatalog.GetExports(definition);
+            return InnerCatalog.GetExports(definition);
         }
 
         private ComposablePartCatalog InnerCatalog
         {
             get
             {
-                this.ThrowIfDisposed();
+                ThrowIfDisposed();
 
-                if (this._innerCatalog == null)
+                if (_innerCatalog == null)
                 {
-                    var catalogReflectionContextAttribute = this._assembly.GetFirstAttribute<CatalogReflectionContextAttribute>();
+                    var catalogReflectionContextAttribute = _assembly.GetFirstAttribute<CatalogReflectionContextAttribute>();
                     var assembly = (catalogReflectionContextAttribute != null)
-                        ? catalogReflectionContextAttribute.CreateReflectionContext().MapAssembly(this._assembly)
-                        : this._assembly;
-                    lock (this._thisLock)
+                        ? catalogReflectionContextAttribute.CreateReflectionContext().MapAssembly(_assembly)
+                        : _assembly;
+                    lock (_thisLock)
                     {
-                        if (this._innerCatalog == null)
+                        if (_innerCatalog == null)
                         {
-                            var catalog = (this._reflectionContext != null)
-                                ? new TypeCatalog(assembly.GetTypes(), this._reflectionContext, this._definitionOrigin)
-                                : new TypeCatalog(assembly.GetTypes(), this._definitionOrigin);
+                            var catalog = (_reflectionContext != null)
+                                ? new TypeCatalog(assembly.GetTypes(), _reflectionContext, _definitionOrigin)
+                                : new TypeCatalog(assembly.GetTypes(), _definitionOrigin);
                             Thread.MemoryBarrier();
-                            this._innerCatalog = catalog;
+                            _innerCatalog = catalog;
                         }
                     }
                 }
-                return this._innerCatalog;
+                return _innerCatalog;
             }
         }
 
@@ -473,7 +473,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 Contract.Ensures(Contract.Result<Assembly>() != null);
 
-                return this._assembly;
+                return _assembly;
             }
         }
 
@@ -486,7 +486,7 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes")]
         string ICompositionElement.DisplayName
         {
-            get { return this.GetDisplayName(); }
+            get { return GetDisplayName(); }
         }
 
         /// <summary>
@@ -509,20 +509,20 @@ namespace System.ComponentModel.Composition.Hosting
         /// </returns>
         public override string ToString()
         {
-            return this.GetDisplayName();
+            return GetDisplayName();
         }
 
         protected override void Dispose(bool disposing)
         {
             try
             {
-                if (Interlocked.CompareExchange(ref this._isDisposed, 1, 0) == 0)
+                if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
                 {
                     if (disposing)
                     {
-                        if (this._innerCatalog != null)
+                        if (_innerCatalog != null)
                         {
-                            this._innerCatalog.Dispose();
+                            _innerCatalog.Dispose();
                         }
                     }
                 }
@@ -535,12 +535,12 @@ namespace System.ComponentModel.Composition.Hosting
 
         public override IEnumerator<ComposablePartDefinition> GetEnumerator()
         {
-            return this.InnerCatalog.GetEnumerator();
+            return InnerCatalog.GetEnumerator();
         }
 
         private void ThrowIfDisposed()
         {
-            if (this._isDisposed == 1)
+            if (_isDisposed == 1)
             {
                 throw ExceptionBuilder.CreateObjectDisposed(this);
             }
@@ -551,7 +551,7 @@ namespace System.ComponentModel.Composition.Hosting
             return string.Format(CultureInfo.CurrentCulture,
                                 "{0} (Assembly=\"{1}\")",   // NOLOC
                                 GetType().Name,
-                                this.Assembly.FullName);
+                                Assembly.FullName);
         }
 
         private static Assembly LoadAssembly(string codeBase)

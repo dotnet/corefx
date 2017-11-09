@@ -31,15 +31,15 @@ namespace System.ComponentModel.Composition.Hosting
 
             public PartManager(ImportEngine importEngine, ComposablePart part)
             {
-                this._importEngine = importEngine;
-                this._part = part;
+                _importEngine = importEngine;
+                _part = part;
             }
 
             public ComposablePart Part
             {
                 get
                 {
-                    return this._part;
+                    return _part;
                 }
             }
 
@@ -47,16 +47,16 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 get
                 {
-                    using (this._importEngine._lock.LockStateForRead())
+                    using (_importEngine._lock.LockStateForRead())
                     {
-                        return this._state;
+                        return _state;
                     }
                 }
                 set
                 {
-                    using (this._importEngine._lock.LockStateForWrite())
+                    using (_importEngine._lock.LockStateForWrite())
                     {
-                        this._state = value;
+                        _state = value;
                     }
                 }
             }
@@ -65,23 +65,23 @@ namespace System.ComponentModel.Composition.Hosting
 
             public IEnumerable<string> GetImportedContractNames()
             {
-                if (this.Part == null)
+                if (Part == null)
                 {
                     return Enumerable.Empty<string>();
                 }
 
-                if (this._importedContractNames == null)
+                if (_importedContractNames == null)
                 {
-                    this._importedContractNames = this.Part.ImportDefinitions.Select(import => import.ContractName ?? ImportDefinition.EmptyContractName).Distinct().ToArray();
+                    _importedContractNames = Part.ImportDefinitions.Select(import => import.ContractName ?? ImportDefinition.EmptyContractName).Distinct().ToArray();
                 }
-                return this._importedContractNames;
+                return _importedContractNames;
             }
 
             public CompositionResult TrySetImport(ImportDefinition import, Export[] exports)
             {
                 try
                 {
-                    this.Part.SetImport(import, exports);
+                    Part.SetImport(import, exports);
                     UpdateDisposableDependencies(import, exports);
                     return CompositionResult.SucceededResult;
                 }
@@ -103,50 +103,50 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 if (atomicComposition != null)
                 {
-                    var savedExports = this.GetSavedImport(import);
+                    var savedExports = GetSavedImport(import);
 
                     // Add a revert action to revert the stored exports
                     // in the case that this atomicComposition gets rolled back.
                     atomicComposition.AddRevertAction(() =>
-                        this.SetSavedImport(import, savedExports, null));
+                        SetSavedImport(import, savedExports, null));
                 }
 
-                if (this._importCache == null)
+                if (_importCache == null)
                 {
-                    this._importCache = new Dictionary<ImportDefinition, Export[]>();
+                    _importCache = new Dictionary<ImportDefinition, Export[]>();
                 }
 
-                this._importCache[import] = exports;
+                _importCache[import] = exports;
             }
 
             public Export[] GetSavedImport(ImportDefinition import)
             {
                 Export[] exports = null;
-                if (this._importCache != null)
+                if (_importCache != null)
                 {
                     // We don't care about the return value we just want the exports
                     // and if it isn't present we just return the initialized null value
-                    this._importCache.TryGetValue(import, out exports);
+                    _importCache.TryGetValue(import, out exports);
                 }
                 return exports;
             }
 
             public void ClearSavedImports()
             {
-                this._importCache = null;
+                _importCache = null;
             }
 
             public CompositionResult TryOnComposed()
             {
                 try
                 {
-                    this.Part.Activate();
+                    Part.Activate();
                     return CompositionResult.SucceededResult;
                 }
                 catch (ComposablePartException ex)
                 {   // Type failed to be constructed, imports could not be set, etc
                     return new CompositionResult(
-                        ErrorBuilder.CreatePartCannotActivate(this.Part, ex));
+                        ErrorBuilder.CreatePartCannotActivate(Part, ex));
                 }
             }
 
@@ -170,18 +170,18 @@ namespace System.ComponentModel.Composition.Hosting
 
                 // Dispose any existing references previously set on this import
                 List<IDisposable> oldDisposableExports = null;
-                if (this._importedDisposableExports != null &&
-                    this._importedDisposableExports.TryGetValue(import, out oldDisposableExports))
+                if (_importedDisposableExports != null &&
+                    _importedDisposableExports.TryGetValue(import, out oldDisposableExports))
                 {
                     oldDisposableExports.ForEach(disposable => disposable.Dispose());
 
                     // If there aren't any replacements, get rid of the old storage
                     if (disposableExports == null)
                     {
-                        this._importedDisposableExports.Remove(import);
-                        if (!this._importedDisposableExports.FastAny())
+                        _importedDisposableExports.Remove(import);
+                        if (!_importedDisposableExports.FastAny())
                         {
-                            this._importedDisposableExports = null;
+                            _importedDisposableExports = null;
                         }
 
                         return;
@@ -191,22 +191,22 @@ namespace System.ComponentModel.Composition.Hosting
                 // Record the new collection
                 if (disposableExports != null)
                 {
-                    if (this._importedDisposableExports == null)
+                    if (_importedDisposableExports == null)
                     {
-                        this._importedDisposableExports = new Dictionary<ImportDefinition, List<IDisposable>>();
+                        _importedDisposableExports = new Dictionary<ImportDefinition, List<IDisposable>>();
                     }
-                    this._importedDisposableExports[import] = disposableExports;
+                    _importedDisposableExports[import] = disposableExports;
                 }
             }
 
             public void DisposeAllDependencies()
             {
-                if (this._importedDisposableExports != null)
+                if (_importedDisposableExports != null)
                 {
-                    IEnumerable<IDisposable> dependencies = this._importedDisposableExports.Values
+                    IEnumerable<IDisposable> dependencies = _importedDisposableExports.Values
                         .SelectMany(exports => exports);
 
-                    this._importedDisposableExports = null;
+                    _importedDisposableExports = null;
 
                     dependencies.ForEach(disposableExport => disposableExport.Dispose());
                 }

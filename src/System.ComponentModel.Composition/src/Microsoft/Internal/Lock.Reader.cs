@@ -17,16 +17,16 @@ namespace Microsoft.Internal
 
         public ReadLock(Lock @lock)
         {
-            this._isDisposed = 0;
-            this._lock = @lock;
-            this._lock.EnterReadLock();
+            _isDisposed = 0;
+            _lock = @lock;
+            _lock.EnterReadLock();
         }
 
         public void Dispose()
         {
-            if (Interlocked.CompareExchange(ref this._isDisposed, 1, 0) == 0)
+            if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
             {
-                this._lock.ExitReadLock();
+                _lock.ExitReadLock();
             }
         }
     }

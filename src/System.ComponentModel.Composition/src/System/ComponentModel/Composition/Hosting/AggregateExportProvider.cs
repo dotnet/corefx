@@ -56,8 +56,8 @@ namespace System.ComponentModel.Composition.Hosting
 
                     copiedProviders[i] = provider;
 
-                    provider.ExportsChanged += this.OnExportChangedInternal;
-                    provider.ExportsChanging += this.OnExportChangingInternal;
+                    provider.ExportsChanged += OnExportChangedInternal;
+                    provider.ExportsChanging += OnExportChangingInternal;
                 }
             }
             else
@@ -65,8 +65,8 @@ namespace System.ComponentModel.Composition.Hosting
                 copiedProviders = new ExportProvider[] { };
             }
 
-            this._providers = copiedProviders;
-            this._readOnlyProviders = new ReadOnlyCollection<ExportProvider>(this._providers);
+            _providers = copiedProviders;
+            _readOnlyProviders = new ReadOnlyCollection<ExportProvider>(_providers);
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -107,13 +107,13 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 // NOTE : According to http://msdn.microsoft.com/en-us/library/4bw5ewxy.aspx, the warning is bogus when used with Interlocked API.
 #pragma warning disable 420
-                if (Interlocked.CompareExchange(ref this._isDisposed, 1, 0) == 0)
+                if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
 #pragma warning restore 420
                 {
-                    foreach (ExportProvider provider in this._providers)
+                    foreach (ExportProvider provider in _providers)
                     {
-                        provider.ExportsChanged -= this.OnExportChangedInternal;
-                        provider.ExportsChanging -= this.OnExportChangingInternal;
+                        provider.ExportsChanged -= OnExportChangedInternal;
+                        provider.ExportsChanging -= OnExportChangingInternal;
                     }
                 }
             }
@@ -133,10 +133,10 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                this.ThrowIfDisposed();
+                ThrowIfDisposed();
                 Contract.Ensures(Contract.Result<ReadOnlyCollection<ExportProvider>>() != null);
 
-                return this._readOnlyProviders;
+                return _readOnlyProviders;
             }
         }
 
@@ -161,12 +161,12 @@ namespace System.ComponentModel.Composition.Hosting
         /// </remarks>
         protected override IEnumerable<Export> GetExportsCore(ImportDefinition definition, AtomicComposition atomicComposition)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
 
             if (definition.Cardinality == ImportCardinality.ZeroOrMore)
             {
                 var exports = new List<Export>();
-                foreach (var provider in this._providers)
+                foreach (var provider in _providers)
                 {
                     foreach (var export in provider.GetExports(definition, atomicComposition))
                     {
@@ -181,7 +181,7 @@ namespace System.ComponentModel.Composition.Hosting
 
                 // if asked for "one or less", the prioriry is at play - the first provider that agrees to return the value 
                 // which best complies with the request, wins.
-                foreach (ExportProvider provider in this._providers)
+                foreach (ExportProvider provider in _providers)
                 {
                     IEnumerable<Export> exports;
                     bool cardinalityCheckResult = provider.TryGetExports(definition, atomicComposition, out exports);
@@ -212,18 +212,18 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void OnExportChangedInternal(object sender, ExportsChangeEventArgs e)
         {
-            this.OnExportsChanged(e);
+            OnExportsChanged(e);
         }
 
         private void OnExportChangingInternal(object sender, ExportsChangeEventArgs e)
         {
-            this.OnExportsChanging(e);
+            OnExportsChanging(e);
         }
 
         [DebuggerStepThrough]
         private void ThrowIfDisposed()
         {
-            if (this._isDisposed == 1)
+            if (_isDisposed == 1)
             {
                 throw ExceptionBuilder.CreateObjectDisposed(this);
             }
