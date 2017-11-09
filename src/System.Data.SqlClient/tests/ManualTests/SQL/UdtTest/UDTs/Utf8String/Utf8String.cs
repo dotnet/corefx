@@ -96,7 +96,6 @@ namespace Microsoft.Samples.SqlServer
             return new SqlString(this.ToString());
         }
 
-
         private SqlString GetSortKeyUsingCultureInternal(CultureInfo culture, bool ignoreCase,
             bool ignoreNonSpace, bool ignoreWidth)
         {

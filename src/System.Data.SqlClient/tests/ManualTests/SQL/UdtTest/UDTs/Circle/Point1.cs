@@ -17,14 +17,10 @@ public class Point1 : INullable, IBinarySerialize
     private int y;
     private bool fIsNull = false;
 
-    //static private Point1 pNull = new Point1(true);
-    //public static readonly Point1 Null = new Point1(true);
     public static Point1 Null { get { return new Point1(true); } }
     public const int MaxByteSize = 9;
     public const bool IsFixedLength = true;
     public const bool IsByteOrdered = false;
-
-
 
     public void Read(BinaryReader r)
     {
@@ -71,7 +67,6 @@ public class Point1 : INullable, IBinarySerialize
     {
         if (data.Length != 9)
             throw new ArgumentException();
-        //byte[] value = data.Value;
 
         x = BitConverter.ToInt32(data, 0);
         y = BitConverter.ToInt32(data, 4);
@@ -80,17 +75,12 @@ public class Point1 : INullable, IBinarySerialize
 
     public void FillFromBytes(SqlBytes value)
     {
-        // todo: throw if bigger than MaxByteSize bytes
-
-
         if (value.IsNull)
         {
             fIsNull = true;
             return;
         }
 
-        //System.Text.UnicodeEncoding e = new System.Text.UnicodeEncoding();
-        //String str = e.GetString(value.Buffer);
         byte[] bytes = value.Value;
         FillFromBytesInternal(bytes);
 
@@ -98,10 +88,9 @@ public class Point1 : INullable, IBinarySerialize
         return;
     }
 
-
     public void FillBytes(SqlBytes value)
     {
-        if (this.fIsNull)
+        if (fIsNull)
         {
             if (value.IsNull)
                 return;
@@ -117,7 +106,6 @@ public class Point1 : INullable, IBinarySerialize
         bytes.CopyTo(bigbytes, 0);
         bytes = BitConverter.GetBytes(y);
         bytes.CopyTo(bigbytes, 4);
-        //value.Value = bigbytes;
 
         int i;
         for (i = 0; i < bigbytes.Length; i++)
@@ -129,19 +117,19 @@ public class Point1 : INullable, IBinarySerialize
 
     public static Point1 Parse(SqlString data)
     {
-        String[] array = data.Value.Split(new char[] { ',' });
+        string[] array = data.Value.Split(new char[] { ',' });
         int x;
         int y;
 
         if (array.Length != 2)
             throw new ArgumentException();
-        x = Int32.Parse(array[0]);
-        y = Int32.Parse(array[1]);
+        x = int.Parse(array[0]);
+        y = int.Parse(array[1]);
 
         return new Point1(x, y);
     }
 
-    public override String ToString()
+    public override string ToString()
     {
         StringBuilder builder = new StringBuilder();
         builder.Append(x);

@@ -12,7 +12,6 @@ using Microsoft.SqlServer.Server;
 [SqlUserDefinedType(Format.UserDefined, IsByteOrdered = false, MaxByteSize = 500)]
 public class Address : INullable, IBinarySerialize
 {
-    //public static readonly Address Null = new Address(true);
     public static Address Null { get { return new Address(true); } }
 
     //******************************************************
@@ -21,7 +20,7 @@ public class Address : INullable, IBinarySerialize
 
     // Constructor for a null value: Address.Null
     // fNull is not used but needed because compiler doesn't let
-    // struct to have parameterless constructors
+    // struct have parameterless constructors
     private Address(bool fNull)
     {
         m_fNotNull = false;
@@ -56,7 +55,6 @@ public class Address : INullable, IBinarySerialize
     //******************************************************
     // Common static and instance methods for SQL UDTs
     //******************************************************
-
     public const int MaxByteSize = 500;
     public const bool IsFixedLength = false;
     public const bool IsByteOrdered = true;
@@ -77,8 +75,6 @@ public class Address : INullable, IBinarySerialize
 
     public void FillFromBytes(SqlBytes value)
     {
-        // todo: throw if bigger than MaxByteSize bytes
-
         if (value.IsNull)
         {
             m_fNotNull = false;
@@ -88,10 +84,10 @@ public class Address : INullable, IBinarySerialize
         }
 
         System.Text.UnicodeEncoding e = new System.Text.UnicodeEncoding();
-        String str = e.GetString(value.Buffer);
+        string str = e.GetString(value.Buffer);
 
-        String[] twolines = new String[2];
-        Char[] seperator = { '|' };
+        string[] twolines = new string[2];
+        char[] seperator = { '|' };
         twolines = str.Split(seperator);
 
         m_firstline = twolines[0];
@@ -101,10 +97,9 @@ public class Address : INullable, IBinarySerialize
         return;
     }
 
-
     public void FillBytes(SqlBytes value)
     {
-        if (this.IsNull)
+        if (IsNull)
         {
             if (value.IsNull)
                 return;
@@ -116,12 +111,12 @@ public class Address : INullable, IBinarySerialize
         }
 
         SqlString str;
-        if ((Object)m_secondline == null || m_secondline.IsNull)
+        if ((object)m_secondline == null || m_secondline.IsNull)
             str = m_firstline;
         else
         {
-            str = String.Concat(m_firstline, "|");
-            str = String.Concat(str, m_secondline);
+            str = string.Concat(m_firstline, "|");
+            str = string.Concat(str, m_secondline);
         }
 
         byte[] stringData = str.GetUnicodeBytes();
@@ -133,53 +128,37 @@ public class Address : INullable, IBinarySerialize
         return;
     }
 
-
-    /*    Not in M1
-
-        public void FillFromBytes( SqlBinary value ) ;
-
-        public static Address FromXmlString( SqlString s );
-
-        public SqlString ToXmlString();
-
-    */
     public override string ToString()
     {
         if (IsNull)
             return "Null";
-
         else
             return Value.ToString();
     }
 
-    public static Address Parse(SqlString s) // formerly FromString
+    public static Address Parse(SqlString s)
     {
         if (s.IsNull)
             return Address.Null;
 
+        string str = s.ToString();
+        string[] twolines = new string[2];
 
-        // todo:throw if bigger than MaxByteSize bytes
-
-        String str = s.ToString();
-        String[] twolines = new String[2];
-        // using || to indicate the seperation between
+        // using || to indicate the separation between
         // address line 1 and 2, assume it won't appear
         // in any address
-        Char[] seperator = { '|', '|' };
+        char[] seperator = { '|', '|' };
         twolines = str.Split(seperator);
 
         if (twolines.Length == 2)
             return new Address(twolines[0], twolines[1]);
         else
             return new Address(twolines[0], SqlString.Null);
-
     }
-
 
     //******************************************************
     // Address Specific Methods
     //******************************************************
-
     public SqlString GetFirstLine()
     {
         return m_firstline;
@@ -190,7 +169,6 @@ public class Address : INullable, IBinarySerialize
         return m_secondline;
     }
 
-
     public SqlString Value
     {
         get
@@ -200,7 +178,7 @@ public class Address : INullable, IBinarySerialize
                 if (m_secondline.IsNull)
                     return m_firstline;
                 else
-                    return String.Concat(m_firstline, m_secondline);
+                    return string.Concat(m_firstline, m_secondline);
             }
             else
                 throw new SqlNullValueException();
@@ -214,4 +192,3 @@ public class Address : INullable, IBinarySerialize
     private SqlString m_secondline;
     private bool m_fNotNull; //false if null, default ctor makes it null
 }
-

@@ -19,7 +19,6 @@ public class Circle : INullable, IBinarySerialize
     private bool fIsNull = false;
 
     public static Circle Null { get { return new Circle(true); } }
-    //public static readonly Circle Null = new Circle(true);
 
     public const int MaxByteSize = 30;
     public const bool IsFixedLength = true;
@@ -55,7 +54,6 @@ public class Circle : INullable, IBinarySerialize
         fIsNull = true;
     }
 
-
     public bool IsNull
     {
         get
@@ -64,10 +62,8 @@ public class Circle : INullable, IBinarySerialize
         }
     }
 
-
     public void FillFromBytes(SqlBytes data)
     {
-
         if (data.IsNull)
         {
             fIsNull = true;
@@ -86,7 +82,7 @@ public class Circle : INullable, IBinarySerialize
 
     public void FillBytes(SqlBytes data)
     {
-        if (this.fIsNull)
+        if (fIsNull)
         {
             if (data.IsNull)
                 return;
@@ -113,22 +109,22 @@ public class Circle : INullable, IBinarySerialize
 
     }
 
-    //it should ne x1,y1,x2,y2
+    //it should be x1,y1,x2,y2
     public static Circle Parse(SqlString data)
     {
-        String[] array = data.Value.Split(new char[] { ',' });
+        string[] array = data.Value.Split(new char[] { ',' });
 
         if (array.Length != 3)
             throw new ArgumentException();
         Circle circ = new Circle();
 
-        circ.center.X = Int32.Parse(array[0]);
-        circ.center.Y = Int32.Parse(array[1]);
-        circ.rad = Int32.Parse(array[2]);
+        circ.center.X = int.Parse(array[0]);
+        circ.center.Y = int.Parse(array[1]);
+        circ.rad = int.Parse(array[2]);
         return circ;
     }
 
-    public override String ToString()
+    public override string ToString()
     {
         StringBuilder builder = new StringBuilder();
         builder.Append(center.ToString());
@@ -145,6 +141,7 @@ public class Circle : INullable, IBinarySerialize
             return center;
         }
     }
+
     public int Radius
     {
         get

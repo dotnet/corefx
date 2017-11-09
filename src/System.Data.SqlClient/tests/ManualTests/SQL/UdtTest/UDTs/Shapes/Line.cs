@@ -19,7 +19,6 @@ public class Line : INullable, IBinarySerialize
     private bool fIsNull = false;
 
     public static Line Null { get { return new Line(true); } }
-    //    public static readonly Line Null = new Line(true);
 
     public const int MaxByteSize = 20;
     public const bool IsFixedLength = true;
@@ -69,7 +68,6 @@ public class Line : INullable, IBinarySerialize
 
     public void FillFromBytes(SqlBytes data)
     {
-
         if (data.IsNull)
         {
             fIsNull = true;
@@ -89,7 +87,7 @@ public class Line : INullable, IBinarySerialize
 
     public void FillBytes(SqlBytes data)
     {
-        if (this.fIsNull)
+        if (fIsNull)
         {
             if (data.IsNull)
                 return;
@@ -115,26 +113,25 @@ public class Line : INullable, IBinarySerialize
         for (i = 0; i < bigbytes.Length; i++)
             data[i] = bigbytes[i];
         data.SetLength(i);
-
     }
 
-    //it should ne x1,y1,x2,y2
+    //it should be x1,y1,x2,y2
     public static Line Parse(SqlString data)
     {
-        String[] array = data.Value.Split(new char[] { ',' });
+        string[] array = data.Value.Split(new char[] { ',' });
 
         if (array.Length != 4)
             throw new ArgumentException();
         Line line = new Line();
-        line.start.X = Int32.Parse(array[0]);
-        line.start.Y = Int32.Parse(array[1]);
-        line.end.X = Int32.Parse(array[2]);
-        line.end.Y = Int32.Parse(array[3]);
+        line.start.X = int.Parse(array[0]);
+        line.start.Y = int.Parse(array[1]);
+        line.end.X = int.Parse(array[2]);
+        line.end.Y = int.Parse(array[3]);
 
         return line;
     }
 
-    public override String ToString()
+    public override string ToString()
     {
         StringBuilder builder = new StringBuilder();
         builder.Append(start.ToString());
@@ -156,6 +153,7 @@ public class Line : INullable, IBinarySerialize
             return start;
         }
     }
+
     public Point End
     {
         get
@@ -164,4 +162,3 @@ public class Line : INullable, IBinarySerialize
         }
     }
 }
-
