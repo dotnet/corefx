@@ -87,14 +87,6 @@ namespace System.Threading.ThreadPools.Tests
             int minw, minc, maxw, maxc;
             ThreadPool.GetMinThreads(out minw, out minc);
             ThreadPool.GetMaxThreads(out maxw, out maxc);
-            Action resetThreadCounts =
-                () =>
-                {
-                    Assert.True(ThreadPool.SetMaxThreads(maxw, maxc));
-                    VerifyMaxThreads(maxw, maxc);
-                    Assert.True(ThreadPool.SetMinThreads(minw, minc));
-                    VerifyMinThreads(minw, minc);
-                };
 
             try
             {
@@ -142,7 +134,10 @@ namespace System.Threading.ThreadPools.Tests
             }
             finally
             {
-                resetThreadCounts();
+                Assert.True(ThreadPool.SetMaxThreads(maxw, maxc));
+                VerifyMaxThreads(maxw, maxc);
+                Assert.True(ThreadPool.SetMinThreads(minw, minc));
+                VerifyMinThreads(minw, minc);
             }
         }
 
@@ -155,14 +150,6 @@ namespace System.Threading.ThreadPools.Tests
             int minw, minc, maxw, maxc;
             ThreadPool.GetMinThreads(out minw, out minc);
             ThreadPool.GetMaxThreads(out maxw, out maxc);
-            Action resetThreadCounts =
-                () =>
-                {
-                    Assert.True(ThreadPool.SetMaxThreads(maxw, maxc));
-                    VerifyMaxThreads(maxw, maxc);
-                    Assert.True(ThreadPool.SetMinThreads(minw, minc));
-                    VerifyMinThreads(minw, minc);
-                };
 
             try
             {
@@ -174,7 +161,10 @@ namespace System.Threading.ThreadPools.Tests
             }
             finally
             {
-                resetThreadCounts();
+                Assert.True(ThreadPool.SetMaxThreads(maxw, maxc));
+                VerifyMaxThreads(maxw, maxc);
+                Assert.True(ThreadPool.SetMinThreads(minw, minc));
+                VerifyMinThreads(minw, minc);
             }
         }
 
@@ -201,11 +191,6 @@ namespace System.Threading.ThreadPools.Tests
             int minw, minc, maxw, maxc;
             ThreadPool.GetMinThreads(out minw, out minc);
             ThreadPool.GetMaxThreads(out maxw, out maxc);
-            void ResetThreadCounts()
-            {
-                Assert.True(ThreadPool.SetMaxThreads(maxw, maxc));
-                Assert.True(ThreadPool.SetMinThreads(minw, minc));
-            }
 
             try
             {
@@ -232,7 +217,8 @@ namespace System.Threading.ThreadPools.Tests
             }
             finally
             {
-                ResetThreadCounts();
+                Assert.True(ThreadPool.SetMaxThreads(maxw, maxc));
+                Assert.True(ThreadPool.SetMinThreads(minw, minc));
             }
         }
 
