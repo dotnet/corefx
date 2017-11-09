@@ -6,7 +6,7 @@
 <rss version="2.0">
 <channel>
 <title>Missing dc:language</title>
-<link>http://purl.org/rss/2.0/</link>
+<link>http://contoso.com/rss/2.0/</link>
 <description>channel should include dc:language</description>
 <language>en-us</language>
 </channel>

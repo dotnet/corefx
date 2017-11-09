@@ -7,10 +7,10 @@
 <channel>
 <title>Valid link</title>
 <description>valid item link (http)</description>
-<link>http://purl.org/rss/2.0/</link>
+<link>http://contoso.com/rss/2.0/</link>
 <item>
 <title>Valid link</title>
-<link>http://purl.org/rss/2.0/#item</link>
+<link>http://contoso.com/rss/2.0/#item</link>
 </item>
 </channel>
 </rss>

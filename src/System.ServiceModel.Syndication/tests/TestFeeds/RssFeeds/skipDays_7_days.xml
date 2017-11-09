@@ -6,7 +6,7 @@
 <rss version="2.0">
 <channel>
 <title>RSS 2.0 test case</title>
-<link>http://www.feedvalidator.org/testcases/rss20/</link>
+<link>http://www.contoso.com/testcases/rss20/</link>
 <description>skipDays contains 7 valid days</description>
 <skipDays>
 <day>Friday</day>

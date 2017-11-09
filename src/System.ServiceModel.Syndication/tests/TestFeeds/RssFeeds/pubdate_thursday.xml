@@ -6,7 +6,7 @@
 <rss version="2.0">
 <channel>
 <title>Validity test</title>
-<link>http://purl.org/rss/2.0/</link>
+<link>http://contoso.com/rss/2.0/</link>
 <description>valid pubDate (Thursday)</description>
 <pubDate>Thu, 26 Dec 2002 14:20:20 GMT</pubDate>
 </channel>

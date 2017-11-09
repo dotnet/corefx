@@ -6,7 +6,7 @@
 <rss version="2.0">
 <channel>
 <title>RSS 2.0 test case</title>
-<link>http://www.feedvalidator.org/testcases/rss20/</link>
+<link>http://www.contoso.com/testcases/rss20/</link>
 <description>skipHours contains 1 valid hour</description>
 <skipHours>
 <hour>12</hour>
