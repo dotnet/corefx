@@ -72,6 +72,35 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [Fact]
+        [OuterLoop("Opens program")]
+        public void ProcessStart_DirectoryNameInCurDirectorySameAsFileNameInExecDirectory_Success()
+        {
+            string fileToOpen = "dotnet";
+            string curDir = Environment.CurrentDirectory;
+            string dotnetFolder = Path.Combine(Path.GetTempPath(),"dotnet");
+            bool shouldDelete = !Directory.Exists(dotnetFolder);
+            try
+            {
+                Directory.SetCurrentDirectory(Path.GetTempPath());
+                Directory.CreateDirectory(dotnetFolder);
+
+                using (var px = Process.Start(fileToOpen))
+                {
+                    Assert.NotNull(px);
+                }
+            }
+            finally
+            {
+                if (shouldDelete)
+                {
+                    Directory.Delete(dotnetFolder);
+                }
+
+                Directory.SetCurrentDirectory(curDir);
+            }
+        }
+
         [Theory, InlineData(true), InlineData(false)]
         [OuterLoop("Opens program")]
         public void ProcessStart_UseShellExecute_OnUnix_SuccessWhenProgramInstalled(bool isFolder)
@@ -93,12 +122,7 @@ namespace System.Diagnostics.Tests
                 using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }))
                 {
                     Assert.NotNull(px);
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                    {
-                        // Assert.Equal(programToOpenWith, px.ProcessName); // on OSX, process name is dotnet for some reason. Refer to #23972
-                        Console.WriteLine($"{nameof(ProcessStart_UseShellExecute_OnUnix_SuccessWhenProgramInstalled)}(isFolder: {isFolder}), ProcessName: {px.ProcessName}");
-                    }
-                    else
+                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) // on OSX, process name is dotnet for some reason. Refer to #23972
                     {
                         Assert.Equal(programToOpen, px.ProcessName);
                     }
@@ -233,7 +257,9 @@ namespace System.Diagnostics.Tests
         {
             string path = GetTestFilePath();
             File.Create(path).Dispose();
-            Assert.Equal(0, chmod(path, 644)); // no execute permissions
+            int mode = Convert.ToInt32("644", 8);
+
+            Assert.Equal(0, chmod(path, mode));
 
             Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
             Assert.NotEqual(0, e.NativeErrorCode);
@@ -244,7 +270,9 @@ namespace System.Diagnostics.Tests
         {
             string path = GetTestFilePath();
             File.Create(path).Dispose();
-            Assert.Equal(0, chmod(path, 744)); // execute permissions
+            int mode = Convert.ToInt32("744", 8);
+
+            Assert.Equal(0, chmod(path, mode)); // execute permissions
 
             using (Process p = Process.Start(path))
             {

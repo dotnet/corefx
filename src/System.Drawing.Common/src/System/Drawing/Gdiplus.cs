@@ -83,7 +83,7 @@ namespace System.Drawing
 
                 s_gdipModule = LoadNativeLibrary();
                 LoadSharedFunctionPointers();
-                LoadPlatformFunctionPointers(); // This should be combined with the above call when Windows/Unix implementations are unified.
+                PlatformInitialize();
 
                 StartupInput input = StartupInput.GetDefault();
                 StartupOutput output;
@@ -852,9 +852,12 @@ namespace System.Drawing
         {
             return IntGlobalAlloc(uFlags, new UIntPtr(dwBytes));
         }
-
-        [DllImport(ExternDll.Kernel32)]
-        static internal extern void ZeroMemory(IntPtr destination, UIntPtr length);
+        
+        static internal unsafe void ZeroMemory(byte* ptr, ulong length)
+        {
+            byte* end = ptr + length;
+            while (ptr != end) *ptr++ = 0;
+        }
 
         public const int ERROR_ACCESS_DENIED = 5;
         public const int ERROR_INVALID_PARAMETER = 87;

@@ -777,9 +777,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_NullableType:
                     typeSrc = typeSrc.StripNubs();
                     goto LAgain;
-                case TypeKind.TK_TypeParameterType:
-                    typeSrc = ((TypeParameterType)typeSrc).GetEffectiveBaseClass();
-                    goto LAgain;
                 case TypeKind.TK_AggregateType:
                     if (!typeSrc.isClassType() && !typeSrc.isStructType() || ((AggregateType)typeSrc).getAggregate().IsSkipUDOps())
                         return null;
@@ -802,7 +799,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Find the next operator.
                 methCur = methCur == null
                     ? GetSymbolLoader().LookupAggMember(pName, atsCur.getAggregate(), symbmask_t.MASK_MethodSymbol) as MethodSymbol
-                    : GetSymbolLoader().LookupNextSym(methCur, atsCur.getAggregate(), symbmask_t.MASK_MethodSymbol) as MethodSymbol;
+                    : SymbolLoader.LookupNextSym(methCur, atsCur.getAggregate(), symbmask_t.MASK_MethodSymbol) as MethodSymbol;
 
                 if (methCur == null)
                 {
@@ -1428,7 +1425,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 for (Symbol symT = symbolLoader.LookupAggMember(pswt.Sym.name, atsObj.getAggregate(), mask);
                      symT != null;
-                     symT = symbolLoader.LookupNextSym(symT, atsObj.getAggregate(), mask))
+                     symT = SymbolLoader.LookupNextSym(symT, atsObj.getAggregate(), mask))
                 {
                     if (symT.IsOverride() && (symT.SymBaseVirtual() == pswt.Sym || symT.SymBaseVirtual() == pswt.Sym.SymBaseVirtual()))
                     {

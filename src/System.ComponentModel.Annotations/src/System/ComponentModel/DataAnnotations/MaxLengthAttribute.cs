@@ -128,6 +128,7 @@ namespace System.ComponentModel.DataAnnotations
                 count = (int)property.GetValue(value);
                 return true;
             }
+
             count = -1;
             return false;
         }

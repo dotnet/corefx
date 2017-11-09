@@ -15,7 +15,9 @@ namespace System
     /// ReadOnlySpan represents a contiguous region of arbitrary memory. Unlike arrays, it can point to either managed
     /// or native memory, or to memory allocated on the stack. It is type- and memory-safe.
     /// </summary>
-    public struct ReadOnlySpan<T>
+    [DebuggerTypeProxy(typeof(SpanDebugView<>))]
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    public readonly ref struct ReadOnlySpan<T>
     {
         /// <summary>
         /// Creates a new read-only span over the entirety of the target array.
@@ -116,6 +118,9 @@ namespace System
             _pinnable = pinnable;
             _byteOffset = byteOffset;
         }
+
+        //Debugger Display = {T[length]}
+        private string DebuggerDisplay => string.Format("{{{0}[{1}]}}", typeof(T).Name, _length);
 
         /// <summary>
         /// The number of items in the read-only span.

@@ -72,7 +72,8 @@ namespace System.Net.Http
                 Uri location = response.Headers.Location;
                 if (location == null)
                 {
-                    throw new HttpRequestException(SR.net_http_headers_missing_location);
+                    // No location header. Nothing to redirect to.
+                    break;
                 }
 
                 if (!location.IsAbsoluteUri)
@@ -80,10 +81,10 @@ namespace System.Net.Http
                     location = new Uri(request.RequestUri, location);
                 }
 
-                // Disallow automatic redirection from https to http
+                // Disallow automatic redirection from secure to non-secure schemes
                 bool allowed =
-                    (request.RequestUri.Scheme == UriScheme.Http && (location.Scheme == UriScheme.Http || location.Scheme == UriScheme.Https)) ||
-                    (request.RequestUri.Scheme == UriScheme.Https && location.Scheme == UriScheme.Https);
+                    (HttpUtilities.IsSupportedNonSecureScheme(request.RequestUri.Scheme) && HttpUtilities.IsSupportedScheme(location.Scheme)) ||
+                    (HttpUtilities.IsSupportedSecureScheme(request.RequestUri.Scheme) && HttpUtilities.IsSupportedSecureScheme(location.Scheme));
                 if (!allowed)
                 {
                     break;

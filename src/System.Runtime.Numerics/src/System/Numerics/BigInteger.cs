@@ -10,7 +10,7 @@ namespace System.Numerics
 {
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Numerics, Version=4.0.0.0, PublicKeyToken=b77a5c561934e089")]
-    public struct BigInteger : IFormattable, IComparable, IComparable<BigInteger>, IEquatable<BigInteger>
+    public readonly struct BigInteger : IFormattable, IComparable, IComparable<BigInteger>, IEquatable<BigInteger>
     {
         private const int knMaskHighBit = int.MinValue;
         private const uint kuMaskHighBit = unchecked((uint)int.MinValue);
@@ -349,23 +349,32 @@ namespace System.Numerics
                     while (len >= 0 && val[len] == 0) len--;
                     len++;
 
-                    if (len == 1 && unchecked((int)(val[0])) > 0)
+                    if (len == 1)
                     {
-                        if (val[0] == 1 /* abs(-1) */)
+                        switch (val[0])
                         {
-                            this = s_bnMinusOneInt;
-                        }
-                        else if (val[0] == kuMaskHighBit) // abs(Int32.MinValue)
-                        {
-                            this = s_bnMinInt;
-                        }
-                        else
-                        {
-                            _sign = (-1) * ((int)val[0]);
-                            _bits = null;
+                            case 1: // abs(-1)
+                                this = s_bnMinusOneInt;
+                                return;
+
+                            case kuMaskHighBit: // abs(Int32.MinValue)
+                                this = s_bnMinInt;
+                                return;
+
+                            default:
+                                if (unchecked((int)val[0]) > 0)
+                                {
+                                    _sign = (-1) * ((int)val[0]);
+                                    _bits = null;
+                                    AssertValid();
+                                    return;
+                                }
+
+                                break;
                         }
                     }
-                    else if (len != val.Length)
+
+                    if (len != val.Length)
                     {
                         _sign = -1;
                         _bits = new uint[len];
