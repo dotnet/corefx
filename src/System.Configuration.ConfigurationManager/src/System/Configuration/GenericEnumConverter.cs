@@ -27,32 +27,24 @@ namespace System.Configuration
 
         public override object ConvertFrom(ITypeDescriptorContext ctx, CultureInfo ci, object data)
         {
-            object result = null;
-            bool valueIsInvalid = true;
-
             // For any error, throw the ArgumentException with SR.Invalid_enum_value
-            try
+            if ((data is string value) && (value.Length > 0))
             {
-                if ((data is string value) && (value.Length > 0))
+                // Disallow numeric values and whitespace at start and end.
+                if ((!char.IsDigit(value[0])) && (value[0] != '-') && (value[0] != '+') &&
+                    (!char.IsWhiteSpace(value[0])) && (!char.IsWhiteSpace(value[value.Length - 1])))
                 {
-                    // Disallow numeric values and whitespace at start and end.
-                    if ((!char.IsDigit(value[0])) && (value[0] != '-') && (value[0] != '+') &&
-                        (!char.IsWhiteSpace(value[0])) && (!char.IsWhiteSpace(value[value.Length - 1])))
+                    try
                     {
-                        result = Enum.Parse(_enumType, value);
-                        valueIsInvalid = false;
+                        return Enum.Parse(_enumType, value);
+                    }
+                    catch
+                    {
+                        // Exception from parse. Will throw more appropriate exception below.
                     }
                 }
             }
-            catch
-            {
-            }
-
-            if (valueIsInvalid)
-            {
-                throw CreateExceptionForInvalidValue();
-            }
-            return result;
+            throw CreateExceptionForInvalidValue();
         }
 
         private ArgumentException CreateExceptionForInvalidValue()
