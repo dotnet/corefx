@@ -455,12 +455,6 @@ namespace System.Text.RegularExpressions
             int advance = -1;
             for (; ;)
             {
-#if DEBUG
-                if (runmatch.Debug)
-                {
-                    DumpState();
-                }
-#endif
                 if (advance >= 0)
                 {
                     // https://github.com/dotnet/coreclr/pull/14850#issuecomment-342256447
@@ -468,6 +462,12 @@ namespace System.Text.RegularExpressions
                     Advance(advance);
                     advance = -1;
                 }
+#if DEBUG
+                if (runmatch.Debug)
+                {
+                    DumpState();
+                }
+#endif
 
                 CheckTimeout();
 
