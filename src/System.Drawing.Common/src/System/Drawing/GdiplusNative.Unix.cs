@@ -15,8 +15,13 @@ namespace System.Drawing
         {
             private const string LibraryName = "libgdiplus";
             public static IntPtr Display = IntPtr.Zero;
+
             // Indicates whether X11 is available. It's available on Linux but not on recent macOS versions
-            public static bool UseX11Drawable = true;
+            // When set to false, where Carbon Drawing is used instead.
+            // macOS users can force X11 by setting the SYSTEM_DRAWING_COMMON_FORCE_X11 flag.
+            public static bool UseX11Drawable { get; } =
+                !RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ||
+                Environment.GetEnvironmentVariable("SYSTEM_DRAWING_COMMON_FORCE_X11") != null;
 
             private static IntPtr LoadNativeLibrary()
             {
@@ -47,15 +52,7 @@ namespace System.Drawing
 
             private static void PlatformInitialize()
             {
-                InitializeSystemContext();
                 LoadFunctionPointers();
-            }
-
-            private static void InitializeSystemContext()
-            {
-                // We use X11 on all platforms except for macOS, where Carbon Drawing can be used.
-                // On macOS, users can force X11 by setting the SYSTEM_DRAWING_COMMON_FORCE_X11 flag.
-                UseX11Drawable = !RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || Environment.GetEnvironmentVariable("SYSTEM_DRAWING_COMMON_FORCE_X11") != null;
             }
 
             private static void LoadFunctionPointers()

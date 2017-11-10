@@ -199,7 +199,7 @@ namespace System.Drawing
             }
             else
             {
-                throw new NotImplementedException();
+                throw new PlatformNotSupportedException();
             }
         }
 
@@ -224,18 +224,6 @@ namespace System.Drawing
             visual.visualid = LibX11Functions.XVisualIDFromVisual(defvisual);
             vPtr = LibX11Functions.XGetVisualInfo(SafeNativeMethods.Gdip.Display, 0x1 /* VisualIDMask */, ref visual, ref nitems);
             visual = (XVisualInfo)Marshal.PtrToStructure(vPtr, typeof(XVisualInfo));
-#if false
-            Console.WriteLine ("visual\t{0}", visual.visual);
-            Console.WriteLine ("visualid\t{0}", visual.visualid);
-            Console.WriteLine ("screen\t{0}", visual.screen);
-            Console.WriteLine ("depth\t{0}", visual.depth);
-            Console.WriteLine ("klass\t{0}", visual.klass);
-            Console.WriteLine ("red_mask\t{0:X}", visual.red_mask);
-            Console.WriteLine ("green_mask\t{0:X}", visual.green_mask);
-            Console.WriteLine ("blue_mask\t{0:X}", visual.blue_mask);
-            Console.WriteLine ("colormap_size\t{0}", visual.colormap_size);
-            Console.WriteLine ("bits_per_rgb\t{0}", visual.bits_per_rgb);
-#endif
             image = LibX11Functions.XGetImage(SafeNativeMethods.Gdip.Display, window, sourceX, sourceY, blockRegionSize.Width,
                 blockRegionSize.Height, AllPlanes, 2 /* ZPixmap*/);
             if (image == IntPtr.Zero)
