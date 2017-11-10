@@ -1896,15 +1896,7 @@ namespace System.Data.SqlClient
 
             try
             {
-                string errorMsg;
-                if (isUdtTypeName)
-                {
-                    errorMsg = SR.SQL_UDTTypeName;
-                }
-                else
-                {
-                    errorMsg = SR.SQL_TypeName;
-                }
+                string errorMsg = isUdtTypeName ? SR.SQL_UDTTypeName : SR.SQL_TypeName;
                 return MultipartIdentifier.ParseMultipartIdentifier(typeName, "[\"", "]\"", '.', 3, true, errorMsg, true);
             }
             catch (ArgumentException)

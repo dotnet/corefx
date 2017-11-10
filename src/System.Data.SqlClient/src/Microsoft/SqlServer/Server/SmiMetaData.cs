@@ -116,94 +116,64 @@ namespace Microsoft.SqlServer.Server
 
         // character defaults hook thread-local culture to get collation
         internal static SmiMetaData DefaultChar
-        {
-            get
-            {
-                return new SmiMetaData(
-                        DefaultChar_NoCollation.SqlDbType,
-                        DefaultChar_NoCollation.MaxLength,
-                        DefaultChar_NoCollation.Precision,
-                        DefaultChar_NoCollation.Scale,
-                        CultureInfo.CurrentCulture.LCID,
-                        SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth,
-                        null);
-            }
-        }
+            => new SmiMetaData(
+                DefaultChar_NoCollation.SqlDbType,
+                DefaultChar_NoCollation.MaxLength,
+                DefaultChar_NoCollation.Precision,
+                DefaultChar_NoCollation.Scale,
+                CultureInfo.CurrentCulture.LCID,
+                SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth,
+                null);
 
         internal static SmiMetaData DefaultNChar
-        {
-            get
-            {
-                return new SmiMetaData(
-                        DefaultNChar_NoCollation.SqlDbType,
-                        DefaultNChar_NoCollation.MaxLength,
-                        DefaultNChar_NoCollation.Precision,
-                        DefaultNChar_NoCollation.Scale,
-                        CultureInfo.CurrentCulture.LCID,
-                        SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth,
-                        null);
-            }
-        }
+            => new SmiMetaData(
+                DefaultNChar_NoCollation.SqlDbType,
+                DefaultNChar_NoCollation.MaxLength,
+                DefaultNChar_NoCollation.Precision,
+                DefaultNChar_NoCollation.Scale,
+                CultureInfo.CurrentCulture.LCID,
+                SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth,
+                null);
 
         internal static SmiMetaData DefaultNText
-        {
-            get
-            {
-                return new SmiMetaData(
-                        DefaultNText_NoCollation.SqlDbType,
-                        DefaultNText_NoCollation.MaxLength,
-                        DefaultNText_NoCollation.Precision,
-                        DefaultNText_NoCollation.Scale,
-                        CultureInfo.CurrentCulture.LCID,
-                        SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth,
-                        null);
-            }
-        }
+            => new SmiMetaData(
+                DefaultNText_NoCollation.SqlDbType,
+                DefaultNText_NoCollation.MaxLength,
+                DefaultNText_NoCollation.Precision,
+                DefaultNText_NoCollation.Scale,
+                CultureInfo.CurrentCulture.LCID,
+                SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth,
+                null);
 
         internal static SmiMetaData DefaultNVarChar
-        {
-            get
-            {
-                return new SmiMetaData(
-                        DefaultNVarChar_NoCollation.SqlDbType,
-                        DefaultNVarChar_NoCollation.MaxLength,
-                        DefaultNVarChar_NoCollation.Precision,
-                        DefaultNVarChar_NoCollation.Scale,
-                        CultureInfo.CurrentCulture.LCID,
-                        SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth,
-                        null);
-            }
-        }
+            => new SmiMetaData(
+                DefaultNVarChar_NoCollation.SqlDbType,
+                DefaultNVarChar_NoCollation.MaxLength,
+                DefaultNVarChar_NoCollation.Precision,
+                DefaultNVarChar_NoCollation.Scale,
+                CultureInfo.CurrentCulture.LCID,
+                SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth,
+                null);
 
         internal static SmiMetaData DefaultText
-        {
-            get
-            {
-                return new SmiMetaData(
-                        DefaultText_NoCollation.SqlDbType,
-                        DefaultText_NoCollation.MaxLength,
-                        DefaultText_NoCollation.Precision,
-                        DefaultText_NoCollation.Scale,
-                        CultureInfo.CurrentCulture.LCID,
-                        SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth,
-                        null);
-            }
-        }
+            => new SmiMetaData(
+                DefaultText_NoCollation.SqlDbType,
+                DefaultText_NoCollation.MaxLength,
+                DefaultText_NoCollation.Precision,
+                DefaultText_NoCollation.Scale,
+                CultureInfo.CurrentCulture.LCID,
+                SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth,
+                null);
 
         internal static SmiMetaData DefaultVarChar
-        {
-            get
-            {
-                return new SmiMetaData(
-                        DefaultVarChar_NoCollation.SqlDbType,
-                        DefaultVarChar_NoCollation.MaxLength,
-                        DefaultVarChar_NoCollation.Precision,
-                        DefaultVarChar_NoCollation.Scale,
-                        CultureInfo.CurrentCulture.LCID,
-                        SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth,
-                        null);
-            }
-        }
+            => new SmiMetaData(
+                DefaultVarChar_NoCollation.SqlDbType,
+                DefaultVarChar_NoCollation.MaxLength,
+                DefaultVarChar_NoCollation.Precision,
+                DefaultVarChar_NoCollation.Scale,
+                CultureInfo.CurrentCulture.LCID,
+                SqlCompareOptions.IgnoreCase | SqlCompareOptions.IgnoreKanaType | SqlCompareOptions.IgnoreWidth,
+                null);
 
         // The one and only constructor for use by outside code.
         //
@@ -244,65 +214,67 @@ namespace Microsoft.SqlServer.Server
 
         // SMI V100 (aka V3) constructor.  Superceded in V200.
         internal SmiMetaData(
-                                SqlDbType dbType,
-                                long maxLength,
-                                byte precision,
-                                byte scale,
-                                long localeId,
-                                SqlCompareOptions compareOptions,
-                                Type userDefinedType) :
-                        this(dbType,
-                                maxLength,
-                                precision,
-                                scale,
-                                localeId,
-                                compareOptions,
-                                userDefinedType,
-                                false,
-                                null,
-                                null)
+            SqlDbType dbType,
+            long maxLength,
+            byte precision,
+            byte scale,
+            long localeId,
+            SqlCompareOptions compareOptions,
+            Type userDefinedType)
+            : this(
+                dbType,
+                maxLength,
+                precision,
+                scale,
+                localeId,
+                compareOptions,
+                userDefinedType,
+                false,
+                null,
+                null)
         {
         }
 
         // SMI V200 ctor.
         internal SmiMetaData(
-                    SqlDbType dbType,
-                    long maxLength,
-                    byte precision,
-                    byte scale,
-                    long localeId,
-                    SqlCompareOptions compareOptions,
-                    Type userDefinedType,
-                    bool isMultiValued,
-                    IList<SmiExtendedMetaData> fieldTypes,
-                    SmiMetaDataPropertyCollection extendedProperties) :
-                    this(dbType,
-                    maxLength,
-                    precision,
-                    scale,
-                    localeId,
-                    compareOptions,
-                    userDefinedType,
-                    null,
-                    isMultiValued,
-                    fieldTypes,
-                    extendedProperties)
+            SqlDbType dbType,
+            long maxLength,
+            byte precision,
+            byte scale,
+            long localeId,
+            SqlCompareOptions compareOptions,
+            Type userDefinedType,
+            bool isMultiValued,
+            IList<SmiExtendedMetaData> fieldTypes,
+            SmiMetaDataPropertyCollection extendedProperties)
+            : this(
+                dbType,
+                maxLength,
+                precision,
+                scale,
+                localeId,
+                compareOptions,
+                userDefinedType,
+                null,
+                isMultiValued,
+                fieldTypes,
+                extendedProperties)
         {
         }
 
         // SMI V220 ctor.
         internal SmiMetaData(
-                                SqlDbType dbType,
-                                long maxLength,
-                                byte precision,
-                                byte scale,
-                                long localeId,
-                                SqlCompareOptions compareOptions,
-                                Type userDefinedType,
-                                string udtAssemblyQualifiedName,
-                                bool isMultiValued,
-                                IList<SmiExtendedMetaData> fieldTypes,
-                                SmiMetaDataPropertyCollection extendedProperties)
+            SqlDbType dbType,
+            long maxLength,
+            byte precision,
+            byte scale,
+            long localeId,
+            SqlCompareOptions compareOptions,
+            Type userDefinedType,
+            string udtAssemblyQualifiedName,
+            bool isMultiValued,
+            IList<SmiExtendedMetaData> fieldTypes,
+            SmiMetaDataPropertyCollection extendedProperties)
         {
             Debug.Assert(IsSupportedDbType(dbType), "Invalid SqlDbType: " + dbType);
 
@@ -728,8 +700,8 @@ namespace Microsoft.SqlServer.Server
             string name,
             string typeSpecificNamePart1,
             string typeSpecificNamePart2,
-            string typeSpecificNamePart3) :
-            this(
+            string typeSpecificNamePart3)
+            : this(
                 dbType,
                 maxLength,
                 precision,
@@ -762,8 +734,8 @@ namespace Microsoft.SqlServer.Server
             string name,
             string typeSpecificNamePart1,
             string typeSpecificNamePart2,
-            string typeSpecificNamePart3) :
-            this(
+            string typeSpecificNamePart3)
+            : this(
                 dbType,
                 maxLength,
                 precision,
@@ -798,8 +770,9 @@ namespace Microsoft.SqlServer.Server
             string name,
             string typeSpecificNamePart1,
             string typeSpecificNamePart2,
-            string typeSpecificNamePart3) :
-            base(dbType,
+            string typeSpecificNamePart3)
+            : base(
+                dbType,
                 maxLength,
                 precision,
                 scale,
@@ -852,8 +825,9 @@ namespace Microsoft.SqlServer.Server
             string typeSpecificNamePart1,
             string typeSpecificNamePart2,
             string typeSpecificNamePart3,
-            ParameterDirection direction) :
-            this(dbType,
+            ParameterDirection direction)
+            : this(
+                dbType,
                 maxLength,
                 precision,
                 scale,
@@ -889,8 +863,9 @@ namespace Microsoft.SqlServer.Server
             string typeSpecificNamePart1,
             string typeSpecificNamePart2,
             string typeSpecificNamePart3,
-            ParameterDirection direction) :
-            base(dbType,
+            ParameterDirection direction)
+            : base(
+                dbType,
                 maxLength,
                 precision,
                 scale,
@@ -957,8 +932,9 @@ namespace Microsoft.SqlServer.Server
             string tableName,
             string columnName,
             SqlBoolean isKey,
-            bool isIdentity) :
-            this(dbType,
+            bool isIdentity)
+            : this(
+                dbType,
                 maxLength,
                 precision,
                 scale,
@@ -1006,31 +982,32 @@ namespace Microsoft.SqlServer.Server
             string tableName,
             string columnName,
             SqlBoolean isKey,
-            bool isIdentity) :
-            this(dbType,
-                    maxLength,
-                    precision,
-                    scale,
-                    localeId,
-                    compareOptions,
-                    userDefinedType,
-                    null,
-                    isMultiValued,
-                    fieldMetaData,
-                    extendedProperties,
-                    name,
-                    typeSpecificNamePart1,
-                    typeSpecificNamePart2,
-                    typeSpecificNamePart3,
-                    allowsDBNull,
-                    serverName,
-                    catalogName,
-                    schemaName,
-                    tableName,
-                    columnName,
-                    isKey,
-                    isIdentity,
-                    false)
+            bool isIdentity)
+            : this(
+                dbType,
+                maxLength,
+                precision,
+                scale,
+                localeId,
+                compareOptions,
+                userDefinedType,
+                null,
+                isMultiValued,
+                fieldMetaData,
+                extendedProperties,
+                name,
+                typeSpecificNamePart1,
+                typeSpecificNamePart2,
+                typeSpecificNamePart3,
+                allowsDBNull,
+                serverName,
+                catalogName,
+                schemaName,
+                tableName,
+                columnName,
+                isKey,
+                isIdentity,
+                false)
         {
         }
 
@@ -1059,8 +1036,9 @@ namespace Microsoft.SqlServer.Server
             string columnName,
             SqlBoolean isKey,
             bool isIdentity,
-            bool isColumnSet) :
-            base(dbType,
+            bool isColumnSet)
+            : base(
+                dbType,
                 maxLength,
                 precision,
                 scale,
@@ -1141,8 +1119,9 @@ namespace Microsoft.SqlServer.Server
             bool isReadOnly,
             SqlBoolean isExpression,
             SqlBoolean isAliased,
-            SqlBoolean isHidden) :
-            this(dbType,
+            SqlBoolean isHidden)
+            : this(
+                dbType,
                 maxLength,
                 precision,
                 scale,
@@ -1198,35 +1177,36 @@ namespace Microsoft.SqlServer.Server
             bool isReadOnly,
             SqlBoolean isExpression,
             SqlBoolean isAliased,
-            SqlBoolean isHidden) :
-            this(dbType,
-                 maxLength,
-                 precision,
-                 scale,
-                 localeId,
-                 compareOptions,
-                 userDefinedType,
-                 null,
-                 isMultiValued,
-                 fieldMetaData,
-                 extendedProperties,
-                 name,
-                 typeSpecificNamePart1,
-                 typeSpecificNamePart2,
-                 typeSpecificNamePart3,
-                 allowsDBNull,
-                 serverName,
-                 catalogName,
-                 schemaName,
-                 tableName,
-                 columnName,
-                 isKey,
-                 isIdentity,
-                 false,
-                 isReadOnly,
-                 isExpression,
-                 isAliased,
-                 isHidden)
+            SqlBoolean isHidden)
+            : this(
+                dbType,
+                maxLength,
+                precision,
+                scale,
+                localeId,
+                compareOptions,
+                userDefinedType,
+                null,
+                isMultiValued,
+                fieldMetaData,
+                extendedProperties,
+                name,
+                typeSpecificNamePart1,
+                typeSpecificNamePart2,
+                typeSpecificNamePart3,
+                allowsDBNull,
+                serverName,
+                catalogName,
+                schemaName,
+                tableName,
+                columnName,
+                isKey,
+                isIdentity,
+                false,
+                isReadOnly,
+                isExpression,
+                isAliased,
+                isHidden)
         {
         }
 
@@ -1259,8 +1239,9 @@ namespace Microsoft.SqlServer.Server
             bool isReadOnly,
             SqlBoolean isExpression,
             SqlBoolean isAliased,
-            SqlBoolean isHidden) :
-            base(dbType,
+            SqlBoolean isHidden)
+            : base(
+                dbType,
                 maxLength,
                 precision,
                 scale,

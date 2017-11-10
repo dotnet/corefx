@@ -279,106 +279,67 @@ namespace Microsoft.SqlServer.Server
 
         public SqlCompareOptions CompareOptions
         {
-            get
-            {
-                return _eCompareOptions;
-            }
+            get => _eCompareOptions;
         }
 
         public DbType DbType
         {
-            get
-            {
-                return sxm_rgSqlDbTypeToDbType[(int)_sqlDbType];
-            }
+            get => sxm_rgSqlDbTypeToDbType[(int)_sqlDbType];
         }
 
         public bool IsUniqueKey
         {
-            get
-            {
-                return _isUniqueKey;
-            }
+            get => _isUniqueKey;
         }
 
         public long LocaleId
         {
-            get
-            {
-                return _lLocale;
-            }
+            get => _lLocale;
         }
 
         public static long Max
         {
-            get
-            {
-                return x_lMax;
-            }
+            get => x_lMax;
         }
 
         public long MaxLength
         {
-            get
-            {
-                return _lMaxLength;
-            }
+            get => _lMaxLength;
         }
 
         public string Name
         {
-            get
-            {
-                return _strName;
-            }
+            get => _strName;
         }
 
         public byte Precision
         {
-            get
-            {
-                return _bPrecision;
-            }
+            get => _bPrecision;
         }
 
         public byte Scale
         {
-            get
-            {
-                return _bScale;
-            }
+            get => _bScale;
         }
 
         public SortOrder SortOrder
         {
-            get
-            {
-                return _columnSortOrder;
-            }
+            get => _columnSortOrder;
         }
 
         public int SortOrdinal
         {
-            get
-            {
-                return _sortOrdinal;
-            }
+            get => _sortOrdinal;
         }
 
         public SqlDbType SqlDbType
         {
-            get
-            {
-                return _sqlDbType;
-            }
+            get => _sqlDbType;
         }
 
         public Type Type
         {
-            get
-            {
-                return _udtType;
-            }
+            get => _udtType;
         }
 
         public string TypeName
@@ -402,50 +363,32 @@ namespace Microsoft.SqlServer.Server
 
         internal string ServerTypeName
         {
-            get
-            {
-                return _serverTypeName;
-            }
+            get => _serverTypeName;
         }
 
         public bool UseServerDefault
         {
-            get
-            {
-                return _useServerDefault;
-            }
+            get => _useServerDefault;
         }
 
         public string XmlSchemaCollectionDatabase
         {
-            get
-            {
-                return _xmlSchemaCollectionDatabase;
-            }
+            get => _xmlSchemaCollectionDatabase;
         }
 
         public string XmlSchemaCollectionName
         {
-            get
-            {
-                return _xmlSchemaCollectionName;
-            }
+            get => _xmlSchemaCollectionName;
         }
 
         public string XmlSchemaCollectionOwningSchema
         {
-            get
-            {
-                return _xmlSchemaCollectionOwningSchema;
-            }
+            get => _xmlSchemaCollectionOwningSchema;
         }
 
         internal bool IsPartialLength
         {
-            get
-            {
-                return _bPartialLength;
-            }
+            get => _bPartialLength;
         }
 
         internal string UdtTypeName
@@ -1031,7 +974,7 @@ namespace Microsoft.SqlServer.Server
                     {
                         byte[] rgbValue = value.Value;
                         byte[] rgbNewValue = new byte[MaxLength];
-                        Array.Copy(rgbValue, rgbNewValue, rgbValue.Length);
+                        Buffer.BlockCopy(rgbValue, 0, rgbNewValue, 0, rgbValue.Length);
                         Array.Clear(rgbNewValue, rgbValue.Length, rgbNewValue.Length - rgbValue.Length);
                         return new SqlBinary(rgbNewValue);
                     }
@@ -1052,7 +995,7 @@ namespace Microsoft.SqlServer.Server
             {
                 byte[] rgbValue = value.Value;
                 byte[] rgbNewValue = new byte[MaxLength];
-                Array.Copy(rgbValue, rgbNewValue, (int)MaxLength);
+                Buffer.BlockCopy(rgbValue, 0, rgbNewValue, 0, (int)MaxLength);
                 value = new SqlBinary(rgbNewValue);
             }
 
@@ -1082,7 +1025,7 @@ namespace Microsoft.SqlServer.Server
                         if (value.MaxLength < MaxLength)
                         {
                             char[] rgchNew = new char[(int)MaxLength];
-                            Array.Copy(value.Buffer, rgchNew, (int)oldLength);
+                            Buffer.BlockCopy(value.Buffer, 0, rgchNew, 0, (int)oldLength);
                             value = new SqlChars(rgchNew);
                         }
 
@@ -1129,7 +1072,7 @@ namespace Microsoft.SqlServer.Server
                         if (value.MaxLength < MaxLength)
                         {
                             byte[] rgbNew = new byte[MaxLength];
-                            Array.Copy(value.Buffer, rgbNew, (int)oldLength);
+                            Buffer.BlockCopy(value.Buffer, 0, rgbNew, 0, (int)oldLength);
                             value = new SqlBytes(rgbNew);
                         }
 
@@ -1479,7 +1422,7 @@ namespace Microsoft.SqlServer.Server
                     if (value.Length < MaxLength)
                     {
                         byte[] rgbNewValue = new byte[MaxLength];
-                        Array.Copy(value, rgbNewValue, value.Length);
+                        Buffer.BlockCopy(value, 0, rgbNewValue, 0, value.Length);
                         Array.Clear(rgbNewValue, value.Length, (int)rgbNewValue.Length - value.Length);
                         return rgbNewValue;
                     }
@@ -1499,7 +1442,7 @@ namespace Microsoft.SqlServer.Server
             if (value.Length > MaxLength && Max != MaxLength)
             {
                 byte[] rgbNewValue = new byte[MaxLength];
-                Array.Copy(value, rgbNewValue, (int)MaxLength);
+                Buffer.BlockCopy(value, 0, rgbNewValue, 0, (int)MaxLength);
                 value = rgbNewValue;
             }
 
@@ -1534,7 +1477,7 @@ namespace Microsoft.SqlServer.Server
                     if (oldLength < MaxLength)
                     {
                         char[] rgchNew = new char[(int)MaxLength];
-                        Array.Copy(value, rgchNew, (int)oldLength);
+                        Buffer.BlockCopy(value, 0, rgchNew, 0, (int)oldLength);
 
                         // pad extra space
                         for (long i = oldLength; i < rgchNew.Length; i++)
@@ -1558,7 +1501,7 @@ namespace Microsoft.SqlServer.Server
             if (value.Length > MaxLength && Max != MaxLength)
             {
                 char[] rgchNewValue = new char[MaxLength];
-                Array.Copy(value, rgchNewValue, (int)MaxLength);
+                Buffer.BlockCopy(value, 0, rgchNewValue, 0, (int)MaxLength);
                 value = rgchNewValue;
             }
 

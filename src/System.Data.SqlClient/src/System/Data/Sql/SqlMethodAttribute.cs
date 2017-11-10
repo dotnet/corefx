@@ -23,38 +23,20 @@ namespace Microsoft.SqlServer.Server
 
         public bool OnNullCall
         {
-            get
-            {
-                return _isCalledOnNullInputs;
-            }
-            set
-            {
-                _isCalledOnNullInputs = value;
-            }
+            get => _isCalledOnNullInputs;
+            set => _isCalledOnNullInputs = value;
         }
 
         public bool IsMutator
         {
-            get
-            {
-                return _isMutator;
-            }
-            set
-            {
-                _isMutator = value;
-            }
+            get => _isMutator;
+            set => _isMutator = value;
         }
 
         public bool InvokeIfReceiverIsNull
         {
-            get
-            {
-                return _shouldInvokeIfReceiverIsNull;
-            }
-            set
-            {
-                _shouldInvokeIfReceiverIsNull = value;
-            }
+            get => _shouldInvokeIfReceiverIsNull;
+            set => _shouldInvokeIfReceiverIsNull = value;
         }
     }
 }

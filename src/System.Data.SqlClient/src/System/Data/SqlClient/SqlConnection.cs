@@ -139,49 +139,31 @@ namespace System.Data.SqlClient
 
         internal bool AsyncCommandInProgress
         {
-            get
-            {
-                return (_AsyncCommandInProgress);
-            }
-            set
-            {
-                _AsyncCommandInProgress = value;
-            }
+            get => _AsyncCommandInProgress;
+            set => _AsyncCommandInProgress = value;
         }
 
         internal SqlConnectionString.TransactionBindingEnum TransactionBinding
         {
-            get
-            {
-                return ((SqlConnectionString)ConnectionOptions).TransactionBinding;
-            }
+            get => ((SqlConnectionString)ConnectionOptions).TransactionBinding;
         }
 
         internal SqlConnectionString.TypeSystem TypeSystem
         {
-            get
-            {
-                return ((SqlConnectionString)ConnectionOptions).TypeSystemVersion;
-            }
+            get => ((SqlConnectionString)ConnectionOptions).TypeSystemVersion;
         }
 
         internal Version TypeSystemAssemblyVersion
         {
-            get
-            {
-                return ((SqlConnectionString)ConnectionOptions).TypeSystemAssemblyVersion;
-            }
+            get => ((SqlConnectionString)ConnectionOptions).TypeSystemAssemblyVersion;
         }
 
         internal int ConnectRetryInterval
         {
-            get
-            {
-                return ((SqlConnectionString)ConnectionOptions).ConnectRetryInterval;
-            }
+            get => ((SqlConnectionString)ConnectionOptions).ConnectRetryInterval;
         }
 
-        override public string ConnectionString
+        public override string ConnectionString
         {
             get
             {
@@ -195,7 +177,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public int ConnectionTimeout
+        public override int ConnectionTimeout
         {
             get
             {
@@ -204,7 +186,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public string Database
+        public override string Database
         {
             // if the connection is open, we need to ask the inner connection what it's
             // current catalog is because it may have gotten changed, otherwise we can
@@ -227,7 +209,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public string DataSource
+        public override string DataSource
         {
             get
             {
@@ -292,15 +274,12 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public string ServerVersion
+        public override string ServerVersion
         {
-            get
-            {
-                return GetOpenTdsConnection().ServerVersion;
-            }
+            get => GetOpenTdsConnection().ServerVersion;
         }
 
-        override public ConnectionState State
+        public override ConnectionState State
         {
             get
             {
@@ -316,10 +295,7 @@ namespace System.Data.SqlClient
 
         internal SqlStatistics Statistics
         {
-            get
-            {
-                return _statistics;
-            }
+            get => _statistics;
         }
 
         public string WorkstationId
@@ -337,7 +313,7 @@ namespace System.Data.SqlClient
 
         protected override DbProviderFactory DbProviderFactory
         {
-            get { return SqlClientFactory.Instance; }
+            get => SqlClientFactory.Instance;
         }
 
         // SqlCredential: Pair User Id and password in SecureString which are to be used for SQL authentication
@@ -350,23 +326,14 @@ namespace System.Data.SqlClient
 
         public bool FireInfoMessageEventOnUserErrors
         {
-            get
-            {
-                return _fireInfoMessageEventOnUserErrors;
-            }
-            set
-            {
-                _fireInfoMessageEventOnUserErrors = value;
-            }
+            get => _fireInfoMessageEventOnUserErrors;
+            set => _fireInfoMessageEventOnUserErrors = value;
         }
 
         // Approx. number of times that the internal connection has been reconnected
         internal int ReconnectCount
         {
-            get
-            {
-                return _reconnectCount;
-            }
+            get => _reconnectCount;
         }
 
         internal bool ForceNewConnection { get; set; }
@@ -450,7 +417,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        override public void ChangeDatabase(string database)
+        public override void ChangeDatabase(string database)
         {
             SqlStatistics statistics = null;
             RepairInnerConnection();
@@ -492,7 +459,7 @@ namespace System.Data.SqlClient
             InnerConnection.CloseConnection(this, ConnectionFactory);
         }
 
-        override public void Close()
+        public override void Close()
         {
             ConnectionState previousState = State;
             Guid operationId = default(Guid);
@@ -593,7 +560,7 @@ namespace System.Data.SqlClient
         }
 
 
-        override public void Open()
+        public override void Open()
         {
             Guid operationId = s_diagnosticListener.WriteConnectionOpenBefore(this);
 

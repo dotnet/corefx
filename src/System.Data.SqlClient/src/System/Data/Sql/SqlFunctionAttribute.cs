@@ -46,86 +46,44 @@ namespace Microsoft.SqlServer.Server
 
         public bool IsDeterministic
         {
-            get
-            {
-                return _isDeterministic;
-            }
-            set
-            {
-                _isDeterministic = value;
-            }
+            get => _isDeterministic;
+            set => _isDeterministic = value;
         }
 
         public DataAccessKind DataAccess
         {
-            get
-            {
-                return _dataAccess;
-            }
-            set
-            {
-                _dataAccess = value;
-            }
+            get => _dataAccess;
+            set => _dataAccess = value;
         }
 
         public SystemDataAccessKind SystemDataAccess
         {
-            get
-            {
-                return _systemDataAccess;
-            }
-            set
-            {
-                _systemDataAccess = value;
-            }
+            get => _systemDataAccess;
+            set => _systemDataAccess = value;
         }
 
         public bool IsPrecise
         {
-            get
-            {
-                return _isPrecise;
-            }
-            set
-            {
-                _isPrecise = value;
-            }
+            get => _isPrecise;
+            set => _isPrecise = value;
         }
 
         public string Name
         {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                _name = value;
-            }
+            get => _name;
+            set => _name = value;
         }
 
         public string TableDefinition
         {
-            get
-            {
-                return _tableDefinition;
-            }
-            set
-            {
-                _tableDefinition = value;
-            }
+            get => _tableDefinition;
+            set => _tableDefinition = value;
         }
 
         public string FillRowMethodName
         {
-            get
-            {
-                return _fillRowMethodName;
-            }
-            set
-            {
-                _fillRowMethodName = value;
-            }
+            get => _fillRowMethodName;
+            set => _fillRowMethodName = value;
         }
     }
 }
