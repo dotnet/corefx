@@ -9,7 +9,7 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_DlOpen")]
+        [DllImport(Libraries.Libdl, EntryPoint = "dlopen")]
         internal static extern IntPtr DlOpen(string fileName, DlOpenFlags flag);
     }
 }

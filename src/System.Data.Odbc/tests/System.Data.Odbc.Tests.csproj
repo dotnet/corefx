@@ -23,6 +23,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.DlOpen.cs">
       <Link>Common\Interop\Unix\libdl\Interop.DlOpen.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.DlOpenFlags.cs">
+      <Link>Common\Interop\Unix\libdl\Interop.DlOpenFlags.cs</Link>
+    </Compile>
     <Compile Include="TestCommon\DataTestUtility.cs" />
     <Compile Include="TestCommon\CheckConnStrSetupFactAttribute.cs" />
     <Compile Include="OdbcParameterTests.cs" />
