@@ -6,15 +6,10 @@ $packagesCachePath = -join($repoRoot, "\packages")
 $localPackageSourcePath = -join($repoRoot, "\bin\packages\Debug\")
 $packageName = "Microsoft.Windows.Compatibility"
 
-function _pathExists($path)
-{
-	return Test-Path -Path $path
-}
-
-if (!(_pathExists $localPackageSourcePath))
+if (!(Test-Path $localPackageSourcePath))
 {
 	$localPackageSourcePath = -join($repoRoot, "\bin\packages\Release\")
-	if (!(_pathExists $localPackageSourcePath))
+	if (!(Test-Path $localPackageSourcePath))
 	{
 		Write-Error -Message "Local package source must exist.";
 		Exit;
@@ -24,7 +19,7 @@ if (!(_pathExists $localPackageSourcePath))
 function _getPackageVersion()
 {
 	$searchPattern = -join($localPackageSourcePath, $packageName, ".[0-9].[0-9].[0-9]*.nupkg")
-	if (!(_pathExists $searchPattern))
+	if (!(Test-Path $searchPattern))
 	{
 		Write-Error -Message (-join("Didn't find package: Microsoft.Windows.Compatibility in source: ", $localPackageSourcePath, " please run build -allConfigurations"))
 		Exit;
@@ -47,7 +42,7 @@ function _restoreAndPublish($targetFramework, $outputType, $rid, $runtimeFramewo
 
     $outputPath = -join($PSScriptRoot, "\bin\Debug\", $targetFramework, "\", $rid, "\publish\refs\")
 
-    if (!(_pathExists $outputPath))
+    if (!(Test-Path $outputPath))
     {
     	Write-Error -Message (-join("There was an error while publishing for framework: ", $targetFramework))
 		Exit;
@@ -57,7 +52,7 @@ function _restoreAndPublish($targetFramework, $outputType, $rid, $runtimeFramewo
 	
 	$refPath = -join($repoRoot, "\bin\ref\ApiPort\", $refDirName)
 
-	if (_pathExists $refPath)
+	if (Test-Path $refPath)
 	{
 		Remove-Item $refPath -r -force
 	}
@@ -66,5 +61,5 @@ function _restoreAndPublish($targetFramework, $outputType, $rid, $runtimeFramewo
 	Copy-Item (-join($outputPath, "*")) $refPath
 }
 
-_restoreAndPublish "netcoreapp2.0" "Exe" $winRID "2.0.0" ".NET Core App 2.0 + Microsoft.Windows.Compatibility"
-_restoreAndPublish "netstandard2.0" "Library" $winRID "2.0.0" ".NET Standard 2.0 + Microsoft.Windows.Compatibility"
+_restoreAndPublish "netcoreapp2.0" "Exe" $winRID "2.0.0" "netcoreapp20_compat"
+_restoreAndPublish "netstandard2.0" "Library" $winRID "2.0.0" "netstandard20_compat"
