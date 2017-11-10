@@ -197,19 +197,10 @@ namespace System.Drawing
             {
                 CopyFromScreenX11(sourceX, sourceY, destinationX, destinationY, blockRegionSize, copyPixelOperation);
             }
-            else if (SafeNativeMethods.Gdip.UseCarbonDrawable)
+            else
             {
-                CopyFromScreenMac(sourceX, sourceY, destinationX, destinationY, blockRegionSize, copyPixelOperation);
+                throw new NotImplementedException();
             }
-            else if (SafeNativeMethods.Gdip.UseCocoaDrawable)
-            {
-                CopyFromScreenMac(sourceX, sourceY, destinationX, destinationY, blockRegionSize, copyPixelOperation);
-            }
-        }
-
-        private void CopyFromScreenMac(int sourceX, int sourceY, int destinationX, int destinationY, Size blockRegionSize, CopyPixelOperation copyPixelOperation)
-        {
-            throw new NotImplementedException();
         }
 
         private void CopyFromScreenX11(int sourceX, int sourceY, int destinationX, int destinationY, Size blockRegionSize, CopyPixelOperation copyPixelOperation)
@@ -298,7 +289,7 @@ namespace System.Drawing
             int status;
             if (!disposed)
             {
-                if (SafeNativeMethods.Gdip.UseCarbonDrawable || SafeNativeMethods.Gdip.UseCocoaDrawable)
+                if (!SafeNativeMethods.Gdip.UseX11Drawable)
                 {
                     Flush();
                     if (maccontext != null)
@@ -1711,18 +1702,7 @@ namespace System.Drawing
         {
             IntPtr graphics;
 
-            if (SafeNativeMethods.Gdip.UseCocoaDrawable)
-            {
-                CocoaContext context = MacSupport.GetCGContextForNSView(hwnd);
-                SafeNativeMethods.Gdip.GdipCreateFromContext_macosx(context.ctx, context.width, context.height, out graphics);
-
-                Graphics g = new Graphics(graphics);
-                g.maccontext = context;
-
-                return g;
-            }
-
-            if (SafeNativeMethods.Gdip.UseCarbonDrawable)
+            if (!SafeNativeMethods.Gdip.UseX11Drawable)
             {
                 CarbonContext context = MacSupport.GetCGContextForView(hwnd);
                 SafeNativeMethods.Gdip.GdipCreateFromContext_macosx(context.ctx, context.width, context.height, out graphics);
@@ -1732,7 +1712,7 @@ namespace System.Drawing
 
                 return g;
             }
-            if (SafeNativeMethods.Gdip.UseX11Drawable)
+            else
             {
                 if (SafeNativeMethods.Gdip.Display == IntPtr.Zero)
                 {
