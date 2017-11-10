@@ -1726,13 +1726,7 @@ namespace System.Drawing
                 }
 
                 return FromXDrawable(hwnd, SafeNativeMethods.Gdip.Display);
-
             }
-
-            int status = SafeNativeMethods.Gdip.GdipCreateFromHWND(hwnd, out graphics);
-            SafeNativeMethods.Gdip.CheckStatus(status);
-
-            return new Graphics(graphics);
         }
 
         [EditorBrowsable(EditorBrowsableState.Advanced)]
