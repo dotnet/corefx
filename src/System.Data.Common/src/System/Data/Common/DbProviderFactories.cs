@@ -19,28 +19,18 @@ namespace System.Data.Common
         private const string Instance = "Instance";
 
         private static DataTable _providerTable = GetInitialProviderTable();
-        private static ReaderWriterLockSlim _providerTableLock = new ReaderWriterLockSlim();
+        private static readonly ReaderWriterLockSlim _providerTableLock = new ReaderWriterLockSlim();
+
+        
+        public static bool TryGetFactory(string providerInvariantName, out DbProviderFactory factory)
+        {
+            factory = DbProviderFactories.GetFactory(providerInvariantName, throwOnError: false);
+            return factory != null;
+        }
 
         public static DbProviderFactory GetFactory(string providerInvariantName)
         {
-            ADP.CheckArgumentLength(providerInvariantName, nameof(providerInvariantName));
-            try
-            {
-                _providerTableLock.EnterReadLock();
-                if (null != _providerTable)
-                {
-                    DataRow providerRow = _providerTable.Rows.Find(providerInvariantName);
-                    if (null != providerRow)
-                    {
-                        return DbProviderFactories.GetFactory(providerRow);
-                    }
-                }
-                throw ADP.Argument(SR.Format(SR.ADP_DbProviderFactories_InvariantNameNotFound, providerInvariantName));
-            }
-            finally
-            {
-                _providerTableLock.ExitReadLock();
-            }
+            return DbProviderFactories.GetFactory(providerInvariantName, throwOnError:true);
         }
 
         public static DbProviderFactory GetFactory(DataRow providerRow)
@@ -48,35 +38,43 @@ namespace System.Data.Common
             ADP.CheckArgumentNull(providerRow, nameof(providerRow));
             // no need for locking on the table, as the row can only be from a DataTable that's a copy of the one contained in this class.
             DataColumn assemblyQualifiedNameColumn = providerRow.Table.Columns[AssemblyQualifiedName];
-            if (null != assemblyQualifiedNameColumn)
+            if (null == assemblyQualifiedNameColumn)
             {
-                // column value may not be a string
-                string assemblyQualifiedName = providerRow[assemblyQualifiedNameColumn] as string;
-                if (!string.IsNullOrWhiteSpace(assemblyQualifiedName))
-                {
-                    Type providerType = Type.GetType(assemblyQualifiedName);
-                    if (null != providerType)
-                    {
-                        System.Reflection.FieldInfo providerInstance = providerType.GetField(Instance, System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                        if (null != providerInstance)
-                        {
-                            if (providerInstance.FieldType.IsSubclassOf(typeof(DbProviderFactory)))
-                            {
-                                object factory = providerInstance.GetValue(null);
-                                if (null != factory)
-                                {
-                                    return (DbProviderFactory)factory;
-                                }
-                                // else throw DataProviderInvalid
-                            }
-                            // else throw DataProviderInvalid
-                        }
-                        throw ADP.InvalidOperation(SR.ADP_DbProviderFactories_NoInstance);
-                    }
-                    throw ADP.Argument(SR.Format(SR.ADP_DbProviderFactories_FactoryNotLoadable, assemblyQualifiedName));
-                }
+                throw ADP.Argument(SR.ADP_DbProviderFactories_NoAssemblyQualifiedName);
             }
-            throw ADP.Argument(SR.ADP_DbProviderFactories_NoAssemblyQualifiedName);
+
+            string assemblyQualifiedName = providerRow[assemblyQualifiedNameColumn] as string;
+            if (string.IsNullOrWhiteSpace(assemblyQualifiedName))
+            {
+                throw ADP.Argument(SR.ADP_DbProviderFactories_NoAssemblyQualifiedName);
+            }
+            Type providerType = Type.GetType(assemblyQualifiedName);
+            if (null == providerType)
+            {
+                throw ADP.Argument(SR.Format(SR.ADP_DbProviderFactories_FactoryNotLoadable, assemblyQualifiedName));
+            }
+            System.Reflection.FieldInfo providerInstance = providerType.GetField(Instance, System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | 
+                                                                                           System.Reflection.BindingFlags.Static);
+            if (null == providerInstance)
+            {
+                throw ADP.InvalidOperation(SR.ADP_DbProviderFactories_NoInstance);
+            }
+            if (!providerInstance.FieldType.IsSubclassOf(typeof(DbProviderFactory)))
+            {
+                throw ADP.InvalidOperation(SR.ADP_DbProviderFactories_NoInstance);
+            }
+            object factory = providerInstance.GetValue(null);
+            if (null == factory)
+            {
+                throw ADP.InvalidOperation(SR.ADP_DbProviderFactories_NoInstance);
+            }
+            return (DbProviderFactory)factory;
+        }
+
+        public static DbProviderFactory GetFactory(DbConnection connection)
+        {
+            ADP.CheckArgumentNull(connection, nameof(connection));
+            return connection.ProviderFactory;
         }
 
         public static DataTable GetFactoryClasses()
@@ -92,56 +90,90 @@ namespace System.Data.Common
             }
         }
 
-        public static DbProviderFactory GetFactory(DbConnection connection)
+        public static void RegisterFactory(string providerInvariantName, string factoryTypeAssemblyQualifiedName)
         {
-            ADP.CheckArgumentNull(connection, nameof(connection));
-            return connection.ProviderFactory;
-        }
-        
-        public static void ConfigureFactory(Type providerFactoryClass)
-        {
-            ConfigureFactory(providerFactoryClass, string.Empty, string.Empty, string.Empty);
+#warning TODO            
         }
 
-        public static void ConfigureFactory(Type providerFactoryClass, string providerInvariantName)
-        {
-            ConfigureFactory(providerFactoryClass, providerInvariantName, string.Empty, string.Empty);
-        }
         
-        public static void ConfigureFactory(Type providerFactoryClass, string providerInvariantName, string name, string description)
+        public static void RegisterFactory(string providerInvariantName, Type providerFactoryClass)
         {
             ADP.CheckArgumentNull(providerFactoryClass, nameof(providerFactoryClass));
-
             if (!providerFactoryClass.IsSubclassOf(typeof(DbProviderFactory)))
             {
                 throw ADP.Argument(SR.Format(SR.ADP_DbProviderFactories_NotAFactoryType, providerFactoryClass.FullName));
             }
-            RegisterFactoryInTable(providerFactoryClass, providerInvariantName, name, description);
+            DbProviderFactories.RegisterFactoryInTable(providerInvariantName, providerFactoryClass);
         }
 
-        public static void ConfigureFactory(DbConnection connection)
+        public static void RegisterFactory(string providerInvariantName, DbProviderFactory factory)
         {
-            ConfigureFactory(connection, string.Empty, string.Empty, string.Empty);
-        }
-
-        public static void ConfigureFactory(DbConnection connection, string providerInvariantName)
-        {
-            ConfigureFactory(connection, providerInvariantName, string.Empty, string.Empty);
+            ADP.CheckArgumentNull(factory, nameof(factory));
+            DbProviderFactories.RegisterFactoryInTable(providerInvariantName, factory.GetType());
         }
         
-        public static void ConfigureFactory(DbConnection connection, string providerInvariantName, string name, string description)
+        public static bool UnregisterFactory(string providerInvariantName)
         {
-            ADP.CheckArgumentNull(connection, nameof(connection));
-
-            DbProviderFactory factoryInstance = GetFactory(connection);
-            if (factoryInstance == null)
+            if (string.IsNullOrWhiteSpace(providerInvariantName))
             {
-                throw ADP.Argument(SR.ADP_DbProviderFactories_NoFactorySuppliedThroughDbConnection);
+                return false;
             }
-            RegisterFactoryInTable(factoryInstance.GetType(), providerInvariantName, name, description);
+            try
+            {
+                _providerTableLock.EnterReadLock();
+                DataRow providerRow = GetProviderRowFromTable(providerInvariantName, throwOnError: false);
+                if (null == providerRow)
+                {
+                    return false;
+                }
+                _providerTable.Rows.Remove(providerRow);
+                return true;
+            }
+            finally
+            {
+                _providerTableLock.ExitReadLock();
+            }
         }
         
-        private static void RegisterFactoryInTable(Type factoryType, string providerInvariantName, string name, string description)
+        private static DbProviderFactory GetFactory(string providerInvariantName, bool throwOnError)
+        {
+            if (throwOnError)
+            {
+                ADP.CheckArgumentLength(providerInvariantName, nameof(providerInvariantName));
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(providerInvariantName))
+                {
+                    return null;
+                }
+            }
+            try
+            {
+                _providerTableLock.EnterReadLock();
+                DataRow providerRow = GetProviderRowFromTable(providerInvariantName, throwOnError);
+                if (null == providerRow)
+                {
+                    return throwOnError ? throw ADP.Argument(SR.Format(SR.ADP_DbProviderFactories_InvariantNameNotFound, providerInvariantName)) : (DbProviderFactory)null;
+                }
+                return DbProviderFactories.GetFactory(providerRow);
+            }
+            finally
+            {
+                _providerTableLock.ExitReadLock();
+            }
+        }
+
+        private static DataRow GetProviderRowFromTable(string providerInvariantName, bool throwOnError)
+        {
+            if (null == _providerTable)
+            {
+                return throwOnError ? throw ADP.Argument(SR.Format(SR.ADP_DbProviderFactories_InvariantNameNotFound, providerInvariantName)) : (DataRow)null;
+            }
+            return _providerTable.Rows.Find(providerInvariantName);
+        }
+        
+        private static void RegisterFactoryInTable(string providerInvariantName, Type factoryType)
         {
             ADP.CheckArgumentNull(factoryType, nameof(factoryType));
 
@@ -156,9 +188,9 @@ namespace System.Data.Common
                 {
                     newRow = true;
                     rowToAlter = _providerTable.NewRow();
-                    rowToAlter[Name] = string.IsNullOrWhiteSpace(name) ? invariantNameToUse : name;
+                    rowToAlter[Name] = invariantNameToUse;
                     rowToAlter[InvariantName] = invariantNameToUse;
-                    rowToAlter[Description] = description ?? string.Empty;
+                    rowToAlter[Description] = string.Empty;
                 }
                 rowToAlter[AssemblyQualifiedName] = factoryType.AssemblyQualifiedName;
                 if (newRow)
@@ -172,21 +204,19 @@ namespace System.Data.Common
             }
         }
 
+        
         private static DataTable GetInitialProviderTable()
         {
-            DataColumn nameColumn = new DataColumn(Name, typeof(string));
-            nameColumn.ReadOnly = true;
-            DataColumn descriptionColumn = new DataColumn(Description, typeof(string));
-            descriptionColumn.ReadOnly = true;
-            DataColumn invariantNameColumn = new DataColumn(InvariantName, typeof(string));
-            invariantNameColumn.ReadOnly = true;
+            DataColumn nameColumn = new DataColumn(Name, typeof(string)) { ReadOnly = true };
+            DataColumn descriptionColumn = new DataColumn(Description, typeof(string)) { ReadOnly = true };
+            DataColumn invariantNameColumn = new DataColumn(InvariantName, typeof(string)) { ReadOnly = true };
+
             // This column is writable in CoreFx, while it is readonly in NetFx, as this class allows overwriting registered providers at runtime.
             DataColumn assemblyQualifiedNameColumn = new DataColumn(AssemblyQualifiedName, typeof(string));
 
             DataColumn[] primaryKey = new DataColumn[] { invariantNameColumn };
             DataColumn[] columns = new DataColumn[] { nameColumn, descriptionColumn, invariantNameColumn, assemblyQualifiedNameColumn };
-            DataTable initialTable = new DataTable(ProviderGroup);
-            initialTable.Locale = CultureInfo.InvariantCulture;
+            DataTable initialTable = new DataTable(ProviderGroup) { Locale = CultureInfo.InvariantCulture };
             initialTable.Columns.AddRange(columns);
             initialTable.PrimaryKey = primaryKey;
             return initialTable;
