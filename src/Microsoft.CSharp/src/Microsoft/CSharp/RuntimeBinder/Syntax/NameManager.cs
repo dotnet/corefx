@@ -164,12 +164,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Syntax
             return s_names.Add(key, length);
         }
 
-        internal static Name Lookup(string key)
-        {
-            Debug.Assert(key != null);
-            return s_names.Lookup(key);
-        }
-
         internal static Name GetPredefinedName(PredefinedName id)
         {
             Debug.Assert(id < PredefinedName.PN_COUNT);

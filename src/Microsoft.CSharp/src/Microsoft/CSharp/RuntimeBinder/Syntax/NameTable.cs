@@ -65,24 +65,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Syntax
         {
             int hashCode = ComputeHashCode(name.Text);
             // make sure it doesn't already exist
-            Debug.Assert(Lookup(name.Text) == null);
             Debug.Assert(_entries.All(e => e?.Name.Text != name.Text));
 
             AddEntry(name, hashCode);
-        }
-
-        public Name Lookup(string key)
-        {
-            int hashCode = ComputeHashCode(key);
-            for (Entry e = _entries[hashCode & _mask]; e != null; e = e.Next)
-            {
-                if (e.HashCode == hashCode && e.Name.Text.Equals(key))
-                {
-                    return e.Name;
-                }
-            }
-
-            return null;
         }
 
         private static int ComputeHashCode(string key)
