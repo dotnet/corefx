@@ -34,7 +34,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _symFactory = new SymFactory(this.tableGlobal);
 
             this.tableTypeArrays = new Dictionary<TypeArrayKey, TypeArray>();
-            _rootNS = _symFactory.CreateNamespace(NameManager.Lookup(""), null);
+            _rootNS = _symFactory.CreateNamespace(NameManager.GetPredefinedName(PredefinedName.PN_EMPTY), null);
 
             ////////////////////////////////////////////////////////////////////////////////
             // Build the data structures needed to make FPreLoad fast. Make sure the 

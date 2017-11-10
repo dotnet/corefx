@@ -572,7 +572,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
 
                 case TypeKind.TK_VoidType:
-                    ErrAppendName(NameManager.Lookup(TokenFacts.GetText(TokenKind.Void)));
+                    ErrAppendName(NameManager.GetPredefinedName(PredefinedName.PN_VOID));
                     break;
 
                 case TypeKind.TK_ParameterModifierType:
