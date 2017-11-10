@@ -85,20 +85,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Syntax
             return null;
         }
 
-        public Name Lookup(string key, int length)
-        {
-            int hashCode = ComputeHashCode(key, length);
-            for (Entry e = _entries[hashCode & _mask]; e != null; e = e.Next)
-            {
-                if (e.HashCode == hashCode && Equals(e.Name.Text, key, length))
-                {
-                    return e.Name;
-                }
-            }
-
-            return null;
-        }
-
         private static int ComputeHashCode(string key)
         {
             unchecked
