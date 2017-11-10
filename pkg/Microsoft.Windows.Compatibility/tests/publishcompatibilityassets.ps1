@@ -39,7 +39,7 @@ function _getPackageVersion()
 	return $matches[0]
 }
 
-function _restoreAndPublish($targetFramework, $outputType, $rid, $runtimeFramework)
+function _restoreAndPublish($targetFramework, $outputType, $rid, $runtimeFramework, $refDirName)
 {
 	$packageVersion = _getPackageVersion
     & $dotnetPath restore --packages $packagesCachePath /p:RestoreSources="https://api.nuget.org/v3/index.json;$localPackageSourcePath" /p:TargetFramework=$targetFramework /p:CompatibilityPackageVersion=$packageVersion $csprojPath
@@ -53,8 +53,18 @@ function _restoreAndPublish($targetFramework, $outputType, $rid, $runtimeFramewo
 		Exit;
     }
 
-    echo (-join("Published succedded for: ", $targetFramework))
+	Write-Output (-join("Published succedded for: ", $targetFramework))
+	
+	$refPath = -join($repoRoot, "\bin\ref\ApiPort\", $refDirName)
+
+	if (_pathExists $refPath)
+	{
+		Remove-Item $refPath -r -force
+	}
+
+	New-Item $refPath -ItemType directory
+	Copy-Item (-join($outputPath, "*")) $refPath
 }
 
-_restoreAndPublish "netcoreapp2.0" "Exe" $winRID "2.0.0"
-_restoreAndPublish "netstandard2.0" "Library" $winRID "2.0.0"
+_restoreAndPublish "netcoreapp2.0" "Exe" $winRID "2.0.0" ".NET Core App 2.0 + Microsoft.Windows.Compatibility"
+_restoreAndPublish "netstandard2.0" "Library" $winRID "2.0.0" ".NET Standard 2.0 + Microsoft.Windows.Compatibility"
