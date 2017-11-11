@@ -322,7 +322,7 @@
     <value>Cannot create '{0}' because a file or directory with the same name already exists.</value>
   </data>
   <data name="IO_PathTooLong" xml:space="preserve">
-    <value>The specified file name or path is too long, or a component of the specified path is too long. ('{0}')</value>
+    <value>The specified file name or path is too long, or a component of the specified path is too long.</value>
   </data>
   <data name="IO_SharingViolation_File" xml:space="preserve">
     <value>The process cannot access the file '{0}' because it is being used by another process.</value>
@@ -332,5 +332,8 @@
   </data>
   <data name="IO_FileExists_Name" xml:space="preserve">
     <value>The file '{0}' already exists.</value>
+  </data>
+  <data name="IO_PathTooLong_Path" xml:space="preserve">
+    <value>The path '{0}' is too long, or a component of the specified path is too long.</value>
   </data>
 </root>

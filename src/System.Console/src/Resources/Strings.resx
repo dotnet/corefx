@@ -169,7 +169,7 @@
     <value>Could not find a part of the path '{0}'.</value>
   </data>
   <data name="IO_PathTooLong" xml:space="preserve">
-    <value>The specified file name or path is too long, or a component of the specified path is too long. ('{0}')</value>
+    <value>The specified file name or path is too long, or a component of the specified path is too long.</value>
   </data>
   <data name="UnauthorizedAccess_IODenied_NoPathName" xml:space="preserve">
     <value>Access to the path is denied.</value>
@@ -254,5 +254,8 @@
   </data>
   <data name="Argument_InvalidCharSequenceNoIndex" xml:space="preserve">
     <value>String contains invalid Unicode code points.</value>
+  </data>
+  <data name="IO_PathTooLong_Path" xml:space="preserve">
+    <value>The path '{0}' is too long, or a component of the specified path is too long.</value>
   </data>
 </root>

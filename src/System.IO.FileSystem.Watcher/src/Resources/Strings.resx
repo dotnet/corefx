@@ -139,7 +139,7 @@
     <value>Specified file length was too large for the file system.</value>
   </data>
   <data name="IO_PathTooLong" xml:space="preserve">
-    <value>The specified file name or path is too long, or a component of the specified path is too long. ('{0}')</value>
+    <value>The specified file name or path is too long, or a component of the specified path is too long.</value>
   </data>
   <data name="IO_PathNotFound_NoPathName" xml:space="preserve">
     <value>Could not find a part of the path.</value>
@@ -185,5 +185,8 @@
   </data>
   <data name="IOException_INotifyWatchesUserLimitExceeded" xml:space="preserve">
     <value>The configured user limit on the number of inotify watches has been reached.</value>
+  </data>
+  <data name="IO_PathTooLong_Path" xml:space="preserve">
+    <value>The path '{0}' is too long, or a component of the specified path is too long.</value>
   </data>
 </root>

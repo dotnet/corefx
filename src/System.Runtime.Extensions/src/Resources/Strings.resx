@@ -163,7 +163,7 @@
     <value>'{0}' must be greater than zero.</value>
   </data>
   <data name="IO_PathTooLong" xml:space="preserve">
-    <value>The specified file name or path is too long, or a component of the specified path is too long. ('{0}')</value>
+    <value>The specified file name or path is too long, or a component of the specified path is too long.</value>
   </data>
   <data name="IO_FileNotFound" xml:space="preserve">
     <value>Unable to find the specified file.</value>
@@ -413,5 +413,8 @@
   </data>
   <data name="IO_InvalidReadLength" xml:space="preserve">
     <value>The read operation returned an invalid length.</value>
+  </data>
+  <data name="IO_PathTooLong_Path" xml:space="preserve">
+    <value>The path '{0}' is too long, or a component of the specified path is too long.</value>
   </data>
 </root>

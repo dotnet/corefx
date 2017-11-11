@@ -71,7 +71,9 @@ namespace System.IO
                     return new IOException(SR.Format(SR.IO_AlreadyExists_Name, path), MakeHRFromErrorCode(errorCode));
 
                 case Interop.Errors.ERROR_FILENAME_EXCED_RANGE:
-                    return new PathTooLongException(SR.Format(SR.IO_PathTooLong, path));
+                    return !string.IsNullOrEmpty(path) ?
+                        new PathTooLongException(SR.Format(SR.IO_PathTooLong_Path, path)) :
+                        new PathTooLongException(SR.IO_PathTooLong);
 
                 case Interop.Errors.ERROR_INVALID_PARAMETER:
                     return new IOException(GetMessage(errorCode), MakeHRFromErrorCode(errorCode));

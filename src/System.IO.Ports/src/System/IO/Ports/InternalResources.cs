@@ -77,7 +77,10 @@ namespace System.IO.Ports
                         throw new UnauthorizedAccessException(string.Format(SR.UnauthorizedAccess_IODenied_Path, str));
 
                 case Interop.Errors.ERROR_FILENAME_EXCED_RANGE:
-                    throw new PathTooLongException(SR.Format(SR.IO_PathTooLong, str));
+                    if (string.IsNullOrEmpty(str))
+                        throw new PathTooLongException(SR.IO_PathTooLong);
+                    else
+                        throw new PathTooLongException(SR.Format(SR.IO_PathTooLong_Path, str));
 
                 case Interop.Errors.ERROR_SHARING_VIOLATION:
                     // error message.
