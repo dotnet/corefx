@@ -56,6 +56,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _symbolTable = table;
         }
 
+        public SymbolTable SymbolTable => _symbolTable;
+
         private sealed class StdTypeVarColl
         {
             private readonly List<TypeParameterType> prgptvs;
@@ -171,33 +173,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 pAggregate.SetErrors(false);
                 _typeTable.InsertAggregate(agg, atsOuter, typeArgs, pAggregate);
-
-                // If we have a generic type definition, then we need to set the
-                // base class to be our current base type, and use that to calculate 
-                // our agg type and its base, then set it to be the generic version of the
-                // base type. This is because:
-                //
-                // Suppose we have Foo<T> : IFoo<T>
-                //
-                // Initially, the BaseType will be IFoo<Foo.T>, which gives us the substitution
-                // that we want to use for our agg type's base type. However, in the Symbol chain,
-                // we want the base type to be IFoo<IFoo.T>. Thats why we need to do this little trick.
-                //
-                // If we don't have a generic type definition, then we just need to set our base
-                // class. This is so that if we have a base type that's generic, we'll be
-                // getting the correctly instantiated base type.
-
-                var baseType = pAggregate.AssociatedSystemType?.BaseType;
-                if (baseType != null)
-                {
-                    // Store the old base class.
-
-                    AggregateType oldBaseType = agg.GetBaseClass();
-                    agg.SetBaseClass(_symbolTable.GetCTypeFromType(baseType) as AggregateType);
-                    pAggregate.GetBaseClass(); // Get the base type for the new agg type we're making.
-
-                    agg.SetBaseClass(oldBaseType);
-                }
             }
             else
             {

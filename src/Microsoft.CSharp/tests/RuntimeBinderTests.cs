@@ -175,7 +175,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             Assert.True(res);
         }
 
-        [Fact, ActiveIssue(7527)]
+        [Fact]
         public void CyclicTypeDefinition()
         {
             dynamic x = new Third<int>();
