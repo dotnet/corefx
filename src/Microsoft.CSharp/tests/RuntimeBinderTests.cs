@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Xunit;
 
@@ -232,5 +233,36 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         }
         public class BuilderBaseEx<T> : BuilderBase<T> where T : BuilderBaseEx<T> { }
         public class BuilderBase<T> where T : BuilderBase<T> { }
+
+        [Fact]
+        public void CircularOnOwnNested()
+        {
+            dynamic d = new Generic<string>.Inner
+            {
+                Foo = "expected"
+            };
+
+            Assert.Equal("expected", d.Foo);
+        }
+
+
+        [Fact]
+        public void CircularOnOwnNestedAbsentMember()
+        {
+            dynamic d = new Generic<string>.Inner
+            {
+                Foo = "expected"
+            };
+
+            Assert.Throws<RuntimeBinderException>(() => d.Bar);
+        }
+
+        class Generic<T> : BindingList<Generic<T>.Inner>
+        {
+            public class Inner
+            {
+                public object Foo { get; set; }
+            }
+        }
     }
 }
