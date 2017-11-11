@@ -643,12 +643,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             List<object> declarationChain = BuildDeclarationChain(originalType);
 
             Type type = originalType;
-            CType ret = null;
-            bool bIsByRef = type.IsByRef;
-            if (bIsByRef)
-            {
-                type = type.GetElementType();
-            }
 
             NamespaceOrAggregateSymbol current = NamespaceSymbol.Root;
 
@@ -716,8 +710,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                             }
                             else
                             {
-                                ret = ctype;
-                                break;
+                                return ctype;
                             }
                         }
                         else
@@ -729,31 +722,26 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                     if (t == type)
                     {
-                        ret = GetConstructedType(type, next as AggregateSymbol);
-                        break;
+                        return GetConstructedType(type, next as AggregateSymbol);
                     }
                 }
                 else if (o is MethodInfo)
                 {
                     // We cant be at the end.
                     Debug.Assert(i + 1 < declarationChain.Count);
-                    ret = ProcessMethodTypeParameter(o as MethodInfo, declarationChain[++i] as Type, current as AggregateSymbol);
-                    break;
+                    return ProcessMethodTypeParameter(o as MethodInfo, declarationChain[++i] as Type, current as AggregateSymbol);
                 }
                 else
                 {
                     Debug.Assert(o is string);
                     next = AddNamespaceToSymbolTable(current, o as string);
                 }
+
                 current = next;
             }
 
-            Debug.Assert(ret != null);
-            if (bIsByRef)
-            {
-                ret = _typeManager.GetParameterModifier(ret, false);
-            }
-            return ret;
+            Debug.Fail("Should be unreachable");
+            return null;
         }
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -972,10 +960,10 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal CType GetCTypeFromType(Type t)
-        {
-            return LoadSymbolsFromType(t);
-        }
+        internal CType GetCTypeFromType(Type type) => type.IsByRef
+            ? _typeManager.GetParameterModifier(LoadSymbolsFromType(type.GetElementType()), false)
+            : LoadSymbolsFromType(type);
+
         #endregion
 
         #region Aggregates
