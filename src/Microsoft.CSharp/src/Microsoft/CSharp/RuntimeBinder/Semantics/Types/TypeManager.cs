@@ -339,9 +339,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return ctx.FNop() ? typeSrc : SubstTypeCore(typeSrc, ctx);
         }
 
-        public CType SubstType(CType typeSrc, TypeArray typeArgsCls)
+        public AggregateType SubstType(AggregateType typeSrc, TypeArray typeArgsCls)
         {
-            return SubstType(typeSrc, typeArgsCls, null, SubstTypeFlags.NormNone);
+            if (typeSrc != null)
+            {
+                SubstContext ctx = new SubstContext(typeArgsCls, null, SubstTypeFlags.NormNone);
+                if (!ctx.FNop())
+                {
+                    return SubstTypeCore(typeSrc, ctx);
+                }
+            }
+
+            return typeSrc;
         }
 
         private CType SubstType(CType typeSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth)
@@ -383,6 +392,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeArray SubstTypeArray(TypeArray taSrc, TypeArray typeArgsCls) => SubstTypeArray(taSrc, typeArgsCls, null);
 
+        private AggregateType SubstTypeCore(AggregateType type, SubstContext ctx)
+        {
+            TypeArray args = type.GetTypeArgsAll();
+            if (args.Count > 0)
+            {
+                TypeArray typeArgs = SubstTypeArray(args, ctx);
+                if (args != typeArgs)
+                {
+                    return GetAggregate(type.getAggregate(), typeArgs);
+                }
+            }
+
+            return type;
+        }
+
         private CType SubstTypeCore(CType type, SubstContext pctx)
         {
             CType typeSrc;
@@ -420,14 +444,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return (typeDst == typeSrc) ? type : GetNullable(typeDst);
 
                 case TypeKind.TK_AggregateType:
-                    AggregateType ats = (AggregateType)type;
-                    if (ats.GetTypeArgsAll().Count > 0)
-                    {
-                        TypeArray typeArgs = SubstTypeArray(ats.GetTypeArgsAll(), pctx);
-                        if (ats.GetTypeArgsAll() != typeArgs)
-                            return GetAggregate(ats.getAggregate(), typeArgs);
-                    }
-                    return type;
+                    return SubstTypeCore((AggregateType)type, pctx);
 
                 case TypeKind.TK_TypeParameterType:
                     {
@@ -740,6 +757,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             return _BSymmgr.AllocParams(cTyVars, (CType[])prgvar);
         }
+
+        public AggregateType SubstType(AggregateType typeSrc, SubstContext ctx) =>
+            ctx == null || ctx.FNop() ? typeSrc : SubstTypeCore(typeSrc, ctx);
 
         public CType SubstType(CType typeSrc, SubstContext pctx)
         {

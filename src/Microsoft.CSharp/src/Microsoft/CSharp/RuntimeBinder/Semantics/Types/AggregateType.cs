@@ -72,7 +72,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 TypeManager manager = GetOwningAggregate().GetTypeManager();
                 AggregateType baseClass = manager.SymbolTable.GetCTypeFromType(baseSysType) as AggregateType;
                 Debug.Assert(baseClass != null);
-                _baseType = manager.SubstType(baseClass, GetTypeArgsAll()) as AggregateType;
+                _baseType = manager.SubstType(baseClass, GetTypeArgsAll());
             }
 
             return _baseType;
