@@ -138,7 +138,7 @@ internal static partial class Interop
                     new UnauthorizedAccessException(SR.UnauthorizedAccess_IODenied_NoPathName, inner);
 
             case Error.ENAMETOOLONG:
-                return new PathTooLongException(SR.IO_PathTooLong);
+                return new PathTooLongException(SR.Format(SR.IO_PathTooLong, path));
 
             case Error.EWOULDBLOCK:
                 return !string.IsNullOrEmpty(path) ?

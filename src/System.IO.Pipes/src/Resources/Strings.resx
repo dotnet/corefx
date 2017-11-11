@@ -226,7 +226,7 @@
     <value>Could not find a part of the path.</value>
   </data>
   <data name="IO_PathTooLong" xml:space="preserve">
-    <value>The specified file name or path is too long, or a component of the specified path is too long.</value>
+    <value>The specified file name or path is too long, or a component of the specified path is too long. ('{0}')</value>
   </data>
   <data name="NotSupported_UnreadableStream" xml:space="preserve">
     <value>Stream does not support reading.</value>
