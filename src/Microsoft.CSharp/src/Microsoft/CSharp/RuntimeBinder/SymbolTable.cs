@@ -664,9 +664,10 @@ namespace Microsoft.CSharp.RuntimeBinder
                     next = _symbolTable.LookupSym(GetName(t), current, symbmask_t.MASK_AggregateSymbol) as AggregateSymbol;
 
                     // Make sure we match arity as well when we find an aggregate.
+                    int arity = t.GetGenericArguments().Length;
                     if (next != null)
                     {
-                        next = FindSymWithMatchingArity(next as AggregateSymbol, t);
+                        next = FindSymWithMatchingArity(next as AggregateSymbol, arity);
                     }
 
                     // Due to dynamic loading or creation, two different types can exist that have
@@ -694,7 +695,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                         next = FindSymWithMatchingArity(
                             BSYMMGR.LookupNextSym(next, current, symbmask_t.MASK_AggregateSymbol) as AggregateSymbol,
-                            t);
+                            arity);
                     }
 
                     // If we haven't found this type yet, then add it to our symbol table.
@@ -839,7 +840,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                         GetName(t), parent, symbmask_t.MASK_AggregateSymbol) as AggregateSymbol;
                     if (agg != null)
                     {
-                        agg = FindSymWithMatchingArity(agg, t);
+                        agg = FindSymWithMatchingArity(agg, t.GetGenericArguments().Length);
                         if (agg != null)
                         {
                             Debug.Assert(agg.getThisType().AssociatedSystemType == t);
@@ -920,17 +921,18 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private AggregateSymbol FindSymWithMatchingArity(AggregateSymbol aggregateSymbol, Type type)
+        private AggregateSymbol FindSymWithMatchingArity(AggregateSymbol agg, int arity)
         {
-            for (AggregateSymbol agg = aggregateSymbol;
+            for (;
                 agg != null;
                 agg = BSYMMGR.LookupNextSym(agg, agg.Parent, symbmask_t.MASK_AggregateSymbol) as AggregateSymbol)
             {
-                if (agg.GetTypeVarsAll().Count == type.GetGenericArguments().Length)
+                if (agg.GetTypeVarsAll().Count == arity)
                 {
                     return agg;
                 }
             }
+
             return null;
         }
 
