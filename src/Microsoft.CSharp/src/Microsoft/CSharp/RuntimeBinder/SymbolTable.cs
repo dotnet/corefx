@@ -651,16 +651,20 @@ namespace Microsoft.CSharp.RuntimeBinder
                 object o = declarationChain[i];
                 if (o is Type t)
                 {
+                    if (t.IsNullableType())
+                    {
+                        return _typeManager.GetNullable(GetCTypeFromType(t.GetGenericArguments()[0]));
+                    }
+
                     AggregateSymbol next = FindSymForType(
                         _symbolTable.LookupSym(GetName(t), current, symbmask_t.MASK_AggregateSymbol), t);
 
                     // If we haven't found this type yet, then add it to our symbol table.
-                    if (next == null || t.IsNullableType())
+                    if (next == null)
                     {
                         // Note that if we have anything other than an AggregateSymbol,
                         // we must be at the end of the line - that is, nothing else can
                         // have children.
-
                         CType ctype = ProcessSpecialTypeInChain(current, t);
                         if (ctype != null)
                         {
@@ -747,7 +751,8 @@ namespace Microsoft.CSharp.RuntimeBinder
                 Debug.Assert(agg != null);
                 return LoadClassTypeParameter(agg, t);
             }
-            else if (t.IsArray)
+
+            if (t.IsArray)
             {
                 // Now we return an array of nesting level corresponding to the rank.
                 return _typeManager.GetArray(
@@ -760,11 +765,8 @@ namespace Microsoft.CSharp.RuntimeBinder
 #endif
                     );
             }
-            else if (t.IsNullableType())
-            {
-                return _typeManager.GetNullable(GetCTypeFromType(t.GetGenericArguments()[0]));
-            }
-            else if (t.IsPointer)
+
+            if (t.IsPointer)
             {
                 // Now we return the pointer type that we want.
                 return _typeManager.GetPointer(GetCTypeFromType(t.GetElementType()));
