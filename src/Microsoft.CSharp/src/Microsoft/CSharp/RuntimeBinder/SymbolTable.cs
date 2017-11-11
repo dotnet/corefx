@@ -655,42 +655,9 @@ namespace Microsoft.CSharp.RuntimeBinder
                 if (o is Type)
                 {
                     Type t = o as Type;
-                    next = _symbolTable.LookupSym(GetName(t), current, symbmask_t.MASK_AggregateSymbol) as AggregateSymbol;
-
-                    // Make sure we match arity as well when we find an aggregate.
-                    int arity = t.GetGenericArguments().Length;
-                    if (next != null)
-                    {
-                        next = FindSymWithMatchingArity(next as AggregateSymbol, arity);
-                    }
-
-                    // Due to dynamic loading or creation, two different types can exist that have
-                    // the same name.
-
-                    // In the static compiler, this would have been an error and name lookup would
-                    // be ambiguous, but here we never have to lookup names of types for real (only
-                    // names of members).
-
-                    // Therefore move onto the next symbol in the chain, and check again for
-                    // appropriate arity.
-
-                    while (next != null)
-                    {
-                        Type existingType = (next as AggregateSymbol).AssociatedSystemType;
-                        Type newType = t.IsGenericType ? t.GetGenericTypeDefinition() : t;
-
-                        // We use "IsEquivalentTo" so that unified local types for NoPIA do
-                        // not trigger a reset. There are other mechanisms to make those sorts
-                        // of types work in some scenarios.
-                        if (existingType.IsEquivalentTo(newType))
-                        {
-                            break;
-                        }
-
-                        next = FindSymWithMatchingArity(
-                            BSYMMGR.LookupNextSym(next, current, symbmask_t.MASK_AggregateSymbol) as AggregateSymbol,
-                            arity);
-                    }
+                    next = FindSymForType(
+                        _symbolTable.LookupSym(GetName(t), current, symbmask_t.MASK_AggregateSymbol),
+                        t);
 
                     // If we haven't found this type yet, then add it to our symbol table.
                     if (next == null || t.IsNullableType())
@@ -907,7 +874,29 @@ namespace Microsoft.CSharp.RuntimeBinder
             return callChain;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
+        // We have an aggregate symbol of the correct parent and full name, but it may have the wrong arity, or, due to
+        // dynamic loading or creation, two different types can exist that have the same name.
+
+        // In the static compiler, this would have been an error and name lookup would be ambiguous, but here we never have
+        // to lookup names of types for real (only names of members).
+
+        // For either case, move onto the next symbol in the chain, and check again for appropriate type.
+        private AggregateSymbol FindSymForType(Symbol sym, Type t)
+        {
+            while (sym != null)
+            {
+                // We use "IsEquivalentTo" so that unified local types match.
+                if (sym is AggregateSymbol agg)
+                if (agg.AssociatedSystemType.IsEquivalentTo(t.IsGenericType ? t.GetGenericTypeDefinition() : t))
+                {
+                    return agg;
+                }
+
+                sym = sym.nextSameName;
+            }
+
+            return null;
+        }
 
         private AggregateSymbol FindSymWithMatchingArity(AggregateSymbol agg, int arity)
         {
