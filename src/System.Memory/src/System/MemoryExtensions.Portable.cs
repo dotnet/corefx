@@ -8,9 +8,9 @@ using System.Runtime.CompilerServices;
 namespace System
 {
     /// <summary>
-    /// Extension methods for Span&lt;T&gt;.
+    /// Extension methods for Span&lt;T&gt;, Memory&lt;T&gt;, and friends.
     /// </summary>
-    public static partial class SpanExtensions
+    public static partial class MemoryExtensions
     {
         /// <summary>
         /// Casts a Span of one primitive type <typeparamref name="T"/> to Span of bytes.

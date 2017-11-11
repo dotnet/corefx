@@ -8,9 +8,9 @@ using System.Runtime.CompilerServices;
 namespace System
 {
     /// <summary>
-    /// Extension methods for Span&lt;T&gt;.
+    /// Extension methods for Span&lt;T&gt;, Memory&lt;T&gt;, and friends.
     /// </summary>
-    public static partial class SpanExtensions
+    public static partial class MemoryExtensions
     {
         /// <summary>
         /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable&lt;T&gt;.Equals(T). 
@@ -273,6 +273,23 @@ namespace System
         public static void CopyTo<T>(this T[] array, Span<T> destination)
         {
             new ReadOnlySpan<T>(array).CopyTo(destination);
+        }
+
+        /// <summary>
+        /// Copies the contents of the array into the memory. If the source
+        /// and destinations overlap, this method behaves as if the original values are in
+        /// a temporary location before the destination is overwritten.
+        /// 
+        ///<param name="array">The array to copy items from.</param>
+        /// <param name="destination">The memory to copy items into.</param>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when the destination is shorter than the source array.
+        /// </exception>
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void CopyTo<T>(this T[] array, Memory<T> destination)
+        {
+            new ReadOnlyMemory<T>(array).CopyTo(destination);
         }
     }
 }
