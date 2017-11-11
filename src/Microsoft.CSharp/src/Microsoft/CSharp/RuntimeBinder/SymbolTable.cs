@@ -823,18 +823,13 @@ namespace Microsoft.CSharp.RuntimeBinder
                     Debug.Assert(bAdded);
                 }
             }
+
             callChain.Reverse();
 
             // Now take out the namespaces and add them to the end of the chain.
-
             if (callingType.Namespace != null)
             {
-                string[] namespaces = callingType.Namespace.Split('.');
-                int index = 0;
-                foreach (string s in namespaces)
-                {
-                    callChain.Insert(index++, s);
-                }
+                callChain.InsertRange(0, callingType.Namespace.Split('.'));
             }
             return callChain;
         }
