@@ -90,6 +90,7 @@ namespace System.Transactions.Tests
         [InlineData(53)]
         [InlineData(54)]
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void AsyncTSTest(int variation)
         {
             using (var listener = new TestEventListener(new Guid("8ac2d80a-1f1a-431b-ace4-bff8824aef0b"), System.Diagnostics.Tracing.EventLevel.Verbose))
@@ -429,6 +430,7 @@ namespace System.Transactions.Tests
         [Theory]
         [InlineData(true, false, null)]
         [InlineData(true, true, null)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void AsyncTSAndDependantClone(bool requiresNew, bool syncronizeScope, string txId)
         {
             string txId1 = null;
@@ -519,6 +521,7 @@ namespace System.Transactions.Tests
         [Theory]
         [InlineData(true, false, null)]
         [InlineData(true, true, null)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void NestedAsyncTSAndDependantClone(bool parentrequiresNew, bool childRequiresNew, string txId)
         {
             string txId1;
@@ -754,6 +757,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void LegacyNestedTxScope()
         {
             string txId1 = null;
@@ -836,6 +840,7 @@ namespace System.Transactions.Tests
         [InlineData(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled, TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled)]
         [InlineData(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled, TransactionScopeOption.RequiresNew, TransactionScopeAsyncFlowOption.Enabled)]
         [InlineData(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled, TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void VerifyNestedTxScope(TransactionScopeOption parentScopeOption, TransactionScopeAsyncFlowOption parentAsyncFlowOption, TransactionScopeOption childScopeOption, TransactionScopeAsyncFlowOption childAsyncFlowOption)
         {
             string txId1;
@@ -905,6 +910,7 @@ namespace System.Transactions.Tests
         [InlineData(TransactionScopeAsyncFlowOption.Suppress, TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled, TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Suppress)]
         [InlineData(TransactionScopeAsyncFlowOption.Enabled, TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Suppress, TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled)]
         [InlineData(TransactionScopeAsyncFlowOption.Enabled, TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled, TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Suppress)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void VerifyParentTwoChildTest(TransactionScopeAsyncFlowOption parentAsyncFlowOption, TransactionScopeOption child1ScopeOption, TransactionScopeAsyncFlowOption child1AsyncFlowOption, TransactionScopeOption child2ScopeOption, TransactionScopeAsyncFlowOption child2AsyncFlowOption)
         {
             string txId1;
@@ -984,6 +990,7 @@ namespace System.Transactions.Tests
         [InlineData(TransactionScopeAsyncFlowOption.Enabled, TransactionScopeAsyncFlowOption.Suppress, TransactionScopeAsyncFlowOption.Enabled, TransactionScopeOption.Suppress, true)]
         [InlineData(TransactionScopeAsyncFlowOption.Enabled, TransactionScopeAsyncFlowOption.Enabled, TransactionScopeAsyncFlowOption.Enabled, TransactionScopeOption.Suppress, false)]
         [InlineData(TransactionScopeAsyncFlowOption.Enabled, TransactionScopeAsyncFlowOption.Enabled, TransactionScopeAsyncFlowOption.Enabled, TransactionScopeOption.Suppress, true)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void VerifyThreeTxScope(TransactionScopeAsyncFlowOption asyncFlowOption1, TransactionScopeAsyncFlowOption asyncFlowOption2, TransactionScopeAsyncFlowOption asyncFlowOption3, TransactionScopeOption scopeOption, bool nested)
         {
             string txId1;
@@ -1071,6 +1078,7 @@ namespace System.Transactions.Tests
         [Theory]
         [InlineData(TransactionScopeAsyncFlowOption.Suppress)]
         [InlineData(TransactionScopeAsyncFlowOption.Enabled)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void VerifyBYOT(TransactionScopeAsyncFlowOption asyncFlowOption)
         {
             string txId1;
@@ -1099,6 +1107,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void VerifyBYOTOpenConnSimulationTest()
         {
             // Create threads to do work
@@ -1115,6 +1124,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void VerifyBYOTSyncTSNestedAsync()
         {
             string txId1;
@@ -1138,6 +1148,7 @@ namespace System.Transactions.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void VerifyBYOTAsyncTSNestedAsync()
         {
             string txId1;
@@ -1164,6 +1175,7 @@ namespace System.Transactions.Tests
         [Theory]
         [InlineData(TransactionScopeAsyncFlowOption.Suppress)]
         [InlineData(TransactionScopeAsyncFlowOption.Enabled)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void DoTxQueueWorkItem(TransactionScopeAsyncFlowOption asyncFlowOption)
         {
             string txId1;
@@ -1200,6 +1212,7 @@ namespace System.Transactions.Tests
         [Theory]
         [InlineData(TransactionScopeAsyncFlowOption.Suppress)]
         [InlineData(TransactionScopeAsyncFlowOption.Enabled)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void DoTxNewThread(TransactionScopeAsyncFlowOption asyncFlowOption)
         {
             string txId1;
@@ -1630,6 +1643,7 @@ namespace System.Transactions.Tests
             Task.WaitAll(a);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void VerifyTxId(bool requiresNew, string parentTxId, string beforeTxId, string afterTxId)
         {
             Assert.Equal(beforeTxId, afterTxId);
@@ -1646,6 +1660,7 @@ namespace System.Transactions.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void AssertTransaction(string txId)
         {
             if (string.IsNullOrEmpty(txId))
@@ -1657,22 +1672,26 @@ namespace System.Transactions.Tests
                 Assert.Equal(txId, AssertAndGetCurrentTransactionId());
             }
         }
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void AssertTransactionNull()
         {
             Assert.Equal(null, Transaction.Current);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void AssertTransactionNotNull()
         {
             Assert.NotEqual(null, Transaction.Current);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static string AssertAndGetCurrentTransactionId()
         {
             AssertTransactionNotNull();
             return Transaction.Current.TransactionInformation.LocalIdentifier;
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static string AssertAndGetCurrentTransactionId(TransactionScopeOption scopeOption)
         {
             if (scopeOption == TransactionScopeOption.Suppress)
@@ -1687,6 +1706,7 @@ namespace System.Transactions.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void AssertTransactionNullAndWaitTask(Task<string> task)
         {
             AssertTransactionNull();
@@ -1694,6 +1714,7 @@ namespace System.Transactions.Tests
             AssertTransactionNull();
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void AssertTransactionNullAndWaitTask(Task task)
         {
             AssertTransactionNull();
@@ -1701,18 +1722,21 @@ namespace System.Transactions.Tests
             AssertTransactionNull();
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void SetExceptionInjection(bool exceptionDefaultOrBeforeAwait, bool exceptionAfterAwait)
         {
             s_throwExceptionDefaultOrBeforeAwait = exceptionDefaultOrBeforeAwait;
             s_throwExceptionAfterAwait = exceptionAfterAwait;
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void ResetExceptionInjection()
         {
             s_throwExceptionDefaultOrBeforeAwait = false;
             s_throwExceptionAfterAwait = false;
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void HandleException(bool exceptionDefaultOrBeforeAwait, bool exceptionAfterAwait, Action action)
         {
             bool hasException = false;

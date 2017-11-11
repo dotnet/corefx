@@ -64,6 +64,7 @@ namespace System.Transactions.Tests
         [InlineData(CloneType.RollbackDependent, IsolationLevel.Chaos, true, true, TransactionStatus.Committed)]
         [InlineData(CloneType.RollbackDependent, IsolationLevel.Unspecified, true, true, TransactionStatus.Committed)]
         */
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Run(CloneType cloneType, IsolationLevel isoLevel, bool forcePromote, bool completeClone, TransactionStatus expectedStatus )
         {
             TransactionOptions options = new TransactionOptions
