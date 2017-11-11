@@ -215,5 +215,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             result = "xyz" + d;
             Assert.Equal("xyzabc", result);
         }
+
+        [Fact]
+        public void DynamicArgumentToCyclicTypeDefinition()
+        {
+            dynamic arg = 5;
+            new Builder<object>().SomeMethod(arg);
+        }
+
+        public class Builder<TItem> : BuilderBaseEx<Builder<TItem>>
+        {
+            public Builder<TItem> SomeMethod(object arg)
+            {
+                return this;
+            }
+        }
+        public class BuilderBaseEx<T> : BuilderBase<T> where T : BuilderBaseEx<T> { }
+        public class BuilderBase<T> where T : BuilderBase<T> { }
     }
 }
