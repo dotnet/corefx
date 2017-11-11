@@ -669,25 +669,17 @@ namespace Microsoft.CSharp.RuntimeBinder
                         next = FindSymWithMatchingArity(next as AggregateSymbol, t);
                     }
 
-                    // In the event that two different types exist that have the same name, they
-                    // cannot both have entries in the symbol table with our current architecture.
-                    // This can happen in dynamic, since the runtime binder lives across all
-                    // call sites in an appdomain, and assemblies can have been loaded at runtime
-                    // that have different types with the same name.
+                    // Due to dynamic loading or creation, two different types can exist that have
+                    // the same name.
 
-                    // In the real compiler, this would have been an error and name lookup would
+                    // In the static compiler, this would have been an error and name lookup would
                     // be ambiguous, but here we never have to lookup names of types for real (only
                     // names of members).
 
-                    // The tactical fix is this: if we encounter this situation, where we have
-                    // identically named types that are not the same, then we are going to clear
-                    // the entire symbol table and restart this binding. This solution is not
-                    // without its own problems, since it is possible to conceive of a single
-                    // dynamic binding that needs to simultaneously know about both of the
-                    // similarly named types, but we are not going to try to solve that
-                    // scenario here.
+                    // Therefore move onto the next symbol in the chain, and check again for
+                    // appropriate arity.
 
-                    if (next != null)
+                    while (next != null)
                     {
                         Type existingType = (next as AggregateSymbol).AssociatedSystemType;
                         Type newType = t.IsGenericType ? t.GetGenericTypeDefinition() : t;
@@ -695,10 +687,14 @@ namespace Microsoft.CSharp.RuntimeBinder
                         // We use "IsEquivalentTo" so that unified local types for NoPIA do
                         // not trigger a reset. There are other mechanisms to make those sorts
                         // of types work in some scenarios.
-                        if (!existingType.IsEquivalentTo(newType))
+                        if (existingType.IsEquivalentTo(newType))
                         {
-                            throw new ResetBindException();
+                            break;
                         }
+
+                        next = FindSymWithMatchingArity(
+                            BSYMMGR.LookupNextSym(next, current, symbmask_t.MASK_AggregateSymbol) as AggregateSymbol,
+                            t);
                     }
 
                     // If we haven't found this type yet, then add it to our symbol table.
