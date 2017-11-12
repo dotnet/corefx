@@ -66,16 +66,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return type;
         }
 
-        public ErrorType CreateError(
-            Name name,
-            Name nameText,
-            TypeArray typeArgs)
+        public ErrorType CreateError(Name nameText)
         {
             ErrorType e = new ErrorType();
-            e.SetName(name);
             e.nameText = nameText;
-            e.typeArgs = typeArgs;
-
             e.SetTypeKind(TypeKind.TK_ErrorType);
             return e;
         }
