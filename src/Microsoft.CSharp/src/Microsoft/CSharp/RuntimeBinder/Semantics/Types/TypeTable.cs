@@ -39,8 +39,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public override int GetHashCode()
         {
-            return (_pKey1 == null ? 0 : _pKey1.GetHashCode())
-                + (_pKey2 == null ? 0 : _pKey2.GetHashCode());
+            int hash = _pKey1 == null ? 0 : _pKey1.GetHashCode();
+            return (hash << 5) - hash + (_pKey2 == null ? 0 : _pKey2.GetHashCode());
         }
     }
 
