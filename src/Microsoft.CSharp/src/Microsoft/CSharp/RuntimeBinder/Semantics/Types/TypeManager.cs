@@ -158,15 +158,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             Debug.Assert(agg.GetTypeVars().Count == typeArgs.Count);
-
-            Name name = _BSymmgr.GetNameFromPtrs(typeArgs, atsOuter);
-            Debug.Assert(name != null);
-
-            AggregateType pAggregate = _typeTable.LookupAggregate(name, agg);
+            AggregateType pAggregate = _typeTable.LookupAggregate(agg, atsOuter, typeArgs);
             if (pAggregate == null)
             {
                 pAggregate = _typeFactory.CreateAggregateType(
-                          name,
                           agg,
                           typeArgs,
                           atsOuter
@@ -175,7 +170,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(!pAggregate.fConstraintsChecked && !pAggregate.fConstraintError);
 
                 pAggregate.SetErrors(false);
-                _typeTable.InsertAggregate(name, agg, pAggregate);
+                _typeTable.InsertAggregate(agg, atsOuter, typeArgs, pAggregate);
 
                 // If we have a generic type definition, then we need to set the
                 // base class to be our current base type, and use that to calculate 

@@ -11,7 +11,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         // Aggregate
         public AggregateType CreateAggregateType(
-            Name name,
             AggregateSymbol parent,
             TypeArray typeArgsThis,
             AggregateType outerType)
@@ -21,8 +20,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.outerType = outerType;
             type.SetOwningAggregate(parent);
             type.SetTypeArgsThis(typeArgsThis);
-            type.SetName(name);
-
             type.SetTypeKind(TypeKind.TK_AggregateType);
             return type;
         }
