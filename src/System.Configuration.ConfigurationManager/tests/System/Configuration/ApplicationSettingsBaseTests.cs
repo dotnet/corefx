@@ -42,8 +42,8 @@ namespace System.ConfigurationTests
             }
         }
 
-        [Theory
-            InlineData(true)
+        [Theory,
+            InlineData(true),
             InlineData(false)
             ]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18832")]
@@ -56,8 +56,8 @@ namespace System.ConfigurationTests
             Assert.NotNull(settings.Context);
         }
 
-        [Theory
-            InlineData(true)
+        [Theory,
+            InlineData(true),
             InlineData(false)
             ]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18832")]
@@ -71,8 +71,8 @@ namespace System.ConfigurationTests
             Assert.NotNull(settings.Providers[typeof(LocalFileSettingsProvider).Name]);
         }
 
-        [Theory
-            InlineData(true)
+        [Theory,
+            InlineData(true),
             InlineData(false)
             ]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18832")]
@@ -87,8 +87,8 @@ namespace System.ConfigurationTests
             Assert.Equal("Foo", settings.StringProperty);
         }
 
-        [Theory
-            InlineData(true)
+        [Theory,
+            InlineData(true),
             InlineData(false)
             ]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18832")]
