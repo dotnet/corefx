@@ -748,7 +748,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             ExprMemberGroup pMemGroup = CreateMemberGroupEXPR(property.name.Text, null, callingObject, SYMKIND.SK_PropertySymbol);
 
             return _binder.BindToProperty(// For a static property instance, don't set the object.
-                    callingObject is ExprClass ? null : callingObject, pwt, flags, null, null, pMemGroup);
+                    callingObject is ExprClass ? null : callingObject, pwt, flags, null, pMemGroup);
         }
 
         /////////////////////////////////////////////////////////////////////////////////
