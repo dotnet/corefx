@@ -176,11 +176,7 @@ namespace System
         /// Thrown when the destination is shorter than the source.
         /// </exception>
         /// </summary>
-        public void CopyTo(Memory<T> destination)
-        {
-            if (!TryCopyTo(destination))
-                ThrowHelper.ThrowArgumentException_DestinationTooShort();
-        }
+        public void CopyTo(Memory<T> destination) => Span.CopyTo(destination.Span);
 
         /// <summary>
         /// Copies the contents of the readonly-only memory into the destination. If the source

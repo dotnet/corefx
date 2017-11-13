@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 namespace System
 {
     /// <summary>
-    /// Extension methods for Span&lt;T&gt;, Memory&lt;T&gt;, and friends.
+    /// Extension methods for Span{T}, Memory{T}, and friends.
     /// </summary>
     public static partial class MemoryExtensions
     {

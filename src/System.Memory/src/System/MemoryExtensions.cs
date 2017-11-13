@@ -8,12 +8,12 @@ using System.Runtime.CompilerServices;
 namespace System
 {
     /// <summary>
-    /// Extension methods for Span&lt;T&gt;, Memory&lt;T&gt;, and friends.
+    /// Extension methods for Span{T}, Memory{T}, and friends.
     /// </summary>
     public static partial class MemoryExtensions
     {
         /// <summary>
-        /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable&lt;T&gt;.Equals(T). 
+        /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The value to search for.</param>
@@ -30,7 +30,7 @@ namespace System
         }
 
         /// <summary>
-        /// Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable&lt;T&gt;.Equals(T). 
+        /// Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The sequence to search for.</param>
@@ -48,7 +48,7 @@ namespace System
         }
 
         /// <summary>
-        /// Determines whether two sequences are equal by comparing the elements using IEquatable&lt;T&gt;.Equals(T). 
+        /// Determines whether two sequences are equal by comparing the elements using IEquatable{T}.Equals(T). 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool SequenceEqual<T>(this Span<T> first, ReadOnlySpan<T> second)
@@ -65,7 +65,7 @@ namespace System
         }
 
         /// <summary>
-        /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable&lt;T&gt;.Equals(T). 
+        /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The value to search for.</param>
@@ -82,7 +82,7 @@ namespace System
         }
 
         /// <summary>
-        /// Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable&lt;T&gt;.Equals(T). 
+        /// Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
         /// </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The sequence to search for.</param>
@@ -172,7 +172,7 @@ namespace System
         }
 
         /// <summary>
-        /// Determines whether two sequences are equal by comparing the elements using IEquatable&lt;T&gt;.Equals(T). 
+        /// Determines whether two sequences are equal by comparing the elements using IEquatable{T}.Equals(T). 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool SequenceEqual<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second)
@@ -289,7 +289,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(this T[] array, Memory<T> destination)
         {
-            new ReadOnlyMemory<T>(array).CopyTo(destination);
+           array.CopyTo(destination.Span);
         }
     }
 }
