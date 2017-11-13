@@ -1226,7 +1226,40 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             UnaOpKind unaryOpKind;
             EXPRFLAG flags;
 
-            if (pArgument.Type == null ||
+            CType type = pArgument.Type;
+            if (type is NullableType nub)
+            {
+                CType nonNub = nub.UnderlyingType;
+                if (nonNub.isEnumType())
+                {
+                    PredefinedType ptOp;
+                    switch (nonNub.fundType())
+                    {
+                        case FUNDTYPE.FT_U4:
+                            ptOp = PredefinedType.PT_UINT;
+                            break;
+
+                        case FUNDTYPE.FT_I8:
+                            ptOp = PredefinedType.PT_LONG;
+                            break;
+
+                        case FUNDTYPE.FT_U8:
+                            ptOp = PredefinedType.PT_ULONG;
+                            break;
+
+                        default:
+                            // Promote all smaller types to int.
+                            ptOp = PredefinedType.PT_INT;
+                            break;
+                    }
+
+                    return mustCast(
+                        BindStandardUnaryOperator(
+                            op, mustCast(pArgument, GetTypes().GetNullable(GetPredefindType(ptOp)))), nub);
+                }
+            }
+
+            if (type == null ||
                 !CalculateExprAndUnaryOpKinds(
                            op,
                            Context.Checked,
@@ -1238,7 +1271,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             UnaOpMask unaryOpMask = (UnaOpMask)(1 << (int)unaryOpKind);
-            CType type = pArgument.Type;
 
             List<UnaOpFullSig> pSignatures = new List<UnaOpFullSig>();
 
