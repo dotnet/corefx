@@ -1343,7 +1343,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                    );
         }
 
-        private void verifyMethodArgs(IExprWithArgs call, CType callingObjectType)
+        private void verifyMethodArgs(ExprWithArgs call, CType callingObjectType)
         {
             Debug.Assert(call != null);
             Expr argsPtr = call.OptionalArguments;

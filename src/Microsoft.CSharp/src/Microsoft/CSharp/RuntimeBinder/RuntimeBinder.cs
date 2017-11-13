@@ -1035,7 +1035,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private Expr ReorderArgumentsForNamedAndOptional(Expr callingObject, Expr pResult)
         {
-            IExprWithArgs result = pResult as IExprWithArgs;
+            ExprWithArgs result = pResult as ExprWithArgs;
             Debug.Assert(result != null);
 
             Expr arguments = result.OptionalArguments;
