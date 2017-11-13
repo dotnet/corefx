@@ -900,7 +900,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         ////////////////////////////////////////////////////////////////////////////////
         // Given a method group or indexer group, bind it to the arguments for an 
         // invocation.
-        internal Expr BindMethodGroupToArguments(BindingFlag bindFlags, ExprMemberGroup grp, Expr args)
+        internal ExprWithArgs BindMethodGroupToArguments(BindingFlag bindFlags, ExprMemberGroup grp, Expr args)
         {
             Debug.Assert(grp.SymKind == SYMKIND.SK_MethodSymbol || grp.SymKind == SYMKIND.SK_PropertySymbol && ((grp.Flags & EXPRFLAG.EXF_INDEXER) != 0));
 
@@ -933,21 +933,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return null;
             }
 
-            Expr exprRes;
             MethPropWithInst mpwiBest = result.GetBestResult();
-
             if (grp.SymKind == SYMKIND.SK_PropertySymbol)
             {
                 Debug.Assert((grp.Flags & EXPRFLAG.EXF_INDEXER) != 0);
                 //PropWithType pwt = new PropWithType(mpwiBest.Prop(), mpwiBest.GetType());
 
-                exprRes = BindToProperty(grp.OptionalObject, new PropWithType(mpwiBest), bindFlags, args, grp);
+                return BindToProperty(grp.OptionalObject, new PropWithType(mpwiBest), bindFlags, args, grp);
             }
-            else
-            {
-                exprRes = BindToMethod(new MethWithInst(mpwiBest), args, grp, (MemLookFlags)grp.Flags);
-            }
-            return exprRes;
+
+            return BindToMethod(new MethWithInst(mpwiBest), args, grp, (MemLookFlags)grp.Flags);
         }
 
         /////////////////////////////////////////////////////////////////////////////////

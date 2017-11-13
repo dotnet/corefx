@@ -410,7 +410,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal Expr DispatchPayload(ICSharpInvokeOrInvokeMemberBinder payload, ArgumentObject[] arguments, LocalVariableSymbol[] locals) =>
+        internal ExprWithArgs DispatchPayload(ICSharpInvokeOrInvokeMemberBinder payload, ArgumentObject[] arguments, LocalVariableSymbol[] locals) =>
             BindCall(payload, CreateCallingObjectForCall(payload, arguments, locals), arguments, locals);
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -753,13 +753,13 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private Expr CreateIndexer(SymWithType swt, Expr callingObject, Expr arguments, BindingFlag bindFlags)
+        private ExprWithArgs CreateIndexer(SymWithType swt, Expr callingObject, Expr arguments, BindingFlag bindFlags)
         {
             IndexerSymbol index = swt.Sym as IndexerSymbol;
             AggregateType ctype = swt.GetType();
             ExprMemberGroup memgroup = CreateMemberGroupEXPR(index.name.Text, null, callingObject, SYMKIND.SK_PropertySymbol);
 
-            Expr result = _binder.BindMethodGroupToArguments(bindFlags, memgroup, arguments);
+            ExprWithArgs result = _binder.BindMethodGroupToArguments(bindFlags, memgroup, arguments);
             return ReorderArgumentsForNamedAndOptional(callingObject, result);
         }
 
@@ -834,7 +834,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private Expr BindCall(
+        private ExprWithArgs BindCall(
             ICSharpInvokeOrInvokeMemberBinder payload,
             Expr callingObject,
             ArgumentObject[] arguments,
@@ -942,7 +942,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 memGroup.Flags &= ~EXPRFLAG.EXF_USERCALLABLE;
             }
 
-            Expr pResult = _binder.BindMethodGroupToArguments(// Tree
+            ExprWithArgs pResult = _binder.BindMethodGroupToArguments(// Tree
                 BindingFlag.BIND_RVALUEREQUIRED | BindingFlag.BIND_STMTEXPRONLY, memGroup, CreateArgumentListEXPR(arguments, locals, 1, arguments.Length));
 
             // If overload resolution failed, throw an error.
@@ -955,7 +955,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return ReorderArgumentsForNamedAndOptional(callingObject, pResult);
         }
 
-        private Expr BindWinRTEventAccessor(EventWithType ewt, Expr callingObject, ArgumentObject[] arguments, LocalVariableSymbol[] locals, bool isAddAccessor)
+        private ExprWithArgs BindWinRTEventAccessor(EventWithType ewt, Expr callingObject, ArgumentObject[] arguments, LocalVariableSymbol[] locals, bool isAddAccessor)
         {
             // We want to generate either:
             // WindowsRuntimeMarshal.AddEventHandler<delegType>(new Func<delegType, EventRegistrationToken>(x.add_foo), new Action<EventRegistrationToken>(x.remove_foo), value)
@@ -1000,12 +1000,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             _symbolTable.PopulateSymbolTableWithName(methodName, new List<Type> { evtType }, windowsRuntimeMarshalType);
             ExprClass marshalClass = _exprFactory.CreateClass(_symbolTable.GetCTypeFromType(windowsRuntimeMarshalType));
             ExprMemberGroup addEventGrp = CreateMemberGroupEXPR(methodName, new [] { evtType }, marshalClass, SYMKIND.SK_MethodSymbol);
-            Expr expr = _binder.BindMethodGroupToArguments(
+            return _binder.BindMethodGroupToArguments(
                 BindingFlag.BIND_RVALUEREQUIRED | BindingFlag.BIND_STMTEXPRONLY,
                 addEventGrp,
                 args);
-
-            return expr;
         }
 
         private static void CheckForConditionalMethodError(Expr pExpr)
@@ -1033,7 +1031,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
         }
 
-        private Expr ReorderArgumentsForNamedAndOptional(Expr callingObject, Expr pResult)
+        private ExprWithArgs ReorderArgumentsForNamedAndOptional(Expr callingObject, ExprWithArgs pResult)
         {
             ExprWithArgs result = pResult as ExprWithArgs;
             Debug.Assert(result != null);
