@@ -1396,26 +1396,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Enum types are special in that they carry a set of "predefined" operators (~ and inc/dec).
                 if (pRawType.isEnumType())
                 {
+                    // Nullable enums are dealt with already.
+                    Debug.Assert(pRawType == pArgumentType);
+                    Debug.Assert(pArgumentType is AggregateType);
                     if ((unaryOpMask & (UnaOpMask.Tilde | UnaOpMask.IncDec)) != 0)
                     {
                         // We have an exact match.
-                        LiftFlags liftFlags = LiftFlags.None;
-                        CType typeSig = pArgumentType;
-
-                        if (typeSig is NullableType nubTypeSig)
-                        {
-                            if (nubTypeSig.GetUnderlyingType() != pRawType)
-                            {
-                                typeSig = GetSymbolLoader().GetTypeManager().GetNullable(pRawType);
-                            }
-                            liftFlags = LiftFlags.Lift1;
-                        }
                         if (unaryOpKind == UnaOpKind.Tilde)
                         {
                             pSignatures.Add(new UnaOpFullSig(
-                                    typeSig.getAggregate().GetUnderlyingType(),
+                                    pArgumentType.getAggregate().GetUnderlyingType(),
                                     BindEnumUnaOp,
-                                    liftFlags,
+                                    LiftFlags.None,
                                     UnaOpFuncKind.EnumUnaOp));
                         }
                         else
@@ -1423,11 +1415,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // For enums, we want to add the signature as the underlying type so that we'll
                             // perform the conversions to and from the enum type.
                             pSignatures.Add(new UnaOpFullSig(
-                                    typeSig.getAggregate().GetUnderlyingType(),
+                                    pArgumentType.getAggregate().GetUnderlyingType(),
                                     null,
-                                    liftFlags,
+                                    LiftFlags.None,
                                     UnaOpFuncKind.None));
                         }
+
                         return UnaryOperatorSignatureFindResult.Match;
                     }
                 }
