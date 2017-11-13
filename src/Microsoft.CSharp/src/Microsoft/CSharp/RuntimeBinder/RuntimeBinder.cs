@@ -756,11 +756,10 @@ namespace Microsoft.CSharp.RuntimeBinder
         private ExprWithArgs CreateIndexer(SymWithType swt, Expr callingObject, Expr arguments, BindingFlag bindFlags)
         {
             IndexerSymbol index = swt.Sym as IndexerSymbol;
-            AggregateType ctype = swt.GetType();
             ExprMemberGroup memgroup = CreateMemberGroupEXPR(index.name.Text, null, callingObject, SYMKIND.SK_PropertySymbol);
-
             ExprWithArgs result = _binder.BindMethodGroupToArguments(bindFlags, memgroup, arguments);
-            return ReorderArgumentsForNamedAndOptional(callingObject, result);
+            ReorderArgumentsForNamedAndOptional(callingObject, result);
+            return result;
         }
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -950,9 +949,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 throw Error.BindCallFailedOverloadResolution();
             }
-            CheckForConditionalMethodError(pResult);
 
-            return ReorderArgumentsForNamedAndOptional(callingObject, pResult);
+            CheckForConditionalMethodError(pResult);
+            ReorderArgumentsForNamedAndOptional(callingObject, pResult);
+            return pResult;
         }
 
         private ExprWithArgs BindWinRTEventAccessor(EventWithType ewt, Expr callingObject, ArgumentObject[] arguments, LocalVariableSymbol[] locals, bool isAddAccessor)
@@ -1031,18 +1031,15 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
         }
 
-        private ExprWithArgs ReorderArgumentsForNamedAndOptional(Expr callingObject, ExprWithArgs pResult)
+        private void ReorderArgumentsForNamedAndOptional(Expr callingObject, ExprWithArgs result)
         {
-            ExprWithArgs result = pResult as ExprWithArgs;
-            Debug.Assert(result != null);
-
             Expr arguments = result.OptionalArguments;
             AggregateType type;
             MethodOrPropertySymbol methprop;
             ExprMemberGroup memgroup;
             TypeArray typeArgs;
 
-            if (pResult is ExprCall call)
+            if (result is ExprCall call)
             {
                 type = call.MethWithInst.Ats;
                 methprop = call.MethWithInst.Meth();
@@ -1051,7 +1048,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             else
             {
-                ExprProperty prop = pResult as ExprProperty;
+                ExprProperty prop = result as ExprProperty;
                 Debug.Assert(prop != null);
                 type = prop.PropWithTypeSlot.Ats;
                 methprop = prop.PropWithTypeSlot.Prop();
@@ -1059,9 +1056,10 @@ namespace Microsoft.CSharp.RuntimeBinder
                 typeArgs = null;
             }
 
-            ArgInfos argInfo = new ArgInfos();
-            bool b;
-            argInfo.carg = ExpressionBinder.CountArguments(arguments, out b);
+            ArgInfos argInfo = new ArgInfos
+            {
+                carg = ExpressionBinder.CountArguments(arguments, out _)
+            };
             _binder.FillInArgInfoFromArgList(argInfo, arguments);
 
             // We need to substitute type parameters BEFORE getting the most derived one because
@@ -1105,7 +1103,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 result.OptionalArguments = pList;
             }
-            return pResult;
         }
 
         private Expr StripNamedArgument(Expr pArg)
