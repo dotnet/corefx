@@ -9,6 +9,40 @@ namespace System.IO.Tests
 {
     public class Directory_Create_Tests : FileSystemWatcherTest
     {
+
+        [Fact]        
+        public void FileSystemWatcher_Directory_NotExists()
+        {
+            string directoryPath = "";
+
+            var exception = Record.Exception(() =>
+            {
+
+                //generate invalid random directory name            
+                while (true)
+                {
+                    directoryPath = GetTestFilePath();
+                    if (Directory.Exists(directoryPath))
+                        continue;
+                    break;
+                }
+
+                using (var watcher = new FileSystemWatcher(directoryPath))
+                {
+
+                }
+
+            });
+
+            string expectedMessage =
+                $"The directory name '{directoryPath}' does not exist." +
+                Environment.NewLine +
+                "Parameter name: path";
+
+            Assert.Equal<string>(expectedMessage, exception.Message);
+
+        }
+
         [Fact]
         public void FileSystemWatcher_Directory_Create()
         {
