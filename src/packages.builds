@@ -14,8 +14,6 @@
     <Project Include="*\pkg\**\*.pkgproj" Condition="'$(SkipManagedPackageBuild)' != 'true' AND '$(BuildAllConfigurations)' == 'true'">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="Microsoft.CSharp\pkg\Microsoft.CSharp.pkgproj" />
-    <Project Include="System.Configuration.ConfigurationManager\pkg\Microsoft.CSharp.pkgproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipManagedPackageBuild)' != 'true'" >
@@ -26,16 +24,6 @@
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Private.CoreFx.NETCoreApp\Microsoft.Private.CoreFx.NETCoreApp.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="Microsoft.CSharp\pkg\*.pkgproj" />
-    <Project Include="System.ComponentModel.Annotations\pkg\*.pkgproj" />    
-    <Project Include="System.Configuration.ConfigurationManager\pkg\*.pkgproj" />
-    <Project Include="System.Data.SqlClient\pkg\*.pkgproj" />
-    <Project Include="System.IO.Packaging\pkg\*.pkgproj" />
-    <Project Include="System.Security.AccessControl\pkg\*.pkgproj" />
-    <Project Include="System.Security.Cryptography.Xml\pkg\*.pkgproj" />
-    <Project Include="System.Security.Permissions\pkg\*.pkgproj" />
-    <Project Include="System.Security.Principal.Windows\pkg\*.pkgproj" />
-    <Project Include="System.ServiceProcess.ServiceController\pkg\*.pkgproj" />
     <!-- Servicing support package to include the changes required for 4.7.1 -->
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\NETStandard.Library.NETFramework\NETStandard.Library.NETFramework.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
