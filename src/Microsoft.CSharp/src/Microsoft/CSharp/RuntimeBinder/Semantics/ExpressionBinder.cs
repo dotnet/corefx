@@ -905,12 +905,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(grp.SymKind == SYMKIND.SK_MethodSymbol || grp.SymKind == SYMKIND.SK_PropertySymbol && ((grp.Flags & EXPRFLAG.EXF_INDEXER) != 0));
 
             // Count the args.
-            bool argTypeErrors;
-            int carg = CountArguments(args, out argTypeErrors);
-            // We need to store the object because BindMethodGroupToArgumentsCore will 
-            // null it out in the case of an extension method, which is then consumed
-            // by BindToMethod. After that, we want to set the object back.
-            Expr pObject = grp.OptionalObject;
+            int carg = CountArguments(args, out bool _);
 
             // If we weren't given a pName, then we couldn't bind the method pName, so we should
             // just bail out of here.
