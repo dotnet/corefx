@@ -23,11 +23,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new RuntimeBinderException(SR.BindCallFailedOverloadResolution);
         }
 
-        internal static Exception BindBinaryOperatorRequireTwoArguments()
-        {
-            return new ArgumentException(SR.BindBinaryOperatorRequireTwoArguments);
-        }
-
         internal static Exception BindUnaryOperatorRequireOneArgument()
         {
             return new ArgumentException(SR.BindUnaryOperatorRequireOneArgument);

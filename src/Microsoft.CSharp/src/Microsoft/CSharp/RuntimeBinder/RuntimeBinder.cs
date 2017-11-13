@@ -1204,10 +1204,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 ArgumentObject[] arguments,
                 LocalVariableSymbol[] locals)
         {
-            if (arguments.Length != 2)
-            {
-                throw Error.BindBinaryOperatorRequireTwoArguments();
-            }
+            Debug.Assert(arguments.Length == 2);
 
             ExpressionKind ek = Operators.GetExpressionKind(GetOperatorKind(payload.Operation, payload.IsLogicalOperation));
             Expr arg1 = CreateArgumentEXPR(arguments[0], locals[0]);

@@ -67,9 +67,6 @@
   <data name="BindCallFailedOverloadResolution" xml:space="preserve">
     <value>Overload resolution failed</value>
   </data>
-  <data name="BindBinaryOperatorRequireTwoArguments" xml:space="preserve">
-    <value>Binary operators must be invoked with two arguments</value>
-  </data>
   <data name="BindUnaryOperatorRequireOneArgument" xml:space="preserve">
     <value>Unary operators must be invoked with one argument</value>
   </data>
