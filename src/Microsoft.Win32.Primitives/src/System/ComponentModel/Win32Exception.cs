@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace System.ComponentModel
 {
@@ -70,5 +72,39 @@ namespace System.ComponentModel
         /// Represents the Win32 error code associated with this exception. This field is read-only.
         /// </summary>
         public int NativeErrorCode { get; }
+
+        /// <summary>
+        /// Returns a string that contains the <see cref="NativeErrorCode"/> of the error.
+        /// </summary>
+        /// <returns>A string that represents the <see cref="NativeErrorCode"/>.</returns>
+        public override string ToString()
+        {
+            string message = Message;
+            string className = GetType().ToString();
+            StringBuilder s = new StringBuilder(className);
+            s.AppendFormat(CultureInfo.InvariantCulture, " ({0})", NativeErrorCode);
+            
+            if (!(String.IsNullOrEmpty(message)))
+            {
+                s.Append(": ");
+                s.Append(message);
+            }
+
+            Exception innerException = InnerException;
+
+            if (innerException != null)
+            {
+                s.Append(" ---> ");
+                s.Append(innerException.ToString());
+            }
+
+            if (StackTrace != null)
+            {
+                s.AppendLine();
+                s.Append(StackTrace);
+            }
+
+            return s.ToString();
+        }
     }
 }

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Tests;
 using System.Text;
@@ -49,6 +50,7 @@ namespace System.ComponentModel.Tests
         {
             int error = 5;
             string message = "This is an error message.";
+            string toStringStart = string.Format(CultureInfo.InvariantCulture, "{0} ({1})", typeof(Win32Exception).ToString(), error);
             Exception innerException = new FormatException();
 
             // Test each of the constructors and validate the properties of the resulting instance
@@ -59,6 +61,7 @@ namespace System.ComponentModel.Tests
             ex = new Win32Exception(error);
             Assert.Equal(expected: E_FAIL, actual: ex.HResult);
             Assert.Equal(expected: error, actual: ex.NativeErrorCode);
+            Assert.StartsWith(expectedStartString: toStringStart, actualString: ex.ToString(), comparisonType: StringComparison.Ordinal);
 
             ex = new Win32Exception(message);
             Assert.Equal(expected: E_FAIL, actual: ex.HResult);
@@ -68,6 +71,7 @@ namespace System.ComponentModel.Tests
             Assert.Equal(expected: E_FAIL, actual: ex.HResult);
             Assert.Equal(expected: error, actual: ex.NativeErrorCode);
             Assert.Equal(expected: message, actual: ex.Message);
+            Assert.StartsWith(expectedStartString: toStringStart, actualString: ex.ToString(), comparisonType: StringComparison.Ordinal);
 
             ex = new Win32Exception(message, innerException);
             Assert.Equal(expected: E_FAIL, actual: ex.HResult);
