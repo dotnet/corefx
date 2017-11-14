@@ -57,6 +57,7 @@ namespace System.Diagnostics.Tests
                 {
                     eventLog.Source = source;
                     Helpers.RetryOnWin7(() => eventLog.WriteEntry(message));
+                    Helpers.WaitForEventLog(eventLog, 1);
                     EventLogEntry entry = Helpers.RetryOnWin7(() => eventLog.Entries[eventLog.Entries.Count - 1]);
                     Assert.False(entry.Equals(null));
                 }
@@ -68,6 +69,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [ActiveIssue(24874)]
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndSupportsEventLogs))]
         public void CheckingEntryEqualityAndIndex()
         {
@@ -81,10 +83,12 @@ namespace System.Diagnostics.Tests
                 {
                     eventLog.Source = source;
                     Helpers.RetryOnWin7(() => eventLog.WriteEntry(message));
+                    Helpers.WaitForEventLog(eventLog, 1);  //There is latency between writing and getting the entry
                     EventLogEntry entry = Helpers.RetryOnWin7(() => eventLog.Entries[eventLog.Entries.Count - 1]);
                     Assert.True(entry.Equals(entry));
 
                     Helpers.RetryOnWin7(() => eventLog.WriteEntry(message));
+                    Helpers.WaitForEventLog(eventLog, 2);
                     EventLogEntry secondEntry = Helpers.RetryOnWin7(() => eventLog.Entries[eventLog.Entries.Count - 1]);
                     Assert.Equal(entry.Index + 1, secondEntry.Index);
                 }
@@ -96,6 +100,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [ActiveIssue(24874)]
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndSupportsEventLogs))]
         public void CheckingEntryInEquality()
         {
@@ -110,6 +115,7 @@ namespace System.Diagnostics.Tests
                     eventLog.Source = source;
                     Helpers.RetryOnWin7(() => eventLog.WriteEntry(message));
                     Helpers.RetryOnWin7(() => eventLog.WriteEntry(message));
+                    Helpers.WaitForEventLog(eventLog, 2);
                     EventLogEntry entry = Helpers.RetryOnWin7(() => eventLog.Entries[eventLog.Entries.Count - 1]);
                     EventLogEntry secondEntry = Helpers.RetryOnWin7(() => eventLog.Entries[eventLog.Entries.Count - 2]);
                     Assert.False(entry.Equals(secondEntry));
