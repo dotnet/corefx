@@ -544,7 +544,8 @@ namespace System
         public string ToString(string format, System.IFormatProvider provider) { throw null; }
         public static bool TryParse(string s, out byte result) { throw null; }
         public static bool TryParse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out byte result) { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<char> s, out byte result, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Integer, System.IFormatProvider provider = null) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, out byte result) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out byte result) { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct Char : System.IComparable, System.IComparable<char>, System.IConvertible, System.IEquatable<char>
@@ -1027,7 +1028,8 @@ namespace System
         public static decimal Truncate(decimal d) { throw null; }
         public static bool TryParse(string s, out decimal result) { throw null; }
         public static bool TryParse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out decimal result) { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<char> s, out decimal result, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Integer, System.IFormatProvider provider = null) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, out decimal result) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out decimal result) { throw null; }
     }
     public abstract partial class Delegate: System.ICloneable, System.Runtime.Serialization.ISerializable
     {
@@ -1118,8 +1120,9 @@ namespace System
         public string ToString(string format) { throw null; }
         public string ToString(string format, System.IFormatProvider provider) { throw null; }
         public static bool TryParse(string s, out double result) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, out double result) { throw null; }
         public static bool TryParse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out double result) { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<char> s, out double result, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Integer, System.IFormatProvider provider = null) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out double result) { throw null; }
     }
     public partial class DuplicateWaitObjectException : System.ArgumentException, System.Runtime.Serialization.ISerializable
     {
@@ -1458,7 +1461,8 @@ namespace System
         public string ToString(string format, System.IFormatProvider provider) { throw null; }
         public static bool TryParse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out short result) { throw null; }
         public static bool TryParse(string s, out short result) { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<char> s, out short result, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Integer, System.IFormatProvider provider = null) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, out short result) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out short result) { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct Int32 : System.IComparable, System.IComparable<int>, System.IConvertible, System.IEquatable<int>, System.IFormattable
@@ -1497,7 +1501,8 @@ namespace System
         public string ToString(string format, System.IFormatProvider provider) { throw null; }
         public static bool TryParse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out int result) { throw null; }
         public static bool TryParse(string s, out int result) { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<char> s, out int result, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Integer, System.IFormatProvider provider = null) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out int result) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, out int result) { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct Int64 : System.IComparable, System.IComparable<long>, System.IConvertible, System.IEquatable<long>, System.IFormattable
@@ -1536,7 +1541,8 @@ namespace System
         public string ToString(string format, System.IFormatProvider provider) { throw null; }
         public static bool TryParse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out long result) { throw null; }
         public static bool TryParse(string s, out long result) { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<char> s, out long result, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Integer, System.IFormatProvider provider = null) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out long result) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, out long result) { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct IntPtr : System.Runtime.Serialization.ISerializable, IEquatable<IntPtr>
@@ -1918,6 +1924,7 @@ namespace System
         [System.ObsoleteAttribute("Equals() on ReadOnlySpan will always throw an exception. Use == instead.")]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public override bool Equals(object obj) { throw null; }
+        public Enumerator GetEnumerator() { throw null; }
         [System.ObsoleteAttribute("GetHashCode() on ReadOnlySpan will always throw an exception.")]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public override int GetHashCode() { throw null; }
@@ -1930,6 +1937,11 @@ namespace System
         public ReadOnlySpan<T> Slice(int start, int length) { throw null; }
         public T[] ToArray() { throw null; }
         public bool TryCopyTo(Span<T> destination) { throw null; }
+        public ref struct Enumerator
+        {
+            public bool MoveNext() { throw null; }
+            public ref readonly T Current { get { throw null; } }
+        }
     }
     public partial class ResolveEventArgs : System.EventArgs
     {
@@ -2025,7 +2037,9 @@ namespace System
         [System.CLSCompliantAttribute(false)]
         public static bool TryParse(string s, out sbyte result) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryParse(ReadOnlySpan<char> s, out sbyte result, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Integer, System.IFormatProvider provider = null) { throw null; }
+        public static bool TryParse(ReadOnlySpan<char> s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out sbyte result) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static bool TryParse(ReadOnlySpan<char> s, out sbyte result) { throw null; }
     }
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate, Inherited = false)]
     public sealed class SerializableAttribute : Attribute
@@ -2083,7 +2097,8 @@ namespace System
         public string ToString(string format, System.IFormatProvider provider) { throw null; }
         public static bool TryParse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out float result) { throw null; }
         public static bool TryParse(string s, out float result) { throw null; }
-        public static bool TryParse(ReadOnlySpan<char> s, out float result, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Integer, System.IFormatProvider provider = null) { throw null; }
+        public static bool TryParse(ReadOnlySpan<char> s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out float result) { throw null; }
+        public static bool TryParse(ReadOnlySpan<char> s, out float result) { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public readonly ref struct Span<T>
@@ -2107,6 +2122,7 @@ namespace System
         [System.ObsoleteAttribute("Equals() on Span will always throw an exception. Use == instead.")]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public override bool Equals(object obj) { throw null; }
+        public Enumerator GetEnumerator() { throw null; }
         [System.ObsoleteAttribute("GetHashCode() on Span will always throw an exception.")]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public override int GetHashCode() { throw null; }
@@ -2120,6 +2136,11 @@ namespace System
         public Span<T> Slice(int start, int length) { throw null; }
         public T[] ToArray() { throw null; }
         public bool TryCopyTo(Span<T> destination) { throw null; }
+        public ref struct Enumerator
+        {
+            public bool MoveNext() { throw null; }
+            public ref T Current { get { throw null; } }
+        }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(64))]
     public sealed partial class STAThreadAttribute : System.Attribute
@@ -2408,14 +2429,17 @@ namespace System
         public string ToString(string format, System.IFormatProvider formatProvider) { throw null; }
         public bool TryFormat(System.Span<char> destination, out int charsWritten, string format = null, System.IFormatProvider provider = null) { throw null; }
         public static bool TryParse(string input, System.IFormatProvider formatProvider, out System.TimeSpan result) { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<char> input, out System.TimeSpan result, System.IFormatProvider formatProvider = null) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> input, System.IFormatProvider formatProvider, out System.TimeSpan result) { throw null; }
         public static bool TryParse(string s, out System.TimeSpan result) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, out System.TimeSpan result) { throw null; }
         public static bool TryParseExact(string input, string format, System.IFormatProvider formatProvider, System.Globalization.TimeSpanStyles styles, out System.TimeSpan result) { throw null; }
+        public static bool TryParseExact(System.ReadOnlySpan<char> input, string format, System.IFormatProvider formatProvider, System.Globalization.TimeSpanStyles styles, out System.TimeSpan result) { throw null; }
         public static bool TryParseExact(string input, string format, System.IFormatProvider formatProvider, out System.TimeSpan result) { throw null; }
-        public static bool TryParseExact(System.ReadOnlySpan<char> input, string format, System.IFormatProvider formatProvider, out System.TimeSpan result, System.Globalization.TimeSpanStyles styles = System.Globalization.TimeSpanStyles.None) { throw null; }
+        public static bool TryParseExact(System.ReadOnlySpan<char> input, string format, System.IFormatProvider formatProvider, out System.TimeSpan result) { throw null; }
         public static bool TryParseExact(string input, string[] formats, System.IFormatProvider formatProvider, System.Globalization.TimeSpanStyles styles, out System.TimeSpan result) { throw null; }
+        public static bool TryParseExact(System.ReadOnlySpan<char> input, string[] formats, System.IFormatProvider formatProvider, System.Globalization.TimeSpanStyles styles, out System.TimeSpan result) { throw null; }
         public static bool TryParseExact(string input, string[] formats, System.IFormatProvider formatProvider, out System.TimeSpan result) { throw null; }
-        public static bool TryParseExact(System.ReadOnlySpan<char> input, string[] formats, System.IFormatProvider formatProvider, out System.TimeSpan result, System.Globalization.TimeSpanStyles styles = System.Globalization.TimeSpanStyles.None) { throw null; }
+        public static bool TryParseExact(System.ReadOnlySpan<char> input, string[] formats, System.IFormatProvider formatProvider, out System.TimeSpan result) { throw null; }
     }
     [ObsoleteAttribute("System.TimeZone has been deprecated.  Please investigate the use of System.TimeZoneInfo instead.")]
     public abstract partial class TimeZone
@@ -3048,9 +3072,11 @@ namespace System
         [System.CLSCompliantAttribute(false)]
         public static bool TryParse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out ushort result) { throw null; }
         [System.CLSCompliantAttribute(false)]
+        public static bool TryParse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out ushort result) { throw null; }
+        [System.CLSCompliantAttribute(false)]
         public static bool TryParse(string s, out ushort result) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryParse(System.ReadOnlySpan<char> s, out ushort result, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Integer, System.IFormatProvider provider = null) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, out ushort result) { throw null; }
     }
     [System.CLSCompliantAttribute(false)]
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -3096,9 +3122,11 @@ namespace System
         [System.CLSCompliantAttribute(false)]
         public static bool TryParse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out uint result) { throw null; }
         [System.CLSCompliantAttribute(false)]
+        public static bool TryParse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out uint result) { throw null; }
+        [System.CLSCompliantAttribute(false)]
         public static bool TryParse(string s, out uint result) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryParse(System.ReadOnlySpan<char> s, out uint result, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Integer, System.IFormatProvider provider = null) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, out uint result) { throw null; }
     }
     [System.CLSCompliantAttribute(false)]
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -3144,9 +3172,11 @@ namespace System
         [System.CLSCompliantAttribute(false)]
         public static bool TryParse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out ulong result) { throw null; }
         [System.CLSCompliantAttribute(false)]
+        public static bool TryParse(System.ReadOnlySpan<char> s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out ulong result) { throw null; }
+        [System.CLSCompliantAttribute(false)]
         public static bool TryParse(string s, out ulong result) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static bool TryParse(System.ReadOnlySpan<char> s, out ulong result, System.Globalization.NumberStyles style = System.Globalization.NumberStyles.Integer, System.IFormatProvider provider = null) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> s, out ulong result) { throw null; }
     }
     [System.CLSCompliantAttribute(false)]
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
