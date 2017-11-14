@@ -99,12 +99,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // than 1/1000 sec for the whole 4000 of them.
 
             ICSharpBinder binder = payload as ICSharpBinder;
-            if (binder == null)
-            {
-                Debug.Assert(false, "Unknown payload kind");
-                throw Error.InternalCompilerError();
-            }
-
+            Debug.Assert(binder != null);
 
             lock (_bindLock)
             {
