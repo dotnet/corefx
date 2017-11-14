@@ -5,11 +5,11 @@
 using System;
 using System.Runtime.InteropServices;
 
-internal partial class Interop
+internal static partial class Interop
 {
-    internal partial class Libdl
+    internal static partial class Sys
     {
-        [DllImport(Libraries.Libdl)]
-        public static extern IntPtr dlsym(IntPtr handle, string symbol);
+        [DllImport(Libraries.Libdl, EntryPoint = "dlopen")]
+        internal static extern IntPtr DlOpen(string fileName, DlOpenFlags flag);
     }
 }

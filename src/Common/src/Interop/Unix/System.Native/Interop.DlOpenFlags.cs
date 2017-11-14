@@ -5,13 +5,15 @@
 using System;
 using System.Runtime.InteropServices;
 
-internal partial class Interop
+internal static partial class Interop
 {
-    internal partial class Libdl
+    internal static partial class Sys
     {
-        public const int RTLD_NOW = 0x002;
-
-        [DllImport(Libraries.Libdl)]
-        public static extern IntPtr dlopen(string fileName, int flag);
+        [Flags]
+        internal enum DlOpenFlags : int
+        {
+            RTLD_LAZY = 1,
+            RTLD_NOW = 2
+        }
     }
 }

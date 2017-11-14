@@ -28,7 +28,7 @@ namespace System.Drawing
                 IntPtr lib = IntPtr.Zero;
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    lib = Interop.Libdl.dlopen("libgdiplus.dylib", Interop.Libdl.RTLD_NOW);
+                    lib = Interop.Sys.DlOpen("libgdiplus.dylib", Interop.Sys.DlOpenFlags.RTLD_NOW);
                 }
                 else
                 {
@@ -36,10 +36,10 @@ namespace System.Drawing
                     // The mono project, where libgdiplus originated, allowed both of the names below to be used, via
                     // a global configuration setting. We prefer the "unversioned" shared object name, and fallback to
                     // the name suffixed with ".0".
-                    lib = Interop.Libdl.dlopen("libgdiplus.so", Interop.Libdl.RTLD_NOW);
+                    lib = Interop.Sys.DlOpen("libgdiplus.so", Interop.Sys.DlOpenFlags.RTLD_NOW);
                     if (lib == IntPtr.Zero)
                     {
-                        lib = Interop.Libdl.dlopen("libgdiplus.so.0", Interop.Libdl.RTLD_NOW);
+                        lib = Interop.Sys.DlOpen("libgdiplus.so.0", Interop.Sys.DlOpenFlags.RTLD_NOW);
                     }
                 }
 
@@ -48,7 +48,7 @@ namespace System.Drawing
                 return lib;
             }
 
-            private static IntPtr LoadFunctionPointer(IntPtr nativeLibraryHandle, string functionName) => Interop.Libdl.dlsym(nativeLibraryHandle, functionName);
+            private static IntPtr LoadFunctionPointer(IntPtr nativeLibraryHandle, string functionName) => Interop.Sys.DlSym(nativeLibraryHandle, functionName);
 
             private static void PlatformInitialize()
             {

@@ -7,6 +7,6 @@ namespace System.Runtime.InteropServices
     internal static partial class FunctionWrapper
     {
         public static IntPtr LoadFunctionPointer(IntPtr nativeLibraryHandle, string functionName)
-            => Interop.Libdl.dlsym(nativeLibraryHandle, functionName);
+            => Interop.Sys.DlSym(nativeLibraryHandle, functionName);
     }
 }
