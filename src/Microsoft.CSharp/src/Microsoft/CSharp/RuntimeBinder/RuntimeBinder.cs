@@ -1463,10 +1463,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             ArgumentObject[] arguments,
             LocalVariableSymbol[] locals)
         {
-            if (arguments.Length < 2)
-            {
-                throw Error.BindBinaryAssignmentRequireTwoArguments();
-            }
+            Debug.Assert(arguments.Length >= 2);
 
             string name = payload.Name;
 
