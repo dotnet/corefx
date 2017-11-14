@@ -86,14 +86,7 @@ namespace MonoTests.System.Runtime.Caching
         private static void Constructor_MissingFiles_Handler()
         {
             HostFileChangeMonitor monitor;
-            PlatformID pid = Environment.OSVersion.Platform;
-            bool runningOnWindows = ((int)pid != 128 && pid != PlatformID.Unix && pid != PlatformID.MacOSX);
-            string missingFile = Path.Combine("missing", "file", "path");
-
-            if (runningOnWindows)
-                missingFile = "c:\\" + missingFile;
-            else
-                missingFile = "/" + missingFile;
+            string missingFile = Path.GetFullPath(Path.Combine(Guid.NewGuid().ToString("N"), "file", "path"));
 
             var paths = new List<string> {
                 missingFile
@@ -115,10 +108,7 @@ namespace MonoTests.System.Runtime.Caching
                 new HostFileChangeMonitor(paths);
             });
 
-            if (runningOnWindows)
-                missingFile = "c:\\file.txt";
-            else
-                missingFile = "/file.txt";
+            missingFile = Path.GetFullPath(Guid.NewGuid().ToString("N"));
 
             paths.Clear();
             paths.Add(missingFile);
@@ -143,14 +133,7 @@ namespace MonoTests.System.Runtime.Caching
         public void Constructor_Duplicates()
         {
             HostFileChangeMonitor monitor;
-            PlatformID pid = Environment.OSVersion.Platform;
-            bool runningOnWindows = ((int)pid != 128 && pid != PlatformID.Unix && pid != PlatformID.MacOSX);
-            string missingFile = Path.Combine("missing", "file", "path");
-
-            if (runningOnWindows)
-                missingFile = "c:\\file.txt";
-            else
-                missingFile = "/file.txt";
+            string missingFile = Path.GetFullPath(Guid.NewGuid().ToString("N"));
 
             var paths = new List<string> {
                 missingFile,
@@ -198,6 +181,19 @@ namespace MonoTests.System.Runtime.Caching
                 {
                     // ignore
                 }
+            }
+
+            try
+            {
+                // 2 nested folders were created by SetupMonitoring, so we'll delete both
+                var dirInfo = new DirectoryInfo(testPath);
+                var parentDirInfo = dirInfo.Parent;
+                dirInfo.Delete(recursive: true);
+                parentDirInfo.Delete(recursive: true);
+            }
+            catch
+            {
+                // ignore
             }
         }
 
