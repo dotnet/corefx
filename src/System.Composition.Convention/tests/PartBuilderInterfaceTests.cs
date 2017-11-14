@@ -3,12 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Composition;
+using System.Composition.Convention;
 using System.Composition.Hosting;
 using System.Linq;
 using System.Reflection;
 using Xunit;
 
-namespace System.Composition.Convention
+namespace System.ComponentModel.Composition
 {
     public class PartBuilderInterfaceTests
     {

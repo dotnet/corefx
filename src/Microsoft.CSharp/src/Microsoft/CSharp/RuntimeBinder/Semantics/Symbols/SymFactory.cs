@@ -28,6 +28,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     sym = new NamespaceSymbol();
                     sym.name = name;
                     break;
+                case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
+                    sym = new AssemblyQualifiedNamespaceSymbol();
+                    sym.name = name;
+                    break;
                 case SYMKIND.SK_AggregateSymbol:
                     sym = new AggregateSymbol();
                     sym.name = name;
@@ -91,6 +95,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             sym.SetAccess(ACCESS.ACC_PUBLIC);
 
             return (sym);
+        }
+
+        public AssemblyQualifiedNamespaceSymbol CreateNamespaceAid(Name name, ParentSymbol parent)
+        {
+            Debug.Assert(name != null);
+
+            AssemblyQualifiedNamespaceSymbol sym = NewBasicSymbol(SYMKIND.SK_AssemblyQualifiedNamespaceSymbol, name, parent) as AssemblyQualifiedNamespaceSymbol;
+
+            Debug.Assert(sym != null);
+            return sym;
         }
 
         /////////////////////////////////////////////////////////////////////////////////

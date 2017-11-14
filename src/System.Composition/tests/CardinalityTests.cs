@@ -32,7 +32,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void RequestingOneWhereMultipleArePresentFails()
         {
             var c = CreateContainer(typeof(LogA), typeof(LogB));
@@ -43,7 +42,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void ImportingOneWhereMultipleArePresentFails()
         {
             var c = CreateContainer(typeof(LogA), typeof(LogB), typeof(UsesLog));

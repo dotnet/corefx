@@ -105,8 +105,8 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(filter));
 
             // Early check for directory parameter so that an exception can be thrown as early as possible.
-            if (!Directory.Exists(path))
-                throw new ArgumentException(SR.Format(SR.InvalidDirName_NotExists, path), nameof(path));
+            if (path.Length == 0 || !Directory.Exists(path))
+                throw new ArgumentException(SR.Format(SR.InvalidDirName, path), nameof(path));
 
             _directory = path;
             _filter = filter;

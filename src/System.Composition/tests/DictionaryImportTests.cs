@@ -69,7 +69,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void DictionaryImportsKeyedByMetadata()
         {
             var container = CreateContainer(new[] { typeof(ValueA), typeof(ValueB), typeof(Consumer) });
@@ -82,7 +81,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void DictionaryImportsRecieveMetadataFromNestedAdapters()
         {
             var container = CreateContainer(new[] { typeof(ValueA), typeof(ValueB), typeof(LazyConsumer) });
@@ -94,7 +92,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void WhenAMetadataKeyIsDuplicatedAnInformativeExceptionIsThrown()
         {
             var container = CreateContainer(typeof(ValueA), typeof(ValueA), typeof(Consumer));
@@ -103,7 +100,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void WhenAMetadataKeyIsMissingAnInformativeExceptionIsThrown()
         {
             var container = CreateContainer(typeof(ValueA), typeof(ValueMissing), typeof(Consumer));
@@ -112,7 +108,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void WhenAMetadataValueIsOfTheWrongTypeAnInformativeExceptionIsThrown()
         {
             var container = CreateContainer(typeof(ValueA), typeof(NonStringValue), typeof(Consumer));
@@ -121,7 +116,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void DictionaryImportsCompatibleWithConventionBuilder()
         {
             var rb = new ConventionBuilder();

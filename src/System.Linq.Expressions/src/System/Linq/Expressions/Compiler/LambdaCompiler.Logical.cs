@@ -483,6 +483,7 @@ namespace System.Linq.Expressions.Compiler
                     EmitExpression(node, CompilationFlags.EmitAsNoTail | CompilationFlags.EmitNoExpressionStart);
                     EmitBranchOp(branchValue, label);
                     break;
+
             }
 
             EmitExpressionEnd(startEmitted);

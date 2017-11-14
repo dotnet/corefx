@@ -106,7 +106,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal enum CheckLvalueKind
     {
         Assignment,
-        Increment
+        OutParameter,
+        Increment,
     }
 
     internal enum BinOpFuncKind
@@ -450,6 +451,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(exprTypeDest != null);
             Debug.Assert(exprTypeDest.Type != null);
             CType typeDest = exprTypeDest.Type;
+            pexprDest = null;
             // If the source is a constant, and cast is really simple (no change in fundamental
             // type, no flags), then create a new constant node with the new type instead of
             // creating a cast node. This allows compile-time constants to be easily recognized.
@@ -478,6 +480,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             pexprDest = exprCast;
             Debug.Assert(exprCast.Argument != null);
+            return;
         }
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -497,11 +500,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             bool fConstrained;
             Expr pObject = pMemGroup.OptionalObject;
             CType callingObjectType = pObject?.Type;
-            PostBindMethod(ref mwi);
+            PostBindMethod(ref mwi, pObject);
             pObject = AdjustMemberObject(mwi, pObject, out fConstrained);
             pMemGroup.OptionalObject = pObject;
 
-            CType pReturnType;
+            CType pReturnType = null;
             if ((flags & (MemLookFlags.Ctor | MemLookFlags.NewObj)) == (MemLookFlags.Ctor | MemLookFlags.NewObj))
             {
                 pReturnType = mwi.Ats;
@@ -656,11 +659,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             bool fConstrained;
             MethWithType mwtGet;
             MethWithType mwtSet;
+            Expr pObjectThrough = null;
 
             // We keep track of the type of the pObject which we're doing the call through so that we can report 
             // protection access errors later, either below when binding the get, or later when checking that
             // the setter is actually an lvalue.
-            Expr pObjectThrough = pObject;
+            pObjectThrough = pObject;
 
             PostBindProperty(pwt, pObject, out mwtGet, out mwtSet);
 
@@ -1076,9 +1080,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private static ErrorCode GetStandardLvalueError(CheckLvalueKind kind)
         {
             Debug.Assert(kind >= CheckLvalueKind.Assignment && kind <= CheckLvalueKind.Increment);
-            return kind == CheckLvalueKind.Increment
-                ? ErrorCode.ERR_IncrementLvalueExpected
-                : ErrorCode.ERR_AssgLvalueExpected;
+            switch (kind)
+            {
+                case CheckLvalueKind.OutParameter:
+                    return ErrorCode.ERR_RefLvalueExpected;
+                case CheckLvalueKind.Increment:
+                    return ErrorCode.ERR_IncrementLvalueExpected;
+                default:
+                    return ErrorCode.ERR_AssgLvalueExpected;
+            }
         }
 
         private void CheckLvalueProp(ExprProperty prop)
@@ -1125,11 +1135,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            Debug.Assert(!(expr is ExprLocal));
-
             switch (expr.Kind)
             {
                 case ExpressionKind.Property:
+                    if (kind == CheckLvalueKind.OutParameter)
+                    {
+                        // passing a property as ref or out
+                        throw ErrorContext.Error(ErrorCode.ERR_RefProperty);
+                    }
+
                     ExprProperty prop = (ExprProperty)expr;
                     if (!prop.MethWithTypeSet)
                     {
@@ -1165,7 +1179,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     throw ErrorContext.Error(GetStandardLvalueError(kind));
 
                 case ExpressionKind.MemberGroup:
-                    ErrorCode err = ErrorCode.ERR_AssgReadonlyLocalCause;
+                    ErrorCode err = (kind == CheckLvalueKind.OutParameter) ? ErrorCode.ERR_RefReadonlyLocalCause : ErrorCode.ERR_AssgReadonlyLocalCause;
                     throw ErrorContext.Error(err, ((ExprMemberGroup)expr).Name, new ErrArgIds(MessageID.MethodGroup));
             }
 
@@ -1173,8 +1187,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        private void PostBindMethod(ref MethWithInst pMWI)
+        private void PostBindMethod(ref MethWithInst pMWI, Expr pObject)
         {
+            MethWithInst mwiOrig = pMWI;
+
+            // If it is virtual, find a remap of the method to something more specific.  This
+            // may alter where the method is found.
+            if (pObject != null && pObject.Type.isSimpleType())
+            {
+                RemapToOverride(GetSymbolLoader(), pMWI, pObject.Type);
+            }
+
             if (pMWI.Meth().RetType != null)
             {
                 checkUnsafe(pMWI.Meth().RetType);
@@ -1367,6 +1390,51 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                        !pObject.Type.isStructOrEnum()
                    // non-struct types are lvalues (such as non-struct method returns)
                    );
+        }
+        ////////////////////////////////////////////////////////////////////////////////
+        // For a base call we need to remap from the virtual to the specific override 
+        // to invoke.  This is also used to map a virtual on pObject (like ToString) to 
+        // the specific override when the pObject is a simple type (int, bool, char, 
+        // etc). In these cases it is safe to assume that any override won't later be 
+        // removed.... We start searching from "typeObj" up the superclass hierarchy 
+        // until we find a method with an exact signature match.
+
+        private static void RemapToOverride(SymbolLoader symbolLoader, SymWithType pswt, CType typeObj)
+        {
+            // For a property/indexer we remap the accessors, not the property/indexer.
+            // Since every event has both accessors we remap the event instead of the accessors.
+            Debug.Assert(pswt && (pswt.Sym is MethodSymbol || pswt.Sym is EventSymbol || pswt.Sym is MethodOrPropertySymbol));
+            Debug.Assert(typeObj != null);
+
+            // Don't remap static or interface methods.
+            if (typeObj is NullableType nubTypeObj)
+            {
+                typeObj = nubTypeObj.GetAts();
+            }
+
+            // Don't remap non-virtual members
+            if (!(typeObj is AggregateType atsObj) || atsObj.isInterfaceType() || !pswt.Sym.IsVirtual())
+            {
+                return;
+            }
+
+            symbmask_t mask = pswt.Sym.mask();
+
+            // Search for an override version of the method.
+            while (atsObj != null && atsObj.getAggregate() != pswt.Sym.parent)
+            {
+                for (Symbol symT = symbolLoader.LookupAggMember(pswt.Sym.name, atsObj.getAggregate(), mask);
+                     symT != null;
+                     symT = SymbolLoader.LookupNextSym(symT, atsObj.getAggregate(), mask))
+                {
+                    if (symT.IsOverride() && (symT.SymBaseVirtual() == pswt.Sym || symT.SymBaseVirtual() == pswt.Sym.SymBaseVirtual()))
+                    {
+                        pswt.Set(symT, atsObj);
+                        return;
+                    }
+                }
+                atsObj = atsObj.GetBaseClass();
+            }
         }
 
         private void verifyMethodArgs(IExprWithArgs call, CType callingObjectType)
@@ -1697,6 +1765,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             @params.CopyItems(0, @params.Count - 1, prgtype);
 
             CType type = @params[@params.Count - 1];
+            CType elementType = null;
 
             if (!(type is ArrayType arr))
             {
@@ -1706,7 +1775,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // At this point, we have an array sym.
-            CType elementType = arr.GetElementType();
+            elementType = arr.GetElementType();
 
             for (int itype = @params.Count - 1; itype < count; itype++)
             {

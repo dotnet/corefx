@@ -32,7 +32,7 @@ namespace System.Linq.Expressions.Interpreter
 
         internal string DebugView => new DebugViewPrinter(_interpreter).ToString();
 
-        private class DebugViewPrinter
+        class DebugViewPrinter
         {
             private readonly Interpreter _interpreter;
             private readonly Dictionary<int, int> _tryStart = new Dictionary<int, int>();

@@ -6,6 +6,7 @@
     <NetFxReference Include="System">
       <ExcludeFromRuntime>true</ExcludeFromRuntime>
     </NetFxReference>
+    <NetFxReference Include="System.ComponentModel.Composition" />
     <NetFxReference Include="System.ComponentModel.DataAnnotations">
       <StrongNameSig>MSSharedLib</StrongNameSig>
     </NetFxReference>

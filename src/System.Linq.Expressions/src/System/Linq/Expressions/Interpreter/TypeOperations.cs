@@ -146,11 +146,11 @@ namespace System.Linq.Expressions.Interpreter
 
         private sealed class GetValueOrDefault : NullableMethodCallInstruction
         {
-            private readonly Type _defaultValueType;
+            private readonly Type defaultValueType;
 
             public GetValueOrDefault(MethodInfo mi)
             {
-                _defaultValueType = mi.ReturnType;
+                defaultValueType = mi.ReturnType;
             }
 
             public override int Run(InterpretedFrame frame)
@@ -158,7 +158,7 @@ namespace System.Linq.Expressions.Interpreter
                 if (frame.Peek() == null)
                 {
                     frame.Pop();
-                    frame.Push(Activator.CreateInstance(_defaultValueType));
+                    frame.Push(Activator.CreateInstance(defaultValueType));
                 }
                 return 1;
             }

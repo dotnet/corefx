@@ -32,7 +32,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void HandlesMetadataCircularity()
         {
             var cc = CreateContainer(typeof(MetadataCircularityA), typeof(MetadataCircularityB));
@@ -91,7 +90,6 @@ namespace System.Composition.UnitTests
         public class Prioritized {[DefaultValue(0)] public int Priority { get; set; } }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void MultipleMetadataAttributesWithAPropertyThatReturnsNull()
         {
             var cc = CreateContainer(typeof(NameNullTwiceExport));
@@ -100,7 +98,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void DiscoversMetadataSpecifiedUsingMetadataAttributeOnExportAttribute()
         {
             var cc = CreateContainer(typeof(SingleNamedExport));
@@ -109,7 +106,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void IfMetadataIsSpecifiedOnAnExportAttributeOtherExportsDoNotHaveIt()
         {
             var cc = CreateContainer(typeof(MultipleExportsOneNamedAndBothPrioritized));
@@ -119,7 +115,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void DiscoversStandaloneExportMetadata()
         {
             var cc = CreateContainer(typeof(NamedAndPrioritized));
@@ -128,7 +123,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void DiscoversStandaloneExportMetadataUsingMetadataAttributes()
         {
             var cc = CreateContainer(typeof(NamedWithCustomMetadata));
@@ -137,7 +131,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void StandaloneExportMetadataAppliesToAllExportsOnAMember()
         {
             var cc = CreateContainer(typeof(MultipleExportsOneNamedAndBothPrioritized));
@@ -147,7 +140,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void MultiplePiecesOfMetadataAreCombinedIntoAnArray()
         {
             var cc = CreateContainer(typeof(MultipleNames));
@@ -161,7 +153,6 @@ namespace System.Composition.UnitTests
         public class NamedFred { }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void SupportsExportMetadata()
         {
             var cc = CreateContainer(typeof(NamedFred));

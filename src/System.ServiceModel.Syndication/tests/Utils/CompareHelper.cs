@@ -48,45 +48,34 @@ namespace System.ServiceModel.Syndication.Tests
                 _diff = value;
             }
         }
-        public bool Compare(string source, string target, out string diffNode)
+        public bool Compare(string source, string target)
         {
-            diffNode = string.Empty;
-            StringBuilder stringBuilder = new StringBuilder();
-            if (_diff.Compare(source, target))
+            if (Diff.Compare(source, target))
             {
                 return true;
             }
             else
             {
                 XmlDocument diffDoc = new XmlDocument();
-                diffDoc.LoadXml(_diff.ToXml());
+                diffDoc.LoadXml(Diff.ToXml());
                 XmlNodeList totalFailures = diffDoc.SelectNodes("/Root/Node/Diff[@DiffType]");
                 XmlNodeList attrFailures = diffDoc.SelectNodes("/Root/Node/Diff[@DiffType=6]|/Root/Node/Diff[@DiffType=5]|/Root/Node/Diff[@DiffType=1]");
 
                 if (attrFailures.Count == totalFailures.Count)
                 {
-                    //Check all different Nodes except allowable Nodes
                     bool allFailuresAllowed = true;
                     foreach (XmlNode node in attrFailures)
                     {
                         if (!IsAllowableFailure(node))
                         {
                             allFailuresAllowed = false;
-                            stringBuilder.AppendLine(node.InnerText);
                             break;
                         }
                     }
-                    diffNode = stringBuilder.ToString();
                     return allFailuresAllowed;
                 }
                 else
                 {
-                    //get all different Nodes
-                    foreach (XmlNode node in totalFailures)
-                    {
-                        stringBuilder.AppendLine(node.InnerText);
-                    }
-                    diffNode = stringBuilder.ToString();
                     return false;
                 }
             }

@@ -20,19 +20,19 @@ namespace System.Dynamic
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
     public sealed class ExpandoObject : IDynamicMetaObjectProvider, IDictionary<string, object>, INotifyPropertyChanged
     {
-        private static readonly MethodInfo s_expandoTryGetValue =
+        private static readonly MethodInfo ExpandoTryGetValue =
             typeof(RuntimeOps).GetMethod(nameof(RuntimeOps.ExpandoTryGetValue));
 
-        private static readonly MethodInfo s_expandoTrySetValue =
+        private static readonly MethodInfo ExpandoTrySetValue =
             typeof(RuntimeOps).GetMethod(nameof(RuntimeOps.ExpandoTrySetValue));
 
-        private static readonly MethodInfo s_expandoTryDeleteValue =
+        private static readonly MethodInfo ExpandoTryDeleteValue =
             typeof(RuntimeOps).GetMethod(nameof(RuntimeOps.ExpandoTryDeleteValue));
 
-        private static readonly MethodInfo s_expandoPromoteClass =
+        private static readonly MethodInfo ExpandoPromoteClass =
             typeof(RuntimeOps).GetMethod(nameof(RuntimeOps.ExpandoPromoteClass));
 
-        private static readonly MethodInfo s_expandoCheckVersion =
+        private static readonly MethodInfo ExpandoCheckVersion =
             typeof(RuntimeOps).GetMethod(nameof(RuntimeOps.ExpandoCheckVersion));
 
         internal readonly object LockObject;                          // the read-only field is used for locking the Expando object
@@ -793,7 +793,7 @@ namespace System.Dynamic
                 ParameterExpression value = Expression.Parameter(typeof(object), "value");
 
                 Expression tryGetValue = Expression.Call(
-                    s_expandoTryGetValue,
+                    ExpandoTryGetValue,
                     GetLimitedSelf(),
                     Expression.Constant(klass, typeof(object)),
                     AstUtils.Constant(index),
@@ -866,7 +866,7 @@ namespace System.Dynamic
                     originalClass,
                     new DynamicMetaObject(
                         Expression.Call(
-                            s_expandoTrySetValue,
+                            ExpandoTrySetValue,
                             GetLimitedSelf(),
                             Expression.Constant(klass, typeof(object)),
                             AstUtils.Constant(index),
@@ -886,7 +886,7 @@ namespace System.Dynamic
                 int index = Value.Class.GetValueIndex(binder.Name, binder.IgnoreCase, Value);
 
                 Expression tryDelete = Expression.Call(
-                    s_expandoTryDeleteValue,
+                    ExpandoTryDeleteValue,
                     GetLimitedSelf(),
                     Expression.Constant(Value.Class, typeof(object)),
                     AstUtils.Constant(index),
@@ -935,7 +935,7 @@ namespace System.Dynamic
                     ifTestSucceeds = Expression.Block(
                         Expression.Call(
                             null,
-                            s_expandoPromoteClass,
+                            ExpandoPromoteClass,
                             GetLimitedSelf(),
                             Expression.Constant(originalClass, typeof(object)),
                             Expression.Constant(klass, typeof(object))
@@ -948,7 +948,7 @@ namespace System.Dynamic
                     Expression.Condition(
                         Expression.Call(
                             null,
-                            s_expandoCheckVersion,
+                            ExpandoCheckVersion,
                             GetLimitedSelf(),
                             Expression.Constant(originalClass ?? klass, typeof(object))
                         ),

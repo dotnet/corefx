@@ -27,7 +27,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void GenericPartDiscoveryIgnoresAPartAndDoesntThrowAnExceptionWhenItsConstraintOnTypeParameterIsNotAssignableFromTheExportTarget()
         {
             var container = CreateContainer(typeof(ThingHandler<>), typeof(BookHandler<>));
@@ -39,7 +38,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void GenericPartDiscoveryIncludesAPartWhenItsConstraintOnTypeParameterIsAssignableFromTheExportTarget()
         {
             var container = CreateContainer(typeof(ThingHandler<>), typeof(BookHandler<>));

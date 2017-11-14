@@ -10,7 +10,6 @@ namespace System.Composition.Hosting.Core.Tests
     public class CompositionOperationTests
     {
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void Run_ValidContextAndAction_ReturnsExpected()
         {
             using (CompositionHost host = CompositionHost.CreateCompositionHost(new ExportDescriptorProvider[0]))
@@ -50,7 +49,6 @@ namespace System.Composition.Hosting.Core.Tests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void Run_NullActivator_ThrowsArgumentNullException()
         {
             using (CompositionHost host = CompositionHost.CreateCompositionHost(new ExportDescriptorProvider[0]))
@@ -63,7 +61,6 @@ namespace System.Composition.Hosting.Core.Tests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void AddNonPrequisiteAction_NullAction_ThrowsArgumentNullException()
         {
             object Activator(LifetimeContext context, CompositionOperation operation)
@@ -82,7 +79,6 @@ namespace System.Composition.Hosting.Core.Tests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void AddPostCompositionAction_NullAction_ThrowsArgumentNullException()
         {
             object Activator(LifetimeContext context, CompositionOperation operation)

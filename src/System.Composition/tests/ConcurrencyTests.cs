@@ -29,7 +29,6 @@ namespace System.Composition.UnitTests
         // This does not test the desired behaviour deterministically,
         // but is close enough to be repeatable at least on my machine :)
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void SharedInstancesAreNotVisibleUntilActivationCompletes()
         {
             var c = CreateContainer(typeof(PausesDuringActivation));

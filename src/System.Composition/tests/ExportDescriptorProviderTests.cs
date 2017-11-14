@@ -41,7 +41,6 @@ namespace System.Composition.Lightweight.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void ProvidersCanLocateImplementationsOfAContractItSupports()
         {
             var container = new ContainerConfiguration()
@@ -54,7 +53,6 @@ namespace System.Composition.Lightweight.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void ProvidersCanDetectAbsenceOfAContractItSupports()
         {
             var container = new ContainerConfiguration()

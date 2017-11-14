@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Composition;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Globalization;
@@ -11,7 +12,7 @@ using System.Reflection;
 
 namespace Microsoft.Internal
 {
-    internal static partial class Requires
+    internal static class Requires
     {
         [DebuggerStepThrough]
         [ContractArgumentValidator]

@@ -42,7 +42,6 @@ namespace System.Composition.UnitTests
             }
         }
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void ImportsMany()
         {
             var cc = CreateContainer(typeof(A), typeof(A2), typeof(ImportManyIA));
@@ -51,7 +50,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void ImportsManyProperties()
         {
             var cc = CreateContainer(typeof(A), typeof(A2), typeof(ImportManyPropsOfA));

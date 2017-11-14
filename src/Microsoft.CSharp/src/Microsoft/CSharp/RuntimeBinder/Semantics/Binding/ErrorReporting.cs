@@ -10,32 +10,56 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed partial class ExpressionBinder
     {
-        private RuntimeBinderException ReportReadOnlyError(ExprField field, bool isNested)
+        private static readonly ErrorCode[] s_ReadOnlyLocalErrors =
+        {
+            ErrorCode.ERR_RefReadonlyLocal,
+            ErrorCode.ERR_AssgReadonlyLocal,
+        };
+
+        private RuntimeBinderException ReportLocalError(LocalVariableSymbol local, CheckLvalueKind kind, bool isNested)
+        {
+            Debug.Assert(local != null);
+
+            int index = kind == CheckLvalueKind.OutParameter ? 0 : 1;
+
+            Debug.Assert(index != 2 && index != 3);
+            // There is no way that we can have no cause AND a read-only local nested in a struct with a
+            // writable field. What would make the local read-only if not one of the causes above?  (Const
+            // locals may not be structs, so we would already have errored out in that scenario.)
+
+            ErrorCode err = s_ReadOnlyLocalErrors[index];
+
+            return ErrorContext.Error(err, local.name);
+        }
+
+        private static readonly ErrorCode[] s_ReadOnlyErrors =
+        {
+            ErrorCode.ERR_RefReadonly,
+            ErrorCode.ERR_AssgReadonly,
+            ErrorCode.ERR_RefReadonlyStatic,
+            ErrorCode.ERR_AssgReadonlyStatic,
+            ErrorCode.ERR_RefReadonly2,
+            ErrorCode.ERR_AssgReadonly2,
+            ErrorCode.ERR_RefReadonlyStatic2,
+            ErrorCode.ERR_AssgReadonlyStatic2
+        };
+
+        private RuntimeBinderException ReportReadOnlyError(ExprField field, CheckLvalueKind kind, bool isNested)
         {
             Debug.Assert(field != null);
 
-            FieldWithType fieldWithType = field.FieldWithType;
-            bool isStatic = fieldWithType.Field().isStatic;
-            ErrArg[] args;
-            ErrorCode err;
-            if (isNested)
-            {
-                args = new ErrArg[]{ fieldWithType };
-                err = isStatic ? ErrorCode.ERR_AssgReadonlyStatic2 : ErrorCode.ERR_AssgReadonly2;
-            }
-            else
-            {
-                args = Array.Empty<ErrArg>();
-                err = isStatic ? ErrorCode.ERR_AssgReadonlyStatic : ErrorCode.ERR_AssgReadonly;
-            }
+            bool isStatic = field.FieldWithType.Field().isStatic;
 
-            return ErrorContext.Error(err, args);
+            int index = (isNested ? 4 : 0) + (isStatic ? 2 : 0) + (kind == CheckLvalueKind.OutParameter ? 0 : 1);
+            ErrorCode err = s_ReadOnlyErrors[index];
+
+            return ErrorContext.Error(err, isNested ? new ErrArg[]{field.FieldWithType} : Array.Empty<ErrArg>());
         }
 
+        // Return true if we actually report a failure.
         private void TryReportLvalueFailure(Expr expr, CheckLvalueKind kind)
         {
             Debug.Assert(expr != null);
-            Debug.Assert(!(expr is ExprLocal));
 
             // We have a lvalue failure. Was the reason because this field
             // was marked readonly? Give special messages for this case.
@@ -45,6 +69,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             while (true)
             {
                 Debug.Assert(expr != null);
+
+                if (expr is ExprLocal local && local.IsOK)
+                {
+                    throw ReportLocalError(local.Local, kind, isNested);
+                }
 
                 Expr pObject = null;
 
@@ -58,7 +87,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     if (field.FieldWithType.Field().isReadOnly)
                     {
-                        throw ReportReadOnlyError(field, isNested);
+                        throw ReportReadOnlyError(field, kind, isNested);
                     }
                     if (!field.FieldWithType.Field().isStatic)
                     {
@@ -89,10 +118,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 // everything else
-                if (pObject != null && !pObject.isLvalue() && (expr is ExprField || !isNested))
+                if (pObject != null && !pObject.isLvalue() && (expr is ExprField || (!isNested && expr is ExprProperty)))
                 {
                     Debug.Assert(pObject.Type.isStructOrEnum());
-                    Debug.Assert(!(pObject is ExprLocal));
                     expr = pObject;
                 }
                 else

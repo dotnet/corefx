@@ -117,7 +117,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void CanHandleDefinitionCircularity()
         {
             var cc = CreateContainer(typeof(ACircular), typeof(BLazy));
@@ -127,7 +126,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void CanHandleDefinitionCircularity2()
         {
             var cc = CreateContainer(typeof(ACircular), typeof(BLazy));
@@ -136,7 +134,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void HandlesPropertyPropertyCircularity()
         {
             var cc = CreateContainer(typeof(PropertyPropertyA), typeof(PropertyPropertyB));
@@ -145,7 +142,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void HandlesPropertyPropertyCircularityReversed()
         {
             var cc = CreateContainer(typeof(PropertyPropertyA), typeof(PropertyPropertyB));
@@ -154,7 +150,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void HandlesConstructorPropertyCircularity()
         {
             var cc = CreateContainer(typeof(ConstructorPropertyA), typeof(ConstructorPropertyB));
@@ -163,7 +158,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void HandlesConstructorPropertyCircularityReversed()
         {
             var cc = CreateContainer(typeof(ConstructorPropertyA), typeof(ConstructorPropertyB));
@@ -172,7 +166,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void HandlesMetadataCircularity()
         {
             var cc = CreateContainer(typeof(MetadataCircularityA), typeof(MetadataCircularityB));
@@ -183,7 +176,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void SharedPartCanHaveNonPrereqDependencyOnSelf()
         {
             var cc = CreateContainer(typeof(NonPrereqSelfDependency));
@@ -192,7 +184,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void PrerequisiteCircularitiesAreDetected()
         {
             var cc = CreateContainer(typeof(PrDepA), typeof(PrDepB));

@@ -225,7 +225,6 @@ namespace System.Threading.Threads.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void CurrentCultureTest_SkipOnDesktopFramework()
         {
             // Cannot access culture properties on a thread object from a different thread
@@ -278,7 +277,6 @@ namespace System.Threading.Threads.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void CurrentPrincipalTest_SkipOnDesktopFramework()
         {
             ThreadTestHelpers.RunTestInBackgroundThread(() => Assert.Null(Thread.CurrentPrincipal));
@@ -319,7 +317,6 @@ namespace System.Threading.Threads.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void ExecutionContextTest()
         {
             ThreadTestHelpers.RunTestInBackgroundThread(
@@ -468,7 +465,6 @@ namespace System.Threading.Threads.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void AbortSuspendTest()
         {
             var e = new ManualResetEvent(false);
@@ -829,7 +825,6 @@ namespace System.Threading.Threads.Tests
 
         [Fact]
         [ActiveIssue(20766,TargetFrameworkMonikers.UapAot)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void MiscellaneousTest()
         {
             Thread.BeginCriticalRegion();

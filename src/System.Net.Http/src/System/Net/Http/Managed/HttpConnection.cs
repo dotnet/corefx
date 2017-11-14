@@ -1076,6 +1076,7 @@ namespace System.Net.Http
 
         private void ReturnConnectionToPool()
         {
+            Debug.Assert(_writeOffset == 0, "Everything in write buffer should have been flushed.");
             Debug.Assert(_readAheadTask == null, "Expected a previous initial read to already be consumed.");
             Debug.Assert(_currentRequest != null, "Expected the connection to be associated with a request.");
 
@@ -1116,7 +1117,6 @@ namespace System.Net.Http
         private void ReturnConnectionToPoolCore()
         {
             Debug.Assert(_sendRequestContentTask == null || _sendRequestContentTask.IsCompleted);
-            Debug.Assert(_writeOffset == 0, "Everything in write buffer should have been flushed.");
 
             if (NetEventSource.IsEnabled)
             {

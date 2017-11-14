@@ -243,7 +243,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 return;
             }
 
-            ErrAppendMethodParentSym(meth, pctx, out TypeArray replacementTypeArray);
+            TypeArray replacementTypeArray = null;
+            ErrAppendMethodParentSym(meth, pctx, out replacementTypeArray);
             if (meth.IsConstructor())
             {
                 // Use the name of the parent class instead of the name "<ctor>".
@@ -390,6 +391,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     ErrAppendEvent((EventSymbol)sym, pctx);
                     break;
 
+                case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
                 case SYMKIND.SK_NamespaceSymbol:
                     if (sym == getBSymmgr().GetRootNS())
                     {

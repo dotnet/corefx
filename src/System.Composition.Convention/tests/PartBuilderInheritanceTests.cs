@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Composition.Convention.UnitTests;
+using System.Linq;
 using System.Reflection;
 using Xunit;
 
