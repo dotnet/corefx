@@ -1,5 +1,5 @@
 $repoRoot = ((get-item $PSScriptRoot).parent.parent.parent.FullName);
-$winRID = "win-x64";
+$winRID = "win7-x64";
 $dotnetPath = -join($repoRoot, "\Tools\dotnetcli\dotnet.exe")
 $csprojPath = -join($PSScriptRoot, "\", (Get-ChildItem $PSScriptRoot"\*.csproj" | Select-Object -ExpandProperty Name))
 $packagesCachePath = -join($repoRoot, "\packages")
@@ -34,7 +34,7 @@ function _getPackageVersion()
 	return $matches[0]
 }
 
-function _restoreAndPublish($targetFramework, $outputType, $rid, $runtimeFramework, $refDirName)
+function _restoreAndPublish($targetFramework, $rid, $runtimeFramework, $refDirName)
 {
 	$packageVersion = _getPackageVersion
     & $dotnetPath restore --packages $packagesCachePath /p:RestoreSources="https://api.nuget.org/v3/index.json;$localPackageSourcePath" /p:TargetFramework=$targetFramework /p:CompatibilityPackageVersion=$packageVersion $csprojPath
@@ -61,5 +61,5 @@ function _restoreAndPublish($targetFramework, $outputType, $rid, $runtimeFramewo
 	Copy-Item (-join($outputPath, "*")) $refPath
 }
 
-_restoreAndPublish "netcoreapp2.0" "Exe" $winRID "2.0.0" "netcoreapp20_compat"
-_restoreAndPublish "netstandard2.0" "Library" $winRID "2.0.0" "netstandard20_compat"
+_restoreAndPublish "netcoreapp2.0" $winRID "2.0.0" "netcoreapp20_compat"
+_restoreAndPublish "netstandard2.0" $winRID "2.0.0" "netstandard20_compat"
