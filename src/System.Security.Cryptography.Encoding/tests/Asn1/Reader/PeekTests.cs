@@ -96,7 +96,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] data = (EncodedValue + "0500").HexToByteArray();
 
             AsnReader reader = new AsnReader(data, AsnEncodingRules.BER);
-            Assert.Equal(EncodedContents, reader.PeekContentSpan().ByteArrayToHex());
+            Assert.Equal(EncodedContents, reader.PeekContentBytes().ByteArrayToHex());
 
             // It's Peek, so it's reproducible.
             Assert.Equal(EncodedValue, reader.PeekEncodedValue().ByteArrayToHex());
@@ -111,7 +111,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] data = (EncodedValue + "0500").HexToByteArray();
 
             AsnReader reader = new AsnReader(data, AsnEncodingRules.BER);
-            Assert.Equal(EncodedContents, reader.PeekContentSpan().ByteArrayToHex());
+            Assert.Equal(EncodedContents, reader.PeekContentBytes().ByteArrayToHex());
 
             // It's Peek, so it's reproducible.
             Assert.Equal(EncodedValue, reader.PeekEncodedValue().ByteArrayToHex());
@@ -130,7 +130,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 () =>
                 {
                     AsnReader reader = new AsnReader(data, AsnEncodingRules.BER);
-                    reader.PeekContentSpan();
+                    reader.PeekContentBytes();
                 });
         }
     }

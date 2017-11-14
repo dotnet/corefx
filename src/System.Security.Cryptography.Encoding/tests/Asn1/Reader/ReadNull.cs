@@ -44,14 +44,9 @@ namespace System.Security.Cryptography.Tests.Asn1
         public static void ReadNull_Throws(string description, PublicEncodingRules ruleSet, string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-
-                    reader.ReadNull();
-                });
+            Assert.Throws<CryptographicException>(() => reader.ReadNull());
         }
     }
 }

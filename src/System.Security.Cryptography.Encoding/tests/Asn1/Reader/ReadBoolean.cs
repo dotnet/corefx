@@ -100,14 +100,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            try
-            {
-                reader.ReadBoolean();
-                Assert.True(false, "CryptographicException was thrown");
-            }
-            catch (CryptographicException)
-            {
-            }
+            Assert.Throws<CryptographicException>(() => reader.ReadBoolean());
 
             if (inputData.Length == 0)
             {

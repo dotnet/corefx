@@ -38,13 +38,9 @@ namespace System.Security.Cryptography.Tests.Asn1
             string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-                    reader.ReadObjectIdentifier(true);
-                });
+            Assert.Throws<CryptographicException>(() => reader.ReadObjectIdentifier(true));
         }
 
         [Theory]

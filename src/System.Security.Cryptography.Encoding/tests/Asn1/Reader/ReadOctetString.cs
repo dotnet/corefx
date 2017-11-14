@@ -24,7 +24,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            bool didRead = reader.TryGetOctetStringBytes(out ReadOnlySpan<byte> contents);
+            bool didRead = reader.TryGetOctetStringBytes(out ReadOnlyMemory<byte> contents);
 
             Assert.False(didRead, "reader.TryGetOctetStringBytes");
             Assert.Equal(0, contents.Length);
@@ -45,7 +45,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            bool didRead = reader.TryGetOctetStringBytes(out ReadOnlySpan<byte> contents);
+            bool didRead = reader.TryGetOctetStringBytes(out ReadOnlyMemory<byte> contents);
 
             Assert.True(didRead, "reader.TryGetOctetStringBytes");
             Assert.Equal(expectedLength, contents.Length);
@@ -65,14 +65,10 @@ namespace System.Security.Cryptography.Tests.Asn1
             string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
             Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-
-                    reader.TryGetOctetStringBytes(out ReadOnlySpan<byte> contents);
-                });
+                () => reader.TryGetOctetStringBytes(out ReadOnlyMemory<byte> contents));
         }
 
         [Fact]
@@ -90,13 +86,10 @@ namespace System.Security.Cryptography.Tests.Asn1
             input[2] = 0x03;
             input[3] = 0xE9;
 
-            Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader reader = new AsnReader(input, AsnEncodingRules.CER);
+            AsnReader reader = new AsnReader(input, AsnEncodingRules.CER);
 
-                    reader.TryGetOctetStringBytes(out ReadOnlySpan<byte> contents);
-                });
+            Assert.Throws<CryptographicException>(
+                () => reader.TryGetOctetStringBytes(out ReadOnlyMemory<byte> contents));
         }
 
         [Fact]
@@ -122,7 +115,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             AsnReader reader = new AsnReader(input, AsnEncodingRules.CER);
 
-            bool success = reader.TryGetOctetStringBytes(out ReadOnlySpan<byte> contents);
+            bool success = reader.TryGetOctetStringBytes(out ReadOnlyMemory<byte> contents);
 
             Assert.True(success, "reader.TryGetOctetStringBytes");
             Assert.Equal(1000, contents.Length);
@@ -131,7 +124,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             unsafe
             {
                 fixed (byte* sourcePtr = &input[4])
-                fixed (byte* contentPtr = &contents.DangerousGetPinnableReference())
+                fixed (byte* contentPtr = &contents.Span.DangerousGetPinnableReference())
                 {
                     Assert.Equal((IntPtr)sourcePtr, (IntPtr)contentPtr);
                 }

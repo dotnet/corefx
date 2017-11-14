@@ -365,12 +365,12 @@ namespace System.Security.Cryptography.Asn1
         DER = DistinguishedEncodingRules,
     }
 
-    internal ref struct AsnReader
+    internal class AsnReader
     {
         // ITU-T-REC-X.690-201508 sec 9.2
         internal const int MaxCERSegmentSize = 1000;
 
-        // T-REC-X.690-201508 sec 8.1.5 says only 0000 is legal.
+        // ITU-T-REC-X.690-201508 sec 8.1.5 says only 0000 is legal.
         private const int EndOfContentsEncodedLength = 2;
 
         private static readonly Text.Encoding s_utf8Encoding = new UTF8Encoding(false, true);
@@ -378,12 +378,12 @@ namespace System.Security.Cryptography.Asn1
         private static readonly Text.Encoding s_ia5Encoding = new IA5Encoding();
         private static readonly Text.Encoding s_visibleStringEncoding = new VisibleStringEncoding();
 
-        private ReadOnlySpan<byte> _data;
+        private ReadOnlyMemory<byte> _data;
         private readonly AsnEncodingRules _ruleSet;
 
         public bool HasData => !_data.IsEmpty;
 
-        public AsnReader(ReadOnlySpan<byte> data, AsnEncodingRules ruleSet)
+        public AsnReader(ReadOnlyMemory<byte> data, AsnEncodingRules ruleSet)
         {
             CheckEncodingRules(ruleSet);
 
@@ -398,7 +398,7 @@ namespace System.Security.Cryptography.Asn1
 
         public Asn1Tag PeekTag()
         {
-            if (TryPeekTag(_data, out Asn1Tag tag, out int bytesRead))
+            if (TryPeekTag(_data.Span, out Asn1Tag tag, out int bytesRead))
             {
                 return tag;
             }
@@ -527,8 +527,8 @@ namespace System.Security.Cryptography.Asn1
 
         internal (Asn1Tag, int?) ReadTagAndLength(out int bytesRead)
         {
-            if (TryPeekTag(_data, out Asn1Tag tag, out int tagBytesRead) &&
-                TryReadLength(_data.Slice(tagBytesRead), _ruleSet, out int? length, out int lengthBytesRead))
+            if (TryPeekTag(_data.Span, out Asn1Tag tag, out int tagBytesRead) &&
+                TryReadLength(_data.Slice(tagBytesRead).Span, _ruleSet, out int? length, out int lengthBytesRead))
             {
                 int allBytesRead = tagBytesRead + lengthBytesRead;
 
@@ -562,19 +562,19 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
-        private static ReadOnlySpan<byte> SeekEndOfContents(
-            ReadOnlySpan<byte> source,
+        private static ReadOnlyMemory<byte> SeekEndOfContents(
+            ReadOnlyMemory<byte> source,
             AsnEncodingRules ruleSet,
             int initialSliceOffset = 0)
         {
-            ReadOnlySpan<byte> cur = source.Slice(initialSliceOffset);
+            ReadOnlyMemory<byte> cur = source.Slice(initialSliceOffset);
             int totalLen = 0;
 
             while (!cur.IsEmpty)
             {
                 AsnReader reader = new AsnReader(cur, ruleSet);
                 (Asn1Tag tag, int? length) = reader.ReadTagAndLength(out int bytesRead);
-                ReadOnlySpan<byte> nestedContents = reader.PeekContentSpan();
+                ReadOnlyMemory<byte> nestedContents = reader.PeekContentBytes();
 
                 int localLen = bytesRead + nestedContents.Length;
 
@@ -604,7 +604,7 @@ namespace System.Security.Cryptography.Asn1
             throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
         }
 
-        public ReadOnlySpan<byte> PeekEncodedValue()
+        public ReadOnlyMemory<byte> PeekEncodedValue()
         {
             (Asn1Tag tag, int? length) = ReadTagAndLength(out int bytesRead);
 
@@ -617,7 +617,7 @@ namespace System.Security.Cryptography.Asn1
             return Slice(_data, 0, bytesRead + length.Value);
         }
 
-        public ReadOnlySpan<byte> PeekContentSpan()
+        public ReadOnlyMemory<byte> PeekContentBytes()
         {
             (Asn1Tag tag, int? length) = ReadTagAndLength(out int bytesRead);
 
@@ -634,9 +634,9 @@ namespace System.Security.Cryptography.Asn1
             GetEncodedValue();
         }
 
-        public ReadOnlySpan<byte> GetEncodedValue()
+        public ReadOnlyMemory<byte> GetEncodedValue()
         {
-            ReadOnlySpan<byte> encodedValue = PeekEncodedValue();
+            ReadOnlyMemory<byte> encodedValue = PeekEncodedValue();
             _data = _data.Slice(encodedValue.Length);
             return encodedValue;
         }
@@ -681,14 +681,14 @@ namespace System.Security.Cryptography.Asn1
             }
 
             bool value = ReadBooleanValue(
-                Slice(_data, headerLength, length.Value),
+                Slice(_data, headerLength, length.Value).Span,
                 _ruleSet);
 
             _data = _data.Slice(headerLength + length.Value);
             return value;
         }
 
-        private ReadOnlySpan<byte> GetIntegerContents(
+        private ReadOnlyMemory<byte> GetIntegerContents(
             UniversalTagNumber tagNumber,
             out int headerLength)
         {
@@ -702,12 +702,13 @@ namespace System.Security.Cryptography.Asn1
             }
 
             // Slice first so that an out of bounds value triggers a CryptographicException.
-            ReadOnlySpan<byte> contents = Slice(_data, headerLength, length.Value);
+            ReadOnlyMemory<byte> contents = Slice(_data, headerLength, length.Value);
+            ReadOnlySpan<byte> contentSpan = contents.Span;
 
             // T-REC-X.690-201508 sec 8.3.2
             if (contents.Length > 1)
             {
-                ushort bigEndianValue = (ushort)(contents[0] << 8 | contents[1]);
+                ushort bigEndianValue = (ushort)(contentSpan[0] << 8 | contentSpan[1]);
                 const ushort RedundancyMask = 0b1111_1111_1000_0000;
                 ushort masked = (ushort)(bigEndianValue & RedundancyMask);
 
@@ -721,9 +722,9 @@ namespace System.Security.Cryptography.Asn1
             return contents;
         }
 
-        public ReadOnlySpan<byte> GetIntegerBytes()
+        public ReadOnlyMemory<byte> GetIntegerBytes()
         {
-            ReadOnlySpan<byte> contents =
+            ReadOnlyMemory<byte> contents =
                 GetIntegerContents(UniversalTagNumber.Integer, out int headerLength);
 
             _data = _data.Slice(headerLength + contents.Length);
@@ -737,7 +738,7 @@ namespace System.Security.Cryptography.Asn1
         {
             Debug.Assert(sizeLimit <= sizeof(long));
 
-            ReadOnlySpan<byte> contents = GetIntegerContents(tagNumber, out int headerLength);
+            ReadOnlyMemory<byte> contents = GetIntegerContents(tagNumber, out int headerLength);
 
             if (contents.Length > sizeLimit)
             {
@@ -745,13 +746,15 @@ namespace System.Security.Cryptography.Asn1
                 return false;
             }
 
-            bool isNegative = contents[0] >= 0x80;
+            ReadOnlySpan<byte> contentSpan = contents.Span;
+
+            bool isNegative = contentSpan[0] >= 0x80;
             long accum = isNegative ? -1 : 0;
 
             for (int i = 0; i < contents.Length; i++)
             {
                 accum <<= 8;
-                accum |= contents[i];
+                accum |= contentSpan[i];
             }
 
             _data = _data.Slice(headerLength + contents.Length);
@@ -766,10 +769,11 @@ namespace System.Security.Cryptography.Asn1
         {
             Debug.Assert(sizeLimit <= sizeof(ulong));
 
-            ReadOnlySpan<byte> contents = GetIntegerContents(tagNumber, out int headerLength);
+            ReadOnlyMemory<byte> contents = GetIntegerContents(tagNumber, out int headerLength);
+            ReadOnlySpan<byte> contentSpan = contents.Span;
             int contentLength = contents.Length;
 
-            bool isNegative = contents[0] >= 0x80;
+            bool isNegative = contentSpan[0] >= 0x80;
 
             if (isNegative)
             {
@@ -778,13 +782,13 @@ namespace System.Security.Cryptography.Asn1
                 return false;
             }
 
-            // Remove any padding zeros.
-            if (contents.Length > 1 && contents[0] == 0)
+            // Ignore any padding zeros.
+            if (contentSpan.Length > 1 && contentSpan[0] == 0)
             {
-                contents = contents.Slice(1);
+                contentSpan = contentSpan.Slice(1);
             }
 
-            if (contents.Length > sizeLimit)
+            if (contentSpan.Length > sizeLimit)
             {
                 value = 0;
                 return false;
@@ -792,10 +796,10 @@ namespace System.Security.Cryptography.Asn1
 
             ulong accum = 0;
 
-            for (int i = 0; i < contents.Length; i++)
+            for (int i = 0; i < contentSpan.Length; i++)
             {
                 accum <<= 8;
-                accum |= contents[i];
+                accum |= contentSpan[i];
             }
 
             _data = _data.Slice(headerLength + contentLength);
@@ -886,7 +890,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         private static bool TryCopyPrimitiveBitStringValue(
-            ReadOnlySpan<byte> source,
+            ReadOnlyMemory<byte> source,
             Span<byte> destination,
             bool write,
             bool requireBerMaskMatch,
@@ -912,7 +916,8 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            unusedBitCount = source[0];
+            ReadOnlySpan<byte> sourceSpan = source.Span;
+            unusedBitCount = sourceSpan[0];
 
             // T-REC-X.690-201508 sec 8.6.2.2
             if (unusedBitCount > 7)
@@ -940,14 +945,14 @@ namespace System.Security.Cryptography.Asn1
             // (then invert that)
             // 0b1111_1000
             byte mask = (byte)~(0xFF >> (8 - unusedBitCount));
-            byte lastByte = source[source.Length - 1];
+            byte lastByte = sourceSpan[sourceSpan.Length - 1];
             byte maskedByte = (byte)(lastByte & mask);
 
             if (maskedByte == lastByte)
             {
                 if (write)
                 {
-                    source.Slice(1).CopyTo(destination);
+                    sourceSpan.Slice(1).CopyTo(destination);
                 }
 
                 bytesWritten = source.Length - 1;
@@ -969,7 +974,7 @@ namespace System.Security.Cryptography.Asn1
 
             if (write)
             {
-                source.Slice(1, source.Length - 2).CopyTo(destination);
+                sourceSpan.Slice(1, sourceSpan.Length - 2).CopyTo(destination);
                 destination[source.Length - 2] = maskedByte;
             }
 
@@ -978,7 +983,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         private static int CopyConstructedBitString(
-            ReadOnlySpan<byte> source,
+            ReadOnlyMemory<byte> source,
             ref Span<byte> destination,
             bool write,
             AsnEncodingRules ruleSet,
@@ -1000,7 +1005,7 @@ namespace System.Security.Cryptography.Asn1
 
             int totalRead = 0;
             int totalContent = 0;
-            ReadOnlySpan<byte> cur = source;
+            ReadOnlyMemory<byte> cur = source;
 
             while (!cur.IsEmpty)
             {
@@ -1110,7 +1115,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         private static bool TryCopyConstructedBitStringValue(
-            ReadOnlySpan<byte> source,
+            ReadOnlyMemory<byte> source,
             Span<byte> dest,
             AsnEncodingRules ruleSet,
             bool isIndefinite,
@@ -1173,7 +1178,7 @@ namespace System.Security.Cryptography.Asn1
 
         private bool TryGetBitStringBytes(
             out int unusedBitCount,
-            out ReadOnlySpan<byte> contents,
+            out ReadOnlyMemory<byte> contents,
             out int headerLength)
         {
             (Asn1Tag tag, int? length) = ReadTagAndLength(out headerLength);
@@ -1186,13 +1191,13 @@ namespace System.Security.Cryptography.Asn1
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                contents = default(ReadOnlySpan<byte>);
+                contents = default(ReadOnlyMemory<byte>);
                 unusedBitCount = 0;
                 return false;
             }
 
             Debug.Assert(length.HasValue);
-            ReadOnlySpan<byte> encodedValue = Slice(_data, headerLength, length.Value);
+            ReadOnlyMemory<byte> encodedValue = Slice(_data, headerLength, length.Value);
 
             if (TryCopyPrimitiveBitStringValue(
                 encodedValue,
@@ -1207,7 +1212,7 @@ namespace System.Security.Cryptography.Asn1
                 return true;
             }
 
-            contents = default(ReadOnlySpan<byte>);
+            contents = default(ReadOnlyMemory<byte>);
             return false;
         }
 
@@ -1232,7 +1237,7 @@ namespace System.Security.Cryptography.Asn1
         /// </exception>
         public bool TryGetBitStringBytes(
             out int unusedBitCount,
-            out ReadOnlySpan<byte> contents)
+            out ReadOnlyMemory<byte> contents)
         {
             bool didGet = TryGetBitStringBytes(out unusedBitCount, out contents, out int headerLength);
 
@@ -1252,7 +1257,7 @@ namespace System.Security.Cryptography.Asn1
         {
             if (TryGetBitStringBytes(
                 out unusedBitCount,
-                out ReadOnlySpan<byte> contents,
+                out ReadOnlyMemory<byte> contents,
                 out int headerLength))
             {
                 if (contents.Length > destination.Length)
@@ -1262,7 +1267,7 @@ namespace System.Security.Cryptography.Asn1
                     return false;
                 }
 
-                contents.CopyTo(destination);
+                contents.Span.CopyTo(destination);
                 bytesWritten = contents.Length;
                 // contents doesn't include the unusedBitCount value, so add one byte for that.
                 _data = _data.Slice(headerLength + contents.Length + 1);
@@ -1332,7 +1337,7 @@ namespace System.Security.Cryptography.Asn1
             int sizeLimit = Marshal.SizeOf(backingType);
             byte* stackmem = stackalloc byte[1 + sizeLimit];
             Span<byte> stackSpan = new Span<byte>(stackmem, 1 + sizeLimit);
-            ReadOnlySpan<byte> saveData = _data;
+            ReadOnlyMemory<byte> saveData = _data;
 
             if (!TryCopyBitStringBytes(stackSpan, out int unusedBitCount, out int bytesWritten))
             {
@@ -1519,10 +1524,10 @@ namespace System.Security.Cryptography.Asn1
             return accum;
         }
 
-        public ReadOnlySpan<byte> GetEnumeratedBytes()
+        public ReadOnlyMemory<byte> GetEnumeratedBytes()
         {
             // T-REC-X.690-201508 sec 8.4 says the contents are the same as for integers.
-            ReadOnlySpan<byte> contents =
+            ReadOnlyMemory<byte> contents =
                 GetIntegerContents(UniversalTagNumber.Enumerated, out int headerLength);
 
             _data = _data.Slice(headerLength + contents.Length);
@@ -1585,7 +1590,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         private bool TryGetOctetStringBytes(
-            out ReadOnlySpan<byte> contents,
+            out ReadOnlyMemory<byte> contents,
             out int headerLength,
             UniversalTagNumber universalTagNumber = UniversalTagNumber.OctetString)
         {
@@ -1599,12 +1604,12 @@ namespace System.Security.Cryptography.Asn1
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                contents = default(ReadOnlySpan<byte>);
+                contents = default(ReadOnlyMemory<byte>);
                 return false;
             }
 
             Debug.Assert(length.HasValue);
-            ReadOnlySpan<byte> encodedValue = Slice(_data, headerLength, length.Value);
+            ReadOnlyMemory<byte> encodedValue = Slice(_data, headerLength, length.Value);
 
             if (_ruleSet == AsnEncodingRules.CER && encodedValue.Length > MaxCERSegmentSize)
             {
@@ -1617,7 +1622,7 @@ namespace System.Security.Cryptography.Asn1
 
         private bool TryGetOctetStringBytes(
             UniversalTagNumber universalTagNumber,
-            out ReadOnlySpan<byte> contents)
+            out ReadOnlyMemory<byte> contents)
         {
             if (TryGetOctetStringBytes(out contents, out int headerLength, universalTagNumber))
             {
@@ -1643,13 +1648,13 @@ namespace System.Security.Cryptography.Asn1
         ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
         /// </ul>
         /// </exception>
-        public bool TryGetOctetStringBytes(out ReadOnlySpan<byte> contents)
+        public bool TryGetOctetStringBytes(out ReadOnlyMemory<byte> contents)
         {
             return TryGetOctetStringBytes(UniversalTagNumber.OctetString, out contents);
         }
 
         private static int CopyConstructedOctetString(
-            ReadOnlySpan<byte> source,
+            ReadOnlyMemory<byte> source,
             ref Span<byte> destination,
             bool write,
             AsnEncodingRules ruleSet,
@@ -1670,7 +1675,7 @@ namespace System.Security.Cryptography.Asn1
 
             int totalRead = 0;
             int totalContent = 0;
-            ReadOnlySpan<byte> cur = source;
+            ReadOnlyMemory<byte> cur = source;
 
             while (!cur.IsEmpty)
             {
@@ -1751,12 +1756,12 @@ namespace System.Security.Cryptography.Asn1
                     totalContent += lengthValue;
                     lastSegmentLength = lengthValue;
 
-                    ReadOnlySpan<byte> segment = Slice(cur, 0, lengthValue);
+                    ReadOnlyMemory<byte> segment = Slice(cur, 0, lengthValue);
                     cur = cur.Slice(lengthValue);
 
                     if (write)
                     {
-                        segment.CopyTo(destination);
+                        segment.Span.CopyTo(destination);
                         destination = destination.Slice(lengthValue);
                     }
                 }
@@ -1772,7 +1777,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         private static bool TryCopyConstructedOctetStringValue(
-            ReadOnlySpan<byte> source,
+            ReadOnlyMemory<byte> source,
             Span<byte> dest,
             bool write,
             AsnEncodingRules ruleSet,
@@ -1835,7 +1840,7 @@ namespace System.Security.Cryptography.Asn1
             out int bytesWritten)
         {
             if (TryGetOctetStringBytes(
-                out ReadOnlySpan<byte> contents,
+                out ReadOnlyMemory<byte> contents,
                 out int headerLength))
             {
                 if (contents.Length > destination.Length)
@@ -1844,7 +1849,7 @@ namespace System.Security.Cryptography.Asn1
                     return false;
                 }
 
-                contents.CopyTo(destination);
+                contents.Span.CopyTo(destination);
                 bytesWritten = contents.Length;
                 _data = _data.Slice(headerLength + contents.Length);
                 return true;
@@ -1928,7 +1933,9 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            ReadOnlySpan<byte> contents = Slice(_data, headerLength, length.Value);
+            ReadOnlyMemory<byte> contentsMemory = Slice(_data, headerLength, length.Value);
+            ReadOnlySpan<byte> contents = contentsMemory.Span;
+
             BigInteger firstIdentifier = ReadSubIdentifier(contents, out int bytesRead);
             byte firstArc;
 
@@ -2002,7 +2009,7 @@ namespace System.Security.Cryptography.Asn1
             out int bytesWritten)
         {
             if (TryGetOctetStringBytes(
-                out ReadOnlySpan<byte> contents,
+                out ReadOnlyMemory<byte> contents,
                 out int headerLength,
                 universalTagNumber))
             {
@@ -2017,7 +2024,7 @@ namespace System.Security.Cryptography.Asn1
                         return false;
                     }
 
-                    contents.CopyTo(destination);
+                    contents.Span.CopyTo(destination);
                 }
 
                 bytesRead = headerLength + bytesWritten;
@@ -2040,10 +2047,10 @@ namespace System.Security.Cryptography.Asn1
         }
 
         private static unsafe string GetCharacterString(
-            ReadOnlySpan<byte> source,
+            ReadOnlyMemory<byte> source,
             Text.Encoding encoding)
         {
-            fixed (byte* bytePtr = &source.DangerousGetPinnableReference())
+            fixed (byte* bytePtr = &source.Span.DangerousGetPinnableReference())
             {
                 try
                 {
@@ -2057,12 +2064,12 @@ namespace System.Security.Cryptography.Asn1
         }
 
         private static unsafe bool TryCopyCharacterString(
-            ReadOnlySpan<byte> source,
+            ReadOnlyMemory<byte> source,
             Text.Encoding encoding,
             Span<char> destination,
             out int charsWritten)
         {
-            fixed (byte* bytePtr = &source.DangerousGetPinnableReference())
+            fixed (byte* bytePtr = &source.Span.DangerousGetPinnableReference())
             fixed (char* charPtr = &destination.DangerousGetPinnableReference())
             {
                 try
@@ -2092,7 +2099,7 @@ namespace System.Security.Cryptography.Asn1
             Text.Encoding encoding)
         {
             if (TryGetOctetStringBytes(
-                out ReadOnlySpan<byte> contents,
+                out ReadOnlyMemory<byte> contents,
                 out int headerLength,
                 universalTagNumber))
             {
@@ -2123,7 +2130,7 @@ namespace System.Security.Cryptography.Asn1
                 }
 
                 string s = GetCharacterString(
-                    rented.AsReadOnlySpan().Slice(0, bytesWritten),
+                    new ReadOnlyMemory<byte>(rented, 0, bytesWritten),
                     encoding);
 
                 _data = _data.Slice(bytesRead);
@@ -2143,7 +2150,7 @@ namespace System.Security.Cryptography.Asn1
             out int charsWritten)
         {
             if (TryGetOctetStringBytes(
-                out ReadOnlySpan<byte> contents,
+                out ReadOnlyMemory<byte> contents,
                 out int headerLength,
                 universalTagNumber))
             {
@@ -2177,7 +2184,7 @@ namespace System.Security.Cryptography.Asn1
                 }
 
                 bool copied = TryCopyCharacterString(
-                    rented.AsReadOnlySpan().Slice(0, bytesWritten),
+                    new ReadOnlyMemory<byte>(rented, 0, bytesWritten), 
                     encoding,
                     destination,
                     out charsWritten);
@@ -2210,7 +2217,7 @@ namespace System.Security.Cryptography.Asn1
         ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
         /// </ul>
         /// </exception>
-        public bool TryGetUTF8StringBytes(out ReadOnlySpan<byte> contents)
+        public bool TryGetUTF8StringBytes(out ReadOnlyMemory<byte> contents)
         {
             return TryGetOctetStringBytes(UniversalTagNumber.UTF8String, out contents);
         }
@@ -2275,7 +2282,7 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            ReadOnlySpan<byte> contents;
+            ReadOnlyMemory<byte> contents;
             int suffix = 0;
 
             if (length != null)
@@ -2313,7 +2320,7 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            ReadOnlySpan<byte> contents;
+            ReadOnlyMemory<byte> contents;
             int suffix = 0;
 
             if (length != null)
@@ -2340,7 +2347,7 @@ namespace System.Security.Cryptography.Asn1
                     while (reader.HasData)
                     {
                         ReadOnlySpan<byte> previous = current;
-                        current = reader.GetEncodedValue();
+                        current = reader.GetEncodedValue().Span;
 
                         int end = Math.Min(previous.Length, current.Length);
                         int i;
@@ -2409,7 +2416,7 @@ namespace System.Security.Cryptography.Asn1
         ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
         /// </ul>
         /// </exception>
-        public bool TryGetIA5StringBytes(out ReadOnlySpan<byte> contents)
+        public bool TryGetIA5StringBytes(out ReadOnlyMemory<byte> contents)
         {
             return TryGetOctetStringBytes(UniversalTagNumber.IA5String, out contents);
         }
@@ -2455,7 +2462,7 @@ namespace System.Security.Cryptography.Asn1
         ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
         /// </ul>
         /// </exception>
-        public bool TryGetBMPStringBytes(out ReadOnlySpan<byte> contents)
+        public bool TryGetBMPStringBytes(out ReadOnlyMemory<byte> contents)
         {
             return TryGetOctetStringBytes(UniversalTagNumber.BMPString, out contents);
         }
@@ -2627,13 +2634,13 @@ namespace System.Security.Cryptography.Asn1
             
             // Optimize for the CER/DER primitive encoding:
             if (TryGetOctetStringBytes(
-                out ReadOnlySpan<byte> primitiveOctets,
+                out ReadOnlyMemory<byte> primitiveOctets,
                 out int headerLength,
                 UniversalTagNumber.UtcTime))
             {
                 if (primitiveOctets.Length == 13)
                 {
-                    DateTimeOffset value = ParseUtcTime(primitiveOctets, twoDigitYearMax);
+                    DateTimeOffset value = ParseUtcTime(primitiveOctets.Span, twoDigitYearMax);
                     _data = _data.Slice(headerLength + primitiveOctets.Length);
                     return value;
                 }
@@ -2998,11 +3005,11 @@ namespace System.Security.Cryptography.Asn1
         public DateTimeOffset GetGeneralizedTime(bool disallowFractions=false)
         {
             if (TryGetOctetStringBytes(
-                out ReadOnlySpan<byte> primitiveOctets,
+                out ReadOnlyMemory<byte> primitiveOctets,
                 out int headerLength,
                 UniversalTagNumber.GeneralizedTime))
             {
-                DateTimeOffset value = ParseGeneralizedTime(_ruleSet, primitiveOctets, disallowFractions);
+                DateTimeOffset value = ParseGeneralizedTime(_ruleSet, primitiveOctets.Span, disallowFractions);
                 _data = _data.Slice(headerLength + primitiveOctets.Length);
                 return value;
             }
@@ -3014,7 +3021,7 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            int upperBound = PeekContentSpan().Length;
+            int upperBound = PeekContentBytes().Length;
 
             byte[] rented = ArrayPool<byte>.Shared.Rent(upperBound);
             ReadOnlySpan<byte> contentOctets = ReadOnlySpan<byte>.Empty;
@@ -3058,7 +3065,7 @@ namespace System.Security.Cryptography.Asn1
             return source.Slice(offset, length);
         }
 
-        private static ReadOnlySpan<byte> Slice(ReadOnlySpan<byte> source, int offset, int? length)
+        private static ReadOnlyMemory<byte> Slice(ReadOnlyMemory<byte> source, int offset, int? length)
         {
             Debug.Assert(offset >= 0);
 
@@ -3067,7 +3074,15 @@ namespace System.Security.Cryptography.Asn1
                 return source.Slice(offset);
             }
 
-            return Slice(source, offset, length.Value);
+            int lengthVal = length.Value;
+            Debug.Assert(lengthVal >= 0);
+
+            if (source.Length - offset < lengthVal)
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+
+            return source.Slice(offset, lengthVal);
         }
 
         private static void CheckEncodingRules(AsnEncodingRules ruleSet)
@@ -3577,10 +3592,26 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteEncodedValue(ReadOnlySpan<byte> preEncodedValue)
         {
+            byte[] buf = ArrayPool<byte>.Shared.Rent(preEncodedValue.Length);
+
+            try
+            {
+                preEncodedValue.CopyTo(buf);
+                WriteEncodedValue(new ReadOnlyMemory<byte>(buf, 0, preEncodedValue.Length));
+            }
+            finally
+            {
+                Array.Clear(buf, 0, preEncodedValue.Length);
+                ArrayPool<byte>.Shared.Return(buf);
+            }
+        }
+
+        public void WriteEncodedValue(ReadOnlyMemory<byte> preEncodedValue)
+        {
             AsnReader reader = new AsnReader(preEncodedValue, RuleSet);
 
             // Is it legal under the current rules?
-            ReadOnlySpan<byte> parsedBack = reader.GetEncodedValue();
+            ReadOnlyMemory<byte> parsedBack = reader.GetEncodedValue();
 
             if (reader.HasData)
                 throw new ArgumentException("Value does not represent a single encoded value", nameof(preEncodedValue));
@@ -3588,7 +3619,7 @@ namespace System.Security.Cryptography.Asn1
             Debug.Assert(parsedBack.Length == preEncodedValue.Length);
 
             EnsureWriteCapacity(preEncodedValue.Length);
-            preEncodedValue.CopyTo(_buffer.AsSpan().Slice(_offset));
+            preEncodedValue.Span.CopyTo(_buffer.AsSpan().Slice(_offset));
             _offset += preEncodedValue.Length;
         }
 
@@ -5006,7 +5037,7 @@ namespace System.Security.Cryptography.Asn1
             if (len == 0)
                 return;
 
-            var reader = new AsnReader(buffer.AsReadOnlySpan().Slice(start, len), AsnEncodingRules.BER);
+            var reader = new AsnReader(new ReadOnlyMemory<byte>(buffer, start, len), AsnEncodingRules.BER);
 
             List<(int, int)> positions = new List<(int, int)>();
 
@@ -5014,7 +5045,7 @@ namespace System.Security.Cryptography.Asn1
 
             while (reader.HasData)
             {
-                ReadOnlySpan<byte> encoded = reader.GetEncodedValue();
+                ReadOnlyMemory<byte> encoded = reader.GetEncodedValue();
                 positions.Add((pos, encoded.Length));
                 pos += encoded.Length;
             }

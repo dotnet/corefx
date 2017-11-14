@@ -223,25 +223,18 @@ namespace System.Security.Cryptography.Tests.Asn1
         public static void ParseTime_BerOnly(string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
+            AsnReader cerReader = new AsnReader(inputData, AsnEncodingRules.CER);
+            AsnReader derReader = new AsnReader(inputData, AsnEncodingRules.DER);
 
-            Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader cerReader = new AsnReader(inputData, AsnEncodingRules.CER);
-                    cerReader.GetGeneralizedTime();
-                });
-
-            Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader derReader = new AsnReader(inputData, AsnEncodingRules.DER);
-                    derReader.GetGeneralizedTime();
-                });
+            Assert.Throws<CryptographicException>(() => cerReader.GetGeneralizedTime());
+            Assert.Throws<CryptographicException>(() => derReader.GetGeneralizedTime());
 
             // Prove it was not just corrupt input
             AsnReader berReader = new AsnReader(inputData, AsnEncodingRules.BER);
             berReader.GetGeneralizedTime();
             Assert.False(berReader.HasData, "berReader.HasData");
+            Assert.True(cerReader.HasData, "cerReader.HasData");
+            Assert.True(derReader.HasData, "derReader.HasData");
         }
 
         [Fact]
@@ -262,13 +255,9 @@ namespace System.Security.Cryptography.Tests.Asn1
         public static void ExcessivelyPreciseNonFraction()
         {
             byte[] inputData = Text.Encoding.ASCII.GetBytes("\u0018\u002A2017092118.012345678901234567890123Q56789Z");
+            AsnReader berReader = new AsnReader(inputData, AsnEncodingRules.BER);
 
-            Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader berReader = new AsnReader(inputData, AsnEncodingRules.BER);
-                    berReader.GetGeneralizedTime();
-                });
+            Assert.Throws<CryptographicException>(() => berReader.GetGeneralizedTime());
         }
 
         [Theory]
@@ -338,16 +327,8 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             AsnReader berReader = new AsnReader(inputData, AsnEncodingRules.BER);
 
-            try
-            {
-                berReader.GetGeneralizedTime(disallowFractions: true);
-                Assert.False(true, "GetGeneralizedTime(true) throws CryptographicException");
-            }
-            catch (CryptographicException e)
-            {
-                Assert.IsType<CryptographicException>(e);
-            }
-
+            Assert.Throws<CryptographicException>(() => berReader.GetGeneralizedTime(disallowFractions: true));
+            
             // Legit if the fraction is allowed
             berReader.GetGeneralizedTime();
             Assert.False(berReader.HasData, "berReader.HasData");
@@ -409,13 +390,9 @@ namespace System.Security.Cryptography.Tests.Asn1
         public static void GetGeneralizedTime_Throws(string description, string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, AsnEncodingRules.BER);
 
-            Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader reader = new AsnReader(inputData, AsnEncodingRules.BER);
-                    reader.GetGeneralizedTime();
-                });
+            Assert.Throws<CryptographicException>(() => reader.GetGeneralizedTime());
         }
     }
 }

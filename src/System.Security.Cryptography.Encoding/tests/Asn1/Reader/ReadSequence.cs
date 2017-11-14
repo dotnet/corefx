@@ -89,14 +89,9 @@ namespace System.Security.Cryptography.Tests.Asn1
             string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-
-                    reader.ReadSequence();
-                });
+            Assert.Throws<CryptographicException>(() => reader.ReadSequence());
         }
 
         private static void ReadEcPublicKey(AsnEncodingRules ruleSet, byte[] inputData)
@@ -109,7 +104,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             AsnReader algorithmReader = spkiReader.ReadSequence();
             Assert.True(spkiReader.HasData, "spkiReader.HasData after reading algorithm");
 
-            ReadOnlySpan<byte> publicKeyValue;
+            ReadOnlyMemory<byte> publicKeyValue;
             int unusedBitCount;
 
             if (!spkiReader.TryGetBitStringBytes(out unusedBitCount, out publicKeyValue))
@@ -121,7 +116,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
                     if (spkiReader.TryCopyBitStringBytes(buf, out unusedBitCount, out int bytesWritten))
                     {
-                        publicKeyValue = new ReadOnlySpan<byte>(buf, 0, bytesWritten);
+                        publicKeyValue = new ReadOnlyMemory<byte>(buf, 0, bytesWritten);
                         break;
                     }
                 }

@@ -45,6 +45,11 @@ namespace Test.Cryptography
             return ByteArrayToHex((ReadOnlySpan<byte>)bytes);
         }
 
+        internal static string ByteArrayToHex(this ReadOnlyMemory<byte> bytes)
+        {
+            return ByteArrayToHex(bytes.Span);
+        }
+
         internal static string ByteArrayToHex(this ReadOnlySpan<byte> bytes)
         {
             StringBuilder builder = new StringBuilder(bytes.Length * 2);

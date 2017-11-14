@@ -286,14 +286,13 @@ namespace System.Security.Cryptography.Tests.Asn1
         public static void ReadNamedBitList_RequiresFlags(PublicEncodingRules ruleSet)
         {
             string inputHex = "030100";
+            AsnReader reader = new AsnReader(inputHex.HexToByteArray(), (AsnEncodingRules)ruleSet);
 
             AssertExtensions.Throws<ArgumentException>(
                 "tFlagsEnum",
-                () =>
-                {
-                    AsnReader reader = new AsnReader(inputHex.HexToByteArray(), (AsnEncodingRules)ruleSet);
-                    reader.GetNamedBitListValue<NamedBitListMode>(NamedBitListMode.NamedZeroIsOne);
-                });
+                () => reader.GetNamedBitListValue<NamedBitListMode>(NamedBitListMode.NamedZeroIsOne));
+
+            Assert.True(reader.HasData, "reader.HasData");
         }
 
         [Theory]
@@ -306,15 +305,8 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             AsnReader reader = new AsnReader(inputHex.HexToByteArray(), (AsnEncodingRules)ruleSet);
 
-            try
-            {
-                reader.GetNamedBitListValue<X509KeyUsageCSharpStyle>(NamedBitListMode.NamedZeroIsOne);
-                Assert.True(false, "Exception was thrown");
-            }
-            catch (Exception e)
-            {
-                Assert.IsType<Exception>(e);
-            }
+            Assert.Throws<Exception>(
+                () => reader.GetNamedBitListValue<X509KeyUsageCSharpStyle>(NamedBitListMode.NamedZeroIsOne));
 
             Assert.True(reader.HasData, "reader.HasData");
         }
@@ -328,15 +320,8 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             AsnReader reader = new AsnReader(inputHex.HexToByteArray(), (AsnEncodingRules)ruleSet);
 
-            try
-            {
-                reader.GetNamedBitListValue<X509KeyUsageCSharpStyle>(NamedBitListMode.NamedZeroIsOne);
-                Assert.True(false, "Exception was thrown");
-            }
-            catch (CryptographicException e)
-            {
-                Assert.IsType<CryptographicException>(e);
-            }
+            Assert.Throws<CryptographicException>(
+                () => reader.GetNamedBitListValue<X509KeyUsageCSharpStyle>(NamedBitListMode.NamedZeroIsOne));
 
             Assert.True(reader.HasData, "reader.HasData");
         }
@@ -350,15 +335,8 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             AsnReader reader = new AsnReader(inputHex.HexToByteArray(), (AsnEncodingRules)ruleSet);
 
-            try
-            {
-                reader.GetNamedBitListValue<X509KeyUsageCSharpStyle>(NamedBitListMode.NamedZeroIsOne);
-                Assert.True(false, "Exception was thrown");
-            }
-            catch (CryptographicException e)
-            {
-                Assert.IsType<CryptographicException>(e);
-            }
+            Assert.Throws<CryptographicException>(
+                () => reader.GetNamedBitListValue<X509KeyUsageCSharpStyle>(NamedBitListMode.NamedZeroIsOne));
 
             Assert.True(reader.HasData, "reader.HasData");
         }
@@ -370,14 +348,11 @@ namespace System.Security.Cryptography.Tests.Asn1
         public static void ReadNamedBitList_RequiresValidMode(PublicEncodingRules ruleSet)
         {
             string inputHex = "0303071480";
+            AsnReader reader = new AsnReader(inputHex.HexToByteArray(), (AsnEncodingRules)ruleSet);
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>(
                 "mode",
-                () =>
-                {
-                    AsnReader reader = new AsnReader(inputHex.HexToByteArray(), (AsnEncodingRules)ruleSet);
-                    reader.GetNamedBitListValue<X509KeyUsageCSharpStyle>((NamedBitListMode)5);
-                });
+                () => reader.GetNamedBitListValue<X509KeyUsageCSharpStyle>((NamedBitListMode)5));
         }
     }
 }

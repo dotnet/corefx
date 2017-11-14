@@ -90,14 +90,9 @@ namespace System.Security.Cryptography.Tests.Asn1
             string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-
-                    reader.ReadSetOf();
-                });
+            Assert.Throws<CryptographicException>(() => reader.ReadSetOf());
         }
 
         [Theory]
@@ -136,12 +131,9 @@ namespace System.Security.Cryptography.Tests.Asn1
             }
             else
             {
-                Assert.Throws<CryptographicException>(
-                    () =>
-                    {
-                        AsnReader alsoReader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-                        alsoReader.ReadSetOf();
-                    });
+                AsnReader alsoReader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+                Assert.Throws<CryptographicException>(() => alsoReader.ReadSetOf());
 
                 setOf = reader.ReadSetOf(skipSortOrderValidation: true);
             }

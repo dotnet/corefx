@@ -32,14 +32,9 @@ namespace System.Security.Cryptography.Tests.Asn1
             string inputHex)
         {
             byte[] data = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(data, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader reader = new AsnReader(data, (AsnEncodingRules)ruleSet);
-
-                    reader.GetIntegerBytes();
-                });
+            Assert.Throws<CryptographicException>(() => reader.GetIntegerBytes());
         }
 
         [Theory]
@@ -415,7 +410,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] data = ("0210" + Payload + "020100").HexToByteArray();
             AsnReader reader = new AsnReader(data, AsnEncodingRules.DER);
 
-            ReadOnlySpan<byte> contents = reader.GetIntegerBytes();
+            ReadOnlyMemory<byte> contents = reader.GetIntegerBytes();
             Assert.Equal(0x10, contents.Length);
             Assert.Equal(Payload, contents.ByteArrayToHex());
         }

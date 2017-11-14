@@ -46,10 +46,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] data = { 0x05, 0x00 };
 
             Assert.Throws<ArgumentOutOfRangeException>(
-                () =>
-                {
-                    AsnReader reader = new AsnReader(data, (AsnEncodingRules)invalidRuleSetValue);
-                });
+                () => new AsnReader(data, (AsnEncodingRules)invalidRuleSetValue));
         }
 
         [Theory]
@@ -64,14 +61,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, AsnEncodingRules.DER);
 
-            try
-            {
-                reader.ReadTagAndLength(out int _);
-                Assert.True(false, "CryptographicException was thrown");
-            }
-            catch (CryptographicException)
-            {
-            }
+            Assert.Throws<CryptographicException>(() => reader.ReadTagAndLength(out int _));
         }
 
         [Theory]
@@ -109,14 +99,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)rules);
 
-            try
-            {
-                reader.ReadTagAndLength(out int _);
-                Assert.True(false, "CryptographicException was thrown");
-            }
-            catch (CryptographicException)
-            {
-            }
+            Assert.Throws<CryptographicException>(() => reader.ReadTagAndLength(out int _));
         }
 
         [Theory]

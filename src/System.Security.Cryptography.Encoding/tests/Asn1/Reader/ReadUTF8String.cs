@@ -218,7 +218,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            bool got = reader.TryGetUTF8StringBytes(out ReadOnlySpan<byte> contents);
+            bool got = reader.TryGetUTF8StringBytes(out ReadOnlyMemory<byte> contents);
 
             if (expectSuccess)
             {
@@ -227,7 +227,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 unsafe
                 {
                     fixed (byte* inputPtr = &inputData[2])
-                    fixed (byte* matchPtr = &contents.DangerousGetPinnableReference())
+                    fixed (byte* matchPtr = &contents.Span.DangerousGetPinnableReference())
                     {
                         Assert.Equal((IntPtr)inputPtr, (IntPtr)matchPtr);
                     }
@@ -260,14 +260,10 @@ namespace System.Security.Cryptography.Tests.Asn1
             string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
             Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-
-                    reader.TryGetUTF8StringBytes(out ReadOnlySpan<byte> contents);
-                });
+                () => reader.TryGetUTF8StringBytes(out ReadOnlyMemory<byte> contents));
         }
 
         [Theory]
@@ -323,15 +319,10 @@ namespace System.Security.Cryptography.Tests.Asn1
             outputData[0] = 252;
 
             int bytesWritten = -1;
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
             Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-
-                    reader.TryCopyUTF8StringBytes(outputData,
-                        out bytesWritten);
-                });
+                () => reader.TryCopyUTF8StringBytes(outputData, out bytesWritten));
 
             Assert.Equal(-1, bytesWritten);
             Assert.Equal(252, outputData[0]);
@@ -343,15 +334,10 @@ namespace System.Security.Cryptography.Tests.Asn1
             outputData[0] = 'a';
 
             int bytesWritten = -1;
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
             Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-
-                    reader.TryCopyUTF8String(outputData,
-                        out bytesWritten);
-                });
+                () => reader.TryCopyUTF8String(outputData, out bytesWritten));
 
             Assert.Equal(-1, bytesWritten);
             Assert.Equal('a', outputData[0]);
@@ -368,14 +354,10 @@ namespace System.Security.Cryptography.Tests.Asn1
             string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
             Assert.Throws<CryptographicException>(
-                () =>
-                {
-                    AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-
-                    reader.GetCharacterString(UniversalTagNumber.UTF8String);
-                });
+                () => reader.GetCharacterString(UniversalTagNumber.UTF8String));
         }
 
         [Theory]
