@@ -146,10 +146,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             DynamicMetaObject[] args,
             out DynamicMetaObject deferredBinding)
         {
-            if (args.Length < 1)
-            {
-                throw Error.BindRequireArguments();
-            }
+            Debug.Assert(args.Length >= 1);
 
             InitializeCallingContext(payload);
             ArgumentObject[] arguments = CreateArgumentArray(payload, parameters, args);

@@ -13,11 +13,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new RuntimeBinderInternalCompilerException(SR.InternalCompilerError);
         }
 
-        internal static Exception BindRequireArguments()
-        {
-            return new ArgumentException(SR.BindRequireArguments);
-        }
-
         internal static Exception BindCallFailedOverloadResolution()
         {
             return new RuntimeBinderException(SR.BindCallFailedOverloadResolution);

@@ -61,9 +61,6 @@
   <data name="InternalCompilerError" xml:space="preserve">
     <value>An unexpected exception occurred while binding a dynamic operation</value>
   </data>
-  <data name="BindRequireArguments" xml:space="preserve">
-    <value>Cannot bind call with no calling object</value>
-  </data>
   <data name="BindCallFailedOverloadResolution" xml:space="preserve">
     <value>Overload resolution failed</value>
   </data>
