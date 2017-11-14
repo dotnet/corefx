@@ -188,7 +188,7 @@ namespace System
                     // and then cast to a Memory<T>. Such a cast can only be done with unsafe or marshaling code,
                     // in which case that's the dangerous operation performed by the dev, and we're just following
                     // suit here to make it work as best as possible.
-                    return new Span<T>(Unsafe.As<Pinnable<T>>(s), SpanExtensions.StringAdjustment, s.Length).Slice(_index, _length);
+                    return new Span<T>(Unsafe.As<Pinnable<char>>(s), SpanExtensions.StringAdjustment, s.Length).Slice(_index, _length);
                 }
                 else if (_object != null)
                 {
