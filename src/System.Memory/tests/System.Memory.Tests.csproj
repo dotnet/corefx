@@ -27,6 +27,7 @@
     <Compile Include="Span\Empty.cs" />
     <Compile Include="Span\Equality.cs" />
     <Compile Include="Span\GcReporting.cs" />
+    <Compile Include="Span\GetEnumerator.cs" />
     <Compile Include="Span\GetHashCode.cs" />
     <Compile Include="Span\IndexOf.T.cs" />
     <Compile Include="Span\IndexOf.byte.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="ReadOnlySpan\DangerousGetPinnableReference.cs" />
     <Compile Include="ReadOnlySpan\Empty.cs" />
     <Compile Include="ReadOnlySpan\Equality.cs" />
+    <Compile Include="ReadOnlySpan\GetEnumerator.cs" />
     <Compile Include="ReadOnlySpan\GetHashCode.cs" />
     <Compile Include="ReadOnlySpan\IndexOf.T.cs" />
     <Compile Include="ReadOnlySpan\IndexOf.byte.cs" />
@@ -70,6 +72,7 @@
     <Compile Include="ReadOnlySpan\Slice.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.T.cs" />
     <Compile Include="ReadOnlySpan\StartsWith.byte.cs" />
+    <Compile Include="ReadOnlyMemory\Strings.cs" />
     <Compile Include="ReadOnlySpan\ToArray.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -87,6 +90,9 @@
     <Compile Include="Memory\Span.cs" />
     <Compile Include="Memory\ToArray.cs" />
     <Compile Include="Memory\TryGetArray.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MemoryMarshal\AsMemory.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ReadOnlyMemory\CopyTo.cs" />

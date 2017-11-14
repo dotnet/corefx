@@ -25,6 +25,7 @@ namespace System
         [System.ObsoleteAttribute("Equals() on ReadOnlySpan will always throw an exception. Use == instead.")]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public override bool Equals(object obj) { throw null; }
+        public Enumerator GetEnumerator() { throw null; }
         [System.ObsoleteAttribute("GetHashCode() on ReadOnlySpan will always throw an exception.")]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public override int GetHashCode() { throw null; }
@@ -37,6 +38,11 @@ namespace System
         public ReadOnlySpan<T> Slice(int start, int length) { throw null; }
         public T[] ToArray() { throw null; }
         public bool TryCopyTo(Span<T> destination) { throw null; }
+        public ref struct Enumerator
+        {
+            public bool MoveNext() { throw null; }
+            public ref readonly T Current { get { throw null; } }
+        }
     }
 
     public readonly ref struct Span<T>
@@ -59,6 +65,7 @@ namespace System
         [System.ObsoleteAttribute("Equals() on Span will always throw an exception. Use == instead.")]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public override bool Equals(object obj) { throw null; }
+        public Enumerator GetEnumerator() { throw null; }
         [System.ObsoleteAttribute("GetHashCode() on Span will always throw an exception.")]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public override int GetHashCode() { throw null; }
@@ -72,6 +79,11 @@ namespace System
         public Span<T> Slice(int start, int length) { throw null; }
         public T[] ToArray() { throw null; }
         public bool TryCopyTo(Span<T> destination) { throw null; }
+        public ref struct Enumerator
+        {
+            public bool MoveNext() { throw null; }
+            public ref T Current { get { throw null; } }
+        }
     }
     
     public static class MemoryExtensions
@@ -92,6 +104,8 @@ namespace System
         public static Span<TTo> NonPortableCast<TFrom, TTo>(this Span<TFrom> source) where TFrom : struct where TTo : struct { throw null; }
         
         public static ReadOnlySpan<char> AsReadOnlySpan(this string text) { throw null; }
+        public static ReadOnlyMemory<char> AsReadOnlyMemory(this string text) { throw null; }
+
         public static Span<T> AsSpan<T>(this T[] array) { throw null; }
         public static Span<T> AsSpan<T>(this ArraySegment<T> arraySegment) { throw null; }
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this T[] array) { throw null; }
@@ -114,6 +128,8 @@ namespace System
         public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> source) where T : struct { throw null; }
         
         public static ReadOnlySpan<TTo> NonPortableCast<TFrom, TTo>(this ReadOnlySpan<TFrom> source) where TFrom : struct where TTo : struct { throw null; }
+
+        public static bool TryGetString(this ReadOnlyMemory<char> readOnlyMemory, out string text, out int start, out int length) { throw null; }
     }
 
     public readonly struct ReadOnlyMemory<T>
@@ -358,3 +374,10 @@ namespace System.Buffers.Text
     }
 }
 
+namespace System.Runtime.InteropServices
+{
+    public static class MemoryMarshal
+    {
+        public static Memory<T> AsMemory<T>(ReadOnlyMemory<T> readOnlyMemory) { throw null; }
+    }
+}
