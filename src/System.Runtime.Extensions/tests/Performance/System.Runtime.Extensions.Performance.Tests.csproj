@@ -17,6 +17,7 @@
       <Link>Common\System\PerfUtils.cs</Link>
     </Compile>
     <Compile Include="System\Perf.Convert.cs" />
+    <Compile Include="System\Perf.Math.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
