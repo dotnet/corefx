@@ -1476,5 +1476,8 @@
     <StablePackage Include="System.Security.Cryptography.OpenSsl">
       <Version>4.0.1</Version>
     </StablePackage>
+    <StablePackage Include="System.Security.Cryptography.X509Certificates">
+      <Version>4.1.2</Version>
+    </StablePackage>
   </ItemGroup>
 </Project>

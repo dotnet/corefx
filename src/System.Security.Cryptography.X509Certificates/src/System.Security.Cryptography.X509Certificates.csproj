@@ -10,7 +10,7 @@
     <ProjectGuid>{6F8576C2-6CD0-4DF3-8394-00B002D82E40}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Security.Cryptography.X509Certificates</AssemblyName>
-    <AssemblyVersion>4.1.0.1</AssemblyVersion>
+    <AssemblyVersion>4.1.0.2</AssemblyVersion>
     <AssemblyVersion Condition="'$(TargetGroup)'=='net46'">4.0.0.0</AssemblyVersion>
     <AssemblyVersion Condition="'$(TargetGroup)'=='net461'">4.1.0.0</AssemblyVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
