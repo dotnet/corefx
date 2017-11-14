@@ -9,7 +9,6 @@ namespace System.IO.Tests
 {
     public class Directory_Create_Tests : FileSystemWatcherTest
     {
-
         [Fact]        
         public void FileSystemWatcher_Directory_EmptyPath()
         {
