@@ -1157,10 +1157,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             ArgumentObject[] arguments,
             LocalVariableSymbol[] locals)
         {
-            if (arguments.Length != 1)
-            {
-                throw Error.BindUnaryOperatorRequireOneArgument();
-            }
+            Debug.Assert(arguments.Length == 1);
 
             OperatorKind op = GetOperatorKind(payload.Operation);
             Expr arg1 = CreateArgumentEXPR(arguments[0], locals[0]);
