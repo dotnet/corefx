@@ -64,8 +64,13 @@
     "CommonTypes": []
   },
   {
-    "Name": "Microsoft.NETFramework.Compatibility",
-    "Description": "References a number of .NET Core libraries that are intended to provide support for more APIs that exist on .NET Framework.",
+    "Name": "Microsoft.Windows.Compatibility",
+    "Description": "This Windows Compatibility Pack provides access to APIs that were previously available only for .NET Framework. It can be used from both .NET Core as well as .NET Standard.",
+    "CommonTypes": []
+  },
+  {
+    "Name": "Microsoft.Windows.Compatibility.Shims",
+    "Description": "This package provides infrastructure services and shouldn't be referenced directly from your code. It provides facade assemblies in order to make the Microsoft.Windows.Compatibility package work across all .NET implementations.",
     "CommonTypes": []
   },
   {
@@ -563,6 +568,13 @@
     "Description": "Provides the System.Diagnostics.EventLog class, which allows the applications to use the windows event log service.",
     "CommonTypes": [
       "System.Diagnostics.EventLog"
+    ]
+  },
+  {
+    "Name": "System.Diagnostics.PerformanceCounter",
+    "Description": "Provides the System.Diagnostics.PerformanceCounter class, which allows access to Windows performance counters.",
+    "CommonTypes": [
+      "System.Diagnostics.PerformanceCounter"
     ]
   },
   {
@@ -1363,6 +1375,23 @@
       "System.UInt64",
       "System.IDisposable",
       "System.Uri"
+    ]
+  },
+  {
+    "Name": "System.Runtime.Caching",
+    "Description": "Provides classes to use caching facilities.",
+    "CommonTypes": [
+      "System.Runtime.Caching.CacheEntryChangeMonitor",
+      "System.Runtime.Caching.CacheEntryRemovedArguments",
+      "System.Runtime.Caching.CacheEntryUpdateArguments",
+      "System.Runtime.Caching.CacheItem",
+      "System.Runtime.Caching.CacheItemPolicy",
+      "System.Runtime.Caching.ChangeMonitor",
+      "System.Runtime.Caching.FileChangeMonitor",
+      "System.Runtime.Caching.HostFileChangeMonitor",
+      "System.Runtime.Caching.MemoryCache",
+      "System.Runtime.Caching.ObjectCache",
+      "System.Runtime.Caching.SqlChangeMonitor",
     ]
   },
   {

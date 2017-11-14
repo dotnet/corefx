@@ -14,9 +14,9 @@ namespace System.Threading.Channels
         /// <summary>Sentinel object used to indicate being done writing.</summary>
         internal static readonly Exception s_doneWritingSentinel = new Exception(nameof(s_doneWritingSentinel));
         /// <summary>A cached task with a Boolean true result.</summary>
-        internal static readonly Task<bool> s_trueTask = Task.FromResult(true);
+        internal static readonly Task<bool> s_trueTask = Task.FromResult(result: true);
         /// <summary>A cached task with a Boolean false result.</summary>
-        internal static readonly Task<bool> s_falseTask = Task.FromResult(false);
+        internal static readonly Task<bool> s_falseTask = Task.FromResult(result: false);
         /// <summary>A cached task that never completes.</summary>
         internal static readonly Task s_neverCompletingTask = new TaskCompletionSource<bool>().Task;
 
@@ -40,7 +40,7 @@ namespace System.Threading.Channels
             }
             else
             {
-                tcs.TrySetResult(default(VoidResult));
+                tcs.TrySetResult(default);
             }
         }
 
@@ -83,9 +83,10 @@ namespace System.Threading.Channels
         /// <param name="error">The error with which to complete each interactor.</param>
         internal static void FailInteractors<T, TInner>(Dequeue<T> interactors, Exception error) where T : Interactor<TInner>
         {
+            Debug.Assert(error != null);
             while (!interactors.IsEmpty)
             {
-                interactors.DequeueHead().Fail(error ?? CreateInvalidCompletionException());
+                interactors.DequeueHead().Fail(error);
             }
         }
 

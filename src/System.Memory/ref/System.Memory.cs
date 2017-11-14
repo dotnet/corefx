@@ -76,20 +76,16 @@ namespace System
     
     public static class SpanExtensions
     {
-        public static int IndexOf<T>(this Span<T> span, T value) where T:struct, IEquatable<T> { throw null; }
-        public static int IndexOf<T>(this Span<T> span, ReadOnlySpan<T> value) where T : struct, IEquatable<T> { throw null; }
-        public static int IndexOf(this Span<byte> span, byte value) { throw null; }
-        public static int IndexOf(this Span<byte> span, ReadOnlySpan<byte> value) { throw null; }
+        public static int IndexOf<T>(this Span<T> span, T value) where T : IEquatable<T> { throw null; }
+        public static int IndexOf<T>(this Span<T> span, ReadOnlySpan<T> value) where T : IEquatable<T> { throw null; }
 
         public static int IndexOfAny(this Span<byte> span, byte value0, byte value1) { throw null; }
         public static int IndexOfAny(this Span<byte> span, byte value0, byte value1, byte value2) { throw null; }
         public static int IndexOfAny(this Span<byte> span, ReadOnlySpan<byte> values) { throw null; }
 
-        public static bool SequenceEqual<T>(this Span<T> first, ReadOnlySpan<T> second) where T:struct, IEquatable<T> { throw null; }
-        public static bool SequenceEqual(this Span<byte> first, ReadOnlySpan<byte> second) { throw null; }
+        public static bool SequenceEqual<T>(this Span<T> first, ReadOnlySpan<T> second) where T : IEquatable<T> { throw null; }
         
-        public static bool StartsWith<T>(this Span<T> span, ReadOnlySpan<T> value) where T : struct, IEquatable<T> { throw null; }
-        public static bool StartsWith(this Span<byte> span, ReadOnlySpan<byte> value) { throw null; }
+        public static bool StartsWith<T>(this Span<T> span, ReadOnlySpan<T> value) where T : IEquatable<T> { throw null; }
 
         public static Span<byte> AsBytes<T>(this Span<T> source) where T : struct { throw null; }
 
@@ -103,20 +99,16 @@ namespace System
 
         public static void CopyTo<T>(this T[] array, Span<T> destination) { throw null; }
 
-        public static int IndexOf<T>(this ReadOnlySpan<T> span, T value) where T : struct, IEquatable<T> { throw null; }
-        public static int IndexOf<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value) where T : struct, IEquatable<T> { throw null; }
-        public static int IndexOf(this ReadOnlySpan<byte> span, byte value) { throw null; }
-        public static int IndexOf(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> value) { throw null; }
+        public static int IndexOf<T>(this ReadOnlySpan<T> span, T value) where T : IEquatable<T> { throw null; }
+        public static int IndexOf<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value) where T : IEquatable<T> { throw null; }
 
         public static int IndexOfAny(this ReadOnlySpan<byte> span, byte value0, byte value1) { throw null; }
         public static int IndexOfAny(this ReadOnlySpan<byte> span, byte value0, byte value1, byte value2) { throw null; }
         public static int IndexOfAny(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> values) { throw null; }
 
-        public static bool SequenceEqual<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second) where T : struct, IEquatable<T> { throw null; }
-        public static bool SequenceEqual(this ReadOnlySpan<byte> first, ReadOnlySpan<byte> second) { throw null; }
+        public static bool SequenceEqual<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second) where T : IEquatable<T> { throw null; }
 
-        public static bool StartsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value) where T : struct, IEquatable<T> { throw null; }
-        public static bool StartsWith(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> value) { throw null; }
+        public static bool StartsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value) where T : IEquatable<T> { throw null; }
 
         public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> source) where T : struct { throw null; }
         
@@ -287,6 +279,28 @@ namespace System.Buffers.Binary
     }
 }
 
+namespace System.Buffers
+{
+    public readonly struct StandardFormat : IEquatable<StandardFormat>
+    {
+        public const byte MaxPrecision = (byte)99;
+        public const byte NoPrecision = (byte)255;
+        public StandardFormat(char symbol, byte precision=(byte)255) => throw null;
+        public bool HasPrecision => throw null;
+        public bool IsDefault => throw null;
+        public byte Precision => throw null;
+        public char Symbol => throw null;
+        public static implicit operator StandardFormat (char symbol) => throw null;
+        public static StandardFormat Parse(ReadOnlySpan<char> format) => throw null;
+        public static StandardFormat Parse(string format) => throw null;
+        public override bool Equals(object obj) => throw null;
+        public override int GetHashCode() => throw null;
+        public bool Equals(StandardFormat other) => throw null;
+        public static bool operator ==(StandardFormat left, StandardFormat right) => throw null;
+        public static bool operator !=(StandardFormat left, StandardFormat right) => throw null;
+    }
+}
+
 namespace System.Buffers.Text
 {
     public static class Base64
@@ -298,4 +312,44 @@ namespace System.Buffers.Text
         public static OperationStatus DecodeFromUtf8InPlace(Span<byte> buffer, out int written) { throw null; }
         public static int GetMaxDecodedFromUtf8Length(int length) { throw null; }
     }
+
+    public static class Utf8Formatter
+    {
+        public static bool TryFormat(bool value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(byte value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(DateTime value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(DateTimeOffset value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(decimal value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(double value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(Guid value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(short value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(int value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(long value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(sbyte value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(float value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(TimeSpan value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(ushort value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(uint value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        public static bool TryFormat(ulong value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+    }
+    public static class Utf8Parser
+    {
+        public static bool TryParse(ReadOnlySpan<byte> text, out bool value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out byte value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out DateTime value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out DateTimeOffset value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out decimal value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out double value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out Guid value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out short value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out int value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out long value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out sbyte value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out float value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out TimeSpan value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out ushort value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out uint value, out int bytesConsumed, char standardFormat = default) => throw null;
+        public static bool TryParse(ReadOnlySpan<byte> text, out ulong value, out int bytesConsumed, char standardFormat = default) => throw null;
+    }
 }
+

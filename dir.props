@@ -72,10 +72,11 @@
        -->
   <PropertyGroup>
     <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
+      $(OverridePackageSource);
+      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
       https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;
       https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
       https://api.nuget.org/v3/index.json;
-      $(OverridePackageSource);
       $(RestoreSources)
     </RestoreSources>
   </PropertyGroup>
@@ -163,6 +164,12 @@
     <BuildingNETFxVertical Condition="'$(BuildingNETFxVertical)' == '' AND ('$(_bc_TargetGroup)'=='netfx' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingNETFxVertical>
     <BuildingUAPVertical Condition="'$(BuildingUAPVertical)' == '' AND ('$(_bc_TargetGroup)'=='uap' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingUAPVertical>
     <BuildingUAPAOTVertical Condition="'$(BuildingUAPAOTVertical)' == '' AND ('$(_bc_TargetGroup)'=='uapaot' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingUAPAOTVertical>
+  </PropertyGroup>
+
+  <!-- Set the kind of PDB to Portable and turn on SourceLink (fetching source from GitHub) -->
+  <PropertyGroup>
+    <DebugType Condition="'$(DebugType)' == ''">Portable</DebugType>
+    <UseSourceLink>true</UseSourceLink>
   </PropertyGroup>
 
   <!-- Set up Default symbol and optimization for Configuration -->

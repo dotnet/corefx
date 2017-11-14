@@ -138,6 +138,7 @@ namespace System.Threading.Channels.Tests
     {
         protected override bool RequiresSingleReader => true;
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Requires internal reflection on framework types.")]
         [Fact]
         public void ValidateInternalDebuggerAttributes()
         {
@@ -147,7 +148,7 @@ namespace System.Threading.Channels.Tests
 
             object queue = DebuggerAttributes.GetFieldValue(c, "_items");
             DebuggerAttributes.ValidateDebuggerDisplayReferences(queue);
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(queue);
+            DebuggerAttributes.InvokeDebuggerTypeProxyProperties(queue);
         }
 
         [Fact]

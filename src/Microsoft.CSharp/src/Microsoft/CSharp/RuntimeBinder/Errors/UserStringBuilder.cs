@@ -243,8 +243,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 return;
             }
 
-            TypeArray replacementTypeArray = null;
-            ErrAppendMethodParentSym(meth, pctx, out replacementTypeArray);
+            ErrAppendMethodParentSym(meth, pctx, out TypeArray replacementTypeArray);
             if (meth.IsConstructor())
             {
                 // Use the name of the parent class instead of the name "<ctor>".
@@ -391,7 +390,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     ErrAppendEvent((EventSymbol)sym, pctx);
                     break;
 
-                case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
                 case SYMKIND.SK_NamespaceSymbol:
                     if (sym == getBSymmgr().GetRootNS())
                     {
@@ -574,7 +572,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
 
                 case TypeKind.TK_VoidType:
-                    ErrAppendName(GetNameManager().Lookup(TokenFacts.GetText(TokenKind.Void)));
+                    ErrAppendName(NameManager.Lookup(TokenFacts.GetText(TokenKind.Void)));
                     break;
 
                 case TypeKind.TK_ParameterModifierType:
@@ -673,11 +671,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             }
 
             return result;
-        }
-
-        private NameManager GetNameManager()
-        {
-            return m_globalSymbols.GetNameManager();
         }
 
         private TypeManager GetTypeManager()
