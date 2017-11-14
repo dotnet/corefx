@@ -551,12 +551,9 @@ namespace System.IO
                         tcs.TrySetResult(new WaitForChangedResult(e.ChangeType, e.Name, oldName: null, timedOut: false));
                     }
                 };
-                if ((changeType & WatcherChangeTypes.Created) != 0)
-                    Created += fseh;
-                if ((changeType & WatcherChangeTypes.Deleted) != 0)
-                    Deleted += fseh;
-                if ((changeType & WatcherChangeTypes.Changed) != 0)
-                    Changed += fseh;
+                if ((changeType & WatcherChangeTypes.Created) != 0) Created += fseh;
+                if ((changeType & WatcherChangeTypes.Deleted) != 0) Deleted += fseh;
+                if ((changeType & WatcherChangeTypes.Changed) != 0) Changed += fseh;
             }
             if ((changeType & WatcherChangeTypes.Renamed) != 0)
             {
@@ -594,12 +591,9 @@ namespace System.IO
                 }
                 if (fseh != null)
                 {
-                    if ((changeType & WatcherChangeTypes.Changed) != 0)
-                        Changed -= fseh;
-                    if ((changeType & WatcherChangeTypes.Deleted) != 0)
-                        Deleted -= fseh;
-                    if ((changeType & WatcherChangeTypes.Created) != 0)
-                        Created -= fseh;
+                    if ((changeType & WatcherChangeTypes.Changed) != 0) Changed -= fseh;
+                    if ((changeType & WatcherChangeTypes.Deleted) != 0) Deleted -= fseh;
+                    if ((changeType & WatcherChangeTypes.Created) != 0) Created -= fseh;
                 }
             }
 
