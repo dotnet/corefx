@@ -98,10 +98,11 @@ namespace System.ComponentModel
                 s.Append(innerException.ToString());
             }
 
-            if (StackTrace != null)
+            string stackTrace = StackTrace;
+            if (stackTrace != null)
             {
                 s.AppendLine();
-                s.Append(StackTrace);
+                s.Append(stackTrace);
             }
 
             return s.ToString();
