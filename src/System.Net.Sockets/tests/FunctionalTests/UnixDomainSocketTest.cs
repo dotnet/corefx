@@ -2,11 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Test.Common;
-using System.Text;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,6 +30,13 @@ namespace System.Net.Sockets.Tests
         {
             SocketException e = Assert.Throws<SocketException>(() => new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified));
             Assert.Equal(SocketError.AddressFamilyNotSupported, e.SocketErrorCode);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]  // new UnixDomainSocketEndPoint should throw on Windows
+        public void Socket_CreateUnixDomainSocketEndPoint_Throws_OnWindows()
+        {
+            Assert.Throws<PlatformNotSupportedException>(() => new UnixDomainSocketEndPoint("/path"));
         }
 
         [OuterLoop] // TODO: Issue #11345
@@ -347,6 +353,21 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests new UnixDomainSocketEndPoint throws the correct exception for invalid args
+        public void CreateWithInvalidPathThrows()
+        {
+            Assert.Throws<ArgumentNullException>(() => new UnixDomainSocketEndPoint(null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new UnixDomainSocketEndPoint(string.Empty));
+
+            int maxNativeSize = (int)typeof(UnixDomainSocketEndPoint)
+                .GetField("s_nativePathLength", BindingFlags.Static | BindingFlags.NonPublic)
+                .GetValue(null);
+
+            string invalidLengthString = new string('a', maxNativeSize + 1);
+            Assert.Throws<ArgumentOutOfRangeException>(() => new UnixDomainSocketEndPoint(invalidLengthString));
+        }
+
         private static string GetRandomNonExistingFilePath()
         {
             string result;
@@ -357,85 +378,6 @@ namespace System.Net.Sockets.Tests
             while (File.Exists(result));
 
             return result;
-        }
-
-        private sealed class UnixDomainSocketEndPoint : EndPoint
-        {
-            private const AddressFamily EndPointAddressFamily = AddressFamily.Unix;
-
-            private static readonly Encoding s_pathEncoding = Encoding.UTF8;
-            private static readonly int s_nativePathOffset = 2; // = offsetof(struct sockaddr_un, sun_path). It's the same on Linux and OSX
-            private static readonly int s_nativePathLength = 91; // sockaddr_un.sun_path at http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_un.h.html, -1 for terminator
-            private static readonly int s_nativeAddressSize = s_nativePathOffset + s_nativePathLength;
-
-            private readonly string _path;
-            private readonly byte[] _encodedPath;
-
-            public UnixDomainSocketEndPoint(string path)
-            {
-                if (path == null)
-                {
-                    throw new ArgumentNullException(nameof(path));
-                }
-
-                _path = path;
-                _encodedPath = s_pathEncoding.GetBytes(_path);
-
-                if (path.Length == 0 || _encodedPath.Length > s_nativePathLength)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(path));
-                }
-            }
-
-            internal UnixDomainSocketEndPoint(SocketAddress socketAddress)
-            {
-                if (socketAddress == null)
-                {
-                    throw new ArgumentNullException(nameof(socketAddress));
-                }
-
-                if (socketAddress.Family != EndPointAddressFamily ||
-                    socketAddress.Size > s_nativeAddressSize)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(socketAddress));
-                }
-
-                if (socketAddress.Size > s_nativePathOffset)
-                {
-                    _encodedPath = new byte[socketAddress.Size - s_nativePathOffset];
-                    for (int i = 0; i < _encodedPath.Length; i++)
-                    {
-                        _encodedPath[i] = socketAddress[s_nativePathOffset + i];
-                    }
-
-                    _path = s_pathEncoding.GetString(_encodedPath, 0, _encodedPath.Length);
-                }
-                else
-                {
-                    _encodedPath = Array.Empty<byte>();
-                    _path = string.Empty;
-                }
-            }
-
-            public override SocketAddress Serialize()
-            {
-                var result = new SocketAddress(AddressFamily.Unix, s_nativeAddressSize);
-                Debug.Assert(_encodedPath.Length + s_nativePathOffset <= result.Size, "Expected path to fit in address");
-
-                for (int index = 0; index < _encodedPath.Length; index++)
-                {
-                    result[s_nativePathOffset + index] = _encodedPath[index];
-                }
-                result[s_nativePathOffset + _encodedPath.Length] = 0; // path must be null-terminated
-
-                return result;
-            }
-
-            public override EndPoint Create(SocketAddress socketAddress) => new UnixDomainSocketEndPoint(socketAddress);
-
-            public override AddressFamily AddressFamily => EndPointAddressFamily;
-
-            public override string ToString() => _path;
         }
     }
 }
