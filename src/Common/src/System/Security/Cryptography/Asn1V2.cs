@@ -123,17 +123,6 @@ namespace System.Security.Cryptography.Asn1
             {
                 throw new ArgumentOutOfRangeException(nameof(tagClass), tagClass, null);
             }
-
-            if (tagClass == TagClass.Universal)
-            {
-                UniversalTagNumber universalTagNumber = (UniversalTagNumber)tagValue;
-
-                if (!Enum.IsDefined(typeof(UniversalTagNumber), universalTagNumber))
-                {
-                    // TODO: Message this one.
-                    throw new ArgumentOutOfRangeException(nameof(tagValue), tagValue, null);
-                }
-            }
         }
 
         public Asn1Tag(byte singleByteEncoding)
@@ -1381,8 +1370,9 @@ namespace System.Security.Cryptography.Asn1
 
             if (!tFlagsEnum.IsDefined(typeof(FlagsAttribute), false))
             {
-                // TODO/review: What kind of exception? (This message is no good)
-                throw new ArgumentException("A [Flags] enum is required", nameof(tFlagsEnum));
+                throw new ArgumentException(
+                    SR.Cryptography_Asn_NamedBitListRequiresFlagsEnum,
+                    nameof(tFlagsEnum));
             }
 
             if (mode != NamedBitListMode.NamedZeroIsOne &&
@@ -1399,8 +1389,8 @@ namespace System.Security.Cryptography.Asn1
 
             if (!TryCopyBitStringBytes(expectedTag, stackSpan, out int unusedBitCount, out int bytesWritten))
             {
-                // TODO/review: What exception goes here?
-                throw new Exception($"Encoded NamedBitList value is larger than the value size of the {tFlagsEnum.Name} enum");
+                throw new CryptographicException(
+                    SR.Format(SR.Cryptography_Asn_NamedBitListValueTooBig, tFlagsEnum.Name));
             }
 
             if (bytesWritten == 0)
@@ -1620,11 +1610,11 @@ namespace System.Security.Cryptography.Asn1
             // so we don't need to validate it.
             Type backingType = tEnum.GetEnumUnderlyingType();
 
-            // TODO/review: Is this worth checking? (Flags would be BitString, not Enumerated)
             if (tEnum.IsDefined(typeof(FlagsAttribute), false))
             {
-                // TODO/review: What kind of exception? (This message is no good)
-                throw new ArgumentException();
+                throw new ArgumentException(
+                    SR.Cryptography_Asn_EnumeratedValueRequiresNonFlagsEnum,
+                    nameof(tEnum));
             }
 
             // T-REC-X.690-201508 sec 8.4 says the contents are the same as for integers.
@@ -3261,7 +3251,7 @@ namespace System.Security.Cryptography.Asn1
             if (expectedTag.TagClass == TagClass.Universal && expectedTag.TagValue != (int)tagNumber)
             {
                 throw new ArgumentException(
-                    "Cannot expect a tag with the wrong universal tag number",
+                    SR.Cryptography_Asn_UniversalValueIsFixed,
                     nameof(expectedTag));
             }
 
@@ -3758,22 +3748,6 @@ namespace System.Security.Cryptography.Asn1
             return 4;
         }
 
-        public void WriteEncodedValue(ReadOnlySpan<byte> preEncodedValue)
-        {
-            byte[] buf = ArrayPool<byte>.Shared.Rent(preEncodedValue.Length);
-
-            try
-            {
-                preEncodedValue.CopyTo(buf);
-                WriteEncodedValue(new ReadOnlyMemory<byte>(buf, 0, preEncodedValue.Length));
-            }
-            finally
-            {
-                Array.Clear(buf, 0, preEncodedValue.Length);
-                ArrayPool<byte>.Shared.Return(buf);
-            }
-        }
-
         public void WriteEncodedValue(ReadOnlyMemory<byte> preEncodedValue)
         {
             AsnReader reader = new AsnReader(preEncodedValue, RuleSet);
@@ -3782,7 +3756,7 @@ namespace System.Security.Cryptography.Asn1
             ReadOnlyMemory<byte> parsedBack = reader.GetEncodedValue();
 
             if (reader.HasData)
-                throw new ArgumentException("Value does not represent a single encoded value", nameof(preEncodedValue));
+                throw new ArgumentException(SR.Cryptography_WriteEncodedValue_OneValueAtATime, nameof(preEncodedValue));
 
             Debug.Assert(parsedBack.Length == preEncodedValue.Length);
 
@@ -3983,7 +3957,7 @@ namespace System.Security.Cryptography.Asn1
                 throw new ArgumentOutOfRangeException(
                     nameof(unusedBitCount),
                     unusedBitCount,
-                    $"Unused bit count must be between 0 and 7 inclusive");
+                    SR.Cryptography_Asn_UnusedBitCountRange);
             }
 
             // T-REC-X.690-201508 sec 8.6.2.3
@@ -4143,10 +4117,12 @@ namespace System.Security.Cryptography.Asn1
 
         private void WriteNamedBitList(Asn1Tag tag, Type tEnum, object enumValue, NamedBitListMode mode)
         {
-            if (!tEnum.IsEnum)
-                throw new ArgumentException("Value type must be an Enum");
+            Type backingType = tEnum.GetEnumUnderlyingType();
+
             if (!tEnum.IsDefined(typeof(FlagsAttribute), false))
-                throw new ArgumentException("Only [Flags] enums are supported");
+            {
+                throw new ArgumentException(SR.Cryptography_Asn_NamedBitListRequiresFlagsEnum, nameof(tEnum));
+            }
 
             if (mode != NamedBitListMode.NamedZeroIsOne &&
                 mode != NamedBitListMode.NamedZeroIs128LittleEndian &&
@@ -4155,7 +4131,6 @@ namespace System.Security.Cryptography.Asn1
                 throw new ArgumentOutOfRangeException(nameof(mode));
             }
 
-            Type backingType = tEnum.GetEnumUnderlyingType();
             ulong integralValue;
 
             if (backingType == typeof(ulong))
@@ -4491,7 +4466,7 @@ namespace System.Security.Cryptography.Asn1
                 if (position > 0 && value == 0)
                 {
                     // T-REC X.680-201508 sec 12.26
-                    throw new CryptographicException("Object identifier is in an invalid format");
+                    throw new CryptographicException(SR.Argument_InvalidOidValue);
                 }
 
                 value *= 10;
@@ -4808,11 +4783,13 @@ namespace System.Security.Cryptography.Asn1
 
             if (normalized.Year > 9999)
             {
+                Exception messageSource = new ArgumentOutOfRangeException();
+
                 // This is unreachable since DateTimeOffset guards against this internally.
                 throw new ArgumentOutOfRangeException(
                     nameof(value),
                     value,
-                    "Date cannot be represented as a GeneralizedTime");
+                    messageSource.Message);
             }
 
             long fracValue = 0;
@@ -4958,7 +4935,7 @@ namespace System.Security.Cryptography.Asn1
         public bool TryEncode(Span<byte> dest, out int bytesWritten)
         {
             if ((_nestingStack?.Count ?? 0) != 0)
-                throw new InvalidOperationException($"Cannot Encode while a SetOf or Sequence is still open");
+                throw new InvalidOperationException(SR.Cryptography_AsnWriter_EncodeUnbalancedStack);
 
             // If the stack is closed out then everything is a definite encoding (BER, DER) or a
             // required indefinite encoding (CER). So we're correctly sized up, and ready to copy.
@@ -4982,7 +4959,7 @@ namespace System.Security.Cryptography.Asn1
         public byte[] Encode()
         {
             if ((_nestingStack?.Count ?? 0) != 0)
-                throw new InvalidOperationException($"Cannot Encode while a SetOf or Sequence is still open");
+                throw new InvalidOperationException(SR.Cryptography_AsnWriter_EncodeUnbalancedStack);
 
             if (_offset == 0)
                 return Array.Empty<byte>();
@@ -5007,12 +4984,12 @@ namespace System.Security.Cryptography.Asn1
         private void PopTag(Asn1Tag tag, bool sortContents=false)
         {
             if (_nestingStack == null || _nestingStack.Count == 0)
-                throw new ArgumentException("Cannot pop the requested tag as it is not currently open", nameof(tag));
+                throw new ArgumentException(SR.Cryptography_AsnWriter_PopWrongTag, nameof(tag));
 
             (Asn1Tag stackTag, int lenOffset) = _nestingStack.Peek();
 
             if (stackTag != tag)
-                throw new ArgumentException("Cannot pop the requested tag as it is not currently open", nameof(tag));
+                throw new ArgumentException(SR.Cryptography_AsnWriter_PopWrongTag, nameof(tag));
 
             _nestingStack.Pop();
 
@@ -5269,7 +5246,7 @@ namespace System.Security.Cryptography.Asn1
             if (tag.TagClass == TagClass.Universal && tag.TagValue != (int)universalTagNumber)
             {
                 throw new ArgumentException(
-                    "Tags with TagClass Universal must have the appropriate TagValue value for the data type being read or written.",
+                    SR.Cryptography_Asn_UniversalValueIsFixed,
                     nameof(tag));
             }
         }

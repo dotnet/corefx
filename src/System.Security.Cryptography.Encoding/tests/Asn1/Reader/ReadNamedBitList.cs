@@ -305,7 +305,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             AsnReader reader = new AsnReader(inputHex.HexToByteArray(), (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<Exception>(
+            Assert.Throws<CryptographicException>(
                 () => reader.GetNamedBitListValue<X509KeyUsageCSharpStyle>(NamedBitListMode.NamedZeroIsOne));
 
             Assert.True(reader.HasData, "reader.HasData");

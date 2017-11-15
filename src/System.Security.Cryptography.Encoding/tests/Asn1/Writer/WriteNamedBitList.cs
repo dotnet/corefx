@@ -340,23 +340,19 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
-                null,
+            Assert.Throws<ArgumentException>(
                 () => writer.WriteNamedBitList(3, NamedBitListMode.NamedZeroIsOne));
 
-            AssertExtensions.Throws<ArgumentException>(
-                null,
+            Assert.Throws<ArgumentException>(
                 () => writer.WriteNamedBitList(
                     new Asn1Tag(TagClass.ContextSpecific, 1),
                     3,
                     NamedBitListMode.NamedZeroIsOne));
 
-            AssertExtensions.Throws<ArgumentException>(
-                null,
+            Assert.Throws<ArgumentException>(
                 () => writer.WriteNamedBitList((object)3, NamedBitListMode.NamedZeroIsOne));
 
-            AssertExtensions.Throws<ArgumentException>(
-                null,
+            Assert.Throws<ArgumentException>(
                 () => writer.WriteNamedBitList(
                     new Asn1Tag(TagClass.ContextSpecific, 1),
                     (object)3,
@@ -372,26 +368,26 @@ namespace System.Security.Cryptography.Tests.Asn1
             AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
 
             AssertExtensions.Throws<ArgumentException>(
-                null,
+                "tEnum",
                 () => writer.WriteNamedBitList(
                     NamedBitListMode.NamedZeroIs128BigEndian,
                     NamedBitListMode.NamedZeroIsOne));
 
             AssertExtensions.Throws<ArgumentException>(
-                null,
+                "tEnum",
                 () => writer.WriteNamedBitList(
                     new Asn1Tag(TagClass.ContextSpecific, 1),
                     NamedBitListMode.NamedZeroIs128BigEndian,
                     NamedBitListMode.NamedZeroIsOne));
 
             AssertExtensions.Throws<ArgumentException>(
-                null,
+                "tEnum",
                 () => writer.WriteNamedBitList(
                     (object)NamedBitListMode.NamedZeroIs128BigEndian,
                     NamedBitListMode.NamedZeroIsOne));
 
             AssertExtensions.Throws<ArgumentException>(
-                null,
+                "tEnum",
                 () => writer.WriteNamedBitList(
                     new Asn1Tag(TagClass.ContextSpecific, 1),
                     (object)NamedBitListMode.NamedZeroIs128BigEndian,
