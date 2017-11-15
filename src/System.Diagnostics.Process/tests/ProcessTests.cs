@@ -135,6 +135,36 @@ namespace System.Diagnostics.Tests
         {
             Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = Path.GetTempPath() }));
         }
+
+        [Fact]
+        [PlatformSpecific(~TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
+        public void TestStartOnUnixWithBadWorkingDirectory()
+        {
+            string program;
+            string workingDirectory;
+            if (PlatformDetection.IsWindows)
+            {
+                program = "type";
+                workingDirectory = @"C:\does-not-exist";
+            }
+            else
+            {
+                program = "uname";
+                workingDirectory = "/does-not-exist";
+            }
+
+            Assert.True(IsProgramInstalled(program));
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = program,
+                UseShellExecute = false,
+                WorkingDirectory = workingDirectory
+            };
+
+            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(psi));
+            Assert.NotEqual(0, e.NativeErrorCode);
+        }
         
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.HasWindowsShell))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]

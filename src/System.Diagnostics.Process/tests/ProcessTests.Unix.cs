@@ -266,6 +266,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [PlatformSpecific(~TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
         public void TestStartOnUnixWithBadFormat()
         {
             string path = GetTestFilePath();
@@ -274,53 +275,30 @@ namespace System.Diagnostics.Tests
 
             Assert.Equal(0, chmod(path, mode)); // execute permissions
 
-            Assert.Throws<Win32Exception>(() => Process.Start(path).Dispose());
+            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
+            Assert.NotEqual(0, e.NativeErrorCode);
         }
 
         [Fact]
-        public void TestStartOnUnixWithBadWorkingDirectory()
+        [PlatformSpecific(TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
+        public void TestStartOnOSXWithBadFormat()
         {
-            string program = "uname";
-            Assert.True(IsProgramInstalled(program));
+            string path = GetTestFilePath();
+            File.Create(path).Dispose();
+            int mode = Convert.ToInt32("744", 8);
 
-            var psi = new ProcessStartInfo
+            Assert.Equal(0, chmod(path, mode)); // execute permissions
+
+            using (Process p = Process.Start(path))
             {
-                FileName = program,
-                UseShellExecute = false,
-                WorkingDirectory = "/does-not-exist"
-            };
-
-            Assert.Throws<Win32Exception>(() => Process.Start(psi).Dispose());
+                p.WaitForExit();
+                Assert.NotEqual(0, p.ExitCode);
+            }
         }
 
         [DllImport("libc")]
         private static extern int chmod(string path, int mode);
 
         private readonly string[] s_allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
-
-        /// <summary>
-        /// Checks if the program is installed
-        /// </summary>
-        /// <param name="program"></param>
-        /// <returns></returns>
-        private bool IsProgramInstalled(string program)
-        {
-            string path;
-            string pathEnvVar = Environment.GetEnvironmentVariable("PATH");
-            if (pathEnvVar != null)
-            {
-                var pathParser = new StringParser(pathEnvVar, ':', skipEmpty: true);
-                while (pathParser.MoveNext())
-                {
-                    string subPath = pathParser.ExtractCurrent();
-                    path = Path.Combine(subPath, program);
-                    if (File.Exists(path))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
     }
 }
