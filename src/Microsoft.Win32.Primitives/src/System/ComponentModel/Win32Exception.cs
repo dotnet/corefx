@@ -7,9 +7,11 @@ using System.Runtime.Serialization;
 
 namespace System.ComponentModel
 {
-    /// <devdoc>
-    ///    <para>The exception that is thrown for a Win32 error code.</para>
-    /// </devdoc>
+    /// <summary>
+    /// The exception that is thrown for a Win32 error code.
+    /// </summary>
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public partial class Win32Exception : ExternalException, ISerializable
     {
         /// <devdoc>
@@ -63,12 +65,13 @@ namespace System.ComponentModel
 
         protected Win32Exception(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            throw new PlatformNotSupportedException();
+            nativeErrorCode = info.GetInt32(nameof(NativeErrorCode));
         }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
+            info.AddValue(nameof(NativeErrorCode), NativeErrorCode);
         }
 
         /// <devdoc>
