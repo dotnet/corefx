@@ -34,6 +34,24 @@ namespace System.SpanTests
         }
 
         [Fact]
+        public static void TryCopyToDefaultImplicit()
+        {
+            int[] dst = default;
+            Span<int> srcSpan = default;
+            bool success = srcSpan.TryCopyTo(dst);
+            Assert.True(success);
+        }
+
+        [Fact]
+        public static void TryCopyToNullImplicit()
+        {
+            int[] dst = null;
+            Span<int> srcSpan = default;
+            bool success = srcSpan.TryCopyTo(dst);
+            Assert.True(success);
+        }
+
+        [Fact]
         public static void TryCopyToArraySegmentImplicit()
         {
             int[] src = { 1, 2, 3 };

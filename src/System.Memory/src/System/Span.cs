@@ -348,7 +348,7 @@ namespace System
         /// <summary>
         /// Defines an implicit conversion of an array to a <see cref="Span{T}"/>
         /// </summary>
-        public static implicit operator Span<T>(T[] array) => new Span<T>(array);
+        public static implicit operator Span<T>(T[] array) => array != null ? new Span<T>(array) : default;
 
         /// <summary>
         /// Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="Span{T}"/>

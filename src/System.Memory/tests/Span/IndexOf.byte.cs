@@ -655,5 +655,23 @@ namespace System.SpanTests
                 Assert.Equal(-1, index);
             }
         }
+
+        [Fact]
+        public static void IndexOfDefaultImplicit()
+        {
+            byte[] dst = default;
+            Span<byte> srcSpan = default;
+            int index = srcSpan.IndexOf(dst);
+            Assert.Equal(0, index);
+        }
+
+        [Fact]
+        public static void IndexOfNullImplicit()
+        {
+            byte[] dst = null;
+            Span<byte> srcSpan = default;
+            int index = srcSpan.IndexOf(dst);
+            Assert.Equal(0, index);
+        }
     }
 }
