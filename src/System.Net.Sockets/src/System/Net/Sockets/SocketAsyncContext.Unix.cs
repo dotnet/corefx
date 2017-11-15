@@ -841,7 +841,10 @@ namespace System.Net.Sockets
 
         private void Register()
         {
-            Debug.Assert(_nonBlockingSet);
+            // Note, on OSX, this is not always true because in certain cases, 
+            // the socket can already be in non-blocking mode even though we didn't set that ourselves.
+            // TODO: Track down exactly why this is
+//            Debug.Assert(_nonBlockingSet);
             lock (_registerLock)
             {
                 if (!_registered)
