@@ -274,11 +274,23 @@ namespace System.Diagnostics.Tests
 
             Assert.Equal(0, chmod(path, mode)); // execute permissions
 
-            using (Process p = Process.Start(path))
+            Assert.Throws<Win32Exception>(() => Process.Start(path).Dispose());
+        }
+
+        [Fact]
+        public void TestStartOnUnixWithBadWorkingDirectory()
+        {
+            string program = "uname";
+            Assert.True(IsProgramInstalled(program));
+
+            var psi = new ProcessStartInfo
             {
-                p.WaitForExit();
-                Assert.NotEqual(0, p.ExitCode);
-            }
+                FileName = program,
+                UseShellExecute = false,
+                WorkingDirectory = "/does-not-exist"
+            };
+
+            Assert.Throws<Win32Exception>(() => Process.Start(psi).Dispose());
         }
 
         [DllImport("libc")]
