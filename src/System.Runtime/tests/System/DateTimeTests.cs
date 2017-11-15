@@ -25,6 +25,12 @@ namespace System.Tests
         }
 
         [Fact]
+        public static void UnixEpoch()
+        {
+            VerifyDateTime(DateTime.UnixEpoch, 1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        }
+
+        [Fact]
         public static void Ctor_Long()
         {
             VerifyDateTime(new DateTime(999999999999999999), 3169, 11, 16, 9, 46, 39, 999, DateTimeKind.Unspecified);
