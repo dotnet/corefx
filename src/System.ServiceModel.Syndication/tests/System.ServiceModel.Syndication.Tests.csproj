@@ -19,7 +19,7 @@
     <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\RssFeeds\*.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-	<Content Include="$(MsBuildThisFileDirectory)\TestFeeds\FailureFeeds\*.xml">
+    <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\FailureFeeds\*.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
