@@ -581,5 +581,103 @@ namespace System.Security.Cryptography.Tests.Asn1
                 expected.ByteArrayToHex(),
                 output.ByteArrayToHex());
         }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public static void TagMustBeCorrect_Universal(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = { 0x0C, 2, (byte)'e', (byte)'l' };
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            AssertExtensions.Throws<ArgumentException>(
+                "expectedTag",
+                () => reader.TryGetUTF8StringBytes(Asn1Tag.Null, out _));
+
+            Assert.True(reader.HasData, "HasData after bad universal tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.TryGetUTF8StringBytes(new Asn1Tag(TagClass.ContextSpecific, 0), out _));
+
+            Assert.True(reader.HasData, "HasData after wrong tag");
+
+            Assert.True(reader.TryGetUTF8StringBytes(out ReadOnlyMemory<byte> value));
+            Assert.Equal("656C", value.ByteArrayToHex());
+            Assert.False(reader.HasData, "HasData after read");
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public static void TagMustBeCorrect_Custom(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = { 0x87, 2, (byte)'h', (byte)'i' };
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            AssertExtensions.Throws<ArgumentException>(
+                "expectedTag",
+                () => reader.TryGetUTF8StringBytes(Asn1Tag.Null, out _));
+
+            Assert.True(reader.HasData, "HasData after bad universal tag");
+
+            Assert.Throws<CryptographicException>(() => reader.TryGetUTF8StringBytes(out _));
+
+            Assert.True(reader.HasData, "HasData after default tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.TryGetUTF8StringBytes(new Asn1Tag(TagClass.Application, 0), out _));
+
+            Assert.True(reader.HasData, "HasData after wrong custom class");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.TryGetUTF8StringBytes(new Asn1Tag(TagClass.ContextSpecific, 1), out _));
+
+            Assert.True(reader.HasData, "HasData after wrong custom tag value");
+
+            Assert.True(
+                reader.TryGetUTF8StringBytes(
+                    new Asn1Tag(TagClass.ContextSpecific, 7),
+                    out ReadOnlyMemory<byte> value));
+
+            Assert.Equal("6869", value.ByteArrayToHex());
+            Assert.False(reader.HasData, "HasData after reading value");
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER, "0C026869", PublicTagClass.Universal, 12)]
+        [InlineData(PublicEncodingRules.CER, "0C026869", PublicTagClass.Universal, 12)]
+        [InlineData(PublicEncodingRules.DER, "0C026869", PublicTagClass.Universal, 12)]
+        [InlineData(PublicEncodingRules.BER, "80023132", PublicTagClass.ContextSpecific, 0)]
+        [InlineData(PublicEncodingRules.CER, "4C023132", PublicTagClass.Application, 12)]
+        [InlineData(PublicEncodingRules.DER, "DF8A46023132", PublicTagClass.Private, 1350)]
+        public static void ExpectedTag_IgnoresConstructed(
+            PublicEncodingRules ruleSet,
+            string inputHex,
+            PublicTagClass tagClass,
+            int tagValue)
+        {
+            byte[] inputData = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            Assert.True(
+                reader.TryGetUTF8StringBytes(
+                    new Asn1Tag((TagClass)tagClass, tagValue, true),
+                    out ReadOnlyMemory<byte> val1));
+
+            Assert.False(reader.HasData);
+
+            reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            Assert.True(
+                reader.TryGetUTF8StringBytes(
+                    new Asn1Tag((TagClass)tagClass, tagValue, false),
+                    out ReadOnlyMemory<byte> val2));
+
+            Assert.False(reader.HasData);
+
+            Assert.Equal(val1.ByteArrayToHex(), val2.ByteArrayToHex());
+        }
     }
 }

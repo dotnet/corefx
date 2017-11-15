@@ -354,5 +354,108 @@ namespace System.Security.Cryptography.Tests.Asn1
                 "mode",
                 () => reader.GetNamedBitListValue<X509KeyUsageCSharpStyle>((NamedBitListMode)5));
         }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public static void TagMustBeCorrect_Universal(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = { 3, 2, 1, 2 };
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+            const NamedBitListMode mode = NamedBitListMode.NamedZeroIs128LittleEndian;
+
+            AssertExtensions.Throws<ArgumentException>(
+                "expectedTag",
+                () => reader.GetNamedBitListValue<X509KeyUsageWin32>(Asn1Tag.Null, mode));
+
+            Assert.True(reader.HasData, "HasData after bad universal tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.GetNamedBitListValue<X509KeyUsageWin32>(new Asn1Tag(TagClass.ContextSpecific, 0), mode));
+
+            Assert.True(reader.HasData, "HasData after wrong tag");
+
+            Assert.Equal(
+                X509KeyUsageWin32.CrlSign,
+                reader.GetNamedBitListValue<X509KeyUsageWin32>(mode));
+            Assert.False(reader.HasData, "HasData after read");
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public static void TagMustBeCorrect_Custom(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = { 0x87, 2, 2, 4 };
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+            const NamedBitListMode mode = NamedBitListMode.NamedZeroIs128LittleEndian;
+
+            AssertExtensions.Throws<ArgumentException>(
+                "expectedTag",
+                () => reader.GetNamedBitListValue<X509KeyUsageWin32>(Asn1Tag.Null, mode));
+
+            Assert.True(reader.HasData, "HasData after bad universal tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.GetNamedBitListValue<X509KeyUsageWin32>(mode));
+
+            Assert.True(reader.HasData, "HasData after default tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.GetNamedBitListValue<X509KeyUsageWin32>(new Asn1Tag(TagClass.Application, 0), mode));
+
+            Assert.True(reader.HasData, "HasData after wrong custom class");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.GetNamedBitListValue<X509KeyUsageWin32>(new Asn1Tag(TagClass.ContextSpecific, 1), mode));
+
+            Assert.True(reader.HasData, "HasData after wrong custom tag value");
+
+            Assert.Equal(
+                X509KeyUsageWin32.KeyCertSign,
+                reader.GetNamedBitListValue<X509KeyUsageWin32>(
+                    new Asn1Tag(TagClass.ContextSpecific, 7),
+                    mode));
+
+            Assert.False(reader.HasData, "HasData after reading value");
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER, "0303070080", PublicTagClass.Universal, 3)]
+        [InlineData(PublicEncodingRules.CER, "0303070080", PublicTagClass.Universal, 3)]
+        [InlineData(PublicEncodingRules.DER, "0303070080", PublicTagClass.Universal, 3)]
+        [InlineData(PublicEncodingRules.BER, "8003070080", PublicTagClass.ContextSpecific, 0)]
+        [InlineData(PublicEncodingRules.CER, "4C03070080", PublicTagClass.Application, 12)]
+        [InlineData(PublicEncodingRules.DER, "DF8A4603070080", PublicTagClass.Private, 1350)]
+        public static void ExpectedTag_IgnoresConstructed(
+            PublicEncodingRules ruleSet,
+            string inputHex,
+            PublicTagClass tagClass,
+            int tagValue)
+        {
+            byte[] inputData = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+            const NamedBitListMode mode = NamedBitListMode.NamedZeroIs128LittleEndian;
+
+            Assert.Equal(
+                X509KeyUsageWin32.DecipherOnly,
+                reader.GetNamedBitListValue<X509KeyUsageWin32>(
+                    new Asn1Tag((TagClass)tagClass, tagValue, true),
+                    mode));
+
+            Assert.False(reader.HasData);
+
+            reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            Assert.Equal(
+                X509KeyUsageWin32.DecipherOnly,
+                reader.GetNamedBitListValue<X509KeyUsageWin32>(
+                    new Asn1Tag((TagClass)tagClass, tagValue, false),
+                    mode));
+
+            Assert.False(reader.HasData);
+        }
     }
 }

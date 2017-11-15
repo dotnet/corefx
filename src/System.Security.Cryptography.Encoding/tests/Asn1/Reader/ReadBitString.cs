@@ -523,5 +523,109 @@ namespace System.Security.Cryptography.Tests.Asn1
                 expected.ByteArrayToHex(),
                 output.ByteArrayToHex());
         }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public static void TagMustBeCorrect_Universal(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = { 3, 2, 1, 0x7E };
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            AssertExtensions.Throws<ArgumentException>(
+                "expectedTag",
+                () => reader.TryGetBitStringBytes(Asn1Tag.Null, out _, out _));
+
+            Assert.True(reader.HasData, "HasData after bad universal tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.TryGetBitStringBytes(new Asn1Tag(TagClass.ContextSpecific, 0), out _, out _));
+
+            Assert.True(reader.HasData, "HasData after wrong tag");
+
+            Assert.True(reader.TryGetBitStringBytes(out int unusedBitCount, out ReadOnlyMemory<byte> contents));
+            Assert.Equal("7E", contents.ByteArrayToHex());
+            Assert.Equal(1, unusedBitCount);
+            Assert.False(reader.HasData, "HasData after read");
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public static void TagMustBeCorrect_Custom(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = { 0x87, 2, 0, 0x80 };
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            AssertExtensions.Throws<ArgumentException>(
+                "expectedTag",
+                () => reader.TryGetBitStringBytes(Asn1Tag.Null, out _, out _));
+
+            Assert.True(reader.HasData, "HasData after bad universal tag");
+
+            Assert.Throws<CryptographicException>(() => reader.TryGetBitStringBytes(out _, out _));
+
+            Assert.True(reader.HasData, "HasData after default tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.TryGetBitStringBytes(new Asn1Tag(TagClass.Application, 0), out _, out _));
+
+            Assert.True(reader.HasData, "HasData after wrong custom class");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.TryGetBitStringBytes(new Asn1Tag(TagClass.ContextSpecific, 1), out _, out _));
+
+            Assert.True(reader.HasData, "HasData after wrong custom tag value");
+
+            Assert.True(
+                reader.TryGetBitStringBytes(
+                    new Asn1Tag(TagClass.ContextSpecific, 7),
+                    out int unusedBitCount,
+                    out ReadOnlyMemory<byte> contents));
+
+            Assert.Equal("80", contents.ByteArrayToHex());
+            Assert.Equal(0, unusedBitCount);
+            Assert.False(reader.HasData, "HasData after reading value");
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER, "030400010203", PublicTagClass.Universal, 3)]
+        [InlineData(PublicEncodingRules.CER, "030400010203", PublicTagClass.Universal, 3)]
+        [InlineData(PublicEncodingRules.DER, "030400010203", PublicTagClass.Universal, 3)]
+        [InlineData(PublicEncodingRules.BER, "800200FF", PublicTagClass.ContextSpecific, 0)]
+        [InlineData(PublicEncodingRules.CER, "4C0200FF", PublicTagClass.Application, 12)]
+        [InlineData(PublicEncodingRules.DER, "DF8A460200FF", PublicTagClass.Private, 1350)]
+        public static void ExpectedTag_IgnoresConstructed(
+            PublicEncodingRules ruleSet,
+            string inputHex,
+            PublicTagClass tagClass,
+            int tagValue)
+        {
+            byte[] inputData = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            Assert.True(
+                reader.TryGetBitStringBytes(
+                    new Asn1Tag((TagClass)tagClass, tagValue, true),
+                    out int ubc1,
+                    out ReadOnlyMemory<byte> val1));
+
+            Assert.False(reader.HasData);
+
+            reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            Assert.True(
+                reader.TryGetBitStringBytes(
+                    new Asn1Tag((TagClass)tagClass, tagValue, false),
+                    out int ubc2,
+                    out ReadOnlyMemory<byte> val2));
+
+            Assert.False(reader.HasData);
+
+            Assert.Equal(val1.ByteArrayToHex(), val2.ByteArrayToHex());
+            Assert.Equal(ubc1, ubc2);
+        }
     }
 }

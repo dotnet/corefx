@@ -667,12 +667,13 @@ namespace System.Security.Cryptography.Asn1
 
             return true;
         }
-        
-        public bool ReadBoolean()
+
+        public bool ReadBoolean() => ReadBoolean(new Asn1Tag(UniversalTagNumber.Boolean));
+
+        public bool ReadBoolean(Asn1Tag expectedTag)
         {
             (Asn1Tag tag, int? length) = ReadTagAndLength(out int headerLength);
-            // TODO/Review: Should non-Universal tags work, or require an expected tag parameter?
-            CheckTagIfUniversal(tag, UniversalTagNumber.Boolean);
+            CheckExpectedTag(tag, expectedTag, UniversalTagNumber.Boolean);
 
             // T-REC-X.690-201508 sec 8.2.1
             if (tag.IsConstructed)
@@ -689,11 +690,12 @@ namespace System.Security.Cryptography.Asn1
         }
 
         private ReadOnlyMemory<byte> GetIntegerContents(
+            Asn1Tag expectedTag,
             UniversalTagNumber tagNumber,
             out int headerLength)
         {
             (Asn1Tag tag, int? length) = ReadTagAndLength(out headerLength);
-            CheckTagIfUniversal(tag, tagNumber);
+            CheckExpectedTag(tag, expectedTag, tagNumber);
 
             // T-REC-X.690-201508 sec 8.3.1
             if (tag.IsConstructed || length < 1)
@@ -722,10 +724,13 @@ namespace System.Security.Cryptography.Asn1
             return contents;
         }
 
-        public ReadOnlyMemory<byte> GetIntegerBytes()
+        public ReadOnlyMemory<byte> GetIntegerBytes() =>
+            GetIntegerBytes(new Asn1Tag(UniversalTagNumber.Integer));
+
+        public ReadOnlyMemory<byte> GetIntegerBytes(Asn1Tag expectedTag)
         {
             ReadOnlyMemory<byte> contents =
-                GetIntegerContents(UniversalTagNumber.Integer, out int headerLength);
+                GetIntegerContents(expectedTag, UniversalTagNumber.Integer, out int headerLength);
 
             _data = _data.Slice(headerLength + contents.Length);
             return contents;
@@ -733,12 +738,13 @@ namespace System.Security.Cryptography.Asn1
 
         private bool TryReadSignedInteger(
             int sizeLimit,
+            Asn1Tag expectedTag,
             UniversalTagNumber tagNumber,
             out long value)
         {
             Debug.Assert(sizeLimit <= sizeof(long));
 
-            ReadOnlyMemory<byte> contents = GetIntegerContents(tagNumber, out int headerLength);
+            ReadOnlyMemory<byte> contents = GetIntegerContents(expectedTag, tagNumber, out int headerLength);
 
             if (contents.Length > sizeLimit)
             {
@@ -764,12 +770,13 @@ namespace System.Security.Cryptography.Asn1
 
         private bool TryReadUnsignedInteger(
             int sizeLimit,
+            Asn1Tag expectedTag,
             UniversalTagNumber tagNumber,
             out ulong value)
         {
             Debug.Assert(sizeLimit <= sizeof(ulong));
 
-            ReadOnlyMemory<byte> contents = GetIntegerContents(tagNumber, out int headerLength);
+            ReadOnlyMemory<byte> contents = GetIntegerContents(expectedTag, tagNumber, out int headerLength);
             ReadOnlySpan<byte> contentSpan = contents.Span;
             int contentLength = contents.Length;
 
@@ -807,9 +814,12 @@ namespace System.Security.Cryptography.Asn1
             return true;
         }
 
-        public bool TryReadInt32(out int value)
+        public bool TryReadInt32(out int value) =>
+            TryReadInt32(new Asn1Tag(UniversalTagNumber.Integer), out value);
+
+        public bool TryReadInt32(Asn1Tag expectedTag, out int value)
         {
-            if (TryReadSignedInteger(sizeof(int), UniversalTagNumber.Integer, out long longValue))
+            if (TryReadSignedInteger(sizeof(int), expectedTag, UniversalTagNumber.Integer, out long longValue))
             {
                 value = (int)longValue;
                 return true;
@@ -819,9 +829,12 @@ namespace System.Security.Cryptography.Asn1
             return false;
         }
 
-        public bool TryReadUInt32(out uint value)
+        public bool TryReadUInt32(out uint value) =>
+            TryReadUInt32(new Asn1Tag(UniversalTagNumber.Integer), out value);
+
+        public bool TryReadUInt32(Asn1Tag expectedTag, out uint value)
         {
-            if (TryReadUnsignedInteger(sizeof(uint), UniversalTagNumber.Integer, out ulong ulongValue))
+            if (TryReadUnsignedInteger(sizeof(uint), expectedTag, UniversalTagNumber.Integer, out ulong ulongValue))
             {
                 value = (uint)ulongValue;
                 return true;
@@ -831,19 +844,28 @@ namespace System.Security.Cryptography.Asn1
             return false;
         }
 
-        public bool TryReadInt64(out long value)
+        public bool TryReadInt64(out long value) =>
+            TryReadInt64(new Asn1Tag(UniversalTagNumber.Integer), out value);
+        
+        public bool TryReadInt64(Asn1Tag expectedTag, out long value)
         {
-            return TryReadSignedInteger(sizeof(long), UniversalTagNumber.Integer, out value);
+            return TryReadSignedInteger(sizeof(long), expectedTag, UniversalTagNumber.Integer, out value);
         }
 
-        public bool TryReadUInt64(out ulong value)
+        public bool TryReadUInt64(out ulong value) =>
+            TryReadUInt64(new Asn1Tag(UniversalTagNumber.Integer), out value);
+
+        public bool TryReadUInt64(Asn1Tag expectedTag, out ulong value)
         {
-            return TryReadUnsignedInteger(sizeof(ulong), UniversalTagNumber.Integer, out value);
+            return TryReadUnsignedInteger(sizeof(ulong), expectedTag, UniversalTagNumber.Integer, out value);
         }
 
-        public bool TryReadInt16(out short value)
+        public bool TryReadInt16(out short value) =>
+            TryReadInt16(new Asn1Tag(UniversalTagNumber.Integer), out value);
+
+        public bool TryReadInt16(Asn1Tag expectedTag, out short value)
         {
-            if (TryReadSignedInteger(sizeof(short), UniversalTagNumber.Integer, out long longValue))
+            if (TryReadSignedInteger(sizeof(short), expectedTag, UniversalTagNumber.Integer, out long longValue))
             {
                 value = (short)longValue;
                 return true;
@@ -853,9 +875,12 @@ namespace System.Security.Cryptography.Asn1
             return false;
         }
 
-        public bool TryReadUInt16(out ushort value)
+        public bool TryReadUInt16(out ushort value) =>
+            TryReadUInt16(new Asn1Tag(UniversalTagNumber.Integer), out value);
+
+        public bool TryReadUInt16(Asn1Tag expectedTag, out ushort value)
         {
-            if (TryReadUnsignedInteger(sizeof(ushort), UniversalTagNumber.Integer, out ulong ulongValue))
+            if (TryReadUnsignedInteger(sizeof(ushort), expectedTag, UniversalTagNumber.Integer, out ulong ulongValue))
             {
                 value = (ushort)ulongValue;
                 return true;
@@ -865,9 +890,12 @@ namespace System.Security.Cryptography.Asn1
             return false;
         }
 
-        public bool TryReadInt8(out sbyte value)
+        public bool TryReadInt8(out sbyte value) =>
+            TryReadInt8(new Asn1Tag(UniversalTagNumber.Integer), out value);
+
+        public bool TryReadInt8(Asn1Tag expectedTag, out sbyte value)
         {
-            if (TryReadSignedInteger(sizeof(sbyte), UniversalTagNumber.Integer, out long longValue))
+            if (TryReadSignedInteger(sizeof(sbyte), expectedTag, UniversalTagNumber.Integer, out long longValue))
             {
                 value = (sbyte)longValue;
                 return true;
@@ -877,9 +905,12 @@ namespace System.Security.Cryptography.Asn1
             return false;
         }
 
-        public bool TryReadUInt8(out byte value)
+        public bool TryReadUInt8(out byte value) =>
+            TryReadUInt8(new Asn1Tag(UniversalTagNumber.Integer), out value);
+
+        public bool TryReadUInt8(Asn1Tag expectedTag, out byte value)
         {
-            if (TryReadUnsignedInteger(sizeof(byte), UniversalTagNumber.Integer, out ulong ulongValue))
+            if (TryReadUnsignedInteger(sizeof(byte), expectedTag, UniversalTagNumber.Integer, out ulong ulongValue))
             {
                 value = (byte)ulongValue;
                 return true;
@@ -1177,12 +1208,13 @@ namespace System.Security.Cryptography.Asn1
         }
 
         private bool TryGetBitStringBytes(
+            Asn1Tag expectedTag,
             out int unusedBitCount,
             out ReadOnlyMemory<byte> contents,
             out int headerLength)
         {
             (Asn1Tag tag, int? length) = ReadTagAndLength(out headerLength);
-            CheckTagIfUniversal(tag, UniversalTagNumber.BitString);
+            CheckExpectedTag(tag, expectedTag, UniversalTagNumber.BitString);
 
             if (tag.IsConstructed)
             {
@@ -1216,9 +1248,13 @@ namespace System.Security.Cryptography.Asn1
             return false;
         }
 
+        public bool TryGetBitStringBytes(out int unusedBitCount, out ReadOnlyMemory<byte> contents)
+            => TryGetBitStringBytes(new Asn1Tag(UniversalTagNumber.BitString), out unusedBitCount, out contents);
+
         /// <summary>
         /// Gets the source data for a BitString under a primitive encoding.
         /// </summary>
+        /// <param name="expectedTag">The expected tag to read</param>
         /// <param name="unusedBitCount">The encoded value for the number of unused bits.</param>
         /// <param name="contents">The content bytes for the BitString payload.</param>
         /// <returns>
@@ -1228,7 +1264,7 @@ namespace System.Security.Cryptography.Asn1
         /// <exception cref="CryptographicException">
         ///  <ul>
         ///   <li>No data remains</li>
-        ///   <li>The tag is invalid for a BitString value</li>
+        ///   <li>The tag read does not match the expected tag</li>
         ///   <li>The length is invalid under the chosen encoding rules</li>
         ///   <li>The unusedBitCount value is out of bounds</li>
         ///   <li>A CER or DER encoding was chosen and an "unused" bit was set to 1</li>
@@ -1236,10 +1272,11 @@ namespace System.Security.Cryptography.Asn1
         /// </ul>
         /// </exception>
         public bool TryGetBitStringBytes(
+            Asn1Tag expectedTag,
             out int unusedBitCount,
             out ReadOnlyMemory<byte> contents)
         {
-            bool didGet = TryGetBitStringBytes(out unusedBitCount, out contents, out int headerLength);
+            bool didGet = TryGetBitStringBytes(expectedTag, out unusedBitCount, out contents, out int headerLength);
 
             if (didGet)
             {
@@ -1255,7 +1292,21 @@ namespace System.Security.Cryptography.Asn1
             out int unusedBitCount,
             out int bytesWritten)
         {
+            return TryCopyBitStringBytes(
+                new Asn1Tag(UniversalTagNumber.BitString),
+                destination,
+                out unusedBitCount,
+                out bytesWritten);
+        }
+
+        public bool TryCopyBitStringBytes(
+            Asn1Tag expectedTag,
+            Span<byte> destination,
+            out int unusedBitCount,
+            out int bytesWritten)
+        {
             if (TryGetBitStringBytes(
+                expectedTag,
                 out unusedBitCount,
                 out ReadOnlyMemory<byte> contents,
                 out int headerLength))
@@ -1274,6 +1325,7 @@ namespace System.Security.Cryptography.Asn1
                 return true;
             }
 
+            // Expected vs actual tag was already checked in TryGetBitStringBytes.
             // Either constructed, or a BER payload with "unused" bits not set to 0.
             (Asn1Tag tag, int? length) = ReadTagAndLength(out headerLength);
 
@@ -1308,14 +1360,20 @@ namespace System.Security.Cryptography.Asn1
             return read;
         }
 
-        public TFlagsEnum GetNamedBitListValue<TFlagsEnum>(NamedBitListMode mode) where TFlagsEnum : struct
+        public TFlagsEnum GetNamedBitListValue<TFlagsEnum>(NamedBitListMode mode) where TFlagsEnum : struct =>
+            GetNamedBitListValue<TFlagsEnum>(new Asn1Tag(UniversalTagNumber.BitString), mode);
+
+        public TFlagsEnum GetNamedBitListValue<TFlagsEnum>(Asn1Tag expectedTag, NamedBitListMode mode) where TFlagsEnum : struct
         {
             Type tFlagsEnum = typeof(TFlagsEnum);
 
-            return (TFlagsEnum)Enum.ToObject(tFlagsEnum, GetNamedBitListValue(tFlagsEnum, mode));
+            return (TFlagsEnum)Enum.ToObject(tFlagsEnum, GetNamedBitListValue(expectedTag, tFlagsEnum, mode));
         }
 
-        public unsafe Enum GetNamedBitListValue(Type tFlagsEnum, NamedBitListMode mode)
+        public Enum GetNamedBitListValue(Type tFlagsEnum, NamedBitListMode mode) =>
+            GetNamedBitListValue(new Asn1Tag(UniversalTagNumber.BitString), tFlagsEnum, mode);
+
+        public unsafe Enum GetNamedBitListValue(Asn1Tag expectedTag, Type tFlagsEnum, NamedBitListMode mode)
         {
             // This will throw an ArgumentException if TEnum isn't an enum type,
             // so we don't need to validate it.
@@ -1339,7 +1397,7 @@ namespace System.Security.Cryptography.Asn1
             Span<byte> stackSpan = new Span<byte>(stackmem, 1 + sizeLimit);
             ReadOnlyMemory<byte> saveData = _data;
 
-            if (!TryCopyBitStringBytes(stackSpan, out int unusedBitCount, out int bytesWritten))
+            if (!TryCopyBitStringBytes(expectedTag, stackSpan, out int unusedBitCount, out int bytesWritten))
             {
                 // TODO/review: What exception goes here?
                 throw new Exception($"Encoded NamedBitList value is larger than the value size of the {tFlagsEnum.Name} enum");
@@ -1524,11 +1582,14 @@ namespace System.Security.Cryptography.Asn1
             return accum;
         }
 
-        public ReadOnlyMemory<byte> GetEnumeratedBytes()
+        public ReadOnlyMemory<byte> GetEnumeratedBytes() =>
+            GetEnumeratedBytes(new Asn1Tag(UniversalTagNumber.Enumerated));
+
+        public ReadOnlyMemory<byte> GetEnumeratedBytes(Asn1Tag expectedTag)
         {
             // T-REC-X.690-201508 sec 8.4 says the contents are the same as for integers.
             ReadOnlyMemory<byte> contents =
-                GetIntegerContents(UniversalTagNumber.Enumerated, out int headerLength);
+                GetIntegerContents(expectedTag, UniversalTagNumber.Enumerated, out int headerLength);
 
             _data = _data.Slice(headerLength + contents.Length);
             return contents;
@@ -1541,7 +1602,17 @@ namespace System.Security.Cryptography.Asn1
             return (TEnum)Enum.ToObject(tEnum, GetEnumeratedValue(tEnum));
         }
 
-        public Enum GetEnumeratedValue(Type tEnum)
+        public TEnum GetEnumeratedValue<TEnum>(Asn1Tag expectedTag) where TEnum : struct
+        {
+            Type tEnum = typeof(TEnum);
+
+            return (TEnum)Enum.ToObject(tEnum, GetEnumeratedValue(expectedTag, tEnum));
+        }
+
+        public Enum GetEnumeratedValue(Type tEnum) =>
+            GetEnumeratedValue(new Asn1Tag(UniversalTagNumber.Enumerated), tEnum);
+
+        public Enum GetEnumeratedValue(Asn1Tag expectedTag, Type tEnum)
         {
             const UniversalTagNumber tagNumber = UniversalTagNumber.Enumerated;
             
@@ -1564,7 +1635,7 @@ namespace System.Security.Cryptography.Asn1
                 backingType == typeof(short) ||
                 backingType == typeof(sbyte))
             {
-                if (!TryReadSignedInteger(sizeLimit, tagNumber, out long value))
+                if (!TryReadSignedInteger(sizeLimit, expectedTag, tagNumber, out long value))
                 {
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
@@ -1577,7 +1648,7 @@ namespace System.Security.Cryptography.Asn1
                 backingType == typeof(ushort) ||
                 backingType == typeof(byte))
             {
-                if (!TryReadUnsignedInteger(sizeLimit, tagNumber, out ulong value))
+                if (!TryReadUnsignedInteger(sizeLimit, expectedTag, tagNumber, out ulong value))
                 {
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
@@ -1590,12 +1661,13 @@ namespace System.Security.Cryptography.Asn1
         }
 
         private bool TryGetOctetStringBytes(
+            Asn1Tag expectedTag,
             out ReadOnlyMemory<byte> contents,
             out int headerLength,
             UniversalTagNumber universalTagNumber = UniversalTagNumber.OctetString)
         {
             (Asn1Tag tag, int? length) = ReadTagAndLength(out headerLength);
-            CheckTagIfUniversal(tag, universalTagNumber);
+            CheckExpectedTag(tag, expectedTag, universalTagNumber);
 
             if (tag.IsConstructed)
             {
@@ -1621,10 +1693,11 @@ namespace System.Security.Cryptography.Asn1
         }
 
         private bool TryGetOctetStringBytes(
+            Asn1Tag expectedTag,
             UniversalTagNumber universalTagNumber,
             out ReadOnlyMemory<byte> contents)
         {
-            if (TryGetOctetStringBytes(out contents, out int headerLength, universalTagNumber))
+            if (TryGetOctetStringBytes(expectedTag, out contents, out int headerLength, universalTagNumber))
             {
                 _data = _data.Slice(headerLength + contents.Length);
                 return true;
@@ -1633,9 +1706,13 @@ namespace System.Security.Cryptography.Asn1
             return false;
         }
 
+        public bool TryGetOctetStringBytes(out ReadOnlyMemory<byte> contents) =>
+            TryGetOctetStringBytes(new Asn1Tag(UniversalTagNumber.OctetString), out contents);
+
         /// <summary>
         /// Gets the source data for an OctetString under a primitive encoding.
         /// </summary>
+        /// <param name="expectedTag">The expected tag value</param>
         /// <param name="contents">The content bytes for the OctetString payload.</param>
         /// <returns>
         ///   <c>true</c> if the octet string uses a primitive encoding, <c>false</c> otherwise.
@@ -1643,14 +1720,14 @@ namespace System.Security.Cryptography.Asn1
         /// <exception cref="CryptographicException">
         ///  <ul>
         ///   <li>No data remains</li>
-        ///   <li>The tag is invalid for an OctetString value</li>
+        ///   <li>The tag read did not match the expected tag</li>
         ///   <li>The length is invalid under the chosen encoding rules</li>
         ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
         /// </ul>
         /// </exception>
-        public bool TryGetOctetStringBytes(out ReadOnlyMemory<byte> contents)
+        public bool TryGetOctetStringBytes(Asn1Tag expectedTag, out ReadOnlyMemory<byte> contents)
         {
-            return TryGetOctetStringBytes(UniversalTagNumber.OctetString, out contents);
+            return TryGetOctetStringBytes(expectedTag, UniversalTagNumber.OctetString, out contents);
         }
 
         private static int CopyConstructedOctetString(
@@ -1839,7 +1916,19 @@ namespace System.Security.Cryptography.Asn1
             Span<byte> destination,
             out int bytesWritten)
         {
+            return TryCopyOctetStringBytes(
+                new Asn1Tag(UniversalTagNumber.OctetString),
+                destination,
+                out bytesWritten);
+        }
+
+        public bool TryCopyOctetStringBytes(
+            Asn1Tag expectedTag,
+            Span<byte> destination,
+            out int bytesWritten)
+        {
             if (TryGetOctetStringBytes(
+                expectedTag,
                 out ReadOnlyMemory<byte> contents,
                 out int headerLength))
             {
@@ -1874,10 +1963,12 @@ namespace System.Security.Cryptography.Asn1
             return copied;
         }
 
-        public void ReadNull()
+        public void ReadNull() => ReadNull(Asn1Tag.Null);
+
+        public void ReadNull(Asn1Tag expectedTag)
         {
             (Asn1Tag tag, int? length) = ReadTagAndLength(out int headerLength);
-            CheckTagIfUniversal(tag, UniversalTagNumber.Null);
+            CheckExpectedTag(tag, expectedTag, UniversalTagNumber.Null);
 
             // T-REC-X.690-201508 sec 8.8.1
             // T-REC-X.690-201508 sec 8.8.2
@@ -1921,10 +2012,10 @@ namespace System.Security.Cryptography.Asn1
             throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
         }
 
-        private string ReadObjectIdentifierAsString(out int totalBytesRead)
+        private string ReadObjectIdentifierAsString(Asn1Tag expectedTag, out int totalBytesRead)
         {
             (Asn1Tag tag, int? length) = ReadTagAndLength(out int headerLength);
-            CheckTagIfUniversal(tag, UniversalTagNumber.ObjectIdentifier);
+            CheckExpectedTag(tag, expectedTag, UniversalTagNumber.ObjectIdentifier);
 
             // T-REC-X.690-201508 sec 8.19.1
             // T-REC-X.690-201508 sec 8.19.2 says the minimum length is 1
@@ -1982,26 +2073,34 @@ namespace System.Security.Cryptography.Asn1
             return builder.ToString();
         }
 
-        public string ReadObjectIdentifierAsString()
+        public string ReadObjectIdentifierAsString() =>
+            ReadObjectIdentifierAsString(new Asn1Tag(UniversalTagNumber.ObjectIdentifier));
+        
+        public string ReadObjectIdentifierAsString(Asn1Tag expectedTag)
         {
-            string oidValue = ReadObjectIdentifierAsString(out int bytesRead);
+            string oidValue = ReadObjectIdentifierAsString(expectedTag, out int bytesRead);
 
             _data = _data.Slice(bytesRead);
 
             return oidValue;
         }
 
-        public Oid ReadObjectIdentifier(bool skipFriendlyName=false)
+        public Oid ReadObjectIdentifier(bool skipFriendlyName = false) =>
+            ReadObjectIdentifier(new Asn1Tag(UniversalTagNumber.ObjectIdentifier), skipFriendlyName);
+
+        public Oid ReadObjectIdentifier(Asn1Tag expectedTag, bool skipFriendlyName=false)
         {
-            string oidValue = ReadObjectIdentifierAsString(out int bytesRead);
+            string oidValue = ReadObjectIdentifierAsString(expectedTag, out int bytesRead);
             Oid oid = skipFriendlyName ? new Oid(oidValue, oidValue) : new Oid(oidValue);
 
+            // Don't slice until the return object has been created.
             _data = _data.Slice(bytesRead);
 
             return oid;
         }
 
         private bool TryCopyCharacterStringBytes(
+            Asn1Tag expectedTag,
             UniversalTagNumber universalTagNumber,
             Span<byte> destination,
             bool write,
@@ -2009,6 +2108,7 @@ namespace System.Security.Cryptography.Asn1
             out int bytesWritten)
         {
             if (TryGetOctetStringBytes(
+                expectedTag,
                 out ReadOnlyMemory<byte> contents,
                 out int headerLength,
                 universalTagNumber))
@@ -2095,10 +2195,12 @@ namespace System.Security.Cryptography.Asn1
         }
 
         private string GetCharacterString(
+            Asn1Tag expectedTag,
             UniversalTagNumber universalTagNumber,
             Text.Encoding encoding)
         {
             if (TryGetOctetStringBytes(
+                expectedTag,
                 out ReadOnlyMemory<byte> contents,
                 out int headerLength,
                 universalTagNumber))
@@ -2111,6 +2213,7 @@ namespace System.Security.Cryptography.Asn1
             }
 
             bool parsed = TryCopyCharacterStringBytes(
+                expectedTag,
                 universalTagNumber,
                 Span<byte>.Empty,
                 false,
@@ -2123,7 +2226,7 @@ namespace System.Security.Cryptography.Asn1
 
             try
             {
-                if (!TryCopyCharacterStringBytes(universalTagNumber, rented, true, out bytesRead, out bytesWritten))
+                if (!TryCopyCharacterStringBytes(expectedTag, universalTagNumber, rented, true, out bytesRead, out bytesWritten))
                 {
                     Debug.Fail("TryCopyCharacterStringBytes failed with a precomputed size");
                     throw new CryptographicException();
@@ -2144,12 +2247,14 @@ namespace System.Security.Cryptography.Asn1
         }
 
         private bool TryCopyCharacterString(
+            Asn1Tag expectedTag,
             UniversalTagNumber universalTagNumber,
             Text.Encoding encoding,
             Span<char> destination,
             out int charsWritten)
         {
             if (TryGetOctetStringBytes(
+                expectedTag,
                 out ReadOnlyMemory<byte> contents,
                 out int headerLength,
                 universalTagNumber))
@@ -2165,6 +2270,7 @@ namespace System.Security.Cryptography.Asn1
             }
 
             bool parsed = TryCopyCharacterStringBytes(
+                expectedTag,
                 universalTagNumber,
                 Span<byte>.Empty,
                 false,
@@ -2177,7 +2283,7 @@ namespace System.Security.Cryptography.Asn1
 
             try
             {
-                if (!TryCopyCharacterStringBytes(universalTagNumber, rented, true, out bytesRead, out bytesWritten))
+                if (!TryCopyCharacterStringBytes(expectedTag, universalTagNumber, rented, true, out bytesRead, out bytesWritten))
                 {
                     Debug.Fail("TryCopyCharacterStringBytes failed with a precomputed size");
                     throw new CryptographicException();
@@ -2202,9 +2308,13 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
+        public bool TryGetUTF8StringBytes(out ReadOnlyMemory<byte> contents) =>
+            TryGetUTF8StringBytes(new Asn1Tag(UniversalTagNumber.UTF8String), out contents);
+
         /// <summary>
         /// Gets the source data for a UTF8String under a primitive encoding.
         /// </summary>
+        /// <param name="expectedTag">The expected tag</param>
         /// <param name="contents">The content bytes for the UTF8String payload.</param>
         /// <returns>
         ///   <c>true</c> if the octet string uses a primitive encoding, <c>false</c> otherwise.
@@ -2212,19 +2322,23 @@ namespace System.Security.Cryptography.Asn1
         /// <exception cref="CryptographicException">
         ///  <ul>
         ///   <li>No data remains</li>
-        ///   <li>The tag is invalid for a UTF8String value</li>
+        ///   <li>The tag read does not match the expected tag</li>
         ///   <li>The length is invalid under the chosen encoding rules</li>
         ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
         /// </ul>
         /// </exception>
-        public bool TryGetUTF8StringBytes(out ReadOnlyMemory<byte> contents)
+        public bool TryGetUTF8StringBytes(Asn1Tag expectedTag, out ReadOnlyMemory<byte> contents)
         {
-            return TryGetOctetStringBytes(UniversalTagNumber.UTF8String, out contents);
+            return TryGetOctetStringBytes(expectedTag, UniversalTagNumber.UTF8String, out contents);
         }
 
-        public bool TryCopyUTF8StringBytes(Span<byte> destination, out int bytesWritten)
+        public bool TryCopyUTF8StringBytes(Span<byte> destination, out int bytesWritten) =>
+            TryCopyUTF8StringBytes(new Asn1Tag(UniversalTagNumber.UTF8String), destination, out bytesWritten);
+
+        public bool TryCopyUTF8StringBytes(Asn1Tag expectedTag, Span<byte> destination, out int bytesWritten)
         {
             bool copied = TryCopyCharacterStringBytes(
+                expectedTag,
                 UniversalTagNumber.UTF8String,
                 destination,
                 true,
@@ -2239,7 +2353,10 @@ namespace System.Security.Cryptography.Asn1
             return copied;
         }
 
-        public string GetCharacterString(UniversalTagNumber encodingType)
+        public string GetCharacterString(UniversalTagNumber encodingType) =>
+            GetCharacterString(new Asn1Tag(encodingType), encodingType);
+            
+        public string GetCharacterString(Asn1Tag expectedTag, UniversalTagNumber encodingType)
         {
             Text.Encoding encoding;
 
@@ -2258,22 +2375,28 @@ namespace System.Security.Cryptography.Asn1
                     throw new ArgumentOutOfRangeException(nameof(encodingType), encodingType, null);
             }
 
-            return GetCharacterString(encodingType, encoding);
+            return GetCharacterString(expectedTag, encodingType, encoding);
         }
 
-        public bool TryCopyUTF8String(Span<char> destination, out int charsWritten)
+        public bool TryCopyUTF8String(Span<char> destination, out int charsWritten) =>
+            TryCopyUTF8String(new Asn1Tag(UniversalTagNumber.UTF8String), destination, out charsWritten);
+
+        public bool TryCopyUTF8String(Asn1Tag expectedTag, Span<char> destination, out int charsWritten)
         {
             return TryCopyCharacterString(
+                expectedTag,
                 UniversalTagNumber.UTF8String,
                 s_utf8Encoding,
                 destination,
                 out charsWritten);
         }
 
-        public AsnReader ReadSequence()
+        public AsnReader ReadSequence() => ReadSequence(new Asn1Tag(UniversalTagNumber.Sequence));
+
+        public AsnReader ReadSequence(Asn1Tag expectedTag)
         {
             (Asn1Tag tag, int? length) = ReadTagAndLength(out int headerLength);
-            CheckTagIfUniversal(tag, UniversalTagNumber.Sequence);
+            CheckExpectedTag(tag, expectedTag, UniversalTagNumber.Sequence);
 
             // T-REC-X.690-201508 sec 8.9.1
             // T-REC-X.690-201508 sec 8.10.1
@@ -2309,10 +2432,13 @@ namespace System.Security.Cryptography.Asn1
         ///   allow reading the data without verifying it was properly sorted by the writer.
         /// </param>
         /// <returns>An AsnReader over the current position, bounded by the contained length value.</returns>
-        public AsnReader ReadSetOf(bool skipSortOrderValidation = false)
+        public AsnReader ReadSetOf(bool skipSortOrderValidation = false) =>
+            ReadSetOf(new Asn1Tag(UniversalTagNumber.SetOf), skipSortOrderValidation);
+
+        public AsnReader ReadSetOf(Asn1Tag expectedTag, bool skipSortOrderValidation = false)
         {
             (Asn1Tag tag, int? length) = ReadTagAndLength(out int headerLength);
-            CheckTagIfUniversal(tag, UniversalTagNumber.SetOf);
+            CheckExpectedTag(tag, expectedTag, UniversalTagNumber.SetOf);
 
             // T-REC-X.690-201508 sec 8.12.1
             if (!tag.IsConstructed)
@@ -2401,9 +2527,13 @@ namespace System.Security.Cryptography.Asn1
             return new AsnReader(contents, _ruleSet);
         }
 
+        public bool TryGetIA5StringBytes(out ReadOnlyMemory<byte> contents) =>
+            TryGetIA5StringBytes(new Asn1Tag(UniversalTagNumber.IA5String), out contents);
+
         /// <summary>
         /// Gets the source data for an IA5String under a primitive encoding.
         /// </summary>
+        /// <param name="expectedTag">The expected tag</param>
         /// <param name="contents">The content bytes for the IA5String payload.</param>
         /// <returns>
         ///   <c>true</c> if the octet string uses a primitive encoding, <c>false</c> otherwise.
@@ -2411,19 +2541,23 @@ namespace System.Security.Cryptography.Asn1
         /// <exception cref="CryptographicException">
         ///  <ul>
         ///   <li>No data remains</li>
-        ///   <li>The tag is invalid for an IA5String value</li>
+        ///   <li>The tag read does not match the expected tag</li>
         ///   <li>The length is invalid under the chosen encoding rules</li>
         ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
         /// </ul>
         /// </exception>
-        public bool TryGetIA5StringBytes(out ReadOnlyMemory<byte> contents)
+        public bool TryGetIA5StringBytes(Asn1Tag expectedTag, out ReadOnlyMemory<byte> contents)
         {
-            return TryGetOctetStringBytes(UniversalTagNumber.IA5String, out contents);
+            return TryGetOctetStringBytes(expectedTag, UniversalTagNumber.IA5String, out contents);
         }
 
-        public bool TryCopyIA5StringBytes(Span<byte> destination, out int bytesWritten)
+        public bool TryCopyIA5StringBytes(Span<byte> destination, out int bytesWritten) =>
+            TryCopyIA5StringBytes(new Asn1Tag(UniversalTagNumber.IA5String), destination, out bytesWritten);
+
+        public bool TryCopyIA5StringBytes(Asn1Tag expectedTag, Span<byte> destination, out int bytesWritten)
         {
             bool copied = TryCopyCharacterStringBytes(
+                expectedTag,
                 UniversalTagNumber.IA5String,
                 destination,
                 true,
@@ -2438,18 +2572,26 @@ namespace System.Security.Cryptography.Asn1
             return copied;
         }
 
-        public bool TryCopyIA5String(Span<char> destination, out int charsWritten)
+        public bool TryCopyIA5String(Span<char> destination, out int charsWritten) =>
+            TryCopyIA5String(new Asn1Tag(UniversalTagNumber.IA5String), destination, out charsWritten);
+
+        public bool TryCopyIA5String(Asn1Tag expectedTag, Span<char> destination, out int charsWritten)
         {
             return TryCopyCharacterString(
+                expectedTag,
                 UniversalTagNumber.IA5String,
                 s_ia5Encoding,
                 destination,
                 out charsWritten);
         }
 
+        public bool TryGetBMPStringBytes(out ReadOnlyMemory<byte> contents) =>
+            TryGetBMPStringBytes(new Asn1Tag(UniversalTagNumber.BMPString), out contents);
+
         /// <summary>
         /// Gets the source data for a BMPString under a primitive encoding.
         /// </summary>
+        /// <param name="expectedTag">The expected tag</param>
         /// <param name="contents">The content bytes for the BMPString payload.</param>
         /// <returns>
         ///   <c>true</c> if the octet string uses a primitive encoding, <c>false</c> otherwise.
@@ -2457,19 +2599,23 @@ namespace System.Security.Cryptography.Asn1
         /// <exception cref="CryptographicException">
         ///  <ul>
         ///   <li>No data remains</li>
-        ///   <li>The tag is invalid for a BMPString value</li>
+        ///   <li>The tag read is does not match the expected tag</li>
         ///   <li>The length is invalid under the chosen encoding rules</li>
         ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
         /// </ul>
         /// </exception>
-        public bool TryGetBMPStringBytes(out ReadOnlyMemory<byte> contents)
+        public bool TryGetBMPStringBytes(Asn1Tag expectedTag, out ReadOnlyMemory<byte> contents)
         {
-            return TryGetOctetStringBytes(UniversalTagNumber.BMPString, out contents);
+            return TryGetOctetStringBytes(expectedTag, UniversalTagNumber.BMPString, out contents);
         }
 
-        public bool TryCopyBMPStringBytes(Span<byte> destination, out int bytesWritten)
+        public bool TryCopyBMPStringBytes(Span<byte> destination, out int bytesWritten) =>
+            TryCopyBMPStringBytes(new Asn1Tag(UniversalTagNumber.BMPString), destination, out bytesWritten);
+
+        public bool TryCopyBMPStringBytes(Asn1Tag expectedTag, Span<byte> destination, out int bytesWritten)
         {
             bool copied = TryCopyCharacterStringBytes(
+                expectedTag,
                 UniversalTagNumber.BMPString,
                 destination,
                 true,
@@ -2484,9 +2630,13 @@ namespace System.Security.Cryptography.Asn1
             return copied;
         }
 
-        public bool TryCopyBMPString(Span<char> destination, out int charsWritten)
+        public bool TryCopyBMPString(Span<char> destination, out int charsWritten) =>
+            TryCopyBMPString(new Asn1Tag(UniversalTagNumber.BMPString), destination, out charsWritten);
+
+        public bool TryCopyBMPString(Asn1Tag expectedTag, Span<char> destination, out int charsWritten)
         {
             return TryCopyCharacterString(
+                expectedTag,
                 UniversalTagNumber.BMPString,
                 s_bmpEncoding,
                 destination,
@@ -2605,9 +2755,13 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
+        public DateTimeOffset GetUtcTime(int twoDigitYearMax = 2049) =>
+            GetUtcTime(new Asn1Tag(UniversalTagNumber.UtcTime), twoDigitYearMax);
+
         /// <summary>
         /// Gets the DateTimeOffset represented by a UTCTime value.
         /// </summary>
+        /// <param name="expectedTag">The expected tag</param>
         /// <param name="twoDigitYearMax">
         /// The largest year to represent with this value.
         /// The default value, 2049, represents the 1950-2049 range for X.509 certificates.
@@ -2616,7 +2770,7 @@ namespace System.Security.Cryptography.Asn1
         /// A DateTimeOffset representing the value encoded in the UTCTime.
         /// </returns>
         /// <seealso cref="System.Globalization.Calendar.TwoDigitYearMax"/>
-        public DateTimeOffset GetUtcTime(int twoDigitYearMax = 2049)
+        public DateTimeOffset GetUtcTime(Asn1Tag expectedTag, int twoDigitYearMax = 2049)
         {
             // T-REC-X.680-201510 sec 47.3 says it is IMPLICIT VisibleString, which means
             // that BER is allowed to do complex constructed forms.
@@ -2634,6 +2788,7 @@ namespace System.Security.Cryptography.Asn1
             
             // Optimize for the CER/DER primitive encoding:
             if (TryGetOctetStringBytes(
+                expectedTag,
                 out ReadOnlyMemory<byte> primitiveOctets,
                 out int headerLength,
                 UniversalTagNumber.UtcTime))
@@ -2659,6 +2814,7 @@ namespace System.Security.Cryptography.Asn1
             try
             {
                 if (TryCopyCharacterStringBytes(
+                    expectedTag,
                     UniversalTagNumber.UtcTime,
                     rented,
                     true,
@@ -3002,9 +3158,13 @@ namespace System.Security.Cryptography.Asn1
             return value;
         }
 
-        public DateTimeOffset GetGeneralizedTime(bool disallowFractions=false)
+        public DateTimeOffset GetGeneralizedTime(bool disallowFractions=false) =>
+            GetGeneralizedTime(new Asn1Tag(UniversalTagNumber.GeneralizedTime), disallowFractions);
+
+        public DateTimeOffset GetGeneralizedTime(Asn1Tag expectedTag, bool disallowFractions=false)
         {
             if (TryGetOctetStringBytes(
+                expectedTag,
                 out ReadOnlyMemory<byte> primitiveOctets,
                 out int headerLength,
                 UniversalTagNumber.GeneralizedTime))
@@ -3029,6 +3189,7 @@ namespace System.Security.Cryptography.Asn1
             try
             {
                 if (TryCopyCharacterStringBytes(
+                    expectedTag,
                     UniversalTagNumber.GeneralizedTime,
                     rented,
                     true,
@@ -3095,9 +3256,16 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
-        private static void CheckTagIfUniversal(Asn1Tag tag, UniversalTagNumber tagNumber)
+        private static void CheckExpectedTag(Asn1Tag tag, Asn1Tag expectedTag, UniversalTagNumber tagNumber)
         {
-            if (tag.TagClass == TagClass.Universal && tag.TagValue != (int)tagNumber)
+            if (expectedTag.TagClass == TagClass.Universal && expectedTag.TagValue != (int)tagNumber)
+            {
+                throw new ArgumentException(
+                    "Cannot expect a tag with the wrong universal tag number",
+                    nameof(expectedTag));
+            }
+
+            if (expectedTag.TagClass != tag.TagClass || expectedTag.TagValue != tag.TagValue)
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }

@@ -185,5 +185,154 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = InputHex.HexToByteArray();
             ReadEcPublicKey((AsnEncodingRules)ruleSet, inputData);
         }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public static void TagMustBeCorrect_Universal_Definite(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = "30020500".HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            AssertExtensions.Throws<ArgumentException>(
+                "expectedTag",
+                () => reader.ReadSequence(Asn1Tag.Null));
+
+            Assert.True(reader.HasData, "HasData after bad universal tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.ReadSequence(new Asn1Tag(TagClass.ContextSpecific, 0)));
+
+            Assert.True(reader.HasData, "HasData after wrong tag");
+
+            AsnReader seq = reader.ReadSequence();
+            Assert.Equal("0500", seq.GetEncodedValue().ByteArrayToHex());
+
+            Assert.False(reader.HasData, "HasData after read");
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        public static void TagMustBeCorrect_Universal_Indefinite(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = "308005000000".HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            AssertExtensions.Throws<ArgumentException>(
+                "expectedTag",
+                () => reader.ReadSequence(Asn1Tag.Null));
+
+            Assert.True(reader.HasData, "HasData after bad universal tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.ReadSequence(new Asn1Tag(TagClass.ContextSpecific, 0)));
+
+            Assert.True(reader.HasData, "HasData after wrong tag");
+
+            AsnReader seq = reader.ReadSequence();
+            Assert.Equal("0500", seq.GetEncodedValue().ByteArrayToHex());
+
+            Assert.False(reader.HasData, "HasData after read");
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public static void TagMustBeCorrect_Custom_Definite(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = "A5020500".HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            AssertExtensions.Throws<ArgumentException>(
+                "expectedTag",
+                () => reader.ReadSequence(Asn1Tag.Null));
+
+            Assert.True(reader.HasData, "HasData after bad universal tag");
+
+            Assert.Throws<CryptographicException>(() => reader.ReadSequence());
+
+            Assert.True(reader.HasData, "HasData after default tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.ReadSequence(new Asn1Tag(TagClass.Application, 5)));
+
+            Assert.True(reader.HasData, "HasData after wrong custom class");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.ReadSequence(new Asn1Tag(TagClass.ContextSpecific, 7)));
+
+            Assert.True(reader.HasData, "HasData after wrong custom tag value");
+
+            AsnReader seq = reader.ReadSequence(new Asn1Tag(TagClass.ContextSpecific, 5));
+            Assert.Equal("0500", seq.GetEncodedValue().ByteArrayToHex());
+
+            Assert.False(reader.HasData, "HasData after reading value");
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        public static void TagMustBeCorrect_Custom_Indefinite(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = "A58005000000".HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            AssertExtensions.Throws<ArgumentException>(
+                "expectedTag",
+                () => reader.ReadSequence(Asn1Tag.Null));
+
+            Assert.True(reader.HasData, "HasData after bad universal tag");
+
+            Assert.Throws<CryptographicException>(() => reader.ReadSequence());
+
+            Assert.True(reader.HasData, "HasData after default tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.ReadSequence(new Asn1Tag(TagClass.Application, 5)));
+
+            Assert.True(reader.HasData, "HasData after wrong custom class");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.ReadSequence(new Asn1Tag(TagClass.ContextSpecific, 7)));
+
+            Assert.True(reader.HasData, "HasData after wrong custom tag value");
+
+            AsnReader seq = reader.ReadSequence(new Asn1Tag(TagClass.ContextSpecific, 5));
+            Assert.Equal("0500", seq.GetEncodedValue().ByteArrayToHex());
+
+            Assert.False(reader.HasData, "HasData after reading value");
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER, "30030101FF", PublicTagClass.Universal, 16)]
+        [InlineData(PublicEncodingRules.BER, "30800101000000", PublicTagClass.Universal, 16)]
+        [InlineData(PublicEncodingRules.CER, "30800101000000", PublicTagClass.Universal, 16)]
+        [InlineData(PublicEncodingRules.DER, "30030101FF", PublicTagClass.Universal, 16)]
+        [InlineData(PublicEncodingRules.BER, "A0030101FF", PublicTagClass.ContextSpecific, 0)]
+        [InlineData(PublicEncodingRules.BER, "A1800101000000", PublicTagClass.ContextSpecific, 1)]
+        [InlineData(PublicEncodingRules.CER, "6C800101000000", PublicTagClass.Application, 12)]
+        [InlineData(PublicEncodingRules.DER, "FF8A46030101FF", PublicTagClass.Private, 1350)]
+        public static void ExpectedTag_IgnoresConstructed(
+            PublicEncodingRules ruleSet,
+            string inputHex,
+            PublicTagClass tagClass,
+            int tagValue)
+        {
+            byte[] inputData = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            AsnReader val1 = reader.ReadSequence(new Asn1Tag((TagClass)tagClass, tagValue, true));
+
+            Assert.False(reader.HasData);
+
+            reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            AsnReader val2 = reader.ReadSequence(new Asn1Tag((TagClass)tagClass, tagValue, false));
+
+            Assert.False(reader.HasData);
+
+            Assert.Equal(val1.GetEncodedValue().ByteArrayToHex(), val2.GetEncodedValue().ByteArrayToHex());
+        }
     }
 }

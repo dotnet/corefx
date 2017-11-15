@@ -671,5 +671,88 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             Assert.Throws<CryptographicException>(() => reader.GetEnumeratedBytes());
         }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public static void TagMustBeCorrect_Universal(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = { 0x0A, 1, 0x7E };
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            AssertExtensions.Throws<ArgumentException>(
+                "expectedTag",
+                () => reader.GetEnumeratedValue<ShortBacked>(Asn1Tag.Null));
+
+            Assert.True(reader.HasData, "HasData after bad universal tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.GetEnumeratedValue<ShortBacked>(new Asn1Tag(TagClass.ContextSpecific, 0)));
+
+            Assert.True(reader.HasData, "HasData after wrong tag");
+
+            ShortBacked value = reader.GetEnumeratedValue<ShortBacked>();
+            Assert.Equal((ShortBacked)0x7E, value);
+            Assert.False(reader.HasData, "HasData after read");
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public static void TagMustBeCorrect_Custom(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = { 0x87, 2, 0, 0x80 };
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            AssertExtensions.Throws<ArgumentException>(
+                "expectedTag",
+                () => reader.GetEnumeratedValue<ShortBacked>(Asn1Tag.Null));
+
+            Assert.True(reader.HasData, "HasData after bad universal tag");
+
+            Assert.Throws<CryptographicException>(() => reader.GetEnumeratedValue<ShortBacked>());
+
+            Assert.True(reader.HasData, "HasData after default tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.GetEnumeratedValue<ShortBacked>(new Asn1Tag(TagClass.Application, 0)));
+
+            Assert.True(reader.HasData, "HasData after wrong custom class");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.GetEnumeratedValue<ShortBacked>(new Asn1Tag(TagClass.ContextSpecific, 1)));
+
+            Assert.True(reader.HasData, "HasData after wrong custom tag value");
+
+            ShortBacked value = reader.GetEnumeratedValue<ShortBacked>(new Asn1Tag(TagClass.ContextSpecific, 7));
+            Assert.Equal((ShortBacked)0x80, value);
+            Assert.False(reader.HasData, "HasData after reading value");
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER, "0A01FF", PublicTagClass.Universal, 10)]
+        [InlineData(PublicEncodingRules.CER, "0A01FF", PublicTagClass.Universal, 10)]
+        [InlineData(PublicEncodingRules.DER, "0A01FF", PublicTagClass.Universal, 10)]
+        [InlineData(PublicEncodingRules.BER, "8001FF", PublicTagClass.ContextSpecific, 0)]
+        [InlineData(PublicEncodingRules.CER, "4C01FF", PublicTagClass.Application, 12)]
+        [InlineData(PublicEncodingRules.DER, "DF8A4601FF", PublicTagClass.Private, 1350)]
+        public static void ExpectedTag_IgnoresConstructed(
+            PublicEncodingRules ruleSet,
+            string inputHex,
+            PublicTagClass tagClass,
+            int tagValue)
+        {
+            byte[] inputData = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+            ShortBacked val1 = reader.GetEnumeratedValue<ShortBacked>(new Asn1Tag((TagClass)tagClass, tagValue, true));
+            Assert.False(reader.HasData);
+            reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+            ShortBacked val2 = reader.GetEnumeratedValue<ShortBacked>(new Asn1Tag((TagClass)tagClass, tagValue, false));
+            Assert.False(reader.HasData);
+
+            Assert.Equal(val1, val2);
+        }
     }
 }

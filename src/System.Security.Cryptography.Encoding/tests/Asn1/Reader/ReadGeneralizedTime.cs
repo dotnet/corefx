@@ -394,5 +394,97 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             Assert.Throws<CryptographicException>(() => reader.GetGeneralizedTime());
         }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public static void TagMustBeCorrect_Universal(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = "180F32303136313130363031323334355A".HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            AssertExtensions.Throws<ArgumentException>(
+                "expectedTag",
+                () => reader.GetGeneralizedTime(Asn1Tag.Null));
+
+            Assert.True(reader.HasData, "HasData after bad universal tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.GetGeneralizedTime(new Asn1Tag(TagClass.ContextSpecific, 0)));
+
+            Assert.True(reader.HasData, "HasData after wrong tag");
+
+            Assert.Equal(
+                new DateTimeOffset(2016, 11, 6, 1, 23, 45, TimeSpan.Zero),
+                reader.GetGeneralizedTime());
+
+            Assert.False(reader.HasData, "HasData after read");
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public static void TagMustBeCorrect_Custom(PublicEncodingRules ruleSet)
+        {
+            byte[] inputData = "850F32303136313130363031323334355A".HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            AssertExtensions.Throws<ArgumentException>(
+                "expectedTag",
+                () => reader.GetGeneralizedTime(Asn1Tag.Null));
+
+            Assert.True(reader.HasData, "HasData after bad universal tag");
+
+            Assert.Throws<CryptographicException>(() => reader.GetUtcTime());
+
+            Assert.True(reader.HasData, "HasData after default tag");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.GetGeneralizedTime(new Asn1Tag(TagClass.Application, 5)));
+
+            Assert.True(reader.HasData, "HasData after wrong custom class");
+
+            Assert.Throws<CryptographicException>(
+                () => reader.GetGeneralizedTime(new Asn1Tag(TagClass.ContextSpecific, 7)));
+
+            Assert.True(reader.HasData, "HasData after wrong custom tag value");
+
+            Assert.Equal(
+                new DateTimeOffset(2016, 11, 6, 1, 23, 45, TimeSpan.Zero),
+                reader.GetGeneralizedTime(new Asn1Tag(TagClass.ContextSpecific, 5)));
+
+            Assert.False(reader.HasData, "HasData after reading value");
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER, "180F32303136313130363031323334355A", PublicTagClass.Universal, 24)]
+        [InlineData(PublicEncodingRules.CER, "180F32303136313130363031323334355A", PublicTagClass.Universal, 24)]
+        [InlineData(PublicEncodingRules.DER, "180F32303136313130363031323334355A", PublicTagClass.Universal, 24)]
+        [InlineData(PublicEncodingRules.BER, "800F31393530303130323132333435365A", PublicTagClass.ContextSpecific, 0)]
+        [InlineData(PublicEncodingRules.CER, "4C0F31393530303130323132333435365A", PublicTagClass.Application, 12)]
+        [InlineData(PublicEncodingRules.DER, "DF8A460F31393530303130323132333435365A", PublicTagClass.Private, 1350)]
+        public static void ExpectedTag_IgnoresConstructed(
+            PublicEncodingRules ruleSet,
+            string inputHex,
+            PublicTagClass tagClass,
+            int tagValue)
+        {
+            byte[] inputData = inputHex.HexToByteArray();
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            DateTimeOffset val1 = reader.GetGeneralizedTime(new Asn1Tag((TagClass)tagClass, tagValue, true));
+
+            Assert.False(reader.HasData);
+
+            reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+
+            DateTimeOffset val2 = reader.GetGeneralizedTime(new Asn1Tag((TagClass)tagClass, tagValue, false));
+
+            Assert.False(reader.HasData);
+
+            Assert.Equal(val1, val2);
+        }
     }
 }
