@@ -47,104 +47,100 @@
 #define lstat_ lstat
 #endif
 
-#ifdef static_assert
-
 // These numeric values are specified by POSIX.
 // Validate that our definitions match.
-static_assert(PAL_S_IRWXU == S_IRWXU, "");
-static_assert(PAL_S_IRUSR == S_IRUSR, "");
-static_assert(PAL_S_IWUSR == S_IWUSR, "");
-static_assert(PAL_S_IXUSR == S_IXUSR, "");
-static_assert(PAL_S_IRWXG == S_IRWXG, "");
-static_assert(PAL_S_IRGRP == S_IRGRP, "");
-static_assert(PAL_S_IWGRP == S_IWGRP, "");
-static_assert(PAL_S_IXGRP == S_IXGRP, "");
-static_assert(PAL_S_IRWXO == S_IRWXO, "");
-static_assert(PAL_S_IROTH == S_IROTH, "");
-static_assert(PAL_S_IWOTH == S_IWOTH, "");
-static_assert(PAL_S_IXOTH == S_IXOTH, "");
-static_assert(PAL_S_ISUID == S_ISUID, "");
-static_assert(PAL_S_ISGID == S_ISGID, "");
+c_static_assert(PAL_S_IRWXU == S_IRWXU);
+c_static_assert(PAL_S_IRUSR == S_IRUSR);
+c_static_assert(PAL_S_IWUSR == S_IWUSR);
+c_static_assert(PAL_S_IXUSR == S_IXUSR);
+c_static_assert(PAL_S_IRWXG == S_IRWXG);
+c_static_assert(PAL_S_IRGRP == S_IRGRP);
+c_static_assert(PAL_S_IWGRP == S_IWGRP);
+c_static_assert(PAL_S_IXGRP == S_IXGRP);
+c_static_assert(PAL_S_IRWXO == S_IRWXO);
+c_static_assert(PAL_S_IROTH == S_IROTH);
+c_static_assert(PAL_S_IWOTH == S_IWOTH);
+c_static_assert(PAL_S_IXOTH == S_IXOTH);
+c_static_assert(PAL_S_ISUID == S_ISUID);
+c_static_assert(PAL_S_ISGID == S_ISGID);
 
 // These numeric values are not specified by POSIX, but the values
 // are common to our current targets.  If these static asserts fail,
 // ConvertFileStatus needs to be updated to twiddle mode bits
 // accordingly.
-static_assert(PAL_S_IFMT == S_IFMT, "");
-static_assert(PAL_S_IFIFO == S_IFIFO, "");
-static_assert(PAL_S_IFCHR == S_IFCHR, "");
-static_assert(PAL_S_IFDIR == S_IFDIR, "");
-static_assert(PAL_S_IFREG == S_IFREG, "");
-static_assert(PAL_S_IFLNK == S_IFLNK, "");
-static_assert(PAL_S_IFSOCK == S_IFSOCK, "");
+c_static_assert(PAL_S_IFMT == S_IFMT);
+c_static_assert(PAL_S_IFIFO == S_IFIFO);
+c_static_assert(PAL_S_IFCHR == S_IFCHR);
+c_static_assert(PAL_S_IFDIR == S_IFDIR);
+c_static_assert(PAL_S_IFREG == S_IFREG);
+c_static_assert(PAL_S_IFLNK == S_IFLNK);
+c_static_assert(PAL_S_IFSOCK == S_IFSOCK);
 
 // Validate that our enum for inode types is the same as what is
 // declared by the dirent.h header on the local system.
-static_assert(PAL_DT_UNKNOWN == DT_UNKNOWN, "");
-static_assert(PAL_DT_FIFO == DT_FIFO, "");
-static_assert(PAL_DT_CHR == DT_CHR, "");
-static_assert(PAL_DT_DIR == DT_DIR, "");
-static_assert(PAL_DT_BLK == DT_BLK, "");
-static_assert(PAL_DT_REG == DT_REG, "");
-static_assert(PAL_DT_LNK == DT_LNK, "");
-static_assert(PAL_DT_SOCK == DT_SOCK, "");
-static_assert(PAL_DT_WHT == DT_WHT, "");
+c_static_assert(PAL_DT_UNKNOWN == DT_UNKNOWN);
+c_static_assert(PAL_DT_FIFO == DT_FIFO);
+c_static_assert(PAL_DT_CHR == DT_CHR);
+c_static_assert(PAL_DT_DIR == DT_DIR);
+c_static_assert(PAL_DT_BLK == DT_BLK);
+c_static_assert(PAL_DT_REG == DT_REG);
+c_static_assert(PAL_DT_LNK == DT_LNK);
+c_static_assert(PAL_DT_SOCK == DT_SOCK);
+c_static_assert(PAL_DT_WHT == DT_WHT);
 
 // Validate that our Lock enum value are correct for the platform
-static_assert(PAL_LOCK_SH == LOCK_SH, "");
-static_assert(PAL_LOCK_EX == LOCK_EX, "");
-static_assert(PAL_LOCK_NB == LOCK_NB, "");
-static_assert(PAL_LOCK_UN == LOCK_UN, "");
+c_static_assert(PAL_LOCK_SH == LOCK_SH);
+c_static_assert(PAL_LOCK_EX == LOCK_EX);
+c_static_assert(PAL_LOCK_NB == LOCK_NB);
+c_static_assert(PAL_LOCK_UN == LOCK_UN);
 
 // Validate our AccessMode enum values are correct for the platform
-static_assert(PAL_F_OK == F_OK, "");
-static_assert(PAL_X_OK == X_OK, "");
-static_assert(PAL_W_OK == W_OK, "");
-static_assert(PAL_R_OK == R_OK, "");
+c_static_assert(PAL_F_OK == F_OK);
+c_static_assert(PAL_X_OK == X_OK);
+c_static_assert(PAL_W_OK == W_OK);
+c_static_assert(PAL_R_OK == R_OK);
 
 // Validate our SeekWhence enum values are correct for the platform
-static_assert(PAL_SEEK_SET == SEEK_SET, "");
-static_assert(PAL_SEEK_CUR == SEEK_CUR, "");
-static_assert(PAL_SEEK_END == SEEK_END, "");
+c_static_assert(PAL_SEEK_SET == SEEK_SET);
+c_static_assert(PAL_SEEK_CUR == SEEK_CUR);
+c_static_assert(PAL_SEEK_END == SEEK_END);
 
 // Validate our PollFlags enum values are correct for the platform
-static_assert(PAL_POLLIN == POLLIN, "");
-static_assert(PAL_POLLPRI == POLLPRI, "");
-static_assert(PAL_POLLOUT == POLLOUT, "");
-static_assert(PAL_POLLERR == POLLERR, "");
-static_assert(PAL_POLLHUP == POLLHUP, "");
-static_assert(PAL_POLLNVAL == POLLNVAL, "");
+c_static_assert(PAL_POLLIN == POLLIN);
+c_static_assert(PAL_POLLPRI == POLLPRI);
+c_static_assert(PAL_POLLOUT == POLLOUT);
+c_static_assert(PAL_POLLERR == POLLERR);
+c_static_assert(PAL_POLLHUP == POLLHUP);
+c_static_assert(PAL_POLLNVAL == POLLNVAL);
 
 // Validate our FileAdvice enum values are correct for the platform
 #if HAVE_POSIX_ADVISE
-static_assert(PAL_POSIX_FADV_NORMAL == POSIX_FADV_NORMAL, "");
-static_assert(PAL_POSIX_FADV_RANDOM == POSIX_FADV_RANDOM, "");
-static_assert(PAL_POSIX_FADV_SEQUENTIAL == POSIX_FADV_SEQUENTIAL, "");
-static_assert(PAL_POSIX_FADV_WILLNEED == POSIX_FADV_WILLNEED, "");
-static_assert(PAL_POSIX_FADV_DONTNEED == POSIX_FADV_DONTNEED, "");
-static_assert(PAL_POSIX_FADV_NOREUSE == POSIX_FADV_NOREUSE, "");
+c_static_assert(PAL_POSIX_FADV_NORMAL == POSIX_FADV_NORMAL);
+c_static_assert(PAL_POSIX_FADV_RANDOM == POSIX_FADV_RANDOM);
+c_static_assert(PAL_POSIX_FADV_SEQUENTIAL == POSIX_FADV_SEQUENTIAL);
+c_static_assert(PAL_POSIX_FADV_WILLNEED == POSIX_FADV_WILLNEED);
+c_static_assert(PAL_POSIX_FADV_DONTNEED == POSIX_FADV_DONTNEED);
+c_static_assert(PAL_POSIX_FADV_NOREUSE == POSIX_FADV_NOREUSE);
 #endif
 
 // Validate our NotifyEvents enum values are correct for the platform
 #if HAVE_INOTIFY
-static_assert(PAL_IN_ACCESS == IN_ACCESS, "");
-static_assert(PAL_IN_MODIFY == IN_MODIFY, "");
-static_assert(PAL_IN_ATTRIB == IN_ATTRIB, "");
-static_assert(PAL_IN_MOVED_FROM == IN_MOVED_FROM, "");
-static_assert(PAL_IN_MOVED_TO == IN_MOVED_TO, "");
-static_assert(PAL_IN_CREATE == IN_CREATE, "");
-static_assert(PAL_IN_DELETE == IN_DELETE, "");
-static_assert(PAL_IN_Q_OVERFLOW == IN_Q_OVERFLOW, "");
-static_assert(PAL_IN_IGNORED == IN_IGNORED, "");
-static_assert(PAL_IN_ONLYDIR == IN_ONLYDIR, "");
-static_assert(PAL_IN_DONT_FOLLOW == IN_DONT_FOLLOW, "");
+c_static_assert(PAL_IN_ACCESS == IN_ACCESS);
+c_static_assert(PAL_IN_MODIFY == IN_MODIFY);
+c_static_assert(PAL_IN_ATTRIB == IN_ATTRIB);
+c_static_assert(PAL_IN_MOVED_FROM == IN_MOVED_FROM);
+c_static_assert(PAL_IN_MOVED_TO == IN_MOVED_TO);
+c_static_assert(PAL_IN_CREATE == IN_CREATE);
+c_static_assert(PAL_IN_DELETE == IN_DELETE);
+c_static_assert(PAL_IN_Q_OVERFLOW == IN_Q_OVERFLOW);
+c_static_assert(PAL_IN_IGNORED == IN_IGNORED);
+c_static_assert(PAL_IN_ONLYDIR == IN_ONLYDIR);
+c_static_assert(PAL_IN_DONT_FOLLOW == IN_DONT_FOLLOW);
 #if HAVE_IN_EXCL_UNLINK
-static_assert(PAL_IN_EXCL_UNLINK == IN_EXCL_UNLINK, "");
+c_static_assert(PAL_IN_EXCL_UNLINK == IN_EXCL_UNLINK);
 #endif // HAVE_IN_EXCL_UNLINK
-static_assert(PAL_IN_ISDIR == IN_ISDIR, "");
+c_static_assert(PAL_IN_ISDIR == IN_ISDIR);
 #endif // HAVE_INOTIFY
-
-#endif // static_assert
 
 static void ConvertFileStatus(const struct stat_* src, struct FileStatus* dst)
 {

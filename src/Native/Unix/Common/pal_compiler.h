@@ -12,3 +12,9 @@
 #define BEGIN_EXTERN_C
 #define END_EXTERN_C
 #endif
+
+#ifdef static_assert
+#define c_static_assert(e) static_assert((e),"")
+#else
+#define c_static_assert(e) typedef char __c_static_assert__[(e)?1:-1]
+#endif

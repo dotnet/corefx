@@ -132,23 +132,19 @@ enum
     INET6_ADDRSTRLEN_MANAGED = 65 // Managed code has a longer max IPv6 string length
 };
 
-#ifdef static_assert
-
-static_assert(GetHostErrorCodes_HOST_NOT_FOUND == HOST_NOT_FOUND, "");
-static_assert(GetHostErrorCodes_TRY_AGAIN == TRY_AGAIN, "");
-static_assert(GetHostErrorCodes_NO_RECOVERY == NO_RECOVERY, "");
-static_assert(GetHostErrorCodes_NO_DATA == NO_DATA, "");
-static_assert(GetHostErrorCodes_NO_ADDRESS == NO_ADDRESS, "");
-static_assert(sizeof(uint8_t) == sizeof(char), ""); // We make casts from uint8_t to char so make sure it's legal
+c_static_assert(GetHostErrorCodes_HOST_NOT_FOUND == HOST_NOT_FOUND);
+c_static_assert(GetHostErrorCodes_TRY_AGAIN == TRY_AGAIN);
+c_static_assert(GetHostErrorCodes_NO_RECOVERY == NO_RECOVERY);
+c_static_assert(GetHostErrorCodes_NO_DATA == NO_DATA);
+c_static_assert(GetHostErrorCodes_NO_ADDRESS == NO_ADDRESS);
+c_static_assert(sizeof(uint8_t) == sizeof(char)); // We make casts from uint8_t to char so make sure it's legal
 
 // We require that IOVector have the same layout as iovec.
-static_assert(sizeof(struct IOVector) == sizeof(struct iovec), "");
-static_assert(sizeof_member(struct IOVector, Base) == sizeof_member(struct iovec, iov_base), "");
-static_assert(offsetof(struct IOVector, Base) == offsetof(struct iovec, iov_base), "");
-static_assert(sizeof_member(struct IOVector, Count) == sizeof_member(struct iovec, iov_len), "");
-static_assert(offsetof(struct IOVector, Count) == offsetof(struct iovec, iov_len), "");
-
-#endif // static_assert
+c_static_assert(sizeof(struct IOVector) == sizeof(struct iovec));
+c_static_assert(sizeof_member(struct IOVector, Base) == sizeof_member(struct iovec, iov_base));
+c_static_assert(offsetof(struct IOVector, Base) == offsetof(struct iovec, iov_base));
+c_static_assert(sizeof_member(struct IOVector, Count) == sizeof_member(struct iovec, iov_len));
+c_static_assert(offsetof(struct IOVector, Count) == offsetof(struct iovec, iov_len));
 
 #define Min(left,right) (((left) < (right)) ? (left) : (right))
 
@@ -1422,9 +1418,7 @@ int32_t SystemNative_SetIPv6MulticastOption(intptr_t socket, int32_t multicastOp
 static int32_t GetMaxLingerTime()
 {
     static volatile int32_t MaxLingerTime = -1;
-#ifdef static_assert
-    static_assert(sizeof_member(struct xsocket, so_linger) == 2, "");
-#endif // static_assert
+    c_static_assert(sizeof_member(struct xsocket, so_linger) == 2);
 
     // OS X does not define the linger time in seconds by default, but in ticks.
     // Furthermore, when SO_LINGER_SEC is used, the value is simply scaled by
@@ -2432,9 +2426,7 @@ static int32_t WaitForSocketEventsInner(int32_t port, struct SocketEvent* buffer
 
 #elif HAVE_KQUEUE
 
-#ifdef static_assert
-static_assert(sizeof(struct SocketEvent) <= sizeof(struct kevent), "");
-#endif // static_assert
+c_static_assert(sizeof(struct SocketEvent) <= sizeof(struct kevent));
 static const size_t SocketEventBufferElementSize = sizeof(struct kevent);
 
 static enum SocketEvents GetSocketEvents(int16_t filter, uint16_t flags)
