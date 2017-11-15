@@ -249,21 +249,21 @@ namespace System.Security.Cryptography.Tests.Asn1
             AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
 
             AssertExtensions.Throws<ArgumentException>(
-                null,
+                "tEnum",
                 () => writer.WriteEnumeratedValue(OpenFlags.IncludeArchived));
 
             AssertExtensions.Throws<ArgumentException>(
-                null,
+                "tEnum",
                 () => writer.WriteEnumeratedValue(
                     new Asn1Tag(TagClass.ContextSpecific, 13),
                     OpenFlags.IncludeArchived));
 
             AssertExtensions.Throws<ArgumentException>(
-                null,
+                "tEnum",
                 () => writer.WriteEnumeratedValue((object)OpenFlags.IncludeArchived));
 
             AssertExtensions.Throws<ArgumentException>(
-                null,
+                "tEnum",
                 () => writer.WriteEnumeratedValue(
                     new Asn1Tag(TagClass.ContextSpecific, 13),
                     (object)OpenFlags.IncludeArchived));
@@ -277,28 +277,22 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
-                null,
+            Assert.Throws<ArgumentException>(
                 () => writer.WriteEnumeratedValue(5));
 
-            AssertExtensions.Throws<ArgumentException>(
-                null,
+            Assert.Throws<ArgumentException>(
                 () => writer.WriteEnumeratedValue((object)"hi"));
 
-            AssertExtensions.Throws<ArgumentException>(
-                null,
+            Assert.Throws<ArgumentException>(
                 () => writer.WriteEnumeratedValue((object)5));
 
-            AssertExtensions.Throws<ArgumentException>(
-                null,
+            Assert.Throws<ArgumentException>(
                 () => writer.WriteEnumeratedValue(new Asn1Tag(TagClass.ContextSpecific, 3), 5));
 
-            AssertExtensions.Throws<ArgumentException>(
-                null,
+            Assert.Throws<ArgumentException>(
                 () => writer.WriteEnumeratedValue(new Asn1Tag(TagClass.ContextSpecific, 3), (object)"hi"));
 
-            AssertExtensions.Throws<ArgumentException>(
-                null,
+            Assert.Throws<ArgumentException>(
                 () => writer.WriteEnumeratedValue(new Asn1Tag(TagClass.ContextSpecific, 3), (object)5));
         }
 

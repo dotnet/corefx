@@ -3798,9 +3798,8 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteBoolean(Asn1Tag tag, bool value)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.Boolean);
+            
             // T-REC-X.690-201508 sec 8.2.1
             if (tag.IsConstructed)
                 throw new ArgumentException($"Constructed Boolean values are not supported", nameof(tag));
@@ -3830,16 +3829,20 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteInteger(Asn1Tag tag, long value)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.Integer);
+
             // T-REC-X.690-201508 sec 8.3.1
             if (tag.IsConstructed)
                 throw new ArgumentException($"Constructed Integer values are not supported", nameof(tag));
 
+            WriteIntegerAnyTag(tag, value);
+        }
+
+        private void WriteIntegerAnyTag(Asn1Tag tag, long value)
+        {
             if (value >= 0)
             {
-                WriteInteger(tag, (ulong)value);
+                WriteIntegerAnyTag(tag, (ulong)value);
                 return;
             }
 
@@ -3889,13 +3892,17 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteInteger(Asn1Tag tag, ulong value)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.Integer);
+
             // T-REC-X.690-201508 sec 8.3.1
             if (tag.IsConstructed)
                 throw new ArgumentException($"Constructed Integer values are not supported", nameof(tag));
 
+            WriteIntegerAnyTag(tag, value);
+        }
+
+        private void WriteIntegerAnyTag(Asn1Tag tag, ulong value)
+        {
             int valueLength;
             
             // 0x80 needs two bytes: 0x00 0x80
@@ -3945,9 +3952,8 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteInteger(Asn1Tag tag, BigInteger value)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.Integer);
+
             // T-REC-X.690-201508 sec 8.3.1
             if (tag.IsConstructed)
                 throw new ArgumentException($"Constructed Integer values are not supported", nameof(tag));
@@ -3969,9 +3975,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteBitString(Asn1Tag tag, ReadOnlySpan<byte> bitString, int unusedBitCount=0)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.BitString);
 
             // T-REC-X.690-201508 sec 8.6.2.2
             if (unusedBitCount < 0 || unusedBitCount > 7)
@@ -4243,9 +4247,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteOctetString(Asn1Tag tag, ReadOnlySpan<byte> octetString)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.OctetString);
 
             if (RuleSet == AsnEncodingRules.BER)
             {
@@ -4342,9 +4344,8 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteNull(Asn1Tag tag)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.Null);
+
             // T-REC-X.690-201508 sec 8.8.1
             if (tag.IsConstructed)
                 throw new ArgumentException($"Constructed Null values are not supported", nameof(tag));
@@ -4392,9 +4393,8 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteObjectIdentifier(Asn1Tag tag, ReadOnlySpan<char> oidValue)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.ObjectIdentifier);
+
             // T-REC-X.690-201508 sec 8.19.1
             if (tag.IsConstructed)
                 throw new ArgumentException($"Constructed ObjectIdentifier values are not supported", nameof(tag));
@@ -4571,25 +4571,29 @@ namespace System.Security.Cryptography.Asn1
 
         private void WriteEnumeratedValue(Asn1Tag tag, Type tEnum, object enumValue)
         {
-            if (!tEnum.IsEnum)
-                throw new ArgumentException("Value type must be an Enum");
-            if (tEnum.IsDefined(typeof(FlagsAttribute), false))
-                throw new ArgumentException("[Flags] enums are not supported");
-
+            CheckUniversalTag(tag, UniversalTagNumber.Enumerated);
+            
             Type backingType = tEnum.GetEnumUnderlyingType();
+
+            if (tEnum.IsDefined(typeof(FlagsAttribute), false))
+            {
+                throw new ArgumentException(
+                    SR.Cryptography_Asn_EnumeratedValueRequiresNonFlagsEnum,
+                    nameof(tEnum));
+            }
 
             if (backingType == typeof(ulong))
             {
                 ulong numericValue = Convert.ToUInt64(enumValue);
                 // T-REC-X.690-201508 sec 8.4
-                WriteInteger(tag, numericValue);
+                WriteIntegerAnyTag(tag, numericValue);
             }
             else
             {
                 // All other types fit in a (signed) long.
                 long numericValue = Convert.ToInt64(enumValue);
                 // T-REC-X.690-201508 sec 8.4
-                WriteInteger(tag, numericValue);
+                WriteIntegerAnyTag(tag, numericValue);
             }
         }
 
@@ -4608,9 +4612,8 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteUtf8String(Asn1Tag tag, string str)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.UTF8String);
+
             if (str == null)
                 throw new ArgumentNullException(nameof(str));
 
@@ -4619,9 +4622,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteUtf8String(Asn1Tag tag, ReadOnlySpan<char> str)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.UTF8String);
 
             WriteCharacterString(tag, s_utf8Encoding, str);
         }
@@ -4633,9 +4634,8 @@ namespace System.Security.Cryptography.Asn1
 
         public void PushSequence(Asn1Tag tag)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.Sequence);
+
             // T-REC-X.690-201508 sec 8.9.1
             if (!tag.IsConstructed)
                 throw new ArgumentException("Primitive Sequence vales are not supported", nameof(tag));
@@ -4650,6 +4650,9 @@ namespace System.Security.Cryptography.Asn1
 
         public void PopSequence(Asn1Tag tag)
         {
+            // PopSequence shouldn't be used to pop a SetOf.
+            CheckUniversalTag(tag, UniversalTagNumber.Sequence);
+
             PopTag(tag);
         }
 
@@ -4660,9 +4663,8 @@ namespace System.Security.Cryptography.Asn1
 
         public void PushSetOf(Asn1Tag tag)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.SetOf);
+
             // T-REC-X.690-201508 sec 8.12.1
             if (!tag.IsConstructed)
                 throw new ArgumentException("Primitive SetOf vales are not supported", nameof(tag));
@@ -4677,6 +4679,8 @@ namespace System.Security.Cryptography.Asn1
 
         public void PopSetOf(Asn1Tag tag)
         {
+            CheckUniversalTag(tag, UniversalTagNumber.SetOf);
+
             // T-REC-X.690-201508 sec 11.6
             bool sortContents = RuleSet == AsnEncodingRules.CER || RuleSet == AsnEncodingRules.DER;
 
@@ -4698,9 +4702,8 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteIA5String(Asn1Tag tag, string str)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.IA5String);
+
             if (str == null)
                 throw new ArgumentNullException(nameof(str));
 
@@ -4709,9 +4712,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteIA5String(Asn1Tag tag, ReadOnlySpan<char> str)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.IA5String);
 
             WriteCharacterString(tag, s_ia5Encoding, str);
         }
@@ -4723,9 +4724,14 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteUtcTime(Asn1Tag tag, DateTimeOffset value)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.UtcTime);
+
+            // UtcTime is IMPLICIT PrintableString.
+            // DER doesn't allow PrintableString to be constructed.
+            // CER doesn't allow this short of a PrintableString to be constructed.
+            // BER technically allows it, but we're writing a primitive encoding, so don't let the tag mismatch.
+            if (tag.IsConstructed)
+                throw new ArgumentException($"Constructed UtcTime values are not supported", nameof(tag));
 
             WriteTag(tag);
 
@@ -4774,9 +4780,14 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteGeneralizedTime(Asn1Tag tag, DateTimeOffset value, bool omitFractionalSeconds = false)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.GeneralizedTime);
+
+            // GeneralizedTime is IMPLICIT PrintableString.
+            // DER doesn't allow PrintableString to be constructed.
+            // CER doesn't allow this short of a PrintableString to be constructed.
+            // BER technically allows it, but we're writing a primitive encoding, so don't let the tag mismatch.
+            if (tag.IsConstructed)
+                throw new ArgumentException($"Constructed GeneralizedTime values are not supported", nameof(tag));
 
             // GeneralizedTime under BER allows many different options:
             // * (HHmmss), (HHmm), (HH)
@@ -4929,9 +4940,8 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteBMPString(Asn1Tag tag, string str)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.BMPString);
+
             if (str == null)
                 throw new ArgumentNullException(nameof(str));
 
@@ -4940,9 +4950,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteBMPString(Asn1Tag tag, ReadOnlySpan<char> str)
         {
-            // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+            CheckUniversalTag(tag, UniversalTagNumber.BMPString);
 
             WriteCharacterString(tag, s_bmpEncoding, str);
         }
@@ -5061,9 +5069,9 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public void WriteCharacterString(Asn1Tag tag, UniversalTagNumber encodingType, string str)
-        {   // T-REC-X.680-201508 sec 8.6
-            if (tag == default(Asn1Tag))
-                throw new ArgumentException($"UNIVERSAL 0 tag may not be specified", nameof(tag));
+        {   
+            CheckUniversalTag(tag, encodingType);
+
             if (str == null)
                 throw new ArgumentNullException(nameof(str));
 
@@ -5253,6 +5261,16 @@ namespace System.Security.Cryptography.Asn1
 
                 i++;
                 j--;
+            }
+        }
+
+        private static void CheckUniversalTag(Asn1Tag tag, UniversalTagNumber universalTagNumber)
+        {
+            if (tag.TagClass == TagClass.Universal && tag.TagValue != (int)universalTagNumber)
+            {
+                throw new ArgumentException(
+                    "Tags with TagClass Universal must have the appropriate TagValue value for the data type being read or written.",
+                    nameof(tag));
             }
         }
 

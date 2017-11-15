@@ -622,7 +622,9 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] data = { 0x0A, 0x01, 0x00 };
             AsnReader reader = new AsnReader(data, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<ArgumentException>(() => reader.GetEnumeratedValue<AssemblyFlags>());
+            AssertExtensions.Throws<ArgumentException>(
+                "tEnum",
+                () => reader.GetEnumeratedValue<AssemblyFlags>());
         }
 
         [Theory]
