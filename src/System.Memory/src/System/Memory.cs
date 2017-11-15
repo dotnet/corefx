@@ -188,7 +188,7 @@ namespace System
                     // and then cast to a Memory<T>. Such a cast can only be done with unsafe or marshaling code,
                     // in which case that's the dangerous operation performed by the dev, and we're just following
                     // suit here to make it work as best as possible.
-                    return new Span<T>(Unsafe.As<Pinnable<char>>(s), MemoryExtensions.StringAdjustment, s.Length).Slice(_index, _length);
+                    return new Span<T>(Unsafe.As<Pinnable<T>>(s), MemoryExtensions.StringAdjustment, s.Length).Slice(_index, _length);
                 }
                 else if (_object != null)
                 {
@@ -238,10 +238,21 @@ namespace System
                     memoryHandle = ((OwnedMemory<T>)_object).Pin();
                     memoryHandle.AddOffset((_index & RemoveOwnedFlagBitMask) * Unsafe.SizeOf<T>());
                 }
+                else if (typeof(T) == typeof(char) && _object is string s)
+                {
+                    // This case can only happen if a ReadOnlyMemory<char> was created around a string
+                    // and then that was cast to a Memory<char> using unsafe / marshaling code.  This needs
+                    // to work, however, so that code that uses a single Memory<char> field to store either
+                    // a readable ReadOnlyMemory<char> or a writable Memory<char> can still be pinned and
+                    // used for interop purposes.
+                    GCHandle handle = GCHandle.Alloc(s, GCHandleType.Pinned);
+                    void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
+                    memoryHandle = new MemoryHandle(null, pointer, handle);
+                }
                 else if (_object is T[] array)
                 {
                     var handle = GCHandle.Alloc(array, GCHandleType.Pinned);
-                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
+                    void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
                     memoryHandle = new MemoryHandle(null, pointer, handle);
                 }
             }

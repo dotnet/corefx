@@ -162,7 +162,7 @@ namespace System
                 }
                 else if (typeof(T) == typeof(char) && _object is string s)
                 {
-                    return new ReadOnlySpan<T>(Unsafe.As<Pinnable<char>>(s), MemoryExtensions.StringAdjustment, s.Length).Slice(_index, _length);
+                    return new ReadOnlySpan<T>(Unsafe.As<Pinnable<T>>(s), MemoryExtensions.StringAdjustment, s.Length).Slice(_index, _length);
                 }
                 else if (_object != null)
                 {
@@ -212,10 +212,16 @@ namespace System
                     memoryHandle = ((OwnedMemory<T>)_object).Pin();
                     memoryHandle.AddOffset((_index & RemoveOwnedFlagBitMask) * Unsafe.SizeOf<T>());
                 }
+                else if (typeof(T) == typeof(char) && _object is string s)
+                {
+                    GCHandle handle = GCHandle.Alloc(s, GCHandleType.Pinned);
+                    void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
+                    memoryHandle = new MemoryHandle(null, pointer, handle);
+                }
                 else if (_object is T[] array)
                 {
                     var handle = GCHandle.Alloc(array, GCHandleType.Pinned);
-                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
+                    void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
                     memoryHandle = new MemoryHandle(null, pointer, handle);
                 }
             }
