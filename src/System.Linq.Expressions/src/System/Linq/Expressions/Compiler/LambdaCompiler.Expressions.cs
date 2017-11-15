@@ -171,7 +171,7 @@ namespace System.Linq.Expressions.Compiler
 
             // Optimization: inline code for literal lambda's directly
             //
-            // This is worth it because otherwise we end up with a extra call
+            // This is worth it because otherwise we end up with an extra call
             // to DynamicMethod.CreateDelegate, which is expensive.
             //
             if (node.LambdaOperand != null)
@@ -181,13 +181,8 @@ namespace System.Linq.Expressions.Compiler
             }
 
             expr = node.Expression;
-            if (typeof(LambdaExpression).IsAssignableFrom(expr.Type))
-            {
-                // if the invoke target is a lambda expression tree, first compile it into a delegate
-                expr = Expression.Call(expr, expr.Type.GetMethod("Compile", Array.Empty<Type>()));
-            }
-
-            EmitMethodCall(expr, expr.Type.GetMethod("Invoke"), node, CompilationFlags.EmitAsNoTail | CompilationFlags.EmitExpressionStart);
+            Debug.Assert(!typeof(LambdaExpression).IsAssignableFrom(expr.Type));
+            EmitMethodCall(expr, expr.Type.GetInvokeMethod(), node, CompilationFlags.EmitAsNoTail | CompilationFlags.EmitExpressionStart);
         }
 
         private void EmitInlinedInvoke(InvocationExpression invoke, CompilationFlags flags)
@@ -199,7 +194,7 @@ namespace System.Linq.Expressions.Compiler
             // stack it is entirely doable.
 
             // 1. Emit invoke arguments
-            List<WriteBack> wb = EmitArguments(lambda.Type.GetMethod("Invoke"), invoke);
+            List<WriteBack> wb = EmitArguments(lambda.Type.GetInvokeMethod(), invoke);
 
             // 2. Create the nested LambdaCompiler
             var inner = new LambdaCompiler(this, lambda, invoke);
@@ -304,15 +299,15 @@ namespace System.Linq.Expressions.Compiler
 
         private void EmitGetArrayElement(Type arrayType)
         {
-            if (!arrayType.IsVector())
-            {
-                // Multidimensional arrays, call get
-                _ilg.Emit(OpCodes.Call, arrayType.GetMethod("Get", BindingFlags.Public | BindingFlags.Instance));
-            }
-            else
+            if (arrayType.IsSZArray)
             {
                 // For one dimensional arrays, emit load
                 _ilg.EmitLoadElement(arrayType.GetElementType());
+            }
+            else
+            {
+                // Multidimensional arrays, call get
+                _ilg.Emit(OpCodes.Call, arrayType.GetMethod("Get", BindingFlags.Public | BindingFlags.Instance));
             }
         }
 
@@ -332,15 +327,15 @@ namespace System.Linq.Expressions.Compiler
 
         private void EmitSetArrayElement(Type arrayType)
         {
-            if (!arrayType.IsVector())
-            {
-                // Multidimensional arrays, call set
-                _ilg.Emit(OpCodes.Call, arrayType.GetMethod("Set", BindingFlags.Public | BindingFlags.Instance));
-            }
-            else
+            if (arrayType.IsSZArray)
             {
                 // For one dimensional arrays, emit store
                 _ilg.EmitStoreElement(arrayType.GetElementType());
+            }
+            else
+            {
+                // Multidimensional arrays, call set
+                _ilg.Emit(OpCodes.Call, arrayType.GetMethod("Set", BindingFlags.Public | BindingFlags.Instance));
             }
         }
 
@@ -594,7 +589,7 @@ namespace System.Linq.Expressions.Compiler
             object site = node.CreateCallSite();
             Type siteType = site.GetType();
 
-            MethodInfo invoke = node.DelegateType.GetMethod("Invoke");
+            MethodInfo invoke = node.DelegateType.GetInvokeMethod();
 
             // site.Target.Invoke(site, args)
             EmitConstant(site, siteType);
@@ -751,7 +746,7 @@ namespace System.Linq.Expressions.Compiler
                     EmitVariableAssignment(node, emitAs);
                     return;
                 default:
-                    throw Error.InvalidLvalue(node.Left.NodeType);
+                    throw ContractUtils.Unreachable;
             }
         }
 
@@ -926,12 +921,6 @@ namespace System.Linq.Expressions.Compiler
             return;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "expr")]
-        private static void EmitExtensionExpression(Expression expr)
-        {
-            throw Error.ExtensionNotReduced();
-        }
-
         #region ListInit, MemberInit
 
         private void EmitListInitExpression(Expression expr)
@@ -957,30 +946,20 @@ namespace System.Linq.Expressions.Compiler
                 case MemberBindingType.MemberBinding:
                     EmitMemberMemberBinding((MemberMemberBinding)binding);
                     break;
-                default:
-                    throw Error.UnknownBindingType();
             }
         }
 
         private void EmitMemberAssignment(MemberAssignment binding, Type objectType)
         {
             EmitExpression(binding.Expression);
-            FieldInfo fi = binding.Member as FieldInfo;
-            if (fi != null)
+            if (binding.Member is FieldInfo fi)
             {
                 _ilg.Emit(OpCodes.Stfld, fi);
             }
             else
             {
-                PropertyInfo pi = binding.Member as PropertyInfo;
-                if (pi != null)
-                {
-                    EmitCall(objectType, pi.GetSetMethod(nonPublic: true));
-                }
-                else
-                {
-                    throw Error.UnhandledBinding();
-                }
+                Debug.Assert(binding.Member is PropertyInfo);
+                EmitCall(objectType, (binding.Member as PropertyInfo).GetSetMethod(nonPublic: true));
             }
         }
 
@@ -1117,34 +1096,13 @@ namespace System.Linq.Expressions.Compiler
 
         private static Type GetMemberType(MemberInfo member)
         {
-            FieldInfo fi = member as FieldInfo;
-            if (fi != null) return fi.FieldType;
-            PropertyInfo pi = member as PropertyInfo;
-            if (pi != null) return pi.PropertyType;
-            throw Error.MemberNotFieldOrProperty(member, nameof(member));
+            Debug.Assert(member is FieldInfo || member is PropertyInfo);
+            return member is FieldInfo fi ? fi.FieldType : (member as PropertyInfo).PropertyType;
         }
 
         #endregion
 
         #region Expression helpers
-
-        internal static void ValidateLift(IReadOnlyList<ParameterExpression> variables, IReadOnlyList<Expression> arguments)
-        {
-            Debug.Assert(variables != null);
-            Debug.Assert(arguments != null);
-
-            if (variables.Count != arguments.Count)
-            {
-                throw Error.IncorrectNumberOfIndexes();
-            }
-            for (int i = 0, n = variables.Count; i < n; i++)
-            {
-                if (!TypeUtils.AreReferenceAssignable(variables[i].Type, arguments[i].Type.GetNonNullableType()))
-                {
-                    throw Error.ArgumentTypesMustMatch();
-                }
-            }
-        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private void EmitLift(ExpressionType nodeType, Type resultType, MethodCallExpression mc, ParameterExpression[] paramList, Expression[] argList)
@@ -1219,17 +1177,12 @@ namespace System.Linq.Expressions.Compiler
                         }
                         else
                         {
-                            switch (nodeType)
-                            {
-                                case ExpressionType.LessThan:
-                                case ExpressionType.LessThanOrEqual:
-                                case ExpressionType.GreaterThan:
-                                case ExpressionType.GreaterThanOrEqual:
-                                    _ilg.Emit(OpCodes.Ldc_I4_0);
-                                    break;
-                                default:
-                                    throw Error.UnknownLiftType(nodeType);
-                            }
+                            Debug.Assert(nodeType == ExpressionType.LessThan
+                                || nodeType == ExpressionType.LessThanOrEqual
+                                || nodeType == ExpressionType.GreaterThan
+                                || nodeType == ExpressionType.GreaterThanOrEqual);
+
+                            _ilg.Emit(OpCodes.Ldc_I4_0);
                         }
                         _ilg.MarkLabel(exit);
                         FreeLocal(anyNull);

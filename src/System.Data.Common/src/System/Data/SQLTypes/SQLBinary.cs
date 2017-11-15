@@ -11,7 +11,6 @@ using System.Xml.Serialization;
 
 namespace System.Data.SqlTypes
 {
-    [Serializable]
     [XmlSchemaProvider("GetXsdType")]
     public struct SqlBinary : INullable, IComparable, IXmlSerializable
     {
@@ -121,7 +120,7 @@ namespace System.Data.SqlTypes
         /// Returns a string describing a <see cref='SqlBinary'/> object.
         /// </summary>
         public override string ToString() =>
-            IsNull ? SQLResource.s_nullString : "SqlBinary(" + _value.Length.ToString(CultureInfo.InvariantCulture) + ")";
+            IsNull ? SQLResource.NullString : "SqlBinary(" + _value.Length.ToString(CultureInfo.InvariantCulture) + ")";
 
         // Unary operators
 

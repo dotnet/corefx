@@ -510,11 +510,6 @@ namespace System.Linq.Expressions
         internal static string NotAMemberOfAnyType(object p0) => SR.Format(SR.NotAMemberOfAnyType, p0);
 
         /// <summary>
-        /// A string like "The expression '{0}' is not supported for type '{1}'"
-        /// </summary>
-        internal static string ExpressionNotSupportedForType(object p0, object p1) => SR.Format(SR.ExpressionNotSupportedForType, p0, p1);
-
-        /// <summary>
         /// A string like "ParameterExpression of type '{0}' cannot be used for delegate parameter of type '{1}'"
         /// </summary>
         internal static string ParameterExpressionNotValidAsDelegate(object p0, object p1) => SR.Format(SR.ParameterExpressionNotValidAsDelegate, p0, p1);
@@ -575,16 +570,6 @@ namespace System.Linq.Expressions
         internal static string TypeNotIEnumerable(object p0) => SR.Format(SR.TypeNotIEnumerable, p0);
 
         /// <summary>
-        /// A string like "Unexpected coalesce operator."
-        /// </summary>
-        internal static string UnexpectedCoalesceOperator => SR.UnexpectedCoalesceOperator;
-
-        /// <summary>
-        /// A string like "Cannot cast from type '{0}' to type '{1}"
-        /// </summary>
-        internal static string InvalidCast(object p0, object p1) => SR.Format(SR.InvalidCast, p0, p1);
-
-        /// <summary>
         /// A string like "Unhandled binary: {0}"
         /// </summary>
         internal static string UnhandledBinary(object p0) => SR.Format(SR.UnhandledBinary, p0);
@@ -598,11 +583,6 @@ namespace System.Linq.Expressions
         /// A string like "Unhandled Binding Type: {0}"
         /// </summary>
         internal static string UnhandledBindingType(object p0) => SR.Format(SR.UnhandledBindingType, p0);
-
-        /// <summary>
-        /// A string like "Unhandled convert: {0}"
-        /// </summary>
-        internal static string UnhandledConvert(object p0) => SR.Format(SR.UnhandledConvert, p0);
 
         /// <summary>
         /// A string like "Unhandled unary: {0}"
@@ -709,11 +689,6 @@ namespace System.Linq.Expressions
         /// </summary>
         internal static string NonLocalJumpWithValue(object p0) => SR.Format(SR.NonLocalJumpWithValue, p0);
 
-        /// <summary>
-        /// A string like "Extension should have been reduced."
-        /// </summary>
-        internal static string ExtensionNotReduced => SR.ExtensionNotReduced;
-
 #if FEATURE_COMPILE_TO_METHODBUILDER
         /// <summary>
         /// A string like "CompileToMethod cannot compile constant '{0}' because it is a non-trivial value, such as a live object. Instead, create an expression tree that can construct this value."
@@ -735,11 +710,6 @@ namespace System.Linq.Expressions
         /// A string like "Invalid lvalue for assignment: {0}."
         /// </summary>
         internal static string InvalidLvalue(object p0) => SR.Format(SR.InvalidLvalue, p0);
-
-        /// <summary>
-        /// A string like "unknown lift type: '{0}'."
-        /// </summary>
-        internal static string UnknownLiftType(object p0) => SR.Format(SR.UnknownLiftType, p0);
 
         /// <summary>
         /// A string like "variable '{0}' of type '{1}' referenced from scope '{2}', but it is not defined"
@@ -808,13 +778,6 @@ namespace System.Linq.Expressions
         internal static string PdbGeneratorNeedsExpressionCompiler => SR.PdbGeneratorNeedsExpressionCompiler;
 #endif
 
-#if FEATURE_COMPILE
-        /// <summary>
-        /// A string like "The operator '{0}' is not implemented for type '{1}'"
-        /// </summary>
-        internal static string OperatorNotImplementedForType(object p0, object p1) => SR.Format(SR.OperatorNotImplementedForType, p0, p1);
-#endif
-
         /// <summary>
         /// A string like "The constructor should not be static"
         /// </summary>
@@ -824,5 +787,74 @@ namespace System.Linq.Expressions
         /// A string like "The constructor should not be declared on an abstract class"
         /// </summary>
         internal static string NonAbstractConstructorRequired => SR.NonAbstractConstructorRequired;
+
+        /// <summary>
+        /// A string like "Expression must be readable"
+        /// </summary>
+        internal static string ExpressionMustBeReadable => SR.ExpressionMustBeReadable;
+
+        /// <summary>
+        /// A string like "Expression of type '{0}' cannot be used for constructor parameter of type '{1}'"
+        /// </summary>
+        internal static string ExpressionTypeDoesNotMatchConstructorParameter(object p0, object p1) => SR.Format(SR.ExpressionTypeDoesNotMatchConstructorParameter, p0, p1);
+
+        /// <summary>
+        /// A string like "Enumeration has either not started or has alreExpressionTypeDoesNotMatchConstructorParameterady finished."
+        /// </summary>
+        internal static string EnumerationIsDone => SR.EnumerationIsDone;
+
+        /// <summary>
+        /// A string like "Type {0} contains generic parameters"
+        /// </summary>
+        internal static string TypeContainsGenericParameters(object p0) => SR.Format(SR.TypeContainsGenericParameters, p0);
+
+        /// <summary>
+        /// A string like "Type {0} is a generic type definition"
+        /// </summary>
+        internal static string TypeIsGeneric(object p0) => SR.Format(SR.TypeIsGeneric, p0);
+        /// <summary>
+        /// A string like "Invalid argument value"
+        /// </summary>
+        internal static string InvalidArgumentValue => SR.InvalidArgumentValue;
+
+        /// <summary>
+        /// A string like "Non-empty collection required"
+        /// </summary>
+        internal static string NonEmptyCollectionRequired => SR.NonEmptyCollectionRequired;
+
+        /// <summary>
+        /// A string like "The value null is not of type '{0}' and cannot be used in this collection."
+        /// </summary>
+        internal static string InvalidNullValue(object p0) => SR.Format(SR.InvalidNullValue, p0);
+
+        /// <summary>
+        /// A string like "The value '{0}' is not of type '{1}' and cannot be used in this collection."
+        /// </summary>
+        internal static string InvalidObjectType(object p0, object p1) => SR.Format(SR.InvalidObjectType, p0, p1);
+
+        /// <summary>
+        /// A string like "Expression of type '{0}' cannot be used for parameter of type '{1}' of method '{2}'"
+        /// </summary>
+        internal static string ExpressionTypeDoesNotMatchMethodParameter(object p0, object p1, object p2) => SR.Format(SR.ExpressionTypeDoesNotMatchMethodParameter, p0, p1, p2);
+
+        /// <summary>
+        /// A string like "Expression of type '{0}' cannot be used for parameter of type '{1}'"
+        /// </summary>
+        internal static string ExpressionTypeDoesNotMatchParameter(object p0, object p1) => SR.Format(SR.ExpressionTypeDoesNotMatchParameter, p0, p1);
+
+        /// <summary>
+        /// A string like "Incorrect number of arguments supplied for call to method '{0}'"
+        /// </summary>
+        internal static string IncorrectNumberOfMethodCallArguments(object p0) => SR.Format(SR.IncorrectNumberOfMethodCallArguments, p0);
+
+        /// <summary>
+        /// A string like "Incorrect number of arguments supplied for lambda invocation"
+        /// </summary>
+        internal static string IncorrectNumberOfLambdaArguments => SR.IncorrectNumberOfLambdaArguments;
+
+        /// <summary>
+        /// A string like "Incorrect number of arguments for constructor"
+        /// </summary>
+        internal static string IncorrectNumberOfConstructorArguments => SR.IncorrectNumberOfConstructorArguments;
     }
 }

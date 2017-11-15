@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Security.AccessControl;
+using System.Buffers;
 
 /*
   Note on transaction support:
@@ -33,7 +34,7 @@ using System.Security.AccessControl;
 /*
   Note on ACL support:
   The key thing to note about ACL's is you set them on a kernel object like a
-  registry key, then the ACL only gets checked when you construct handles to 
+  registry key, then the ACL only gets checked when you construct handles to
   them.  So if you set an ACL to deny read access to yourself, you'll still be
   able to read with that handle, but not with new handles.
 
@@ -45,8 +46,8 @@ using System.Security.AccessControl;
   may not be able to read or write to a registry key.  It's very strange.  But
   the real test of these handles is attempting to read or set a value in an
   affected registry key.
-  
-  For reference, at least two registry keys must be set to particular values 
+
+  For reference, at least two registry keys must be set to particular values
   for this behavior:
   HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Terminal Server\RegistryExtensionFlags, the least significant bit must be 1.
   HKLM\SYSTEM\CurrentControlSet\Control\TerminalServer\TSAppCompat must be 1
@@ -67,14 +68,14 @@ namespace Microsoft.Win32
             // System keys should never be closed.  However, we want to call RegCloseKey
             // on HKEY_PERFORMANCE_DATA when called from PerformanceCounter.CloseSharedResources
             // (i.e. when disposing is true) so that we release the PERFLIB cache and cause it
-            // to be refreshed (by re-reading the registry) when accessed subsequently. 
-            // This is the only way we can see the just installed perf counter.  
+            // to be refreshed (by re-reading the registry) when accessed subsequently.
+            // This is the only way we can see the just installed perf counter.
             // NOTE: since HKEY_PERFORMANCE_DATA is process wide, there is inherent race in closing
             // the key asynchronously. While Vista is smart enough to rebuild the PERFLIB resources
-            // in this situation the down level OSes are not. We have a small window of race between  
-            // the dispose below and usage elsewhere (other threads). This is By Design. 
-            // This is less of an issue when OS > NT5 (i.e Vista & higher), we can close the perfkey  
-            // (to release & refresh PERFLIB resources) and the OS will rebuild PERFLIB as necessary. 
+            // in this situation the down level OSes are not. We have a small window of race between
+            // the dispose below and usage elsewhere (other threads). This is By Design.
+            // This is less of an issue when OS > NT5 (i.e Vista & higher), we can close the perfkey
+            // (to release & refresh PERFLIB resources) and the OS will rebuild PERFLIB as necessary.
             Interop.Advapi32.RegCloseKey(HKEY_PERFORMANCE_DATA);
         }
 
@@ -106,7 +107,6 @@ namespace Microsoft.Win32
             if (ret == 0 && !result.IsInvalid)
             {
                 RegistryKey key = new RegistryKey(result, (permissionCheck != RegistryKeyPermissionCheck.ReadSubTree), false, _remoteKey, false, _regView);
-                CheckPermission(RegistryInternalCheck.CheckSubTreePermission, subkey, false, permissionCheck);
                 key._checkMode = permissionCheck;
 
                 if (subkey.Length == 0)
@@ -162,7 +162,7 @@ namespace Microsoft.Win32
             int errorCode = Interop.Advapi32.RegDeleteValue(_hkey, name);
 
             //
-            // From windows 2003 server, if the name is too long we will get error code ERROR_FILENAME_EXCED_RANGE  
+            // From windows 2003 server, if the name is too long we will get error code ERROR_FILENAME_EXCED_RANGE
             // This still means the name doesn't exist. We need to be consistent with previous OS.
             //
             if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND ||
@@ -394,36 +394,45 @@ namespace Microsoft.Win32
             return subkeys;
         }
 
-        private unsafe string[] InternalGetSubKeyNamesCore(int subkeys)
+        private string[] InternalGetSubKeyNamesCore(int subkeys)
         {
-            string[] names = new string[subkeys];
-            char[] name = new char[MaxKeyLength + 1];
+            var names = new List<string>(subkeys);
+            char[] name = ArrayPool<char>.Shared.Rent(MaxKeyLength + 1);
 
-            int namelen;
-
-            fixed (char* namePtr = &name[0])
+            try
             {
-                for (int i = 0; i < subkeys; i++)
-                {
-                    namelen = name.Length; // Don't remove this. The API's doesn't work if this is not properly initialized.
-                    int ret = Interop.Advapi32.RegEnumKeyEx(_hkey,
-                        i,
-                        namePtr,
-                        ref namelen,
-                        null,
-                        null,
-                        null,
-                        null);
-                    if (ret != 0)
-                    {
-                        Win32Error(ret, null);
-                    }
+                int result;
+                int nameLength = name.Length;
 
-                    names[i] = new string(namePtr);
+                while ((result = Interop.Advapi32.RegEnumKeyEx(
+                    _hkey,
+                    names.Count,
+                    name,
+                    ref nameLength,
+                    null,
+                    null,
+                    null,
+                    null)) != Interop.Errors.ERROR_NO_MORE_ITEMS)
+                {
+                    switch (result)
+                    {
+                        case Interop.Errors.ERROR_SUCCESS:
+                            names.Add(new string(name, 0, nameLength));
+                            nameLength = name.Length;
+                            break;
+                        default:
+                            // Throw the error
+                            Win32Error(result, null);
+                            break;
+                    }
                 }
             }
+            finally
+            {
+                ArrayPool<char>.Shared.Return(name);
+            }
 
-            return names;
+            return names.ToArray();
         }
 
         private int InternalValueCountCore()
@@ -454,37 +463,79 @@ namespace Microsoft.Win32
         /// <returns>All value names.</returns>
         private unsafe string[] GetValueNamesCore(int values)
         {
-            string[] names = new string[values];
-            char[] name = new char[MaxValueLength + 1];
-            int namelen;
+            var names = new List<string>(values);
 
-            fixed (char* namePtr = &name[0])
+            // Names in the registry aren't usually very long, although they can go to as large
+            // as 16383 characters (MaxValueLength).
+            //
+            // Every call to RegEnumValue will allocate another buffer to get the data from
+            // NtEnumerateValueKey before copying it back out to our passed in buffer. This can
+            // add up quickly- we'll try to keep the memory pressure low and grow the buffer
+            // only if needed.
+
+            char[] name = ArrayPool<char>.Shared.Rent(100);
+
+            try
             {
-                for (int i = 0; i < values; i++)
+                int result;
+                int nameLength = name.Length;
+
+                while ((result = Interop.Advapi32.RegEnumValue(
+                    _hkey,
+                    names.Count,
+                    name,
+                    ref nameLength,
+                    IntPtr.Zero,
+                    null,
+                    null,
+                    null)) != Interop.Errors.ERROR_NO_MORE_ITEMS)
                 {
-                    namelen = name.Length;
-
-                    int ret = Interop.Advapi32.RegEnumValue(_hkey,
-                        i,
-                        namePtr,
-                        ref namelen,
-                        IntPtr.Zero,
-                        null,
-                        null,
-                        null);
-
-                    if (ret != 0)
+                    switch (result)
                     {
-                        // ignore ERROR_MORE_DATA if we're querying HKEY_PERFORMANCE_DATA
-                        if (!(IsPerfDataKey() && ret == Interop.Errors.ERROR_MORE_DATA))
-                            Win32Error(ret, null);
+                        // The size is only ever reported back correctly in the case
+                        // of ERROR_SUCCESS. It will almost always be changed, however.
+                        case Interop.Errors.ERROR_SUCCESS:
+                            names.Add(new string(name, 0, nameLength));
+                            break;
+                        case Interop.Errors.ERROR_MORE_DATA:
+                            if (IsPerfDataKey())
+                            {
+                                // Enumerating the values for Perf keys always returns
+                                // ERROR_MORE_DATA, but has a valid name. Buffer does need
+                                // to be big enough however. 8 characters is the largest
+                                // known name. The size isn't returned, but the string is
+                                // null terminated.
+                                fixed (char* c = &name[0])
+                                {
+                                    names.Add(new string(c));
+                                }
+                            }
+                            else
+                            {
+                                char[] oldName = name;
+                                int oldLength = oldName.Length;
+                                name = null;
+                                ArrayPool<char>.Shared.Return(oldName);
+                                name = ArrayPool<char>.Shared.Rent(checked(oldLength * 2));
+                            }
+                            break;
+                        default:
+                            // Throw the error
+                            Win32Error(result, null);
+                            break;
                     }
 
-                    names[i] = new string(namePtr);
+                    // Always set the name length back to the buffer size
+                    nameLength = name.Length;
                 }
             }
+            finally
+            {
+                if (name != null)
+                    ArrayPool<char>.Shared.Return(name);
+            }
 
-            return names;
+            return names.ToArray();
         }
 
         private object InternalGetValueCore(string name, object defaultValue, bool doNotExpand)
@@ -506,15 +557,15 @@ namespace Microsoft.Win32
                     byte[] blob = new byte[size];
                     while (Interop.Errors.ERROR_MORE_DATA == (r = Interop.Advapi32.RegQueryValueEx(_hkey, name, null, ref type, blob, ref sizeInput)))
                     {
-                        if (size == Int32.MaxValue)
+                        if (size == int.MaxValue)
                         {
                             // ERROR_MORE_DATA was returned however we cannot increase the buffer size beyond Int32.MaxValue
                             Win32Error(r, name);
                         }
-                        else if (size > (Int32.MaxValue / 2))
+                        else if (size > (int.MaxValue / 2))
                         {
                             // at this point in the loop "size * 2" would cause an overflow
-                            size = Int32.MaxValue;
+                            size = int.MaxValue;
                         }
                         else
                         {
@@ -532,8 +583,8 @@ namespace Microsoft.Win32
                 else
                 {
                     // For stuff like ERROR_FILE_NOT_FOUND, we want to return null (data).
-                    // Some OS's returned ERROR_MORE_DATA even in success cases, so we 
-                    // want to continue on through the function. 
+                    // Some OS's returned ERROR_MORE_DATA even in success cases, so we
+                    // want to continue on through the function.
                     if (ret != Interop.Errors.ERROR_MORE_DATA)
                     {
                         return data;
@@ -613,7 +664,7 @@ namespace Microsoft.Win32
                         }
                         else
                         {
-                            // in the very unlikely case the data is missing null termination, 
+                            // in the very unlikely case the data is missing null termination,
                             // pass in the whole char[] to prevent truncating a character
                             data = new string(blob);
                         }
@@ -644,7 +695,7 @@ namespace Microsoft.Win32
                         }
                         else
                         {
-                            // in the very unlikely case the data is missing null termination, 
+                            // in the very unlikely case the data is missing null termination,
                             // pass in the whole char[] to prevent truncating a character
                             data = new string(blob);
                         }
@@ -703,8 +754,8 @@ namespace Microsoft.Win32
                                 }
                                 else
                                 {
-                                    // we found an empty string.  But if we're at the end of the data, 
-                                    // it's just the extra null terminator. 
+                                    // we found an empty string.  But if we're at the end of the data,
+                                    // it's just the extra null terminator.
                                     if (nextNull != len - 1)
                                     {
                                         toAdd = string.Empty;
@@ -777,14 +828,14 @@ namespace Microsoft.Win32
 
                     case RegistryValueKind.MultiString:
                         {
-                            // Other thread might modify the input array after we calculate the buffer length.                            
+                            // Other thread might modify the input array after we calculate the buffer length.
                             // Make a copy of the input array to be safe.
                             string[] dataStrings = (string[])(((string[])value).Clone());
 
                             // First determine the size of the array
                             //
                             // Format is null terminator between strings and final null terminator at the end.
-                            //    e.g. str1\0str2\0str3\0\0 
+                            //    e.g. str1\0str2\0str3\0\0
                             //
                             int sizeInChars = 1; // no matter what, we have the final null terminator.
                             for (int i = 0; i < dataStrings.Length; i++)
@@ -873,14 +924,6 @@ namespace Microsoft.Win32
             }
         }
 
-        private bool ContainsRegistryValueCore(string name)
-        {
-            int type = 0;
-            int datasize = 0;
-            int retval = Interop.Advapi32.RegQueryValueEx(_hkey, name, null, ref type, (byte[])null, ref datasize);
-            return retval == 0;
-        }
-
         /// <summary>
         /// After calling GetLastWin32Error(), it clears the last error field,
         /// so you must save the HResult and pass it to this method.  This method
@@ -903,10 +946,10 @@ namespace Microsoft.Win32
                     // SafeRegHandle and only throw the IOException.  This is to workaround reentrancy issues
                     // in PerformanceCounter.NextValue() where the API could throw {NullReference, ObjectDisposed, ArgumentNull}Exception
                     // on reentrant calls because of this error code path in RegistryKey
-                    // 
+                    //
                     // Normally we'd make our caller synchronize access to a shared RegistryKey instead of doing something like this,
-                    // however we shipped PerformanceCounter.NextValue() un-synchronized in v2.0RTM and customers have taken a dependency on 
-                    // this behavior (being able to simultaneously query multiple remote-machine counters on multiple threads, instead of 
+                    // however we shipped PerformanceCounter.NextValue() un-synchronized in v2.0RTM and customers have taken a dependency on
+                    // this behavior (being able to simultaneously query multiple remote-machine counters on multiple threads, instead of
                     // having serialized access).
                     if (!IsPerfDataKey())
                     {
@@ -935,15 +978,6 @@ namespace Microsoft.Win32
                 default:
                     throw new IOException(Interop.Kernel32.GetMessage(errorCode), errorCode);
             }
-        }
-
-        private static bool IsWritable(int rights)
-        {
-            return (rights & (Interop.Advapi32.RegistryOperations.KEY_SET_VALUE |
-                              Interop.Advapi32.RegistryOperations.KEY_CREATE_SUB_KEY |
-                              (int)RegistryRights.Delete |
-                              (int)RegistryRights.TakeOwnership |
-                              (int)RegistryRights.ChangePermissions)) != 0;
         }
 
         private static int GetRegistryKeyAccess(bool isWritable)

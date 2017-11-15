@@ -9,9 +9,10 @@ namespace System.IO.Compression.Tests
 {
     public class zip_ManualAndCompatabilityTests : ZipFileTestBase
     {
+        public static bool IsUsingNewPathNormalization => !PathFeatures.IsUsingLegacyPathNormalization();
+
         [Theory]
         [InlineData("7zip.zip", "normal", true, true)]
-        [InlineData("deflate64.zip", "normal", true, true)]
         [InlineData("windows.zip", "normalWithoutEmptyDir", false, true)]
         [InlineData("dotnetzipstreaming.zip", "normal", false, false)]
         [InlineData("sharpziplib.zip", "normalWithoutEmptyDir", false, false)]
@@ -19,6 +20,13 @@ namespace System.IO.Compression.Tests
         public static async Task CompatibilityTests(string zipFile, string zipFolder, bool requireExplicit, bool checkTimes)
         {
             IsZipSameAsDir(await StreamHelpers.CreateTempCopyStream(compat(zipFile)), zfolder(zipFolder), ZipArchiveMode.Update, requireExplicit, checkTimes);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Deflate64 zip support is a netcore feature not available on full framework.")]
+        public static async Task Deflate64Zip()
+        {
+            IsZipSameAsDir(await StreamHelpers.CreateTempCopyStream(compat("deflate64.zip")), zfolder("normal"), ZipArchiveMode.Update, requireExplicit: true, checkTimes: true);
         }
 
         [Theory]
@@ -39,7 +47,7 @@ namespace System.IO.Compression.Tests
         /// For example, the file "aa\bb\cc\dd" in a zip created on Unix should be one file "aa\bb\cc\dd" whereas the same file
         /// in a zip created on Windows should be interpreted as the file "dd" underneath three subdirectories.
         /// </summary>
-        [Theory]
+        [ConditionalTheory(nameof(IsUsingNewPathNormalization))]
         [InlineData("backslashes_FromUnix.zip", "aa\\bb\\cc\\dd")]
         [InlineData("backslashes_FromWindows.zip", "dd")]
         [InlineData("WindowsInvalid_FromUnix.zip", "aa<b>d")]

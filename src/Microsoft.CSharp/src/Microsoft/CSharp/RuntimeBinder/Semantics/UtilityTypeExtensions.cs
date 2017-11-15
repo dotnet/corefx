@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -9,21 +10,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal static class UtilityTypeExtensions
     {
-        private static IEnumerable<AggregateType> InterfaceAndBases(this AggregateType type)
-        {
-            Debug.Assert(type != null);
-            yield return type;
-            foreach (AggregateType t in type.GetIfacesAll().ToArray())
-                yield return t;
-        }
-
-        private static IEnumerable<AggregateType> AllConstraintInterfaces(this TypeArray constraints)
-        {
-            Debug.Assert(constraints != null);
-            foreach (AggregateType c in constraints.ToArray())
-                foreach (AggregateType t in c.InterfaceAndBases())
-                    yield return t;
-        }
 
         private static IEnumerable<AggregateType> TypeAndBaseClasses(this AggregateType type)
         {
@@ -40,25 +26,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(type != null);
             foreach (AggregateType b in type.TypeAndBaseClasses())
-                foreach (AggregateType t in b.GetIfacesAll().ToArray())
+                foreach (AggregateType t in b.GetIfacesAll().Items)
                     yield return t;
         }
 
-        public static IEnumerable<CType> AllPossibleInterfaces(this CType type)
+        public static IEnumerable<AggregateType> AllPossibleInterfaces(this CType type)
         {
             Debug.Assert(type != null);
-            if (type.IsAggregateType())
+            if (type is AggregateType ats)
             {
-                foreach (CType t in type.AsAggregateType().TypeAndBaseClassInterfaces())
-                    yield return t;
+                return ats.TypeAndBaseClassInterfaces();
             }
-            else if (type.IsTypeParameterType())
-            {
-                foreach (CType t in type.AsTypeParameterType().GetEffectiveBaseClass().TypeAndBaseClassInterfaces())
-                    yield return t;
-                foreach (CType t in type.AsTypeParameterType().GetInterfaceBounds().AllConstraintInterfaces())
-                    yield return t;
-            }
+
+            Debug.Assert(type is NullableType); // Is even this case possible?
+            return Array.Empty<AggregateType>();
         }
     }
 }

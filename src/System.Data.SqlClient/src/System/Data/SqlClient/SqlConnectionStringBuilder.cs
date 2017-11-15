@@ -2,26 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
-
-//------------------------------------------------------------------------------
-
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-
 namespace System.Data.SqlClient
 {
-    public sealed class SqlConnectionStringBuilder : DbConnectionStringBuilder
+    public sealed partial class SqlConnectionStringBuilder : DbConnectionStringBuilder
     {
         private enum Keywords
         { // specific ordering for ConnectionString output construction
-          //            NamedConnection,
-
+            // NamedConnection,
             DataSource,
             FailoverPartner,
             AttachDBFilename,
@@ -31,6 +26,7 @@ namespace System.Data.SqlClient
             UserID,
             Password,
 
+            Enlist,
             Pooling,
             MinPoolSize,
             MaxPoolSize,
@@ -51,6 +47,7 @@ namespace System.Data.SqlClient
 
             UserInstance,
 
+            TransactionBinding,
 
             ApplicationIntent,
 
@@ -65,7 +62,7 @@ namespace System.Data.SqlClient
         }
 
         internal const int KeywordsCount = (int)Keywords.KeywordsCount;
-        internal const int DeprecatedKeywordsCount = 6;
+        internal const int DeprecatedKeywordsCount = 4;
 
         private static readonly string[] s_validKeywords = CreateValidKeywords();
         private static readonly Dictionary<string, Keywords> s_keywords = CreateKeywordsDictionary();
@@ -79,6 +76,7 @@ namespace System.Data.SqlClient
         private string _initialCatalog = DbConnectionStringDefaults.InitialCatalog;
         //      private string _namedConnection   = DbConnectionStringDefaults.NamedConnection;
         private string _password = DbConnectionStringDefaults.Password;
+        private string _transactionBinding = DbConnectionStringDefaults.TransactionBinding;
         private string _typeSystemVersion = DbConnectionStringDefaults.TypeSystemVersion;
         private string _userID = DbConnectionStringDefaults.UserID;
         private string _workstationID = DbConnectionStringDefaults.WorkstationID;
@@ -93,6 +91,7 @@ namespace System.Data.SqlClient
 
         private bool _encrypt = DbConnectionStringDefaults.Encrypt;
         private bool _trustServerCertificate = DbConnectionStringDefaults.TrustServerCertificate;
+        private bool _enlist = DbConnectionStringDefaults.Enlist;
         private bool _integratedSecurity = DbConnectionStringDefaults.IntegratedSecurity;
         private bool _multipleActiveResultSets = DbConnectionStringDefaults.MultipleActiveResultSets;
         private bool _multiSubnetFailover = DbConnectionStringDefaults.MultiSubnetFailover;
@@ -111,6 +110,7 @@ namespace System.Data.SqlClient
             validKeywords[(int)Keywords.CurrentLanguage] = DbConnectionStringKeywords.CurrentLanguage;
             validKeywords[(int)Keywords.DataSource] = DbConnectionStringKeywords.DataSource;
             validKeywords[(int)Keywords.Encrypt] = DbConnectionStringKeywords.Encrypt;
+            validKeywords[(int)Keywords.Enlist] = DbConnectionStringKeywords.Enlist;
             validKeywords[(int)Keywords.FailoverPartner] = DbConnectionStringKeywords.FailoverPartner;
             validKeywords[(int)Keywords.InitialCatalog] = DbConnectionStringKeywords.InitialCatalog;
             validKeywords[(int)Keywords.IntegratedSecurity] = DbConnectionStringKeywords.IntegratedSecurity;
@@ -125,6 +125,7 @@ namespace System.Data.SqlClient
             validKeywords[(int)Keywords.PersistSecurityInfo] = DbConnectionStringKeywords.PersistSecurityInfo;
             validKeywords[(int)Keywords.Pooling] = DbConnectionStringKeywords.Pooling;
             validKeywords[(int)Keywords.Replication] = DbConnectionStringKeywords.Replication;
+            validKeywords[(int)Keywords.TransactionBinding] = DbConnectionStringKeywords.TransactionBinding;
             validKeywords[(int)Keywords.TrustServerCertificate] = DbConnectionStringKeywords.TrustServerCertificate;
             validKeywords[(int)Keywords.TypeSystemVersion] = DbConnectionStringKeywords.TypeSystemVersion;
             validKeywords[(int)Keywords.UserID] = DbConnectionStringKeywords.UserID;
@@ -145,6 +146,7 @@ namespace System.Data.SqlClient
             hash.Add(DbConnectionStringKeywords.CurrentLanguage, Keywords.CurrentLanguage);
             hash.Add(DbConnectionStringKeywords.DataSource, Keywords.DataSource);
             hash.Add(DbConnectionStringKeywords.Encrypt, Keywords.Encrypt);
+            hash.Add(DbConnectionStringKeywords.Enlist, Keywords.Enlist);
             hash.Add(DbConnectionStringKeywords.FailoverPartner, Keywords.FailoverPartner);
             hash.Add(DbConnectionStringKeywords.InitialCatalog, Keywords.InitialCatalog);
             hash.Add(DbConnectionStringKeywords.IntegratedSecurity, Keywords.IntegratedSecurity);
@@ -159,6 +161,7 @@ namespace System.Data.SqlClient
             hash.Add(DbConnectionStringKeywords.PersistSecurityInfo, Keywords.PersistSecurityInfo);
             hash.Add(DbConnectionStringKeywords.Pooling, Keywords.Pooling);
             hash.Add(DbConnectionStringKeywords.Replication, Keywords.Replication);
+            hash.Add(DbConnectionStringKeywords.TransactionBinding, Keywords.TransactionBinding);
             hash.Add(DbConnectionStringKeywords.TrustServerCertificate, Keywords.TrustServerCertificate);
             hash.Add(DbConnectionStringKeywords.TypeSystemVersion, Keywords.TypeSystemVersion);
             hash.Add(DbConnectionStringKeywords.UserID, Keywords.UserID);
@@ -225,6 +228,7 @@ namespace System.Data.SqlClient
                         //                  case Keywords.NamedConnection:          NamedConnection = ConvertToString(value); break;
                         case Keywords.Password: Password = ConvertToString(value); break;
                         case Keywords.UserID: UserID = ConvertToString(value); break;
+                        case Keywords.TransactionBinding: TransactionBinding = ConvertToString(value); break;
                         case Keywords.TypeSystemVersion: TypeSystemVersion = ConvertToString(value); break;
                         case Keywords.WorkstationID: WorkstationID = ConvertToString(value); break;
 
@@ -238,6 +242,7 @@ namespace System.Data.SqlClient
 
                         case Keywords.Encrypt: Encrypt = ConvertToBoolean(value); break;
                         case Keywords.TrustServerCertificate: TrustServerCertificate = ConvertToBoolean(value); break;
+                        case Keywords.Enlist: Enlist = ConvertToBoolean(value); break;
                         case Keywords.MultipleActiveResultSets: MultipleActiveResultSets = ConvertToBoolean(value); break;
                         case Keywords.MultiSubnetFailover: MultiSubnetFailover = ConvertToBoolean(value); break;
                         case Keywords.PersistSecurityInfo: PersistSecurityInfo = ConvertToBoolean(value); break;
@@ -348,6 +353,16 @@ namespace System.Data.SqlClient
             }
         }
 
+        public bool Enlist
+        {
+            get { return _enlist; }
+            set
+            {
+                SetValue(DbConnectionStringKeywords.Enlist, value);
+                _enlist = value;
+            }
+        }
+
         public string FailoverPartner
         {
             get { return _failoverPartner; }
@@ -358,6 +373,7 @@ namespace System.Data.SqlClient
             }
         }
 
+        [TypeConverter(typeof(SqlInitialCatalogConverter))]
         public string InitialCatalog
         {
             get { return _initialCatalog; }
@@ -538,6 +554,16 @@ namespace System.Data.SqlClient
             }
         }
 
+        public string TransactionBinding
+        {
+            get { return _transactionBinding; }
+            set
+            {
+                SetValue(DbConnectionStringKeywords.TransactionBinding, value);
+                _transactionBinding = value;
+            }
+        }
+
         public string TypeSystemVersion
         {
             get { return _typeSystemVersion; }
@@ -649,6 +675,7 @@ namespace System.Data.SqlClient
                 case Keywords.CurrentLanguage: return CurrentLanguage;
                 case Keywords.DataSource: return DataSource;
                 case Keywords.Encrypt: return Encrypt;
+                case Keywords.Enlist: return Enlist;
                 case Keywords.FailoverPartner: return FailoverPartner;
                 case Keywords.InitialCatalog: return InitialCatalog;
                 case Keywords.IntegratedSecurity: return IntegratedSecurity;
@@ -663,6 +690,7 @@ namespace System.Data.SqlClient
                 case Keywords.PersistSecurityInfo: return PersistSecurityInfo;
                 case Keywords.Pooling: return Pooling;
                 case Keywords.Replication: return Replication;
+                case Keywords.TransactionBinding: return TransactionBinding;
                 case Keywords.TrustServerCertificate: return TrustServerCertificate;
                 case Keywords.TypeSystemVersion: return TypeSystemVersion;
                 case Keywords.UserID: return UserID;
@@ -729,6 +757,9 @@ namespace System.Data.SqlClient
                 case Keywords.Encrypt:
                     _encrypt = DbConnectionStringDefaults.Encrypt;
                     break;
+                case Keywords.Enlist:
+                    _enlist = DbConnectionStringDefaults.Enlist;
+                    break;
                 case Keywords.FailoverPartner:
                     _failoverPartner = DbConnectionStringDefaults.FailoverPartner;
                     break;
@@ -776,6 +807,9 @@ namespace System.Data.SqlClient
                     break;
                 case Keywords.Replication:
                     _replication = DbConnectionStringDefaults.Replication;
+                    break;
+                case Keywords.TransactionBinding:
+                    _transactionBinding = DbConnectionStringDefaults.TransactionBinding;
                     break;
                 case Keywords.TrustServerCertificate:
                     _trustServerCertificate = DbConnectionStringDefaults.TrustServerCertificate;
@@ -840,7 +874,6 @@ namespace System.Data.SqlClient
             DbConnectionStringKeywords.AsynchronousProcessing,
             DbConnectionStringKeywords.ConnectionReset,
             DbConnectionStringKeywords.ContextConnection,
-            DbConnectionStringKeywords.Enlist,
             DbConnectionStringKeywords.TransactionBinding,
 
             DbConnectionStringSynonyms.Async
@@ -866,6 +899,89 @@ namespace System.Data.SqlClient
             else
             {
                 return ADP.KeywordNotSupported(keyword);
+            }
+        }
+
+        private sealed class SqlInitialCatalogConverter : StringConverter
+        {
+            // converter classes should have public ctor
+            public SqlInitialCatalogConverter()
+            {
+            }
+
+            public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+            {
+                return GetStandardValuesSupportedInternal(context);
+            }
+
+            private bool GetStandardValuesSupportedInternal(ITypeDescriptorContext context)
+            {
+                // Only say standard values are supported if the connection string has enough
+                // information set to instantiate a connection and retrieve a list of databases
+                bool flag = false;
+                if (null != context)
+                {
+                    SqlConnectionStringBuilder constr = (context.Instance as SqlConnectionStringBuilder);
+                    if (null != constr)
+                    {
+                        if ((0 < constr.DataSource.Length) && (constr.IntegratedSecurity || (0 < constr.UserID.Length)))
+                        {
+                            flag = true;
+                        }
+                    }
+                }
+                return flag;
+            }
+
+            public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
+            {
+                // Although theoretically this could be true, some people may want to just type in a name
+                return false;
+            }
+
+            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+            {
+                // There can only be standard values if the connection string is in a state that might
+                // be able to instantiate a connection
+                if (GetStandardValuesSupportedInternal(context))
+                {
+
+                    // Create an array list to store the database names
+                    List<string> values = new List<string>();
+
+                    try
+                    {
+                        SqlConnectionStringBuilder constr = (SqlConnectionStringBuilder)context.Instance;
+
+                        // Create a connection
+                        using (SqlConnection connection = new SqlConnection())
+                        {
+
+                            // Create a basic connection string from current property values
+                            connection.ConnectionString = constr.ConnectionString;
+
+                            // Try to open the connection
+                            connection.Open();
+
+                            DataTable databaseTable = connection.GetSchema("DATABASES");
+
+                            foreach (DataRow row in databaseTable.Rows)
+                            {
+                                string dbName = (string)row["database_name"];
+                                values.Add(dbName);
+                            }
+                        }
+                    }
+                    catch (SqlException e)
+                    {
+                        ADP.TraceExceptionWithoutRethrow(e);
+                        // silently fail
+                    }
+
+                    // Return values as a StandardValuesCollection
+                    return new StandardValuesCollection(values);
+                }
+                return null;
             }
         }
     }

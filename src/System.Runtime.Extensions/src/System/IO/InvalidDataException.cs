@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 namespace System.IO
 {
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class InvalidDataException : SystemException
     {
         public InvalidDataException()
@@ -25,7 +26,7 @@ namespace System.IO
         }
 
         private InvalidDataException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+        {            
         }
     }
 }

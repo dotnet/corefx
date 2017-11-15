@@ -2,60 +2,41 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.IO.Tests
 {
-    public class DirectoryInfo_GetSetAttributes : FileSystemTest
+    public class DirectoryInfo_GetSetAttributes : InfoGetSetAttributes<DirectoryInfo>
     {
-        #region Utilities
-
-        protected virtual FileAttributes Get(string path)
-        {
-            var info = new DirectoryInfo(path);
-            return info.Attributes;
-        }
-
-        protected virtual void Set(string path, FileAttributes attributes)
-        {
-            var info = new DirectoryInfo(path);
-            info.Attributes = attributes;
-        }
-
-        #endregion
-
-        [Fact]
-        public void NullParameters()
-        {
-            Assert.Throws<ArgumentNullException>(() => Get(null));
-            Assert.Throws<ArgumentNullException>(() => Set(null, FileAttributes.Normal));
-        }
-
-        [Fact]
-        public void InvalidParameters()
-        {
-            Assert.Throws<ArgumentException>(() => Get(string.Empty));
-            Assert.Throws<ArgumentException>(() => Set(string.Empty, FileAttributes.Normal));
-        }
-
-        [Fact]
-        public void NonExistentFile()
-        {
-            Assert.Throws<FileNotFoundException>(() => Set(GetTestFilePath(), FileAttributes.Normal));
-            Assert.Throws<FileNotFoundException>(() => Set(IOServices.AddTrailingSlashIfNeeded(GetTestFilePath()), FileAttributes.Normal));
-            Assert.Throws<FileNotFoundException>(() => Set(IOServices.RemoveTrailingSlash(GetTestFilePath()), FileAttributes.Normal));
-        }
+        protected override FileAttributes GetAttributes(string path) => new DirectoryInfo(path).Attributes;
+        protected override void SetAttributes(string path, FileAttributes attributes) => new DirectoryInfo(path).Attributes = attributes;
+        protected override string CreateItem(string path = null, [CallerMemberName] string memberName = null, [CallerLineNumber] int lineNumber = 0)
+            => Directory.CreateDirectory(path ?? GetTestFilePath()).FullName;
+        protected override DirectoryInfo CreateInfo(string path) => new DirectoryInfo(path);
+        protected override void DeleteItem(string path) => Directory.Delete(path);
+        protected override bool IsDirectory => true;
 
         [Theory]
         [InlineData(FileAttributes.ReadOnly)]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests Unix file attributes
         public void UnixAttributeSetting(FileAttributes attr)
         {
-            var test = new DirectoryInfo(GetTestFilePath());
-            test.Create();
-            Set(test.FullName, attr);
-            Assert.Equal(attr | FileAttributes.Directory, Get(test.FullName));
-            Set(test.FullName, 0);
+            string path = CreateItem();
+            SetAttributes(path, attr);
+            Assert.Equal(attr | FileAttributes.Directory, GetAttributes(path));
+            SetAttributes(path, 0);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void UnixDirectoryBeginningWithPeriodIsHidden(bool endsWithSlash)
+        {
+            string testDir = "." + GetTestFileName();
+            Directory.CreateDirectory(Path.Combine(TestDirectory, testDir));
+            Assert.True(0 != (new DirectoryInfo(Path.Combine(TestDirectory, testDir) + (endsWithSlash ? "/" : "")).Attributes & FileAttributes.Hidden));
         }
 
         [Theory]
@@ -67,11 +48,10 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows file attributes
         public void WindowsAttributeSetting(FileAttributes attr)
         {
-            var test = new DirectoryInfo(GetTestFilePath());
-            test.Create();
-            Set(test.FullName, attr);
-            Assert.Equal(attr | FileAttributes.Directory, Get(test.FullName));
-            Set(test.FullName, 0);
+            string path = CreateItem();
+            SetAttributes(path, attr);
+            Assert.Equal(attr | FileAttributes.Directory, GetAttributes(path));
+            SetAttributes(path, 0);
         }
 
         [Theory]
@@ -84,10 +64,9 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-invalid file attributes that don't get set
         public void UnixInvalidAttributes(FileAttributes attr)
         {
-            var path = GetTestFilePath();
-            File.Create(path).Dispose();
-            Set(path, attr);
-            Assert.Equal(FileAttributes.Normal, Get(path));
+            string path = CreateItem();
+            SetAttributes(path, attr);
+            Assert.Equal(FileAttributes.Directory, GetAttributes(path));
         }
 
         [Theory]
@@ -99,10 +78,9 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid file attributes that don't get set
         public void WindowsInvalidAttributes(FileAttributes attr)
         {
-            var path = GetTestFilePath();
-            File.Create(path).Dispose();
-            Set(path, attr);
-            Assert.Equal(FileAttributes.Normal, Get(path));
+            string path = CreateItem();
+            SetAttributes(path, attr);
+            Assert.Equal(FileAttributes.Directory, GetAttributes(path));
         }
 
         [Theory]
@@ -111,9 +89,8 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-invalid file attributes that throw
         public void UnixInvalidAttributes_ThrowArgumentException(FileAttributes attr)
         {
-            var test = new DirectoryInfo(GetTestFilePath());
-            test.Create();
-            Assert.Throws<ArgumentException>(() => Set(test.FullName, attr));
+            string path = CreateItem();
+            Assert.Throws<ArgumentException>(() => SetAttributes(path, attr));
         }
 
         [Theory]
@@ -123,43 +100,8 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid file attributes that throw
         public void WindowsInvalidAttributes_ThrowArgumentException(FileAttributes attr)
         {
-            var test = new DirectoryInfo(GetTestFilePath());
-            test.Create();
-            Assert.Throws<ArgumentException>(() => Set(test.FullName, attr));
-        }
-
-        [ConditionalFact(nameof(CanCreateSymbolicLinks))]
-        public void SymLinksAreReparsePoints()
-        {
-            var path = GetTestFilePath();
-            var linkPath = GetTestFilePath();
-
-            Directory.CreateDirectory(path);
-            Assert.True(MountHelper.CreateSymbolicLink(linkPath, path, isDirectory: true));
-
-            Assert.NotEqual(FileAttributes.ReparsePoint, FileAttributes.ReparsePoint & Get(path));
-            Assert.Equal(FileAttributes.ReparsePoint, FileAttributes.ReparsePoint & Get(linkPath));
-        }
-
-        [ConditionalFact(nameof(CanCreateSymbolicLinks))]
-        public void SymLinksReflectSymLinkAttributes()
-        {
-            var path = GetTestFilePath();
-            var linkPath = GetTestFilePath();
-
-            Directory.CreateDirectory(path);
-            Assert.True(MountHelper.CreateSymbolicLink(linkPath, path, isDirectory: true));
-
-            Set(path, FileAttributes.ReadOnly);
-            try
-            {
-                Assert.Equal(FileAttributes.ReadOnly, FileAttributes.ReadOnly & Get(path));
-                Assert.NotEqual(FileAttributes.ReadOnly, FileAttributes.ReadOnly & Get(linkPath));
-            }
-            finally
-            {
-                Set(path, Get(path) & ~FileAttributes.ReadOnly);
-            }
+            string path = CreateItem();
+            Assert.Throws<ArgumentException>(() => SetAttributes(path, attr));
         }
     }
 }

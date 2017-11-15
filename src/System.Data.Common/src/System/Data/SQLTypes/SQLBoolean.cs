@@ -17,10 +17,11 @@ namespace System.Data.SqlTypes
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [XmlSchemaProvider("GetXsdType")]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public struct SqlBoolean : INullable, IComparable, IXmlSerializable
     {
         // m_value: 2 (true), 1 (false), 0 (unknown/Null)
-        private byte _value;
+        private byte m_value; // Do not rename (binary serialization)
 
         private const byte x_Null = 0;
         private const byte x_False = 1;
@@ -33,7 +34,7 @@ namespace System.Data.SqlTypes
         /// </summary>
         public SqlBoolean(bool value)
         {
-            _value = value ? x_True : x_False;
+            m_value = value ? x_True : x_False;
         }
 
         public SqlBoolean(int value) : this(value, false)
@@ -43,9 +44,9 @@ namespace System.Data.SqlTypes
         private SqlBoolean(int value, bool fNull)
         {
             if (fNull)
-                _value = x_Null;
+                m_value = x_Null;
             else
-                _value = (value != 0) ? x_True : x_False;
+                m_value = (value != 0) ? x_True : x_False;
         }
 
 
@@ -55,7 +56,7 @@ namespace System.Data.SqlTypes
         /// </summary>
         public bool IsNull
         {
-            get { return _value == x_Null; }
+            get { return m_value == x_Null; }
         }
 
         // property: Value
@@ -66,7 +67,7 @@ namespace System.Data.SqlTypes
         {
             get
             {
-                switch (_value)
+                switch (m_value)
                 {
                     case x_True:
                         return true;
@@ -85,7 +86,7 @@ namespace System.Data.SqlTypes
         /// </summary>
         public bool IsTrue
         {
-            get { return _value == x_True; }
+            get { return m_value == x_True; }
         }
 
         /// <summary>
@@ -93,7 +94,7 @@ namespace System.Data.SqlTypes
         /// </summary>
         public bool IsFalse
         {
-            get { return _value == x_False; }
+            get { return m_value == x_False; }
         }
 
 
@@ -123,7 +124,7 @@ namespace System.Data.SqlTypes
         /// </summary>
         public static SqlBoolean operator !(SqlBoolean x)
         {
-            switch (x._value)
+            switch (x.m_value)
             {
                 case x_True:
                     return SqlBoolean.False;
@@ -132,7 +133,7 @@ namespace System.Data.SqlTypes
                     return SqlBoolean.True;
 
                 default:
-                    Debug.Assert(x._value == x_Null);
+                    Debug.Assert(x.m_value == x_Null);
                     return SqlBoolean.Null;
             }
         }
@@ -154,9 +155,9 @@ namespace System.Data.SqlTypes
         /// </summary>
         public static SqlBoolean operator &(SqlBoolean x, SqlBoolean y)
         {
-            if (x._value == x_False || y._value == x_False)
+            if (x.m_value == x_False || y.m_value == x_False)
                 return SqlBoolean.False;
-            else if (x._value == x_True && y._value == x_True)
+            else if (x.m_value == x_True && y.m_value == x_True)
                 return SqlBoolean.True;
             else
                 return SqlBoolean.Null;
@@ -167,9 +168,9 @@ namespace System.Data.SqlTypes
         /// </summary>
         public static SqlBoolean operator |(SqlBoolean x, SqlBoolean y)
         {
-            if (x._value == x_True || y._value == x_True)
+            if (x.m_value == x_True || y.m_value == x_True)
                 return SqlBoolean.True;
-            else if (x._value == x_False && y._value == x_False)
+            else if (x.m_value == x_False && y.m_value == x_False)
                 return SqlBoolean.False;
             else
                 return SqlBoolean.Null;
@@ -183,7 +184,7 @@ namespace System.Data.SqlTypes
             get
             {
                 if (!IsNull)
-                    return (_value == x_True) ? (byte)1 : (byte)0;
+                    return (m_value == x_True) ? (byte)1 : (byte)0;
                 else
                     throw new SqlNullValueException();
             }
@@ -191,7 +192,7 @@ namespace System.Data.SqlTypes
 
         public override string ToString()
         {
-            return IsNull ? SQLResource.s_nullString : Value.ToString();
+            return IsNull ? SQLResource.NullString : Value.ToString();
         }
 
         public static SqlBoolean Parse(string s)
@@ -199,7 +200,7 @@ namespace System.Data.SqlTypes
             if (null == s)
                 // Let Boolean.Parse throw exception
                 return new SqlBoolean(bool.Parse(s));
-            if (s == SQLResource.s_nullString)
+            if (s == SQLResource.NullString)
                 return SqlBoolean.Null;
 
             s = s.TrimStart();
@@ -226,7 +227,7 @@ namespace System.Data.SqlTypes
 
         public static SqlBoolean operator ^(SqlBoolean x, SqlBoolean y)
         {
-            return (x.IsNull || y.IsNull) ? Null : new SqlBoolean(x._value != y._value);
+            return (x.IsNull || y.IsNull) ? Null : new SqlBoolean(x.m_value != y.m_value);
         }
 
 
@@ -295,7 +296,7 @@ namespace System.Data.SqlTypes
         // Overloading comparison operators
         public static SqlBoolean operator ==(SqlBoolean x, SqlBoolean y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value == y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value == y.m_value);
         }
 
         public static SqlBoolean operator !=(SqlBoolean x, SqlBoolean y)
@@ -305,22 +306,22 @@ namespace System.Data.SqlTypes
 
         public static SqlBoolean operator <(SqlBoolean x, SqlBoolean y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value < y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value < y.m_value);
         }
 
         public static SqlBoolean operator >(SqlBoolean x, SqlBoolean y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value > y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value > y.m_value);
         }
 
         public static SqlBoolean operator <=(SqlBoolean x, SqlBoolean y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value <= y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value <= y.m_value);
         }
 
         public static SqlBoolean operator >=(SqlBoolean x, SqlBoolean y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value >= y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value >= y.m_value);
         }
 
         //--------------------------------------------------
@@ -499,11 +500,11 @@ namespace System.Data.SqlTypes
             {
                 // Read the next value.
                 reader.ReadElementString();
-                _value = x_Null;
+                m_value = x_Null;
             }
             else
             {
-                _value = XmlConvert.ToBoolean(reader.ReadElementString()) ? x_True : x_False;
+                m_value = XmlConvert.ToBoolean(reader.ReadElementString()) ? x_True : x_False;
             }
         }
 
@@ -515,7 +516,7 @@ namespace System.Data.SqlTypes
             }
             else
             {
-                writer.WriteString(_value == x_True ? "true" : "false");
+                writer.WriteString(m_value == x_True ? "true" : "false");
             }
         }
 

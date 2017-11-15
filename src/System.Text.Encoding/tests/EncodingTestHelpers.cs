@@ -6,12 +6,15 @@ using Xunit;
 
 namespace System.Text.Tests
 {
-    public static class EncodingHelpers
+    public static partial class EncodingHelpers
     {
         public static void Encode(Encoding encoding, string chars, int index, int count, byte[] expected)
         {
             GetByteCount(encoding, chars, index, count, expected.Length);
             GetBytes(encoding, chars, index, count, expected);
+
+            GetByteCount_NetCoreApp(encoding, chars, index, count, expected.Length);
+            GetBytes_NetCoreApp(encoding, chars, index, count, expected);
         }
 
         private static unsafe void GetByteCount(Encoding encoding, string chars, int index, int count, int expected)
@@ -23,6 +26,7 @@ namespace System.Text.Tests
                 Assert.Equal(expected, encoding.GetByteCount(chars));
                 Assert.Equal(expected, encoding.GetByteCount(charArray));
             }
+
             // Use GetByteCount(char[], int, int)
             Assert.Equal(expected, encoding.GetByteCount(charArray, index, count));
 
@@ -65,6 +69,7 @@ namespace System.Text.Tests
                 byte[] charArrayResultBasic = encoding.GetBytes(source.ToCharArray());
                 VerifyGetBytes(charArrayResultBasic, 0, charArrayResultBasic.Length, originalBytes, expectedBytes);
             }
+
             // Use GetBytes(char[], int, int)
             byte[] charArrayResultAdvanced = encoding.GetBytes(source.ToCharArray(), index, count);
             VerifyGetBytes(charArrayResultAdvanced, 0, charArrayResultAdvanced.Length, originalBytes, expectedBytes);
@@ -118,6 +123,9 @@ namespace System.Text.Tests
             GetCharCount(encoding, bytes, index, count, expected.Length);
             GetChars(encoding, bytes, index, count, expected.ToCharArray());
             GetString(encoding, bytes, index, count, expected);
+
+            GetCharCount_NetCoreApp(encoding, bytes, index, count, expected.Length);
+            GetString_NetCoreApp(encoding, bytes, index, count, expected);
         }
 
         private static unsafe void GetCharCount(Encoding encoding, byte[] bytes, int index, int count, int expected)
@@ -140,8 +148,7 @@ namespace System.Text.Tests
             }
         }
 
-        private static void GetChars(Encoding encoding, byte[] bytes, int index, int count, char[]
-         expectedChars)
+        private static void GetChars(Encoding encoding, byte[] bytes, int index, int count, char[] expectedChars)
         {
             char[] fullArray = new char[expectedChars.Length + 4];
             for (int i = 0; i < fullArray.Length; i++)
@@ -192,6 +199,8 @@ namespace System.Text.Tests
                 }
                 VerifyGetChars(bytePointerChars, charIndex, charCount, originalChars, expectedChars);
             }
+
+            VerifyGetChars_NetCoreApp(encoding, bytes, byteIndex, byteCount, chars, charIndex, expectedChars);
         }
 
         private static void VerifyGetChars(char[] chars, int charIndex, int charCount, char[] originalChars, char[] expectedChars)
@@ -222,5 +231,12 @@ namespace System.Text.Tests
             // Use GetString(byte[], int, int)
             Assert.Equal(expected, encoding.GetString(bytes, index, count));
         }
+
+        // Netcoreapp adds several Encoding members.
+        static partial void GetByteCount_NetCoreApp(Encoding encoding, string chars, int index, int count, int expected);
+        static partial void GetBytes_NetCoreApp(Encoding encoding, string chars, int index, int count, byte[] expected);
+        static partial void GetCharCount_NetCoreApp(Encoding encoding, byte[] bytes, int index, int count, int expected);
+        static partial void VerifyGetChars_NetCoreApp(Encoding encoding, byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex, char[] expectedChars);
+        static partial void GetString_NetCoreApp(Encoding encoding, byte[] bytes, int index, int count, string expected);
     }
 }

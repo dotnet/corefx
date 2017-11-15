@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -630,9 +689,6 @@
   </data>
   <data name="Sch_NotTokenString" xml:space="preserve">
     <value>line-feed (#xA) or tab (#x9) characters, leading or trailing spaces and sequences of one or more spaces (#x20) are not allowed in 'xs:token'.</value>
-  </data>
-  <data name="Sch_XsdDateTimeCompare" xml:space="preserve">
-    <value>Cannot compare '{0}' and '{1}'.</value>
   </data>
   <data name="Sch_InvalidDateTimeOption" xml:space="preserve">
     <value>The '{0}' value for the 'dateTimeOption' parameter is not an allowed value for the 'XmlDateTimeSerializationMode' enumeration.</value>
@@ -2125,12 +2181,6 @@
   <data name="SqlTypes_ArithOverflow" xml:space="preserve">
     <value>Arithmetic Overflow.</value>
   </data>
-  <data name="SqlTypes_ArithTruncation" xml:space="preserve">
-    <value>Numeric arithmetic causes truncation.</value>
-  </data>
-  <data name="SqlTypes_DivideByZero" xml:space="preserve">
-    <value>Divide by zero error encountered.</value>
-  </data>
   <data name="XmlMissingType" xml:space="preserve">
     <value>Invalid serialization assembly: Required type {0} cannot be found in the generated assembly '{1}'.</value>
   </data>
@@ -2223,9 +2273,6 @@
   </data>
   <data name="XmlInvalidConstantAttribute" xml:space="preserve">
     <value>Only XmlEnum may be used on enumerated constants.</value>
-  </data>
-  <data name="XmlIllegalDefault" xml:space="preserve">
-    <value>The default value for XmlAttribute or XmlElement may only be specified for primitive types.</value>
   </data>
   <data name="XmlIllegalAttributesArrayAttribute" xml:space="preserve">
     <value>XmlAttribute and XmlAnyAttribute cannot be used in conjunction with XmlElement, XmlText, XmlAnyElement, XmlArray, or XmlArrayItem.</value>
@@ -2734,15 +2781,6 @@
   <data name="XmlSerializableRootDupName" xml:space="preserve">
     <value>Cannot reconcile schema for '{0}'. Please use [XmlRoot] attribute to change default name or namespace of the top-level element to avoid duplicate element declarations: element name='{1}' namespace='{2}'.</value>
   </data>
-  <data name="XmlPregenMissingDirectory" xml:space="preserve">
-    <value>Could not find directory to save XmlSerializer generated assembly: {0}.</value>
-  </data>
-  <data name="XmlPregenMissingTempDirectory" xml:space="preserve">
-    <value>Could not find TEMP directory to save XmlSerializer generated assemblies.</value>
-  </data>
-  <data name="XmlPregenAssemblyDynamic" xml:space="preserve">
-    <value>Cannot pre-generate serialization assembly. Pre-generation of serialization assemblies is not supported for dynamic assemblies. Save the assembly and load it from disk to use it with XmlSerialization.</value>
-  </data>
   <data name="XmlNotSerializable" xml:space="preserve">
     <value>Type '{0}' is not serializable.</value>
   </data>
@@ -2800,11 +2838,8 @@
   <data name="Arg_IncompatibleParamType" xml:space="preserve">
     <value>Type is incompatible.</value>
   </data>
-  <data name="Xml_XapResolverCannotOpenUri" xml:space="preserve">
-    <value>Cannot open '{0}'. The Uri parameter must be a relative path pointing to content inside the Silverlight application's XAP package. If you need to load content from an arbitrary Uri, please see the documentation on Loading XML content using WebClient/HttpWebRequest.</value>
-  </data>
   <data name="Xml_SystemPathResolverCannotOpenUri" xml:space="preserve">
-    <value />
+    <value>Cannot open '{0}'. The Uri parameter must be a file system relative or absolute path.</value>
   </data>
   <data name="Xml_EndOfInnerExceptionStack" xml:space="preserve">
     <value>--- End of inner exception stack trace ---</value>
@@ -2967,9 +3002,6 @@
   </data>
   <data name="Xslt_ScriptMixedLanguages" xml:space="preserve">
     <value>All script blocks implementing the namespace '{0}' must use the same language.</value>
-  </data>
-  <data name="Xslt_AssemblyNameHref" xml:space="preserve">
-    <value>'msxsl:assembly' must have either a 'name' attribute or an 'href' attribute, but not both.</value>
   </data>
   <data name="Xslt_ScriptAndExtensionClash" xml:space="preserve">
     <value>Cannot have both an extension object and a script implementing the same namespace '{0}'.</value>
@@ -3298,12 +3330,6 @@
   <data name="Xslt_InvalidPattern" xml:space="preserve">
     <value>'{0}' is an invalid XSLT pattern.</value>
   </data>
-  <data name="InvalidNullEmptyArgument" xml:space="preserve">
-    <value>Argument {0} cannot be null or zero-length.</value>
-  </data>
-  <data name="DuplicateFileName" xml:space="preserve">
-    <value>The file name '{0}' was already in the collection.</value>
-  </data>
   <data name="XmlInvalidCharSchemaPrimitive" xml:space="preserve">
     <value>Char is not a valid schema primitive and should be treated as int in DataContract</value>
   </data>
@@ -3318,5 +3344,108 @@
   </data>
   <data name="Xslt_UpperCaseFirstNotSupported" xml:space="preserve">
     <value>Uppercase-First sorting option is not supported.</value>
+  </data>
+  <data name="XmlPregenTypeDynamic" xml:space="preserve">
+    <value>Cannot pre-generate serialization code for type '{0}'. Pre-generation of serialization assemblies is not supported for dynamic types. Save the assembly and load it from disk to use it with XmlSerialization.</value>
+  </data>
+  <data name="XmlPregenOrphanType" xml:space="preserve">
+    <value>Cannot pre-generate serializer for multiple assemblies. Type '{0}' does not belong to assembly {1}.</value>
+  </data>
+  <data name="ErrSerializerExists" xml:space="preserve">
+    <value>Cannot generate serialization code {0} because the code file already exists. Use /{1} to force an overwrite of the existing file.</value>
+  </data>
+  <data name="ErrDirectoryExists" xml:space="preserve">
+    <value>Cannot generate serialization code '{0}' because a directory with the same name already exists.</value>
+  </data>
+  <data name="ErrDirectoryNotExists" xml:space="preserve">
+    <value>Cannot generate serialization code '{0}' because directory {1} doesn't exist.</value>
+  </data>
+  <data name="ErrInvalidArgument" xml:space="preserve">
+    <value>Ignoring invalid command line argument: '{0}'.</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>Warning: {0}.</value>
+  </data>
+  <data name="ErrMissingRequiredArgument" xml:space="preserve">
+    <value>Missing required command-line argument: {0}.</value>
+  </data>
+  <data name="ErrAssembly" xml:space="preserve">
+    <value>The name of the source assembly.</value>
+  </data>
+  <data name="InfoGeneratedFile" xml:space="preserve">
+    <value>Generated serialization code for assembly {0} --&gt; '{1}'.</value>
+  </data>
+  <data name="InfoFileName" xml:space="preserve">
+    <value>Serialization Code File Name: {0}.</value>
+  </data>
+  <data name="ErrGenerationFailed" xml:space="preserve">
+    <value>Sgen utility failed to pregenerate serialization code for {0}.</value>
+  </data>
+  <data name="ErrorDetails" xml:space="preserve">
+    <value>Error: {0}.</value>
+  </data>
+  <data name="ErrLoadType" xml:space="preserve">
+    <value>Type '{0}' was not found in the assembly '{1}'.</value>
+  </data>
+  <data name="DirectoryAccessDenied" xml:space="preserve">
+    <value>Access to directory {0} is denied.  The process under which XmlSerializer is running does not have sufficient permission to access the directory.</value>
+  </data>
+  <data name="Xslt_NotSupported" xml:space="preserve">
+    <value>Compilation of XSLT is not supported on this platform.</value>
+  </data>
+  <data name="ErrLoadAssembly" xml:space="preserve">
+    <value>File or assembly name '{0}', or one of its dependencies, was not found.</value>
+  </data>
+  <data name="InfoNoSerializableTypes" xml:space="preserve">
+    <value>Assembly '{0}' does not contain any types that can be serialized using XmlSerializer.</value>
+  </data>
+  <data name="InfoIgnoreType" xml:space="preserve">
+    <value>Ignoring '{0}'.</value>
+  </data>
+  <data name="FailLoadAssemblyUnderPregenMode" xml:space="preserve">
+    <value>"Fail to load assembly {0} or {0} doesn't exist under PreGen Mode.</value>
+  </data>
+  <data name="HelpDescription" xml:space="preserve">
+    <value>Generates serialization code for use with XmlSerializer.
+The utility allows developers to pre-generate code for serialization
+building and deploying the assemblies with the application.
+    </value>
+  </data>
+  <data name="HelpUsage" xml:space="preserve">
+    <value>
+Usage: dotnet {0} [[/assembly:&lt;assembly name&gt;] | [&lt;assembly file location&gt;]]
+      [/type:] [/debug].
+    </value>
+  </data>
+  <data name="HelpDevOptions" xml:space="preserve">
+    <value>  Developer options:</value>
+  </data>
+  <data name="HelpAssembly" xml:space="preserve">
+    <value>     {0}   Assembly location or display name. Short form is '{1}'.</value>
+  </data>
+  <data name="HelpType" xml:space="preserve">
+    <value>     {0}       Generate code for serialization/deserialization of the
+                  specified type from the input assembly. Short form is '{1}'.</value>
+  </data>
+  <data name="HelpForce" xml:space="preserve">
+    <value>     {0}       Forces overwrite of a previously generated assembly.
+                  Short form is '{1}'.</value>
+  </data>
+  <data name="HelpProxy" xml:space="preserve">
+    <value>     {0}  Generate serialization code only for proxy classes and web
+                  method parameters. Short form is '{1}'.</value>
+  </data>
+  <data name="HelpOut" xml:space="preserve">
+    <value>     {0}        Output directory name (default: target assembly location).
+                  Short form is '{1}'.</value>
+  </data>
+  <data name="HelpMiscOptions" xml:space="preserve">
+    <value>  Miscellaneous options:</value>
+  </data>
+  <data name="HelpHelp" xml:space="preserve">
+    <value>     {0} or {1}  Show this message</value>
+  </data>
+  <data name="MoreHelp" xml:space="preserve">
+    <value>If you would like more help, please type "sgen {0}".</value>
   </data>
 </root>

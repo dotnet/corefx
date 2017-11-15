@@ -6,6 +6,8 @@
     <TestCategories>InnerLoop;OuterLoop</TestCategories>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
@@ -42,6 +44,7 @@
     <Compile Include="SerialPort\Handshake.cs" />
     <Compile Include="SerialPort\IsOpen.cs" />
     <Compile Include="SerialPort\NewLine.cs" />
+    <Compile Include="SerialPort\AbortOnError.cs" />
     <Compile Include="SerialPort\Open.cs" />
     <Compile Include="SerialPort\OpenDevices.cs" />
     <Compile Include="SerialPort\Open_Stress.cs" />
@@ -115,9 +118,6 @@
     <Compile Include="Support\TCSupport.cs" />
     <Compile Include="Support\PortsTest.cs" />
     <Compile Include="Support\TestEventHandler.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Legacy\Manual\" />

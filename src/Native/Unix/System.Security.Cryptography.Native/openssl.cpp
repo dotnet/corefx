@@ -1257,6 +1257,10 @@ static void LockingCallback(int mode, int n, const char* file, int line)
 {
     (void)file, (void)line; // deliberately unused parameters
 
+// Clang complains about releasing locks that are not held.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wthread-safety-analysis"
+
     int result;
     if (mode & CRYPTO_LOCK)
     {
@@ -1271,6 +1275,7 @@ static void LockingCallback(int mode, int n, const char* file, int line)
     {
         assert(0 && "LockingCallback failed.");
     }
+#pragma clang diagnostic pop
 }
 
 #ifdef __APPLE__

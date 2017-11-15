@@ -10,7 +10,7 @@ namespace System.Collections.Generic
     /// Represents a reserved region within a <see cref="SparseArrayBuilder{T}"/>.
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    internal struct Marker
+    internal readonly struct Marker
     {
         /// <summary>
         /// Constructs a new marker.
@@ -113,9 +113,10 @@ namespace System.Collections.Generic
         /// <param name="count">The number of items to copy.</param>
         public void CopyTo(T[] array, int arrayIndex, int count)
         {
+            Debug.Assert(array != null);
             Debug.Assert(arrayIndex >= 0);
             Debug.Assert(count >= 0 && count <= Count);
-            Debug.Assert(array?.Length - arrayIndex >= count);
+            Debug.Assert(array.Length - arrayIndex >= count);
 
             int copied = 0;
             var position = CopyPosition.Start;
@@ -149,8 +150,11 @@ namespace System.Collections.Generic
                 count -= reservedCount;
             }
 
-            // Finish copying after the final marker.
-            _builder.CopyTo(position, array, arrayIndex, count);
+            if (count > 0)
+            {
+                // Finish copying after the final marker.
+                _builder.CopyTo(position, array, arrayIndex, count);
+            }
         }
 
         /// <summary>
@@ -173,6 +177,33 @@ namespace System.Collections.Generic
             {
                 _reservedCount += count;
             }
+        }
+
+        /// <summary>
+        /// Reserves a region if the items' count can be predetermined; otherwise, adds the items to this builder.
+        /// </summary>
+        /// <param name="items">The items to reserve or add.</param>
+        /// <returns><c>true</c> if the items were reserved; otherwise, <c>false</c>.</returns>
+        /// <remarks>
+        /// If the items' count is predetermined to be 0, no reservation is made and the return value is <c>false</c>.
+        /// The effect is the same as if the items were added, since adding an empty collection does nothing.
+        /// </remarks>
+        public bool ReserveOrAdd(IEnumerable<T> items)
+        {
+            int itemCount;
+            if (EnumerableHelpers.TryGetCount(items, out itemCount))
+            {
+                if (itemCount > 0)
+                {
+                    Reserve(itemCount);
+                    return true;
+                }
+            }
+            else
+            {
+                AddRange(items);
+            }
+            return false;
         }
 
         /// <summary>

@@ -73,6 +73,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Public Sub New()
             MyBase.New(GetResourceString(SR.InternalError))
         End Sub
+
     End Class
 
 End Namespace

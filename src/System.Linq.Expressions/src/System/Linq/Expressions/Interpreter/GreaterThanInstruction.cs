@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Dynamic.Utils;
-using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -295,7 +294,7 @@ namespace System.Linq.Expressions.Interpreter
                     case TypeCode.Single: return s_liftedToNullSingle ?? (s_liftedToNullSingle = new GreaterThanSingle(null));
                     case TypeCode.Double: return s_liftedToNullDouble ?? (s_liftedToNullDouble = new GreaterThanDouble(null));
                     default:
-                        throw Error.ExpressionNotSupportedForType("GreaterThan", type);
+                        throw ContractUtils.Unreachable;
                 }
             }
             else
@@ -314,11 +313,9 @@ namespace System.Linq.Expressions.Interpreter
                     case TypeCode.Single: return s_Single ?? (s_Single = new GreaterThanSingle(Utils.BoxedFalse));
                     case TypeCode.Double: return s_Double ?? (s_Double = new GreaterThanDouble(Utils.BoxedFalse));
                     default:
-                        throw Error.ExpressionNotSupportedForType("GreaterThan", type);
+                        throw ContractUtils.Unreachable;
                 }
             }
         }
-
-        public override string ToString() => "GreaterThan()";
     }
 }

@@ -14,6 +14,7 @@ using System.Xml;
 namespace System.Configuration
 {
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public class ConfigurationErrorsException : ConfigurationException
     {
         // Constants
@@ -122,7 +123,6 @@ namespace System.Configuration
             for (int i = 0; i < count; i++)
             {
                 string numPrefix = i.ToString(CultureInfo.InvariantCulture);
-
                 string currentType = info.GetString(numPrefix + SerializationParamErrorType);
                 Type currentExceptionType = Type.GetType(currentType, true);
 
@@ -131,9 +131,7 @@ namespace System.Configuration
                     (currentExceptionType != typeof(ConfigurationErrorsException)))
                     throw ExceptionUtil.UnexpectedError("ConfigurationErrorsException");
 
-                _errors[i] = (ConfigurationException)
-                    info.GetValue(numPrefix + SerializationParamErrorData,
-                        currentExceptionType);
+                _errors[i] = (ConfigurationException)info.GetValue(numPrefix + SerializationParamErrorData, currentExceptionType);
             }
         }
 
@@ -197,9 +195,6 @@ namespace System.Configuration
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            int subErrors = 0;
-
-            // call base implementation
             base.GetObjectData(info, context);
 
             // Serialize our members
@@ -209,19 +204,16 @@ namespace System.Configuration
             // Serialize rest of errors, along with count
             // (since first error duplicates this error, only worry if
             //  there is more than one)
-            if ((_errors != null) &&
-                (_errors.Length > 1))
+            int subErrors = 0;
+            if ((_errors != null) && (_errors.Length > 1))
             {
                 subErrors = _errors.Length;
 
                 for (int i = 0; i < _errors.Length; i++)
                 {
                     string numPrefix = i.ToString(CultureInfo.InvariantCulture);
-
-                    info.AddValue(numPrefix + SerializationParamErrorData,
-                        _errors[i]);
-                    info.AddValue(numPrefix + SerializationParamErrorType,
-                        _errors[i].GetType());
+                    info.AddValue(numPrefix + SerializationParamErrorData, _errors[i]);
+                    info.AddValue(numPrefix + SerializationParamErrorType, _errors[i].GetType());
                 }
             }
 

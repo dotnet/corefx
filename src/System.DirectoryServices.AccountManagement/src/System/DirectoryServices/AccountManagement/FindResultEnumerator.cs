@@ -39,7 +39,7 @@ namespace System.DirectoryServices.AccountManagement
                                         _endReached,
                                         _resultSet);
 
-                    throw new InvalidOperationException(StringResources.FindResultEnumInvalidPos);
+                    throw new InvalidOperationException(SR.FindResultEnumInvalidPos);
                 }
 
                 Debug.Assert(typeof(T) == typeof(System.DirectoryServices.AccountManagement.Principal) || typeof(T).IsSubclassOf(typeof(System.DirectoryServices.AccountManagement.Principal)));
@@ -154,7 +154,7 @@ namespace System.DirectoryServices.AccountManagement
         // Internal Constructors
         //
 
-        // Constructs a enumerator to enumerate over the supplied of ResultSet
+        // Constructs an enumerator to enumerate over the supplied of ResultSet
         // Note that resultSet can be null
         internal FindResultEnumerator(ResultSet resultSet)
         {

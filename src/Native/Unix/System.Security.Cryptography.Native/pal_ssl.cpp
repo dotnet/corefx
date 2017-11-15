@@ -27,46 +27,6 @@ extern "C" const SSL_METHOD* CryptoNative_SslV2_3Method()
     return method;
 }
 
-extern "C" const SSL_METHOD* CryptoNative_SslV3Method()
-{
-#ifdef OPENSSL_NO_SSL3_METHOD
-    return nullptr;
-#else
-    const SSL_METHOD* method = SSLv3_method();
-    assert(method != nullptr);
-    return method;
-#endif
-}
-
-extern "C" const SSL_METHOD* CryptoNative_TlsV1Method()
-{
-    const SSL_METHOD* method = TLSv1_method();
-    assert(method != nullptr);
-    return method;
-}
-
-extern "C" const SSL_METHOD* CryptoNative_TlsV1_1Method()
-{
-#if HAVE_TLS_V1_1
-    const SSL_METHOD* method = TLSv1_1_method();
-    assert(method != nullptr);
-    return method;
-#else
-    return nullptr;
-#endif
-}
-
-extern "C" const SSL_METHOD* CryptoNative_TlsV1_2Method()
-{
-#if HAVE_TLS_V1_2
-    const SSL_METHOD* method = TLSv1_2_method();
-    assert(method != nullptr);
-    return method;
-#else
-    return nullptr;
-#endif
-}
-
 extern "C" SSL_CTX* CryptoNative_SslCtxCreate(SSL_METHOD* method)
 {
     SSL_CTX* ctx = SSL_CTX_new(method);
@@ -83,7 +43,12 @@ extern "C" SSL_CTX* CryptoNative_SslCtxCreate(SSL_METHOD* method)
 
 extern "C" void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
 {
-    // protocols may be 0 (default). Less secure protocols should be excluded in this case.    
+    // protocols may be 0, meaning system default, in which case let OpenSSL do what OpenSSL wants.
+    if (protocols == 0)
+    {
+        return;
+    }
+
     long protocolOptions = 0;
 
     if ((protocols & PAL_SSL_SSL2) != PAL_SSL_SSL2)
@@ -92,10 +57,13 @@ extern "C" void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols proto
     }
 #ifndef OPENSSL_NO_SSL3
     if ((protocols & PAL_SSL_SSL3) != PAL_SSL_SSL3)
+#endif
     {
+        // If OPENSSL_NO_SSL3 is defined, then ensure we always include
+        // SSL_OP_NO_SSLv3 in case we end up running against a binary
+        // which had SSLv3 enabled (we don't want to use SSLv3 in that case).
         protocolOptions |= SSL_OP_NO_SSLv3;
     }
-#endif
     if ((protocols & PAL_SSL_TLS) != PAL_SSL_TLS)
     {
         protocolOptions |= SSL_OP_NO_TLSv1;
@@ -480,6 +448,11 @@ extern "C" void CryptoNative_SslCtxSetQuietShutdown(SSL_CTX* ctx)
     SSL_CTX_set_quiet_shutdown(ctx, 1);
 }
 
+extern "C" void CryptoNative_SslSetQuietShutdown(SSL* ssl, int mode)
+{
+    SSL_set_quiet_shutdown(ssl, mode);
+}
+
 extern "C" X509NameStack* CryptoNative_SslGetClientCAList(SSL* ssl)
 {
     return SSL_get_client_CA_list(ssl);
@@ -536,26 +509,6 @@ extern "C" void CryptoNative_SslCtxSetClientCertCallback(SSL_CTX* ctx, SslClient
     SSL_CTX_set_client_cert_cb(ctx, callback);
 }
 
-extern "C" void CryptoNative_GetStreamSizes(int32_t* header, int32_t* trailer, int32_t* maximumMessage)
-{
-    // This function is kept for compatibility with RC2 builds on a jagged upgrade path.
-    // Removal is tracked via issue #8504.
-    if (header)
-    {
-        *header = SSL3_RT_HEADER_LENGTH;
-    }
-
-    if (trailer)
-    {
-        *trailer = 68;
-    }
-
-    if (maximumMessage)
-    {
-        *maximumMessage = SSL3_RT_MAX_PLAIN_LENGTH;
-    }
-}
-
 extern "C" int32_t CryptoNative_SslAddExtraChainCert(SSL* ssl, X509* x509)
 {
     if (!x509 || !ssl)
@@ -571,3 +524,58 @@ extern "C" int32_t CryptoNative_SslAddExtraChainCert(SSL* ssl, X509* x509)
 
     return 0;
 }
+
+extern "C" void CryptoNative_SslCtxSetAlpnSelectCb(SSL_CTX* ctx, SslCtxSetAlpnCallback cb, void* arg)
+{
+#if HAVE_OPENSSL_ALPN
+    if (API_EXISTS(SSL_CTX_set_alpn_select_cb))
+    {
+        SSL_CTX_set_alpn_select_cb(ctx, cb, arg);
+    }
+#else
+    (void)ctx;
+    (void)cb;
+    (void)arg;
+#endif
+}
+
+extern "C" int32_t CryptoNative_SslCtxSetAlpnProtos(SSL_CTX* ctx, const uint8_t* protos, uint32_t protos_len)
+{
+#if HAVE_OPENSSL_ALPN
+    if (API_EXISTS(SSL_CTX_set_alpn_protos))
+    {
+        return SSL_CTX_set_alpn_protos(ctx, protos, protos_len);
+    }
+    else
+#else
+    (void)ctx;
+    (void)protos;
+    (void)protos_len;
+#endif
+    {
+        return 0;
+    }
+}
+
+extern "C" void CryptoNative_SslGet0AlpnSelected(SSL* ssl, const uint8_t** protocol, uint32_t* len)
+{
+#if HAVE_OPENSSL_ALPN
+    if (API_EXISTS(SSL_get0_alpn_selected))
+    {
+        SSL_get0_alpn_selected(ssl, protocol, len);
+    }
+    else
+#else
+    (void)ssl;
+#endif
+    {
+        *protocol = nullptr;
+        *len = 0;
+    }
+}
+
+extern "C" int32_t CryptoNative_SslSetTlsExtHostName(SSL* ssl, const uint8_t* name)
+{
+    return static_cast<int32_t>(SSL_set_tlsext_host_name(ssl, name));
+}
+

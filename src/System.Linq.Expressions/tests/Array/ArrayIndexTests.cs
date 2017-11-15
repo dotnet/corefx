@@ -2725,41 +2725,41 @@ namespace System.Linq.Expressions.Tests
         public static void ArrayIndexNotArray()
         {
             Expression intExp = Expression.Constant(1);
-            Assert.Throws<ArgumentException>("array", () => Expression.ArrayIndex(intExp, intExp));
+            AssertExtensions.Throws<ArgumentException>("array", () => Expression.ArrayIndex(intExp, intExp));
         }
 
         [Fact]
         public static void ArrayIndexNullArray()
         {
-            Assert.Throws<ArgumentNullException>("array", () => Expression.ArrayIndex(null, Expression.Constant(0)));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => Expression.ArrayIndex(null, Expression.Constant(0)));
         }
 
         [Fact]
         public static void ArrayIndexNullIndices()
         {
             Expression array = Expression.Constant(new[] {1, 2});
-            Assert.Throws<ArgumentNullException>("index", () => Expression.ArrayIndex(array, default(Expression)));
+            AssertExtensions.Throws<ArgumentNullException>("index", () => Expression.ArrayIndex(array, default(Expression)));
         }
 
         [Fact]
         public static void ArrayIndexWrongRank()
         {
             Expression array = Expression.Constant(new[,] { { 1, 2 }, { 2, 1 } });
-            Assert.Throws<ArgumentException>(null, () => Expression.ArrayIndex(array, Expression.Constant(2)));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.ArrayIndex(array, Expression.Constant(2)));
         }
 
         [Fact]
         public static void ArrayIndexWrongType()
         {
             Expression array = Expression.Constant(new[] {1, 2});
-            Assert.Throws<ArgumentException>("index", () => Expression.ArrayIndex(array, Expression.Constant(2L)));
+            AssertExtensions.Throws<ArgumentException>("index", () => Expression.ArrayIndex(array, Expression.Constant(2L)));
         }
 
         [Fact]
         public static void UnreadableArray()
         {
             Expression array = Expression.Property(null, typeof(Unreadable<int[]>), nameof(Unreadable<int>.WriteOnly));
-            Assert.Throws<ArgumentException>(() => Expression.ArrayIndex(array, Expression.Constant(0)));
+            AssertExtensions.Throws<ArgumentException>("array", () => Expression.ArrayIndex(array, Expression.Constant(0)));
         }
 
         [Fact]
@@ -2767,10 +2767,11 @@ namespace System.Linq.Expressions.Tests
         {
             Expression array = Expression.Constant(new[]  { 1, 2 });
             Expression index = Expression.Property(null, typeof(Unreadable<int>), nameof(Unreadable<int>.WriteOnly));
-            Assert.Throws<ArgumentException>("index", () => Expression.ArrayIndex(array, index));
+            AssertExtensions.Throws<ArgumentException>("index", () => Expression.ArrayIndex(array, index));
         }
 
-        [Theory, ClassData(typeof(CompilationTypes))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
+        [ClassData(typeof(CompilationTypes))]
         public static void NonZeroBasedOneDimensionalArrayIndex(bool useInterpreter)
         {
             Array arrayObj = Array.CreateInstance(typeof(int), new[] { 3 }, new[] { -1 });
@@ -2790,7 +2791,8 @@ namespace System.Linq.Expressions.Tests
             Assert.True(testValues());
         }
 
-        [Theory, ClassData(typeof(CompilationTypes))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
+        [ClassData(typeof(CompilationTypes))]
         public static void NonZeroBasedOneDimensionalArrayIndexMethod(bool useInterpreter)
         {
             Array arrayObj = Array.CreateInstance(typeof(int), new[] { 3 }, new[] { -1 });

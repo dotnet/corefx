@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Linq;
 
 namespace System.Collections.Immutable
 {
@@ -46,16 +47,15 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableQueue{T}"/> class.
         /// </summary>
-        /// <param name="forward">The forward stack.</param>
-        /// <param name="backward">The backward stack.</param>
-        private ImmutableQueue(ImmutableStack<T> forward, ImmutableStack<T> backward)
+        /// <param name="forwards">The forwards stack.</param>
+        /// <param name="backwards">The backwards stack.</param>
+        internal ImmutableQueue(ImmutableStack<T> forwards, ImmutableStack<T> backwards)
         {
-            Requires.NotNull(forward, nameof(forward));
-            Requires.NotNull(backward, nameof(backward));
+            Debug.Assert(forwards != null);
+            Debug.Assert(backwards != null);
 
-            _forwards = forward;
-            _backwards = backward;
-            _backwardsReversed = null;
+            _forwards = forwards;
+            _backwards = backwards;
         }
 
         /// <summary>
@@ -76,7 +76,11 @@ namespace System.Collections.Immutable
         /// </value>
         public bool IsEmpty
         {
-            get { return _forwards.IsEmpty && _backwards.IsEmpty; }
+            get
+            {
+                Debug.Assert(!_forwards.IsEmpty || _backwards.IsEmpty);
+                return _forwards.IsEmpty;
+            }
         }
 
         /// <summary>
@@ -151,7 +155,7 @@ namespace System.Collections.Immutable
 
             if (this.IsEmpty)
             {
-                return new ImmutableQueue<T>(ImmutableStack<T>.Empty.Push(value), ImmutableStack<T>.Empty);
+                return new ImmutableQueue<T>(ImmutableStack.Create(value), ImmutableStack<T>.Empty);
             }
             else
             {
@@ -246,7 +250,9 @@ namespace System.Collections.Immutable
         [Pure]
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            return new EnumeratorObject(this);
+            return this.IsEmpty ?
+                Enumerable.Empty<T>().GetEnumerator() :
+                new EnumeratorObject(this);
         }
 
         /// <summary>

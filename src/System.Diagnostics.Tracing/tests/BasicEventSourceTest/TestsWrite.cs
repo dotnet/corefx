@@ -7,7 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+#if USE_MDT_EVENTSOURCE
+using Microsoft.Diagnostics.Tracing;
+#else
 using System.Diagnostics.Tracing;
+#endif
 using Xunit;
 #if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
 using Microsoft.Diagnostics.Tracing.Session;
@@ -39,6 +43,7 @@ namespace BasicEventSourceTests
         /// Tests the EventListener code path
         /// </summary>
         [Fact]
+        [ActiveIssue("dotnet/corefx #19455", TargetFrameworkMonikers.NetFramework)]
         public void Test_Write_T_EventListener()
         {
             using (var listener = new EventListenerListener())
@@ -52,6 +57,7 @@ namespace BasicEventSourceTests
         /// Tests the EventListener code path using events instead of virtual callbacks.
         /// </summary>
         [Fact]
+        [ActiveIssue("dotnet/corefx #19455", TargetFrameworkMonikers.NetFramework)]
         public void Test_Write_T_EventListener_UseEvents()
         {
             Test_Write_T(new EventListenerListener(true));
@@ -407,6 +413,7 @@ namespace BasicEventSourceTests
         /// events MUST use SelfDescribing serialization.  
         /// </summary>
         [Fact]
+        [ActiveIssue("dotnet/corefx #18806", TargetFrameworkMonikers.NetFramework)]
         public void Test_Write_T_In_Manifest_Serialization()
         {
             using (var eventListener = new EventListenerListener())

@@ -40,7 +40,7 @@ namespace System.IO.Compression.Tests
                 ZipArchiveEntry entry = archive.GetEntry("first.txt");
 
                 //null/empty string
-                Assert.Throws<ArgumentException>(() => archive.CreateEntry("")); //"Should throw on empty entry name"
+                AssertExtensions.Throws<ArgumentException>("entryName", () => archive.CreateEntry("")); //"Should throw on empty entry name"
                 Assert.Throws<ArgumentNullException>(() => archive.CreateEntry(null)); //"should throw on null entry name"
             }
         }
@@ -220,7 +220,7 @@ namespace System.IO.Compression.Tests
         {
             string zipname = strange("largetrailingwhitespacedeflation.zip");
             string entryname = "A/B/C/D";
-            using (FileStream stream = File.Open(zipname, FileMode.Open, FileAccess.ReadWrite))
+            using (FileStream stream = File.Open(zipname, FileMode.Open, FileAccess.Read))
             using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
             {
                 ZipArchiveEntry entry = archive.GetEntry(entryname);

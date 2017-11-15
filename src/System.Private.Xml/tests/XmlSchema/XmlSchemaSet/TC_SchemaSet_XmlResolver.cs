@@ -19,8 +19,6 @@ namespace System.Xml.Tests
             _output = output;
         }
 
-
-        //todo: use rootpath
         public bool bWarningCallback;
 
         public bool bErrorCallback;
@@ -124,6 +122,7 @@ namespace System.Xml.Tests
         }
 
         //[Variation(Desc = "v6 - schema(Local)->schema(Local), but resolving external URI is not allowed", Priority = 1)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop Framework doesn't have the switch AllowDefaultResolver and false is not default behavior")]
         [Fact]
         public void v6()
         {
@@ -140,7 +139,3 @@ namespace System.Xml.Tests
         }
     }
 }
-
-//todo: add tests for include
-//add tests for intranet
-//add tests for custom resolver

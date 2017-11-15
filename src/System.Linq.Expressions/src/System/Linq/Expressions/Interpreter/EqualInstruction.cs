@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Dynamic.Utils;
-using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -555,7 +554,5 @@ namespace System.Linq.Expressions.Interpreter
                 }
             }
         }
-
-        public override string ToString() => "Equal()";
     }
 }

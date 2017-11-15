@@ -15,14 +15,15 @@ using System.Globalization;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Xml.Xsl.Qil;
+#if FEATURE_COMPILED_XSL
 using System.Xml.Xsl.IlGen;
+#endif
 using System.ComponentModel;
 using MS.Internal.Xml.XPath;
 using System.Runtime.Versioning;
 
 namespace System.Xml.Xsl.Runtime
 {
-
     /// <summary>
     /// XmlQueryRuntime is passed as the first parameter to all generated query methods.
     ///
@@ -470,19 +471,6 @@ namespace System.Xml.Xsl.Runtime
             return (GetAtomizedName(indexLocalName) == navigator.LocalName) && (GetAtomizedName(indexNamespaceUri) == navigator.NamespaceURI);
         }
 
-
-        //-----------------------------------------------
-        // Xml types
-        //-----------------------------------------------
-
-        /// <summary>
-        /// Get the array of xml types that are used within this query.
-        /// </summary>
-        internal XmlQueryType[] XmlTypes
-        {
-            get { return _types; }
-        }
-
         /// <summary>
         /// Get the Xml query type at the specified index in the array of types.
         /// </summary>
@@ -506,8 +494,10 @@ namespace System.Xml.Xsl.Runtime
         /// </summary>
         internal object ChangeTypeXsltArgument(XmlQueryType xmlType, object value, Type destinationType)
         {
+#if FEATURE_COMPILED_XSL
             Debug.Assert(XmlILTypeHelper.GetStorageType(xmlType).IsAssignableFrom(value.GetType()),
                          "Values passed to ChangeTypeXsltArgument should be in ILGen's default Clr representation.");
+#endif
             Debug.Assert(destinationType == XsltConvert.ObjectType || !destinationType.IsAssignableFrom(value.GetType()),
                          "No need to call ChangeTypeXsltArgument since value is already assignable to destinationType " + destinationType);
 
@@ -705,7 +695,9 @@ namespace System.Xml.Xsl.Runtime
                     }
             }
 
+#if FEATURE_COMPILED_XSL
             Debug.Assert(XmlILTypeHelper.GetStorageType(xmlType).IsAssignableFrom(value.GetType()), "Xml type " + xmlType + " is not represented in ILGen as " + value.GetType().Name);
+#endif
             return value;
         }
 

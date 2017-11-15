@@ -13,7 +13,7 @@ namespace System.Globalization.Tests
         public static IEnumerable<object[]> CurrencyNegativePattern_TestData()
         {
             yield return new object[] { NumberFormatInfo.InvariantInfo, new int[] { 0 } };
-            yield return new object[] { new CultureInfo("bg-BG").NumberFormat, new int[] { 8 } };
+            yield return new object[] { CultureInfo.GetCultureInfo("bg-BG").NumberFormat, new int[] { 8 } };
         }
 
         [Theory]
@@ -36,7 +36,7 @@ namespace System.Globalization.Tests
             CultureInfo culture; 
             try
             {
-                culture = new CultureInfo(locale);
+                culture = CultureInfo.GetCultureInfo(locale);
             }
             catch(CultureNotFoundException)
             {
@@ -61,8 +61,8 @@ namespace System.Globalization.Tests
         [Fact]
         public void CurrencyNegativePattern_Set_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("CurrencyNegativePattern", () => new NumberFormatInfo().CurrencyNegativePattern = -1);
-            Assert.Throws<ArgumentOutOfRangeException>("CurrencyNegativePattern", () => new NumberFormatInfo().CurrencyNegativePattern = 16);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("CurrencyNegativePattern", () => new NumberFormatInfo().CurrencyNegativePattern = -1);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("CurrencyNegativePattern", () => new NumberFormatInfo().CurrencyNegativePattern = 16);
             Assert.Throws<InvalidOperationException>(() => NumberFormatInfo.InvariantInfo.CurrencyNegativePattern = 1);
         }
     }

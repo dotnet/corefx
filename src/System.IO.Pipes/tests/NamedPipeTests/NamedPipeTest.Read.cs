@@ -8,6 +8,7 @@ using Xunit;
 
 namespace System.IO.Pipes.Tests
 {
+    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
     public class NamedPipeTest_Read_ServerOut_ClientIn : PipeTest_Read
     {
         protected override ServerClientPair CreateServerClientPair()
@@ -26,7 +27,8 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-
+    
+    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
     public class NamedPipeTest_Read_ServerIn_ClientOut : PipeTest_Read
     {
         protected override ServerClientPair CreateServerClientPair()
@@ -45,7 +47,8 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
     }
-
+    
+    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
     public class NamedPipeTest_Read_ServerInOut_ClientInOut : PipeTest_Read
     {
         protected override ServerClientPair CreateServerClientPair()
@@ -64,7 +67,28 @@ namespace System.IO.Pipes.Tests
             return ret;
         }
 
-        // InOut pipes can be written/read from either direction
-        public override void WriteToReadOnlyPipe_Throws_NotSupportedException() { }
+        public override bool SupportsBidirectionalReadingWriting => true;
+    }
+    
+    [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
+    public class NamedPipeTest_Read_ServerInOut_ClientInOut_APMWaitForConnection : PipeTest_Read
+    {
+        protected override ServerClientPair CreateServerClientPair()
+        {
+            ServerClientPair ret = new ServerClientPair();
+            string pipeName = GetUniquePipeName();
+            var readablePipe = new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+            var writeablePipe = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+
+            Task serverConnect = Task.Factory.FromAsync(readablePipe.BeginWaitForConnection, readablePipe.EndWaitForConnection, null);
+            writeablePipe.Connect();
+            serverConnect.Wait();
+
+            ret.readablePipe = readablePipe;
+            ret.writeablePipe = writeablePipe;
+            return ret;
+        }
+
+        public override bool SupportsBidirectionalReadingWriting => true;
     }
 }

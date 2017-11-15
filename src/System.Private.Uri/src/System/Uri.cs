@@ -12,6 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace System
 {
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public partial class Uri : ISerializable
     {
         public static readonly string UriSchemeFile = UriParser.FileUri.SchemeName;
@@ -111,6 +112,7 @@ namespace System
             QueryIriCanonical = 0x20000000000,
             FragmentIriCanonical = 0x40000000000,
             IriCanonical = 0x78000000000,
+            UnixPath = 0x100000000000,
         }
 
         private Flags _flags;
@@ -168,6 +170,11 @@ namespace System
         private bool IsUncPath
         {
             get { return (_flags & Flags.UncPath) != 0; }
+        }
+
+        private bool IsUnixPath
+        {
+            get { return (_flags & Flags.UnixPath) != 0; }
         }
 
         private Flags HostType
@@ -398,7 +405,7 @@ namespace System
         //
         protected Uri(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            string uriString = serializationInfo.GetString("AbsoluteUri");
+            string uriString = serializationInfo.GetString("AbsoluteUri"); // Do not rename (binary serialization)
 
             if (uriString.Length != 0)
             {
@@ -406,7 +413,7 @@ namespace System
                 return;
             }
 
-            uriString = serializationInfo.GetString("RelativeUri");
+            uriString = serializationInfo.GetString("RelativeUri");  // Do not rename (binary serialization)
             if ((object)uriString == null)
                 throw new ArgumentNullException("uriString");
 
@@ -431,11 +438,11 @@ namespace System
         {
 
             if (IsAbsoluteUri)
-                serializationInfo.AddValue("AbsoluteUri", GetParts(UriComponents.SerializationInfoString, UriFormat.UriEscaped));
+                serializationInfo.AddValue("AbsoluteUri", GetParts(UriComponents.SerializationInfoString, UriFormat.UriEscaped)); // Do not rename (binary serialization)
             else
             {
-                serializationInfo.AddValue("AbsoluteUri", string.Empty);
-                serializationInfo.AddValue("RelativeUri", GetParts(UriComponents.SerializationInfoString, UriFormat.UriEscaped));
+                serializationInfo.AddValue("AbsoluteUri", string.Empty); // Do not rename (binary serialization)
+                serializationInfo.AddValue("RelativeUri", GetParts(UriComponents.SerializationInfoString, UriFormat.UriEscaped)); // Do not rename (binary serialization)
             }
         }
 
@@ -1400,10 +1407,15 @@ namespace System
             {
                 throw new ArgumentOutOfRangeException(nameof(character));
             }
-            char[] chars = new char[3];
-            int pos = 0;
-            UriHelper.EscapeAsciiChar(character, chars, ref pos);
-            return new string(chars);
+
+            unsafe
+            {
+                char* chars = stackalloc char[3];
+                chars[0] = '%';
+                chars[1] = UriHelper.s_hexUpperChars[(character & 0xf0) >> 4];
+                chars[2] = UriHelper.s_hexUpperChars[character & 0xf];
+                return new string(chars, 0, 3);
+            }
         }
 
         //
@@ -1480,7 +1492,8 @@ namespace System
             return
                 (pattern.Length - index) >= 3 &&
                 pattern[index] == '%' &&
-                UriHelper.EscapedAscii(pattern[index + 1], pattern[index + 2]) != c_DummyChar;
+                IsHexDigit(pattern[index + 1]) &&
+                IsHexDigit(pattern[index + 2]);
         }
 
         //
@@ -1527,12 +1540,10 @@ namespace System
         // Throws:
         //  Nothing
         //
-        public static bool IsHexDigit(char character)
-        {
-            return ((character >= '0') && (character <= '9'))
-                || ((character >= 'A') && (character <= 'F'))
-                || ((character >= 'a') && (character <= 'f'));
-        }
+        public static bool IsHexDigit(char character) =>
+            (uint)(character - '0') <= '9' - '0' ||
+            (uint)(character - 'A') <= 'F' - 'A' ||
+            (uint)(character - 'a') <= 'f' - 'a';
 
         //
         // Returns:
@@ -1541,21 +1552,11 @@ namespace System
         // Throws:
         //  ArgumentException
         //
-        public static int FromHex(char digit)
-        {
-            if (((digit >= '0') && (digit <= '9'))
-                || ((digit >= 'A') && (digit <= 'F'))
-                || ((digit >= 'a') && (digit <= 'f')))
-            {
-                return (digit <= '9')
-                    ? ((int)digit - (int)'0')
-                    : (((digit <= 'F')
-                    ? ((int)digit - (int)'A')
-                    : ((int)digit - (int)'a'))
-                    + 10);
-            }
+        public static int FromHex(char digit) =>
+            (uint)(digit - '0') <= '9' - '0' ? digit - '0' :
+            (uint)(digit - 'A') <= 'F' - 'A' ? digit - 'A' + 10 :
+            (uint)(digit - 'a') <= 'f' - 'a' ? digit - 'a' + 10 :
             throw new ArgumentException(nameof(digit));
-        }
 
         //
         // GetHashCode
@@ -2028,6 +2029,14 @@ namespace System
                     ++length;
                 }
 
+                // Unix Path
+                if (!IsWindowsSystem && InFact(Flags.UnixPath))
+                {
+                    _flags |= Flags.BasicHostType;
+                    _flags |= (Flags)idx;
+                    return ParsingError.None;
+                }
+
                 // Old Uri parser tries to figure out on a DosPath in all cases.
                 // Hence http://c:/ is treated as DosPath without the host while it should be a host "c", port 80
                 //
@@ -2038,7 +2047,7 @@ namespace System
                     && NotAny(Flags.ImplicitFile) && (idx + 1 < length))
                 {
                     char c;
-                    ushort i = (ushort)idx;
+                    ushort i = idx;
 
                     // V1 Compat: Allow _compression_ of > 3 slashes only for File scheme.
                     // This will skip all slashes and if their number is 2+ it sets the AuthorityFound flag
@@ -2056,10 +2065,10 @@ namespace System
                             _flags |= Flags.AuthorityFound;
                         }
                         // DOS-like path?
-                        if (i + 1 < (ushort)length && ((c = pUriString[i + 1]) == ':' || c == '|') &&
+                        if (i + 1 < length && ((c = pUriString[i + 1]) == ':' || c == '|') &&
                             UriHelper.IsAsciiLetter(pUriString[i]))
                         {
-                            if (i + 2 >= (ushort)length || ((c = pUriString[i + 2]) != '\\' && c != '/'))
+                            if (i + 2 >= length || ((c = pUriString[i + 2]) != '\\' && c != '/'))
                             {
                                 // report an error but only for a file: scheme
                                 if (_syntax.InFact(UriSyntaxFlags.FileLikeUri))
@@ -2086,6 +2095,7 @@ namespace System
                                 }
                             }
                         }
+                        // UNC share?
                         else if (_syntax.InFact(UriSyntaxFlags.FileLikeUri) && (i - idx >= 2 && i - idx != 3 &&
                             i < length && pUriString[i] != '?' && pUriString[i] != '#'))
                         {
@@ -2094,12 +2104,18 @@ namespace System
                             _flags |= Flags.UncPath;
                             idx = i;
                         }
+                        else if (!IsWindowsSystem && _syntax.InFact(UriSyntaxFlags.FileLikeUri) && pUriString[i - 1] == '/' && i - idx == 3)
+                        {
+                            _syntax = UriParser.UnixFileUri;
+                            _flags |= Flags.UnixPath | Flags.AuthorityFound;
+                            idx += 2;
+                        }
                     }
                 }
                 //
                 //STEP 1.5 decide on the Authority component
                 //
-                if ((_flags & (Flags.UncPath | Flags.DosPath)) != 0)
+                if ((_flags & (Flags.UncPath | Flags.DosPath | Flags.UnixPath)) != 0)
                 {
                 }
                 else if ((idx + 2) <= length)
@@ -2165,15 +2181,24 @@ namespace System
                 // We must ensure that known schemes do use a server-based authority
                 {
                     ParsingError err = ParsingError.None;
-                    idx = CheckAuthorityHelper(pUriString, idx, (ushort)length, ref err, ref _flags, _syntax, ref newHost);
+                    idx = CheckAuthorityHelper(pUriString, idx, length, ref err, ref _flags, _syntax, ref newHost);
                     if (err != ParsingError.None)
                         return err;
 
-                    // This will disallow '\' as the host terminator for any scheme that is not implicitFile or cannot have a Dos Path
-                    if ((idx < (ushort)length && pUriString[idx] == '\\') && NotAny(Flags.ImplicitFile) &&
-                        _syntax.NotAny(UriSyntaxFlags.AllowDOSPath))
+                    if (idx < (ushort)length)
                     {
-                        return ParsingError.BadAuthorityTerminator;
+                        char hostTerminator = pUriString[idx];
+
+                        // This will disallow '\' as the host terminator for any scheme that is not implicitFile or cannot have a Dos Path
+                        if (hostTerminator == '\\' && NotAny(Flags.ImplicitFile) && _syntax.NotAny(UriSyntaxFlags.AllowDOSPath))
+                        {
+                            return ParsingError.BadAuthorityTerminator;
+                        }
+                        // When the hostTerminator is '/' on Unix, use the UnixFile syntax (preserve backslashes)
+                        else if (!IsWindowsSystem && hostTerminator == '/' && NotAny(Flags.ImplicitFile) && InFact(Flags.UncPath) && _syntax == UriParser.FileUri)
+                        {
+                            _syntax = UriParser.UnixFileUri;
+                        }
                     }
                 }
 
@@ -3618,6 +3643,14 @@ namespace System
                 ++idx;
             }
 
+            // Unix: Unix path?
+            if (!IsWindowsSystem && idx < length && uriString[idx] == '/')
+            {
+                flags |= (Flags.UnixPath | Flags.ImplicitFile | Flags.AuthorityFound);
+                syntax = UriParser.UnixFileUri;
+                return idx;
+            }
+
             // sets the recognizer for well known registered schemes
             // file, ftp, http, https, uuid, etc
             // Note that we don't support one-letter schemes that will be put into a DOS path bucket
@@ -3673,7 +3706,7 @@ namespace System
                 }
                 else if ((c = uriString[idx]) == '/' || c == '\\')
                 {
-                    //UNC share ?
+                    //UNC share?
                     if ((c = uriString[idx + 1]) == '\\' || c == '/')
                     {
                         flags |= (Flags.UncPath | Flags.ImplicitFile | Flags.AuthorityFound);
@@ -4000,12 +4033,6 @@ namespace System
             bool hostNotUnicodeNormalized = ((flags & Flags.HostUnicodeNormalized) == 0); // perf
             UriSyntaxFlags syntaxFlags = syntax.Flags;
 
-            // need to build new Iri'zed string
-            if (hasUnicode && iriParsing && hostNotUnicodeNormalized)
-            {
-                newHost = _originalUnicodeString.Substring(0, startInput);
-            }
-
             //Special case is an empty authority
             if (idx == length || ((ch = pString[idx]) == '/' || (ch == '\\' && StaticIsFile(syntax)) || ch == '#' || ch == '?'))
             {
@@ -4026,6 +4053,12 @@ namespace System
                 }
 
                 return idx;
+            }
+
+            // need to build new Iri'zed string
+            if (hasUnicode && iriParsing && hostNotUnicodeNormalized)
+            {
+                newHost = _originalUnicodeString.Substring(0, startInput);
             }
 
             string userInfoString = null;
@@ -4715,6 +4748,14 @@ namespace System
                         end += (_info.Offset.Query - _info.Offset.Path);
                     }
                 }
+
+                // On Unix, escape '\\' in path of file uris to '%5C' canonical form.
+                if (!IsWindowsSystem && InFact(Flags.BackslashInPath) && _syntax.NotAny(UriSyntaxFlags.ConvertPathSlashes) && _syntax.InFact(UriSyntaxFlags.FileLikeUri) && !IsImplicitFile)
+                {
+                    string str = new string(dest, pos, end - pos);
+                    dest = UriHelper.EscapeString(str, 0, str.Length, dest, ref pos, true, '\\', c_DummyChar, '%');
+                    end = pos;
+                }
             }
             else
             {
@@ -5241,6 +5282,10 @@ namespace System
                         // The FILE DOS path comes as /c:/path, we have to exclude first 3 chars from compression
                         path = Compress(path, 3, ref length, basePart.Syntax);
                         return new string(path, 1, length - 1) + extra;
+                    }
+                    else if (!IsWindowsSystem && basePart.IsUnixPath)
+                    {
+                        left = basePart.GetParts(UriComponents.Host, UriFormat.Unescaped);
                     }
                     else
                     {

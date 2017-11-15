@@ -29,7 +29,7 @@ namespace System.Reflection.Metadata
         private static string[] s_projectedTypeNames;
         private static ProjectionInfo[] s_projectionInfos;
 
-        private struct ProjectionInfo
+        private readonly struct ProjectionInfo
         {
             public readonly string WinRTNamespace;
             public readonly StringHandle.VirtualIndex ClrNamespace;
@@ -364,12 +364,6 @@ namespace System.Reflection.Metadata
         {
             return StringHeap.EqualsRaw(TypeRefTable.GetNamespace(handle), "System") &&
                    StringHeap.EqualsRaw(TypeRefTable.GetName(handle), "Attribute");
-        }
-
-        private bool IsSystemEnum(TypeReferenceHandle handle)
-        {
-            return StringHeap.EqualsRaw(TypeRefTable.GetNamespace(handle), "System") &&
-                   StringHeap.EqualsRaw(TypeRefTable.GetName(handle), "Enum");
         }
 
         private bool NeedsWinRTPrefix(TypeAttributes flags, EntityHandle extends)

@@ -1,7 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Tests;
@@ -17,11 +18,11 @@ namespace System.CodeDom.Tests
 
         protected override bool NullAllowed => false;
         protected override bool Enumerator_Current_UndefinedOperation_Throws => true;
-        protected override bool IList_CurrentAfterAdd_Throws => false;
         protected override bool ICollection_NonGeneric_HasNullSyncRoot => true;
 
         protected override Type ICollection_NonGeneric_CopyTo_NonZeroLowerBound_ThrowType => typeof(ArgumentOutOfRangeException);
-        protected override Type ICollection_NonGeneric_CopyTo_ArrayOfEnumType_ThrowType => typeof(ArgumentException);
+        protected override Type ICollection_NonGeneric_CopyTo_ArrayOfIncorrectReferenceType_ThrowType => typeof(InvalidCastException);
+        protected override Type ICollection_NonGeneric_CopyTo_ArrayOfIncorrectValueType_ThrowType => typeof(InvalidCastException);
 
         [Fact]
         public void Add()
@@ -79,8 +80,8 @@ namespace System.CodeDom.Tests
         public void AddRange_Null_ThrowsArgumentNullException()
         {
             var collection = new CodeNamespaceImportCollection();
-            Assert.Throws<ArgumentNullException>("value", () => collection.AddRange(null));
-            Assert.Throws<ArgumentNullException>("value", () => collection.AddRange(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => collection.AddRange(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => collection.AddRange(null));
         }
 
         [Fact]
@@ -96,8 +97,8 @@ namespace System.CodeDom.Tests
         public void Item_InvalidIndex_ThrowsArgumentOutOfRangeException(int index)
         {
             var collection = new CodeNamespaceCollection();
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => collection[index]);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => collection[index] = new CodeNamespace());
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collection[index]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collection[index] = new CodeNamespace());
         }
 
         [Fact]

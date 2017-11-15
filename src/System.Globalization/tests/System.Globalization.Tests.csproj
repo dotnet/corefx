@@ -2,11 +2,14 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <ProjectGuid>{9A8926D9-1D4C-4069-8965-A626F6CA8C29}</ProjectGuid>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ProjectGuid>{484C92C6-6D2C-45BC-A5E2-4A12BA228E1E}</ProjectGuid>
+    <DefineConstants Condition="'$(TargetGroup)' == 'uap'">$(DefineConstants);uap</DefineConstants>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="CharUnicodeInfo\CharUnicodeInfoTestData.cs" />
     <Compile Include="CharUnicodeInfo\CharUnicodeInfoTests.cs" />
@@ -53,6 +56,7 @@
     <Compile Include="CultureInfo\CultureInfoGetHashCode.cs" />
     <Compile Include="CultureInfo\CultureInfoIsNeutralCulture.cs" />
     <Compile Include="CultureInfo\CultureInfoNativeName.cs" />
+    <Compile Include="CultureInfo\CultureInfoNumberFormat.cs" />
     <Compile Include="CultureInfo\CultureInfoParent.cs" />
     <Compile Include="CultureInfo\CultureInfoReadOnly.cs" />
     <Compile Include="CultureInfo\CultureInfoTwoLetterISOLanguageName.cs" />
@@ -90,6 +94,7 @@
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoShortestDayNames.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoShortTimePattern.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoSortableDateTimePattern.cs" />
+    <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoTests.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoUniversalSortableDateTimePattern.cs" />
     <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoYearMonthPattern.cs" />
     <Compile Include="DateTimeStyles\DateTimeStylesTests.cs" />
@@ -103,51 +108,35 @@
     <Compile Include="NumberFormatInfo\NumberFormatInfoGetFormat.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoGetInstance.cs" />
     <Compile Include="NumberFormatInfo\NumberFormatInfoReadOnly.cs" />
+    <Compile Include="NumberFormatInfo\NumberFormatInfoTests.cs" />
     <Compile Include="NumberStyles\NumberStylesTests.cs" />
+    <Compile Include="SortVersion\SortVersionTests.cs" />
     <Compile Include="StringInfo\StringInfoCtor.cs" />
     <Compile Include="StringInfo\StringInfoEquals.cs" />
     <Compile Include="StringInfo\StringInfoGetNextTextElement.cs" />
     <Compile Include="StringInfo\StringInfoGetTextElementEnumerator.cs" />
     <Compile Include="StringInfo\StringInfoParseCombiningCharacters.cs" />
     <Compile Include="StringInfo\StringInfoString.cs" />
+    <Compile Include="StringInfo\StringInfoTests.cs" />
     <Compile Include="TextElementEnumerator\TextElementEnumeratorTests.cs" />
     <Compile Include="TextInfo\TextInfoCultureName.cs" />
     <Compile Include="TextInfo\TextInfoEquals.cs" />
     <Compile Include="TextInfo\TextInfoIsRightToLeft.cs" />
     <Compile Include="TextInfo\TextInfoIsReadOnly.cs" />
     <Compile Include="TextInfo\TextInfoListSeparator.cs" />
+    <Compile Include="TextInfo\TextInfoTests.cs" />
     <Compile Include="TextInfo\TextInfoToLower.cs" />
     <Compile Include="TextInfo\TextInfoToString.cs" />
     <Compile Include="TextInfo\TextInfoToUpper.cs" />
     <Compile Include="UnicodeCategory\UnicodeCategoryTests.cs" />
     <!-- Helpers -->
-    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
-      <Link>Common\System\PlatformDetection.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs">
       <Link>Common\System\RandomDataGenerator.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
-      <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
-      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
     </Compile>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="CharUnicodeInfo\CharUnicodeInfoTests.netstandard.cs" />
-    <Compile Include="CompareInfo\CompareInfoTests.netstandard.cs" />
-    <Compile Include="CultureInfo\CultureInfoTests.netstandard.cs" />
-    <Compile Include="DateTimeFormatInfo\DateTimeFormatInfoTests.netstandard.cs" />
-    <Compile Include="NumberFormatInfo\NumberFormatInfoTests.netstandard.cs" />
-    <Compile Include="RegionInfo\RegionInfoTests.netstandard.cs" />
-    <Compile Include="TextInfo\TextInfoTests.netstandard.cs" />
-    <Compile Include="StringInfo\StringInfoTests.netstandard.cs" />
-    <Compile Include="SortVersion\SortVersionTests.netstandard.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(CommonTestPath)\Data\UnicodeData.8.0.txt">

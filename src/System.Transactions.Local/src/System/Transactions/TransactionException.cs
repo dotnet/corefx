@@ -11,6 +11,7 @@ namespace System.Transactions
     /// Summary description for TransactionException.
     /// </summary>
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Transactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class TransactionException : SystemException
     {
         internal static bool IncludeDistributedTxId(Guid distributedTxId)
@@ -173,6 +174,7 @@ namespace System.Transactions
     /// Summary description for TransactionAbortedException.
     /// </summary>
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Transactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class TransactionAbortedException : TransactionException
     {
         internal static new TransactionAbortedException Create(string message, Exception innerException, Guid distributedTxId)
@@ -248,6 +250,7 @@ namespace System.Transactions
     /// Summary description for TransactionInDoubtException.
     /// </summary>
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Transactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class TransactionInDoubtException : TransactionException
     {
         internal static new TransactionInDoubtException Create(TraceSourceType traceSource, string message, Exception innerException, Guid distributedTxId)
@@ -308,6 +311,7 @@ namespace System.Transactions
     /// Summary description for TransactionManagerCommunicationException.
     /// </summary>
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Transactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class TransactionManagerCommunicationException : TransactionException
     {
         internal static new TransactionManagerCommunicationException Create(string message, Exception innerException)
@@ -363,8 +367,8 @@ namespace System.Transactions
         }
     }
 
-
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Transactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class TransactionPromotionException : TransactionException
     {
         /// <summary>

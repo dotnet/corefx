@@ -67,6 +67,7 @@ namespace System.Net.Http.Functional.Tests
                     await clientSocket.SendAsync(
                         new ArraySegment<byte>(Encoding.ASCII.GetBytes("HTTP/1.1 407 Proxy Auth Required\r\nProxy-Authenticate: Basic\r\n\r\n")),
                         SocketFlags.None).ConfigureAwait(false);
+
                     clientSocket.Shutdown(SocketShutdown.Send);
                     clientSocket.Dispose();
 
@@ -129,6 +130,18 @@ namespace System.Net.Http.Functional.Tests
                 clientSocket.Dispose();
                 listener.Stop();
             }
+        }
+
+        private static Task<int> SendAsyncApm(Socket socket, ArraySegment<byte> buffer, SocketFlags socketFlags)
+        {
+            var tcs = new TaskCompletionSource<int>(socket);
+            socket.BeginSend(buffer.Array, buffer.Offset, buffer.Count, socketFlags, iar =>
+            {
+                var innerTcs = (TaskCompletionSource<int>)iar.AsyncState;
+                try { innerTcs.TrySetResult(((Socket)innerTcs.Task.AsyncState).EndSend(iar)); }
+                catch (Exception e) { innerTcs.TrySetException(e); }
+            }, tcs);
+            return tcs.Task;
         }
     }
 }

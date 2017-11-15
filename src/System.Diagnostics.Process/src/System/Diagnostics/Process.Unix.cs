@@ -40,13 +40,13 @@ namespace System.Diagnostics
         [CLSCompliant(false)]
         public static Process Start(string fileName, string userName, SecureString password, string domain)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported);
         }
 
         [CLSCompliant(false)]
         public static Process Start(string fileName, string arguments, string userName, SecureString password, string domain)
-        { 
-            throw new PlatformNotSupportedException();
+        {
+            throw new PlatformNotSupportedException(SR.ProcessStartIdentityNotSupported);
         }
 
         /// <summary>Stops the associated process immediately.</summary>
@@ -81,6 +81,37 @@ namespace System.Diagnostics
             // Make sure that we configure the wait state holder for this process object, which we can only do once we have a process ID.
             Debug.Assert(_haveProcessId, $"{nameof(ConfigureAfterProcessIdSet)} should only be called once a process ID is set");
             GetWaitState(); // lazily initializes the wait state
+        }
+
+        /// <devdoc>
+        ///     Make sure we are watching for a process exit.
+        /// </devdoc>
+        /// <internalonly/>
+        private void EnsureWatchingForExit()
+        {
+            if (!_watchingForExit)
+            {
+                lock (this)
+                {
+                    if (!_watchingForExit)
+                    {
+                        Debug.Assert(_haveProcessHandle, "Process.EnsureWatchingForExit called with no process handle");
+                        Debug.Assert(Associated, "Process.EnsureWatchingForExit called with no associated process");
+                        _watchingForExit = true;
+                        try
+                        {
+                            _waitHandle = new ProcessWaitHandle(_processHandle);
+                            _registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(_waitHandle,
+                                new WaitOrTimerCallback(CompletionCallback), null, -1, true);
+                        }
+                        catch
+                        {
+                            _watchingForExit = false;
+                            throw;
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -163,7 +194,7 @@ namespace System.Diagnostics
                 }
 
                 Debug.Assert(pri >= -20 && pri <= 20);
-                return 
+                return
                     pri < -15 ? ProcessPriorityClass.RealTime :
                     pri < -10 ? ProcessPriorityClass.High :
                     pri < -5 ? ProcessPriorityClass.AboveNormal :
@@ -219,7 +250,10 @@ namespace System.Diagnostics
             return new SafeProcessHandle(_processId);
         }
 
-        /// <summary>Starts the process using the supplied start info.</summary>
+        /// <summary>
+        /// Starts the process using the supplied start info. 
+        /// With UseShellExecute option, we'll try the shell tools to launch it(e.g. "open fileName")
+        /// </summary>
         /// <param name="startInfo">The start info with which to start the process.</param>
         private bool StartCore(ProcessStartInfo startInfo)
         {
@@ -232,32 +266,43 @@ namespace System.Diagnostics
                 {
                     throw new InvalidOperationException(SR.CantRedirectStreams);
                 }
+            }
 
-                const string ShellPath = "/bin/sh";
+            int childPid, stdinFd, stdoutFd, stderrFd;
+            string[] envp = CreateEnvp(startInfo);
+            string cwd = !string.IsNullOrWhiteSpace(startInfo.WorkingDirectory) ? startInfo.WorkingDirectory : null;
 
-                filename = ShellPath;
-                argv = new string[3] { ShellPath, "-c", startInfo.FileName + " " + startInfo.Arguments};
+            if (startInfo.UseShellExecute)
+            {
+                // use default program to open file/url
+                filename = GetPathToOpenFile();
+                argv = ParseArgv(startInfo, filename);
             }
             else
             {
                 filename = ResolvePath(startInfo.FileName);
                 argv = ParseArgv(startInfo);
+                if (Directory.Exists(filename))
+                {
+                    throw new Win32Exception(SR.DirectoryNotValidAsInput);
+                }
             }
 
-            string[] envp = CreateEnvp(startInfo);
-            string cwd = !string.IsNullOrWhiteSpace(startInfo.WorkingDirectory) ? startInfo.WorkingDirectory : null;
+            if (string.IsNullOrEmpty(filename))
+            {
+                throw new Win32Exception(Interop.Error.ENOENT.Info().RawErrno);
+            }
 
             // Invoke the shim fork/execve routine.  It will create pipes for all requested
             // redirects, fork a child process, map the pipe ends onto the appropriate stdin/stdout/stderr
             // descriptors, and execve to execute the requested process.  The shim implementation
             // is used to fork/execve as executing managed code in a forked process is not safe (only
             // the calling thread will transfer, thread IDs aren't stable across the fork, etc.)
-            int childPid, stdinFd, stdoutFd, stderrFd;
             Interop.Sys.ForkAndExecProcess(
-                filename, argv, envp, cwd,
-                startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
-                out childPid,
-                out stdinFd, out stdoutFd, out stderrFd);
+                    filename, argv, envp, cwd,
+                    startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
+                    out childPid,
+                    out stdinFd, out stdoutFd, out stderrFd);
 
             // Store the child's information into this Process object.
             Debug.Assert(childPid >= 0);
@@ -300,23 +345,31 @@ namespace System.Diagnostics
         /// <summary>Size to use for redirect streams and stream readers/writers.</summary>
         private const int StreamBufferSize = 4096;
 
+
         /// <summary>Converts the filename and arguments information from a ProcessStartInfo into an argv array.</summary>
         /// <param name="psi">The ProcessStartInfo.</param>
+        /// <param name="alternativePath">alternative resolved path to use as first argument</param>
         /// <returns>The argv array.</returns>
-        private static string[] ParseArgv(ProcessStartInfo psi)
+        private static string[] ParseArgv(ProcessStartInfo psi, string alternativePath = null)
         {
-            string argv0 = psi.FileName; // pass filename (instead of resolved path) as argv[0], to match what caller supplied
-            if (string.IsNullOrEmpty(psi.Arguments))
+            string argv0 = psi.FileName; // when no alternative path exists, pass filename (instead of resolved path) as argv[0], to match what caller supplied
+            if (string.IsNullOrEmpty(psi.Arguments) && string.IsNullOrEmpty(alternativePath))
             {
                 return new string[] { argv0 };
             }
-            else
+
+            var argvList = new List<string>();
+            if (!string.IsNullOrEmpty(alternativePath))
             {
-                var argvList = new List<string>();
-                argvList.Add(argv0);
-                ParseArgumentsIntoList(psi.Arguments, argvList);
-                return argvList.ToArray();
+                argvList.Add(alternativePath);
+                if (alternativePath.Contains("kfmclient"))
+                {
+                    argvList.Add("openURL"); // kfmclient needs OpenURL
+                }
             }
+            argvList.Add(argv0);
+            ParseArgumentsIntoList(psi.Arguments, argvList);
+            return argvList.ToArray();
         }
 
         /// <summary>Converts the environment variables information from a ProcessStartInfo into an envp array.</summary>
@@ -333,9 +386,9 @@ namespace System.Diagnostics
             return envp;
         }
 
-        /// <summary>Resolves a path to the filename passed to ProcessStartInfo.</summary>
+        /// <summary>Resolves a path to the filename passed to ProcessStartInfo. </summary>
         /// <param name="filename">The filename.</param>
-        /// <returns>The resolved path.</returns>
+        /// <returns>The resolved path. It can return null in case of URLs.</returns>
         private static string ResolvePath(string filename)
         {
             // Follow the same resolution that Windows uses with CreateProcess:
@@ -377,6 +430,17 @@ namespace System.Diagnostics
             }
 
             // Then check each directory listed in the PATH environment variables
+            return FindProgramInPath(filename);
+        }
+
+        /// <summary>
+        /// Gets the path to the program
+        /// </summary>
+        /// <param name="program"></param>
+        /// <returns></returns>
+        private static string FindProgramInPath(string program)
+        {
+            string path;
             string pathEnvVar = Environment.GetEnvironmentVariable("PATH");
             if (pathEnvVar != null)
             {
@@ -384,16 +448,14 @@ namespace System.Diagnostics
                 while (pathParser.MoveNext())
                 {
                     string subPath = pathParser.ExtractCurrent();
-                    path = Path.Combine(subPath, filename);
+                    path = Path.Combine(subPath, program);
                     if (File.Exists(path))
                     {
                         return path;
                     }
                 }
             }
-
-            // Could not find the file
-            throw new Win32Exception(Interop.Error.ENOENT.Info().RawErrno);
+            return null;
         }
 
         /// <summary>Convert a number of "jiffies", or ticks, to a TimeSpan.</summary>
@@ -436,7 +498,7 @@ namespace System.Diagnostics
         {
             Debug.Assert(fd >= 0);
             return new FileStream(
-                new SafeFileHandle((IntPtr)fd, ownsHandle: true), 
+                new SafeFileHandle((IntPtr)fd, ownsHandle: true),
                 access, StreamBufferSize, isAsync: false);
         }
 
@@ -449,15 +511,34 @@ namespace System.Diagnostics
         /// </remarks>
         private static void ParseArgumentsIntoList(string arguments, List<string> results)
         {
-            var currentArgument = new StringBuilder();
-            bool inQuotes = false;
-
             // Iterate through all of the characters in the argument string.
             for (int i = 0; i < arguments.Length; i++)
             {
+                while (i < arguments.Length && (arguments[i] == ' ' || arguments[i] == '\t'))
+                    i++;
+
+                if (i == arguments.Length)
+                    break;
+
+                results.Add(GetNextArgument(arguments, ref i));
+            }
+        }
+
+        private static string GetNextArgument(string arguments, ref int i)
+        {
+            var currentArgument = StringBuilderCache.Acquire();
+            bool inQuotes = false;
+
+            while (i < arguments.Length)
+            {
                 // From the current position, iterate through contiguous backslashes.
                 int backslashCount = 0;
-                for (; i < arguments.Length && arguments[i] == '\\'; i++, backslashCount++) ;
+                while (i < arguments.Length && arguments[i] == '\\')
+                {
+                    i++;
+                    backslashCount++;
+                }
+
                 if (backslashCount > 0)
                 {
                     if (i >= arguments.Length || arguments[i] != '"')
@@ -465,7 +546,6 @@ namespace System.Diagnostics
                         // Backslashes not followed by a double quote:
                         // they should all be treated as literal backslashes.
                         currentArgument.Append('\\', backslashCount);
-                        i--;
                     }
                     else
                     {
@@ -473,15 +553,13 @@ namespace System.Diagnostics
                         // - Output a literal slash for each complete pair of slashes
                         // - If one remains, use it to make the subsequent quote a literal.
                         currentArgument.Append('\\', backslashCount / 2);
-                        if (backslashCount % 2 == 0)
-                        {
-                            i--;
-                        }
-                        else
+                        if (backslashCount % 2 != 0)
                         {
                             currentArgument.Append('"');
+                            i++;
                         }
                     }
+
                     continue;
                 }
 
@@ -492,33 +570,33 @@ namespace System.Diagnostics
                 // it contains spaces.
                 if (c == '"')
                 {
-                    inQuotes = !inQuotes;
+                    if (inQuotes && i < arguments.Length - 1 && arguments[i + 1] == '"')
+                    {
+                        currentArgument.Append('"');
+                        i++;
+                    }
+                    else
+                    {
+                        inQuotes = !inQuotes;
+                    }
+
+                    i++;
                     continue;
                 }
 
                 // If this is a space/tab and we're not in quotes, we're done with the current
-                // argument, and if we've built up any characters in the current argument,
-                // it should be added to the results and then reset for the next one.
+                // argument, it should be added to the results and then reset for the next one.
                 if ((c == ' ' || c == '\t') && !inQuotes)
                 {
-                    if (currentArgument.Length > 0)
-                    {
-                        results.Add(currentArgument.ToString());
-                        currentArgument.Clear();
-                    }
-                    continue;
+                    break;
                 }
 
                 // Nothing special; add the character to the current argument.
                 currentArgument.Append(c);
+                i++;
             }
 
-            // If we reach the end of the string and we still have anything in our current
-            // argument buffer, treat it as an argument to be added to the results.
-            if (currentArgument.Length > 0)
-            {
-                results.Add(currentArgument.ToString());
-            }
+            return StringBuilderCache.GetStringAndRelease(currentArgument);
         }
 
         /// <summary>Gets the wait state for this Process object.</summary>
@@ -532,21 +610,14 @@ namespace System.Diagnostics
             return _waitStateHolder._state;
         }
 
-        private bool IsRespondingCore()
-        {
-            return true;
-        }
-        private string GetMainWindowTitle()
-        {
-            return string.Empty;
-        }
-        private bool CloseMainWindowCore()
-        {
-            return false;
-        }
-        private bool WaitForInputIdleCore(int milliseconds)
-        {
-            throw new InvalidOperationException(SR.InputIdleUnkownError);
-        }
+        public IntPtr MainWindowHandle => IntPtr.Zero;
+
+        private bool CloseMainWindowCore() => false;
+
+        public string MainWindowTitle => string.Empty;
+
+        public bool Responding => true;
+
+        private bool WaitForInputIdleCore(int milliseconds) => throw new InvalidOperationException(SR.InputIdleUnkownError);
     }
 }

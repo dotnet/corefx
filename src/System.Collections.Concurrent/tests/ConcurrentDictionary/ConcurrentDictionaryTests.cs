@@ -4,6 +4,8 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -539,10 +541,92 @@ namespace System.Collections.Concurrent.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void TestDebuggerAttributes()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new ConcurrentDictionary<string, int>());
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(new ConcurrentDictionary<string, int>());
+            ConcurrentDictionary<string, int> dict = new ConcurrentDictionary<string, int>();
+            dict.TryAdd("One", 1);
+            dict.TryAdd("Two", 2);
+            DebuggerAttributeInfo info = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(dict);
+            PropertyInfo itemProperty = info.Properties.Single(pr => pr.GetCustomAttribute<DebuggerBrowsableAttribute>().State == DebuggerBrowsableState.RootHidden);
+            KeyValuePair<string, int>[] items = itemProperty.GetValue(info.Instance) as KeyValuePair<string, int>[];
+            Assert.Equal(dict, items);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
+        public static void TestDebuggerAttributes_Null()
+        {
+            Type proxyType = DebuggerAttributes.GetProxyType(new ConcurrentDictionary<string, int>());
+            TargetInvocationException tie = Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(proxyType, (object)null));
+            Assert.IsType<ArgumentNullException>(tie.InnerException);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18432 yet.")]
+        public static void TestNullComparer()
+        {
+            AssertDefaultComparerBehavior(new ConcurrentDictionary<EqualityApiSpy, int>((IEqualityComparer<EqualityApiSpy>)null));
+
+            AssertDefaultComparerBehavior(new ConcurrentDictionary<EqualityApiSpy, int>(new[] { new KeyValuePair<EqualityApiSpy, int>(new EqualityApiSpy(), 1) }, null));
+
+            AssertDefaultComparerBehavior(new ConcurrentDictionary<EqualityApiSpy, int>(1, new[] { new KeyValuePair<EqualityApiSpy, int>(new EqualityApiSpy(), 1) }, null));
+
+            AssertDefaultComparerBehavior(new ConcurrentDictionary<EqualityApiSpy, int>(1, 1, null));
+
+            void AssertDefaultComparerBehavior(ConcurrentDictionary<EqualityApiSpy, int> dictionary)
+            {
+                var spyKey = new EqualityApiSpy();
+
+                Assert.True(dictionary.TryAdd(spyKey, 1));
+                Assert.False(dictionary.TryAdd(spyKey, 1));
+
+                Assert.False(spyKey.ObjectApiUsed);
+                Assert.True(spyKey.IEquatableApiUsed);
+            }
+        }
+
+        private sealed class EqualityApiSpy : IEquatable<EqualityApiSpy>
+        {
+            public bool ObjectApiUsed { get; private set; }
+            public bool IEquatableApiUsed { get; private set; }
+
+
+            public override bool Equals(object obj)
+            {
+                ObjectApiUsed = true;
+                return ReferenceEquals(this, obj);
+            }
+
+            public override int GetHashCode() => base.GetHashCode();
+
+            public bool Equals(EqualityApiSpy other)
+            {
+                IEquatableApiUsed = true;
+                return ReferenceEquals(this, other);
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18432 yet.")]
+        public static void TestNullComparer_netfx()
+        {
+            Assert.Throws<ArgumentNullException>(
+               () => new ConcurrentDictionary<int, int>((IEqualityComparer<int>)null));
+            // "TestConstructor:  FAILED.  Constructor didn't throw ANE when null IEqualityComparer is passed");
+
+            Assert.Throws<ArgumentNullException>(
+               () => new ConcurrentDictionary<int, int>(new[] { new KeyValuePair<int, int>(1, 1) }, null));
+            // "TestConstructor:  FAILED.  Constructor didn't throw ANE when non null collection and null IEqualityComparer passed");
+
+            Assert.Throws<ArgumentNullException>(
+               () => new ConcurrentDictionary<int, int>(1, new[] { new KeyValuePair<int, int>(1, 1) }, null));
+            // "TestConstructor:  FAILED.  Constructor didn't throw ANE when null comparer is passed");
+
+            Assert.Throws<ArgumentNullException>(
+               () => new ConcurrentDictionary<int, int>(1, 1, null));
+            // "TestConstructor:  FAILED.  Constructor didn't throw ANE when null comparer is passed");
         }
 
         [Fact]
@@ -553,35 +637,19 @@ namespace System.Collections.Concurrent.Tests
             // "TestConstructor:  FAILED.  Constructor didn't throw ANE when null collection is passed");
 
             Assert.Throws<ArgumentNullException>(
-               () => new ConcurrentDictionary<int, int>((IEqualityComparer<int>)null));
-            // "TestConstructor:  FAILED.  Constructor didn't throw ANE when null IEqualityComparer is passed");
-
-            Assert.Throws<ArgumentNullException>(
                () => new ConcurrentDictionary<int, int>((ICollection<KeyValuePair<int, int>>)null, EqualityComparer<int>.Default));
             // "TestConstructor:  FAILED.  Constructor didn't throw ANE when null collection and non null IEqualityComparer passed");
 
             Assert.Throws<ArgumentNullException>(
-               () => new ConcurrentDictionary<int, int>(new[] { new KeyValuePair<int, int>(1, 1) }, null));
-            // "TestConstructor:  FAILED.  Constructor didn't throw ANE when non null collection and null IEqualityComparer passed");
-
-            Assert.Throws<ArgumentNullException>(
                () => new ConcurrentDictionary<string, int>(new[] { new KeyValuePair<string, int>(null, 1) }));
             // "TestConstructor:  FAILED.  Constructor didn't throw ANE when collection has null key passed");
-            Assert.Throws<ArgumentException>(
-               () => new ConcurrentDictionary<int, int>(new[] { new KeyValuePair<int, int>(1, 1), new KeyValuePair<int, int>(1, 2) }));
-            // "TestConstructor:  FAILED.  Constructor didn't throw AE when collection has duplicate keys passed");
 
+            // Duplicate keys.
+            AssertExtensions.Throws<ArgumentException>(null, () => new ConcurrentDictionary<int, int>(new[] { new KeyValuePair<int, int>(1, 1), new KeyValuePair<int, int>(1, 2) }));
+            
             Assert.Throws<ArgumentNullException>(
                () => new ConcurrentDictionary<int, int>(1, null, EqualityComparer<int>.Default));
             // "TestConstructor:  FAILED.  Constructor didn't throw ANE when null collection is passed");
-
-            Assert.Throws<ArgumentNullException>(
-               () => new ConcurrentDictionary<int, int>(1, new[] { new KeyValuePair<int, int>(1, 1) }, null));
-            // "TestConstructor:  FAILED.  Constructor didn't throw ANE when null comparer is passed");
-
-            Assert.Throws<ArgumentNullException>(
-               () => new ConcurrentDictionary<int, int>(1, 1, null));
-            // "TestConstructor:  FAILED.  Constructor didn't throw ANE when null comparer is passed");
 
             Assert.Throws<ArgumentOutOfRangeException>(
                () => new ConcurrentDictionary<int, int>(0, 10));
@@ -658,10 +726,9 @@ namespace System.Collections.Concurrent.Tests
                () => dictionary.AddOrUpdate(null, (k) => 0, null));
             // "TestExceptions:  FAILED.  AddOrUpdate didn't throw ANE when null addFactory is passed");
 
+            // Duplicate key.
             dictionary.TryAdd("1", 1);
-            Assert.Throws<ArgumentException>(
-               () => ((IDictionary<string, int>)dictionary).Add("1", 2));
-            // "TestExceptions:  FAILED.  IDictionary didn't throw AE when duplicate key is passed");
+            AssertExtensions.Throws<ArgumentException>(null, () => ((IDictionary<string, int>)dictionary).Add("1", 2));
         }
 
         [Fact]
@@ -724,13 +791,11 @@ namespace System.Collections.Concurrent.Tests
                () => dictionary.Add(null, 1));
             // "TestIDictionary:  FAILED.  Add didn't throw ANE when null key is passed");
 
-            Assert.Throws<ArgumentException>(
-               () => dictionary.Add(1, 1));
-            // "TestIDictionary:  FAILED.  Add didn't throw AE when incorrect key type is passed");
+            // Invalid key type.
+            AssertExtensions.Throws<ArgumentException>(null, () => dictionary.Add(1, 1));
 
-            Assert.Throws<ArgumentException>(
-               () => dictionary.Add("1", "1"));
-            // "TestIDictionary:  FAILED.  Add didn't throw AE when incorrect value type is passed");
+            // Invalid value type.
+            AssertExtensions.Throws<ArgumentException>(null, () => dictionary.Add("1", "1"));
 
             Assert.Throws<ArgumentNullException>(
                () => dictionary.Contains(null));
@@ -749,13 +814,11 @@ namespace System.Collections.Concurrent.Tests
                () => dictionary[null] = 0);
             // "TestIDictionary:  FAILED.  this[] setter didn't throw ANE when null key is passed");
 
-            Assert.Throws<ArgumentException>(
-               () => dictionary[1] = 0);
-            // "TestIDictionary:  FAILED.  this[] setter didn't throw AE when invalid key type is passed");
+            // Invalid key type.
+            AssertExtensions.Throws<ArgumentException>(null, () => dictionary[1] = 0);
 
-            Assert.Throws<ArgumentException>(
-               () => dictionary["1"] = "0");
-            // "TestIDictionary:  FAILED.  this[] setter didn't throw AE when invalid value type is passed");
+            // Invalid value type.
+            AssertExtensions.Throws<ArgumentException>(null, () => dictionary["1"] = "0");
         }
 
         [Fact]
@@ -808,7 +871,7 @@ namespace System.Collections.Concurrent.Tests
 
             //add one item to the dictionary
             ((ConcurrentDictionary<int, int>)dictionary).TryAdd(1, 1);
-            Assert.Throws<ArgumentException>(() => dictionary.CopyTo(new object[] { }, 0));
+            AssertExtensions.Throws<ArgumentException>(null, () => dictionary.CopyTo(new object[] { }, 0));
             // "TestICollection:  FAILED.  CopyTo didn't throw AE when the Array size is smaller than the dictionary count");
         }
 

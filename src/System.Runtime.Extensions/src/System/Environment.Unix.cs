@@ -327,6 +327,8 @@ namespace System
                 revision = FindAndParseNextNumber(release, ref i);
             }
 
+            // For compatibility reasons with Mono, PlatformID.Unix is returned on MacOSX. PlatformID.MacOSX
+            // is hidden from the editor and shouldn't be used.
             return new OperatingSystem(PlatformID.Unix, new Version(major, minor, build, revision));
         });
 
@@ -356,11 +358,11 @@ namespace System
             return num;
         }
 
-        public static int ProcessorCount => (int)Interop.Sys.SysConf(Interop.Sys.SysConfName._SC_NPROCESSORS_ONLN);
+        public static int ProcessorCount => CheckedSysConf(Interop.Sys.SysConfName._SC_NPROCESSORS_ONLN);
 
         public static string SystemDirectory => GetFolderPathCore(SpecialFolder.System, SpecialFolderOption.None);
 
-        public static int SystemPageSize => (int)Interop.Sys.SysConf(Interop.Sys.SysConfName._SC_PAGESIZE);
+        public static int SystemPageSize => CheckedSysConf(Interop.Sys.SysConfName._SC_PAGESIZE);
 
         public static unsafe string UserName
         {
@@ -431,5 +433,19 @@ namespace System
         }
 
         public static string UserDomainName => MachineName;
+
+        /// <summary>Invoke <see cref="Interop.Sys.SysConf"/>, throwing if it fails.</summary>
+        private static int CheckedSysConf(Interop.Sys.SysConfName name)
+        {
+            long result = Interop.Sys.SysConf(name);
+            if (result == -1)
+            {
+                Interop.ErrorInfo errno = Interop.Sys.GetLastErrorInfo();
+                throw errno.Error == Interop.Error.EINVAL ?
+                    new ArgumentOutOfRangeException(nameof(name), name, errno.GetErrorMessage()) :
+                    Interop.GetIOException(errno);
+            }
+            return (int)result;
+        }
     }
 }

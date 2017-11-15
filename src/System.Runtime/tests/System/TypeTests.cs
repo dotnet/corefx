@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using Xunit;
 
 internal class Outside
@@ -18,7 +20,7 @@ internal class Outside<T>
 
 namespace System.Tests
 {
-    public static class TypeTests
+    public class TypeTests
     {
         [Theory]
         [InlineData(typeof(int), null)]
@@ -166,7 +168,7 @@ namespace System.Tests
         [InlineData(typeof(IList<>))]
         public static void GetArrayRank_Invalid(Type t)
         {
-            Assert.Throws<ArgumentException>(() => t.GetArrayRank());
+            AssertExtensions.Throws<ArgumentException>(null, () => t.GetArrayRank());
         }
 
         [Theory]
@@ -289,9 +291,107 @@ namespace System.Tests
 
         public static void ReflectionOnlyGetType()
         {
-            Assert.Throws<ArgumentNullException>("typeName", () => Type.ReflectionOnlyGetType(null, true, false));
+            AssertExtensions.Throws<ArgumentNullException>("typeName", () => Type.ReflectionOnlyGetType(null, true, false));
             Assert.Throws<TypeLoadException>(() => Type.ReflectionOnlyGetType("", true, true));
             Assert.Throws<NotSupportedException>(() => Type.ReflectionOnlyGetType("System.Tests.TypeTests", false, true));
+        }
+    }
+
+    public class TypeTestsExtended : RemoteExecutorTestBase
+    {
+        public class ContextBoundClass : ContextBoundObject
+        {
+            public string Value = "The Value property.";
+        }
+
+        static string s_testAssemblyPath = Path.Combine(Environment.CurrentDirectory, "TestLoadAssembly.dll");
+        static string testtype = "System.Collections.Generic.Dictionary`2[[Program, Foo], [Program, Foo]]";
+
+        private static Func<AssemblyName, Assembly> assemblyloader = (aName) => aName.Name == "TestLoadAssembly" ?
+                           Assembly.LoadFrom(@".\TestLoadAssembly.dll") :
+                           null;
+        private static Func<Assembly, String, Boolean, Type> typeloader = (assem, name, ignore) => assem == null ?
+                             Type.GetType(name, false, ignore) :
+                                 assem.GetType(name, false, ignore);
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() is not supported on UapAot")]
+        public static void GetTypeByName()
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            RemoteInvoke(() =>
+               {
+                   string test1 = testtype;
+                   Type t1 = Type.GetType(test1,
+                             (aName) => aName.Name == "Foo" ?
+                                   Assembly.LoadFrom(s_testAssemblyPath) : null,
+                             typeloader,
+                             true
+                     );
+
+                   Assert.NotNull(t1);
+
+                   string test2 = "System.Collections.Generic.Dictionary`2[[Program, TestLoadAssembly], [Program, TestLoadAssembly]]";
+                   Type t2 = Type.GetType(test2, assemblyloader, typeloader, true);
+
+                   Assert.NotNull(t2);
+                   Assert.Equal(t1, t2);
+
+                   return SuccessExitCode;
+               }, options).Dispose();
+        }
+
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() is not supported on UapAot")]
+        [InlineData("System.Collections.Generic.Dictionary`2[[Program, TestLoadAssembly], [Program2, TestLoadAssembly]]")]
+        [InlineData("")]
+        public void GetTypeByName_NoSuchType_ThrowsTypeLoadException(string typeName)
+        {
+            RemoteInvoke(marshalledTypeName =>
+            {
+                Assert.Throws<TypeLoadException>(() => Type.GetType(marshalledTypeName, assemblyloader, typeloader, true));
+                Assert.Null(Type.GetType(marshalledTypeName, assemblyloader, typeloader, false));
+
+                return SuccessExitCode;
+            }, typeName).Dispose();
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() is not supported on UapAot")]
+        public static void GetTypeByNameCaseSensitiveTypeloadFailure()
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            RemoteInvoke(() =>
+               {
+                   //Type load failure due to case sensitive search of type Ptogram
+                   string test3 = "System.Collections.Generic.Dictionary`2[[Program, TestLoadAssembly], [program, TestLoadAssembly]]";
+                   Assert.Throws<TypeLoadException>(() =>
+                                Type.GetType(test3,
+                                            assemblyloader,
+                                            typeloader,
+                                            true,
+                                            false     //case sensitive
+                   ));
+
+                   //non throwing version
+                   Type t2 = Type.GetType(test3,
+                                          assemblyloader,
+                                          typeloader,
+                                          false,  //no throw
+                                          false
+                  );
+
+                   Assert.Null(t2);
+
+                   return SuccessExitCode;
+               }, options).Dispose();
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void IsContextful()
+        {
+            Assert.True(!typeof(TypeTestsExtended).IsContextful);
+            Assert.True(!typeof(ContextBoundClass).IsContextful);
         }
     }
 }

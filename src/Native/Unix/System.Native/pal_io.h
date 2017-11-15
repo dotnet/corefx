@@ -5,6 +5,7 @@
 #pragma once
 
 #include "pal_types.h"
+#include "pal_errno.h"
 #include <stdio.h>
 #include <dirent.h>
 #include <sys/types.h>
@@ -23,6 +24,8 @@ struct FileStatus
     int64_t MTime;     // time of last modification
     int64_t CTime;     // time of last status change
     int64_t BirthTime; // time the file was created
+    int64_t Dev;       // ID of the device containing the file
+    int64_t Ino;       // inode number of the file
 };
 
 /************

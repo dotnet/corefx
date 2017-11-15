@@ -12,7 +12,7 @@ namespace System.Globalization.Tests
         public static IEnumerable<object[]> PercentSymbol_TestData()
         {
             yield return new object[] { NumberFormatInfo.InvariantInfo, "%" };
-            yield return new object[] { new CultureInfo("en-US").NumberFormat, "%" };
+            yield return new object[] { CultureInfo.GetCultureInfo("en-US").NumberFormat, "%" };
         }
 
         [Theory]
@@ -36,7 +36,7 @@ namespace System.Globalization.Tests
         [Fact]
         public void PercentSymbol_Set_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("PercentSymbol", () => new NumberFormatInfo().PercentSymbol = null);
+            AssertExtensions.Throws<ArgumentNullException>("PercentSymbol", () => new NumberFormatInfo().PercentSymbol = null);
             Assert.Throws<InvalidOperationException>(() => NumberFormatInfo.InvariantInfo.PercentSymbol = "");
         }
     }

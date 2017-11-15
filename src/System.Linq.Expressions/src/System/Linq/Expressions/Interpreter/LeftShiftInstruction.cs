@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Dynamic.Utils;
-using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -175,7 +174,7 @@ namespace System.Linq.Expressions.Interpreter
                 case TypeCode.UInt32: return s_UInt32 ?? (s_UInt32 = new LeftShiftUInt32());
                 case TypeCode.UInt64: return s_UInt64 ?? (s_UInt64 = new LeftShiftUInt64());
                 default:
-                    throw Error.ExpressionNotSupportedForType("LeftShift", type);
+                    throw ContractUtils.Unreachable;
             }
         }
     }

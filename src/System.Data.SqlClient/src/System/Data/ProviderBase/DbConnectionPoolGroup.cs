@@ -38,6 +38,7 @@ namespace System.Data.ProviderBase
         private int _state;          // see PoolGroupState* below
 
         private DbConnectionPoolGroupProviderInfo _providerInfo;
+        private DbMetaDataFactory _metaDataFactory;
 
         // always lock this before changing _state, we don't want to move out of the 'Disabled' state
         // PoolGroupStateUninitialized = 0;
@@ -110,6 +111,18 @@ namespace System.Data.ProviderBase
             }
         }
 
+        internal DbMetaDataFactory MetaDataFactory
+        {
+            get
+            {
+                return _metaDataFactory;
+            }
+
+            set
+            {
+                _metaDataFactory = value;
+            }
+        }
 
         internal int Clear()
         {
@@ -173,20 +186,19 @@ namespace System.Data.ProviderBase
                         currentIdentity = null;
                     }
                 }
+
                 if (null != currentIdentity)
                 {
-                    if (!_poolCollection.TryGetValue(currentIdentity, out pool))
-                    { // find the pool
-                        DbConnectionPoolProviderInfo connectionPoolProviderInfo = connectionFactory.CreateConnectionPoolProviderInfo(this.ConnectionOptions);
-
-                        // optimistically create pool, but its callbacks are delayed until after actual add
-                        DbConnectionPool newPool = new DbConnectionPool(connectionFactory, this, currentIdentity, connectionPoolProviderInfo);
-
+                    if (!_poolCollection.TryGetValue(currentIdentity, out pool)) // find the pool
+                    { 
                         lock (this)
                         {
                             // Did someone already add it to the list?
                             if (!_poolCollection.TryGetValue(currentIdentity, out pool))
                             {
+                                DbConnectionPoolProviderInfo connectionPoolProviderInfo = connectionFactory.CreateConnectionPoolProviderInfo(this.ConnectionOptions);
+                                DbConnectionPool newPool = new DbConnectionPool(connectionFactory, this, currentIdentity, connectionPoolProviderInfo);
+
                                 if (MarkPoolGroupAsActive())
                                 {
                                     // If we get here, we know for certain that we there isn't
@@ -196,12 +208,15 @@ namespace System.Data.ProviderBase
                                     bool addResult = _poolCollection.TryAdd(currentIdentity, newPool);
                                     Debug.Assert(addResult, "No other pool with current identity should exist at this point");
                                     pool = newPool;
-                                    newPool = null;
                                 }
                                 else
                                 {
                                     // else pool entry has been disabled so don't create new pools
                                     Debug.Assert(PoolGroupStateDisabled == _state, "state should be disabled");
+
+                                    // don't need to call connectionFactory.QueuePoolForRelease(newPool) because		
+                                    // pool callbacks were delayed and no risk of connections being created		
+                                    newPool.Shutdown();
                                 }
                             }
                             else
@@ -209,13 +224,6 @@ namespace System.Data.ProviderBase
                                 // else found an existing pool to use instead
                                 Debug.Assert(PoolGroupStateActive == _state, "state should be active since a pool exists and lock holds");
                             }
-                        }
-
-                        if (null != newPool)
-                        {
-                            // don't need to call connectionFactory.QueuePoolForRelease(newPool) because
-                            // pool callbacks were delayed and no risk of connections being created
-                            newPool.Shutdown();
                         }
                     }
                     // the found pool could be in any state

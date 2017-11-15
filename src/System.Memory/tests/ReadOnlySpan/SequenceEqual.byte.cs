@@ -15,7 +15,7 @@ namespace System.SpanTests
 
             ReadOnlySpan<byte> first = new ReadOnlySpan<byte>(a, 1, 0);
             ReadOnlySpan<byte> second = new ReadOnlySpan<byte>(a, 2, 0);
-            bool b = first.SequenceEqual(second);
+            bool b = first.SequenceEqual<byte>(second);
             Assert.True(b);
         }
 
@@ -24,7 +24,28 @@ namespace System.SpanTests
         {
             byte[] a = { 4, 5, 6 };
             ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a);
-            bool b = span.SequenceEqual(span);
+            bool b = span.SequenceEqual<byte>(span);
+            Assert.True(b);
+        }
+
+        [Fact]
+        public static void SequenceEqualArrayImplicit_Byte()
+        {
+            byte[] a = { 4, 5, 6 };
+            ReadOnlySpan<byte> first = new ReadOnlySpan<byte>(a, 0, 3);
+            bool b = first.SequenceEqual<byte>(a);
+            Assert.True(b);
+        }
+
+        [Fact]
+        public static void SequenceEqualArraySegmentImplicit_Byte()
+        {
+            byte[] src = { 1, 2, 3 };
+            byte[] dst = { 5, 1, 2, 3, 10 };
+            var segment = new ArraySegment<byte>(dst, 1, 3);
+
+            ReadOnlySpan<byte> first = new ReadOnlySpan<byte>(src, 0, 3);
+            bool b = first.SequenceEqual<byte>(segment);
             Assert.True(b);
         }
 
@@ -34,7 +55,7 @@ namespace System.SpanTests
             byte[] a = { 4, 5, 6 };
             ReadOnlySpan<byte> first = new ReadOnlySpan<byte>(a, 0, 3);
             ReadOnlySpan<byte> second = new ReadOnlySpan<byte>(a, 0, 2);
-            bool b = first.SequenceEqual(second);
+            bool b = first.SequenceEqual<byte>(second);
             Assert.False(b);
         }
 
@@ -56,7 +77,7 @@ namespace System.SpanTests
 
                     ReadOnlySpan<byte> firstSpan = new ReadOnlySpan<byte>(first);
                     ReadOnlySpan<byte> secondSpan = new ReadOnlySpan<byte>(second);
-                    bool b = firstSpan.SequenceEqual(secondSpan);
+                    bool b = firstSpan.SequenceEqual<byte>(secondSpan);
                     Assert.False(b);
                 }
             }
@@ -75,7 +96,7 @@ namespace System.SpanTests
                 second[length + 1] = 100;
                 ReadOnlySpan<byte> span1 = new ReadOnlySpan<byte>(first, 1, length);
                 ReadOnlySpan<byte> span2 = new ReadOnlySpan<byte>(second, 1, length);
-                bool b = span1.SequenceEqual(span2);
+                bool b = span1.SequenceEqual<byte>(span2);
                 Assert.True(b);
             }
         }

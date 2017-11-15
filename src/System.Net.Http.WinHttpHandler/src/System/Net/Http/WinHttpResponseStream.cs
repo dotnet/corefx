@@ -207,6 +207,11 @@ namespace System.Net.Http
 
         private async Task<int> ReadAsyncCore(byte[] buffer, int offset, int count, CancellationToken token)
         {
+            if (count == 0)
+            {
+                return 0;
+            }
+
             _state.PinReceiveBuffer(buffer);
             var ctr = token.Register(s => ((WinHttpResponseStream)s).CancelPendingResponseStreamReadOperation(), this);
             _state.AsyncReadInProgress = true;
@@ -309,11 +314,8 @@ namespace System.Net.Http
             {
                 if (_state.AsyncReadInProgress)
                 {
-                    Debug.Assert(_requestHandle != null);
-                    Debug.Assert(!_requestHandle.IsInvalid);
-                    
                     WinHttpTraceHelper.Trace("WinHttpResponseStream.CancelPendingResponseStreamReadOperation: before dispose");
-                    _requestHandle.Dispose();
+                    _requestHandle?.Dispose(); // null check necessary to handle race condition between stream disposal and cancellation
                     WinHttpTraceHelper.Trace("WinHttpResponseStream.CancelPendingResponseStreamReadOperation: after dispose");
                 }
             }

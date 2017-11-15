@@ -28,16 +28,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public new bool isStatic;               // Static member?
         public bool isOverride;             // Overrides an inherited member. Only valid if isVirtual is set.
-        // false implies that a new vtable slot is required for this method.
-        public bool useMethInstead;         // Only valid iff isBogus == TRUE && IsPropertySymbol().
-        // If this is true then tell the user to call the accessors directly.
+                                            // false implies that a new vtable slot is required for this method.
         public bool isOperator;             // a user defined operator (or default indexed property)
         public bool isParamArray;           // new style varargs
         public bool isHideByName;           // this property hides all below it regardless of signature
         public List<Name> ParameterNames { get; private set; }
         private bool[] _optionalParameterIndex;
         private bool[] _defaultParameterIndex;
-        private CONSTVAL[] _defaultParameters;
+        private ConstVal[] _defaultParameters;
         private CType[] _defaultParameterConstValTypes;
         private bool[] _marshalAsIndex;
         private UnmanagedType[] _marshalAsBuffer;
@@ -63,15 +61,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // Should only be set once!
                 _Params = value;
-                _optionalParameterIndex = new bool[_Params.size];
-                _defaultParameterIndex = new bool[_Params.size];
-                _defaultParameters = new CONSTVAL[_Params.size];
-                _defaultParameterConstValTypes = new CType[_Params.size];
-                _marshalAsIndex = new bool[_Params.size];
-                _marshalAsBuffer = new UnmanagedType[_Params.size];
+                _optionalParameterIndex = new bool[_Params.Count];
+                _defaultParameterIndex = new bool[_Params.Count];
+                _defaultParameters = new ConstVal[_Params.Count];
+                _defaultParameterConstValTypes = new CType[_Params.Count];
+                _marshalAsIndex = new bool[_Params.Count];
+                _marshalAsBuffer = new UnmanagedType[_Params.Count];
             }
         }             // array of cParams parameter types.
-        public AggregateDeclaration declaration;       // containing declaration
 
         public MethodOrPropertySymbol()
         {
@@ -82,7 +79,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool IsParameterOptional(int index)
         {
-            Debug.Assert(index < Params.size);
+            Debug.Assert(index < Params.Count);
 
             if (_optionalParameterIndex == null)
             {
@@ -115,21 +112,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool HasDefaultParameterValue(int index)
         {
-            Debug.Assert(index < Params.size);
+            Debug.Assert(index < Params.Count);
             Debug.Assert(_defaultParameterIndex != null);
             return _defaultParameterIndex[index];
         }
 
-        public void SetDefaultParameterValue(int index, CType type, CONSTVAL cv)
+        public void SetDefaultParameterValue(int index, CType type, ConstVal cv)
         {
             Debug.Assert(_defaultParameterIndex != null);
-            ConstValFactory factory = new ConstValFactory();
             _defaultParameterIndex[index] = true;
-            _defaultParameters[index] = factory.Copy(type.constValKind(), cv);
+            _defaultParameters[index] = cv;
             _defaultParameterConstValTypes[index] = type;
         }
 
-        public CONSTVAL GetDefaultParameterValue(int index)
+        public ConstVal GetDefaultParameterValue(int index)
         {
             Debug.Assert(HasDefaultParameterValue(index));
             Debug.Assert(_defaultParameterIndex != null);
@@ -171,19 +167,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return marshalAsType == UnmanagedType.Interface || marshalAsType == UnmanagedType.IUnknown;
         }
 
-        public AggregateSymbol getClass()
-        {
-            return parent.AsAggregateSymbol();
-        }
+        public AggregateSymbol getClass() => parent as AggregateSymbol;
 
         public bool IsExpImpl()
         {
             return name == null;
-        }
-
-        public AggregateDeclaration containingDeclaration()
-        {
-            return declaration;
         }
     }
 }

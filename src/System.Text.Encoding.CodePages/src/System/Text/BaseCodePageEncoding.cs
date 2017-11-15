@@ -41,7 +41,6 @@ namespace System.Text
     //       WORD        byteReplace;    // 2 bytes = 48     // default replacement byte(s)
     //       BYTE[]      data;           // data section
     //   }
-    [Serializable]
     internal abstract class BaseCodePageEncoding : EncodingNLS, ISerializable
     {
         internal const String CODE_PAGE_DATA_FILE_NAME = "codepages.nlp";
@@ -81,8 +80,7 @@ namespace System.Text
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            CodePageEncodingSurrogate.SerializeEncoding(this, info, context);
-            info.SetType(typeof(CodePageEncodingSurrogate));
+            throw new PlatformNotSupportedException();
         }
 
         // Just a helper as we cannot use 'this' when calling 'base(...)' 

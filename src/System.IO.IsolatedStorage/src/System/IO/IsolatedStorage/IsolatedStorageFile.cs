@@ -138,7 +138,7 @@ namespace System.IO.IsolatedStorage
 
             // We can save a bunch of work if the directory we want to create already exists.  This also
             // saves us in the case where sub paths are inaccessible (due to ERROR_ACCESS_DENIED) but the
-            // final path is accessable and the directory already exists.  For example, consider trying
+            // final path is accessible and the directory already exists.  For example, consider trying
             // to create c:\Foo\Bar\Baz, where everything already exists but ACLS prevent access to c:\Foo
             // and c:\Foo\Bar.  In that case, this code will think it needs to create c:\Foo, and c:\Foo\Bar
             // and fail to due so, causing an exception to be thrown.  This is not what we want.
@@ -504,6 +504,50 @@ namespace System.IO.IsolatedStorage
             }
         }
 
+        public override long AvailableFreeSpace
+        {
+            get
+            {
+                return Quota - UsedSize;
+            }
+        }
+
+        [CLSCompliant(false)]
+        [Obsolete("IsolatedStorage.MaximumSize has been deprecated because it is not CLS Compliant.  To get the maximum size use IsolatedStorage.Quota")]
+        public override ulong MaximumSize
+        {
+            get
+            {
+                return long.MaxValue;
+            }
+        }
+
+        public override long Quota
+        {
+            get
+            {
+                return long.MaxValue;
+            }
+        }
+
+        public override long UsedSize
+        {
+            get
+            {
+                return 0; // We do not have a mechanism for tracking usage.
+            }
+        }
+
+        [CLSCompliant(false)]
+        [Obsolete("IsolatedStorage.CurrentSize has been deprecated because it is not CLS Compliant.  To get the current size use IsolatedStorage.UsedSize")]
+        public override ulong CurrentSize
+        {
+            get
+            {
+                return 0; // We do not have a mechanism for tracking usage.
+            }
+        }
+
         public static IsolatedStorageFile GetUserStoreForApplication()
         {
             return GetStore(IsolatedStorageScope.Application | IsolatedStorageScope.User);
@@ -568,33 +612,25 @@ namespace System.IO.IsolatedStorage
         public static IsolatedStorageFile GetStore(IsolatedStorageScope scope, Type applicationEvidenceType)
         {
             // Scope MUST be Application
-
-            // https://github.com/dotnet/corefx/issues/10935
-            throw new PlatformNotSupportedException();
+            return (applicationEvidenceType == null) ? GetStore(scope) : throw new PlatformNotSupportedException(SR.PlatformNotSupported_CAS); // https://github.com/dotnet/corefx/issues/10935
         }
 
         public static IsolatedStorageFile GetStore(IsolatedStorageScope scope, object applicationIdentity)
         {
             // Scope MUST be Application
-
-            // https://github.com/dotnet/corefx/issues/10935
-            throw new PlatformNotSupportedException();
+            return (applicationIdentity == null) ? GetStore(scope) : throw new PlatformNotSupportedException(SR.PlatformNotSupported_CAS); // https://github.com/dotnet/corefx/issues/10935
         }
 
         public static IsolatedStorageFile GetStore(IsolatedStorageScope scope, Type domainEvidenceType, Type assemblyEvidenceType)
         {
             // Scope MUST NOT be Application (assembly is assumed otherwise)
-
-            // https://github.com/dotnet/corefx/issues/10935
-            throw new PlatformNotSupportedException();
+            return (domainEvidenceType == null && assemblyEvidenceType == null) ? GetStore(scope) : throw new PlatformNotSupportedException(SR.PlatformNotSupported_CAS); // https://github.com/dotnet/corefx/issues/10935
         }
 
         public static IsolatedStorageFile GetStore(IsolatedStorageScope scope, object domainIdentity, object assemblyIdentity)
         {
             // Scope MUST NOT be Application (assembly is assumed otherwise)
-
-            // https://github.com/dotnet/corefx/issues/10935
-            throw new PlatformNotSupportedException();
+            return (domainIdentity == null && assemblyIdentity == null) ? GetStore(scope) : throw new PlatformNotSupportedException(SR.PlatformNotSupported_CAS); // https://github.com/dotnet/corefx/issues/10935
         }
 
         // https://github.com/dotnet/corefx/issues/10935
@@ -655,12 +691,7 @@ namespace System.IO.IsolatedStorage
             if (Disposed)
                 throw new ObjectDisposedException(null, SR.IsolatedStorage_StoreNotOpen);
 
-            if (IsDeleted)
-            {
-                throw new IsolatedStorageException(SR.IsolatedStorage_StoreNotOpen);
-            }
-
-            if (_closed)
+            if (_closed || IsDeleted)
                 throw new InvalidOperationException(SR.IsolatedStorage_StoreNotOpen);
         }
 

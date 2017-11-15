@@ -6,6 +6,7 @@ using Xunit;
 
 namespace System.IO.IsolatedStorage
 {
+    [ActiveIssue(18940, TargetFrameworkMonikers.UapAot)]
     public class GetLastAccessTimeTests : IsoStorageTest
     {
         [Fact]
@@ -18,12 +19,12 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void GetLastAccessTime_ThrowsIsolatedStorageException()
+        public void GetLastAccessTime_Removed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.GetLastAccessTime("foo"));
+                Assert.Throws<InvalidOperationException>(() => isf.GetLastAccessTime("foo"));
             }
         }
 
@@ -39,7 +40,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void GetLastAccessTime_ThrowsInvalidOperationException()
+        public void GetLastAccessTime_Closed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -53,11 +54,12 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.GetLastAccessTime("\0bad"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.GetLastAccessTime("\0bad"));
             }
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void GetLastAccessTime_GetsTime()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())

@@ -12,8 +12,8 @@ namespace System.Globalization.Tests
         public static IEnumerable<object[]> CurrencyPositivePattern_TestData()
         {
             yield return new object[] { NumberFormatInfo.InvariantInfo, 0 };
-            yield return new object[] { new CultureInfo("en-US").NumberFormat, 0 };
-            yield return new object[] { new CultureInfo("fr-FR").NumberFormat, 3 };
+            yield return new object[] { CultureInfo.GetCultureInfo("en-US").NumberFormat, 0 };
+            yield return new object[] { CultureInfo.GetCultureInfo("fr-FR").NumberFormat, 3 };
         }
 
         [Theory]
@@ -37,8 +37,8 @@ namespace System.Globalization.Tests
         [Fact]
         public void CurrencyPositivePattern_Set_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("CurrencyPositivePattern", () => new NumberFormatInfo().CurrencyPositivePattern = -1);
-            Assert.Throws<ArgumentOutOfRangeException>("CurrencyPositivePattern", () => new NumberFormatInfo().CurrencyPositivePattern = 4);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("CurrencyPositivePattern", () => new NumberFormatInfo().CurrencyPositivePattern = -1);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("CurrencyPositivePattern", () => new NumberFormatInfo().CurrencyPositivePattern = 4);
             Assert.Throws<InvalidOperationException>(() => NumberFormatInfo.InvariantInfo.CurrencyPositivePattern = 1);
         }
     }

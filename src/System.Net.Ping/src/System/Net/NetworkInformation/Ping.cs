@@ -206,7 +206,7 @@ namespace System.Net.NetworkInformation
             pingTask.ContinueWith((t, state) =>
             {
                 var asyncOp = (AsyncOperation)state;
-                var e = new PingCompletedEventArgs(t.Status == TaskStatus.RanToCompletion ? t.Result : null, t.Exception, t.IsCanceled, asyncOp.UserSuppliedState);
+                var e = new PingCompletedEventArgs(t.IsCompletedSuccessfully ? t.Result : null, t.Exception, t.IsCanceled, asyncOp.UserSuppliedState);
                 SendOrPostCallback callback = _onPingCompletedDelegate ?? (_onPingCompletedDelegate = new SendOrPostCallback(o => { OnPingCompleted((PingCompletedEventArgs)o); }));
                 asyncOp.PostOperationCompleted(callback, e);
             }, AsyncOperationManager.CreateOperation(userToken), CancellationToken.None, TaskContinuationOptions.DenyChildAttach, TaskScheduler.Default);
@@ -275,8 +275,11 @@ namespace System.Net.NetworkInformation
             // Need to snapshot the address here, so we're sure that it's not changed between now
             // and the operation, and to be sure that IPAddress.ToString() is called and not some override.
             IPAddress addressSnapshot = (address.AddressFamily == AddressFamily.InterNetwork) ?
-                new IPAddress(address.GetAddressBytes()) :
+#pragma warning disable CS0618 // IPAddress.Address is obsoleted, but it's the most efficient way to get the Int32 IPv4 address
+                new IPAddress(address.Address) :
+#pragma warning restore CS0618
                 new IPAddress(address.GetAddressBytes(), address.ScopeId);
+
 
             CheckStart();
             try

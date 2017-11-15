@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Xunit;
@@ -10,11 +11,12 @@ using Xunit;
 public partial class ThreadPoolBoundHandleTests
 {
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public unsafe void SingleOperationOverSingleHandle()
     {
         const int DATA_SIZE = 2;
 
-        SafeHandle handle = HandleFactory.CreateAsyncFileHandleForWrite(@"SingleOverlappedOverSingleHandle.tmp");
+        SafeHandle handle = HandleFactory.CreateAsyncFileHandleForWrite(Path.Combine(TestDirectory, @"SingleOverlappedOverSingleHandle.tmp"));
         ThreadPoolBoundHandle boundHandle = ThreadPoolBoundHandle.BindHandle(handle);
 
         OverlappedContext result = new OverlappedContext();
@@ -47,11 +49,12 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public unsafe void MultipleOperationsOverSingleHandle()
     {
         const int DATA_SIZE = 2;
 
-        SafeHandle handle = HandleFactory.CreateAsyncFileHandleForWrite(@"MultipleOperationsOverSingleHandle.tmp");
+        SafeHandle handle = HandleFactory.CreateAsyncFileHandleForWrite(Path.Combine(TestDirectory, @"MultipleOperationsOverSingleHandle.tmp"));
         ThreadPoolBoundHandle boundHandle = ThreadPoolBoundHandle.BindHandle(handle);
 
         OverlappedContext result1 = new OverlappedContext();
@@ -104,12 +107,13 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public unsafe void MultipleOperationsOverMultipleHandles()
     {
         const int DATA_SIZE = 2;
 
-        SafeHandle handle1 = HandleFactory.CreateAsyncFileHandleForWrite(@"MultipleOperationsOverMultipleHandle1.tmp");
-        SafeHandle handle2 = HandleFactory.CreateAsyncFileHandleForWrite(@"MultipleOperationsOverMultipleHandle2.tmp");
+        SafeHandle handle1 = HandleFactory.CreateAsyncFileHandleForWrite(Path.Combine(TestDirectory, @"MultipleOperationsOverMultipleHandle1.tmp"));
+        SafeHandle handle2 = HandleFactory.CreateAsyncFileHandleForWrite(Path.Combine(TestDirectory, @"MultipleOperationsOverMultipleHandle2.tmp"));
         ThreadPoolBoundHandle boundHandle1 = ThreadPoolBoundHandle.BindHandle(handle1);
         ThreadPoolBoundHandle boundHandle2 = ThreadPoolBoundHandle.BindHandle(handle2);
 
@@ -175,12 +179,14 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Active Issue dotnet/corefx#13343")]
     public unsafe void FlowsAsyncLocalsToCallback()
     {   // Makes sure that we flow async locals to callback
 
         const int DATA_SIZE = 2;
 
-        SafeHandle handle = HandleFactory.CreateAsyncFileHandleForWrite(@"AsyncLocal.tmp");
+        SafeHandle handle = HandleFactory.CreateAsyncFileHandleForWrite(Path.Combine(TestDirectory, @"AsyncLocal.tmp"));
         ThreadPoolBoundHandle boundHandle = ThreadPoolBoundHandle.BindHandle(handle);
 
         OverlappedContext context = new OverlappedContext();

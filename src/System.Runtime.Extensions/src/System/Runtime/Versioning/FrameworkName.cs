@@ -6,7 +6,6 @@ using System.Diagnostics;
 
 namespace System.Runtime.Versioning
 {
-    [Serializable]
     public sealed class FrameworkName : IEquatable<FrameworkName>
     {
         private readonly string _identifier;
@@ -199,7 +198,7 @@ namespace System.Runtime.Versioning
                     }
                     try
                     {
-                        _version = new Version(value);
+                        _version = Version.Parse(value);
                     }
                     catch (Exception e)
                     {

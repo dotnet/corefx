@@ -27,6 +27,7 @@ namespace System.Data
     [Serializable]
     [XmlSchemaProvider(nameof(GetDataSetSchema))]
     [XmlRoot(nameof(DataSet))]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class DataSet : MarshalByValueComponent, IListSource, IXmlSerializable, ISupportInitializeNotification, ISerializable
     {
         private const string KEY_XMLSCHEMA = "XmlSchema";
@@ -3062,7 +3063,7 @@ namespace System.Data
         private void OnInitialized() => Initialized?.Invoke(this, EventArgs.Empty);
 
         /// <summary>
-        /// This method should be overriden by subclasses to restrict tables being removed.
+        /// This method should be overridden by subclasses to restrict tables being removed.
         /// </summary>
         protected internal virtual void OnRemoveTable(DataTable table) { }
 
@@ -3076,7 +3077,7 @@ namespace System.Data
         }
 
         /// <summary>
-        /// This method should be overriden by subclasses to restrict tables being removed.
+        /// This method should be overridden by subclasses to restrict tables being removed.
         /// </summary>
         protected virtual void OnRemoveRelation(DataRelation relation) { }
 

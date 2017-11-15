@@ -16,7 +16,7 @@ namespace Microsoft.Win32.RegistryTests
             Assert.Throws<ArgumentNullException>(() => TestRegistryKey.OpenSubKey(name: null, permissionCheck: RegistryKeyPermissionCheck.ReadSubTree));
 
             // Should throw if subkey name greater than 255 chars
-            Assert.Throws<ArgumentException>(() => TestRegistryKey.OpenSubKey(new string('a', 256), RegistryKeyPermissionCheck.Default));
+            AssertExtensions.Throws<ArgumentException>("name", null, () => TestRegistryKey.OpenSubKey(new string('a', 256), RegistryKeyPermissionCheck.Default));
 
             // Should throw when opened with default permission check
             const string name = "FooBar";
@@ -50,7 +50,6 @@ namespace Microsoft.Win32.RegistryTests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Net46, "dotnet/corefx#11332")]
         public void OpenSubKeyTest()
         {
             // [] Vanilla; open a subkey in read/write mode and write to it

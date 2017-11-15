@@ -3,151 +3,127 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal static class Operators
     {
-        private sealed class OPINFO
+        private sealed class OperatorInfo
         {
-            public OPINFO(TokenKind t, PredefinedName pn, ExpressionKind e, int c)
+            public readonly TokenKind TokenKind;
+            public readonly PredefinedName MethodName;
+            public readonly ExpressionKind ExpressionKind;
+
+            public OperatorInfo(TokenKind kind, PredefinedName pn, ExpressionKind e)
             {
-                iToken = t;
-                methodName = pn;
-                expressionKind = e;
+                TokenKind = kind;
+                MethodName = pn;
+                ExpressionKind = e;
             }
-            public readonly TokenKind iToken;
-            public readonly PredefinedName methodName;
-            public readonly ExpressionKind expressionKind;
         }
 
-        private static readonly Dictionary<OperatorKind, OPINFO> s_rgOpInfo = new Dictionary<OperatorKind, OPINFO>()
-        {
-{OperatorKind.OP_NONE,            new OPINFO(TokenKind.Unknown             , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 0)},
-{OperatorKind.OP_ASSIGN,          new OPINFO(TokenKind.Equal               , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 2)},
-{OperatorKind.OP_ADDEQ,           new OPINFO(TokenKind.PlusEqual           , PredefinedName.PN_COUNT                , ExpressionKind.EK_MULTIOFFSET + (int)ExpressionKind.EK_ADD   , 2)},
-{OperatorKind.OP_SUBEQ,           new OPINFO(TokenKind.MinusEqual          , PredefinedName.PN_COUNT                , ExpressionKind.EK_MULTIOFFSET + (int)ExpressionKind.EK_SUB   , 2)},
-{OperatorKind.OP_MULEQ,           new OPINFO(TokenKind.SplatEqual          , PredefinedName.PN_COUNT                , ExpressionKind.EK_MULTIOFFSET + (int)ExpressionKind.EK_MUL   , 2)},
-{OperatorKind.OP_DIVEQ,           new OPINFO(TokenKind.SlashEqual          , PredefinedName.PN_COUNT                , ExpressionKind.EK_MULTIOFFSET + (int)ExpressionKind.EK_DIV   , 2)},
-{OperatorKind.OP_MODEQ,           new OPINFO(TokenKind.PercentEqual        , PredefinedName.PN_COUNT                , ExpressionKind.EK_MULTIOFFSET + (int)ExpressionKind.EK_MOD   , 2)},
-{OperatorKind.OP_ANDEQ,           new OPINFO(TokenKind.AndEqual            , PredefinedName.PN_COUNT                , ExpressionKind.EK_MULTIOFFSET + (int)ExpressionKind.EK_BITAND, 2)},
-{OperatorKind.OP_XOREQ,           new OPINFO(TokenKind.HatEqual            , PredefinedName.PN_COUNT                , ExpressionKind.EK_MULTIOFFSET + (int)ExpressionKind.EK_BITXOR, 2)},
-{OperatorKind.OP_OREQ,            new OPINFO(TokenKind.BarEqual            , PredefinedName.PN_COUNT                , ExpressionKind.EK_MULTIOFFSET + (int)ExpressionKind.EK_BITOR , 2)},
-{OperatorKind.OP_LSHIFTEQ,        new OPINFO(TokenKind.LeftShiftEqual      , PredefinedName.PN_COUNT                , ExpressionKind.EK_MULTIOFFSET + (int)ExpressionKind.EK_LSHIFT, 2)},
-{OperatorKind.OP_RSHIFTEQ,        new OPINFO(TokenKind.RightShiftEqual     , PredefinedName.PN_COUNT                , ExpressionKind.EK_MULTIOFFSET + (int)ExpressionKind.EK_RSHIFT, 2)},
-{OperatorKind.OP_QUESTION,        new OPINFO(TokenKind.Question            , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 2)},
-{OperatorKind.OP_VALORDEF,        new OPINFO(TokenKind.QuestionQuestion    , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 2)},
-{OperatorKind.OP_LOGOR,           new OPINFO(TokenKind.LogicalOr           , PredefinedName.PN_COUNT                , ExpressionKind.EK_LOGOR                  , 2)},
-{OperatorKind.OP_LOGAND,          new OPINFO(TokenKind.LogicalAnd          , PredefinedName.PN_COUNT                , ExpressionKind.EK_LOGAND                 , 2)},
-{OperatorKind.OP_BITOR,           new OPINFO(TokenKind.Bar                 , PredefinedName.PN_OPBITWISEOR          , ExpressionKind.EK_BITOR                  , 2)},
-{OperatorKind.OP_BITXOR,          new OPINFO(TokenKind.Hat                 , PredefinedName.PN_OPXOR                , ExpressionKind.EK_BITXOR                 , 2)},
-{OperatorKind.OP_BITAND,          new OPINFO(TokenKind.Ampersand           , PredefinedName.PN_OPBITWISEAND         , ExpressionKind.EK_BITAND                 , 2)},
-{OperatorKind.OP_EQ,              new OPINFO(TokenKind.EqualEqual          , PredefinedName.PN_OPEQUALITY           , ExpressionKind.EK_EQ                     , 2)},
-{OperatorKind.OP_NEQ,             new OPINFO(TokenKind.NotEqual            , PredefinedName.PN_OPINEQUALITY         , ExpressionKind.EK_NE                     , 2)},
-{OperatorKind.OP_LT,              new OPINFO(TokenKind.LessThan            , PredefinedName.PN_OPLESSTHAN           , ExpressionKind.EK_LT                     , 2)},
-{OperatorKind.OP_LE,              new OPINFO(TokenKind.LessThanEqual       , PredefinedName.PN_OPLESSTHANOREQUAL    , ExpressionKind.EK_LE                     , 2)},
-{OperatorKind.OP_GT,              new OPINFO(TokenKind.GreaterThan         , PredefinedName.PN_OPGREATERTHAN        , ExpressionKind.EK_GT                     , 2)},
-{OperatorKind.OP_GE,              new OPINFO(TokenKind.GreaterThanEqual    , PredefinedName.PN_OPGREATERTHANOREQUAL , ExpressionKind.EK_GE                     , 2)},
-{OperatorKind.OP_IS,              new OPINFO(TokenKind.Is                  , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 2)},
-{OperatorKind.OP_AS,              new OPINFO(TokenKind.As                  , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 2)},
-{OperatorKind.OP_LSHIFT,          new OPINFO(TokenKind.LeftShift           , PredefinedName.PN_OPLEFTSHIFT          , ExpressionKind.EK_LSHIFT                 , 2)},
-{OperatorKind.OP_RSHIFT,          new OPINFO(TokenKind.RightShift          , PredefinedName.PN_OPRIGHTSHIFT         , ExpressionKind.EK_RSHIFT                 , 2)},
-{OperatorKind.OP_ADD,             new OPINFO(TokenKind.Plus                , PredefinedName.PN_OPPLUS               , ExpressionKind.EK_ADD                    , 2)},
-{OperatorKind.OP_SUB,             new OPINFO(TokenKind.Minus               , PredefinedName.PN_OPMINUS              , ExpressionKind.EK_SUB                    , 2)},
-{OperatorKind.OP_MUL,             new OPINFO(TokenKind.Splat               , PredefinedName.PN_OPMULTIPLY           , ExpressionKind.EK_MUL                    , 2)},
-{OperatorKind.OP_DIV,             new OPINFO(TokenKind.Slash               , PredefinedName.PN_OPDIVISION           , ExpressionKind.EK_DIV                    , 2)},
-{OperatorKind.OP_MOD,             new OPINFO(TokenKind.Percent             , PredefinedName.PN_OPMODULUS            , ExpressionKind.EK_MOD                    , 2)},
-{OperatorKind.OP_NOP,             new OPINFO(TokenKind.Unknown             , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 1)},
-{OperatorKind.OP_UPLUS,           new OPINFO(TokenKind.Plus                , PredefinedName.PN_OPUNARYPLUS          , ExpressionKind.EK_UPLUS                  , 1)},
-{OperatorKind.OP_NEG,             new OPINFO(TokenKind.Minus               , PredefinedName.PN_OPUNARYMINUS         , ExpressionKind.EK_NEG                    , 1)},
-{OperatorKind.OP_BITNOT,          new OPINFO(TokenKind.Tilde               , PredefinedName.PN_OPCOMPLEMENT         , ExpressionKind.EK_BITNOT                 , 1)},
-{OperatorKind.OP_LOGNOT,          new OPINFO(TokenKind.Bang                , PredefinedName.PN_OPNEGATION           , ExpressionKind.EK_LOGNOT                 , 1)},
-{OperatorKind.OP_PREINC,          new OPINFO(TokenKind.PlusPlus            , PredefinedName.PN_OPINCREMENT          , ExpressionKind.EK_ADD                    , 1)},
-{OperatorKind.OP_PREDEC,          new OPINFO(TokenKind.MinusMinus          , PredefinedName.PN_OPDECREMENT          , ExpressionKind.EK_SUB                    , 1)},
-{OperatorKind.OP_TYPEOF,          new OPINFO(TokenKind.TypeOf              , PredefinedName.PN_COUNT                , ExpressionKind.EK_TYPEOF                 , 1)},
-{OperatorKind.OP_CHECKED,         new OPINFO(TokenKind.Checked             , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 1)},
-{OperatorKind.OP_UNCHECKED,       new OPINFO(TokenKind.Unchecked           , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 1)},
-{OperatorKind.OP_MAKEREFANY,      new OPINFO(TokenKind.MakeRef             , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 1)},
-{OperatorKind.OP_REFVALUE,        new OPINFO(TokenKind.RefValue            , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 2)},
-{OperatorKind.OP_REFTYPE,         new OPINFO(TokenKind.RefType             , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 1)},
-{OperatorKind.OP_ARGS,            new OPINFO(TokenKind.ArgList             , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 0)},
-{OperatorKind.OP_CAST,            new OPINFO(TokenKind.Unknown             , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 2)},
-{OperatorKind.OP_INDIR,           new OPINFO(TokenKind.Splat               , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 1)},
-{OperatorKind.OP_ADDR,            new OPINFO(TokenKind.Ampersand           , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 1)},
-{OperatorKind.OP_COLON,           new OPINFO(TokenKind.Colon               , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 2)},
-{OperatorKind.OP_THIS,            new OPINFO(TokenKind.This                , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 0)},
-{OperatorKind.OP_BASE,            new OPINFO(TokenKind.Base                , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 0)},
-{OperatorKind.OP_NULL,            new OPINFO(TokenKind.Null                , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 0)},
-{OperatorKind.OP_TRUE,            new OPINFO(TokenKind.True                , PredefinedName.PN_OPTRUE               , ExpressionKind.EK_COUNT                  , 1)},
-{OperatorKind.OP_FALSE,           new OPINFO(TokenKind.False               , PredefinedName.PN_OPFALSE              , ExpressionKind.EK_COUNT                  , 1)},
-{OperatorKind.OP_CALL,            new OPINFO(TokenKind.Unknown             , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 0)},
-{OperatorKind.OP_DEREF,           new OPINFO(TokenKind.Unknown             , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 0)},
-{OperatorKind.OP_PAREN,           new OPINFO(TokenKind.Unknown             , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 0)},
-{OperatorKind.OP_POSTINC,         new OPINFO(TokenKind.PlusPlus            , PredefinedName.PN_COUNT                , ExpressionKind.EK_ADD                    , 1)},
-{OperatorKind.OP_POSTDEC,         new OPINFO(TokenKind.MinusMinus          , PredefinedName.PN_COUNT                , ExpressionKind.EK_SUB                    , 1)},
-{OperatorKind.OP_DOT,             new OPINFO(TokenKind.Dot                 , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 2)},
-{OperatorKind.OP_IMPLICIT,        new OPINFO(TokenKind.Implicit            , PredefinedName.PN_OPIMPLICITMN         , ExpressionKind.EK_COUNT                  , 1)},
-{OperatorKind.OP_EXPLICIT,        new OPINFO(TokenKind.Explicit            , PredefinedName.PN_OPEXPLICITMN         , ExpressionKind.EK_COUNT                  , 1)},
-{OperatorKind.OP_EQUALS,          new OPINFO(TokenKind.Unknown             , PredefinedName.PN_OPEQUALS             , ExpressionKind.EK_COUNT                  , 2)},
-{OperatorKind.OP_COMPARE,         new OPINFO(TokenKind.Unknown             , PredefinedName.PN_OPCOMPARE            , ExpressionKind.EK_COUNT                  , 2)},
-{OperatorKind.OP_DEFAULT,         new OPINFO(TokenKind.Unknown             , PredefinedName.PN_COUNT                , ExpressionKind.EK_COUNT                  , 0)}
+        private static readonly OperatorInfo[] s_operatorInfos = {
+            new OperatorInfo(TokenKind.Unknown         , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Equal           , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.PlusEqual       , PredefinedName.PN_COUNT               , ExpressionKind.MultiOffset + (int)ExpressionKind.Add               ),
+            new OperatorInfo(TokenKind.MinusEqual      , PredefinedName.PN_COUNT               , ExpressionKind.MultiOffset + (int)ExpressionKind.Subtract          ),
+            new OperatorInfo(TokenKind.SplatEqual      , PredefinedName.PN_COUNT               , ExpressionKind.MultiOffset + (int)ExpressionKind.Multiply          ),
+            new OperatorInfo(TokenKind.SlashEqual      , PredefinedName.PN_COUNT               , ExpressionKind.MultiOffset + (int)ExpressionKind.Divide            ),
+            new OperatorInfo(TokenKind.PercentEqual    , PredefinedName.PN_COUNT               , ExpressionKind.MultiOffset + (int)ExpressionKind.Modulo            ),
+            new OperatorInfo(TokenKind.AndEqual        , PredefinedName.PN_COUNT               , ExpressionKind.MultiOffset + (int)ExpressionKind.BitwiseAnd        ),
+            new OperatorInfo(TokenKind.HatEqual        , PredefinedName.PN_COUNT               , ExpressionKind.MultiOffset + (int)ExpressionKind.BitwiseExclusiveOr),
+            new OperatorInfo(TokenKind.BarEqual        , PredefinedName.PN_COUNT               , ExpressionKind.MultiOffset + (int)ExpressionKind.BitwiseOr         ),
+            new OperatorInfo(TokenKind.LeftShiftEqual  , PredefinedName.PN_COUNT               , ExpressionKind.MultiOffset + (int)ExpressionKind.LeftShirt         ),
+            new OperatorInfo(TokenKind.RightShiftEqual , PredefinedName.PN_COUNT               , ExpressionKind.MultiOffset + (int)ExpressionKind.RightShift        ),
+            new OperatorInfo(TokenKind.Question        , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.QuestionQuestion, PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.LogicalOr       , PredefinedName.PN_COUNT               , ExpressionKind.LogicalOr                                           ),
+            new OperatorInfo(TokenKind.LogicalAnd      , PredefinedName.PN_COUNT               , ExpressionKind.LogicalAnd                                          ),
+            new OperatorInfo(TokenKind.Bar             , PredefinedName.PN_OPBITWISEOR         , ExpressionKind.BitwiseOr                                           ),
+            new OperatorInfo(TokenKind.Hat             , PredefinedName.PN_OPXOR               , ExpressionKind.BitwiseExclusiveOr                                  ),
+            new OperatorInfo(TokenKind.Ampersand       , PredefinedName.PN_OPBITWISEAND        , ExpressionKind.BitwiseAnd                                          ),
+            new OperatorInfo(TokenKind.EqualEqual      , PredefinedName.PN_OPEQUALITY          , ExpressionKind.Eq                                                  ),
+            new OperatorInfo(TokenKind.NotEqual        , PredefinedName.PN_OPINEQUALITY        , ExpressionKind.NotEq                                               ),
+            new OperatorInfo(TokenKind.LessThan        , PredefinedName.PN_OPLESSTHAN          , ExpressionKind.LessThan                                            ),
+            new OperatorInfo(TokenKind.LessThanEqual   , PredefinedName.PN_OPLESSTHANOREQUAL   , ExpressionKind.LessThanOrEqual                                     ),
+            new OperatorInfo(TokenKind.GreaterThan     , PredefinedName.PN_OPGREATERTHAN       , ExpressionKind.GreaterThan                                         ),
+            new OperatorInfo(TokenKind.GreaterThanEqual, PredefinedName.PN_OPGREATERTHANOREQUAL, ExpressionKind.GreaterThanOrEqual                                  ),
+            new OperatorInfo(TokenKind.Is              , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.As              , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.LeftShift       , PredefinedName.PN_OPLEFTSHIFT         , ExpressionKind.LeftShirt                                           ),
+            new OperatorInfo(TokenKind.RightShift      , PredefinedName.PN_OPRIGHTSHIFT        , ExpressionKind.RightShift                                          ),
+            new OperatorInfo(TokenKind.Plus            , PredefinedName.PN_OPPLUS              , ExpressionKind.Add                                                 ),
+            new OperatorInfo(TokenKind.Minus           , PredefinedName.PN_OPMINUS             , ExpressionKind.Subtract                                            ),
+            new OperatorInfo(TokenKind.Splat           , PredefinedName.PN_OPMULTIPLY          , ExpressionKind.Multiply                                            ),
+            new OperatorInfo(TokenKind.Slash           , PredefinedName.PN_OPDIVISION          , ExpressionKind.Divide                                              ),
+            new OperatorInfo(TokenKind.Percent         , PredefinedName.PN_OPMODULUS           , ExpressionKind.Modulo                                              ),
+            new OperatorInfo(TokenKind.Unknown         , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Plus            , PredefinedName.PN_OPUNARYPLUS         , ExpressionKind.UnaryPlus                                           ),
+            new OperatorInfo(TokenKind.Minus           , PredefinedName.PN_OPUNARYMINUS        , ExpressionKind.Negate                                              ),
+            new OperatorInfo(TokenKind.Tilde           , PredefinedName.PN_OPCOMPLEMENT        , ExpressionKind.BitwiseNot                                          ),
+            new OperatorInfo(TokenKind.Bang            , PredefinedName.PN_OPNEGATION          , ExpressionKind.LogicalNot                                          ),
+            new OperatorInfo(TokenKind.PlusPlus        , PredefinedName.PN_OPINCREMENT         , ExpressionKind.Add                                                 ),
+            new OperatorInfo(TokenKind.MinusMinus      , PredefinedName.PN_OPDECREMENT         , ExpressionKind.Subtract                                            ),
+            new OperatorInfo(TokenKind.TypeOf          , PredefinedName.PN_COUNT               , ExpressionKind.TypeOf                                              ),
+            new OperatorInfo(TokenKind.Checked         , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Unchecked       , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.MakeRef         , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.RefValue        , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.RefType         , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.ArgList         , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Unknown         , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Splat           , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Ampersand       , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Colon           , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.This            , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Base            , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Null            , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.True            , PredefinedName.PN_OPTRUE              , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.False           , PredefinedName.PN_OPFALSE             , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Unknown         , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Unknown         , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Unknown         , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.PlusPlus        , PredefinedName.PN_COUNT               , ExpressionKind.Add                                                 ),
+            new OperatorInfo(TokenKind.MinusMinus      , PredefinedName.PN_COUNT               , ExpressionKind.Subtract                                            ),
+            new OperatorInfo(TokenKind.Dot             , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Implicit        , PredefinedName.PN_OPIMPLICITMN        , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Explicit        , PredefinedName.PN_OPEXPLICITMN        , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Unknown         , PredefinedName.PN_OPEQUALS            , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Unknown         , PredefinedName.PN_OPCOMPARE           , ExpressionKind.ExpressionKindCount                                 ),
+            new OperatorInfo(TokenKind.Unknown         , PredefinedName.PN_COUNT               , ExpressionKind.ExpressionKindCount                                 )
         };
 
+        private static Dictionary<Name, string> s_operatorsByName;
 
-        private static OPINFO GetInfo(OperatorKind op)
+        private static Dictionary<Name, string> GetOperatorByName()
         {
-            //Debug.Assert(IsValid(op));
-            return s_rgOpInfo[op];
-        }
-        public static OperatorKind OperatorOfMethodName(NameManager namemgr, Name name)
-        {
-            Debug.Assert(name != null);
-
-            for (OperatorKind i = OperatorKind.OP_NONE; i < OperatorKind.OP_LAST; i = (i + 1))
+            Dictionary<Name, string> dict = new Dictionary<Name, string>(28)
             {
-                if (HasMethodName(i) && (name == GetMethodName(namemgr, i)))
+                {NameManager.GetPredefinedName(PredefinedName.PN_OPEQUALS), "equals"},
+                {NameManager.GetPredefinedName(PredefinedName.PN_OPCOMPARE), "compare" }
+            };
+
+            foreach (OperatorInfo opInfo in s_operatorInfos)
+            {
+                PredefinedName predefName = opInfo.MethodName;
+                TokenKind token = opInfo.TokenKind;
+                if (predefName != PredefinedName.PN_COUNT && token != TokenKind.Unknown)
                 {
-                    return i;
+                    dict.Add(NameManager.GetPredefinedName(predefName), TokenFacts.GetText(token));
                 }
             }
 
-            return OperatorKind.OP_NONE;
+            return dict;
         }
 
-        private static bool HasMethodName(OperatorKind op)
-        {
-            //Debug.Assert(IsValid(op));
-            return GetMethodName(op) != PredefinedName.PN_COUNT;
-        }
+        private static OperatorInfo GetInfo(OperatorKind op) => s_operatorInfos[(int)op];
 
-        private static PredefinedName GetMethodName(OperatorKind op)
-        {
-            //Debug.Assert(IsValid(op));
-            return GetInfo(op).methodName;
-        }
+        public static string OperatorOfMethodName(Name name) =>
+            (s_operatorsByName ?? (s_operatorsByName = GetOperatorByName()))[name];
 
-        private static Name GetMethodName(NameManager namemgr, OperatorKind op)
-        {
-            Debug.Assert(HasMethodName(op));
-            return namemgr.GetPredefName(GetMethodName(op));
-        }
+        public static string GetDisplayName(OperatorKind op) => TokenFacts.GetText(GetInfo(op).TokenKind);
 
-        public static bool HasDisplayName(OperatorKind op)
-        {
-            //Debug.Assert(IsValid(op));
-            return GetInfo(op).iToken != TokenKind.Unknown;
-        }
-        public static string GetDisplayName(OperatorKind op)
-        {
-            Debug.Assert(HasDisplayName(op));
-            return TokenFacts.GetText(GetInfo(op).iToken);
-        }
-        public static ExpressionKind GetExpressionKind(OperatorKind op)
-        {
-            //Debug.Assert(IsValid(op));
-            return GetInfo(op).expressionKind;
-        }
+        public static ExpressionKind GetExpressionKind(OperatorKind op) => GetInfo(op).ExpressionKind;
     }
 }

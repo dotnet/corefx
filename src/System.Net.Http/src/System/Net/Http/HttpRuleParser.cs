@@ -40,7 +40,7 @@ namespace System.Net.Http
         internal const int MaxInt32Digits = 10;
 
         // iso-8859-1, Western European (ISO)
-#if PHONE || NETNative
+#if uap
         internal static readonly Encoding DefaultHttpEncoding = Encoding.GetEncoding("iso-8859-1");
 #else
         internal static readonly Encoding DefaultHttpEncoding = Encoding.GetEncoding(28591);
@@ -113,6 +113,34 @@ namespace System.Net.Http
                 current++;
             }
             return input.Length - startIndex;
+        }
+
+        [Pure]
+        internal static bool IsToken(string input)
+        {
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (!IsTokenChar(input[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        [Pure]
+        internal static bool IsToken(ReadOnlySpan<byte> input)
+        {
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (!IsTokenChar((char) input[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         internal static int GetWhitespaceLength(string input, int startIndex)

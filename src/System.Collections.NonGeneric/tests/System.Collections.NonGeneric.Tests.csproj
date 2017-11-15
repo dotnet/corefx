@@ -4,13 +4,9 @@
   <PropertyGroup>
     <ProjectGuid>{EE95AE39-845A-42D3-86D0-8065DBE56612}</ProjectGuid>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="$(CommonTestPath)\System\AssertExtensions.cs">
-      <Link>Common\System\AssertExtensions.cs</Link>
-    </Compile>
     <!-- Common Collections tests -->
     <Compile Include="$(CommonTestPath)\System\Collections\ICollection.NonGeneric.Tests.cs">
       <Link>Common\System\Collections\ICollection.NonGeneric.Tests.cs</Link>
@@ -30,13 +26,16 @@
     <Compile Include="$(CommonTestPath)\System\Collections\TestingTypes.cs">
       <Link>Common\System\Collections\TestingTypes.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
+      <Link>System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
+    </Compile>
     <Compile Include="ArrayListTests.cs" />
     <Compile Include="ArrayList\ArrayList.IList.Tests.cs" />
     <Compile Include="Hashtable\Hashtable.Values.Tests.cs" />
     <Compile Include="Hashtable\Hashtable.Keys.Tests.cs" />
     <Compile Include="Hashtable\Hashtable.IDictionary.Tests.cs" />
     <Compile Include="Helpers.cs" />
-    <Compile Include="CaseInsentiveComparerTests.cs" />
+    <Compile Include="CaseInsensitiveComparerTests.cs" />
     <Compile Include="CollectionBaseTests.cs" />
     <Compile Include="CollectionsUtilTests.cs" />
     <Compile Include="ComparerTests.cs" />
@@ -53,6 +52,12 @@
     <Compile Include="$(CommonTestPath)\System\Collections\IEnumerable.NonGeneric.Serialization.Tests.cs">
       <Link>Common\System\Collections\IEnumerable.NonGeneric.Serialization.Tests.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

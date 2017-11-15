@@ -1,6 +1,6 @@
 Building CoreFX on FreeBSD, Linux and OS X
 ==========================================
-##Building
+## Building
 
 1. Install the prerequisites ([Linux](#user-content-linux), [macOS](#user-content-macos))
 2. Clone the corefx repo `git clone https://github.com/dotnet/corefx.git`
@@ -25,7 +25,7 @@ For Ubuntu 14.04, the following packages should be installed to build the native
 components
 
 * git
-* clang-3.5
+* clang-3.9
 * cmake
 * make
 * libc6-dev
@@ -34,7 +34,7 @@ components
 * libcurl4-openssl-dev
 * zlib1g-dev
 
-`sudo apt-get install git clang-3.5 cmake make libc6-dev libssl-dev libkrb5-dev
+`sudo apt-get install git clang-3.9 cmake make libc6-dev libssl-dev libkrb5-dev
 libcurl4-openssl-dev zlib1g-dev`
 
 #### Managed build
@@ -47,7 +47,8 @@ For Ubuntu 14.04, install the following packages:
 
 `sudo apt-get install libunwind8 libicu52 curl`
 
-For Ubuntu 16.04 LTS / Bash on Ubuntu on Windows you may need to replace libicu52 with libicu55. Ubuntu 16.10 will require libcu57.
+For Ubuntu 16.04 LTS / Bash on Ubuntu on Windows you may need to replace libicu52 with libicu55.
+Ubuntu 16.10 and Ubuntu 17.04 will require libicu57. 
 
 `sudo apt-get install libunwind8 libicu55 curl`
 
@@ -56,6 +57,8 @@ in the native section should also be installed (this happens automatically on
 most systems when you install the development packages).
 
 ### macOS
+
+macOS 10.12 or higher is needed to build corefx 2.x.
 
 On macOS a few components are needed which are not provided by a default developer setup:
 * CMake

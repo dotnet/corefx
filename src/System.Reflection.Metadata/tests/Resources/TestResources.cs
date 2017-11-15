@@ -12,6 +12,7 @@ namespace System.Reflection.Metadata.Tests
     internal static class Interop
     {
         public static readonly byte[] IndexerWithByRefParam = ResourceHelper.GetResource("Interop.IndexerWithByRefParam.dll");
+        public static readonly byte[] OtherAccessors = ResourceHelper.GetResource("Interop.OtherAccessors.dll");
         public static readonly byte[] Interop_Mock01 = ResourceHelper.GetResource("Interop.Interop.Mock01.dll");
         public static readonly byte[] Interop_Mock01_Impl = ResourceHelper.GetResource("Interop.Interop.Mock01.Impl.dll");
     }
@@ -25,6 +26,7 @@ namespace System.Reflection.Metadata.Tests
         public static readonly byte[] Debug = ResourceHelper.GetResource("Misc.Debug.dll");
         public static readonly byte[] KeyPair = ResourceHelper.GetResource("Misc.KeyPair.snk");
         public static readonly byte[] Signed = ResourceHelper.GetResource("Misc.Signed.exe");
+        public static readonly byte[] Satellite = ResourceHelper.GetResource("Misc.SatelliteAssembly.resources.dll");
 
         public static readonly byte[] KeyPair_PublicKey = new byte[] 
         {

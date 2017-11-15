@@ -137,23 +137,13 @@ namespace System.Linq.Expressions
             }
 
             TypeUtils.ValidateType(type, nameof(type));
-            if (type.IsByRef)
-            {
-                throw Error.TypeMustNotBeByRef(nameof(type));
-            }
-
-            if (type.IsPointer)
-            {
-                throw Error.TypeMustNotBePointer(nameof(type));
-            }
-
             ReadOnlyCollection<Expression> initializerList = initializers.ToReadOnly();
 
             Expression[] newList = null;
             for (int i = 0, n = initializerList.Count; i < n; i++)
             {
                 Expression expr = initializerList[i];
-                RequiresCanRead(expr, nameof(initializers), i);
+                ExpressionUtils.RequiresCanRead(expr, nameof(initializers), i);
 
                 if (!TypeUtils.AreReferenceAssignable(type, expr.Type))
                 {
@@ -215,15 +205,6 @@ namespace System.Linq.Expressions
             }
 
             TypeUtils.ValidateType(type, nameof(type));
-            if (type.IsByRef)
-            {
-                throw Error.TypeMustNotBeByRef(nameof(type));
-            }
-
-            if (type.IsPointer)
-            {
-                throw Error.TypeMustNotBePointer(nameof(type));
-            }
 
             ReadOnlyCollection<Expression> boundsList = bounds.ToReadOnly();
 
@@ -233,7 +214,7 @@ namespace System.Linq.Expressions
             for (int i = 0; i < dimensions; i++)
             {
                 Expression expr = boundsList[i];
-                RequiresCanRead(expr, nameof(bounds), i);
+                ExpressionUtils.RequiresCanRead(expr, nameof(bounds), i);
                 if (!expr.Type.IsInteger())
                 {
                     throw Error.ArgumentMustBeInteger(nameof(bounds), i);

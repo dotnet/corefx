@@ -8,14 +8,14 @@ using Xunit;
 
 namespace System.Diagnostics.TextWriterTraceListenerTests
 {
-    public class DelimiterWriteMethodTests : IDisposable
+    public class DelimiterWriteMethodTests : FileCleanupTestBase
     {
         private readonly Stream _stream;
         private readonly string _fileName;
 
         public DelimiterWriteMethodTests()
         {
-            _fileName = string.Format("{0}.xml", GetType().Name);
+            _fileName = $"{GetTestFilePath()}.xml";
             CommonUtilities.DeleteFile(_fileName);
             _stream = new FileStream(_fileName, FileMode.OpenOrCreate, FileAccess.Write);
         }
@@ -50,7 +50,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
             using (var target = new DelimitedListTraceListener(_stream))
             {
                 target.Filter = filter;
-                target.TraceOutputOptions = TraceOptions.ProcessId | TraceOptions.ThreadId | TraceOptions.DateTime | TraceOptions.Timestamp;
+                target.TraceOutputOptions = TraceOptions.ProcessId | TraceOptions.ThreadId | TraceOptions.DateTime | TraceOptions.Timestamp | TraceOptions.LogicalOperationStack;
                 target.TraceEvent(eventCache, source, eventType, id, format, args);
             }
 
@@ -66,7 +66,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
             using (var target = new DelimitedListTraceListener(_stream))
             {
                 target.Filter = filter;
-                target.TraceOutputOptions = TraceOptions.ProcessId | TraceOptions.ThreadId | TraceOptions.DateTime | TraceOptions.Timestamp;
+                target.TraceOutputOptions = TraceOptions.ProcessId | TraceOptions.ThreadId | TraceOptions.DateTime | TraceOptions.Timestamp | TraceOptions.LogicalOperationStack;
                 target.TraceEvent(eventCache, source, eventType, id, message);
             }
 
@@ -102,7 +102,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
             using (var target = new DelimitedListTraceListener(_stream))
             {
                 target.Filter = filter;
-                target.TraceOutputOptions = TraceOptions.ProcessId | TraceOptions.ThreadId | TraceOptions.DateTime | TraceOptions.Timestamp;
+                target.TraceOutputOptions = TraceOptions.ProcessId | TraceOptions.ThreadId | TraceOptions.DateTime | TraceOptions.Timestamp | TraceOptions.LogicalOperationStack;
                 target.TraceData(eventCache, source, eventType, id, data);
             }
 
@@ -138,7 +138,7 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
             {
                 target.Delimiter = delimiter;
                 target.Filter = filter;
-                target.TraceOutputOptions = TraceOptions.ProcessId | TraceOptions.ThreadId | TraceOptions.DateTime | TraceOptions.Timestamp;
+                target.TraceOutputOptions = TraceOptions.ProcessId | TraceOptions.ThreadId | TraceOptions.DateTime | TraceOptions.Timestamp | TraceOptions.LogicalOperationStack;
                 target.TraceData(eventCache, source, eventType, id, data);
             }
 
@@ -146,10 +146,10 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
             Assert.Equal(expected, File.ReadAllText(_fileName));
         }
 
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
             _stream.Dispose();
-            CommonUtilities.DeleteFile(_fileName);
+            base.Dispose(disposing);
         }
     }
 }

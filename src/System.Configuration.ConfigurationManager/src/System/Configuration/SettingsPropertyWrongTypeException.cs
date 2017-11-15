@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 namespace System.Configuration
 {
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class SettingsPropertyWrongTypeException : Exception
     {
         public SettingsPropertyWrongTypeException(String message)
@@ -25,6 +26,7 @@ namespace System.Configuration
         }
 
         public SettingsPropertyWrongTypeException()
-        { }
+        {            
+        }
     }
 }

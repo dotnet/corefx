@@ -154,7 +154,7 @@ namespace System.Linq.Parallel.Tests
         public static void WithExecutionMode_ArgumentException(Labeled<ParallelQuery<int>> labeled, int count)
         {
             ParallelQuery<int> query = labeled.Item;
-            Assert.Throws<ArgumentException>(null, () => query.WithExecutionMode((ParallelExecutionMode)2));
+            AssertExtensions.Throws<ArgumentException>(null, () => query.WithExecutionMode((ParallelExecutionMode)2));
         }
 
         [Theory]
@@ -167,7 +167,7 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void WithExecutionMode_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).WithExecutionMode(ParallelExecutionMode.Default));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((ParallelQuery<int>)null).WithExecutionMode(ParallelExecutionMode.Default));
         }
 
         /// <summary>Tracks all of the Tasks from which AddCurrent is called.</summary>

@@ -50,6 +50,10 @@ namespace System.Linq.Expressions
 
             return Expression.MemberBind(Member, bindings);
         }
+
+        internal override void ValidateAsDefinedHere(int index)
+        {
+        }
     }
 
     public partial class Expression
@@ -115,28 +119,31 @@ namespace System.Linq.Expressions
 
         private static void ValidateGettableFieldOrPropertyMember(MemberInfo member, out Type memberType)
         {
-            FieldInfo fi = member as FieldInfo;
-            if (fi == null)
+            Type decType = member.DeclaringType;
+            if (decType == null)
             {
-                PropertyInfo pi = member as PropertyInfo;
-                if (pi == null)
-                {
-                    throw Error.ArgumentMustBeFieldInfoOrPropertyInfo(nameof(member));
-                }
-                if (!pi.CanRead)
-                {
-                    throw Error.PropertyDoesNotHaveGetter(pi, nameof(member));
-                }
-                memberType = pi.PropertyType;
+                throw Error.NotAMemberOfAnyType(member, nameof(member));
             }
-            else
-            {
-                if (fi.DeclaringType == null)
-                {
-                    throw Error.NotAMemberOfAnyType(fi, nameof(member));
-                }
 
-                memberType = fi.FieldType;
+            // Null paramName as there are several paths here with different parameter names at the API
+            TypeUtils.ValidateType(decType, null, allowByRef: true, allowPointer: true);
+            switch (member)
+            {
+                case PropertyInfo pi:
+                    if (!pi.CanRead)
+                    {
+                        throw Error.PropertyDoesNotHaveGetter(pi, nameof(member));
+                    }
+
+                    memberType = pi.PropertyType;
+                    break;
+
+                case FieldInfo fi:
+                    memberType = fi.FieldType;
+                    break;
+
+                default:
+                    throw Error.ArgumentMustBeFieldInfoOrPropertyInfo(nameof(member));
             }
         }
 
@@ -146,6 +153,7 @@ namespace System.Linq.Expressions
             {
                 MemberBinding b = bindings[i];
                 ContractUtils.RequiresNotNull(b, nameof(bindings));
+                b.ValidateAsDefinedHere(i);
                 if (!b.Member.DeclaringType.IsAssignableFrom(type))
                 {
                     throw Error.NotAMemberOfType(b.Member.Name, type, nameof(bindings), i);

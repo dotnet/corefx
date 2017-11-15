@@ -255,21 +255,6 @@ namespace Internal.Cryptography.Pal
             get { return _privateKey; }
         }
 
-        public AsymmetricAlgorithm GetPrivateKey()
-        {
-            switch (KeyAlgorithm)
-            {
-                case Oids.RsaRsa:
-                    return GetRSAPrivateKey();
-                case Oids.DsaDsa:
-                    return GetDSAPrivateKey();
-                case Oids.Ecc:
-                    return GetECDsaPrivateKey();
-            }
-
-            throw new NotSupportedException(SR.NotSupported_KeyAlgorithm);
-        }
-
         public RSA GetRSAPrivateKey()
         {
             if (_privateKey == null || _privateKey.IsInvalid)
@@ -308,6 +293,78 @@ namespace Internal.Cryptography.Pal
             }
 
             return new ECDsaOpenSsl(_privateKey);
+        }
+
+        private ICertificatePal CopyWithPrivateKey(SafeEvpPKeyHandle privateKey)
+        {
+            // This could be X509Duplicate for a full clone, but since OpenSSL certificates
+            // are functionally immutable (unlike Windows ones) an UpRef is sufficient.
+            SafeX509Handle certHandle = Interop.Crypto.X509UpRef(_cert);
+            OpenSslX509CertificateReader duplicate = new OpenSslX509CertificateReader(certHandle);
+
+            duplicate.SetPrivateKey(privateKey);
+            return duplicate;
+        }
+
+        public ICertificatePal CopyWithPrivateKey(DSA privateKey)
+        {
+            DSAOpenSsl typedKey = privateKey as DSAOpenSsl;
+
+            if (typedKey != null)
+            {
+                return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
+            }
+
+            DSAParameters dsaParameters = privateKey.ExportParameters(true);
+
+            using (PinAndClear.Track(dsaParameters.X))
+            using (typedKey = new DSAOpenSsl(dsaParameters))
+            {
+                return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
+            }
+        }
+
+        public ICertificatePal CopyWithPrivateKey(ECDsa privateKey)
+        {
+            ECDsaOpenSsl typedKey = privateKey as ECDsaOpenSsl;
+
+            if (typedKey != null)
+            {
+                return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
+            }
+
+            ECParameters ecParameters = privateKey.ExportParameters(true);
+
+            using (PinAndClear.Track(ecParameters.D))
+            using (typedKey = new ECDsaOpenSsl())
+            {
+                typedKey.ImportParameters(ecParameters);
+
+                return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
+            }
+        }
+
+        public ICertificatePal CopyWithPrivateKey(RSA privateKey)
+        {
+            RSAOpenSsl typedKey = privateKey as RSAOpenSsl;
+
+            if (typedKey != null)
+            {
+                return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
+            }
+
+            RSAParameters rsaParameters = privateKey.ExportParameters(true);
+
+            using (PinAndClear.Track(rsaParameters.D))
+            using (PinAndClear.Track(rsaParameters.P))
+            using (PinAndClear.Track(rsaParameters.Q))
+            using (PinAndClear.Track(rsaParameters.DP))
+            using (PinAndClear.Track(rsaParameters.DQ))
+            using (PinAndClear.Track(rsaParameters.InverseQ))
+            using (typedKey = new RSAOpenSsl(rsaParameters))
+            {
+                return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
+            }
         }
 
         public string GetNameInfo(X509NameType nameType, bool forIssuer)

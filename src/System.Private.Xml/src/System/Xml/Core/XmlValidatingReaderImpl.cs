@@ -57,7 +57,7 @@ namespace System.Xml
                 {
                     _eventHandler(_reader, new ValidationEventArgs((XmlSchemaException)exception, severity));
                 }
-                else if (_reader.ValidationType != ValidationType.None && severity == XmlSeverityType.Error)
+                else if (_reader._validationType != ValidationType.None && severity == XmlSeverityType.Error)
                 {
                     throw exception;
                 }
@@ -1106,12 +1106,6 @@ namespace System.Xml
             }
         }
 
-        internal void Close(bool closeStream)
-        {
-            _coreReaderImpl.Close(closeStream);
-            _parsingFunction = ParsingFunction.ReaderClosed;
-        }
-
         internal BaseValidator Validator
         {
             get
@@ -1157,14 +1151,6 @@ namespace System.Xml
             set
             {
                 _coreReaderImpl.InternalTypedValue = value;
-            }
-        }
-
-        internal bool Normalization
-        {
-            get
-            {
-                return _coreReaderImpl.Normalization;
             }
         }
 

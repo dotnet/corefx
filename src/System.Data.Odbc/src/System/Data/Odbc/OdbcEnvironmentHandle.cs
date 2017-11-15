@@ -2,19 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections;
-using System.ComponentModel;
-using System.Data;
 using System.Data.Common;
-using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Security;
-using System.Security.Permissions;
-using System.Text;
-using System.Threading;
 
 namespace System.Data.Odbc
 {
@@ -29,7 +18,7 @@ namespace System.Data.Odbc
 
             //Set the expected driver manager version
             //
-            retcode = UnsafeNativeMethods.SQLSetEnvAttr(
+            retcode = Interop.Odbc.SQLSetEnvAttr(
                 this,
                 ODBC32.SQL_ATTR.ODBC_VERSION,
                 ODBC32.SQL_OV_ODBC3,
@@ -41,7 +30,7 @@ namespace System.Data.Odbc
             //handle are pooled.  So we have to keep it alive and not create a new environment
             //for   every connection.
             //
-            retcode = UnsafeNativeMethods.SQLSetEnvAttr(
+            retcode = Interop.Odbc.SQLSetEnvAttr(
                 this,
                 ODBC32.SQL_ATTR.CONNECTION_POOLING,
                 ODBC32.SQL_CP_ONE_PER_HENV,

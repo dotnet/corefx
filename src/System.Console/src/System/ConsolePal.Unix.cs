@@ -53,8 +53,7 @@ namespace System
             {
                 EnsureInitialized();
 
-                return Volatile.Read(ref s_stdInReader) ??
-                    Console.EnsureInitialized(
+                return Console.EnsureInitialized(
                         ref s_stdInReader,
                         () => SyncTextReader.GetSynchronizedTextReader(
                             new StdInReader(
@@ -978,6 +977,17 @@ namespace System
                         // that ended, so simply pretend we were successful.
                         return;
                     }
+                    else if (errorInfo.Error == Interop.Error.EAGAIN) // aka EWOULDBLOCK
+                    {
+                        // May happen if the file handle is configured as non-blocking.
+                        // In that case, we need to wait to be able to write and then
+                        // try again. We poll, but don't actually care about the result,
+                        // only the blocking behavior, and thus ignore any poll errors
+                        // and loop around to do another write (which may correctly fail
+                        // if something else has gone wrong).
+                        Interop.Sys.Poll(fd, Interop.Sys.PollEvents.POLLOUT, Timeout.Infinite, out Interop.Sys.PollEvents triggered);
+                        continue;
+                    }
                     else
                     {
                         // Something else... fail.
@@ -1064,14 +1074,14 @@ namespace System
                 ValidateRead(buffer, offset, count);
 
                 return ConsolePal.Read(_handle, buffer, offset, count);
-                }
+            }
 
             public override void Write(byte[] buffer, int offset, int count)
             {
                 ValidateWrite(buffer, offset, count);
 
                 ConsolePal.Write(_handle, buffer, offset, count);
-                }
+            }
 
             public override void Flush()
             {

@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Dynamic.Utils;
-using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -22,17 +21,16 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                int index = frame.StackIndex;
+                object[] stack = frame.Data;
+                object left = stack[index - 2];
+                if (left != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
+                    object right = stack[index - 1];
+                    stack[index - 2] = right == null ? null : (object)unchecked((short)((short)left / (short)right));
                 }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = unchecked((short)((short)l / (short)r));
-                }
-                frame.StackIndex--;
+
+                frame.StackIndex = index - 1;
                 return 1;
             }
         }
@@ -41,17 +39,16 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                int index = frame.StackIndex;
+                object[] stack = frame.Data;
+                object left = stack[index - 2];
+                if (left != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
+                    object right = stack[index - 1];
+                    stack[index - 2] = right == null ? null : ScriptingRuntimeHelpers.Int32ToObject((int)left / (int)right);
                 }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = ScriptingRuntimeHelpers.Int32ToObject((int)l / (int)r);
-                }
-                frame.StackIndex--;
+
+                frame.StackIndex = index - 1;
                 return 1;
             }
         }
@@ -60,17 +57,16 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                int index = frame.StackIndex;
+                object[] stack = frame.Data;
+                object left = stack[index - 2];
+                if (left != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
+                    object right = stack[index - 1];
+                    stack[index - 2] = right == null ? null : (object)((long)left / (long)right);
                 }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (long)l / (long)r;
-                }
-                frame.StackIndex--;
+
+                frame.StackIndex = index - 1;
                 return 1;
             }
         }
@@ -79,17 +75,16 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                int index = frame.StackIndex;
+                object[] stack = frame.Data;
+                object left = stack[index - 2];
+                if (left != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
+                    object right = stack[index - 1];
+                    stack[index - 2] = right == null ? null : (object)unchecked((ushort)((ushort)left / (ushort)right));
                 }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (ushort)((ushort)l / (ushort)r);
-                }
-                frame.StackIndex--;
+
+                frame.StackIndex = index - 1;
                 return 1;
             }
         }
@@ -98,17 +93,16 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                int index = frame.StackIndex;
+                object[] stack = frame.Data;
+                object left = stack[index - 2];
+                if (left != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
+                    object right = stack[index - 1];
+                    stack[index - 2] = right == null ? null : (object)((uint)left / (uint)right);
                 }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (uint)l / (uint)r;
-                }
-                frame.StackIndex--;
+
+                frame.StackIndex = index - 1;
                 return 1;
             }
         }
@@ -117,17 +111,16 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                int index = frame.StackIndex;
+                object[] stack = frame.Data;
+                object left = stack[index - 2];
+                if (left != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
+                    object right = stack[index - 1];
+                    stack[index - 2] = right == null ? null : (object)((ulong)left / (ulong)right);
                 }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (ulong)l / (ulong)r;
-                }
-                frame.StackIndex--;
+
+                frame.StackIndex = index - 1;
                 return 1;
             }
         }
@@ -136,17 +129,16 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                int index = frame.StackIndex;
+                object[] stack = frame.Data;
+                object left = stack[index - 2];
+                if (left != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
+                    object right = stack[index - 1];
+                    stack[index - 2] = right == null ? null : (object)((float)left / (float)right);
                 }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (float)l / (float)r;
-                }
-                frame.StackIndex--;
+
+                frame.StackIndex = index - 1;
                 return 1;
             }
         }
@@ -155,17 +147,16 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object l = frame.Data[frame.StackIndex - 2];
-                object r = frame.Data[frame.StackIndex - 1];
-                if (l == null || r == null)
+                int index = frame.StackIndex;
+                object[] stack = frame.Data;
+                object left = stack[index - 2];
+                if (left != null)
                 {
-                    frame.Data[frame.StackIndex - 2] = null;
+                    object right = stack[index - 1];
+                    stack[index - 2] = right == null ? null : (object)((double)left / (double)right);
                 }
-                else
-                {
-                    frame.Data[frame.StackIndex - 2] = (double)l / (double)r;
-                }
-                frame.StackIndex--;
+
+                frame.StackIndex = index - 1;
                 return 1;
             }
         }
@@ -184,7 +175,7 @@ namespace System.Linq.Expressions.Interpreter
                 case TypeCode.Single: return s_Single ?? (s_Single = new DivSingle());
                 case TypeCode.Double: return s_Double ?? (s_Double = new DivDouble());
                 default:
-                    throw Error.ExpressionNotSupportedForType("Div", type);
+                    throw ContractUtils.Unreachable;
             }
         }
     }

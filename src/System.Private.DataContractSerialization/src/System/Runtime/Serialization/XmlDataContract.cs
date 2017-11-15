@@ -15,7 +15,7 @@ namespace System.Runtime.Serialization
     using System.Security;
     using System.Linq;
 
-#if NET_NATIVE
+#if uapaot
     public delegate IXmlSerializable CreateXmlSerializableDelegate();
     public sealed class XmlDataContract : DataContract
 #else
@@ -84,14 +84,20 @@ namespace System.Runtime.Serialization
             { _helper.TopLevelElementNamespace = value; }
         }
 
-#if NET_NATIVE
+        internal bool IsTopLevelElementNullable
+        {
+            get { return _helper.IsTopLevelElementNullable; }
+            set { _helper.IsTopLevelElementNullable = value; }
+        }
+
+#if uapaot
         private CreateXmlSerializableDelegate _createXmlSerializableDelegate;
         public CreateXmlSerializableDelegate CreateXmlSerializableDelegate        
 #else
         internal CreateXmlSerializableDelegate CreateXmlSerializableDelegate
 #endif
         {
-#if !NET_NATIVE
+#if !uapaot
             get
             {
                 // We create XmlSerializableDelegate via CodeGen when CodeGen is enabled;
@@ -143,6 +149,7 @@ namespace System.Runtime.Serialization
             private bool _isKnownTypeAttributeChecked;
             private XmlDictionaryString _topLevelElementName;
             private XmlDictionaryString _topLevelElementNamespace;
+            private bool _isTopLevelElementNullable;
             private bool _hasRoot;
             private CreateXmlSerializableDelegate _createXmlSerializable;
             private XmlSchemaType _xsdType;
@@ -173,6 +180,7 @@ namespace System.Runtime.Serialization
                     {
                         _topLevelElementName = Name;
                         _topLevelElementNamespace = (this.StableName.Namespace == Globals.SchemaNamespace) ? DictionaryGlobals.EmptyString : Namespace;
+                        _isTopLevelElementNullable = true;
                     }
                 }
                 else
@@ -180,6 +188,7 @@ namespace System.Runtime.Serialization
                     if (hasRoot)
                     {
                         XmlRootAttribute xmlRootAttribute = (XmlRootAttribute)xmlRootAttributes[0];
+                        _isTopLevelElementNullable = xmlRootAttribute.IsNullable;
                         string elementName = xmlRootAttribute.ElementName;
                         _topLevelElementName = (elementName == null || elementName.Length == 0) ? Name : dictionary.Add(DataContract.EncodeLocalName(elementName));
                         string elementNs = xmlRootAttribute.Namespace;
@@ -247,6 +256,13 @@ namespace System.Runtime.Serialization
                 set
                 { _topLevelElementNamespace = value; }
             }
+
+            internal bool IsTopLevelElementNullable
+            {
+                get { return _isTopLevelElementNullable; }
+                set { _isTopLevelElementNullable = value; }
+            }
+
             internal CreateXmlSerializableDelegate CreateXmlSerializableDelegate
             {
                 get { return _createXmlSerializable; }
@@ -268,7 +284,7 @@ namespace System.Runtime.Serialization
             return ctor;
         }
 
-#if !NET_NATIVE
+#if !uapaot
         internal CreateXmlSerializableDelegate GenerateCreateXmlSerializableDelegate()
         {
             Type type = this.UnderlyingType;

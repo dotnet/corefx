@@ -5,7 +5,6 @@
 // Enables instruction counting and displaying stats at process exit.
 // #define STATS
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
@@ -16,7 +15,7 @@ namespace System.Linq.Expressions.Interpreter
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes")]
     [DebuggerTypeProxy(typeof(InstructionArray.DebugView))]
-    internal struct InstructionArray
+    internal readonly struct InstructionArray
     {
         internal readonly int MaxStackDepth;
         internal readonly int MaxContinuationDepth;
@@ -143,7 +142,7 @@ namespace System.Linq.Expressions.Interpreter
             }
 
             [DebuggerDisplay("{GetValue(),nq}", Name = "{GetName(),nq}", Type = "{GetDisplayType(), nq}")]
-            internal struct InstructionView
+            internal readonly struct InstructionView
             {
                 private readonly int _index;
                 private readonly int _stackDepth;
@@ -822,19 +821,9 @@ namespace System.Linq.Expressions.Interpreter
             Emit(new DefaultValueInstruction(type));
         }
 
-        public void EmitNew(ConstructorInfo constructorInfo)
-        {
-            EmitNew(constructorInfo, constructorInfo.GetParametersCached());
-        }
-
         public void EmitNew(ConstructorInfo constructorInfo, ParameterInfo[] parameters)
         {
             Emit(new NewInstruction(constructorInfo, parameters.Length));
-        }
-
-        public void EmitByRefNew(ConstructorInfo constructorInfo, ByRefUpdater[] updaters)
-        {
-            EmitByRefNew(constructorInfo, constructorInfo.GetParametersCached(), updaters);
         }
 
         public void EmitByRefNew(ConstructorInfo constructorInfo, ParameterInfo[] parameters, ByRefUpdater[] updaters)

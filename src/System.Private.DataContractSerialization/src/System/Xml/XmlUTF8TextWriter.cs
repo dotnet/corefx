@@ -35,6 +35,11 @@ namespace System.Xml
             _writer.SetOutput(stream, ownsStream, encoding);
             SetOutput(_writer);
         }
+
+        protected override XmlSigningNodeWriter CreateSigningNodeWriter()
+        {
+            return new XmlSigningNodeWriter(true);
+        }
     }
 
     internal class XmlUTF8NodeWriter : XmlStreamNodeWriter
@@ -108,14 +113,6 @@ namespace System.Xml
             base.SetOutput(stream, ownsStream, utf8Encoding);
             _encoding = encoding;
             _inAttribute = false;
-        }
-
-        public Encoding Encoding
-        {
-            get
-            {
-                return _encoding;
-            }
         }
 
         private byte[] GetCharEntityBuffer()

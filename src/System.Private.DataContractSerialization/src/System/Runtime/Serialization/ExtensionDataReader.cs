@@ -41,7 +41,6 @@ namespace System.Runtime.Serialization
         private XmlNodeReader _xmlNodeReader;
 #pragma warning restore 0649
 
-        private Queue<IDataNode> _deserializedDataNodes;
         private XmlObjectSerializerReadContext _context;
 
         private static Dictionary<string, string> s_nsToPrefixTable;
@@ -63,29 +62,11 @@ namespace System.Runtime.Serialization
             _context = context;
         }
 
-        internal void SetDeserializedValue(object obj)
-        {
-            IDataNode deserializedDataNode = (_deserializedDataNodes == null || _deserializedDataNodes.Count == 0) ? null : _deserializedDataNodes.Dequeue();
-            if (deserializedDataNode != null && !(obj is IDataNode))
-            {
-                deserializedDataNode.Value = obj;
-                deserializedDataNode.IsFinalValue = true;
-            }
-        }
-
         internal IDataNode GetCurrentNode()
         {
             IDataNode retVal = _element.dataNode;
             Skip();
             return retVal;
-        }
-
-        internal void SetDataNode(IDataNode dataNode, string name, string ns)
-        {
-            SetNextElement(dataNode, name, ns, null);
-            _element = _nextElement;
-            _nextElement = null;
-            SetElement();
         }
 
         internal void Reset()
@@ -100,7 +81,6 @@ namespace System.Runtime.Serialization
             _element = null;
             _nextElement = null;
             _elements = null;
-            _deserializedDataNodes = null;
         }
 
         private bool IsXmlDataNode { get { return (_internalNodeType == ExtensionDataNodeType.Xml); } }
@@ -451,11 +431,6 @@ namespace System.Runtime.Serialization
             throw NotImplemented.ByDesign;
         }
 
-        private void SetNextElement(IDataNode node, string name, string ns, string prefix)
-        {
-            throw NotImplemented.ByDesign;
-        }
-
         private void PushElement()
         {
             GrowElementsIfNeeded();
@@ -530,7 +505,7 @@ namespace System.Runtime.Serialization
         }
     }
 
-#if USE_REFEMIT || NET_NATIVE
+#if USE_REFEMIT || uapaot
     public class AttributeData
 #else
     internal class AttributeData
@@ -542,7 +517,7 @@ namespace System.Runtime.Serialization
         public string value;
     }
 
-#if USE_REFEMIT || NET_NATIVE
+#if USE_REFEMIT || uapaot
     public class ElementData
 #else
     internal class ElementData

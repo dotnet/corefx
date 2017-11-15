@@ -12,7 +12,7 @@ namespace System.Globalization.Tests
         public static IEnumerable<object[]> NumberNegativePattern_TestData()
         {
             yield return new object[] { NumberFormatInfo.InvariantInfo, 1 };
-            yield return new object[] { new CultureInfo("en-US").NumberFormat, 1 };
+            yield return new object[] { CultureInfo.GetCultureInfo("en-US").NumberFormat, 1 };
         }
 
         [Theory]
@@ -36,8 +36,8 @@ namespace System.Globalization.Tests
         [Fact]
         public void NumberNegativePattern_Set_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("NumberNegativePattern", () => new NumberFormatInfo().NumberNegativePattern = -1);
-            Assert.Throws<ArgumentOutOfRangeException>("NumberNegativePattern", () => new NumberFormatInfo().NumberNegativePattern = 5);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("NumberNegativePattern", () => new NumberFormatInfo().NumberNegativePattern = -1);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("NumberNegativePattern", () => new NumberFormatInfo().NumberNegativePattern = 5);
 
             Assert.Throws<InvalidOperationException>(() => NumberFormatInfo.InvariantInfo.NumberNegativePattern = 1);
         }

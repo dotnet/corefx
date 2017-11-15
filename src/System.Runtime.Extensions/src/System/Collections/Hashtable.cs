@@ -57,6 +57,7 @@ namespace System.Collections
     [DebuggerTypeProxy(typeof(System.Collections.Hashtable.HashtableDebugView))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class Hashtable : IDictionary, ISerializable, IDeserializationCallback, ICloneable
     {
         /*
@@ -113,14 +114,14 @@ namespace System.Collections
         internal const Int32 HashPrime = 101;
         private const Int32 InitialSize = 3;
 
-        private const String LoadFactorName = "LoadFactor";
-        private const String VersionName = "Version";
-        private const String ComparerName = "Comparer";
-        private const String HashCodeProviderName = "HashCodeProvider";
-        private const String HashSizeName = "HashSize";  // Must save buckets.Length
-        private const String KeysName = "Keys";
-        private const String ValuesName = "Values";
-        private const String KeyComparerName = "KeyComparer";
+        private const String LoadFactorName = "LoadFactor"; // Do not rename (binary serialization)
+        private const String VersionName = "Version"; // Do not rename (binary serialization)
+        private const String ComparerName = "Comparer"; // Do not rename (binary serialization)
+        private const String HashCodeProviderName = "HashCodeProvider"; // Do not rename (binary serialization)
+        private const String HashSizeName = "HashSize";  // Must save buckets.Length. Do not rename (binary serialization)
+        private const String KeysName = "Keys"; // Do not rename (binary serialization)
+        private const String ValuesName = "Values"; // Do not rename (binary serialization)
+        private const String KeyComparerName = "KeyComparer"; // Do not rename (binary serialization)
 
         // Deleted entries have their key set to buckets
 
@@ -731,13 +732,13 @@ namespace System.Collections
         private void expand()
         {
             int rawsize = HashHelpers.ExpandPrime(_buckets.Length);
-            rehash(rawsize, false);
+            rehash(rawsize);
         }
 
         // We occasionally need to rehash the table to clean up the collision bits.
         private void rehash()
         {
-            rehash(_buckets.Length, false);
+            rehash(_buckets.Length);
         }
 
         private void UpdateVersion()
@@ -747,7 +748,7 @@ namespace System.Collections
             _version++;
         }
 
-        private void rehash(int newsize, bool forceNewHashCode)
+        private void rehash(int newsize)
         {
             // reset occupancy
             _occupancy = 0;
@@ -767,7 +768,7 @@ namespace System.Collections
                 bucket oldb = _buckets[nb];
                 if ((oldb.key != null) && (oldb.key != _buckets))
                 {
-                    int hashcode = ((forceNewHashCode ? GetHash(oldb.key) : oldb.hash_coll) & 0x7FFFFFFF);
+                    int hashcode = oldb.hash_coll & 0x7FFFFFFF;
                     putEntry(newBuckets, oldb.key, oldb.val, hashcode);
                 }
             }
@@ -780,7 +781,6 @@ namespace System.Collections
             _isWriterInProgress = false;
             // minimum size of hashtable is 3 now and maximum loadFactor is 0.72 now.
             Debug.Assert(_loadsize < newsize, "Our current implementation means this is not possible.");
-            return;
         }
 
         // Returns an enumerator for this hashtable.
@@ -944,18 +944,7 @@ namespace System.Collections
                     _count++;
                     UpdateVersion();
                     _isWriterInProgress = false;
-#if FEATURE_RANDOMIZED_STRING_HASHING
-                    if (ntry > HashHelpers.HashCollisionThreshold && HashHelpers.IsWellKnownEqualityComparer(_keycomparer))
-                    {
-                        // PERF: We don't want to rehash if _keycomparer is already a RandomizedObjectEqualityComparer since in some
-                        // cases there may not be any strings in the hashtable and we wouldn't get any mixing.
-                        if (_keycomparer == null || !(_keycomparer is System.Collections.Generic.RandomizedObjectEqualityComparer))
-                        {
-                            _keycomparer = HashHelpers.GetRandomizedEqualityComparer(_keycomparer);
-                            rehash(buckets.Length, true);
-                        }
-                    }
-#endif
+
                     return;
                 }
 
@@ -974,18 +963,6 @@ namespace System.Collections
                     UpdateVersion();
                     _isWriterInProgress = false;
 
-#if FEATURE_RANDOMIZED_STRING_HASHING
-                    if (ntry > HashHelpers.HashCollisionThreshold && HashHelpers.IsWellKnownEqualityComparer(_keycomparer))
-                    {
-                        // PERF: We don't want to rehash if _keycomparer is already a RandomizedObjectEqualityComparer since in some
-                        // cases there may not be any strings in the hashtable and we wouldn't get any mixing.
-                        if (_keycomparer == null || !(_keycomparer is System.Collections.Generic.RandomizedObjectEqualityComparer))
-                        {
-                            _keycomparer = HashHelpers.GetRandomizedEqualityComparer(_keycomparer);
-                            rehash(buckets.Length, true);
-                        }
-                    }
-#endif
                     return;
                 }
 
@@ -1016,18 +993,6 @@ namespace System.Collections
                 UpdateVersion();
                 _isWriterInProgress = false;
 
-#if FEATURE_RANDOMIZED_STRING_HASHING
-                if (buckets.Length > HashHelpers.HashCollisionThreshold && HashHelpers.IsWellKnownEqualityComparer(_keycomparer))
-                {
-                    // PERF: We don't want to rehash if _keycomparer is already a RandomizedObjectEqualityComparer since in some
-                    // cases there may not be any strings in the hashtable and we wouldn't get any mixing.
-                    if (_keycomparer == null || !(_keycomparer is System.Collections.Generic.RandomizedObjectEqualityComparer))
-                    {
-                        _keycomparer = HashHelpers.GetRandomizedEqualityComparer(_keycomparer);
-                        rehash(buckets.Length, true);
-                    }
-                }
-#endif
                 return;
             }
 
@@ -1301,7 +1266,6 @@ namespace System.Collections
 
         // Implements a Collection for the keys of a hashtable. An instance of this
         // class is created by the GetKeys method of a hashtable.
-        [Serializable]
         private class KeyCollection : ICollection
         {
             private Hashtable _hashtable;
@@ -1348,7 +1312,6 @@ namespace System.Collections
 
         // Implements a Collection for the values of a hashtable. An instance of
         // this class is created by the GetValues method of a hashtable.
-        [Serializable]
         private class ValueCollection : ICollection
         {
             private Hashtable _hashtable;
@@ -1394,7 +1357,6 @@ namespace System.Collections
         }
 
         // Synchronized wrapper for hashtable
-        [Serializable]
         private class SyncHashtable : Hashtable, IEnumerable
         {
             protected Hashtable _table;
@@ -1406,27 +1368,12 @@ namespace System.Collections
 
             internal SyncHashtable(SerializationInfo info, StreamingContext context) : base(info, context)
             {
-                _table = (Hashtable)info.GetValue("ParentTable", typeof(Hashtable));
-                if (_table == null)
-                {
-                    throw new SerializationException(SR.Serialization_InsufficientState);
-                }
+                throw new PlatformNotSupportedException();
             }
 
             public override void GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                if (info == null)
-                {
-                    throw new ArgumentNullException(nameof(info));
-                }
-                Contract.EndContractBlock();
-
-                // Our serialization code hasn't been fully tweaked to be safe 
-                // for a concurrent writer.
-                lock (_table.SyncRoot)
-                {
-                    info.AddValue("ParentTable", _table, typeof(Hashtable));
-                }
+                throw new PlatformNotSupportedException();
             }
 
             public override int Count
@@ -1581,7 +1528,6 @@ namespace System.Collections
         // Implements an enumerator for a hashtable. The enumerator uses the
         // internal version number of the hashtable to ensure that no modifications
         // are made to the hashtable while an enumeration is in progress.
-        [Serializable]
         private class HashtableEnumerator : IDictionaryEnumerator, ICloneable
         {
             private Hashtable _hashtable;
@@ -1708,10 +1654,6 @@ namespace System.Collections
 
     internal static class HashHelpers
     {
-#if FEATURE_RANDOMIZED_STRING_HASHING
-        public const int HashCollisionThreshold = 100;
-        public static bool s_UseRandomizedStringHashing = String.UseRandomizedHashing();
-#endif
         // Table of prime numbers to use as hash table sizes. 
         // A typical resize algorithm would pick the smallest prime number in this array
         // that is larger than twice the previous capacity. 
@@ -1789,87 +1731,5 @@ namespace System.Collections
 
         private static ConditionalWeakTable<object, SerializationInfo> s_serializationInfoTable;
         public static ConditionalWeakTable<object, SerializationInfo> SerializationInfoTable => LazyInitializer.EnsureInitialized(ref s_serializationInfoTable);
-
-#if FEATURE_RANDOMIZED_STRING_HASHING
-        public static bool IsWellKnownEqualityComparer(object comparer)
-        {
-            return (comparer == null || comparer == System.Collections.Generic.EqualityComparer<string>.Default || comparer is IWellKnownStringEqualityComparer);
-        }
-
-        public static IEqualityComparer GetRandomizedEqualityComparer(object comparer)
-        {
-            Debug.Assert(comparer == null || comparer == System.Collections.Generic.EqualityComparer<string>.Default || comparer is IWellKnownStringEqualityComparer);
-
-            if (comparer == null)
-            {
-                return new System.Collections.Generic.RandomizedObjectEqualityComparer();
-            }
-
-            if (comparer == System.Collections.Generic.EqualityComparer<string>.Default)
-            {
-                return new System.Collections.Generic.RandomizedStringEqualityComparer();
-            }
-
-            IWellKnownStringEqualityComparer cmp = comparer as IWellKnownStringEqualityComparer;
-
-            if (cmp != null)
-            {
-                return cmp.GetRandomizedEqualityComparer();
-            }
-
-            Debug.Fail("Missing case in GetRandomizedEqualityComparer!");
-
-            return null;
-        }
-
-        public static object GetEqualityComparerForSerialization(object comparer)
-        {
-            if (comparer == null)
-            {
-                return null;
-            }
-
-            IWellKnownStringEqualityComparer cmp = comparer as IWellKnownStringEqualityComparer;
-
-            if (cmp != null)
-            {
-                return cmp.GetEqualityComparerForSerialization();
-            }
-
-            return comparer;
-        }
-
-        private const int bufferSize = 1024;
-        private static RandomNumberGenerator rng;
-        private static byte[] data;
-        private static int currentIndex = bufferSize;
-        private static readonly object lockObj = new Object();
-
-        internal static long GetEntropy()
-        {
-            lock (lockObj)
-            {
-                long ret;
-
-                if (currentIndex == bufferSize)
-                {
-                    if (null == rng)
-                    {
-                        rng = RandomNumberGenerator.Create();
-                        data = new byte[bufferSize];
-                        Debug.Assert(bufferSize % 8 == 0, "We increment our current index by 8, so our buffer size must be a multiple of 8");
-                    }
-
-                    rng.GetBytes(data);
-                    currentIndex = 0;
-                }
-
-                ret = BitConverter.ToInt64(data, currentIndex);
-                currentIndex += 8;
-
-                return ret;
-            }
-        }
-#endif // FEATURE_RANDOMIZED_STRING_HASHING
     }
 }

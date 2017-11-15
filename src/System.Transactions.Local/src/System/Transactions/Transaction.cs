@@ -53,7 +53,6 @@ namespace System.Transactions
     // When we serialize a Transaction, we specify the type DistributedTransaction, so a Transaction never
     // actually gets deserialized.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2229", Justification = "Serialization not yet supported and will be done using DistributedTransaction")]
-    [Serializable]
     public class Transaction : IDisposable, ISerializable
     {
         // UseServiceDomain
@@ -453,7 +452,7 @@ namespace System.Transactions
         /// 
         /// If the transaction has not already been promoted, retrieving this value will cause promotion. Before retrieving the
         /// PromotedToken, the Transaction.PromoterType value should be checked to see if it is a promoter type (Guid) that the
-        /// caller understands. If the caller does not recognize the PromoterType value, retreiving the PromotedToken doesn't
+        /// caller understands. If the caller does not recognize the PromoterType value, retrieving the PromotedToken doesn't
         /// have much value because the caller doesn't know how to utilize it. But if the PromoterType is recognized, the
         /// caller should know how to utilize the PromotedToken to communicate with the promoting distributed transaction
         /// coordinator to enlist on the distributed transaction.
@@ -908,37 +907,39 @@ namespace System.Transactions
             SerializationInfo serializationInfo,
             StreamingContext context)
         {
-            TransactionsEtwProvider etwLog = TransactionsEtwProvider.Log;
-            if (etwLog.IsEnabled())
-            {
-                etwLog.MethodEnter(TraceSourceType.TraceSourceLtm, this);
-            }
+            //TransactionsEtwProvider etwLog = TransactionsEtwProvider.Log;
+            //if (etwLog.IsEnabled())
+            //{
+            //    etwLog.MethodEnter(TraceSourceType.TraceSourceLtm, this);
+            //}
 
-            if (Disposed)
-            {
-                throw new ObjectDisposedException(nameof(Transaction));
-            }
+            //if (Disposed)
+            //{
+            //    throw new ObjectDisposedException(nameof(Transaction));
+            //}
 
-            if (serializationInfo == null)
-            {
-                throw new ArgumentNullException(nameof(serializationInfo));
-            }
+            //if (serializationInfo == null)
+            //{
+            //    throw new ArgumentNullException(nameof(serializationInfo));
+            //}
 
-            if (_complete)
-            {
-                throw TransactionException.CreateTransactionCompletedException(DistributedTxId);
-            }
+            //if (_complete)
+            //{
+            //    throw TransactionException.CreateTransactionCompletedException(DistributedTxId);
+            //}
 
-            lock (_internalTransaction)
-            {
-                _internalTransaction.State.GetObjectData(_internalTransaction, serializationInfo, context);
-            }
+            //lock (_internalTransaction)
+            //{
+            //    _internalTransaction.State.GetObjectData(_internalTransaction, serializationInfo, context);
+            //}
 
-            if (etwLog.IsEnabled())
-            {
-                etwLog.TransactionSerialized(this, "Transaction");
-                etwLog.MethodExit(TraceSourceType.TraceSourceLtm, this);
-            }
+            //if (etwLog.IsEnabled())
+            //{
+            //    etwLog.TransactionSerialized(this, "Transaction");
+            //    etwLog.MethodExit(TraceSourceType.TraceSourceLtm, this);
+            //}
+
+            throw new PlatformNotSupportedException();
         }
 
         /// <summary>
@@ -950,7 +951,7 @@ namespace System.Transactions
         /// 
         /// False if the transaction already has a durable enlistment or promotable single phase enlistment or
         /// if the transaction has already promoted. In this case, the caller will need to enlist in the transaction through other
-        /// means, such as Transaction.EnlistDurable or retreive the MSDTC export cookie or propagation token to enlist with MSDTC.
+        /// means, such as Transaction.EnlistDurable or retrieve the MSDTC export cookie or propagation token to enlist with MSDTC.
         /// </returns>
         // We apparently didn't spell Promotable like FXCop thinks it should be spelled.
         public bool EnlistPromotableSinglePhase(IPromotableSinglePhaseNotification promotableSinglePhaseNotification)
@@ -1234,7 +1235,7 @@ namespace System.Transactions
         internal bool _asyncFlow;
 
         [ThreadStatic]
-        private static ContextData s_staticData;
+        private static ContextData t_staticData;
 
         internal ContextData(bool asyncFlow)
         {
@@ -1245,28 +1246,28 @@ namespace System.Transactions
         {
             get
             {
-                ContextData data = s_staticData;
+                ContextData data = t_staticData;
                 if (data == null)
                 {
                     data = new ContextData(false);
-                    s_staticData = data;
+                    t_staticData = data;
                 }
 
                 return data;
             }
             set
             {
-                if (value == null && s_staticData != null)
+                if (value == null && t_staticData != null)
                 {
                     // set each property to null to retain one TLS ContextData copy.
-                    s_staticData.CurrentScope = null;
-                    s_staticData.CurrentTransaction = null;
-                    s_staticData.DefaultComContextState = DefaultComContextState.Unknown;
-                    s_staticData.WeakDefaultComContext = null;
+                    t_staticData.CurrentScope = null;
+                    t_staticData.CurrentTransaction = null;
+                    t_staticData.DefaultComContextState = DefaultComContextState.Unknown;
+                    t_staticData.WeakDefaultComContext = null;
                 }
                 else
                 {
-                    s_staticData = value;
+                    t_staticData = value;
                 }
             }
         }

@@ -13,7 +13,6 @@ namespace System.Text.RegularExpressions
     /// Represents the results from a single subexpression capture. The object represents
     /// one substring for a single successful capture.
     /// </summary>
-    [Serializable]
     public class Capture
     {
         internal string _text;
@@ -102,20 +101,5 @@ namespace System.Text.RegularExpressions
             return _text.Substring(_index + _length, _text.Length - _index - _length);
         }
 
-#if DEBUG
-        internal virtual string Description()
-        {
-            StringBuilder Sb = new StringBuilder();
-
-            Sb.Append("(I = ");
-            Sb.Append(_index);
-            Sb.Append(", L = ");
-            Sb.Append(_length);
-            Sb.Append("): ");
-            Sb.Append(_text, _index, _length);
-
-            return Sb.ToString();
-        }
-#endif
     }
 }

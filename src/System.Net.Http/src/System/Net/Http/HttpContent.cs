@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if !NET46
 using System.Buffers;
-#endif
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
@@ -19,8 +17,8 @@ namespace System.Net.Http
     {
         private HttpContentHeaders _headers;
         private MemoryStream _bufferedContent;
+        private object _contentReadStream; // Stream or Task<Stream>
         private bool _disposed;
-        private Task<Stream> _contentReadStream;
         private bool _canCalculateLength;
 
         internal const int MaxBufferSize = int.MaxValue;
@@ -33,7 +31,7 @@ namespace System.Net.Http
         private const byte UTF8PreambleByte2 = 0xBF;
         private const int UTF8PreambleFirst2Bytes = 0xEFBB;
 
-#if !NETNative
+#if !uap
         // UTF32 not supported on Phone
         private const int UTF32CodePage = 12000;
         private const int UTF32PreambleLength = 4;
@@ -64,7 +62,7 @@ namespace System.Net.Http
                 UTF8PreambleByte1,
                 UTF8PreambleByte2);
 
-#if !NETNative
+#if !uap
             // UTF32 not supported on Phone
             AssertEncodingConstants(Encoding.UTF32, UTF32CodePage, UTF32PreambleLength, UTF32OrUnicodePreambleFirst2Bytes,
                 UTF32PreambleByte0,
@@ -145,9 +143,6 @@ namespace System.Net.Http
 
         internal bool TryGetBuffer(out ArraySegment<byte> buffer)
         {
-#if NET46
-            buffer = default(ArraySegment<byte>);
-#endif
             return _bufferedContent != null && _bufferedContent.TryGetBuffer(out buffer);
         }
 
@@ -188,9 +183,9 @@ namespace System.Net.Http
 
         internal static string ReadBufferAsString(ArraySegment<byte> buffer, HttpContentHeaders headers)
         {
-            // We don't validate the Content-Encoding header: If the content was encoded, it's the caller's 
-            // responsibility to make sure to only call ReadAsString() on already decoded content. E.g. if the 
-            // Content-Encoding is 'gzip' the user should set HttpClientHandler.AutomaticDecompression to get a 
+            // We don't validate the Content-Encoding header: If the content was encoded, it's the caller's
+            // responsibility to make sure to only call ReadAsString() on already decoded content. E.g. if the
+            // Content-Encoding is 'gzip' the user should set HttpClientHandler.AutomaticDecompression to get a
             // decoded response stream.
 
             Encoding encoding = null;
@@ -213,7 +208,7 @@ namespace System.Net.Http
                 }
             }
 
-            // If no content encoding is listed in the ContentType HTTP header, or no Content-Type header present, 
+            // If no content encoding is listed in the ContentType HTTP header, or no Content-Type header present,
             // then check for a BOM in the data to figure out the encoding.
             if (encoding == null)
             {
@@ -240,28 +235,66 @@ namespace System.Net.Http
 
         internal byte[] ReadBufferedContentAsByteArray()
         {
-            // The returned array is exposed out of the library, so use ToArray rather 
+            // The returned array is exposed out of the library, so use ToArray rather
             // than TryGetBuffer in order to make a copy.
-            return _bufferedContent.ToArray(); 
+            return _bufferedContent.ToArray();
         }
 
         public Task<Stream> ReadAsStreamAsync()
         {
             CheckDisposed();
 
-            ArraySegment<byte> buffer;
-            if (_contentReadStream == null && TryGetBuffer(out buffer))
-            {
-                _contentReadStream = Task.FromResult<Stream>(new MemoryStream(buffer.Array, buffer.Offset, buffer.Count, writable: false));
-            }
+            // _contentReadStream will be either null (nothing yet initialized), a Stream (it was previously
+            // initialized in TryReadAsStream), or a Task<Stream> (it was previously initialized here
+            // in ReadAsStreamAsync).
 
-            if (_contentReadStream != null)
+            if (_contentReadStream == null) // don't yet have a Stream
             {
-                return _contentReadStream;
+                Task<Stream> t = TryGetBuffer(out ArraySegment<byte> buffer) ?
+                    Task.FromResult<Stream>(new MemoryStream(buffer.Array, buffer.Offset, buffer.Count, writable: false)) :
+                    CreateContentReadStreamAsync();
+                _contentReadStream = t;
+                return t;
             }
+            else if (_contentReadStream is Task<Stream> t) // have a Task<Stream>
+            {
+                return t;
+            }
+            else
+            {
+                Debug.Assert(_contentReadStream is Stream, $"Expected a Stream, got ${_contentReadStream}");
+                Task<Stream> ts = Task.FromResult((Stream)_contentReadStream);
+                _contentReadStream = ts;
+                return ts;
+            }
+        }
 
-            _contentReadStream = CreateContentReadStreamAsync();
-            return _contentReadStream;
+        internal Stream TryReadAsStream()
+        {
+            CheckDisposed();
+
+            // _contentReadStream will be either null (nothing yet initialized), a Stream (it was previously
+            // initialized here in TryReadAsStream), or a Task<Stream> (it was previously initialized
+            // in ReadAsStreamAsync).
+
+            if (_contentReadStream == null) // don't yet have a Stream
+            {
+                Stream s = TryGetBuffer(out ArraySegment<byte> buffer) ?
+                    new MemoryStream(buffer.Array, buffer.Offset, buffer.Count, writable: false) :
+                    TryCreateContentReadStream();
+                _contentReadStream = s;
+                return s;
+            }
+            else if (_contentReadStream is Stream s) // have a Stream
+            {
+                return s;
+            }
+            else // have a Task<Stream>
+            {
+                Debug.Assert(_contentReadStream is Task<Stream>, $"Expected a Task<Stream>, got ${_contentReadStream}");
+                Task<Stream> t = (Task<Stream>)_contentReadStream;
+                return t.Status == TaskStatus.RanToCompletion ? t.Result : null;
+            }
         }
 
         protected abstract Task SerializeToStreamAsync(Stream stream, TransportContext context);
@@ -313,15 +346,6 @@ namespace System.Net.Http
             return CopyToAsync(stream, null);
         }
 
-#if NET46
-        // Workaround for HttpWebRequest synchronous resubmit. This code is required because the underlying
-        // .NET Framework HttpWebRequest implementation cannot use CopyToAsync and only uses sync based CopyTo.
-        internal void CopyTo(Stream stream)
-        {
-            CopyToAsync(stream).Wait();
-        }
-#endif
-
         public Task LoadIntoBufferAsync()
         {
             return LoadIntoBufferAsync(MaxBufferSize);
@@ -335,7 +359,7 @@ namespace System.Net.Http
             CheckDisposed();
             if (maxBufferSize > HttpContent.MaxBufferSize)
             {
-                // This should only be hit when called directly; HttpClient/HttpClientHandler 
+                // This should only be hit when called directly; HttpClient/HttpClientHandler
                 // will not exceed this limit.
                 throw new ArgumentOutOfRangeException(nameof(maxBufferSize), maxBufferSize,
                     string.Format(System.Globalization.CultureInfo.InvariantCulture,
@@ -402,6 +426,12 @@ namespace System.Net.Http
             // way, like wrapping a read-only MemoryStream around the bytes/string)
             return WaitAndReturnAsync(LoadIntoBufferAsync(), this, s => (Stream)s._bufferedContent);
         }
+
+        // As an optimization for internal consumers of HttpContent (e.g. HttpClient.GetStreamAsync), and for
+        // HttpContent-derived implementations that override CreateContentReadStreamAsync in a way that always
+        // or frequently returns synchronously-completed tasks, we can avoid the task allocation by enabling
+        // callers to try to get the Stream first synchronously.
+        internal virtual Stream TryCreateContentReadStream() => null;
 
         // Derived types return true if they're able to compute the length. It's OK if derived types return false to
         // indicate that they're not able to compute the length. The transport channel needs to decide what to do in
@@ -471,10 +501,11 @@ namespace System.Net.Http
             {
                 _disposed = true;
 
-                if (_contentReadStream != null &&
-                    _contentReadStream.Status == TaskStatus.RanToCompletion)
+                if (_contentReadStream != null)
                 {
-                    _contentReadStream.Result.Dispose();
+                    Stream s = _contentReadStream as Stream ??
+                        (_contentReadStream is Task<Stream> t && t.Status == TaskStatus.RanToCompletion ? t.Result : null);
+                    s?.Dispose();
                     _contentReadStream = null;
                 }
 
@@ -547,7 +578,7 @@ namespace System.Net.Http
                         && data[offset + 0] == UTF8PreambleByte0
                         && data[offset + 1] == UTF8PreambleByte1
                         && data[offset + 2] == UTF8PreambleByte2) ? UTF8PreambleLength : 0;
-#if !NETNative
+#if !uap
                 // UTF32 not supported on Phone
                 case UTF32CodePage:
                     return (dataLength >= UTF32PreambleLength
@@ -596,7 +627,7 @@ namespace System.Net.Http
                         break;
 
                     case UTF32OrUnicodePreambleFirst2Bytes:
-#if !NETNative
+#if !uap
                         // UTF32 not supported on Phone
                         if (dataLength >= UTF32PreambleLength && data[offset + 2] == UTF32PreambleByte2 && data[offset + 3] == UTF32PreambleByte3)
                         {
@@ -662,8 +693,6 @@ namespace System.Net.Http
                 _maxSize = maxSize;
             }
 
-            public int MaxSize => _maxSize;
-
             public byte[] GetSizedBuffer()
             {
                 ArraySegment<byte> buffer;
@@ -728,7 +757,6 @@ namespace System.Net.Http
             }
         }
 
-#if !NET46
         internal sealed class LimitArrayPoolWriteStream : Stream
         {
             private const int MaxByteArrayLength = 0x7FFFFFC7;
@@ -776,23 +804,19 @@ namespace System.Net.Http
 
             private void EnsureCapacity(int value)
             {
-                if (value > _buffer.Length)
-                {
-                    Grow(value);
-                }
-                else if (value < 0) // overflow
+                if ((uint)value > (uint)_maxBufferSize) // value cast handles overflow to negative as well
                 {
                     throw CreateOverCapacityException(_maxBufferSize);
+                }
+                else if (value > _buffer.Length)
+                {
+                    Grow(value);
                 }
             }
 
             private void Grow(int value)
             {
                 Debug.Assert(value > _buffer.Length);
-                if (value > _maxBufferSize)
-                {
-                    throw CreateOverCapacityException(_maxBufferSize);
-                }
 
                 // Extract the current buffer to be replaced.
                 byte[] currentBuffer = _buffer;
@@ -822,14 +846,27 @@ namespace System.Net.Http
                 Debug.Assert(offset >= 0);
                 Debug.Assert(count >= 0);
 
-                EnsureCapacity(_buffer.Length + count);
+                EnsureCapacity(_length + count);
                 Buffer.BlockCopy(buffer, offset, _buffer, _length, count);
                 _length += count;
+            }
+
+            public override void Write(ReadOnlySpan<byte> source)
+            {
+                EnsureCapacity(_length + source.Length);
+                source.CopyTo(new Span<byte>(_buffer, _length, source.Length));
+                _length += source.Length;
             }
 
             public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
                 Write(buffer, offset, count);
+                return Task.CompletedTask;
+            }
+
+            public override Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default)
+            {
+                Write(source.Span);
                 return Task.CompletedTask;
             }
 
@@ -841,7 +878,7 @@ namespace System.Net.Http
 
             public override void WriteByte(byte value)
             {
-                int newLength = _buffer.Length + 1;
+                int newLength = _length + 1;
                 EnsureCapacity(newLength);
                 _buffer[_length] = value;
                 _length = newLength;
@@ -860,6 +897,5 @@ namespace System.Net.Http
             public override long Seek(long offset, SeekOrigin origin) { throw new NotSupportedException(); }
             public override void SetLength(long value) { throw new NotSupportedException(); }
         }
-#endif        
     }
 }

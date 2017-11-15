@@ -12,7 +12,7 @@ namespace System.Linq.Expressions.Tests
     {
         private static IEnumerable<object[]> Ranks() => Enumerable.Range(1, 5).Select(i => new object[] {i});
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
         [ClassData(typeof(CompilationTypes))]
         public static void ArrayAccess_MultiDimensionalOf1(bool useInterpreter)
         {
@@ -30,7 +30,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(42, get());
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
         [ClassData(typeof(CompilationTypes))]
         public static void ArrayIndex_MultiDimensionalOf1(bool useInterpreter)
         {
@@ -50,7 +50,7 @@ namespace System.Linq.Expressions.Tests
         {
             ConstantExpression instance = Expression.Constant(46);
             ConstantExpression index = Expression.Constant(2);
-            Assert.Throws<ArgumentException>("array", () => Expression.ArrayAccess(instance, index));
+            AssertExtensions.Throws<ArgumentException>("array", () => Expression.ArrayAccess(instance, index));
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace System.Linq.Expressions.Tests
         {
             ConstantExpression instance = Expression.Constant(new int[2,3]);
             ConstantExpression index = Expression.Constant(2);
-            Assert.Throws<ArgumentException>(() => Expression.ArrayAccess(instance, index));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.ArrayAccess(instance, index));
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace System.Linq.Expressions.Tests
         {
             ConstantExpression instance = Expression.Constant(new int[4]);
             ConstantExpression index = Expression.Constant("2");
-            Assert.Throws<ArgumentException>("indexes", () => Expression.ArrayAccess(instance, index));
+            AssertExtensions.Throws<ArgumentException>("indexes", () => Expression.ArrayAccess(instance, index));
         }
 
         [Fact]
@@ -74,10 +74,11 @@ namespace System.Linq.Expressions.Tests
         {
             ConstantExpression instance = Expression.Constant(new int[4]);
             MemberExpression index = Expression.Property(null, typeof(Unreadable<int>).GetProperty(nameof(Unreadable<int>.WriteOnly)));
-            Assert.Throws<ArgumentException>("indexes", () => Expression.ArrayAccess(instance, index));
+            AssertExtensions.Throws<ArgumentException>("indexes", () => Expression.ArrayAccess(instance, index));
         }
 
-        [Theory, ClassData(typeof(CompilationTypes))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
+        [ClassData(typeof(CompilationTypes))]
         public static void NonZeroBasedOneDimensionalArrayAccess(bool useInterpreter)
         {
             Array arrayObj = Array.CreateInstance(typeof(int), new[] { 3 }, new[] { -1 });

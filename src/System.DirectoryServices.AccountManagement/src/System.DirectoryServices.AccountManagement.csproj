@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
@@ -7,16 +7,24 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);FLAVOR_WHIDBEY;PAPI_AD;PAPI_REGSAM;USE_CTX_CACHE</DefineConstants>
     <NoWarn>$(NoWarn);8073</NoWarn>
+    <!-- Although we have a netstandard configuration, we know we are not currently UAP compatible-->
+    <UWPCompatible>false</UWPCompatible>
+    <IncludeDllSafeSearchPathAttribute>true</IncludeDllSafeSearchPathAttribute>
+    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard'">SR.DirectoryServicesAccountManagement_PlatformNotSupported</GeneratePlatformNotSupportedAssemblyMessage>
   </PropertyGroup>
-  <!-- Help VS understand available configurations -->
-  <ItemGroup>
-    <Compile Include="System\DirectoryServices\AccountManagement\externdll.cs" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp2.0-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp2.0-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
+    <Compile Include="System\DirectoryServices\AccountManagement\ExternDll.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\interopt.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\PrincipalSearcher.cs" />
-    <Compile Include="System\DirectoryServices\AccountManagement\utils.cs" />
+    <Compile Include="System\DirectoryServices\AccountManagement\Utils.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\constants.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\Context.cs" />
-    <Compile Include="System\DirectoryServices\AccountManagement\Resources.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\StoreCtx.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\StoreKey.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\Principal.cs" />
@@ -61,7 +69,7 @@
     <Compile Include="System\DirectoryServices\AccountManagement\AD\QBEMatchType.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\AD\SidList.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\AD\ADDNConstraintLinkedAttrSet.cs" />
-    <Compile Include="System\DirectoryServices\AccountManagement\AD\dspropertycollection.cs" />
+    <Compile Include="System\DirectoryServices\AccountManagement\AD\DSPropertyCollection.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\AD\ADStoreCtx.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\AD\ADStoreCtx_Query.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\AD\ADStoreCtx_LoadStore.cs" />
@@ -85,16 +93,38 @@
     <Compile Include="System\DirectoryServices\AccountManagement\IdentityClaim.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\IdentityReference.cs" />
     <Compile Include="System\DirectoryServices\AccountManagement\UnknownPrincipal.cs" />
-    <ProjectReference Include="..\..\System.DirectoryServices\ref\System.DirectoryServices.csproj" />
-    <ProjectReference Include="..\..\System.DirectoryServices.Protocols\ref\System.DirectoryServices.Protocols.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.Protocols" />
     <Reference Include="System.Configuration.ConfigurationManager" />
     <Reference Include="System.IO.FileSystem.AccessControl" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Security.AccessControl" />
     <Reference Include="System.Security.Permissions" />
     <Reference Include="System.Security.Principal.Windows" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.NonGeneric" />
+    <Reference Include="System.Collections.Specialized" />
+    <Reference Include="System.ComponentModel.Primitives" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Net.Primitives" />
+    <Reference Include="System.Net.Security" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Security.Claims" />
+    <Reference Include="System.Security.Principal" />
+    <Reference Include="System.Security.Cryptography.X509Certificates" />
+    <Reference Include="System.Text.RegularExpressions" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Thread" />
+    <Reference Include="System.Xml.ReaderWriter" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp2.0'">
+    <Reference Include="System.ComponentModel.TypeConverter" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

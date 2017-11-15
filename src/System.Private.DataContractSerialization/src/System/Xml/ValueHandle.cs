@@ -326,8 +326,11 @@ namespace System.Xml
             if (type == ValueHandleType.Double)
             {
                 double value = GetDouble();
-                if ((value >= Single.MinValue && value <= Single.MaxValue) || double.IsInfinity(value) || double.IsNaN(value))
+
+                if ((value >= Single.MinValue && value <= Single.MaxValue) || !double.IsFinite(value))
+                {
                     return (Single)value;
+                }
             }
             if (type == ValueHandleType.Zero)
                 return 0;
@@ -562,6 +565,55 @@ namespace System.Xml
             return true;
         }
 
+        public void Sign(XmlSigningNodeWriter writer)
+        {
+            switch (_type)
+            {
+                case ValueHandleType.Int8:
+                case ValueHandleType.Int16:
+                case ValueHandleType.Int32:
+                    writer.WriteInt32Text(ToInt());
+                    break;
+                case ValueHandleType.Int64:
+                    writer.WriteInt64Text(GetInt64());
+                    break;
+                case ValueHandleType.UInt64:
+                    writer.WriteUInt64Text(GetUInt64());
+                    break;
+                case ValueHandleType.Single:
+                    writer.WriteFloatText(GetSingle());
+                    break;
+                case ValueHandleType.Double:
+                    writer.WriteDoubleText(GetDouble());
+                    break;
+                case ValueHandleType.Decimal:
+                    writer.WriteDecimalText(GetDecimal());
+                    break;
+                case ValueHandleType.DateTime:
+                    writer.WriteDateTimeText(ToDateTime());
+                    break;
+                case ValueHandleType.Empty:
+                    break;
+                case ValueHandleType.UTF8:
+                    writer.WriteEscapedText(_bufferReader.Buffer, _offset, _length);
+                    break;
+                case ValueHandleType.Base64:
+                    writer.WriteBase64Text(_bufferReader.Buffer, 0, _bufferReader.Buffer, _offset, _length);
+                    break;
+                case ValueHandleType.UniqueId:
+                    writer.WriteUniqueIdText(ToUniqueId());
+                    break;
+                case ValueHandleType.Guid:
+                    writer.WriteGuidText(ToGuid());
+                    break;
+                case ValueHandleType.TimeSpan:
+                    writer.WriteTimeSpanText(ToTimeSpan());
+                    break;
+                default:
+                    writer.WriteEscapedText(GetString());
+                    break;
+            }
+        }
 
         public object[] ToList()
         {

@@ -34,7 +34,6 @@ namespace System.Net
 {
     internal sealed class ChunkedInputStream : HttpRequestStream
     {
-        private bool _disposed;
         private ChunkStream _decoder;
         private readonly HttpListenerContext _context;
         private bool _no_more_data;
@@ -70,39 +69,26 @@ namespace System.Net
             set { _decoder = value; }
         }
 
-        public override int Read(byte[] buffer, int offset, int count)
+        protected override int ReadCore(byte[] buffer, int offset, int count)
         {
-            IAsyncResult ares = BeginRead(buffer, offset, count, null, null);
+            IAsyncResult ares = BeginReadCore(buffer, offset, count, null, null);
             return EndRead(ares);
         }
 
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback cback, object state)
+        protected override IAsyncResult BeginReadCore(byte[] buffer, int offset, int size, AsyncCallback cback, object state)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().ToString());
-
-            if (buffer == null)
-                throw new ArgumentNullException(nameof(buffer));
-
-            int len = buffer.Length;
-            if (offset < 0 || offset > len)
-                throw new ArgumentOutOfRangeException(nameof(offset), SR.offset_out_of_range);
-
-            if (count < 0 || offset > len - count)
-                throw new ArgumentOutOfRangeException(nameof(count), SR.offset_out_of_range);
-
-            HttpStreamAsyncResult ares = new HttpStreamAsyncResult();
+            HttpStreamAsyncResult ares = new HttpStreamAsyncResult(this);
             ares._callback = cback;
             ares._state = state;
-            if (_no_more_data)
+            if (_no_more_data || size == 0 || _closed)
             {
                 ares.Complete();
                 return ares;
             }
-            int nread = _decoder.Read(buffer, offset, count);
+            int nread = _decoder.Read(buffer, offset, size);
             offset += nread;
-            count -= nread;
-            if (count == 0)
+            size -= nread;
+            if (size == 0)
             {
                 // got all we wanted, no need to bother the decoder yet
                 ares._count = nread;
@@ -119,9 +105,9 @@ namespace System.Net
             ares._buffer = new byte[8192];
             ares._offset = 0;
             ares._count = 8192;
-            ReadBufferState rb = new ReadBufferState(buffer, offset, count, ares);
+            ReadBufferState rb = new ReadBufferState(buffer, offset, size, ares);
             rb.InitialCount += nread;
-            base.BeginRead(ares._buffer, ares._offset, ares._count, OnRead, rb);
+            base.BeginReadCore(ares._buffer, ares._offset, ares._count, OnRead, rb);
             return ares;
         }
 
@@ -132,11 +118,19 @@ namespace System.Net
             try
             {
                 int nread = base.EndRead(base_ares);
+                if (nread == 0)
+                {
+                    _no_more_data = true;
+                    ares._count = rb.InitialCount - rb.Count;
+                    ares.Complete();
+                    return;
+                }
+
                 _decoder.Write(ares._buffer, ares._offset, nread);
                 nread = _decoder.Read(rb.Buffer, rb.Offset, rb.Count);
                 rb.Offset += nread;
                 rb.Count -= nread;
-                if (rb.Count == 0 || !_decoder.WantMore || nread == 0)
+                if (rb.Count == 0 || !_decoder.WantMore)
                 {
                     _no_more_data = !_decoder.WantMore && nread == 0;
                     ares._count = rb.InitialCount - rb.Count;
@@ -145,7 +139,7 @@ namespace System.Net
                 }
                 ares._offset = 0;
                 ares._count = Math.Min(8192, _decoder.ChunkLeft + 6);
-                base.BeginRead(ares._buffer, ares._offset, ares._count, OnRead, rb);
+                base.BeginReadCore(ares._buffer, ares._offset, ares._count, OnRead, rb);
             }
             catch (Exception e)
             {
@@ -156,12 +150,19 @@ namespace System.Net
 
         public override int EndRead(IAsyncResult asyncResult)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().ToString());
+            if (asyncResult == null)
+                throw new ArgumentNullException(nameof(asyncResult));
 
             HttpStreamAsyncResult ares = asyncResult as HttpStreamAsyncResult;
-            if (asyncResult == null)
+            if (ares == null || !ReferenceEquals(this, ares._parent))
+            {
                 throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
+            }
+            if (ares._endCalled)
+            {
+                throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, nameof(EndRead)));
+            }
+            ares._endCalled = true;
 
             if (!asyncResult.IsCompleted)
                 asyncResult.AsyncWaitHandle.WaitOne();
@@ -170,15 +171,6 @@ namespace System.Net
                 throw new HttpListenerException((int)HttpStatusCode.BadRequest, SR.Format(SR.net_io_operation_aborted, ares._error.Message));
 
             return ares._count;
-        }
-
-        public override void Close()
-        {
-            if (!_disposed)
-            {
-                _disposed = true;
-                base.Close();
-            }
         }
     }
 }

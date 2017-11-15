@@ -64,6 +64,8 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/20656", TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void MissingTopLevelExportMessageIsInformative()
         {
             var cc = CreateContainer();
@@ -72,6 +74,8 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/20656", TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void MissingTopLevelNamedExportMessageIsInformative()
         {
             var cc = CreateContainer();
@@ -80,6 +84,7 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
+        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void MissingDependencyMessageIsInformative()
         {
             var cc = CreateContainer(typeof(UserOfUnregistered));
@@ -90,6 +95,7 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
+        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void CycleMessageIsInformative()
         {
             var cc = CreateContainer(typeof(CycleA), typeof(CycleB), typeof(CycleC));
@@ -103,6 +109,7 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
+        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void CardinalityViolationMessageIsInformative()
         {
             var cc = CreateContainer(typeof(ShouldBeOne), typeof(ButThereIsAnother), typeof(RequiresOnlyOne));

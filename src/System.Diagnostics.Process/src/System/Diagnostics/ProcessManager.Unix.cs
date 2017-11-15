@@ -59,10 +59,7 @@ namespace System.Diagnostics
             return (int)processHandle.DangerousGetHandle(); // not actually dangerous; just wraps a process ID
         }
 
-        /// <summary>Gets whether the named machine is remote or local.</summary>
-        /// <param name="machineName">The machine name.</param>
-        /// <returns>true if the machine is remote; false if it's local.</returns>
-        public static bool IsRemoteMachine(string machineName)
+        private static bool IsRemoteMachineCore(string machineName)
         {
             return 
                 machineName != "." && 
@@ -82,7 +79,7 @@ namespace System.Diagnostics
         }
         public static IntPtr GetMainWindowHandle(int processId)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(); // Window handle is a Windows concept
         }
     }
 }

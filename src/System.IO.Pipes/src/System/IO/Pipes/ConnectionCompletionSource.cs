@@ -11,8 +11,8 @@ namespace System.IO.Pipes
         private readonly NamedPipeServerStream _serverStream;
 
         // Using RunContinuationsAsynchronously for compat reasons (old API used ThreadPool.QueueUserWorkItem for continuations)
-        internal ConnectionCompletionSource(NamedPipeServerStream server, CancellationToken cancellationToken)
-            : base(server._threadPoolBinding, cancellationToken, pinData: null)
+        internal ConnectionCompletionSource(NamedPipeServerStream server)
+            : base(server._threadPoolBinding, ReadOnlyMemory<byte>.Empty)
         {
             _serverStream = server;
         }
@@ -38,6 +38,8 @@ namespace System.IO.Pipes
         {
             TrySetException(Win32Marshal.GetExceptionForWin32Error(errorCode));
         }
+
+        protected override void HandleUnexpectedCancellation() => TrySetException(Error.GetOperationAborted());
     }
 
     internal struct VoidResult { }

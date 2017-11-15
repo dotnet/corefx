@@ -5,11 +5,14 @@
     <ProjectGuid>{5F9C3C9F-652E-461E-B2D6-85D264F5A733}</ProjectGuid>
     <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn Condition="'$(TargetGroup)' == 'uap'">$(NoWarn);0436</NoWarn>
+    <DefineConstants Condition="'$(TargetGroup)' == 'uap'">$(DefineConstants);uap</DefineConstants>
   </PropertyGroup>
-  <!-- Help VS understand available configurations -->
-  <!-- Do not reference these assemblies from the TargetingPack since we are building part of the source code for tests. -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
+  <!-- Do not reference these assemblies from the TargetingPack since we are building part of the source code for tests. -->
   <ItemGroup>
     <TargetingPackExclusions Include="System.Net.Http" />
     <TargetingPackExclusions Include="System.Net.Mail" />
@@ -45,6 +48,12 @@
     <Compile Include="$(CommonPath)\System\Net\Logging\NetEventSource.Common.cs">
       <Link>ProductionCode\Common\System\Net\Logging\NetEventSource.Common.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\SecurityProtocol.cs">
+      <Link>Common\System\Net\SecurityProtocol.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\UriScheme.cs">
+      <Link>Common\System\Net\UriScheme.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\ShouldNotBeInvokedException.cs">
       <Link>Common\System\ShouldNotBeInvokedException.cs</Link>
     </Compile>
@@ -75,12 +84,6 @@
     <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
       <Link>ProductionCode\Common\System\Threading\Tasks\TaskToApm.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Internal\UriHelper.cs">
-      <Link>ProductionCode\Internal\UriHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Shims\Uri.cs">
-      <Link>ProductionCode\Shims\Uri.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\System\Net\Http\ByteArrayContent.cs">
       <Link>ProductionCode\System\Net\Http\ByteArrayContent.cs</Link>
     </Compile>
@@ -92,6 +95,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\DelegatingStream.cs">
       <Link>ProductionCode\System\IO\DelegatingStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\ByteArrayHelpers.cs">
+      <Link>ProductionCode\System\Net\Http\ByteArrayHelpers.cs</Link>
     </Compile>
     <Compile Include="..\..\src\System\Net\Http\FormUrlEncodedContent.cs">
       <Link>ProductionCode\System\Net\Http\FormUrlEncodedContent.cs</Link>
@@ -126,6 +132,9 @@
     <Compile Include="..\..\src\System\Net\Http\Headers\GenericHeaderParser.cs">
       <Link>ProductionCode\System\Net\Http\Headers\GenericHeaderParser.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\System\Net\Http\Headers\HeaderDescriptor.cs">
+      <Link>ProductionCode\System\Net\Http\Headers\HeaderDescriptor.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\System\Net\Http\Headers\HeaderUtilities.cs">
       <Link>ProductionCode\System\Net\Http\Headers\HeaderUtilities.cs</Link>
     </Compile>
@@ -141,6 +150,9 @@
     <Compile Include="..\..\src\System\Net\Http\Headers\HttpHeaders.cs">
       <Link>ProductionCode\System\Net\Http\Headers\HttpHeaders.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\System\Net\Http\Headers\HttpHeaderType.cs">
+      <Link>ProductionCode\System\Net\Http\Headers\HttpHeaderType.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\System\Net\Http\Headers\HttpHeaderValueCollection.cs">
       <Link>ProductionCode\System\Net\Http\Headers\HttpHeaderValueCollection.cs</Link>
     </Compile>
@@ -155,6 +167,12 @@
     </Compile>
     <Compile Include="..\..\src\System\Net\Http\Headers\Int64NumberHeaderParser.cs">
       <Link>ProductionCode\System\Net\Http\Headers\Int64NumberHeaderParser.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\Headers\KnownHeaders.cs">
+      <Link>ProductionCode\System\Net\Http\Headers\KnownHeaders.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\Headers\KnownHeader.cs">
+      <Link>ProductionCode\System\Net\Http\Headers\KnownHeader.cs</Link>
     </Compile>
     <Compile Include="..\..\src\System\Net\Http\Headers\MediaTypeHeaderParser.cs">
       <Link>ProductionCode\System\Net\Http\Headers\MediaTypeHeaderParser.cs</Link>
@@ -279,6 +297,9 @@
     <Compile Include="..\..\src\System\Net\Http\Unix\CurlResponseHeaderReader.cs">
       <Link>ProductionCode\System\Net\Http\CurlResponseHeaderReader.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\Http\HttpHandlerDefaults.cs">
+      <Link>ProductionCode\System\Net\Http\HttpHandlerDefaults.cs</Link>
+    </Compile>
     <Compile Include="Fakes\HttpClientHandler.cs" />
     <Compile Include="Headers\AuthenticationHeaderValueTest.cs" />
     <Compile Include="Headers\ByteArrayHeaderParserTest.cs" />
@@ -339,9 +360,6 @@
     <Compile Include="StreamToStreamCopyTest.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netstandard' And '$(TargetGroup)' != 'netcoreapp'">
-    <Compile Include="..\..\src\Internal\ICloneable.cs">
-      <Link>ProductionCode\Internal\ICloneable.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\SerializableAttribute.cs">
       <Link>Common\System\SerializableAttribute.cs</Link>
     </Compile>

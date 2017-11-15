@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace System.IO
@@ -19,11 +17,11 @@ namespace System.IO
         internal static Exception GetExceptionForLastWin32Error()
         {
             int errorCode = Marshal.GetLastWin32Error();
-            return GetExceptionForWin32Error(errorCode, String.Empty);
+            return GetExceptionForWin32Error(errorCode, string.Empty);
         }
 
         /// <summary>
-        ///     Converts, resetting it, the last Win32 error into a corresponding <see cref="Exception"/> object, optionally 
+        ///     Converts, resetting it, the last Win32 error into a corresponding <see cref="Exception"/> object, optionally
         ///     including the specified path in the error message.
         /// </summary>
         internal static Exception GetExceptionForLastWin32Error(string path)
@@ -41,7 +39,7 @@ namespace System.IO
         }
 
         /// <summary>
-        ///     Converts the specified Win32 error into a corresponding <see cref="Exception"/> object, optionally 
+        ///     Converts the specified Win32 error into a corresponding <see cref="Exception"/> object, optionally
         ///     including the specified path in the error message.
         /// </summary>
         internal static Exception GetExceptionForWin32Error(int errorCode, string path)
@@ -73,7 +71,9 @@ namespace System.IO
                     return new IOException(SR.Format(SR.IO_AlreadyExists_Name, path), MakeHRFromErrorCode(errorCode));
 
                 case Interop.Errors.ERROR_FILENAME_EXCED_RANGE:
-                    return new PathTooLongException(SR.IO_PathTooLong);
+                    return !string.IsNullOrEmpty(path) ?
+                        new PathTooLongException(SR.Format(SR.IO_PathTooLong_Path, path)) :
+                        new PathTooLongException(SR.IO_PathTooLong);
 
                 case Interop.Errors.ERROR_INVALID_PARAMETER:
                     return new IOException(GetMessage(errorCode), MakeHRFromErrorCode(errorCode));
@@ -99,11 +99,13 @@ namespace System.IO
         }
 
         /// <summary>
-        ///     Returns a HRESULT for the specified Win32 error code.
+        /// If not already an HRESULT, returns an HRESULT for the specified Win32 error code.
         /// </summary>
         internal static int MakeHRFromErrorCode(int errorCode)
         {
-            Debug.Assert((0xFFFF0000 & errorCode) == 0, "This is an HRESULT, not an error code!");
+            // Don't convert it if it is already an HRESULT
+            if ((0xFFFF0000 & errorCode) != 0)
+                return errorCode;
 
             return unchecked(((int)0x80070000) | errorCode);
         }

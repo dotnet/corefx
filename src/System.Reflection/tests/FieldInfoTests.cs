@@ -314,9 +314,9 @@ namespace System.Reflection.Tests
             object obj = Activator.CreateInstance(type);
             FieldInfo fieldInfo = GetField(type, "bArray");
 
-            Assert.Throws<ArgumentException>(() => fieldInfo.SetValue(obj, ATypeWithMixedAB));
-            Assert.Throws<ArgumentException>(() => fieldInfo.SetValue(obj, ATypeWithAllA));
-            Assert.Throws<ArgumentException>(() => fieldInfo.SetValue(obj, ATypeWithAllB));
+            AssertExtensions.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, ATypeWithMixedAB));
+            AssertExtensions.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, ATypeWithAllA));
+            AssertExtensions.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, ATypeWithAllB));
 
             fieldInfo.SetValue(obj, BTypeWithAllB);
             Assert.Equal(BTypeWithAllB, fieldInfo.GetValue(obj));
@@ -348,7 +348,7 @@ namespace System.Reflection.Tests
             fieldInfo.SetValue(obj, intArray);
             Assert.Equal(intArray, fieldInfo.GetValue(obj));
 
-            Assert.Throws<ArgumentException>(() => fieldInfo.SetValue(obj, new byte[] { 2, 3, 4 }));
+            AssertExtensions.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, new byte[] { 2, 3, 4 }));
         }
 
         [Fact]
@@ -366,8 +366,8 @@ namespace System.Reflection.Tests
             fieldInfo.SetValue(obj, BTypeWithAllB_Contra);
             Assert.Equal(BTypeWithAllB_Contra, fieldInfo.GetValue(obj));
 
-            Assert.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, new int[] { 1, -1, 2, -2 }));
-            Assert.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, new byte[] { 2, 3, 4 }));
+            AssertExtensions.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, new int[] { 1, -1, 2, -2 }));
+            AssertExtensions.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, new byte[] { 2, 3, 4 }));
         }
 
         public static IEnumerable<object[]> FieldInfoRTGenericTests_TestData()
@@ -521,6 +521,39 @@ namespace System.Reflection.Tests
             public static FI_GenericClass<T> dependField;
             public static FI_GenericClass<T>[] arrayField;
             public static FI_StaticGenericField<T> selfField;
+        }
+
+        struct FieldData
+        {
+            public Inner inner;
+        }
+
+        struct Inner
+        {
+            public object field;
+        }
+
+        [Theory]
+        [InlineData(222)]
+        [InlineData("new value")]
+        [InlineData('A')]
+        [InlineData(false)]
+        [InlineData(4.56f)]
+        [InlineData(double.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData(byte.MaxValue)]
+        [InlineData(null)]
+        public static void SetValueDirect_GetValueDirectRoundDataTest(object value)
+        {
+            FieldData testField = new FieldData { inner = new Inner() { field = -1 } };
+            FieldInfo innerFieldInfo = typeof(FieldData).GetField(nameof(FieldData.inner));
+            FieldInfo[] fields = { innerFieldInfo };
+            FieldInfo fieldFieldInfo = typeof(Inner).GetField(nameof(Inner.field));
+            TypedReference reference = TypedReference.MakeTypedReference(testField, fields);
+            fieldFieldInfo.SetValueDirect(reference, value);
+            object result = fieldFieldInfo.GetValueDirect(reference);
+
+            Assert.Equal(value, result);
         }
     }
 }

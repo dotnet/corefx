@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
@@ -116,6 +117,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 X509Certificate2Collection collection = ic.Collection;
                 Assert.Equal(1, collection.Count);
+
+                Assert.Equal("D5B5BC1C458A558845BFF51CB4DFF31C", collection[0].SerialNumber);
             }
         }
 
@@ -126,6 +129,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 X509Certificate2Collection collection = ic.Collection;
                 Assert.Equal(1, collection.Count);
+
+                Assert.Equal("D5B5BC1C458A558845BFF51CB4DFF31C", collection[0].SerialNumber);
             }
         }
 
@@ -136,6 +141,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 X509Certificate2Collection collection = ic.Collection;
                 Assert.Equal(1, collection.Count);
+
+                Assert.Equal("D5B5BC1C458A558845BFF51CB4DFF31C", collection[0].SerialNumber);
             }
         }
 
@@ -146,6 +153,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 X509Certificate2Collection collection = ic.Collection;
                 Assert.Equal(1, collection.Count);
+
+                Assert.Equal("D5B5BC1C458A558845BFF51CB4DFF31C", collection[0].SerialNumber);
             }
         }
 
@@ -301,26 +310,24 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-
         [Fact]
         public static void InvalidStorageFlags()
         {
             X509Certificate2Collection coll = new X509Certificate2Collection();
             byte[] nonEmptyBytes = new byte[1];
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "keyStorageFlags",
                 () => coll.Import(nonEmptyBytes, string.Empty, (X509KeyStorageFlags)0xFF));
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "keyStorageFlags",
                 () => coll.Import(string.Empty, string.Empty, (X509KeyStorageFlags)0xFF));
             
             // No test is performed here for the ephemeral flag failing downlevel, because the live
             // binary is always used by default, meaning it doesn't know EphemeralKeySet doesn't exist.
         }
-
-#if netcoreapp
+        
         [Fact]
         public static void InvalidStorageFlags_PersistedEphemeral()
         {
@@ -330,25 +337,22 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             byte[] nonEmptyBytes = new byte[1];
             X509Certificate2Collection coll = new X509Certificate2Collection();
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "keyStorageFlags",
                 () => coll.Import(nonEmptyBytes, string.Empty, PersistedEphemeral));
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "keyStorageFlags",
                 () => coll.Import(string.Empty, string.Empty, PersistedEphemeral));
         }
-#endif
 
         public static IEnumerable<object[]> StorageFlags
         {
             get
             {
                 yield return new object[] { X509KeyStorageFlags.DefaultKeySet };
-
-#if netcoreapp
-                yield return new object[] { X509KeyStorageFlags.EphemeralKeySet };
-#endif
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    yield return new object[] { X509KeyStorageFlags.EphemeralKeySet };
             }
         }
 

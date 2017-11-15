@@ -76,15 +76,12 @@ namespace System.ComponentModel.Design
         {
             if (savedLicenseKeys == null || savedLicenseKeys[type.AssemblyQualifiedName] == null)
             {
-                Debug.WriteLineIf(s_runtimeLicenseContextSwitch.TraceVerbose, "savedLicenseKey is null or doesnt contain our type");
+                Debug.WriteLineIf(s_runtimeLicenseContextSwitch.TraceVerbose, "savedLicenseKey is null or doesn't contain our type");
                 if (savedLicenseKeys == null)
                 {
                     savedLicenseKeys = new Hashtable();
                 }
 
-                Uri licenseFile = null;
-                // the AppDomain.CurrentDomain.SetupInformation.LicenseFile always returns null.
-                // This means we have to find the license file using the fallback logic below.
                 if (resourceAssembly == null)
                 {
                     resourceAssembly = Assembly.GetEntryAssembly();
@@ -167,20 +164,6 @@ namespace System.ComponentModel.Design
                         DesigntimeLicenseContextSerializer.Deserialize(s, fileName.ToUpper(CultureInfo.InvariantCulture), this);
                     }
                 }
-
-                if (licenseFile != null)
-                {
-                    Debug.WriteLineIf(s_runtimeLicenseContextSwitch.TraceVerbose, $"licenseFile: {licenseFile.ToString()}");
-                    Debug.WriteLineIf(s_runtimeLicenseContextSwitch.TraceVerbose, $"opening licenses file over URI {licenseFile.ToString()}");
-                    Stream s = OpenRead(licenseFile);
-                    if (s != null)
-                    {
-                        string[] segments = licenseFile.Segments;
-                        string licFileName = segments[segments.Length - 1];
-                        string key = licFileName.Substring(0, licFileName.LastIndexOf("."));
-                        DesigntimeLicenseContextSerializer.Deserialize(s, key.ToUpper(CultureInfo.InvariantCulture), this);
-                    }
-                }
             }
             Debug.WriteLineIf(s_runtimeLicenseContextSwitch.TraceVerbose, $"returning : {(string)savedLicenseKeys[type.AssemblyQualifiedName]}");
             return (string)savedLicenseKeys[type.AssemblyQualifiedName];
@@ -215,24 +198,6 @@ namespace System.ComponentModel.Design
             //case insensitive match we found
             //
             return satellite.GetManifestResourceStream(name);
-        }
-
-        private static Stream OpenRead(Uri resourceUri)
-        {
-            Stream result = null;
-
-            try
-            {
-                WebClient webClient = new WebClient();
-                webClient.Credentials = CredentialCache.DefaultCredentials;
-                result = webClient.OpenRead(resourceUri.ToString());
-            }
-            catch (Exception e)
-            {
-                Debug.Fail(e.ToString());
-            }
-
-            return result;
         }
     }
 }

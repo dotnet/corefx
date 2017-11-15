@@ -2,7 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if XMLSERIALIZERGENERATOR
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     using System.Reflection;
     using System.Collections;
@@ -11,11 +15,16 @@ namespace System.Xml.Serialization
     using System;
     using System.Collections.Generic;
     using System.Xml.Extensions;
+    using System.Xml;
 
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
+#if XMLSERIALIZERGENERATOR
+    internal class XmlSerializerNamespaces
+#else
     public class XmlSerializerNamespaces
+#endif
     {
         private Dictionary<string, string> _namespaces = null;
 

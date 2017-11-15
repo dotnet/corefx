@@ -3,7 +3,7 @@
     "TargetGroup": {
       "description": "Sets the target framework for the BuildConfiguration you want to build.",
       "valueType": "property",
-      "values": ["netcoreapp", "netstandard", "netfx", "uap"],
+      "values": ["netcoreapp", "netstandard", "netfx", "uap", "mono"],
       "defaultValue": "netcoreapp"
     },
     "OSGroup": {
@@ -31,10 +31,22 @@
       "defaultValue": false
     },
     "RuntimeOS": {
-      "description": "The RuntimeOS used for building and restoring native OS dependent assets (i.e. RID specific binaries)",
+      "description": "The RuntimeOS of the build system.",
       "valueType": "property",
       "values": ["win7", "osx.10.10", "ubuntu.14.04", "ubuntu.16.04", "etc-other-rid-based-os-names"],
       "defaultValue": ""
+    },
+    "PackageRID": {
+      "description": "The RID of the target package.",
+      "valueType": "property",
+      "values": ["win7-x64", "ubuntu.14.04-x64"],
+      "defaultValue": ""
+    },
+    "PortableBuild": {
+      "description": "Indicates if this is a portable build.",
+      "valueType": "property",
+      "values": [ "True", "False"],
+      "defaultValue": "true"
     },
     "SkipTests": {
       "description": "Enables/Disables running tests.",
@@ -227,9 +239,84 @@
       "valueType": "target",
       "values": [],
       "defaultValue": ""
-    }
+    },
+    "DirectoryToBuild": {
+      "description": "MsBuild property used to set the directory to scope the build to things under that directory.",
+      "valueType": "property",
+      "values": [],
+      "defaultValue": "Please-Specify-A-Directory"
+    },
+    "Clang": {
+        "description": "Specific version of Clang to use e.g. clang3.7, clang3.8, etc ...",
+        "valueType": "property",
+        "values": [],
+        "defaultValue": ""
+    },
   },
   "commands": {
+    "build-directory": {
+      "alias":{
+        "directory": {
+           "description": "Root directory in which to scope the build from.",
+           "settings": {
+             "DirectoryToBuild": "default"
+           }
+        },
+        "debug": {
+          "description": "Sets optimization level to debug for managed build configuration. (/p:ConfigurationGroup=Debug)",
+          "settings": {
+            "ConfigurationGroup": "Debug"
+          }
+        },
+        "release": {
+          "description": "Sets optimization level to release for managed build configuration. (/p:ConfigurationGroup=Release)",
+          "settings": {
+            "ConfigurationGroup": "Release"
+          }
+        },
+        "allConfigurations": {
+          "description": "Builds all configurations instead of only those specified by framework/os.",
+          "settings": {
+            "BuildAllConfigurations":"true"
+          }
+        },
+        "framework": {
+          "description": "Sets target framework for managed build configuration and only builds the libraries applicable for that framework. (/p:TargetGroup=[value])",
+          "settings": {
+            "TargetGroup": "default"
+          }
+        },
+        "os": {
+          "description": "Sets OS for the managed build configuration and only builds the libraries applicable for that OS. (/p:OSGroup=[value])",
+          "settings": {
+            "OSGroup": "default"
+          }
+        },
+        "buildArch": {
+          "description": "Sets the architecture for the managed build confiuguration. (/p:ArchGroup=[value])",
+          "settings": {
+            "ArchGroup": "default"
+          }
+        },
+        "runtimeos": {
+          "description": "Sets runtime OS for the managed build configuration, which is used for building and restoring native OS dependent assets (i.e. RID specific binaries). (/p:RuntimeOS=[value]",
+          "settings": {
+            "RuntimeOS": "default"
+          }
+        },
+      },
+      "defaultValues": {
+        "toolName": "msbuild",
+        "settings": {
+          "Project": "src/dirs.proj",
+          "ConfigurationGroup": "default",
+          "DirectoryToBuild": "default",
+          "MsBuildLogging":"default",
+          "MsBuildWarning":"default",
+          "MsBuildError":"default"
+        }
+      }
+    },
     "build-managed": {
       "alias":{
         "packages": {
@@ -240,10 +327,10 @@
             "MsBuildLogging":"/flp:v=normal;LogFile=build-packages.log"
           }
         },
-        "portableLinux":{
-          "description": "Make the build-native script generate binaries that are portable over glibc based Linux distros.",
+        "portable":{
+          "description": "Make the build-native script generate binaries that are portable for the platform.",
           "settings": {
-            "RuntimeOS":"linux"
+            "PortableBuild":"true"
           }
         },
         "stripSymbols": {
@@ -380,10 +467,10 @@
             "RuntimeOs": "default"
           }
         },
-        "portableLinux":{
-          "description": "Make the build-native script generate binaries that are portable over glibc based Linux distros.",
+        "portable":{
+          "description": "Make the build-native script generate binaries that are portable for the platform.",
           "settings": {
-            "AdditionalArgs": "portableLinux"
+            "AdditionalArgs": "-portable"
           }
         },
         "stripSymbols": {
@@ -405,7 +492,7 @@
            "CmakeBuildType": "default",
            "HostOs": "default",
            "ProcessorCount": "default",
-           "AdditionalArgs": "default",
+           "AdditionalArgs": "-portable",
            "ToolSetDir": "default"
          }
       }
@@ -533,10 +620,10 @@
             "BuildNumberMinor": "default"
           }
         },
-        "portableLinux":{
-          "description": "Download packages that are portable over glibc based Linux distros.",
+        "portable":{
+          "description": "Download packages that are portable for the platform.",
           "settings": {
-            "RuntimeOS":"linux"
+            "PortableBuild":"true"
           }
         },
         "verbose": {

@@ -21,15 +21,10 @@ namespace System.IO.Tests
         {
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
             {
-                Assert.Throws<ArgumentNullException>("destination", () => { fs.CopyToAsync(null); });
-                Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => { fs.CopyToAsync(new MemoryStream(), 0); });
+                AssertExtensions.Throws<ArgumentNullException>("destination", () => { fs.CopyToAsync(null); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => { fs.CopyToAsync(new MemoryStream(), 0); });
                 Assert.Throws<NotSupportedException>(() => { fs.CopyToAsync(new MemoryStream(new byte[1], writable: false)); });
                 fs.Dispose();
-                Assert.Throws<ObjectDisposedException>(() => { fs.CopyToAsync(new MemoryStream()); });
-            }
-            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
-            {
-                fs.SafeFileHandle.Dispose();
                 Assert.Throws<ObjectDisposedException>(() => { fs.CopyToAsync(new MemoryStream()); });
             }
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.Write))
@@ -41,6 +36,53 @@ namespace System.IO.Tests
             {
                 dst.Dispose();
                 Assert.Throws<ObjectDisposedException>(() => { src.CopyToAsync(dst); });
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The Stream CopyToAsync fails on netcoreapp because it calls Length which checks the validity of the underlying handle. On NetFX the operation no-ops for no input or delays failure to execution for input. See /dotnet/coreclr/pull/4540.")]
+        public void DisposeHandleThenUseFileStream_CopyToAsync(bool useAsync)
+        {
+            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
+            {
+                fs.SafeFileHandle.Dispose();
+                Assert.Throws<ObjectDisposedException>(() => { fs.CopyToAsync(new MemoryStream()); });
+            }
+
+            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
+            {
+                fs.Write(TestBuffer, 0, TestBuffer.Length);
+                fs.SafeFileHandle.Dispose();
+                Assert.Throws<ObjectDisposedException>(() => { fs.CopyToAsync(new MemoryStream()).Wait(); });
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The Stream CopyToAsync fails on netcoreapp because it calls Length which checks the validity of the underlying handle. On NetFX the operation no-ops for no input or delays failure to execution for input. See /dotnet/coreclr/pull/4540.")]
+        public void DisposeHandleThenUseFileStream_CopyToAsync_netfx(bool useAsync)
+        {
+            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
+            {
+                fs.SafeFileHandle.Dispose();
+                fs.CopyToAsync(new MemoryStream());
+            }
+
+            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
+            {
+                fs.Write(TestBuffer, 0, TestBuffer.Length);
+                fs.SafeFileHandle.Dispose();
+                try
+                {
+                    fs.CopyToAsync(new MemoryStream()).Wait();
+                }
+                catch (AggregateException e)
+                {
+                    Assert.Equal(typeof(ObjectDisposedException), e.InnerException.GetType());
+                }
             }
         }
 
@@ -200,6 +242,7 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(false, 10, 1024)]
         [InlineData(true, 10, 1024)]
+        [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
         public async Task NamedPipeViaFileStream_AllDataCopied(bool useAsync, int writeSize, int numWrites)
         {
             long totalLength = writeSize * numWrites;
@@ -209,7 +252,7 @@ namespace System.IO.Tests
             var results = new MemoryStream();
             var pipeOptions = useAsync ? PipeOptions.Asynchronous : PipeOptions.None;
 
-            string name = Guid.NewGuid().ToString("N");
+            string name = GetNamedPipeServerStreamName();
             using (var server = new NamedPipeServerStream(name, PipeDirection.Out, 1, PipeTransmissionMode.Byte, pipeOptions))
             {
                 Task serverTask = Task.Run(async () =>

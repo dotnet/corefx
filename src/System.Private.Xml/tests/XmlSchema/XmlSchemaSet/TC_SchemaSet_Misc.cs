@@ -19,9 +19,7 @@ namespace System.Xml.Tests
         {
             _output = output;
         }
-
-
-        //todo: use rootpath
+        
         public bool bWarningCallback;
 
         public bool bErrorCallback;
@@ -74,7 +72,7 @@ namespace System.Xml.Tests
             }
         }
 
-        //[Variation(Desc = "v2 - Bug115049 - XSD: content model validation for an invalid root element should be adandoned", Priority = 2)]
+        //[Variation(Desc = "v2 - Bug115049 - XSD: content model validation for an invalid root element should be abandoned", Priority = 2)]
         [InlineData()]
         [Theory]
         public void v2()
@@ -1070,6 +1068,9 @@ namespace System.Xml.Tests
             return;
         }
 
+        // Test failure on ILC: Test depends on Xml Serialization and requires reflection on a LOT of types under System.Xml.Schema namespace.
+        // Rd.xml with "<Namespace Name="System.Xml.Schema" Dynamic="Required Public" />" lets this test pass but we should probably be
+        // fixing up XmlSerializer's own rd.xml rather than the test here.
         [Fact]
         public void GetBuiltinSimpleTypeWorksAsEcpected()
         {
@@ -1258,7 +1259,10 @@ namespace System.Xml.Tests
                 CError.Compare(exception.SourceObject != null, "SourceObject == null");
                 return;
             }
-            CError.Compare(exception.SourceObject.GetType().ToString(), "MS.Internal.Xml.Cache.XPathDocumentNavigator", "SourceObject.GetType");
+            if (!PlatformDetection.IsNetNative) // Cannot get names of internal framework types
+            {
+                CError.Compare(exception.SourceObject.GetType().ToString(), "MS.Internal.Xml.Cache.XPathDocumentNavigator", "SourceObject.GetType");
+            }
             _output.WriteLine("Exc: " + exception);
         }
 

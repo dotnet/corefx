@@ -56,8 +56,8 @@ namespace System.ComponentModel.Tests
             c = (CultureInfo)converter.ConvertFrom(null, CultureInfo.InvariantCulture,
                 "nl-BE");
             Assert.Equal(new CultureInfo("nl-BE"), c);
-            
-            try 
+
+            try
             {
                 // Linux can create such cultures
                 var cul = new CultureInfo("Dutch (Bel");
@@ -65,8 +65,8 @@ namespace System.ComponentModel.Tests
             catch (CultureNotFoundException)
             {
                 // if we cannot create the cultures we should get exception from the Converter too
-                Assert.Throws<ArgumentException>(() => c = (CultureInfo)converter.ConvertFrom(null, CultureInfo.InvariantCulture, "Dutch (Bel"));
-                Assert.Throws<ArgumentException>(() => c = (CultureInfo)converter.ConvertFrom(null, CultureInfo.InvariantCulture, "duTcH (Bel"));
+                AssertExtensions.Throws<ArgumentException>(null, () => c = (CultureInfo)converter.ConvertFrom(null, CultureInfo.InvariantCulture, "Dutch (Bel"));
+                AssertExtensions.Throws<ArgumentException>(null, () => c = (CultureInfo)converter.ConvertFrom(null, CultureInfo.InvariantCulture, "duTcH (Bel"));
             }
 
             c = (CultureInfo)converter.ConvertFrom(null, CultureInfo.InvariantCulture, "(Default)");
@@ -85,7 +85,7 @@ namespace System.ComponentModel.Tests
         {
             ArgumentException ex;
 
-            try 
+            try
             {
                 // Linux can create such cultures
                 var cul = new CultureInfo("(default)");
@@ -93,51 +93,60 @@ namespace System.ComponentModel.Tests
             catch (CultureNotFoundException)
             {
                 // if we cannot create the cultures we should get exception from the Converter too
-                ex = Assert.Throws<ArgumentException>(() => converter.ConvertFrom(null, CultureInfo.InvariantCulture, "(default)"));
+                ex = AssertExtensions.Throws<ArgumentException>(null, () => converter.ConvertFrom(null, CultureInfo.InvariantCulture, "(default)"));
                 // The (default) culture cannot be converted to
                 // a CultureInfo object on this computer
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf(typeof(CultureInfo).Name) != -1);
-                Assert.True(ex.Message.IndexOf("(default)") != -1);
-                Assert.Null(ex.ParamName);
+                if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.True(ex.Message.IndexOf(typeof(CultureInfo).Name) != -1);
+                    Assert.True(ex.Message.IndexOf("(default)") != -1);
+                    Assert.Null(ex.ParamName);
+                }
             }
 
-            try 
+            try
             {
                 // Linux can create such cultures
                 var cul = new CultureInfo(" ");
             }
             catch (CultureNotFoundException)
             {
-                ex = Assert.Throws<ArgumentException>(() => converter.ConvertFrom(null, CultureInfo.InvariantCulture, " "));
+                ex = AssertExtensions.Throws<ArgumentException>(null, () => converter.ConvertFrom(null, CultureInfo.InvariantCulture, " "));
                 // The   culture cannot be converted to
                 // a CultureInfo object on this computer
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf(typeof(CultureInfo).Name) != -1);
-                Assert.True(ex.Message.IndexOf("   ") != -1);
-                Assert.Null(ex.ParamName);
+                if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.True(ex.Message.IndexOf(typeof(CultureInfo).Name) != -1);
+                    Assert.True(ex.Message.IndexOf("   ") != -1);
+                    Assert.Null(ex.ParamName);
+                }
             }
 
-            try 
+            try
             {
                 // Linux can create such cultures
                 var cul = new CultureInfo("\r\n");
             }
             catch (CultureNotFoundException)
             {
-                ex = Assert.Throws<ArgumentException>(() => converter.ConvertFrom(null, CultureInfo.InvariantCulture, "\r\n"));
+                ex = AssertExtensions.Throws<ArgumentException>(null, () => converter.ConvertFrom(null, CultureInfo.InvariantCulture, "\r\n"));
                 // The \r\n culture cannot be converted to
                 // a CultureInfo object on this computer
                 Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf(typeof(CultureInfo).Name) != -1);
-                Assert.True(ex.Message.IndexOf("\r\n") != -1);
-                Assert.Null(ex.ParamName);
+                if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
+                {
+                    Assert.NotNull(ex.Message);
+                    Assert.True(ex.Message.IndexOf(typeof(CultureInfo).Name) != -1);
+                    Assert.True(ex.Message.IndexOf("\r\n") != -1);
+                    Assert.Null(ex.ParamName);
+                }
             }
         }
 

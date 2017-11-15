@@ -7,7 +7,6 @@ using System.Runtime.Serialization;
 
 namespace System.Configuration
 {
-    [Serializable]
     public class SettingsContext : Hashtable
     {
         public SettingsContext() : base() { }
@@ -15,6 +14,7 @@ namespace System.Configuration
         protected SettingsContext(SerializationInfo serializationInfo, StreamingContext streamingContext)
             : base(serializationInfo, streamingContext)
         {
+            throw new PlatformNotSupportedException();
         }
     }
 }

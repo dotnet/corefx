@@ -4,19 +4,18 @@
 
 using System;
 using System.Diagnostics;
-using System.Net.Security;
 using System.Runtime.InteropServices;
-using System.Security.Authentication;
-using System.Security.Authentication.ExtendedProtection;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
 {
     internal static partial class Ssl
     {
+        internal const int SSL_TLSEXT_ERR_OK = 0;
+        internal const int OPENSSL_NPN_NEGOTIATED = 1;
+        internal const int SSL_TLSEXT_ERR_NOACK = 3;
+
         internal delegate int SslCtxSetVerifyCallback(int preverify_ok, IntPtr x509_ctx);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EnsureLibSslInitialized")]
@@ -24,18 +23,6 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslV2_3Method")]
         internal static extern IntPtr SslV2_3Method();
-
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslV3Method")]
-        internal static extern IntPtr SslV3Method();
-
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_TlsV1Method")]
-        internal static extern IntPtr TlsV1Method();
-
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_TlsV1_1Method")]
-        internal static extern IntPtr TlsV1_1Method();
-
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_TlsV1_2Method")]
-        internal static extern IntPtr TlsV1_2Method();
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslCreate")]
         internal static extern SafeSslHandle SslCreate(SafeSslContextHandle ctx);
@@ -45,6 +32,9 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslGetError")]
         internal static extern SslErrorCode SslGetError(IntPtr ssl, int ret);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslSetQuietShutdown")]
+        internal static extern void SslSetQuietShutdown(SafeSslHandle ssl, int mode);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslDestroy")]
         internal static extern void SslDestroy(IntPtr ssl);
@@ -57,6 +47,26 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslGetVersion")]
         private static extern IntPtr SslGetVersion(SafeSslHandle ssl);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslSetTlsExtHostName")]
+        internal static extern int SslSetTlsExtHostName(SafeSslHandle ssl, string host);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslGet0AlpnSelected")]
+        internal static extern void SslGetAlpnSelected(SafeSslHandle ssl, out IntPtr protocol, out int len);
+
+        internal static byte[] SslGetAlpnSelected(SafeSslHandle ssl)
+        {
+            IntPtr protocol;
+            int len;
+            SslGetAlpnSelected(ssl, out protocol, out len);
+
+            if (len == 0)
+                return null;
+
+            byte[] result = new byte[len];
+            Marshal.Copy(protocol, result, 0, len);
+            return result;
+        }
 
         internal static string GetProtocolVersion(SafeSslHandle ssl)
         {
@@ -76,7 +86,7 @@ internal static partial class Interop
         internal static extern unsafe int SslWrite(SafeSslHandle ssl, byte* buf, int num);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslRead")]
-        internal static extern int SslRead(SafeSslHandle ssl, byte[] buf, int num);
+        internal static extern unsafe int SslRead(SafeSslHandle ssl, byte* buf, int num);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_IsSslRenegotiatePending")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -84,6 +94,9 @@ internal static partial class Interop
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslShutdown")]
         internal static extern int SslShutdown(IntPtr ssl);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslShutdown")]
+        internal static extern int SslShutdown(SafeSslHandle ssl);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslSetBio")]
         internal static extern void SslSetBio(SafeSslHandle ssl, SafeBioHandle rbio, SafeBioHandle wbio);
@@ -156,10 +169,6 @@ internal static partial class Interop
 
         internal static class SslMethods
         {
-            internal static readonly IntPtr TLSv1_method = TlsV1Method();
-            internal static readonly IntPtr TLSv1_1_method = TlsV1_1Method();
-            internal static readonly IntPtr TLSv1_2_method = TlsV1_2Method();
-            internal static readonly IntPtr SSLv3_method = SslV3Method();
             internal static readonly IntPtr SSLv23_method = SslV2_3Method();
         }
 
@@ -171,12 +180,12 @@ internal static partial class Interop
             SSL_ERROR_WANT_WRITE = 3,
             SSL_ERROR_SYSCALL = 5,
             SSL_ERROR_ZERO_RETURN = 6,
-            
+
             // NOTE: this SslErrorCode value doesn't exist in OpenSSL, but
             // we use it to distinguish when a renegotiation is pending.
             // Choosing an arbitrarily large value that shouldn't conflict
             // with any actual OpenSSL error codes
-            SSL_ERROR_RENEGOTIATE = 29304 
+            SSL_ERROR_RENEGOTIATE = 29304
         }
     }
 }
@@ -189,6 +198,9 @@ namespace Microsoft.Win32.SafeHandles
         private SafeBioHandle _writeBio;
         private bool _isServer;
         private bool _handshakeCompleted = false;
+        private GCHandle _alpnHandle;
+
+        public GCHandle AlpnHandle { set => _alpnHandle = value; }
 
         public bool IsServer
         {
@@ -270,6 +282,12 @@ namespace Microsoft.Win32.SafeHandles
                 _readBio?.Dispose();
                 _writeBio?.Dispose();
             }
+
+            if (_alpnHandle.IsAllocated)
+            {
+                _alpnHandle.Free();
+            }
+
             base.Dispose(disposing);
         }
 
@@ -291,17 +309,16 @@ namespace Microsoft.Win32.SafeHandles
         {
             Debug.Assert(!IsInvalid, "Expected a valid context in Disconnect");
 
-            // Because we set "quiet shutdown" on the SSL_CTX, SslShutdown is supposed
-            // to always return 1 (completed success).  In "close-notify" shutdown (the
-            // opposite of quiet) there's also 0 (incomplete success) and negative
-            // (probably async IO WANT_READ/WANT_WRITE, but need to check) return codes
-            // to handle.
-            //
-            // If quiet shutdown is ever not set, see
-            // https://www.openssl.org/docs/manmaster/ssl/SSL_shutdown.html
-            // for guidance on how to rewrite this method.
             int retVal = Interop.Ssl.SslShutdown(handle);
-            Debug.Assert(retVal == 1);
+
+            // Here, we are ignoring checking for <0 return values from Ssl_Shutdown,
+            // since the underlying memory bio is already disposed, we are not
+            // interested in reading or writing to it.
+            if (retVal == 0)
+            {
+                // Do a bi-directional shutdown.
+                retVal = Interop.Ssl.SslShutdown(handle);
+            }
         }
 
         private SafeSslHandle() : base(IntPtr.Zero, true)
@@ -311,82 +328,6 @@ namespace Microsoft.Win32.SafeHandles
         internal SafeSslHandle(IntPtr validSslPointer, bool ownsHandle) : base(IntPtr.Zero, ownsHandle)
         {
             handle = validSslPointer;
-        }
-    }
-
-    internal sealed class SafeChannelBindingHandle : SafeHandle
-    {
-        [StructLayout(LayoutKind.Sequential)]
-        private struct SecChannelBindings
-        {
-            internal int InitiatorLength;
-            internal int InitiatorOffset;
-            internal int AcceptorAddrType;
-            internal int AcceptorLength;
-            internal int AcceptorOffset;
-            internal int ApplicationDataLength;
-            internal int ApplicationDataOffset;
-        }
-
-        private const int CertHashMaxSize = 128;
-        private static readonly byte[] s_tlsServerEndPointByteArray = Encoding.UTF8.GetBytes("tls-server-end-point:");
-        private static readonly byte[] s_tlsUniqueByteArray = Encoding.UTF8.GetBytes("tls-unique:");
-        private static readonly int s_secChannelBindingSize = Marshal.SizeOf<SecChannelBindings>();
-
-        private readonly int _cbtPrefixByteArraySize;
-        internal int Length { get; private set; }
-        internal IntPtr CertHashPtr { get; private set; }
-
-        internal void SetCertHash(byte[] certHashBytes)
-        {
-            Debug.Assert(certHashBytes != null, "check certHashBytes is not null");
-            Debug.Assert(certHashBytes.Length <= CertHashMaxSize);
-
-            int length = certHashBytes.Length;
-            Marshal.Copy(certHashBytes, 0, CertHashPtr, length);
-            SetCertHashLength(length);
-        }
-
-        private byte[] GetPrefixBytes(ChannelBindingKind kind)
-        {
-            Debug.Assert(kind == ChannelBindingKind.Endpoint || kind == ChannelBindingKind.Unique);
-            return kind == ChannelBindingKind.Endpoint ?
-                s_tlsServerEndPointByteArray :
-                s_tlsUniqueByteArray;
-        }
-
-        internal SafeChannelBindingHandle(ChannelBindingKind kind)
-            : base(IntPtr.Zero, true)
-        {
-            byte[] cbtPrefix = GetPrefixBytes(kind);
-            _cbtPrefixByteArraySize = cbtPrefix.Length;
-            handle = Marshal.AllocHGlobal(s_secChannelBindingSize + _cbtPrefixByteArraySize + CertHashMaxSize);
-            IntPtr cbtPrefixPtr = handle + s_secChannelBindingSize;
-            Marshal.Copy(cbtPrefix, 0, cbtPrefixPtr, _cbtPrefixByteArraySize);
-            CertHashPtr = cbtPrefixPtr + _cbtPrefixByteArraySize;
-            Length = CertHashMaxSize;
-        }
-
-        internal void SetCertHashLength(int certHashLength)
-        {
-            int cbtLength = _cbtPrefixByteArraySize + certHashLength;
-            Length = s_secChannelBindingSize + cbtLength;
-
-            SecChannelBindings channelBindings = new SecChannelBindings()
-            {
-                ApplicationDataLength = cbtLength,
-                ApplicationDataOffset = s_secChannelBindingSize
-            };
-            Marshal.StructureToPtr(channelBindings, handle, true);
-        }
-
-        public override bool IsInvalid => handle == IntPtr.Zero;
-
-        protected override bool ReleaseHandle()
-        {
-            Marshal.FreeHGlobal(handle);
-            SetHandle(IntPtr.Zero);
-            return true;
         }
     }
 }

@@ -14,6 +14,9 @@ namespace System.Globalization.Tests
         [Fact]
         public void CurrentCulture()
         {
+            if (PlatformDetection.IsNetNative && !PlatformDetection.IsInAppContainer) // Tide us over until .Net Native ILC tests run are run inside an appcontainer.
+                return;
+
             RemoteInvoke(() =>
             {
                 CultureInfo newCulture = new CultureInfo(CultureInfo.CurrentCulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "ar-SA" : "ja-JP");
@@ -34,12 +37,15 @@ namespace System.Globalization.Tests
         [Fact]
         public void CurrentCulture_Set_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => CultureInfo.CurrentCulture = null);
+            AssertExtensions.Throws<ArgumentNullException>("value", () => CultureInfo.CurrentCulture = null);
         }
 
         [Fact]
         public void CurrentUICulture()
         {
+            if (PlatformDetection.IsNetNative && !PlatformDetection.IsInAppContainer) // Tide us over until .Net Native ILC tests run are run inside an appcontainer.
+                return;
+
             RemoteInvoke(() =>
             {
                 CultureInfo newUICulture = new CultureInfo(CultureInfo.CurrentUICulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "ar-SA" : "ja-JP");
@@ -57,6 +63,7 @@ namespace System.Globalization.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Thread cultures is not honored in UWP.")]
         public void DefaultThreadCurrentCulture()
         {
             RemoteInvoke(() =>
@@ -76,6 +83,7 @@ namespace System.Globalization.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Thread cultures is not honored in UWP.")]
         public void DefaultThreadCurrentUICulture()
         {
             RemoteInvoke(() =>
@@ -97,7 +105,7 @@ namespace System.Globalization.Tests
         [Fact]
         public void CurrentUICulture_Set_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => CultureInfo.CurrentUICulture = null);
+            AssertExtensions.Throws<ArgumentNullException>("value", () => CultureInfo.CurrentUICulture = null);
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Windows locale support doesn't rely on LANG variable

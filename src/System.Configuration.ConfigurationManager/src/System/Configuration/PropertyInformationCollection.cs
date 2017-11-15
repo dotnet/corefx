@@ -8,7 +8,6 @@ using System.Runtime.Serialization;
 
 namespace System.Configuration
 {
-    [Serializable]
     public sealed class PropertyInformationCollection : NameObjectCollectionBase
     {
         internal PropertyInformationCollection(ConfigurationElement thisElement) : base(StringComparer.Ordinal)
@@ -18,11 +17,6 @@ namespace System.Configuration
                 if (prop.Name != thisElement1.ElementTagName)
                     BaseAdd(prop.Name, new PropertyInformation(thisElement, prop.Name));
             IsReadOnly = true;
-        }
-
-        private PropertyInformationCollection(SerializationInfo serializationInfo, StreamingContext streamingContext)
-            : base(serializationInfo, streamingContext)
-        {
         }
 
         public PropertyInformation this[string propertyName]

@@ -10,68 +10,20 @@ namespace System.Reflection.Internal
 {
     internal static class FileStreamReadLightUp
     {
-        internal static Lazy<Type> FileStreamType = new Lazy<Type>(() =>
-        {
-            const string systemIOFileSystem = "System.IO.FileSystem, Version=4.0.0.0, Culture=neutral, PublicKeyToken = b03f5f7f11d50a3a";
-            const string mscorlib = "mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
-
-            return LightUpHelper.GetType("System.IO.FileStream", systemIOFileSystem, mscorlib);
-        });
-
-        internal static Lazy<PropertyInfo> SafeFileHandle = new Lazy<PropertyInfo>(() =>
-        {
-            return FileStreamType.Value.GetTypeInfo().GetDeclaredProperty("SafeFileHandle");
-        });
-
         // internal for testing
-        internal static bool readFileCompatNotAvailable;
-        internal static bool readFileModernNotAvailable;
-        internal static bool safeFileHandleNotAvailable;
+        internal static bool readFileNotAvailable = Path.DirectorySeparatorChar != '\\'; // Available on Windows only
+        internal static bool safeFileHandleNotAvailable = false;
 
-        internal static bool IsFileStream(Stream stream)
-        {
-            if (FileStreamType.Value == null)
-            {
-                return false;
-            }
-
-            var type = stream.GetType();
-            return type == FileStreamType.Value || type.GetTypeInfo().IsSubclassOf(FileStreamType.Value);
-        }
+        internal static bool IsFileStream(Stream stream) => stream is FileStream;
 
         internal static SafeHandle GetSafeFileHandle(Stream stream)
         {
-            Debug.Assert(FileStreamType.IsValueCreated && FileStreamType.Value != null && IsFileStream(stream));
-
-            if (safeFileHandleNotAvailable)
-            {
-                return null;
-            }
-
-            PropertyInfo safeFileHandleProperty = SafeFileHandle.Value;
-            if (safeFileHandleProperty == null)
-            {
-                safeFileHandleNotAvailable = true;
-                return null;
-            }
-
             SafeHandle handle;
             try
             {
-                handle = (SafeHandle)safeFileHandleProperty.GetValue(stream);
+                handle = ((FileStream)stream).SafeFileHandle;
             }
-            catch (MemberAccessException)
-            {
-                safeFileHandleNotAvailable = true;
-                return null;
-            }
-            catch (InvalidOperationException)
-            {
-                // thrown when accessing unapproved API in a Windows Store app
-                safeFileHandleNotAvailable = true;
-                return null;
-            }
-            catch (TargetInvocationException)
+            catch
             {
                 // Some FileStream implementations (e.g. IsolatedStorage) restrict access to the underlying handle by throwing 
                 // Tolerate it and fall back to slow path.
@@ -90,7 +42,7 @@ namespace System.Reflection.Internal
 
         internal static unsafe bool TryReadFile(Stream stream, byte* buffer, long start, int size)
         {
-            if (readFileModernNotAvailable && readFileCompatNotAvailable)
+            if (readFileNotAvailable)
             {
                 return false;
             }
@@ -104,29 +56,14 @@ namespace System.Reflection.Internal
             bool result = false;
             int bytesRead = 0;
 
-            if (!readFileModernNotAvailable)
+            try
             {
-                try
-                {
-                    result = NativeMethods.ReadFileModern(handle, buffer, size, out bytesRead, IntPtr.Zero);
-                }
-                catch
-                {
-                    readFileModernNotAvailable = true;
-                }
+                result = ReadFile(handle, buffer, size, out bytesRead, IntPtr.Zero);
             }
-
-            if (readFileModernNotAvailable)
+            catch
             {
-                try
-                {
-                    result = NativeMethods.ReadFileCompat(handle, buffer, size, out bytesRead, IntPtr.Zero);
-                }
-                catch
-                {
-                    readFileCompatNotAvailable = true;
-                    return false;
-                }
+                readFileNotAvailable = true;
+                return false;
             }
 
             if (!result || bytesRead != size)
@@ -142,33 +79,16 @@ namespace System.Reflection.Internal
             return true;
         }
 
-
-// The library guards against unavailable entrypoints by using EntryPointNotFoundException.
-#pragma warning disable BCL0015 // Diasable Pinvoke analyzer errors.
-        private static unsafe class NativeMethods
-        {
-            // API sets available on modern platforms:
-            [DllImport(@"api-ms-win-core-file-l1-1-0.dll", EntryPoint = "ReadFile", ExactSpelling = true, SetLastError = true)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool ReadFileModern(
-                 SafeHandle fileHandle,
-                 byte* buffer,
-                 int byteCount,
-                 out int bytesRead,
-                 IntPtr overlapped
-            );
-
-            // older Windows systems:
-            [DllImport(@"kernel32.dll", EntryPoint = "ReadFile", ExactSpelling = true, SetLastError = true)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            internal static extern bool ReadFileCompat(
-                 SafeHandle fileHandle,
-                 byte* buffer,
-                 int byteCount,
-                 out int bytesRead,
-                 IntPtr overlapped
-            );
-        }
+#pragma warning disable BCL0015 // Disable Pinvoke analyzer errors.
+        [DllImport(@"kernel32.dll", EntryPoint = "ReadFile", ExactSpelling = true, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static unsafe extern bool ReadFile(
+             SafeHandle fileHandle,
+             byte* buffer,
+             int byteCount,
+             out int bytesRead,
+             IntPtr overlapped
+        );
 #pragma warning restore BCL0015
     }
 }

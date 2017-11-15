@@ -22,7 +22,7 @@ namespace System.Linq.Expressions
     {
         internal DynamicExpression(Type delegateType, CallSiteBinder binder)
         {
-            Debug.Assert(delegateType.GetMethod("Invoke").GetReturnType() == typeof(object) || GetType() != typeof(DynamicExpression));
+            Debug.Assert(delegateType.GetInvokeMethod().GetReturnType() == typeof(object) || GetType() != typeof(DynamicExpression));
             DelegateType = delegateType;
             Binder = binder;
         }
@@ -516,7 +516,7 @@ namespace System.Linq.Expressions
         internal TypedDynamicExpressionN(Type returnType, Type delegateType, CallSiteBinder binder, IReadOnlyList<Expression> arguments)
             : base(delegateType, binder, arguments)
         {
-            Debug.Assert(delegateType.GetMethod("Invoke").GetReturnType() == returnType);
+            Debug.Assert(delegateType.GetInvokeMethod().GetReturnType() == returnType);
             Type = returnType;
         }
 
@@ -551,7 +551,7 @@ namespace System.Linq.Expressions
                 using (IEnumerator<Expression> en = arguments.GetEnumerator())
                 {
                     en.MoveNext();
-                    return en.Current == ReturnObject<Expression>(_arg0);
+                    return en.Current == ExpressionUtils.ReturnObject<Expression>(_arg0);
                 }
             }
 
@@ -818,7 +818,7 @@ namespace System.Linq.Expressions
 
     #endregion
 
-    internal class ExpressionExtension
+    internal static class ExpressionExtension
     {
         /// <summary>
         /// Creates a <see cref="DynamicExpression" /> that represents a dynamic operation bound by the provided <see cref="CallSiteBinder" />.
@@ -1014,7 +1014,7 @@ namespace System.Linq.Expressions
 
         private static MethodInfo GetValidMethodForDynamic(Type delegateType)
         {
-            var method = delegateType.GetMethod("Invoke");
+            var method = delegateType.GetInvokeMethod();
             var pi = method.GetParametersCached();
             if (pi.Length == 0 || pi[0].ParameterType != typeof(CallSite)) throw Error.FirstArgumentMustBeCallSite();
             return method;
@@ -1271,7 +1271,7 @@ namespace System.Linq.Expressions
             ExpressionUtils.RequiresCanRead(arg, paramName, index);
             var type = arg.Type;
             ContractUtils.RequiresNotNull(type, nameof(type));
-            TypeUtils.ValidateType(type, nameof(type));
+            TypeUtils.ValidateType(type, nameof(type), allowByRef: true, allowPointer: true);
             if (type == typeof(void)) throw Error.ArgumentTypeCannotBeVoid();
         }
     }

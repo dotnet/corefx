@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
 using System.Numerics.Hashing;
 
 namespace System.Drawing
@@ -11,6 +12,7 @@ namespace System.Drawing
     ///    define a point in a two-dimensional plane.
     /// </summary>
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public struct Point : IEquatable<Point>
     {
         /// <summary>
@@ -19,8 +21,8 @@ namespace System.Drawing
         /// </summary>
         public static readonly Point Empty = new Point();
 
-        private int _x;
-        private int _y;
+        private int x; // Do not rename (binary serialization)
+        private int y; // Do not rename (binary serialization)
 
         /// <summary>
         ///    Initializes a new instance of the <see cref='System.Drawing.Point'/> class
@@ -28,8 +30,8 @@ namespace System.Drawing
         /// </summary>
         public Point(int x, int y)
         {
-            _x = x;
-            _y = y;
+            this.x = x;
+            this.y = y;
         }
 
         /// <summary>
@@ -40,8 +42,8 @@ namespace System.Drawing
         /// </summary>
         public Point(Size sz)
         {
-            _x = sz.Width;
-            _y = sz.Height;
+            x = sz.Width;
+            y = sz.Height;
         }
 
         /// <summary>
@@ -50,8 +52,8 @@ namespace System.Drawing
         /// </summary>
         public Point(int dw)
         {
-            _x = LowInt16(dw);
-            _y = HighInt16(dw);
+            x = LowInt16(dw);
+            y = HighInt16(dw);
         }
 
         /// <summary>
@@ -59,15 +61,16 @@ namespace System.Drawing
         ///       Gets a value indicating whether this <see cref='System.Drawing.Point'/> is empty.
         ///    </para>
         /// </summary>
-        public bool IsEmpty => _x == 0 && _y == 0;
+        [Browsable(false)]
+        public bool IsEmpty => x == 0 && y == 0;
 
         /// <summary>
         ///    Gets the x-coordinate of this <see cref='System.Drawing.Point'/>.
         /// </summary>
         public int X
         {
-            get { return _x; }
-            set { _x = value; }
+            get { return x; }
+            set { x = value; }
         }
 
         /// <summary>
@@ -77,8 +80,8 @@ namespace System.Drawing
         /// </summary>
         public int Y
         {
-            get { return _y; }
-            set { _y = value; }
+            get { return y; }
+            set { y = value; }
         }
 
         /// <summary>

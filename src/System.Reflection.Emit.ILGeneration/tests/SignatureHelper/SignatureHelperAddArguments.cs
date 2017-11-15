@@ -44,7 +44,7 @@ namespace System.Reflection.Emit.Tests
             SignatureHelper helper = SignatureHelper.GetFieldSigHelper(module);
             helper.GetSignature();
 
-            Assert.Throws<ArgumentException>(null, () => helper.AddArguments(new Type[] { typeof(string) }, null, null));
+            AssertExtensions.Throws<ArgumentException>(null, () => helper.AddArguments(new Type[] { typeof(string) }, null, null));
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace System.Reflection.Emit.Tests
             ModuleBuilder module = Helpers.DynamicModule();
             SignatureHelper helper = SignatureHelper.GetFieldSigHelper(module);
 
-            Assert.Throws<ArgumentNullException>("requiredCustomModifiers", () => { helper.AddArguments(new Type[] { typeof(string) }, new Type[][] { new Type[] { typeof(int), null } }, null); });
+            AssertExtensions.Throws<ArgumentNullException>("requiredCustomModifiers", () => { helper.AddArguments(new Type[] { typeof(string) }, new Type[][] { new Type[] { typeof(int), null } }, null); });
         }
 
         [Fact]
@@ -62,11 +62,11 @@ namespace System.Reflection.Emit.Tests
             ModuleBuilder module = Helpers.DynamicModule();
             SignatureHelper helper = SignatureHelper.GetFieldSigHelper(module);
 
-            Assert.Throws<ArgumentException>("requiredCustomModifiers", () => helper.AddArguments(new Type[] { typeof(string) }, new Type[][] { new Type[] { typeof(int), typeof(int[]) } }, null));
-            Assert.Throws<ArgumentException>(null, () => helper.AddArguments(new Type[] { typeof(string) }, new Type[][] { new Type[] { typeof(int) }, new Type[] { typeof(char) } }, null));
+            AssertExtensions.Throws<ArgumentException>("requiredCustomModifiers", () => helper.AddArguments(new Type[] { typeof(string) }, new Type[][] { new Type[] { typeof(int), typeof(int[]) } }, null));
+            AssertExtensions.Throws<ArgumentException>(null, () => helper.AddArguments(new Type[] { typeof(string) }, new Type[][] { new Type[] { typeof(int) }, new Type[] { typeof(char) } }, null));
 
-            Assert.Throws<ArgumentException>("optionalCustomModifiers", () => helper.AddArguments(new Type[] { typeof(string) }, null, new Type[][] { new Type[] { typeof(int), typeof(int[]) } }));
-            Assert.Throws<ArgumentException>(null, () => helper.AddArguments(new Type[] { typeof(string) }, null, new Type[][] { new Type[] { typeof(int) }, new Type[] { typeof(char) } }));
+            AssertExtensions.Throws<ArgumentException>("optionalCustomModifiers", () => helper.AddArguments(new Type[] { typeof(string) }, null, new Type[][] { new Type[] { typeof(int), typeof(int[]) } }));
+            AssertExtensions.Throws<ArgumentException>(null, () => helper.AddArguments(new Type[] { typeof(string) }, null, new Type[][] { new Type[] { typeof(int) }, new Type[] { typeof(char) } }));
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace System.Reflection.Emit.Tests
             ModuleBuilder module = Helpers.DynamicModule();
             SignatureHelper helper = SignatureHelper.GetFieldSigHelper(module);
 
-            Assert.Throws<ArgumentNullException>("optionalCustomModifiers", () => helper.AddArguments(new Type[] { typeof(string) }, null, new Type[][] { new Type[] { typeof(int), null } }));
+            AssertExtensions.Throws<ArgumentNullException>("optionalCustomModifiers", () => helper.AddArguments(new Type[] { typeof(string) }, null, new Type[][] { new Type[] { typeof(int), null } }));
         }
     }
 }

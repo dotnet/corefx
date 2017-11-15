@@ -12,7 +12,7 @@ namespace System.Globalization.Tests
         public static IEnumerable<object[]> PositiveSign_TestData()
         {
             yield return new object[] { NumberFormatInfo.InvariantInfo, "+" };
-            yield return new object[] { new CultureInfo("en-US").NumberFormat, "+" };
+            yield return new object[] { CultureInfo.GetCultureInfo("en-US").NumberFormat, "+" };
         }
 
         [Theory]
@@ -36,7 +36,7 @@ namespace System.Globalization.Tests
         [Fact]
         public void PositiveSign_Set_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("PositiveSign", () => new NumberFormatInfo().PositiveSign = null);
+            AssertExtensions.Throws<ArgumentNullException>("PositiveSign", () => new NumberFormatInfo().PositiveSign = null);
             Assert.Throws<InvalidOperationException>(() => NumberFormatInfo.InvariantInfo.PositiveSign = "");
         }
     }

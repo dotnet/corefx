@@ -240,7 +240,7 @@ namespace System.Net
 
         [Event(ErrorEventId, Level = EventLevel.Warning, Keywords = Keywords.Default)]
         private void ErrorMessage(string thisOrContextObject, string memberName, string message) =>
-            WriteEvent(InfoEventId, thisOrContextObject, memberName ?? MissingMember, message);
+            WriteEvent(ErrorEventId, thisOrContextObject, memberName ?? MissingMember, message);
         #endregion
 
         #region Fail
@@ -274,7 +274,7 @@ namespace System.Net
 
         [Event(CriticalFailureEventId, Level = EventLevel.Critical, Keywords = Keywords.Debug)]
         private void CriticalFailure(string thisOrContextObject, string memberName, string message) =>
-            WriteEvent(InfoEventId, thisOrContextObject, memberName ?? MissingMember, message);
+            WriteEvent(CriticalFailureEventId, thisOrContextObject, memberName ?? MissingMember, message);
         #endregion
 
         #region DumpBuffer
@@ -287,7 +287,7 @@ namespace System.Net
         {
             DumpBuffer(thisOrContextObject, buffer, 0, buffer.Length, memberName);
         }
-
+                
         /// <summary>Logs the contents of a buffer.</summary>
         /// <param name="thisOrContextObject">`this`, or another object that serves to provide context for the operation.</param>
         /// <param name="buffer">The buffer to be logged.</param>
@@ -483,36 +483,6 @@ namespace System.Net
         #endregion
 
         #region Custom WriteEvent overloads
-        [NonEvent]
-        private unsafe void WriteEvent(int eventId, int arg1, int arg2, string arg3, string arg4)
-        {
-            if (IsEnabled())
-            {
-                if (arg3 == null) arg3 = "";
-                if (arg4 == null) arg4 = "";
-
-                fixed (char* string3Bytes = arg3)
-                fixed (char* string4Bytes = arg4)
-                {
-                    const int NumEventDatas = 4;
-                    var descrs = stackalloc EventData[NumEventDatas];
-
-                    descrs[0].DataPointer = (IntPtr)(&arg1);
-                    descrs[0].Size = sizeof(int);
-
-                    descrs[1].DataPointer = (IntPtr)(&arg2);
-                    descrs[1].Size = sizeof(int);
-
-                    descrs[2].DataPointer = (IntPtr)string3Bytes;
-                    descrs[2].Size = ((arg3.Length + 1) * 2);
-
-                    descrs[3].DataPointer = (IntPtr)string4Bytes;
-                    descrs[3].Size = ((arg4.Length + 1) * 2);
-
-                    WriteEventCore(eventId, NumEventDatas, descrs);
-                }
-            }
-        }
 
         [NonEvent]
         private unsafe void WriteEvent(int eventId, string arg1, string arg2, string arg3, string arg4)
@@ -606,47 +576,6 @@ namespace System.Net
 
                     descrs[3].DataPointer = (IntPtr)(&arg4);
                     descrs[3].Size = sizeof(int);
-
-                    WriteEventCore(eventId, NumEventDatas, descrs);
-                }
-            }
-        }
-
-        [NonEvent]
-        private unsafe void WriteEvent(int eventId, string arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8)
-        {
-            if (IsEnabled())
-            {
-                if (arg1 == null) arg1 = "";
-
-                fixed (char* arg1Ptr = arg1)
-                {
-                    const int NumEventDatas = 8;
-                    var descrs = stackalloc EventData[NumEventDatas];
-
-                    descrs[0].DataPointer = (IntPtr)(arg1Ptr);
-                    descrs[0].Size = (arg1.Length + 1) * sizeof(char);
-
-                    descrs[1].DataPointer = (IntPtr)(&arg2);
-                    descrs[1].Size = sizeof(int);
-
-                    descrs[2].DataPointer = (IntPtr)(&arg3);
-                    descrs[2].Size = sizeof(int);
-
-                    descrs[3].DataPointer = (IntPtr)(&arg4);
-                    descrs[3].Size = sizeof(int);
-
-                    descrs[4].DataPointer = (IntPtr)(&arg5);
-                    descrs[4].Size = sizeof(int);
-
-                    descrs[5].DataPointer = (IntPtr)(&arg6);
-                    descrs[5].Size = sizeof(int);
-
-                    descrs[6].DataPointer = (IntPtr)(&arg7);
-                    descrs[6].Size = sizeof(int);
-
-                    descrs[7].DataPointer = (IntPtr)(&arg8);
-                    descrs[7].Size = sizeof(int);
 
                     WriteEventCore(eventId, NumEventDatas, descrs);
                 }

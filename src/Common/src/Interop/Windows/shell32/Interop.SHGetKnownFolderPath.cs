@@ -12,50 +12,12 @@ internal partial class Interop
         internal const int COR_E_PLATFORMNOTSUPPORTED = unchecked((int)0x80131539);
 
         // https://msdn.microsoft.com/en-us/library/windows/desktop/bb762188.aspx
-        [DllImport(Libraries.Shell32, CharSet = CharSet.Unicode, SetLastError = false, BestFitMapping = false, ExactSpelling = true, EntryPoint = "SHGetKnownFolderPath")]
-        private static extern int SHGetKnownFolderPath_ShellFolders(
+        [DllImport(Libraries.Shell32, CharSet = CharSet.Unicode, SetLastError = false, BestFitMapping = false, ExactSpelling = true)]
+        internal static extern int SHGetKnownFolderPath(
             [MarshalAs(UnmanagedType.LPStruct)] Guid rfid,
             uint dwFlags,
             IntPtr hToken,
             out string ppszPath);
-
-        private static bool s_skipShellFolders;
-
-// Disabling the warning about availability.
-#pragma warning disable BCL0015
-        [DllImport(Libraries.Shell32, CharSet = CharSet.Unicode, SetLastError = false, BestFitMapping = false, ExactSpelling = true, EntryPoint = "SHGetKnownFolderPath")]
-        private static extern int SHGetKnownFolderPath_Shell32(
-            [MarshalAs(UnmanagedType.LPStruct)] Guid rfid,
-            uint dwFlags,
-            IntPtr hToken,
-            out string ppszPath);
-#pragma warning restore BCL0015
-
-        internal static int SHGetKnownFolderPath(
-            Guid rfid,
-            uint dwFlags,
-            IntPtr hToken,
-            out string ppszPath)
-        {
-            // The ShellFolders API set isn't available on Win7, while the direct Shell32 isn't available
-            // on some mincore versions of Windows. We'll attempt the newer API set version and fall back
-            // to the older "Shell32" if needed.
-            if (!s_skipShellFolders)
-            {
-                try
-                {
-                    return SHGetKnownFolderPath_ShellFolders(rfid, dwFlags, hToken, out ppszPath);
-                }
-                catch (TypeLoadException)
-                {
-                    // TypeLoad contains DllNotFound and EntryPointNotFound.
-                    // Skip the API set attempt next time through.
-                    s_skipShellFolders = true;
-                }
-            }
-
-            return SHGetKnownFolderPath_Shell32(rfid, dwFlags, hToken, out ppszPath);
-        }
 
         // https://msdn.microsoft.com/en-us/library/windows/desktop/dd378457.aspx
         internal static class KnownFolders
@@ -114,7 +76,7 @@ internal partial class Interop
             internal const string ComputerFolder = "{0AC0837C-BBF8-452A-850D-79D08E667CA7}";
 
             /// <summary>
-            /// (CSIDL_CONNECTIONS) Network Conections virtual folder
+            /// (CSIDL_CONNECTIONS) Network Connections virtual folder
             /// </summary>
             internal const string ConnectionsFolder = "{6F0CD92B-2E97-45D1-88FF-B0D186B8DEDD}";
 

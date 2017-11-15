@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Test.Common;
 using System.Security.Principal;
@@ -67,6 +68,7 @@ namespace System.Net.Security.Tests
                 Assert.Equal("NTLM", clientIdentity.AuthenticationType);
 
                 Assert.Equal(true, clientIdentity.IsAuthenticated);
+
                 IdentityValidator.AssertIsCurrentIdentity(clientIdentity);
             }
         }
@@ -121,11 +123,13 @@ namespace System.Net.Security.Tests
                 Assert.Equal("NTLM", clientIdentity.AuthenticationType);
 
                 Assert.Equal(true, clientIdentity.IsAuthenticated);
+
                 IdentityValidator.AssertIsCurrentIdentity(clientIdentity);
             }
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core difference in behavior: https://github.com/dotnet/corefx/issues/5241")]
         public void NegotiateStream_StreamToStream_Authentication_EmptyCredentials_Fails()
         {
             string targetName = "testTargetName";
@@ -272,6 +276,7 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Relies on FlushAsync override not available in desktop")]
         public void NegotiateStream_StreamToStream_FlushAsync_Propagated()
         {
             VirtualNetwork network = new VirtualNetwork();

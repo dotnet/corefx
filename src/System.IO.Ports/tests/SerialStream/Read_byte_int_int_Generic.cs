@@ -6,8 +6,10 @@ using System.Diagnostics;
 using System.IO.PortsTests;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Legacy.Support;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 namespace System.IO.Ports.Tests
 {
@@ -73,7 +75,7 @@ namespace System.IO.Ports.Tests
             }
         }
 
-        [OuterLoop("Slow test")]
+        [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)]  // Timing-sensitive
         [ConditionalFact(nameof(HasOneSerialPort))]
         public void Timeout()
         {
@@ -89,7 +91,7 @@ namespace System.IO.Ports.Tests
             }
         }
 
-        [OuterLoop("Slow Test")]
+        [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)]  // Timing-sensitive
         [ConditionalFact(nameof(HasOneSerialPort))]
         public void SuccessiveReadTimeoutNoData()
         {
@@ -116,7 +118,7 @@ namespace System.IO.Ports.Tests
             using (var com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
             {
                 var rndGen = new Random(-55);
-                var t = new Thread(WriteToCom1);
+                var t = new Task(WriteToCom1);
 
                 com1.ReadTimeout = rndGen.Next(minRandomTimeout, maxRandomTimeout);
                 com1.Encoding = new UTF8Encoding();
@@ -137,9 +139,7 @@ namespace System.IO.Ports.Tests
                 {
                 }
 
-                // Wait for the thread to finish
-                while (t.IsAlive)
-                    Thread.Sleep(50);
+                TCSupport.WaitForTaskCompletion(t);
 
                 // Make sure there is no bytes in the buffer so the next call to read will timeout
                 com1.DiscardInBuffer();

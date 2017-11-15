@@ -10,7 +10,6 @@ namespace System.Xml.Linq
     /// <summary>
     /// Represents a name of an XML element or attribute. This class cannot be inherited.
     /// </summary>
-    [Serializable]
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Serialization", "CA2229", Justification = "Serialized with custom proxy")]
     public sealed class XName : IEquatable<XName>, ISerializable
     {
@@ -190,29 +189,9 @@ namespace System.Xml.Linq
         /// </summary>
         /// <param name="info">The <see cref="SerializationInfo"/> to populate with data</param>
         /// <param name="context">The destination for this serialization</param>
-        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) {
-            if (info == null) throw new ArgumentNullException(nameof(info));
-            info.AddValue("name", ToString());
-            info.SetType(typeof(NameSerializer));
-        }
-    }
-
-    [Serializable]
-    internal sealed class NameSerializer : IObjectReference, ISerializable
-    {
-        string _expandedName;
-
-        private NameSerializer(SerializationInfo info, StreamingContext context) {
-            if (info == null) throw new ArgumentNullException(nameof(info));
-            _expandedName = info.GetString("name");
-        }
-
-        object IObjectReference.GetRealObject(StreamingContext context) {
-            return XName.Get(_expandedName);
-        }
-
-        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) {
-            throw new NotSupportedException(); // nop
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            throw new PlatformNotSupportedException();
         }
     }
 }

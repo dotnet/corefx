@@ -25,31 +25,31 @@ namespace System.ConfigurationTests
         [Fact]
         public void NullNameThrows()
         {
-            Assert.Throws<ArgumentException>(() => new ConfigurationProperty(null, typeof(string)));
+            AssertExtensions.Throws<ArgumentException>("name", () => new ConfigurationProperty(null, typeof(string)));
         }
 
         [Fact]
         public void EmptyNameThrows()
         {
-            Assert.Throws<ArgumentException>(() => new ConfigurationProperty("", typeof(string)));
+            AssertExtensions.Throws<ArgumentException>("name", () => new ConfigurationProperty("", typeof(string)));
         }
 
-        [Theory
-            InlineData("lock")
-            InlineData("locks")
-            InlineData("config")
+        [Theory,
+            InlineData("lock"),
+            InlineData("locks"),
+            InlineData("config"),
             InlineData("configuration")
             ]
         public void ReservedNameThrows(string name)
         {
-            Assert.Throws<ArgumentException>(() => new ConfigurationProperty(name, typeof(string)));
+            AssertExtensions.Throws<ArgumentException>(null, () => new ConfigurationProperty(name, typeof(string)));
         }
 
-        [Theory
-            InlineData("Lock")
-            InlineData("ilock")
-            InlineData("LOCKS")
-            InlineData("CoNfig")
+        [Theory,
+            InlineData("Lock"),
+            InlineData("ilock"),
+            InlineData("LOCKS"),
+            InlineData("CoNfig"),
             InlineData("conFIGuration")
             ]
         public void ReservedNameOrdinallyCompared(string name)
@@ -164,8 +164,8 @@ namespace System.ConfigurationTests
             Assert.IsType<GenericEnumConverter>(property.Converter);
         }
 
-        [Theory
-            InlineData(typeof(string), typeof(StringConverter))
+        [Theory,
+            InlineData(typeof(string), typeof(StringConverter)),
             InlineData(typeof(int), typeof(Int32Converter))
             ]
         public void FindConverterForBuiltInTypes(Type type, Type converterType)

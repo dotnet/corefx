@@ -29,10 +29,11 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void TestModulesContainsDotnet()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "Process.Modules is not supported on uap")]
+        public void Modules_Get_ContainsHostFileName()
         {
             ProcessModuleCollection modules = Process.GetCurrentProcess().Modules;
-            Assert.Contains(modules.Cast<ProcessModule>(), m => m.FileName.Contains("dotnet"));
+            Assert.Contains(modules.Cast<ProcessModule>(), m => m.FileName.Contains(HostRunnerName));
         }
 
         [Fact]
@@ -42,6 +43,31 @@ namespace System.Diagnostics.Tests
             ProcessModuleCollection modules = Process.GetCurrentProcess().Modules;
             Assert.Contains(modules.Cast<ProcessModule>(), m => m.FileName.Contains("libcoreclr"));
             Assert.Contains(modules.Cast<ProcessModule>(), m => m.FileName.Contains("System.Native"));
+        }
+
+        [Fact]
+        public void Modules_GetMultipleTimes_ReturnsSameInstance()
+        {
+            Process currentProcess = Process.GetCurrentProcess();
+            Assert.Same(currentProcess.Modules, currentProcess.Modules);
+        }
+
+        [Fact]
+        public void Modules_GetNotStarted_ThrowsInvalidOperationException()
+        {
+            var process = new Process();
+            Assert.Throws<InvalidOperationException>(() => process.Modules);
+        }
+
+        [Fact]
+        public void ModuleCollectionSubClass_DefaultConstructor_Success()
+        {
+            Assert.Empty(new ModuleCollectionSubClass());
+        }
+
+        public class ModuleCollectionSubClass : ProcessModuleCollection
+        {
+            public ModuleCollectionSubClass() : base() { }
         }
     }
 }

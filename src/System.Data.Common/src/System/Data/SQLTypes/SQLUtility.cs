@@ -25,6 +25,7 @@ namespace System.Data.SqlTypes
     }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class SqlTypeException : SystemException
     {
         public SqlTypeException() : this(SR.SqlMisc_SqlTypeMessage, null)
@@ -41,8 +42,6 @@ namespace System.Data.SqlTypes
             HResult = HResults.SqlType;
         }
 
-        // runtime will call even if private...
-        // <fxcop ignore=SerializableTypesMustHaveMagicConstructorWithAdequateSecurity />
         protected SqlTypeException(SerializationInfo si, StreamingContext sc) : base(SqlTypeExceptionSerialization(si, sc), sc)
         {
         }
@@ -57,13 +56,14 @@ namespace System.Data.SqlTypes
             }
             return si;
         }
-    } // SqlTypeException
+    }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class SqlNullValueException : SqlTypeException
     {
         // Creates a new SqlNullValueException with its message string set to the common string.
-        public SqlNullValueException() : this(SQLResource.s_nullValueMessage, null)
+        public SqlNullValueException() : this(SQLResource.NullValueMessage, null)
         {
         }
 
@@ -77,8 +77,6 @@ namespace System.Data.SqlTypes
             HResult = HResults.SqlNullValue;
         }
 
-        // runtime will call even if private...
-        // <fxcop ignore=SerializableTypesMustHaveMagicConstructorWithAdequateSecurity />
         private SqlNullValueException(SerializationInfo si, StreamingContext sc) : base(SqlNullValueExceptionSerialization(si, sc), sc)
         {
         }
@@ -93,13 +91,14 @@ namespace System.Data.SqlTypes
             }
             return si;
         }
-    } // NullValueException
+    }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class SqlTruncateException : SqlTypeException
     {
         // Creates a new SqlTruncateException with its message string set to the empty string.
-        public SqlTruncateException() : this(SQLResource.s_truncationMessage, null)
+        public SqlTruncateException() : this(SQLResource.TruncationMessage, null)
         {
         }
 
@@ -113,8 +112,6 @@ namespace System.Data.SqlTypes
             HResult = HResults.SqlTruncate;
         }
 
-        // runtime will call even if private...
-        // <fxcop ignore=SerializableTypesMustHaveMagicConstructorWithAdequateSecurity />
         private SqlTruncateException(SerializationInfo si, StreamingContext sc) : base(SqlTruncateExceptionSerialization(si, sc), sc)
         {
         }
@@ -129,13 +126,14 @@ namespace System.Data.SqlTypes
             }
             return si;
         }
-    } // SqlTruncateException
+    }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class SqlNotFilledException : SqlTypeException
     {
         // Creates a new SqlNotFilledException with its message string set to the common string.
-        public SqlNotFilledException() : this(SQLResource.s_notFilledMessage, null)
+        public SqlNotFilledException() : this(SQLResource.NotFilledMessage, null)
         {
         }
 
@@ -149,18 +147,17 @@ namespace System.Data.SqlTypes
             HResult = HResults.SqlNullValue;
         }
 
-        // runtime will call even if private...
-        // <fxcop ignore=SerializableTypesMustHaveMagicConstructorWithAdequateSecurity />
         private SqlNotFilledException(SerializationInfo si, StreamingContext sc) : base(si, sc)
         {
         }
-    } // SqlNotFilledException
+    }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class SqlAlreadyFilledException : SqlTypeException
     {
         // Creates a new SqlNotFilledException with its message string set to the common string.
-        public SqlAlreadyFilledException() : this(SQLResource.s_alreadyFilledMessage, null)
+        public SqlAlreadyFilledException() : this(SQLResource.AlreadyFilledMessage, null)
         {
         }
 
@@ -174,10 +171,8 @@ namespace System.Data.SqlTypes
             HResult = HResults.SqlNullValue;
         }
 
-        // runtime will call even if private...
-        // <fxcop ignore=SerializableTypesMustHaveMagicConstructorWithAdequateSecurity />
         private SqlAlreadyFilledException(SerializationInfo si, StreamingContext sc) : base(si, sc)
         {
         }
-    } // SqlNotFilledException
+    }
 }

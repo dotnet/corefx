@@ -1,59 +1,88 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
 namespace System.Collections.Tests
 {
+    /// <summary>
+    /// Contains tests that ensure the correctness of the Dictionary class.
+    /// </summary>
     public abstract partial class Dictionary_Generic_Tests<TKey, TValue> : IDictionary_Generic_Tests<TKey, TValue>
     {
-        [Fact]
-        public void Dictionary_Generic_Constructor_IEnumerable_ThrowsOnNull()
+        #region Remove(TKey)
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void Dictionary_Generic_RemoveKey_ValidKeyNotContainedInDictionary(int count)
         {
-            Assert.Throws<ArgumentNullException>("collection", () => new Dictionary<TKey, TValue>((IEnumerable<KeyValuePair<TKey, TValue>>)null));
-            Assert.Throws<ArgumentNullException>("collection", () => new Dictionary<TKey, TValue>((IEnumerable<KeyValuePair<TKey, TValue>>)null, EqualityComparer<TKey>.Default));
+            Dictionary<TKey, TValue> dictionary = (Dictionary<TKey, TValue>)GenericIDictionaryFactory(count);
+            TValue value;
+            TKey missingKey = GetNewKey(dictionary);
+
+            Assert.False(dictionary.Remove(missingKey, out value));
+            Assert.Equal(count, dictionary.Count);
+            Assert.Equal(default(TValue), value);
         }
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void Dictionary_Generic_Constructor_IEnumerable(int count)
+        public void Dictionary_Generic_RemoveKey_ValidKeyContainedInDictionary(int count)
         {
-            IEnumerable<KeyValuePair<TKey, TValue>> collection = GenericIEnumerableFactory(count);
-            var copied = new Dictionary<TKey, TValue>(collection);
-            Assert.Equal(count, collection.Count());
-            Assert.Equal(collection, copied);
+            Dictionary<TKey, TValue> dictionary = (Dictionary<TKey, TValue>)GenericIDictionaryFactory(count);
+            TKey missingKey = GetNewKey(dictionary);
+            TValue outValue;
+            TValue inValue = CreateTValue(count);
+
+            dictionary.Add(missingKey, inValue);
+            Assert.True(dictionary.Remove(missingKey, out outValue));
+            Assert.Equal(count, dictionary.Count);
+            Assert.Equal(inValue, outValue);
+            Assert.False(dictionary.TryGetValue(missingKey, out outValue));
         }
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void Dictionary_Generic_Constructor_IEnumerable_IEqualityComparer(int count)
+        public void Dictionary_Generic_RemoveKey_DefaultKeyNotContainedInDictionary(int count)
         {
-            IEqualityComparer<TKey> comparer = GetKeyIEqualityComparer();
-            IEnumerable<KeyValuePair<TKey, TValue>> collection = GenericIEnumerableFactory(count);
-            var copied = new Dictionary<TKey, TValue>(collection, comparer);
-            Assert.Equal(collection, copied);
+            Dictionary<TKey, TValue> dictionary = (Dictionary<TKey, TValue>)GenericIDictionaryFactory(count);
+            TValue outValue;
+
+            if (DefaultValueAllowed)
+            {
+                TKey missingKey = default(TKey);
+                while (dictionary.ContainsKey(missingKey))
+                    dictionary.Remove(missingKey);
+                Assert.False(dictionary.Remove(missingKey, out outValue));
+                Assert.Equal(default(TValue), outValue);
+            }
+            else
+            {
+                TValue initValue = CreateTValue(count);
+                outValue = initValue;
+                Assert.Throws<ArgumentNullException>(() => dictionary.Remove(default(TKey), out outValue));
+                Assert.Equal(initValue, outValue);
+            }
         }
 
-        [Fact]
-        public void GetValueOrDefault_KeyExists_ReturnsValue()
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void Dictionary_Generic_RemoveKey_DefaultKeyContainedInDictionary(int count)
         {
-            int seed = 9600;
-            TKey key = CreateTKey(seed++);
-            TValue value = CreateTValue(seed++);
-            Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>() { { key, value } };
+            if (DefaultValueAllowed)
+            {
+                Dictionary<TKey, TValue> dictionary = (Dictionary<TKey, TValue>)(GenericIDictionaryFactory(count));
+                TKey missingKey = default(TKey);
+                TValue value;
 
-            Assert.Equal(value, dictionary.GetValueOrDefault(key));
-            Assert.Equal(value, dictionary.GetValueOrDefault(key, CreateTValue(seed++)));
+                dictionary.TryAdd(missingKey, default(TValue));
+                Assert.True(dictionary.Remove(missingKey, out value));
+            }
         }
 
-        [Fact]
-        public void GetValueOrDefault_KeyDoesntExist_ReturnsDefaultValue()
-        {
-            int seed = 9600;
-            TKey key = CreateTKey(seed++);
-            TValue defaultValue = CreateTValue(seed++);
-            Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>() { { CreateTKey(seed++), CreateTValue(seed++) } };
-            Assert.Equal(default(TValue), dictionary.GetValueOrDefault(key));
-            Assert.Equal(defaultValue, dictionary.GetValueOrDefault(key, defaultValue));
-        }
+        #endregion
     }
 }

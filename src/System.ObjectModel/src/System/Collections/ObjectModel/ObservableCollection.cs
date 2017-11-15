@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 
 namespace System.Collections.ObjectModel
 {
@@ -17,8 +18,23 @@ namespace System.Collections.ObjectModel
     [Serializable]
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("WindowsBase, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
     public class ObservableCollection<T> : Collection<T>, INotifyCollectionChanged, INotifyPropertyChanged
     {
+        //------------------------------------------------------
+        //
+        //  Private Fields
+        //
+        //------------------------------------------------------
+
+        #region Private Fields
+
+        private SimpleMonitor _monitor; // Lazily allocated only when a subclass calls BlockReentrancy() or during serialization. Do not rename (binary serialization)
+
+        [NonSerialized]
+        private int _blockReentrancyCount;
+        #endregion Private Fields
+
         //------------------------------------------------------
         //
         //  Constructors
@@ -238,17 +254,21 @@ namespace System.Collections.ObjectModel
             NotifyCollectionChangedEventHandler handler = CollectionChanged;
             if (handler != null)
             {
-                // Not calling BlockReentrancy() here to avoid the IDisposable box allocation.
+                // Not calling BlockReentrancy() here to avoid the SimpleMonitor allocation.
                 _blockReentrancyCount++;
-                using (new BlockReentrancyDisposable(this))
+                try
                 {
                     handler(this, e);
+                }
+                finally
+                {
+                    _blockReentrancyCount--;
                 }
             }
         }
 
         /// <summary>
-        /// Disallow reentrant attempts to change this collection. E.g. a event handler
+        /// Disallow reentrant attempts to change this collection. E.g. an event handler
         /// of the CollectionChanged event is not allowed to make changes to this collection.
         /// </summary>
         /// <remarks>
@@ -263,8 +283,7 @@ namespace System.Collections.ObjectModel
         protected IDisposable BlockReentrancy()
         {
             _blockReentrancyCount++;
-            // Lazily box the struct as IDisposable once and reuse the same boxed instance with subsequent calls.
-            return _boxedBlockReentrancyDisposable ?? (_boxedBlockReentrancyDisposable = new BlockReentrancyDisposable(this));
+            return EnsureMonitorInitialized();
         }
 
         /// <summary> Check and assert for reentrant attempts to change this collection. </summary>
@@ -340,6 +359,28 @@ namespace System.Collections.ObjectModel
         {
             OnCollectionChanged(EventArgsCache.ResetCollectionChanged);
         }
+
+        private SimpleMonitor EnsureMonitorInitialized()
+        {
+            return _monitor ?? (_monitor = new SimpleMonitor(this));
+        }
+
+        [OnSerializing]
+        private void OnSerializing(StreamingContext context)
+        {
+            EnsureMonitorInitialized();
+            _monitor._busyCount = _blockReentrancyCount;
+        }
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            if (_monitor != null)
+            {
+                _blockReentrancyCount = _monitor._busyCount;
+                _monitor._collection = this;
+            }
+        }
         #endregion Private Methods
 
         //------------------------------------------------------
@@ -350,33 +391,29 @@ namespace System.Collections.ObjectModel
 
         #region Private Types
 
+        // this class helps prevent reentrant calls
         [Serializable]
-        private struct BlockReentrancyDisposable : IDisposable
+        [System.Runtime.CompilerServices.TypeForwardedFrom("WindowsBase, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
+        private sealed class SimpleMonitor : IDisposable
         {
-            private readonly ObservableCollection<T> _collection;
+            internal int _busyCount; // Only used during (de)serialization to maintain compatibility with desktop. Do not rename (binary serialization)
 
-            public BlockReentrancyDisposable(ObservableCollection<T> collection)
+            [NonSerialized]
+            internal ObservableCollection<T> _collection;
+
+            public SimpleMonitor(ObservableCollection<T> collection)
             {
                 Debug.Assert(collection != null);
                 _collection = collection;
             }
 
-            public void Dispose() => _collection._blockReentrancyCount--;
+            public void Dispose()
+            {
+                _collection._blockReentrancyCount--;
+            }
         }
 
         #endregion Private Types
-
-        //------------------------------------------------------
-        //
-        //  Private Fields
-        //
-        //------------------------------------------------------
-
-        #region Private Fields
-
-        private int _blockReentrancyCount;
-        private IDisposable _boxedBlockReentrancyDisposable; // Lazily allocated only when a subclass calls BlockReentrancy().
-        #endregion Private Fields
     }
 
     internal static class EventArgsCache

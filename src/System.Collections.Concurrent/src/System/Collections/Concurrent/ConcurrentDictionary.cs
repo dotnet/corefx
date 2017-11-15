@@ -17,7 +17,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
 using System.Threading;
 
 namespace System.Collections.Concurrent
@@ -33,7 +32,6 @@ namespace System.Collections.Concurrent
     /// </remarks>
     [DebuggerTypeProxy(typeof(IDictionaryDebugView<,>))]
     [DebuggerDisplay("Count = {Count}")]
-    [Serializable]
     public class ConcurrentDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>
     {
         /// <summary>
@@ -56,17 +54,10 @@ namespace System.Collections.Concurrent
             }
         }
 
-        [NonSerialized]
         private volatile Tables _tables; // Internal tables of the dictionary
         private IEqualityComparer<TKey> _comparer; // Key equality comparer
-        [NonSerialized]
         private readonly bool _growLockArray; // Whether to dynamically increase the size of the striped lock
-        [NonSerialized]
         private int _budget; // The maximum number of elements per lock before a resize operation is triggered
-
-        private KeyValuePair<TKey, TValue>[] _serializationArray; // Used for custom serialization
-        private int _serializationConcurrencyLevel; // used to save the concurrency level in serialization
-        private int _serializationCapacity; // used to save the capacity in serialization
 
         // The default capacity, i.e. the initial # of buckets. When choosing this value, we are making
         // a trade-off between the size of a very small dictionary, and the number of resizes when
@@ -125,7 +116,7 @@ namespace System.Collections.Concurrent
         /// class that is empty, has the default concurrency level, has the default initial capacity, and
         /// uses the default comparer for the key type.
         /// </summary>
-        public ConcurrentDictionary() : this(DefaultConcurrencyLevel, DefaultCapacity, true, EqualityComparer<TKey>.Default) { }
+        public ConcurrentDictionary() : this(DefaultConcurrencyLevel, DefaultCapacity, true, null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see
@@ -142,7 +133,7 @@ namespace System.Collections.Concurrent
         /// less than 1.</exception>
         /// <exception cref="T:System.ArgumentOutOfRangeException"> <paramref name="capacity"/> is less than
         /// 0.</exception>
-        public ConcurrentDictionary(int concurrencyLevel, int capacity) : this(concurrencyLevel, capacity, false, EqualityComparer<TKey>.Default) { }
+        public ConcurrentDictionary(int concurrencyLevel, int capacity) : this(concurrencyLevel, capacity, false, null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentDictionary{TKey,TValue}"/>
@@ -158,7 +149,7 @@ namespace System.Collections.Concurrent
         /// (Nothing in Visual Basic).</exception>
         /// <exception cref="T:System.ArgumentException"><paramref name="collection"/> contains one or more
         /// duplicate keys.</exception>
-        public ConcurrentDictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection) : this(collection, EqualityComparer<TKey>.Default) { }
+        public ConcurrentDictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection) : this(collection, null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentDictionary{TKey,TValue}"/>
@@ -167,8 +158,6 @@ namespace System.Collections.Concurrent
         /// </summary>
         /// <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>
         /// implementation to use when comparing keys.</param>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="comparer"/> is a null reference
-        /// (Nothing in Visual Basic).</exception>
         public ConcurrentDictionary(IEqualityComparer<TKey> comparer) : this(DefaultConcurrencyLevel, DefaultCapacity, true, comparer) { }
 
         /// <summary>
@@ -185,9 +174,7 @@ namespace System.Collections.Concurrent
         /// <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>
         /// implementation to use when comparing keys.</param>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is a null reference
-        /// (Nothing in Visual Basic). -or-
-        /// <paramref name="comparer"/> is a null reference (Nothing in Visual Basic).
-        /// </exception>
+        /// (Nothing in Visual Basic).</exception>
         public ConcurrentDictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey> comparer)
             : this(comparer)
         {
@@ -210,8 +197,6 @@ namespace System.Collections.Concurrent
         /// when comparing keys.</param>
         /// <exception cref="T:System.ArgumentNullException">
         /// <paramref name="collection"/> is a null reference (Nothing in Visual Basic).
-        /// -or-
-        /// <paramref name="comparer"/> is a null reference (Nothing in Visual Basic).
         /// </exception>
         /// <exception cref="T:System.ArgumentOutOfRangeException">
         /// <paramref name="concurrencyLevel"/> is less than 1.
@@ -261,8 +246,6 @@ namespace System.Collections.Concurrent
         /// <paramref name="concurrencyLevel"/> is less than 1. -or-
         /// <paramref name="capacity"/> is less than 0.
         /// </exception>
-        /// <exception cref="T:System.ArgumentNullException"><paramref name="comparer"/> is a null reference
-        /// (Nothing in Visual Basic).</exception>
         public ConcurrentDictionary(int concurrencyLevel, int capacity, IEqualityComparer<TKey> comparer)
             : this(concurrencyLevel, capacity, false, comparer)
         {
@@ -278,7 +261,6 @@ namespace System.Collections.Concurrent
             {
                 throw new ArgumentOutOfRangeException(nameof(capacity), SR.ConcurrentDictionary_CapacityMustNotBeNegative);
             }
-            if (comparer == null) throw new ArgumentNullException(nameof(comparer));
 
             // The capacity should be at least as large as the concurrency level. Otherwise, we would have locks that don't guard
             // any buckets.
@@ -297,47 +279,9 @@ namespace System.Collections.Concurrent
             Node[] buckets = new Node[capacity];
             _tables = new Tables(buckets, locks, countPerLock);
 
-            _comparer = comparer;
+            _comparer = comparer ?? EqualityComparer<TKey>.Default;
             _growLockArray = growLockArray;
             _budget = buckets.Length / locks.Length;
-        }
-
-        /// <summary>Get the data array to be serialized.</summary>
-        [OnSerializing]
-        private void OnSerializing(StreamingContext context)
-        {
-            Tables tables = _tables;
-
-            // save the data into the serialization array to be saved
-            _serializationArray = ToArray();
-            _serializationConcurrencyLevel = tables._locks.Length;
-            _serializationCapacity = tables._buckets.Length;
-        }
-
-        /// <summary>Clear the serialized state.</summary>
-        [OnSerialized]
-        private void OnSerialized(StreamingContext context)
-        {
-            _serializationArray = null;
-        }
-
-        /// <summary>Construct the dictionary from a previously serialized one</summary>
-        [OnDeserialized]
-        private void OnDeserialized(StreamingContext context)
-        {
-            KeyValuePair<TKey, TValue>[] array = _serializationArray;
-
-            var buckets = new Node[_serializationCapacity];
-            var countPerLock = new int[_serializationConcurrencyLevel];
-            var locks = new object[_serializationConcurrencyLevel];
-            for (int i = 0; i < locks.Length; i++)
-            {
-                locks[i] = new object();
-            }
-            _tables = new Tables(buckets, locks, countPerLock);
-
-            InitializeFromCollection(array);
-            _serializationArray = null;
         }
 
         /// <summary>
@@ -495,7 +439,8 @@ namespace System.Collections.Concurrent
             int bucketNo = GetBucket(hashcode, tables._buckets.Length);
 
             // We can get away w/out a lock here.
-            // The Volatile.Read ensures that the load of the fields of 'n' doesn't move before the load from buckets[i].
+            // The Volatile.Read ensures that we have a copy of the reference to tables._buckets[bucketNo].
+            // This protects us from reading fields ('_hashcode', '_key', '_value' and '_next') of different instances.
             Node n = Volatile.Read<Node>(ref tables._buckets[bucketNo]);
 
             while (n != null)
@@ -591,7 +536,7 @@ namespace System.Collections.Concurrent
 
                                     if (prev == null)
                                     {
-                                        tables._buckets[bucketNo] = newNode;
+                                        Volatile.Write(ref tables._buckets[bucketNo], newNode);
                                     }
                                     else
                                     {
@@ -790,7 +735,8 @@ namespace System.Collections.Concurrent
 
             for (int i = 0; i < buckets.Length; i++)
             {
-                // The Volatile.Read ensures that the load of the fields of 'current' doesn't move before the load from buckets[i].
+                // The Volatile.Read ensures that we have a copy of the reference to buckets[i].
+                // This protects us from reading fields ('_key', '_value' and '_next') of different instances.
                 Node current = Volatile.Read<Node>(ref buckets[i]);
 
                 while (current != null)
@@ -852,7 +798,7 @@ namespace System.Collections.Concurrent
                                     Node newNode = new Node(node._key, value, hashcode, node._next);
                                     if (prev == null)
                                     {
-                                        tables._buckets[bucketNo] = newNode;
+                                        Volatile.Write(ref tables._buckets[bucketNo], newNode);
                                     }
                                     else
                                     {
@@ -993,7 +939,7 @@ namespace System.Collections.Concurrent
         /// <summary>
         /// Gets the number of key/value pairs contained in the <see
         /// cref="ConcurrentDictionary{TKey,TValue}"/>. Should only be used after all locks
-        /// have been aquired.
+        /// have been acquired.
         /// </summary>
         /// <exception cref="T:System.OverflowException">The dictionary contains too many
         /// elements.</exception>
@@ -1063,7 +1009,7 @@ namespace System.Collections.Concurrent
         /// if the key was not in the dictionary.</returns>
         public TValue GetOrAdd<TArg>(TKey key, Func<TKey, TArg, TValue> valueFactory, TArg factoryArgument)
         {
-            if (key == null) throw new ArgumentNullException(nameof(key));
+            if (key == null) ThrowKeyNullException();
             if (valueFactory == null) throw new ArgumentNullException(nameof(valueFactory));
 
             int hashcode = _comparer.GetHashCode(key);
@@ -1125,7 +1071,7 @@ namespace System.Collections.Concurrent
         public TValue AddOrUpdate<TArg>(
             TKey key, Func<TKey, TArg, TValue> addValueFactory, Func<TKey, TValue, TArg, TValue> updateValueFactory, TArg factoryArgument)
         {
-            if (key == null) throw new ArgumentNullException(nameof(key));
+            if (key == null) ThrowKeyNullException();
             if (addValueFactory == null) throw new ArgumentNullException(nameof(addValueFactory));
             if (updateValueFactory == null) throw new ArgumentNullException(nameof(updateValueFactory));
 
@@ -2044,7 +1990,6 @@ namespace System.Collections.Concurrent
         /// <summary>
         /// A node in a singly-linked list representing a particular hash table bucket.
         /// </summary>
-        [Serializable]
         private sealed class Node
         {
             internal readonly TKey _key;
@@ -2065,7 +2010,6 @@ namespace System.Collections.Concurrent
         /// A private class to represent enumeration over the dictionary that implements the 
         /// IDictionaryEnumerator interface.
         /// </summary>
-        [Serializable]
         private sealed class DictionaryEnumerator : IDictionaryEnumerator
         {
             IEnumerator<KeyValuePair<TKey, TValue>> _enumerator; // Enumerator over the dictionary.

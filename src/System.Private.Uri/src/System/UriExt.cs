@@ -45,10 +45,11 @@ namespace System
                     // V1 compat
                     // A relative Uri wins over implicit UNC path unless the UNC path is of the form "\\something" and 
                     // uriKind != Absolute
+                    // A relative Uri wins over implicit Unix path unless uriKind == Absolute
                     if (NotAny(Flags.DosPath) &&
                         uriKind != UriKind.Absolute &&
-                       (uriKind == UriKind.Relative || (_string.Length >= 2 && (_string[0] != '\\' || _string[1] != '\\'))))
-
+                       ((uriKind == UriKind.Relative || (_string.Length >= 2 && (_string[0] != '\\' || _string[1] != '\\')))
+                    || (!IsWindowsSystem && InFact(Flags.UnixPath))))
                     {
                         _syntax = null; //make it be relative Uri
                         _flags &= Flags.UserEscaped; // the only flag that makes sense for a relative uri
@@ -223,7 +224,7 @@ namespace System
             {
                 for (int i = 0; i < data.Length - 2; ++i)
                 {
-                    if (tempPtr[i] == '%' && UriHelper.IsHexDigit(tempPtr[i + 1]) && UriHelper.IsHexDigit(tempPtr[i + 2])
+                    if (tempPtr[i] == '%' && IsHexDigit(tempPtr[i + 1]) && IsHexDigit(tempPtr[i + 2])
                         && tempPtr[i + 1] >= '0' && tempPtr[i + 1] <= '7') // max 0x7F
                     {
                         char ch = UriHelper.EscapedAscii(tempPtr[i + 1], tempPtr[i + 2]);

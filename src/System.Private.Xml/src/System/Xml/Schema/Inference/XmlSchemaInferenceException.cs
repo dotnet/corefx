@@ -2,20 +2,23 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.IO;
+using System.Resources;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Diagnostics;
+using System.Globalization;
+
 namespace System.Xml.Schema
 {
-    using System;
-    using System.IO;
-    using System.Resources;
-    using System.Runtime.Serialization;
-    using System.Text;
-    using System.Diagnostics;
-    using System.Globalization;
-
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class XmlSchemaInferenceException : XmlSchemaException
     {
-        protected XmlSchemaInferenceException(SerializationInfo info, StreamingContext context) : base(info, context){}
+        protected XmlSchemaInferenceException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -40,25 +43,7 @@ namespace System.Xml.Schema
         {
         }
 
-        internal XmlSchemaInferenceException(string res, string[] args) : base(res, args, null, null, 0, 0, null)
-        {
-        }
-
         internal XmlSchemaInferenceException(string res, string arg) : base(res, new string[] { arg }, null, null, 0, 0, null)
-        {
-        }
-        internal XmlSchemaInferenceException(string res, string arg, string sourceUri, int lineNumber, int linePosition) :
-            base(res, new string[] { arg }, null, sourceUri, lineNumber, linePosition, null)
-        {
-        }
-
-        internal XmlSchemaInferenceException(string res, string sourceUri, int lineNumber, int linePosition) :
-            base(res, (string[])null, null, sourceUri, lineNumber, linePosition, null)
-        {
-        }
-
-        internal XmlSchemaInferenceException(string res, string[] args, string sourceUri, int lineNumber, int linePosition) :
-            base(res, args, null, sourceUri, lineNumber, linePosition, null)
         {
         }
 
@@ -67,6 +52,6 @@ namespace System.Xml.Schema
         {
         }
     }
-} // namespace System.Xml.Schema
+}
 
 

@@ -2,105 +2,94 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Net.Test.Common;
 using System.Threading;
-
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Net.Sockets.Tests
 {
     public class ReceiveMessageFromAsync
     {
-        public void OnCompleted(object sender, SocketAsyncEventArgs args)
-        {
-            EventWaitHandle handle = (EventWaitHandle)args.UserToken;
-            handle.Set();
-        }
-
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/987
-        public void Success()
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void ReceiveSentMessages_SocketAsyncEventArgs_Success(bool ipv4, bool changeReceiveBufferEachCall)
         {
-            ManualResetEvent completed = new ManualResetEvent(false);
+            const int DataLength = 1024;
+            AddressFamily family = ipv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
+            IPAddress loopback = ipv4 ? IPAddress.Loopback : IPAddress.IPv6Loopback;
 
-            if (Socket.OSSupportsIPv4)
+            var completed = new ManualResetEventSlim(false);
+            using (var sender = new Socket(family, SocketType.Dgram, ProtocolType.Udp))
+            using (var receiver = new Socket(family, SocketType.Dgram, ProtocolType.Udp))
             {
-                using (Socket receiver = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+                sender.Bind(new IPEndPoint(loopback, 0));
+                receiver.SetSocketOption(ipv4 ? SocketOptionLevel.IP : SocketOptionLevel.IPv6, SocketOptionName.PacketInformation, true);
+                int port = receiver.BindToAnonymousPort(loopback);
+
+                var args = new SocketAsyncEventArgs() { RemoteEndPoint = new IPEndPoint(ipv4 ? IPAddress.Any : IPAddress.IPv6Any, 0) };
+                args.Completed += (s,e) => completed.Set();
+                args.SetBuffer(new byte[DataLength], 0, DataLength);
+
+                for (int iters = 0; iters < 5; iters++)
                 {
-                    int port = receiver.BindToAnonymousPort(IPAddress.Loopback);
-                    receiver.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.PacketInformation, true);
-
-                    Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                    sender.Bind(new IPEndPoint(IPAddress.Loopback, 0));
-
                     for (int i = 0; i < TestSettings.UDPRedundancy; i++)
                     {
-                        sender.SendTo(new byte[1024], new IPEndPoint(IPAddress.Loopback, port));
+                        sender.SendTo(new byte[DataLength], new IPEndPoint(loopback, port));
                     }
 
-                    SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-                    args.RemoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                    args.SetBuffer(new byte[1024], 0, 1024);
-                    args.Completed += OnCompleted;
-                    args.UserToken = completed;
-
-                    bool pending = receiver.ReceiveMessageFromAsync(args);
-                    if (!pending)
+                    if (changeReceiveBufferEachCall)
                     {
-                        OnCompleted(null, args);
+                        args.SetBuffer(new byte[DataLength], 0, DataLength);
                     }
 
-                    Assert.True(completed.WaitOne(TestSettings.PassingTestTimeout), "Timeout while waiting for connection");
+                    if (!receiver.ReceiveMessageFromAsync(args))
+                    {
+                        completed.Set();
+                    }
+                    Assert.True(completed.Wait(TestSettings.PassingTestTimeout), "Timeout while waiting for connection");
+                    completed.Reset();
 
-                    Assert.Equal(1024, args.BytesTransferred);
+                    Assert.Equal(DataLength, args.BytesTransferred);
                     Assert.Equal(sender.LocalEndPoint, args.RemoteEndPoint);
                     Assert.Equal(((IPEndPoint)sender.LocalEndPoint).Address, args.ReceiveMessageFromPacketInfo.Address);
-
-                    sender.Dispose();
                 }
             }
         }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/987
-        public void Success_IPv6()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task ReceiveSentMessages_Tasks_Success(bool ipv4)
         {
-            ManualResetEvent completed = new ManualResetEvent(false);
+            const int DataLength = 1024;
+            AddressFamily family = ipv4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
+            IPAddress loopback = ipv4 ? IPAddress.Loopback : IPAddress.IPv6Loopback;
 
-            if (Socket.OSSupportsIPv6)
+            using (var receiver = new Socket(family, SocketType.Dgram, ProtocolType.Udp))
+            using (var sender = new Socket(family, SocketType.Dgram, ProtocolType.Udp))
             {
-                using (Socket receiver = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
+                sender.Bind(new IPEndPoint(loopback, 0));
+                receiver.SetSocketOption(ipv4 ? SocketOptionLevel.IP : SocketOptionLevel.IPv6, SocketOptionName.PacketInformation, true);
+                int port = receiver.BindToAnonymousPort(loopback);
+
+                for (int iters = 0; iters < 5; iters++)
                 {
-                    int port = receiver.BindToAnonymousPort(IPAddress.IPv6Loopback);
-                    receiver.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.PacketInformation, true);
-
-                    Socket sender = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp);
-                    sender.Bind(new IPEndPoint(IPAddress.IPv6Loopback, 0));
-
                     for (int i = 0; i < TestSettings.UDPRedundancy; i++)
                     {
-                        sender.SendTo(new byte[1024], new IPEndPoint(IPAddress.IPv6Loopback, port));
+                        sender.SendTo(new byte[DataLength], new IPEndPoint(loopback, port));
                     }
 
-                    SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-                    args.RemoteEndPoint = new IPEndPoint(IPAddress.IPv6Any, 0);
-                    args.SetBuffer(new byte[1024], 0, 1024);
-                    args.Completed += OnCompleted;
-                    args.UserToken = completed;
-
-                    bool pending = receiver.ReceiveMessageFromAsync(args);
-                    if (!pending)
-                    {
-                        OnCompleted(null, args);
-                    }
-
-                    Assert.True(completed.WaitOne(TestSettings.PassingTestTimeout), "Timeout while waiting for connection");
-
-                    Assert.Equal(1024, args.BytesTransferred);
-                    Assert.Equal(sender.LocalEndPoint, args.RemoteEndPoint);
-                    Assert.Equal(((IPEndPoint)sender.LocalEndPoint).Address, args.ReceiveMessageFromPacketInfo.Address);
-
-                    sender.Dispose();
+                    SocketReceiveMessageFromResult result = await receiver.ReceiveMessageFromAsync(
+                        new ArraySegment<byte>(new byte[DataLength], 0, DataLength), SocketFlags.None,
+                        new IPEndPoint(ipv4 ? IPAddress.Any : IPAddress.IPv6Any, 0));
+                    Assert.Equal(DataLength, result.ReceivedBytes);
+                    Assert.Equal(sender.LocalEndPoint, result.RemoteEndPoint);
+                    Assert.Equal(((IPEndPoint)sender.LocalEndPoint).Address, result.PacketInformation.Address);
                 }
             }
         }

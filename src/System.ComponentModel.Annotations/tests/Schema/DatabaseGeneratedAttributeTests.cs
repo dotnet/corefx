@@ -23,7 +23,7 @@ namespace System.ComponentModel.DataAnnotations.Schema.Tests
         [InlineData((DatabaseGeneratedOption)10)]
         public static void Ctor_DatabaseGeneratedOption_UndefinedOption_ThrowsArgumentOutOfRangeException(DatabaseGeneratedOption databaseGeneratedOption)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("databaseGeneratedOption", () => new DatabaseGeneratedAttribute(databaseGeneratedOption));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("databaseGeneratedOption", () => new DatabaseGeneratedAttribute(databaseGeneratedOption));
         }
     }
 }

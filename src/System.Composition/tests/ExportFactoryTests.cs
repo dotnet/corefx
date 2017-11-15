@@ -106,6 +106,7 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
+        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void SharedPartsAreSharedBetweenAllScopes()
         {
             var cc = CreateContainer(typeof(SharedUnbounded), typeof(DataConsistencyBoundaryProvider));
@@ -116,6 +117,8 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/20656", TargetFrameworkMonikers.UapAot)]
+        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void TheSameSharedInstanceIsReusedWithinItsSharingBoundary()
         {
             var cc = CreateContainer(typeof(SharedBoundedByDC), typeof(SharedPartConsumer), typeof(DataConsistencyBoundaryProvider));
@@ -129,6 +132,7 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
+        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void NonSharedInstancesCreatedByAnExportFactoryAreControlledByTheirExportLifetimeContext()
         {
             var cc = CreateContainer(typeof(A), typeof(UseExportFactory));
@@ -141,6 +145,7 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
+        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void DependenciesOfSharedPartsAreResolvedInTheGlobalScope()
         {
             var cc = new ContainerConfiguration()
@@ -156,6 +161,7 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
+        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void WhenABoundaryIsPresentBoundedPartsCannotBeCreatedOutsideIt()
         {
             var container = CreateContainer(typeof(DataConsistencyBoundaryProvider), typeof(SharedBoundedByDC));
@@ -163,6 +169,7 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
+        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void TheProductOfAnExportFactoryCanBeDisposedDuringDisposalOfTheParent()
         {
             var container = new ContainerConfiguration()
@@ -194,6 +201,7 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
+        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void ExportFactoryCanBeComposedWithImportManyAndNames()
         {
             var cc = CreateContainer(typeof(AConsumer), typeof(A1), typeof(A2));
@@ -227,6 +235,7 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
+        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void WhenReleasingAnExportFromAnExportFactoryItsNonSharedDependenciesAreDisposed()
         {
             var cc = CreateContainer(typeof(Disposable), typeof(HasDisposableDependency), typeof(HasFactory));

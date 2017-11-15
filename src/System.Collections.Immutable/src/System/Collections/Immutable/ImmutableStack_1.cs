@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Linq;
 
 namespace System.Collections.Immutable
 {
@@ -52,7 +53,8 @@ namespace System.Collections.Immutable
         /// <param name="tail">The rest of the elements on the stack.</param>
         private ImmutableStack(T head, ImmutableStack<T> tail)
         {
-            Requires.NotNull(tail, nameof(tail));
+            Debug.Assert(tail != null);
+            
             _head = head;
             _tail = tail;
         }
@@ -207,7 +209,9 @@ namespace System.Collections.Immutable
         [Pure]
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            return new EnumeratorObject(this);
+            return this.IsEmpty ?
+                Enumerable.Empty<T>().GetEnumerator() :
+                new EnumeratorObject(this);
         }
 
         /// <summary>

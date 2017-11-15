@@ -85,6 +85,7 @@ namespace System.Net.Http
         public System.Security.Cryptography.X509Certificates.X509CertificateCollection ClientCertificates { get { throw null; } }
         public System.Net.CookieContainer CookieContainer { get { throw null; } set { } }
         public System.Net.ICredentials Credentials { get { throw null; } set { } }
+        public static System.Func<System.Net.Http.HttpRequestMessage, System.Security.Cryptography.X509Certificates.X509Certificate2, System.Security.Cryptography.X509Certificates.X509Chain, System.Net.Security.SslPolicyErrors, bool> DangerousAcceptAnyServerCertificateValidator { get { throw null; } }
         public System.Net.ICredentials DefaultProxyCredentials { get { throw null; } set { } }
         public int MaxAutomaticRedirections { get { throw null; } set { } }
         public int MaxConnectionsPerServer { get { throw null; } set { } }
@@ -223,6 +224,12 @@ namespace System.Net.Http
         public override void Add(System.Net.Http.HttpContent content) { }
         public void Add(System.Net.Http.HttpContent content, string name) { }
         public void Add(System.Net.Http.HttpContent content, string name, string fileName) { }
+    }
+    public sealed partial class ReadOnlyMemoryContent : System.Net.Http.HttpContent
+    {
+        public ReadOnlyMemoryContent(System.ReadOnlyMemory<byte> content) { }
+        protected override System.Threading.Tasks.Task SerializeToStreamAsync(System.IO.Stream stream, System.Net.TransportContext context) => throw null;
+        protected internal override bool TryComputeLength(out long length) => throw null;
     }
     public partial class StreamContent : System.Net.Http.HttpContent
     {

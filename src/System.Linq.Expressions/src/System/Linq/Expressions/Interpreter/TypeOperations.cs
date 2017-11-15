@@ -146,11 +146,11 @@ namespace System.Linq.Expressions.Interpreter
 
         private sealed class GetValueOrDefault : NullableMethodCallInstruction
         {
-            private readonly Type defaultValueType;
+            private readonly Type _defaultValueType;
 
             public GetValueOrDefault(MethodInfo mi)
             {
-                defaultValueType = mi.ReturnType;
+                _defaultValueType = mi.ReturnType;
             }
 
             public override int Run(InterpretedFrame frame)
@@ -158,7 +158,7 @@ namespace System.Linq.Expressions.Interpreter
                 if (frame.Peek() == null)
                 {
                     frame.Pop();
-                    frame.Push(Activator.CreateInstance(defaultValueType));
+                    frame.Push(Activator.CreateInstance(_defaultValueType));
                 }
                 return 1;
             }
@@ -468,8 +468,8 @@ namespace System.Linq.Expressions.Interpreter
             _hoistedVariables = hoistedVariables;
         }
 
-        public override int ConsumedStack => 0;
         public override int ProducedStack => 1;
+
         public override string InstructionName => "Quote";
 
         public override int Run(InterpretedFrame frame)

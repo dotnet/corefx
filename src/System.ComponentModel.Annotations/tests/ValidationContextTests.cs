@@ -12,8 +12,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         [Fact]
         public static void Constructor_throws_if_passed_null_instance()
         {
-            Assert.Equal("instance",
-                Assert.Throws<ArgumentNullException>(() => new ValidationContext(null)).ParamName);
+            AssertExtensions.Throws<ArgumentNullException>("instance", () => new ValidationContext(null));
         }
 
         [Fact]
@@ -99,10 +98,8 @@ namespace System.ComponentModel.DataAnnotations.Tests
             Assert.Equal("ExistingMember", validationContext.DisplayName);
             validationContext.DisplayName = "NonExistentDisplayName";
             Assert.Equal("NonExistentDisplayName", validationContext.DisplayName);
-            Assert.Equal("value",
-                Assert.Throws<ArgumentNullException>(() => validationContext.DisplayName = null).ParamName);
-            Assert.Equal("value",
-                Assert.Throws<ArgumentNullException>(() => validationContext.DisplayName = string.Empty).ParamName);
+            AssertExtensions.Throws<ArgumentNullException>("value", () => validationContext.DisplayName = null);
+            AssertExtensions.Throws<ArgumentNullException>("value", () => validationContext.DisplayName = string.Empty);
         }
 
         // DisplayName_returns_class_name_for_unset_member_name_and_can_be_overridden()
@@ -138,6 +135,32 @@ namespace System.ComponentModel.DataAnnotations.Tests
             Assert.Equal("ExistingMember", validationContext.DisplayName);
             validationContext.DisplayName = "OverriddenDisplayName";
             Assert.Equal("OverriddenDisplayName", validationContext.DisplayName);
+        }
+
+        [Fact]
+        public void DisplayName_NoSuchMemberName_ReturnsMemberName()
+        {
+            var validationContext = new ValidationContext(new object()) { MemberName = "test" };
+            Assert.Equal("test", validationContext.DisplayName);
+        }
+
+        [Fact]
+        public void GetService_CustomServiceProvider_ReturnsNull()
+        {
+            var validationContext = new ValidationContext(new object());
+            validationContext.InitializeServiceProvider(type =>
+            {
+                Assert.Equal(typeof(int), type);
+                return typeof(bool);
+            });
+            Assert.Equal(typeof(bool), validationContext.GetService(typeof(int)));
+        }
+
+        [Fact]
+        public void GetService_NullServiceProvider_ReturnsNull()
+        {
+            var validationContext = new ValidationContext(new object());
+            Assert.Null(validationContext.GetService(typeof(int)));
         }
     }
 

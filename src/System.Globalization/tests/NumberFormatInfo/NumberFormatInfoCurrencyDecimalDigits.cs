@@ -13,8 +13,8 @@ namespace System.Globalization.Tests
         public static IEnumerable<object[]> CurrencyDecimalDigits_TestData()
         {
             yield return new object[] { NumberFormatInfo.InvariantInfo, 2, 2 };
-            yield return new object[] { new CultureInfo("en-US").NumberFormat, 2, 2 };
-            yield return new object[] { new CultureInfo("ko").NumberFormat, 0, 2 };
+            yield return new object[] { CultureInfo.GetCultureInfo("en-US").NumberFormat, 2, 2 };
+            yield return new object[] { CultureInfo.GetCultureInfo("ko").NumberFormat, 0, 2 };
         }
 
         [Theory]
@@ -39,8 +39,8 @@ namespace System.Globalization.Tests
         [Fact]
         public void CurrencyDecimalDigits_Set_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("CurrencyDecimalDigits", () => new NumberFormatInfo().CurrencyDecimalDigits = -1);
-            Assert.Throws<ArgumentOutOfRangeException>("CurrencyDecimalDigits", () => new NumberFormatInfo().CurrencyDecimalDigits = 100);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("CurrencyDecimalDigits", () => new NumberFormatInfo().CurrencyDecimalDigits = -1);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("CurrencyDecimalDigits", () => new NumberFormatInfo().CurrencyDecimalDigits = 100);
             Assert.Throws<InvalidOperationException>(() => NumberFormatInfo.InvariantInfo.CurrencyDecimalDigits = 2);
         }
     }

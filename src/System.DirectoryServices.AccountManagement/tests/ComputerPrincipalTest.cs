@@ -2,76 +2,82 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.DirectoryServices.AccountManagement;
 using Xunit;
 
-namespace AccountManagementUnitTests
+namespace System.DirectoryServices.AccountManagement.Tests
 {
-    /// <summary>
-    ///This is a test class for ComputerPrincipalTest and is intended
-    ///to contain all ComputerPrincipalTest Unit Tests
-    ///</summary>
     public class ComputerPrincipalTest : PrincipalTest
     {
-        #region Additional test attributes
-        // 
-        //You can use the following additional attributes as you write your tests:
-        //
-        //Use ClassInitialize to run code before running the first test in the class
-        //[ClassInitialize()]
-        //public static void MyClassInitialize(TestContext testContext)
-        //{
-        //}
-        //
-        //Use ClassCleanup to run code after all tests in a class have run
-        //[ClassCleanup()]
-        //public static void MyClassCleanup()
-        //{
-        //}
-        //
-        //Use TestInitialize to run code before running each test
-        //[TestInitialize()]
-        //public void MyTestInitialize()
-        //{
-        //}
-        //
-        //Use TestCleanup to run code after each test has run
-        //[TestCleanup()]
-        //public void MyTestCleanup()
-        //{
-        //}
-        //
-        #endregion
+        [Fact]
+        public void Ctor_Context()
+        {
+            var context = new PrincipalContext(ContextType.Machine);
+            var principal = new ComputerPrincipal(context);
+            Assert.Same(context, principal.Context);
+            Assert.Empty(principal.ServicePrincipalNames);
+        }
 
-        /// <summary>
-        ///A test for ComputerPrincipal Constructor
-        ///</summary>
+        [Fact]
+        public void Ctor_NullContext_ThrowsArgumentException()
+        {
+            AssertExtensions.Throws<ArgumentException>(null, () => new ComputerPrincipal(null));
+            AssertExtensions.Throws<ArgumentException>(null, () => new ComputerPrincipal(null, "samAcountName", "password", enabled: true));
+        }
+
+        [Fact]
+        public void Ctor_NullSamAccountName_ThrowsArgumentException()
+        {
+            var context = new PrincipalContext(ContextType.Machine);
+            AssertExtensions.Throws<ArgumentException>(null, () => new ComputerPrincipal(context, null, "password", enabled: true));
+        }
+
+        [Fact]
+        public void Ctor_EmptySamAccountName_ThrowsArgumentNullException()
+        {
+            var context = new PrincipalContext(ContextType.Machine);
+            AssertExtensions.Throws<ArgumentNullException>("Principal.SamAccountName cannot be null or empty.", () => new ComputerPrincipal(context, string.Empty, "password", enabled: true));
+        }
+
+        [Fact]
+        public void Ctor_NullPassword_ThrowsArgumentException()
+        {
+            var context = new PrincipalContext(ContextType.Machine);
+            AssertExtensions.Throws<ArgumentException>(null, () => new ComputerPrincipal(context, "samAccountName", null, enabled: true));
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] 
+        public void Ctor_MachineContext_NoException()
+        {
+            var context = new PrincipalContext(ContextType.Machine);
+            var principal = new ComputerPrincipal(context, "samAccountName", "password", enabled: true);
+            Assert.Equal(ContextType.Machine, principal.ContextType);
+        }
+
         [Fact]
         public void ComputerPrincipalConstructorTest()
         {
-            ComputerPrincipal computer = new ComputerPrincipal(domainContext);
+            if (DomainContext == null)
+            {
+                return;
+            }
+
+            ComputerPrincipal computer = new ComputerPrincipal(DomainContext);
             computer.Dispose();
-            // jsimmons - I currently do not see a straightforward 
-            //   XUnit replacement for Assert.Inconclusive.
-            //Assert.Inconclusive("TODO: Implement code to verify target");
         }
 
-        internal override Principal CreatePrincipal(PrincipalContext context, string name)
+        public override Principal CreatePrincipal(PrincipalContext context, string name)
         {
-            ComputerPrincipal computer = new ComputerPrincipal(context);
-            computer.Name = name;
-            return computer;
+            return new ComputerPrincipal(context) { Name = name };
         }
 
-        internal override Principal CreateExtendedPrincipal(PrincipalContext context, string name)
+        public override Principal CreateExtendedPrincipal(PrincipalContext context, string name)
         {
-            //Assert.Inconclusive("TODO: Implement code to verify target");
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        internal override Principal FindExtendedPrincipal(PrincipalContext context, string name)
+        public override Principal FindExtendedPrincipal(PrincipalContext context, string name)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

@@ -145,8 +145,8 @@ namespace System.Net.Security.Tests
         {
             VirtualNetwork network = new VirtualNetwork();
 
-            using (var clientStream = new VirtualNetworkStream(network, isServer:false))
-            using (var serverStream = new VirtualNetworkStream(network, isServer:true))
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
             using (var clientSslStream = new SslStream(clientStream, false, AllowAnyServerCertificate))
             using (var serverSslStream = new SslStream(serverStream))
             {
@@ -228,13 +228,12 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        [ActiveIssue(16516, TestPlatforms.Windows)]
         public void SslStream_StreamToStream_Write_ReadByte_Success()
         {
             VirtualNetwork network = new VirtualNetwork();
 
-            using (var clientStream = new VirtualNetworkStream(network, isServer:false))
-            using (var serverStream = new VirtualNetworkStream(network, isServer:true))
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
             using (var clientSslStream = new SslStream(clientStream, false, AllowAnyServerCertificate))
             using (var serverSslStream = new SslStream(serverStream))
             {
@@ -334,6 +333,7 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Relies on FlushAsync override not available in desktop")]
         public void SslStream_StreamToStream_FlushAsync_Propagated()
         {
             VirtualNetwork network = new VirtualNetwork();
@@ -354,7 +354,7 @@ namespace System.Net.Security.Tests
             return expectedBuffer.SequenceEqual(actualBuffer);
         }
 
-        private bool AllowAnyServerCertificate(
+        protected bool AllowAnyServerCertificate(
             object sender,
             X509Certificate certificate,
             X509Chain chain,

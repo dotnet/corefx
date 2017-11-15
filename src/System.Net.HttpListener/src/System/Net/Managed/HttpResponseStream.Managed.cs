@@ -31,16 +31,17 @@
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net
 {
-    internal class HttpResponseStream : Stream
+    internal partial class HttpResponseStream : Stream
     {
         private HttpListenerResponse _response;
         private bool _ignore_errors;
-        private bool _disposed;
         private bool _trailer_sent;
         private Stream _stream;
 
@@ -51,66 +52,45 @@ namespace System.Net
             _stream = stream;
         }
 
-        public override bool CanRead => false;
-
-        public override bool CanSeek => false;
-
-        public override bool CanWrite => true;
-
-        public override long Length
+        private void DisposeCore()
         {
-            get { throw new NotSupportedException(SR.net_noseek); }
-        }
-
-        public override long Position
-        {
-            get { throw new NotSupportedException(SR.net_noseek); }
-            set { throw new NotSupportedException(SR.net_noseek); }
-        }
-
-        public override void Close()
-        {
-            if (_disposed == false)
+            byte[] bytes = null;
+            MemoryStream ms = GetHeaders(true);
+            bool chunked = _response.SendChunked;
+            if (_stream.CanWrite)
             {
-                _disposed = true;
-                byte[] bytes = null;
-                MemoryStream ms = GetHeaders(true);
-                bool chunked = _response.SendChunked;
-                if (_stream.CanWrite)
+                try
                 {
-                    try
+                    if (ms != null)
                     {
-                        if (ms != null)
-                        {
-                            long start = ms.Position;
-                            if (chunked && !_trailer_sent)
-                            {
-                                bytes = GetChunkSizeBytes(0, true);
-                                ms.Position = ms.Length;
-                                ms.Write(bytes, 0, bytes.Length);
-                            }
-                            InternalWrite(ms.GetBuffer(), (int)start, (int)(ms.Length - start));
-                            _trailer_sent = true;
-                        }
-                        else if (chunked && !_trailer_sent)
+                        long start = ms.Position;
+                        if (chunked && !_trailer_sent)
                         {
                             bytes = GetChunkSizeBytes(0, true);
-                            InternalWrite(bytes, 0, bytes.Length);
-                            _trailer_sent = true;
+                            ms.Position = ms.Length;
+                            ms.Write(bytes, 0, bytes.Length);
                         }
+                        InternalWrite(ms.GetBuffer(), (int)start, (int)(ms.Length - start));
+                        _trailer_sent = true;
                     }
-                    catch (IOException)
+                    else if (chunked && !_trailer_sent)
                     {
-                        // Ignore error due to connection reset by peer
+                        bytes = GetChunkSizeBytes(0, true);
+                        InternalWrite(bytes, 0, bytes.Length);
+                        _trailer_sent = true;
                     }
                 }
-                _response.Close();
+                catch (HttpListenerException)
+                {
+                    // Ignore error due to connection reset by peer
+                }
             }
+            _response.Close();
         }
 
         internal async Task WriteWebSocketHandshakeHeadersAsync()
         {
-            if (_disposed)
+            if (_closed)
                 throw new ObjectDisposedException(GetType().ToString());
 
             if (_stream.CanWrite)
@@ -136,7 +116,7 @@ namespace System.Net
             // SendHeaders works on shared headers
             lock (_response._headersLock)
             {
-                if (_response._headersSent)
+                if (_response.SentHeaders)
                 {
                     return null;
                 }
@@ -145,10 +125,6 @@ namespace System.Net
                 _response.SendHeaders(closing, ms, isWebSocketHandshake);
                 return ms;
             }
-        }
-
-        public override void Flush()
-        {
         }
 
         private static byte[] s_crlf = new byte[] { 13, 10 };
@@ -170,7 +146,14 @@ namespace System.Net
             }
             else
             {
-                _stream.Write(buffer, offset, count);
+                try
+                {
+                    _stream.Write(buffer, offset, count);
+                }
+                catch (IOException ex)
+                {
+                    throw new HttpListenerException(ex.HResult, ex.Message);
+                }
             }
         }
 
@@ -183,11 +166,9 @@ namespace System.Net
             catch { }
         }
 
-        public override void Write(byte[] buffer, int offset, int count)
+        private void WriteCore(byte[] buffer, int offset, int size)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().ToString());
-            if (count == 0)
+            if (size == 0)
                 return;
 
             byte[] bytes = null;
@@ -199,13 +180,13 @@ namespace System.Net
                 ms.Position = ms.Length;
                 if (chunked)
                 {
-                    bytes = GetChunkSizeBytes(count, false);
+                    bytes = GetChunkSizeBytes(size, false);
                     ms.Write(bytes, 0, bytes.Length);
                 }
 
-                int new_count = Math.Min(count, 16384 - (int)ms.Position + (int)start);
+                int new_count = Math.Min(size, 16384 - (int)ms.Position + (int)start);
                 ms.Write(buffer, offset, new_count);
-                count -= new_count;
+                size -= new_count;
                 offset += new_count;
                 InternalWrite(ms.GetBuffer(), (int)start, (int)(ms.Length - start));
                 ms.SetLength(0);
@@ -213,20 +194,26 @@ namespace System.Net
             }
             else if (chunked)
             {
-                bytes = GetChunkSizeBytes(count, false);
+                bytes = GetChunkSizeBytes(size, false);
                 InternalWrite(bytes, 0, bytes.Length);
             }
 
-            if (count > 0)
-                InternalWrite(buffer, offset, count);
+            if (size > 0)
+                InternalWrite(buffer, offset, size);
             if (chunked)
                 InternalWrite(s_crlf, 0, 2);
         }
 
-        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback cback, object state)
+        private IAsyncResult BeginWriteCore(byte[] buffer, int offset, int size, AsyncCallback cback, object state)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().ToString());
+            if (_closed)
+            {
+                HttpStreamAsyncResult ares = new HttpStreamAsyncResult(this);
+                ares._callback = cback;
+                ares._state = state;
+                ares.Complete();
+                return ares;
+            }
 
             byte[] bytes = null;
             MemoryStream ms = GetHeaders(false);
@@ -237,33 +224,51 @@ namespace System.Net
                 ms.Position = ms.Length;
                 if (chunked)
                 {
-                    bytes = GetChunkSizeBytes(count, false);
+                    bytes = GetChunkSizeBytes(size, false);
                     ms.Write(bytes, 0, bytes.Length);
                 }
-                ms.Write(buffer, offset, count);
+                ms.Write(buffer, offset, size);
                 buffer = ms.GetBuffer();
                 offset = (int)start;
-                count = (int)(ms.Position - start);
+                size = (int)(ms.Position - start);
             }
             else if (chunked)
             {
-                bytes = GetChunkSizeBytes(count, false);
+                bytes = GetChunkSizeBytes(size, false);
                 InternalWrite(bytes, 0, bytes.Length);
             }
 
-            return _stream.BeginWrite(buffer, offset, count, cback, state);
+            try
+            {
+                return _stream.BeginWrite(buffer, offset, size, cback, state);
+            }
+            catch (IOException ex)
+            {
+                if (_ignore_errors)
+                {
+                    HttpStreamAsyncResult ares = new HttpStreamAsyncResult(this);
+                    ares._callback = cback;
+                    ares._state = state;
+                    ares.Complete();
+                    return ares;
+                }
+                else
+                {
+                    throw new HttpListenerException(ex.HResult, ex.Message);
+                }
+            }
         }
 
-        public override void EndWrite(IAsyncResult ares)
+        private void EndWriteCore(IAsyncResult asyncResult)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().ToString());
+            if (_closed)
+                return;
 
             if (_ignore_errors)
             {
                 try
                 {
-                    _stream.EndWrite(ares);
+                    _stream.EndWrite(asyncResult);
                     if (_response.SendChunked)
                         _stream.Write(s_crlf, 0, 2);
                 }
@@ -271,37 +276,25 @@ namespace System.Net
             }
             else
             {
-                _stream.EndWrite(ares);
-                if (_response.SendChunked)
-                    _stream.Write(s_crlf, 0, 2);
+                try
+                {
+                    _stream.EndWrite(asyncResult);
+                    if (_response.SendChunked)
+                        _stream.Write(s_crlf, 0, 2);
+                }
+                catch (IOException ex)
+                {
+                    // NetworkStream wraps exceptions in IOExceptions; if the underlying socket operation
+                    // failed because of invalid arguments or usage, propagate that error.  Otherwise
+                    // wrap the whole thing in an HttpListenerException.  This is all to match Windows behavior.
+                    if (ex.InnerException is ArgumentException || ex.InnerException is InvalidOperationException)
+                    {
+                        ExceptionDispatchInfo.Throw(ex.InnerException);
+                    }
+
+                    throw new HttpListenerException(ex.HResult, ex.Message);
+                }
             }
-        }
-
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            throw new NotSupportedException(SR.net_writeonlystream);
-        }
-
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count,
-                            AsyncCallback cback, object state)
-        {
-            throw new NotSupportedException(SR.net_writeonlystream);
-        }
-
-        public override int EndRead(IAsyncResult ares)
-        {
-            throw new NotSupportedException(SR.net_writeonlystream);
-        }
-
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException(SR.net_noseek);
-        }
-
-        public override void SetLength(long value)
-        {
-            throw new NotSupportedException(SR.net_noseek);
         }
     }
 }
-

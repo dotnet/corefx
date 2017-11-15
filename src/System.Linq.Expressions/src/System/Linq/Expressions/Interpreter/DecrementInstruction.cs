@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Dynamic.Utils;
-using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -168,7 +167,7 @@ namespace System.Linq.Expressions.Interpreter
                 case TypeCode.Single: return s_Single ?? (s_Single = new DecrementSingle());
                 case TypeCode.Double: return s_Double ?? (s_Double = new DecrementDouble());
                 default:
-                    throw Error.ExpressionNotSupportedForType("Decrement", type);
+                    throw ContractUtils.Unreachable;
             }
         }
     }

@@ -30,20 +30,27 @@ namespace System.Linq.Tests
         public void ToArray_UseArrayEmptyWhenEmpty()
         {
             int[] emptySourceArray = Array.Empty<int>();
-            Assert.Same(emptySourceArray.ToArray(), emptySourceArray.ToArray());
 
-            Assert.Same(emptySourceArray.Select(i => i).ToArray(), emptySourceArray.Select(i => i).ToArray());
-            Assert.Same(emptySourceArray.ToList().Select(i => i).ToArray(), emptySourceArray.ToList().Select(i => i).ToArray());
-            Assert.Same(new Collection<int>(emptySourceArray).Select(i => i).ToArray(), new Collection<int>(emptySourceArray).Select(i => i).ToArray());
-            Assert.Same(emptySourceArray.OrderBy(i => i).ToArray(), emptySourceArray.OrderBy(i => i).ToArray());
+            // .NET Core returns the instance as an optimization.
+            // see https://github.com/dotnet/corefx/pull/2401.
+            Action<object, object> assertSame = (objA, objB) =>
+                Assert.Equal(!PlatformDetection.IsFullFramework, ReferenceEquals(objA, objB));
 
-            Assert.Same(Enumerable.Range(5, 0).ToArray(), Enumerable.Range(3, 0).ToArray());
-            Assert.Same(Enumerable.Range(5, 3).Take(0).ToArray(), Enumerable.Range(3, 0).ToArray());
-            Assert.Same(Enumerable.Range(5, 3).Skip(3).ToArray(), Enumerable.Range(3, 0).ToArray());
 
-            Assert.Same(Enumerable.Repeat(42, 0).ToArray(), Enumerable.Range(84, 0).ToArray());
-            Assert.Same(Enumerable.Repeat(42, 3).Take(0).ToArray(), Enumerable.Range(84, 3).Take(0).ToArray());
-            Assert.Same(Enumerable.Repeat(42, 3).Skip(3).ToArray(), Enumerable.Range(84, 3).Skip(3).ToArray());
+            assertSame(emptySourceArray.ToArray(), emptySourceArray.ToArray());
+
+            assertSame(emptySourceArray.Select(i => i).ToArray(), emptySourceArray.Select(i => i).ToArray());
+            assertSame(emptySourceArray.ToList().Select(i => i).ToArray(), emptySourceArray.ToList().Select(i => i).ToArray());
+            assertSame(new Collection<int>(emptySourceArray).Select(i => i).ToArray(), new Collection<int>(emptySourceArray).Select(i => i).ToArray());
+            assertSame(emptySourceArray.OrderBy(i => i).ToArray(), emptySourceArray.OrderBy(i => i).ToArray());
+
+            assertSame(Enumerable.Range(5, 0).ToArray(), Enumerable.Range(3, 0).ToArray());
+            assertSame(Enumerable.Range(5, 3).Take(0).ToArray(), Enumerable.Range(3, 0).ToArray());
+            assertSame(Enumerable.Range(5, 3).Skip(3).ToArray(), Enumerable.Range(3, 0).ToArray());
+
+            assertSame(Enumerable.Repeat(42, 0).ToArray(), Enumerable.Range(84, 0).ToArray());
+            assertSame(Enumerable.Repeat(42, 3).Take(0).ToArray(), Enumerable.Range(84, 3).Take(0).ToArray());
+            assertSame(Enumerable.Repeat(42, 3).Skip(3).ToArray(), Enumerable.Range(84, 3).Skip(3).ToArray());
         }
 
 
@@ -113,7 +120,7 @@ namespace System.Linq.Tests
         public void ToArray_ThrowArgumentNullExceptionWhenSourceIsNull()
         {
             int[] source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.ToArray());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.ToArray());
         }
 
         // Generally the optimal approach. Anything that breaks this should be confirmed as not harming performance.
@@ -127,8 +134,7 @@ namespace System.Linq.Tests
             Assert.Equal(1, source.CopyToTouched);
         }
 
-        [Fact]
-        [ActiveIssue("Valid test but too intensive to enable even in OuterLoop")]
+        [Fact(Skip = "Valid test but too intensive to enable even in OuterLoop")]
         public void ToArray_FailOnExtremelyLargeCollection()
         {
             var largeSeq = new FastInfiniteEnumerator<byte>();
@@ -212,7 +218,9 @@ namespace System.Linq.Tests
         [Fact]
         public void EmptyArraysSameObject()
         {
-            Assert.Same(Enumerable.Empty<int>().ToArray(), Enumerable.Empty<int>().ToArray());
+            // .NET Core returns the instance as an optimization.
+            // see https://github.com/dotnet/corefx/pull/2401.
+            Assert.Equal(!PlatformDetection.IsFullFramework, ReferenceEquals(Enumerable.Empty<int>().ToArray(), Enumerable.Empty<int>().ToArray()));
             
             var array = new int[0];
             Assert.NotSame(array, array.ToArray());
@@ -340,6 +348,33 @@ namespace System.Linq.Tests
             var range = Enumerable.Range(0, length);
             var lazyEnumerable = ForceNotCollection(range); // We won't go down the IIListProvider path
             Assert.Equal(range, lazyEnumerable.ToArray());
+        }
+
+        // Consider that two very similar enums is not unheard of, if e.g. two assemblies map the
+        // same external source of numbers (codes, response codes, colour codes, etc.) to values.
+        private enum Enum0
+        {
+            First,
+            Second,
+            Third
+        }
+
+        private enum Enum1
+        {
+            First,
+            Second,
+            Third
+        }
+
+        [Fact, SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework disallows copying assignable value types. See corefx#13816")]
+        public void ToArray_Cast()
+        {
+            Enum0[] source = { Enum0.First, Enum0.Second, Enum0.Third };
+            var cast = source.Cast<Enum1>();
+            Assert.IsType<Enum0[]>(cast);
+            var castArray = cast.ToArray();
+            Assert.IsType<Enum1[]>(castArray);
+            Assert.Equal(new[] { Enum1.First, Enum1.Second, Enum1.Third }, castArray);
         }
 
         public static IEnumerable<object[]> JustBelowPowersOfTwoLengths()

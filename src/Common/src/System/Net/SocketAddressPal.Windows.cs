@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Diagnostics;
 using System.Net.Sockets;
-using System.Text;
 
 namespace System.Net
 {
@@ -52,7 +49,7 @@ namespace System.Net
             }
         }
 
-        public static unsafe void GetIPv6Address(byte[] buffer, byte[] address, out uint scope)
+        public static unsafe void GetIPv6Address(byte[] buffer, Span<byte> address, out uint scope)
         {
             for (int i = 0; i < address.Length; i++)
             {
@@ -75,7 +72,7 @@ namespace System.Net
             buffer[7] = unchecked((byte)(address >> 24));
         }
 
-        public static unsafe void SetIPv6Address(byte[] buffer, byte[] address, uint scope)
+        public static unsafe void SetIPv6Address(byte[] buffer, Span<byte> address, uint scope)
         {
             // No handling for Flow Information
             buffer[4] = (byte)0;

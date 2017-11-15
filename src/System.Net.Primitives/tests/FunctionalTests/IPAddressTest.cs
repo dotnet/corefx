@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 
 using Xunit;
@@ -17,22 +18,32 @@ namespace System.Net.Primitives.Functional.Tests
         private const long MinScopeId = 0;
         private const long MaxScopeId = 0xFFFFFFFF;
 
-        private static byte[] ipV6AddressBytes1 = new byte[] { 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80, 0x90, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16 };
-        private static byte[] ipV6AddressBytes2 = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16 };
+        private const string IpV4AddressString1 = "192.168.0.9";
+        private const string IpV4AddressString2 = "169.192.1.10";
+        private const string IpV6AddressString = "fe80::200:f8ff:fe21:67cf";
 
-        private static IPAddress IPV4Address()
+        private static readonly byte[] IpV4AddressBytes = { 0x01, 0x02, 0x03, 0x04 };
+        private static readonly byte[] IpV6AddressBytes1 = { 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80, 0x90, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16 };
+        private static readonly byte[] IpV6AddressBytes2 = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16 };
+
+        private static IPAddress IPV4Address1()
         {
-            return IPAddress.Parse("192.168.0.9");
+            return IPAddress.Parse(IpV4AddressString1);
+        }
+
+        private static IPAddress IPV4Address2()
+        {
+            return IPAddress.Parse(IpV4AddressString2);
         }
 
         private static IPAddress IPV6Address1()
         {
-            return new IPAddress(ipV6AddressBytes1);
+            return new IPAddress(IpV6AddressBytes1);
         }
 
         private static IPAddress IPV6Address2()
         {
-            return new IPAddress(ipV6AddressBytes2);
+            return new IPAddress(IpV6AddressBytes2);
         }
 
         [Theory]
@@ -54,7 +65,7 @@ namespace System.Net.Primitives.Functional.Tests
         [InlineData(MaxAddress + 1)]
         public static void Ctor_Long_Invalid(long address)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("newAddress", () => new IPAddress(address));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("newAddress", () => new IPAddress(address));
         }
 
         [Theory]
@@ -69,15 +80,15 @@ namespace System.Net.Primitives.Functional.Tests
         public static object[][] AddressBytesAndFamilies =
         {
             new object[] { new byte[] { 0x8f, 0x18, 0x14, 0x24 }, AddressFamily.InterNetwork },
-            new object[] { ipV6AddressBytes1, AddressFamily.InterNetworkV6 },
-            new object[] { ipV6AddressBytes2, AddressFamily.InterNetworkV6 }
+            new object[] { IpV6AddressBytes1, AddressFamily.InterNetworkV6 },
+            new object[] { IpV6AddressBytes2, AddressFamily.InterNetworkV6 }
         };
 
         [Fact]
         public static void Ctor_Bytes_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("address", () => new IPAddress(null));
-            Assert.Throws<ArgumentException>("address", () => new IPAddress(new byte[] { 0x01, 0x01, 0x02 }));
+            AssertExtensions.Throws<ArgumentNullException>("address", () => new IPAddress(null));
+            AssertExtensions.Throws<ArgumentException>("address", () => new IPAddress(new byte[] { 0x01, 0x01, 0x02 }));
         }
 
         [Theory]
@@ -96,8 +107,8 @@ namespace System.Net.Primitives.Functional.Tests
             {
                 foreach (long scopeId in new long[] { MinScopeId, MaxScopeId, 500 })
                 {
-                    yield return new object[] { ipV6AddressBytes1, scopeId };
-                    yield return new object[] { ipV6AddressBytes2, scopeId };
+                    yield return new object[] { IpV6AddressBytes1, scopeId };
+                    yield return new object[] { IpV6AddressBytes2, scopeId };
                 }
             }
         }
@@ -105,50 +116,12 @@ namespace System.Net.Primitives.Functional.Tests
         [Fact]
         public static void Ctor_BytesScopeId_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("address", () => new IPAddress(null, 500));
+            AssertExtensions.Throws<ArgumentNullException>("address", () => new IPAddress(null, 500));
 
-            Assert.Throws<ArgumentException>("address", () => new IPAddress(new byte[] { 0x01, 0x01, 0x02 }, 500));
+            AssertExtensions.Throws<ArgumentException>("address", () => new IPAddress(new byte[] { 0x01, 0x01, 0x02 }, 500));
 
-            Assert.Throws<ArgumentOutOfRangeException>("scopeid", () => new IPAddress(ipV6AddressBytes1, MinScopeId - 1));
-            Assert.Throws<ArgumentOutOfRangeException>("scopeid", () => new IPAddress(ipV6AddressBytes1, MaxScopeId + 1));
-        }
-
-        [Theory]
-        [InlineData("192.168.0.1", "192.168.0.1")] //IpV4
-
-        [InlineData("Fe08::1", "fe08::1")] //IpV6...
-        [InlineData("[Fe08::1]", "fe08::1")]
-        [InlineData("[Fe08::1]:80", "fe08::1")] //Drop port
-        [InlineData("[Fe08::1]:0xFA", "fe08::1")] //Drop hex port
-        [InlineData("Fe08::1%13542", "fe08::1%13542")] //With scope id
-        public static void Parse_String_Success(string ipString, string expected)
-        {
-            Assert.Equal(expected, IPAddress.Parse(ipString).ToString());
-        }
-
-        [Theory]
-        [InlineData("")] //Empty string
-
-        [InlineData("192.168.0.0/16")] //IpV4: Invalid format
-        [InlineData("192.168.0.0:80")] //IpV4: Port included
-
-        [InlineData("Fe08::1]")] //IpV6: No leading bracket
-        [InlineData("[Fe08::1")] //IpV6: No trailing bracket
-        [InlineData("[Fe08::1]:80Z")] //IpV6: Invalid port
-        [InlineData("Fe08::/64")] //IpV6: Subnet fail
-        public static void Parse_String_Invalid(string ipString)
-        {
-            Assert.Throws<FormatException>(() => { IPAddress.Parse(ipString); });
-            IPAddress ip;
-            Assert.False(IPAddress.TryParse(ipString, out ip));
-        }
-
-        [Fact]
-        public static void Parse_String_Invalid()
-        {
-            Assert.Throws<ArgumentNullException>("ipString", () => { IPAddress.Parse(null); });
-            IPAddress ip;
-            Assert.False(IPAddress.TryParse(null, out ip));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("scopeid", () => new IPAddress(IpV6AddressBytes1, MinScopeId - 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("scopeid", () => new IPAddress(IpV6AddressBytes1, MaxScopeId + 1));
         }
 
         [Fact]
@@ -166,13 +139,13 @@ namespace System.Net.Primitives.Functional.Tests
         [Fact]
         public static void ScopeId_Set_Invalid()
         {
-            IPAddress ip = IPV4Address(); //IpV4
+            IPAddress ip = IPV4Address1(); //IpV4
             Assert.ThrowsAny<Exception>(() => ip.ScopeId = 500);
             Assert.ThrowsAny<Exception>(() => ip.ScopeId);
 
             ip = IPV6Address1(); //IpV6
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => ip.ScopeId = MinScopeId - 1);
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => ip.ScopeId = MaxScopeId + 1);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => ip.ScopeId = MinScopeId - 1);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => ip.ScopeId = MaxScopeId + 1);
         }
 
         [Fact]
@@ -180,26 +153,34 @@ namespace System.Net.Primitives.Functional.Tests
         {
             long l1 = (long)0x1350;
             long l2 = (long)0x5013000000000000;
+            long l3 = (long)0x0123456789ABCDEF;
+            long l4 = unchecked((long)0xEFCDAB8967452301);
 
             int i1 = (int)0x1350;
             int i2 = (int)0x50130000;
-
+            int i3 = (int)0x01234567;
+            int i4 = (int)0x67452301;
+            
             short s1 = (short)0x1350;
             short s2 = (short)0x5013;
-
+            
             Assert.Equal(l2, IPAddress.HostToNetworkOrder(l1));
+            Assert.Equal(l4, IPAddress.HostToNetworkOrder(l3));
             Assert.Equal(i2, IPAddress.HostToNetworkOrder(i1));
+            Assert.Equal(i4, IPAddress.HostToNetworkOrder(i3));
             Assert.Equal(s2, IPAddress.HostToNetworkOrder(s1));
 
             Assert.Equal(l1, IPAddress.NetworkToHostOrder(l2));
+            Assert.Equal(l3, IPAddress.NetworkToHostOrder(l4));
             Assert.Equal(i1, IPAddress.NetworkToHostOrder(i2));
+            Assert.Equal(i3, IPAddress.NetworkToHostOrder(i4));
             Assert.Equal(s1, IPAddress.NetworkToHostOrder(s2));
         }
 
         [Fact]
         public static void IsLoopback_Get_Success()
         {
-            IPAddress ip = IPV4Address(); //IpV4
+            IPAddress ip = IPV4Address1(); //IpV4
             Assert.False(IPAddress.IsLoopback(ip));
 
             ip = new IPAddress(IPAddress.Loopback.GetAddressBytes()); //IpV4 loopback
@@ -215,7 +196,7 @@ namespace System.Net.Primitives.Functional.Tests
         [Fact]
         public static void IsLooback_Get_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("address", () => IPAddress.IsLoopback(null));
+            AssertExtensions.Throws<ArgumentNullException>("address", () => IPAddress.IsLoopback(null));
         }
 
         [Fact]
@@ -223,7 +204,7 @@ namespace System.Net.Primitives.Functional.Tests
         {
             Assert.True(IPAddress.Parse("ff02::1").IsIPv6Multicast);
             Assert.False(IPAddress.Parse("Fe08::1").IsIPv6Multicast);
-            Assert.False(IPV4Address().IsIPv6Multicast);
+            Assert.False(IPV4Address1().IsIPv6Multicast);
         }
 
         [Fact]
@@ -231,7 +212,7 @@ namespace System.Net.Primitives.Functional.Tests
         {
             Assert.True(IPAddress.Parse("fe80::1").IsIPv6LinkLocal);
             Assert.False(IPAddress.Parse("Fe08::1").IsIPv6LinkLocal);
-            Assert.False(IPV4Address().IsIPv6LinkLocal);
+            Assert.False(IPV4Address1().IsIPv6LinkLocal);
         }
 
         [Fact]
@@ -239,7 +220,7 @@ namespace System.Net.Primitives.Functional.Tests
         {
             Assert.True(IPAddress.Parse("FEC0::1").IsIPv6SiteLocal);
             Assert.False(IPAddress.Parse("Fe08::1").IsIPv6SiteLocal);
-            Assert.False(IPV4Address().IsIPv6SiteLocal);
+            Assert.False(IPV4Address1().IsIPv6SiteLocal);
         }
 
         [Fact]
@@ -247,19 +228,19 @@ namespace System.Net.Primitives.Functional.Tests
         {
             Assert.True(IPAddress.Parse("2001::1").IsIPv6Teredo);
             Assert.False(IPAddress.Parse("Fe08::1").IsIPv6Teredo);
-            Assert.False(IPV4Address().IsIPv6Teredo);
+            Assert.False(IPV4Address1().IsIPv6Teredo);
         }
 
         [Fact]
         public static void Equals_Compare_Success()
         {
-            IPAddress ip1 = IPAddress.Parse("192.168.0.9"); //IpV4
-            IPAddress ip2 = IPAddress.Parse("192.168.0.9"); //IpV4
-            IPAddress ip3 = IPAddress.Parse("169.192.1.10"); //IpV4
+            IPAddress ip1 = IPAddress.Parse(IpV4AddressString1); //IpV4
+            IPAddress ip2 = IPAddress.Parse(IpV4AddressString1); //IpV4
+            IPAddress ip3 = IPAddress.Parse(IpV4AddressString2); //IpV4
 
-            IPAddress ip4 = new IPAddress(ipV6AddressBytes1); //IpV6
-            IPAddress ip5 = new IPAddress(ipV6AddressBytes1); //IpV6
-            IPAddress ip6 = new IPAddress(ipV6AddressBytes2); //IpV6
+            IPAddress ip4 = IPV6Address1(); //IpV6
+            IPAddress ip5 = IPV6Address1(); //IpV6
+            IPAddress ip6 = IPV6Address2(); //IpV6
 
             Assert.True(ip1.Equals(ip2));
             Assert.True(ip2.Equals(ip1));
@@ -280,23 +261,56 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.False(ip4.GetHashCode().Equals(ip6.GetHashCode()));
         }
 
+        [Theory]
+        [MemberData(nameof(GetValidIPAddresses))]
+        [MemberData(nameof(GeneratedIPAddresses))]
+        public static void GetHashCode_ValidIPAddresses_Success(IPAddress ip)
+        {
+            Assert.Equal(ip.GetHashCode(), ip.GetHashCode());
+
+            var clonedIp = ip.AddressFamily == AddressFamily.InterNetworkV6 ?
+                new IPAddress(ip.GetAddressBytes(), ip.ScopeId) :
+                new IPAddress(ip.GetAddressBytes());
+
+            Assert.Equal(ip.GetHashCode(), clonedIp.GetHashCode());
+        }
+
+        private static IEnumerable<object[]> GetValidIPAddresses()
+        {
+            return IPAddressParsing.ValidIpv4Addresses
+                .Concat(IPAddressParsing.ValidIpv6Addresses)
+                .Select(array => new object[] {IPAddress.Parse((string)array[0])});
+        }
+
+        public static readonly object[][] GeneratedIPAddresses =
+        {
+            new object[] {IPAddress.Parse(IpV4AddressString1)},
+            new object[] {IPAddress.Parse(IpV6AddressString)},
+            new object[] {new IPAddress(MinAddress)},
+            new object[] {new IPAddress(MaxAddress)},
+            new object[] {new IPAddress(IpV4AddressBytes)},
+            new object[] {new IPAddress(IpV6AddressBytes1)},
+            new object[] {new IPAddress(IpV6AddressBytes1, MinScopeId)},
+        };
+
 #pragma warning disable 618
-         [Fact]
-         public static void Address_Property_Failure()
-         {
-             IPAddress ip1 = IPAddress.Parse("fe80::200:f8ff:fe21:67cf");
-             Assert.Throws<SocketException>(() => ip1.Address);
-         }
- 
-         [Fact]
-         public static void Address_Property_Success()
-         {
-             IPAddress ip1 = IPAddress.Parse("192.168.0.9");
-             //192.168.0.10
-             long newIp4Address = 192 << 24 | 168 << 16 | 0 << 8 | 10;
-             ip1.Address = newIp4Address;
-             Assert.Equal("10.0.168.192" , ip1.ToString());
-         }
+        [Fact]
+        public static void Address_Property_Failure()
+        {
+            IPAddress ip = IPAddress.Parse("fe80::200:f8ff:fe21:67cf");
+            Assert.Throws<SocketException>(() => ip.Address);
+        }
+
+        [Fact]
+        public static void Address_Property_Success()
+        {
+            IPAddress ip1 = IPV4Address1();
+            IPAddress ip2 = IPV4Address2();
+            ip1.Address = ip2.Address;
+
+            Assert.Equal(ip1, ip2);
+            Assert.Equal(ip1.GetHashCode(), ip2.GetHashCode());
+        }
 #pragma warning restore 618
     }
 }

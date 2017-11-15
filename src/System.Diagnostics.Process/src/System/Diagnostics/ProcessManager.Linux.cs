@@ -80,6 +80,22 @@ namespace System.Diagnostics
                 }
             }
 
+            // Move the main executable module to be the first in the list if it's not already
+            string exePath = Process.GetExePath(processId);
+            for (int i = 0; i < modules.Count; i++)
+            {
+                ProcessModule module = modules[i];
+                if (module.FileName == exePath)
+                {
+                    if (i > 0)
+                    {
+                        modules.RemoveAt(i);
+                        modules.Insert(0, module);
+                    }
+                    break;
+                }
+            }
+
             // Return the set of modules found
             return modules;
         }
@@ -193,18 +209,27 @@ namespace System.Diagnostics
         {
             switch (c)
             {
-                case 'R':
+                case 'R': // Running
                     return ThreadState.Running;
-                case 'S':
-                case 'D':
-                case 'T':
+
+                case 'D': // Waiting on disk
+                case 'P': // Parked
+                case 'S': // Sleeping in a wait
+                case 't': // Tracing/debugging
+                case 'T': // Stopped on a signal
                     return ThreadState.Wait;
-                case 'Z':
+
+                case 'x': // dead
+                case 'X': // Dead
+                case 'Z': // Zombie
                     return ThreadState.Terminated;
-                case 'W':
+
+                case 'W': // Paging or waking
+                case 'K': // Wakekill
                     return ThreadState.Transition;
+
                 default:
-                    Debug.Fail("Unexpected status character");
+                    Debug.Fail($"Unexpected status character: {c}");
                     return ThreadState.Unknown;
             }
         }

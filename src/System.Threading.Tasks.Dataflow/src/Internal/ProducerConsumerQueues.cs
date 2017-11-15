@@ -24,10 +24,10 @@
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 using System.Collections;
-#if CONCURRENT_COLLECTIONS
-using System.Collections.Concurrent;
-#else
+#if USE_INTERNAL_CONCURRENT_COLLECTIONS
 using System.Threading.Tasks.Dataflow.Internal.Collections;
+#else
+using System.Collections.Concurrent;
 #endif
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -551,7 +551,7 @@ namespace System.Threading.Tasks
     }
 
     /// <summary>Padding structure used to minimize false sharing in SingleProducerSingleConsumerQueue{T}.</summary>
-    [StructLayout(LayoutKind.Explicit, Size = PaddingHelpers.CACHE_LINE_SIZE - sizeof(Int32))] // Based on common case of 64-byte cache lines
+    [StructLayout(LayoutKind.Explicit, Size = PaddingHelpers.CACHE_LINE_SIZE - sizeof(Int32))]
     struct PaddingFor32
     {
     }

@@ -26,7 +26,7 @@ namespace System.Data.ProviderBase
             _defaultLocaleID = defaultLocaleID;
         }
 
-        public FieldNameLookup(DbDataReader reader, int defaultLocaleID) : base(reader)
+        public FieldNameLookup(IDataReader reader, int defaultLocaleID) : base(reader)
         {
             _defaultLocaleID = defaultLocaleID;
         }
@@ -37,7 +37,7 @@ namespace System.Data.ProviderBase
             CompareInfo compareInfo = null;
             if (-1 != _defaultLocaleID)
             {
-                compareInfo = CompareInfo.GetCompareInfo(Locale.GetLocaleNameForLcid(_defaultLocaleID));
+                compareInfo = CompareInfo.GetCompareInfo(_defaultLocaleID);
             }
             if (null == compareInfo)
             {

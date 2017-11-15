@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Linq.Expressions.Tests;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using Microsoft.CSharp.RuntimeBinder;
 using Xunit;
 
@@ -644,7 +647,7 @@ namespace System.Dynamic.Tests
         [Theory, MemberData(nameof(NonBinaryExpressionTypes))]
         public void NonBinaryOperations(ExpressionType type)
         {
-            Assert.Throws<ArgumentException>("operation", () => new MinimumOverrideBinaryOperationBinder(type));
+            AssertExtensions.Throws<ArgumentException>("operation", () => new MinimumOverrideBinaryOperationBinder(type));
         }
 
         [Theory, MemberData(nameof(BinaryExpressionTypes))]
@@ -664,7 +667,7 @@ namespace System.Dynamic.Tests
         {
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
             var arg = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
-            Assert.Throws<ArgumentNullException>("target", () => binder.Bind(null, new[] {arg}));
+            AssertExtensions.Throws<ArgumentNullException>("target", () => binder.Bind(null, new[] {arg}));
         }
 
         [Fact]
@@ -672,7 +675,7 @@ namespace System.Dynamic.Tests
         {
             var target = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
-            Assert.Throws<ArgumentNullException>("args", () => binder.Bind(target, null));
+            AssertExtensions.Throws<ArgumentNullException>("args", () => binder.Bind(target, null));
         }
 
         [Fact]
@@ -680,7 +683,7 @@ namespace System.Dynamic.Tests
         {
             var target = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
-            Assert.Throws<ArgumentException>("args", () => binder.Bind(target, Array.Empty<DynamicMetaObject>()));
+            AssertExtensions.Throws<ArgumentException>("args", () => binder.Bind(target, Array.Empty<DynamicMetaObject>()));
         }
 
         [Fact]
@@ -690,7 +693,7 @@ namespace System.Dynamic.Tests
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
             var arg0 = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
             var arg1 = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
-            Assert.Throws<ArgumentException>("args", () => binder.Bind(target, new[] {arg0, arg1}));
+            AssertExtensions.Throws<ArgumentException>("args", () => binder.Bind(target, new[] {arg0, arg1}));
         }
 
         [Fact]
@@ -698,7 +701,7 @@ namespace System.Dynamic.Tests
         {
             var target = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
-            Assert.Throws<ArgumentNullException>("args", () => binder.Bind(target, new DynamicMetaObject[1]));
+            AssertExtensions.Throws<ArgumentNullException>("args", () => binder.Bind(target, new DynamicMetaObject[1]));
         }
 
         [Fact]
@@ -744,6 +747,27 @@ namespace System.Dynamic.Tests
             Func<object> func = Expression.Lambda<Func<object>>(expression).Compile(useInterpreter);
             Assert.Equal("42", func().ToString());
         }
+
+#if FEATURE_COMPILE // We're not testing compilation, but we do need Reflection.Emit for the test
+        [Fact]
+        public void OperationOnTwoObjectsDifferentTypesOfSameName()
+        {
+            object objX = Activator.CreateInstance(
+                AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("TestAssembly"), AssemblyBuilderAccess.Run)
+                    .DefineDynamicModule("TestModule").DefineType("TestType", TypeAttributes.Public).CreateType());
+            object objY = Activator.CreateInstance(
+                AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("TestAssembly"), AssemblyBuilderAccess.Run)
+                    .DefineDynamicModule("TestModule").DefineType("TestType", TypeAttributes.Public).CreateType());
+
+            CallSiteBinder binder =
+                Microsoft.CSharp.RuntimeBinder.Binder.BinaryOperation(
+                    CSharpBinderFlags.None, ExpressionType.Equal,
+                    GetType(), new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null), CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null) });
+            var cs = CallSite<Func<CallSite, object, object, object>>.Create(binder);
+            var t = cs.Target;
+            Assert.Throws<RuntimeBinderException>(() => t(cs, objX, objY));
+        }
+#endif
 
         private class BinaryCallSiteBinder : BinaryOperationBinder
         {

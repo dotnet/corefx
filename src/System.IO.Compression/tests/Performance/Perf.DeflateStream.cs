@@ -6,6 +6,7 @@ using Xunit;
 using Microsoft.Xunit.Performance;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace System.IO.Compression.Tests
 {
@@ -96,22 +97,24 @@ namespace System.IO.Compression.Tests
             NormalData = 4
         }
 
-        [Benchmark]
+        private const int Iter = 1000;
+
+        [Benchmark(InnerIterationCount = Iter)]
         [InlineData(CompressionType.CryptoRandom)]
         [InlineData(CompressionType.RepeatedSegments)]
         [InlineData(CompressionType.NormalData)]
-        public async void Decompress(CompressionType type)
+        public async Task Decompress(CompressionType type)
         {
             string testFilePath = CreateCompressedFile(type);
             int _bufferSize = 1024;
-            int retCount = -1;
             var bytes = new byte[_bufferSize];
             using (MemoryStream gzStream = await LocalMemoryStream.readAppFileAsync(testFilePath))
             using (MemoryStream strippedMs = StripHeaderAndFooter.Strip(gzStream))
                 foreach (var iteration in Benchmark.Iterations)
                     using (iteration.StartMeasurement())
-                        for (int i = 0; i < 10000; i++)
+                        for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                         {
+                            int retCount = -1;
                             using (DeflateStream zip = new DeflateStream(strippedMs, CompressionMode.Decompress, leaveOpen: true))
                             {
                                 while (retCount != 0)

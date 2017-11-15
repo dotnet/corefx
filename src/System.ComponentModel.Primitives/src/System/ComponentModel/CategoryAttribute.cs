@@ -28,6 +28,8 @@ namespace System.ComponentModel
 
         private bool _localized;
 
+        private object _locker = new Object();
+
         /// <summary>
         ///    <para>
         ///       Provides the actual category name.
@@ -261,7 +263,6 @@ namespace System.ComponentModel
         public CategoryAttribute(string category)
         {
             _categoryValue = category;
-            _localized = false;
         }
 
         /// <summary>
@@ -274,23 +275,22 @@ namespace System.ComponentModel
             {
                 if (!_localized)
                 {
-                    _localized = true;
-                    string localizedValue = GetLocalizedString(_categoryValue);
-                    if (localizedValue != null)
+                    lock (_locker)
                     {
-                        _categoryValue = localizedValue;
+                        string localizedValue = GetLocalizedString(_categoryValue);
+                        if (localizedValue != null)
+                        {
+                            _categoryValue = localizedValue;
+                        }
+
+                        _localized = true;
                     }
                 }
+
                 return _categoryValue;
             }
         }
 
-        /// <summary>
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <internalonly/>
-        /// <internalonly/>
         public override bool Equals(object obj)
         {
             if (obj == this)
@@ -302,25 +302,13 @@ namespace System.ComponentModel
             return other != null && Category.Equals(other.Category);
         }
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return Category.GetHashCode();
-        }
+        public override int GetHashCode() => Category.GetHashCode();
 
         /// <summary>
         ///    <para>Looks up the localized name of a given category.</para>
         /// </summary>
-        protected virtual string GetLocalizedString(string value)
-        {
-            return SR.GetResourceString("PropertyCategory" + value, null);
-        }
+        protected virtual string GetLocalizedString(string value) => SR.GetResourceString("PropertyCategory" + value, null);
 
-        public override bool IsDefaultAttribute()
-        {
-            return Category.Equals(CategoryAttribute.Default.Category);
-        }
+        public override bool IsDefaultAttribute() => Category.Equals(Default.Category);
     }
 }

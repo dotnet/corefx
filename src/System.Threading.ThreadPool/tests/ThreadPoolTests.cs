@@ -8,19 +8,57 @@ using Xunit;
 
 namespace System.Threading.ThreadPools.Tests
 {
-    public static class ThreadPoolTests
+    public partial class ThreadPoolTests
     {
         private const int UnexpectedTimeoutMilliseconds = ThreadTestHelpers.UnexpectedTimeoutMilliseconds;
         private const int ExpectedTimeoutMilliseconds = ThreadTestHelpers.ExpectedTimeoutMilliseconds;
         private const int MaxPossibleThreadCount = 0x7fff;
+
+        static ThreadPoolTests()
+        {
+            // Run the following tests before any others
+            if (!PlatformDetection.IsNetNative)
+            {
+                ConcurrentInitializeTest();
+            }
+        }
+
+        // Tests concurrent calls to ThreadPool.SetMinThreads
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "ThreadPool.SetMinThreads is not supported on UapAot.")]
+        public static void ConcurrentInitializeTest()
+        {
+            int processorCount = Environment.ProcessorCount;
+            var countdownEvent = new CountdownEvent(processorCount);
+            Action threadMain =
+                () =>
+                {
+                    countdownEvent.Signal();
+                    countdownEvent.Wait(ThreadTestHelpers.UnexpectedTimeoutMilliseconds);
+                    Assert.True(ThreadPool.SetMinThreads(processorCount, processorCount));
+                };
+
+            var waitForThreadArray = new Action[processorCount];
+            for (int i = 0; i < processorCount; ++i)
+            {
+                var t = ThreadTestHelpers.CreateGuardedThread(out waitForThreadArray[i], threadMain);
+                t.IsBackground = true;
+                t.Start();
+            }
+
+            foreach (Action waitForThread in waitForThreadArray)
+            {
+                waitForThread();
+            }
+        }
 
         [Fact]
         public static void GetMinMaxThreadsTest()
         {
             int minw, minc;
             ThreadPool.GetMinThreads(out minw, out minc);
-            Assert.True(minw > 0);
-            Assert.True(minc > 0);
+            Assert.True(minw >= 0);
+            Assert.True(minc >= 0);
 
             int maxw, maxc;
             ThreadPool.GetMaxThreads(out maxw, out maxc);
@@ -43,19 +81,12 @@ namespace System.Threading.ThreadPools.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "ThreadPool.SetMinThreads and SetMaxThreads are not supported on UapAot.")]
         public static void SetMinMaxThreadsTest()
         {
             int minw, minc, maxw, maxc;
             ThreadPool.GetMinThreads(out minw, out minc);
             ThreadPool.GetMaxThreads(out maxw, out maxc);
-            Action resetThreadCounts =
-                () =>
-                {
-                    Assert.True(ThreadPool.SetMaxThreads(maxw, maxc));
-                    VerifyMaxThreads(maxw, maxc);
-                    Assert.True(ThreadPool.SetMinThreads(minw, minc));
-                    VerifyMinThreads(minw, minc);
-                };
 
             try
             {
@@ -96,7 +127,6 @@ namespace System.Threading.ThreadPools.Tests
                 VerifyMinThreads(MaxPossibleThreadCount, MaxPossibleThreadCount);
 
                 Assert.True(ThreadPool.SetMinThreads(0, 0));
-                VerifyMinThreads(0, 0);
                 Assert.True(ThreadPool.SetMaxThreads(1, 1));
                 VerifyMaxThreads(1, 1);
                 Assert.True(ThreadPool.SetMinThreads(1, 1));
@@ -104,37 +134,38 @@ namespace System.Threading.ThreadPools.Tests
             }
             finally
             {
-                resetThreadCounts();
+                Assert.True(ThreadPool.SetMaxThreads(maxw, maxc));
+                VerifyMaxThreads(maxw, maxc);
+                Assert.True(ThreadPool.SetMinThreads(minw, minc));
+                VerifyMinThreads(minw, minc);
             }
         }
 
         [Fact]
         // Desktop framework doesn't check for this and instead, hits an assertion failure
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "ThreadPool.SetMinThreads and SetMaxThreads are not supported on UapAot.")]
         public static void SetMinMaxThreadsTest_ChangedInDotNetCore()
         {
             int minw, minc, maxw, maxc;
             ThreadPool.GetMinThreads(out minw, out minc);
             ThreadPool.GetMaxThreads(out maxw, out maxc);
-            Action resetThreadCounts =
-                () =>
-                {
-                    Assert.True(ThreadPool.SetMaxThreads(maxw, maxc));
-                    VerifyMaxThreads(maxw, maxc);
-                    Assert.True(ThreadPool.SetMinThreads(minw, minc));
-                    VerifyMinThreads(minw, minc);
-                };
 
             try
             {
                 Assert.True(ThreadPool.SetMinThreads(0, 0));
-                VerifyMinThreads(0, 0);
-                Assert.False(ThreadPool.SetMaxThreads(0, 0));
+                VerifyMinThreads(1, 1);
+                Assert.False(ThreadPool.SetMaxThreads(0, 1));
+                Assert.False(ThreadPool.SetMaxThreads(1, 0));
                 VerifyMaxThreads(maxw, maxc);
             }
             finally
             {
-                resetThreadCounts();
+                Assert.True(ThreadPool.SetMaxThreads(maxw, maxc));
+                VerifyMaxThreads(maxw, maxc);
+                Assert.True(ThreadPool.SetMinThreads(minw, minc));
+                VerifyMinThreads(minw, minc);
             }
         }
 
@@ -152,6 +183,44 @@ namespace System.Threading.ThreadPools.Tests
             ThreadPool.GetMaxThreads(out maxw, out maxc);
             Assert.Equal(expectedMaxw, maxw);
             Assert.Equal(expectedMaxc, maxc);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Triggers an assertion failure.")]
+        private static void SetMinThreadsTo0Test()
+        {
+            int minw, minc, maxw, maxc;
+            ThreadPool.GetMinThreads(out minw, out minc);
+            ThreadPool.GetMaxThreads(out maxw, out maxc);
+
+            try
+            {
+                Assert.True(ThreadPool.SetMinThreads(0, minc));
+                Assert.True(ThreadPool.SetMaxThreads(1, maxc));
+
+                int count = 0;
+                var done = new ManualResetEvent(false);
+                WaitCallback callback = null;
+                callback = state =>
+                {
+                    ++count;
+                    if (count > 100)
+                    {
+                        done.Set();
+                    }
+                    else
+                    {
+                        ThreadPool.QueueUserWorkItem(callback);
+                    }
+                };
+                ThreadPool.QueueUserWorkItem(callback);
+                done.WaitOne(ThreadTestHelpers.UnexpectedTimeoutMilliseconds);
+            }
+            finally
+            {
+                Assert.True(ThreadPool.SetMaxThreads(maxw, maxc));
+                Assert.True(ThreadPool.SetMinThreads(minw, minc));
+            }
         }
 
         [Fact]

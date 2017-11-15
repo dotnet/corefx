@@ -12,13 +12,12 @@ namespace System.Globalization.Tests
         public static IEnumerable<object[]> CurrencyGroupSizes_TestData()
         {
             yield return new object[] { NumberFormatInfo.InvariantInfo, new int[] { 3 } };
-            yield return new object[] { new CultureInfo("en-US").NumberFormat, new int[] { 3 } };
+            yield return new object[] { CultureInfo.GetCultureInfo("en-US").NumberFormat, new int[] { 3 } };
 
-            // TODO: when dotnet/corefx#2103 is addressed, we should also check fr-FR
-            if (!PlatformDetection.IsUbuntu1510 && !PlatformDetection.IsUbuntu1604 && !PlatformDetection.IsUbuntu1610
-                && !PlatformDetection.IsWindows7 && !PlatformDetection.IsWindows8x && !PlatformDetection.IsFedora24)
+            if ((!PlatformDetection.IsUbuntu || PlatformDetection.IsUbuntu1404)
+                && !PlatformDetection.IsWindows7 && !PlatformDetection.IsWindows8x && !PlatformDetection.IsFedora)
             {
-                yield return new object[] { new CultureInfo("ur-IN").NumberFormat, new int[] { 3, 2 } };
+                yield return new object[] { CultureInfo.GetCultureInfo("ur-IN").NumberFormat, new int[] { 3, 2 } };
             }
         }
 
@@ -44,10 +43,10 @@ namespace System.Globalization.Tests
         [Fact]
         public void CurrencyGroupSizes_Set_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("CurrencyGroupSizes", () => new NumberFormatInfo().CurrencyGroupSizes = null);
-            Assert.Throws<ArgumentException>("CurrencyGroupSizes", () => new NumberFormatInfo().CurrencyGroupSizes = new int[] { -1, 1, 2 });
-            Assert.Throws<ArgumentException>("CurrencyGroupSizes", () => new NumberFormatInfo().CurrencyGroupSizes = new int[] { 98, 99, 100 });
-            Assert.Throws<ArgumentException>("CurrencyGroupSizes", () => new NumberFormatInfo().CurrencyGroupSizes = new int[] { 0, 1, 2 });
+            AssertExtensions.Throws<ArgumentNullException>("CurrencyGroupSizes", () => new NumberFormatInfo().CurrencyGroupSizes = null);
+            AssertExtensions.Throws<ArgumentException>("CurrencyGroupSizes", () => new NumberFormatInfo().CurrencyGroupSizes = new int[] { -1, 1, 2 });
+            AssertExtensions.Throws<ArgumentException>("CurrencyGroupSizes", () => new NumberFormatInfo().CurrencyGroupSizes = new int[] { 98, 99, 100 });
+            AssertExtensions.Throws<ArgumentException>("CurrencyGroupSizes", () => new NumberFormatInfo().CurrencyGroupSizes = new int[] { 0, 1, 2 });
 
             Assert.Throws<InvalidOperationException>(() => NumberFormatInfo.InvariantInfo.CurrencyGroupSizes = new int[] { 1, 2, 3 });
         }

@@ -11,6 +11,7 @@ namespace System.IO.IsolatedStorage
     // We put the tests in the "Store collection" to get them to pick up the StoreTestsFixture. This will run the fixture
     // at the start and end of the collection, cleaning the test environment.
     [Collection("Store collection")]
+    [ActiveIssue(18940, TargetFrameworkMonikers.UapAot)]
     public class IsoStorageTest
     {
         public static IEnumerable<object[]> ValidScopes
@@ -79,7 +80,8 @@ namespace System.IO.IsolatedStorage
                 };
 
                 // https://github.com/dotnet/corefx/issues/12628
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    && !PlatformDetection.IsInAppContainer)
                 {
                     validScopes.Add(PresetScopes.MachineStoreForApplication);
                     validScopes.Add(PresetScopes.MachineStoreForAssembly);
@@ -93,7 +95,7 @@ namespace System.IO.IsolatedStorage
 /*
  *      Template for Store test method
  * 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         public void ExampleTest(PresetScopes scope)
         {
             // If a dirty state will fail the test, use this

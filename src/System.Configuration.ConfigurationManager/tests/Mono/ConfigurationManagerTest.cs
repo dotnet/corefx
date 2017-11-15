@@ -42,7 +42,8 @@ namespace MonoTests.System.Configuration
 
     public class ConfigurationManagerTest
     {
-        [Fact] // OpenExeConfiguration (ConfigurationUserLevel)
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp))] // OpenExeConfiguration (ConfigurationUserLevel)
+        [ActiveIssue("dotnet/corefx #19384", TargetFrameworkMonikers.NetFramework)]
         public void OpenExeConfiguration1_UserLevel_None()
         {
             SysConfig config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -50,7 +51,7 @@ namespace MonoTests.System.Configuration
             Assert.Equal(TestUtil.ThisConfigFileName, fi.Name);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp))]
         public void OpenExeConfiguration1_UserLevel_PerUserRoaming()
         {
             string applicationData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -65,7 +66,8 @@ namespace MonoTests.System.Configuration
             Assert.Equal("user.config", fi.Name);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp))]
+        [ActiveIssue(15065, TestPlatforms.AnyUnix)]
         public void OpenExeConfiguration1_UserLevel_PerUserRoamingAndLocal()
         {
             SysConfig config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
@@ -130,6 +132,7 @@ namespace MonoTests.System.Configuration
         }
 
         [Fact]
+        [ActiveIssue("dotnet/corefx #18831", TargetFrameworkMonikers.NetFramework)]
         public void exePath_UserLevelNone()
         {
             string name = TestUtil.ThisApplicationPath;
@@ -137,24 +140,23 @@ namespace MonoTests.System.Configuration
             Assert.Equal(TestUtil.ThisApplicationPath + ".config", config.FilePath);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp))]
         public void exePath_UserLevelPerRoaming()
         {
             string applicationData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
             // If there is not ApplicationData folder PerUserRoaming won't work
-            if (string.IsNullOrEmpty(applicationData)) return;
-
-            Assert.True(Directory.Exists(applicationData), "application data should exist");
+            if (string.IsNullOrEmpty(applicationData))
+                return;
 
             SysConfig config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoaming);
             string filePath = config.FilePath;
             Assert.False(string.IsNullOrEmpty(filePath), "should have some file path");
-            Assert.True(filePath.StartsWith(applicationData), "#1:" + filePath);
             Assert.Equal("user.config", Path.GetFileName(filePath));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp))]
+        [ActiveIssue(15066, TestPlatforms.AnyUnix)]
         public void exePath_UserLevelPerRoamingAndLocal()
         {
             SysConfig config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
@@ -196,7 +198,7 @@ namespace MonoTests.System.Configuration
             ExeConfigurationFileMap map = new ExeConfigurationFileMap();
             map.RoamingUserConfigFilename = "roaminguser";
 
-            Assert.Throws<ArgumentException>(() => ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.PerUserRoaming));
+            AssertExtensions.Throws<ArgumentException>("fileMap.ExeConfigFilename", () => ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.PerUserRoaming));
         }
 
         [Fact]
@@ -221,7 +223,7 @@ namespace MonoTests.System.Configuration
             map.RoamingUserConfigFilename = "roaminguser";
             map.LocalUserConfigFilename = "localuser";
 
-            Assert.Throws<ArgumentException>(() => ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.PerUserRoamingAndLocal));
+            AssertExtensions.Throws<ArgumentException>("fileMap.ExeConfigFilename", () => ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.PerUserRoamingAndLocal));
         }
 
         [Fact]
@@ -233,7 +235,7 @@ namespace MonoTests.System.Configuration
             map.ExeConfigFilename = "execonfig";
             map.LocalUserConfigFilename = "localuser";
 
-            Assert.Throws<ArgumentException>(() => ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.PerUserRoamingAndLocal));
+            AssertExtensions.Throws<ArgumentException>("fileMap.RoamingUserConfigFilename", () => ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.PerUserRoamingAndLocal));
         }
 
         [Fact]
@@ -256,9 +258,10 @@ namespace MonoTests.System.Configuration
             Assert.Equal("machineconfig", fi.Name);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp))]
         // Doesn't pass on Mono
         // [Category("NotWorking")]
+        [ActiveIssue("dotnet/corefx #19384", TargetFrameworkMonikers.NetFramework)]
         public void mapped_ExeConfiguration_null()
         {
             SysConfig config = ConfigurationManager.OpenMappedExeConfiguration(null, ConfigurationUserLevel.None);
@@ -278,13 +281,13 @@ namespace MonoTests.System.Configuration
             Assert.Equal("machine.config", fi.Name);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp))]
         public void GetSectionReturnsNativeObject()
         {
             Assert.True(ConfigurationManager.GetSection("appSettings") is NameValueCollection);
         }
 
-        [Fact]  // Test for bug #3412
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp))] // Test for bug #3412
         // Doesn't pass on Mono
         // [Category("NotWorking")]
         public void TestAddRemoveSection()
@@ -320,13 +323,13 @@ namespace MonoTests.System.Configuration
         [Fact]
         public void TestFileMap()
         {
-            var name = Path.GetRandomFileName() + ".config";
-            Assert.False(File.Exists(name));
-
-            try
+            using (var temp = new TempDirectory())
             {
+                string configPath = Path.Combine(temp.Path, Path.GetRandomFileName() + ".config");
+                Assert.False(File.Exists(configPath));
+
                 var map = new ExeConfigurationFileMap();
-                map.ExeConfigFilename = name;
+                map.ExeConfigFilename = configPath;
 
                 var config = ConfigurationManager.OpenMappedExeConfiguration(
                     map, ConfigurationUserLevel.None);
@@ -335,16 +338,12 @@ namespace MonoTests.System.Configuration
 
                 config.Save();
 
-                Assert.True(File.Exists(name), "#1");
-                Assert.True(File.Exists(Path.GetFullPath(name)), "#2");
-            }
-            finally
-            {
-                File.Delete(name);
+                Assert.True(File.Exists(configPath), "#1");
+                Assert.True(File.Exists(Path.GetFullPath(configPath)), "#2");
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp))]
         public void TestContext()
         {
             var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -373,13 +372,13 @@ namespace MonoTests.System.Configuration
         [Fact]
         public void TestContext2()
         {
-            var name = Path.GetRandomFileName() + ".config";
-            Assert.False(File.Exists(name));
-
-            try
+            using (var temp = new TempDirectory())
             {
+                string configPath = Path.Combine(temp.Path, Path.GetRandomFileName() + ".config");
+                Assert.False(File.Exists(configPath));
+
                 var map = new ExeConfigurationFileMap();
-                map.ExeConfigFilename = name;
+                map.ExeConfigFilename = configPath;
 
                 var config = ConfigurationManager.OpenMappedExeConfiguration(
                     map, ConfigurationUserLevel.None);
@@ -389,11 +388,7 @@ namespace MonoTests.System.Configuration
 
                 config.Save();
 
-                Assert.True(File.Exists(name), "#1");
-            }
-            finally
-            {
-                File.Delete(name);
+                Assert.True(File.Exists(configPath), "#1");
             }
         }
 

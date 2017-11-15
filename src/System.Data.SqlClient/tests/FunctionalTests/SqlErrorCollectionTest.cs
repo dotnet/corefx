@@ -1,7 +1,7 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
-
+using System;
 using System.Collections;
 
 using Xunit;
@@ -39,8 +39,8 @@ namespace System.Data.SqlClient.Tests
         {
             SqlErrorCollection c = CreateCollection();
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => c[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => c[c.Count]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => c[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => c[c.Count]);
         }
 
         [Fact]
@@ -81,7 +81,7 @@ namespace System.Data.SqlClient.Tests
             ValidateCopyToThrows((collection, array, index) => ((ICollection)collection).CopyTo(array, index), c =>
             {
                 ICollection ic = c;
-                Assert.Throws<ArgumentException>(null, () => ic.CopyTo(new SqlError[4, 3], 0));
+                AssertExtensions.Throws<ArgumentException>(null, () => ic.CopyTo(new SqlError[4, 3], 0));
                 Assert.Throws<InvalidCastException>(() => ic.CopyTo(new string[10], 0));
             });
         }
@@ -95,7 +95,7 @@ namespace System.Data.SqlClient.Tests
             Assert.Throws<ArgumentNullException>(() => copyTo(c, null, 0));
             Assert.Throws<ArgumentNullException>(() => copyTo(c, null, -1));
             Assert.Throws<ArgumentOutOfRangeException>(() => copyTo(c, new SqlError[10], -1));
-            Assert.Throws<ArgumentException>(() => copyTo(c, new SqlError[10], 1000));
+            AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => copyTo(c, new SqlError[10], 1000));
 
             additionalValidation?.Invoke(c);
         }

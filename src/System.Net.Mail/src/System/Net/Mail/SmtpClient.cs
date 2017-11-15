@@ -9,7 +9,6 @@ using System.Net.NetworkInformation;
 using System.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -111,15 +110,6 @@ namespace System.Net.Mail
 
         private void Initialize()
         {
-            if (_port == DefaultPort || _port == 0)
-            {
-                new SmtpPermission(SmtpAccess.Connect).Demand();
-            }
-            else
-            {
-                new SmtpPermission(SmtpAccess.ConnectToUnrestrictedPort).Demand();
-            }
-
             _transport = new SmtpTransport(this);
             if (NetEventSource.IsEnabled) NetEventSource.Associate(this, _transport);
             _onSendCompletedDelegate = new SendOrPostCallback(SendCompletedWaitCallback);
@@ -140,13 +130,14 @@ namespace System.Net.Mail
             if (clientDomain == null)
             {
                 // We use the local host name as the default client domain
-                // for the client's EHLO or HELO message. This limits the 
-                // information about the host that we share. Additionally, the 
+                // for the client's EHLO or HELO message. This limits the
+                // information about the host that we share. Additionally, the
                 // FQDN is not available to us or useful to the server (internal
                 // machine connecting to public server).
 
                 // SMTP RFC's require ASCII only host names in the HELO/EHLO message.
                 string clientDomainRaw = IPGlobalProperties.GetIPGlobalProperties().HostName;
+
                 IdnMapping mapping = new IdnMapping();
                 try
                 {
@@ -156,7 +147,7 @@ namespace System.Net.Mail
 
                 // For some inputs GetAscii may fail (bad Unicode, etc).  If that happens
                 // we must strip out any non-ASCII characters.
-                // If we end up with no characters left, we use the string "LocalHost".  This 
+                // If we end up with no characters left, we use the string "LocalHost".  This
                 // matches Outlook behavior.
                 StringBuilder sb = new StringBuilder();
                 char ch;
@@ -223,11 +214,6 @@ namespace System.Net.Mail
                 if (value <= 0)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
-                }
-
-                if (value != DefaultPort)
-                {
-                    new SmtpPermission(SmtpAccess.ConnectToUnrestrictedPort).Demand();
                 }
 
                 if (value != _port)
@@ -365,7 +351,7 @@ namespace System.Net.Mail
         }
 
         /// <summary>
-        /// Certificates used by the client for establishing an SSL connection with the server. 
+        /// Certificates used by the client for establishing an SSL connection with the server.
         /// </summary>
         public X509CertificateCollection ClientCertificates
         {
@@ -594,7 +580,6 @@ namespace System.Net.Mail
             }
         }
 
-        [HostProtection(ExternalThreading = true)]
         public void SendAsync(string from, string recipients, string subject, string body, object userToken)
         {
             if (_disposed)
@@ -604,7 +589,6 @@ namespace System.Net.Mail
             SendAsync(new MailMessage(from, recipients, subject, body), userToken);
         }
 
-        [HostProtection(ExternalThreading = true)]
         public void SendAsync(MailMessage message, object userToken)
         {
             if (_disposed)
@@ -789,14 +773,12 @@ namespace System.Net.Mail
 
 
         //************* Task-based async public methods *************************
-        [HostProtection(ExternalThreading = true)]
         public Task SendMailAsync(string from, string recipients, string subject, string body)
         {
             var message = new MailMessage(from, recipients, subject, body);
             return SendMailAsync(message);
         }
 
-        [HostProtection(ExternalThreading = true)]
         public Task SendMailAsync(MailMessage message)
         {
             // Create a TaskCompletionSource to represent the operation

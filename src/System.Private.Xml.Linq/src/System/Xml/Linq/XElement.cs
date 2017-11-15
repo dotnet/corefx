@@ -129,7 +129,13 @@ namespace System.Xml.Linq
             AddContentSkipNotify(other.content);
         }
 
+#if uap
+        // XmlSerializer needs to reflect on the default constructor of XElement.
+        // We need to make the ctor public on UWP to keep the metadata for it.
         public XElement()
+#else
+        internal XElement()
+#endif
             : this("default")
         {
         }
@@ -1861,7 +1867,7 @@ namespace System.Xml.Linq
         }
 
         /// <summary>
-        /// Generates a <see cref="XElement"/> from its XML respresentation.
+        /// Generates a <see cref="XElement"/> from its XML representation.
         /// </summary>
         /// <param name="reader">
         /// The <see cref="XmlReader"/> stream from which the <see cref="XElement"/>

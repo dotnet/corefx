@@ -155,20 +155,20 @@ namespace System.Collections.Specialized.Tests
             NameObjectCollectionBase.KeysCollection keys = nameObjectCollection.Keys;
             ICollection keysCollection = keys;
 
-            Assert.Throws<ArgumentNullException>("array", () => keysCollection.CopyTo(null, 0));
-            Assert.Throws<ArgumentException>(() => keysCollection.CopyTo(new string[count, count], 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => keysCollection.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentException>("array", null, () => keysCollection.CopyTo(new string[count, count], 0));
 
             if (count > 0)
             {
-                Assert.Throws<ArgumentException>(null, () => keysCollection.CopyTo(new string[0], 0));
-                Assert.Throws<ArgumentException>(null, () => keysCollection.CopyTo(new string[count - 1], 0));
+                AssertExtensions.Throws<ArgumentException>(null, () => keysCollection.CopyTo(new string[0], 0));
+                AssertExtensions.Throws<ArgumentException>(null, () => keysCollection.CopyTo(new string[count - 1], 0));
 
                 Assert.Throws<InvalidCastException>(() => keysCollection.CopyTo(new Foo[count], 0));
             }
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => keysCollection.CopyTo(new string[count], -1));
-            Assert.Throws<ArgumentException>(null, () => keysCollection.CopyTo(new string[count], 1));
-            Assert.Throws<ArgumentException>(null, () => keysCollection.CopyTo(new string[count], count + 1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => keysCollection.CopyTo(new string[count], -1));
+            AssertExtensions.Throws<ArgumentException>(null, () => keysCollection.CopyTo(new string[count], 1));
+            AssertExtensions.Throws<ArgumentException>(null, () => keysCollection.CopyTo(new string[count], count + 1));
         }
     }
 }

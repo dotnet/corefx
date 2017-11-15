@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 namespace System.Data
 {
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class InvalidExpressionException : DataException
     {
         protected InvalidExpressionException(SerializationInfo info, StreamingContext context)
@@ -23,12 +24,14 @@ namespace System.Data
     }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class EvaluateException : InvalidExpressionException
     {
         protected EvaluateException(SerializationInfo info, StreamingContext context)
         : base(info, context)
         {
         }
+
         public EvaluateException() : base() { }
         public EvaluateException(string s) : base(s) { }
 
@@ -36,6 +39,7 @@ namespace System.Data
     }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class SyntaxErrorException : InvalidExpressionException
     {
         protected SyntaxErrorException(SerializationInfo info, StreamingContext context)

@@ -52,7 +52,7 @@ namespace System.Net.Sockets.Tests
                 var readList = new List<Socket>(readPairs.Select(p => p.Key).ToArray());
                 var writeList = new List<Socket>(writePairs.Select(p => p.Key).ToArray());
 
-                Socket.Select(readList, writeList, null, FailTimeoutMicroseconds);
+                Socket.Select(readList, writeList, null, -1); // using -1 to test wait code path, but should complete instantly
 
                 // Since no buffers are full, all writes should be available.
                 Assert.Equal(writePairs.Length, writeList.Count);
@@ -146,7 +146,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [PlatformSpecific(~TestPlatforms.OSX)] // typical OSX install has very low max open file descriptors value
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/989
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
         public void Select_Error_OneReadyAtATime()
         {
             const int Errors = 90; // value larger than the internal value in SocketPal.Unix that swaps between stack and heap allocation

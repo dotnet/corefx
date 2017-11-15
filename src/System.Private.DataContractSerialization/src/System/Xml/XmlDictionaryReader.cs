@@ -151,7 +151,7 @@ namespace System.Xml
         public static XmlDictionaryReader CreateMtomReader(Stream stream, Encoding[] encodings, string contentType,
             XmlDictionaryReaderQuotas quotas, int maxBufferSize, OnXmlDictionaryReaderClose onClose)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.PlatformNotSupported_MtomEncoding);
         }
 
         public static XmlDictionaryReader CreateMtomReader(byte[] buffer, int offset, int count, Encoding encoding, XmlDictionaryReaderQuotas quotas)
@@ -175,7 +175,7 @@ namespace System.Xml
         public static XmlDictionaryReader CreateMtomReader(byte[] buffer, int offset, int count, Encoding[] encodings, string contentType,
             XmlDictionaryReaderQuotas quotas, int maxBufferSize, OnXmlDictionaryReaderClose onClose)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.PlatformNotSupported_MtomEncoding);
         }
 
         public virtual bool CanCanonicalize
@@ -856,7 +856,7 @@ namespace System.Xml
             else
             {
                 ReadStartElement();
-                value = ReadContentAsDateTimeOffset().DateTime;
+                value = ReadContentAsDateTime();
                 ReadEndElement();
             }
 
@@ -1667,22 +1667,7 @@ namespace System.Xml
 
             public override DateTime ReadContentAsDateTime()
             {
-                try
-                {
-                    return _reader.ReadContentAsDateTimeOffset().DateTime;
-                }
-                catch (ArgumentException exception)
-                {
-                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlExceptionHelper.CreateConversionException("DateTime", exception));
-                }
-                catch (FormatException exception)
-                {
-                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlExceptionHelper.CreateConversionException("DateTime", exception));
-                }
-                catch (OverflowException exception)
-                {
-                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlExceptionHelper.CreateConversionException("DateTime", exception));
-                }
+                return _reader.ReadContentAsDateTime();
             }
 
             public override Decimal ReadContentAsDecimal()

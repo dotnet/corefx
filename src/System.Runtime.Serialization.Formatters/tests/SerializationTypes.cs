@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 
 [Serializable]
 public struct TypeWithoutNamespace { }
@@ -21,7 +23,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public override bool Equals(object obj)
         {
             var o = obj as SealedObjectWithIntStringFields;
-            if (o == null) return false;
+            if (o == null)
+                return false;
             return
                 EqualityComparer<int>.Default.Equals(Member1, o.Member1) &&
                 EqualityComparer<string>.Default.Equals(Member2, o.Member2) &&
@@ -52,7 +55,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public override bool Equals(object obj)
         {
             var o = obj as ObjectWithIntStringUShortUIntULongAndCustomObjectFields;
-            if (o == null) return false;
+            if (o == null)
+                return false;
 
             return
                 EqualityComparer<int>.Default.Equals(Member1, o.Member1) &&
@@ -78,7 +82,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     }
 
     [Serializable]
-    public class Point
+    public class Point : IComparable<Point>, IEquatable<Point>
     {
         public int X;
         public int Y;
@@ -89,12 +93,25 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Y = y;
         }
 
-        public override bool Equals(object obj)
+        public int CompareTo(object obj)
         {
-            var o = obj as Point;
-            if (o == null) return false;
-            return X == o.X && Y == o.Y;
+            return CompareTo(obj as Point);
         }
+
+        public int CompareTo(Point other)
+        {
+            return other == null ? 1 : 0;
+        }
+
+        public override bool Equals(object obj) => Equals(obj as Point);
+
+        public bool Equals(Point other)
+        {
+            return other != null &&
+                X == other.X &&
+                Y == other.Y;
+        }
+
         public override int GetHashCode() => 1;
     }
 
@@ -115,7 +132,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public override bool Equals(object obj)
         {
             Tree<T> o = obj as Tree<T>;
-            if (o == null) return false;
+            if (o == null)
+                return false;
 
             return
                 EqualityComparer<T>.Default.Equals(Value, o.Value) &&
@@ -138,7 +156,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public override bool Equals(object obj)
         {
             Graph<T> o = obj as Graph<T>;
-            if (o == null) return false;
+            if (o == null)
+                return false;
 
             var toExplore = new Stack<KeyValuePair<Graph<T>, Graph<T>>>();
             toExplore.Push(new KeyValuePair<Graph<T>, Graph<T>>(this, o));
@@ -158,7 +177,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
                 if (Links == null || o.Links == null)
                 {
-                    if (Links != o.Links) return false;
+                    if (Links != o.Links)
+                        return false;
                     continue;
                 }
 
@@ -180,7 +200,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     }
 
     [Serializable]
-    internal sealed class ObjectWithArrays
+    public sealed class ObjectWithArrays
     {
         public int[] IntArray;
         public string[] StringArray;
@@ -192,7 +212,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public override bool Equals(object obj)
         {
             ObjectWithArrays o = obj as ObjectWithArrays;
-            if (o == null) return false;
+            if (o == null)
+                return false;
 
             return
                 EqualityHelpers.ArraysAreEqual(IntArray, o.IntArray) &&
@@ -237,6 +258,12 @@ namespace System.Runtime.Serialization.Formatters.Tests
     }
 
     [Serializable]
+    public class SerializableClassDerivedFromNonSerializableClass : NonSerializableClass
+    {
+        public int AnotherValue;
+    }
+
+    [Serializable]
     public class SerializableClassWithBadField
     {
         public NonSerializableClass Value;
@@ -272,7 +299,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         public override bool Equals(object obj)
         {
-            if (!(obj is StructContainingArraysOfOtherStructs)) return false;
+            if (!(obj is StructContainingArraysOfOtherStructs))
+                return false;
             return EqualityHelpers.ArraysAreEqual(Nested, ((StructContainingArraysOfOtherStructs)obj).Nested);
         }
 
@@ -303,8 +331,10 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public override bool Equals(object obj)
         {
             var o = obj as BasicISerializableObject;
-            if (o == null) return false;
-            if (_data == null || o._data == null) return _data == o._data;
+            if (o == null)
+                return false;
+            if (_data == null || o._data == null)
+                return _data == o._data;
             return _data.Value1 == o._data.Value1 && _data.Value2 == o._data.Value2;
         }
 
@@ -381,7 +411,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     {
         public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
-            var pair = (NonSerializablePair<int,string>)obj;
+            var pair = (NonSerializablePair<int, string>)obj;
             info.AddValue("Value1", pair.Value1);
             info.AddValue("Value2", pair.Value2);
         }
@@ -426,12 +456,71 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public int GetHashCode(object obj) => RuntimeHelpers.GetHashCode(obj);
     }
 
+    [Serializable]
+    public sealed class PointEqualityComparer : IEqualityComparer<Point>
+    {
+        public bool Equals(Point x, Point y) => (x.X == y.X) && (x.Y == y.Y);
+
+        public int GetHashCode(Point obj) => RuntimeHelpers.GetHashCode(obj);
+    }
+
+    [Serializable]
+    public class SimpleKeyedCollection : System.Collections.ObjectModel.KeyedCollection<int, Point>
+    {
+        protected override int GetKeyForItem(Point item)
+        {
+            return item.Y;
+        }
+    }
+
+    [Serializable]
+    internal class GenericTypeWithArg<T>
+    {
+        public T Test;
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+                return false;
+
+            var p = (GenericTypeWithArg<T>)obj;
+            return Test.Equals(p.Test);
+        }
+
+        public override int GetHashCode()
+        {
+            return Test == null ? 0 : Test.GetHashCode();
+        }
+    }
+
+    [Serializable]
+    internal class SomeType
+    {
+        public int SomeField;
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+                return false;
+
+            var p = (SomeType)obj;
+            return SomeField.Equals(p.SomeField);
+        }
+
+        public override int GetHashCode()
+        {
+            return SomeField;
+        }
+    }
+
     internal static class EqualityHelpers
     {
         public static bool ArraysAreEqual<T>(T[] array1, T[] array2)
         {
-            if (array1 == null || array2 == null) return array1 == array2;
-            if (array1.Length != array2.Length) return false;
+            if (array1 == null || array2 == null)
+                return array1 == array2;
+            if (array1.Length != array2.Length)
+                return false;
             for (int i = 0; i < array1.Length; i++)
             {
                 if (!EqualityComparer<T>.Default.Equals(array1[i], array2[i]))
@@ -444,13 +533,17 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         public static bool ArraysAreEqual(Array array1, Array array2)
         {
-            if (array1 == null || array2 == null) return array1 == array2;
-            if (array1.Length != array2.Length) return false;
-            if (array1.Rank != array2.Rank) return false;
+            if (array1 == null || array2 == null)
+                return array1 == array2;
+            if (array1.Length != array2.Length)
+                return false;
+            if (array1.Rank != array2.Rank)
+                return false;
 
             for (int i = 0; i < array1.Rank; i++)
             {
-                if (array1.GetLength(i) != array2.GetLength(i)) return false;
+                if (array1.GetLength(i) != array2.GetLength(i))
+                    return false;
             }
 
             var e1 = array1.GetEnumerator();
@@ -468,13 +561,17 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         public static bool ArraysAreEqual<T>(T[][] array1, T[][] array2)
         {
-            if (array1 == null || array2 == null) return array1 == array2;
-            if (array1.Length != array2.Length) return false;
+            if (array1 == null || array2 == null)
+                return array1 == array2;
+            if (array1.Length != array2.Length)
+                return false;
             for (int i = 0; i < array1.Length; i++)
             {
                 T[] sub1 = array1[i], sub2 = array2[i];
-                if (sub1 == null || sub2 == null && (sub1 != sub2)) return false;
-                if (sub1.Length != sub2.Length) return false;
+                if (sub1 == null || (sub2 == null && (sub1 != sub2)))
+                    return false;
+                if (sub1.Length != sub2.Length)
+                    return false;
                 for (int j = 0; j < sub1.Length; j++)
                 {
                     if (!EqualityComparer<T>.Default.Equals(sub1[j], sub2[j]))
@@ -486,4 +583,15 @@ namespace System.Runtime.Serialization.Formatters.Tests
             return true;
         }
     }
+
+#pragma warning disable 0618 // obsolete warning
+    [Serializable]
+    internal class HashCodeProvider : IHashCodeProvider
+    {
+        public int GetHashCode(object obj)
+        {
+            return 8;
+        }
+    }
+#pragma warning restore 0618
 }

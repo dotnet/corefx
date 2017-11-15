@@ -2,18 +2,22 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics.Tracing;
 #if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
 using Microsoft.Diagnostics.Tracing.Session;
 #endif
-using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if USE_MDT_EVENTSOURCE
+using Microsoft.Diagnostics.Tracing;
+#else
+using System.Diagnostics.Tracing;
+#endif
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace BasicEventSourceTests
 {
@@ -42,7 +46,7 @@ namespace BasicEventSourceTests
             }
         }
 
-        internal void EnableTimer(EventSource eventSource, int pollingTime)
+        internal void EnableTimer(EventSource eventSource, double pollingTime)
         {
             FilteringOptions options = new FilteringOptions();
             options.Args = new Dictionary<string, string>();
@@ -84,9 +88,29 @@ namespace BasicEventSourceTests
         public abstract int PayloadCount { get; }
         public virtual string PayloadString(int propertyIndex, string propertyName)
         {
-            return PayloadValue(propertyIndex, propertyName).ToString();
+            var obj = PayloadValue(propertyIndex, propertyName);
+            var asDict = obj as IDictionary<string, object>;
+            if (asDict != null)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("{");
+                bool first = true;
+                foreach (var key in asDict.Keys)
+                {
+                    if (!first)
+                        sb.Append(",");
+                    first = false;
+                    var value = asDict[key];
+                    sb.Append(key).Append(":").Append(value != null ? value.ToString() : "NULL");
+                }
+                sb.Append("}");
+                return sb.ToString();
+            }
+            if (obj != null)
+                return obj.ToString();
+            return "";
         }
-        public abstract IEnumerable<string> PayloadNames { get; }
+        public abstract IList<string> PayloadNames { get; }
 
 #if DEBUG
         /// <summary>
@@ -211,7 +235,7 @@ namespace BasicEventSourceTests
             }
         }
 
-        #region private
+    #region private
         private void OnEventHelper(TraceEvent data)
         {
             // Ignore manifest events. 
@@ -240,120 +264,80 @@ namespace BasicEventSourceTests
                 return _data.PayloadString(propertyIndex);
             }
             public override int PayloadCount { get { return _data.PayloadNames.Length; } }
-            public override IEnumerable<string> PayloadNames { get { return _data.PayloadNames; } }
+            public override IList<string> PayloadNames { get { return _data.PayloadNames; } }
 
-            #region private
+    #region private
             internal EtwEvent(TraceEvent data) { _data = data.Clone(); }
 
             private TraceEvent _data;
-            #endregion
+    #endregion
         }
 
         private string _dataFileName;
         private volatile TraceEventSession _session;
-        #endregion
+    #endregion
 
     }
 #endif //USE_ETW
 
     public class EventListenerListener : Listener
     {
-#if false // TODO: Enable when we ship the events. GitHub issue #4865
+        private EventListener _listener;
+        private Action<EventSource> _onEventSourceCreated;
+
+#if FEATURE_ETLEVENTS
         public event EventHandler<EventSourceCreatedEventArgs> EventSourceCreated
         {
             add
             {
-                if (this.m_listener != null)
-                {
-                    this.m_listener.EventSourceCreated += value;
-                }
+                if (this._listener != null)
+                    this._listener.EventSourceCreated += value;
             }
             remove
             {
-                if (this.m_listener != null)
-                {
-                    this.m_listener.EventSourceCreated -= value;
-                }
+                if (this._listener != null)
+                    this._listener.EventSourceCreated -= value;
             }
         }
-        
+
         public event EventHandler<EventWrittenEventArgs> EventWritten
         {
             add
             {
-                if (this.m_listener != null)
-                {
-                    this.m_listener.EventWritten += value;
-                }
+                if (this._listener != null)
+                    this._listener.EventWritten += value;
             }
             remove
             {
-                if (this.m_listener != null)
-                {
-                    this.m_listener.EventWritten -= value;
-                }
+                if (this._listener != null)
+                    this._listener.EventWritten -= value;
             }
         }
-#endif // false
+#endif
+
         public EventListenerListener(bool useEventsToListen = false)
         {
-#if false // TODO: enable when we ship the events. GitHub issue #4865
+#if FEATURE_ETLEVENTS
             if (useEventsToListen)
             {
-                m_listener = new HelperEventListener(null);
-                m_listener.EventSourceCreated += mListenerEventSourceCreated;
-                m_listener.EventWritten += mListenerEventWritten;
+                _listener = new HelperEventListener(null);
+                _listener.EventSourceCreated += (sender, eventSourceCreatedEventArgs)
+                    => _onEventSourceCreated?.Invoke(eventSourceCreatedEventArgs.EventSource);
+                _listener.EventWritten += mListenerEventWritten;
             }
             else
-#endif // false
+#endif
             {
                 _listener = new HelperEventListener(this);
             }
         }
 
-        private void mListenerEventWritten(object sender, EventWrittenEventArgs eventData)
-        {
-            OnEvent(new EventListenerEvent(eventData));
-        }
-
-#if false // TODO: enable when we ship the events. GitHub issue #4865
-        private void mListenerEventSourceCreated(object sender, EventSourceCreatedEventArgs eventSource)
-        {
-            if (_onEventSourceCreated != null)
-            {
-                _onEventSourceCreated(eventSource.EventSource);
-            }
-        }
-#endif // false
-
-        public override void EventSourceCommand(string eventSourceName, EventCommand command, FilteringOptions options = null)
-        {
-            if (options == null)
-                options = new FilteringOptions();
-            foreach (EventSource source in EventSource.GetSources())
-            {
-                if (source.Name == eventSourceName)
-                {
-                    DoCommand(source, command, options);
-                    return;
-                }
-            }
-            _onEventSourceCreated += delegate (EventSource sourceBeingCreated)
-            {
-                if (eventSourceName != null && eventSourceName == sourceBeingCreated.Name)
-                {
-                    DoCommand(sourceBeingCreated, command, options);
-                    eventSourceName = null;         // so we only do it once.  
-                }
-            };
-        }
-
         public override void Dispose()
         {
+            EventTestHarness.LogWriteLine("Disposing Listener");
             _listener.Dispose();
         }
 
-        #region private
         private void DoCommand(EventSource source, EventCommand command, FilteringOptions options)
         {
             if (command == EventCommand.Enable)
@@ -364,30 +348,61 @@ namespace BasicEventSourceTests
                 throw new NotImplementedException();
         }
 
+        public override void EventSourceCommand(string eventSourceName, EventCommand command, FilteringOptions options = null)
+        {
+            EventTestHarness.LogWriteLine("Sending command {0} to EventSource {1} Options {2}", eventSourceName, command, options);
+
+            if (options == null)
+                options = new FilteringOptions();
+
+            foreach (EventSource source in EventSource.GetSources())
+            {
+                if (source.Name == eventSourceName)
+                {
+                    DoCommand(source, command, options);
+                    return;
+                }
+            }
+
+            _onEventSourceCreated += delegate (EventSource sourceBeingCreated)
+            {
+                if (eventSourceName != null && eventSourceName == sourceBeingCreated.Name)
+                {
+                    DoCommand(sourceBeingCreated, command, options);
+                    eventSourceName = null;         // so we only do it once.  
+                }
+            };
+        }
+
+        private void mListenerEventWritten(object sender, EventWrittenEventArgs eventData)
+        {
+            OnEvent(new EventListenerEvent(eventData));
+        }
+
         private class HelperEventListener : EventListener
         {
-            public HelperEventListener(EventListenerListener forwardTo) { _forwardTo = forwardTo; }
-            protected override void OnEventWritten(EventWrittenEventArgs eventData)
-            {
-#if false // TODO: EventListener events are not enabled in coreclr. GitHub issue #4865
-                base.OnEventWritten(eventData);
-#endif // false
+            private readonly EventListenerListener _forwardTo;
 
-                if (_forwardTo != null && _forwardTo.OnEvent != null)
-                {
-                    _forwardTo.OnEvent(new EventListenerEvent(eventData));
-                }
+            public HelperEventListener(EventListenerListener forwardTo)
+            {
+                _forwardTo = forwardTo;
             }
 
             protected override void OnEventSourceCreated(EventSource eventSource)
             {
                 base.OnEventSourceCreated(eventSource);
 
-                if (_forwardTo != null && _forwardTo._onEventSourceCreated != null)
-                    _forwardTo._onEventSourceCreated(eventSource);
+                _forwardTo?._onEventSourceCreated?.Invoke(eventSource);
             }
 
-            private EventListenerListener _forwardTo;
+            protected override void OnEventWritten(EventWrittenEventArgs eventData)
+            {
+#if FEATURE_ETLEVENTS
+                // OnEventWritten is abstract in netfx <= 461
+                base.OnEventWritten(eventData);
+#endif
+                _forwardTo?.OnEvent?.Invoke(new EventListenerEvent(eventData));
+            }
         }
 
         /// <summary>
@@ -395,35 +410,33 @@ namespace BasicEventSourceTests
         /// </summary>
         internal class EventListenerEvent : Event
         {
+            private readonly EventWrittenEventArgs _data;
+
             public override bool IsEventListener { get { return true; } }
+
             public override string ProviderName { get { return _data.EventSource.Name; } }
+
             public override string EventName { get { return _data.EventName; } }
+
+            public override IList<string> PayloadNames { get { return _data.PayloadNames; } }
+
+            public override int PayloadCount
+            {
+                get { return _data.Payload?.Count ?? 0; }
+            }
+
+            internal EventListenerEvent(EventWrittenEventArgs data)
+            {
+                _data = data;
+            }
+
             public override object PayloadValue(int propertyIndex, string propertyName)
             {
                 if (propertyName != null)
                     Assert.Equal(propertyName, _data.PayloadNames[propertyIndex]);
+
                 return _data.Payload[propertyIndex];
             }
-            public override int PayloadCount
-            {
-                get
-                {
-                    if (_data.Payload == null)
-                        return 0;
-                    return _data.Payload.Count;
-                }
-            }
-            public override IEnumerable<string> PayloadNames { get { return _data.PayloadNames; } }
-
-
-            #region private
-            internal EventListenerEvent(EventWrittenEventArgs data) { _data = data; }
-            private EventWrittenEventArgs _data;
-            #endregion
         }
-
-        private EventListener _listener;
-        private Action<EventSource> _onEventSourceCreated;
-        #endregion
     }
 }

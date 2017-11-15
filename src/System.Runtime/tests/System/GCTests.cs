@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
+using System.Threading;
 using System.Runtime;
 using Xunit;
 
@@ -15,11 +17,11 @@ namespace System.Tests
         [Fact]
         public static void AddMemoryPressure_InvalidBytesAllocated_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("bytesAllocated", () => GC.AddMemoryPressure(-1)); // Bytes allocated < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("bytesAllocated", () => GC.AddMemoryPressure(-1)); // Bytes allocated < 0
 
             if (s_is32Bits)
             {
-                Assert.Throws<ArgumentOutOfRangeException>("pressure", () => GC.AddMemoryPressure((long)int.MaxValue + 1)); // Bytes allocated > int.MaxValue on 32 bit platforms
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("pressure", () => GC.AddMemoryPressure((long)int.MaxValue + 1)); // Bytes allocated > int.MaxValue on 32 bit platforms
             }
         }
 
@@ -35,7 +37,7 @@ namespace System.Tests
         [Fact]
         public static void Collect_Int_NegativeGeneration_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("generation", () => GC.Collect(-1)); // Generation < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("generation", () => GC.Collect(-1)); // Generation < 0
         }
 
         [Theory]
@@ -49,28 +51,26 @@ namespace System.Tests
                 int oldCollectionCount = GC.CollectionCount(gen);
                 b = null;
 
-                GC.Collect(gen, GCCollectionMode.Default);
+                GC.Collect(gen, mode);
 
                 Assert.True(GC.CollectionCount(gen) > oldCollectionCount);
             }
         }
 
         [Fact]
-        public static void Collect_Int_GCCollectionMode_Invalid()
+        public static void Collect_NegativeGenerationCount_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("generation", () => GC.Collect(-1, GCCollectionMode.Default)); // Generation < 0
-
-            Assert.Throws<ArgumentOutOfRangeException>("mode", () => GC.Collect(2, GCCollectionMode.Default - 1)); // Invalid collection mode
-            Assert.Throws<ArgumentOutOfRangeException>("mode", () => GC.Collect(2, GCCollectionMode.Optimized + 1)); // Invalid collection mode
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("generation", () => GC.Collect(-1, GCCollectionMode.Default));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("generation", () => GC.Collect(-1, GCCollectionMode.Default, false));
         }
 
-        [Fact]
-        public static void Collect_Int_GCCollectionMode_Bool_Invalid()
+        [Theory]
+        [InlineData(GCCollectionMode.Default - 1)]
+        [InlineData(GCCollectionMode.Optimized + 1)]
+        public static void Collection_InvalidCollectionMode_ThrowsArgumentOutOfRangeException(GCCollectionMode mode)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("generation", () => GC.Collect(-1, GCCollectionMode.Default, false)); // Generation < 0
-
-            Assert.Throws<ArgumentOutOfRangeException>("mode", () => GC.Collect(2, GCCollectionMode.Default - 1, false)); // Invalid collection mode
-            Assert.Throws<ArgumentOutOfRangeException>("mode", () => GC.Collect(2, GCCollectionMode.Optimized + 1, false)); // Invalid collection mode
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("mode", "Enum value was out of legal range.", () => GC.Collect(2, mode));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("mode", "Enum value was out of legal range.", () => GC.Collect(2, mode, false)); 
         }
 
         [Fact]
@@ -269,7 +269,7 @@ namespace System.Tests
         [Fact]
         public static void SuppressFinalizer_NullObject_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("obj", () => GC.SuppressFinalize(null)); // Obj is null
+            AssertExtensions.Throws<ArgumentNullException>("obj", () => GC.SuppressFinalize(null)); // Obj is null
         }
 
         [Fact]
@@ -281,7 +281,7 @@ namespace System.Tests
         [Fact]
         public static void ReRegisterFoFinalize_NullObject_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("obj", () => GC.ReRegisterForFinalize(null)); // Obj is null
+            AssertExtensions.Throws<ArgumentNullException>("obj", () => GC.ReRegisterForFinalize(null)); // Obj is null
         }
 
         private class ReRegisterForFinalizeTest
@@ -324,17 +324,17 @@ namespace System.Tests
         [Fact]
         public static void CollectionCount_NegativeGeneration_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("generation", () => GC.CollectionCount(-1)); // Generation < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("generation", () => GC.CollectionCount(-1)); // Generation < 0
         }
 
         [Fact]
         public static void RemoveMemoryPressure_InvalidBytesAllocated_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("bytesAllocated", () => GC.RemoveMemoryPressure(-1)); // Bytes allocated < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("bytesAllocated", () => GC.RemoveMemoryPressure(-1)); // Bytes allocated < 0
 
             if (s_is32Bits)
             {
-                Assert.Throws<ArgumentOutOfRangeException>("bytesAllocated", () => GC.RemoveMemoryPressure((long)int.MaxValue + 1)); // Bytes allocated > int.MaxValue on 32 bit platforms
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("bytesAllocated", () => GC.RemoveMemoryPressure((long)int.MaxValue + 1)); // Bytes allocated > int.MaxValue on 32 bit platforms
             }
         }
 
@@ -418,5 +418,380 @@ namespace System.Tests
         [InlineData(GCLatencyMode.LowLatency)]
         [InlineData(GCLatencyMode.SustainedLowLatency)]
         public static void LatencyRoundtrips_LowLatency(GCLatencyMode value) => LatencyRoundtrips(value);
+    }
+
+    public class GCExtendedTests : RemoteExecutorTestBase
+    {
+        private const int TimeoutMilliseconds = 10 * 30 * 1000; //if full GC is triggered it may take a while
+
+        /// <summary>
+        /// NoGC regions will be automatically exited if more than the requested budget
+        /// is allocated while still in the region. In order to avoid this, the budget is set
+        /// to be higher than what the test should be allocating. When running on CoreCLR/DesktopCLR,
+        /// these tests generally do not allocate because they are implemented as fcalls into the runtime
+        /// itself, but the CoreRT runtime is written in mostly managed code and tends to allocate more.
+        ///
+        /// This budget should be high enough to avoid exiting no-gc regions when doing normal unit
+        /// tests, regardless of the runtime.
+        /// </summary>
+        private const int NoGCRequestedBudget = 8192;
+
+        [Fact]
+        [OuterLoop]
+        public static void GetGeneration_WeakReference()
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke(() =>
+                {
+
+                    Func<WeakReference> getweakref = delegate ()
+                    {
+                        Version myobj = new Version();
+                        var wkref = new WeakReference(myobj);
+
+                        Assert.True(GC.TryStartNoGCRegion(NoGCRequestedBudget));
+                        Assert.True(GC.GetGeneration(wkref) >= 0);
+                        Assert.Equal(GC.GetGeneration(wkref), GC.GetGeneration(myobj));
+                        GC.EndNoGCRegion();
+
+                        myobj = null;
+                        return wkref;
+                    };
+
+                    WeakReference weakref = getweakref();
+                    Assert.True(weakref != null);
+#if !DEBUG
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
+                    Assert.Throws<ArgumentNullException>(() => GC.GetGeneration(weakref));
+#endif
+                    return SuccessExitCode;
+                }, options).Dispose();
+
+        }
+
+        [Fact]
+        public static void GCNotificationNegTests()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => GC.RegisterForFullGCNotification(-1, -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => GC.RegisterForFullGCNotification(100, -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => GC.RegisterForFullGCNotification(-1, 100));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => GC.RegisterForFullGCNotification(10, -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => GC.RegisterForFullGCNotification(-1, 10));
+            Assert.Throws<ArgumentOutOfRangeException>(() => GC.RegisterForFullGCNotification(100, 10));
+            Assert.Throws<ArgumentOutOfRangeException>(() => GC.RegisterForFullGCNotification(10, 100));
+
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => GC.WaitForFullGCApproach(-2));
+            Assert.Throws<ArgumentOutOfRangeException>(() => GC.WaitForFullGCComplete(-2));
+        }
+
+        [Theory]
+        [InlineData(true, -1)]
+        [InlineData(false, -1)]
+        [InlineData(true, 0)]
+        [InlineData(false, 0)]
+        [InlineData(true, 100)]
+        [InlineData(false, 100)]
+        [InlineData(true, int.MaxValue)]
+        [InlineData(false, int.MaxValue)]
+        [OuterLoop]
+        public static void GCNotificationTests(bool approach, int timeout)
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke((approachString, timeoutString) =>
+                {
+                    TestWait(bool.Parse(approachString), int.Parse(timeoutString));
+                    return SuccessExitCode;
+                }, approach.ToString(), timeout.ToString(), options).Dispose();
+        }
+
+        [Fact]
+        [OuterLoop]
+        public static void TryStartNoGCRegion_EndNoGCRegion_ThrowsInvalidOperationException()
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke(() =>
+                {
+                    Assert.Throws<InvalidOperationException>(() => GC.EndNoGCRegion());
+                    return SuccessExitCode;
+                }, options).Dispose();
+        }
+
+        [MethodImpl(MethodImplOptions.NoOptimization)]
+        private static void AllocateALot()
+        {
+            for (int i = 0; i < 10000; i++)
+            {
+                var array = new long[NoGCRequestedBudget];
+                GC.KeepAlive(array);
+            }
+        }
+
+        [Fact]
+        [OuterLoop]
+        public static void TryStartNoGCRegion_ExitThroughAllocation()
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke(() =>
+                {
+                    Assert.True(GC.TryStartNoGCRegion(1024));
+
+                    AllocateALot();
+
+                    // at this point, the GC should have booted us out of the no GC region
+                    // since we allocated too much.
+                    Assert.Throws<InvalidOperationException>(() => GC.EndNoGCRegion());
+                    return SuccessExitCode;
+                }, options).Dispose();
+        }
+
+        [Fact]
+        [OuterLoop]
+        public static void TryStartNoGCRegion_StartWhileInNoGCRegion()
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke(() =>
+            {
+                Assert.True(GC.TryStartNoGCRegion(NoGCRequestedBudget));
+                Assert.Throws<InvalidOperationException>(() => GC.TryStartNoGCRegion(NoGCRequestedBudget));
+
+                Assert.Throws<InvalidOperationException>(() => GC.EndNoGCRegion());
+
+                return SuccessExitCode;
+            }, options).Dispose();
+        }
+
+        [Fact]
+        [OuterLoop]
+        public static void TryStartNoGCRegion_StartWhileInNoGCRegion_BlockingCollection()
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke(() =>
+            {
+                Assert.True(GC.TryStartNoGCRegion(NoGCRequestedBudget, true));
+                Assert.Throws<InvalidOperationException>(() => GC.TryStartNoGCRegion(NoGCRequestedBudget, true));
+
+                Assert.Throws<InvalidOperationException>(() => GC.EndNoGCRegion());
+
+                return SuccessExitCode;
+            }, options).Dispose();
+        }
+
+        [Fact]
+        [OuterLoop]
+        public static void TryStartNoGCRegion_StartWhileInNoGCRegion_LargeObjectHeapSize()
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke(() =>
+            {
+                Assert.True(GC.TryStartNoGCRegion(NoGCRequestedBudget, NoGCRequestedBudget));
+                Assert.Throws<InvalidOperationException>(() => GC.TryStartNoGCRegion(NoGCRequestedBudget, NoGCRequestedBudget));
+
+                Assert.Throws<InvalidOperationException>(() => GC.EndNoGCRegion());
+
+                return SuccessExitCode;
+            }, options).Dispose();
+        }
+
+        [Fact]
+        [OuterLoop]
+        public static void TryStartNoGCRegion_StartWhileInNoGCRegion_BlockingCollectionAndLOH()
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke(() =>
+            {
+                Assert.True(GC.TryStartNoGCRegion(NoGCRequestedBudget, NoGCRequestedBudget, true));
+                Assert.Throws<InvalidOperationException>(() => GC.TryStartNoGCRegion(NoGCRequestedBudget, NoGCRequestedBudget, true));
+
+                Assert.Throws<InvalidOperationException>(() => GC.EndNoGCRegion());
+
+                return SuccessExitCode;
+            }, options).Dispose();
+        }
+
+        [Fact]
+        [OuterLoop]
+        public static void TryStartNoGCRegion_SettingLatencyMode_ThrowsInvalidOperationException()
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke(() =>
+            {
+                // The budget for this test is 4mb, because the act of throwing an exception with a message
+                // contained in a resource file has to potential to allocate a lot on CoreRT. In particular, when compiling
+                // in multi-file mode, this will trigger a resource lookup in System.Private.CoreLib.
+                //
+                // In addition to this, the Assert.Throws xunit combinator tends to also allocate a lot.
+                Assert.True(GC.TryStartNoGCRegion(4000 * 1024, true));
+                Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+                Assert.Throws<InvalidOperationException>(() => GCSettings.LatencyMode = GCLatencyMode.LowLatency);
+
+                GC.EndNoGCRegion();
+
+                return SuccessExitCode;
+            }, options).Dispose();
+        }
+
+        [Fact]
+        [OuterLoop]
+        public static void TryStartNoGCRegion_SOHSize()
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke(() =>
+                {
+
+                    Assert.True(GC.TryStartNoGCRegion(NoGCRequestedBudget));
+                    Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+                    GC.EndNoGCRegion();
+
+                    return SuccessExitCode;
+
+                }, options).Dispose();
+        }
+
+        [Fact]
+        [OuterLoop]
+        public static void TryStartNoGCRegion_SOHSize_BlockingCollection()
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke(() =>
+            {
+                Assert.True(GC.TryStartNoGCRegion(NoGCRequestedBudget, true));
+                Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+                GC.EndNoGCRegion();
+
+                return SuccessExitCode;
+
+            }, options).Dispose();
+        }
+
+        [Fact]
+        [OuterLoop]
+        public static void TryStartNoGCRegion_SOHSize_LOHSize()
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke(() =>
+            {
+                Assert.True(GC.TryStartNoGCRegion(NoGCRequestedBudget, NoGCRequestedBudget));
+                Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+                GC.EndNoGCRegion();
+
+                return SuccessExitCode;
+
+            }, options).Dispose();
+        }
+
+        [Fact]
+        [OuterLoop]
+        public static void TryStartNoGCRegion_SOHSize_LOHSize_BlockingCollection()
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke(() =>
+            {
+                Assert.True(GC.TryStartNoGCRegion(NoGCRequestedBudget, NoGCRequestedBudget, true));
+                Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+                GC.EndNoGCRegion();
+
+                return SuccessExitCode;
+
+            }, options).Dispose();
+        }
+
+        [Theory]
+        [OuterLoop]
+        [InlineData(0)]
+        [InlineData(-1)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Difference in behavior, full framework doesn't throw, fixed in .NET Core")]
+        public static void TryStartNoGCRegion_TotalSizeOutOfRange(long size)
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke(sizeString =>
+            {
+                Assert.Throws<ArgumentOutOfRangeException>("totalSize", () => GC.TryStartNoGCRegion(long.Parse(sizeString)));
+                return SuccessExitCode;
+            }, size.ToString(), options).Dispose();
+        }
+
+        [Theory]
+        [OuterLoop]
+        [InlineData(0)]                   // invalid because lohSize ==
+        [InlineData(-1)]                  // invalid because lohSize < 0
+        [InlineData(1152921504606846976)] // invalid because lohSize > totalSize
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Difference in behavior, full framework doesn't throw, fixed in .NET Core")]
+        public static void TryStartNoGCRegion_LOHSizeInvalid(long size)
+        {
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.TimeOut = TimeoutMilliseconds;
+            RemoteInvoke(sizeString =>
+            {
+                Assert.Throws<ArgumentOutOfRangeException>("lohSize", () => GC.TryStartNoGCRegion(1024, long.Parse(sizeString)));
+                return SuccessExitCode;
+            }, size.ToString(), options).Dispose();
+        }
+
+        public static void TestWait(bool approach, int timeout)
+        {
+            GCNotificationStatus result = GCNotificationStatus.Failed;
+            Thread cancelProc = null;
+
+            // Since we need to test an infinite (or very large) wait but the API won't return, spawn off a thread which
+            // will cancel the wait after a few seconds
+            //
+            bool cancelTimeout = (timeout == -1) || (timeout > 10000);
+
+            GC.RegisterForFullGCNotification(20, 20);
+
+            try
+            {
+                if (cancelTimeout)
+                {
+                    cancelProc = new Thread(new ThreadStart(CancelProc));
+                    cancelProc.Start();
+                }
+
+                if (approach)
+                    result = GC.WaitForFullGCApproach(timeout);
+                else
+                    result = GC.WaitForFullGCComplete(timeout);
+            }
+            catch (Exception e)
+            {
+                Assert.True(false, $"({approach}, {timeout}) Error - Unexpected exception received: {e.ToString()}");
+            }
+            finally
+            {
+                if (cancelProc != null)
+                    cancelProc.Join();
+            }
+
+            if (cancelTimeout)
+            {
+                Assert.True(result == GCNotificationStatus.Canceled, $"({approach}, {timeout}) Error - WaitForFullGCApproach result not Cancelled");
+            }
+            else
+            {
+                Assert.True(result == GCNotificationStatus.Timeout, $"({approach}, {timeout}) Error - WaitForFullGCApproach result not Timeout");
+            }
+        }
+
+        public static void CancelProc()
+        {
+            Thread.Sleep(500);
+            GC.CancelFullGCNotification();
+        }
     }
 }

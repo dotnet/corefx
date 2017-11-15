@@ -87,7 +87,7 @@ namespace System.Net.Http
         private TimeSpan _sendTimeout = TimeSpan.FromSeconds(30);
         private TimeSpan _receiveHeadersTimeout = TimeSpan.FromSeconds(30);
         private TimeSpan _receiveDataTimeout = TimeSpan.FromSeconds(30);
-        private int _maxResponseHeadersLength = 64 * 1024;
+        private int _maxResponseHeadersLength = HttpHandlerDefaults.DefaultMaxResponseHeadersLength;
         private int _maxResponseDrainSize = 64 * 1024;
         private IDictionary<String, Object> _properties; // Only create dictionary when required.
         private volatile bool _operationStarted;
@@ -259,6 +259,11 @@ namespace System.Net.Http
         {
             get
             {
+                if (_clientCertificateOption != ClientCertificateOption.Manual)
+                {
+                    throw new InvalidOperationException(SR.Format(SR.net_http_invalid_enable_first, "ClientCertificateOptions", "Manual"));
+                }
+
                 if (_clientCertificates == null)
                 {
                     _clientCertificates = new X509Certificate2Collection();
@@ -716,7 +721,7 @@ namespace System.Net.Http
                             Interop.WinHttp.WINHTTP_NO_PROXY_NAME,
                             Interop.WinHttp.WINHTTP_NO_PROXY_BYPASS,
                             (int)Interop.WinHttp.WINHTTP_FLAG_ASYNC);
-                            
+
                         if (sessionHandle.IsInvalid)
                         {
                             int lastError = Marshal.GetLastWin32Error();
@@ -842,7 +847,7 @@ namespace System.Net.Http
                 // will have the side-effect of WinHTTP cancelling any pending I/O and accelerating its callbacks
                 // on the handle and thus releasing the awaiting tasks in the loop below. This helps to provide
                 // a more timely, cooperative, cancellation pattern.
-                using (state.CancellationToken.Register(s => ((WinHttpRequestState)s).RequestHandle.Dispose(), state))                
+                using (state.CancellationToken.Register(s => ((WinHttpRequestState)s).RequestHandle.Dispose(), state))
                 {
                     do
                     {
@@ -912,7 +917,7 @@ namespace System.Net.Http
         private void SetSessionHandleTlsOptions(SafeWinHttpHandle sessionHandle)
         {
             uint optionData = 0;
-            SslProtocols sslProtocols = 
+            SslProtocols sslProtocols =
                 (_sslProtocols == SslProtocols.None) ? SecurityProtocol.DefaultSecurityProtocols : _sslProtocols;
 
             if ((sslProtocols & SslProtocols.Tls) != 0)
@@ -1071,7 +1076,7 @@ namespace System.Net.Http
                     ref optionData);
             }
 
-            optionData = _automaticRedirection ? 
+            optionData = _automaticRedirection ?
                 Interop.WinHttp.WINHTTP_OPTION_REDIRECT_POLICY_DISALLOW_HTTPS_TO_HTTP :
                 Interop.WinHttp.WINHTTP_OPTION_REDIRECT_POLICY_NEVER;
             SetWinHttpOption(requestHandle, Interop.WinHttp.WINHTTP_OPTION_REDIRECT_POLICY, ref optionData);
@@ -1089,7 +1094,7 @@ namespace System.Net.Http
 
         private void SetRequestHandleTlsOptions(SafeWinHttpHandle requestHandle)
         {
-            // If we have a custom server certificate validation callback method then 
+            // If we have a custom server certificate validation callback method then
             // we need to have WinHTTP ignore some errors so that the callback method
             // will have a chance to be called.
             uint optionData;
@@ -1120,11 +1125,11 @@ namespace System.Net.Http
             X509Certificate2 clientCertificate = null;
             if (_clientCertificateOption == ClientCertificateOption.Manual)
             {
-                clientCertificate = WinHttpCertificateHelper.GetEligibleClientCertificate(ClientCertificates);
+                clientCertificate = CertificateHelper.GetEligibleClientCertificate(ClientCertificates);
             }
             else
             {
-                clientCertificate = WinHttpCertificateHelper.GetEligibleClientCertificate();
+                clientCertificate = CertificateHelper.GetEligibleClientCertificate();
             }
 
             if (clientCertificate != null)
@@ -1168,7 +1173,7 @@ namespace System.Net.Http
 
         private void SetRequestHandleBufferingOptions(SafeWinHttpHandle requestHandle)
         {
-            uint optionData = (uint)_maxResponseHeadersLength;
+            uint optionData = (uint)(_maxResponseHeadersLength * 1024);
             SetWinHttpOption(requestHandle, Interop.WinHttp.WINHTTP_OPTION_MAX_RESPONSE_HEADER_SIZE, ref optionData);
             optionData = (uint)_maxResponseDrainSize;
             SetWinHttpOption(requestHandle, Interop.WinHttp.WINHTTP_OPTION_MAX_RESPONSE_DRAIN_SIZE, ref optionData);
@@ -1177,21 +1182,17 @@ namespace System.Net.Http
         private void SetRequestHandleHttp2Options(SafeWinHttpHandle requestHandle, Version requestVersion)
         {
             Debug.Assert(requestHandle != null);
-            if (requestVersion == HttpVersion20)
+            uint optionData = (requestVersion == HttpVersion20) ? Interop.WinHttp.WINHTTP_PROTOCOL_FLAG_HTTP2 : 0;
+            if (Interop.WinHttp.WinHttpSetOption(
+                requestHandle,
+                Interop.WinHttp.WINHTTP_OPTION_ENABLE_HTTP_PROTOCOL,
+                ref optionData))
             {
-                WinHttpTraceHelper.Trace("WinHttpHandler.SetRequestHandleHttp2Options: setting HTTP/2 option");
-                uint optionData = Interop.WinHttp.WINHTTP_PROTOCOL_FLAG_HTTP2;
-                if (Interop.WinHttp.WinHttpSetOption(
-                    requestHandle,
-                    Interop.WinHttp.WINHTTP_OPTION_ENABLE_HTTP_PROTOCOL,
-                    ref optionData))
-                {
-                    WinHttpTraceHelper.Trace("WinHttpHandler.SetRequestHandleHttp2Options: HTTP/2 option supported");
-                }
-                else
-                {
-                    WinHttpTraceHelper.Trace("WinHttpHandler.SetRequestHandleHttp2Options: HTTP/2 option not supported");
-                }
+                WinHttpTraceHelper.Trace("WinHttpHandler.SetRequestHandleHttp2Options: HTTP/2 option supported, setting to {0}", optionData);
+            }
+            else
+            {
+                WinHttpTraceHelper.Trace("WinHttpHandler.SetRequestHandleHttp2Options: HTTP/2 option not supported");
             }
         }
 
@@ -1244,9 +1245,9 @@ namespace System.Net.Http
                 // If the exception was due to the cancellation token being canceled, throw cancellation exception.
                 state.Tcs.TrySetCanceled(state.CancellationToken);
             }
-            else if (ex is WinHttpException || ex is IOException)
+            else if (ex is WinHttpException || ex is IOException || ex is InvalidOperationException)
             {
-                // Wrap expected exceptions as HttpRequestExceptions since this is considered an error during 
+                // Wrap expected exceptions as HttpRequestExceptions since this is considered an error during
                 // execution. All other exception types, including ArgumentExceptions and ProtocolViolationExceptions
                 // are 'unexpected' or caused by user error and should not be wrapped.
                 state.Tcs.TrySetException(new HttpRequestException(SR.net_http_client_execution_error, ex));
@@ -1307,7 +1308,7 @@ namespace System.Net.Http
                 }
             }
         }
-        
+
         private void ThrowOnInvalidHandle(SafeWinHttpHandle handle)
         {
             if (handle.IsInvalid)
@@ -1317,7 +1318,7 @@ namespace System.Net.Http
                 throw WinHttpException.CreateExceptionUsingError(lastError);
             }
         }
-        
+
         private RendezvousAwaitable<int> InternalSendRequestAsync(WinHttpRequestState state)
         {
             lock (state.Lock)
@@ -1332,17 +1333,22 @@ namespace System.Net.Http
                     0,
                     state.ToIntPtr()))
                 {
+                    int lastError = Marshal.GetLastWin32Error();
+                    Debug.Assert((unchecked((int)lastError) != Interop.WinHttp.ERROR_INSUFFICIENT_BUFFER &&
+                        unchecked((int)lastError) != unchecked((int)0x80090321)), // SEC_E_BUFFER_TOO_SMALL
+                        $"Unexpected async error in WinHttpRequestCallback: {unchecked((int)lastError)}");
+
                     // Dispose (which will unpin) the state object. Since this failed, WinHTTP won't associate
                     // our context value (state object) to the request handle. And thus we won't get HANDLE_CLOSING
                     // notifications which would normally cause the state object to be unpinned and disposed.
                     state.Dispose();
-                    WinHttpException.ThrowExceptionUsingLastError();
+                    throw WinHttpException.CreateExceptionUsingError(lastError);
                 }
             }
 
             return state.LifecycleAwaitable;
         }
-        
+
         private async Task InternalSendRequestBodyAsync(WinHttpRequestState state, bool chunkedModeForSend)
         {
             using (var requestStream = new WinHttpRequestStream(state, chunkedModeForSend))
@@ -1353,7 +1359,7 @@ namespace System.Net.Http
                 await requestStream.EndUploadAsync(state.CancellationToken).ConfigureAwait(false);
             }
         }
-        
+
         private RendezvousAwaitable<int> InternalReceiveResponseHeadersAsync(WinHttpRequestState state)
         {
             lock (state.Lock)

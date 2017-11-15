@@ -2,9 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+
+#if XMLSERIALIZERGENERATOR
+namespace Microsoft.XmlSerializer.Generator
+{
+    internal class XmlSerializationPrimitiveWriter : Microsoft.XmlSerializer.Generator.XmlSerializationWriter
+#else
 namespace System.Xml.Serialization
 {
     internal class XmlSerializationPrimitiveWriter : System.Xml.Serialization.XmlSerializationWriter
+#endif
     {
         internal void Write_string(object o)
         {
@@ -228,6 +236,7 @@ namespace System.Xml.Serialization
         }
     }
 
+#if !XMLSERIALIZERGENERATOR
     internal class XmlSerializationPrimitiveReader : System.Xml.Serialization.XmlSerializationReader
     {
         internal object Read_string()
@@ -750,4 +759,5 @@ namespace System.Xml.Serialization
             _id1_QName = Reader.NameTable.Add(@"QName");
         }
     }
+#endif
 }

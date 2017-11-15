@@ -223,7 +223,12 @@ namespace System.Linq.Tests
             Assert.Empty(ordered.Skip(100).Take(20));
             Assert.Equal(Enumerable.Range(10, 20), ordered.Take(30).Skip(10));
             Assert.Equal(Enumerable.Range(10, 1), ordered.Take(11).Skip(10));
+        }
 
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "This fails with an OOM with the full .NET Framework, as it iterates through the large array. See https://github.com/dotnet/corefx/pull/6821.")]
+        public void TakeAndSkip_DoesntIterateRangeUnlessNecessary()
+        {
             Assert.Empty(Enumerable.Range(0, int.MaxValue).Take(int.MaxValue).OrderBy(i => i).Skip(int.MaxValue - 4).Skip(15));
         }
 
@@ -423,7 +428,7 @@ namespace System.Linq.Tests
             Assert.Equal(6, source.ElementAt(2));
             Assert.Equal(8, source.ElementAtOrDefault(3));
             Assert.Equal(0, source.ElementAtOrDefault(8));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(-2));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(-2));
         }
 
         [Fact]

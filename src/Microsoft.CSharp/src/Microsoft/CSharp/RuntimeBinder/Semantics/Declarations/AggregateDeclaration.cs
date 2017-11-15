@@ -10,7 +10,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     //
     // AggregateDeclaration
     //
-    // AggregateDeclaration - represents a declaration of a aggregate type. With partial classes,
+    // AggregateDeclaration - represents a declaration of an aggregate type. With partial classes,
     // an aggregate type might be declared in multiple places.  This symbol represents
     // on of the declarations.
     //
@@ -18,16 +18,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // ----------------------------------------------------------------------------
 
     // Either a ClassNode or a DelegateNode
-    internal sealed class AggregateDeclaration : Declaration
+    internal sealed class AggregateDeclaration : ParentSymbol
     {
+        public NamespaceOrAggregateSymbol bag;
+
+        public AggregateDeclaration declNext;
+
         public AggregateSymbol Agg()
         {
-            return bag.AsAggregateSymbol();
-        }
-
-        public new InputFile getInputFile()
-        {
-            return null;
+            return bag as AggregateSymbol;
         }
 
         public Assembly GetAssembly()

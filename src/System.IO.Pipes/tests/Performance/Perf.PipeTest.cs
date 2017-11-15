@@ -10,8 +10,9 @@ namespace System.IO.Pipes.Tests
 {
     public abstract class Perf_PipeTest : PipeTestBase
     {
-        [Benchmark]
+        [Benchmark(Skip = "https://github.com/dotnet/corefx/issues/18290")]
         [InlineData(1000000)]
+        [ActiveIssue(18290, TestPlatforms.AnyUnix)]
         public async Task ReadWrite(int size)
         {
             Random rand = new Random(314);

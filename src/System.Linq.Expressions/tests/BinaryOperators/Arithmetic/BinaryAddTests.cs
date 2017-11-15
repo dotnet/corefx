@@ -487,7 +487,7 @@ namespace System.Linq.Expressions.Tests
             Expression exp = Expression.Add(Expression.Constant(0), Expression.Constant(0));
             Assert.False(exp.CanReduce);
             Assert.Same(exp, exp.Reduce());
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
@@ -496,31 +496,31 @@ namespace System.Linq.Expressions.Tests
             Expression exp = Expression.AddChecked(Expression.Constant(0), Expression.Constant(0));
             Assert.False(exp.CanReduce);
             Assert.Same(exp, exp.Reduce());
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
         public static void ThrowsOnLeftNull()
         {
-            Assert.Throws<ArgumentNullException>("left", () => Expression.Add(null, Expression.Constant("")));
+            AssertExtensions.Throws<ArgumentNullException>("left", () => Expression.Add(null, Expression.Constant("")));
         }
 
         [Fact]
         public static void ThrowsOnRightNull()
         {
-            Assert.Throws<ArgumentNullException>("right", () => Expression.Add(Expression.Constant(""), null));
+            AssertExtensions.Throws<ArgumentNullException>("right", () => Expression.Add(Expression.Constant(""), null));
         }
 
         [Fact]
         public static void CheckedThrowsOnLeftNull()
         {
-            Assert.Throws<ArgumentNullException>("left", () => Expression.AddChecked(null, Expression.Constant("")));
+            AssertExtensions.Throws<ArgumentNullException>("left", () => Expression.AddChecked(null, Expression.Constant("")));
         }
 
         [Fact]
         public static void CheckedThrowsOnRightNull()
         {
-            Assert.Throws<ArgumentNullException>("right", () => Expression.AddChecked(Expression.Constant(""), null));
+            AssertExtensions.Throws<ArgumentNullException>("right", () => Expression.AddChecked(Expression.Constant(""), null));
         }
 
         private static class Unreadable<T>
@@ -535,28 +535,28 @@ namespace System.Linq.Expressions.Tests
         public static void ThrowsOnLeftUnreadable()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
-            Assert.Throws<ArgumentException>("left", () => Expression.Add(value, Expression.Constant(1)));
+            AssertExtensions.Throws<ArgumentException>("left", () => Expression.Add(value, Expression.Constant(1)));
         }
 
         [Fact]
         public static void ThrowsOnRightUnreadable()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
-            Assert.Throws<ArgumentException>("right", () => Expression.Add(Expression.Constant(1), value));
+            AssertExtensions.Throws<ArgumentException>("right", () => Expression.Add(Expression.Constant(1), value));
         }
 
         [Fact]
         public static void CheckedThrowsOnLeftUnreadable()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
-            Assert.Throws<ArgumentException>("left", () => Expression.AddChecked(value, Expression.Constant(1)));
+            AssertExtensions.Throws<ArgumentException>("left", () => Expression.AddChecked(value, Expression.Constant(1)));
         }
 
         [Fact]
         public static void CheckedThrowsOnRightUnreadable()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
-            Assert.Throws<ArgumentException>("right", () => Expression.Add(Expression.Constant(1), value));
+            AssertExtensions.Throws<ArgumentException>("right", () => Expression.Add(Expression.Constant(1), value));
         }
 
         [Fact]

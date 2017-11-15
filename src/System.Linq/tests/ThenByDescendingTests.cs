@@ -142,28 +142,94 @@ And Immortality.".Split(new[] { ' ', '\n', '\r', '—' }, StringSplitOptions.Rem
         public void NullSource()
         {
             IOrderedEnumerable<int> source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.ThenByDescending(i => i));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.ThenByDescending(i => i));
         }
 
         [Fact]
         public void NullKeySelector()
         {
             Func<DateTime, int> keySelector = null;
-            Assert.Throws<ArgumentNullException>("keySelector", () => Enumerable.Empty<DateTime>().OrderBy(e => e).ThenByDescending(keySelector));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => Enumerable.Empty<DateTime>().OrderBy(e => e).ThenByDescending(keySelector));
         }
 
         [Fact]
         public void NullSourceComparer()
         {
             IOrderedEnumerable<int> source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.ThenByDescending(i => i, null));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.ThenByDescending(i => i, null));
         }
 
         [Fact]
         public void NullKeySelectorComparer()
         {
             Func<DateTime, int> keySelector = null;
-            Assert.Throws<ArgumentNullException>("keySelector", () => Enumerable.Empty<DateTime>().OrderBy(e => e).ThenByDescending(keySelector, null));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => Enumerable.Empty<DateTime>().OrderBy(e => e).ThenByDescending(keySelector, null));
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void SortsLargeAscendingEnumerableCorrectly(int thenBys)
+        {
+            const int Items = 100_000;
+            IEnumerable<int> expected = NumberRangeGuaranteedNotCollectionType(0, Items);
+
+            IEnumerable<int> unordered = expected.Select(i => i);
+            IOrderedEnumerable<int> ordered = unordered.OrderBy(_ => 0);
+            switch (thenBys)
+            {
+                case 1: ordered = ordered.ThenByDescending(i => -i); break;
+                case 2: ordered = ordered.ThenByDescending(i => 0).ThenByDescending(i => -i); break;
+                case 3: ordered = ordered.ThenByDescending(i => 0).ThenByDescending(i => 0).ThenByDescending(i => -i); break;
+            }
+
+            Assert.Equal(expected, ordered);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void SortsLargeDescendingEnumerableCorrectly(int thenBys)
+        {
+            const int Items = 100_000;
+            IEnumerable<int> expected = NumberRangeGuaranteedNotCollectionType(0, Items);
+
+            IEnumerable<int> unordered = expected.Select(i => Items - i - 1);
+            IOrderedEnumerable<int> ordered = unordered.OrderBy(_ => 0);
+            switch (thenBys)
+            {
+                case 1: ordered = ordered.ThenByDescending(i => -i); break;
+                case 2: ordered = ordered.ThenByDescending(i => 0).ThenByDescending(i => -i); break;
+                case 3: ordered = ordered.ThenByDescending(i => 0).ThenByDescending(i => 0).ThenByDescending(i => -i); break;
+            }
+
+            Assert.Equal(expected, ordered);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void SortsLargeRandomizedEnumerableCorrectly(int thenBys)
+        {
+            const int Items = 100_000;
+            var r = new Random(42);
+
+            int[] randomized = Enumerable.Range(0, Items).Select(i => r.Next()).ToArray();
+
+            IOrderedEnumerable<int> orderedEnumerable = randomized.OrderBy(_ => 0);
+            switch (thenBys)
+            {
+                case 1: orderedEnumerable = orderedEnumerable.ThenByDescending(i => -i); break;
+                case 2: orderedEnumerable = orderedEnumerable.ThenByDescending(i => 0).ThenByDescending(i => -i); break;
+                case 3: orderedEnumerable = orderedEnumerable.ThenByDescending(i => 0).ThenByDescending(i => 0).ThenByDescending(i => -i); break;
+            }
+            int[] ordered = orderedEnumerable.ToArray();
+
+            Array.Sort(randomized, (a, b) => a - b);
+            Assert.Equal(randomized, orderedEnumerable);
         }
     }
 }

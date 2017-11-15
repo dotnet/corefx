@@ -7,14 +7,11 @@ using System.Reflection;
 
 namespace System.CodeDom.Compiler
 {
-    [Serializable]
     public partial class CompilerResults
     {
         private readonly CompilerErrorCollection _errors = new CompilerErrorCollection();
         private readonly StringCollection _output = new StringCollection();
         private Assembly _compiledAssembly;
-
-        [NonSerialized]
         private TempFileCollection _tempFiles;
 
         public CompilerResults(TempFileCollection tempFiles)

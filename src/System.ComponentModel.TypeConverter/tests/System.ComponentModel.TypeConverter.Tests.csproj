@@ -5,13 +5,15 @@
     <ProjectGuid>{3F0326A1-9E19-4A6C-95CE-63E65C9D2030}</ProjectGuid>
     <DefineConstants>$(DefineConstants);FUNCTIONAL_TESTS</DefineConstants>
     <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
+    <AssemblyVersion>9.9.9.9</AssemblyVersion>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp' And '$(TargetGroup)' != 'netstandard'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
     <Compile Include="Drawing\ColorConverterTests.cs" />
     <Compile Include="Drawing\PointConverterTests.cs" />
     <Compile Include="Drawing\RectangleConverterTests.cs" />
@@ -19,13 +21,16 @@
     <Compile Include="Drawing\SizeFConverterTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AmbientValueAttributeTests.cs" />
     <Compile Include="ArrayConverterTests.cs" />
     <Compile Include="AttributeCollectionTests.cs" />
     <Compile Include="AttributeProviderAttributeTests.cs" />
+    <Compile Include="BindingListTests.cs" />
     <Compile Include="BooleanConverterTests.cs" />
     <Compile Include="ByteConvertersTests.cs" />
     <Compile Include="CharConverterTests.cs" />
     <Compile Include="CollectionConverterTests.cs" />
+    <Compile Include="ComponentResourceManagerTests.cs" />
     <Compile Include="ConverterTestBase.cs" />
     <Compile Include="CustomTypeDescriptorTests.cs" />
     <Compile Include="DateTimeConverterTests.cs" />
@@ -51,6 +56,11 @@
     <Compile Include="PropertyDescriptorCollectionTests.cs" />
     <Compile Include="PropertyDescriptorTests.cs" />
     <Compile Include="ProvidePropertyAttributeTests.cs" />
+    <Compile Include="Resources\TestResx.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TestResx.resx</DependentUpon>
+    </Compile>
     <Compile Include="SampleClasses.cs" />
     <Compile Include="SByteConverterTests.cs" />
     <Compile Include="SingleConverterTests.cs" />
@@ -67,14 +77,27 @@
     <Compile Include="UriTypeConverterTests.cs" />
     <Compile Include="Drawing\StringTypeConverterTestBase.cs" />
     <Compile Include="TimerTests.cs" />
-    <Compile Include="BindingListTests.cs" />
     <Compile Include="ContainerTests.cs" />
     <Compile Include="CultureInfoConverterTests.cs" />
     <Compile Include="LicenseManagerTests.cs" />
     <Compile Include="ReferenceConverterTests.cs" />
     <Compile Include="ContextStackTests.cs" />
     <Compile Include="InstanceDescriptorTests.cs" />
+    <Compile Include="Design\DesignerOptionServiceTests.cs" />
     <Compile Include="Security\Authentication\ExtendedProtection\ExtendedProtectionPolicyTypeConverterTests.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\TestResx.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TestResx.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

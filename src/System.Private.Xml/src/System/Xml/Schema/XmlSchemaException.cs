@@ -2,18 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.IO;
+using System.Text;
+using System.Resources;
+using System.Runtime.Serialization;
+using System.Globalization;
+using System.Diagnostics;
+
 namespace System.Xml.Schema
 {
-    using System;
-    using System.IO;
-    using System.Text;
-    using System.Resources;
-    using System.Runtime.Serialization;
-    using System.Globalization;
-    using System.Diagnostics;
-
     /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException"]/*' />
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class XmlSchemaException : SystemException
     {
         private string _res;
@@ -22,7 +23,6 @@ namespace System.Xml.Schema
         private int _lineNumber;
         private int _linePosition;
 
-        [NonSerialized]
         private XmlSchemaObject _sourceSchemaObject;
 
         // message != null for V1 exceptions deserialized in Whidbey
@@ -30,40 +30,46 @@ namespace System.Xml.Schema
         private string _message;
 
         /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException.XmlSchemaException5"]/*' />
-        protected XmlSchemaException(SerializationInfo info, StreamingContext context) : base(info, context) {
-            _res                = (string)         info.GetValue("res"  , typeof(string));
-            _args               = (string[])       info.GetValue("args", typeof(string[]));
-            _sourceUri          = (string)         info.GetValue("sourceUri", typeof(string));
-            _lineNumber         = (int)            info.GetValue("lineNumber", typeof(int));
-            _linePosition       = (int)            info.GetValue("linePosition", typeof(int));
+        protected XmlSchemaException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            _res = (string)info.GetValue("res", typeof(string));
+            _args = (string[])info.GetValue("args", typeof(string[]));
+            _sourceUri = (string)info.GetValue("sourceUri", typeof(string));
+            _lineNumber = (int)info.GetValue("lineNumber", typeof(int));
+            _linePosition = (int)info.GetValue("linePosition", typeof(int));
 
             // deserialize optional members
             string version = null;
-            foreach ( SerializationEntry e in info ) {
-                if ( e.Name == "version" ) {
+            foreach (SerializationEntry e in info)
+            {
+                if (e.Name == "version")
+                {
                     version = (string)e.Value;
                 }
             }
 
-            if ( version == null ) {
+            if (version == null)
+            {
                 // deserializing V1 exception
-                _message = CreateMessage( _res, _args );
+                _message = CreateMessage(_res, _args);
             }
-            else {
+            else
+            {
                 // deserializing V2 or higher exception -> exception message is serialized by the base class (Exception._message)
                 _message = null;
             }
         }
 
         /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException.GetObjectData"]/*' />
-		public override void GetObjectData(SerializationInfo info, StreamingContext context) {
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
             base.GetObjectData(info, context);
-            info.AddValue("res",                _res);
-            info.AddValue("args",               _args);
-            info.AddValue("sourceUri",          _sourceUri);
-            info.AddValue("lineNumber",         _lineNumber);
-            info.AddValue("linePosition",       _linePosition);
-            info.AddValue("version",            "2.0");
+            info.AddValue("res", _res);
+            info.AddValue("args", _args);
+            info.AddValue("sourceUri", _sourceUri);
+            info.AddValue("lineNumber", _lineNumber);
+            info.AddValue("linePosition", _linePosition);
+            info.AddValue("version", "2.0");
         }
 
         /// <include file='doc\XmlSchemaException.uex' path='docs/doc[@for="XmlSchemaException.XmlSchemaException1"]/*' />
@@ -214,11 +220,6 @@ namespace System.Xml.Schema
             _linePosition = source.LinePosition;
         }
 
-        internal void SetResourceId(string resourceId)
-        {
-            _res = resourceId;
-        }
-
         public override string Message
         {
             get
@@ -227,6 +228,6 @@ namespace System.Xml.Schema
             }
         }
     };
-} // namespace System.Xml.Schema
+}
 
 

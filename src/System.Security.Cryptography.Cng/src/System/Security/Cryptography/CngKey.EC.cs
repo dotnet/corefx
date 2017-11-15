@@ -11,16 +11,6 @@ namespace System.Security.Cryptography
     public sealed partial class CngKey : IDisposable
     {
         /// <summary>
-        /// Does the key use elliptic curve cryptography
-        /// </summary>
-        /// <returns></returns>
-        internal bool IsEcc()
-        {
-            return (AlgorithmGroup == CngAlgorithmGroup.ECDiffieHellman ||
-                AlgorithmGroup == CngAlgorithmGroup.ECDsa);
-        }
-
-        /// <summary>
         /// Does the key represent a named curve (Win10+)
         /// </summary>
         /// <returns></returns>
@@ -37,22 +27,20 @@ namespace System.Security.Cryptography
 
         internal string GetCurveName()
         {
-#if !NETNATIVE
             if (IsECNamedCurve())
             {
                 return _keyHandle.GetPropertyAsString(KeyPropertyName.ECCCurveName, CngPropertyOptions.None);
             }
-#endif //!NETNATIVE
 
             // Use hard-coded values (for use with pre-Win10 APIs)
-            return GetECSpecificCurveName(); 
+            return GetECSpecificCurveName();
         }
 
         private string GetECSpecificCurveName()
         {
             string algorithm = Algorithm.Algorithm;
 
-            if (algorithm == CngAlgorithm.ECDiffieHellmanP256.Algorithm || 
+            if (algorithm == CngAlgorithm.ECDiffieHellmanP256.Algorithm ||
                 algorithm == CngAlgorithm.ECDsaP256.Algorithm)
             {
                 return "nistP256";
@@ -74,7 +62,6 @@ namespace System.Security.Cryptography
             throw new PlatformNotSupportedException(string.Format(SR.Cryptography_CurveNotSupported, algorithm));
         }
 
-#if !NETNATIVE
         /// <summary>
         ///     Return a CngProperty representing a named curve.
         /// </summary>
@@ -88,7 +75,6 @@ namespace System.Security.Cryptography
                 return new CngProperty(KeyPropertyName.ECCCurveName, curveNameBytes, CngPropertyOptions.None);
             }
         }
-#endif //!NETNATIVE
 
         /// <summary>
         /// Map a curve name to algorithm. This enables curves that worked pre-Win10

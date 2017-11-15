@@ -6,7 +6,6 @@ using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -306,6 +305,34 @@ namespace System.Net.Sockets
 #endif
         }
 
+        public override int Read(Span<byte> destination)
+        {
+            if (GetType() != typeof(NetworkStream))
+            {
+                // NetworkStream is not sealed, and a derived type may have overridden Read(byte[], int, int) prior
+                // to this Read(Span<byte>) overload being introduced.  In that case, this Read(Span<byte>) overload
+                // should use the behavior of Read(byte[],int,int) overload.
+                return base.Read(destination);
+            }
+
+            if (_cleanedUp) throw new ObjectDisposedException(GetType().FullName);
+            if (!CanRead) throw new InvalidOperationException(SR.net_writeonlystream);
+
+            int bytesRead = _streamSocket.Receive(destination, SocketFlags.None, out SocketError errorCode);
+            if (errorCode != SocketError.Success)
+            {
+                var exception = new SocketException((int)errorCode);
+                throw new IOException(SR.Format(SR.net_io_readfailure, exception.Message), exception);
+            }
+            return bytesRead;
+        }
+
+        public override unsafe int ReadByte()
+        {
+            int b;
+            return Read(new Span<byte>(&b, 1)) == 0 ? -1 : b;
+        }
+
         // Write - provide core Write functionality.
         // 
         // Provide core write functionality. All we do is call through to the
@@ -368,6 +395,31 @@ namespace System.Net.Sockets
             }
 #endif
         }
+
+        public override void Write(ReadOnlySpan<byte> source)
+        {
+            if (GetType() != typeof(NetworkStream))
+            {
+                // NetworkStream is not sealed, and a derived type may have overridden Write(byte[], int, int) prior
+                // to this Write(ReadOnlySpan<byte>) overload being introduced.  In that case, this Write(ReadOnlySpan<byte>)
+                // overload should use the behavior of Write(byte[],int,int) overload.
+                base.Write(source);
+                return;
+            }
+
+            if (_cleanedUp) throw new ObjectDisposedException(GetType().FullName);
+            if (!CanWrite) throw new InvalidOperationException(SR.net_readonlystream);
+
+            _streamSocket.Send(source, SocketFlags.None, out SocketError errorCode);
+            if (errorCode != SocketError.Success)
+            {
+                var exception = new SocketException((int)errorCode);
+                throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
+            }
+        }
+
+        public override unsafe void WriteByte(byte value) =>
+            Write(new ReadOnlySpan<byte>(&value, 1));
 
         private int _closeTimeout = Socket.DefaultCloseTimeout; // -1 = respect linger options
 
@@ -443,10 +495,7 @@ namespace System.Net.Sockets
         // Returns:
         // 
         //     An IASyncResult, representing the read.
-#if !netcore50
-        override
-#endif
-        public IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, Object state)
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, Object state)
         {
 #if DEBUG
             using (DebugThreadTracking.SetThreadKind(ThreadKinds.User | ThreadKinds.Async))
@@ -505,10 +554,7 @@ namespace System.Net.Sockets
         // Returns:
         // 
         //     The number of bytes read. May throw an exception.
-#if !netcore50
-        override
-#endif
-        public int EndRead(IAsyncResult asyncResult)
+        public override int EndRead(IAsyncResult asyncResult)
         {
 #if DEBUG
             using (DebugThreadTracking.SetThreadKind(ThreadKinds.User))
@@ -554,10 +600,7 @@ namespace System.Net.Sockets
         // Returns:
         // 
         //     An IASyncResult, representing the write.
-#if !netcore50
-        override
-#endif
-        public IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, Object state)
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, Object state)
         {
 #if DEBUG
             using (DebugThreadTracking.SetThreadKind(ThreadKinds.User | ThreadKinds.Async))
@@ -613,10 +656,7 @@ namespace System.Net.Sockets
         // This method is called when an async write is completed. All we
         // do is call through to the core socket EndSend functionality.
         // Returns:  The number of bytes read. May throw an exception.
-#if !netcore50
-        override
-#endif
-        public void EndWrite(IAsyncResult asyncResult)
+        public override void EndWrite(IAsyncResult asyncResult)
         {
 #if DEBUG
             using (DebugThreadTracking.SetThreadKind(ThreadKinds.User))
@@ -699,7 +739,35 @@ namespace System.Net.Sockets
                 return _streamSocket.ReceiveAsync(
                     new ArraySegment<byte>(buffer, offset, size),
                     SocketFlags.None,
-                    wrapExceptionsInIOExceptions: true);
+                    fromNetworkStream: true);
+            }
+            catch (Exception exception) when (!(exception is OutOfMemoryException))
+            {
+                // Some sort of error occurred on the socket call,
+                // set the SocketException as InnerException and throw.
+                throw new IOException(SR.Format(SR.net_io_readfailure, exception.Message), exception);
+            }
+        }
+
+        public override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
+        {
+            bool canRead = CanRead; // Prevent race with Dispose.
+            if (_cleanedUp)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
+            if (!canRead)
+            {
+                throw new InvalidOperationException(SR.net_writeonlystream);
+            }
+
+            try
+            {
+                return _streamSocket.ReceiveAsync(
+                    destination,
+                    SocketFlags.None,
+                    fromNetworkStream: true,
+                    cancellationToken: cancellationToken);
             }
             catch (Exception exception) when (!(exception is OutOfMemoryException))
             {
@@ -760,7 +828,39 @@ namespace System.Net.Sockets
                 return _streamSocket.SendAsync(
                     new ArraySegment<byte>(buffer, offset, size),
                     SocketFlags.None,
-                    wrapExceptionsInIOExceptions: true);
+                    fromNetworkStream: true);
+            }
+            catch (Exception exception) when (!(exception is OutOfMemoryException))
+            {
+                // Some sort of error occurred on the socket call,
+                // set the SocketException as InnerException and throw.
+                throw new IOException(SR.Format(SR.net_io_writefailure, exception.Message), exception);
+            }
+        }
+
+        public override Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+        {
+            bool canWrite = CanWrite; // Prevent race with Dispose.
+            if (_cleanedUp)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
+            if (!canWrite)
+            {
+                throw new InvalidOperationException(SR.net_readonlystream);
+            }
+
+            try
+            {
+                ValueTask<int> t = _streamSocket.SendAsync(
+                    source,
+                    SocketFlags.None,
+                    fromNetworkStream: true,
+                    cancellationToken: cancellationToken);
+
+                return t.IsCompletedSuccessfully ?
+                    Task.CompletedTask :
+                    t.AsTask();
             }
             catch (Exception exception) when (!(exception is OutOfMemoryException))
             {
@@ -835,7 +935,6 @@ namespace System.Net.Sockets
         internal void SetSocketTimeoutOption(SocketShutdown mode, int timeout, bool silent)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, mode, timeout, silent);
-            DebugThreadTracking.ThreadContract(ThreadKinds.Unknown, $"NetworkStream#{NetEventSource.IdOf(this)}");
 
             if (timeout < 0)
             {
@@ -936,7 +1035,8 @@ namespace System.Net.Sockets
             /// <summary>Queues the provided continuation to be executed once the operation has completed.</summary>
             public void OnCompleted(Action continuation)
             {
-                if (_continuation == s_completedSentinel || Interlocked.CompareExchange(ref _continuation, continuation, null) == s_completedSentinel)
+                if (ReferenceEquals(_continuation, s_completedSentinel) ||
+                    ReferenceEquals(Interlocked.CompareExchange(ref _continuation, continuation, null), s_completedSentinel))
                 {
                     Task.Run(continuation);
                 }

@@ -20,13 +20,13 @@ namespace System.Tests
         [Fact]
         public void CurrentDirectory_Null_Path_Throws_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => Environment.CurrentDirectory = null);
+            AssertExtensions.Throws<ArgumentNullException>("value", () => Environment.CurrentDirectory = null);
         }
 
         [Fact]
         public void CurrentDirectory_Empty_Path_Throws_ArgumentException()
         {
-            Assert.Throws<ArgumentException>("value", () => Environment.CurrentDirectory = string.Empty);
+            AssertExtensions.Throws<ArgumentException>("value", null, () => Environment.CurrentDirectory = string.Empty);
         }
 
         [Fact]
@@ -174,14 +174,23 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // Throws InvalidOperationException in Uap as NtQuerySystemInformation Pinvoke is not available
         public void WorkingSet_Valid()
         {
             Assert.True(Environment.WorkingSet > 0, "Expected positive WorkingSet value");
         }
 
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
+        public void WorkingSet_Valid_Uap()
+        {
+            Assert.Throws<PlatformNotSupportedException>(() => Environment.WorkingSet);
+        }
+
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
         [OuterLoop]
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/21404", TargetFrameworkMonikers.Uap)]
         public void FailFast_ExpectFailureExitCode()
         {
             using (Process p = RemoteInvoke(() => { Environment.FailFast("message"); return SuccessExitCode; }).Process)
@@ -209,6 +218,17 @@ namespace System.Tests
         [Fact]
         public void GetSystemDirectory()
         {
+            if (PlatformDetection.IsWindowsNanoServer)
+            {
+                // https://github.com/dotnet/corefx/issues/19110
+                // On Windows Nano, ShGetKnownFolderPath currently doesn't give
+                // the correct result for SystemDirectory.
+                // Assert that it's wrong, so that if it's fixed, we don't forget to
+                // enable this test for Nano.
+                Assert.NotEqual(Environment.GetFolderPath(Environment.SpecialFolder.System), Environment.SystemDirectory);
+                return;
+            }
+
             Assert.Equal(Environment.GetFolderPath(Environment.SpecialFolder.System), Environment.SystemDirectory);
         }
 
@@ -254,8 +274,66 @@ namespace System.Tests
             }
         }
 
+        // Requires recent RS3 builds and needs to run inside AppContainer
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows10Version1709OrGreater), nameof(PlatformDetection.IsInAppContainer))]
+        [InlineData(Environment.SpecialFolder.LocalApplicationData)]
+        [InlineData(Environment.SpecialFolder.Cookies)]
+        [InlineData(Environment.SpecialFolder.History)]
+        [InlineData(Environment.SpecialFolder.InternetCache)]
+        [InlineData(Environment.SpecialFolder.System)]
+        [InlineData(Environment.SpecialFolder.SystemX86)]
+        [InlineData(Environment.SpecialFolder.Windows)]
+        public void GetFolderPath_UapExistAndAccessible(Environment.SpecialFolder folder)
+        {
+            string knownFolder = Environment.GetFolderPath(folder);
+            Assert.NotEmpty(knownFolder);
+            AssertDirectoryExists(knownFolder);
+        }
+
+        // Requires recent RS3 builds and needs to run inside AppContainer
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows10Version1709OrGreater), nameof(PlatformDetection.IsInAppContainer))]
+        [InlineData(Environment.SpecialFolder.ApplicationData)]
+        [InlineData(Environment.SpecialFolder.MyMusic)]
+        [InlineData(Environment.SpecialFolder.MyPictures)]
+        [InlineData(Environment.SpecialFolder.MyVideos)]
+        [InlineData(Environment.SpecialFolder.Recent)]
+        [InlineData(Environment.SpecialFolder.Templates)]
+        [InlineData(Environment.SpecialFolder.DesktopDirectory)]
+        [InlineData(Environment.SpecialFolder.Personal)]
+        [InlineData(Environment.SpecialFolder.UserProfile)]
+        [InlineData(Environment.SpecialFolder.CommonDocuments)]
+        [InlineData(Environment.SpecialFolder.CommonMusic)]
+        [InlineData(Environment.SpecialFolder.CommonPictures)]
+        [InlineData(Environment.SpecialFolder.CommonDesktopDirectory)]
+        [InlineData(Environment.SpecialFolder.CommonVideos)]
+        // These are in the package folder
+        [InlineData(Environment.SpecialFolder.CommonApplicationData)]
+        [InlineData(Environment.SpecialFolder.Desktop)]
+        [InlineData(Environment.SpecialFolder.Favorites)]
+        public void GetFolderPath_UapNotEmpty(Environment.SpecialFolder folder)
+        {
+            // The majority of the paths here cannot be accessed from an appcontainer
+            string knownFolder = Environment.GetFolderPath(folder);
+            Assert.NotEmpty(knownFolder);
+        }
+
+        private void AssertDirectoryExists(string path)
+        {
+            // Directory.Exists won't tell us if access was denied, etc. Invoking directly
+            // to get diagnosable test results.
+
+            FileAttributes attributes = GetFileAttributesW(path);
+            if (attributes == (FileAttributes)(-1))
+            {
+                int error = Marshal.GetLastWin32Error();
+                Assert.False(true, $"error {error} getting attributes for {path}");
+            }
+
+            Assert.True((attributes & FileAttributes.Directory) == FileAttributes.Directory, $"not a directory: {path}");
+        }
+
         // The commented out folders aren't set on all systems.
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // https://github.com/dotnet/corefx/issues/19110
         [InlineData(Environment.SpecialFolder.ApplicationData)]
         [InlineData(Environment.SpecialFolder.CommonApplicationData)]
         [InlineData(Environment.SpecialFolder.LocalApplicationData)]
@@ -280,7 +358,7 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.ProgramFiles)]
         [InlineData(Environment.SpecialFolder.CommonProgramFiles)]
         [InlineData(Environment.SpecialFolder.AdminTools)]
-        [InlineData(Environment.SpecialFolder.CDBurning)]
+        //[InlineData(Environment.SpecialFolder.CDBurning)]  // Not available on Server Core
         [InlineData(Environment.SpecialFolder.CommonAdminTools)]
         [InlineData(Environment.SpecialFolder.CommonDocuments)]
         [InlineData(Environment.SpecialFolder.CommonMusic)]
@@ -303,6 +381,7 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.SystemX86)]
         [InlineData(Environment.SpecialFolder.Windows)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests OS-specific environment
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)] // Don't run on UAP
         public unsafe void GetFolderPath_Windows(Environment.SpecialFolder folder)
         {
             string knownFolder = Environment.GetFolderPath(folder);
@@ -312,6 +391,7 @@ namespace System.Tests
             char* buffer = stackalloc char[260];
             SHGetFolderPathW(IntPtr.Zero, (int)folder, IntPtr.Zero, 0, buffer);
             string folderPath = new string(buffer);
+
             Assert.Equal(folderPath, knownFolder);
         }
 
@@ -355,5 +435,18 @@ namespace System.Tests
             IntPtr hToken,
             uint dwFlags,
             char* pszPath);
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode, ExactSpelling = true)]
+        internal static extern FileAttributes GetFileAttributesW(string lpFileName);
+
+        public static IEnumerable<object[]> EnvironmentVariableTargets
+        {
+            get
+            {
+                yield return new object[] { EnvironmentVariableTarget.Process };
+                yield return new object[] { EnvironmentVariableTarget.User };
+                yield return new object[] { EnvironmentVariableTarget.Machine };
+            }
+        }
     }
 }

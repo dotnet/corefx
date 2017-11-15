@@ -34,15 +34,15 @@ namespace System.Text.Tests
         [Fact]
         public void Ctor_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("replacement", () => new EncoderReplacementFallback(null));
+            AssertExtensions.Throws<ArgumentNullException>("replacement", () => new EncoderReplacementFallback(null));
 
             // Invalid surrogate pair
-            Assert.Throws<ArgumentException>(() => new EncoderReplacementFallback("\uD800"));
-            Assert.Throws<ArgumentException>(() => new EncoderReplacementFallback("\uD800a"));
-            Assert.Throws<ArgumentException>(() => new EncoderReplacementFallback("\uDC00"));
-            Assert.Throws<ArgumentException>(() => new EncoderReplacementFallback("a\uDC00"));
-            Assert.Throws<ArgumentException>(() => new EncoderReplacementFallback("\uDC00\uDC00"));
-            Assert.Throws<ArgumentException>(() => new EncoderReplacementFallback("\uD800\uD800"));
+            AssertExtensions.Throws<ArgumentException>(null, () => new EncoderReplacementFallback("\uD800"));
+            AssertExtensions.Throws<ArgumentException>(null, () => new EncoderReplacementFallback("\uD800a"));
+            AssertExtensions.Throws<ArgumentException>(null, () => new EncoderReplacementFallback("\uDC00"));
+            AssertExtensions.Throws<ArgumentException>(null, () => new EncoderReplacementFallback("a\uDC00"));
+            AssertExtensions.Throws<ArgumentException>(null, () => new EncoderReplacementFallback("\uDC00\uDC00"));
+            AssertExtensions.Throws<ArgumentException>(null, () => new EncoderReplacementFallback("\uD800\uD800"));
         }
 
         public static IEnumerable<object[]> Equals_TestData()
@@ -90,8 +90,8 @@ namespace System.Text.Tests
             EncoderFallbackBuffer buffer = new EncoderReplacementFallback(replacement).CreateFallbackBuffer();
             buffer.Fallback('a', 0);
 
-            Assert.Throws<ArgumentException>("chars", () => buffer.Fallback('a', 0));
-            Assert.Throws<ArgumentException>("chars", () => buffer.Fallback('\uD800', '\uDC00', 0));
+            AssertExtensions.Throws<ArgumentException>("chars", () => buffer.Fallback('a', 0));
+            AssertExtensions.Throws<ArgumentException>("chars", () => buffer.Fallback('\uD800', '\uDC00', 0));
         }
 
         [Theory]
@@ -109,8 +109,8 @@ namespace System.Text.Tests
         {
             EncoderFallbackBuffer buffer = new EncoderReplacementFallback().CreateFallbackBuffer();
 
-            Assert.Throws<ArgumentOutOfRangeException>("charUnknownHigh", () => buffer.Fallback('a', '\uDC00', 0));
-            Assert.Throws<ArgumentOutOfRangeException>("charUnknownLow", () => buffer.Fallback('\uD800', 'a', 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("charUnknownHigh", () => buffer.Fallback('a', '\uDC00', 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("charUnknownLow", () => buffer.Fallback('\uD800', 'a', 0));
         }
 
         [Fact]
@@ -119,8 +119,8 @@ namespace System.Text.Tests
         {
             EncoderFallbackBuffer buffer = new EncoderReplacementFallback().CreateFallbackBuffer();
 
-            Assert.Throws<ArgumentOutOfRangeException>("charUnknownHigh", () => buffer.Fallback('a', '\uDC00', 0));
-            Assert.Throws<ArgumentOutOfRangeException>("CharUnknownLow", () => buffer.Fallback('\uD800', 'a', 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("charUnknownHigh", () => buffer.Fallback('a', '\uDC00', 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("CharUnknownLow", () => buffer.Fallback('\uD800', 'a', 0));
         }
     }
 }

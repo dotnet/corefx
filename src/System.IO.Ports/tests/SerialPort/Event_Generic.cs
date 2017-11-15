@@ -21,7 +21,6 @@ namespace System.IO.Ports.Tests
 
         #region Test Cases
 
-        [OuterLoop("Slow Test")]
         [ConditionalFact(nameof(HasNullModem))]
         public void EventHandlers_CalledSerially()
         {
@@ -180,6 +179,10 @@ namespace System.IO.Ports.Tests
                     }
                 }
 
+                Assert.True(pinChangedEventHandler.SuccessfulWait, "pinChangedEventHandler did not receive resume handle event");
+                Assert.True(receivedEventHandler.SuccessfulWait, "receivedEventHandler did not receive resume handle event");
+                Assert.True(errorEventHandler.SuccessfulWait, "errorEventHandler did not receive resume handle event");
+
                 if (!pinChangedEventHandler.WaitForEvent(MAX_TIME_WAIT, 3))
                 {
                     Fail("Err_2288ajied Expected 3 PinChangedEvents to be fired and only {0} occurred",
@@ -219,7 +222,6 @@ namespace System.IO.Ports.Tests
             }
         }
 
-        [OuterLoop("Slow Test")]
         [ConditionalFact(nameof(HasNullModem))]
         public void Thread_In_PinChangedEvent()
         {
@@ -251,12 +253,11 @@ namespace System.IO.Ports.Tests
                 Thread.Sleep(5000);
 
                 pinChangedEventHandler.ResumeHandleEvent();
-
                 TCSupport.WaitForTaskCompletion(task);
+                Assert.True(pinChangedEventHandler.SuccessfulWait, "pinChangedEventHandler did not receive resume handle event");
             }
         }
 
-        [OuterLoop("Slow Test")]
         [ConditionalFact(nameof(HasNullModem))]
         public void Thread_In_ReceivedEvent()
         {
@@ -291,12 +292,11 @@ namespace System.IO.Ports.Tests
                 Thread.Sleep(5000);
 
                 receivedEventHandler.ResumeHandleEvent();
-
                 TCSupport.WaitForTaskCompletion(task);
+                Assert.True(receivedEventHandler.SuccessfulWait, "receivedEventHandler did not receive resume handle event");
             }
         }
 
-        [OuterLoop("Slow Test")]
         [ConditionalFact(nameof(HasNullModem))]
         public void Thread_In_ErrorEvent()
         {
@@ -331,6 +331,7 @@ namespace System.IO.Ports.Tests
 
                 errorEventHandler.ResumeHandleEvent();
                 TCSupport.WaitForTaskCompletion(task);
+                Assert.True(errorEventHandler.SuccessfulWait, "errorEventHandler did not receive resume handle event");
             }
         }
         #endregion

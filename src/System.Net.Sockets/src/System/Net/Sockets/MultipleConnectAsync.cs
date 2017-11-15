@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,8 +32,6 @@ namespace System.Net.Sockets
         private State _state;
 
         private object _lockObject = new object();
-
-        protected abstract Socket UserSocket { get; }
 
         // Called by Socket to kick off the ConnectAsync process.  We'll complete the user's SAEA
         // when it's done.  Returns true if the operation will be asynchronous, false if it has failed synchronously
@@ -65,7 +64,7 @@ namespace System.Net.Sockets
 
                 _state = State.DnsQuery;
 
-                IAsyncResult result = DnsAPMExtensions.BeginGetHostAddresses(endPoint.Host, new AsyncCallback(DnsCallback), null);
+                IAsyncResult result = Dns.BeginGetHostAddresses(endPoint.Host, new AsyncCallback(DnsCallback), null);
                 if (result.CompletedSynchronously)
                 {
                     return DoDnsCallback(result, true);
@@ -109,7 +108,7 @@ namespace System.Net.Sockets
 
                 try
                 {
-                    _addressList = DnsAPMExtensions.EndGetHostAddresses(result);
+                    _addressList = Dns.EndGetHostAddresses(result);
                     if (_addressList == null)
                     {
                         NetEventSource.Fail(this, "MultipleConnectAsync.DoDnsCallback(): EndGetHostAddresses returned null!");
@@ -162,7 +161,7 @@ namespace System.Net.Sockets
                 if (_state == State.Canceled)
                 {
                     // If Cancel was called before we got the lock, the Socket will be closed soon.  We need to report
-                    // OperationAborted (even though the connection actually completed), or the user will try to use a 
+                    // OperationAborted (even though the connection actually completed), or the user will try to use a
                     // closed Socket.
                     exception = new SocketException((int)SocketError.OperationAborted);
                 }
@@ -185,7 +184,7 @@ namespace System.Net.Sockets
                     }
                     else
                     {
-                    
+
                         // Keep track of this because it will be overwritten by AttemptConnection
                         SocketError currentFailure = args.SocketError;
                         Exception connectException = AttemptConnection();
@@ -269,7 +268,7 @@ namespace System.Net.Sockets
             }
             catch (ObjectDisposedException)
             {
-                // This can happen if the user closes the socket, and is equivalent to a call 
+                // This can happen if the user closes the socket, and is equivalent to a call
                 // to CancelConnectAsync
                 return new SocketException((int)SocketError.OperationAborted);
             }
@@ -322,7 +321,7 @@ namespace System.Net.Sockets
             }
             else
             {
-                throw e;
+                ExceptionDispatchInfo.Throw(e);
             }
         }
 
@@ -412,8 +411,6 @@ namespace System.Net.Sockets
         private Socket _socket;
         private bool _userSocket;
 
-        protected override Socket UserSocket => _socket;
-
         public SingleSocketMultipleConnectAsync(Socket socket, bool userSocket)
         {
             _socket = socket;
@@ -444,7 +441,7 @@ namespace System.Net.Sockets
 
         protected override void OnFail(bool abortive)
         {
-            // Close the socket if this is an abortive failure (CancelConnectAsync) 
+            // Close the socket if this is an abortive failure (CancelConnectAsync)
             // or if we created it internally
             if (abortive || !_userSocket)
             {
@@ -462,8 +459,6 @@ namespace System.Net.Sockets
     {
         private Socket _socket4;
         private Socket _socket6;
-
-        protected override Socket UserSocket => null;
 
         public DualSocketMultipleConnectAsync(SocketType socketType, ProtocolType protocolType)
         {
@@ -522,64 +517,8 @@ namespace System.Net.Sockets
         // close both sockets whether its abortive or not - we always create them internally
         protected override void OnFail(bool abortive)
         {
-            if (_socket4 != null)
-            {
-                _socket4.Dispose();
-            }
-            if (_socket6 != null)
-            {
-                _socket6.Dispose();
-            }
+            _socket4?.Dispose();
+            _socket6?.Dispose();
         }
-    }
-
-    internal sealed class MultipleSocketMultipleConnectAsync : MultipleConnectAsync
-    {
-        private readonly SocketType _socketType;
-        private readonly ProtocolType _protocolType;
-        private readonly bool _supportsIPv4;
-        private readonly bool _supportsIPv6;
-
-        protected override Socket UserSocket => null;
-
-        public MultipleSocketMultipleConnectAsync(SocketType socketType, ProtocolType protocolType)
-        {
-            _socketType = socketType;
-            _protocolType = protocolType;
-            _supportsIPv4 = Socket.OSSupportsIPv4;
-            _supportsIPv6 = Socket.OSSupportsIPv6;
-        }
-
-        protected override IPAddress GetNextAddress(out Socket attemptSocket)
-        {
-            if (_supportsIPv4 || _supportsIPv6)
-            {
-                while (_nextAddress < _addressList.Length)
-                {
-                    IPAddress rval = _addressList[_nextAddress];
-                    ++_nextAddress;
-
-                    if (_supportsIPv6 && rval.AddressFamily == AddressFamily.InterNetworkV6)
-                    {
-                        attemptSocket = new Socket(AddressFamily.InterNetworkV6, _socketType, _protocolType);
-                        return rval;
-                    }
-                    else if (_supportsIPv4 && rval.AddressFamily == AddressFamily.InterNetwork)
-                    {
-                        attemptSocket = new Socket(AddressFamily.InterNetwork, _socketType, _protocolType);
-                        return rval;
-                    }
-                }
-            }
-
-            attemptSocket = null;
-            return null;
-        }
-
-        // nothing to do on failure
-        protected override void OnFail(bool abortive) { }
-
-        // nothing to do on success
-        protected override void OnSucceed() { }
     }
 }

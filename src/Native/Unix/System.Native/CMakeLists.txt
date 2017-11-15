@@ -18,6 +18,8 @@ set(NATIVE_SOURCES
     pal_tcpstate.cpp
     pal_time.cpp
     pal_uid.cpp
+    pal_datetime.cpp
+    pal_sysctl.cpp
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL Linux)
@@ -45,6 +47,10 @@ SET_TARGET_PROPERTIES(System.Native-Static PROPERTIES OUTPUT_NAME System.Native 
 
 if (CMAKE_SYSTEM_NAME STREQUAL Linux AND NOT CLR_CMAKE_PLATFORM_ANDROID)
     target_link_libraries(System.Native rt)
+endif ()
+
+if (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+    target_link_libraries(System.Native pthread)
 endif ()
 
 install_library_and_symbols (System.Native)

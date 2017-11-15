@@ -10,5 +10,6 @@ Namespace Global.Microsoft.VisualBasic.CompilerServices
         Public Sub New()
             MyBase.New()
         End Sub
+
     End Class
 End Namespace

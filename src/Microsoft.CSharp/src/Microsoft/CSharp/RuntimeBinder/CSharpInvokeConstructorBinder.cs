@@ -5,23 +5,39 @@
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using Microsoft.CSharp.RuntimeBinder.Semantics;
 
 namespace Microsoft.CSharp.RuntimeBinder
 {
     internal sealed class CSharpInvokeConstructorBinder : DynamicMetaObjectBinder, ICSharpInvokeOrInvokeMemberBinder
     {
+        public BindingFlag BindingFlags => 0;
+
+        public Expr DispatchPayload(RuntimeBinder runtimeBinder, ArgumentObject[] arguments, LocalVariableSymbol[] locals)
+            => runtimeBinder.DispatchPayload(this, arguments, locals);
+
+        public void PopulateSymbolTableWithName(SymbolTable symbolTable, Type callingType, ArgumentObject[] arguments)
+            => RuntimeBinder.PopulateSymbolTableWithPayloadInformation(symbolTable, this, callingType, arguments);
+
+        public bool IsBinderThatCanHaveRefReceiver => true;
+
         public CSharpCallFlags Flags { get; }
 
         public Type CallingContext { get; }
 
-        public IList<CSharpArgumentInfo> ArgumentInfo { get { return _argumentInfo.AsReadOnly(); } }
-        private readonly List<CSharpArgumentInfo> _argumentInfo;
+        public bool IsChecked => false;
 
-        public bool StaticCall { get { return true; } }
-        public IList<Type> TypeArguments { get { return Array.Empty<Type>(); } }
-        public string Name { get { return ".ctor"; } }
+        private readonly CSharpArgumentInfo[] _argumentInfo;
 
-        bool ICSharpInvokeOrInvokeMemberBinder.ResultDiscarded { get { return false; } }
+        CSharpArgumentInfo ICSharpBinder.GetArgumentInfo(int index) => _argumentInfo[index];
+
+        public bool StaticCall => true;
+
+        public Type[] TypeArguments => Array.Empty<Type>();
+
+        public string Name => ".ctor";
+
+        bool ICSharpInvokeOrInvokeMemberBinder.ResultDiscarded => false;
 
         private readonly RuntimeBinder _binder;
 
@@ -32,12 +48,14 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             Flags = flags;
             CallingContext = callingContext;
-            _argumentInfo = BinderHelper.ToList(argumentInfo);
+            _argumentInfo = BinderHelper.ToArray(argumentInfo);
             _binder = RuntimeBinder.GetInstance();
         }
 
-        public sealed override DynamicMetaObject Bind(DynamicMetaObject target, DynamicMetaObject[] args)
+        public override DynamicMetaObject Bind(DynamicMetaObject target, DynamicMetaObject[] args)
         {
+            BinderHelper.ValidateBindArgument(target, nameof(target));
+            BinderHelper.ValidateBindArgument(args, nameof(args));
             return BinderHelper.Bind(this, _binder, BinderHelper.Cons(target, args), _argumentInfo, null);
         }
     }

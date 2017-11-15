@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Dynamic.Utils;
@@ -25,7 +24,7 @@ namespace System.Linq.Expressions.Compiler
         /// ends up using a JIT temp and defeats the purpose of caching the
         /// value in a local)
         /// </summary>
-        private struct TypedConstant : IEquatable<TypedConstant>
+        private readonly struct TypedConstant : IEquatable<TypedConstant>
         {
             internal readonly object Value;
             internal readonly Type Type;
@@ -84,9 +83,8 @@ namespace System.Linq.Expressions.Compiler
         /// </summary>
         internal void AddReference(object value, Type type)
         {
-            if (!_indexes.ContainsKey(value))
+            if (_indexes.TryAdd(value, _values.Count))
             {
-                _indexes.Add(value, _values.Count);
                 _values.Add(value);
             }
             Helpers.IncrementCount(new TypedConstant(value, type), _references);

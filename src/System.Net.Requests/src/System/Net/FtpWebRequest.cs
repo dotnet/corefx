@@ -8,8 +8,10 @@ using System.IO;
 using System.Net.Cache;
 using System.Net.Sockets;
 using System.Security;
+using System.Runtime.ExceptionServices;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net
@@ -83,11 +85,6 @@ namespace System.Net
         internal bool IsDownload
         {
             get { return (Flags & FtpMethodFlags.IsDownload) != 0; }
-        }
-
-        internal bool HasHttpCommand
-        {
-            get { return (Flags & FtpMethodFlags.HasHttpCommand) != 0; }
         }
 
         /// <summary>
@@ -236,15 +233,6 @@ namespace System.Net
             get
             {
                 return _methodInfo;
-            }
-        }
-
-        // Used by FtpControlStream
-        internal static NetworkCredential DefaultNetworkCredential
-        {
-            get
-            {
-                return s_defaultFtpNetworkCredential;
             }
         }
 
@@ -1231,7 +1219,7 @@ namespace System.Net
         {
             if (_exception != null)
             {
-                throw _exception;
+                ExceptionDispatchInfo.Throw(_exception);
             }
         }
 
@@ -1501,9 +1489,9 @@ namespace System.Net
                     if (stage >= RequestStage.WriteReady)
                     {
                         // If writeResult == null and this is an upload request, it means
-                        // that the user has called GetResponse() without calling 
-                        // GetRequestStream() first. So they are not interested in a 
-                        // stream. Therefore we close the stream so that the 
+                        // that the user has called GetResponse() without calling
+                        // GetRequestStream() first. So they are not interested in a
+                        // stream. Therefore we close the stream so that the
                         // request/pipeline can continue
                         if (_methodInfo.IsUpload && !_getRequestStreamStarted)
                         {
@@ -1574,7 +1562,7 @@ namespace System.Net
         {
             get
             {
-                return false;
+                return true;
             }
             set
             {
@@ -1643,17 +1631,7 @@ namespace System.Net
         {
             get
             {
-                if (_clientCertificates == null)
-                {
-                    lock (_syncObject)
-                    {
-                        if (_clientCertificates == null)
-                        {
-                            _clientCertificates = new X509CertificateCollection();
-                        }
-                    }
-                }
-                return _clientCertificates;
+                return LazyInitializer.EnsureInitialized(ref _clientCertificates, ref _syncObject, () => new X509CertificateCollection());
             }
             set
             {
@@ -1813,28 +1791,6 @@ namespace System.Net
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Returns {_ftpWebResponse} with stream {_ftpWebResponse._responseStream}");
 
             return;
-        }
-
-        /// <summary>
-        ///    <para>Returns username string</para>
-        /// </summary>
-        internal string GetUserString()
-        {
-            string name = null;
-            if (this.Credentials != null)
-            {
-                NetworkCredential networkCreds = this.Credentials.GetCredential(_uri, "basic");
-                if (networkCreds != null)
-                {
-                    name = networkCreds.UserName;
-                    string domain = networkCreds.Domain;
-                    if (!string.IsNullOrEmpty(domain))
-                    {
-                        name = domain + "\\" + name;
-                    }
-                }
-            }
-            return name == null ? null : (String.Compare(name, "anonymous", StringComparison.InvariantCultureIgnoreCase) == 0 ? null : name);
         }
 
         internal void DataStreamClosed(CloseExState closeState)

@@ -86,7 +86,8 @@ namespace System.Runtime.CompilerServices
             if (!delegateType.IsSubclassOf(typeof(MulticastDelegate))) throw System.Linq.Expressions.Error.TypeMustBeDerivedFromSystemDelegate();
 
             CacheDict<Type, Func<CallSiteBinder, CallSite>> ctors = s_siteCtors;
-            if (ctors == null) {
+            if (ctors == null)
+            {
                 // It's okay to just set this, worst case we're just throwing away some data
                 s_siteCtors = ctors = new CacheDict<Type, Func<CallSiteBinder, CallSite>>(100);
             }
@@ -118,7 +119,7 @@ namespace System.Runtime.CompilerServices
     /// Dynamic site type.
     /// </summary>
     /// <typeparam name="T">The delegate type.</typeparam>
-    public partial class CallSite<T> : CallSite where T : class
+    public class CallSite<T> : CallSite where T : class
     {
         /// <summary>
         /// The update delegate. Called when the dynamic site experiences cache miss.
@@ -273,14 +274,14 @@ namespace System.Runtime.CompilerServices
         {
 #if !FEATURE_COMPILE
             Type target = typeof(T);
-            MethodInfo invoke = target.GetMethod("Invoke");
+            MethodInfo invoke = target.GetInvokeMethod();
 
             s_cachedNoMatch = CreateCustomNoMatchDelegate(invoke);
             return CreateCustomUpdateDelegate(invoke);
 #else
             Type target = typeof(T);
             Type[] args;
-            MethodInfo invoke = target.GetMethod("Invoke");
+            MethodInfo invoke = target.GetInvokeMethod();
 
             if (target.IsGenericType && IsSimpleSignature(invoke, out args))
             {

@@ -583,6 +583,18 @@ namespace System.Security.Cryptography.Xml
             return rgbOutput;
         }
 
+        internal static int ConvertByteArrayToInt(byte[] input)
+        {
+            // Input to this routine is always big endian
+            int dwOutput = 0;
+            for (int i = 0; i < input.Length; i++)
+            {
+                dwOutput *= 256;
+                dwOutput += input[i];
+            }
+            return (dwOutput);
+        }
+
         internal static int GetHexArraySize(byte[] hex)
         {
             int index = hex.Length;
@@ -668,7 +680,10 @@ namespace System.Security.Cryptography.Xml
                             }
                         }
                     }
+                    // Store doesn't exist, no read permissions, other system error
                     catch (CryptographicException) { }
+                    // Opening LocalMachine stores (other than Root or CertificateAuthority) on Linux
+                    catch (PlatformNotSupportedException) { }
 
                     if (filters != null)
                         collection.AddRange(filters);
@@ -742,8 +757,7 @@ namespace System.Security.Cryptography.Xml
 
         internal static AsymmetricAlgorithm GetAnyPublicKey(X509Certificate2 certificate)
         {
-            // TODO: Add ?? certificate.GetDSAPublicKey(), when available (dotnet/corefx#11802).
-            return certificate.GetRSAPublicKey();
+            return (AsymmetricAlgorithm)certificate.GetRSAPublicKey();
         }
     }
 }

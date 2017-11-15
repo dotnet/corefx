@@ -49,7 +49,7 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         public string Value
         {
-            get { return _propertyValue; }
+            get => _propertyValue;
             set
             {
                 if (_propertyValue != value)
@@ -65,7 +65,7 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         public Type ResourceType
         {
-            get { return _resourceType; }
+            get => _resourceType;
             set
             {
                 if (_resourceType != value)
@@ -122,8 +122,6 @@ namespace System.ComponentModel.DataAnnotations
                 else
                 {
                     // Get the property from the resource type for this resource key
-                    // TODO - check that GetRuntimeProperty() returns the same as old GetProperty()
-                    // in all situations regardless of property modifiers
                     var property = _resourceType.GetRuntimeProperty(_propertyValue);
 
                     // We need to detect bad configurations so that we can throw exceptions accordingly

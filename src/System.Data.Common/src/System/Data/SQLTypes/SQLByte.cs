@@ -17,10 +17,11 @@ namespace System.Data.SqlTypes
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [XmlSchemaProvider("GetXsdType")]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public struct SqlByte : INullable, IComparable, IXmlSerializable
     {
-        private bool _fNotNull; // false if null
-        private byte _value;
+        private bool m_fNotNull; // false if null. Do not rename (binary serialization)
+        private byte m_value; // Do not rename (binary serialization)
 
         private static readonly int s_iBitNotByteMax = ~0xff;
 
@@ -28,20 +29,20 @@ namespace System.Data.SqlTypes
         // construct a Null
         private SqlByte(bool fNull)
         {
-            _fNotNull = false;
-            _value = 0;
+            m_fNotNull = false;
+            m_value = 0;
         }
 
         public SqlByte(byte value)
         {
-            _value = value;
-            _fNotNull = true;
+            m_value = value;
+            m_fNotNull = true;
         }
 
         // INullable
         public bool IsNull
         {
-            get { return !_fNotNull; }
+            get { return !m_fNotNull; }
         }
 
         // property: Value
@@ -49,8 +50,8 @@ namespace System.Data.SqlTypes
         {
             get
             {
-                if (_fNotNull)
-                    return _value;
+                if (m_fNotNull)
+                    return m_value;
                 else
                     throw new SqlNullValueException();
             }
@@ -70,12 +71,12 @@ namespace System.Data.SqlTypes
 
         public override string ToString()
         {
-            return IsNull ? SQLResource.s_nullString : _value.ToString((IFormatProvider)null);
+            return IsNull ? SQLResource.NullString : m_value.ToString((IFormatProvider)null);
         }
 
         public static SqlByte Parse(string s)
         {
-            if (s == SQLResource.s_nullString)
+            if (s == SQLResource.NullString)
                 return SqlByte.Null;
             else
                 return new SqlByte(byte.Parse(s, null));
@@ -84,7 +85,7 @@ namespace System.Data.SqlTypes
         // Unary operators
         public static SqlByte operator ~(SqlByte x)
         {
-            return x.IsNull ? Null : new SqlByte(unchecked((byte)~x._value));
+            return x.IsNull ? Null : new SqlByte(unchecked((byte)~x.m_value));
         }
 
 
@@ -96,9 +97,9 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            int iResult = x._value + y._value;
+            int iResult = x.m_value + y.m_value;
             if ((iResult & s_iBitNotByteMax) != 0)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
             else
                 return new SqlByte((byte)iResult);
         }
@@ -108,9 +109,9 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            int iResult = x._value - y._value;
+            int iResult = x.m_value - y.m_value;
             if ((iResult & s_iBitNotByteMax) != 0)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
             else
                 return new SqlByte((byte)iResult);
         }
@@ -120,9 +121,9 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            int iResult = x._value * y._value;
+            int iResult = x.m_value * y.m_value;
             if ((iResult & s_iBitNotByteMax) != 0)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
             else
                 return new SqlByte((byte)iResult);
         }
@@ -132,12 +133,12 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            if (y._value != 0)
+            if (y.m_value != 0)
             {
-                return new SqlByte((byte)(x._value / y._value));
+                return new SqlByte((byte)(x.m_value / y.m_value));
             }
             else
-                throw new DivideByZeroException(SQLResource.s_divideByZeroMessage);
+                throw new DivideByZeroException(SQLResource.DivideByZeroMessage);
         }
 
         public static SqlByte operator %(SqlByte x, SqlByte y)
@@ -145,28 +146,28 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            if (y._value != 0)
+            if (y.m_value != 0)
             {
-                return new SqlByte((byte)(x._value % y._value));
+                return new SqlByte((byte)(x.m_value % y.m_value));
             }
             else
-                throw new DivideByZeroException(SQLResource.s_divideByZeroMessage);
+                throw new DivideByZeroException(SQLResource.DivideByZeroMessage);
         }
 
         // Bitwise operators
         public static SqlByte operator &(SqlByte x, SqlByte y)
         {
-            return (x.IsNull || y.IsNull) ? Null : new SqlByte((byte)(x._value & y._value));
+            return (x.IsNull || y.IsNull) ? Null : new SqlByte((byte)(x.m_value & y.m_value));
         }
 
         public static SqlByte operator |(SqlByte x, SqlByte y)
         {
-            return (x.IsNull || y.IsNull) ? Null : new SqlByte((byte)(x._value | y._value));
+            return (x.IsNull || y.IsNull) ? Null : new SqlByte((byte)(x.m_value | y.m_value));
         }
 
         public static SqlByte operator ^(SqlByte x, SqlByte y)
         {
-            return (x.IsNull || y.IsNull) ? Null : new SqlByte((byte)(x._value ^ y._value));
+            return (x.IsNull || y.IsNull) ? Null : new SqlByte((byte)(x.m_value ^ y.m_value));
         }
 
 
@@ -195,7 +196,7 @@ namespace System.Data.SqlTypes
                 return Null;
 
             if (x.Value > byte.MaxValue || x.Value < byte.MinValue)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             return x.IsNull ? Null : new SqlByte((byte)(x.Value));
         }
@@ -207,7 +208,7 @@ namespace System.Data.SqlTypes
                 return Null;
 
             if (x.Value > byte.MaxValue || x.Value < byte.MinValue)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             return x.IsNull ? Null : new SqlByte((byte)(x.Value));
         }
@@ -219,7 +220,7 @@ namespace System.Data.SqlTypes
                 return Null;
 
             if (x.Value > byte.MaxValue || x.Value < byte.MinValue)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             return x.IsNull ? Null : new SqlByte((byte)(x.Value));
         }
@@ -231,7 +232,7 @@ namespace System.Data.SqlTypes
                 return Null;
 
             if (x.Value > byte.MaxValue || x.Value < byte.MinValue)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             return x.IsNull ? Null : new SqlByte((byte)(x.Value));
         }
@@ -243,7 +244,7 @@ namespace System.Data.SqlTypes
                 return Null;
 
             if (x.Value > byte.MaxValue || x.Value < byte.MinValue)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             return x.IsNull ? Null : new SqlByte((byte)(x.Value));
         }
@@ -264,7 +265,7 @@ namespace System.Data.SqlTypes
         // Overloading comparison operators
         public static SqlBoolean operator ==(SqlByte x, SqlByte y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value == y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value == y.m_value);
         }
 
         public static SqlBoolean operator !=(SqlByte x, SqlByte y)
@@ -274,22 +275,22 @@ namespace System.Data.SqlTypes
 
         public static SqlBoolean operator <(SqlByte x, SqlByte y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value < y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value < y.m_value);
         }
 
         public static SqlBoolean operator >(SqlByte x, SqlByte y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value > y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value > y.m_value);
         }
 
         public static SqlBoolean operator <=(SqlByte x, SqlByte y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value <= y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value <= y.m_value);
         }
 
         public static SqlBoolean operator >=(SqlByte x, SqlByte y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value >= y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value >= y.m_value);
         }
 
         //--------------------------------------------------
@@ -503,12 +504,12 @@ namespace System.Data.SqlTypes
             {
                 // Read the next value.
                 reader.ReadElementString();
-                _fNotNull = false;
+                m_fNotNull = false;
             }
             else
             {
-                _value = XmlConvert.ToByte(reader.ReadElementString());
-                _fNotNull = true;
+                m_value = XmlConvert.ToByte(reader.ReadElementString());
+                m_fNotNull = true;
             }
         }
 
@@ -520,7 +521,7 @@ namespace System.Data.SqlTypes
             }
             else
             {
-                writer.WriteString(XmlConvert.ToString(_value));
+                writer.WriteString(XmlConvert.ToString(m_value));
             }
         }
 

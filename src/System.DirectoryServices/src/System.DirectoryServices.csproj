@@ -6,19 +6,30 @@
     <AssemblyName>System.DirectoryServices</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);0649</NoWarn>
+    <!-- Although we have a netstandard configuration, we know we are not currently UAP compatible-->
+    <UWPCompatible>false</UWPCompatible>
+    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard'">SR.DirectoryServices_PlatformNotSupported</GeneratePlatformNotSupportedAssemblyMessage>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="System\DirectoryServices\externdll.cs" />
-    <Compile Include="System\DirectoryServices\PrivilegedConfigurationManager.cs" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp2.0-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp.2.0-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
+  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
+    <Compile Include="System\DirectoryServices\ExternDll.cs" />
     <Compile Include="System\DirectoryServices\ActiveDirectorySecurity.cs" />
     <Compile Include="System\DirectoryServices\AdsVLV.cs" />
     <Compile Include="System\DirectoryServices\AuthenticationTypes.cs" />
-    <Compile Include="System\DirectoryServices\BinaryCompatibility.cs" />
     <Compile Include="System\DirectoryServices\DerefAlias.cs" />
     <Compile Include="System\DirectoryServices\DirectoryEntries.cs" />
-    <Compile Include="System\DirectoryServices\DirectoryEntry.cs"/>
+    <Compile Include="System\DirectoryServices\DirectoryEntry.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\DirectoryServices\DirectoryEntryConfiguration.cs" />
-    <Compile Include="System\DirectoryServices\DirectorySearcher.cs"/>
+    <Compile Include="System\DirectoryServices\DirectorySearcher.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\DirectoryServices\DirectorySynchronization.cs" />
     <Compile Include="System\DirectoryServices\DirectorySynchronizationFlags.cs" />
     <Compile Include="System\DirectoryServices\DirectoryVirtualListView.cs" />
@@ -34,7 +45,6 @@
     <Compile Include="System\DirectoryServices\SearchResult.cs" />
     <Compile Include="System\DirectoryServices\SearchResultCollection.cs" />
     <Compile Include="System\DirectoryServices\SearchScope.cs" />
-    <Compile Include="System\DirectoryServices\SearchWaitHandler.cs" />
     <Compile Include="System\DirectoryServices\SecurityMasks.cs" />
     <Compile Include="System\DirectoryServices\SortDirection.cs" />
     <Compile Include="System\DirectoryServices\SortOption.cs" />
@@ -142,6 +152,21 @@
     <Reference Include="System.Security.AccessControl" />
     <Reference Include="System.Security.Permissions" />
     <Reference Include="System.Security.Principal.Windows" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
+    <Reference Include="System.Collections.Specialized" />
+    <Reference Include="System.ComponentModel" />
+    <Reference Include="System.ComponentModel.Primitives" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.Net.NameResolution" />
+    <Reference Include="System.Net.Primitives" />
+    <Reference Include="System.Net.Security" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Security.Claims" />
+    <Reference Include="System.Security.Cryptography.Algorithms" />
+    <Reference Include="System.Threading.Thread" />
+    <Reference Include="System.Threading" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -4,7 +4,8 @@
   <PropertyGroup>
     <ProjectGuid>{B6C09633-D161-499A-8FE1-46B2D53A16E7}</ProjectGuid>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
@@ -31,6 +32,7 @@
     <Compile Include="Task\TaskContinueWhenAllTests.cs" />
     <Compile Include="Task\TaskFromAsyncWork.cs" />
     <Compile Include="Task\TaskFromAsyncTest.cs" />
+    <Compile Include="Task\TaskFromAsyncTest2.cs" />
     <Compile Include="Task\TaskCancelWaitTests.cs" />
     <Compile Include="Task\TaskCancelWaitTest.cs" />
     <Compile Include="Task\TaskRtTests.cs" />
@@ -48,9 +50,11 @@
     <Compile Include="$(CommonTestPath)\System\Threading\ThreadPoolHelpers.cs">
       <Link>CommonTest\System\Threading\ThreadPoolHelpers.cs</Link>
     </Compile>
+    <Compile Include="Task\TaskDisposeTests.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Task\TaskDisposeTests.netstandard.cs" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="CancellationTokenTests.netcoreapp.cs" />
+    <Compile Include="Task\TaskStatusTest.netcoreapp.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

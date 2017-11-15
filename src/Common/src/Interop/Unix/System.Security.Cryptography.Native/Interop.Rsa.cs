@@ -25,19 +25,35 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_DecodeRsaPublicKey")]
         internal static extern SafeRsaHandle DecodeRsaPublicKey(byte[] buf, int len);
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_RsaPublicEncrypt")]
-        internal extern static int RsaPublicEncrypt(
+        internal static int RsaPublicEncrypt(
             int flen,
-            byte[] from,
-            byte[] to,
+            ReadOnlySpan<byte> from,
+            Span<byte> to,
+            SafeRsaHandle rsa,
+            RsaPadding padding) =>
+            RsaPublicEncrypt(flen, ref from.DangerousGetPinnableReference(), ref to.DangerousGetPinnableReference(), rsa, padding);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_RsaPublicEncrypt")]
+        private extern static int RsaPublicEncrypt(
+            int flen,
+            ref byte from,
+            ref byte to,
             SafeRsaHandle rsa,
             RsaPadding padding);
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_RsaPrivateDecrypt")]
-        internal extern static int RsaPrivateDecrypt(
+        internal static int RsaPrivateDecrypt(
             int flen,
-            byte[] from,
-            byte[] to,
+            ReadOnlySpan<byte> from,
+            Span<byte> to,
+            SafeRsaHandle rsa,
+            RsaPadding padding) =>
+            RsaPrivateDecrypt(flen, ref from.DangerousGetPinnableReference(), ref to.DangerousGetPinnableReference(), rsa, padding);
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_RsaPrivateDecrypt")]
+        private extern static int RsaPrivateDecrypt(
+            int flen,
+            ref byte from,
+            ref byte to,
             SafeRsaHandle rsa,
             RsaPadding padding);
 
@@ -47,13 +63,19 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_RsaGenerateKeyEx")]
         internal static extern int RsaGenerateKeyEx(SafeRsaHandle rsa, int bits, SafeBignumHandle e);
 
+        internal static bool RsaSign(int type, ReadOnlySpan<byte> m, int m_len, Span<byte> sigret, out int siglen, SafeRsaHandle rsa) =>
+            RsaSign(type, ref m.DangerousGetPinnableReference(), m_len, ref sigret.DangerousGetPinnableReference(), out siglen, rsa);
+
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_RsaSign")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool RsaSign(int type, byte[] m, int m_len, byte[] sigret, out int siglen, SafeRsaHandle rsa);
+        private static extern bool RsaSign(int type, ref byte m, int m_len, ref byte sigret, out int siglen, SafeRsaHandle rsa);
+
+        internal static bool RsaVerify(int type, ReadOnlySpan<byte> m, int m_len, ReadOnlySpan<byte> sigbuf, int siglen, SafeRsaHandle rsa) =>
+            RsaVerify(type, ref m.DangerousGetPinnableReference(), m_len, ref sigbuf.DangerousGetPinnableReference(), siglen, rsa);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_RsaVerify")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool RsaVerify(int type, byte[] m, int m_len, byte[] sigbuf, int siglen, SafeRsaHandle rsa);
+        private static extern bool RsaVerify(int type, ref byte m, int m_len, ref byte sigbuf, int siglen, SafeRsaHandle rsa);
 
         internal static RSAParameters ExportRsaParameters(SafeRsaHandle key, bool includePrivateParameters)
         {
@@ -66,35 +88,47 @@ internal static partial class Interop
                 throw new CryptographicException();
             }
 
-            IntPtr n, e, d, p, dmp1, q, dmq1, iqmp;
-            if (!GetRsaParameters(key, out n, out e, out d, out p, out dmp1, out q, out dmq1, out iqmp))
+            bool addedRef = false;
+
+            try
             {
-                throw new CryptographicException();
+                key.DangerousAddRef(ref addedRef);
+
+                IntPtr n, e, d, p, dmp1, q, dmq1, iqmp;
+                if (!GetRsaParameters(key, out n, out e, out d, out p, out dmp1, out q, out dmq1, out iqmp))
+                {
+                    throw new CryptographicException();
+                }
+
+                int modulusSize = Crypto.RsaSize(key);
+
+                // RSACryptoServiceProvider expects P, DP, Q, DQ, and InverseQ to all
+                // be padded up to half the modulus size.
+                int halfModulus = modulusSize / 2;
+
+                RSAParameters rsaParameters = new RSAParameters
+                {
+                    Modulus = Crypto.ExtractBignum(n, modulusSize),
+                    Exponent = Crypto.ExtractBignum(e, 0),
+                };
+
+                if (includePrivateParameters)
+                {
+                    rsaParameters.D = Crypto.ExtractBignum(d, modulusSize);
+                    rsaParameters.P = Crypto.ExtractBignum(p, halfModulus);
+                    rsaParameters.DP = Crypto.ExtractBignum(dmp1, halfModulus);
+                    rsaParameters.Q = Crypto.ExtractBignum(q, halfModulus);
+                    rsaParameters.DQ = Crypto.ExtractBignum(dmq1, halfModulus);
+                    rsaParameters.InverseQ = Crypto.ExtractBignum(iqmp, halfModulus);
+                }
+
+                return rsaParameters;
             }
-
-            int modulusSize = Crypto.RsaSize(key);
-
-            // RSACryptoServiceProvider expects P, DP, Q, DQ, and InverseQ to all
-            // be padded up to half the modulus size.
-            int halfModulus = modulusSize / 2;
-
-            RSAParameters rsaParameters = new RSAParameters
+            finally
             {
-                Modulus = Crypto.ExtractBignum(n, modulusSize),
-                Exponent = Crypto.ExtractBignum(e, 0),
-            };
-
-            if (includePrivateParameters)
-            {
-                rsaParameters.D = Crypto.ExtractBignum(d, modulusSize);
-                rsaParameters.P = Crypto.ExtractBignum(p, halfModulus);
-                rsaParameters.DP = Crypto.ExtractBignum(dmp1, halfModulus);
-                rsaParameters.Q = Crypto.ExtractBignum(q, halfModulus);
-                rsaParameters.DQ = Crypto.ExtractBignum(dmq1, halfModulus);
-                rsaParameters.InverseQ = Crypto.ExtractBignum(iqmp, halfModulus);
+                if (addedRef)
+                    key.DangerousRelease();
             }
-
-            return rsaParameters;
         }
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_GetRsaParameters")]

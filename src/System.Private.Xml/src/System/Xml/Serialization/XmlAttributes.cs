@@ -2,14 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if XMLSERIALIZERGENERATOR
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     using System;
     using System.Reflection;
     using System.Collections;
     using System.ComponentModel;
     using System.Linq;
-    using Collections.Generic;
+    using System.Collections.Generic;
+    using System.Xml.Serialization;
 
     internal enum XmlAttributeFlags
     {
@@ -30,7 +35,11 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
+#if XMLSERIALIZERGENERATOR
+    internal class XmlAttributes
+#else
     public class XmlAttributes
+#endif
     {
         private XmlElementAttributes _xmlElements = new XmlElementAttributes();
         private XmlArrayItemAttributes _xmlArrayItems = new XmlArrayItemAttributes();
@@ -120,7 +129,7 @@ namespace System.Xml.Serialization
                 else if (attrs[i] is XmlAnyElementAttribute)
                 {
                     XmlAnyElementAttribute any = (XmlAnyElementAttribute)attrs[i];
-                    if ((any.Name == null || any.Name.Length == 0) && any.NamespaceSpecified && any.Namespace == null)
+                    if ((any.Name == null || any.Name.Length == 0) && any.GetNamespaceSpecified() && any.Namespace == null)
                     {
                         // ignore duplicate wildcards
                         wildcard = any;

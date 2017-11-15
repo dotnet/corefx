@@ -66,7 +66,7 @@ namespace System.Xml
 
         public static XmlDictionaryWriter CreateMtomWriter(Stream stream, Encoding encoding, int maxSizeInBytes, string startInfo, string boundary, string startUri, bool writeMessageHeaders, bool ownsStream)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.PlatformNotSupported_MtomEncoding);
         }
 
         public static XmlDictionaryWriter CreateDictionaryWriter(XmlWriter writer)
@@ -82,6 +82,12 @@ namespace System.Xml
             }
 
             return dictionaryWriter;
+        }
+
+        public override Task WriteBase64Async(byte[] buffer, int index, int count)
+        {
+            WriteBase64(buffer, index, count);
+            return Task.CompletedTask;
         }
 
         public void WriteStartElement(XmlDictionaryString localName, XmlDictionaryString namespaceUri)

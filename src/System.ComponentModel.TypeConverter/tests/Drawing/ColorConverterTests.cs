@@ -84,8 +84,9 @@ namespace System.ComponentModel.TypeConverterTests
             }
         }
 
-        public static IEnumerable<object[]> ColorNames =>
-            Enum.GetNames(typeof(KnownColor)).Select(n => new object[] {n});
+        public static IEnumerable<object[]> ColorNames => typeof(Color).GetProperties()
+                .Where(p => p.PropertyType == typeof(Color))
+                .Select(p => new object[] { p.Name} );
 
         [Theory]
         [MemberData(nameof(ColorData))]
@@ -165,7 +166,7 @@ namespace System.ComponentModel.TypeConverterTests
         public void ConvertFrom_ArgumentException(string value)
         {
             var conv = new ColorConverter();
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 conv.ConvertFrom(null, CultureInfo.InvariantCulture, value);
             });
@@ -325,7 +326,7 @@ namespace System.ComponentModel.TypeConverterTests
         public void ConvertFromInvariantString_Invalid()
         {
             var conv = new ColorConverter();
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 conv.ConvertFromInvariantString("1, 2, 3, 4, 5");
             });
@@ -371,7 +372,7 @@ namespace System.ComponentModel.TypeConverterTests
         public void ConvertFromString_Invalid()
         {
             var conv = new ColorConverter();
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 conv.ConvertFromString(string.Format("1{0} 2{0} 3{0} 4{0} 5", CultureInfo.CurrentCulture.TextInfo.ListSeparator));
             });
@@ -436,8 +437,7 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var conv = new ColorConverter();
 
-            Assert.Equal((int) KnownColor.MenuHighlight, conv.GetStandardValues().Count);
-            Assert.Equal((int) KnownColor.MenuHighlight, conv.GetStandardValues(null).Count);
+            Assert.True(conv.GetStandardValues().Count > 0);
         }
 
         [Fact]

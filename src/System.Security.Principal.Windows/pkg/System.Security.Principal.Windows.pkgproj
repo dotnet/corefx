@@ -3,12 +3,18 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Security.Principal.Windows.csproj">
-      <SupportedFramework>net463;netcoreapp2.0</SupportedFramework>
+      <SupportedFramework>net461;netcoreapp2.0;$(UAPvNextTFM);$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>
     <ProjectReference Include="..\src\System.Security.Principal.Windows.csproj" />
-    <ValidatePackageSuppression Include="SuppressNETStandardInference">
-      <Value>.NETCoreApp,Version=v1.1;.NETCoreApp,Version=v2.0</Value>
-    </ValidatePackageSuppression>
+    <File Include="$(PlaceHolderFile)">
+      <TargetPath>runtimes/win/lib/$(UAPvNextTFM)</TargetPath>
+    </File>
+    <InboxOnTargetFramework Include="$(UAPvNextTFM)" />
+    <HarvestIncludePaths Include="ref/net46;lib/net46;runtimes/win/lib/net46" />
+    <HarvestIncludePaths Include="ref/netstandard1.3;runtimes/win/lib/netstandard1.3;lib/netstandard1.3" />
+    <!-- this package is part of the implementation closure of NETStandard.Library
+         therefore it cannot reference NETStandard.Library -->
+    <SuppressMetaPackage Include="NETStandard.Library" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

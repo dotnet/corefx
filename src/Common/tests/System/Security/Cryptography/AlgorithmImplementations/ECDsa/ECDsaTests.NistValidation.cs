@@ -12,13 +12,13 @@ using Test.Cryptography;
 
 namespace System.Security.Cryptography.EcDsa.Tests
 {
-    public partial class ECDsaTests : ECDsaTestsBase
+    public abstract partial class ECDsaTests : ECDsaTestsBase
     {
         // These test cases are from http://csrc.nist.gov/groups/STM/cavp/digital-signatures.html#test-vectors
         // FIPS 186-4 ECDSA test vectors
         // 186-3ecdsatestvectors.zip
         // SigGen.txt
-
+#if netcoreapp
         [Fact]
         public static void ValidateNistP256Sha256()
         {
@@ -291,5 +291,6 @@ namespace System.Security.Cryptography.EcDsa.Tests
                 }
             }
         }
+#endif // netcoreapp
     }
 }

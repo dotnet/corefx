@@ -9,9 +9,10 @@ using Xunit;
 public partial class ThreadPoolBoundHandleTests
 {
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public void Handle_ReturnsHandle()
     {
-        using(SafeHandle handle = HandleFactory.CreateAsyncFileHandleForWrite())
+        using(SafeHandle handle = HandleFactory.CreateAsyncFileHandleForWrite(GetTestFilePath()))
         {
             using(ThreadPoolBoundHandle boundHandle = CreateThreadPoolBoundHandle(handle))
             {
@@ -21,9 +22,10 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public void Handle_AfterDisposed_DoesNotThrow()
     {
-        using(SafeHandle handle = HandleFactory.CreateAsyncFileHandleForWrite())
+        using(SafeHandle handle = HandleFactory.CreateAsyncFileHandleForWrite(GetTestFilePath()))
         {
             ThreadPoolBoundHandle boundHandle = CreateThreadPoolBoundHandle(handle);
             boundHandle.Dispose();

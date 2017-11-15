@@ -50,12 +50,15 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void Constructor0_Arguments_Mismatch()
         {
-            ArgumentException ex = Assert.Throws<ArgumentException>(() => new InstanceDescriptor(ci, null));
+            ArgumentException ex = AssertExtensions.Throws<ArgumentException>(null, () => new InstanceDescriptor(ci, null));
             // Length mismatch
             Assert.Equal(typeof(ArgumentException), ex.GetType());
             Assert.Null(ex.InnerException);
-            Assert.NotNull(ex.Message);
-            Assert.Null(ex.ParamName);
+            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
+            {
+                Assert.NotNull(ex.Message);
+                Assert.Null(ex.ParamName);
+            }
         }
 
         [Fact]
@@ -72,7 +75,7 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void Constructor_MemberInfo_Null_Boolean()
         {
-            Assert.Throws<ArgumentException>(() => new InstanceDescriptor(ci, null, false));
+            AssertExtensions.Throws<ArgumentException>(null, () => new InstanceDescriptor(ci, null, false));
             // mismatch for required parameters
         }
 
@@ -90,7 +93,7 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void Field_Arguments_Empty()
         {
-            FieldInfo fi = typeof(Uri).GetField("SchemeDelimiter");
+            FieldInfo fi = typeof(StaticField).GetField(nameof(StaticField.Field));
 
             InstanceDescriptor id = new InstanceDescriptor(fi, new object[0]);
             Assert.Equal(0, id.Arguments.Count);
@@ -102,20 +105,23 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void Field_Arguments_Mismatch()
         {
-            FieldInfo fi = typeof(Uri).GetField("SchemeDelimiter");
+            FieldInfo fi = typeof(StaticField).GetField(nameof(StaticField.Field));
 
-            ArgumentException ex = Assert.Throws<ArgumentException>(() => new InstanceDescriptor(fi, new object[] { url }));
+            ArgumentException ex = AssertExtensions.Throws<ArgumentException>(null, () => new InstanceDescriptor(fi, new object[] { url }));
             // Parameter must be static
             Assert.Equal(typeof(ArgumentException), ex.GetType());
             Assert.Null(ex.InnerException);
-            Assert.NotNull(ex.Message);
-            Assert.Null(ex.ParamName);
+            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
+            {
+                Assert.NotNull(ex.Message);
+                Assert.Null(ex.ParamName);
+            }
         }
 
         [Fact]
         public void Field_Arguments_Null()
         {
-            FieldInfo fi = typeof(Uri).GetField("SchemeDelimiter");
+            FieldInfo fi = typeof(StaticField).GetField(nameof(StaticField.Field));
 
             InstanceDescriptor id = new InstanceDescriptor(fi, null);
             Assert.Equal(0, id.Arguments.Count);
@@ -127,20 +133,23 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void Field_MemberInfo_NonStatic()
         {
-            FieldInfo fi = typeof(InstanceField).GetField("Name");
+            FieldInfo fi = typeof(InstanceField).GetField(nameof(InstanceField.Name));
 
-            ArgumentException ex = Assert.Throws<ArgumentException>(() => new InstanceDescriptor(fi, null));
+            ArgumentException ex = AssertExtensions.Throws<ArgumentException>(null, () => new InstanceDescriptor(fi, null));
             // Parameter must be static
             Assert.Equal(typeof(ArgumentException), ex.GetType());
             Assert.Null(ex.InnerException);
-            Assert.NotNull(ex.Message);
-            Assert.Null(ex.ParamName);
+            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
+            {
+                Assert.NotNull(ex.Message);
+                Assert.Null(ex.ParamName);
+            }
         }
 
         [Fact]
         public void Property_Arguments_Mismatch()
         {
-            PropertyInfo pi = typeof(Thread).GetProperty("CurrentThread");
+            PropertyInfo pi = typeof(StaticProperty).GetProperty(nameof(StaticProperty.Property));
 
             InstanceDescriptor id = new InstanceDescriptor(pi, new object[] { url });
             Assert.Equal(1, id.Arguments.Count);
@@ -156,7 +165,7 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void Property_Arguments_Null()
         {
-            PropertyInfo pi = typeof(Thread).GetProperty("CurrentThread");
+            PropertyInfo pi = typeof(StaticProperty).GetProperty(nameof(StaticProperty.Property));
 
             InstanceDescriptor id = new InstanceDescriptor(pi, null);
             Assert.Equal(0, id.Arguments.Count);
@@ -168,36 +177,45 @@ namespace System.ComponentModel.Tests
         [Fact]
         public void Property_MemberInfo_NonStatic()
         {
-            PropertyInfo pi = typeof(Uri).GetProperty("Host");
+            PropertyInfo pi = typeof(InstanceProperty).GetProperty(nameof(InstanceProperty.Property));
 
             ArgumentException ex;
 
-            ex = Assert.Throws<ArgumentException>(() => new InstanceDescriptor(pi, null));
+            ex = AssertExtensions.Throws<ArgumentException>(null, () => new InstanceDescriptor(pi, null));
             // Parameter must be static
             Assert.Equal(typeof(ArgumentException), ex.GetType());
             Assert.Null(ex.InnerException);
-            Assert.NotNull(ex.Message);
-            Assert.Null(ex.ParamName);
+            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
+            {
+                Assert.NotNull(ex.Message);
+                Assert.Null(ex.ParamName);
+            }
 
-            ex = Assert.Throws<ArgumentException>(() => new InstanceDescriptor(pi, null, false));
+            ex = AssertExtensions.Throws<ArgumentException>(null, () => new InstanceDescriptor(pi, null, false));
             // Parameter must be static
             Assert.Equal(typeof(ArgumentException), ex.GetType());
             Assert.Null(ex.InnerException);
-            Assert.NotNull(ex.Message);
-            Assert.Null(ex.ParamName);
+            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
+            {
+                Assert.NotNull(ex.Message);
+                Assert.Null(ex.ParamName);
+            }
         }
 
         [Fact]
         public void Property_MemberInfo_WriteOnly()
         {
-            PropertyInfo pi = typeof(WriteOnlyProperty).GetProperty("Name");
+            PropertyInfo pi = typeof(WriteOnlyProperty).GetProperty(nameof(WriteOnlyProperty.Name));
 
-            ArgumentException ex = Assert.Throws<ArgumentException>(() => new InstanceDescriptor(pi, null));
+            ArgumentException ex = AssertExtensions.Throws<ArgumentException>(null, () => new InstanceDescriptor(pi, null));
             // Parameter must be readable
             Assert.Equal(typeof(ArgumentException), ex.GetType());
             Assert.Null(ex.InnerException);
-            Assert.NotNull(ex.Message);
-            Assert.Null(ex.ParamName);
+            if (!PlatformDetection.IsNetNative) // .Net Native toolchain optimizes away exception messages and paramnames.
+            {
+                Assert.NotNull(ex.Message);
+                Assert.Null(ex.ParamName);
+            }
         }
 
         private class WriteOnlyProperty
@@ -212,7 +230,22 @@ namespace System.ComponentModel.Tests
 
         public class InstanceField
         {
-            public string Name;
+            public string Name = "FieldValue";
+        }
+
+        public class InstanceProperty
+        {
+            public string Property => "PropertyValue";
+        }
+
+        public class StaticField
+        {
+            public static readonly string Field = "FieldValue";
+        }
+
+        public class StaticProperty
+        {
+            public static string Property => "PropertyValue";
         }
     }
 }

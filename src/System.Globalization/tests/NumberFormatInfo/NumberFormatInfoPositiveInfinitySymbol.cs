@@ -12,8 +12,8 @@ namespace System.Globalization.Tests
         public static IEnumerable<object[]> PositiveInfinitySymbol_TestData()
         {
             yield return new object[] { NumberFormatInfo.InvariantInfo };
-            yield return new object[] { new CultureInfo("en-US").NumberFormat };
-            yield return new object[] { new CultureInfo("fr-FR").NumberFormat };
+            yield return new object[] { CultureInfo.GetCultureInfo("en-US").NumberFormat };
+            yield return new object[] { CultureInfo.GetCultureInfo("fr-FR").NumberFormat };
         }
 
         [Theory]
@@ -37,7 +37,7 @@ namespace System.Globalization.Tests
         [Fact]
         public void PositiveInfinitySymbol_Set_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("PositiveInfinitySymbol", () => new NumberFormatInfo().PositiveInfinitySymbol = null);
+            AssertExtensions.Throws<ArgumentNullException>("PositiveInfinitySymbol", () => new NumberFormatInfo().PositiveInfinitySymbol = null);
             Assert.Throws<InvalidOperationException>(() => NumberFormatInfo.InvariantInfo.PositiveInfinitySymbol = "");
         }
     }

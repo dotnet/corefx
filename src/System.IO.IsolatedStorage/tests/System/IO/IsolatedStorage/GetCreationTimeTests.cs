@@ -6,6 +6,7 @@ using Xunit;
 
 namespace System.IO.IsolatedStorage
 {
+    [ActiveIssue(18940, TargetFrameworkMonikers.UapAot)]
     public class GetCreationTimeTests : IsoStorageTest
     {
         [Fact]
@@ -18,12 +19,12 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void GetCreationTime_ThrowsIsolatedStorageException()
+        public void GetCreationTime_Removed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.GetCreationTime("foo"));
+                Assert.Throws<InvalidOperationException>(() => isf.GetCreationTime("foo"));
             }
         }
 
@@ -39,7 +40,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void GetCreationTime_ThrowsInvalidOperationException()
+        public void GetCreationTime_Closed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -53,29 +54,33 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.GetCreationTime("\0bad"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.GetCreationTime("\0bad"));
             }
         }
 
         [Fact]
-        [ActiveIssue(12539, TestPlatforms.Linux)]
         [PlatformSpecific(TestPlatforms.FreeBSD | TestPlatforms.Linux | TestPlatforms.NetBSD)]  // Filesystem timestamps vary in granularity
         public void GetCreationTime_GetsTime_Unix()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
+                DateTimeOffset before = DateTimeOffset.Now;
+
                 string file = "GetCreationTime_GetsTime";
                 isf.CreateTestFile(file);
 
-                // Filesystem timestamps vary in granularity, we can't make a positive assertion that
-                // the time will come before or after the current time.
-                Assert.Equal(default(DateTimeOffset), isf.GetCreationTime(file));
+                DateTimeOffset after = DateTimeOffset.Now;
+
+                DateTimeOffset creationTime = isf.GetCreationTime(file);
+                Assert.InRange(creationTime, before.AddSeconds(-10), after.AddSeconds(10)); // +/- 10 for some wiggle room
+                Assert.Equal(creationTime, isf.GetCreationTime(file));
             }
         }
 
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]  // Filesystem timestamps vary in granularity
+        [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void GetCreationTime_GetsTime_Windows_OSX()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())

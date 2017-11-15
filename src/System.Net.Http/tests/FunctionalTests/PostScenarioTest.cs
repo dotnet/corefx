@@ -2,14 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
-using System.Net.Http.Headers;
-using System.Net.Test.Common;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-
 using Xunit;
 using Xunit.Abstractions;
 
@@ -19,7 +13,8 @@ namespace System.Net.Http.Functional.Tests
 
     // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
     // to separately Dispose (or have a 'using' statement) for the handler.
-    public class PostScenarioTest
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
+    public class PostScenarioTest : HttpClientTestBase
     {
         private const string ExpectedContent = "Test contest";
         private const string UserName = "user1";
@@ -71,6 +66,14 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(EchoServers))]
+        public async Task PostEmptyContentUsingConflictingSemantics_Success(Uri serverUri)
+        {
+            await PostHelper(serverUri, string.Empty, new StringContent(string.Empty),
+                useContentLengthUpload: true, useChunkedEncodingUpload: true);
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Theory, MemberData(nameof(EchoServers))]
         public async Task PostUsingContentLengthSemantics_Success(Uri serverUri)
         {
             await PostHelper(serverUri, ExpectedContent, new StringContent(ExpectedContent),
@@ -111,6 +114,7 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(EchoServers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "netfx behaves differently and will buffer content and use 'Content-Length' semantics")]
         public async Task PostUsingNoSpecifiedSemantics_UsesChunkedSemantics(Uri serverUri)
         {
             await PostHelper(serverUri, ExpectedContent, new StringContent(ExpectedContent),
@@ -146,11 +150,11 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(BasicAuthEchoServers))]
-        public async Task PostNonRewindableContentUsingAuth_NoPreAuthenticate_ThrowsInvalidOperationException(Uri serverUri)
+        public async Task PostNonRewindableContentUsingAuth_NoPreAuthenticate_ThrowsHttpRequestException(Uri serverUri)
         {
             HttpContent content = CustomContent.Create(ExpectedContent, false);
             var credential = new NetworkCredential(UserName, Password);
-            await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            await Assert.ThrowsAsync<HttpRequestException>(() => 
                 PostUsingAuthHelper(serverUri, ExpectedContent, content, credential, preAuthenticate: false));
         }
 
@@ -163,7 +167,21 @@ namespace System.Net.Http.Functional.Tests
             var credential = new NetworkCredential(UserName, Password);
             await PostUsingAuthHelper(serverUri, ExpectedContent, content, credential, preAuthenticate: true);
         }
-        
+
+        [OuterLoop] // TODO: Issue #11345
+        [Theory, MemberData(nameof(EchoServers))]
+        public async Task PostAsync_EmptyContent_ContentTypeHeaderNotSent(Uri serverUri)
+        {
+            using (HttpClient client = CreateHttpClient())
+            using (HttpResponseMessage response = await client.PostAsync(serverUri, null))
+            {
+                string responseContent = await response.Content.ReadAsStringAsync();
+                bool sentContentType = TestHelper.JsonMessageContainsKey(responseContent, "Content-Type");
+
+                Assert.False(sentContentType);
+            }
+        }
+
         private async Task PostHelper(
             Uri serverUri,
             string requestBody,
@@ -171,7 +189,7 @@ namespace System.Net.Http.Functional.Tests
             bool useContentLengthUpload,
             bool useChunkedEncodingUpload)
         {
-            using (var client = new HttpClient())
+            using (HttpClient client = CreateHttpClient())
             {
                 if (!useContentLengthUpload && requestContent != null)
                 {
@@ -210,7 +228,7 @@ namespace System.Net.Http.Functional.Tests
             NetworkCredential credential,
             bool preAuthenticate)
         {
-            var handler = new HttpClientHandler();
+            HttpClientHandler handler = CreateHttpClientHandler();
             handler.PreAuthenticate = preAuthenticate;
             handler.Credentials = credential;
             using (var client = new HttpClient(handler))
@@ -229,7 +247,7 @@ namespace System.Net.Http.Functional.Tests
                 requestContent.Headers.ContentLength = null;
                 request.Headers.TransferEncodingChunked = true;
 
-                using (HttpResponseMessage response = await client.PostAsync(serverUri, requestContent))
+                using (HttpResponseMessage response = await client.SendAsync(request))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                     string responseContent = await response.Content.ReadAsStringAsync();

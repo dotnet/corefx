@@ -2,77 +2,60 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.DirectoryServices.AccountManagement;
+using System.Security.Principal;
 using Xunit;
 
-namespace AccountManagementUnitTests
+namespace System.DirectoryServices.AccountManagement.Tests
 {
-    /// <summary>
-    ///This is a test class for PrincipalTest and is intended
-    ///to contain all PrincipalTest Unit Tests
-    ///</summary>
-    abstract public class PrincipalTest : IDisposable
+    public abstract class PrincipalTest : IDisposable
     {
-        protected PrincipalContext domainContext;
+        public PrincipalContext DomainContext { get; private set; }
 
-        #region Additional test attributes
-
-        public void PrincipalTestInitialize()
-        {
-            RefreshContext();
-        }
+        public PrincipalTest() => RefreshContext();
 
         private void RefreshContext()
         {
             string username = "Administrator";
             string password = "Adrumble@6";
 
-            //TODO: don't assume it exists, create it if its not
             string OU = "Tests";
-            string baseDomain = System.Security.Principal.WindowsIdentity.GetCurrent().Name.Split(new char[] { '\\' })[1] + "-TEST";
-            string domain = String.Format("{0}.nttest.microsoft.com", baseDomain);
-            string container = String.Format("ou={0},dc={1},dc=nttest,dc=microsoft,dc=com", OU, baseDomain);
-
-            if (domainContext != null)
+            string baseDomain = WindowsIdentity.GetCurrent().Name.Split(new char[] { '\\' })[1] + "-TEST";
+            string domain = $"{baseDomain}.nttest.microsoft.com";
+            string container = $"ou={OU},dc={baseDomain},dc=nttest,dc=microsoft,dc=com";
+            DomainContext?.Dispose();
+            try
             {
-                domainContext.Dispose();
+                DomainContext = new PrincipalContext(ContextType.Domain, domain, container, username, password);
             }
-
-            domainContext = new PrincipalContext(ContextType.Domain, domain, container, username, password);
-        }
-
-        public void Dispose()
-        {
-            if (domainContext != null)
+            catch
             {
-                domainContext.Dispose();
-                domainContext = null;
             }
         }
 
-        #endregion
+        public void Dispose() => DomainContext?.Dispose();
 
-        /// <summary>
-        ///  testing user creation
-        ///  right now we just test that if trying to add an existing user it causes it to be deleted
         [Fact]
         public void AddExistingPrincipal()
         {
+            if (DomainContext == null)
+            {
+                return;
+            }
+            
             // use new GUID for the user name so we be sure this user does not exist yet
             string name = Guid.NewGuid().ToString();
-            using (Principal principal = CreatePrincipal(domainContext, name))
+            using (Principal principal = CreatePrincipal(DomainContext, name))
             {
                 principal.Save();
             }
 
-            Assert.NotNull(Principal.FindByIdentity(domainContext, name));
+            Assert.NotNull(Principal.FindByIdentity(DomainContext, name));
 
             // this previously caused the user to be deleted. it is still expected to throw an exception, but not delete the user
             bool exceptionThrown = false;
             try
             {
-                using (Principal principal = CreatePrincipal(domainContext, name))
+                using (Principal principal = CreatePrincipal(DomainContext, name))
                 {
                     principal.Save();
                 }
@@ -86,7 +69,7 @@ namespace AccountManagementUnitTests
             Assert.True(exceptionThrown);
 
             // validate that we did not delete incorrectly delete the first principal
-            using (Principal principal2 = Principal.FindByIdentity(domainContext, name))
+            using (Principal principal2 = Principal.FindByIdentity(DomainContext, name))
             {
                 Assert.NotNull(principal2);
 
@@ -95,22 +78,20 @@ namespace AccountManagementUnitTests
             }
 
             // ensure we cleaned up the test principal
-            Assert.Null(Principal.FindByIdentity(domainContext, name));
+            Assert.Null(Principal.FindByIdentity(DomainContext, name));
         }
 
-
-        /// <summary>
-        /// 
-        /// </summary>
         [Fact]
         public void TestExtendedPrincipal()
         {
-            // to improve this, we might want to generate random sequences
-            byte[] writtenArray = { 10, 20, 30 };
-            byte[] readArray;
+            if (DomainContext == null)
+            {
+                return;
+            }
 
             string name = Guid.NewGuid().ToString();
-            using (Principal principal = CreateExtendedPrincipal(domainContext, name))
+            byte[] writtenArray = new byte[] { 10, 20, 30 };
+            using (Principal principal = CreateExtendedPrincipal(DomainContext, name))
             {
                 IExtendedPrincipalTest extendedPrincipal = (IExtendedPrincipalTest)principal;
                 extendedPrincipal.ByteArrayExtension = writtenArray;
@@ -118,48 +99,22 @@ namespace AccountManagementUnitTests
             }
 
             RefreshContext();
-
-            using (Principal principal = FindExtendedPrincipal(domainContext, name))
+            using (Principal principal = FindExtendedPrincipal(DomainContext, name))
             {
                 IExtendedPrincipalTest extendedPrincipal = (IExtendedPrincipalTest)principal;
-                readArray = extendedPrincipal.ByteArrayExtension;
+                byte[] readArray = extendedPrincipal.ByteArrayExtension;
                 principal.Delete();
             }
-
-            //CollectionAssert.AreEqual(writtenArray, readArray);
         }
 
-        private void RefreshDomainContext()
-        {
-            domainContext.Dispose();
-        }
+        public abstract Principal CreatePrincipal(PrincipalContext context, string name);
 
-        /// <summary>
-        /// derived classes will create concrete instances
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        internal abstract Principal CreatePrincipal(PrincipalContext context, string name);
+        public abstract Principal CreateExtendedPrincipal(PrincipalContext context, string name);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        internal abstract Principal CreateExtendedPrincipal(PrincipalContext context, string name);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        internal abstract Principal FindExtendedPrincipal(PrincipalContext context, string name);
+        public abstract Principal FindExtendedPrincipal(PrincipalContext context, string name);
     }
 
-    internal interface IExtendedPrincipalTest
+    public interface IExtendedPrincipalTest
     {
         object ObjectExtension { get; set; }
         byte[] ByteArrayExtension { get; set; }

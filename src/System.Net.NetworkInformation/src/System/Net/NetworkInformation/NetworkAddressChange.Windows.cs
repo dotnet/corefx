@@ -40,14 +40,6 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        internal static bool CanListenForNetworkChanges
-        {
-            get
-            {
-                return true;
-            }
-        }
-
         internal static class AvailabilityChangeListener
         {
             private static readonly object s_syncObject = new object();
@@ -251,7 +243,7 @@ namespace System.Net.NetworkInformation
                                 (int)IOControlCode.AddressListChange,
                                 null, 0, null, 0,
                                 out length,
-                                SafeNativeOverlapped.Zero, IntPtr.Zero);
+                                IntPtr.Zero, IntPtr.Zero);
 
                             if (errorCode != SocketError.Success)
                             {
@@ -290,7 +282,7 @@ namespace System.Net.NetworkInformation
                                 (int)IOControlCode.AddressListChange,
                                 null, 0, null, 0,
                                 out length,
-                                SafeNativeOverlapped.Zero, IntPtr.Zero);
+                                IntPtr.Zero, IntPtr.Zero);
 
                             if (errorCode != SocketError.Success)
                             {

@@ -42,6 +42,10 @@ namespace System.Diagnostics
         {
             get
             {
+#if ENABLE_HTTP_HANDLER
+                GC.KeepAlive(HttpHandlerDiagnosticListener.s_instance);
+#endif
+
                 if (s_allListenerObservable == null)
                 {
                     s_allListenerObservable = new AllListenerObservable();
@@ -57,7 +61,18 @@ namespace System.Diagnostics
         /// </summary>
         public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Predicate<string> isEnabled)
         {
-            return SubscribeInternal(observer, isEnabled, (name, arg1, arg2) => isEnabled(name));
+            IDisposable subscription;
+            if (isEnabled == null)
+            {
+                subscription = SubscribeInternal(observer, null, null);
+            }
+            else
+            {
+                Predicate<string> localIsEnabled = isEnabled;
+                subscription = SubscribeInternal(observer, isEnabled, (name, arg1, arg2) => localIsEnabled(name));
+            }
+
+            return subscription;
         }
 
         /// <summary>
@@ -72,13 +87,15 @@ namespace System.Diagnostics
         /// Use Subscribe overload with name-based filtering if producer does NOT support context-based filtering</param>
         public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Func<string, object, object, bool> isEnabled)
         {
-            return SubscribeInternal(observer, name => IsEnabled(name, null, null), isEnabled);
+            return isEnabled == null ?
+             SubscribeInternal(observer, null, null) :
+             SubscribeInternal(observer, name => IsEnabled(name, null, null), isEnabled);
         }
 
         /// <summary>
         /// Same as other Subscribe overload where the predicate is assumed to always return true.  
         /// </summary>
-        public IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer)
+        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer)
         {
             return SubscribeInternal(observer, null, null);
         }
@@ -107,9 +124,9 @@ namespace System.Diagnostics
                 s_allListeners = this;
             }
 
-            // Call IsEnabled just so we insure that the DiagnosticSourceEventSource has been 
-            // constructed (and thus is responsive to ETW requests to be enabled).  
-            DiagnosticSourceEventSource.Logger.IsEnabled();
+            // Touch DiagnosticSourceEventSource.Logger so we ensure that the
+            // DiagnosticSourceEventSource has been constructed (and thus is responsive to ETW requests to be enabled).
+            GC.KeepAlive(DiagnosticSourceEventSource.Logger);
         }
 
         /// <summary>

@@ -12,7 +12,7 @@ using System.Data.Common;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Text;
-
+using Microsoft.SqlServer.Server;
 
 namespace System.Data.SqlClient
 {
@@ -266,15 +266,20 @@ namespace System.Data.SqlClient
     sealed internal class _SqlMetaData : SqlMetaDataPriv
     {
         internal string column;
+        internal string baseColumn;
         internal MultiPartTableName multiPartTableName;
         internal readonly int ordinal;
         internal byte updatability;     // two bit field (0 is read only, 1 is updatable, 2 is updatability unknown)
+        internal byte tableNum;
         internal bool isDifferentName;
         internal bool isKey;
         internal bool isHidden;
         internal bool isExpression;
         internal bool isIdentity;
-        internal string baseColumn;
+        internal bool isColumnSet;
+        internal byte op;        // for altrow-columns only
+        internal ushort operand; // for altrow-columns only
+
         internal _SqlMetaData(int ordinal) : base()
         {
             this.ordinal = ordinal;
@@ -301,7 +306,6 @@ namespace System.Data.SqlClient
                 return multiPartTableName.SchemaName;
             }
         }
-
         internal string tableName
         {
             get
@@ -331,11 +335,18 @@ namespace System.Data.SqlClient
             _SqlMetaData result = new _SqlMetaData(ordinal);
             result.CopyFrom(this);
             result.column = column;
+            result.baseColumn = baseColumn;
             result.multiPartTableName = multiPartTableName;
             result.updatability = updatability;
+            result.tableNum = tableNum;
+            result.isDifferentName = isDifferentName;
             result.isKey = isKey;
             result.isHidden = isHidden;
+            result.isExpression = isExpression;
             result.isIdentity = isIdentity;
+            result.isColumnSet = isColumnSet;
+            result.op = op;
+            result.operand = operand;
             return result;
         }
     }
@@ -345,6 +356,7 @@ namespace System.Data.SqlClient
         internal ushort id;             // for altrow-columns only
         internal int[] indexMap;
         internal int visibleColumns;
+        internal DataTable schemaTable;
         private readonly _SqlMetaData[] _metaDataArray;
         internal ReadOnlyCollection<DbColumn> dbColumnSchema;
 
@@ -469,6 +481,7 @@ namespace System.Data.SqlClient
         internal int codePage;
         internal Encoding encoding;
         internal bool isNullable;
+        internal bool isMultiValued = false;
 
         // UDT specific metadata
         // server metadata info
@@ -477,13 +490,21 @@ namespace System.Data.SqlClient
         internal string udtSchemaName;
         internal string udtTypeName;
         internal string udtAssemblyQualifiedName;
-        
+
+        // on demand
+        internal Type udtType;
+
         // Xml specific metadata
         internal string xmlSchemaCollectionDatabase;
         internal string xmlSchemaCollectionOwningSchema;
         internal string xmlSchemaCollectionName;
         internal MetaType metaType; // cached metaType
 
+        // Structured type-specific metadata
+        internal string structuredTypeDatabaseName;
+        internal string structuredTypeSchemaName;
+        internal string structuredTypeName;
+        internal IList<SmiMetaData> structuredFields;
 
         internal SqlMetaDataPriv()
         {
@@ -500,14 +521,21 @@ namespace System.Data.SqlClient
             this.codePage = original.codePage;
             this.encoding = original.encoding;
             this.isNullable = original.isNullable;
+            this.isMultiValued = original.isMultiValued;
             this.udtDatabaseName = original.udtDatabaseName;
             this.udtSchemaName = original.udtSchemaName;
             this.udtTypeName = original.udtTypeName;
             this.udtAssemblyQualifiedName = original.udtAssemblyQualifiedName;
+            this.udtType = original.udtType;
             this.xmlSchemaCollectionDatabase = original.xmlSchemaCollectionDatabase;
             this.xmlSchemaCollectionOwningSchema = original.xmlSchemaCollectionOwningSchema;
             this.xmlSchemaCollectionName = original.xmlSchemaCollectionName;
             this.metaType = original.metaType;
+
+            this.structuredTypeDatabaseName = original.structuredTypeDatabaseName;
+            this.structuredTypeSchemaName = original.structuredTypeSchemaName;
+            this.structuredTypeName = original.structuredTypeName;
+            this.structuredFields = original.structuredFields;
         }
     }
 
@@ -518,6 +546,30 @@ namespace System.Data.SqlClient
         internal ushort options;
         internal SqlParameter[] parameters;
         internal byte[] paramoptions;
+
+        internal int? recordsAffected;
+        internal int cumulativeRecordsAffected;
+
+        internal int errorsIndexStart;
+        internal int errorsIndexEnd;
+        internal SqlErrorCollection errors;
+
+        internal int warningsIndexStart;
+        internal int warningsIndexEnd;
+        internal SqlErrorCollection warnings;
+
+        internal string GetCommandTextOrRpcName()
+        {
+            if (TdsEnums.RPC_PROCID_EXECUTESQL == ProcID)
+            {
+                // Param 0 is the actual sql executing
+                return (string)parameters[0].Value;
+            }
+            else
+            {
+                return rpcName;
+            }
+        }
     }
 
     sealed internal class SqlReturnValue : SqlMetaDataPriv

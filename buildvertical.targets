@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask TaskName="FindBestConfigurations" AssemblyFile="$(CoreFxToolsTaskDir)CoreFx.Tools.dll"/>
+  <UsingTask TaskName="FindBestConfigurations" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
   <PropertyGroup>
     <ImportedBuildVerticalTargets>true</ImportedBuildVerticalTargets>
     <_traversalBuildConfigurations>$(BuildConfiguration)</_traversalBuildConfigurations>
@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <!-- Import configuration data model -->
-  <Import Project="$(MSBuildThisFileDirectory)src/Tools/GenerateProps/properties.props" />
+  <Import Project="$(ProjectDir)tools-local/properties.props" />
 
   <!-- Runs during traversal when BuildAllConfigurations is set to expand each project
        to a seperate instance for each of its BuildConfigurations -->
@@ -53,7 +53,7 @@
       <_NonPkgProjProjectReferenceBuildConfigurations>
         <AdditionalProperties>Configuration=%(Identity);%(_NonPkgProjProjectReferenceBuildConfigurations.AdditionalProperties)</AdditionalProperties>
       </_NonPkgProjProjectReferenceBuildConfigurations>
-      
+
       <!-- transform back to project -->
       <_NonPkgProjProjectReferenceWitnConfiguration Include="@(_NonPkgProjProjectReferenceBuildConfigurations->'%(OriginalItemSpec)')" />
     </ItemGroup>
@@ -96,15 +96,24 @@
   </Target>
 
   <Target Name="FilterProjects"
+          Condition="'$(FilterProjectsByBuildConfiguration)' != 'false'"
           DependsOnTargets="ExpandAllBuildConfigurations;FilterBuildConfiguration" />
 
   <!-- Runs in a leaf project (eg: csproj) to determine all configurations -->
   <Target Name="GetBuildConfigurations"
           Returns="$(_AllBuildConfigurations)">
-     <PropertyGroup>
-       <_AllBuildConfigurations>$(BuildConfigurations)</_AllBuildConfigurations>
-       <_AllBuildConfigurations Condition="'$(BuildConfigurations)' == ''">$(_traversalBuildConfigurations)</_AllBuildConfigurations>
-     </PropertyGroup>
+    <PropertyGroup>
+      <_AllBuildConfigurations>$(BuildConfigurations)</_AllBuildConfigurations>
+      <_AllBuildConfigurations Condition="'$(BuildConfigurations)' == ''">$(_traversalBuildConfigurations)</_AllBuildConfigurations>
+    </PropertyGroup>
+
+    <!-- Filter out configurations for things not in netcoreapp when building only netcoreapp -->
+    <PropertyGroup Condition="'$(BuildNETCoreAppOnly)' == 'true' and ('$(MSBuildProjectExtension)' == '.csproj' or '$(MSBuildProjectExtension)' == '.ilproj')">
+      <PartOfNETCoreAppBuild Condition="'$(PartOfNETCoreAppBuild)' == ''">$(IsNETCoreApp)</PartOfNETCoreAppBuild>
+
+      <_AllBuildConfigurations Condition="'$(PartOfNETCoreAppBuild)' != 'true'"></_AllBuildConfigurations>
+    </PropertyGroup>
+
   </Target>
 
   <!-- Runs in a leaf project (eg: csproj) to determine configurations to package -->
@@ -112,7 +121,7 @@
           Returns="$(PackageConfigurations)">
      <ItemGroup Condition="'$(PackageConfigurations)' == ''">
        <_buildConfigurations Include="$(BuildConfigurations)" />
-       <_excludeBuildConfigurations Include="@(_buildConfigurations)" Condition="'$(IsReferenceAssembly)' == 'true' AND ('%(Identity)' == 'netfx' OR $([System.String]::new('%(Identity)').StartsWith('net4')))"/>
+       <_excludeBuildConfigurations Include="mono" />
        <_packageConfigurations Include="@(_buildConfigurations)" Exclude="@(_excludeBuildConfigurations)" />
      </ItemGroup>
 
@@ -164,13 +173,31 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="BuildAllConfigurations">
+  <Target Name="_getAllBuildConfigurations">
     <ItemGroup>
       <_buildConfigurations Include="$(BuildConfigurations)" />
       <_buildConfigurations Condition="'@(_buildConfigurations)' == ''" Include="$(_traversalBuildConfigurations)" />
     </ItemGroup>
+  </Target>
 
+  <Target Name="BuildAllConfigurations" DependsOnTargets="_getAllBuildConfigurations">
     <MSBuild Projects="$(MSBuildProjectFullPath)"
              Properties="Configuration=%(_buildConfigurations.Identity);BuildAllConfigurations=true" />
   </Target>
+  <Target Name="BuildAll" DependsOnTargets="BuildAllConfigurations" />
+  
+  <Target Name="RebuildAllConfigurations" DependsOnTargets="_getAllBuildConfigurations">
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+             Targets="Rebuild"
+             Properties="Configuration=%(_buildConfigurations.Identity);BuildAllConfigurations=true" />
+  </Target>
+  <Target Name="RebuildAll" DependsOnTargets="RebuildAllConfigurations" />
+
+  <Target Name="CleanAllConfigurations" DependsOnTargets="_getAllBuildConfigurations">
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+             Targets="Clean"
+             Properties="Configuration=%(_buildConfigurations.Identity);BuildAllConfigurations=true" />
+  </Target>
+  <Target Name="CleanAll" DependsOnTargets="CleanAllConfigurations" />
+  
 </Project>

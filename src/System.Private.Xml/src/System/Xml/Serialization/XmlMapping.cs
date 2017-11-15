@@ -6,12 +6,21 @@ using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
+using System.Xml.Serialization;
 
 
+#if XMLSERIALIZERGENERATOR
+namespace Microsoft.XmlSerializer.Generator
+#else
 namespace System.Xml.Serialization
+#endif
 {
     [Flags]
+#if XMLSERIALIZERGENERATOR
+    internal enum XmlMappingAccess
+#else
     public enum XmlMappingAccess
+#endif
     {
         None = 0x00,
         Read = 0x01,
@@ -22,7 +31,11 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
+#if XMLSERIALIZERGENERATOR
+    internal abstract class XmlMapping
+#else
     public abstract class XmlMapping
+#endif
     {
         private TypeScope _scope;
         private bool _generateSerializer = false;
@@ -59,7 +72,11 @@ namespace System.Xml.Serialization
         /// </devdoc>
         public string ElementName
         {
+#if XMLSERIALIZERGENERATOR
+            get { return Microsoft.XmlSerializer.Generator.Accessor.UnescapeName(Accessor.Name); }
+#else
             get { return System.Xml.Serialization.Accessor.UnescapeName(Accessor.Name); }
+#endif
         }
 
         /// <devdoc>
@@ -118,7 +135,7 @@ namespace System.Xml.Serialization
             {
                 root = (XmlRootAttribute)XmlAttributes.GetAttr(type, typeof(XmlRootAttribute));
             }
-            return type.FullName + ":" + (root == null ? String.Empty : root.Key) + ":" + (ns == null ? String.Empty : ns);
+            return type.FullName + ":" + (root == null ? String.Empty : root.GetKey()) + ":" + (ns == null ? String.Empty : ns);
         }
 
         internal string Key { get { return _key; } }

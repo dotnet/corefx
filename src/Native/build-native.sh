@@ -7,30 +7,47 @@ usage()
     echo "If you plan to only run this script, be sure to pass those parameters."
     echo "For more information type build-native.sh -? at the root of the repo."
     echo
-    echo "Usage: $0 [runParameters][verbose] [clangx.y] [cross] [staticLibLink] [cmakeargs] [makeargs]"
-    echo "runParameters: buildArch, buildType, buildOS, --numProc <numproc value>"
-    echo "verbose - optional argument to enable verbose build output."
-    echo "clangx.y - optional argument to build using clang version x.y."
-    echo "cross - optional argument to signify cross compilation,"
-    echo "      - will use ROOTFS_DIR environment variable if set."
-    echo "staticLibLink - Optional argument to statically link any native library."
-    echo "portableLinux - Optional argument to build native libraries portable over GLIBC based Linux distros."
-    echo "stripSymbols - Optional argument to strip native symbols during the build."
-    echo "generateversion - Pass this in to get a version on the build output."
-    echo "cmakeargs - user-settable additional arguments passed to CMake."
+    echo "Usage: $0 [runParameters][-verbose] [-clangx.y] [-cross] [-staticLibLink] [-cmakeargs] [-makeargs]"
+    echo "runParameters: buildArch, buildType, buildOS, -numProc <numproc value>"
+    echo "BuildArch can be: -x64, -x86, -arm, -armel, -arm64"
+    echo "BuildType can be: -debug, -checked, -release"
+    echo "-verbose - optional argument to enable verbose build output."
+    echo "-clangx.y - optional argument to build using clang version x.y."
+    echo "-cross - optional argument to signify cross compilation,"
+    echo "       - will use ROOTFS_DIR environment variable if set."
+    echo "-staticLibLink - Optional argument to statically link any native library."
+    echo "-portable - Optional argument to build native libraries portable over GLIBC based Linux distros."
+    echo "-stripSymbols - Optional argument to strip native symbols during the build."
+    echo "-generateversion - Pass this in to get a version on the build output."
+    echo "-cmakeargs - user-settable additional arguments passed to CMake."
     exit 1
 }
 
 initHostDistroRid()
 {
+    __HostDistroRid=""
     if [ "$__HostOS" == "Linux" ]; then
-        if [ ! -e /etc/os-release ]; then
-            echo "WARNING: Can not determine runtime id for current distro."
-            __HostDistroRid=""
-        else
+        if [ -e /etc/os-release ]; then
             source /etc/os-release
+            if [[ $ID == "alpine" ]]; then
+                # remove the last version digit
+                VERSION_ID=${VERSION_ID%.*}
+            fi
             __HostDistroRid="$ID.$VERSION_ID-$__HostArch"
+        elif [ -e /etc/redhat-release ]; then
+            local redhatRelease=$(</etc/redhat-release)
+            if [[ $redhatRelease == "CentOS release 6."* || $redhatRelease == "Red Hat Enterprise Linux Server release 6."* ]]; then
+               __HostDistroRid="rhel.6-$__HostArch"
+            fi
         fi
+    elif [ "$__HostOS" == "FreeBSD" ]; then
+      __freebsd_version=`sysctl -n kern.osrelease | cut -f1 -d'.'`
+      __HostDistroRid="freebsd.$__freebsd_version-x64"
+    fi
+
+
+    if [ "$__HostDistroRid" == "" ]; then
+        echo "WARNING: Can not determine runtime id for current distro."
     fi
 }
 
@@ -57,8 +74,6 @@ setup_dirs()
 
     mkdir -p "$__BinDir"
     mkdir -p "$__IntermediatesDir"
-    mkdir -p "$__RuntimePath"
-    mkdir -p "$__TestSharedFrameworkPath"
 }
 
 # Check the system to ensure the right pre-reqs are in place
@@ -68,6 +83,14 @@ check_native_prereqs()
 
     # Check presence of CMake on the path
     hash cmake 2>/dev/null || { echo >&2 "Please install cmake before running this script"; exit 1; }
+
+
+    # Minimum required version of clang is version 3.9 for arm/armel cross build
+    if [[ $__CrossBuild == 1 && ("$__BuildArch" == "arm" || "$__BuildArch" == "armel") ]]; then
+        if ! [[ "$__ClangMajorVersion" -gt "3" || ( $__ClangMajorVersion == 3 && $__ClangMinorVersion == 9 ) ]]; then
+            echo "Please install clang3.9 or latest for arm/armel cross build"; exit 1;
+        fi
+    fi
 
     # Check for clang
     hash clang-$__ClangMajorVersion.$__ClangMinorVersion 2>/dev/null ||  hash clang$__ClangMajorVersion$__ClangMinorVersion 2>/dev/null ||  hash clang 2>/dev/null || { echo >&2 "Please install clang before running this script"; exit 1; }
@@ -126,13 +149,6 @@ build_native()
     fi
 }
 
-copy_to_vertical_runtime()
-{
-    echo "Copying native shims to vertical runtime folder."
-    cp $__BinDir/* "$__RuntimePath"
-    cp $__BinDir/* "$__TestSharedFrameworkPath"
-}
-
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
 __nativeroot=$__scriptpath/Unix
 __rootRepo="$__scriptpath/../.."
@@ -155,7 +171,7 @@ __VerboseBuild=false
 __ClangMajorVersion=0
 __ClangMinorVersion=0
 __StaticLibLink=0
-__PortableLinux=0
+__PortableBuild=0
 
 CPUName=$(uname -p)
 # Some Linux platforms report unknown for platform, but the arch for machine.
@@ -166,6 +182,46 @@ fi
 if [ $CPUName == "i686" ]; then
     __BuildArch=x86
 fi
+
+# Use uname to determine what the OS is.
+OSName=$(uname -s)
+case $OSName in
+    Linux)
+        __BuildOS=Linux
+        __HostOS=Linux
+        ;;
+
+    Darwin)
+        __BuildOS=OSX
+        __HostOS=OSX
+        ;;
+
+    FreeBSD)
+        __BuildOS=FreeBSD
+        __HostOS=FreeBSD
+        ;;
+
+    OpenBSD)
+        __BuildOS=OpenBSD
+        __HostOS=OpenBSD
+        ;;
+
+    NetBSD)
+        __BuildOS=NetBSD
+        __HostOS=NetBSD
+        ;;
+
+    SunOS)
+        __BuildOS=SunOS
+        __HostOS=SunOS
+        ;;
+
+    *)
+        echo "Unsupported OS $OSName detected, configuring as if for Linux"
+        __BuildOS=Linux
+        __HostOS=Linux
+        ;;
+esac
 
 while :; do
     if [ $# -le 0 ]; then
@@ -178,87 +234,100 @@ while :; do
             usage
             exit 1
             ;;
-        x86)
+        x86|-x86)
             __BuildArch=x86
             ;;
-        x64)
+        x64|-x64)
             __BuildArch=x64
             ;;
-        arm)
+        arm|-arm)
             __BuildArch=arm
             ;;
-        armel)
+        armel|-armel)
             __BuildArch=armel
             ;;
-        arm64)
+        arm64|-arm64)
             __BuildArch=arm64
             ;;
-        debug)
+        debug|-debug)
             __BuildType=Debug
             ;;
-        release)
+        release|-release)
             __BuildType=Release
             __CMakeArgs=RELEASE
             ;;
-        freebsd)
+        freebsd|FreeBSD|-freebsd|-FreeBSD)
             __BuildOS=FreeBSD
             ;;
-        linux)
+        linux|-linux)
             __BuildOS=Linux
             ;;
-        netbsd)
+        netbsd|-netbsd)
             __BuildOS=NetBSD
             ;;
-        osx)
+        osx|-osx)
             __BuildOS=OSX
             ;;
-        stripsymbols)
+        stripsymbols|-stripsymbols)
             __CMakeExtraArgs="$__CMakeExtraArgs -DSTRIP_SYMBOLS=true"
             ;;
         --targetgroup)
             shift
             __TargetGroup=$1
             ;;
-        --numproc)
+        --numproc|-numproc|numproc)
             shift
             __NumProc=$1
             ;;
-        verbose)
+        verbose|-verbose)
             __VerboseBuild=1
             ;;
-        staticliblink)
+        staticliblink|-staticliblink)
             __StaticLibLink=1
             ;;
-        portablelinux)
-            __PortableLinux=1
+        -portable|-portable)
+            # Portable native components are only supported on Linux
+            if [ "$__HostOS" == "Linux" ]; then
+                __PortableBuild=1
+            fi
             ;;
-        generateversion)
+        generateversion|-generateversion)
             __generateversionsource=true
             ;;
-        clang3.5)
+        --clang*)
+                # clangx.y or clang-x.y
+                v=`echo $lowerI | tr -d '[:alpha:]-='`
+                __ClangMajorVersion=`echo $v | cut -d '.' -f1`
+                __ClangMinorVersion=`echo $v | cut -d '.' -f2`
+            ;;
+        clang3.5|-clang3.5)
             __ClangMajorVersion=3
             __ClangMinorVersion=5
             ;;
-        clang3.6)
+        clang3.6|-clang3.6)
             __ClangMajorVersion=3
             __ClangMinorVersion=6
             ;;
-        clang3.7)
+        clang3.7|-clang3.7)
             __ClangMajorVersion=3
             __ClangMinorVersion=7
             ;;
-        clang3.8)
+        clang3.8|-clang3.8)
             __ClangMajorVersion=3
             __ClangMinorVersion=8
             ;;
-        clang3.9)
+        clang3.9|-clang3.9)
             __ClangMajorVersion=3
             __ClangMinorVersion=9
             ;;
-        cross)
+        clang4.0|-clang4.0)
+            __ClangMajorVersion=4
+            __ClangMinorVersion=0
+            ;;
+        cross|-cross)
             __CrossBuild=1
             ;;
-        cmakeargs)
+        cmakeargs|-cmakeargs)
             if [ -n "$2" ]; then
                 __CMakeExtraArgs="$__CMakeExtraArgs $2"
                 shift
@@ -267,7 +336,7 @@ while :; do
                 exit 1
             fi
             ;;
-        makeargs)
+        makeargs|-makeargs)
             if [ -n "$2" ]; then
                 __MakeExtraArgs="$__MakeExtraArgs $2"
                 shift
@@ -276,7 +345,7 @@ while :; do
                 exit 1
             fi
             ;;
-        useservergc)
+        useservergc|-useservergc)
             __ServerGC=1
             ;;
         *)
@@ -286,7 +355,7 @@ while :; do
     shift
 done
 
-__CMakeExtraArgs="$__CMakeExtraArgs -DFEATURE_DISTRO_AGNOSTIC_SSL=$__PortableLinux"
+__CMakeExtraArgs="$__CMakeExtraArgs -DFEATURE_DISTRO_AGNOSTIC_SSL=$__PortableBuild"
 __CMakeExtraArgs="$__CMakeExtraArgs -DCMAKE_STATIC_LIB_LINK=$__StaticLibLink"
 
 # Set cross build
@@ -307,20 +376,13 @@ esac
 
 # Set the default clang version if not already set
 if [[ $__ClangMajorVersion == 0 && $__ClangMinorVersion == 0 ]]; then
-    if [ $__CrossBuild == 1 ]; then
-        __ClangMajorVersion=3
-        __ClangMinorVersion=6
-    else
-        __ClangMajorVersion=3
-        __ClangMinorVersion=5
-    fi
+    __ClangMajorVersion=3
+    __ClangMinorVersion=9
 fi
 
 # Set the remaining variables based upon the determined build configuration
 __IntermediatesDir="$__rootbinpath/obj/$__BuildOS.$__BuildArch.$__BuildType/native"
 __BinDir="$__rootbinpath/$__BuildOS.$__BuildArch.$__BuildType/native"
-__RuntimePath="$__rootbinpath/runtime/$__TargetGroup-$__BuildOS-$__BuildType-$__BuildArch"
-__TestSharedFrameworkPath="$__rootbinpath/testhost/$__TargetGroup-$__BuildOS-$__BuildType-$__BuildArch/shared/Microsoft.NETCore.App/9.9.9"
 
 # Make the directories necessary for build if they don't exist
 setup_dirs
@@ -350,7 +412,3 @@ initTargetDistroRid
     # Build the corefx native components.
 
     build_native
-
-    # Copy files to vertical runtime folder
-
-    copy_to_vertical_runtime

@@ -47,12 +47,10 @@ namespace System.Linq.Expressions.Interpreter
         public override int Run(InterpretedFrame frame)
         {
             int length = ConvertHelper.ToInt32NoNull(frame.Pop());
-            if (length < 0)
-            {
-                // to make behavior aligned with array creation emitted by C# compiler
-                throw new OverflowException();
-            }
-            frame.Push(Array.CreateInstance(_elementType, length));
+            // To make behavior aligned with array creation emitted by C# compiler if length is less than
+            // zero we try to use it to create an array, which will throw an OverflowException with the
+            // correct localized error message.
+            frame.Push(length < 0 ? new int[length] : Array.CreateInstance(_elementType, length));
             return 1;
         }
     }
@@ -119,7 +117,6 @@ namespace System.Linq.Expressions.Interpreter
         private SetArrayItemInstruction() { }
 
         public override int ConsumedStack => 3;
-        public override int ProducedStack => 0;
         public override string InstructionName => "SetArrayItem";
 
         public override int Run(InterpretedFrame frame)
@@ -150,7 +147,7 @@ namespace System.Linq.Expressions.Interpreter
         }
     }
 
-    internal sealed class ConvertHelper
+    internal static class ConvertHelper
     {
         public static int ToInt32NoNull(object val)
         {

@@ -39,6 +39,7 @@ namespace System.IO.Compression
         private bool _currentlyOpenForWrite;
         private bool _everOpenedForWrite;
         private Stream _outstandingWriteStream;
+        private uint _externalFileAttr;
         private string _storedEntryName;
         private byte[] _storedEntryNameBytes;
         // only apply to update mode
@@ -46,13 +47,6 @@ namespace System.IO.Compression
         private List<ZipGenericExtraField> _lhUnknownExtraFields;
         private byte[] _fileComment;
         private CompressionLevel? _compressionLevel;
-
-        // Initializes, attaches it to archive
-        internal ZipArchiveEntry(ZipArchive archive, ZipCentralDirectoryFileHeader cd, CompressionLevel compressionLevel)
-            : this(archive, cd)
-        {
-            _compressionLevel = compressionLevel;
-        }
 
         // Initializes, attaches it to archive
         internal ZipArchiveEntry(ZipArchive archive, ZipCentralDirectoryFileHeader cd)
@@ -70,6 +64,7 @@ namespace System.IO.Compression
             _lastModified = new DateTimeOffset(ZipHelper.DosTimeToDateTime(cd.LastModified));
             _compressedSize = cd.CompressedSize;
             _uncompressedSize = cd.UncompressedSize;
+            _externalFileAttr = cd.ExternalFileAttributes;
             _offsetOfLocalHeader = cd.RelativeOffsetOfLocalHeader;
             // we don't know this yet: should be _offsetOfLocalHeader + 30 + _storedEntryNameBytes.Length + extrafieldlength
             // but entryname/extra length could be different in LH
@@ -116,6 +111,7 @@ namespace System.IO.Compression
 
             _compressedSize = 0; // we don't know these yet
             _uncompressedSize = 0;
+            _externalFileAttr = 0;
             _offsetOfLocalHeader = 0;
             _storedOffsetOfCompressedData = null;
             _crc32 = 0;
@@ -162,6 +158,19 @@ namespace System.IO.Compression
                 if (_everOpenedForWrite)
                     throw new InvalidOperationException(SR.LengthAfterWrite);
                 return _compressedSize;
+            }
+        }
+
+        public int ExternalAttributes
+        {
+            get
+            {
+                return (int)_externalFileAttr;
+            }
+            set
+            {
+                ThrowIfInvalidArchive();
+                _externalFileAttr = (uint)value;
             }
         }
 
@@ -444,7 +453,7 @@ namespace System.IO.Compression
             BinaryWriter writer = new BinaryWriter(_archive.ArchiveStream);
 
             // _entryname only gets set when we read in or call moveTo. MoveTo does a check, and
-            // reading in should not be able to produce a entryname longer than ushort.MaxValue
+            // reading in should not be able to produce an entryname longer than ushort.MaxValue
             Debug.Assert(_storedEntryNameBytes.Length <= ushort.MaxValue);
 
             // decide if we need the Zip64 extra field:
@@ -527,7 +536,7 @@ namespace System.IO.Compression
             writer.Write(_fileComment != null ? (ushort)_fileComment.Length : (ushort)0); // file comment length
             writer.Write((ushort)0); // disk number start
             writer.Write((ushort)0); // internal file attributes
-            writer.Write((uint)0); // external file attributes
+            writer.Write(_externalFileAttr); // external file attributes
             writer.Write(offsetOfLocalHeaderTruncated); // offset of local header
 
             writer.Write(_storedEntryNameBytes);
@@ -770,7 +779,7 @@ namespace System.IO.Compression
             BinaryWriter writer = new BinaryWriter(_archive.ArchiveStream);
 
             // _entryname only gets set when we read in or call moveTo. MoveTo does a check, and
-            // reading in should not be able to produce a entryname longer than ushort.MaxValue
+            // reading in should not be able to produce an entryname longer than ushort.MaxValue
             Debug.Assert(_storedEntryNameBytes.Length <= ushort.MaxValue);
 
             // decide if we need the Zip64 extra field:
@@ -1073,7 +1082,7 @@ namespace System.IO.Compression
             return path;
         }
 
-        private sealed class DirectToArchiveWriterStream : Stream
+        private sealed partial class DirectToArchiveWriterStream : Stream
         {
             private long _position;
             private CheckSumAndSizeWriteStream _crcSizeStream;
@@ -1223,7 +1232,5 @@ namespace System.IO.Compression
         private enum BitFlagValues : ushort { DataDescriptor = 0x8, UnicodeFileName = 0x800 }
 
         internal enum CompressionMethodValues : ushort { Stored = 0x0, Deflate = 0x8, Deflate64 = 0x9, BZip2 = 0xC, LZMA = 0xE }
-
-        private enum OpenableValues { Openable, FileNonExistent, FileTooLarge }
     }
 }

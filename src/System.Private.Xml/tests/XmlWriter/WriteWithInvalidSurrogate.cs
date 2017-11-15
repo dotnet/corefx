@@ -29,7 +29,7 @@ namespace System.Xml.Tests
                 writer.WriteStartElement("test");
                 char[] invalidSurrogatePair = new char[] { (char)(SurHighStart + 5), (char)(SurLowStart - 1) };
 
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>(null, () =>
                 {
                     writer.WriteRaw(invalidSurrogatePair, 0, invalidSurrogatePair.Length);
                 });
@@ -37,7 +37,7 @@ namespace System.Xml.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.Netcore50)]  // Switch to throw exception was introduced in NetStandard1.7
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]  // Switch to throw exception was introduced in NetStandard1.7
         public static void XmlWriterChecksUpperBoundOfLowerSurrogate_newBehavior()
         {
             // Turn the switch off to get the new behavior in case the platform has it on by default
@@ -49,7 +49,7 @@ namespace System.Xml.Tests
                 writer.WriteStartElement("test");
                 char[] invalidSurrogatePair = new char[] { (char)(SurHighStart + 5), (char)(SurLowEnd + 1) };
 
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>(null, () =>
                 {
                     writer.WriteRaw(invalidSurrogatePair, 0, invalidSurrogatePair.Length);
                 });

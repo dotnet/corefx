@@ -16,6 +16,8 @@ namespace System.IO.Pipes.Tests
     /// </summary>
     public abstract partial class PipeTest_Read : PipeTestBase
     {
+        public virtual bool SupportsBidirectionalReadingWriting => false;
+
         [Fact]
         public void ReadWithNullBuffer_Throws_ArgumentNullException()
         {
@@ -26,16 +28,16 @@ namespace System.IO.Pipes.Tests
                 Assert.True(pipe.CanRead);
 
                 // Null is an invalid Buffer
-                Assert.Throws<ArgumentNullException>("buffer", () => pipe.Read(null, 0, 1));
-                Assert.Throws<ArgumentNullException>("buffer", () => { pipe.ReadAsync(null, 0, 1); });
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => pipe.Read(null, 0, 1));
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => { pipe.ReadAsync(null, 0, 1); });
 
                 // Buffer validity is checked before Offset
-                Assert.Throws<ArgumentNullException>("buffer", () => pipe.Read(null, -1, 1));
-                Assert.Throws<ArgumentNullException>("buffer", () => { pipe.ReadAsync(null, -1, 1); });
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => pipe.Read(null, -1, 1));
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => { pipe.ReadAsync(null, -1, 1); });
 
                 // Buffer validity is checked before Count
-                Assert.Throws<ArgumentNullException>("buffer", () => pipe.Read(null, -1, -1));
-                Assert.Throws<ArgumentNullException>("buffer", () => { pipe.ReadAsync(null, -1, -1); });
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => pipe.Read(null, -1, -1));
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => { pipe.ReadAsync(null, -1, -1); });
             }
         }
 
@@ -49,8 +51,8 @@ namespace System.IO.Pipes.Tests
                 Assert.True(pipe.CanRead);
 
                 // Offset must be nonnegative
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () => pipe.Read(new byte[6], -1, 1));
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () => { pipe.ReadAsync(new byte[4], -1, 1); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => pipe.Read(new byte[6], -1, 1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => { pipe.ReadAsync(new byte[4], -1, 1); });
             }
         }
 
@@ -64,8 +66,8 @@ namespace System.IO.Pipes.Tests
                 Assert.True(pipe.CanRead);
 
                 // Count must be nonnegative
-                Assert.Throws<ArgumentOutOfRangeException>("count", () => pipe.Read(new byte[3], 0, -1));
-                Assert.Throws<System.ArgumentOutOfRangeException>("count", () => { pipe.ReadAsync(new byte[7], 0, -1); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => pipe.Read(new byte[3], 0, -1));
+                AssertExtensions.Throws<System.ArgumentOutOfRangeException>("count", () => { pipe.ReadAsync(new byte[7], 0, -1); });
             }
         }
 
@@ -79,46 +81,51 @@ namespace System.IO.Pipes.Tests
                 Assert.True(pipe.CanRead);
 
                 // offset out of bounds
-                Assert.Throws<ArgumentException>(null, () => pipe.Read(new byte[1], 1, 1));
+                AssertExtensions.Throws<ArgumentException>(null, () => pipe.Read(new byte[1], 1, 1));
 
                 // offset out of bounds for 0 count read
-                Assert.Throws<ArgumentException>(null, () => pipe.Read(new byte[1], 2, 0));
+                AssertExtensions.Throws<ArgumentException>(null, () => pipe.Read(new byte[1], 2, 0));
 
                 // offset out of bounds even for 0 length buffer
-                Assert.Throws<ArgumentException>(null, () => pipe.Read(new byte[0], 1, 0));
+                AssertExtensions.Throws<ArgumentException>(null, () => pipe.Read(new byte[0], 1, 0));
 
                 // combination offset and count out of bounds
-                Assert.Throws<ArgumentException>(null, () => pipe.Read(new byte[2], 1, 2));
+                AssertExtensions.Throws<ArgumentException>(null, () => pipe.Read(new byte[2], 1, 2));
 
                 // edges
-                Assert.Throws<ArgumentException>(null, () => pipe.Read(new byte[0], int.MaxValue, 0));
-                Assert.Throws<ArgumentException>(null, () => pipe.Read(new byte[0], int.MaxValue, int.MaxValue));
+                AssertExtensions.Throws<ArgumentException>(null, () => pipe.Read(new byte[0], int.MaxValue, 0));
+                AssertExtensions.Throws<ArgumentException>(null, () => pipe.Read(new byte[0], int.MaxValue, int.MaxValue));
 
-                Assert.Throws<ArgumentException>(() => pipe.Read(new byte[5], 3, 4));
+                AssertExtensions.Throws<ArgumentException>(null, () => pipe.Read(new byte[5], 3, 4));
 
                 // offset out of bounds
-                Assert.Throws<ArgumentException>(null, () => { pipe.ReadAsync(new byte[1], 1, 1); });
+                AssertExtensions.Throws<ArgumentException>(null, () => { pipe.ReadAsync(new byte[1], 1, 1); });
 
                 // offset out of bounds for 0 count read
-                Assert.Throws<ArgumentException>(null, () => { pipe.ReadAsync(new byte[1], 2, 0); });
+                AssertExtensions.Throws<ArgumentException>(null, () => { pipe.ReadAsync(new byte[1], 2, 0); });
 
                 // offset out of bounds even for 0 length buffer
-                Assert.Throws<ArgumentException>(null, () => { pipe.ReadAsync(new byte[0], 1, 0); });
+                AssertExtensions.Throws<ArgumentException>(null, () => { pipe.ReadAsync(new byte[0], 1, 0); });
 
                 // combination offset and count out of bounds
-                Assert.Throws<ArgumentException>(null, () => { pipe.ReadAsync(new byte[2], 1, 2); });
+                AssertExtensions.Throws<ArgumentException>(null, () => { pipe.ReadAsync(new byte[2], 1, 2); });
 
                 // edges
-                Assert.Throws<ArgumentException>(null, () => { pipe.ReadAsync(new byte[0], int.MaxValue, 0); });
-                Assert.Throws<ArgumentException>(null, () => { pipe.ReadAsync(new byte[0], int.MaxValue, int.MaxValue); });
+                AssertExtensions.Throws<ArgumentException>(null, () => { pipe.ReadAsync(new byte[0], int.MaxValue, 0); });
+                AssertExtensions.Throws<ArgumentException>(null, () => { pipe.ReadAsync(new byte[0], int.MaxValue, int.MaxValue); });
 
-                Assert.Throws<ArgumentException>(() => { pipe.ReadAsync(new byte[5], 3, 4); });
+                AssertExtensions.Throws<ArgumentException>(null, () => { pipe.ReadAsync(new byte[5], 3, 4); });
             }
         }
 
         [Fact]
-        public virtual void WriteToReadOnlyPipe_Throws_NotSupportedException()
+        public void WriteToReadOnlyPipe_Throws_NotSupportedException()
         {
+            if (SupportsBidirectionalReadingWriting)
+            {
+                return;
+            }
+
             using (ServerClientPair pair = CreateServerClientPair())
             {
                 PipeStream pipe = pair.readablePipe;
@@ -140,7 +147,7 @@ namespace System.IO.Pipes.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/975
+        [Fact]
         public async Task ReadWithZeroLengthBuffer_Nop()
         {
             using (ServerClientPair pair = CreateServerClientPair())
@@ -197,8 +204,8 @@ namespace System.IO.Pipes.Tests
         {
             using (ServerClientPair pair = CreateServerClientPair())
             {
-                Assert.Throws<ArgumentNullException>("destination", () => { pair.readablePipe.CopyToAsync(null); });
-                Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => { pair.readablePipe.CopyToAsync(new MemoryStream(), 0); });
+                AssertExtensions.Throws<ArgumentNullException>("destination", () => { pair.readablePipe.CopyToAsync(null); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => { pair.readablePipe.CopyToAsync(new MemoryStream(), 0); });
                 Assert.Throws<NotSupportedException>(() => { pair.readablePipe.CopyToAsync(new MemoryStream(new byte[1], writable: false)); });
                 if (!pair.writeablePipe.CanRead)
                 {
@@ -208,6 +215,7 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "There is a bug in netfx around async read on a broken PipeStream. See #2601 and #2899. This bug is fixed in netcore.")]
         public virtual async Task ReadFromPipeWithClosedPartner_ReadNoBytes()
         {
             using (ServerClientPair pair = CreateServerClientPair())
@@ -349,5 +357,60 @@ namespace System.IO.Pipes.Tests
             }
         }
 
+        [Fact]
+        public async Task ValidWriteAsync_ValidReadAsync_APM()
+        {
+            using (ServerClientPair pair = CreateServerClientPair())
+            {
+                Assert.True(pair.writeablePipe.IsConnected);
+                Assert.True(pair.readablePipe.IsConnected);
+
+                byte[] sent = new byte[] { 123, 0, 5 };
+                byte[] received = new byte[] { 0, 0, 0 };
+
+                Task write = Task.Factory.FromAsync<byte[], int, int>(pair.writeablePipe.BeginWrite, pair.writeablePipe.EndWrite, sent, 0, sent.Length, null);
+                Task<int> read = Task.Factory.FromAsync<byte[], int, int, int>(pair.readablePipe.BeginRead, pair.readablePipe.EndRead, received, 0, received.Length, null);
+                Assert.Equal(sent.Length, await read);
+                Assert.Equal(sent, received);
+                await write;
+            }
+        }
+
+        [Theory]
+        [OuterLoop]
+        [MemberData(nameof(AsyncReadWriteChain_MemberData))]
+        public async Task AsyncReadWriteChain_ReadWrite_APM(int iterations, int writeBufferSize, int readBufferSize, bool cancelableToken)
+        {
+            var writeBuffer = new byte[writeBufferSize];
+            var readBuffer = new byte[readBufferSize];
+            var rand = new Random();
+            var cancellationToken = cancelableToken ? new CancellationTokenSource().Token : CancellationToken.None;
+
+            using (ServerClientPair pair = CreateServerClientPair())
+            {
+                // Repeatedly and asynchronously write to the writable pipe and read from the readable pipe,
+                // verifying that the correct data made it through.
+                for (int iter = 0; iter < iterations; iter++)
+                {
+                    rand.NextBytes(writeBuffer);
+                    Task write = Task.Factory.FromAsync<byte[], int, int>(pair.writeablePipe.BeginWrite, pair.writeablePipe.EndWrite, writeBuffer, 0, writeBuffer.Length, null);
+
+                    int totalRead = 0;
+                    while (totalRead < writeBuffer.Length)
+                    {
+                        Task<int> read = Task.Factory.FromAsync<byte[], int, int, int>(pair.readablePipe.BeginRead, pair.readablePipe.EndRead, readBuffer, 0, readBuffer.Length, null);
+                        int numRead = await read;
+                        Assert.True(numRead > 0);
+                        Assert.Equal<byte>(
+                            new ArraySegment<byte>(writeBuffer, totalRead, numRead),
+                            new ArraySegment<byte>(readBuffer, 0, numRead));
+                        totalRead += numRead;
+                    }
+                    Assert.Equal(writeBuffer.Length, totalRead);
+
+                    await write;
+                }
+            }
+        }
     }
 }

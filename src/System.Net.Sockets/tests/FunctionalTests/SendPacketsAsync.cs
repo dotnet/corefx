@@ -16,8 +16,9 @@ namespace System.Net.Sockets.Tests
         private readonly ITestOutputHelper _log;
 
         private IPAddress _serverAddress = IPAddress.IPv6Loopback;
-        // In the current directory
-        private const string TestFileName = "NCLTest.Socket.SendPacketsAsync.testpayload";
+        // Accessible directories for UWP app:
+        // C:\Users\<UserName>\AppData\Local\Packages\<ApplicationPackageName>\
+        private string TestFileName = Environment.GetEnvironmentVariable("LocalAppData") + @"\NCLTest.Socket.SendPacketsAsync.testpayload";
         private static int s_testFileSize = 1024;
 
         #region Additional test attributes
@@ -57,24 +58,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // SendPacketAsync not supported on Unix
-        public void Unix_NotSupported_ThrowsPlatformNotSupportedException(SocketImplementationType type)
-        {
-            int port;
-            using (SocketTestServer.SocketTestServerFactory(type, _serverAddress, out port))
-            using (var sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
-            using (var args = new SocketAsyncEventArgs())
-            {
-                sock.Connect(new IPEndPoint(_serverAddress, port));
-                args.SendPacketsElements = new SendPacketsElement[1];
-                Assert.Throws<PlatformNotSupportedException>(() => sock.SendPacketsAsync(args));
-            }
-        }
-
-        [OuterLoop] // TODO: Issue #11345
-        [Theory]
-        [InlineData(SocketImplementationType.APM)]
-        [InlineData(SocketImplementationType.Async)]
         public void Disposed_Throw(SocketImplementationType type)
         {
             int port;
@@ -93,6 +76,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Bug in SendPacketsAsync that dereferences null SAEA argument")]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(SocketImplementationType.APM)]
@@ -105,12 +89,8 @@ namespace System.Net.Sockets.Tests
                 using (Socket sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
                 {
                     sock.Connect(new IPEndPoint(_serverAddress, port));
-
-                    ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
-                    {
-                        sock.SendPacketsAsync(null);
-                    });
-                    Assert.Equal("e", ex.ParamName);
+                    
+                    AssertExtensions.Throws<ArgumentNullException>("e", () => sock.SendPacketsAsync(null));
                 }
             }
         }
@@ -121,32 +101,26 @@ namespace System.Net.Sockets.Tests
             Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
             // Needs to be connected before send
 
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
+            Assert.Throws<NotSupportedException>(() =>
             {
-                socket.SendPacketsAsync(new SocketAsyncEventArgs());
+                socket.SendPacketsAsync(new SocketAsyncEventArgs { SendPacketsElements = new SendPacketsElement[0] });
             });
-            Assert.Equal("e.SendPacketsElements", ex.ParamName);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Bug in SendPacketsAsync that dereferences null m_SendPacketsElementsInternal array")]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
         public void NullList_Throws(SocketImplementationType type)
         {
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
-            {
-                SendPackets(type, (SendPacketsElement[])null, SocketError.Success, 0);
-            });
-
-            Assert.Equal("e.SendPacketsElements", ex.ParamName);
+            AssertExtensions.Throws<ArgumentNullException>("e.SendPacketsElements", () => SendPackets(type, (SendPacketsElement[])null, SocketError.Success, 0));
         }
 
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void NullElement_Ignored(SocketImplementationType type)
         {
             SendPackets(type, (SendPacketsElement)null, 0);
@@ -156,7 +130,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void EmptyList_Ignored(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement[0], SocketError.Success, 0);
@@ -177,7 +150,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void NormalBuffer_Success(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(new byte[10]), 10);
@@ -186,7 +158,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void NormalBufferRange_Success(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(new byte[10], 5, 5), 5);
@@ -195,7 +166,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void EmptyBuffer_Ignored(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(new byte[0]), 0);
@@ -204,7 +174,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void BufferZeroCount_Ignored(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(new byte[10], 4, 0), 0);
@@ -213,7 +182,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void BufferMixedBuffers_ZeroCountBufferIgnored(SocketImplementationType type)
         {
             SendPacketsElement[] elements = new SendPacketsElement[]
@@ -228,7 +196,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void BufferZeroCountThenNormal_ZeroCountIgnored(SocketImplementationType type)
         {
             Assert.True(Capability.IPv6Support());
@@ -283,7 +250,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void SocketDisconnected_TransmitFileOptionDisconnect(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(new byte[10], 4, 4), TransmitFileOptions.Disconnect, 4);
@@ -292,7 +258,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void SocketDisconnectedAndReusable_TransmitFileOptionReuseSocket(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(new byte[10], 4, 4), TransmitFileOptions.Disconnect | TransmitFileOptions.ReuseSocket, 4);
@@ -304,10 +269,9 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void SendPacketsElement_EmptyFileName_Throws(SocketImplementationType type)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("path", null, () =>
             {
                 SendPackets(type, new SendPacketsElement(String.Empty), 0);
             });
@@ -316,10 +280,10 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
+        [PlatformSpecific(TestPlatforms.Windows)] // whitespace-only is a valid name on Unix
         public void SendPacketsElement_BlankFileName_Throws(SocketImplementationType type)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("path", null, () =>
             {
                 // Existence is validated on send
                 SendPackets(type, new SendPacketsElement(" \t  "), 0);
@@ -329,10 +293,10 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
+        [PlatformSpecific(TestPlatforms.Windows)] // valid filename chars on Unix
         public void SendPacketsElement_BadCharactersFileName_Throws(SocketImplementationType type)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("path", null, () =>
             {
                 // Existence is validated on send
                 SendPackets(type, new SendPacketsElement("blarkd@dfa?/sqersf"), 0);
@@ -342,7 +306,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void SendPacketsElement_MissingDirectoryName_Throws(SocketImplementationType type)
         {
             Assert.Throws<DirectoryNotFoundException>(() =>
@@ -355,7 +318,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void SendPacketsElement_MissingFile_Throws(SocketImplementationType type)
         {
             Assert.Throws<FileNotFoundException>(() =>
@@ -368,7 +330,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void SendPacketsElement_File_Success(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(TestFileName), s_testFileSize); // Whole File
@@ -377,7 +338,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void SendPacketsElement_FileZeroCount_Success(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(TestFileName, 0, 0), s_testFileSize);  // Whole File
@@ -386,7 +346,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void SendPacketsElement_FilePart_Success(SocketImplementationType type)
         {
             SendPackets(type, new SendPacketsElement(TestFileName, 10, 20), 20);
@@ -395,7 +354,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void SendPacketsElement_FileMultiPart_Success(SocketImplementationType type)
         {
             SendPacketsElement[] elements = new SendPacketsElement[]
@@ -410,7 +368,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void SendPacketsElement_FileLargeOffset_Throws(SocketImplementationType type)
         {
             // Length is validated on Send
@@ -420,7 +377,6 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
-        [PlatformSpecific(TestPlatforms.Windows)]  // SendPacketAsync not supported on Unix
         public void SendPacketsElement_FileLargeCount_Throws(SocketImplementationType type)
         {
             // Length is validated on Send
@@ -428,21 +384,6 @@ namespace System.Net.Sockets.Tests
         }
 
         #endregion Files
-
-        #region GC Finalizer test
-        // This test assumes sequential execution of tests and that it is going to be executed after other tests
-        // that used Sockets. 
-        [Fact]
-        public void TestFinalizers()
-        {
-            // Making several passes through the FReachable list.
-            for (int i = 0; i < 3; i++)
-            {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-            }
-        }
-        #endregion
 
         #region Helpers
         private void SendPackets(SocketImplementationType type, SendPacketsElement element, TransmitFileOptions flags, int bytesExpected)

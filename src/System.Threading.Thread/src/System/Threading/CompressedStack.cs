@@ -6,23 +6,15 @@ using System.Runtime.Serialization;
 
 namespace System.Threading
 {
-    [Serializable]
     public sealed class CompressedStack : ISerializable
     {
         private CompressedStack()
         {
         }
 
-        private CompressedStack(SerializationInfo info, StreamingContext context)
-        {
-        }
-
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
+            throw new PlatformNotSupportedException();
         }
 
         public static CompressedStack Capture()

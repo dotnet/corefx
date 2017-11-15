@@ -4,14 +4,6 @@
 
 namespace System.Xml.Schema
 {
-#if SILVERLIGHT
-    public class XmlSchema : XmlSchemaObject
-    {
-        //Empty XmlSchema class to enable backward compatibility of interface method IXmlSerializable.GetSchema()        
-        //Add private ctor to prevent constructing of this class
-        XmlSchema() { }
-    }
-#else
     using System.IO;
     using System.Collections;
     using System.ComponentModel;
@@ -189,7 +181,7 @@ namespace System.Xml.Schema
                 bool ignoreXS = false;
                 if (this.Namespaces != null)
                 { //User may have set both nsManager and Namespaces property on the XmlSchema object
-                    ignoreXS = this.Namespaces.Namespaces["xs"] != null || this.Namespaces.Namespaces.ContainsValue(XmlReservedNs.NsXs);
+                    ignoreXS = this.Namespaces.Namespaces.ContainsKey("xs") || this.Namespaces.Namespaces.ContainsValue(XmlReservedNs.NsXs);
                 }
                 if (!ignoreXS && namespaceManager.LookupPrefix(XmlReservedNs.NsXs) == null &&
                     namespaceManager.LookupNamespace("xs") == null)
@@ -267,7 +259,6 @@ namespace System.Xml.Schema
                 SchemaCollectionCompiler compiler = new SchemaCollectionCompiler(nameTable, validationEventHandler);
                 _isCompiled = compiler.Execute(this, schemaInfo, CompileContentModel);
                 this.SetIsCompiled(_isCompiled);
-                //TODO includes isCompiled flag
                 return _isCompiled;
             }
         }
@@ -759,6 +750,4 @@ namespace System.Xml.Schema
         }
 #endif//TRUST_COMPILE_STATE
     }
-
-#endif//!SILVERLIGHT
 }

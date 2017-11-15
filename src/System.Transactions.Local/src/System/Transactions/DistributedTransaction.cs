@@ -49,7 +49,7 @@ namespace System.Transactions.Distributed
     /// <summary>
     /// A Transaction object represents a single transaction.  It is created by TransactionManager
     /// objects through CreateTransaction or through deserialization.  Alternatively, the static Create
-    /// methodis provided, which creates a "default" TransactionManager and requests that it create
+    /// methods provided, which creates a "default" TransactionManager and requests that it create
     /// a new transaction with default values.  A transaction can only be committed by 
     /// the client application that created the transaction.  If a client application wishes to allow 
     /// access to the transaction by multiple threads, but wants to prevent those other threads from 
@@ -57,7 +57,6 @@ namespace System.Transactions.Distributed
     /// clones have the same capabilities as the original transaction, except for the ability to commit 
     /// the transaction.
     /// </summary>
-    [Serializable]
     internal class DistributedTransaction : ISerializable, IObjectReference
     {
         internal DistributedTransaction()
@@ -66,12 +65,13 @@ namespace System.Transactions.Distributed
 
         protected DistributedTransaction(SerializationInfo serializationInfo, StreamingContext context)
         {
-            if (serializationInfo == null)
-            {
-                throw new ArgumentNullException(nameof(serializationInfo));
-            }
+            //if (serializationInfo == null)
+            //{
+            //    throw new ArgumentNullException(nameof(serializationInfo));
+            //}
 
-            throw NotSupported();
+            //throw NotSupported();
+            throw new PlatformNotSupportedException();
         }
 
         internal Exception InnerException { get; set; }
@@ -132,12 +132,14 @@ namespace System.Transactions.Distributed
 
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext context)
         {
-            if (serializationInfo == null)
-            {
-                throw new ArgumentNullException(nameof(serializationInfo));
-            }
+            //if (serializationInfo == null)
+            //{
+            //    throw new ArgumentNullException(nameof(serializationInfo));
+            //}
 
-            throw NotSupported();
+            //throw NotSupported();
+
+            throw new PlatformNotSupportedException();
         }
 
         internal static Exception NotSupported()
@@ -145,14 +147,12 @@ namespace System.Transactions.Distributed
             return new PlatformNotSupportedException(SR.DistributedNotSupported);
         }
 
-        [Serializable]
         internal class RealDistributedTransaction
         {
             internal InternalTransaction InternalTransaction { get; set; }
         }
     }
 
-    [Serializable]
     internal class DistributedDependentTransaction : DistributedTransaction
     {
         internal void Complete()
@@ -161,7 +161,6 @@ namespace System.Transactions.Distributed
         }
     }
 
-    [Serializable]
     internal class DistributedCommittableTransaction : DistributedTransaction
     {
         internal void BeginCommit(InternalTransaction tx)

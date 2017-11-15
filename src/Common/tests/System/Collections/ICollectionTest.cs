@@ -122,7 +122,7 @@ namespace Tests.Collections
             CollectionAssert.Equal(items, items2);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNonZeroLowerBoundArraySupported))]
         public void CopyToArrayWithNonZeroBounds()
         {
             object[] items = GenerateItems(16);
@@ -260,6 +260,9 @@ namespace Tests.Collections
             int arrayLowerBound,
             int copyToIndex)
         {
+            if (arrayLowerBound != 0 && !PlatformDetection.IsNonZeroLowerBoundArraySupported)
+                return;
+
             object[] items = GenerateItems(16);
             ICollection collection = GetCollection(items);
             Array itemArray = Array.CreateInstance(

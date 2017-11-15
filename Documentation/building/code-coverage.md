@@ -1,9 +1,7 @@
 Code Coverage
 =============
 
-"Code coverage" is a measure that indicates how much of our library code is exercised by our test suites.  We measure code coverage using the [OpenCover](https://github.com/opencover/opencover), and a report of our latest code coverage results can be seen by clicking the coverage badge on the [CoreFX home page](https://github.com/dotnet/corefx):
-
-[![Coverage status](https://img.shields.io/badge/coverage-report-blue.svg)](http://dotnet-ci.cloudapp.net/job/dotnet_corefx_coverage_windows/lastBuild/Code_Coverage_Report/)
+"Code coverage" is a measure that indicates how much of our library code is exercised by our test suites.  We measure code coverage using the [OpenCover](https://github.com/opencover/opencover), and a report of our latest code coverage results can be seen by clicking the coverage badge on the [CoreFX home page](https://github.com/dotnet/corefx), linking to the latest [Coverage Report](https://ci.dot.net/job/dotnet_corefx/job/master/job/code_coverage_windows/Code_Coverage_Report/).
 
 This report shows each library currently being tested with code coverage and provides statistics around the quality of the code coverage for the library.  It also provides a line-by-line breakdown of what lines are being covered and what lines are not.
 
@@ -22,7 +20,7 @@ Our default, somewhat-arbitrary initial goal for a library is 90% code coverage.
 
 ## Issues
 
-Issues are opened for a library when a cursory examination of its code coverage reveal that there are likely still some meaningful gaps that need to be addressed.  We welcome contributions to our test suites to help address these gaps and close these issues.  Many of these issues are marked as "up for grabs".
+Issues are opened for a library when a cursory examination of its code coverage reveal that there are likely still some meaningful gaps that need to be addressed.  We welcome contributions to our test suites to help address these gaps and close these issues.  Many of these issues are marked as [up-for-grabs](https://github.com/dotnet/corefx/labels/up-for-grabs).
 
 An issue need not be addressed in its entirety.  We happily accept contributions that improve our tests and work towards improving code coverage numbers even if they only incrementally improve the situation.
 
@@ -79,5 +77,8 @@ Some of the libraries for which contracts and tests live in the corefx repo are 
 
 1. Follow the steps outlined at [Testing with Private CoreClr Bits](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md#testing-with-private-coreclr-bits).  Make sure to include the optional steps listed as being required for code coverage.
 2. Add /p:CodeCoverageAssemblies="System.Private.CoreLib" to the previously discussed msbuild command, e.g. msbuild /t:BuildAndTest /p:Coverage=true /p:CodeCoverageAssemblies="System.Private.CoreLib"
+
+Note that you will also want to copy the System.Private.CoreLib.pdb along with the System.Private.CoreLib.dll.  As of 10/2017 this PDB must be a windows PDB (Hopefully by early 2018 OpenCOver will directly support portable PDBs.  
+You can determine if it is a windows PDB by doing 'more System.Private.CoreLib.pdb.  If it begins with 'Microsoft C/C++ MSF 7.00' it is a windows PDB)  If you need a windows PDB the Pdb2Pdb tool will convert (or you can do a msbuild /t:rebuild /p:DebugType=full in the src\mscorlib)
 
 The resulting code coverage report should now also include details for System.Private.CoreLib.

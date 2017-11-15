@@ -12,14 +12,14 @@
     <Compile Include="ZipFileConvenienceMethods.cs" />
     <Compile Include="ZipFileInvalidFileTests.cs" />
     <Compile Include="ZipFileReadOpenUpdateTests.cs" />
-    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
-      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\TempDirectory.cs">
       <Link>Common\System\IO\TempDirectory.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\IO\StreamSpanExtensions.netstandard.cs" Condition="'$(TargetGroup)' == 'netstandard'">
+      <Link>Common\System\IO\StreamSpanExtensions.netstandard.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\Compression\CRC.cs">
       <Link>Common\System\IO\Compression\CRC.cs</Link>
@@ -41,7 +41,7 @@
     <Compile Include="ZipFileConvenienceMethods.netcoreapp1.1.cs" />
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)System.IO.Compression.TestData\1.0.4-prerelease\content\**\*.*">
+    <SupplementalTestData Include="$(PackagesDir)system.io.compression.testdata\1.0.5-prerelease\content\**\*.*">
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
     </SupplementalTestData>
   </ItemGroup>

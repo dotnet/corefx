@@ -5,6 +5,7 @@
   <Import Project="..\dir.targets" />
 
   <PropertyGroup>
+    <!-- The SignFiles target needs OutDir to be defined -->
     <OutDir>$(BinDir)</OutDir>
   </PropertyGroup>
 
@@ -14,7 +15,7 @@
     <WindowsNativeLocation Include="$(NativeBinDir)\clrcompression.dll" />
     <WindowsNativeLocation Include="$(NativeBinDir)_aot\clrcompression.dll" />
   </ItemGroup>
-  
+
   <Target Name="GenerateSignForWindowsNative">
     <WriteSigningRequired AuthenticodeSig="$(AuthenticodeSig)"
                           MarkerFile="%(WindowsNativeLocation.Identity).requires_signing" />
@@ -25,17 +26,19 @@
           DependsOnTargets="GenerateSignForWindowsNative">
     <!-- read all of the marker files and populate the FilesToSign item group -->
     <ItemGroup>
+      <!-- Note: this also looks for things under bin\obj which require signing like the shims -->
       <SignMarkerFile Include="$(OutDir)**\*.requires_signing" />
     </ItemGroup>
     <ReadSigningRequired MarkerFiles="@(SignMarkerFile)">
       <Output TaskParameter="SigningMetadata" ItemName="FilesToSign" />
     </ReadSigningRequired>
+    <Message Importance="High" Text="Attempting to sign %(FilesToSign.Identity) with authenticode='%(FilesToSign.Authenticode)' and strongname='%(FilesToSign.StrongName)'" />
   </Target>
 
   <Target Name="Build"
-          Condition="'$(SkipSigning)' != 'true' and '$(SignType)' != 'oss'"
-          DependsOnTargets="GetFilesToSignItems">
-    <CallTarget Targets="SignFiles" />
+          Condition="'$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
+          DependsOnTargets="GetFilesToSignItems;SignFiles">
+
     <!-- now that the files have been signed delete the marker files -->
     <Delete Files="@(SignMarkerFile)" />
   </Target>

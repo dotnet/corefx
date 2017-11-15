@@ -13,7 +13,6 @@ namespace System.Security.Cryptography
 #endif
         public sealed partial class ECDsaCng : ECDsa
         {
-#if !NETNATIVE
             /// <summary>
             /// Create an ECDsaCng algorithm with a named curve.
             /// </summary>
@@ -22,14 +21,9 @@ namespace System.Security.Cryptography
             /// <exception cref="PlatformNotSupportedException">if <paramref name="curve" /> does not contain an Oid with a FriendlyName.</exception>
             public ECDsaCng(ECCurve curve)
             {
-                // FriendlyName is required; an attempt was already made to default it in ECCurve
-                if (string.IsNullOrEmpty(curve.Oid.FriendlyName))
-                    throw new PlatformNotSupportedException(string.Format(SR.Cryptography_InvalidCurveOid, curve.Oid.Value.ToString()));
-
-                // Named curves generate the key immediately
+                // Specified curves generate the key immediately
                 GenerateKey(curve);
             }
-#endif
 
             /// <summary>
             ///     Create an ECDsaCng algorithm with a random 521 bit key pair.

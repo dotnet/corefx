@@ -14,17 +14,20 @@ using Microsoft.SqlServer.TDS.Error;
 using Microsoft.SqlServer.TDS.Servers;
 using Microsoft.SqlServer.TDS.SQLBatch;
 using Xunit;
+using System.Runtime.CompilerServices;
 
 namespace System.Data.SqlClient.Tests
 {
+    [ActiveIssue("dotnet/corefx #17925", TestPlatforms.Any)]
     public class DiagnosticTest : RemoteExecutorTestBase
     {
         private const string BadConnectionString = "data source = bad; initial catalog = bad; uid = bad; password = bad; connection timeout = 1;";
-        private static readonly string s_tcpConnStr = $"\"{Environment.GetEnvironmentVariable("TEST_TCP_CONN_STR")}\"";
+        private static readonly string s_tcpConnStr = Environment.GetEnvironmentVariable("TEST_TCP_CONN_STR") ?? string.Empty;
         
-        public static bool IsConnectionStringConfigured() => s_tcpConnStr != "\"\"";
+        public static bool IsConnectionStringConfigured() => s_tcpConnStr != string.Empty;
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteScalarTest()
         {
             RemoteInvoke(() =>
@@ -46,6 +49,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteScalarErrorTest()
         {
             RemoteInvoke(() =>
@@ -69,6 +73,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteNonQueryTest()
         {
             RemoteInvoke(() =>
@@ -90,6 +95,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteNonQueryErrorTest()
         {
             RemoteInvoke(() =>
@@ -97,21 +103,37 @@ namespace System.Data.SqlClient.Tests
                 CollectStatisticsDiagnostics(connectionString =>
                 {
                     using (SqlConnection conn = new SqlConnection(connectionString))
-                    using (SqlCommand cmd = new SqlCommand())
                     {
-                        cmd.Connection = conn;
-                        cmd.CommandText = "select 1 / 0;";
+                        using (SqlCommand cmd = new SqlCommand())
+                        {
+                            cmd.Connection = conn;
+                            cmd.CommandText = "select 1 / 0;";
+                            
+                            // Limiting the command timeout to 3 seconds. This should be lower than the Process timeout.
+                            cmd.CommandTimeout = 3;
+                            conn.Open();
+                            Console.WriteLine("SqlClient.DiagnosticTest.ExecuteNonQueryErrorTest Connection Open Successful");
 
-                        conn.Open();
-                        try { var output = cmd.ExecuteNonQuery(); }
-                        catch { }
+                            try
+                            {
+                                var output = cmd.ExecuteNonQuery();
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine("SqlClient.DiagnosticTest.ExecuteNonQueryErrorTest " + e.Message);
+                            }
+                            Console.WriteLine("SqlClient.DiagnosticTest.ExecuteNonQueryErrorTest Command Executed");
+                        }
+                        Console.WriteLine("SqlClient.DiagnosticTest.ExecuteNonQueryErrorTest Command Disposed");
                     }
+                    Console.WriteLine("SqlClient.DiagnosticTest.ExecuteNonQueryErrorTest Connection Disposed");
                 });
                 return SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteReaderTest()
         {
             RemoteInvoke(() =>
@@ -134,6 +156,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteReaderErrorTest()
         {
             RemoteInvoke(() =>
@@ -159,6 +182,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteReaderWithCommandBehaviorTest()
         {
             RemoteInvoke(() =>
@@ -181,6 +205,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [ConditionalFact(nameof(IsConnectionStringConfigured))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteXmlReaderTest()
         {
             RemoteInvoke(cs =>
@@ -203,6 +228,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteXmlReaderErrorTest()
         {
             RemoteInvoke(() =>
@@ -228,6 +254,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteScalarAsyncTest()
         {
             RemoteInvoke(() =>
@@ -249,6 +276,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteScalarAsyncErrorTest()
         {
             RemoteInvoke(() =>
@@ -272,6 +300,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteNonQueryAsyncTest()
         {
             RemoteInvoke(() =>
@@ -293,6 +322,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteNonQueryAsyncErrorTest()
         {
             RemoteInvoke(() =>
@@ -315,6 +345,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteReaderAsyncTest()
         {
             RemoteInvoke(() =>
@@ -337,6 +368,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteReaderAsyncErrorTest()
         {
             RemoteInvoke(() =>
@@ -362,6 +394,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [ConditionalFact(nameof(IsConnectionStringConfigured))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteXmlReaderAsyncTest()
         {
             RemoteInvoke(cs =>
@@ -384,6 +417,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [ConditionalFact(nameof(IsConnectionStringConfigured))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ExecuteXmlReaderAsyncErrorTest()
         {
             RemoteInvoke(cs =>
@@ -409,6 +443,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ConnectionOpenTest()
         {
             RemoteInvoke(() =>
@@ -420,12 +455,16 @@ namespace System.Data.SqlClient.Tests
                         sqlConnection.Open();
                         Console.WriteLine("SqlClient.DiagnosticsTest.ConnectionOpenTest:: Connection Opened ");
                     }
+                    Console.WriteLine("SqlClient.DiagnosticsTest.ConnectionOpenTest:: Connection Should Be Disposed");
                 }, true);
+
+                Console.WriteLine("SqlClient.DiagnosticsTest.ConnectionOpenTest:: Done with Diagnostics collection");
                 return SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ConnectionOpenErrorTest()
         {
             RemoteInvoke(() =>
@@ -442,6 +481,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ConnectionOpenAsyncTest()
         {
             RemoteInvoke(() =>
@@ -458,6 +498,7 @@ namespace System.Data.SqlClient.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)] // Internals reflection not supported on uapaot
         public void ConnectionOpenAsyncErrorTest()
         {
             RemoteInvoke(() =>
@@ -473,7 +514,7 @@ namespace System.Data.SqlClient.Tests
             }).Dispose();
         }
 
-        private static void CollectStatisticsDiagnostics(Action<string> sqlOperation, bool enableServerLogging = false)
+        private static void CollectStatisticsDiagnostics(Action<string> sqlOperation, bool enableServerLogging = false, [CallerMemberName] string methodName = "")
         {
             bool statsLogged = false;
             bool operationHasError = false;
@@ -657,16 +698,28 @@ namespace System.Data.SqlClient.Tests
 
             diagnosticListenerObserver.Enable();
             using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
-            using (var server = TestTdsServer.StartServerWithQueryEngine(new DiagnosticsQueryEngine(), enableLog:enableServerLogging))
             {
-                sqlOperation(server.ConnectionString);
 
-                Assert.True(statsLogged);
+                Console.WriteLine(string.Format("Test: {0} Enabled Listeners", methodName));
+                using (var server = TestTdsServer.StartServerWithQueryEngine(new DiagnosticsQueryEngine(), enableLog:enableServerLogging, methodName: methodName))
+                {
+                    Console.WriteLine(string.Format("Test: {0} Started Server", methodName));
+                    sqlOperation(server.ConnectionString);
 
-                diagnosticListenerObserver.Disable();
+                    Console.WriteLine(string.Format("Test: {0} SqlOperation Successful", methodName));
+                    
+                    Assert.True(statsLogged);
+
+                    diagnosticListenerObserver.Disable();
+
+                    Console.WriteLine(string.Format("Test: {0} Listeners Disabled", methodName));
+                }
+                Console.WriteLine(string.Format("Test: {0} Server Disposed", methodName));
             }
+            Console.WriteLine(string.Format("Test: {0} Listeners Disposed Successfully", methodName));
         }
-        private static async Task CollectStatisticsDiagnosticsAsync(Func<string, Task> sqlOperation)
+
+        private static async Task CollectStatisticsDiagnosticsAsync(Func<string, Task> sqlOperation, [CallerMemberName] string methodName = "")
         {
             bool statsLogged = false;
             bool operationHasError = false;
@@ -835,14 +888,25 @@ namespace System.Data.SqlClient.Tests
 
             diagnosticListenerObserver.Enable();
             using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
-            using (var server = TestTdsServer.StartServerWithQueryEngine(new DiagnosticsQueryEngine()))
             {
-                await sqlOperation(server.ConnectionString);
+                Console.WriteLine(string.Format("Test: {0} Enabled Listeners", methodName));
+                using (var server = TestTdsServer.StartServerWithQueryEngine(new DiagnosticsQueryEngine(), methodName: methodName))
+                {
+                    Console.WriteLine(string.Format("Test: {0} Started Server", methodName));
 
-                Assert.True(statsLogged);
+                    await sqlOperation(server.ConnectionString);
 
-                diagnosticListenerObserver.Disable();
+                    Console.WriteLine(string.Format("Test: {0} SqlOperation Successful", methodName));
+
+                    Assert.True(statsLogged);
+
+                    diagnosticListenerObserver.Disable();
+
+                    Console.WriteLine(string.Format("Test: {0} Listeners Disabled", methodName));
+                }
+                Console.WriteLine(string.Format("Test: {0} Server Disposed", methodName));
             }
+            Console.WriteLine(string.Format("Test: {0} Listeners Disposed Successfully", methodName));
         }
         
         private static T GetPropertyValueFromType<T>(object obj, string propName)

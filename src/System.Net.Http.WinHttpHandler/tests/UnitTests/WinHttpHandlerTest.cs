@@ -42,7 +42,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             Assert.Equal(SslProtocols.None, handler.SslProtocols);
             Assert.Equal(true, handler.AutomaticRedirection);
             Assert.Equal(50, handler.MaxAutomaticRedirections);
-            Assert.Equal(DecompressionMethods.Deflate | DecompressionMethods.GZip, handler.AutomaticDecompression);
+            Assert.Equal(DecompressionMethods.None, handler.AutomaticDecompression);
             Assert.Equal(CookieUsePolicy.UseInternalCookieStoreOnly, handler.CookieUsePolicy);
             Assert.Equal(null, handler.CookieContainer);
             Assert.Equal(null, handler.ServerCertificateValidationCallback);
@@ -59,7 +59,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             Assert.Equal(TimeSpan.FromSeconds(30), handler.SendTimeout);
             Assert.Equal(TimeSpan.FromSeconds(30), handler.ReceiveHeadersTimeout);
             Assert.Equal(TimeSpan.FromSeconds(30), handler.ReceiveDataTimeout);
-            Assert.Equal(64 * 1024, handler.MaxResponseHeadersLength);
+            Assert.Equal(64, handler.MaxResponseHeadersLength);
             Assert.Equal(64 * 1024, handler.MaxResponseDrainSize);
             Assert.NotNull(handler.Properties);
         }
@@ -130,7 +130,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         }
 
         [Fact]
-        public async void CookieUsePolicy_UseSpecifiedCookieContainerAndNullContainer_ThrowsInvalidOperationException()
+        public async Task CookieUsePolicy_UseSpecifiedCookieContainerAndNullContainer_ThrowsInvalidOperationException()
         {
             var handler = new WinHttpHandler();
             Assert.Null(handler.CookieContainer);
@@ -577,7 +577,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
         }
 
         [Fact]
-        public async Task SendAsync_PostNoContentObjectWithChunkedEncodingHeader_ExpectInvalidOperationException()
+        public async Task SendAsync_PostNoContentObjectWithChunkedEncodingHeader_ExpectHttpRequestException()
         {
             var handler = new WinHttpHandler();
             using (var client = new HttpClient(handler))
@@ -587,7 +587,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
 
                 var request = new HttpRequestMessage(HttpMethod.Post, TestServer.FakeServerEndpoint);
 
-                await Assert.ThrowsAsync<InvalidOperationException>(() => client.SendAsync(request));
+                await Assert.ThrowsAsync<HttpRequestException>(() => client.SendAsync(request));
             }
         }
 

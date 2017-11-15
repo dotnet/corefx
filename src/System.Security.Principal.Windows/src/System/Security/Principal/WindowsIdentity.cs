@@ -24,7 +24,6 @@ using System.Runtime.Serialization;
 
 namespace System.Security.Principal
 {
-    [Serializable]
     public class WindowsIdentity : ClaimsIdentity, IDisposable, ISerializable, IDeserializationCallback
     {
         private string _name = null;
@@ -39,15 +38,10 @@ namespace System.Security.Principal
         private volatile bool _impersonationLevelInitialized;
 
         public new const string DefaultIssuer = @"AD AUTHORITY";
-        [NonSerialized]
         private string _issuerName = DefaultIssuer;
-        [NonSerialized]
         private object _claimsIntiailizedLock = new object();
-        [NonSerialized]
         private volatile bool _claimsInitialized;
-        [NonSerialized]
         private List<Claim> _deviceClaims;
-        [NonSerialized]
         private List<Claim> _userClaims;
 
         //
@@ -62,7 +56,7 @@ namespace System.Security.Principal
         /// Initializes a new instance of the WindowsIdentity class for the user represented by the specified User Principal Name (UPN).
         /// </summary>
         /// <remarks>
-        /// Unlike the desktop version, we connect to Lsa only as an untrusted caller. We do not attempt to explot Tcb privilege or adjust the current
+        /// Unlike the desktop version, we connect to Lsa only as an untrusted caller. We do not attempt to exploit Tcb privilege or adjust the current
         /// thread privilege to include Tcb.
         /// </remarks>
         public WindowsIdentity(string sUserPrincipalName)
@@ -240,23 +234,18 @@ namespace System.Security.Principal
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2229", Justification = "Public API has already shipped.")]
         public WindowsIdentity(SerializationInfo info, StreamingContext context)
         {
-            _claimsInitialized = false;
-
-            IntPtr userToken = (IntPtr)info.GetValue("m_userToken", typeof(IntPtr));
-            if (userToken != IntPtr.Zero)
-            {
-                CreateFromToken(userToken);
-            }
+            throw new PlatformNotSupportedException();
         }
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            // TODO: Add back when ClaimsIdentity is serializable
-            // base.GetObjectData(info, context);
-            info.AddValue("m_userToken", _safeTokenHandle.DangerousGetHandle());
+            throw new PlatformNotSupportedException();
         }
 
-        void IDeserializationCallback.OnDeserialization(object sender) { }
+        void IDeserializationCallback.OnDeserialization(object sender)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         //
         // Factory methods.
@@ -409,10 +398,20 @@ namespace System.Security.Principal
 
 
                 // CheckTokenMembership will check if the SID is both present and enabled in the access token.
+#if uap
+                if (!Interop.Kernel32.CheckTokenMembershipEx((til != TokenImpersonationLevel.None ? _safeTokenHandle : token),
+                                                      sid.BinaryForm,
+                                                      Interop.Kernel32.CTMF_INCLUDE_APPCONTAINER,
+                                                      ref isMember))
+                    throw new SecurityException(new Win32Exception().Message);
+#else
                 if (!Interop.Advapi32.CheckTokenMembership((til != TokenImpersonationLevel.None ? _safeTokenHandle : token),
                                                       sid.BinaryForm,
                                                       ref isMember))
                     throw new SecurityException(new Win32Exception().Message);
+#endif
+
+
             }
             finally
             {
@@ -726,8 +725,8 @@ namespace System.Security.Principal
             if ((uint)status == Interop.StatusOptions.STATUS_INSUFFICIENT_RESOURCES || (uint)status == Interop.StatusOptions.STATUS_NO_MEMORY)
                 return new OutOfMemoryException();
 
-            int win32ErrorCode = Interop.NtDll.RtlNtStatusToDosError(status);
-            return new SecurityException(new Win32Exception(win32ErrorCode).Message);
+            uint win32ErrorCode = Interop.Advapi32.LsaNtStatusToWinError((uint)status);
+            return new SecurityException(new Win32Exception(unchecked((int)win32ErrorCode)).Message);
         }
         
         private static SafeAccessTokenHandle GetCurrentToken(TokenAccessLevels desiredAccess, bool threadOnly, out bool isImpersonating, out int hr)
@@ -773,44 +772,6 @@ namespace System.Security.Principal
                 return information.Read<T>(0);
             }
         }
-
-        //
-        // QueryImpersonation used to test if the current thread is impersonated.
-        // This method doesn't return the thread token (WindowsIdentity).
-        // Note GetCurrentInternal can be used to perform the same test, but 
-        // QueryImpersonation is optimized for performance
-        // 
-
-        internal static ImpersonationQueryResult QueryImpersonation()
-        {
-            SafeAccessTokenHandle safeTokenHandle = null;
-            bool success = Interop.Advapi32.OpenThreadToken(TokenAccessLevels.Query, WinSecurityContext.Thread, out safeTokenHandle);
-
-            if (safeTokenHandle != null)
-            {
-                Debug.Assert(success, "[WindowsIdentity..QueryImpersonation] - success");
-                safeTokenHandle.Dispose();
-                return ImpersonationQueryResult.Impersonated;
-            }
-
-            int lastError = Marshal.GetLastWin32Error();
-
-            if (lastError == Interop.Errors.ERROR_ACCESS_DENIED)
-            {
-                // thread is impersonated because the thread was there (and we failed to open it).
-                return ImpersonationQueryResult.Impersonated;
-            }
-
-            if (lastError == Interop.Errors.ERROR_NO_TOKEN)
-            {
-                // definitely not impersonating
-                return ImpersonationQueryResult.NotImpersonated;
-            }
-
-            // Unexpected failure.
-            return ImpersonationQueryResult.Failed;
-        }
-
 
         private static Interop.LUID GetLogonAuthId(SafeAccessTokenHandle safeTokenHandle)
         {
@@ -895,29 +856,6 @@ namespace System.Security.Principal
             return identity._authType;
         }
 
-        internal IntPtr GetTokenInternal()
-        {
-            return _safeTokenHandle.DangerousGetHandle();
-        }
-
-
-        internal WindowsIdentity(ClaimsIdentity claimsIdentity, IntPtr userToken)
-            : base(claimsIdentity)
-        {
-            if (userToken != IntPtr.Zero && userToken.ToInt64() > 0)
-            {
-                CreateFromToken(userToken);
-            }
-        }
-
-        /// <summary>
-        /// Returns a new instance of the base, used when serializing the WindowsIdentity.
-        /// </summary>
-        internal ClaimsIdentity CloneAsBase()
-        {
-            return base.Clone();
-        }
-
         /// <summary>
         /// Returns a new instance of <see cref="WindowsIdentity"/> with values copied from this object.
         /// </summary>
@@ -977,8 +915,8 @@ namespace System.Security.Principal
         }
 
         /// <summary>
-        /// Intenal method to initialize the claim collection.
-        /// Lazy init is used so claims are not initialzed until needed
+        /// Internal method to initialize the claim collection.
+        /// Lazy init is used so claims are not initialized until needed
         /// </summary>        
         private void InitializeClaims()
         {
@@ -1128,21 +1066,12 @@ namespace System.Security.Principal
         Both = 3 // OpenAsSelf = true, then OpenAsSelf = false
     }
 
-    internal enum ImpersonationQueryResult
-    {
-        Impersonated = 0,    // current thread is impersonated
-        NotImpersonated = 1,    // current thread is not impersonated
-        Failed = 2     // failed to query 
-    }
-
-    [Serializable]
     internal enum TokenType : int
     {
         TokenPrimary = 1,
         TokenImpersonation
     }
 
-    [Serializable]
     internal enum TokenInformationClass : int
     {
         TokenUser = 1,

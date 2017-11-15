@@ -39,6 +39,7 @@ namespace System.Net.Http
             private static readonly bool s_curlDebugLogging = Environment.GetEnvironmentVariable("CURLHANDLER_DEBUG_VERBOSE") == "true";
 
             internal readonly CurlHandler _handler;
+            internal readonly MultiAgent _associatedMultiAgent;
             internal readonly HttpRequestMessage _requestMessage;
             internal readonly CurlResponseMessage _responseMessage;
             internal readonly CancellationToken _cancellationToken;
@@ -49,17 +50,22 @@ namespace System.Net.Http
             internal SafeCurlHandle _easyHandle;
             private SafeCurlSListHandle _requestHeaders;
 
-            internal MultiAgent _associatedMultiAgent;
             internal SendTransferState _sendTransferState;
             internal StrongToWeakReference<EasyRequest> _selfStrongToWeakReference;
 
             private SafeCallbackHandle _callbackHandle;
 
-            public EasyRequest(CurlHandler handler, HttpRequestMessage requestMessage, CancellationToken cancellationToken) :
+            public EasyRequest(CurlHandler handler, MultiAgent agent, HttpRequestMessage requestMessage, CancellationToken cancellationToken) :
                 base(TaskCreationOptions.RunContinuationsAsynchronously)
             {
+                Debug.Assert(handler != null, $"Expected non-null {nameof(handler)}");
+                Debug.Assert(agent != null, $"Expected non-null {nameof(agent)}");
+                Debug.Assert(requestMessage != null, $"Expected non-null {nameof(requestMessage)}");
+
                 _handler = handler;
+                _associatedMultiAgent = agent;
                 _requestMessage = requestMessage;
+
                 _cancellationToken = cancellationToken;
                 _responseMessage = new CurlResponseMessage(this);
             }
@@ -81,6 +87,8 @@ namespace System.Net.Http
                 }
                 _easyHandle = easyHandle;
 
+                EventSourceTrace("Configuring request.");
+
                 // Before setting any other options, turn on curl's debug tracing
                 // if desired.  CURLOPT_VERBOSE may also be set subsequently if
                 // EventSource tracing is enabled.
@@ -89,6 +97,10 @@ namespace System.Net.Http
                     SetCurlOption(CURLoption.CURLOPT_VERBOSE, 1L);
                 }
 
+                // Before actually configuring the handle based on the state of the request,
+                // do any necessary cleanup of the request object.
+                SanitizeRequestMessage();
+                
                 // Configure the handle
                 SetUrl();
                 SetNetworkingOptions();
@@ -99,10 +111,12 @@ namespace System.Net.Http
                 SetVersion();
                 SetDecompressionOptions();
                 SetProxyOptions(_requestMessage.RequestUri);
-                SetCredentialsOptions(_handler.GetCredentials(_requestMessage.RequestUri));
+                SetCredentialsOptions(_handler._useDefaultCredentials ? GetDefaultCredentialAndAuth() : _handler.GetCredentials(_requestMessage.RequestUri));
                 SetCookieOption(_requestMessage.RequestUri);
                 SetRequestHeaders();
                 SetSslOptions();
+
+                EventSourceTrace("Done configuring request.");
             }
 
             public void EnsureResponseMessagePublished()
@@ -137,7 +151,7 @@ namespace System.Net.Http
 
                 // Now ensure it's published.
                 bool completedTask = TrySetResult(_responseMessage);
-                Debug.Assert(completedTask || Task.Status == TaskStatus.RanToCompletion,
+                Debug.Assert(completedTask || Task.IsCompletedSuccessfully,
                     "If the task was already completed, it should have been completed successfully; " +
                     "we shouldn't be completing as successful after already completing as failed.");
 
@@ -182,7 +196,7 @@ namespace System.Net.Http
                 }
                 else
                 {
-                    if (error is IOException || error is CurlException || error == null)
+                    if (error is InvalidOperationException || error is IOException || error is CurlException || error == null)
                     {
                         error = CreateHttpRequestException(error);
                     }
@@ -233,6 +247,15 @@ namespace System.Net.Http
 
                 // Release any send transfer state, which will return its buffer to the pool
                 _sendTransferState?.Dispose();
+            }
+
+            private void SanitizeRequestMessage()
+            {
+                // Make sure Transfer-Encoding and Content-Length make sense together.
+                if (_requestMessage.Content != null)
+                {
+                    SetChunkedModeForSend(_requestMessage);
+                }
             }
 
             private void SetUrl()
@@ -321,7 +344,7 @@ namespace System.Net.Http
             {
                 // Reset cookies in case we redirect.  Below we'll set new cookies for the
                 // new location if we have any.
-                if (_handler._useCookie)
+                if (_handler._useCookies)
                 {
                     SetCurlOption(CURLoption.CURLOPT_COOKIE, IntPtr.Zero);
                 }
@@ -335,13 +358,15 @@ namespace System.Net.Http
                     // Just as with WinHttpHandler, for security reasons, we drop the server credential if it is 
                     // anything other than a CredentialCache. We allow credentials in a CredentialCache since they 
                     // are specifically tied to URIs.
-                    updatedCredentials = GetCredentials(newUri, _handler.Credentials as CredentialCache, s_orderedAuthTypes);
+                    updatedCredentials = _handler._useDefaultCredentials ?
+                        GetDefaultCredentialAndAuth() : 
+                        GetCredentials(newUri, _handler.Credentials as CredentialCache, s_orderedAuthTypes);
 
                     // Reset proxy - it is possible that the proxy has different credentials for the new URI
                     SetProxyOptions(newUri);
 
                     // Set up new cookies
-                    if (_handler._useCookie)
+                    if (_handler._useCookies)
                     {
                         SetCookieOption(newUri);
                     }
@@ -609,7 +634,6 @@ namespace System.Net.Http
             {
                 if (credentials == CredentialCache.DefaultCredentials)
                 {
-                    // No "default credentials" on Unix; nop just like UseDefaultCredentials.
                     EventSourceTrace("DefaultCredentials set for proxy. Skipping.");
                 }
                 else if (credentials != null)
@@ -656,9 +680,12 @@ namespace System.Net.Http
                 EventSourceTrace("Credentials set.");
             }
 
+            private static KeyValuePair<NetworkCredential, CURLAUTH> GetDefaultCredentialAndAuth() =>
+                new KeyValuePair<NetworkCredential, CURLAUTH>(CredentialCache.DefaultNetworkCredentials, CURLAUTH.Negotiate);
+
             internal void SetCookieOption(Uri uri)
             {
-                if (!_handler._useCookie)
+                if (!_handler._useCookies)
                 {
                     return;
                 }
@@ -675,18 +702,22 @@ namespace System.Net.Http
             {
                 var slist = new SafeCurlSListHandle();
 
-                // Add content request headers
+                bool suppressContentType;
                 if (_requestMessage.Content != null)
                 {
-                    SetChunkedModeForSend(_requestMessage);
-
+                    // Add content request headers
                     AddRequestHeaders(_requestMessage.Content.Headers, slist);
+                    suppressContentType = _requestMessage.Content.Headers.ContentType == null;
+                }
+                else
+                {
+                    suppressContentType = true;
+                }
 
-                    if (_requestMessage.Content.Headers.ContentType == null)
-                    {
-                        // Remove the Content-Type header libcurl adds by default.
-                        ThrowOOMIfFalse(Interop.Http.SListAppend(slist, NoContentType));
-                    }
+                if (suppressContentType)
+                {
+                    // Remove the Content-Type header libcurl adds by default.
+                    ThrowOOMIfFalse(Interop.Http.SListAppend(slist, NoContentType));
                 }
 
                 // Add request headers
@@ -701,9 +732,8 @@ namespace System.Net.Http
                 }
 
                 // Since libcurl adds an Expect header if it sees enough post data, we need to explicitly block
-                // it if caller specifically does not want to set the header
-                if (_requestMessage.Headers.ExpectContinue.HasValue &&
-                    !_requestMessage.Headers.ExpectContinue.Value)
+                // it unless the caller has explicitly opted-in to it.
+                if (!_requestMessage.Headers.ExpectContinue.GetValueOrDefault())
                 {
                     ThrowOOMIfFalse(Interop.Http.SListAppend(slist, NoExpect));
                 }
@@ -731,6 +761,10 @@ namespace System.Net.Http
                 // potentially more expensive than, just always setting the callback.
                 SslProvider.SetSslOptions(this, _handler.ClientCertificateOptions);
             }
+
+            internal bool ServerCertificateValidationCallbackAcceptsAll => ReferenceEquals(
+                _handler.ServerCertificateCustomValidationCallback,
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator);
 
             internal void SetCurlCallbacks(
                 IntPtr easyGCHandle,

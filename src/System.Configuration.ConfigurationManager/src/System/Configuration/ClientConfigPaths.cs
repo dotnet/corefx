@@ -60,7 +60,9 @@ namespace System.Configuration
                 // used for local paths and "file://" for UNCs. Simply removing the prefix will make
                 // local paths relative on Unix (e.g. "file:///home" will become "home" instead of
                 // "/home").
-                Uri uri = new Uri(exeAssembly.CodeBase);
+                string configBasePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, exeAssembly.ManifestModule.Name);
+                Uri uri = new Uri(configBasePath);
+
                 if (uri.IsFile)
                 {
                     ApplicationUri = uri.LocalPath;
@@ -68,7 +70,7 @@ namespace System.Configuration
                 }
                 else
                 {
-                    ApplicationUri = exeAssembly.EscapedCodeBase;
+                    ApplicationUri =  Uri.EscapeDataString(configBasePath);
                 }
             }
 
@@ -90,7 +92,7 @@ namespace System.Configuration
             // (1) Company name
             string part1 = Validate(_companyName, limitSize: true);
 
-            // (2) Domain or product name & a application urit hash
+            // (2) Domain or product name & an application urit hash
             string namePrefix = Validate(AppDomain.CurrentDomain.FriendlyName, limitSize: true);
             if (string.IsNullOrEmpty(namePrefix))
                 namePrefix = Validate(ProductName, limitSize: true);
@@ -201,7 +203,7 @@ namespace System.Configuration
             if (assembly != null)
             {
                 AssemblyName assemblyName = assembly.GetName();
-                Uri codeBase = new Uri(assembly.CodeBase);
+                Uri codeBase = new Uri(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, assembly.ManifestModule.Name));
 
                 hash = IdentityHelper.GetNormalizedStrongNameHash(assemblyName);
                 if (hash != null)

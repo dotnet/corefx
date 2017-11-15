@@ -9,6 +9,7 @@ namespace System.Collections.Generic.Tests
 {
     public abstract partial class ComparersGenericTests<T>
     {
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Missing https://github.com/dotnet/coreclr/pull/4340")]
         [Fact]
         public void EqualityComparer_EqualityComparerDefault()
         {
@@ -31,7 +32,6 @@ namespace System.Collections.Generic.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "See dotnet/corert#1736")]
         public void EqualityComparer_EqualsShouldBeOverriddenAndWorkForDifferentInstances_cloned()
         {
             var comparer = EqualityComparer<T>.Default;
@@ -58,7 +58,6 @@ namespace System.Collections.Generic.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "See dotnet/corert#1736")]
         public void EqualityComparer_GetHashCodeShouldBeOverriddenAndBeTheSameAsLongAsTheTypeIsTheSame_cloned()
         {
             var comparer = EqualityComparer<T>.Default;
@@ -89,13 +88,13 @@ namespace System.Collections.Generic.Tests
 
             if (default(T) != null) // if default(T) is null this assert will fail as IEqualityComparer.Equals returns early if either input is null
             {
-                Assert.Throws<ArgumentException>(() => comparer.Equals(notOfTypeT, default(T))); // lhs is the problem
-                Assert.Throws<ArgumentException>(() => comparer.Equals(default(T), notOfTypeT)); // rhs is the problem
+                AssertExtensions.Throws<ArgumentException>(null, () => comparer.Equals(notOfTypeT, default(T))); // lhs is the problem
+                AssertExtensions.Throws<ArgumentException>(null, () => comparer.Equals(default(T), notOfTypeT)); // rhs is the problem
             }
 
             if (!(notOfTypeT is T)) // catch cases where Task<T> actually is a T, like object or non-generic Task
             {
-                Assert.Throws<ArgumentException>(() => comparer.Equals(notOfTypeT, Task.FromResult(default(T))));
+                AssertExtensions.Throws<ArgumentException>(null, () => comparer.Equals(notOfTypeT, Task.FromResult(default(T))));
             }
         }
 
@@ -113,7 +112,7 @@ namespace System.Collections.Generic.Tests
 
             if (!(notOfTypeT is T))
             {
-                Assert.Throws<ArgumentException>(() => comparer.GetHashCode(notOfTypeT));
+                AssertExtensions.Throws<ArgumentException>(null, () => comparer.GetHashCode(notOfTypeT));
             }
         }
     }

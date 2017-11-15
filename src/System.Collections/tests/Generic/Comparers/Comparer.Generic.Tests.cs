@@ -13,6 +13,7 @@ namespace System.Collections.Generic.Tests
 {
     public abstract partial class ComparersGenericTests<T>
     {
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Missing https://github.com/dotnet/coreclr/pull/4340")]
         [Fact]
         public void Comparer_ComparerDefault()
         {
@@ -35,7 +36,6 @@ namespace System.Collections.Generic.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "See dotnet/corert#1736")]
         public void Comparer_EqualsShouldBeOverriddenAndWorkForDifferentInstances_cloned()
         {
             var comparer = Comparer<T>.Default;
@@ -62,7 +62,6 @@ namespace System.Collections.Generic.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "See dotnet/corert#1736")]
         public void Comparer_GetHashCodeShouldBeOverriddenAndBeTheSameAsLongAsTheTypeIsTheSame_cloned()
         {
             var comparer = Comparer<T>.Default;
@@ -83,13 +82,13 @@ namespace System.Collections.Generic.Tests
             Task<T> notOfTypeT = Task.FromResult(default(T));
             if (default(T) != null) // if default(T) is null these asserts will fail as IComparer.Compare returns early if either side is null
             {
-                Assert.Throws<ArgumentException>(() => comparer.Compare(notOfTypeT, default(T))); // lhs is the problem
-                Assert.Throws<ArgumentException>(() => comparer.Compare(default(T), notOfTypeT)); // rhs is the problem
+                AssertExtensions.Throws<ArgumentException>(null, () => comparer.Compare(notOfTypeT, default(T))); // lhs is the problem
+                AssertExtensions.Throws<ArgumentException>(null, () => comparer.Compare(default(T), notOfTypeT)); // rhs is the problem
             }
             if (!(notOfTypeT is T)) // catch cases where Task<T> actually is a T, like object or non-generic Task
             {
-                Assert.Throws<ArgumentException>(() => comparer.Compare(notOfTypeT, notOfTypeT)); // The implementation should not attempt to short-circuit if both sides have reference equality
-                Assert.Throws<ArgumentException>(() => comparer.Compare(notOfTypeT, Task.FromResult(default(T)))); // And it should also work when they don't
+                AssertExtensions.Throws<ArgumentException>(null, () => comparer.Compare(notOfTypeT, notOfTypeT)); // The implementation should not attempt to short-circuit if both sides have reference equality
+                AssertExtensions.Throws<ArgumentException>(null, () => comparer.Compare(notOfTypeT, Task.FromResult(default(T)))); // And it should also work when they don't
             }
         }
 
@@ -129,7 +128,7 @@ namespace System.Collections.Generic.Tests
         [Fact]
         public void Comparer_ComparerCreateWithNullComparisonThrows()
         {
-            Assert.Throws<ArgumentNullException>("comparison", () => Comparer<T>.Create(comparison: null));
+            AssertExtensions.Throws<ArgumentNullException>("comparison", () => Comparer<T>.Create(comparison: null));
         }
     }
 }

@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
 using Xunit;
 
 namespace System.IO.Tests
@@ -36,7 +34,21 @@ namespace System.IO.Tests
         [Fact]
         public void InvalidModeThrows()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("mode", () => CreateFileStream(GetTestFilePath(), ~FileMode.Open));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("mode", () => CreateFileStream(GetTestFilePath(), ~FileMode.Open));
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void MissingFile_ThrowsFileNotFound(char trailingChar)
+        {
+            string path = GetTestFilePath() + trailingChar;
+            Assert.Throws<FileNotFoundException>(() => CreateFileStream(path, FileMode.Open));
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void MissingDirectory_ThrowsDirectoryNotFound(char trailingChar)
+        {
+            string path = Path.Combine(GetTestFilePath(), "file" + trailingChar);
+            Assert.Throws<DirectoryNotFoundException>(() => CreateFileStream(path, FileMode.Open));
         }
 
         [Fact]
@@ -167,7 +179,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void FileModeAppend()
+        public virtual void FileModeAppend()
         {
             using (FileStream fs = CreateFileStream(GetTestFilePath(), FileMode.Append))
             {
@@ -177,7 +189,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void FileModeAppendExisting()
+        public virtual void FileModeAppendExisting()
         {
             string fileName = GetTestFilePath();
             using (FileStream fs = CreateFileStream(fileName, FileMode.Create))

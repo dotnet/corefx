@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
+
 namespace System.Security.Cryptography.X509Certificates.Tests
 {
     //
@@ -11,12 +13,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests
     //
     internal static class Cert
     {
-        internal const X509KeyStorageFlags EphemeralIfPossible =
-#if netcoreapp
-            X509KeyStorageFlags.EphemeralKeySet;
-#else
+        // netstandard: DefaultKeySet
+        // netcoreapp-OSX: DefaultKeySet
+        // netcoreapp-other: EphemeralKeySet
+        internal static readonly X509KeyStorageFlags EphemeralIfPossible =
+            !RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? X509KeyStorageFlags.EphemeralKeySet :
             X509KeyStorageFlags.DefaultKeySet;
-#endif
         //
         // The Import() methods have an overload for each X509Certificate2Collection.Import() overload.
         //

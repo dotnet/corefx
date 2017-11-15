@@ -46,7 +46,7 @@ namespace System.Linq.Expressions
         /// <summary>
         /// Gets the arguments to the constructor.
         /// </summary>
-        public ReadOnlyCollection<Expression> Arguments => ReturnReadOnly(ref _arguments);
+        public ReadOnlyCollection<Expression> Arguments => ExpressionUtils.ReturnReadOnly(ref _arguments);
 
         /// <summary>
         /// Gets the argument expression with the specified <paramref name="index"/>.
@@ -135,7 +135,7 @@ namespace System.Linq.Expressions
         {
             ContractUtils.RequiresNotNull(constructor, nameof(constructor));
             ContractUtils.RequiresNotNull(constructor.DeclaringType, nameof(constructor) + "." + nameof(constructor.DeclaringType));
-            TypeUtils.ValidateType(constructor.DeclaringType, nameof(constructor));
+            TypeUtils.ValidateType(constructor.DeclaringType, nameof(constructor), allowByRef: true, allowPointer: true);
             ValidateConstructor(constructor, nameof(constructor));
             ReadOnlyCollection<Expression> argList = arguments.ToReadOnly();
             ValidateArgumentTypes(constructor, ExpressionType.New, ref argList, nameof(constructor));
@@ -154,7 +154,7 @@ namespace System.Linq.Expressions
         {
             ContractUtils.RequiresNotNull(constructor, nameof(constructor));
             ContractUtils.RequiresNotNull(constructor.DeclaringType, nameof(constructor) + "." + nameof(constructor.DeclaringType));
-            TypeUtils.ValidateType(constructor.DeclaringType, nameof(constructor));
+            TypeUtils.ValidateType(constructor.DeclaringType, nameof(constructor), allowByRef: true, allowPointer: true);
             ValidateConstructor(constructor, nameof(constructor));
             ReadOnlyCollection<MemberInfo> memberList = members.ToReadOnly();
             ReadOnlyCollection<Expression> argList = arguments.ToReadOnly();
@@ -219,7 +219,7 @@ namespace System.Linq.Expressions
                 for (int i = 0, n = arguments.Count; i < n; i++)
                 {
                     Expression arg = arguments[i];
-                    RequiresCanRead(arg, nameof(arguments), i);
+                    ExpressionUtils.RequiresCanRead(arg, nameof(arguments), i);
                     MemberInfo member = members[i];
                     ContractUtils.RequiresNotNull(member, nameof(members), i);
                     if (!TypeUtils.AreEquivalent(member.DeclaringType, constructor.DeclaringType))

@@ -2,6 +2,9 @@
   <Import Project="..\dir.props" />
   <PropertyGroup>
     <IntermediateOutputPath>$(IntermediateOutputPath)$(OSGroup)-$(ArchGroup)/</IntermediateOutputPath>
-    <NugetRuntimeIdentifier>$(RuntimeOS)-$(ArchGroup)</NugetRuntimeIdentifier>
+    <NugetRuntimeIdentifier>None</NugetRuntimeIdentifier>
+    <ContainsPackageReferences>true</ContainsPackageReferences>
+    <!-- We need configuration-specific assets files. -->
+    <RestoreOutputPath>$(IntermediateOutputPath)</RestoreOutputPath>
   </PropertyGroup>
 </Project>

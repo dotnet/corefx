@@ -29,22 +29,12 @@ namespace System.Reflection.Tests
         }
 
         [Theory]
-        [InlineData(typeof(int))]
-        [InlineData(typeof(List<>))]
-        [InlineData(typeof(ModuleTest))]
-        public void FullyQualifiedName(TypeInfo typeInfo)
-        {
-            Module module = typeInfo.Module;
-            Assert.Contains(typeInfo.Assembly.GetName().Name, module.FullyQualifiedName, StringComparison.CurrentCultureIgnoreCase);
-            Assert.Contains(typeInfo.Assembly.GetName().Name, module.Name, StringComparison.CurrentCultureIgnoreCase);
-        }
-
-        [Theory]
         [InlineData(typeof(Attr), 77, "AttrSimple")]
         [InlineData(typeof(Int32Attr), 77, "Int32AttrSimple")]
         [InlineData(typeof(Int64Attr), (long)77, "Int64AttrSimple")]
         [InlineData(typeof(StringAttr), "hello", "StringAttrSimple")]
-        [InlineData(typeof(EnumAttr), PublicEnum.Case1, "EnumAttrSimple")]        
+        [InlineData(typeof(EnumAttr), PublicEnum.Case1, "EnumAttrSimple")]  
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Custom Attributes on Modules not supported on UapAot.")]
         public void CustomAttributes<CtorArg, NamedArg>(Type attrType, CtorArg expectedCtorValue, NamedArg expectedNamedValue)
         {
             Module module = typeof(ModuleTest).GetTypeInfo().Module;

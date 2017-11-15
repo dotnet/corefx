@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -30,11 +31,7 @@ namespace System.Reflection.Tests
             yield return new object[] { "NAME", "NAME" };
             yield return new object[] { "name with spaces", "name with spaces" };
             yield return new object[] { "\uD800\uDC00", "\uD800\uDC00" };
-            yield return new object[] { "привет", "привет" };
-
-            // Invalid Unicode
-            yield return new object[] { "\uD800", "\uFFFD" };
-            yield return new object[] { "\uDC00", "\uFFFD" };
+            yield return new object[] { "\u043F\u0440\u0438\u0432\u0435\u0442", "\u043F\u0440\u0438\u0432\u0435\u0442" };
         }
 
         [Fact]
@@ -50,7 +47,7 @@ namespace System.Reflection.Tests
         public void Ctor_String(string name, string expectedName)
         {
             AssemblyName assemblyName = new AssemblyName(name);
-            Assert.Equal(expectedName, assemblyName.Name);
+            Assert.Equal(expectedName.ToLowerInvariant(), assemblyName.Name.ToLowerInvariant());
             Assert.Equal(ProcessorArchitecture.None, assemblyName.ProcessorArchitecture);
         }
 
@@ -188,8 +185,11 @@ namespace System.Reflection.Tests
         {
             AssemblyName assemblyName = new AssemblyName(name);
 
-            string extended = $"{expectedName}, Culture=neutral, PublicKeyToken=null";
-            Assert.True(assemblyName.FullName == expectedName || assemblyName.FullName == extended);
+            expectedName = expectedName.ToLowerInvariant();
+            string extended = $"{expectedName}, Culture=neutral, PublicKeyToken=null".ToLowerInvariant();
+            string afn = assemblyName.FullName.ToLowerInvariant();
+
+            Assert.True(afn == expectedName || afn == extended, $"Expected\n{afn} == {expectedName}\nor\n{afn} == {extended}");
         }
 
         [Fact]
@@ -252,11 +252,35 @@ namespace System.Reflection.Tests
             Assert.StartsWith("System.Reflection.Tests", assemblyName.Name);
         }
 
+        // The ECMA replacement key for the Microsoft implementation of the CLR.
+        private static readonly byte[] TheKey =
+        {
+            0x00,0x24,0x00,0x00,0x04,0x80,0x00,0x00,0x94,0x00,0x00,0x00,0x06,0x02,0x00,0x00,
+            0x00,0x24,0x00,0x00,0x52,0x53,0x41,0x31,0x00,0x04,0x00,0x00,0x01,0x00,0x01,0x00,
+            0x07,0xd1,0xfa,0x57,0xc4,0xae,0xd9,0xf0,0xa3,0x2e,0x84,0xaa,0x0f,0xae,0xfd,0x0d,
+            0xe9,0xe8,0xfd,0x6a,0xec,0x8f,0x87,0xfb,0x03,0x76,0x6c,0x83,0x4c,0x99,0x92,0x1e,
+            0xb2,0x3b,0xe7,0x9a,0xd9,0xd5,0xdc,0xc1,0xdd,0x9a,0xd2,0x36,0x13,0x21,0x02,0x90,
+            0x0b,0x72,0x3c,0xf9,0x80,0x95,0x7f,0xc4,0xe1,0x77,0x10,0x8f,0xc6,0x07,0x77,0x4f,
+            0x29,0xe8,0x32,0x0e,0x92,0xea,0x05,0xec,0xe4,0xe8,0x21,0xc0,0xa5,0xef,0xe8,0xf1,
+            0x64,0x5c,0x4c,0x0c,0x93,0xc1,0xab,0x99,0x28,0x5d,0x62,0x2c,0xaa,0x65,0x2c,0x1d,
+            0xfa,0xd6,0x3d,0x74,0x5d,0x6f,0x2d,0xe5,0xf1,0x7e,0x5e,0xaf,0x0f,0xc4,0x96,0x3d,
+            0x26,0x1c,0x8a,0x12,0x43,0x65,0x18,0x20,0x6d,0xc0,0x93,0x34,0x4d,0x5a,0xd2,0x93
+        };
+
+        [Fact]
+        public static void FullName_WithPublicKey()
+        {
+            AssemblyName assemblyName = new AssemblyName("MyAssemblyName, Version=1.0.0.0");
+            assemblyName.SetPublicKey(TheKey);
+            Assert.Equal("MyAssemblyName, Version=1.0.0.0, PublicKeyToken=b03f5f7f11d50a3a", assemblyName.FullName);
+        }
+
         public static IEnumerable<object[]> Version_TestData()
         {
-            yield return new object[] { new Version(255, 1), "255.1.65535.65535" };
-            yield return new object[] { new Version(255, 1, 2), "255.1.2.65535" };
+            yield return new object[] { new Version(255, 1), "255.1" };
+            yield return new object[] { new Version(255, 1, 2), "255.1.2" };
             yield return new object[] { new Version(255, 1, 2, 3), "255.1.2.3" };
+            yield return new object[] { new Version(1, 2, 0x1ffff, 4), "1.2" };
         }
 
         [Theory]
@@ -268,7 +292,9 @@ namespace System.Reflection.Tests
 
             string expected = "MyAssemblyName, Version=" + versionString;
             string extended = expected + ", Culture=neutral, PublicKeyToken=null";
-            Assert.True(assemblyName.FullName == expected || assemblyName.FullName == extended);
+
+            Assert.True(assemblyName.FullName == expected || assemblyName.FullName == extended,
+                        $"Expected\n{assemblyName.FullName} == {expected}\nor\n{assemblyName.FullName} == {extended}");
         }
 
         [Fact]
@@ -277,6 +303,177 @@ namespace System.Reflection.Tests
             AssemblyName assemblyName = typeof(AssemblyNameTests).GetTypeInfo().Assembly.GetName();
             assemblyName.Version = new Version(255, 1, 2, 3);
             Assert.Contains("Version=255.1.2.3", assemblyName.FullName);
+        }
+
+        private static readonly string VersionUnspecifiedStr = ushort.MaxValue.ToString(NumberFormatInfo.InvariantInfo);
+
+        private static IEnumerable<object[]> Constructor_String_InvalidVersionTest_MemberData()
+        {
+            // No components
+            yield return new object[] { "" };
+            yield return new object[] { $"{VersionUnspecifiedStr}" };
+            yield return new object[] { $"{VersionUnspecifiedStr}.{VersionUnspecifiedStr}" };
+            yield return new object[] { $"{VersionUnspecifiedStr}.{VersionUnspecifiedStr}.{VersionUnspecifiedStr}" };
+            yield return new object[] { $"{VersionUnspecifiedStr}.{VersionUnspecifiedStr}.{VersionUnspecifiedStr}.{VersionUnspecifiedStr}" };
+
+            // No major version
+            yield return new object[] { $"{VersionUnspecifiedStr}.1" };
+            yield return new object[] { $"{VersionUnspecifiedStr}.1.1" };
+            yield return new object[] { $"{VersionUnspecifiedStr}.1.1.1" };
+
+            // No minor version
+            yield return new object[] { "1" };
+            yield return new object[] { $"1.{VersionUnspecifiedStr}" };
+            yield return new object[] { $"1.{VersionUnspecifiedStr}.1" };
+            yield return new object[] { $"1.{VersionUnspecifiedStr}.1.1" };
+
+            // Too long
+            yield return new object[] { "1.1.1.1." };
+            yield return new object[] { "1.1.1.1.1" };
+
+            // Invalid component
+            foreach (var invalidComponent in new string[] { "", ".", ".1", "-1", "65536", "foo" })
+            {
+                yield return new object[] { "" + invalidComponent };
+                yield return new object[] { "1." + invalidComponent };
+                yield return new object[] { "1.1." + invalidComponent };
+                yield return new object[] { "1.1.1." + invalidComponent };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(Constructor_String_InvalidVersionTest_MemberData))]
+        [SkipOnTargetFramework(
+            TargetFrameworkMonikers.NetFramework,
+            ".NET Core behavior differs from .NET Framework since it does not want to replicate some bugs")]
+        public static void Constructor_String_InvalidVersionTest(string versionStr)
+        {
+            Assert.Throws<FileLoadException>(() => new AssemblyName("a, Version=" + versionStr));
+
+            if (versionStr.Split('.').Length < 2 || // Version(string) should throw when the minor version is not specified
+                (
+                    // The Version class has components of size int32, while AssemblyName(string) only allows uint16 values
+                    versionStr.IndexOf(VersionUnspecifiedStr, StringComparison.Ordinal) == -1 &&
+                    versionStr.IndexOf("65536", StringComparison.Ordinal) == -1
+                ))
+            {
+                Assert.ThrowsAny<Exception>(() => new Version(versionStr));
+            }
+            else
+            {
+                new Version(versionStr);
+            }
+        }
+
+        private static IEnumerable<object[]> Constructor_String_VersionTest_MemberData()
+        {
+            // No build
+            var expectedVersion = new Version(1, 1);
+            yield return new object[] { expectedVersion, "1.1" };
+            yield return new object[] { expectedVersion, $"1.1.{VersionUnspecifiedStr}" };
+            yield return new object[] { expectedVersion, $"1.1.{VersionUnspecifiedStr}.1" };
+
+            // No revision
+            expectedVersion = new Version(1, 1, 1);
+            yield return new object[] { expectedVersion, "1.1.1" };
+            yield return new object[] { expectedVersion, $"1.1.1.{VersionUnspecifiedStr}" };
+
+            // All components
+            yield return new object[] { new Version(1, 1, 1, 1), "1.1.1.1" };
+            // 65535 causes the component to be considered unspecified. That's not very interesting, so using 65534 instead.
+            yield return new object[] { new Version(65534, 65534, 65534, 65534), "65534.65534.65534.65534" };
+        }
+
+        [Theory]
+        [MemberData(nameof(Constructor_String_VersionTest_MemberData))]
+        [SkipOnTargetFramework(
+            TargetFrameworkMonikers.NetFramework,
+            ".NET Core behavior differs from .NET Framework since it does not want to replicate some bugs")]
+        public static void Constructor_String_VersionTest(Version expectedVersion, string versionStr)
+        {
+            Assert.NotNull(expectedVersion);
+
+            Action<AssemblyName> verify =
+                an =>
+                {
+                    if (expectedVersion == null)
+                    {
+                        Assert.Null(an.Version);
+                    }
+                    else
+                    {
+                        Assert.Equal(expectedVersion, an.Version);
+                    }
+                };
+
+            var assemblyNameFromStr = new AssemblyName("a, Version=" + versionStr);
+            verify(assemblyNameFromStr);
+            verify(new AssemblyName(assemblyNameFromStr.FullName));
+
+            var versionFromStr = new Version(versionStr);
+
+            // The Version class has components of size int32, while AssemblyName(string) only allows uint16 values
+            if (versionStr.IndexOf(VersionUnspecifiedStr, StringComparison.Ordinal) == -1)
+            {
+                Assert.Equal(expectedVersion, versionFromStr);
+            }
+
+            assemblyNameFromStr = new AssemblyName("a, Version=" + versionFromStr);
+            verify(assemblyNameFromStr);
+            verify(new AssemblyName(assemblyNameFromStr.FullName));
+
+            assemblyNameFromStr = new AssemblyName() { Name = "a", Version = expectedVersion };
+            verify(assemblyNameFromStr);
+            verify(new AssemblyName(assemblyNameFromStr.FullName));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(
+            TargetFrameworkMonikers.NetFramework,
+            ".NET Core behavior differs from .NET Framework since it does not want to replicate some bugs")]
+        public static void Constructor_String_LoadVersionTest()
+        {
+            string assemblyNamePrefix = "System.Reflection.Tests.Assembly_";
+
+            // Requested version 1.0 does not load 0.0.0.0, but loads 1.2.0.0, 3.0.0.0
+            Assert.Throws<FileLoadException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "0_0_0_0, Version=1.0")));
+            Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_2_0_0, Version=1.0")));
+            Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "3_0_0_0, Version=1.0")));
+
+            // Requested version 1.1 does not load 1.0.0.0, but loads 1.1.2.0, 1.3.0.0
+            Assert.Throws<FileLoadException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_0_0_0, Version=1.1")));
+            Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_2_0, Version=1.1")));
+            Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_3_0_0, Version=1.1")));
+
+            // Requested version 1.1.1 does not load 1.1.0.0, but loads 1.1.1.2, 1.1.3.0
+            Assert.Throws<FileLoadException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_0_0, Version=1.1.1")));
+            Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_1_2, Version=1.1.1")));
+            Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_3_0, Version=1.1.1")));
+
+            // Requested version 1.1.1.1 does not load 1.1.1.0, but loads 1.1.1.3
+            Assert.Throws<FileLoadException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_1_0, Version=1.1.1.1")));
+            Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_1_3, Version=1.1.1.1")));
+
+            Constructor_String_LoadVersionTest_ReferenceVersionAssemblies();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)] // delay type loading so that the test above can run first
+        private static void Constructor_String_LoadVersionTest_ReferenceVersionAssemblies()
+        {
+            // The purpose of this function is only to have a static reference to each of the test assemblies required by
+            // Constructor_String_LoadVersionTest so that the compiler does not optimize away the project references and ILC can
+            // include them in the closure. Otherwise, the test does not work on UapAot.
+            Assert.NotNull(typeof(AssemblyVersion.Program_0_0_0_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_0_0_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_1_0_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_1_1_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_1_1_2));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_1_1_3));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_1_2_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_1_3_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_2_0_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_1_3_0_0));
+            Assert.NotNull(typeof(AssemblyVersion.Program_3_0_0_0));
         }
 
         [Theory]

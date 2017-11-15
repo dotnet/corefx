@@ -22,7 +22,7 @@ namespace Legacy.Support
         private static SerialPortRequirements s_localMachineSerialPortRequirements;
 
         // Set this true to display port info to the console rather than Debug.WriteLine
-        private static bool s_displayPortInfoOnConsole = false;
+        private static bool s_displayPortInfoOnConsole = true;
 
         static TCSupport()
         {
@@ -100,7 +100,7 @@ namespace Legacy.Support
                 portName2 = openablePortNames.FirstOrDefault(name => name != portName1);
             }
 
-            // See Github issue #15961 and #16033 - hardware tests are currently insufficiently stable on master CI
+            // See Github issues #15961, #16033, #20764 - hardware tests are currently insufficiently stable on master CI
             if (loopbackPortName == null && !nullModemPresent)
             {
                 // We don't have any supporting hardware - disable all the tests which would use just an open port
@@ -150,8 +150,9 @@ namespace Legacy.Support
 
                         openablePortNames.Add(portName);
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        PrintInfo("Exception opening port {0}: {1}", portName, e);
                     }
                 }
             }

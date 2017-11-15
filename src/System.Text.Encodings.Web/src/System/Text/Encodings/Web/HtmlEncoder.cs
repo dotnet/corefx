@@ -50,14 +50,14 @@ namespace System.Text.Encodings.Web
         private AllowedCharactersBitmap _allowedCharacters;
         internal static readonly DefaultHtmlEncoder Singleton = new DefaultHtmlEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
 
-        public DefaultHtmlEncoder(TextEncoderSettings filter)
+        public DefaultHtmlEncoder(TextEncoderSettings settings)
         {
-            if (filter == null)
+            if (settings == null)
             {
-                throw new ArgumentNullException(nameof(filter));
+                throw new ArgumentNullException(nameof(settings));
             }
 
-            _allowedCharacters = filter.GetAllowedCharacters();
+            _allowedCharacters = settings.GetAllowedCharacters();
 
             // Forbid codepoints which aren't mapped to characters or which are otherwise always disallowed
             // (includes categories Cc, Cs, Co, Cn, Zs [except U+0020 SPACE], Zl, Zp)
@@ -94,7 +94,7 @@ namespace System.Text.Encodings.Web
 
         public override int MaxOutputCharactersPerInputCharacter
         {
-            get { return 9; } // "&#xFFFFF;" is the longest encoded form
+            get { return 10; } // "&#x10FFFF;" is the longest encoded form
         }
 
         static readonly char[] s_quote = "&quot;".ToCharArray();

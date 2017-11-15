@@ -2,12 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.IO;
 using Legacy.Support;
 using Xunit;
 
 namespace System.IO.PortsTests
 {
-    public class PortsTest
+    public class PortsTest : FileCleanupTestBase
     {
         public static bool HasOneSerialPort => TCSupport.SufficientHardwareRequirements(TCSupport.SerialPortRequirements.OneSerialPort);
 
@@ -27,7 +28,7 @@ namespace System.IO.PortsTests
 
         /// <summary>
         /// Shows that we can inhibit transmission using hardware flow control
-        /// Some kinds of virtual port or RS485 adaptor can't do this
+        /// Some kinds of virtual port or RS485 adapter can't do this
         /// </summary>
         public static bool HasHardwareFlowControl => TCSupport.HardwareWriteBlockingAvailable;
 

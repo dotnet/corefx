@@ -28,19 +28,23 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Net
 {
-    internal class HttpRequestStream : Stream
+    internal partial class HttpRequestStream : Stream
     {
         private byte[] _buffer;
         private int _offset;
         private int _length;
         private long _remainingBody;
-        private bool _disposed;
+        protected bool _closed;
         private Stream _stream;
 
         internal HttpRequestStream(Stream stream, byte[] buffer, int offset, int length)
@@ -57,47 +61,11 @@ namespace System.Net
             _remainingBody = contentlength;
         }
 
-        public override bool CanRead => true;
-
-        public override bool CanSeek => false;
-
-        public override bool CanWrite => false;
-
-        public override long Length
-        {
-            get { throw new NotSupportedException(SR.net_noseek); }
-        }
-
-        public override long Position
-        {
-            get { throw new NotSupportedException(SR.net_noseek); }
-            set { throw new NotSupportedException(SR.net_noseek); }
-        }
-
-        public override void Close() => _disposed = true;
-
-        public override void Flush()
-        {
-        }
-
-
         // Returns 0 if we can keep reading from the base stream,
         // > 0 if we read something from the buffer.
         // -1 if we had a content length set and we finished reading that many bytes.
         private int FillFromBuffer(byte[] buffer, int offset, int count)
         {
-            if (buffer == null)
-                throw new ArgumentNullException(nameof(buffer));
-            if (offset < 0)
-                throw new ArgumentOutOfRangeException(nameof(offset));
-            if (count < 0)
-                throw new ArgumentOutOfRangeException(nameof(count));
-            int len = buffer.Length;
-            if (offset > len)
-                throw new ArgumentException(nameof(offset), SR.offset_out_of_range);
-            if (offset > len - count)
-                throw new ArgumentException(nameof(count), SR.offset_out_of_range);
-
             if (_remainingBody == 0)
                 return -1;
 
@@ -123,13 +91,10 @@ namespace System.Net
             return size;
         }
 
-        public override int Read(byte[] buffer, int offset, int count)
+        protected virtual int ReadCore(byte[] buffer, int offset, int size)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(typeof(HttpRequestStream).ToString());
-
             // Call FillFromBuffer to check for buffer boundaries even when remaining_body is 0
-            int nread = FillFromBuffer(buffer, offset, count);
+            int nread = FillFromBuffer(buffer, offset, size);
             if (nread == -1)
             { // No more bytes available (Content-Length)
                 return 0;
@@ -139,24 +104,45 @@ namespace System.Net
                 return nread;
             }
 
-            nread = _stream.Read(buffer, offset, count);
-            if (nread > 0 && _remainingBody > 0)
+            if (_remainingBody > 0)
+            {
+                size = (int)Math.Min(_remainingBody, (long)size);
+            }
+
+            nread = _stream.Read(buffer, offset, size);
+
+            if (_remainingBody > 0)
+            {
+                if (nread == 0)
+                {
+                    throw new HttpListenerException((int)HttpStatusCode.BadRequest);
+                }
+
+                Debug.Assert(nread <= _remainingBody);
                 _remainingBody -= nread;
+            }
+
             return nread;
         }
 
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback cback, object state)
+        protected virtual IAsyncResult BeginReadCore(byte[] buffer, int offset, int size, AsyncCallback cback, object state)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(typeof(HttpRequestStream).ToString());
+            if (size == 0 || _closed)
+            {
+                HttpStreamAsyncResult ares = new HttpStreamAsyncResult(this);
+                ares._callback = cback;
+                ares._state = state;
+                ares.Complete();
+                return ares;
+            }
 
-            int nread = FillFromBuffer(buffer, offset, count);
+            int nread = FillFromBuffer(buffer, offset, size);
             if (nread > 0 || nread == -1)
             {
-                HttpStreamAsyncResult ares = new HttpStreamAsyncResult();
+                HttpStreamAsyncResult ares = new HttpStreamAsyncResult(this);
                 ares._buffer = buffer;
                 ares._offset = offset;
-                ares._count = count;
+                ares._count = size;
                 ares._callback = cback;
                 ares._state = state;
                 ares._synchRead = Math.Max(0, nread);
@@ -166,63 +152,64 @@ namespace System.Net
 
             // Avoid reading past the end of the request to allow
             // for HTTP pipelining
-            if (_remainingBody >= 0 && count > _remainingBody)
+            if (_remainingBody >= 0 && size > _remainingBody)
             {
-                count = (int)Math.Min(int.MaxValue, _remainingBody);
+                size = (int)Math.Min(_remainingBody, (long)size);
             }
 
-            return _stream.BeginRead(buffer, offset, count, cback, state);
+            return _stream.BeginRead(buffer, offset, size, cback, state);
         }
 
         public override int EndRead(IAsyncResult asyncResult)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(typeof(HttpRequestStream).ToString());
-
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
 
-            if (asyncResult is HttpStreamAsyncResult)
+            if (asyncResult is HttpStreamAsyncResult r)
             {
-                HttpStreamAsyncResult r = (HttpStreamAsyncResult)asyncResult;
+                if (!ReferenceEquals(this, r._parent))
+                {
+                    throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
+                }
+                if (r._endCalled)
+                {
+                    throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, nameof(EndRead)));
+                }
+                r._endCalled = true;
+
                 if (!asyncResult.IsCompleted)
+                {
                     asyncResult.AsyncWaitHandle.WaitOne();
+                }
+
                 return r._synchRead;
             }
 
-            int nread = _stream.EndRead(asyncResult);
-            if (_remainingBody > 0 && nread > 0)
+            if (_closed)
+                return 0;
+
+            int nread = 0;
+            try
             {
+                nread = _stream.EndRead(asyncResult);
+            }
+            catch (IOException e) when (e.InnerException is ArgumentException || e.InnerException is InvalidOperationException)
+            {
+                ExceptionDispatchInfo.Throw(e.InnerException);
+            }
+
+            if (_remainingBody > 0)
+            {
+                if (nread == 0)
+                {
+                    throw new HttpListenerException((int)HttpStatusCode.BadRequest);
+                }
+
+                Debug.Assert(nread <= _remainingBody);
                 _remainingBody -= nread;
             }
 
             return nread;
-        }
-
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException(SR.net_noseek);
-        }
-
-        public override void SetLength(long value)
-        {
-            throw new NotSupportedException(SR.net_noseek);
-        }
-
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            throw new NotSupportedException(SR.net_readonlystream);
-        }
-
-        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count,
-                            AsyncCallback cback, object state)
-        {
-            throw new NotSupportedException(SR.net_readonlystream);
-        }
-
-        public override void EndWrite(IAsyncResult async_result)
-        {
-            throw new NotSupportedException(SR.net_readonlystream);
         }
     }
 }

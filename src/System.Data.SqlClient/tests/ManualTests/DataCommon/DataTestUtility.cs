@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -12,22 +13,22 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     {
         public static readonly string NpConnStr = null;
         public static readonly string TcpConnStr = null;
+        private static readonly Assembly s_systemDotData = typeof(System.Data.SqlClient.SqlConnection).GetTypeInfo().Assembly;
+        private static readonly Type s_tdsParserStateObjectFactory = s_systemDotData?.GetType("System.Data.SqlClient.TdsParserStateObjectFactory");
+        private static readonly PropertyInfo s_useManagedSNI = s_tdsParserStateObjectFactory?.GetProperty("UseManagedSNI", BindingFlags.Static | BindingFlags.Public);
 
         static DataTestUtility()
         {
             NpConnStr = Environment.GetEnvironmentVariable("TEST_NP_CONN_STR");
             TcpConnStr = Environment.GetEnvironmentVariable("TEST_TCP_CONN_STR");
-
-            if (!AreConnStringsSetup())
-            {
-                Console.WriteLine("INFO: Test connection strings not defined! Tests cannot be run. Refer README.md of Manual tests for more information. ");
-            }
         }
 
         public static bool AreConnStringsSetup()
         {
             return !string.IsNullOrEmpty(NpConnStr) && !string.IsNullOrEmpty(TcpConnStr);
         }
+
+        public static bool IsUsingManagedSNI() => (bool)(s_useManagedSNI?.GetValue(null) ?? false);
 
         // the name length will be no more then (16 + prefix.Length + escapeLeft.Length + escapeRight.Length)
         // some providers does not support names (Oracle supports up to 30)
@@ -42,6 +43,37 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return uniqueName;
         }
 
+        // SQL Server supports long names (up to 128 characters), add extra info for troubleshooting
+        public static string GetUniqueNameForSqlServer(string prefix)
+        {
+            string extendedPrefix = string.Format(
+                "{0}_{1}@{2}",
+                prefix,
+                Environment.UserName,
+                Environment.MachineName,
+                DateTime.Now.ToString("yyyy_MM_dd", CultureInfo.InvariantCulture));
+            string name = GetUniqueName(extendedPrefix, "[", "]");
+            if (name.Length > 128)
+            {
+                throw new ArgumentOutOfRangeException("the name is too long - SQL Server names are limited to 128");
+            }
+            return name;
+        }
+
+        public static bool IsLocalDBInstalled()
+        {
+            string localDBInstallationFlag = Environment.GetEnvironmentVariable("TEST_LOCALDB_INSTALLED");
+            if (!string.IsNullOrWhiteSpace(localDBInstallationFlag))
+            {
+                int result;
+                if (int.TryParse(localDBInstallationFlag.Trim(), out result))
+                {
+                    return result == 1;
+                }
+            }
+            return false;
+        }
+
         private static bool CheckException<TException>(Exception ex, string exceptionMessage, bool innerExceptionMustBeNull) where TException : Exception
         {
             return ((ex != null) && (ex is TException) &&
@@ -51,13 +83,14 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         public static void AssertEqualsWithDescription(object expectedValue, object actualValue, string failMessage)
         {
-            var msg = string.Format("{0}\nExpected: {1}\nActual: {2}", failMessage, expectedValue, actualValue);
             if (expectedValue == null || actualValue == null)
             {
+                var msg = string.Format("{0}\nExpected: {1}\nActual: {2}", failMessage, expectedValue, actualValue);
                 Assert.True(expectedValue == actualValue, msg);
             }
             else
             {
+                var msg = string.Format("{0}\nExpected: {1} ({2})\nActual: {3} ({4})", failMessage, expectedValue, expectedValue.GetType(), actualValue, actualValue.GetType());
                 Assert.True(expectedValue.Equals(actualValue), msg);
             }
         }
@@ -189,6 +222,43 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         public static void ExpectAsyncFailure<TException, TInnerException>(Func<Task> actionThatFails, string exceptionMessage = null, string innerExceptionMessage = null, bool innerInnerExceptionMustBeNull = false) where TException : Exception where TInnerException : Exception
         {
             ExpectFailure<AggregateException, TException, TInnerException>(() => actionThatFails().Wait(), null, exceptionMessage, innerExceptionMessage, innerInnerExceptionMustBeNull);
+        }
+
+        public static string GenerateTableName()
+        {
+            return string.Format("TEST_{0}{1}{2}", Environment.GetEnvironmentVariable("ComputerName"), Environment.TickCount, Guid.NewGuid()).Replace('-', '_');
+        }
+
+        public static void RunNonQuery(string connectionString, string sql)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = sql;
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static DataTable RunQuery(string connectionString, string sql)
+        {
+            DataTable result = null;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = sql;
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        result = new DataTable();
+                        result.Load(reader);
+                    }
+                }
+            }
+            return result;
         }
     }
 }
