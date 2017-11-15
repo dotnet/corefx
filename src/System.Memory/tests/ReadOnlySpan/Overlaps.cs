@@ -41,22 +41,31 @@ namespace System.SpanTests
         [Fact]
         public static void TestUnalignedForwards()
         {
-            for (int i = 0; i < 14; i++)
+            Assert.Throws<ArgumentException>(() =>
             {
-                int[] a = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+                int[] a = new int[] { 1, 2, 3, 4, 5, 6 };
 
                 ReadOnlySpan<int> source = a.AsReadOnlySpan().AsBytes()
-                    .Slice(7 * sizeof(int) + 2, 5 * sizeof(int))
+                    .Slice(2, 5 * sizeof(int))
                     .NonPortableCast<byte, int>();
 
-                Span<int> expected = new int[a.Length].AsSpan().Slice(i, 5);
-                Span<int> actual = a.AsSpan().Slice(i, 5);
+                Span<int> actual = a.AsSpan().Slice(0, 5);
 
-                DoubleEachElementForwards(source, expected);
                 DoubleEachElementForwards(source, actual);
+            });
 
-                Assert.Equal(expected.ToArray(), actual.ToArray());
-            }
+            Assert.Throws<ArgumentException>(() =>
+            {
+                int[] a = new int[] { 1, 2, 3, 4, 5, 6 };
+
+                ReadOnlySpan<int> source = a.AsReadOnlySpan().AsBytes()
+                    .Slice(2, 5 * sizeof(int))
+                    .NonPortableCast<byte, int>();
+
+                Span<int> actual = a.AsSpan().Slice(1, 5);
+
+                DoubleEachElementForwards(source, actual);
+            });
         }
 
         private static void DoubleEachElementBackwards(ReadOnlySpan<int> source, Span<int> destination)
@@ -96,22 +105,31 @@ namespace System.SpanTests
         [Fact]
         public static void TestUnalignedBackwards()
         {
-            for (int i = 0; i < 14; i++)
+            Assert.Throws<ArgumentException>(() =>
             {
-                int[] a = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+                int[] a = new int[] { 1, 2, 3, 4, 5, 6 };
 
                 ReadOnlySpan<int> source = a.AsReadOnlySpan().AsBytes()
-                    .Slice(7 * sizeof(int) + 2, 5 * sizeof(int))
+                    .Slice(2, 5 * sizeof(int))
                     .NonPortableCast<byte, int>();
 
-                Span<int> expected = new int[a.Length].AsSpan().Slice(i, 5);
-                Span<int> actual = a.AsSpan().Slice(i, 5);
+                Span<int> actual = a.AsSpan().Slice(0, 5);
 
-                DoubleEachElementBackwards(source, expected);
                 DoubleEachElementBackwards(source, actual);
+            });
 
-                Assert.Equal(expected.ToArray(), actual.ToArray());
-            }
+            Assert.Throws<ArgumentException>(() =>
+            {
+                int[] a = new int[] { 1, 2, 3, 4, 5, 6 };
+
+                ReadOnlySpan<int> source = a.AsReadOnlySpan().AsBytes()
+                    .Slice(2, 5 * sizeof(int))
+                    .NonPortableCast<byte, int>();
+
+                Span<int> actual = a.AsSpan().Slice(1, 5);
+
+                DoubleEachElementBackwards(source, actual);
+            });
         }
 
         [Fact]

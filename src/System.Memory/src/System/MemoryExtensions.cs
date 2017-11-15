@@ -481,14 +481,13 @@ namespace System
 
             if (Unsafe.SizeOf<IntPtr>() == sizeof(int))
             {
-                if ((uint)byteOffset < (uint)(first.Length * Unsafe.SizeOf<T>()))
+                if ((uint)byteOffset < (uint)(first.Length * Unsafe.SizeOf<T>()) ||
+                    (uint)byteOffset > (uint)-(second.Length * Unsafe.SizeOf<T>()))
                 {
-                    elementOffset = ((int)byteOffset + (Unsafe.SizeOf<T>() - 1)) / Unsafe.SizeOf<T>();
-                    return true;
-                }
-                else if ((uint)byteOffset > (uint)-(second.Length * Unsafe.SizeOf<T>()))
-                {
-                    elementOffset = ((int)byteOffset - (Unsafe.SizeOf<T>() - 1)) / Unsafe.SizeOf<T>();
+                    if ((int)byteOffset % Unsafe.SizeOf<T>() != 0)
+                        ThrowHelper.ThrowArgumentException_OverlapAlignmentMismatch();
+
+                    elementOffset = (int)byteOffset / Unsafe.SizeOf<T>();
                     return true;
                 }
                 else
@@ -499,14 +498,13 @@ namespace System
             }
             else
             {
-                if ((ulong)byteOffset < (ulong)((long)first.Length * Unsafe.SizeOf<T>()))
+                if ((ulong)byteOffset < (ulong)((long)first.Length * Unsafe.SizeOf<T>()) ||
+                    (ulong)byteOffset > (ulong)-((long)second.Length * Unsafe.SizeOf<T>()))
                 {
-                    elementOffset = (int)(((long)byteOffset + (Unsafe.SizeOf<T>() - 1)) / Unsafe.SizeOf<T>());
-                    return true;
-                }
-                else if ((ulong)byteOffset > (ulong)-((long)second.Length * Unsafe.SizeOf<T>()))
-                {
-                    elementOffset = (int)(((long)byteOffset - (Unsafe.SizeOf<T>() - 1)) / Unsafe.SizeOf<T>());
+                    if ((long)byteOffset % Unsafe.SizeOf<T>() != 0)
+                        ThrowHelper.ThrowArgumentException_OverlapAlignmentMismatch();
+
+                    elementOffset = (int)((long)byteOffset / Unsafe.SizeOf<T>());
                     return true;
                 }
                 else
