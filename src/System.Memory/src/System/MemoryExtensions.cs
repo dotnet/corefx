@@ -275,6 +275,23 @@ namespace System
             new ReadOnlySpan<T>(array).CopyTo(destination);
         }
 
+        /// <summary>
+        /// Copies the contents of the array into the memory. If the source
+        /// and destinations overlap, this method behaves as if the original values are in
+        /// a temporary location before the destination is overwritten.
+        /// 
+        ///<param name="array">The array to copy items from.</param>
+        /// <param name="destination">The memory to copy items into.</param>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when the destination is shorter than the source array.
+        /// </exception>
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void CopyTo<T>(this T[] array, Memory<T> destination)
+        {
+            array.CopyTo(destination.Span);
+        }
+
         //
         //  Overlaps
         //  ========
@@ -402,23 +419,6 @@ namespace System
         //  yLength is zero, since 2³² - 0 is 0 and not 2³². So the case
         //  y.IsEmpty must be handled separately first.
         //  
-
-        /// <summary>
-        /// Copies the contents of the array into the memory. If the source
-        /// and destinations overlap, this method behaves as if the original values are in
-        /// a temporary location before the destination is overwritten.
-        /// 
-        ///<param name="array">The array to copy items from.</param>
-        /// <param name="destination">The memory to copy items into.</param>
-        /// <exception cref="System.ArgumentException">
-        /// Thrown when the destination is shorter than the source array.
-        /// </exception>
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this T[] array, Memory<T> destination)
-        {
-            array.CopyTo(destination.Span);
-        }
 
         /// <summary>
         /// Determines whether two sequences overlap in memory.

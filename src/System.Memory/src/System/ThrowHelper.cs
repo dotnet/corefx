@@ -88,10 +88,6 @@ namespace System
             ThrowHelper.ThrowFormatException_BadFormatSpecifier();
             return false;
         }
-
-        internal static void ThrowArgumentException_OverlapAlignmentMismatch() { throw CreateArgumentException_OverlapAlignmentMismatch(); }
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static Exception CreateArgumentException_OverlapAlignmentMismatch() { return new ArgumentException(SR.Argument_OverlapAlignmentMismatch); }
     }
 
     internal enum ExceptionArgument
