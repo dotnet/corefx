@@ -36,12 +36,9 @@
     <Project Include="System.Security.Cryptography.OpenSsl\pkg\System.Security.Cryptography.OpenSsl.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-<<<<<<< HEAD
-=======
     <Project Include="System.Security.Cryptography.X509Certificates\pkg\System.Security.Cryptography.X509Certificates.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
->>>>>>> msrc/release/1.0.0-MSRC
   </ItemGroup>
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipNativePackageBuild)' != 'true'" >
