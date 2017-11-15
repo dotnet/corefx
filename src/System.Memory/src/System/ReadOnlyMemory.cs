@@ -163,7 +163,7 @@ namespace System
                 }
                 else if (typeof(T) == typeof(char) && _object is string s)
                 {
-                    return new ReadOnlySpan<T>(Unsafe.As<Pinnable<T>>(s), SpanExtensions.StringAdjustment, s.Length).Slice(_index, _length);
+                    return new ReadOnlySpan<T>(Unsafe.As<Pinnable<T>>(s), MemoryExtensions.StringAdjustment, s.Length).Slice(_index, _length);
                 }
                 else
                 {
