@@ -2922,4 +2922,24 @@ public static partial class XmlSerializerTests
 
         Assert.StrictEqual(value, actual);
     }
+
+    [Fact]
+    public static void TimeSpanXmlQualifiedNameTest()
+    {
+        string baseline = "<?xml version=\"1.0\"?>\r\n<xs:schema xmlns:tns=\"http://microsoft.com/wsdl/types/\" elementFormDefault=\"qualified\" targetNamespace=\"http://microsoft.com/wsdl/types/\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\r\n  <xs:simpleType name=\"TimeSpan\">\r\n    <xs:restriction base=\"xs:duration\" />\r\n  </xs:simpleType>\r\n</xs:schema>";
+        var schemas = new XmlSchemas();
+        var exporter = new XmlSchemaExporter(schemas);
+        XmlTypeMapping mapping = new XmlReflectionImporter().ImportTypeMapping(typeof(TimeSpan));
+        exporter.ExportTypeMapping(mapping);
+        var schemaEnumerator = new XmlSchemaEnumerator(schemas);
+        var ms = new MemoryStream();
+        schemaEnumerator.MoveNext();
+        schemaEnumerator.MoveNext();
+        schemaEnumerator.Current.Write(ms);
+        ms.Position = 0;
+        string actualOutput = new StreamReader(ms).ReadToEnd();
+        Utils.CompareResult result = Utils.Compare(baseline, actualOutput);
+        Assert.True(result.Equal, string.Format("{1}{0}Test failed for wrong output from schema: {0}Expected: {2}{0}Actual: {3}",
+                Environment.NewLine, result.ErrorMessage, baseline, actualOutput));
+    }
 }
