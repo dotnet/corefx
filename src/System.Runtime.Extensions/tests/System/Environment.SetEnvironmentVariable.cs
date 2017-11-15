@@ -72,8 +72,9 @@ namespace System.Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void EnvironmentVariableTooLarge_Throws()
         {
-            // string slightly less than 2 GiB so the constructor doesn't fail
-            string longVar = new string('c', 1024 * 1024 * 1024 - 64);
+            // string slightly less than 2 GiB (1 GiB for x86) so the constructor doesn't fail
+            var count = Environment.Is64BitProcess ? 1024 * 1024 * 1024 - 64 : 512 * 1024 * 1024;
+            string longVar = new string('c', count);
             string val = "Test_SetEnvironmentVariable_EnvironmentVariableTooLarge_Throws";
 
             Assert.ThrowsAny<OutOfMemoryException>(() => Environment.SetEnvironmentVariable(longVar, val));
@@ -85,8 +86,10 @@ namespace System.Tests
         {
             string var = "Test_SetEnvironmentVariable_EnvironmentVariableValueTooLarge_Throws";
 
-            // string slightly less than 2 GiB so the constructor doesn't fail
-            string longVal = new string('c', 1024 * 1024 * 1024 - 64);
+            // string slightly less than 2 GiB (1 GiB for x86) so the constructor doesn't fail
+            var count = Environment.Is64BitProcess ? 1024 * 1024 * 1024 - 64 : 512 * 1024 * 1024;
+
+            string longVal = new string('c', count);
 
             Assert.ThrowsAny<OutOfMemoryException>(() => Environment.SetEnvironmentVariable(var, longVal));
         }
