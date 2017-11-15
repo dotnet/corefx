@@ -37,7 +37,6 @@ fi
 
 echo "Running: $__scriptpath/init-tools.sh" > $__init_tools_log
 
-
 display_error_message() {
     echo "Please check the detailed log that follows." 1>&2
     cat "$__init_tools_log" 1>&2
