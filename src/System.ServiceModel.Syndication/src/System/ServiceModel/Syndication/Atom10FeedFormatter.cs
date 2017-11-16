@@ -829,7 +829,7 @@ namespace System.ServiceModel.Syndication
                 XmlBuffer buffer = null;
                 XmlDictionaryWriter extWriter = null;
                 bool areAllItemsRead = true;
-                var feedItems = new NullNotAllowedCollection<SyndicationItem>();
+                NullNotAllowedCollection<SyndicationItem> feedItems = null;
 
                 if (!elementIsEmpty)
                 {
@@ -843,6 +843,7 @@ namespace System.ServiceModel.Syndication
                             }
                             else if (reader.IsStartElement(Atom10Constants.EntryTag, Atom10Constants.Atom10Namespace) && !isSourceFeed)
                             {
+                                feedItems = feedItems ?? new NullNotAllowedCollection<SyndicationItem>();
                                 IEnumerable<SyndicationItem> items = ReadItems(reader, result, out areAllItemsRead);
                                 foreach(SyndicationItem item in items)
                                 {
@@ -872,11 +873,7 @@ namespace System.ServiceModel.Syndication
                             }
                         }
 
-                        if (feedItems.Count != 0)
-                        {
-                            result.Items = feedItems;
-                        }
-
+                        result.Items = feedItems;
                         LoadElementExtensions(buffer, extWriter, result);
                     }
                     finally
