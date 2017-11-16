@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
@@ -16,6 +17,7 @@ namespace System.Data.Common
         private TestProviderFactory() { }
     }
 
+    [Trait("Tests", "DbProviderFactories")]
     public class DbProviderFactoriesTests
     {
         [Fact]
@@ -102,6 +104,29 @@ namespace System.Data.Common
             Assert.Throws<ArgumentException>(() => DbProviderFactories.GetFactory("System.Data.SqlClient"));
             Assert.Throws<ArgumentException>(() => DbProviderFactories.RegisterFactory(string.Empty, typeof(System.Data.SqlClient.SqlClientFactory)));
         }
+        
+        [Fact]
+        public void RegisterFactoryWithAssemblyQualifiedNameTest()
+        {
+            ClearRegisteredFactories();
+            RegisterSqlClientAndTestRegistration(()=>DbProviderFactories.RegisterFactory("System.Data.SqlClient", typeof(System.Data.SqlClient.SqlClientFactory).AssemblyQualifiedName));
+        }
+
+        [Fact]
+        public void RegisterFactoryWithWrongAssemblyQualifiedNameTest()
+        {
+            ClearRegisteredFactories();
+            Assert.Throws<ArgumentException>(() => DbProviderFactories.GetFactory("System.Data.SqlClient"));
+            DataTable providerTable = DbProviderFactories.GetFactoryClasses();
+            Assert.Equal(0, providerTable.Rows.Count);
+            // register the connection type which is the wrong type. Registraton should succeed, as type registration/checking is deferred.
+            DbProviderFactories.RegisterFactory("System.Data.SqlClient", typeof(System.Data.SqlClient.SqlConnection).AssemblyQualifiedName);
+            providerTable = DbProviderFactories.GetFactoryClasses();
+            Assert.Equal(1, providerTable.Rows.Count);
+            // obtaining the factory will kick in the checks of the registered type name, which will cause exceptions. The checks were deferred till the GetFactory() call.
+            Assert.Throws<ArgumentException>(() => DbProviderFactories.GetFactory(providerTable.Rows[0]));
+            Assert.Throws<ArgumentException>(() => DbProviderFactories.GetFactory("System.Data.SqlClient"));
+        }
 
         [Fact]
         public void UnregisterFactoryTest()
@@ -158,7 +183,7 @@ namespace System.Data.Common
             // as the DbProviderFactories table is shared, for tests we need a clean one before a test starts to make sure the tests always succeed. 
             Type type = typeof(DbProviderFactories);
             FieldInfo info = type.GetField("_registeredFactories", BindingFlags.NonPublic | BindingFlags.Static);
-            ConcurrentDictionary<string, DbProviderFactory> providerStorage = info.GetValue(null) as ConcurrentDictionary<string, DbProviderFactory>;
+            IDictionary providerStorage = info.GetValue(null) as IDictionary;
             Assert.NotNull(providerStorage);
             providerStorage.Clear();
             Assert.Equal(0, providerStorage.Count);
