@@ -92,12 +92,54 @@ static int Dup2WithInterruptedRetry(int oldfd, int newfd)
     return result;
 }
 
+static ssize_t WriteSize(int fd, const void* buffer, size_t count)
+{
+    ssize_t rv = 0;
+    while (count > 0)
+    {
+        ssize_t result = 0;
+        while (CheckInterrupted(result = write(fd, buffer, count)));
+        if (result > 0)
+        {
+            rv += result;
+            buffer = reinterpret_cast<const uint8_t*>(buffer) + result;
+            count -= static_cast<size_t>(result);
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    return rv;
+}
+
+static ssize_t ReadSize(int fd, void* buffer, size_t count)
+{
+    ssize_t rv = 0;
+    while (count > 0)
+    {
+        ssize_t result = 0;
+        while (CheckInterrupted(result = read(fd, buffer, count)));
+        if (result > 0)
+        {
+            rv += result;
+            buffer = reinterpret_cast<uint8_t*>(buffer) + result;
+            count -= static_cast<size_t>(result);
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    return rv;
+}
+
 __attribute__((noreturn))
 static void ExitChild(int pipeToParent, int error)
 {
     if (pipeToParent != -1)
     {
-        while (CheckInterrupted(write(pipeToParent, &error, sizeof(error))));
+        WriteSize(pipeToParent, &error, sizeof(error));
     }
     _exit(error != 0 ? error : EXIT_FAILURE);
 }
@@ -226,8 +268,7 @@ done:
         int childError;
         if (success)
         {
-            ssize_t result;
-            while (CheckInterrupted(result = read(waitForChildToExecPipe[READ_END_OF_PIPE], &childError, sizeof(childError))));
+            ssize_t result = ReadSize(waitForChildToExecPipe[READ_END_OF_PIPE], &childError, sizeof(childError));
             if (result == sizeof(childError))
             {
                 success = false;
