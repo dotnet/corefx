@@ -144,7 +144,7 @@ namespace System.Diagnostics.Tests
             string workingDirectory;
             if (PlatformDetection.IsWindows)
             {
-                program = "type";
+                program = "powershell.exe";
                 workingDirectory = @"C:\does-not-exist";
             }
             else
