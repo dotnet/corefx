@@ -873,7 +873,11 @@ namespace System.ServiceModel.Syndication
                             }
                         }
 
-                        result.Items = feedItems;
+                        if (feedItems != null)
+                        {
+                            result.Items = feedItems;
+                        }
+
                         LoadElementExtensions(buffer, extWriter, result);
                     }
                     finally

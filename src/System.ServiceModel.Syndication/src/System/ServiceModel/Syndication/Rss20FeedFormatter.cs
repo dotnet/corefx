@@ -1022,8 +1022,11 @@ namespace System.ServiceModel.Syndication
                         }
                     }
 
+                    if (feedItems != null)
+                    {
+                        result.Items = feedItems;
+                    }
 
-                    result.Items = feedItems;
                     LoadElementExtensions(buffer, extWriter, result);
                 }
                 finally
