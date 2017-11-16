@@ -54,7 +54,8 @@ namespace System.Linq.Expressions.Compiler
                     }
                     else
                     {
-                        il.Emit(OpCodes.Ldarg, index);
+                        // cast to short, result is correct ushort.
+                        il.Emit(OpCodes.Ldarg, (short)index);
                     }
                     break;
             }
@@ -70,7 +71,8 @@ namespace System.Linq.Expressions.Compiler
             }
             else
             {
-                il.Emit(OpCodes.Ldarga, index);
+                // cast to short, result is correct ushort.
+                il.Emit(OpCodes.Ldarga, (short)index);
             }
         }
 
@@ -84,7 +86,8 @@ namespace System.Linq.Expressions.Compiler
             }
             else
             {
-                il.Emit(OpCodes.Starg, index);
+                // cast to short, result is correct ushort.
+                il.Emit(OpCodes.Starg, (short)index);
             }
         }
 
