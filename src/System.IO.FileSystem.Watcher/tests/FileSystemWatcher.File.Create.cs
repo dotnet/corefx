@@ -9,7 +9,7 @@ using Xunit;
 namespace System.IO.Tests
 {
     public class File_Create_Tests : FileSystemWatcherTest
-    {       
+    {
         [Fact]
         public void FileSystemWatcher_File_Create()
         {
