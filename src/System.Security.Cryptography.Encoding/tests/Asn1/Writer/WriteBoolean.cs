@@ -62,17 +62,20 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.CER, true)]
         [InlineData(PublicEncodingRules.DER, false)]
         [InlineData(PublicEncodingRules.DER, true)]
-        public void VerifyWriteBoolean_Constructed(PublicEncodingRules ruleSet, bool value)
+        public void VerifyWriteBoolean_ConstructedIgnored(PublicEncodingRules ruleSet, bool value)
         {
             AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
+            writer.WriteBoolean(new Asn1Tag(TagClass.ContextSpecific, 7, true), value);
+            writer.WriteBoolean(new Asn1Tag(UniversalTagNumber.Boolean, true), value);
 
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteBoolean(new Asn1Tag(TagClass.ContextSpecific, 7, true), value));
-
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteBoolean(new Asn1Tag(UniversalTagNumber.Boolean, true), value));
+            if (value)
+            {
+                Verify(writer, "8701FF0101FF");
+            }
+            else
+            {
+                Verify(writer, "870100010100");
+            }
         }
     }
 }

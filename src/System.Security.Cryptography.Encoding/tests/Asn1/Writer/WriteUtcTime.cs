@@ -104,5 +104,19 @@ namespace System.Security.Cryptography.Tests.Asn1
                 "tag",
                 () => writer.WriteUtcTime(Asn1Tag.EndOfContents, DateTimeOffset.Now));
         }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public void VerifyWriteUtcTime_IgnoresConstructed(PublicEncodingRules ruleSet)
+        {
+            AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
+            DateTimeOffset value = new DateTimeOffset(2017, 11, 16, 17, 35, 1, TimeSpan.Zero);
+
+            writer.WriteUtcTime(new Asn1Tag(UniversalTagNumber.UtcTime, true), value);
+            writer.WriteUtcTime(new Asn1Tag(TagClass.ContextSpecific, 3, true), value);
+            Verify(writer, "170D3137313131363137333530315A" + "830D3137313131363137333530315A");
+        }
     }
 }

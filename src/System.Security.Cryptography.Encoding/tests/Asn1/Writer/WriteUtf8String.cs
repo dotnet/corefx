@@ -174,13 +174,29 @@ namespace System.Security.Cryptography.Tests.Asn1
         public new void VerifyWrite_CER_Span_CustomTag_ClearsConstructed(string input, string expectedPayloadHex) =>
             base.VerifyWrite_CER_Span_CustomTag_ClearsConstructed(input, expectedPayloadHex);
 
-        [Fact]
-        public new void VerifyWrite_DER_Prohibits_Constructed() =>
-            base.VerifyWrite_DER_Prohibits_Constructed();
+        [Theory]
+        [MemberData(nameof(ShortValidCases))]
+        [MemberData(nameof(LongValidCases))]
+        public new void VerifyWrite_DER_String_ClearsConstructed(string input, string expectedPayloadHex) =>
+            base.VerifyWrite_DER_String_ClearsConstructed(input, expectedPayloadHex);
 
-        [Fact]
-        public new void VerifyWrite_DER_Prohibits_Constructed_CustomTag() =>
-            base.VerifyWrite_DER_Prohibits_Constructed_CustomTag();
+        [Theory]
+        [MemberData(nameof(ShortValidCases))]
+        [MemberData(nameof(LongValidCases))]
+        public new void VerifyWrite_DER_String_CustomTag_ClearsConstructed(string input, string expectedPayloadHex) =>
+            base.VerifyWrite_DER_String_CustomTag_ClearsConstructed(input, expectedPayloadHex);
+
+        [Theory]
+        [MemberData(nameof(ShortValidCases))]
+        [MemberData(nameof(LongValidCases))]
+        public new void VerifyWrite_DER_Span_ClearsConstructed(string input, string expectedPayloadHex) =>
+            base.VerifyWrite_DER_Span_ClearsConstructed(input, expectedPayloadHex);
+
+        [Theory]
+        [MemberData(nameof(ShortValidCases))]
+        [MemberData(nameof(LongValidCases))]
+        public new void VerifyWrite_DER_Span_CustomTag_ClearsConstructed(string input, string expectedPayloadHex) =>
+            base.VerifyWrite_DER_Span_CustomTag_ClearsConstructed(input, expectedPayloadHex);
 
         [Theory]
         [InlineData(PublicEncodingRules.BER)]

@@ -196,34 +196,21 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER)]
         [InlineData(PublicEncodingRules.CER)]
         [InlineData(PublicEncodingRules.DER)]
-        public void VerifyWriteObjectIdentifier_Constructed(PublicEncodingRules ruleSet)
+        public void VerifyWriteObjectIdentifier_ConstructedIgnored(PublicEncodingRules ruleSet)
         {
             AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
             const string OidValue = "1.1";
+            Asn1Tag constructedOid = new Asn1Tag(UniversalTagNumber.ObjectIdentifier, isConstructed: true);
+            Asn1Tag constructedContext0 = new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true);
 
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteObjectIdentifier(new Asn1Tag(UniversalTagNumber.Integer, isConstructed: true), OidValue));
+            writer.WriteObjectIdentifier(constructedOid, OidValue);
+            writer.WriteObjectIdentifier(constructedContext0, OidValue);
+            writer.WriteObjectIdentifier(constructedOid, OidValue.AsReadOnlySpan());
+            writer.WriteObjectIdentifier(constructedContext0, OidValue.AsReadOnlySpan());
+            writer.WriteObjectIdentifier(constructedOid, new Oid(OidValue, OidValue));
+            writer.WriteObjectIdentifier(constructedContext0, new Oid(OidValue, OidValue));
 
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteObjectIdentifier(new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true), OidValue));
-
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteObjectIdentifier(new Asn1Tag(UniversalTagNumber.Integer, isConstructed: true), OidValue.AsReadOnlySpan()));
-
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteObjectIdentifier(new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true), OidValue.AsReadOnlySpan()));
-
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteObjectIdentifier(new Asn1Tag(UniversalTagNumber.Integer, isConstructed: true), new Oid(OidValue, OidValue)));
-
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteObjectIdentifier(new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true), new Oid(OidValue, OidValue)));
+            Verify(writer, "060129800129060129800129060129800129");
         }
 
         public static IEnumerable<object[]> ValidOidData { get; } =

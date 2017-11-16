@@ -222,21 +222,44 @@ namespace System.Security.Cryptography.Tests.Asn1
             Verify(writer, Stringify(expected) + expectedPayloadHex);
         }
 
-        protected void VerifyWrite_DER_Prohibits_Constructed()
+        protected void VerifyWrite_DER_String_ClearsConstructed(string input, string expectedPayloadHex)
         {
             AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
-
             Asn1Tag standard = StandardTag;
-            Assert.Throws<CryptographicException>(
-                () => WriteString(writer, new Asn1Tag(standard.TagClass, standard.TagValue, true), "hello"));
+            Asn1Tag tag = new Asn1Tag(standard.TagClass, standard.TagValue, isConstructed: true);
+            WriteString(writer, tag, input);
+
+            Verify(writer, Stringify(standard) + expectedPayloadHex);
         }
 
-        protected void VerifyWrite_DER_Prohibits_Constructed_CustomTag()
+        protected void VerifyWrite_DER_String_CustomTag_ClearsConstructed(string input, string expectedPayloadHex)
         {
             AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
+            Asn1Tag tag = new Asn1Tag(TagClass.Application, 19, isConstructed: true);
+            Asn1Tag expected = new Asn1Tag(tag.TagClass, tag.TagValue);
+            WriteString(writer, tag, input);
 
-            Assert.Throws<CryptographicException>(
-                () => WriteString(writer, new Asn1Tag(TagClass.ContextSpecific, 5, true), "hello"));
+            Verify(writer, Stringify(expected) + expectedPayloadHex);
+        }
+
+        protected void VerifyWrite_DER_Span_ClearsConstructed(string input, string expectedPayloadHex)
+        {
+            AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
+            Asn1Tag standard = StandardTag;
+            Asn1Tag tag = new Asn1Tag(standard.TagClass, standard.TagValue, isConstructed: true);
+            WriteSpan(writer, tag, input.AsReadOnlySpan());
+
+            Verify(writer, Stringify(standard) + expectedPayloadHex);
+        }
+
+        protected void VerifyWrite_DER_Span_CustomTag_ClearsConstructed(string input, string expectedPayloadHex)
+        {
+            AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
+            Asn1Tag tag = new Asn1Tag(TagClass.Private, 24601, isConstructed: true);
+            Asn1Tag expected = new Asn1Tag(tag.TagClass, tag.TagValue);
+            WriteSpan(writer, tag, input.AsReadOnlySpan());
+
+            Verify(writer, Stringify(expected) + expectedPayloadHex);
         }
 
         protected void VerifyWrite_String_Null(PublicEncodingRules ruleSet)

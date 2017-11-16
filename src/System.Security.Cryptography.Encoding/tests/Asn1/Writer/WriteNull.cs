@@ -38,17 +38,13 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER)]
         [InlineData(PublicEncodingRules.DER)]
         [InlineData(PublicEncodingRules.CER)]
-        public void VerifyWriteNull_Constructed(PublicEncodingRules ruleSet)
+        public void VerifyWriteNull_ConstructedIgnored(PublicEncodingRules ruleSet)
         {
             AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
+            writer.WriteNull(new Asn1Tag(TagClass.ContextSpecific, 7, true));
+            writer.WriteNull(new Asn1Tag(UniversalTagNumber.Null, true));
 
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteNull(new Asn1Tag(TagClass.ContextSpecific, 7, true)));
-
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteNull(new Asn1Tag(UniversalTagNumber.Null, true)));
+            Verify(writer, "87000500");
         }
     }
 }

@@ -3774,11 +3774,8 @@ namespace System.Security.Cryptography.Asn1
         {
             CheckUniversalTag(tag, UniversalTagNumber.Boolean);
             
-            // T-REC-X.690-201508 sec 8.2.1
-            if (tag.IsConstructed)
-                throw new ArgumentException($"Constructed Boolean values are not supported", nameof(tag));
-
-            WriteTag(tag);
+            // Clear the constructed bit, if it was set.
+            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
             WriteLength(1);
             // Ensured by WriteLength
             Debug.Assert(_offset < _buffer.Length);
@@ -3804,10 +3801,6 @@ namespace System.Security.Cryptography.Asn1
         public void WriteInteger(Asn1Tag tag, long value)
         {
             CheckUniversalTag(tag, UniversalTagNumber.Integer);
-
-            // T-REC-X.690-201508 sec 8.3.1
-            if (tag.IsConstructed)
-                throw new ArgumentException($"Constructed Integer values are not supported", nameof(tag));
 
             WriteIntegerAnyTag(tag, value);
         }
@@ -3838,8 +3831,9 @@ namespace System.Security.Cryptography.Asn1
                 valueLength = 7;
             else
                 valueLength = 8;
-           
-            WriteTag(tag);
+
+            // Clear the constructed bit, if it was set.
+            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
             WriteLength(valueLength);
 
             long remaining = value;
@@ -3868,10 +3862,6 @@ namespace System.Security.Cryptography.Asn1
         {
             CheckUniversalTag(tag, UniversalTagNumber.Integer);
 
-            // T-REC-X.690-201508 sec 8.3.1
-            if (tag.IsConstructed)
-                throw new ArgumentException($"Constructed Integer values are not supported", nameof(tag));
-
             WriteIntegerAnyTag(tag, value);
         }
 
@@ -3899,7 +3889,8 @@ namespace System.Security.Cryptography.Asn1
             else
                 valueLength = 9;
 
-            WriteTag(tag);
+            // Clear the constructed bit, if it was set.
+            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
             WriteLength(valueLength);
 
             ulong remaining = value;
@@ -3928,15 +3919,12 @@ namespace System.Security.Cryptography.Asn1
         {
             CheckUniversalTag(tag, UniversalTagNumber.Integer);
 
-            // T-REC-X.690-201508 sec 8.3.1
-            if (tag.IsConstructed)
-                throw new ArgumentException($"Constructed Integer values are not supported", nameof(tag));
-
-            // TODO: Rewrite with Span operations after moving branch forward.
+            // TODO: Split this for netstandard vs netcoreapp for span-perf?.
             byte[] encoded = value.ToByteArray();
             Array.Reverse(encoded);
 
-            WriteTag(tag);
+            // Clear the constructed bit, if it was set.
+            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
             WriteLength(encoded.Length);
             Buffer.BlockCopy(encoded, 0, _buffer, _offset, encoded.Length);
             _offset += encoded.Length;
@@ -3985,33 +3973,19 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            if (RuleSet == AsnEncodingRules.BER)
+            if (RuleSet == AsnEncodingRules.CER)
             {
-                // Clear the constructed flag, if present.
-                tag = new Asn1Tag(tag.TagClass, tag.TagValue);
-            }
-            else if (RuleSet == AsnEncodingRules.DER && tag.IsConstructed)
-            {
-                // T-REC-X.690-201508 sec 10.2
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-            else if (RuleSet == AsnEncodingRules.CER)
-            {
-                // If it's within a primitive segment, just clear the constructed flag
-                // (if present) and continue.
-                // (strict less than because of the unused bit count byte)
-                if (bitString.Length < AsnReader.MaxCERSegmentSize)
-                {
-                    tag = new Asn1Tag(tag.TagClass, tag.TagValue);
-                }
-                else
+                // If it's not within a primitive segment, use the constructed encoding.
+                // (>= instead of > because of the unused bit count byte)
+                if (bitString.Length >= AsnReader.MaxCERSegmentSize)
                 {
                     WriteCERBitString(tag, bitString, unusedBitCount);
                     return;
                 }
             }
 
-            WriteTag(tag);
+            // Clear the constructed flag, if present.
+            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
             // The unused bits byte requires +1.
             WriteLength(bitString.Length + 1);
             _buffer[_offset] = (byte)unusedBitCount;
@@ -4224,32 +4198,18 @@ namespace System.Security.Cryptography.Asn1
         {
             CheckUniversalTag(tag, UniversalTagNumber.OctetString);
 
-            if (RuleSet == AsnEncodingRules.BER)
+            if (RuleSet == AsnEncodingRules.CER)
             {
-                // Clear the constructed flag, if present.
-                tag = new Asn1Tag(tag.TagClass, tag.TagValue);
-            }
-            else if (RuleSet == AsnEncodingRules.DER && tag.IsConstructed)
-            {
-                // T-REC-X.690-201508 sec 10.2
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-            else if (RuleSet == AsnEncodingRules.CER)
-            {
-                // If it's within a primitive segment, just clear the constructed flag
-                // (if present) and continue.
-                if (octetString.Length <= AsnReader.MaxCERSegmentSize)
-                {
-                    tag = new Asn1Tag(tag.TagClass, tag.TagValue);
-                }
-                else
+                // If it's bigger than a primitive segment, use the constructed encoding
+                if (octetString.Length > AsnReader.MaxCERSegmentSize)
                 {
                     WriteCEROctetString(tag, octetString);
                     return;
                 }
             }
 
-            WriteTag(tag);
+            // Clear the constructed flag, if present.
+            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
             WriteLength(octetString.Length);
             octetString.CopyTo(_buffer.AsSpan().Slice(_offset));
             _offset += octetString.Length;
@@ -4321,11 +4281,8 @@ namespace System.Security.Cryptography.Asn1
         {
             CheckUniversalTag(tag, UniversalTagNumber.Null);
 
-            // T-REC-X.690-201508 sec 8.8.1
-            if (tag.IsConstructed)
-                throw new ArgumentException($"Constructed Null values are not supported", nameof(tag));
-
-            WriteTag(tag);
+            // Clear the constructed flag, if present.
+            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
             WriteLength(0);
         }
 
@@ -4370,11 +4327,6 @@ namespace System.Security.Cryptography.Asn1
         {
             CheckUniversalTag(tag, UniversalTagNumber.ObjectIdentifier);
 
-            // T-REC-X.690-201508 sec 8.19.1
-            if (tag.IsConstructed)
-                throw new ArgumentException($"Constructed ObjectIdentifier values are not supported", nameof(tag));
-
-            // TODO: Review exceptions.
             if (oidValue.Length < 3 /* "1.1" is the shortest value */)
                 throw new CryptographicException(SR.Argument_InvalidOidValue);
             if (oidValue[1] != '.')
@@ -4432,7 +4384,8 @@ namespace System.Security.Cryptography.Asn1
                     tmpOffset += localLen;
                 }
 
-                WriteTag(tag);
+                // Clear the constructed flag, if present.
+                WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
                 WriteLength(tmpOffset);
                 Buffer.BlockCopy(tmp, 0, _buffer, _offset, tmpOffset);
                 _offset += tmpOffset;
@@ -4458,7 +4411,7 @@ namespace System.Security.Cryptography.Asn1
 
             // The following code is equivalent to
             // BigInteger.TryParse(temp, NumberStyles.None, CultureInfo.InvariantCulture, out value)
-            // TODO: Change it when BigInteger supports ROS<char>?
+            // TODO: Split this for netstandard vs netcoreapp for span-perf?.
             BigInteger value = BigInteger.Zero;
 
             for (int position = 0; position < endIndex; position++)
@@ -4611,11 +4564,8 @@ namespace System.Security.Cryptography.Asn1
         {
             CheckUniversalTag(tag, UniversalTagNumber.Sequence);
 
-            // T-REC-X.690-201508 sec 8.9.1
-            if (!tag.IsConstructed)
-                throw new ArgumentException("Primitive Sequence vales are not supported", nameof(tag));
-
-            PushTag(tag);
+            // Assert the constructed flag, in case it wasn't.
+            PushTag(new Asn1Tag(tag.TagClass, tag.TagValue, isConstructed: true));
         }
 
         public void PopSequence()
@@ -4639,12 +4589,9 @@ namespace System.Security.Cryptography.Asn1
         public void PushSetOf(Asn1Tag tag)
         {
             CheckUniversalTag(tag, UniversalTagNumber.SetOf);
-
-            // T-REC-X.690-201508 sec 8.12.1
-            if (!tag.IsConstructed)
-                throw new ArgumentException("Primitive SetOf vales are not supported", nameof(tag));
-
-            PushTag(tag);
+            
+            // Assert the constructed flag, in case it wasn't.
+            PushTag(new Asn1Tag(tag.TagClass, tag.TagValue, isConstructed: true));
         }
 
         public void PopSetOf()
@@ -4701,14 +4648,8 @@ namespace System.Security.Cryptography.Asn1
         {
             CheckUniversalTag(tag, UniversalTagNumber.UtcTime);
 
-            // UtcTime is IMPLICIT PrintableString.
-            // DER doesn't allow PrintableString to be constructed.
-            // CER doesn't allow this short of a PrintableString to be constructed.
-            // BER technically allows it, but we're writing a primitive encoding, so don't let the tag mismatch.
-            if (tag.IsConstructed)
-                throw new ArgumentException($"Constructed UtcTime values are not supported", nameof(tag));
-
-            WriteTag(tag);
+            // Clear the constructed flag, if present.
+            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
 
             // BER allows for omitting the seconds, but that's not an option we need to expose.
             // BER allows for non-UTC values, but that's also not an option we need to expose.
@@ -4756,13 +4697,6 @@ namespace System.Security.Cryptography.Asn1
         public void WriteGeneralizedTime(Asn1Tag tag, DateTimeOffset value, bool omitFractionalSeconds = false)
         {
             CheckUniversalTag(tag, UniversalTagNumber.GeneralizedTime);
-
-            // GeneralizedTime is IMPLICIT PrintableString.
-            // DER doesn't allow PrintableString to be constructed.
-            // CER doesn't allow this short of a PrintableString to be constructed.
-            // BER technically allows it, but we're writing a primitive encoding, so don't let the tag mismatch.
-            if (tag.IsConstructed)
-                throw new ArgumentException($"Constructed GeneralizedTime values are not supported", nameof(tag));
 
             // GeneralizedTime under BER allows many different options:
             // * (HHmmss), (HHmm), (HH)
@@ -4847,7 +4781,8 @@ namespace System.Security.Cryptography.Asn1
                 totalLength += 1 + fracLength;
             }
 
-            WriteTag(tag);
+            // Clear the constructed flag, if present.
+            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
             WriteLength(totalLength);
 
             int year = normalized.Year;
@@ -4988,7 +4923,7 @@ namespace System.Security.Cryptography.Asn1
 
             (Asn1Tag stackTag, int lenOffset) = _nestingStack.Peek();
 
-            if (stackTag != tag)
+            if (stackTag != new Asn1Tag(tag.TagClass, tag.TagValue, true))
                 throw new ArgumentException(SR.Cryptography_AsnWriter_PopWrongTag, nameof(tag));
 
             _nestingStack.Pop();
@@ -5079,25 +5014,16 @@ namespace System.Security.Cryptography.Asn1
 
         private void WriteCharacterString(Asn1Tag tag, Text.Encoding encoding, ReadOnlySpan<char> str)
         {
-            if (RuleSet == AsnEncodingRules.BER)
+            if (RuleSet == AsnEncodingRules.CER)
             {
-                // Clear the constructed tag, if present.
-                tag = new Asn1Tag(tag.TagClass, tag.TagValue);
-            }
-            else if (RuleSet == AsnEncodingRules.DER && tag.IsConstructed)
-            {
-                // T-REC-X.690-201508 sec 10.2
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-            else
-            {
-                // TODO: Didn't this get spanified?
+                // TODO: Split this for netstandard vs netcoreapp for span?.
                 unsafe
                 {
                     fixed (char* strPtr = &str.DangerousGetPinnableReference())
                     {
                         int size = encoding.GetByteCount(strPtr, str.Length);
 
+                        // If it exceeds the primitive segment size, use the constructed encoding.
                         if (size > AsnReader.MaxCERSegmentSize)
                         {
                             WriteCERCharacterString(tag, encoding, str);
@@ -5105,19 +5031,17 @@ namespace System.Security.Cryptography.Asn1
                         }
                     }
                 }
-
-                // It fit in a primitive segment, so clear the constructed tag, if present.
-                tag = new Asn1Tag(tag.TagClass, tag.TagValue);
             }
 
-            // TODO: Didn't this get spanified?
+            // TODO: Split this for netstandard vs netcoreapp for span?.
             unsafe
             {
                 fixed (char* strPtr = &str.DangerousGetPinnableReference())
                 {
                     int size = encoding.GetByteCount(strPtr, str.Length);
 
-                    WriteTag(tag);
+                    // Clear the constructed tag, if present.
+                    WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
                     WriteLength(size);
                     Span<byte> dest = _buffer.AsSpan().Slice(_offset, size);
 
@@ -5142,7 +5066,7 @@ namespace System.Security.Cryptography.Asn1
             byte[] tmp;
             int size;
 
-            // TODO: Didn't this get spanified?
+            // TODO: Split this for netstandard vs netcoreapp for span?.
             unsafe
             {
                 fixed (char* strPtr = &str.DangerousGetPinnableReference())

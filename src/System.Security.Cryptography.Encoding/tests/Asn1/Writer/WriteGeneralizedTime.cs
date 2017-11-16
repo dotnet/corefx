@@ -226,5 +226,19 @@ namespace System.Security.Cryptography.Tests.Asn1
                 "tag",
                 () => writer.WriteGeneralizedTime(Asn1Tag.EndOfContents, DateTimeOffset.Now, omitFractionalSeconds));
         }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public void VerifyWriteGeneralizedTime_IgnoresConstructed(PublicEncodingRules ruleSet)
+        {
+            AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
+            DateTimeOffset value = new DateTimeOffset(2017, 11, 16, 17, 35, 1, TimeSpan.Zero);
+
+            writer.WriteGeneralizedTime(new Asn1Tag(UniversalTagNumber.GeneralizedTime, true), value);
+            writer.WriteGeneralizedTime(new Asn1Tag(TagClass.ContextSpecific, 3, true), value);
+            Verify(writer, "180F32303137313131363137333530315A" + "830F32303137313131363137333530315A");
+        }
     }
 }

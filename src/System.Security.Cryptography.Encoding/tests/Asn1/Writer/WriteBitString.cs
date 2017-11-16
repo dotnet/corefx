@@ -72,14 +72,18 @@ namespace System.Security.Cryptography.Tests.Asn1
         [Theory]
         [InlineData(PublicEncodingRules.BER, 0, false)]
         [InlineData(PublicEncodingRules.CER, 0, false)]
+        [InlineData(PublicEncodingRules.DER, 0, false)]
         [InlineData(PublicEncodingRules.BER, 999, false)]
         [InlineData(PublicEncodingRules.CER, 999, false)]
+        [InlineData(PublicEncodingRules.DER, 999, false)]
         [InlineData(PublicEncodingRules.BER, 1000, false)]
         [InlineData(PublicEncodingRules.CER, 1000, true)]
+        [InlineData(PublicEncodingRules.DER, 1000, false)]
         [InlineData(PublicEncodingRules.BER, 1998, false)]
         [InlineData(PublicEncodingRules.CER, 1998, true)]
         [InlineData(PublicEncodingRules.BER, 4096, false)]
         [InlineData(PublicEncodingRules.CER, 4096, true)]
+        [InlineData(PublicEncodingRules.DER, 4096, false)]
         public void VerifyWriteBitString_PrimitiveOrConstructed(
             PublicEncodingRules ruleSet,
             int payloadLength,
@@ -117,18 +121,6 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Equal(toTry.TagClass, writtenTag.TagClass);
                 Assert.Equal(toTry.TagValue, writtenTag.TagValue);
             }
-        }
-
-        [Fact]
-        public void WriteBitString_DER_PrimitiveOnly()
-        {
-            AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
-
-            Assert.Throws<CryptographicException>(
-                () => writer.WriteBitString(new Asn1Tag(UniversalTagNumber.BitString, true), ReadOnlySpan<byte>.Empty));
-
-            Assert.Throws<CryptographicException>(
-                () => writer.WriteBitString(new Asn1Tag(TagClass.ContextSpecific, 4, true), ReadOnlySpan<byte>.Empty));
         }
 
         [Theory]

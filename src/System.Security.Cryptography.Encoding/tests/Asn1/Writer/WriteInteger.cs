@@ -290,33 +290,17 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER)]
         [InlineData(PublicEncodingRules.CER)]
         [InlineData(PublicEncodingRules.DER)]
-        public void VerifyWriteInteger_Constructed(PublicEncodingRules ruleSet)
+        public void VerifyWriteInteger_ConstructedIgnored(PublicEncodingRules ruleSet)
         {
             AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
+            writer.WriteInteger(new Asn1Tag(UniversalTagNumber.Integer, isConstructed: true), 0L);
+            writer.WriteInteger(new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true), 0L);
+            writer.WriteInteger(new Asn1Tag(UniversalTagNumber.Integer, isConstructed: true), 0UL);
+            writer.WriteInteger(new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true), 0UL);
+            writer.WriteInteger(new Asn1Tag(UniversalTagNumber.Integer, isConstructed: true), BigInteger.Zero);
+            writer.WriteInteger(new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true), BigInteger.Zero);
 
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteInteger(new Asn1Tag(UniversalTagNumber.Integer, isConstructed: true), 0L));
-
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteInteger(new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true), 0L));
-
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteInteger(new Asn1Tag(UniversalTagNumber.Integer, isConstructed: true), 0UL));
-
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteInteger(new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true), 0UL));
-
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteInteger(new Asn1Tag(UniversalTagNumber.Integer, isConstructed: true), BigInteger.Zero));
-
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.WriteInteger(new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true), BigInteger.Zero));
+            Verify(writer, "020100800100020100800100020100800100");
         }
     }
 }

@@ -102,26 +102,40 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER)]
         [InlineData(PublicEncodingRules.CER)]
         [InlineData(PublicEncodingRules.DER)]
-        public static void PushPrimitive(PublicEncodingRules ruleSet)
+        public static void PushPrimitive_PopStandard(PublicEncodingRules ruleSet)
         {
             AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
+            writer.PushSequence(new Asn1Tag(UniversalTagNumber.Sequence));
+            writer.PopSequence();
 
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.PushSequence(new Asn1Tag(UniversalTagNumber.Sequence)));
+            if (ruleSet == PublicEncodingRules.CER)
+            {
+                Verify(writer, "30800000");
+            }
+            else
+            {
+                Verify(writer, "3000");
+            }
         }
 
         [Theory]
         [InlineData(PublicEncodingRules.BER)]
         [InlineData(PublicEncodingRules.CER)]
         [InlineData(PublicEncodingRules.DER)]
-        public static void PushCustomPrimitive(PublicEncodingRules ruleSet)
+        public static void PushCustomPrimitive_PopConstructed(PublicEncodingRules ruleSet)
         {
             AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
+            writer.PushSequence(new Asn1Tag(TagClass.Private, 5));
+            writer.PopSequence(new Asn1Tag(TagClass.Private, 5, true));
 
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.PushSequence(new Asn1Tag(TagClass.Private, 5)));
+            if (ruleSet == PublicEncodingRules.CER)
+            {
+                Verify(writer, "E5800000");
+            }
+            else
+            {
+                Verify(writer, "E500");
+            }
         }
 
         [Theory]
@@ -132,11 +146,16 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
             writer.PushSequence();
+            writer.PopSequence(new Asn1Tag(UniversalTagNumber.Sequence, isConstructed: false));
 
-            // Not the exact same tag.
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.PopSequence(new Asn1Tag(UniversalTagNumber.Sequence)));
+            if (ruleSet == PublicEncodingRules.CER)
+            {
+                Verify(writer, "30800000");
+            }
+            else
+            {
+                Verify(writer, "3000");
+            }
         }
 
         [Theory]
@@ -147,10 +166,13 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
             writer.PushSequence(new Asn1Tag(TagClass.Private, (int)ruleSet, true));
+            writer.PopSequence(new Asn1Tag(TagClass.Private, (int)ruleSet));
 
-            AssertExtensions.Throws<ArgumentException>(
-                "tag",
-                () => writer.PopSequence(new Asn1Tag(TagClass.Private, (int)ruleSet)));
+            byte tag = (byte)((int)ruleSet | 0b1110_0000);
+            string tagHex = tag.ToString("X2");
+            string rest = ruleSet == PublicEncodingRules.CER ? "800000" : "00";
+
+            Verify(writer, tagHex + rest);
         }
 
         [Fact]
