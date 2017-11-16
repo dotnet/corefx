@@ -151,7 +151,7 @@ namespace System.SpanTests
         }
 
         //
-        // The following tests were all generated with with this (otherwise unused) method:
+        // The following tests were all generated with this (otherwise unused) method:
         //
         private static string GenerateOverlapsTests()
         {
