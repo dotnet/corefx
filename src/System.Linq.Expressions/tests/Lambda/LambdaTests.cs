@@ -942,6 +942,14 @@ namespace System.Linq.Expressions.Tests
 ");
         }
 
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void ExcessiveArity(bool useInterpreter)
+        {
+            ParameterExpression[] pars = Enumerable.Range(0, ushort.MaxValue).Select(_ => Expression.Parameter(typeof(int))).ToArray();
+            LambdaExpression lambda = Expression.Lambda(pars.Last(), pars);
+            Assert.Throws<InvalidProgramException>(() => lambda.Compile(useInterpreter));
+        }
+
         private static int Add(ref int var, int val)
         {
             return var += val;

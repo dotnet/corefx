@@ -32,6 +32,7 @@ namespace System.Linq.Expressions.Compiler
         internal static void EmitLoadArg(this ILGenerator il, int index)
         {
             Debug.Assert(index >= 0);
+            Debug.Assert(index < ushort.MaxValue);
 
             switch (index)
             {
@@ -64,6 +65,7 @@ namespace System.Linq.Expressions.Compiler
         internal static void EmitLoadArgAddress(this ILGenerator il, int index)
         {
             Debug.Assert(index >= 0);
+            Debug.Assert(index < ushort.MaxValue);
 
             if (index <= byte.MaxValue)
             {
@@ -79,6 +81,7 @@ namespace System.Linq.Expressions.Compiler
         internal static void EmitStoreArg(this ILGenerator il, int index)
         {
             Debug.Assert(index >= 0);
+            Debug.Assert(index < ushort.MaxValue);
 
             if (index <= byte.MaxValue)
             {
