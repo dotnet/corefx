@@ -138,7 +138,7 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(~TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
-        public void TestStartOnUnixWithBadWorkingDirectory()
+        public void TestStartWithBadWorkingDirectory()
         {
             string program;
             string workingDirectory;
