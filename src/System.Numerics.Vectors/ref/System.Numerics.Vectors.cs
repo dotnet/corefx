@@ -52,7 +52,7 @@ namespace System.Numerics
         public static System.Numerics.Matrix3x2 operator -(System.Numerics.Matrix3x2 value) { throw null; }
         public static System.Numerics.Matrix3x2 Subtract(System.Numerics.Matrix3x2 value1, System.Numerics.Matrix3x2 value2) { throw null; }
         public override string ToString() { throw null; }
-#if netcoreapp || uap
+#if FEATURE_REF_OVERLOADS
         public static void Add(ref System.Numerics.Matrix3x2 value1, ref System.Numerics.Matrix3x2 value2, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
         public static void CreateRotation(float radians, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
         public static void CreateRotation(float radians, ref System.Numerics.Vector2 centerPoint, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
@@ -148,7 +148,7 @@ namespace System.Numerics
         public override string ToString() { throw null; }
         public static System.Numerics.Matrix4x4 Transform(System.Numerics.Matrix4x4 value, System.Numerics.Quaternion rotation) { throw null; }
         public static System.Numerics.Matrix4x4 Transpose(System.Numerics.Matrix4x4 matrix) { throw null; }
-#if netcoreapp || uap
+#if FEATURE_REF_OVERLOADS
         public static void Add(ref System.Numerics.Matrix4x4 value1, ref System.Numerics.Matrix4x4 value2, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
         public static void CreateBillboard(ref System.Numerics.Vector3 objectPosition, ref System.Numerics.Vector3 cameraPosition, ref System.Numerics.Vector3 cameraUpVector, ref System.Numerics.Vector3 cameraForwardVector, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
         public static void CreateConstrainedBillboard(ref System.Numerics.Vector3 objectPosition, ref System.Numerics.Vector3 cameraPosition, ref System.Numerics.Vector3 rotateAxis, ref System.Numerics.Vector3 cameraForwardVector, ref System.Numerics.Vector3 objectForwardVector, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
@@ -210,7 +210,7 @@ namespace System.Numerics
         public override string ToString() { throw null; }
         public static System.Numerics.Plane Transform(System.Numerics.Plane plane, System.Numerics.Matrix4x4 matrix) { throw null; }
         public static System.Numerics.Plane Transform(System.Numerics.Plane plane, System.Numerics.Quaternion rotation) { throw null; }
-#if netcoreapp || uap
+#if FEATURE_REF_OVERLOADS
         public static void CreateFromVertices(ref System.Numerics.Vector3 point1, ref System.Numerics.Vector3 point2, ref System.Numerics.Vector3 point3, out System.Numerics.Plane result) { result = default(System.Numerics.Plane); }
         public static void Dot(ref System.Numerics.Plane plane, ref System.Numerics.Vector4 value, out float result) { result = default(float); }
         public static void DotCoordinate(ref System.Numerics.Plane plane, ref System.Numerics.Vector3 value, out float result) { result = default(float); }
@@ -261,7 +261,7 @@ namespace System.Numerics
         public static System.Numerics.Quaternion Slerp(System.Numerics.Quaternion quaternion1, System.Numerics.Quaternion quaternion2, float amount) { throw null; }
         public static System.Numerics.Quaternion Subtract(System.Numerics.Quaternion value1, System.Numerics.Quaternion value2) { throw null; }
         public override string ToString() { throw null; }
-#if netcoreapp || uap
+#if FEATURE_REF_OVERLOADS
         public static void Add(ref System.Numerics.Quaternion value1, ref System.Numerics.Quaternion value2, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
         public static void Concatenate(ref System.Numerics.Quaternion value1, ref System.Numerics.Quaternion value2, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
         public static void Conjugate(ref System.Numerics.Quaternion value, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
@@ -488,7 +488,7 @@ namespace System.Numerics
         public static System.Numerics.Vector2 Transform(System.Numerics.Vector2 value, System.Numerics.Quaternion rotation) { throw null; }
         public static System.Numerics.Vector2 TransformNormal(System.Numerics.Vector2 normal, System.Numerics.Matrix3x2 matrix) { throw null; }
         public static System.Numerics.Vector2 TransformNormal(System.Numerics.Vector2 normal, System.Numerics.Matrix4x4 matrix) { throw null; }
-#if netcoreapp || uap
+#if FEATURE_REF_OVERLOADS
         public static void Abs(ref System.Numerics.Vector2 value, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
         public static void Add(ref System.Numerics.Vector2 left, ref System.Numerics.Vector2 right, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
         public static void Clamp(ref System.Numerics.Vector2 value1, ref System.Numerics.Vector2 min, ref System.Numerics.Vector2 max, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
@@ -572,7 +572,7 @@ namespace System.Numerics
         public static System.Numerics.Vector3 Transform(System.Numerics.Vector3 position, System.Numerics.Matrix4x4 matrix) { throw null; }
         public static System.Numerics.Vector3 Transform(System.Numerics.Vector3 value, System.Numerics.Quaternion rotation) { throw null; }
         public static System.Numerics.Vector3 TransformNormal(System.Numerics.Vector3 normal, System.Numerics.Matrix4x4 matrix) { throw null; }
-#if netcoreapp || uap
+#if FEATURE_REF_OVERLOADS
         public static void Abs(ref System.Numerics.Vector3 value, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
         public static void Add(ref System.Numerics.Vector3 left, ref System.Numerics.Vector3 right, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
         public static void Clamp(ref System.Numerics.Vector3 value1, ref System.Numerics.Vector3 min, ref System.Numerics.Vector3 max, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
@@ -659,7 +659,7 @@ namespace System.Numerics
         public static System.Numerics.Vector4 Transform(System.Numerics.Vector3 value, System.Numerics.Quaternion rotation) { throw null; }
         public static System.Numerics.Vector4 Transform(System.Numerics.Vector4 vector, System.Numerics.Matrix4x4 matrix) { throw null; }
         public static System.Numerics.Vector4 Transform(System.Numerics.Vector4 value, System.Numerics.Quaternion rotation) { throw null; }
-#if netcoreapp || uap
+#if FEATURE_REF_OVERLOADS
         public static void Abs(ref System.Numerics.Vector4 value, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
         public static void Add(ref System.Numerics.Vector4 left, ref System.Numerics.Vector4 right, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
         public static void Clamp(ref System.Numerics.Vector4 value1, ref System.Numerics.Vector4 min, ref System.Numerics.Vector4 max, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
