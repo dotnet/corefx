@@ -35,6 +35,7 @@
     <Compile Include="System\Xml\IxmlLineInfo.cs" />
     <Compile Include="System\Xml\IXmlNamespaceResolver.cs" />
     <Compile Include="System\Xml\LineInfo.cs" />
+    <Compile Include="System\Xml\MarvinHash.cs" />
     <Compile Include="System\Xml\NameTable.cs" />
     <Compile Include="System\Xml\Ref.cs" />
     <Compile Include="System\Xml\ValidateNames.cs" />
