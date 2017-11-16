@@ -25,6 +25,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework not supporting UnixEpoch yet")]
         public static void UnixEpoch()
         {
             VerifyDateTime(DateTime.UnixEpoch, 1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
