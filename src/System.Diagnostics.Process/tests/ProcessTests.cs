@@ -153,19 +153,24 @@ namespace System.Diagnostics.Tests
                 workingDirectory = "/does-not-exist";
             }
 
-            Assert.True(IsProgramInstalled(program));
-
-            var psi = new ProcessStartInfo
+            if (IsProgramInstalled(program))
             {
-                FileName = program,
-                UseShellExecute = false,
-                WorkingDirectory = workingDirectory
-            };
+                var psi = new ProcessStartInfo
+                {
+                    FileName = program,
+                    UseShellExecute = false,
+                    WorkingDirectory = workingDirectory
+                };
 
-            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(psi));
-            Assert.NotEqual(0, e.NativeErrorCode);
+                Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(psi));
+                Assert.NotEqual(0, e.NativeErrorCode);
+            }
+            else
+            {
+                Console.WriteLine($"Program {program} is not installed on this machine.");
+            }
         }
-        
+
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.HasWindowsShell))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
         [OuterLoop("Launches File Explorer")]
