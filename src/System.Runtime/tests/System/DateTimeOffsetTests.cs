@@ -24,13 +24,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework not supporting UnixEpoch yet")]
-        public static void UnixEpoch()
-        {
-            VerifyDateTimeOffset(DateTimeOffset.UnixEpoch, 1970, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
-        }
-
-        [Fact]
         public static void Ctor_Empty()
         {
             VerifyDateTimeOffset(new DateTimeOffset(), 1, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
