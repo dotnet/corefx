@@ -2937,8 +2937,14 @@ public static partial class XmlSerializerTests
         schema.Write(ms);
         ms.Position = 0;
         string actualOutput = new StreamReader(ms).ReadToEnd();
-        Utils.CompareResult result = Utils.Compare(baseline, actualOutput, false);
-        Assert.True(result.Equal, string.Format("{1}{0}Test failed for wrong output from schema: {0}Expected: {2}{0}Actual: {3}",
-                Environment.NewLine, result.ErrorMessage, baseline, actualOutput));
+        XElement element = XElement.Parse(actualOutput);
+        while (element.Elements().Count() != 0)
+        {
+            element = element.Elements().First();
+        }
+
+        string expected = element.LastAttribute.Value;
+        Assert.True(expected == "xs:duration", string.Format("{0}Test failed for wrong output from schema: {0}Expected: {1}{0}Actual: {2}",
+                Environment.NewLine, baseline, actualOutput));
     }
 }
