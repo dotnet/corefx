@@ -71,7 +71,8 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory]
+        [MemberData(nameof(ValidStores))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18268")]
         public void DirectoryExists_Existance(PresetScopes scope)
         {
