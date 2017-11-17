@@ -791,6 +791,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(23, result);
         }
 
+#if FEATURE_COMPILE
         [Theory, ClassData(typeof(CompilationTypes))]
         public void AboveByteMaxArityArgIL(bool useInterpreter)
         {
@@ -808,6 +809,7 @@ namespace System.Linq.Expressions.Tests
 }
 ");
         }
+#endif
 
         private struct Mutable
         {
@@ -881,6 +883,7 @@ namespace System.Linq.Expressions.Tests
             Assert.True(result.Mutated);
         }
 
+#if FEATURE_COMPILE
         [Fact]
         public void AboveByteMaxArityArgAddressIL()
         {
@@ -901,6 +904,7 @@ namespace System.Linq.Expressions.Tests
 }
 ");
         }
+#endif
 
         [Theory, ClassData(typeof(CompilationTypes))]
         public void ExcessiveArity(bool useInterpreter)
