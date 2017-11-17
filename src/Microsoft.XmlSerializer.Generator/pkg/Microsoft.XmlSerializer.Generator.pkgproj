@@ -6,7 +6,7 @@
   </ItemGroup>
   <PropertyGroup>
     <ReleaseNotes>https://go.microsoft.com/fwlink/?LinkID=863421</ReleaseNotes>
-    <projectUrl>https://go.microsoft.com/fwlink/?linkid=858594</projectUrl>
+    <ProjectUrl>https://go.microsoft.com/fwlink/?linkid=858594</ProjectUrl>
     <SkipPackageFileCheck>true</SkipPackageFileCheck>
   </PropertyGroup>
   <ItemGroup>
