@@ -644,6 +644,7 @@ namespace System
     {
         public static readonly System.DateTime MaxValue;
         public static readonly System.DateTime MinValue;
+        public static readonly System.DateTime UnixEpoch;
         public DateTime(int year, int month, int day) { throw null; }
         public DateTime(int year, int month, int day, System.Globalization.Calendar calendar) { throw null; }
         public DateTime(int year, int month, int day, int hour, int minute, int second) { throw null; }
@@ -772,6 +773,7 @@ namespace System
     {
         public static readonly System.DateTimeOffset MaxValue;
         public static readonly System.DateTimeOffset MinValue;
+        public static readonly System.DateTimeOffset UnixEpoch;
         public DateTimeOffset(System.DateTime dateTime) { throw null; }
         public DateTimeOffset(System.DateTime dateTime, System.TimeSpan offset) { throw null; }
         public DateTimeOffset(int year, int month, int day, int hour, int minute, int second, int millisecond, System.Globalization.Calendar calendar, System.TimeSpan offset) { throw null; }
@@ -1662,10 +1664,12 @@ namespace System
     public readonly struct Memory<T>
     {
         public static Memory<T> Empty { get { throw null; } }
-        public Memory(T[] array) { throw null;}
-        public Memory(T[] array, int start, int length) { throw null;}
+        public Memory(T[] array) { throw null; }
+        public Memory(T[] array, int start, int length) { throw null; }
         public bool IsEmpty { get { throw null; } }
         public int Length { get { throw null; } }
+        public void CopyTo(Memory<T> destination) { }
+        public bool TryCopyTo(Memory<T> destination) { throw null; }
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public override bool Equals(object obj) { throw null; }
         public bool Equals(Memory<T> other) { throw null; }
@@ -1885,10 +1889,12 @@ namespace System
     public readonly struct ReadOnlyMemory<T>
     {
         public static ReadOnlyMemory<T> Empty { get { throw null; } }
-        public ReadOnlyMemory(T[] array) { throw null;}
-        public ReadOnlyMemory(T[] array, int start, int length) { throw null;}
+        public ReadOnlyMemory(T[] array) { throw null; }
+        public ReadOnlyMemory(T[] array, int start, int length) { throw null; }
         public bool IsEmpty { get { throw null; } }
         public int Length { get { throw null; } }
+        public void CopyTo(Memory<T> destination) { }
+        public bool TryCopyTo(Memory<T> destination) { throw null; }
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public override bool Equals(object obj) { throw null; }
         public bool Equals(ReadOnlyMemory<T> other) { throw null; }
@@ -1924,6 +1930,7 @@ namespace System
         [System.ObsoleteAttribute("Equals() on ReadOnlySpan will always throw an exception. Use == instead.")]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public override bool Equals(object obj) { throw null; }
+        public Enumerator GetEnumerator() { throw null; }
         [System.ObsoleteAttribute("GetHashCode() on ReadOnlySpan will always throw an exception.")]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public override int GetHashCode() { throw null; }
@@ -1936,6 +1943,11 @@ namespace System
         public ReadOnlySpan<T> Slice(int start, int length) { throw null; }
         public T[] ToArray() { throw null; }
         public bool TryCopyTo(Span<T> destination) { throw null; }
+        public ref struct Enumerator
+        {
+            public bool MoveNext() { throw null; }
+            public ref readonly T Current { get { throw null; } }
+        }
     }
     public partial class ResolveEventArgs : System.EventArgs
     {
@@ -2116,6 +2128,7 @@ namespace System
         [System.ObsoleteAttribute("Equals() on Span will always throw an exception. Use == instead.")]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public override bool Equals(object obj) { throw null; }
+        public Enumerator GetEnumerator() { throw null; }
         [System.ObsoleteAttribute("GetHashCode() on Span will always throw an exception.")]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public override int GetHashCode() { throw null; }
@@ -2129,6 +2142,11 @@ namespace System
         public Span<T> Slice(int start, int length) { throw null; }
         public T[] ToArray() { throw null; }
         public bool TryCopyTo(Span<T> destination) { throw null; }
+        public ref struct Enumerator
+        {
+            public bool MoveNext() { throw null; }
+            public ref T Current { get { throw null; } }
+        }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(64))]
     public sealed partial class STAThreadAttribute : System.Attribute
