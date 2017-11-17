@@ -304,11 +304,11 @@ namespace System
         //
         //  If two sequences overlap, the element offset is the number of
         //  elements by which the second sequence is offset from the first
-        //  sequence (i.e., second minus first). The number is rounded away from
-        //  zero if it is not a whole number, which can happen when casting a
-        //  sequence of a smaller type to a sequence of a larger type. If the
-        //  sequences do not overlap, the offset is meaningless and arbitrarily
-        //  set to zero.
+        //  sequence (i.e., second minus first). An exception is thrown if the
+        //  number is not a whole number, which can happen when a sequence of a
+        //  smaller type is cast to a sequence of a larger type with unsafe code
+        //  or NonPortableCast. If the sequences do not overlap, the offset is
+        //  meaningless and arbitrarily set to zero.
         //
         //  Implementation
         //  --------------
