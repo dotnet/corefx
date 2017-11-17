@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -80,13 +81,17 @@ namespace System.Diagnostics
             get
             {
                 // '/proc/uptime' accounts time a device spends in sleep mode.
-                const string uptimeFile = "/proc/uptime";
+                const string uptimeFile = Interop.procfs.ProcUptimeFilePath;
                 string text = File.ReadAllText(uptimeFile);
 
-                double uptimeSeconds;
+                double uptimeSeconds = 0;
                 int length = text.IndexOf(' ');
-                bool success = Double.TryParse(text.Substring(0, length), NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo, out uptimeSeconds);
-                Debug.Assert(success);
+                Debug.Assert(length != -1);
+                if (length != -1)
+                {
+                    bool success = Double.TryParse(text.AsReadOnlySpan().Slice(0, length), NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo, out uptimeSeconds);
+                    Debug.Assert(success);
+                }
 
                 return TimeSpan.FromSeconds(uptimeSeconds);
             }
