@@ -2923,7 +2923,7 @@ public static partial class XmlSerializerTests
         Assert.StrictEqual(value, actual);
     }
 
-    [Fact]
+    [ConditionalFact(nameof(IsTimeSpanSerializationAvailable))]
     public static void TimeSpanXmlQualifiedNameTest()
     {
         string baseline = "<?xml version=\"1.0\"?>\r\n<xs:schema xmlns:tns=\"http://microsoft.com/wsdl/types/\" elementFormDefault=\"qualified\" targetNamespace=\"http://microsoft.com/wsdl/types/\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\r\n  <xs:simpleType name=\"TimeSpan\">\r\n    <xs:restriction base=\"xs:duration\" />\r\n  </xs:simpleType>\r\n</xs:schema>";
@@ -2931,11 +2931,10 @@ public static partial class XmlSerializerTests
         var exporter = new XmlSchemaExporter(schemas);
         XmlTypeMapping mapping = new XmlReflectionImporter().ImportTypeMapping(typeof(TimeSpan));
         exporter.ExportTypeMapping(mapping);
-        var schemaEnumerator = new XmlSchemaEnumerator(schemas);
+        XmlSchema schema = schemas.Where(s => s.TargetNamespace == "http://microsoft.com/wsdl/types/").FirstOrDefault();
+        Assert.NotNull(schema);
         var ms = new MemoryStream();
-        schemaEnumerator.MoveNext();
-        schemaEnumerator.MoveNext();
-        schemaEnumerator.Current.Write(ms);
+        schema.Write(ms);
         ms.Position = 0;
         string actualOutput = new StreamReader(ms).ReadToEnd();
         Utils.CompareResult result = Utils.Compare(baseline, actualOutput);
