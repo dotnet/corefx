@@ -321,7 +321,16 @@ namespace System.ServiceModel.Syndication
             else if (reader.IsStartElement(Atom10Constants.UpdatedTag, Atom10Constants.Atom10Namespace))
             {
                 reader.ReadStartElement();
-                result.LastUpdatedTime = DateFromString(reader.ReadString(), reader);
+                string dtoString = reader.ReadString();
+                try
+                {
+                    result.LastUpdatedTime = DateFromString(dtoString, reader);
+                }
+                catch (XmlException e)
+                {
+                    result.LastUpdatedTimeError = e;
+                }
+
                 reader.ReadEndElement();
             }
             else
@@ -360,7 +369,16 @@ namespace System.ServiceModel.Syndication
             else if (reader.IsStartElement(Atom10Constants.PublishedTag, Atom10Constants.Atom10Namespace))
             {
                 reader.ReadStartElement();
-                result.PublishDate = DateFromString(reader.ReadString(), reader);
+                string dtoString = reader.ReadString();
+                try
+                {
+                    result.PublishDate = DateFromString(dtoString, reader);
+                }
+                catch (XmlException e)
+                {
+                    result.PublishDateError = e;
+                }
+
                 reader.ReadEndElement();
             }
             else if (reader.IsStartElement(Atom10Constants.RightsTag, Atom10Constants.Atom10Namespace))
@@ -384,7 +402,16 @@ namespace System.ServiceModel.Syndication
             else if (reader.IsStartElement(Atom10Constants.UpdatedTag, Atom10Constants.Atom10Namespace))
             {
                 reader.ReadStartElement();
-                result.LastUpdatedTime = DateFromString(reader.ReadString(), reader);
+                string dtoString = reader.ReadString();
+                try
+                {
+                    result.LastUpdatedTime = DateFromString(dtoString, reader);
+                }
+                catch (XmlException e)
+                {
+                    result.LastUpdatedTimeError = e;
+                }
+
                 reader.ReadEndElement();
             }
             else

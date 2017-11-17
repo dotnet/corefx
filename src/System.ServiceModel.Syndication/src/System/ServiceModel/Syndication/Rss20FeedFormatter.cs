@@ -656,7 +656,14 @@ namespace System.ServiceModel.Syndication
                                     string str = reader.ReadString();
                                     if (!string.IsNullOrEmpty(str))
                                     {
-                                        result.PublishDate = DateFromString(str, reader);
+                                        try
+                                        {
+                                            result.PublishDate = DateFromString(str, reader);
+                                        }
+                                        catch (XmlException e)
+                                        {
+                                            result.PublishDateError = e;
+                                        }
                                     }
                                     reader.ReadEndElement();
                                 }
@@ -954,7 +961,14 @@ namespace System.ServiceModel.Syndication
                                 string str = reader.ReadString();
                                 if (!string.IsNullOrEmpty(str))
                                 {
-                                    result.LastUpdatedTime = DateFromString(str, reader);
+                                    try
+                                    {
+                                        result.LastUpdatedTime = DateFromString(str, reader);
+                                    }
+                                    catch (XmlException e)
+                                    {
+                                        result.LastUpdatedTimeError = e;
+                                    }
                                 }
                                 reader.ReadEndElement();
                             }

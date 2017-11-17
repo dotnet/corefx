@@ -158,10 +158,24 @@ namespace System.ServiceModel.Syndication
             set { _id = value; }
         }
 
+        internal Exception LastUpdatedTimeError { get; set; }
+
         public DateTimeOffset LastUpdatedTime
         {
-            get { return _lastUpdatedTime; }
-            set { _lastUpdatedTime = value; }
+            get
+            {
+                if (LastUpdatedTimeError != null)
+                {
+                    throw LastUpdatedTimeError;
+                }
+
+                return _lastUpdatedTime;
+            }
+            set
+            {
+                LastUpdatedTimeError = null;
+                _lastUpdatedTime = value;
+            }
         }
 
         public Collection<SyndicationLink> Links
@@ -176,10 +190,24 @@ namespace System.ServiceModel.Syndication
             }
         }
 
+        internal Exception PublishDateError { get; set; }
+
         public DateTimeOffset PublishDate
         {
-            get { return _publishDate; }
-            set { _publishDate = value; }
+            get
+            {
+                if (PublishDateError != null)
+                {
+                    throw PublishDateError;
+                }
+
+                return _publishDate;
+            }
+            set
+            {
+                PublishDateError = null;
+                _publishDate = value;
+            }
         }
 
         public SyndicationFeed SourceFeed

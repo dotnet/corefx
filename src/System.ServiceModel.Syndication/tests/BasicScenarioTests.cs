@@ -9,6 +9,7 @@ using System.ServiceModel.Syndication;
 using System.Xml;
 using System.IO;
 using Xunit;
+using System.Linq;
 
 namespace System.ServiceModel.Syndication.Tests
 {
@@ -285,7 +286,6 @@ namespace System.ServiceModel.Syndication.Tests
         }
 
         [Fact]
-        [ActiveIssue(25156)]
         public static void SyndicationFeed_Rss_WrongDateFormat()
         {
             // *** SETUP *** \\
@@ -297,7 +297,15 @@ namespace System.ServiceModel.Syndication.Tests
             SyndicationFeed res = SyndicationFeed.Load(reader);
 
             // *** ASSERT *** \\
-            Assert.True(!res.LastUpdatedTime.Equals(new DateTimeOffset()));
+            Assert.True(res != null, "res was null.");
+            DateTimeOffset lastUpdatedTime;
+            Assert.Throws<XmlException>(() => lastUpdatedTime = res.LastUpdatedTime);
+            Assert.True(res.Items != null, "res.Items was null.");
+            Assert.True(res.Items.Count() == 4, $"res.Items.Count() was not as expected. Expected: 4; Actual: {res.Items.Count()}");
+            SyndicationItem[] items = res.Items.ToArray();
+            DateTimeOffset pubDate;
+            Assert.Throws<XmlException>(() => pubDate = items[1].PublishDate);
+            Assert.Throws<XmlException>(() => pubDate = items[2].PublishDate);
         }
 
         [Fact]

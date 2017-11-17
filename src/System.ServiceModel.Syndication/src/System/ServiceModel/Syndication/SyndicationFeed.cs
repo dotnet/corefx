@@ -227,10 +227,24 @@ namespace System.ServiceModel.Syndication
             set { _language = value; }
         }
 
+        internal Exception LastUpdatedTimeError { get; set; }
+
         public DateTimeOffset LastUpdatedTime
         {
-            get { return _lastUpdatedTime; }
-            set { _lastUpdatedTime = value; }
+            get
+            {
+                if (LastUpdatedTimeError != null)
+                {
+                    throw LastUpdatedTimeError;
+                }
+
+                return _lastUpdatedTime;
+            }
+            set
+            {
+                LastUpdatedTimeError = null;
+                _lastUpdatedTime = value;
+            }
         }
 
         public Collection<SyndicationLink> Links
