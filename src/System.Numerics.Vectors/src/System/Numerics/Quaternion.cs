@@ -119,7 +119,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The source Quaternion.</param>
         /// <param name="result">The normalized Quaternion.</param>
-        public static void Normalize(ref Quaternion value, out Quaternion result)
+        public static void Normalize(in Quaternion value, out Quaternion result)
         {
             float ls = value.X * value.X + value.Y * value.Y + value.Z * value.Z + value.W * value.W;
 
@@ -153,7 +153,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The Quaternion of which to return the conjugate.</param>
         /// <param name="result">A new Quaternion that is the conjugate of the specified one.</param>
-        public static void Conjugate(ref Quaternion value, out Quaternion result)
+        public static void Conjugate(in Quaternion value, out Quaternion result)
         {
             result.X = -value.X;
             result.Y = -value.Y;
@@ -190,7 +190,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The source Quaternion.</param>
         /// <param name="result">The inverted Quaternion.</param>
-        public static void Inverse(ref Quaternion value, out Quaternion result)
+        public static void Inverse(in Quaternion value, out Quaternion result)
         {
             //  -1   (       a              -v       )
             // q   = ( -------------   ------------- )
@@ -235,7 +235,7 @@ namespace System.Numerics
         /// This vector must be normalized before calling this function or the resulting Quaternion will be incorrect.</param>
         /// <param name="angle">The angle, in radians, to rotate around the vector.</param>
         /// <param name="result">The created Quaternion.</param>
-        public static void CreateFromAxisAngle(ref Vector3 axis, float angle, out Quaternion result)
+        public static void CreateFromAxisAngle(in Vector3 axis, float angle, out Quaternion result)
         {
             float halfAngle = angle * 0.5f;
             float s = (float)Math.Sin(halfAngle);
@@ -372,7 +372,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="matrix">The rotation matrix.</param>
         /// <param name="result">The created Quaternion.</param>
-        public static void CreateFromRotationMatrix(ref Matrix4x4 matrix, out Quaternion result)
+        public static void CreateFromRotationMatrix(in Matrix4x4 matrix, out Quaternion result)
         {
             float trace = matrix.M11 + matrix.M22 + matrix.M33;
 
@@ -437,7 +437,7 @@ namespace System.Numerics
         /// <param name="quaternion1">The first source Quaternion.</param>
         /// <param name="quaternion2">The second source Quaternion.</param>
         /// <param name="result">The dot product of the Quaternions.</param>
-        public static void Dot(ref Quaternion quaternion1, ref Quaternion quaternion2, out float result)
+        public static void Dot(in Quaternion quaternion1, in Quaternion quaternion2, out float result)
         {
             result = quaternion1.X * quaternion2.X +
                      quaternion1.Y * quaternion2.Y +
@@ -505,7 +505,7 @@ namespace System.Numerics
         /// <param name="quaternion2">The second source Quaternion.</param>
         /// <param name="amount">The relative weight of the second source Quaternion in the interpolation.</param>
         /// <param name="result">The interpolated Quaternion.</param>
-        public static void Slerp(ref Quaternion quaternion1, ref Quaternion quaternion2, float amount, out Quaternion result)
+        public static void Slerp(in Quaternion quaternion1, in Quaternion quaternion2, float amount, out Quaternion result)
         {
             const float epsilon = 1e-6f;
 
@@ -598,7 +598,7 @@ namespace System.Numerics
         /// <param name="quaternion2">The second source Quaternion.</param>
         /// <param name="amount">The relative weight of the second source Quaternion in the interpolation.</param>
         /// <param name="result">The interpolated Quaternion.</param>
-        public static void Lerp(ref Quaternion quaternion1, ref Quaternion quaternion2, float amount, out Quaternion result)
+        public static void Lerp(in Quaternion quaternion1, in Quaternion quaternion2, float amount, out Quaternion result)
         {
             float t = amount;
             float t1 = 1.0f - t;
@@ -674,7 +674,7 @@ namespace System.Numerics
         /// <param name="value1">The first Quaternion rotation in the series.</param>
         /// <param name="value2">The second Quaternion rotation in the series.</param>
         /// <param name="result">A new Quaternion representing the concatenation of the value1 rotation followed by the value2 rotation.</param>
-        public static void Concatenate(ref Quaternion value1, ref Quaternion value2, out Quaternion result)
+        public static void Concatenate(in Quaternion value1, in Quaternion value2, out Quaternion result)
         {
             // Concatenate rotation is actually q2 * q1 instead of q1 * q2.
             // So that's why value2 goes q1 and value1 goes q2.
@@ -723,7 +723,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The source Quaternion.</param>
         /// <param name="result">The negated Quaternion.</param>
-        public static void Negate(ref Quaternion value, out Quaternion result)
+        public static void Negate(in Quaternion value, out Quaternion result)
         {
             result.X = -value.X;
             result.Y = -value.Y;
@@ -755,7 +755,7 @@ namespace System.Numerics
         /// <param name="value1">The first source Quaternion.</param>
         /// <param name="value2">The second source Quaternion.</param>
         /// <param name="result">The result of adding the Quaternions.</param>
-        public static void Add(ref Quaternion value1, ref Quaternion value2, out Quaternion result)
+        public static void Add(in Quaternion value1, in Quaternion value2, out Quaternion result)
         {
             result.X = value1.X + value2.X;
             result.Y = value1.Y + value2.Y;
@@ -787,7 +787,7 @@ namespace System.Numerics
         /// <param name="value1">The first source Quaternion.</param>
         /// <param name="value2">The second Quaternion, to be subtracted from the first.</param>
         /// <param name="result">The result of the subtraction.</param>
-        public static void Subtract(ref Quaternion value1, ref Quaternion value2, out Quaternion result)
+        public static void Subtract(in Quaternion value1, in Quaternion value2, out Quaternion result)
         {
             result.X = value1.X - value2.X;
             result.Y = value1.Y - value2.Y;
@@ -836,7 +836,7 @@ namespace System.Numerics
         /// <param name="value1">The Quaternion on the left side of the multiplication.</param>
         /// <param name="value2">The Quaternion on the right side of the multiplication.</param>
         /// <param name="result">The result of the multiplication.</param>
-        public static void Multiply(ref Quaternion value1, ref Quaternion value2, out Quaternion result)
+        public static void Multiply(in Quaternion value1, in Quaternion value2, out Quaternion result)
         {
             float q1x = value1.X;
             float q1y = value1.Y;
@@ -885,7 +885,7 @@ namespace System.Numerics
         /// <param name="value1">The source Quaternion.</param>
         /// <param name="value2">The scalar value.</param>
         /// <param name="result">The result of the multiplication.</param>
-        public static void Multiply(ref Quaternion value1, float value2, out Quaternion result)
+        public static void Multiply(in Quaternion value1, float value2, out Quaternion result)
         {
             result.X = value1.X * value2;
             result.Y = value1.Y * value2;
@@ -943,7 +943,7 @@ namespace System.Numerics
         /// <param name="value1">The source Quaternion.</param>
         /// <param name="value2">The divisor.</param>
         /// <param name="result">The result of the division.</param>
-        public static void Divide(ref Quaternion value1, ref Quaternion value2, out Quaternion result)
+        public static void Divide(in Quaternion value1, in Quaternion value2, out Quaternion result)
         {
             float q1x = value1.X;
             float q1y = value1.Y;

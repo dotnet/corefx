@@ -114,8 +114,10 @@ namespace System.Numerics.Tests
             actual = Vector4.DistanceSquared(a, b);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.DistanceSquared did not return the expected value.");
 
-            Vector4.DistanceSquared(ref a, ref b, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.DistanceSquared(in a, in b, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.DistanceSquared did not return the expected value.");
+#endif
         }
 
         // A test for Distance (Vector4f, Vector4f)
@@ -131,8 +133,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Distance(a, b);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Distance did not return the expected value.");
 
-            Vector4.Distance(ref a, ref b, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Distance(in a, in b, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Distance did not return the expected value.");
+#endif
         }
 
         // A test for Distance (Vector4f, Vector4f)
@@ -147,8 +151,10 @@ namespace System.Numerics.Tests
             float actual = Vector4.Distance(a, b);
             Assert.Equal(0.0f, actual);
 
-            Vector4.Distance(ref a, ref b, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Distance(in a, in b, out actual);
             Assert.Equal(0.0f, actual);
+#endif
         }
 
         // A test for Dot (Vector4f, Vector4f)
@@ -164,8 +170,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Dot(a, b);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Dot did not return the expected value.");
 
-            Vector4.Dot(ref a, ref b, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Dot(in a, in b, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Dot did not return the expected value.");
+#endif
         }
 
         // A test for Dot (Vector4f, Vector4f)
@@ -183,8 +191,10 @@ namespace System.Numerics.Tests
             float actual = Vector4.Dot(d, e);
             Assert.True(MathHelper.Equal(0.0f, actual), "Vector4f.Dot did not return the expected value.");
 
-            Vector4.Dot(ref d, ref e, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Dot(in d, in e, out actual);
             Assert.True(MathHelper.Equal(0.0f, actual), "Vector4f.Dot did not return the expected value.");
+#endif
         }
 
         // A test for Length ()
@@ -246,8 +256,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Min(a, b);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Min did not return the expected value.");
 
-            Vector4.Min(ref a, ref b, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Min(in a, in b, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Min did not return the expected value.");
+#endif
         }
 
         // A test for Max (Vector4f, Vector4f)
@@ -262,8 +274,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Max(a, b);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Max did not return the expected value.");
 
-            Vector4.Max(ref a, ref b, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Max(in a, in b, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Max did not return the expected value.");
+#endif
         }
 
         [Fact]
@@ -277,27 +291,35 @@ namespace System.Numerics.Tests
             actual = Vector4.Min(min, max);
             Assert.Equal(actual, min);
 
-            Vector4.Min(ref min, ref max, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Min(in min, in max, out actual);
             Assert.Equal(actual, min);
+#endif
 
             actual = Vector4.Min(max, min);
             Assert.Equal(actual, min);
 
-            Vector4.Min(ref max, ref min, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Min(in max, in min, out actual);
             Assert.Equal(actual, min);
+#endif
 
             // Max.
             actual = Vector4.Max(min, max);
             Assert.Equal(actual, max);
 
-            Vector4.Max(ref min, ref max, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Max(in min, in max, out actual);
             Assert.Equal(actual, max);
+#endif
 
             actual = Vector4.Max(max, min);
             Assert.Equal(actual, max);
 
-            Vector4.Max(ref max, ref min, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Max(in max, in min, out actual);
             Assert.Equal(actual, max);
+#endif
         }
 
         // A test for Clamp (Vector4f, Vector4f, Vector4f)
@@ -314,8 +336,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
 
-            Vector4.Clamp(ref a, ref min, ref max, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Clamp(in a, in min, in max, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
+#endif
 
             // Normal case.
             // Case N2: specified value is bigger than max value.
@@ -324,8 +348,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
 
-            Vector4.Clamp(ref a, ref min, ref max, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Clamp(in a, in min, in max, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
+#endif
 
             // Case N3: specified value is smaller than max value.
             a = new Vector4(-2.0f, -3.0f, -4.0f, -5.0f);
@@ -333,8 +359,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
 
-            Vector4.Clamp(ref a, ref min, ref max, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Clamp(in a, in min, in max, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
+#endif
 
             // Case N4: combination case.
             a = new Vector4(-2.0f, 0.5f, 4.0f, -5.0f);
@@ -342,8 +370,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
 
-            Vector4.Clamp(ref a, ref min, ref max, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Clamp(in a, in min, in max, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
+#endif
 
             // User specified min value is bigger than max value.
             max = new Vector4(0.0f, 0.1f, 0.13f, 0.14f);
@@ -355,8 +385,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
 
-            Vector4.Clamp(ref a, ref min, ref max, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Clamp(in a, in min, in max, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
+#endif
 
             // Normal case.
             // Case W2: specified value is bigger than max and min value.
@@ -365,8 +397,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
 
-            Vector4.Clamp(ref a, ref min, ref max, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Clamp(in a, in min, in max, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
+#endif
 
             // Case W3: specified value is smaller than min and max value.
             a = new Vector4(-2.0f, -3.0f, -4.0f, -5.0f);
@@ -374,8 +408,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
 
-            Vector4.Clamp(ref a, ref min, ref max, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Clamp(in a, in min, in max, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Clamp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Vector4f, Vector4f, float)
@@ -393,8 +429,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Lerp did not return the expected value.");
 
-            Vector4.Lerp(ref a, ref b, t, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Lerp(in a, in b, t, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Vector4f, Vector4f, float)
@@ -410,8 +448,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Lerp did not return the expected value.");
 
-            Vector4.Lerp(ref a, ref b, t, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Lerp(in a, in b, t, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Vector4f, Vector4f, float)
@@ -427,8 +467,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Lerp did not return the expected value.");
 
-            Vector4.Lerp(ref a, ref b, t, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Lerp(in a, in b, t, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Vector4f, Vector4f, float)
@@ -444,8 +486,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Lerp did not return the expected value.");
 
-            Vector4.Lerp(ref a, ref b, t, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Lerp(in a, in b, t, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Vector4f, Vector4f, float)
@@ -461,8 +505,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Lerp did not return the expected value.");
 
-            Vector4.Lerp(ref a, ref b, t, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Lerp(in a, in b, t, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Vector4f, Vector4f, float)
@@ -478,8 +524,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Lerp did not return the expected value.");
 
-            Vector4.Lerp(ref a, ref b, t, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Lerp(in a, in b, t, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector2f, Matrix4x4)
@@ -502,8 +550,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector3f, Matrix4x4)
@@ -526,8 +576,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "vector4.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "vector4.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector4f, Matrix4x4)
@@ -550,8 +602,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
 
             // 
             v.W = 1.0f;
@@ -560,8 +614,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector4f, Matrix4x4)
@@ -576,8 +632,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector4f, Matrix4x4)
@@ -592,8 +650,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector3f, Matrix4x4)
@@ -615,10 +675,12 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
+#if FEATURE_REF_OVERLOADS
             Vector4 v2 = new Vector4(v, 1.0f);
-            Vector4.Transform(ref v2, ref m, out expected);
-            Vector4.Transform(ref v, ref m, out actual);
+            Vector4.Transform(in v2, in m, out expected);
+            Vector4.Transform(in v, in m, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector3f, Matrix4x4)
@@ -633,8 +695,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector3f, Matrix4x4)
@@ -649,8 +713,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector2f, Matrix4x4)
@@ -672,11 +738,12 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
+#if FEATURE_REF_OVERLOADS
             Vector4 v2 = new Vector4(v, 0.0f, 1.0f);
-            Vector4.Transform(ref v2, ref m, out expected);
-            Vector4.Transform(ref v, ref m, out actual);
+            Vector4.Transform(in v2, in m, out expected);
+            Vector4.Transform(in v, in m, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
-
+#endif
         }
 
         // A test for Transform (Vector2f, Matrix4x4)
@@ -691,8 +758,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector2f, Matrix4x4)
@@ -707,8 +776,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector2f, Quaternion)
@@ -731,10 +802,11 @@ namespace System.Numerics.Tests
             actual = Vector4.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out expected);
-            Vector4.Transform(ref v, ref q, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out expected);
+            Vector4.Transform(in v, in q, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
-
+#endif
         }
 
         // A test for Transform (Vector3f, Quaternion)
@@ -756,9 +828,11 @@ namespace System.Numerics.Tests
             actual = Vector4.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "vector4.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out expected);
-            Vector4.Transform(ref v, ref q, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out expected);
+            Vector4.Transform(in v, in q, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "vector4.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector4f, Quaternion)
@@ -780,9 +854,11 @@ namespace System.Numerics.Tests
             actual = Vector4.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out expected);
-            Vector4.Transform(ref v, ref q, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out expected);
+            Vector4.Transform(in v, in q, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
 
             // 
             v.W = 1.0f;
@@ -790,8 +866,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref q, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in q, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector4f, Quaternion)
@@ -806,8 +884,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref q, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in q, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector4f, Quaternion)
@@ -822,8 +902,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref q, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in q, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector3f, Quaternion)
@@ -843,9 +925,11 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out actual);
-            Vector4.Transform(ref v, ref q, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out actual);
+            Vector4.Transform(in v, in q, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector3f, Quaternion)
@@ -860,8 +944,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref q, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in q, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector3f, Quaternion)
@@ -876,8 +962,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref q, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in q, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector2f, Quaternion)
@@ -897,9 +985,11 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref m, out expected);
-            Vector4.Transform(ref v, ref q, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in m, out expected);
+            Vector4.Transform(in v, in q, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector2f, Quaternion)
@@ -914,8 +1004,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref q, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in q, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector2f, Matrix4x4)
@@ -930,8 +1022,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
 
-            Vector4.Transform(ref v, ref q, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Transform(in v, in q, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Normalize (Vector4f)
@@ -950,8 +1044,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Normalize(a);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Normalize did not return the expected value.");
 
-            Vector4.Normalize(ref a, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Normalize(in a, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Normalize did not return the expected value.");
+#endif
         }
 
         // A test for Normalize (Vector4f)
@@ -965,8 +1061,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Normalize(a);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Normalize did not return the expected value.");
 
-            Vector4.Normalize(ref a, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Normalize(in a, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Normalize did not return the expected value.");
+#endif
         }
 
         // A test for Normalize (Vector4f)
@@ -980,8 +1078,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Normalize(a);
             Assert.True(float.IsNaN(actual.X) && float.IsNaN(actual.Y) && float.IsNaN(actual.Z) && float.IsNaN(actual.W), "Vector4f.Normalize did not return the expected value.");
 
-            Vector4.Normalize(ref a, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Normalize(in a, out actual);
             Assert.True(float.IsNaN(actual.X) && float.IsNaN(actual.Y) && float.IsNaN(actual.Z) && float.IsNaN(actual.W), "Vector4f.Normalize did not return the expected value.");
+#endif
         }
 
         // A test for operator - (Vector4f)
@@ -1235,8 +1335,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Add(a, b);
             Assert.Equal(expected, actual);
 
-            Vector4.Add(ref a, ref b, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Add(in a, in b, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Divide (Vector4f, float)
@@ -1250,8 +1352,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Divide(a, div);
             Assert.Equal(expected, actual);
 
-            Vector4.Divide(ref a, div, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Divide(in a, div, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Divide (Vector4f, Vector4f)
@@ -1267,8 +1371,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Divide(a, b);
             Assert.Equal(expected, actual);
 
-            Vector4.Divide(ref a, ref b, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Divide(in a, in b, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Equals (object)
@@ -1315,8 +1421,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Multiply(factor, a);
             Assert.Equal(expected, actual);
 
-            Vector4.Multiply(factor, ref a, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Multiply(factor, in a, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Multiply (Vector4f, float)
@@ -1329,8 +1437,10 @@ namespace System.Numerics.Tests
             Vector4 actual = Vector4.Multiply(a, factor);
             Assert.Equal(expected, actual);
 
-            Vector4.Multiply(ref a, factor, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Multiply(in a, factor, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Multiply (Vector4f, Vector4f)
@@ -1346,8 +1456,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Multiply(a, b);
             Assert.Equal(expected, actual);
 
-            Vector4.Multiply(ref a, ref b, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Multiply(in a, in b, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Negate (Vector4f)
@@ -1362,8 +1474,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Negate(a);
             Assert.Equal(expected, actual);
 
-            Vector4.Negate(ref a, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Negate(in a, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for operator != (Vector4f, Vector4f)
@@ -1417,8 +1531,10 @@ namespace System.Numerics.Tests
             actual = Vector4.Subtract(a, b);
             Assert.Equal(expected, actual);
 
-            Vector4.Subtract(ref a, ref b, out actual);
+#if FEATURE_REF_OVERLOADS
+            Vector4.Subtract(in a, in b, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for UnitW
@@ -1546,9 +1662,10 @@ namespace System.Numerics.Tests
             Assert.Equal(Single.PositiveInfinity, v3.Z);
             Assert.Equal(Single.NaN, v3.W);
 
+#if FEATURE_REF_OVERLOADS
             Vector4 v4 = new Vector4(Single.PositiveInfinity, 0.0f, Single.NegativeInfinity, Single.NaN);
-            Vector4.Abs(ref v4, out v3);
-            Vector4.Abs(ref v1, out v);
+            Vector4.Abs(in v4, out v3);
+            Vector4.Abs(in v1, out v);
             Assert.Equal(2.5f, v.X);
             Assert.Equal(2.0f, v.Y);
             Assert.Equal(3.0f, v.Z);
@@ -1557,6 +1674,7 @@ namespace System.Numerics.Tests
             Assert.Equal(0.0f, v3.Y);
             Assert.Equal(Single.PositiveInfinity, v3.Z);
             Assert.Equal(Single.NaN, v3.W);
+#endif
         }
 
         [Fact]
@@ -1570,15 +1688,17 @@ namespace System.Numerics.Tests
             Assert.Equal(2, (int)Vector4.SquareRoot(v2).W);
             Assert.Equal(Single.NaN, Vector4.SquareRoot(v1).X);
 
+#if FEATURE_REF_OVERLOADS
             Vector4 sqrt1;
             Vector4 sqrt2;
-            Vector4.SquareRoot(ref v1, out sqrt1);
-            Vector4.SquareRoot(ref v2, out sqrt2);
+            Vector4.SquareRoot(in v1, out sqrt1);
+            Vector4.SquareRoot(in v2, out sqrt2);
             Assert.Equal(2, (int)sqrt2.X);
             Assert.Equal(2, (int)sqrt2.Y);
             Assert.Equal(2, (int)sqrt2.Z);
             Assert.Equal(2, (int)sqrt2.W);
             Assert.Equal(float.NaN, sqrt1.X);
+#endif
         }
 
         // A test to make sure these types are blittable directly into GPU buffer memory layouts

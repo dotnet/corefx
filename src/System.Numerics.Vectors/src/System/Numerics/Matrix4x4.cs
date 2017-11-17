@@ -246,10 +246,10 @@ namespace System.Numerics
         /// <param name="cameraForwardVector">The forward vector of the camera.</param>
         /// <param name="result">The created billboard matrix</param>
         public static void CreateBillboard(
-            ref Vector3 objectPosition,
-            ref Vector3 cameraPosition,
-            ref Vector3 cameraUpVector,
-            ref Vector3 cameraForwardVector,
+            in Vector3 objectPosition,
+            in Vector3 cameraPosition,
+            in Vector3 cameraUpVector,
+            in Vector3 cameraForwardVector,
             out Matrix4x4 result)
         {
             const float epsilon = 1e-4f;
@@ -385,11 +385,11 @@ namespace System.Numerics
         /// <param name="objectForwardVector">Forward vector of the object.</param>
         /// <param name="result">The created billboard matrix.</param>
         public static void CreateConstrainedBillboard(
-            ref Vector3 objectPosition,
-            ref Vector3 cameraPosition,
-            ref Vector3 rotateAxis,
-            ref Vector3 cameraForwardVector,
-            ref Vector3 objectForwardVector,
+            in Vector3 objectPosition,
+            in Vector3 cameraPosition,
+            in Vector3 rotateAxis,
+            in Vector3 cameraForwardVector,
+            in Vector3 objectForwardVector,
             out Matrix4x4 result)
         {
             const float epsilon = 1e-4f;
@@ -494,7 +494,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="position">The amount to translate in each axis.</param>
         /// <param name="result">The translation matrix.</param>
-        public static void CreateTranslation(ref Vector3 position, out Matrix4x4 result)
+        public static void CreateTranslation(in Vector3 position, out Matrix4x4 result)
         {
             result.M11 = 1.0f;
             result.M12 = 0.0f;
@@ -677,7 +677,7 @@ namespace System.Numerics
         /// <param name="zScale">Value to scale by on the Z-axis.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <param name="result">The scaling matrix.</param>
-        public static void CreateScale(float xScale, float yScale, float zScale, ref Vector3 centerPoint, out Matrix4x4 result)
+        public static void CreateScale(float xScale, float yScale, float zScale, in Vector3 centerPoint, out Matrix4x4 result)
         {
             float tx = centerPoint.X * (1 - xScale);
             float ty = centerPoint.Y * (1 - yScale);
@@ -735,7 +735,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="scales">The vector containing the amount to scale by on each axis.</param>
         /// <param name="result">The scaling matrix.</param>
-        public static void CreateScale(ref Vector3 scales, out Matrix4x4 result)
+        public static void CreateScale(in Vector3 scales, out Matrix4x4 result)
         {
             result.M11 = scales.X;
             result.M12 = 0.0f;
@@ -795,7 +795,7 @@ namespace System.Numerics
         /// <param name="scales">The vector containing the amount to scale by on each axis.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <param name="result">The scaling matrix.</param>
-        public static void CreateScale(ref Vector3 scales, ref Vector3 centerPoint, out Matrix4x4 result)
+        public static void CreateScale(in Vector3 scales, in Vector3 centerPoint, out Matrix4x4 result)
         {
             float tx = centerPoint.X * (1 - scales.X);
             float ty = centerPoint.Y * (1 - scales.Y);
@@ -913,7 +913,7 @@ namespace System.Numerics
         /// <param name="scale">The uniform scaling factor.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <param name="result">The scaling matrix.</param>
-        public static void CreateScale(float scale, ref Vector3 centerPoint, out Matrix4x4 result)
+        public static void CreateScale(float scale, in Vector3 centerPoint, out Matrix4x4 result)
         {
             float tx = centerPoint.X * (1 - scale);
             float ty = centerPoint.Y * (1 - scale);
@@ -1051,7 +1051,7 @@ namespace System.Numerics
         /// <param name="radians">The amount, in radians, by which to rotate around the X-axis.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <param name="result">The rotation matrix.</param>
-        public static void CreateRotationX(float radians, ref Vector3 centerPoint, out Matrix4x4 result)
+        public static void CreateRotationX(float radians, in Vector3 centerPoint, out Matrix4x4 result)
         {
             float c = (float)Math.Cos(radians);
             float s = (float)Math.Sin(radians);
@@ -1195,7 +1195,7 @@ namespace System.Numerics
         /// <param name="radians">The amount, in radians, by which to rotate around the Y-axis.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <param name="result">The rotation matrix.</param>
-        public static void CreateRotationY(float radians, ref Vector3 centerPoint, out Matrix4x4 result)
+        public static void CreateRotationY(float radians, in Vector3 centerPoint, out Matrix4x4 result)
         {
             float c = (float)Math.Cos(radians);
             float s = (float)Math.Sin(radians);
@@ -1339,7 +1339,7 @@ namespace System.Numerics
         /// <param name="radians">The amount, in radians, by which to rotate around the Z-axis.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <param name="result">The rotation matrix.</param>
-        public static void CreateRotationZ(float radians, ref Vector3 centerPoint, out Matrix4x4 result)
+        public static void CreateRotationZ(float radians, in Vector3 centerPoint, out Matrix4x4 result)
         {
             float c = (float)Math.Cos(radians);
             float s = (float)Math.Sin(radians);
@@ -1435,7 +1435,7 @@ namespace System.Numerics
         /// <param name="axis">The axis to rotate around.</param>
         /// <param name="angle">The angle to rotate around the given axis, in radians.</param>
         /// <param name="result">The rotation matrix.</param>
-        public static void CreateFromAxisAngle(ref Vector3 axis, float angle, out Matrix4x4 result)
+        public static void CreateFromAxisAngle(in Vector3 axis, float angle, out Matrix4x4 result)
         {
             // a: angle
             // x, y, z: unit vector for axis.
@@ -1887,7 +1887,7 @@ namespace System.Numerics
         /// <param name="cameraTarget">The target towards which the camera is pointing.</param>
         /// <param name="cameraUpVector">The direction that is "up" from the camera's point of view.</param>
         /// <param name="result">The view matrix.</param>
-        public static void CreateLookAt(ref Vector3 cameraPosition, ref Vector3 cameraTarget, ref Vector3 cameraUpVector, out Matrix4x4 result)
+        public static void CreateLookAt(in Vector3 cameraPosition, in Vector3 cameraTarget, in Vector3 cameraUpVector, out Matrix4x4 result)
         {
             Vector3 zaxis = Vector3.Normalize(cameraPosition - cameraTarget);
             Vector3 xaxis = Vector3.Normalize(Vector3.Cross(cameraUpVector, zaxis));
@@ -1953,7 +1953,7 @@ namespace System.Numerics
         /// <param name="forward">Forward direction of the object.</param>
         /// <param name="up">Upward direction of the object; usually [0, 1, 0].</param>
         /// <param name="result">The world matrix.</param>
-        public static void CreateWorld(ref Vector3 position, ref Vector3 forward, ref Vector3 up, out Matrix4x4 result)
+        public static void CreateWorld(in Vector3 position, in Vector3 forward, in Vector3 up, out Matrix4x4 result)
         {
             Vector3 zaxis = Vector3.Normalize(-forward);
             Vector3 xaxis = Vector3.Normalize(Vector3.Cross(up, zaxis));
@@ -2022,7 +2022,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="quaternion">The source Quaternion.</param>
         /// <param name="result">The rotation matrix.</param>
-        public static void CreateFromQuaternion(ref Quaternion quaternion, out Matrix4x4 result)
+        public static void CreateFromQuaternion(in Quaternion quaternion, out Matrix4x4 result)
         {
             float xx = quaternion.X * quaternion.X;
             float yy = quaternion.Y * quaternion.Y;
@@ -2077,7 +2077,7 @@ namespace System.Numerics
         public static void CreateFromYawPitchRoll(float yaw, float pitch, float roll, out Matrix4x4 result)
         {
             Quaternion q = Quaternion.CreateFromYawPitchRoll(yaw, pitch, roll);
-            CreateFromQuaternion(ref q, out result);
+            CreateFromQuaternion(q, out result);
         }
 
         /// <summary>
@@ -2127,7 +2127,7 @@ namespace System.Numerics
         /// <param name="lightDirection">The direction from which the light that will cast the shadow is coming.</param>
         /// <param name="plane">The Plane onto which the new matrix should flatten geometry so as to cast a shadow.</param>
         /// <param name="result">A new Matrix that can be used to flatten geometry onto the specified plane from the specified direction.</param>
-        public static void CreateShadow(ref Vector3 lightDirection, ref Plane plane, out Matrix4x4 result)
+        public static void CreateShadow(in Vector3 lightDirection, in Plane plane, out Matrix4x4 result)
         {
             Plane p = Plane.Normalize(plane);
 
@@ -2205,13 +2205,13 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The Plane about which to create a reflection.</param>
         /// <param name="result">A new matrix expressing the reflection.</param>
-        public static void CreateReflection(ref Plane value, out Matrix4x4 result)
+        public static void CreateReflection(in Plane value, out Matrix4x4 result)
         {
-            value = Plane.Normalize(value);
+            Plane.Normalize(value, out Plane normalizedValue);
 
-            float a = value.Normal.X;
-            float b = value.Normal.Y;
-            float c = value.Normal.Z;
+            float a = normalizedValue.Normal.X;
+            float b = normalizedValue.Normal.Y;
+            float c = normalizedValue.Normal.Z;
 
             float fa = -2.0f * a;
             float fb = -2.0f * b;
@@ -2232,9 +2232,9 @@ namespace System.Numerics
             result.M33 = fc * c + 1.0f;
             result.M34 = 0.0f;
 
-            result.M41 = fa * value.D;
-            result.M42 = fb * value.D;
-            result.M43 = fc * value.D;
+            result.M41 = fa * normalizedValue.D;
+            result.M42 = fb * normalizedValue.D;
+            result.M43 = fc * normalizedValue.D;
             result.M44 = 1.0f;
         }
 
@@ -2462,7 +2462,7 @@ namespace System.Numerics
         /// <param name="matrix">The source matrix to invert.</param>
         /// <param name="result">If successful, contains the inverted matrix.</param>
         /// <param name="succeeded">True if the source matrix could be inverted; False otherwise.</param>
-        public static void Invert(ref Matrix4x4 matrix, out bool succeeded, out Matrix4x4 result)
+        public static void Invert(in Matrix4x4 matrix, out bool succeeded, out Matrix4x4 result)
         {
             //                                       -1
             // If you have matrix M, inverse Matrix M   can compute
@@ -2849,7 +2849,7 @@ namespace System.Numerics
         /// <param name="rotation">The rotation component of the transformation matrix.</param>
         /// <param name="translation">The translation component of the transformation matrix</param>
         /// <param name="succeeded">True if the source matrix was successfully decomposed; False otherwise.</param>
-        public static void Decompose(ref Matrix4x4 matrix, out bool succeeded, out Vector3 scale, out Quaternion rotation, out Vector3 translation)
+        public static void Decompose(in Matrix4x4 matrix, out bool succeeded, out Vector3 scale, out Quaternion rotation, out Vector3 translation)
         {
             succeeded = true;
 
@@ -3110,7 +3110,7 @@ namespace System.Numerics
         /// <param name="value">The source matrix to transform.</param>
         /// <param name="rotation">The rotation to apply.</param>
         /// <param name="result">The transformed matrix.</param>
-        public static void Transform(ref Matrix4x4 value, ref Quaternion rotation, out Matrix4x4 result)
+        public static void Transform(in Matrix4x4 value, in Quaternion rotation, out Matrix4x4 result)
         {
             // Compute rotation matrix.
             float x2 = rotation.X + rotation.X;
@@ -3198,7 +3198,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="matrix">The source matrix.</param>
         /// <param name="result">The transposed matrix.</param>
-        public static void Transpose(ref Matrix4x4 matrix, out Matrix4x4 result)
+        public static void Transpose(in Matrix4x4 matrix, out Matrix4x4 result)
         {
             result.M11 = matrix.M11;
             result.M12 = matrix.M21;
@@ -3263,7 +3263,7 @@ namespace System.Numerics
         /// <param name="matrix2">The second source matrix.</param>
         /// <param name="amount">The relative weight of the second source matrix.</param>
         /// <param name="result">The interpolated matrix.</param>
-        public static void Lerp(ref Matrix4x4 matrix1, ref Matrix4x4 matrix2, float amount, out Matrix4x4 result)
+        public static void Lerp(in Matrix4x4 matrix1, in Matrix4x4 matrix2, float amount, out Matrix4x4 result)
         {
             // First row
             result.M11 = matrix1.M11 + (matrix2.M11 - matrix1.M11) * amount;
@@ -3324,7 +3324,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The source matrix.</param>
         /// <param name="result">The negated matrix.</param>
-        public static void Negate(ref Matrix4x4 value, out Matrix4x4 result)
+        public static void Negate(in Matrix4x4 value, out Matrix4x4 result)
         {
             result.M11 = -value.M11;
             result.M12 = -value.M12;
@@ -3380,7 +3380,7 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <param name="result">The resulting matrix.</param>
-        public static void Add(ref Matrix4x4 value1, ref Matrix4x4 value2, out Matrix4x4 result)
+        public static void Add(in Matrix4x4 value1, in Matrix4x4 value2, out Matrix4x4 result)
         {
             result.M11 = value1.M11 + value2.M11;
             result.M12 = value1.M12 + value2.M12;
@@ -3436,7 +3436,7 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <param name="result">The result of the subtraction.</param>
-        public static void Subtract(ref Matrix4x4 value1, ref Matrix4x4 value2, out Matrix4x4 result)
+        public static void Subtract(in Matrix4x4 value1, in Matrix4x4 value2, out Matrix4x4 result)
         {
             result.M11 = value1.M11 - value2.M11;
             result.M12 = value1.M12 - value2.M12;
@@ -3499,7 +3499,7 @@ namespace System.Numerics
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <param name="result">The result of the multiplication.</param>
-        public static void Multiply(ref Matrix4x4 value1, ref Matrix4x4 value2, out Matrix4x4 result)
+        public static void Multiply(in Matrix4x4 value1, in Matrix4x4 value2, out Matrix4x4 result)
         {
             // First row
             result.M11 = value1.M11 * value2.M11 + value1.M12 * value2.M21 + value1.M13 * value2.M31 + value1.M14 * value2.M41;
@@ -3562,7 +3562,7 @@ namespace System.Numerics
         /// <param name="value1">The source matrix.</param>
         /// <param name="value2">The scaling factor.</param>
         /// <param name="result">The scaled matrix.</param>
-        public static void Multiply(ref Matrix4x4 value1, float value2, out Matrix4x4 result)
+        public static void Multiply(in Matrix4x4 value1, float value2, out Matrix4x4 result)
         {
             result.M11 = value1.M11 * value2;
             result.M12 = value1.M12 * value2;

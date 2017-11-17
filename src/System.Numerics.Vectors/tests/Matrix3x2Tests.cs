@@ -98,14 +98,14 @@ namespace System.Numerics.Tests
             Assert.True(Matrix3x2.Invert(mtx, out actual));
             Assert.True(MathHelper.Equal(expected, actual), "Matrix3x2.Invert did not return the expected value.");
 
-            // By-Ref
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateRotation(MathHelper.ToRadians(30.0f), out mtx);
 
             bool succeeded;
-            Matrix3x2.Invert(ref mtx, out succeeded, out actual);
+            Matrix3x2.Invert(in mtx, out succeeded, out actual);
             Assert.True(succeeded, "Inversion should have succeeded.");
             Assert.True(MathHelper.Equal(expected, actual), "Matrix3x2.Invert did not return the expected value.");
-
+#endif
 
             Matrix3x2 i = mtx * actual;
             Assert.True(MathHelper.Equal(i, Matrix3x2.Identity), "Matrix3x2.Invert did not return the expected value.");
@@ -121,11 +121,12 @@ namespace System.Numerics.Tests
             Assert.True(Matrix3x2.Invert(mtx, out actual));
             Assert.True(MathHelper.Equal(actual, Matrix3x2.Identity));
 
-            // By-Ref
+#if FEATURE_REF_OVERLOADS
             bool succeeded;
-            Matrix3x2.Invert(ref mtx, out succeeded, out actual);
+            Matrix3x2.Invert(in mtx, out succeeded, out actual);
             Assert.True(succeeded, "Inversion should have succeeded.");
             Assert.True(MathHelper.Equal(actual, Matrix3x2.Identity));
+#endif
         }
 
         // A test for Invert (Matrix3x2)
@@ -140,14 +141,15 @@ namespace System.Numerics.Tests
             Matrix3x2 i = mtx * actual;
             Assert.True(MathHelper.Equal(i, Matrix3x2.Identity));
 
-            // By-Ref
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateTranslation(23, 42, out mtx);
 
             bool succeeded;
-            Matrix3x2.Invert(ref mtx, out succeeded, out actual);
+            Matrix3x2.Invert(in mtx, out succeeded, out actual);
             Assert.True(succeeded, "Inversion should have succeeded.");
             i = mtx * actual;
             Assert.True(MathHelper.Equal(i, Matrix3x2.Identity));
+#endif
         }
 
         // A test for Invert (Matrix3x2)
@@ -162,14 +164,15 @@ namespace System.Numerics.Tests
             Matrix3x2 i = mtx * actual;
             Assert.True(MathHelper.Equal(i, Matrix3x2.Identity));
 
-            // By-Ref
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateRotation(2, out mtx);
 
             bool succeeded;
-            Matrix3x2.Invert(ref mtx, out succeeded, out actual);
+            Matrix3x2.Invert(in mtx, out succeeded, out actual);
             Assert.True(succeeded, "Inversion should have succeeded.");
             i = mtx * actual;
             Assert.True(MathHelper.Equal(i, Matrix3x2.Identity));
+#endif
         }
 
         // A test for Invert (Matrix3x2)
@@ -184,15 +187,16 @@ namespace System.Numerics.Tests
             Matrix3x2 i = mtx * actual;
             Assert.True(MathHelper.Equal(i, Matrix3x2.Identity));
 
-            // By-Ref
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateScale(23, -42, out mtx);
 
             bool succeeded;
-            Matrix3x2.Invert(ref mtx, out succeeded, out actual);
+            Matrix3x2.Invert(in mtx, out succeeded, out actual);
             Assert.True(succeeded, "Inversion should have succeeded.");
 
             i = mtx * actual;
             Assert.True(MathHelper.Equal(i, Matrix3x2.Identity));
+#endif
         }
 
         // A test for Invert (Matrix3x2)
@@ -209,22 +213,22 @@ namespace System.Numerics.Tests
             Matrix3x2 i = mtx * actual;
             Assert.True(MathHelper.Equal(i, Matrix3x2.Identity));
 
-            // By-ref
+#if FEATURE_REF_OVERLOADS
             Matrix3x2 rotation, scale, translation;
             Matrix3x2.CreateRotation(2, out rotation);
             Matrix3x2.CreateScale(23, -42, out scale);
             Matrix3x2.CreateTranslation(17, 53, out translation);
 
-            Matrix3x2.Multiply(ref rotation, ref scale, out mtx);
-            Matrix3x2.Multiply(ref mtx, ref translation, out mtx);
+            Matrix3x2.Multiply(in rotation, in scale, out mtx);
+            Matrix3x2.Multiply(in mtx, in translation, out mtx);
 
             bool suceeded;
-            Matrix3x2.Invert(ref mtx, out suceeded, out actual);
+            Matrix3x2.Invert(in mtx, out suceeded, out actual);
             Assert.True(suceeded);
 
-            Matrix3x2.Multiply(ref mtx, ref actual, out i);
+            Matrix3x2.Multiply(in mtx, in actual, out i);
             Assert.True(MathHelper.Equal(i, Matrix3x2.Identity));
-
+#endif
         }
 
         // A test for CreateRotation (float)
@@ -243,8 +247,10 @@ namespace System.Numerics.Tests
             actual = Matrix3x2.CreateRotation(radians);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix3x2.CreateRotation did not return the expected value.");
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateRotation(radians, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix3x2.CreateRotation did not return the expected value.");
+#endif
         }
 
         // A test for CreateRotation (float, Vector2f)
@@ -263,11 +269,11 @@ namespace System.Numerics.Tests
             rotateAroundZeroExpected = Matrix3x2.CreateRotation(radians);
             Assert.True(MathHelper.Equal(rotateAroundZero, rotateAroundZeroExpected));
 
-            // Around Zero - ByRef
-
-            Matrix3x2.CreateRotation(radians, ref zero, out rotateAroundZero);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateRotation(radians, in zero, out rotateAroundZero);
             Matrix3x2.CreateRotation(radians, out rotateAroundZeroExpected);
             Assert.True(MathHelper.Equal(rotateAroundZero, rotateAroundZeroExpected));
+#endif
 
             // Around Center
 
@@ -278,20 +284,20 @@ namespace System.Numerics.Tests
             rotateAroundCenterExpected = Matrix3x2.CreateTranslation(-center) * Matrix3x2.CreateRotation(radians) * Matrix3x2.CreateTranslation(center);
             Assert.True(MathHelper.Equal(rotateAroundCenter, rotateAroundCenterExpected));
 
-            // Around Center - ByRef
-
-            Matrix3x2.CreateRotation(radians, ref center, out rotateAroundCenter);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateRotation(radians, in center, out rotateAroundCenter);
 
             Matrix3x2 negTranslation, rotation, translation;
             Vector2 negCenter = -center;
-            Matrix3x2.CreateTranslation(ref negCenter, out negTranslation);
-            Matrix3x2.CreateTranslation(ref center, out translation);
+            Matrix3x2.CreateTranslation(in negCenter, out negTranslation);
+            Matrix3x2.CreateTranslation(in center, out translation);
             Matrix3x2.CreateRotation(radians, out rotation);
 
-            Matrix3x2.Multiply(ref negTranslation, ref rotation, out rotateAroundCenterExpected);
-            Matrix3x2.Multiply(ref rotateAroundCenterExpected, ref translation, out rotateAroundCenterExpected);
+            Matrix3x2.Multiply(in negTranslation, in rotation, out rotateAroundCenterExpected);
+            Matrix3x2.Multiply(in rotateAroundCenterExpected, in translation, out rotateAroundCenterExpected);
 
             Assert.True(MathHelper.Equal(rotateAroundCenter, rotateAroundCenterExpected));
+#endif
         }
 
         // A test for CreateRotation (float)
@@ -302,44 +308,58 @@ namespace System.Numerics.Tests
             Matrix3x2 actual = Matrix3x2.CreateRotation(0);
             Assert.Equal(new Matrix3x2(1, 0, 0, 1, 0, 0), actual);
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateRotation(0, out actual);
             Assert.Equal(new Matrix3x2(1, 0, 0, 1, 0, 0), actual);
+#endif
 
             actual = Matrix3x2.CreateRotation(MathHelper.Pi / 2);
             Assert.Equal(new Matrix3x2(0, 1, -1, 0, 0, 0), actual);
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateRotation(MathHelper.Pi / 2, out actual);
             Assert.Equal(new Matrix3x2(0, 1, -1, 0, 0, 0), actual);
+#endif
 
             actual = Matrix3x2.CreateRotation(MathHelper.Pi);
             Assert.Equal(new Matrix3x2(-1, 0, 0, -1, 0, 0), actual);
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateRotation(MathHelper.Pi, out actual);
             Assert.Equal(new Matrix3x2(-1, 0, 0, -1, 0, 0), actual);
+#endif
 
             actual = Matrix3x2.CreateRotation(MathHelper.Pi * 3 / 2);
             Assert.Equal(new Matrix3x2(0, -1, 1, 0, 0, 0), actual);
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateRotation(MathHelper.Pi * 3 / 2, out actual);
             Assert.Equal(new Matrix3x2(0, -1, 1, 0, 0, 0), actual);
+#endif
 
             actual = Matrix3x2.CreateRotation(MathHelper.Pi * 2);
             Assert.Equal(new Matrix3x2(1, 0, 0, 1, 0, 0), actual);
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateRotation(MathHelper.Pi * 2, out actual);
             Assert.Equal(new Matrix3x2(1, 0, 0, 1, 0, 0), actual);
+#endif
 
             actual = Matrix3x2.CreateRotation(MathHelper.Pi * 5 / 2);
             Assert.Equal(new Matrix3x2(0, 1, -1, 0, 0, 0), actual);
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateRotation(MathHelper.Pi * 5 / 2, out actual);
             Assert.Equal(new Matrix3x2(0, 1, -1, 0, 0, 0), actual);
+#endif
 
             actual = Matrix3x2.CreateRotation(-MathHelper.Pi / 2);
             Assert.Equal(new Matrix3x2(0, -1, 1, 0, 0, 0), actual);
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateRotation(-MathHelper.Pi / 2, out actual);
             Assert.Equal(new Matrix3x2(0, -1, 1, 0, 0, 0), actual);
+#endif
 
             // But merely close-to-90 rotations should not be excessively clamped.
             float delta = MathHelper.ToRadians(0.01f);
@@ -347,14 +367,18 @@ namespace System.Numerics.Tests
             actual = Matrix3x2.CreateRotation(MathHelper.Pi + delta);
             Assert.False(MathHelper.Equal(new Matrix3x2(-1, 0, 0, -1, 0, 0), actual));
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateRotation(MathHelper.Pi + delta, out actual);
             Assert.False(MathHelper.Equal(new Matrix3x2(-1, 0, 0, -1, 0, 0), actual));
+#endif
 
             actual = Matrix3x2.CreateRotation(MathHelper.Pi - delta);
             Assert.False(MathHelper.Equal(new Matrix3x2(-1, 0, 0, -1, 0, 0), actual));
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateRotation(MathHelper.Pi - delta, out actual);
             Assert.False(MathHelper.Equal(new Matrix3x2(-1, 0, 0, -1, 0, 0), actual));
+#endif
         }
 
         // A test for CreateRotation (float, Vector2f)
@@ -367,44 +391,58 @@ namespace System.Numerics.Tests
             Matrix3x2 actual = Matrix3x2.CreateRotation(0, center);
             Assert.Equal(new Matrix3x2(1, 0, 0, 1, 0, 0), actual);
 
-            Matrix3x2.CreateRotation(0, ref center, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateRotation(0, in center, out actual);
             Assert.Equal(new Matrix3x2(1, 0, 0, 1, 0, 0), actual);
+#endif
 
             actual = Matrix3x2.CreateRotation(MathHelper.Pi / 2, center);
             Assert.Equal(new Matrix3x2(0, 1, -1, 0, 10, 4), actual);
 
-            Matrix3x2.CreateRotation(MathHelper.Pi / 2, ref center, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateRotation(MathHelper.Pi / 2, in center, out actual);
             Assert.Equal(new Matrix3x2(0, 1, -1, 0, 10, 4), actual);
+#endif
 
             actual = Matrix3x2.CreateRotation(MathHelper.Pi, center);
             Assert.Equal(new Matrix3x2(-1, 0, 0, -1, 6, 14), actual);
 
-            Matrix3x2.CreateRotation(MathHelper.Pi, ref center, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateRotation(MathHelper.Pi, in center, out actual);
             Assert.Equal(new Matrix3x2(-1, 0, 0, -1, 6, 14), actual);
+#endif
 
             actual = Matrix3x2.CreateRotation(MathHelper.Pi * 3 / 2, center);
             Assert.Equal(new Matrix3x2(0, -1, 1, 0, -4, 10), actual);
 
-            Matrix3x2.CreateRotation(MathHelper.Pi * 3 / 2, ref center, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateRotation(MathHelper.Pi * 3 / 2, in center, out actual);
             Assert.Equal(new Matrix3x2(0, -1, 1, 0, -4, 10), actual);
+#endif
 
             actual = Matrix3x2.CreateRotation(MathHelper.Pi * 2, center);
             Assert.Equal(new Matrix3x2(1, 0, 0, 1, 0, 0), actual);
 
-            Matrix3x2.CreateRotation(MathHelper.Pi * 2, ref center, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateRotation(MathHelper.Pi * 2, in center, out actual);
             Assert.Equal(new Matrix3x2(1, 0, 0, 1, 0, 0), actual);
+#endif
 
             actual = Matrix3x2.CreateRotation(MathHelper.Pi * 5 / 2, center);
             Assert.Equal(new Matrix3x2(0, 1, -1, 0, 10, 4), actual);
 
-            Matrix3x2.CreateRotation(MathHelper.Pi * 5 / 2, ref center, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateRotation(MathHelper.Pi * 5 / 2, in center, out actual);
             Assert.Equal(new Matrix3x2(0, 1, -1, 0, 10, 4), actual);
+#endif
 
             actual = Matrix3x2.CreateRotation(-MathHelper.Pi / 2, center);
             Assert.Equal(new Matrix3x2(0, -1, 1, 0, -4, 10), actual);
 
-            Matrix3x2.CreateRotation(-MathHelper.Pi / 2, ref center, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateRotation(-MathHelper.Pi / 2, in center, out actual);
             Assert.Equal(new Matrix3x2(0, -1, 1, 0, -4, 10), actual);
+#endif
 
             // But merely close-to-90 rotations should not be excessively clamped.
             float delta = MathHelper.ToRadians(0.01f);
@@ -412,14 +450,18 @@ namespace System.Numerics.Tests
             actual = Matrix3x2.CreateRotation(MathHelper.Pi + delta, center);
             Assert.False(MathHelper.Equal(new Matrix3x2(-1, 0, 0, -1, 6, 14), actual));
 
-            Matrix3x2.CreateRotation(MathHelper.Pi + delta, ref center, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateRotation(MathHelper.Pi + delta, in center, out actual);
             Assert.False(MathHelper.Equal(new Matrix3x2(-1, 0, 0, -1, 6, 14), actual));
+#endif
 
             actual = Matrix3x2.CreateRotation(MathHelper.Pi - delta, center);
             Assert.False(MathHelper.Equal(new Matrix3x2(-1, 0, 0, -1, 6, 14), actual));
 
-            Matrix3x2.CreateRotation(MathHelper.Pi - delta, ref center, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateRotation(MathHelper.Pi - delta, in center, out actual);
             Assert.False(MathHelper.Equal(new Matrix3x2(-1, 0, 0, -1, 6, 14), actual));
+#endif
         }
 
         // A test for Invert (Matrix3x2)
@@ -448,9 +490,9 @@ namespace System.Numerics.Tests
                 float.IsNaN(actual.M31) && float.IsNaN(actual.M32)
                 , "Matrix3x2.Invert did not return the expected value.");
 
-            //By-Ref
+#if FEATURE_REF_OVERLOADS
             bool succeeded;
-            Matrix3x2.Invert(ref a, out succeeded, out actual);
+            Matrix3x2.Invert(in a, out succeeded, out actual);
             Assert.False(succeeded, "Inversion should not have succeeded.");
 
             // all the elements in Actual is NaN
@@ -459,7 +501,7 @@ namespace System.Numerics.Tests
                 float.IsNaN(actual.M21) && float.IsNaN(actual.M22) &&
                 float.IsNaN(actual.M31) && float.IsNaN(actual.M32)
                 , "Matrix3x2.Invert did not return the expected value.");
-
+#endif
         }
 
         // A test for Lerp (Matrix3x2, Matrix3x2, float)
@@ -492,8 +534,10 @@ namespace System.Numerics.Tests
             actual = Matrix3x2.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix3x2.Lerp did not return the expected value.");
 
-            Matrix3x2.Lerp(ref a, ref b, t, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.Lerp(in a, in b, t, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix3x2.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for operator - (Matrix3x2)
@@ -645,8 +689,10 @@ namespace System.Numerics.Tests
             actual = Matrix3x2.Add(a, b);
             Assert.Equal(expected, actual);
 
-            Matrix3x2.Add(ref a, ref b, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.Add(in a, in b, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Equals (object)
@@ -717,8 +763,10 @@ namespace System.Numerics.Tests
             actual = Matrix3x2.Multiply(a, b);
             Assert.Equal(expected, actual);
 
-            Matrix3x2.Multiply(ref a, ref b, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.Multiply(in a, in b, out actual);
             Assert.Equal(expected, actual);
+#endif
 
             // Sanity check by comparison with 4x4 multiply.
             a = Matrix3x2.CreateRotation(MathHelper.ToRadians(30)) * Matrix3x2.CreateTranslation(23, 42);
@@ -733,25 +781,27 @@ namespace System.Numerics.Tests
 
             Assert.True(MathHelper.Equal(expected44, actual44), "Matrix3x2.Multiply did not return the expected value.");
 
+#if FEATURE_REF_OVERLOADS
             // Sanity check by comparison with 4x4 multiply - ByRef
             Matrix3x2 rotation, translation1;
             Matrix3x2.CreateRotation(MathHelper.ToRadians(30), out rotation);
             Matrix3x2.CreateTranslation(23, 42, out translation1);
-            Matrix3x2.Multiply(ref rotation, ref translation1, out a);
+            Matrix3x2.Multiply(in rotation, in translation1, out a);
 
             Matrix3x2 scale, translation2;
             Matrix3x2.CreateScale(3, 7, out scale);
             Matrix3x2.CreateTranslation(666, -1, out translation2);
-            Matrix3x2.Multiply(ref scale, ref translation2, out b);
+            Matrix3x2.Multiply(in scale, in translation2, out b);
 
-            Matrix3x2.Multiply(ref a , ref b, out actual);
+            Matrix3x2.Multiply(in a , in b, out actual);
 
             a44 = new Matrix4x4(a);
             b44 = new Matrix4x4(b);
-            Matrix4x4.Multiply(ref a44, ref b44, out expected44);
+            Matrix4x4.Multiply(in a44, in b44, out expected44);
             actual44 = new Matrix4x4(actual);
 
             Assert.True(MathHelper.Equal(expected44, actual44), "Matrix3x2.Multiply did not return the expected value.");
+#endif
         }
 
         // A test for Multiply (Matrix3x2, float)
@@ -764,8 +814,10 @@ namespace System.Numerics.Tests
             Matrix3x2 actual = Matrix3x2.Multiply(a, 3);
             Assert.Equal(expected, actual);
 
-            Matrix3x2.Multiply(ref a, 3, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.Multiply(in a, 3, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for operator * (Matrix3x2, float)
@@ -797,8 +849,10 @@ namespace System.Numerics.Tests
             actual = Matrix3x2.Negate(m);
             Assert.Equal(expected, actual);
 
-            Matrix3x2.Negate(ref m, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.Negate(in m, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for operator != (Matrix3x2, Matrix3x2)
@@ -851,8 +905,10 @@ namespace System.Numerics.Tests
             actual = Matrix3x2.Subtract(a, b);
             Assert.Equal(expected, actual);
 
-            Matrix3x2.Subtract(ref a, ref b, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.Subtract(in a, in b, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for CreateScale (Vector2f)
@@ -867,8 +923,10 @@ namespace System.Numerics.Tests
             Matrix3x2 actual = Matrix3x2.CreateScale(scales);
             Assert.Equal(expected, actual);
 
-            Matrix3x2.CreateScale(ref scales, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateScale(in scales, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for CreateScale (Vector2f, Vector2f)
@@ -886,11 +944,11 @@ namespace System.Numerics.Tests
             Matrix3x2 scaleAroundZeroExpected = Matrix3x2.CreateScale(scale);
             Assert.True(MathHelper.Equal(scaleAroundZero, scaleAroundZeroExpected));
 
-            // Around Zero - ByRef
-
-            Matrix3x2.CreateScale(ref scale, ref zero, out scaleAroundZero);
-            Matrix3x2.CreateScale(ref scale, out scaleAroundZeroExpected);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateScale(in scale, in zero, out scaleAroundZero);
+            Matrix3x2.CreateScale(in scale, out scaleAroundZeroExpected);
             Assert.True(MathHelper.Equal(scaleAroundZero, scaleAroundZeroExpected));
+#endif
 
             // Around Center
 
@@ -898,17 +956,17 @@ namespace System.Numerics.Tests
             Matrix3x2 scaleAroundCenterExpected = Matrix3x2.CreateTranslation(-center) * Matrix3x2.CreateScale(scale) * Matrix3x2.CreateTranslation(center);
             Assert.True(MathHelper.Equal(scaleAroundCenter, scaleAroundCenterExpected));
 
-            // Around Center - ByRef
-
-            Matrix3x2.CreateScale(ref scale, ref center, out scaleAroundCenter);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateScale(in scale, in center, out scaleAroundCenter);
 
             Matrix3x2 negTranslation, scaleMat, translation;
-            Matrix3x2.CreateTranslation(ref negCenter, out negTranslation);
-            Matrix3x2.CreateScale(ref scale, out scaleMat);
-            Matrix3x2.CreateTranslation(ref center, out translation);
-            Matrix3x2.Multiply(ref negTranslation, ref scaleMat, out scaleAroundCenterExpected);
-            Matrix3x2.Multiply(ref scaleAroundCenterExpected, ref translation, out scaleAroundCenterExpected);
+            Matrix3x2.CreateTranslation(in negCenter, out negTranslation);
+            Matrix3x2.CreateScale(in scale, out scaleMat);
+            Matrix3x2.CreateTranslation(in center, out translation);
+            Matrix3x2.Multiply(in negTranslation, in scaleMat, out scaleAroundCenterExpected);
+            Matrix3x2.Multiply(in scaleAroundCenterExpected, in translation, out scaleAroundCenterExpected);
             Assert.True(MathHelper.Equal(scaleAroundCenter, scaleAroundCenterExpected));
+#endif
         }
 
         // A test for CreateScale (float)
@@ -923,8 +981,10 @@ namespace System.Numerics.Tests
             Matrix3x2 actual = Matrix3x2.CreateScale(scale);
             Assert.Equal(expected, actual);
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateScale(scale, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for CreateScale (float, Vector2f)
@@ -942,11 +1002,11 @@ namespace System.Numerics.Tests
             Matrix3x2 scaleAroundZeroExpected = Matrix3x2.CreateScale(scale);
             Assert.True(MathHelper.Equal(scaleAroundZero, scaleAroundZeroExpected));
 
-            // Around Zero - ByRef
-
-            Matrix3x2.CreateScale(scale, ref zero, out scaleAroundZero);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateScale(scale, in zero, out scaleAroundZero);
             Matrix3x2.CreateScale(scale, out scaleAroundZeroExpected);
             Assert.True(MathHelper.Equal(scaleAroundZero, scaleAroundZeroExpected));
+#endif
 
             // Around Center
 
@@ -954,18 +1014,18 @@ namespace System.Numerics.Tests
             Matrix3x2 scaleAroundCenterExpected = Matrix3x2.CreateTranslation(-center) * Matrix3x2.CreateScale(scale) * Matrix3x2.CreateTranslation(center);
             Assert.True(MathHelper.Equal(scaleAroundCenter, scaleAroundCenterExpected));
 
-            // Around Center - ByRef
-
-            Matrix3x2.CreateScale(scale, ref center, out scaleAroundCenter);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateScale(scale, in center, out scaleAroundCenter);
 
             Matrix3x2 negTranslation, scaleMat, translation;
-            Matrix3x2.CreateTranslation(ref negCenter, out negTranslation);
+            Matrix3x2.CreateTranslation(in negCenter, out negTranslation);
             Matrix3x2.CreateScale(scale, out scaleMat);
-            Matrix3x2.CreateTranslation(ref center, out translation);
-            Matrix3x2.Multiply(ref negTranslation, ref scaleMat, out scaleAroundCenterExpected);
-            Matrix3x2.Multiply(ref scaleAroundCenterExpected, ref translation, out scaleAroundCenterExpected);
+            Matrix3x2.CreateTranslation(in center, out translation);
+            Matrix3x2.Multiply(in negTranslation, in scaleMat, out scaleAroundCenterExpected);
+            Matrix3x2.Multiply(in scaleAroundCenterExpected, in translation, out scaleAroundCenterExpected);
 
             Assert.True(MathHelper.Equal(scaleAroundCenter, scaleAroundCenterExpected));
+#endif
         }
 
         // A test for CreateScale (float, float)
@@ -981,8 +1041,10 @@ namespace System.Numerics.Tests
             Matrix3x2 actual = Matrix3x2.CreateScale(xScale, yScale);
             Assert.Equal(expected, actual);
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateScale(xScale, yScale, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for CreateScale (float, float, Vector2f)
@@ -1000,11 +1062,11 @@ namespace System.Numerics.Tests
             Matrix3x2 scaleAroundZeroExpected = Matrix3x2.CreateScale(scale.X, scale.Y);
             Assert.True(MathHelper.Equal(scaleAroundZero, scaleAroundZeroExpected));
 
-            // Around Zero - ByRef
-
-            Matrix3x2.CreateScale(scale.X, scale.Y, ref zero, out scaleAroundZero);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateScale(scale.X, scale.Y, in zero, out scaleAroundZero);
             Matrix3x2.CreateScale(scale.X, scale.Y, out scaleAroundZeroExpected);
             Assert.True(MathHelper.Equal(scaleAroundZero, scaleAroundZeroExpected));
+#endif
 
             // Around Center
 
@@ -1012,18 +1074,18 @@ namespace System.Numerics.Tests
             Matrix3x2 scaleAroundCenterExpected = Matrix3x2.CreateTranslation(-center) * Matrix3x2.CreateScale(scale.X, scale.Y) * Matrix3x2.CreateTranslation(center);
             Assert.True(MathHelper.Equal(scaleAroundCenter, scaleAroundCenterExpected));
 
-            // Around Center - ByRef
-
-            Matrix3x2.CreateScale(scale.X, scale.Y, ref center, out scaleAroundCenter);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateScale(scale.X, scale.Y, in center, out scaleAroundCenter);
 
             Matrix3x2 negTranslation, scaleMat, translation;
-            Matrix3x2.CreateTranslation(ref negCenter, out negTranslation);
+            Matrix3x2.CreateTranslation(in negCenter, out negTranslation);
             Matrix3x2.CreateScale(scale.X, scale.Y, out scaleMat);
-            Matrix3x2.CreateTranslation(ref center, out translation);
-            Matrix3x2.Multiply(ref negTranslation, ref scaleMat, out scaleAroundCenterExpected);
-            Matrix3x2.Multiply(ref scaleAroundCenterExpected, ref translation, out scaleAroundCenterExpected);
+            Matrix3x2.CreateTranslation(in center, out translation);
+            Matrix3x2.Multiply(in negTranslation, in scaleMat, out scaleAroundCenterExpected);
+            Matrix3x2.Multiply(in scaleAroundCenterExpected, in translation, out scaleAroundCenterExpected);
 
             Assert.True(MathHelper.Equal(scaleAroundCenter, scaleAroundCenterExpected));
+#endif
         }
 
         // A test for CreateTranslation (Vector2f)
@@ -1039,8 +1101,10 @@ namespace System.Numerics.Tests
             Matrix3x2 actual = Matrix3x2.CreateTranslation(position);
             Assert.Equal(expected, actual);
 
-            Matrix3x2.CreateTranslation(ref position, out actual);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateTranslation(in position, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for CreateTranslation (float, float)
@@ -1058,8 +1122,10 @@ namespace System.Numerics.Tests
             Matrix3x2 actual = Matrix3x2.CreateTranslation(xPosition, yPosition);
             Assert.Equal(expected, actual);
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateTranslation(xPosition, yPosition, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Translation
@@ -1113,8 +1179,10 @@ namespace System.Numerics.Tests
             Matrix3x2 actual = Matrix3x2.CreateSkew(0, 0);
             Assert.Equal(expected, actual);
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateSkew(0, 0, out actual);
             Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for CreateSkew (float, float)
@@ -1125,43 +1193,55 @@ namespace System.Numerics.Tests
             Matrix3x2 actual = Matrix3x2.CreateSkew(-MathHelper.Pi / 8, 0);
             Assert.True(MathHelper.Equal(expected, actual));
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateSkew(-MathHelper.Pi / 8, 0, out actual);
             Assert.True(MathHelper.Equal(expected, actual));
+#endif
 
             expected = new Matrix3x2(1, 0, 0.414213562373095f, 1, 0, 0);
             actual = Matrix3x2.CreateSkew(MathHelper.Pi / 8, 0);
             Assert.True(MathHelper.Equal(expected, actual));
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateSkew(MathHelper.Pi / 8, 0, out actual);
             Assert.True(MathHelper.Equal(expected, actual));
+#endif
 
             Vector2 zero = new Vector2(0, 0);
             Vector2 result = Vector2.Transform(zero, actual);
             Assert.True(MathHelper.Equal(zero, result));
 
-            Vector2.Transform(ref zero, ref actual, out result);
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in zero, in actual, out result);
             Assert.True(MathHelper.Equal(zero, result));
+#endif
 
             Vector2 zeroOne = new Vector2(0, 1);
             result = Vector2.Transform(zeroOne, actual);
             Assert.True(MathHelper.Equal(new Vector2(0.414213568f, 1), result));
 
-            Vector2.Transform(ref zeroOne, ref actual, out result);
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in zeroOne, in actual, out result);
             Assert.True(MathHelper.Equal(new Vector2(0.414213568f, 1), result));
+#endif
 
             Vector2 zeroNegOne = new Vector2(0, -1);
             result = Vector2.Transform(zeroNegOne, actual);
             Assert.True(MathHelper.Equal(new Vector2(-0.414213568f, -1), result));
 
-            Vector2.Transform(ref zeroNegOne, ref actual, out result);
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in zeroNegOne, in actual, out result);
             Assert.True(MathHelper.Equal(new Vector2(-0.414213568f, -1), result));
+#endif
 
             Vector2 threeTen = new Vector2(3, 10);
             result = Vector2.Transform(threeTen, actual);
             Assert.True(MathHelper.Equal(new Vector2(7.14213568f, 10), result));
 
-            Vector2.Transform(ref threeTen, ref actual, out result);
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in threeTen, in actual, out result);
             Assert.True(MathHelper.Equal(new Vector2(7.14213568f, 10), result));
+#endif
         }
 
         // A test for CreateSkew (float, float)
@@ -1172,43 +1252,55 @@ namespace System.Numerics.Tests
             Matrix3x2 actual = Matrix3x2.CreateSkew(0, -MathHelper.Pi / 8);
             Assert.True(MathHelper.Equal(expected, actual));
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateSkew(0, -MathHelper.Pi / 8, out actual);
             Assert.True(MathHelper.Equal(expected, actual));
+#endif
 
             expected = new Matrix3x2(1, 0.414213562373095f, 0, 1, 0, 0);
             actual = Matrix3x2.CreateSkew(0, MathHelper.Pi / 8);
             Assert.True(MathHelper.Equal(expected, actual));
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateSkew(0, MathHelper.Pi / 8, out actual);
             Assert.True(MathHelper.Equal(expected, actual));
+#endif
 
             Vector2 zero = new Vector2(0, 0);
             Vector2 result = Vector2.Transform(zero, actual);
             Assert.True(MathHelper.Equal(zero, result));
 
-            Vector2.Transform(ref zero, ref actual, out result);
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in zero, in actual, out result);
             Assert.True(MathHelper.Equal(zero, result));
+#endif
 
             Vector2 oneZero = new Vector2(1, 0);
             result = Vector2.Transform(oneZero, actual);
             Assert.True(MathHelper.Equal(new Vector2(1, 0.414213568f), result));
 
-            Vector2.Transform(ref oneZero, ref actual, out result);
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in oneZero, in actual, out result);
             Assert.True(MathHelper.Equal(new Vector2(1, 0.414213568f), result));
+#endif
 
             Vector2 negOneZero = new Vector2(-1, 0);
             result = Vector2.Transform(negOneZero, actual);
             Assert.True(MathHelper.Equal(new Vector2(-1, -0.414213568f), result));
 
-            Vector2.Transform(ref negOneZero, ref actual, out result);
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in negOneZero, in actual, out result);
             Assert.True(MathHelper.Equal(new Vector2(-1, -0.414213568f), result));
+#endif
 
             Vector2 tenThree = new Vector2(10, 3);
             result = Vector2.Transform(tenThree, actual);
             Assert.True(MathHelper.Equal(new Vector2(10, 7.14213568f), result));
 
-            Vector2.Transform(ref tenThree, ref actual, out result);
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in tenThree, in actual, out result);
             Assert.True(MathHelper.Equal(new Vector2(10, 7.14213568f), result));
+#endif
         }
 
         // A test for CreateSkew (float, float)
@@ -1219,36 +1311,46 @@ namespace System.Numerics.Tests
             Matrix3x2 actual = Matrix3x2.CreateSkew(MathHelper.Pi / 4, -MathHelper.Pi / 8);
             Assert.True(MathHelper.Equal(expected, actual));
 
+#if FEATURE_REF_OVERLOADS
             Matrix3x2.CreateSkew(MathHelper.Pi / 4, -MathHelper.Pi / 8, out actual);
             Assert.True(MathHelper.Equal(expected, actual));
+#endif
 
             Vector2 zero = new Vector2(0, 0);
             Vector2 result = Vector2.Transform(zero, actual);
             Assert.True(MathHelper.Equal(new Vector2(0, 0), result));
 
-            Vector2.Transform(ref zero, ref actual, out result);
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in zero, in actual, out result);
             Assert.True(MathHelper.Equal(new Vector2(0, 0), result));
+#endif
 
             Vector2 oneZero = new Vector2(1, 0);
             result = Vector2.Transform(oneZero, actual);
             Assert.True(MathHelper.Equal(new Vector2(1, -0.414213562373095f), result));
 
-            Vector2.Transform(ref oneZero, ref actual, out result);
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in oneZero, in actual, out result);
             Assert.True(MathHelper.Equal(new Vector2(1, -0.414213562373095f), result));
+#endif
 
             Vector2 zeroOne = new Vector2(0, 1);
             result = Vector2.Transform(zeroOne, actual);
             Assert.True(MathHelper.Equal(new Vector2(1, 1), result));
 
-            Vector2.Transform(ref zeroOne, ref actual, out result);
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in zeroOne, in actual, out result);
             Assert.True(MathHelper.Equal(new Vector2(1, 1), result));
+#endif
 
             Vector2 one = new Vector2(1, 1);
             result = Vector2.Transform(one, actual);
             Assert.True(MathHelper.Equal(new Vector2(2, 0.585786437626905f), result));
 
-            Vector2.Transform(ref one, ref actual, out result);
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in one, in actual, out result);
             Assert.True(MathHelper.Equal(new Vector2(2, 0.585786437626905f), result));
+#endif
         }
 
         // A test for CreateSkew (float, float, Vector2f)
@@ -1266,11 +1368,11 @@ namespace System.Numerics.Tests
             Matrix3x2 skewAroundZeroExpected = Matrix3x2.CreateSkew(skewX, skewY);
             Assert.True(MathHelper.Equal(skewAroundZero, skewAroundZeroExpected));
 
-            // Around Zero - ByRef
-
-            Matrix3x2.CreateSkew(skewX, skewY, ref zero, out skewAroundZero);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateSkew(skewX, skewY, in zero, out skewAroundZero);
             Matrix3x2.CreateSkew(skewX, skewY, out skewAroundZeroExpected);
             Assert.True(MathHelper.Equal(skewAroundZero, skewAroundZeroExpected));
+#endif
 
             // Around Center
 
@@ -1278,17 +1380,17 @@ namespace System.Numerics.Tests
             Matrix3x2 skewAroundCenterExpected = Matrix3x2.CreateTranslation(-center) * Matrix3x2.CreateSkew(skewX, skewY) * Matrix3x2.CreateTranslation(center);
             Assert.True(MathHelper.Equal(skewAroundCenter, skewAroundCenterExpected));
 
-            // Around Center - ByRef
-
-            Matrix3x2.CreateSkew(skewX, skewY, ref center, out skewAroundCenter);
+#if FEATURE_REF_OVERLOADS
+            Matrix3x2.CreateSkew(skewX, skewY, in center, out skewAroundCenter);
 
             Matrix3x2 negTranslation, skewMat, translation;
-            Matrix3x2.CreateTranslation(ref negCenter, out negTranslation);
+            Matrix3x2.CreateTranslation(in negCenter, out negTranslation);
             Matrix3x2.CreateSkew(skewX, skewY, out skewMat);
-            Matrix3x2.CreateTranslation(ref center, out translation);
-            Matrix3x2.Multiply(ref negTranslation, ref skewMat, out skewAroundCenterExpected);
-            Matrix3x2.Multiply(ref skewAroundCenterExpected, ref translation, out skewAroundCenterExpected);
+            Matrix3x2.CreateTranslation(in center, out translation);
+            Matrix3x2.Multiply(in negTranslation, in skewMat, out skewAroundCenterExpected);
+            Matrix3x2.Multiply(in skewAroundCenterExpected, in translation, out skewAroundCenterExpected);
             Assert.True(MathHelper.Equal(skewAroundCenter, skewAroundCenterExpected));
+#endif
         }
 
         // A test for IsIdentity

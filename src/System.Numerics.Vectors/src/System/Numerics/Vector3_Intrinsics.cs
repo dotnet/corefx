@@ -134,7 +134,7 @@ namespace System.Numerics
         /// <param name="result">The dot product.</param>
         [JitIntrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Dot(ref Vector3 vector1, ref Vector3 vector2, out float result)
+        public static void Dot(in Vector3 vector1, in Vector3 vector2, out float result)
         {
             result = vector1.X * vector2.X +
                      vector1.Y * vector2.Y +
@@ -163,7 +163,7 @@ namespace System.Numerics
         /// <param name="value2">The second source vector.</param>
         /// <param name="result">The minimized vector.</param>
         [JitIntrinsic]
-        public static void Min(ref Vector3 value1, ref Vector3 value2, out Vector3 result)
+        public static void Min(in Vector3 value1, in Vector3 value2, out Vector3 result)
         {
             result = new Vector3(
                 (value1.X < value2.X) ? value1.X : value2.X,
@@ -195,7 +195,7 @@ namespace System.Numerics
         /// <param name="result">The maximized vector.</param>
         [JitIntrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Max(ref Vector3 value1, ref Vector3 value2, out Vector3 result)
+        public static void Max(in Vector3 value1, in Vector3 value2, out Vector3 result)
         {
             result = new Vector3(
                 (value1.X > value2.X) ? value1.X : value2.X,
@@ -222,7 +222,7 @@ namespace System.Numerics
         /// <param name="result">The absolute value vector.</param>
         [JitIntrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Abs(ref Vector3 value, out Vector3 result)
+        public static void Abs(in Vector3 value, out Vector3 result)
         {
             result = new Vector3(Math.Abs(value.X), Math.Abs(value.Y), Math.Abs(value.Z));
         }
@@ -246,7 +246,7 @@ namespace System.Numerics
         /// <param name="result">The square root vector.</param>
         [JitIntrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SquareRoot(ref Vector3 value, out Vector3 result)
+        public static void SquareRoot(in Vector3 value, out Vector3 result)
         {
             result = new Vector3((Single)Math.Sqrt(value.X), (Single)Math.Sqrt(value.Y), (Single)Math.Sqrt(value.Z));
         }

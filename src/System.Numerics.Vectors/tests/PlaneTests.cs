@@ -137,8 +137,10 @@ namespace System.Numerics.Tests
             Plane target = Plane.CreateFromVertices(point1, point2, point3);
             Assert.Equal(target, expected);
 
-            Plane.CreateFromVertices(ref point1, ref point2, ref point3, out target);
+#if FEATURE_REF_OVERLOADS
+            Plane.CreateFromVertices(in point1, in point2, in point3, out target);
             Assert.Equal(target, expected);
+#endif
         }
 
         // A test for Plane.CreateFromVertices
@@ -155,8 +157,10 @@ namespace System.Numerics.Tests
             Plane target = Plane.CreateFromVertices(point1, point2, point3);
             Assert.True(MathHelper.Equal(target, expected), "Plane.cstor did not return the expected value.");
 
-            Plane.CreateFromVertices(ref point1, ref point2, ref point3, out target);
+#if FEATURE_REF_OVERLOADS
+            Plane.CreateFromVertices(in point1, in point2, in point3, out target);
             Assert.True(MathHelper.Equal(target, expected), "Plane.cstor did not return the expected value.");
+#endif
         }
 
         // A test for Plane (Vector3f, float)
@@ -194,8 +198,10 @@ namespace System.Numerics.Tests
             float actual = Plane.Dot(target, value);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.Dot returns unexpected value.");
 
-            Plane.Dot(ref target, ref value, out actual);
+#if FEATURE_REF_OVERLOADS
+            Plane.Dot(in target, in value, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.Dot returns unexpected value.");
+#endif
         }
 
         [Fact]
@@ -208,8 +214,10 @@ namespace System.Numerics.Tests
             float actual = Plane.DotCoordinate(target, value);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.DotCoordinate returns unexpected value.");
 
-            Plane.DotCoordinate(ref target, ref value, out actual);
+#if FEATURE_REF_OVERLOADS
+            Plane.DotCoordinate(in target, in value, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.DotCoordinate returns unexpected value.");
+#endif
         }
 
         [Fact]
@@ -222,8 +230,10 @@ namespace System.Numerics.Tests
             float actual = Plane.DotNormal(target, value);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.DotCoordinate returns unexpected value.");
 
-            Plane.DotNormal(ref target, ref value, out actual);
+#if FEATURE_REF_OVERLOADS
+            Plane.DotNormal(in target, in value, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.DotCoordinate returns unexpected value.");
+#endif
         }
 
         [Fact]
@@ -242,15 +252,14 @@ namespace System.Numerics.Tests
             actual = Plane.Normalize(actual);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.Normalize returns unexpected value.");
 
-            // By-Ref
-
-            Plane.Normalize(ref target, out actual);
+#if FEATURE_REF_OVERLOADS
+            Plane.Normalize(in target, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.Normalize returns unexpected value.");
 
             // normalize, normalized normal.
-            Plane.Normalize(ref actual, out actual);
+            Plane.Normalize(in actual, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.Normalize returns unexpected value.");
-
+#endif
         }
 
         [Fact]
@@ -283,8 +292,10 @@ namespace System.Numerics.Tests
             actual = Plane.Transform(target, m);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.Transform did not return the expected value.");
 
-            Plane.Transform(ref target, ref m, out actual);
+#if FEATURE_REF_OVERLOADS
+            Plane.Transform(in target, in m, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.Transform did not return the expected value.");
+#endif
         }
 
         [Fact]
@@ -312,8 +323,10 @@ namespace System.Numerics.Tests
             actual = Plane.Transform(target, q);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.Transform did not return the expected value.");
 
-            Plane.Transform(ref target, ref q, out actual);
+#if FEATURE_REF_OVERLOADS
+            Plane.Transform(in target, in q, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Plane.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Plane comparison involving NaN values

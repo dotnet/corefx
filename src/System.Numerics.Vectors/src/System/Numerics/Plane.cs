@@ -118,7 +118,7 @@ namespace System.Numerics
         /// <param name="point3">The third point defining the Plane.</param>
         /// <param name="result">The Plane containing the three points.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CreateFromVertices(ref Vector3 point1, ref Vector3 point2, ref Vector3 point3, out Plane result)
+        public static void CreateFromVertices(in Vector3 point1, in Vector3 point2, in Vector3 point3, out Plane result)
         {
             if (Vector.IsHardwareAccelerated)
             {
@@ -211,7 +211,7 @@ namespace System.Numerics
         /// <param name="value">The source Plane.</param>
         /// <param name="result">The normalized Plane.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Normalize(ref Plane value, out Plane result)
+        public static void Normalize(in Plane value, out Plane result)
         {
             const float FLT_EPSILON = 1.192092896e-07f; // smallest such that 1.0+FLT_EPSILON != 1.0
             if (Vector.IsHardwareAccelerated)
@@ -276,7 +276,7 @@ namespace System.Numerics
         /// <param name="matrix">The transformation matrix to apply to the Plane.</param>
         /// <param name="result">The transformed Plane.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Transform(ref Plane plane, ref Matrix4x4 matrix, out Plane result)
+        public static void Transform(in Plane plane, in Matrix4x4 matrix, out Plane result)
         {
             Matrix4x4 m;
             Matrix4x4.Invert(matrix, out m);
@@ -344,7 +344,7 @@ namespace System.Numerics
         /// <param name="rotation">The Quaternion rotation to apply to the Plane.</param>
         /// <param name="result">A new Plane that results from applying the rotation.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Transform(ref Plane plane, ref Quaternion rotation, out Plane result)
+        public static void Transform(in Plane plane, in Quaternion rotation, out Plane result)
         {
             // Compute rotation matrix.
             float x2 = rotation.X + rotation.X;
@@ -404,7 +404,7 @@ namespace System.Numerics
         /// <param name="value">The Vector4.</param>
         /// <param name="result">The dot product.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Dot(ref Plane plane, ref Vector4 value, out float result)
+        public static void Dot(in Plane plane, in Vector4 value, out float result)
         {
             result = plane.Normal.X * value.X +
                      plane.Normal.Y * value.Y +
@@ -441,7 +441,7 @@ namespace System.Numerics
         /// <param name="value">The Vector3.</param>
         /// <param name="result">The resulting value.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DotCoordinate(ref Plane plane, ref Vector3 value, out float result)
+        public static void DotCoordinate(in Plane plane, in Vector3 value, out float result)
         {
             if (Vector.IsHardwareAccelerated)
             {
@@ -484,7 +484,7 @@ namespace System.Numerics
         /// <param name="value">The Vector3.</param>
         /// <param name="result">The resulting dot product.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DotNormal(ref Plane plane, ref Vector3 value, out float result)
+        public static void DotNormal(in Plane plane, in Vector3 value, out float result)
         {
             if (Vector.IsHardwareAccelerated)
             {

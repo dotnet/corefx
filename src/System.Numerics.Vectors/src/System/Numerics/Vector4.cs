@@ -187,7 +187,7 @@ namespace System.Numerics
         /// <param name="value2">The second point.</param>
         /// <param name="result">The distance.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Distance(ref Vector4 value1, ref Vector4 value2, out float result)
+        public static void Distance(in Vector4 value1, in Vector4 value2, out float result)
         {
             if (Vector.IsHardwareAccelerated)
             {
@@ -240,7 +240,7 @@ namespace System.Numerics
         /// <param name="value2">The second point.</param>
         /// <param name="result">The distance squared.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DistanceSquared(ref Vector4 value1, ref Vector4 value2, out float result)
+        public static void DistanceSquared(in Vector4 value1, in Vector4 value2, out float result)
         {
             if (Vector.IsHardwareAccelerated)
             {
@@ -290,7 +290,7 @@ namespace System.Numerics
         /// <param name="vector">The vector to normalize.</param>
         /// <param name="result">The normalized vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Normalize(ref Vector4 vector, out Vector4 result)
+        public static void Normalize(in Vector4 vector, out Vector4 result)
         {
             if (Vector.IsHardwareAccelerated)
             {
@@ -350,7 +350,7 @@ namespace System.Numerics
         /// <param name="max">The maximum value.</param>
         /// <param name="result">The restricted vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Clamp(ref Vector4 value1, ref Vector4 min, ref Vector4 max, out Vector4 result)
+        public static void Clamp(in Vector4 value1, in Vector4 min, in Vector4 max, out Vector4 result)
         {
             // This compare order is very important!!!
             // We must follow HLSL behavior in the case user specified min value is bigger than max value.
@@ -399,7 +399,7 @@ namespace System.Numerics
         /// <param name="amount">Value between 0 and 1 indicating the weight of the second source vector.</param>
         /// <param name="result">The interpolated vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Lerp(ref Vector4 value1, ref Vector4 value2, float amount, out Vector4 result)
+        public static void Lerp(in Vector4 value1, in Vector4 value2, float amount, out Vector4 result)
         {
             result = new Vector4(
                 value1.X + (value2.X - value1.X) * amount,
@@ -431,7 +431,7 @@ namespace System.Numerics
         /// <param name="matrix">The transformation matrix.</param>
         /// <param name="result">The transformed vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Transform(ref Vector2 position, ref Matrix4x4 matrix, out Vector4 result)
+        public static void Transform(in Vector2 position, in Matrix4x4 matrix, out Vector4 result)
         {
             result = new Vector4(
                 position.X * matrix.M11 + position.Y * matrix.M21 + matrix.M41,
@@ -463,7 +463,7 @@ namespace System.Numerics
         /// <param name="matrix">The transformation matrix.</param>
         /// <param name="result">The transformed vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Transform(ref Vector3 position, ref Matrix4x4 matrix, out Vector4 result)
+        public static void Transform(in Vector3 position, in Matrix4x4 matrix, out Vector4 result)
         {
             result = new Vector4(
                 position.X * matrix.M11 + position.Y * matrix.M21 + position.Z * matrix.M31 + matrix.M41,
@@ -495,7 +495,7 @@ namespace System.Numerics
         /// <param name="matrix">The transformation matrix.</param>
         /// <param name="result">The transformed vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Transform(ref Vector4 vector, ref Matrix4x4 matrix, out Vector4 result)
+        public static void Transform(in Vector4 vector, in Matrix4x4 matrix, out Vector4 result)
         {
             result = new Vector4(
                 vector.X * matrix.M11 + vector.Y * matrix.M21 + vector.Z * matrix.M31 + vector.W * matrix.M41,
@@ -541,7 +541,7 @@ namespace System.Numerics
         /// <param name="rotation">The rotation to apply.</param>
         /// <param name="result">The transformed vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Transform(ref Vector2 value, ref Quaternion rotation, out Vector4 result)
+        public static void Transform(in Vector2 value, in Quaternion rotation, out Vector4 result)
         {
             float x2 = rotation.X + rotation.X;
             float y2 = rotation.Y + rotation.Y;
@@ -601,7 +601,7 @@ namespace System.Numerics
         /// <param name="rotation">The rotation to apply.</param>
         /// <param name="result">The transformed vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Transform(ref Vector3 value, ref Quaternion rotation, out Vector4 result)
+        public static void Transform(in Vector3 value, in Quaternion rotation, out Vector4 result)
         {
             float x2 = rotation.X + rotation.X;
             float y2 = rotation.Y + rotation.Y;
@@ -661,7 +661,7 @@ namespace System.Numerics
         /// <param name="rotation">The rotation to apply.</param>
         /// <param name="result">The transformed vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Transform(ref Vector4 value, ref Quaternion rotation, out Vector4 result)
+        public static void Transform(in Vector4 value, in Quaternion rotation, out Vector4 result)
         {
             float x2 = rotation.X + rotation.X;
             float y2 = rotation.Y + rotation.Y;
@@ -708,7 +708,7 @@ namespace System.Numerics
         /// <param name="right">The second source vector.</param>
         /// <param name="result">The summed vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Add(ref Vector4 left, ref Vector4 right, out Vector4 result)
+        public static void Add(in Vector4 left, in Vector4 right, out Vector4 result)
         {
             result = left + right;
         }
@@ -732,7 +732,7 @@ namespace System.Numerics
         /// <param name="right">The second source vector.</param>
         /// <param name="result">The difference vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Subtract(ref Vector4 left, ref Vector4 right, out Vector4 result)
+        public static void Subtract(in Vector4 left, in Vector4 right, out Vector4 result)
         {
             result = left - right;
         }
@@ -756,7 +756,7 @@ namespace System.Numerics
         /// <param name="right">The second source vector.</param>
         /// <param name="result">The product vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Multiply(ref Vector4 left, ref Vector4 right, out Vector4 result)
+        public static void Multiply(in Vector4 left, in Vector4 right, out Vector4 result)
         {
             result = left * right;
         }
@@ -780,7 +780,7 @@ namespace System.Numerics
         /// <param name="right">The scalar value.</param>
         /// <param name="result">The scaled vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Multiply(ref Vector4 left, Single right, out Vector4 result)
+        public static void Multiply(in Vector4 left, Single right, out Vector4 result)
         {
             result = left * new Vector4(right, right, right, right);
         }
@@ -804,7 +804,7 @@ namespace System.Numerics
         /// <param name="right">The source vector.</param>
         /// <param name="result">The scaled vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Multiply(Single left, ref Vector4 right, out Vector4 result)
+        public static void Multiply(Single left, in Vector4 right, out Vector4 result)
         {
             result = new Vector4(left, left, left, left) * right;
         }
@@ -828,7 +828,7 @@ namespace System.Numerics
         /// <param name="right">The second source vector.</param>
         /// <param name="result">The vector resulting from the division.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Divide(ref Vector4 left, ref Vector4 right, out Vector4 result)
+        public static void Divide(in Vector4 left, in Vector4 right, out Vector4 result)
         {
             result = left / right;
         }
@@ -852,7 +852,7 @@ namespace System.Numerics
         /// <param name="divisor">The scalar value.</param>
         /// <param name="result">The result of the division.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Divide(ref Vector4 left, Single divisor, out Vector4 result)
+        public static void Divide(in Vector4 left, Single divisor, out Vector4 result)
         {
             result = left / divisor;
         }
@@ -874,7 +874,7 @@ namespace System.Numerics
         /// <param name="value">The source vector.</param>
         /// <param name="result">The negated vector.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Negate(ref Vector4 value, out Vector4 result)
+        public static void Negate(in Vector4 value, out Vector4 result)
         {
             result = -value;
         }
