@@ -81,8 +81,8 @@ namespace System.Diagnostics
             get
             {
                 // '/proc/uptime' accounts time a device spends in sleep mode.
-                const string uptimeFile = Interop.procfs.ProcUptimeFilePath;
-                string text = File.ReadAllText(uptimeFile);
+                const string UptimeFile = Interop.procfs.ProcUptimeFilePath;
+                string text = File.ReadAllText(UptimeFile);
 
                 double uptimeSeconds = 0;
                 int length = text.IndexOf(' ');
