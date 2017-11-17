@@ -2937,7 +2937,7 @@ public static partial class XmlSerializerTests
         schema.Write(ms);
         ms.Position = 0;
         string actualOutput = new StreamReader(ms).ReadToEnd();
-        Utils.CompareResult result = Utils.Compare(baseline, actualOutput);
+        Utils.CompareResult result = Utils.Compare(baseline, actualOutput, false);
         Assert.True(result.Equal, string.Format("{1}{0}Test failed for wrong output from schema: {0}Expected: {2}{0}Actual: {3}",
                 Environment.NewLine, result.ErrorMessage, baseline, actualOutput));
     }
