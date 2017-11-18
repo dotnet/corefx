@@ -22,13 +22,13 @@ internal partial class Interop
             string lpFileName,
             int dwDesiredAccess,
             System.IO.FileShare dwShareMode,
-            Interop.Kernel32.SECURITY_ATTRIBUTES* securityAttrs,
+            SECURITY_ATTRIBUTES* securityAttrs,
             System.IO.FileMode dwCreationDisposition,
             int dwFlagsAndAttributes,
             IntPtr hTemplateFile)
         {
-            Interop.Kernel32.CREATEFILE2_EXTENDED_PARAMETERS parameters;
-            parameters.dwSize = (uint)Marshal.SizeOf<Interop.Kernel32.CREATEFILE2_EXTENDED_PARAMETERS>();
+            CREATEFILE2_EXTENDED_PARAMETERS parameters;
+            parameters.dwSize = (uint)Marshal.SizeOf<CREATEFILE2_EXTENDED_PARAMETERS>();
 
             parameters.dwFileAttributes = (uint)dwFlagsAndAttributes & 0x0000FFFF;
             parameters.dwSecurityQosFlags = (uint)dwFlagsAndAttributes & 0x000F0000;
@@ -37,19 +37,19 @@ internal partial class Interop
             parameters.hTemplateFile = hTemplateFile;
             parameters.lpSecurityAttributes = securityAttrs;
             
-            return Interop.Kernel32.CreateFile2(lpFileName, dwDesiredAccess, dwShareMode, dwCreationDisposition, ref parameters);
+            return CreateFile2(lpFileName, dwDesiredAccess, dwShareMode, dwCreationDisposition, ref parameters);
         }
 
         internal static unsafe SafeFileHandle CreateFile(
             string lpFileName,
             int dwDesiredAccess,
             System.IO.FileShare dwShareMode,
-            ref Interop.Kernel32.SECURITY_ATTRIBUTES securityAttrs,
+            ref SECURITY_ATTRIBUTES securityAttrs,
             System.IO.FileMode dwCreationDisposition,
             int dwFlagsAndAttributes,
             IntPtr hTemplateFile)
         {
-            fixed (Interop.Kernel32.SECURITY_ATTRIBUTES* lpSecurityAttributes = &securityAttrs)
+            fixed (SECURITY_ATTRIBUTES* lpSecurityAttributes = &securityAttrs)
             {
                 return CreateFile(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
             }
