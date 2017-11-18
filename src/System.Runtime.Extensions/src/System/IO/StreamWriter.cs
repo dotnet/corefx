@@ -370,14 +370,15 @@ namespace System.IO
         {
             CheckAsyncTaskInProgress();
 
-            if (buffer.Length <= 4 && // Threshold of 4 chosen based on perf experimentation
-                buffer.Length <= _charLen - _charPos)
+            char[] bufferArray = buffer.ToArray();
+            if (bufferArray.Length <= 4 && // Threshold of 4 chosen based on perf experimentation
+                bufferArray.Length <= _charLen - _charPos)
             {
                 // For very short buffers and when we don't need to worry about running out of space
                 // in the char buffer, just copy the chars individually.
-                for (int i = 0; i < buffer.Length; i++)
+                for (int i = 0; i < bufferArray.Length; i++)
                 {
-                    _charBuffer[_charPos++] = buffer[i];
+                    _charBuffer[_charPos++] = bufferArray[i];
                 }
             }
             else
@@ -394,11 +395,12 @@ namespace System.IO
                     throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
                 }
 
-                fixed (char* bufferPtr = &buffer.DangerousGetPinnableReference())
+                if (bufferArray.Length == 0) return;
+                fixed (char* bufferPtr = &bufferArray[0])
                 fixed (char* dstPtr = &charBuffer[0])
                 {
                     char* srcPtr = bufferPtr;
-                    int count = buffer.Length;
+                    int count = bufferArray.Length;
                     int dstPos = _charPos; // use a local copy of _charPos for safety
                     while (count > 0)
                     {

@@ -566,7 +566,7 @@ namespace System.IO
                 return _checkPreamble;
             }
 
-            ReadOnlySpan<byte> preamble = _encoding.Preamble;
+            byte[] preamble = _encoding.Preamble.ToArray();;
 
             Debug.Assert(_bytePos <= preamble.Length, "_compressPreamble was called with the current bytePos greater than the preamble buffer length.  Are two threads using this StreamReader at the same time?");
             int len = (_byteLen >= (preamble.Length)) ? (preamble.Length - _bytePos) : (_byteLen - _bytePos);
