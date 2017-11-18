@@ -879,8 +879,9 @@ Assert.False(true);
 
                 Assert.Throws<ArgumentException>(() =>
                 {
+                    // Set to a different sensitivity than before: this breaks the DataRelation constraint
+                    // because it is not the sensitivity of the related table
                     table.CaseSensitive = true;
-                    table1.CaseSensitive = true;
                 });
 
                 Assert.Throws<ArgumentException>(() =>
