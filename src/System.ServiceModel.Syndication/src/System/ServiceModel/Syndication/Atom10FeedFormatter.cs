@@ -21,7 +21,7 @@ namespace System.ServiceModel.Syndication
     [XmlRoot(ElementName = Atom10Constants.FeedTag, Namespace = Atom10Constants.Atom10Namespace)]
     public class Atom10FeedFormatter : SyndicationFeedFormatter, IXmlSerializable
     {
-        internal static readonly TimeSpan zeroOffset = new TimeSpan(0, 0, 0);
+        internal static readonly TimeSpan ZeroOffset = new TimeSpan(0, 0, 0);
         internal const string XmlNs = "http://www.w3.org/XML/1998/namespace";
         internal const string XmlNsNs = "http://www.w3.org/2000/xmlns/";
         private static readonly XmlQualifiedName s_atom10Href = new XmlQualifiedName(Atom10Constants.HrefTag, string.Empty);
@@ -69,6 +69,11 @@ namespace System.ServiceModel.Syndication
             _maxExtensionSize = int.MaxValue;
             _preserveAttributeExtensions = _preserveElementExtensions = true;
             _feedType = feedToWrite.GetType();
+        }
+
+        internal override Func<string, string, string, DateTimeOffset> GetDefaultDateTimeParser()
+        {
+            return DateTimeHelper.DefaultAtom10DateTimeParser;
         }
 
         public bool PreserveAttributeExtensions
@@ -668,7 +673,7 @@ namespace System.ServiceModel.Syndication
 
         private string AsString(DateTimeOffset dateTime)
         {
-            if (dateTime.Offset == zeroOffset)
+            if (dateTime.Offset == ZeroOffset)
             {
                 return dateTime.ToUniversalTime().ToString(Rfc3339UTCDateTimeFormat, CultureInfo.InvariantCulture);
             }
@@ -676,44 +681,6 @@ namespace System.ServiceModel.Syndication
             {
                 return dateTime.ToString(Rfc3339LocalDateTimeFormat, CultureInfo.InvariantCulture);
             }
-        }
-
-        private DateTimeOffset DateFromString(string dateTimeString, XmlReader reader)
-        {
-            dateTimeString = dateTimeString.Trim();
-            if (dateTimeString.Length < 20)
-            {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(
-                    new XmlException(FeedUtils.AddLineInfo(reader,
-                    SR.ErrorParsingDateTime)));
-            }
-            if (dateTimeString[19] == '.')
-            {
-                // remove any fractional seconds, we choose to ignore them
-                int i = 20;
-                while (dateTimeString.Length > i && char.IsDigit(dateTimeString[i]))
-                {
-                    ++i;
-                }
-                dateTimeString = dateTimeString.Substring(0, 19) + dateTimeString.Substring(i);
-            }
-            DateTimeOffset localTime;
-            if (DateTimeOffset.TryParseExact(dateTimeString, Rfc3339LocalDateTimeFormat,
-                CultureInfo.InvariantCulture.DateTimeFormat,
-                DateTimeStyles.None, out localTime))
-            {
-                return localTime;
-            }
-            DateTimeOffset utcTime;
-            if (DateTimeOffset.TryParseExact(dateTimeString, Rfc3339UTCDateTimeFormat,
-                CultureInfo.InvariantCulture.DateTimeFormat,
-                DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out utcTime))
-            {
-                return utcTime;
-            }
-            throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(
-                new XmlException(FeedUtils.AddLineInfo(reader,
-                SR.ErrorParsingDateTime)));
         }
 
         private void ReadCategory(XmlReader reader, SyndicationCategory category)

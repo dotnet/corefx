@@ -298,14 +298,12 @@ namespace System.ServiceModel.Syndication.Tests
 
             // *** ASSERT *** \\
             Assert.True(res != null, "res was null.");
-            DateTimeOffset lastUpdatedTime;
-            Assert.Throws<XmlException>(() => lastUpdatedTime = res.LastUpdatedTime);
+            Assert.Equal(new DateTimeOffset(2016, 8, 23, 16, 8, 0, new TimeSpan(-4, 0, 0)), res.LastUpdatedTime);
             Assert.True(res.Items != null, "res.Items was null.");
             Assert.True(res.Items.Count() == 4, $"res.Items.Count() was not as expected. Expected: 4; Actual: {res.Items.Count()}");
             SyndicationItem[] items = res.Items.ToArray();
-            DateTimeOffset pubDate;
-            Assert.Throws<XmlException>(() => pubDate = items[1].PublishDate);
-            Assert.Throws<XmlException>(() => pubDate = items[2].PublishDate);
+            DateTimeOffset dateTimeOffset;
+            Assert.Throws<XmlException>(() => dateTimeOffset = items[2].PublishDate);
         }
 
         [Fact]
