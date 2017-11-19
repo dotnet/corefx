@@ -13,6 +13,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             SourceType = sourceType;
         }
 
-        public CType SourceType { get; set; }
+        public CType SourceType { get; }
     }
 }
