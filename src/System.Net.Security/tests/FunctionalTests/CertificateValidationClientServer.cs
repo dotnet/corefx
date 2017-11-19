@@ -49,8 +49,8 @@ namespace System.Net.Security.Tests
 
             _clientCertificateRemovedByFilter = false;
 
-            if (PlatformDetection.IsWindows7 && 
-                !useClientSelectionCallback && 
+            if (PlatformDetection.IsWindows7 &&
+                !useClientSelectionCallback &&
                 !Capability.IsTrustedRootCertificateInstalled())
             {
                 // https://technet.microsoft.com/en-us/library/hh831771.aspx#BKMK_Changes2012R2
@@ -70,11 +70,7 @@ namespace System.Net.Security.Tests
                 Task clientConnect = clientConnection.ConnectAsync(serverEndPoint.Address, serverEndPoint.Port);
                 Task<TcpClient> serverAccept = server.AcceptTcpClientAsync();
 
-                Assert.True(
-                    Task.WaitAll(
-                        new Task[] { clientConnect, serverAccept },
-                        TestConfiguration.PassingTestTimeoutMilliseconds),
-                    "Client/Server TCP Connect timed out.");
+                Assert.True(await TestConfiguration.WhenAllWithTimeout(clientConnect, serverAccept), "Client/Server TCP Connect timed out.");
 
                 LocalCertificateSelectionCallback clientCertCallback = null;
 
@@ -115,10 +111,7 @@ namespace System.Net.Security.Tests
                         SslProtocolSupport.DefaultSslProtocols,
                         false);
 
-                    Assert.True(
-                        Task.WaitAll(
-                            new Task[] { clientAuthentication, serverAuthentication },
-                            TestConfiguration.PassingTestTimeoutMilliseconds),
+                    Assert.True(await TestConfiguration.WhenAllWithTimeout(clientAuthentication, serverAuthentication),
                         "Client/Server Authentication timed out.");
 
                     if (!_clientCertificateRemovedByFilter)
