@@ -121,7 +121,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case ExpressionKind.Constant:
                     return VisitCONSTANT(pExpr as ExprConstant);
                 case ExpressionKind.Class:
-                    return VisitCLASS(pExpr as ExprClass);
+                    return pExpr;
                 case ExpressionKind.Property:
                     return VisitPROP(pExpr as ExprProperty);
                 case ExpressionKind.Multi:
@@ -481,10 +481,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         protected virtual Expr VisitRETURN(ExprReturn pExpr)
         {
             return VisitSTMT(pExpr);
-        }
-        protected virtual Expr VisitCLASS(ExprClass pExpr)
-        {
-            return VisitEXPR(pExpr);
         }
         protected virtual Expr VisitSTMT(ExprStatement pExpr)
         {
