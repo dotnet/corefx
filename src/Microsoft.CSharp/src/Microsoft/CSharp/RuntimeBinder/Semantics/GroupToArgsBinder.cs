@@ -88,7 +88,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // This method does the actual binding.
             // ----------------------------------------------------------------------------
 
-            public bool Bind()
+            public void Bind()
             {
                 Debug.Assert(_pGroup.SymKind == SYMKIND.SK_MethodSymbol || _pGroup.SymKind == SYMKIND.SK_PropertySymbol && 0 != (_pGroup.Flags & EXPRFLAG.EXF_INDEXER));
 
@@ -100,8 +100,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     throw ReportErrorsOnFailure();
                 }
-
-                return true;
             }
 
             public GroupToArgsBinderResult GetResultsOfBind()
