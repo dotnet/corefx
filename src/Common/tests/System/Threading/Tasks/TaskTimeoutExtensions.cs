@@ -38,5 +38,47 @@ namespace System.Threading.Tasks
                 throw new TimeoutException();
             }
         }
+
+        public static async Task WhenAllOrAnyFailed(this Task[] tasks, int millisecondsTimeout)
+        {
+            var cts = new CancellationTokenSource();
+            Task task = tasks.WhenAllOrAnyFailed();
+            if (task == await Task.WhenAny(task, Task.Delay(millisecondsTimeout, cts.Token)))
+            {
+                cts.Cancel();
+                await task;
+            }
+            else
+            {
+                throw new TimeoutException();
+            }
+        }
+
+        public static Task WhenAllOrAnyFailed(this Task[] tasks)
+        {
+            int remaining = tasks.Length;
+            var tcs = new TaskCompletionSource<bool>();
+            foreach (Task t in tasks)
+            {
+                t.ContinueWith(a =>
+                {
+                    if (a.IsFaulted)
+                    {
+                        tcs.TrySetException(a.Exception.InnerExceptions);
+                        Interlocked.Decrement(ref remaining);
+                    }
+                    else if (a.IsCanceled)
+                    {
+                        tcs.TrySetCanceled();
+                        Interlocked.Decrement(ref remaining);
+                    }
+                    else if (Interlocked.Decrement(ref remaining) == 0)
+                    {
+                        tcs.TrySetResult(true);
+                    }
+                }, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
+            }
+            return tcs.Task;
+        }
     }
 }

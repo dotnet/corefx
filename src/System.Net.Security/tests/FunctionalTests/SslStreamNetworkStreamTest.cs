@@ -66,7 +66,7 @@ namespace System.Net.Security.Tests
                     byte[] readBuffer = new byte[256];
                     Task<int> readTask = serverStream.ReadAsync(readBuffer, 0, readBuffer.Length);
 
-                    bool result = await TestConfiguration.WhenAllWithTimeout(writeTask, readTask);
+                    bool result = await TestConfiguration.WhenAllOrAnyFailedWithTimeout(writeTask, readTask);
 
                     Assert.True(result, "WriteAsync timed-out.");
                 }

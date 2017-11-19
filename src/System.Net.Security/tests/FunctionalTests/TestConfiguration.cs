@@ -30,13 +30,13 @@ namespace System.Net.Security.Tests
 
         public static bool SupportsNullEncryption { get { return s_supportsNullEncryption.Value; } }
 
-        public static async Task<bool> WhenAllWithTimeout(params Task[] tasks)
+        public static async Task<bool> WhenAllOrAnyFailedWithTimeout(params Task[] tasks)
         {
             try
             {
-                await Task.WhenAll(tasks).TimeoutAfter(PassingTestTimeoutMilliseconds);
+                await tasks.WhenAllOrAnyFailed(PassingTestTimeoutMilliseconds);
             }
-            catch (TimeoutException)
+            catch(TimeoutException)
             {
                 return false;
             }

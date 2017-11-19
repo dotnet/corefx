@@ -31,7 +31,7 @@ namespace System.Net.Security.Tests
                 Task t1 = clientSslStream.AuthenticateAsClientAsync(clientOptions, CancellationToken.None);
                 Task t2 = serverSslStream.AuthenticateAsServerAsync(serverOptions, CancellationToken.None);
 
-                return await TestConfiguration.WhenAllWithTimeout(t1, t2);
+                return await TestConfiguration.WhenAllOrAnyFailedWithTimeout(t1, t2);
             }
         }
 
@@ -84,7 +84,7 @@ namespace System.Net.Security.Tests
                 Task t1 = Assert.ThrowsAsync<InvalidOperationException>(() => client.AuthenticateAsClientAsync(clientOptions, CancellationToken.None));
                 Task t2 = Assert.ThrowsAsync<InvalidOperationException>(() => server.AuthenticateAsServerAsync(serverOptions, CancellationToken.None));
 
-                Assert.True(await TestConfiguration.WhenAllWithTimeout(t1, t2));
+                Assert.True(await TestConfiguration.WhenAllOrAnyFailedWithTimeout(t1, t2));
             }
         }
 
@@ -143,7 +143,7 @@ namespace System.Net.Security.Tests
                 Task t1 = Assert.ThrowsAsync<AuthenticationException>(() => client.AuthenticateAsClientAsync(clientOptions, CancellationToken.None));
                 Task t2 = Assert.ThrowsAsync<AuthenticationException>(() => server.AuthenticateAsServerAsync(serverOptions, CancellationToken.None));
 
-                Assert.True(await TestConfiguration.WhenAllWithTimeout(t1, t2));
+                Assert.True(await TestConfiguration.WhenAllOrAnyFailedWithTimeout(t1, t2));
             }
         }
 

@@ -388,7 +388,7 @@ namespace System.Net.Security.Tests
             {
                 Task t1 = clientSslStream.AuthenticateAsClientAsync(certificate.GetNameInfo(X509NameType.SimpleName, false));
                 Task t2 = serverSslStream.AuthenticateAsServerAsync(certificate);
-                return await TestConfiguration.WhenAllWithTimeout(t1, t2);
+                return await TestConfiguration.WhenAllOrAnyFailedWithTimeout(t1, t2);
             }
         }
     }
@@ -402,7 +402,7 @@ namespace System.Net.Security.Tests
                 Task t1 = Task.Factory.FromAsync(clientSslStream.BeginAuthenticateAsClient(certificate.GetNameInfo(X509NameType.SimpleName, false), null, null), clientSslStream.EndAuthenticateAsClient);
                 Task t2 = Task.Factory.FromAsync(serverSslStream.BeginAuthenticateAsServer(certificate, null, null), serverSslStream.EndAuthenticateAsServer);
 
-                return await TestConfiguration.WhenAllWithTimeout(t1, t2);
+                return await TestConfiguration.WhenAllOrAnyFailedWithTimeout(t1, t2);
             }
         }
     }
@@ -415,7 +415,7 @@ namespace System.Net.Security.Tests
             {
                 Task t1 = Task.Run(() => clientSslStream.AuthenticateAsClient(certificate.GetNameInfo(X509NameType.SimpleName, false)));
                 Task t2 = Task.Run(() => serverSslStream.AuthenticateAsServer(certificate));
-                return await TestConfiguration.WhenAllWithTimeout(t1, t2);
+                return await TestConfiguration.WhenAllOrAnyFailedWithTimeout(t1, t2);
             }
         }
     }

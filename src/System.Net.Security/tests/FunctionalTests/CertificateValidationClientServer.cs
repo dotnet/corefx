@@ -70,7 +70,7 @@ namespace System.Net.Security.Tests
                 Task clientConnect = clientConnection.ConnectAsync(serverEndPoint.Address, serverEndPoint.Port);
                 Task<TcpClient> serverAccept = server.AcceptTcpClientAsync();
 
-                Assert.True(await TestConfiguration.WhenAllWithTimeout(clientConnect, serverAccept), "Client/Server TCP Connect timed out.");
+                Assert.True(await TestConfiguration.WhenAllOrAnyFailedWithTimeout(clientConnect, serverAccept), "Client/Server TCP Connect timed out.");
 
                 LocalCertificateSelectionCallback clientCertCallback = null;
 
@@ -111,7 +111,7 @@ namespace System.Net.Security.Tests
                         SslProtocolSupport.DefaultSslProtocols,
                         false);
 
-                    Assert.True(await TestConfiguration.WhenAllWithTimeout(clientAuthentication, serverAuthentication),
+                    Assert.True(await TestConfiguration.WhenAllOrAnyFailedWithTimeout(clientAuthentication, serverAuthentication),
                         "Client/Server Authentication timed out.");
 
                     if (!_clientCertificateRemovedByFilter)
