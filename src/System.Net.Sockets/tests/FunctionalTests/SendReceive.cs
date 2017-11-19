@@ -553,7 +553,7 @@ namespace System.Net.Sockets.Tests
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(LoopbacksAndBuffers))]
-        public void SendRecvPollSync_TcpListener_Socket(IPAddress listenAt, bool pollBeforeOperation)
+        public async Task SendRecvPollSync_TcpListener_Socket(IPAddress listenAt, bool pollBeforeOperation)
         {
             const int BytesToSend = 123456;
             const int ListenBacklog = 1;
@@ -622,7 +622,7 @@ namespace System.Net.Sockets.Tests
                     }
                 });
 
-                Assert.True(Task.WaitAll(new[] { serverTask, clientTask }, TestTimeout), "Wait timed out");
+                Assert.True(await (new[] { serverTask, clientTask }).WhenAllWithTimeout(TestTimeout), "Wait timed out");
 
                 Assert.Equal(bytesSent, bytesReceived);
                 Assert.Equal(sentChecksum.Sum, receivedChecksum.Sum);
@@ -1041,7 +1041,7 @@ namespace System.Net.Sockets.Tests
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(Loopbacks))]
-        public void SendToRecvFromAsync_Datagram_UDP_UdpClient(IPAddress loopbackAddress)
+        public async Task SendToRecvFromAsync_Datagram_UDP_UdpClient(IPAddress loopbackAddress)
         {
             IPAddress leftAddress = loopbackAddress, rightAddress = loopbackAddress;
 
@@ -1107,7 +1107,7 @@ namespace System.Net.Sockets.Tests
                     }
                 });
 
-                Assert.True(Task.WaitAll(new[] { receiverTask, senderTask }, TestTimeout));
+                Assert.True(await (new[] { receiverTask, senderTask }).WhenAllWithTimeout(TestTimeout));
                 for (int i = 0; i < DatagramsToSend; i++)
                 {
                     Assert.NotNull(receivedChecksums[i]);
@@ -1122,7 +1122,7 @@ namespace System.Net.Sockets.Tests
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(Loopbacks))]
-        public void SendRecvAsync_TcpListener_TcpClient(IPAddress listenAt)
+        public async Task SendRecvAsync_TcpListener_TcpClient(IPAddress listenAt)
         {
             const int BytesToSend = 123456;
             const int ListenBacklog = 1;
@@ -1184,7 +1184,7 @@ namespace System.Net.Sockets.Tests
                 }
             });
 
-            Assert.True(Task.WaitAll(new[] { serverTask, clientTask }, TestTimeout),
+            Assert.True(await (new[] { serverTask, clientTask }).WhenAllWithTimeout(TestTimeout),
                 $"Time out waiting for serverTask ({serverTask.Status}) and clientTask ({clientTask.Status})");
 
             Assert.Equal(bytesSent, bytesReceived);
