@@ -20,7 +20,7 @@ namespace System.Net.Security.Tests
 
     public class SslStreamAlpnTests
     {
-        private async Task<bool> DoHandshakeWithOptions(SslStream clientSslStream, SslStream serverSslStream, SslClientAuthenticationOptions clientOptions, SslServerAuthenticationOptions serverOptions)
+        private async Task DoHandshakeWithOptions(SslStream clientSslStream, SslStream serverSslStream, SslClientAuthenticationOptions clientOptions, SslServerAuthenticationOptions serverOptions)
         {
             using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
             {
@@ -31,7 +31,7 @@ namespace System.Net.Security.Tests
                 Task t1 = clientSslStream.AuthenticateAsClientAsync(clientOptions, CancellationToken.None);
                 Task t2 = serverSslStream.AuthenticateAsServerAsync(serverOptions, CancellationToken.None);
 
-                return await TestConfiguration.WhenAllOrAnyFailedWithTimeout(t1, t2);
+                await TestConfiguration.WhenAllOrAnyFailedWithTimeout(t1, t2);
             }
         }
 
@@ -84,7 +84,7 @@ namespace System.Net.Security.Tests
                 Task t1 = Assert.ThrowsAsync<InvalidOperationException>(() => client.AuthenticateAsClientAsync(clientOptions, CancellationToken.None));
                 Task t2 = Assert.ThrowsAsync<InvalidOperationException>(() => server.AuthenticateAsServerAsync(serverOptions, CancellationToken.None));
 
-                Assert.True(await TestConfiguration.WhenAllOrAnyFailedWithTimeout(t1, t2));
+                await TestConfiguration.WhenAllOrAnyFailedWithTimeout(t1, t2);
             }
         }
 
@@ -108,7 +108,7 @@ namespace System.Net.Security.Tests
                     ApplicationProtocols = serverProtocols,
                 };
 
-                Assert.True(await DoHandshakeWithOptions(client, server, clientOptions, serverOptions));
+                await DoHandshakeWithOptions(client, server, clientOptions, serverOptions);
 
                 Assert.Equal(expected, client.NegotiatedApplicationProtocol);
                 Assert.Equal(expected, server.NegotiatedApplicationProtocol);
@@ -143,7 +143,7 @@ namespace System.Net.Security.Tests
                 Task t1 = Assert.ThrowsAsync<AuthenticationException>(() => client.AuthenticateAsClientAsync(clientOptions, CancellationToken.None));
                 Task t2 = Assert.ThrowsAsync<AuthenticationException>(() => server.AuthenticateAsServerAsync(serverOptions, CancellationToken.None));
 
-                Assert.True(await TestConfiguration.WhenAllOrAnyFailedWithTimeout(t1, t2));
+                await TestConfiguration.WhenAllOrAnyFailedWithTimeout(t1, t2);
             }
         }
 

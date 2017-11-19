@@ -20,7 +20,7 @@ namespace System.Threading.Tasks
             }
             else
             {
-                throw new TimeoutException();
+                throw new TimeoutException($"Task timed out after {millisecondsTimeout}");
             }
         }
 
@@ -35,7 +35,7 @@ namespace System.Threading.Tasks
             }
             else
             {
-                throw new TimeoutException();
+                throw new TimeoutException($"Task timed out after {millisecondsTimeout}");
             }
         }
 
@@ -43,14 +43,14 @@ namespace System.Threading.Tasks
         {
             var cts = new CancellationTokenSource();
             Task task = tasks.WhenAllOrAnyFailed();
-            if (task == await Task.WhenAny(task, Task.Delay(millisecondsTimeout, cts.Token)))
+            if (task == await Task.WhenAny(task, Task.Delay(millisecondsTimeout, cts.Token)).ConfigureAwait(false))
             {
                 cts.Cancel();
-                await task;
+                await task.ConfigureAwait(false);
             }
             else
             {
-                throw new TimeoutException();
+                throw new TimeoutException($"{nameof(WhenAllOrAnyFailed)} timed out after {millisecondsTimeout}");
             }
         }
 

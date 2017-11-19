@@ -30,18 +30,8 @@ namespace System.Net.Security.Tests
 
         public static bool SupportsNullEncryption { get { return s_supportsNullEncryption.Value; } }
 
-        public static async Task<bool> WhenAllOrAnyFailedWithTimeout(params Task[] tasks)
-        {
-            try
-            {
-                await tasks.WhenAllOrAnyFailed(PassingTestTimeoutMilliseconds);
-            }
-            catch(TimeoutException)
-            {
-                return false;
-            }
-            return true;
-        }
+        public static Task WhenAllOrAnyFailedWithTimeout(params Task[] tasks) 
+            => tasks.WhenAllOrAnyFailed(PassingTestTimeoutMilliseconds);
 
         private static Lazy<bool> s_supportsNullEncryption = new Lazy<bool>(() =>
         {
