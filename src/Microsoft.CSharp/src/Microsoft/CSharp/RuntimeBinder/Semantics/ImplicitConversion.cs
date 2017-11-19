@@ -348,7 +348,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Expr exprTmp = _exprSrc;
 
                     // If there is an implicit/explicit S => T then there is an implicit/explicit S => T?
-                    if (_typeSrc == typeDstBase || pfn(_exprSrc, _typeSrc, exprTypeDstBase, nubDst, _needsExprDest, out exprTmp, _flags | CONVERTTYPE.NOUDC))
+                    if (_typeSrc == typeDstBase || pfn(_exprSrc, _typeSrc, exprTypeDstBase, _needsExprDest, out exprTmp, _flags | CONVERTTYPE.NOUDC))
                     {
                         if (_needsExprDest)
                         {
@@ -383,7 +383,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // Both are Nullable so there is only a conversion if there is a conversion between the base types.
                 // That is, if there is an implicit/explicit S => T then there is an implicit/explicit S?+ => T?+.
-                if (typeSrcBase != typeDstBase && !pfn(null, typeSrcBase, exprTypeDstBase, nubDst, false, out _exprDest, _flags | CONVERTTYPE.NOUDC))
+                if (typeSrcBase != typeDstBase && !pfn(null, typeSrcBase, exprTypeDstBase, false, out _exprDest, _flags | CONVERTTYPE.NOUDC))
                 {
                     // No builtin conversion. Maybe there is a user defined conversion....
                     return 0 == (_flags & CONVERTTYPE.NOUDC) && _binder.bindUserDefinedConversion(_exprSrc, _typeSrc, nubDst, _needsExprDest, out _exprDest, 0 == (_flags & CONVERTTYPE.ISEXPLICIT));
@@ -402,9 +402,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                     bool convertible = (_flags & CONVERTTYPE.ISEXPLICIT) != 0
                         ? _binder.BindExplicitConversion(
-                            arg1, arg1.Type, arg2, typeDstBase, out arg1, _flags | CONVERTTYPE.NOUDC)
+                            arg1, arg1.Type, arg2, out arg1, _flags | CONVERTTYPE.NOUDC)
                         : _binder.BindImplicitConversion(
-                            arg1, arg1.Type, arg2, typeDstBase, out arg1, _flags | CONVERTTYPE.NOUDC);
+                            arg1, arg1.Type, arg2, out arg1, _flags | CONVERTTYPE.NOUDC);
 
                     if (!convertible)
                     {

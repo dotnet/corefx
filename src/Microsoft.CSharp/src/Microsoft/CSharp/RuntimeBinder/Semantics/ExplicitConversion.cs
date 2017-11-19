@@ -36,7 +36,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // to report the error on, so that when the lambda conversion fails, it reports
             // errors on the correct type.
 
-            private readonly CType _pDestinationTypeForLambdaErrorReporting;
             private Expr _exprDest;
             private readonly bool _needsExprDest;
             private readonly CONVERTTYPE _flags;
@@ -45,13 +44,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // BindExplicitConversion
             // ----------------------------------------------------------------------------
 
-            public ExplicitConversion(ExpressionBinder binder, Expr exprSrc, CType typeSrc, ExprClass typeDest, CType pDestinationTypeForLambdaErrorReporting, bool needsExprDest, CONVERTTYPE flags)
+            public ExplicitConversion(ExpressionBinder binder, Expr exprSrc, CType typeSrc, ExprClass typeDest, bool needsExprDest, CONVERTTYPE flags)
             {
                 _binder = binder;
                 _exprSrc = exprSrc;
                 _typeSrc = typeSrc;
                 _typeDest = typeDest.Type;
-                _pDestinationTypeForLambdaErrorReporting = pDestinationTypeForLambdaErrorReporting;
                 _exprTypeDest = typeDest;
                 _needsExprDest = needsExprDest;
                 _flags = flags;
@@ -100,7 +98,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // The set of explicit conversions includes all implicit conversions.
 
                 // Don't try user-defined conversions now because we'll try them again later.
-                if (_binder.BindImplicitConversion(_exprSrc, _typeSrc, _exprTypeDest, _pDestinationTypeForLambdaErrorReporting, _needsExprDest, out _exprDest, _flags | CONVERTTYPE.ISEXPLICIT))
+                if (_binder.BindImplicitConversion(_exprSrc, _typeSrc, _exprTypeDest, _needsExprDest, out _exprDest, _flags | CONVERTTYPE.ISEXPLICIT))
                 {
                     return true;
                 }
@@ -194,7 +192,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // If S and T are value types and there is a builtin conversion from S => T then there is an
                 // explicit conversion from S? => T that throws on null.
-                if (_typeDest.IsValType() && _binder.BindExplicitConversion(null, _typeSrc.StripNubs(), _exprTypeDest, _pDestinationTypeForLambdaErrorReporting, _flags | CONVERTTYPE.NOUDC))
+                if (_typeDest.IsValType() && _binder.BindExplicitConversion(null, _typeSrc.StripNubs(), _exprTypeDest, _flags | CONVERTTYPE.NOUDC))
                 {
                     if (_needsExprDest)
                     {
@@ -205,7 +203,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
 
                         Debug.Assert(valueSrc.Type == _typeSrc.StripNubs());
-                        if (!_binder.BindExplicitConversion(valueSrc, valueSrc.Type, _exprTypeDest, _pDestinationTypeForLambdaErrorReporting, _needsExprDest, out _exprDest, _flags | CONVERTTYPE.NOUDC))
+                        if (!_binder.BindExplicitConversion(valueSrc, valueSrc.Type, _exprTypeDest, _needsExprDest, out _exprDest, _flags | CONVERTTYPE.NOUDC))
                         {
                             Debug.Fail("BindExplicitConversion failed unexpectedly");
                             return false;

@@ -46,7 +46,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Expr pSourceExpr,
             CType pSourceType,
             ExprClass pDestinationTypeExpr,
-            CType pDestinationTypeForLambdaErrorReporting,
             bool needsExprDest,
             out Expr ppDestinationExpr,
             CONVERTTYPE flags);
@@ -334,7 +333,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private bool canConvert(CType src, CType dest, CONVERTTYPE flags)
         {
             ExprClass exprDest = ExprFactory.CreateClass(dest);
-            return BindImplicitConversion(null, src, exprDest, dest, flags);
+            return BindImplicitConversion(null, src, exprDest, flags);
         }
 
         public bool canConvert(CType src, CType dest)
@@ -351,7 +350,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private bool canConvert(Expr expr, CType dest, CONVERTTYPE flags)
         {
             ExprClass exprDest = ExprFactory.CreateClass(dest);
-            return BindImplicitConversion(expr, expr.Type, exprDest, dest, flags);
+            return BindImplicitConversion(expr, expr.Type, exprDest, flags);
         }
 
         // performs an implicit conversion if it's possible. otherwise displays an error. flags is an optional parameter.
@@ -367,7 +366,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Expr exprResult;
             CType dest = destExpr.Type;
 
-            if (BindImplicitConversion(expr, expr.Type, destExpr, dest, out exprResult, flags))
+            if (BindImplicitConversion(expr, expr.Type, destExpr, out exprResult, flags))
             {
                 // Conversion works.
                 checkUnsafe(expr.Type); // added to the binder so we don't bind to pointer ops
@@ -426,7 +425,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Expr exprResult;
             ExprClass exprDest = ExprFactory.CreateClass(dest);
-            if (BindImplicitConversion(expr, expr.Type, exprDest, dest, out exprResult, flags))
+            if (BindImplicitConversion(expr, expr.Type, exprDest, out exprResult, flags))
             {
                 checkUnsafe(expr.Type); // added to the binder so we don't bind to pointer ops
                 checkUnsafe(dest); // added to the binder so we don't bind to pointer ops
@@ -467,7 +466,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             SemanticChecker.CheckForStaticClass(null, dest, ErrorCode.ERR_ConvertToStaticClass);
             if (expr.IsOK)
             {
-                if (BindExplicitConversion(expr, expr.Type, destExpr, dest, out exprResult, flags))
+                if (BindExplicitConversion(expr, expr.Type, destExpr, out exprResult, flags))
                 {
                     // Conversion works.
                     checkUnsafe(expr.Type); // added to the binder so we don't bind to pointer ops
@@ -566,15 +565,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private bool canCast(CType src, CType dest, CONVERTTYPE flags)
         {
             ExprClass destExpr = ExprFactory.CreateClass(dest);
-            return BindExplicitConversion(null, src, destExpr, dest, flags);
+            return BindExplicitConversion(null, src, destExpr, flags);
         }
 
-        private bool BindImplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, CONVERTTYPE flags)
+        private bool BindImplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, CONVERTTYPE flags)
         {
             ImplicitConversion binder = new ImplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, false, flags);
             return binder.Bind();
         }
-        private bool BindImplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, out Expr ppDestinationExpr, CONVERTTYPE flags)
+        private bool BindImplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, out Expr ppDestinationExpr, CONVERTTYPE flags)
         {
             ImplicitConversion binder = new ImplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, true, flags);
             bool result = binder.Bind();
@@ -582,7 +581,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return result;
         }
 
-        private bool BindImplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, bool needsExprDest, out Expr ppDestinationExpr, CONVERTTYPE flags)
+        private bool BindImplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, bool needsExprDest, out Expr ppDestinationExpr, CONVERTTYPE flags)
         {
             ImplicitConversion binder = new ImplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, needsExprDest, flags);
             bool result = binder.Bind();
@@ -590,25 +589,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return result;
         }
 
-        private bool BindExplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, bool needsExprDest, out Expr ppDestinationExpr, CONVERTTYPE flags)
+        private bool BindExplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, bool needsExprDest, out Expr ppDestinationExpr, CONVERTTYPE flags)
         {
-            ExplicitConversion binder = new ExplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, pDestinationTypeForLambdaErrorReporting, needsExprDest, flags);
+            ExplicitConversion binder = new ExplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, needsExprDest, flags);
             bool result = binder.Bind();
             ppDestinationExpr = needsExprDest ? binder.ExprDest : null;
             return result;
         }
 
-        private bool BindExplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, out Expr ppDestinationExpr, CONVERTTYPE flags)
+        private bool BindExplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, out Expr ppDestinationExpr, CONVERTTYPE flags)
         {
-            ExplicitConversion binder = new ExplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, pDestinationTypeForLambdaErrorReporting, true, flags);
+            ExplicitConversion binder = new ExplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, true, flags);
             bool result = binder.Bind();
             ppDestinationExpr = binder.ExprDest;
             return result;
         }
 
-        private bool BindExplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, CType pDestinationTypeForLambdaErrorReporting, CONVERTTYPE flags)
+        private bool BindExplicitConversion(Expr pSourceExpr, CType pSourceType, ExprClass pDestinationTypeExpr, CONVERTTYPE flags)
         {
-            ExplicitConversion binder = new ExplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, pDestinationTypeForLambdaErrorReporting, false, flags);
+            ExplicitConversion binder = new ExplicitConversion(this, pSourceExpr, pSourceType, pDestinationTypeExpr, false, flags);
             return binder.Bind();
         }
 
@@ -1515,7 +1514,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             BindingContext ctx = new BindingContext(Context);
             Debug.Assert(typeDest != null);
             Debug.Assert(typeDest.Type != null);
-            return (new ExpressionBinder(ctx)).BindExplicitConversion(exprSrc, typeSrc, typeDest, typeDest.Type, flags);
+            return (new ExpressionBinder(ctx)).BindExplicitConversion(exprSrc, typeSrc, typeDest, flags);
         }
     }
 
