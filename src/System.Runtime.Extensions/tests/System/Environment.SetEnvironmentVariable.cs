@@ -76,7 +76,7 @@ namespace System.Tests
         public void EnvironmentVariableTooLarge_Throws()
         {
             // string slightly less than 2 GiB (1 GiB for x86) so the constructor doesn't fail
-            var count = (Environment.Is64BitProcess ? 1024 * 1024 * 1024 : 512 * 1024 * 1024) - 64;
+            var count = (Environment.Is64BitProcess ? 1024 * 1024 * 1024 : 500 * 1024 * 1024) - 64;
             string longVar = new string('c', count);
             string val = "Test_SetEnvironmentVariable_EnvironmentVariableTooLarge_Throws";
 
@@ -100,7 +100,7 @@ namespace System.Tests
             string var = "Test_SetEnvironmentVariable_EnvironmentVariableValueTooLarge_Throws";
 
             // string slightly less than 2 GiB (1 GiB for x86) so the constructor doesn't fail
-            var count = (Environment.Is64BitProcess ? 1024 * 1024 * 1024 : 512 * 1024 * 1024) - 64;
+            var count = (Environment.Is64BitProcess ? 1024 * 1024 * 1024 : 500 * 1024 * 1024) - 64;
 
             string longVal = new string('c', count);
 
