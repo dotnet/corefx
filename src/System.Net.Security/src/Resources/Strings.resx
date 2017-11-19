@@ -426,4 +426,7 @@
   <data name="net_conflicting_options" xml:space="preserve">
     <value>The '{0}' option was already set in the SslStream constructor.</value>
   </data>
+  <data name="net_alpn_failed" xml:space="preserve">
+    <value>No common application protocol exists between the client and the server. Application negotiation No No common application protocol exists between the client and the server.</value>
+  </data>
 </root>
