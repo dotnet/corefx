@@ -75,10 +75,20 @@ namespace System.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework does not have the fix to allow arbitrary length environment variables.")]
         public void EnvironmentVariableTooLarge_Throws()
         {
-            // string slightly less than 2 GiB (1 GiB for x86) so the constructor doesn't fail
-            var count = (Environment.Is64BitProcess ? 1024 * 1024 * 1024 : 500 * 1024 * 1024) - 64;
-            string longVar = new string('c', count);
+            string longVar;
             string val = "Test_SetEnvironmentVariable_EnvironmentVariableTooLarge_Throws";
+
+            try
+            {
+                // string slightly less than 2 GiB (1 GiB for x86) so the constructor doesn't fail
+                var count = (Environment.Is64BitProcess ? 1024 * 1024 * 1024 : 512 * 1024 * 1024) - 64;
+                longVar = new string('c', count);
+            }
+            catch (OutOfMemoryException)
+            {
+                // not enough memory to allocate a string at test time
+                return;
+            }
 
             try
             {
@@ -98,11 +108,19 @@ namespace System.Tests
         public void EnvironmentVariableValueTooLarge_Throws()
         {
             string var = "Test_SetEnvironmentVariable_EnvironmentVariableValueTooLarge_Throws";
+            string longVal;
 
-            // string slightly less than 2 GiB (1 GiB for x86) so the constructor doesn't fail
-            var count = (Environment.Is64BitProcess ? 1024 * 1024 * 1024 : 500 * 1024 * 1024) - 64;
-
-            string longVal = new string('c', count);
+            try
+            {
+                // string slightly less than 2 GiB (1 GiB for x86) so the constructor doesn't fail
+                var count = (Environment.Is64BitProcess ? 1024 * 1024 * 1024 : 512 * 1024 * 1024) - 64;
+                longVal = new string('c', count);
+            }
+            catch (OutOfMemoryException)
+            {
+                // not enough memory to allocate a string at test time
+                return;
+            }
 
             try
             {
