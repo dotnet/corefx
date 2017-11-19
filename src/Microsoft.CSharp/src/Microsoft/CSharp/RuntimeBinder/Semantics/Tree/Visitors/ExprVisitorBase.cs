@@ -329,16 +329,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case ExpressionKind.TypeOf:
-                    exprRet = Visit((pExpr as ExprTypeOf).SourceType);
-                    (pExpr as ExprTypeOf).SourceType = exprRet as ExprClass;
                     break;
 
                 case ExpressionKind.Cast:
                     exprRet = Visit((pExpr as ExprCast).Argument);
                     Debug.Assert(exprRet != null);
                     (pExpr as ExprCast).Argument = exprRet;
-                    exprRet = Visit((pExpr as ExprCast).DestinationType);
-                    (pExpr as ExprCast).DestinationType = exprRet as ExprClass;
                     break;
 
                 case ExpressionKind.UserDefinedConversion:
