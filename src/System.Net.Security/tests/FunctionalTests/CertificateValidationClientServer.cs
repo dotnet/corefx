@@ -34,8 +34,10 @@ namespace System.Net.Security.Tests
         {
             _serverCertificate.Dispose();
             _clientCertificate.Dispose();
-            foreach (X509Certificate2 cert in _serverCertificateCollection) cert.Dispose();
-            foreach (X509Certificate2 cert in _clientCertificateCollection) cert.Dispose();
+            foreach (X509Certificate2 cert in _serverCertificateCollection)
+                cert.Dispose();
+            foreach (X509Certificate2 cert in _clientCertificateCollection)
+                cert.Dispose();
         }
 
         [Theory]
@@ -49,8 +51,8 @@ namespace System.Net.Security.Tests
 
             _clientCertificateRemovedByFilter = false;
 
-            if (PlatformDetection.IsWindows7 && 
-                !useClientSelectionCallback && 
+            if (PlatformDetection.IsWindows7 &&
+                !useClientSelectionCallback &&
                 !Capability.IsTrustedRootCertificateInstalled())
             {
                 // https://technet.microsoft.com/en-us/library/hh831771.aspx#BKMK_Changes2012R2
@@ -70,11 +72,7 @@ namespace System.Net.Security.Tests
                 Task clientConnect = clientConnection.ConnectAsync(serverEndPoint.Address, serverEndPoint.Port);
                 Task<TcpClient> serverAccept = server.AcceptTcpClientAsync();
 
-                Assert.True(
-                    Task.WaitAll(
-                        new Task[] { clientConnect, serverAccept },
-                        TestConfiguration.PassingTestTimeoutMilliseconds),
-                    "Client/Server TCP Connect timed out.");
+                await Task.WhenAll(clientConnect, serverAccept).TimeoutAfter(TestConfiguration.PassingTestTimeoutMilliseconds);
 
                 LocalCertificateSelectionCallback clientCertCallback = null;
 
@@ -115,11 +113,7 @@ namespace System.Net.Security.Tests
                         SslProtocolSupport.DefaultSslProtocols,
                         false);
 
-                    Assert.True(
-                        Task.WaitAll(
-                            new Task[] { clientAuthentication, serverAuthentication },
-                            TestConfiguration.PassingTestTimeoutMilliseconds),
-                        "Client/Server Authentication timed out.");
+                    await Task.WhenAll(clientAuthentication, serverAuthentication).TimeoutAfter(TestConfiguration.PassingTestTimeoutMilliseconds);
 
                     if (!_clientCertificateRemovedByFilter)
                     {

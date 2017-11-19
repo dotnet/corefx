@@ -9,6 +9,8 @@ using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.IO;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,7 +22,7 @@ namespace System.Net.Security.Tests
 
     public class SslStreamAlpnTests
     {
-        private bool DoHandshakeWithOptions(SslStream clientSslStream, SslStream serverSslStream, SslClientAuthenticationOptions clientOptions, SslServerAuthenticationOptions serverOptions)
+        private async Task<bool> DoHandshakeWithOptions(SslStream clientSslStream, SslStream serverSslStream, SslClientAuthenticationOptions clientOptions, SslServerAuthenticationOptions serverOptions)
         {
             using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
             {
@@ -31,7 +33,15 @@ namespace System.Net.Security.Tests
                 Task t1 = clientSslStream.AuthenticateAsClientAsync(clientOptions, CancellationToken.None);
                 Task t2 = serverSslStream.AuthenticateAsServerAsync(serverOptions, CancellationToken.None);
 
-                return Task.WaitAll(new[] { t1, t2 }, TestConfiguration.PassingTestTimeoutMilliseconds);
+                try
+                {
+                    await Task.WhenAll(new[] { t1, t2 }).TimeoutAfter(TestConfiguration.PassingTestTimeoutMilliseconds);
+                }
+                catch (TimeoutException)
+                {
+                    return false;
+                }
+                return true;
             }
         }
 
@@ -61,7 +71,7 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        public void SslStream_StreamToStream_DuplicateOptions_Throws()
+        public async Task SslStream_StreamToStream_DuplicateOptions_Throws()
         {
             RemoteCertificateValidationCallback rCallback = (sender, certificate, chain, errors) => { return true; };
             LocalCertificateSelectionCallback lCallback = (sender, host, localCertificates, remoteCertificate, issuers) => { return null; };
@@ -84,13 +94,13 @@ namespace System.Net.Security.Tests
                 Task t1 = Assert.ThrowsAsync<InvalidOperationException>(() => client.AuthenticateAsClientAsync(clientOptions, CancellationToken.None));
                 Task t2 = Assert.ThrowsAsync<InvalidOperationException>(() => server.AuthenticateAsServerAsync(serverOptions, CancellationToken.None));
 
-                Assert.True(Task.WaitAll(new[] { t1, t2 }, TestConfiguration.PassingTestTimeoutMilliseconds));
+                await Task.WhenAll(new[] { t1, t2 }).TimeoutAfter(TestConfiguration.PassingTestTimeoutMilliseconds);
             }
         }
 
         [Theory]
         [MemberData(nameof(Alpn_TestData))]
-        public void SslStream_StreamToStream_Alpn_Success(List<SslApplicationProtocol> clientProtocols, List<SslApplicationProtocol> serverProtocols, SslApplicationProtocol expected)
+        public async Task SslStream_StreamToStream_Alpn_Success(List<SslApplicationProtocol> clientProtocols, List<SslApplicationProtocol> serverProtocols, SslApplicationProtocol expected)
         {
             VirtualNetwork network = new VirtualNetwork();
             using (var clientStream = new VirtualNetworkStream(network, false))
@@ -108,7 +118,7 @@ namespace System.Net.Security.Tests
                     ApplicationProtocols = serverProtocols,
                 };
 
-                Assert.True(DoHandshakeWithOptions(client, server, clientOptions, serverOptions));
+                Assert.True(await DoHandshakeWithOptions(client, server, clientOptions, serverOptions));
 
                 Assert.Equal(expected, client.NegotiatedApplicationProtocol);
                 Assert.Equal(expected, server.NegotiatedApplicationProtocol);
@@ -116,34 +126,59 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        [ActiveIssue(24853)]
         [PlatformSpecific(~TestPlatforms.OSX)]
-        public void SslStream_StreamToStream_Alpn_NonMatchingProtocols_Fail()
+        public async Task SslStream_StreamToStream_Alpn_NonMatchingProtocols_Fail()
         {
-            VirtualNetwork network = new VirtualNetwork();
-            using (var clientStream = new VirtualNetworkStream(network, false))
-            using (var serverStream = new VirtualNetworkStream(network, true))
-            using (var client = new SslStream(clientStream, false))
-            using (var server = new SslStream(serverStream, false))
-            using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
+            TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
+            try
             {
-                SslClientAuthenticationOptions clientOptions = new SslClientAuthenticationOptions
+                listener.Start();
+                using (TcpClient client = new TcpClient())
                 {
-                    ApplicationProtocols = new List<SslApplicationProtocol> { SslApplicationProtocol.Http11 },
-                    RemoteCertificateValidationCallback = AllowAnyServerCertificate,
-                    TargetHost = certificate.GetNameInfo(X509NameType.SimpleName, false),
-                };
+                    Task<TcpClient> serverTask = listener.AcceptTcpClientAsync();
+                    await client.ConnectAsync(IPAddress.Loopback, ((IPEndPoint)listener.LocalEndpoint).Port);
+                    using (TcpClient server = await serverTask)
+                    using (SslStream serverStream = new SslStream(server.GetStream(), leaveInnerStreamOpen: false))
+                    using (SslStream clientStream = new SslStream(client.GetStream(), leaveInnerStreamOpen: false))
+                    using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
+                    {
+                        SslServerAuthenticationOptions serverOptions = new SslServerAuthenticationOptions
+                        {
+                            ApplicationProtocols = new List<SslApplicationProtocol> { SslApplicationProtocol.Http2 },
+                            ServerCertificate = certificate,
+                        };
+                        SslClientAuthenticationOptions clientOptions = new SslClientAuthenticationOptions
+                        {
+                            ApplicationProtocols = new List<SslApplicationProtocol> { SslApplicationProtocol.Http11 },
+                            RemoteCertificateValidationCallback = AllowAnyServerCertificate,
+                            TargetHost = certificate.GetNameInfo(X509NameType.SimpleName, false),
+                        };
 
-                SslServerAuthenticationOptions serverOptions = new SslServerAuthenticationOptions
-                {
-                    ApplicationProtocols = new List<SslApplicationProtocol> { SslApplicationProtocol.Http2 },
-                    ServerCertificate = certificate,
-                };
-                
-                Task t1 = Assert.ThrowsAsync<AuthenticationException>(() => client.AuthenticateAsClientAsync(clientOptions, CancellationToken.None));
-                Task t2 = Assert.ThrowsAsync<AuthenticationException>(() => server.AuthenticateAsServerAsync(serverOptions, CancellationToken.None));
-
-                Assert.True(Task.WaitAll(new[] { t1, t2 }, TestConfiguration.PassingTestTimeoutMilliseconds));
+                        // Test alpn failure only on platforms that supports ALPN.
+                        if ((RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && !(PlatformDetection.IsUbuntu1404 || PlatformDetection.IsDebian8 || PlatformDetection.IsCentos6)) ||
+                            (PlatformDetection.IsWindows && !PlatformDetection.IsWindows7))
+                        {
+                            Task t1 = Assert.ThrowsAsync<IOException>(() => clientStream.AuthenticateAsClientAsync(clientOptions, CancellationToken.None));
+                            Task t2 = Assert.ThrowsAsync<AuthenticationException>(() => serverStream.AuthenticateAsServerAsync(serverOptions, CancellationToken.None)).ContinueWith(t =>
+                                {
+                                    server.Dispose();
+                                }, TaskScheduler.Default);
+                            Assert.True(await TestConfiguration.WhenAll(t1, t2));
+                        }
+                        else
+                        {
+                            Task t1 = clientStream.AuthenticateAsClientAsync(clientOptions, CancellationToken.None);
+                            Task t2 = serverStream.AuthenticateAsServerAsync(serverOptions, CancellationToken.None);
+                            Assert.True(await TestConfiguration.WhenAll(t1, t2));
+                            Assert.Equal(default(SslApplicationProtocol), clientStream.NegotiatedApplicationProtocol);
+                            Assert.Equal(default(SslApplicationProtocol), serverStream.NegotiatedApplicationProtocol);
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                listener.Stop();
             }
         }
 

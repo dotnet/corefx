@@ -27,7 +27,7 @@ namespace System.Net.Security.Tests
         private const string ScriptUninstallArgs = "--uninstall --yes";
         private const string ScriptInstallArgs = "--password {0} --yes";
         private const int InstalledButUnconfiguredExitCode = 2;
-        private readonly bool _isKrbPreInstalled ;
+        private readonly bool _isKrbPreInstalled;
         public readonly string password;
         private const string NtlmUserFile = "NTLM_USER_FILE";
         private readonly bool _successfulSetup = true;
@@ -187,7 +187,7 @@ namespace System.Net.Security.Tests
 
         [Fact, OuterLoop]
         [PlatformSpecific(TestPlatforms.Linux)]
-        public void NegotiateStream_StreamToStream_AuthToHttpTarget_Success()
+        public async Task NegotiateStream_StreamToStream_AuthToHttpTarget_Success()
         {
             if (!_isKrbAvailable)
             {
@@ -206,13 +206,10 @@ namespace System.Net.Security.Tests
 
                 string user = string.Format("{0}@{1}", TestConfiguration.KerberosUser, TestConfiguration.Realm);
                 NetworkCredential credential = new NetworkCredential(user, _fixture.password);
-                Task[] auth = new Task[] {
-                    client.AuthenticateAsClientAsync(credential, TestConfiguration.HttpTarget),
-                    server.AuthenticateAsServerAsync()
-                };
+                Task t1 = client.AuthenticateAsClientAsync(credential, TestConfiguration.HttpTarget);
+                Task t2 = server.AuthenticateAsServerAsync();
 
-                bool finished = Task.WaitAll(auth, TestConfiguration.PassingTestTimeoutMilliseconds);
-                Assert.True(finished, "Handshake completed in the allotted time");
+                await Task.WhenAll(t1, t2).TimeoutAfter(TestConfiguration.PassingTestTimeoutMilliseconds);
 
                 AssertClientPropertiesForTarget(client, TestConfiguration.HttpTarget);
             }
@@ -431,7 +428,7 @@ namespace System.Net.Security.Tests
                 string user = string.Format("{0}@{1}", TestConfiguration.KerberosUser, TestConfiguration.Realm);
                 string target = string.Format("{0}@{1}", TestConfiguration.HostTarget, TestConfiguration.Realm);
                 NetworkCredential credential = new NetworkCredential(user.Substring(1), _fixture.password);
-                Assert.ThrowsAsync<AuthenticationException>(() =>client.AuthenticateAsClientAsync(credential, target));
+                Assert.ThrowsAsync<AuthenticationException>(() => client.AuthenticateAsClientAsync(credential, target));
                 Assert.ThrowsAsync<AuthenticationException>(() => server.AuthenticateAsServerAsync());
             }
         }
@@ -490,30 +487,30 @@ namespace System.Net.Security.Tests
 
         public static IEnumerable<object[]> ValidNtlmCredentials()
         {
-         
-                yield return new object[]{new NetworkCredential(TestConfiguration.NtlmUser, _ntlmPassword, TestConfiguration.Domain)};
-                yield return new object[] {new NetworkCredential(TestConfiguration.NtlmUser, _ntlmPassword)};
-                yield return new object[]
-                {
+
+            yield return new object[] { new NetworkCredential(TestConfiguration.NtlmUser, _ntlmPassword, TestConfiguration.Domain) };
+            yield return new object[] { new NetworkCredential(TestConfiguration.NtlmUser, _ntlmPassword) };
+            yield return new object[]
+            {
                     new NetworkCredential($@"{TestConfiguration.Domain}\{TestConfiguration.NtlmUser}", _ntlmPassword)
-                };
-                yield return new object[]
-                {
+            };
+            yield return new object[]
+            {
                     new NetworkCredential($"{TestConfiguration.NtlmUser}@{TestConfiguration.Domain}", _ntlmPassword)
-                };
+            };
         }
 
         public static IEnumerable<object[]> InvalidNtlmCredentials
         {
             get
             {
-                yield return new object[] { new NetworkCredential(TestConfiguration.NtlmUser, _ntlmPassword, TestConfiguration.Domain.Substring(1))};
+                yield return new object[] { new NetworkCredential(TestConfiguration.NtlmUser, _ntlmPassword, TestConfiguration.Domain.Substring(1)) };
                 yield return new object[] { new NetworkCredential(TestConfiguration.NtlmUser.Substring(1), _ntlmPassword, TestConfiguration.Domain) };
                 yield return new object[] { new NetworkCredential(TestConfiguration.NtlmUser, _ntlmPassword.Substring(1), TestConfiguration.Domain) };
-                yield return new object[] { new NetworkCredential($@"{TestConfiguration.Domain}\{TestConfiguration.NtlmUser}", _ntlmPassword, TestConfiguration.Domain.Substring(1))};
-                yield return new object[] { new NetworkCredential($"{TestConfiguration.NtlmUser}@{TestConfiguration.Domain.Substring(1)}", _ntlmPassword)};
-                yield return new object[] { new NetworkCredential($@"{TestConfiguration.Domain.Substring(1)}\{TestConfiguration.NtlmUser}", _ntlmPassword, TestConfiguration.Domain)};
-                yield return new object[] { new NetworkCredential(TestConfiguration.NtlmUser, _ntlmPassword, TestConfiguration.Realm)};
+                yield return new object[] { new NetworkCredential($@"{TestConfiguration.Domain}\{TestConfiguration.NtlmUser}", _ntlmPassword, TestConfiguration.Domain.Substring(1)) };
+                yield return new object[] { new NetworkCredential($"{TestConfiguration.NtlmUser}@{TestConfiguration.Domain.Substring(1)}", _ntlmPassword) };
+                yield return new object[] { new NetworkCredential($@"{TestConfiguration.Domain.Substring(1)}\{TestConfiguration.NtlmUser}", _ntlmPassword, TestConfiguration.Domain) };
+                yield return new object[] { new NetworkCredential(TestConfiguration.NtlmUser, _ntlmPassword, TestConfiguration.Realm) };
 
             }
         }
@@ -564,7 +561,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-     
+
         [Fact, OuterLoop]
         [PlatformSpecific(TestPlatforms.Linux)]
         public void NegotiateStream_StreamToStream_NtlmAuthentication_Fallback_Success()
