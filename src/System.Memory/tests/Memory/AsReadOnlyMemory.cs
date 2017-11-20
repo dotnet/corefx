@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.MemoryTests
 {
-    public static partial class AsReadOnlyMemory
+    public static class AsReadOnlyMemory
     {
         [Fact]
         public static void EmptyMemoryAsReadOnlyMemory()
