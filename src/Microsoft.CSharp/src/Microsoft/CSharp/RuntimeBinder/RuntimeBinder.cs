@@ -253,7 +253,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             ExprBoundLambda boundLambda = GenerateBoundLambda(pScope, pResult);
 
             // (4) - Rewrite the ExprBoundLambda into an expression tree.
-            Expr exprTree = ExpressionTreeRewriter.Rewrite(boundLambda, _exprFactory, SymbolLoader);
+            ExprBinOp exprTree = ExpressionTreeRewriter.Rewrite(boundLambda, _exprFactory, SymbolLoader);
 
             // (5) - Create the actual Expression Tree
             Expression e = ExpressionTreeCallRewriter.Rewrite(SymbolLoader.GetTypeManager(), exprTree, parameters);

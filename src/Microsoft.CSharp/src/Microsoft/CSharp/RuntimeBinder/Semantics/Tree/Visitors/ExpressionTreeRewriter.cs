@@ -9,7 +9,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExpressionTreeRewriter : ExprVisitorBase
     {
-        public static Expr Rewrite(ExprBoundLambda expr, ExprFactory expressionFactory, SymbolLoader symbolLoader) =>
+        public static ExprBinOp Rewrite(ExprBoundLambda expr, ExprFactory expressionFactory, SymbolLoader symbolLoader) =>
             new ExpressionTreeRewriter(expressionFactory, symbolLoader).VisitBoundLambda(expr);
 
         private ExprFactory expressionFactory;
@@ -90,7 +90,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /////////////////////////////////////////////////////////////////////////////////
         // Expression types.
 
-        private Expr VisitBoundLambda(ExprBoundLambda anonmeth)
+        private ExprBinOp VisitBoundLambda(ExprBoundLambda anonmeth)
         {
             Debug.Assert(anonmeth != null);
 
