@@ -103,6 +103,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType expressionType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_EXPRESSION);
             MethWithInst mwi = new MethWithInst(lambdaMethod, expressionType, lambdaTypeParams);
             Expr createParameters = CreateWraps(anonmeth);
+            Debug.Assert(createParameters != null);
             Expr body = RewriteLambdaBody(anonmeth);
             Debug.Assert(anonmeth.ArgumentScope.nextChild == null);
             Expr parameters = GenerateParamsArray(null, PredefinedType.PT_PARAMETEREXPRESSION);
@@ -110,16 +111,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType typeRet = GetSymbolLoader().GetTypeManager().SubstType(mwi.Meth().RetType, mwi.GetType(), mwi.TypeArgs);
             ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(null, mwi);
             ExprCall call = GetExprFactory().CreateCall(0, typeRet, args, pMemGroup, mwi);
-            Expr callLambda = call;
-
             call.PredefinedMethod = PREDEFMETH.PM_EXPRESSION_LAMBDA;
-
-            if (createParameters != null)
-            {
-                callLambda = GetExprFactory().CreateSequence(createParameters, callLambda);
-            }
-
-            return callLambda;
+            return GetExprFactory().CreateSequence(createParameters, call);
         }
         protected override Expr VisitCONSTANT(ExprConstant expr)
         {
