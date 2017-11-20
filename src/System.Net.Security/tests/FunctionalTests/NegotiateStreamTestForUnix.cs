@@ -283,7 +283,7 @@ namespace System.Net.Security.Tests
 
         [Fact, OuterLoop]
         [PlatformSpecific(TestPlatforms.Linux)]
-        public void NegotiateStream_EchoServer_ClientWriteRead_Successive_Sync_Success()
+        public async Task NegotiateStream_EchoServer_ClientWriteRead_Successive_Sync_Success()
         {
             if (!_isKrbAvailable)
             {
