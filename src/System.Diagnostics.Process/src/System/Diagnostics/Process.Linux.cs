@@ -86,11 +86,9 @@ namespace System.Diagnostics
 
                 double uptimeSeconds = 0;
                 int length = text.IndexOf(' ');
-                Debug.Assert(length != -1);
                 if (length != -1)
                 {
-                    bool success = Double.TryParse(text.AsReadOnlySpan().Slice(0, length), NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo, out uptimeSeconds);
-                    Debug.Assert(success);
+                    Double.TryParse(text.AsReadOnlySpan().Slice(0, length), NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo, out uptimeSeconds);
                 }
 
                 return TimeSpan.FromSeconds(uptimeSeconds);
