@@ -149,9 +149,8 @@ namespace Microsoft.CSharp.RuntimeBinder
             LocalVariableSymbol[] locals = PopulateLocalScope(payload, pScope, arguments, parameters);
 
             // (1.5) - Check to see if we need to defer.
-            if (DeferBinding(payload, arguments, args, locals, out DynamicMetaObject o))
+            if (DeferBinding(payload, arguments, args, locals, out deferredBinding))
             {
-                deferredBinding = o;
                 return null;
             }
 
@@ -159,9 +158,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             Expr pResult = payload.DispatchPayload(this, arguments, locals);
             Debug.Assert(pResult != null);
 
-            deferredBinding = null;
-            Expression e = CreateExpressionTreeFromResult(parameters, pScope, pResult);
-            return e;
+            return CreateExpressionTreeFromResult(parameters, pScope, pResult);
         }
 
         #region Helpers
