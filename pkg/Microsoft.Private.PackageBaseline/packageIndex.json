@@ -55,7 +55,8 @@
         "4.0.1",
         "4.0.0",
         "4.3.0",
-        "4.4.0"
+        "4.4.0",
+        "4.4.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {
@@ -736,7 +737,8 @@
         "4.0.10",
         "4.1.0",
         "4.3.0",
-        "4.4.0"
+        "4.4.0",
+        "4.4.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {
@@ -966,7 +968,8 @@
     },
     "System.Configuration.ConfigurationManager": {
       "StableVersions": [
-        "4.4.0"
+        "4.4.0",
+        "4.4.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {},
@@ -1121,7 +1124,8 @@
         "4.1.0",
         "4.3.0",
         "4.4.0",
-        "4.4.1"
+        "4.4.1",
+        "4.4.2"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {
@@ -1977,7 +1981,8 @@
       "StableVersions": [
         "4.0.0",
         "4.3.0",
-        "4.4.0"
+        "4.4.0",
+        "4.4.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {},
@@ -3796,7 +3801,8 @@
       "StableVersions": [
         "4.0.0",
         "4.3.0",
-        "4.4.0"
+        "4.4.0",
+        "4.4.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {},
@@ -4016,7 +4022,8 @@
     },
     "System.Security.Cryptography.Xml": {
       "StableVersions": [
-        "4.4.0"
+        "4.4.0",
+        "4.4.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {},
@@ -4026,7 +4033,8 @@
     },
     "System.Security.Permissions": {
       "StableVersions": [
-        "4.4.0"
+        "4.4.0",
+        "4.4.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {},
@@ -4077,7 +4085,8 @@
       "StableVersions": [
         "4.0.0",
         "4.3.0",
-        "4.4.0"
+        "4.4.0",
+        "4.4.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {},
@@ -4284,7 +4293,8 @@
       "StableVersions": [
         "4.1.0",
         "4.3.0",
-        "4.4.0"
+        "4.4.0",
+        "4.4.1"
       ],
       "BaselineVersion": "4.4.0",
       "InboxOn": {},
