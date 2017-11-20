@@ -74,15 +74,30 @@ namespace System.ComponentModel
         public int NativeErrorCode { get; }
 
         /// <summary>
-        /// Returns a string that contains the <see cref="NativeErrorCode"/> of the error.
+        /// Returns a string that contains the <see cref="NativeErrorCode"/>, or <see cref="Exception.HResult"/>, or both.
         /// </summary>
-        /// <returns>A string that represents the <see cref="NativeErrorCode"/>.</returns>
+        /// <returns>A string that represents the <see cref="NativeErrorCode"/>, or <see cref="Exception.HResult"/>, or both.</returns>
         public override string ToString()
         {
+            if (NativeErrorCode == 0 || NativeErrorCode == HResult)
+            {
+                return base.ToString();
+            }
+
             string message = Message;
             string className = GetType().ToString();
             StringBuilder s = new StringBuilder(className);
-            s.AppendFormat(CultureInfo.InvariantCulture, " ({0})", NativeErrorCode);
+            string nativeErrorString = NativeErrorCode < 0
+                ? string.Format(CultureInfo.InvariantCulture, "0x{0:X8}", NativeErrorCode)
+                : NativeErrorCode.ToString(CultureInfo.InvariantCulture);
+            if (HResult == E_FAIL)
+            {
+                s.AppendFormat(CultureInfo.InvariantCulture, " ({0})", nativeErrorString);
+            }
+            else
+            {
+                s.AppendFormat(CultureInfo.InvariantCulture, " ({0:X8}, {1})", HResult, nativeErrorString);
+            }
             
             if (!(String.IsNullOrEmpty(message)))
             {
@@ -91,7 +106,6 @@ namespace System.ComponentModel
             }
 
             Exception innerException = InnerException;
-
             if (innerException != null)
             {
                 s.Append(" ---> ");
