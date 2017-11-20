@@ -371,19 +371,18 @@ namespace System.IO
         {
             CheckAsyncTaskInProgress();
 
-            Span<char> bufferSpan;
-            unsafe
-            {
-                bufferSpan = new Span<char>(Unsafe.AsPointer<char>(ref buffer.DangerousGetPinnableReference()), buffer.Length);
-            }
-            if (bufferSpan.Length <= 4 && // Threshold of 4 chosen based on perf experimentation
-                bufferSpan.Length <= _charLen - _charPos)
+            if (buffer.Length <= 4 && // Threshold of 4 chosen based on perf experimentation
+                buffer.Length <= _charLen - _charPos)
             {
                 // For very short buffers and when we don't need to worry about running out of space
                 // in the char buffer, just copy the chars individually.
-                for (int i = 0; i < bufferSpan.Length; i++)
+                fixed (char* bufferPtr = &buffer.DangerousGetPinnableReference())
                 {
-                    _charBuffer[_charPos++] = bufferSpan[i];
+                    Span<char> bufferSpan = new Span<char>(bufferPtr, buffer.Length);
+                    for (int i = 0; i < buffer.Length; i++)
+                    {
+                        _charBuffer[_charPos++] = bufferSpan[i];
+                    }
                 }
             }
             else
@@ -400,11 +399,11 @@ namespace System.IO
                     throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
                 }
 
-                fixed (char* bufferPtr = &bufferSpan.DangerousGetPinnableReference())
+                fixed (char* bufferPtr = &buffer.DangerousGetPinnableReference())
                 fixed (char* dstPtr = &charBuffer[0])
                 {
                     char* srcPtr = bufferPtr;
-                    int count = bufferSpan.Length;
+                    int count = buffer.Length;
                     int dstPos = _charPos; // use a local copy of _charPos for safety
                     while (count > 0)
                     {
