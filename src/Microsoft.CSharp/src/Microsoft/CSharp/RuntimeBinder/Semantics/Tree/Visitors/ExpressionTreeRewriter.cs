@@ -108,7 +108,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethWithInst mwi = new MethWithInst(lambdaMethod, expressionType, lambdaTypeParams);
             Expr createParameters = CreateWraps(anonmeth);
             Expr body = RewriteLambdaBody(anonmeth);
-            Expr parameters = RewriteLambdaParameters(anonmeth);
+            Debug.Assert(anonmeth.ArgumentScope.nextChild == null);
+            Expr parameters = GenerateParamsArray(null, PredefinedType.PT_PARAMETEREXPRESSION);
             Expr args = GetExprFactory().CreateList(body, parameters);
             CType typeRet = GetSymbolLoader().GetTypeManager().SubstType(mwi.Meth().RetType, mwi.GetType(), mwi.TypeArgs);
             ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(null, mwi);
@@ -692,32 +693,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // or something like Expression<Action<Foo>> e = (Foo f) => f.MyEvent += MyDelegate;
 
             throw Error.InternalCompilerError();
-        }
-
-        private Expr RewriteLambdaParameters(ExprBoundLambda anonmeth)
-        {
-            Debug.Assert(anonmeth != null);
-
-            // new ParameterExpression[2] {Parameter(typeof(type1), name1), Parameter(typeof(type2), name2)}
-
-            Expr paramArrayInitializerArgs = null;
-            Expr paramArrayInitializerArgsTail = paramArrayInitializerArgs;
-
-            for (Symbol sym = anonmeth.ArgumentScope; sym != null; sym = sym.nextChild)
-            {
-                if (!(sym is LocalVariableSymbol local))
-                {
-                    continue;
-                }
-
-                if (local.isThis)
-                {
-                    continue;
-                }
-                GetExprFactory().AppendItemToList(local.wrap, ref paramArrayInitializerArgs, ref paramArrayInitializerArgsTail);
-            }
-
-            return GenerateParamsArray(paramArrayInitializerArgs, PredefinedType.PT_PARAMETEREXPRESSION);
         }
 
         private Expr GenerateConversion(Expr arg, CType CType, bool bChecked)
