@@ -266,9 +266,6 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
     <ReferenceFromRuntime Include="System.Private.Interop" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
-    <ProjectReference Include="..\..\System.Runtime.CompilerServices.Unsafe\src\System.Runtime.CompilerServices.Unsafe.ilproj" />
-  </ItemGroup>
   <ItemGroup>
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
   </ItemGroup>
