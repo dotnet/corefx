@@ -20,9 +20,6 @@ namespace System.Net.Sockets.Tests
         // This occurs on *nix but not Windows because *nix uses random values (1024-65535) while Windows increments.
         public const int UDPRedundancy = 1;
 
-        public static Task<bool> WhenAllWithTimeout(params Task[] tasks)
-        {
-            return tasks.WhenAllWithTimeout(PassingTestTimeout);
-        }
+        public static Task WhenAllOrAnyFailedWithTimeout(params Task[] tasks) => tasks.WhenAllOrAnyFailed(PassingTestTimeout);
     }
 }

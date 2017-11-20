@@ -301,8 +301,7 @@ namespace System.Net.Sockets.Tests
                     writes[i] = Task.Factory.StartNew(s => client.Send(sendData, (int)s, 1, SocketFlags.None), i,
                         CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
                 }
-                await Task.WhenAll(writes);
-                await Task.WhenAll(reads);
+                await TestSettings.WhenAllOrAnyFailedWithTimeout(writes.Concat(reads).ToArray());
 
                 Assert.Equal(sendData.OrderBy(i => i), receiveData.OrderBy(i => i));
             }
@@ -341,8 +340,8 @@ namespace System.Net.Sockets.Tests
                 {
                     reads[i] = accepted.ReceiveAsync(new ArraySegment<byte>(receiveData, i, 1), SocketFlags.None);
                 }
-                await Task.WhenAll(writes);
-                await Task.WhenAll(reads);
+
+                await TestSettings.WhenAllOrAnyFailedWithTimeout(writes.Concat(reads).ToArray());
 
                 Assert.Equal(sendData, receiveData);
             }

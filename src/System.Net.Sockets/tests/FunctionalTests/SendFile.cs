@@ -141,7 +141,7 @@ namespace System.Net.Sockets.Tests
                     using (remote)
                     {
                         var recvBuffer = new byte[256];
-                        for (;;)
+                        for (; ; )
                         {
                             int received = remote.Receive(recvBuffer, 0, recvBuffer.Length, SocketFlags.None);
                             if (received == 0)
@@ -228,7 +228,7 @@ namespace System.Net.Sockets.Tests
                 });
 
                 // Wait for the tasks to complete
-                Assert.True(await (new[] { serverTask, clientTask }).WhenAllWithTimeout(TestTimeout), $"Tasks didn't complete within allowed time. Server:{serverTask.Status} Client:{clientTask.Status}");
+                await (new[] { serverTask, clientTask }).WhenAllOrAnyFailed(TestTimeout);
 
                 // Validate the results
                 Assert.Equal(bytesToSend, bytesReceived);

@@ -20,7 +20,7 @@ namespace System.Net.Sockets.Tests
                 using (Socket client = new Socket(listenAt.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
                 {
                     Task connectTask = ConnectAsync(client, new IPEndPoint(listenAt, port));
-                    Assert.True(await TestSettings.WhenAllWithTimeout(connectTask), "IPv4: Timed out while waiting for connection");
+                    await TestSettings.WhenAllOrAnyFailedWithTimeout(connectTask);
                     Assert.True(client.Connected);
                 }
             }
@@ -39,7 +39,7 @@ namespace System.Net.Sockets.Tests
             using (Socket client = new Socket(listenAt.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
             {
                 Task connectTask = MultiConnectAsync(client, new IPAddress[] { IPAddress.Loopback, IPAddress.IPv6Loopback }, port);
-                Assert.True(await TestSettings.WhenAllWithTimeout(connectTask), "Timed out while waiting for connection");
+                await TestSettings.WhenAllOrAnyFailedWithTimeout(connectTask);
                 Assert.True(client.Connected);
             }
         }

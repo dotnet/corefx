@@ -137,7 +137,7 @@ namespace System.Net.Sockets.Tests
                         if (!useMultipleBuffers)
                         {
                             var recvBuffer = new byte[256];
-                            for (;;)
+                            for (; ; )
                             {
                                 int received = await ReceiveAsync(remote, new ArraySegment<byte>(recvBuffer));
                                 if (received == 0)
@@ -156,7 +156,7 @@ namespace System.Net.Sockets.Tests
                                 new ArraySegment<byte>(new byte[256], 2, 100),
                                 new ArraySegment<byte>(new byte[1], 0, 0),
                                 new ArraySegment<byte>(new byte[64], 9, 33)};
-                            for (;;)
+                            for (; ; )
                             {
                                 int received = await ReceiveAsync(remote, recvBuffers);
                                 if (received == 0)
@@ -622,7 +622,7 @@ namespace System.Net.Sockets.Tests
                     }
                 });
 
-                Assert.True(await (new[] { serverTask, clientTask }).WhenAllWithTimeout(TestTimeout), "Wait timed out");
+                await (new[] { serverTask, clientTask }).WhenAllOrAnyFailed(TestTimeout);
 
                 Assert.Equal(bytesSent, bytesReceived);
                 Assert.Equal(sentChecksum.Sum, receivedChecksum.Sum);
@@ -1107,7 +1107,7 @@ namespace System.Net.Sockets.Tests
                     }
                 });
 
-                Assert.True(await (new[] { receiverTask, senderTask }).WhenAllWithTimeout(TestTimeout));
+                await (new[] { receiverTask, senderTask }).WhenAllOrAnyFailed(TestTimeout);
                 for (int i = 0; i < DatagramsToSend; i++)
                 {
                     Assert.NotNull(receivedChecksums[i]);
@@ -1140,7 +1140,7 @@ namespace System.Net.Sockets.Tests
                 using (NetworkStream stream = remote.GetStream())
                 {
                     var recvBuffer = new byte[256];
-                    for (;;)
+                    for (; ; )
                     {
                         int received = await stream.ReadAsync(recvBuffer, 0, recvBuffer.Length);
                         if (received == 0)
@@ -1184,8 +1184,7 @@ namespace System.Net.Sockets.Tests
                 }
             });
 
-            Assert.True(await (new[] { serverTask, clientTask }).WhenAllWithTimeout(TestTimeout),
-                $"Time out waiting for serverTask ({serverTask.Status}) and clientTask ({clientTask.Status})");
+            await (new[] { serverTask, clientTask }).WhenAllOrAnyFailed(TestTimeout);
 
             Assert.Equal(bytesSent, bytesReceived);
             Assert.Equal(sentChecksum.Sum, receivedChecksum.Sum);
