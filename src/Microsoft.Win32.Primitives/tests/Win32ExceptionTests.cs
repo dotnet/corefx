@@ -17,6 +17,7 @@ namespace System.ComponentModel.Tests
         private const int FORMAT_MESSAGE_ARGUMENT_ARRAY = 0x00002000;
         private const int ERROR_INSUFFICIENT_BUFFER = 0x7A;
         private const int FirstPassBufferSize = 256;
+        private const int E_FAIL = unchecked((int)0x80004005);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, EntryPoint = "FormatMessageW", SetLastError = true, BestFitMapping = true)]
         private static extern int FormatMessage(
@@ -50,7 +51,12 @@ namespace System.ComponentModel.Tests
         {
             int error = 5;
             string message = "This is an error message.";
-            string toStringStart = string.Format(CultureInfo.InvariantCulture, "{0} ({1})", typeof(Win32Exception).ToString(), error);
+            string toStringStart = string.Format(
+                CultureInfo.InvariantCulture,
+                "{0} ({1})",
+                typeof(Win32Exception).ToString(),
+                PlatformDetection.IsFullFramework ? $"0x{E_FAIL:X8}" : error.ToString(CultureInfo.InvariantCulture));
+
             Exception innerException = new FormatException();
 
             // Test each of the constructors and validate the properties of the resulting instance
@@ -78,8 +84,6 @@ namespace System.ComponentModel.Tests
             Assert.Equal(expected: message, actual: ex.Message);
             Assert.Same(expected: innerException, actual: ex.InnerException);
         }
-
-        private const int E_FAIL = unchecked((int)0x80004005);
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes to check whether the exception resource length >256 chars
