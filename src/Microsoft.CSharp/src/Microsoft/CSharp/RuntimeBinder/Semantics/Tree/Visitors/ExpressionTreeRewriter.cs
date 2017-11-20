@@ -95,7 +95,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(anonmeth != null);
 
             MethodSymbol lambdaMethod = GetPreDefMethod(PREDEFMETH.PM_EXPRESSION_LAMBDA);
-            CType delegateType = anonmeth.DelegateType;
+            AggregateType delegateType = anonmeth.DelegateType;
             TypeArray lambdaTypeParams = GetSymbolLoader().getBSymmgr().AllocParams(1, new CType[] { delegateType });
             AggregateType expressionType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_EXPRESSION);
             MethWithInst mwi = new MethWithInst(lambdaMethod, expressionType, lambdaTypeParams);

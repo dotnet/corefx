@@ -8,10 +8,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExprBoundLambda : ExprWithType
     {
-        public ExprBoundLambda(CType type, Scope argumentScope)
+        public ExprBoundLambda(AggregateType type, Scope argumentScope)
             : base(ExpressionKind.BoundLambda, type)
         {
-            Debug.Assert(type == null || type.isDelegateType());
+            Debug.Assert(type != null);
+            Debug.Assert(type.isDelegateType());
             Debug.Assert(argumentScope != null);
             ArgumentScope = argumentScope;
         }
