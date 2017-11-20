@@ -5,7 +5,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -599,6 +598,7 @@ namespace System.IO
                     _detectEncoding = false;
                 }
             }
+
             return _checkPreamble;
         }
 
