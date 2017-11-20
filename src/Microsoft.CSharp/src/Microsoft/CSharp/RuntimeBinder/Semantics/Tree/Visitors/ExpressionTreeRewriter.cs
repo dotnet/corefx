@@ -17,7 +17,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private ExprFactory expressionFactory;
         private SymbolLoader symbolLoader;
-        private ExprBoundLambda currentAnonMeth;
 
         private ExprFactory GetExprFactory() { return expressionFactory; }
 
@@ -98,10 +97,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(anonmeth != null);
 
-            ExprBoundLambda prevAnonMeth = currentAnonMeth;
-            currentAnonMeth = anonmeth;
             MethodSymbol lambdaMethod = GetPreDefMethod(PREDEFMETH.PM_EXPRESSION_LAMBDA);
-
             CType delegateType = anonmeth.DelegateType;
             TypeArray lambdaTypeParams = GetSymbolLoader().getBSymmgr().AllocParams(1, new CType[] { delegateType });
             AggregateType expressionType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_EXPRESSION);
@@ -118,19 +114,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             call.PredefinedMethod = PREDEFMETH.PM_EXPRESSION_LAMBDA;
 
-            currentAnonMeth = prevAnonMeth;
             if (createParameters != null)
             {
                 callLambda = GetExprFactory().CreateSequence(createParameters, callLambda);
             }
-            Expr expr = callLambda;
-            // If we are already inside an expression tree rewrite and this is an expression tree lambda
-            // then it needs to be quoted.
-            if (currentAnonMeth != null)
-            {
-                expr = GenerateCall(PREDEFMETH.PM_EXPRESSION_QUOTE, expr);
-            }
-            return expr;
+
+            return callLambda;
         }
         protected override Expr VisitCONSTANT(ExprConstant expr)
         {
