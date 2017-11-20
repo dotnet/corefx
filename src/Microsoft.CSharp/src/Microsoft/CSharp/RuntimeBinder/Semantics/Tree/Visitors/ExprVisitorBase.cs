@@ -146,8 +146,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return VisitUSERLOGOP(pExpr as ExprUserLogicalOp);
                 case ExpressionKind.MemberGroup:
                     return VisitMEMGRP(pExpr as ExprMemberGroup);
-                case ExpressionKind.BoundLambda:
-                    return VisitBOUNDLAMBDA(pExpr as ExprBoundLambda);
                 case ExpressionKind.HoistedLocalExpression:
                     return VisitHOISTEDLOCALEXPR(pExpr as ExprHoistedLocalExpr);
                 case ExpressionKind.FieldInfo:
@@ -444,11 +442,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     (pExpr as ExprArrayInit).OptionalArgumentDimensions = exprRet;
                     break;
 
-                case ExpressionKind.BoundLambda:
-                    exprRet = Visit((pExpr as ExprBoundLambda).OptionalBody);
-                    (pExpr as ExprBoundLambda).OptionalBody = exprRet as ExprBlock;
-                    break;
-
                 case ExpressionKind.Local:
                 case ExpressionKind.Class:
                 case ExpressionKind.MultiGet:
@@ -569,10 +562,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return VisitEXPR(pExpr);
         }
         protected virtual Expr VisitARRINIT(ExprArrayInit pExpr)
-        {
-            return VisitEXPR(pExpr);
-        }
-        protected virtual Expr VisitBOUNDLAMBDA(ExprBoundLambda pExpr)
         {
             return VisitEXPR(pExpr);
         }

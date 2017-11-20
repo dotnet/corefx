@@ -249,10 +249,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             Scope pScope,
             Expr pResult)
         {
-            // (3) - Place the result in a return statement and create the EXPRBOUNDLAMBDA.
+            // (3) - Place the result in a return statement and create the ExprBoundLambda.
             ExprBoundLambda boundLambda = GenerateBoundLambda(pScope, pResult);
 
-            // (4) - Rewrite the EXPRBOUNDLAMBDA into an expression tree.
+            // (4) - Rewrite the ExprBoundLambda into an expression tree.
             Expr exprTree = ExpressionTreeRewriter.Rewrite(boundLambda, _exprFactory, SymbolLoader);
 
             // (5) - Create the actual Expression Tree
