@@ -120,12 +120,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         protected override Expr VisitLOCAL(ExprLocal local)
         {
             Debug.Assert(local != null);
-            // this is true for all parameters of an expression lambda
-            if (local.Local.wrap != null)
-            {
-                return local.Local.wrap;
-            }
-            return GetExprFactory().CreateHoistedLocalInExpression();
+            Debug.Assert(local.Local.wrap != null);
+            return local.Local.wrap;
         }
         protected override Expr VisitFIELD(ExprField expr)
         {

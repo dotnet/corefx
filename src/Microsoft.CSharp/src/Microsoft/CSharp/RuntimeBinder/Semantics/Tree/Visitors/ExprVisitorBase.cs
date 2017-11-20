@@ -85,8 +85,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return VisitUSERLOGOP(pExpr as ExprUserLogicalOp);
                 case ExpressionKind.MemberGroup:
                     return VisitMEMGRP(pExpr as ExprMemberGroup);
-                case ExpressionKind.HoistedLocalExpression:
-                    return VisitHOISTEDLOCALEXPR(pExpr as ExprHoistedLocalExpr);
                 case ExpressionKind.FieldInfo:
                     return VisitFIELDINFO(pExpr as ExprFieldInfo);
                 case ExpressionKind.MethodInfo:
@@ -374,7 +372,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case ExpressionKind.MultiGet:
                 case ExpressionKind.Wrap:
                 case ExpressionKind.NoOp:
-                case ExpressionKind.HoistedLocalExpression:
                 case ExpressionKind.FieldInfo:
                 case ExpressionKind.MethodInfo:
                     break;
@@ -481,10 +478,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return VisitEXPR(pExpr);
         }
 
-        protected virtual Expr VisitHOISTEDLOCALEXPR(ExprHoistedLocalExpr pExpr)
-        {
-            return VisitEXPR(pExpr);
-        }
         protected virtual Expr VisitFIELDINFO(ExprFieldInfo pExpr)
         {
             return VisitEXPR(pExpr);

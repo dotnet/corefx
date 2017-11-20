@@ -31,7 +31,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         UserLogicalOp,
         MemberGroup,
         BoundLambda,
-        HoistedLocalExpression,
         FieldInfo,
         MethodInfo,
         PropertyInfo,
