@@ -123,7 +123,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 callLambda = GetExprFactory().CreateSequence(createParameters, callLambda);
             }
-            Expr expr = DestroyWraps(anonmeth, callLambda);
+            Expr expr = callLambda;
             // If we are already inside an expression tree rewrite and this is an expression tree lambda
             // then it needs to be quoted.
             if (currentAnonMeth != null)
@@ -857,27 +857,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            return sequence;
-        }
-
-        private Expr DestroyWraps(ExprBoundLambda anonmeth, Expr sequence)
-        {
-            for (Symbol sym = anonmeth.ArgumentScope; sym != null; sym = sym.nextChild)
-            {
-                if (!(sym is LocalVariableSymbol local))
-                {
-                    continue;
-                }
-
-                if (local.isThis)
-                {
-                    continue;
-                }
-                Debug.Assert(local.wrap != null);
-                Debug.Assert(anonmeth.OptionalBody != null);
-                Expr freeWrap = GetExprFactory().CreateWrap(local.wrap);
-                sequence = GetExprFactory().CreateReverseSequence(sequence, freeWrap);
-            }
             return sequence;
         }
 
