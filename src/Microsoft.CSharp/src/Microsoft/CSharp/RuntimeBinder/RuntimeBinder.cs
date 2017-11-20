@@ -434,7 +434,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             // We don't actually need the real delegate type here - we just need SOME delegate type.
             // This is because we never attempt any conversions on the lambda itself.
-            AggregateType delegateType = _symbolTable.GetCTypeFromType(typeof(Func<>)) as AggregateType;
+            AggregateType delegateType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_FUNC);
             LocalVariableSymbol thisLocal = _semanticChecker.GetGlobalSymbolFactory().CreateLocalVar(NameManager.Add("this"), pScope, _symbolTable.GetCTypeFromType(typeof(object)));
             thisLocal.isThis = true;
             ExprBoundLambda boundLambda = _exprFactory.CreateAnonymousMethod(delegateType, pScope);
