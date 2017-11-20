@@ -101,7 +101,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethWithInst mwi = new MethWithInst(lambdaMethod, expressionType, lambdaTypeParams);
             Expr createParameters = CreateWraps(anonmeth);
             Debug.Assert(createParameters != null);
-            Expr body = RewriteLambdaBody(anonmeth);
+            Debug.Assert(anonmeth.Expression != null);
+            Expr body = Visit(anonmeth.Expression);
             Debug.Assert(anonmeth.ArgumentScope.nextChild == null);
             Expr parameters = GenerateParamsArray(null, PredefinedType.PT_PARAMETEREXPRESSION);
             Expr args = GetExprFactory().CreateList(body, parameters);
@@ -652,28 +653,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GenerateCall(pdm, p1, p2, lift, methodInfo);
         }
 
-        private Expr RewriteLambdaBody(ExprBoundLambda anonmeth)
-        {
-            Debug.Assert(anonmeth != null);
-            Debug.Assert(anonmeth.OptionalBody != null);
-            Debug.Assert(anonmeth.OptionalBody.OptionalStatements != null);
-            // There ought to be no way to get an empty statement block successfully converted into an expression tree.
-            Debug.Assert(anonmeth.OptionalBody.OptionalStatements.OptionalNextStatement== null);
-
-            ExprBlock body = anonmeth.OptionalBody;
-
-            // The most likely case:
-            if (body.OptionalStatements is ExprReturn ret)
-            {
-                Debug.Assert(ret.OptionalObject != null);
-                return Visit(ret.OptionalObject);
-            }
-            // This can only if it is a void delegate and this is a void expression, such as a call to a void method
-            // or something like Expression<Action<Foo>> e = (Foo f) => f.MyEvent += MyDelegate;
-
-            throw Error.InternalCompilerError();
-        }
-
         private Expr GenerateConversion(Expr arg, CType CType, bool bChecked)
         {
             return GenerateConversionWithSource(Visit(arg), CType, bChecked || arg.isChecked());
@@ -822,7 +801,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     continue;
                 }
-                Debug.Assert(anonmeth.OptionalBody != null);
+
+                Debug.Assert(anonmeth.Expression != null);
                 Expr create = GenerateParameter(local.name.Text, local.GetType());
                 local.wrap = GetExprFactory().CreateWrap(create);
                 Expr save = GetExprFactory().CreateSave(local.wrap);

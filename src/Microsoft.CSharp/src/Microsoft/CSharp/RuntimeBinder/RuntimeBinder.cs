@@ -437,11 +437,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             AggregateType delegateType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_FUNC);
             LocalVariableSymbol thisLocal = _semanticChecker.GetGlobalSymbolFactory().CreateLocalVar(NameManager.Add("this"), pScope, _symbolTable.GetCTypeFromType(typeof(object)));
             thisLocal.isThis = true;
-            ExprBoundLambda boundLambda = _exprFactory.CreateAnonymousMethod(delegateType, pScope);
-            ExprReturn returnStatement = _exprFactory.CreateReturn(call);
-            ExprBlock block = _exprFactory.CreateBlock(returnStatement);
-            boundLambda.OptionalBody = block;
-            return boundLambda;
+            return _exprFactory.CreateAnonymousMethod(delegateType, pScope, call);
         }
 
         #region ExprCreation

@@ -59,8 +59,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ExprLocal CreateLocal(LocalVariableSymbol local) => new ExprLocal(local);
 
-        public ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType, Scope argumentScope) => 
-            new ExprBoundLambda(delegateType, argumentScope);
+        public ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType, Scope argumentScope, Expr expression) => 
+            new ExprBoundLambda(delegateType, argumentScope, expression);
 
         public ExprHoistedLocalExpr CreateHoistedLocalInExpression() => 
             new ExprHoistedLocalExpr(Types.GetPredefAgg(PredefinedType.PT_EXPRESSION).getThisType());
