@@ -2924,9 +2924,8 @@ public static partial class XmlSerializerTests
     }
 
     [ConditionalFact(nameof(IsTimeSpanSerializationAvailable))]
-    public static void TimeSpanXmlQualifiedNameTest()
+    public static void VerifyRestrictionElementForTimeSpanTest()
     {
-        string baseline = "<?xml version=\"1.0\"?>\r\n<xs:schema xmlns:tns=\"http://microsoft.com/wsdl/types/\" elementFormDefault=\"qualified\" targetNamespace=\"http://microsoft.com/wsdl/types/\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\r\n  <xs:simpleType name=\"TimeSpan\">\r\n    <xs:restriction base=\"xs:duration\" />\r\n  </xs:simpleType>\r\n</xs:schema>";
         var schemas = new XmlSchemas();
         var exporter = new XmlSchemaExporter(schemas);
         XmlTypeMapping mapping = new XmlReflectionImporter().ImportTypeMapping(typeof(TimeSpan));
@@ -2943,8 +2942,8 @@ public static partial class XmlSerializerTests
             element = element.Elements().First();
         }
 
-        string expected = element.LastAttribute.Value;
-        Assert.True(expected == "xs:duration", string.Format("{0}Test failed for wrong output from schema: {0}Expected: {1}{0}Actual: {2}",
-                Environment.NewLine, baseline, actualOutput));
+        string expectedAttribute = "xs:duration";
+        Assert.True(element.LastAttribute.Value == expectedAttribute, string.Format("{0}Test failed for wrong output from schema: {0}Expected Output: {1}{0}Actual Output: {2}",
+                Environment.NewLine, "<?xml version=\"1.0\"?>\r\n<xs:schema xmlns:tns=\"http://microsoft.com/wsdl/types/\" elementFormDefault=\"qualified\" targetNamespace=\"http://microsoft.com/wsdl/types/\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\r\n  <xs:simpleType name=\"TimeSpan\">\r\n    <xs:restriction base=\"xs:duration\" />\r\n  </xs:simpleType>\r\n</xs:schema>", actualOutput));
     }
 }
