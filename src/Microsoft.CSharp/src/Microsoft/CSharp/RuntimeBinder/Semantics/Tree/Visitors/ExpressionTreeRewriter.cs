@@ -120,7 +120,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         protected override Expr VisitLOCAL(ExprLocal local)
         {
             Debug.Assert(local != null);
-            Debug.Assert(!local.Local.isThis);
             // this is true for all parameters of an expression lambda
             if (local.Local.wrap != null)
             {
@@ -793,11 +792,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             for (Symbol sym = anonmeth.ArgumentScope.firstChild; sym != null; sym = sym.nextChild)
             {
                 if (!(sym is LocalVariableSymbol local))
-                {
-                    continue;
-                }
-
-                if (local.isThis)
                 {
                     continue;
                 }
