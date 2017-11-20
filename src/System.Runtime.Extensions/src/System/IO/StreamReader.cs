@@ -5,6 +5,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -566,7 +567,13 @@ namespace System.IO
                 return _checkPreamble;
             }
 
-            byte[] preamble = _encoding.Preamble.ToArray();;
+            ReadOnlySpan<byte> readonlyPreamble = _encoding.Preamble;
+            Span<byte> preamble;
+            
+            unsafe
+            {
+                preamble = new Span<byte>(Unsafe.AsPointer<byte>(ref readonlyPreamble.DangerousGetPinnableReference()), readonlyPreamble.Length);
+            }
 
             Debug.Assert(_bytePos <= preamble.Length, "_compressPreamble was called with the current bytePos greater than the preamble buffer length.  Are two threads using this StreamReader at the same time?");
             int len = (_byteLen >= (preamble.Length)) ? (preamble.Length - _bytePos) : (_byteLen - _bytePos);

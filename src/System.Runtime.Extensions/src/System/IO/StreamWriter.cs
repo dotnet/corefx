@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -370,15 +371,19 @@ namespace System.IO
         {
             CheckAsyncTaskInProgress();
 
-            char[] bufferArray = buffer.ToArray();
-            if (bufferArray.Length <= 4 && // Threshold of 4 chosen based on perf experimentation
-                bufferArray.Length <= _charLen - _charPos)
+            Span<char> bufferSpan;
+            unsafe
+            {
+                bufferSpan = new Span<char>(Unsafe.AsPointer<char>(ref buffer.DangerousGetPinnableReference()), buffer.Length);
+            }
+            if (bufferSpan.Length <= 4 && // Threshold of 4 chosen based on perf experimentation
+                bufferSpan.Length <= _charLen - _charPos)
             {
                 // For very short buffers and when we don't need to worry about running out of space
                 // in the char buffer, just copy the chars individually.
-                for (int i = 0; i < bufferArray.Length; i++)
+                for (int i = 0; i < bufferSpan.Length; i++)
                 {
-                    _charBuffer[_charPos++] = bufferArray[i];
+                    _charBuffer[_charPos++] = bufferSpan[i];
                 }
             }
             else
@@ -395,12 +400,11 @@ namespace System.IO
                     throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
                 }
 
-                if (bufferArray.Length == 0) return;
-                fixed (char* bufferPtr = &bufferArray[0])
+                fixed (char* bufferPtr = &bufferSpan.DangerousGetPinnableReference())
                 fixed (char* dstPtr = &charBuffer[0])
                 {
                     char* srcPtr = bufferPtr;
-                    int count = bufferArray.Length;
+                    int count = bufferSpan.Length;
                     int dstPos = _charPos; // use a local copy of _charPos for safety
                     while (count > 0)
                     {
