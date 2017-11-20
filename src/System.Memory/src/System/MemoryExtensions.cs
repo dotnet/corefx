@@ -252,7 +252,6 @@ namespace System
         /// <summary>
         /// Creates a new readonly span over the entire target span.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this Span<T> span) => span;
 
         /// <summary>
@@ -267,7 +266,6 @@ namespace System
         /// <summary>
         /// Creates a new readonly memory over the entire target memory.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlyMemory<T> AsReadOnlyMemory<T>(this Memory<T> memory) => memory;
 
         /// <summary>
