@@ -15,7 +15,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprWrap wrap;
 
         // movedToField should have iIteratorLocal set appropriately
-        public bool fUsedInAnonMeth;   // Set if the local is ever used in an anon method
 
         public void SetType(CType pType)
         {

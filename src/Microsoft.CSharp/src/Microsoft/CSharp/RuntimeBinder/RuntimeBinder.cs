@@ -419,7 +419,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 LocalVariableSymbol local =
                     _semanticChecker.GetGlobalSymbolFactory()
                         .CreateLocalVar(NameManager.Add("p" + i), pScope, type);
-                local.fUsedInAnonMeth = true;
                 locals[i] = local;
             }
 
