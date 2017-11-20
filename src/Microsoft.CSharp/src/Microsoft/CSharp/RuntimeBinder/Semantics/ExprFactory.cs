@@ -197,9 +197,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         ////////////////////////////////////////////////////////////////////////////////
         // Create a node that evaluates the first, evaluates the second, results in the first.
 
-        public ExprBinOp CreateReverseSequence(Expr first, Expr second) =>
-            CreateBinop(ExpressionKind.SequenceReverse, first.Type, first, second);
-
         public ExprAssignment CreateAssignment(Expr left, Expr right) => new ExprAssignment(left, right);
 
         ////////////////////////////////////////////////////////////////////////////////

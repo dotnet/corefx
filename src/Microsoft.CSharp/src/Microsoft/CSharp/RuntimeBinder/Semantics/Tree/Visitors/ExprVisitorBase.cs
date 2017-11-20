@@ -194,8 +194,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return VisitLOGOR(pExpr as ExprBinOp);
                 case ExpressionKind.Sequence:
                     return VisitSEQUENCE(pExpr as ExprBinOp);
-                case ExpressionKind.SequenceReverse:
-                    return VisitSEQREV(pExpr as ExprBinOp);
                 case ExpressionKind.Save:
                     return VisitSAVE(pExpr as ExprBinOp);
                 case ExpressionKind.Swap:
@@ -672,10 +670,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return VisitBINOP(pExpr);
         }
         protected virtual Expr VisitLOGOR(ExprBinOp pExpr)
-        {
-            return VisitBINOP(pExpr);
-        }
-        protected virtual Expr VisitSEQREV(ExprBinOp pExpr)
         {
             return VisitBINOP(pExpr);
         }
