@@ -18,7 +18,7 @@ namespace System.Net.NameResolution.Tests
         public const string LocalIPString = "127.0.0.1";
 
         // Timeout values in milliseconds.
-        public const int PassingTestTimeout = 10000;
+        public const int PassingTestTimeout = 30_000;
 
         public static Task<IPAddress> GetLocalIPAddress()
         {

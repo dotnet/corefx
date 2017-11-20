@@ -23,18 +23,15 @@ namespace System.Net.NameResolution.Tests
         [Theory]
         [InlineData("")]
         [InlineData(TestSettings.LocalHost)]
-        public Task Dns_GetHostEntry_HostString_Ok(string hostName) 
-            => TestGetHostEntryAsync(() => Task.FromResult(Dns.GetHostEntry(hostName)));
+        public Task Dns_GetHostEntry_HostString_Ok(string hostName) => TestGetHostEntryAsync(() => Task.FromResult(Dns.GetHostEntry(hostName)));
 
         [Theory]
         [InlineData("")]
         [InlineData(TestSettings.LocalHost)]
-        public Task Dns_GetHostEntryAsync_HostString_Ok(string hostName) 
-            => TestGetHostEntryAsync(() => Dns.GetHostEntryAsync(hostName));
+        public Task Dns_GetHostEntryAsync_HostString_Ok(string hostName) => TestGetHostEntryAsync(() => Dns.GetHostEntryAsync(hostName));
 
         [Fact]
-        public Task Dns_GetHostEntryAsync_IPString_Ok() 
-            => TestGetHostEntryAsync(() => Dns.GetHostEntryAsync(TestSettings.LocalIPString));
+        public Task Dns_GetHostEntryAsync_IPString_Ok() => TestGetHostEntryAsync(() => Dns.GetHostEntryAsync(TestSettings.LocalIPString));
 
         private static async Task TestGetHostEntryAsync(Func<Task<IPHostEntry>> getHostEntryFunc)
         {
@@ -57,13 +54,11 @@ namespace System.Net.NameResolution.Tests
         }
 
         [Fact]
-        public Task Dns_GetHostEntryAsync_NullStringHost_Fail() 
-            => Assert.ThrowsAsync<ArgumentNullException>(() => Dns.GetHostEntryAsync((string)null));
-        
+        public Task Dns_GetHostEntryAsync_NullStringHost_Fail() => Assert.ThrowsAsync<ArgumentNullException>(() => Dns.GetHostEntryAsync((string)null));
+
         [Fact]
-        public Task Dns_GetHostEntryAsync_NullIPAddressHost_Fail() 
-            => Assert.ThrowsAsync<ArgumentNullException>(() => Dns.GetHostEntryAsync((IPAddress)null));
-        
+        public Task Dns_GetHostEntryAsync_NullIPAddressHost_Fail() => Assert.ThrowsAsync<ArgumentNullException>(() => Dns.GetHostEntryAsync((IPAddress)null));
+
         public static IEnumerable<object[]> GetInvalidAddresses()
         {
             yield return new object[] { IPAddress.Any };
