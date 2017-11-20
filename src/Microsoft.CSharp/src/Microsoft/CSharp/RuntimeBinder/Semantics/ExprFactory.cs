@@ -55,8 +55,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ExprCast CreateCast(EXPRFLAG flags, CType type, Expr argument) => new ExprCast(flags, type, argument);
 
-        public ExprReturn CreateReturn(Expr optionalObject) => new ExprReturn(optionalObject);
-
         public ExprLocal CreateLocal(LocalVariableSymbol local) => new ExprLocal(local);
 
         public ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType, Scope argumentScope, Expr expression) => 
@@ -151,8 +149,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ExprConstant CreateBoolConstant(bool b) => 
             CreateConstant(Types.GetPredefAgg(PredefinedType.PT_BOOL).getThisType(), ConstVal.Get(b));
-
-        public ExprBlock CreateBlock(ExprStatement pOptionalStatements) => new ExprBlock(pOptionalStatements);
 
         public ExprArrayIndex CreateArrayIndex(CType type, Expr array, Expr index) =>
             new ExprArrayIndex(type, array, index);
