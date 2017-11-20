@@ -191,16 +191,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return pResult;
         }
 
-        public Scope CreateScope(Scope parent)
-        {
-            Scope sym = (Scope)NewBasicSymbol(SYMKIND.SK_Scope, null, parent);
-            if (parent != null)
-            {
-                sym.nestingOrder = parent.nestingOrder + 1;
-            }
-
-            return sym;
-        }
+        public Scope CreateScope() => (Scope)NewBasicSymbol(SYMKIND.SK_Scope, null, null);
 
         public IndexerSymbol CreateIndexer(Name name, ParentSymbol parent, Name realName)
         {
