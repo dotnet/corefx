@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.Asn1;
 using Test.Cryptography;
 using Xunit;
@@ -121,14 +122,10 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Equal(1000, contents.Length);
 
             // Check that it is, in fact, the same memory. No copies with this API.
-            unsafe
-            {
-                fixed (byte* sourcePtr = &input[4])
-                fixed (byte* contentPtr = &contents.Span.DangerousGetPinnableReference())
-                {
-                    Assert.Equal((IntPtr)sourcePtr, (IntPtr)contentPtr);
-                }
-            }
+            Assert.True(
+                Unsafe.AreSame(
+                    ref contents.Span.DangerousGetPinnableReference(),
+                    ref input[4]));
         }
 
         [Theory]

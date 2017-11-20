@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.Asn1;
 using Test.Cryptography;
 using Xunit;
@@ -224,14 +225,10 @@ namespace System.Security.Cryptography.Tests.Asn1
             {
                 Assert.True(got, "reader.TryGetUTF8StringBytes");
 
-                unsafe
-                {
-                    fixed (byte* inputPtr = &inputData[2])
-                    fixed (byte* matchPtr = &contents.Span.DangerousGetPinnableReference())
-                    {
-                        Assert.Equal((IntPtr)inputPtr, (IntPtr)matchPtr);
-                    }
-                }
+                Assert.True(
+                    Unsafe.AreSame(
+                        ref contents.Span.DangerousGetPinnableReference(),
+                        ref inputData[2]));
             }
             else
             {
