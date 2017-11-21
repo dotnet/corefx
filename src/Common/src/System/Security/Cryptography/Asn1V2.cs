@@ -108,7 +108,11 @@ namespace System.Security.Cryptography.Asn1
         public Asn1Tag(UniversalTagNumber universalTagNumber, bool isConstructed = false)
             : this(isConstructed ? ConstructedMask : (byte)0, (int)universalTagNumber)
         {
-            if (!Enum.IsDefined(typeof(UniversalTagNumber), universalTagNumber))
+            const UniversalTagNumber ReservedIndex = (UniversalTagNumber)15;
+
+            if (universalTagNumber < UniversalTagNumber.EndOfContents ||
+                universalTagNumber > UniversalTagNumber.Duration ||
+                universalTagNumber == ReservedIndex)
             {
                 throw new ArgumentOutOfRangeException(nameof(universalTagNumber), universalTagNumber, null);
             }
@@ -117,7 +121,7 @@ namespace System.Security.Cryptography.Asn1
         public Asn1Tag(TagClass tagClass, int tagValue, bool isConstructed = false)
             : this((byte)((byte)tagClass | (isConstructed ? ConstructedMask : 0)), tagValue)
         {
-            if (!Enum.IsDefined(typeof(TagClass), tagClass))
+            if (tagClass < TagClass.Universal || tagClass > TagClass.Private)
             {
                 throw new ArgumentOutOfRangeException(nameof(tagClass), tagClass, null);
             }
@@ -125,20 +129,17 @@ namespace System.Security.Cryptography.Asn1
 
         public Asn1Tag(byte singleByteEncoding)
         {
-            unsafe
-            {
-                byte* data = &singleByteEncoding;
+            ReadOnlySpan<byte> span = ReadOnlySpan<byte>.DangerousCreate(null, ref singleByteEncoding, 1);
 
-                if (TryParse(new ReadOnlySpan<byte>(data, 1), out Asn1Tag parsed, out int bytesRead))
-                {
-                    Debug.Assert(bytesRead == 1);
-                    _controlFlags = parsed._controlFlags;
-                    _tagValue = parsed._tagValue;
-                }
-                else
-                {
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                }
+            if (TryParse(span, out Asn1Tag parsed, out int bytesRead))
+            {
+                Debug.Assert(bytesRead == 1);
+                _controlFlags = parsed._controlFlags;
+                _tagValue = parsed._tagValue;
+            }
+            else
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
         }
 
@@ -150,8 +151,8 @@ namespace System.Security.Cryptography.Asn1
             if (source.IsEmpty)
                 return false;
 
+            byte first = source[bytesRead];
             bytesRead++;
-            byte first = source[0];
             uint tagValue = (uint)(first & TagNumberMask);
 
             if (tagValue == TagNumberMask)
@@ -404,8 +405,8 @@ namespace System.Security.Cryptography.Asn1
 
             // T-REC-X.690-201508 sec 8.1.3
 
+            byte lengthOrLengthLength = source[bytesRead];
             bytesRead++;
-            byte lengthOrLengthLength = source[0];
             const byte MultiByteMarker = 0x80;
 
             // 0x00-0x7F are direct length values.
@@ -1355,7 +1356,7 @@ namespace System.Security.Cryptography.Asn1
         public Enum GetNamedBitListValue(Type tFlagsEnum, NamedBitListMode mode) =>
             GetNamedBitListValue(new Asn1Tag(UniversalTagNumber.BitString), tFlagsEnum, mode);
 
-        public unsafe Enum GetNamedBitListValue(Asn1Tag expectedTag, Type tFlagsEnum, NamedBitListMode mode)
+        public Enum GetNamedBitListValue(Asn1Tag expectedTag, Type tFlagsEnum, NamedBitListMode mode)
         {
             // This will throw an ArgumentException if TEnum isn't an enum type,
             // so we don't need to validate it.
@@ -1376,8 +1377,7 @@ namespace System.Security.Cryptography.Asn1
             }
 
             int sizeLimit = Marshal.SizeOf(backingType);
-            byte* stackmem = stackalloc byte[1 + sizeLimit];
-            Span<byte> stackSpan = new Span<byte>(stackmem, 1 + sizeLimit);
+            Span<byte> stackSpan = stackalloc byte[1 + sizeLimit];
             ReadOnlyMemory<byte> saveData = _data;
 
             if (!TryCopyBitStringBytes(expectedTag, stackSpan, out int unusedBitCount, out int bytesWritten))
