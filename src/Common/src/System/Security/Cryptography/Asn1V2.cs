@@ -128,7 +128,8 @@ namespace System.Security.Cryptography.Asn1
 
         public Asn1Tag(byte singleByteEncoding)
         {
-            ReadOnlySpan<byte> span = ReadOnlySpan<byte>.DangerousCreate(null, ref singleByteEncoding, 1);
+            Span<byte> span = stackalloc byte[1];
+            span[0] = singleByteEncoding;
 
             if (TryParse(span, out Asn1Tag parsed, out int bytesRead))
             {
