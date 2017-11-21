@@ -2349,14 +2349,17 @@ namespace System.Security.Cryptography.Asn1
                 case UniversalTagNumber.UTF8String:
                     encoding = s_utf8Encoding;
                     break;
+                case UniversalTagNumber.PrintableString:
+                    encoding = s_printableStringEncoding;
+                    break;
                 case UniversalTagNumber.IA5String:
                     encoding = s_ia5Encoding;
                     break;
+                case UniversalTagNumber.VisibleString:
+                    encoding = s_visibleStringEncoding;
+                    break;
                 case UniversalTagNumber.BMPString:
                     encoding = s_bmpEncoding;
-                    break;
-                case UniversalTagNumber.PrintableString:
-                    encoding = s_printableStringEncoding;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(encodingType), encodingType, null);
@@ -3632,6 +3635,7 @@ namespace System.Security.Cryptography.Asn1
         private static readonly Text.Encoding s_ia5Encoding = new IA5Encoding();
         private static readonly Text.Encoding s_utf8Encoding = new UTF8Encoding(false, true);
         private static readonly Text.Encoding s_printableStringEncoding = new PrintableStringEncoding();
+        private static readonly Text.Encoding s_visibleStringEncoding = new VisibleStringEncoding();
 
         private byte[] _buffer;
         private int _offset;
@@ -5006,14 +5010,17 @@ namespace System.Security.Cryptography.Asn1
                 case UniversalTagNumber.UTF8String:
                     encoding = s_utf8Encoding;
                     break;
+                case UniversalTagNumber.PrintableString:
+                    encoding = s_printableStringEncoding;
+                    break;
                 case UniversalTagNumber.IA5String:
                     encoding = s_ia5Encoding;
                     break;
+                case UniversalTagNumber.VisibleString:
+                    encoding = s_visibleStringEncoding;
+                    break;
                 case UniversalTagNumber.BMPString:
                     encoding = s_bmpEncoding;
-                    break;
-                case UniversalTagNumber.PrintableString:
-                    encoding = s_printableStringEncoding;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(encodingType), encodingType, null);
