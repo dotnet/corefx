@@ -17,6 +17,7 @@ namespace System.ComponentModel.Composition.Primitives
     /// </summary>
     [DebuggerTypeProxy(typeof(ComposablePartExceptionDebuggerProxy))]
     [DebuggerDisplay("{Message}")]
+    [Serializable]
     public class ComposablePartException : Exception
     {
         private readonly ICompositionElement _element;
@@ -109,6 +110,16 @@ namespace System.ComponentModel.Composition.Primitives
             : base(message, innerException)
         {
             _element = element;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ComposablePartException"/> class with serialized data.
+        /// </summary>
+        /// <param name="info">The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
+        /// <param name="context">The <see cref="StreamingContext"/>  that contains contextual information about the source or destination.</param>
+        protected ComposablePartException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
         }
 
 #if FEATURE_SERIALIZATION

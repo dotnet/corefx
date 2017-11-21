@@ -17,6 +17,7 @@ namespace System.ComponentModel.Composition
     /// </summary>
     [DebuggerTypeProxy(typeof(ImportCardinalityMismatchExceptionDebuggerProxy))]
     [DebuggerDisplay("{Message}")]
+    [Serializable]
     public class ImportCardinalityMismatchException : Exception
     {
         /// <summary>
@@ -61,6 +62,16 @@ namespace System.ComponentModel.Composition
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImportCardinalityMismatchException"/> class with serialized data.
+        /// </summary>
+        /// <param name="info">The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
+        /// <param name="context">The <see cref="StreamingContext"/>  that contains contextual information about the source or destination.</param>
+        protected ImportCardinalityMismatchException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+        
 #if FEATURE_SERIALIZATION
 
         /// <summary>

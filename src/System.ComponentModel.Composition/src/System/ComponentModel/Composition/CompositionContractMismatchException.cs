@@ -12,6 +12,7 @@ namespace System.ComponentModel.Composition
     ///     <see cref="Lazy{T}"/> or <see cref="Lazy{T, TMetadataView}"/> object cannot be 
     ///     cast to <c>T</c> or <c>TMetadataView</c>, respectively.
     /// </summary>
+    [Serializable]
     public class CompositionContractMismatchException : Exception
     {
         /// <summary>
@@ -53,6 +54,16 @@ namespace System.ComponentModel.Composition
         /// </param>
         public CompositionContractMismatchException(string message, Exception innerException)
             : base(message, innerException)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CompositionContractMismatchException"/> class with serialized data.
+        /// </summary>
+        /// <param name="info">The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
+        /// <param name="context">The <see cref="StreamingContext"/>  that contains contextual information about the source or destination.</param>
+        protected CompositionContractMismatchException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
 

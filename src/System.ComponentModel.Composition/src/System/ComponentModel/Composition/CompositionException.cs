@@ -23,6 +23,7 @@ namespace System.ComponentModel.Composition
     /// </summary>
     [DebuggerTypeProxy(typeof(CompositionExceptionDebuggerProxy))]
     [DebuggerDisplay("{Message}")]
+    [Serializable]
     public class CompositionException : Exception
     {
         private const string ErrorsKey = "Errors";
@@ -132,6 +133,16 @@ namespace System.ComponentModel.Composition
             };
 #endif
             _errors = new ReadOnlyCollection<CompositionError>(errors == null ? new CompositionError[0] : errors.ToArray<CompositionError>());
+        }
+        
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CompositionException"/> class with serialized data.
+        /// </summary>
+        /// <param name="info">The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
+        /// <param name="context">The <see cref="StreamingContext"/>  that contains contextual information about the source or destination.</param>
+        protected CompositionException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
         }
 
         /// <summary>
