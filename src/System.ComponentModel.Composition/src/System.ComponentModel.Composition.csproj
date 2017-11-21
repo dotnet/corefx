@@ -32,7 +32,6 @@
     <Compile Include="Microsoft\Internal\Lock.cs" />
     <Compile Include="Microsoft\Internal\Lock.Reader.cs" />
     <Compile Include="Microsoft\Internal\Lock.Writer.cs" />
-    <Compile Include="Microsoft\Internal\Runtime\Serialization\SerializationServices.cs" />
     <Compile Include="Microsoft\Internal\StringComparers.cs" />
     <Compile Include="Microsoft\Internal\ReflectionServices.cs" />
     <Compile Include="Microsoft\Internal\ReflectionInvoke.cs" />

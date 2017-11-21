@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 using Microsoft.Internal;
-using Microsoft.Internal.Runtime.Serialization;
 
 namespace System.ComponentModel.Composition.Primitives
 {
@@ -111,18 +110,7 @@ namespace System.ComponentModel.Composition.Primitives
         {
             _element = element;
         }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ComposablePartException"/> class with serialized data.
-        /// </summary>
-        /// <param name="info">The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
-        /// <param name="context">The <see cref="StreamingContext"/>  that contains contextual information about the source or destination.</param>
-        protected ComposablePartException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-#if FEATURE_SERIALIZATION
+        
         /// <summary>
         ///     Initializes a new instance of the <see cref="ComposablePartException"/> class 
         ///     with the specified serialization data.
@@ -147,10 +135,10 @@ namespace System.ComponentModel.Composition.Primitives
         protected ComposablePartException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+#if FEATURE_SERIALIZATION
             _element = info.GetValue<ICompositionElement>("Element");
-        }
-
 #endif //FEATURE_SERIALIZATION
+        }
 
         /// <summary>
         ///     Gets the composition element that is the cause of the exception.
