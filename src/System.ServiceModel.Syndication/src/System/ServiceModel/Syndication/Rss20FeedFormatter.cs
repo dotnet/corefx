@@ -354,7 +354,7 @@ namespace System.ServiceModel.Syndication
             reader.ReadStartElement(Rss20Constants.CategoryTag, Rss20Constants.Rss20Namespace);
             if (!isEmpty)
             {
-                category.Name = reader.ReadString();
+                category.Name = StringParser(reader.ReadString(), reader.LocalName, Rss20Constants.Rss20Namespace);
                 reader.ReadEndElement();
             }
         }
@@ -414,7 +414,7 @@ namespace System.ServiceModel.Syndication
                         {
                             if (reader.IsStartElement(Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace))
                             {
-                                result.Title = new TextSyndicationContent(reader.ReadElementString());
+                                result.Title = new TextSyndicationContent(StringParser(reader.ReadElementString(), Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace));
                             }
                             else if (reader.IsStartElement(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace))
                             {
@@ -423,7 +423,7 @@ namespace System.ServiceModel.Syndication
                             }
                             else if (reader.IsStartElement(Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace))
                             {
-                                result.Summary = new TextSyndicationContent(reader.ReadElementString());
+                                result.Summary = new TextSyndicationContent(StringParser(reader.ReadElementString(), Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace));
                             }
                             else if (reader.IsStartElement(Rss20Constants.AuthorTag, Rss20Constants.Rss20Namespace))
                             {
@@ -445,7 +445,8 @@ namespace System.ServiceModel.Syndication
                                 {
                                     isPermalink = false;
                                 }
-                                result.Id = reader.ReadElementString();
+
+                                result.Id = StringParser(reader.ReadElementString(), Rss20Constants.GuidTag, Rss20Constants.Rss20Namespace);
                                 if (isPermalink)
                                 {
                                     fallbackAlternateLink = result.Id;
@@ -503,7 +504,8 @@ namespace System.ServiceModel.Syndication
                                         }
                                     }
                                 }
-                                string feedTitle = reader.ReadElementString();
+
+                                string feedTitle = StringParser(reader.ReadElementString(), Rss20Constants.SourceTag, Rss20Constants.Rss20Namespace);
                                 feed.Title = new TextSyndicationContent(feedTitle);
                                 result.SourceFeed = feed;
                             }
@@ -661,7 +663,7 @@ namespace System.ServiceModel.Syndication
             reader.ReadStartElement();
             if (!isEmpty)
             {
-                string email = reader.ReadString();
+                string email = StringParser(reader.ReadString(), reader.LocalName, reader.NamespaceURI);
                 reader.ReadEndElement();
                 person.Email = email;
             }
@@ -734,7 +736,7 @@ namespace System.ServiceModel.Syndication
                     {
                         if (reader.IsStartElement(Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace))
                         {
-                            result.Title = new TextSyndicationContent(reader.ReadElementString());
+                            result.Title = new TextSyndicationContent(StringParser(reader.ReadElementString(), Rss20Constants.TitleTag, Rss20Constants.Rss20Namespace));
                         }
                         else if (reader.IsStartElement(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace))
                         {
@@ -742,15 +744,15 @@ namespace System.ServiceModel.Syndication
                         }
                         else if (reader.IsStartElement(Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace))
                         {
-                            result.Description = new TextSyndicationContent(reader.ReadElementString());
+                            result.Description = new TextSyndicationContent(StringParser(reader.ReadElementString(), Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace));
                         }
                         else if (reader.IsStartElement(Rss20Constants.LanguageTag, Rss20Constants.Rss20Namespace))
                         {
-                            result.Language = reader.ReadElementString();
+                            result.Language = StringParser(reader.ReadElementString(), Rss20Constants.LanguageTag, Rss20Constants.Rss20Namespace);
                         }
                         else if (reader.IsStartElement(Rss20Constants.CopyrightTag, Rss20Constants.Rss20Namespace))
                         {
-                            result.Copyright = new TextSyndicationContent(reader.ReadElementString());
+                            result.Copyright = new TextSyndicationContent(StringParser(reader.ReadElementString(), Rss20Constants.CopyrightTag, Rss20Constants.Rss20Namespace));
                         }
                         else if (reader.IsStartElement(Rss20Constants.ManagingEditorTag, Rss20Constants.Rss20Namespace))
                         {
@@ -783,7 +785,7 @@ namespace System.ServiceModel.Syndication
                         }
                         else if (reader.IsStartElement(Rss20Constants.GeneratorTag, Rss20Constants.Rss20Namespace))
                         {
-                            result.Generator = reader.ReadElementString();
+                            result.Generator = StringParser(reader.ReadElementString(), Rss20Constants.GeneratorTag, Rss20Constants.Rss20Namespace);
                         }
                         else if (reader.IsStartElement(Rss20Constants.ImageTag, Rss20Constants.Rss20Namespace))
                         {

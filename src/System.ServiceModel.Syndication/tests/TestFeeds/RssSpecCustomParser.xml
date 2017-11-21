@@ -1,0 +1,23 @@
+﻿<?xml version="1.0"?>
+<rss version="2.0">
+  <channel customAttribute="customAtt">
+    <title>FeedTitle</title>
+    <link>http://liftoff.msfc.nasa.gov/</link>
+    <description>FeedDescription</description>
+    <language>FeedLanguage</language>
+    <lastBuildDate>Tue, 23 August 2016 16:08:00 EDT</lastBuildDate>
+    <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+    <generator>FeedGenerator</generator>
+    <managingEditor>FeedEditorEmail</managingEditor>
+    <category>FeedCategory</category>
+    <copyright>FeedCopyright</copyright>
+    <ttl>60</ttl>
+    <item>
+      <title>ItemTitle</title>
+      <link>http://liftoff.msfc.nasa.gov/news/2003/news-starcity.asp</link>
+      <description>ItemDescription</description>
+      <pubDate>Tue, 03 Jun 2003 09:39:21 GMT</pubDate>
+      <guid>ItemGuid</guid>
+    </item>
+  </channel>
+</rss>

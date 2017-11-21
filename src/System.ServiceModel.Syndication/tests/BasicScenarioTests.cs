@@ -289,8 +289,6 @@ namespace System.ServiceModel.Syndication.Tests
         public static void SyndicationFeed_Rss_WrongDateFormat()
         {
             // *** SETUP *** \\
-            Rss20FeedFormatter rssformatter = new Rss20FeedFormatter();
-
             XmlReader reader = XmlReader.Create(@"rssSpecExampleWrongDateFormat.xml");
 
             // *** EXECUTE *** \\
@@ -304,6 +302,116 @@ namespace System.ServiceModel.Syndication.Tests
             SyndicationItem[] items = res.Items.ToArray();
             DateTimeOffset dateTimeOffset;
             Assert.Throws<XmlException>(() => dateTimeOffset = items[2].PublishDate);
+        }
+
+        [Fact]
+        public static void SyndicationFeed_Rss_DateTimeParser()
+        {
+            // *** SETUP *** \\
+            // *** EXECUTE *** \\
+            SyndicationFeed feed;
+            DateTimeOffset dto = new DateTimeOffset(2017, 1, 2, 3, 4, 5, new TimeSpan(0));
+            using (XmlReader reader = XmlReader.Create(@"RssSpecCustomParser.xml"))
+            {
+                var formatter = new Rss20FeedFormatter();
+                formatter.DateTimeParser = (value, localName, ns) => dto;
+                formatter.ReadFrom(reader);
+                feed = formatter.Feed;
+            }
+
+            // *** ASSERT *** \\
+            Assert.True(feed != null, "res was null.");
+            Assert.Equal(dto, feed.LastUpdatedTime);
+        }
+
+        [Fact]
+        public static void SyndicationFeed_Rss_StringParser()
+        {
+            // *** SETUP *** \\
+            // *** EXECUTE *** \\
+            SyndicationFeed feed;
+            using (XmlReader reader = XmlReader.Create(@"RssSpecCustomParser.xml"))
+            {
+                var formatter = new Rss20FeedFormatter();
+                formatter.StringParser = (value, localName, ns) => $"value:{value}-localName:{localName}-ns:{ns}";
+                formatter.ReadFrom(reader);
+                feed = formatter.Feed;
+            }
+
+            // *** ASSERT *** \\
+            Assert.True(feed != null, "res was null.");
+            Assert.Equal("value:FeedGenerator-localName:generator-ns:", feed.Generator);
+            Assert.Equal("value:FeedTitle-localName:title-ns:", feed.Title.Text);
+            Assert.Equal("value:FeedDescription-localName:description-ns:", feed.Description.Text);
+            Assert.Equal("value:FeedCopyright-localName:copyright-ns:", feed.Copyright.Text);
+            Assert.Equal("value:FeedLanguage-localName:language-ns:", feed.Language);
+            Assert.NotNull(feed.Authors);
+            Assert.Equal(1, feed.Authors.Count);
+            Assert.Equal("value:FeedEditorEmail-localName:managingEditor-ns:", feed.Authors.First().Email);
+            Assert.NotNull(feed.Categories);
+            Assert.Equal(1, feed.Categories.Count);
+            Assert.Equal("value:FeedCategory-localName:category-ns:", feed.Categories.First().Name);
+            
+            Assert.True(feed.Items != null, "res.Items was null.");
+            Assert.Equal(1, feed.Items.Count());
+            Assert.Equal("value:ItemTitle-localName:title-ns:", feed.Items.First().Title.Text);
+            Assert.Equal("value:ItemGuid-localName:guid-ns:", feed.Items.First().Id);
+            Assert.Equal("value:ItemDescription-localName:description-ns:", feed.Items.First().Summary.Text);
+        }
+
+        [Fact]
+        public static void SyndicationFeed_Atom_DateTimeParser()
+        {
+            // *** SETUP *** \\
+            // *** EXECUTE *** \\
+            SyndicationFeed feed;
+            DateTimeOffset dto = new DateTimeOffset(2017, 1, 2, 3, 4, 5, new TimeSpan(0));
+            using (XmlReader reader = XmlReader.Create(@"SimpleAtomFeedCustomParser.xml"))
+            {
+                var formatter = new Atom10FeedFormatter();
+                formatter.DateTimeParser = (value, localName, ns) => dto;
+                formatter.ReadFrom(reader);
+                feed = formatter.Feed;
+            }
+
+
+            // *** ASSERT *** \\
+            Assert.True(feed != null, "res was null.");
+            Assert.Equal(dto, feed.LastUpdatedTime);
+
+            Assert.True(feed.Items != null, "res.Items was null.");
+            Assert.Equal(1, feed.Items.Count());
+            Assert.Equal(dto, feed.Items.First().LastUpdatedTime);
+        }
+
+        [Fact]
+        public static void SyndicationFeed_Atom_StringParser()
+        {
+            // *** SETUP *** \\
+            // *** EXECUTE *** \\
+            SyndicationFeed feed;
+            using (XmlReader reader = XmlReader.Create(@"SimpleAtomFeedCustomParser.xml"))
+            {
+                var formatter = new Atom10FeedFormatter();
+                formatter.StringParser = (value, localName, ns) => $"value:{value}-localName:{localName}-ns:{ns}";
+                formatter.ReadFrom(reader);
+                feed = formatter.Feed;
+            }
+
+            
+            // *** ASSERT *** \\
+            Assert.True(feed != null, "res was null.");
+            Assert.Equal("value:FeedGenerator-localName:generator-ns:http://www.w3.org/2005/Atom", feed.Generator);
+            Assert.Equal("value:FeedID-localName:id-ns:http://www.w3.org/2005/Atom", feed.Id);
+            Assert.NotNull(feed.Authors);
+            Assert.Equal(1, feed.Authors.Count);
+            Assert.Equal("value:AuthorName-localName:name-ns:", feed.Authors.First().Name);
+            Assert.Equal("value:author@Contoso.com-localName:email-ns:", feed.Authors.First().Email);
+            Assert.Equal("value:AuthorUri-localName:uri-ns:", feed.Authors.First().Uri);
+
+            Assert.True(feed.Items != null, "res.Items was null.");
+            Assert.Equal(1, feed.Items.Count());
+            Assert.Equal("value:EntryId-localName:id-ns:http://www.w3.org/2005/Atom", feed.Items.First().Id);
         }
 
         [Fact]
