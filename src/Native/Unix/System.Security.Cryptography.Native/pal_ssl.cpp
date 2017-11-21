@@ -14,8 +14,11 @@ static_assert(PAL_SSL_ERROR_WANT_WRITE == SSL_ERROR_WANT_WRITE, "");
 static_assert(PAL_SSL_ERROR_SYSCALL == SSL_ERROR_SYSCALL, "");
 static_assert(PAL_SSL_ERROR_ZERO_RETURN == SSL_ERROR_ZERO_RETURN, "");
 
+extern "C" int32_t CryptoNative_EnsureOpenSslInitialized();
+
 extern "C" void CryptoNative_EnsureLibSslInitialized()
 {
+    CryptoNative_EnsureOpenSslInitialized();
     SSL_library_init();
     SSL_load_error_strings();
 }
@@ -573,3 +576,9 @@ extern "C" void CryptoNative_SslGet0AlpnSelected(SSL* ssl, const uint8_t** proto
         *len = 0;
     }
 }
+
+extern "C" int32_t CryptoNative_SslSetTlsExtHostName(SSL* ssl, const uint8_t* name)
+{
+    return static_cast<int32_t>(SSL_set_tlsext_host_name(ssl, name));
+}
+

@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic.Utils;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -154,7 +155,7 @@ namespace System.Linq.Expressions.Compiler
             AddReturnLabel(_lambda);
             _boundConstants.EmitCacheConstants(this);
         }
-        
+
         internal ILGenerator IL => _ilg;
 
         internal IParameterProvider Parameters => _lambda;
@@ -172,6 +173,8 @@ namespace System.Linq.Expressions.Compiler
         /// <returns>The compiled delegate.</returns>
         internal static Delegate Compile(LambdaExpression lambda)
         {
+            lambda.ValidateArgumentCount();
+
             // 1. Bind lambda
             AnalyzedTree tree = AnalyzeLambda(ref lambda);
 

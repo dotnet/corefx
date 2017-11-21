@@ -5,6 +5,7 @@
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace System.Drawing
@@ -15,16 +16,23 @@ namespace System.Drawing
         {
             private const string LibraryName = "libgdiplus";
             public static IntPtr Display = IntPtr.Zero;
-            public static bool UseX11Drawable = false;
-            public static bool UseCarbonDrawable = false;
-            public static bool UseCocoaDrawable = false;
+
+            // Indicates whether X11 is available. It's available on Linux but not on recent macOS versions
+            // When set to false, where Carbon Drawing is used instead.
+            // macOS users can force X11 by setting the SYSTEM_DRAWING_COMMON_FORCE_X11 flag.
+            public static bool UseX11Drawable { get; } =
+                !RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ||
+                Environment.GetEnvironmentVariable("SYSTEM_DRAWING_COMMON_FORCE_X11") != null;
 
             private static IntPtr LoadNativeLibrary()
             {
+                string libraryName;
+
                 IntPtr lib = IntPtr.Zero;
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    lib = Interop.Libdl.dlopen("libgdiplus.dylib", Interop.Libdl.RTLD_NOW);
+                    libraryName = "libgdiplus.dylib";
+                    lib = Interop.Libdl.dlopen(libraryName, Interop.Libdl.RTLD_NOW);
                 }
                 else
                 {
@@ -32,10 +40,30 @@ namespace System.Drawing
                     // The mono project, where libgdiplus originated, allowed both of the names below to be used, via
                     // a global configuration setting. We prefer the "unversioned" shared object name, and fallback to
                     // the name suffixed with ".0".
-                    lib = Interop.Libdl.dlopen("libgdiplus.so", Interop.Libdl.RTLD_NOW);
+                    libraryName = "libgdiplus.so";
+                    lib = Interop.Libdl.dlopen(libraryName, Interop.Libdl.RTLD_NOW);
                     if (lib == IntPtr.Zero)
                     {
                         lib = Interop.Libdl.dlopen("libgdiplus.so.0", Interop.Libdl.RTLD_NOW);
+                    }
+                }
+
+                // If we couldn't find libgdiplus in the system search path, try to look for libgdiplus in the
+                // NuGet package folders. This matches the DllImport behavior.
+                if (lib == IntPtr.Zero)
+                {
+                    string[] searchDirectories = ((string)AppContext.GetData("NATIVE_DLL_SEARCH_DIRECTORIES")).Split(':');
+
+                    foreach (var searchDirectory in searchDirectories)
+                    {
+                        var searchPath = Path.Combine(searchDirectory, libraryName);
+
+                        lib = Interop.Libdl.dlopen(searchPath, Interop.Libdl.RTLD_NOW);
+
+                        if (lib != IntPtr.Zero)
+                        {
+                            break;
+                        }
                     }
                 }
 
@@ -48,52 +76,7 @@ namespace System.Drawing
 
             private static void PlatformInitialize()
             {
-                InitializeSystemContext();
                 LoadFunctionPointers();
-            }
-
-            private static void InitializeSystemContext()
-            {
-                if (Environment.GetEnvironmentVariable("not_supported_MONO_MWF_USE_NEW_X11_BACKEND") != null || Environment.GetEnvironmentVariable("MONO_MWF_MAC_FORCE_X11") != null)
-                {
-                    UseX11Drawable = true;
-                }
-                else
-                {
-                    IntPtr buf = Marshal.AllocHGlobal(8192);
-                    // This is kind of a hack but gets us sysname from uname (struct utsname *name) on
-                    // linux and darwin
-                    if (uname(buf) != 0)
-                    {
-                        // WTH: We couldn't detect the OS; lets default to X11
-                        UseX11Drawable = true;
-                    }
-                    else
-                    {
-                        string os = Marshal.PtrToStringAnsi(buf);
-                        if (os == "Darwin")
-                            UseCarbonDrawable = true;
-                        else
-                            UseX11Drawable = true;
-                    }
-                    Marshal.FreeHGlobal(buf);
-                }
-
-                // under MS 1.x this event is raised only for the default application domain
-#if !NETSTANDARD1_6
-                AppDomain.CurrentDomain.ProcessExit += new EventHandler(ProcessExit);
-#endif
-            }
-
-            [DllImport("libc")]
-            static extern int uname(IntPtr buf);
-
-            private static void ProcessExit(object sender, EventArgs e)
-            {
-                // Called all pending objects and claim any pending handle before
-                // shutting down
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
             }
 
             private static void LoadFunctionPointers()
