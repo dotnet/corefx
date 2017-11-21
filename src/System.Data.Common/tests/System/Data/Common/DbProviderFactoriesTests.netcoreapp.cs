@@ -17,7 +17,6 @@ namespace System.Data.Common
         private TestProviderFactory() { }
     }
 
-    [Trait("Tests", "DbProviderFactories")]
     public class DbProviderFactoriesTests
     {
         [Fact]
