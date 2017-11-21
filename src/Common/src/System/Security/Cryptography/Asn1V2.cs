@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
@@ -360,6 +359,7 @@ namespace System.Security.Cryptography.Asn1
         private static readonly Text.Encoding s_bmpEncoding = new BMPEncoding();
         private static readonly Text.Encoding s_ia5Encoding = new IA5Encoding();
         private static readonly Text.Encoding s_visibleStringEncoding = new VisibleStringEncoding();
+        private static readonly Text.Encoding s_printableStringEncoding = new PrintableStringEncoding();
 
         private ReadOnlyMemory<byte> _data;
         private readonly AsnEncodingRules _ruleSet;
@@ -2354,6 +2354,9 @@ namespace System.Security.Cryptography.Asn1
                 case UniversalTagNumber.BMPString:
                     encoding = s_bmpEncoding;
                     break;
+                case UniversalTagNumber.PrintableString:
+                    encoding = s_printableStringEncoding;
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(encodingType), encodingType, null);
             }
@@ -3429,11 +3432,20 @@ namespace System.Security.Cryptography.Asn1
         }
     }
 
+    internal class PrintableStringEncoding : RestrictedAsciiStringEncoding
+    {
+        // ITU-T-REC-X.680-201508 sec 41.4
+        internal PrintableStringEncoding()
+            : base("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 '()+,-./:=?")
+        {
+        }
+    }
+
     internal abstract class RestrictedAsciiStringEncoding : SpanBasedEncoding
     {
         private readonly bool[] _isAllowed;
 
-        protected RestrictedAsciiStringEncoding(IList<char> allowedChars)
+        protected RestrictedAsciiStringEncoding(IEnumerable<char> allowedChars)
         {
             bool[] isAllowed = new bool[0x7F];
 
@@ -3618,6 +3630,7 @@ namespace System.Security.Cryptography.Asn1
         private static readonly Text.Encoding s_bmpEncoding = new BMPEncoding();
         private static readonly Text.Encoding s_ia5Encoding = new IA5Encoding();
         private static readonly Text.Encoding s_utf8Encoding = new UTF8Encoding(false, true);
+        private static readonly Text.Encoding s_printableStringEncoding = new PrintableStringEncoding();
 
         private byte[] _buffer;
         private int _offset;
@@ -4997,6 +5010,9 @@ namespace System.Security.Cryptography.Asn1
                     break;
                 case UniversalTagNumber.BMPString:
                     encoding = s_bmpEncoding;
+                    break;
+                case UniversalTagNumber.PrintableString:
+                    encoding = s_printableStringEncoding;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(encodingType), encodingType, null);
