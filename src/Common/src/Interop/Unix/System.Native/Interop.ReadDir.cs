@@ -4,13 +4,14 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
 {
     internal static partial class Sys
     {
-        private static readonly int s_direntSize = GetDirentSize();
+        private static readonly int s_readBufferSize = GetReadDirRBufferSize();
 
         internal enum NodeType : int
         {
@@ -42,11 +43,11 @@ internal static partial class Interop
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_OpenDir", SetLastError = true)]
         internal static extern Microsoft.Win32.SafeHandles.SafeDirectoryHandle OpenDir(string path);
 
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetDirentSize", SetLastError = false)]
-        internal static extern int GetDirentSize();
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetReadDirRBufferSize", SetLastError = false)]
+        internal static extern int GetReadDirRBufferSize();
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_ReadDirR", SetLastError = false)]
-        private static extern unsafe int ReadDirR(SafeDirectoryHandle dir, byte* buffer, int bufferSize, out InternalDirectoryEntry outputEntry);
+        private static extern unsafe int ReadDirR(IntPtr dir, byte* buffer, int bufferSize, out InternalDirectoryEntry outputEntry);
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_CloseDir", SetLastError = true)]
         internal static extern int CloseDir(IntPtr dir);
@@ -54,17 +55,42 @@ internal static partial class Interop
         // The calling pattern for ReadDir is described in src/Native/System.Native/pal_readdir.cpp
         internal static int ReadDir(SafeDirectoryHandle dir, out DirectoryEntry outputEntry)
         {
-            unsafe
+            bool addedRef = false;
+            try
             {
-                // To reduce strcpys, alloc a buffer here and get the result from OS, then copy it over for the caller.
-                byte* buffer = stackalloc byte[s_direntSize];
-                InternalDirectoryEntry temp;
-                int ret = ReadDirR(dir, buffer, s_direntSize, out temp);
-                outputEntry = ret == 0 ?
-                            new DirectoryEntry() { InodeName = GetDirectoryEntryName(temp), InodeType = temp.InodeType } : 
-                            default(DirectoryEntry);
+                // We avoid a native string copy into InternalDirectoryEntry.
+                // - If the platform suppors reading into a buffer, the data is read directly into the stackalloced buffer.
+                // - If the platform does not support reading into a buffer, the information returned in
+                // InternalDirectoryEntry points to native memory owned by the SafeDirectoryHandle.
+                // We extend the reference until we have copied all data from that native memory to ensure
+                // it does not become invalid by a CloseDir; or by a concurrent ReadDir call.
+                int readerCount = Interlocked.Increment(ref dir.ReadDirCounter);
+                if (readerCount != 1)
+                {
+                    ThrowConcurrentReadNotSupported();
+                }
+                dir.DangerousAddRef(ref addedRef);
 
-                return ret;
+                unsafe
+                {
+                    // note: s_readBufferSize is zero when the native implementation does not support reading into a buffer.
+                    byte* buffer = stackalloc byte[s_readBufferSize];
+                    InternalDirectoryEntry temp;
+                    int ret = ReadDirR(dir.DangerousGetHandle(), buffer, s_readBufferSize, out temp);
+                    outputEntry = ret == 0 ?
+                                new DirectoryEntry() { InodeName = GetDirectoryEntryName(temp), InodeType = temp.InodeType } : 
+                                default(DirectoryEntry);
+
+                    return ret;
+                }
+            }
+            finally
+            {
+                if (addedRef)
+                {
+                    dir.DangerousRelease();
+                }
+                Interlocked.Decrement(ref dir.ReadDirCounter);
             }
         }
 
@@ -74,6 +100,11 @@ internal static partial class Interop
                 return Marshal.PtrToStringAnsi(dirEnt.Name);
             else
                 return Marshal.PtrToStringAnsi(dirEnt.Name, dirEnt.NameLength);
+        }
+
+        private static void ThrowConcurrentReadNotSupported()
+        {
+            throw new NotSupportedException("Concurrent directory enumeration is not supported.");
         }
     }
 }
