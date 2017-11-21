@@ -214,7 +214,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.True(Unsafe.AreSame(ref a, ref b), msg);
         }
 
-        private static readonly byte[] MicrosoftDotComSslCertBytes = (
+        internal static readonly byte[] MicrosoftDotComSslCertBytes = (
             "308205943082047CA00302010202103DF70C5D9903F8D8868B9B8CCF20DF6930" +
             "0D06092A864886F70D01010B05003077310B3009060355040613025553311D30" +
             "1B060355040A131453796D616E74656320436F72706F726174696F6E311F301D" +

@@ -31,6 +31,7 @@
     <Compile Include="Asn1\Reader\ReadObjectIdentifier.cs" />
     <Compile Include="Asn1\Reader\ReadOctetString.cs" />
     <Compile Include="Asn1\Writer\Asn1WriterTests.cs" />
+    <Compile Include="Asn1\Writer\ComprehensiveWriteTest.cs" />
     <Compile Include="Asn1\Writer\PushPopSequence.cs" />
     <Compile Include="Asn1\Writer\PushPopSetOf.cs" />
     <Compile Include="Asn1\Writer\WriteBitString.cs" />
