@@ -92,8 +92,6 @@ namespace System.Security.Cryptography.Asn1
         internal static readonly Asn1Tag EndOfContents = new Asn1Tag(0);
         internal static readonly Asn1Tag Null = new Asn1Tag(5);
 
-        private static readonly ConcurrentDictionary<Asn1Tag, string> s_toString = new ConcurrentDictionary<Asn1Tag, string>();
-
         private readonly byte _controlFlags;
         private readonly int _tagValue;
 
@@ -318,29 +316,24 @@ namespace System.Security.Cryptography.Asn1
 
         public override string ToString()
         {
-            return s_toString.GetOrAdd(
-                this,
-                tag =>
-                {
-                    const string ConstructedPrefix = "Constructed ";
-                    string classAndValue;
+            const string ConstructedPrefix = "Constructed ";
+            string classAndValue;
 
-                    if (tag.TagClass == TagClass.Universal)
-                    {
-                        classAndValue = ((UniversalTagNumber)tag.TagValue).ToString();
-                    }
-                    else
-                    {
-                        classAndValue = tag.TagClass + "-" + tag.TagValue;
-                    }
+            if (TagClass == TagClass.Universal)
+            {
+                classAndValue = ((UniversalTagNumber)TagValue).ToString();
+            }
+            else
+            {
+                classAndValue = TagClass + "-" + TagValue;
+            }
 
-                    if (tag.IsConstructed)
-                    {
-                        return ConstructedPrefix + classAndValue;
-                    }
+            if (IsConstructed)
+            {
+                return ConstructedPrefix + classAndValue;
+            }
 
-                    return classAndValue;
-                });
+            return classAndValue;
         }
     }
 
