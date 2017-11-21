@@ -223,6 +223,44 @@ namespace System
         }
 
         /// <summary>
+        /// Determines whether the specified sequence appears at the end of the span.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool EndsWith<T>(this Span<T> span, ReadOnlySpan<T> value)
+            where T : IEquatable<T>
+        {
+            int spanLength = span.Length;
+            int valueLength = value.Length;
+            if (typeof(T) == typeof(byte))
+                return valueLength <= spanLength &&
+                SpanHelpers.EndsWith(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    spanLength,
+                    valueLength);
+            return valueLength <= spanLength && SpanHelpers.EndsWith(ref span.DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), spanLength, valueLength);
+        }
+
+        /// <summary>
+        /// Determines whether the specified sequence appears at the end of the span.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool EndsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
+            where T : IEquatable<T>
+        {
+            int spanLength = span.Length;
+            int valueLength = value.Length;
+            if (typeof(T) == typeof(byte))
+                return valueLength <= spanLength &&
+                SpanHelpers.EndsWith(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    spanLength,
+                    valueLength);
+            return valueLength <= spanLength && SpanHelpers.EndsWith(ref span.DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), spanLength, valueLength);
+        }
+
+        /// <summary>
         /// Creates a new  span over the portion of the target array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

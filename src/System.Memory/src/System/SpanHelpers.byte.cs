@@ -513,6 +513,75 @@ namespace System
             return false;
         }
 
+        public static bool EndsWith<T>(ref T first, ref T second, int firstLenght, int secondLength)
+            where T : IEquatable<T>
+        {
+            Debug.Assert(firstLenght >= secondLength);
+
+            if (Unsafe.AreSame(ref first, ref second))
+                goto Equal;
+
+            IntPtr firstIndex = (IntPtr)firstLenght - 1;
+            IntPtr secondIndex = (IntPtr)secondLength - 1;
+            var length = secondLength;
+            while (length >= 8)
+            {
+                length -= 8;
+
+                if (!Unsafe.Add(ref first, firstIndex).Equals(Unsafe.Add(ref second, secondIndex)))
+                    goto NotEqual;
+                if (!Unsafe.Add(ref first, firstIndex - 1).Equals(Unsafe.Add(ref second, secondIndex - 1)))
+                    goto NotEqual;
+                if (!Unsafe.Add(ref first, firstIndex - 2).Equals(Unsafe.Add(ref second, secondIndex - 2)))
+                    goto NotEqual;
+                if (!Unsafe.Add(ref first, firstIndex - 3).Equals(Unsafe.Add(ref second, secondIndex - 3)))
+                    goto NotEqual;
+                if (!Unsafe.Add(ref first, firstIndex - 4).Equals(Unsafe.Add(ref second, secondIndex - 4)))
+                    goto NotEqual;
+                if (!Unsafe.Add(ref first, firstIndex - 5).Equals(Unsafe.Add(ref second, secondIndex - 5)))
+                    goto NotEqual;
+                if (!Unsafe.Add(ref first, firstIndex - 6).Equals(Unsafe.Add(ref second, secondIndex - 6)))
+                    goto NotEqual;
+                if (!Unsafe.Add(ref first, firstIndex - 7).Equals(Unsafe.Add(ref second, secondIndex - 7)))
+                    goto NotEqual;
+
+                firstIndex -= 8;
+                secondIndex -= 8;
+            }
+
+            if (length >= 4)
+            {
+                length -= 4;
+
+                if (!Unsafe.Add(ref first, firstIndex).Equals(Unsafe.Add(ref second, secondIndex)))
+                    goto NotEqual;
+                if (!Unsafe.Add(ref first, firstIndex - 1).Equals(Unsafe.Add(ref second, secondIndex - 1)))
+                    goto NotEqual;
+                if (!Unsafe.Add(ref first, firstIndex - 2).Equals(Unsafe.Add(ref second, secondIndex - 2)))
+                    goto NotEqual;
+                if (!Unsafe.Add(ref first, firstIndex - 3).Equals(Unsafe.Add(ref second, secondIndex - 3)))
+                    goto NotEqual;
+
+                firstIndex -= 4;
+                secondIndex -= 4;
+            }
+
+            while (length > 0)
+            {
+                if (!Unsafe.Add(ref first, firstIndex).Equals(Unsafe.Add(ref second, secondIndex)))
+                    goto NotEqual;
+                firstIndex -= 1;
+                secondIndex -= 1;
+                length--;
+            }
+
+Equal:
+            return true;
+
+NotEqual:
+            return false;
+        }
+
 #if !netstandard11
         // Vector sub-search adapted from https://github.com/aspnet/KestrelHttpServer/pull/1138
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
