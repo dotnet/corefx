@@ -135,9 +135,6 @@ namespace System.ComponentModel.Composition.Primitives
         protected ComposablePartException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-#if FEATURE_SERIALIZATION
-            _element = info.GetValue<ICompositionElement>("Element");
-#endif //FEATURE_SERIALIZATION
         }
 
         /// <summary>
@@ -151,28 +148,5 @@ namespace System.ComponentModel.Composition.Primitives
         {
             get { return _element; }
         }
-
-#if FEATURE_SERIALIZATION
-        /// <summary>
-        ///     Gets the serialization data of the exception.
-        /// </summary>
-        /// <param name="info">
-        ///     The <see cref="SerializationInfo"/> that holds the serialized object data about the 
-        ///     <see cref="ComposablePartException"/>.
-        /// </param>
-        /// <param name="context">
-        ///     The <see cref="StreamingContext"/> that contains contextual information about the 
-        ///     source or destination.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="info"/> is <see langword="null"/>.
-        /// </exception>
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-
-            info.AddValue("Element", _element.ToSerializableElement());
-        }
-#endif //FEATURE_SERIALIZATION
     }
 }

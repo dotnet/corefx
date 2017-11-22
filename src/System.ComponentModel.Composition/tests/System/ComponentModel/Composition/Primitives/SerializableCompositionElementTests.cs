@@ -85,41 +85,7 @@ namespace System.ComponentModel.Composition.Hosting
                 Assert.Equal(e, result.ToString());
             }
         }
-
-#if FEATURE_SERIALIZATION
-
-        [Fact]
-        public void Origin_CanBeSerialized()
-        {
-            var expectations = Expectations.GetCompositionElements();
-
-            foreach (var e in expectations)
-            {
-                var element = CreateSerializableCompositionElement(e);
-
-                var result = SerializationTestServices.RoundTrip(element);
-
-                ElementAssert.AreEqual(e, result);
-            }
-        }
-
-        [Fact]
-        public void DisplayName_CanBeSerialized()
-        {
-            var expectations = Expectations.GetDisplayNames();
-
-            foreach (var e in expectations)
-            {
-                var element = CreateSerializableCompositionElement(e);
-
-                var result = SerializationTestServices.RoundTrip(element);
-
-                Assert.Equal(e, result.DisplayName);
-            }
-        }
-
-#endif //FEATURE_SERIALIZATION
-
+        
         private static SerializableCompositionElement CreateSerializableCompositionElement(string displayName)
         {
             var element = ElementFactory.Create(displayName);

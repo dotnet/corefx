@@ -18,9 +18,6 @@ namespace System.ComponentModel.Composition.Primitives
 
         public SerializableCompositionElement(string displayName, ICompositionElement origin)
         {
-#if FEATURE_SERIALIZATION
-            Assumes.IsTrue(origin == null || origin.GetType().IsSerializable);
-#endif
             _displayName = displayName ?? string.Empty;
             _origin = origin;
         }

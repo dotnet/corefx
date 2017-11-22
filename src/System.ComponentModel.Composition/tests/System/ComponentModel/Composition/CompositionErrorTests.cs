@@ -397,56 +397,7 @@ namespace System.ComponentModel.Composition
                 Assert.Equal(error.Description, error.ToString());
             }
         }
-
-#if FEATURE_SERIALIZATION
-
-        [Fact]
-        public void ICompositionErrorId_CanBeSerialized()
-        {
-            var expectations = Expectations.GetEnumValues<CompositionErrorId>();
-
-            foreach (var e in expectations)
-            {
-                var error = CreateCompositionError(e);
-
-                var result = SerializationTestServices.RoundTrip(error);
-
-                Assert.Equal(error.Id, result.Id);
-            }
-        }
-
-        [Fact]
-        public void Exception_CanBeSerialized()
-        {
-            var expectations = Expectations.GetInnerExceptionsWithNull();
-
-            foreach (var e in expectations)
-            {
-                var error = CreateCompositionError(e);
-
-                var result = SerializationTestServices.RoundTrip(error);
-
-                ExtendedAssert.IsInstanceOfSameType(error.Exception, result.Exception);
-            }
-        }
-
-        [Fact]
-        public void Message_CanBeSerialized()
-        {
-            var expectations = Expectations.GetExceptionMessages();
-
-            foreach (var e in expectations)
-            {
-                var error = CreateCompositionError(e);
-
-                var result = SerializationTestServices.RoundTrip(error);
-
-                Assert.Equal(error.Description, result.Description);
-            }
-        }
-
-#endif //FEATURE_SERIALIZATION
-
+        
         private static CompositionError CreateCompositionError()
         {
             return CreateCompositionError(CompositionErrorId.Unknown, (string)null, (ICompositionElement)null, (Exception)null);
