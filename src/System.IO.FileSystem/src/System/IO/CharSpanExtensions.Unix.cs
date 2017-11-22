@@ -8,7 +8,7 @@ namespace System.IO
 {
     internal static partial class CharSpanExtensions
     {
-        internal static unsafe bool EqualsOrdinalUnix(ReadOnlySpan<char> first, ReadOnlySpan<char> second, bool ignoreCase = false)
+        internal static unsafe bool EqualsOrdinal(ReadOnlySpan<char> first, ReadOnlySpan<char> second, bool ignoreCase = false)
         {
             if (first.Length != second.Length)
                 return false;

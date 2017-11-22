@@ -14,7 +14,7 @@ internal partial class Interop
             /// Returns basic information (timestamps and attributes).
             /// </summary>
             /// <remarks>
-            /// Thunks to NtQueryInformationFile & FileBasicInformation.
+            /// Thunks to NtQueryInformationFile and FileBasicInformation.
             /// </remarks>
             FileBasicInfo,
 
@@ -22,7 +22,7 @@ internal partial class Interop
             /// Returns file size, link count, pending delete status, and if it is a directory.
             /// </summary>
             /// <remarks>
-            /// Thunks to NtQueryInformationFile & FileStandardInformation.
+            /// Thunks to NtQueryInformationFile and FileStandardInformation.
             /// </remarks>
             FileStandardInfo,
 
@@ -30,7 +30,7 @@ internal partial class Interop
             /// Gets the file name.
             /// </summary>
             /// <remarks>
-            /// Thunks to NtQueryInformationFile & FileNameInformation.
+            /// Thunks to NtQueryInformationFile and FileNameInformation.
             /// </remarks>
             FileNameInfo,
 
@@ -39,7 +39,7 @@ internal partial class Interop
             /// a handle to the directory the file resides in.
             /// </summary>
             /// <remarks>
-            /// Only valid for SetFileInformationByHandle. Thunks to NtSetInformationFile & FileRenameInformation.
+            /// Only valid for SetFileInformationByHandle. Thunks to NtSetInformationFile and FileRenameInformation.
             /// MoveFileEx is effectively the same API.
             /// </remarks>
             FileRenameInfo,
@@ -49,7 +49,7 @@ internal partial class Interop
             /// You cannot change the state of a handle opened with DeleteOnClose.
             /// </summary>
             /// <remarks>
-            /// Only valid for SetFileInformationByHandle. Thunks to NtSetInformationFile & FileDispositionInformation.
+            /// Only valid for SetFileInformationByHandle. Thunks to NtSetInformationFile and FileDispositionInformation.
             /// DeleteFile is effectively the same API.
             /// </remarks>
             FileDispositionInfo,
@@ -76,7 +76,7 @@ internal partial class Interop
             /// Gets stream information for the file.
             /// </summary>
             /// <remarks>
-            /// Thunks to NtQueryInformationFile & FileStreamInformation.
+            /// Thunks to NtQueryInformationFile and FileStreamInformation.
             /// </remarks>
             FileStreamInfo,
 
@@ -84,7 +84,7 @@ internal partial class Interop
             /// Gets compression information for the file.
             /// </summary>
             /// <remarks>
-            /// Thunks to NtQueryInformationFile & FileCompressionInformation.
+            /// Thunks to NtQueryInformationFile and FileCompressionInformation.
             /// </remarks>
             FileCompressionInfo,
 
@@ -92,7 +92,7 @@ internal partial class Interop
             /// Gets the file attributes and reparse tag.
             /// </summary>
             /// <remarks>
-            /// Thunks to NtQueryInformationFile & FileAttributeTagInformation.
+            /// Thunks to NtQueryInformationFile and FileAttributeTagInformation.
             /// </remarks>
             FileAttributeTagInfo,
 
@@ -100,7 +100,7 @@ internal partial class Interop
             /// Starts a query for for file information in a directory.
             /// </summary>
             /// <remarks>
-            /// Thunks to NtQueryDirectoryFile & FileIdBothDirectoryInformation with RestartScan
+            /// Thunks to NtQueryDirectoryFile and FileIdBothDirectoryInformation with RestartScan
             /// set to false.
             /// </remarks>
             FileIdBothDirectoryInfo,
@@ -109,7 +109,7 @@ internal partial class Interop
             /// Resumes a query for file information in a directory.
             /// </summary>
             /// <remarks>
-            /// Thunks to NtQueryDirectoryFile & FileIdBothDirectoryInformation with RestartScan
+            /// Thunks to NtQueryDirectoryFile and FileIdBothDirectoryInformation with RestartScan
             /// set to true.
             /// </remarks>
             FileIdBothDirectoryRestartInfo,
@@ -126,7 +126,7 @@ internal partial class Interop
             /// Gets the file remote protocol information.
             /// </summary>
             /// <remarks>
-            /// Thunks to NtQueryInformationFile & FileRemoteProtocolInformation.
+            /// Thunks to NtQueryInformationFile and FileRemoteProtocolInformation.
             /// </remarks>
             FileRemoteProtocolInfo,
 
@@ -134,7 +134,7 @@ internal partial class Interop
             /// Starts a query for for file information in a directory. Uses FILE_FULL_DIR_INFO.
             /// </summary>
             /// <remarks>
-            /// Thunks to NtQueryDirectoryFile & FileFullDirectoryInformation with RestartScan
+            /// Thunks to NtQueryDirectoryFile and FileFullDirectoryInformation with RestartScan
             /// set to false. Windows 8 and up.
             /// </remarks>
             FileFullDirectoryInfo,
@@ -143,7 +143,7 @@ internal partial class Interop
             /// Resumes a query for file information in a directory. Uses FILE_FULL_DIR_INFO.
             /// </summary>
             /// <remarks>
-            /// Thunks to NtQueryDirectoryFile & FileFullDirectoryInformation with RestartScan
+            /// Thunks to NtQueryDirectoryFile and FileFullDirectoryInformation with RestartScan
             /// set to true. Windows 8 and up.
             /// </remarks>
             FileFullDirectoryRestartInfo
