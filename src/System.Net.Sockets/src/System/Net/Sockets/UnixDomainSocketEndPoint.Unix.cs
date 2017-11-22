@@ -27,8 +27,6 @@ namespace System.Net.Sockets
             Debug.Assert(s_nativePathOffset >= 0, "Expected path offset to be positive");
             Debug.Assert(s_nativePathOffset + s_nativePathLength <= s_nativeAddressSize, "Expected address size to include all of the path length");
             Debug.Assert(s_nativePathLength >= 92, "Expected max path length to be at least 92"); // per http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_un.h.html
-
-            s_nativePathLength -= 1; // to account for null terminator within the allotted space
         }
 
         public UnixDomainSocketEndPoint(string path)
@@ -39,7 +37,17 @@ namespace System.Net.Sockets
             }
 
             _path = path;
-            _encodedPath = s_pathEncoding.GetBytes(_path);
+
+            // Pathname socket addresses should be null-terminated.
+            // Linux abstract socket addresses start with a zero byte, they must not be null-terminated.
+            bool isAbstract = path.Length > 0 && path[0] == '\0';
+            int length = s_pathEncoding.GetByteCount(path);
+            if (!isAbstract)
+            {
+                length++;
+            }
+            _encodedPath = new byte[length];
+            s_pathEncoding.GetBytes(path, 0, path.Length, _encodedPath, 0);
 
             if (path.Length == 0 || _encodedPath.Length > s_nativePathLength)
             {
@@ -70,7 +78,17 @@ namespace System.Net.Sockets
                     _encodedPath[i] = socketAddress[s_nativePathOffset + i];
                 }
 
-                _path = s_pathEncoding.GetString(_encodedPath, 0, _encodedPath.Length);
+                // Strip trailing null of pathname socket addresses.
+                int length = _encodedPath.Length;
+                bool isAbstract = _encodedPath[0] == 0;
+                if (!isAbstract)
+                {
+                    if (_encodedPath[length - 1] == 0)
+                    {
+                        length--;
+                    }
+                }
+                _path = s_pathEncoding.GetString(_encodedPath, 0, length);
             }
             else
             {
@@ -81,14 +99,12 @@ namespace System.Net.Sockets
 
         public override SocketAddress Serialize()
         {
-            var result = new SocketAddress(AddressFamily.Unix, s_nativeAddressSize);
-            Debug.Assert(_encodedPath.Length + s_nativePathOffset <= result.Size, "Expected path to fit in address");
+            var result = new SocketAddress(AddressFamily.Unix, s_nativePathOffset + _encodedPath.Length);
 
             for (int index = 0; index < _encodedPath.Length; index++)
             {
                 result[s_nativePathOffset + index] = _encodedPath[index];
             }
-            result[s_nativePathOffset + _encodedPath.Length] = 0; // path must be null-terminated
 
             return result;
         }

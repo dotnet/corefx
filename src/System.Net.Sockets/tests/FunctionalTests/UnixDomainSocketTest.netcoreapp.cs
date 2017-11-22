@@ -5,6 +5,7 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -348,6 +349,63 @@ namespace System.Net.Sockets.Tests
 
             string invalidLengthString = new string('a', maxNativeSize + 1);
             Assert.Throws<ArgumentOutOfRangeException>(() => new UnixDomainSocketEndPoint(invalidLengthString));
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void UnixDomainSocketEndPoint_RemoteEndPointEqualsBindAddress(bool abstractAddress)
+        {
+            string serverAddress;
+            string clientAddress;
+            if (abstractAddress)
+            {
+                // abstract socket addresses are a Linux feature.
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    return;
+                }
+                // An abstract socket address starts with a zero byte.
+                serverAddress = '\0' + Guid.NewGuid().ToString();
+                clientAddress = '\0' + Guid.NewGuid().ToString();
+            }
+            else
+            {
+                serverAddress = GetRandomNonExistingFilePath();
+                clientAddress = GetRandomNonExistingFilePath();
+            }
+
+            try
+            {
+                using (Socket server = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified))
+                {
+                    server.Bind(new UnixDomainSocketEndPoint(serverAddress));
+                    server.Listen(1);
+
+                    using (Socket client = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified))
+                    {
+                        // Bind the client.
+                        client.Bind(new UnixDomainSocketEndPoint(clientAddress));
+                        client.Connect(new UnixDomainSocketEndPoint(serverAddress));
+                        using (Socket acceptedClient = server.Accept())
+                        {
+                            // Verify the client address on the server.
+                            EndPoint clientAddressOnServer = acceptedClient.RemoteEndPoint;
+                            Assert.True(string.CompareOrdinal(clientAddress, clientAddressOnServer.ToString()) == 0);
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                if (!abstractAddress)
+                {
+                    try { File.Delete(serverAddress); }
+                    catch { }
+                    try { File.Delete(clientAddress); }
+                    catch { }
+                }
+            }
         }
 
         private static string GetRandomNonExistingFilePath()
