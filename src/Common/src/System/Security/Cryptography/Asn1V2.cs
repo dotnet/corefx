@@ -324,12 +324,9 @@ namespace System.Security.Cryptography.Asn1
 
     internal enum AsnEncodingRules
     {
-        BasicEncodingRules,
-        BER = BasicEncodingRules,
-        CanonicalEncodingRules,
-        CER = CanonicalEncodingRules,
-        DistinguishedEncodingRules,
-        DER = DistinguishedEncodingRules,
+        BER,
+        CER,
+        DER,
     }
 
     internal class AsnReader
