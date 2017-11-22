@@ -786,23 +786,20 @@ internal static partial class Interop
             return GetVerb(request, 0);
         }
 
-        internal static unsafe string GetVerb(byte[] memoryBlob, IntPtr originalAddress)
+        internal static unsafe string GetVerb(IntPtr memoryBlob, IntPtr originalAddress)
         {
-            fixed (byte* pMemoryBlob = memoryBlob)
-            {
-                return GetVerb((HTTP_REQUEST*)pMemoryBlob, pMemoryBlob - (byte*)originalAddress);
-            }
+            return GetVerb((HTTP_REQUEST*)memoryBlob.ToPointer(), (byte*)memoryBlob - (byte*)originalAddress);
         }
 
         // Server API
 
-        internal static unsafe WebHeaderCollection GetHeaders(byte[] memoryBlob, IntPtr originalAddress)
+        internal static unsafe WebHeaderCollection GetHeaders(IntPtr memoryBlob, IntPtr originalAddress)
         {
             NetEventSource.Enter(null);
 
             // Return value.
             WebHeaderCollection headerCollection = new WebHeaderCollection();
-            fixed (byte* pMemoryBlob = memoryBlob)
+            byte* pMemoryBlob = (byte*)memoryBlob;
             {
                 HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
                 long fixup = pMemoryBlob - (byte*)originalAddress;
@@ -854,7 +851,7 @@ internal static partial class Interop
         }
 
 
-        internal static unsafe uint GetChunks(byte[] memoryBlob, IntPtr originalAddress, ref int dataChunkIndex, ref uint dataChunkOffset, byte[] buffer, int offset, int size)
+        internal static unsafe uint GetChunks(IntPtr memoryBlob, IntPtr originalAddress, ref int dataChunkIndex, ref uint dataChunkOffset, byte[] buffer, int offset, int size)
         {
             if (NetEventSource.IsEnabled)
             {
@@ -863,7 +860,7 @@ internal static partial class Interop
 
             // Return value.
             uint dataRead = 0;
-            fixed (byte* pMemoryBlob = memoryBlob)
+            byte* pMemoryBlob = (byte*)memoryBlob;
             {
                 HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
                 long fixup = pMemoryBlob - (byte*)originalAddress;
@@ -917,13 +914,13 @@ internal static partial class Interop
             return dataRead;
         }
 
-        internal static unsafe HTTP_VERB GetKnownVerb(byte[] memoryBlob, IntPtr originalAddress)
+        internal static unsafe HTTP_VERB GetKnownVerb(IntPtr memoryBlob, IntPtr originalAddress)
         {
             NetEventSource.Enter(null);
 
             // Return value.
             HTTP_VERB verb = HTTP_VERB.HttpVerbUnknown;
-            fixed (byte* pMemoryBlob = memoryBlob)
+            byte* pMemoryBlob = (byte*)memoryBlob;
             {
                 HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
                 if ((int)request->Verb > (int)HTTP_VERB.HttpVerbUnparsed && (int)request->Verb < (int)HTTP_VERB.HttpVerbMaximum)
@@ -936,14 +933,14 @@ internal static partial class Interop
             return verb;
         }
 
-        internal static unsafe IPEndPoint GetRemoteEndPoint(byte[] memoryBlob, IntPtr originalAddress)
+        internal static unsafe IPEndPoint GetRemoteEndPoint(IntPtr memoryBlob, IntPtr originalAddress)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null);
 
             SocketAddress v4address = new SocketAddress(AddressFamily.InterNetwork, IPv4AddressSize);
             SocketAddress v6address = new SocketAddress(AddressFamily.InterNetworkV6, IPv6AddressSize);
 
-            fixed (byte* pMemoryBlob = memoryBlob)
+            byte* pMemoryBlob = (byte*)memoryBlob;
             {
                 HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
                 IntPtr address = request->Address.pRemoteAddress != null ? (IntPtr)(pMemoryBlob - (byte*)originalAddress + (byte*)request->Address.pRemoteAddress) : IntPtr.Zero;
@@ -964,14 +961,14 @@ internal static partial class Interop
             return endpoint;
         }
 
-        internal static unsafe IPEndPoint GetLocalEndPoint(byte[] memoryBlob, IntPtr originalAddress)
+        internal static unsafe IPEndPoint GetLocalEndPoint(IntPtr memoryBlob, IntPtr originalAddress)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null);
 
             SocketAddress v4address = new SocketAddress(AddressFamily.InterNetwork, IPv4AddressSize);
             SocketAddress v6address = new SocketAddress(AddressFamily.InterNetworkV6, IPv6AddressSize);
 
-            fixed (byte* pMemoryBlob = memoryBlob)
+            byte* pMemoryBlob = (byte*)memoryBlob;
             {
                 HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
                 IntPtr address = request->Address.pLocalAddress != null ? (IntPtr)(pMemoryBlob - (byte*)originalAddress + (byte*)request->Address.pLocalAddress) : IntPtr.Zero;

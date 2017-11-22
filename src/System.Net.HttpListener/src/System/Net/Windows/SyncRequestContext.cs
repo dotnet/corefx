@@ -20,19 +20,19 @@ namespace System.Net
         {
             if (_pinnedHandle.IsAllocated)
             {
-                if (RequestBuffer.Length == size)
+                if (Size == size)
                 {
                     return RequestBlob;
                 }
                 _pinnedHandle.Free();
             }
             SetBuffer(size);
-            if (RequestBuffer == null)
+            if (RequestBuffer == IntPtr.Zero)
             {
                 return null;
             }
             _pinnedHandle = GCHandle.Alloc(RequestBuffer, GCHandleType.Pinned);
-            return (Interop.HttpApi.HTTP_REQUEST*)Marshal.UnsafeAddrOfPinnedArrayElement(RequestBuffer, 0);
+            return (Interop.HttpApi.HTTP_REQUEST*)RequestBuffer.ToPointer();
         }
 
         internal void Reset(int size)

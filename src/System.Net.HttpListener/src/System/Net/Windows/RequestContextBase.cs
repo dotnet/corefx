@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace System.Net
 {
@@ -10,11 +11,12 @@ namespace System.Net
     {
         private Interop.HttpApi.HTTP_REQUEST* _memoryBlob;
         private Interop.HttpApi.HTTP_REQUEST* _originalBlobAddress;
-        private byte[] _backingBuffer;
+        private IntPtr _backingBuffer = IntPtr.Zero;
+        private int _backingBufferLength = 0;
 
         // Must call this from derived class' constructors.
         protected void BaseConstruction(Interop.HttpApi.HTTP_REQUEST* requestBlob)
-        {
+        {          
             if (requestBlob == null)
             {
                 GC.SuppressFinalize(this);
@@ -29,9 +31,9 @@ namespace System.Net
         // before an object (HttpListenerRequest) which closes the RequestContext on demand is returned to the application.
         internal void ReleasePins()
         {
-            Debug.Assert(_memoryBlob != null || _backingBuffer == null, "RequestContextBase::ReleasePins()|ReleasePins() called twice.");
+            Debug.Assert(_memoryBlob != null || _backingBuffer == IntPtr.Zero, "RequestContextBase::ReleasePins()|ReleasePins() called twice.");
             _originalBlobAddress = _memoryBlob;
-            UnsetBlob();
+            UnsetBlob();         
             OnReleasePins();
         }
 
@@ -59,12 +61,12 @@ namespace System.Net
         {
             get
             {
-                Debug.Assert(_memoryBlob != null || _backingBuffer == null, "RequestContextBase::Dispose()|RequestBlob requested after ReleasePins().");
+                Debug.Assert(_memoryBlob != null || _backingBuffer == IntPtr.Zero, "RequestContextBase::Dispose()|RequestBlob requested after ReleasePins().");
                 return _memoryBlob;
             }
         }
 
-        internal byte[] RequestBuffer
+        internal IntPtr RequestBuffer
         {
             get
             {
@@ -76,7 +78,7 @@ namespace System.Net
         {
             get
             {
-                return (uint)_backingBuffer.Length;
+                return (uint)_backingBufferLength;
             }
         }
 
@@ -91,7 +93,7 @@ namespace System.Net
 
         protected void SetBlob(Interop.HttpApi.HTTP_REQUEST* requestBlob)
         {
-            Debug.Assert(_memoryBlob != null || _backingBuffer == null, "RequestContextBase::Dispose()|SetBlob() called after ReleasePins().");
+            Debug.Assert(_memoryBlob != null || _backingBuffer == IntPtr.Zero, "RequestContextBase::Dispose()|SetBlob() called after ReleasePins().");
             if (requestBlob == null)
             {
                 UnsetBlob();
@@ -116,7 +118,19 @@ namespace System.Net
 
         protected void SetBuffer(int size)
         {
-            _backingBuffer = size == 0 ? null : new byte[size];
+            if(_backingBuffer != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(_backingBuffer);
+            }
+
+            _backingBuffer = size == 0 ? IntPtr.Zero : Marshal.AllocHGlobal(size);
+            _backingBufferLength = size;
+
+            for(int i = 0; i < size; ++i)
+            {
+                Marshal.WriteByte(_backingBuffer + i, 0);
+            }
+            Debug.Assert(size == 0 || _backingBuffer.ToInt64() % 8 == 0);
         }
     }
 }
