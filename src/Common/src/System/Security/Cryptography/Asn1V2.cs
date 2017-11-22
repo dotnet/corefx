@@ -2226,7 +2226,8 @@ namespace System.Security.Cryptography.Asn1
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(rented, clearArray: true);
+                Array.Clear(rented, 0, bytesWritten);
+                ArrayPool<byte>.Shared.Return(rented);
             }
         }
 
@@ -2288,7 +2289,8 @@ namespace System.Security.Cryptography.Asn1
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(rented, clearArray: true);
+                Array.Clear(rented, 0, bytesWritten);
+                ArrayPool<byte>.Shared.Return(rented);
             }
         }
 
@@ -4343,31 +4345,32 @@ namespace System.Security.Cryptography.Asn1
             if (oidValue[1] != '.')
                 throw new CryptographicException(SR.Argument_InvalidOidValue);
 
-            // The worst case is "1.1.1.1.1", which takes 4 bytes (5 rids, with the first two condensed)
+            // The worst case is "1.1.1.1.1", which takes 4 bytes (5 components, with the first two condensed)
             // Longer numbers get smaller: "2.1.127" is only 2 bytes. (81d (0x51) and 127 (0x7F))
             // So length / 2 should prevent any reallocations.
             byte[] tmp = ArrayPool<byte>.Shared.Rent(oidValue.Length / 2);
+            int tmpOffset = 0;
 
             try
             {
-                int firstRid;
+                int firstComponent;
 
                 switch (oidValue[0])
                 {
                     case '0':
-                        firstRid = 0;
+                        firstComponent = 0;
                         break;
                     case '1':
-                        firstRid = 1;
+                        firstComponent = 1;
                         break;
                     case '2':
-                        firstRid = 2;
+                        firstComponent = 2;
                         break;
                     default:
                         throw new CryptographicException(SR.Argument_InvalidOidValue);
                 }
 
-                // The first two RIDs are special:
+                // The first two components are special:
                 // ITU X.690 8.19.4:
                 //   The numerical value of the first subidentifier is derived from the values of the first two
                 //   object identifier components in the object identifier value being encoded, using the formula:
@@ -4381,17 +4384,16 @@ namespace System.Security.Cryptography.Asn1
                 // skip firstRid and the trailing .
                 ReadOnlySpan<char> remaining = oidValue.Slice(2);
 
-                BigInteger rid = ParseOidRid(ref remaining);
-                rid += 40 * firstRid;
+                BigInteger subIdentifier = ParseSubIdentifier(ref remaining);
+                subIdentifier += 40 * firstComponent;
 
-                int tmpOffset = 0;
-                int localLen = EncodeRid(tmp.AsSpan().Slice(tmpOffset), ref rid);
+                int localLen = EncodeSubIdentifier(tmp.AsSpan().Slice(tmpOffset), ref subIdentifier);
                 tmpOffset += localLen;
 
                 while (!remaining.IsEmpty)
                 {
-                    rid = ParseOidRid(ref remaining);
-                    localLen = EncodeRid(tmp.AsSpan().Slice(tmpOffset), ref rid);
+                    subIdentifier = ParseSubIdentifier(ref remaining);
+                    localLen = EncodeSubIdentifier(tmp.AsSpan().Slice(tmpOffset), ref subIdentifier);
                     tmpOffset += localLen;
                 }
 
@@ -4403,11 +4405,12 @@ namespace System.Security.Cryptography.Asn1
             }
             finally
             {
+                Array.Clear(tmp, 0, tmpOffset);
                 ArrayPool<byte>.Shared.Return(tmp);
             }
         }
 
-        private static BigInteger ParseOidRid(ref ReadOnlySpan<char> oidValue)
+        private static BigInteger ParseSubIdentifier(ref ReadOnlySpan<char> oidValue)
         {
             int endIndex = oidValue.IndexOf('.');
 
@@ -4449,25 +4452,26 @@ namespace System.Security.Cryptography.Asn1
             throw new CryptographicException(SR.Argument_InvalidOidValue);
         }
 
-        private static int EncodeRid(Span<byte> dest, ref BigInteger rid)
+        private static int EncodeSubIdentifier(Span<byte> dest, ref BigInteger subIdentifier)
         {
             Debug.Assert(dest.Length > 0);
 
-            if (rid.IsZero)
+            if (subIdentifier.IsZero)
             {
                 dest[0] = 0;
                 return 1;
             }
            
-            BigInteger unencoded = rid;
+            BigInteger unencoded = subIdentifier;
             int idx = 0;
 
+            // ITU-T-X.690-201508 sec 8.19.5
             do
             {
                 BigInteger cur = unencoded & 0x7F;
                 byte curByte = (byte)cur;
 
-                if (rid != unencoded)
+                if (subIdentifier != unencoded)
                 {
                     curByte |= 0x80;
                 }
@@ -5031,6 +5035,8 @@ namespace System.Security.Cryptography.Asn1
 
         private void WriteCharacterString(Asn1Tag tag, Text.Encoding encoding, ReadOnlySpan<char> str)
         {
+            int size = -1;
+
             if (RuleSet == AsnEncodingRules.CER)
             {
                 // TODO: Split this for netstandard vs netcoreapp for span?.
@@ -5038,7 +5044,7 @@ namespace System.Security.Cryptography.Asn1
                 {
                     fixed (char* strPtr = &str.DangerousGetPinnableReference())
                     {
-                        int size = encoding.GetByteCount(strPtr, str.Length);
+                        size = encoding.GetByteCount(strPtr, str.Length);
 
                         // If it exceeds the primitive segment size, use the constructed encoding.
                         if (size > AsnReader.MaxCERSegmentSize)
@@ -5055,7 +5061,10 @@ namespace System.Security.Cryptography.Asn1
             {
                 fixed (char* strPtr = &str.DangerousGetPinnableReference())
                 {
-                    int size = encoding.GetByteCount(strPtr, str.Length);
+                    if (size < 0)
+                    {
+                        size = encoding.GetByteCount(strPtr, str.Length);
+                    }
 
                     // Clear the constructed tag, if present.
                     WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
@@ -5153,10 +5162,10 @@ namespace System.Security.Cryptography.Asn1
 
             pos = 0;
 
-            foreach (var tuple in positions)
+            foreach ((int offset, int length) in positions)
             {
-                Buffer.BlockCopy(buffer, tuple.Item1, tmp, pos, tuple.Item2);
-                pos += tuple.Item2;
+                Buffer.BlockCopy(buffer, offset, tmp, pos, length);
+                pos += length;
             }
 
             Debug.Assert(pos == len);
