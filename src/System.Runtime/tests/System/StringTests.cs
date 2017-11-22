@@ -838,11 +838,14 @@ namespace System.Tests
 
         [Theory]
         [InlineData("Hello", 'H', true)]
+        [InlineData("Hello", 'Z', false)]
+        [InlineData("Hello", 'e', true)]
+        [InlineData("Hello", 'E', false)]
+        [InlineData("", 'H', false)]
         public static void Contains(string s, char value, bool expected)
         {
             Assert.Equal(expected, s.Contains(value));
         }
-
 
         [Fact]
         public static void Contains_NullValue_ThrowsArgumentNullException()
