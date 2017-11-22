@@ -4,23 +4,23 @@
 
 internal partial class Interop
 {
-    public struct BOOLEAN
+    internal struct BOOLEAN
     {
-        public byte RawValue;
+        internal byte RawValue;
 
-        public BOOLEAN(bool b)
+        internal BOOLEAN(bool b)
         {
             RawValue = b ? (byte)1 : (byte)0;
         }
 
-        public BOOLEAN(byte value)
+        internal BOOLEAN(byte value)
         {
             RawValue = value;
         }
 
-        public bool IsTrue => RawValue != 0;
+        internal bool IsTrue => RawValue != 0;
 
-        public bool IsFalse => RawValue == 0;
+        internal bool IsFalse => RawValue == 0;
 
         public static implicit operator bool(BOOLEAN b) => b.IsTrue;
 

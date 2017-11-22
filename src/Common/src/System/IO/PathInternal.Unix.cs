@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Diagnostics;
 using System.Text;
 
@@ -19,6 +20,11 @@ namespace System.IO
         internal const string ParentDirectoryPrefix = @"../";
 
         internal static int GetRootLength(string path)
+        {
+            return path.Length > 0 && IsDirectorySeparator(path[0]) ? 1 : 0;
+        }
+
+        internal static int GetRootLength(ReadOnlySpan<char> path)
         {
             return path.Length > 0 && IsDirectorySeparator(path[0]) ? 1 : 0;
         }
@@ -69,7 +75,7 @@ namespace System.IO
 
             return builder.ToString();
         }
-        
+
         /// <summary>
         /// Returns true if the character is a directory or volume separator.
         /// </summary>
@@ -81,6 +87,16 @@ namespace System.IO
             Debug.Assert(Path.DirectorySeparatorChar == Path.AltDirectorySeparatorChar);
             Debug.Assert(Path.DirectorySeparatorChar == Path.VolumeSeparatorChar);
             return ch == Path.DirectorySeparatorChar;
+        }
+
+        internal static bool IsPartiallyQualified(string path)
+        {
+            // This is much simpler than Windows where paths can be rooted, but not fully qualified (such as Drive Relative)
+            // As long as the path is rooted in Unix it doesn't use the current directory and therefore is fully qualified.
+            if (path == null)
+                return true;
+
+            return !(path.Length > 0 && path[0] == Path.DirectorySeparatorChar);
         }
     }
 }
