@@ -339,7 +339,7 @@ int32_t SystemNative_GetReadDirRBufferSize(void)
 // referenced by outputEntry remains valid until it is read.
 // If the platform supports readdir_r, the caller provides a buffer into which the data is read.
 // If the platform uses readdir, the caller must ensure no calls are made to readdir/closedir since those will invalidate
-// the current dirent.
+// the current dirent. We assume the platform supports concurrent readdir calls to different DIRs.
 int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferSize, struct DirectoryEntry* outputEntry)
 {
     assert(dir != NULL);
