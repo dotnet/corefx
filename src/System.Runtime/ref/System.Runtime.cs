@@ -2189,9 +2189,10 @@ namespace System
         [System.CLSCompliantAttribute(false)]
         public static string Concat(params string[] values) { throw null; }
         public static string Concat<T>(System.Collections.Generic.IEnumerable<T> values) { throw null; }
-        public bool Contains(char value) { throw null; }
         public bool Contains(string value) { throw null; }
+        public bool Contains(char value) { throw null; }
         public bool Contains(string value, StringComparison comparisonType) { throw null; }
+        public bool Contains(char value, StringComparison comparisonType) { throw null; }
         public static System.String Copy(System.String str) { throw null; }
         public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) { }
         public static string Create<TState>(int length, TState state, System.Buffers.SpanAction<char, TState> action) { throw null; }
@@ -2216,6 +2217,7 @@ namespace System
         public override int GetHashCode() { throw null; }
         public int GetHashCode(System.StringComparison comparisonType) { throw null; }
         public int IndexOf(char value) { throw null; }
+        public int IndexOf(char value, StringComparison comparisonType) { throw null; }
         public int IndexOf(char value, int startIndex) { throw null; }
         public int IndexOf(char value, int startIndex, int count) { throw null; }
         public int IndexOf(string value) { throw null; }
