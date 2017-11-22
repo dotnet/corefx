@@ -26,6 +26,7 @@
     <Project Include="..\pkg\Microsoft.Private.PackageBaseline\Microsoft.Private.PackageBaseline.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+    <!-- add specific builds / pkgproj's here to include in servicing builds -->
   </ItemGroup>
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipNativePackageBuild)' != 'true'" >
