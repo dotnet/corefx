@@ -233,12 +233,15 @@ namespace System
             int valueLength = value.Length;
             if (typeof(T) == typeof(byte))
                 return valueLength <= spanLength &&
-                SpanHelpers.EndsWith(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                SpanHelpers.SequenceEqual(
+                    ref Unsafe.As<T, byte>(ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength)),
                     ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
-                    spanLength,
                     valueLength);
-            return valueLength <= spanLength && SpanHelpers.EndsWith(ref span.DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), spanLength, valueLength);
+            return valueLength <= spanLength && 
+                SpanHelpers.SequenceEqual(
+                    ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength), 
+                    ref value.DangerousGetPinnableReference(), 
+                    valueLength);
         }
 
         /// <summary>
@@ -252,12 +255,15 @@ namespace System
             int valueLength = value.Length;
             if (typeof(T) == typeof(byte))
                 return valueLength <= spanLength &&
-                SpanHelpers.EndsWith(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                SpanHelpers.SequenceEqual(
+                    ref Unsafe.As<T, byte>(ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength)),
                     ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
-                    spanLength,
                     valueLength);
-            return valueLength <= spanLength && SpanHelpers.EndsWith(ref span.DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), spanLength, valueLength);
+            return valueLength <= spanLength &&
+                SpanHelpers.SequenceEqual(
+                    ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength),
+                    ref value.DangerousGetPinnableReference(), 
+                    valueLength);
         }
 
         /// <summary>
