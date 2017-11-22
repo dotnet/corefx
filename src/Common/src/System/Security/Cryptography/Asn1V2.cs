@@ -21,6 +21,7 @@ namespace System.Security.Cryptography.Asn1
         Private = 0b1100_0000,
     }
 
+    // ITU-T-REC.X.680-201508 sec 8.6
     internal enum UniversalTagNumber
     {
         EndOfContents = 0,
@@ -65,7 +66,9 @@ namespace System.Security.Cryptography.Asn1
         Duration = 34,
     }
 
-    internal struct Asn1Tag
+    // Represents a BER-family encoded tag.
+    // T-REC-X.690 sec 8.1.2
+    internal struct Asn1Tag : IEquatable<Asn1Tag>
     {
         private const byte ClassMask = 0b1100_0000;
         private const byte ConstructedMask = 0b0010_0000;
@@ -79,7 +82,7 @@ namespace System.Security.Cryptography.Asn1
         private readonly int _tagValue;
 
         public TagClass TagClass => (TagClass)(_controlFlags & ClassMask);
-        public bool IsConstructed => (_controlFlags & ConstructedMask) == ConstructedMask;
+        public bool IsConstructed => (_controlFlags & ConstructedMask) != 0;
         public int TagValue => _tagValue;
 
         private Asn1Tag(byte controlFlags, int tagValue)
@@ -127,13 +130,25 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
+        public Asn1Tag AsConstructed()
+        {
+            return new Asn1Tag((byte)(_controlFlags | ConstructedMask), _tagValue);
+        }
+
+        public Asn1Tag AsPrimitive()
+        {
+            return new Asn1Tag((byte)(_controlFlags & ~ConstructedMask), _tagValue);
+        }
+
         public static bool TryParse(ReadOnlySpan<byte> source, out Asn1Tag tag, out int bytesRead)
         {
             tag = default(Asn1Tag);
             bytesRead = 0;
 
             if (source.IsEmpty)
+            {
                 return false;
+            }
 
             byte first = source[bytesRead];
             bytesRead++;
@@ -161,13 +176,6 @@ namespace System.Security.Cryptography.Asn1
                     byte currentValue = (byte)(current & ValueMask);
                     bytesRead++;
 
-                    // The first byte cannot have the value 0 (T-REC-X.690-201508 sec 8.1.2.4.2.c)
-                    if (currentValue == 0 && tagValue == 0)
-                    {
-                        bytesRead = 0;
-                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                    }
-
                     // If TooBigToShift is shifted left 7, the content bit shifts out.
                     // So any value greater than or equal to this cannot be shifted without loss.
                     const int TooBigToShift = 0b00000010_00000000_00000000_00000000;
@@ -180,12 +188,18 @@ namespace System.Security.Cryptography.Asn1
 
                     tagValue <<= 7;
                     tagValue |= currentValue;
+
+                    // The first byte cannot have the value 0 (T-REC-X.690-201508 sec 8.1.2.4.2.c)
+                    if (tagValue == 0)
+                    {
+                        bytesRead = 0;
+                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    }
                 }
                 while ((current & ContinuationFlag) == ContinuationFlag);
 
                 // This encoding is only valid for tag values greater than 30.
                 // (T-REC-X.690-201508 sec 8.1.2.3, 8.1.2.4)
-
                 if (tagValue <= 30)
                 {
                     bytesRead = 0;
@@ -331,10 +345,10 @@ namespace System.Security.Cryptography.Asn1
 
     internal class AsnReader
     {
-        // ITU-T-REC-X.690-201508 sec 9.2
+        // T-REC-X.690-201508 sec 9.2
         internal const int MaxCERSegmentSize = 1000;
 
-        // ITU-T-REC-X.690-201508 sec 8.1.5 says only 0000 is legal.
+        // T-REC-X.690-201508 sec 8.1.5 says only 0000 is legal.
         private const int EndOfContentsEncodedLength = 2;
 
         private ReadOnlyMemory<byte> _data;
@@ -377,7 +391,9 @@ namespace System.Security.Cryptography.Asn1
             CheckEncodingRules(ruleSet);
 
             if (source.IsEmpty)
+            {
                 return false;
+            }
 
             // T-REC-X.690-201508 sec 8.1.3
 
@@ -1730,7 +1746,7 @@ namespace System.Security.Cryptography.Asn1
                 ref lastSegmentSize,
                 out int encodedLength);
 
-            // ITU-T-REC-X.690-201508 sec 9.2
+            // T-REC-X.690-201508 sec 9.2
             if (ruleSet == AsnEncodingRules.CER && contentLength <= MaxCERSegmentSize)
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
@@ -2423,7 +2439,9 @@ namespace System.Security.Cryptography.Asn1
         private static byte GetDigit(byte b)
         {
             if (b >= '0' && b <= '9')
+            {
                 return (byte)(b - '0');
+            }
 
             throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
         }
@@ -3050,7 +3068,7 @@ namespace System.Security.Cryptography.Asn1
 
         private static void CheckCharacterStringEncodingType(UniversalTagNumber encodingType)
         {
-            // ITU-T-REC-X.680-201508 sec 41
+            // T-REC-X.680-201508 sec 41
             switch (encodingType)
             {
                 case UniversalTagNumber.BMPString:
@@ -3277,7 +3295,7 @@ namespace System.Security.Cryptography.Asn1
 
     internal class PrintableStringEncoding : RestrictedAsciiStringEncoding
     {
-        // ITU-T-REC-X.680-201508 sec 41.4
+        // T-REC-X.680-201508 sec 41.4
         internal PrintableStringEncoding()
             : base("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 '()+,-./:=?")
         {
@@ -3728,7 +3746,7 @@ namespace System.Security.Cryptography.Asn1
                 valueLength = 6;
             else if (value < 0x800000_00000000)
                 valueLength = 7;
-            else if (value < 0x800000_0000000000)
+            else if (value < 0x80000000_00000000)
                 valueLength = 8;
             else
                 valueLength = 9;
@@ -4243,7 +4261,9 @@ namespace System.Security.Cryptography.Asn1
         private static int AtoI(char c)
         {
             if (c >= '0' && c <= '9')
+            {
                 return c - '0';
+            }
 
             throw new CryptographicException(SR.Argument_InvalidOidValue);
         }
@@ -4615,10 +4635,14 @@ namespace System.Security.Cryptography.Asn1
         public byte[] Encode()
         {
             if ((_nestingStack?.Count ?? 0) != 0)
+            {
                 throw new InvalidOperationException(SR.Cryptography_AsnWriter_EncodeUnbalancedStack);
+            }
 
             if (_offset == 0)
+            {
                 return Array.Empty<byte>();
+            }
 
             // If the stack is closed out then everything is a definite encoding (BER, DER) or a
             // required indefinite encoding (CER). So we're correctly sized up, and ready to copy.
@@ -4640,12 +4664,16 @@ namespace System.Security.Cryptography.Asn1
         private void PopTag(Asn1Tag tag, bool sortContents=false)
         {
             if (_nestingStack == null || _nestingStack.Count == 0)
+            {
                 throw new ArgumentException(SR.Cryptography_AsnWriter_PopWrongTag, nameof(tag));
+            }
 
             (Asn1Tag stackTag, int lenOffset) = _nestingStack.Peek();
 
             if (stackTag != new Asn1Tag(tag.TagClass, tag.TagValue, true))
+            {
                 throw new ArgumentException(SR.Cryptography_AsnWriter_PopWrongTag, nameof(tag));
+            }
 
             _nestingStack.Pop();
 
@@ -4706,7 +4734,9 @@ namespace System.Security.Cryptography.Asn1
             CheckUniversalTag(tag, encodingType);
 
             if (str == null)
+            {
                 throw new ArgumentNullException(nameof(str));
+            }
 
             WriteCharacterString(tag, encodingType, str.AsReadOnlySpan());
         }
