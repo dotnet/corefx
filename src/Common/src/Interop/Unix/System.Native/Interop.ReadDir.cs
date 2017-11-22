@@ -59,19 +59,22 @@ internal static partial class Interop
             try
             {
                 // We avoid a native string copy into InternalDirectoryEntry.
-                // - If the platform suppors reading into a buffer, the data is read directly into the stackalloced buffer.
+                // - If the platform suppors reading into a buffer, the data is read directly into the buffer. The
+                //   data can be read as long as the buffer is valid.
                 // - If the platform does not support reading into a buffer, the information returned in
-                // InternalDirectoryEntry points to native memory owned by the SafeDirectoryHandle.
-                // We extend the reference until we have copied all data from that native memory to ensure
-                // it does not become invalid by a CloseDir.
+                //   InternalDirectoryEntry points to native memory owned by the SafeDirectoryHandle. The data is only
+                //   valid until the next call to CloseDir/ReadDir. We extend the reference until we have copied all data
+                //   to ensure it does not become invalid by a CloseDir; and we copy the data so our caller does not
+                //   use the native memory held by the SafeDirectoryHandle.
                 dir.DangerousAddRef(ref addedRef);
 
                 unsafe
                 {
-                    // note: s_readBufferSize is zero when the native implementation does not support reading into a buffer.
+                    // s_readBufferSize is zero when the native implementation does not support reading into a buffer.
                     byte* buffer = stackalloc byte[s_readBufferSize];
                     InternalDirectoryEntry temp;
                     int ret = ReadDirR(dir.DangerousGetHandle(), buffer, s_readBufferSize, out temp);
+                    // We copy data into DirectoryEntry to ensure there are no dangling references.
                     outputEntry = ret == 0 ?
                                 new DirectoryEntry() { InodeName = GetDirectoryEntryName(temp), InodeType = temp.InodeType } : 
                                 default(DirectoryEntry);
