@@ -7,5 +7,5 @@ namespace System.IO
     /// <summary>
     /// Interface for filtering out find results.
     /// </summary>
-    internal delegate bool FindPredicate(ref RawFindData findData);
+    internal delegate bool FindPredicate<TState>(ref RawFindData findData, TState state);
 }

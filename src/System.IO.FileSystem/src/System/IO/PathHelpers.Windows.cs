@@ -31,6 +31,8 @@ namespace System.IO
 
         public static bool IsPathRooted(string path)
         {
+            // Want to avoid PathInternal.CheckInvalidPathChars on Path.IsPathRooted
+
             if (path != null)
             {
                 int length = path.Length;

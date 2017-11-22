@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.IO
 {
-    internal partial class FindEnumerable<TResult>
+    internal partial class FindEnumerable<TResult, TState>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe bool GetData()

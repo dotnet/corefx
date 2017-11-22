@@ -12,15 +12,17 @@ using System.Threading;
 
 namespace System.IO
 {
-    internal unsafe partial class FindEnumerable<TResult> : CriticalFinalizerObject, IEnumerable<TResult>, IEnumerator<TResult>
+    internal unsafe partial class FindEnumerable<TResult, TState> : CriticalFinalizerObject, IEnumerable<TResult>, IEnumerator<TResult>
     {
         private readonly string _originalFullPath;
         private readonly string _originalUserPath;
         private readonly bool _recursive;
         private readonly FindTransform<TResult> _transform;
-        private readonly FindPredicate _predicate;
+        private readonly FindPredicate<TState> _predicate;
         private readonly int _threadId;
-        private int _state;
+        private readonly TState _state;
+
+        private int _enumeratorCreated;
 
         private Interop.NtDll.FILE_FULL_DIR_INFORMATION* _info;
         private byte[] _buffer;
@@ -37,7 +39,8 @@ namespace System.IO
         public FindEnumerable(
             string directory,
             FindTransform<TResult> transform,
-            FindPredicate predicate,
+            FindPredicate<TState> predicate,
+            TState state = default,
             bool recursive = false)
         {
             _originalUserPath = directory;
@@ -46,19 +49,22 @@ namespace System.IO
             _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
             _transform = transform ?? throw new ArgumentNullException(nameof(transform));
             _threadId = Environment.CurrentManagedThreadId;
+            _state = state;
         }
 
         private FindEnumerable(
             string originalUserPath,
             string originalFullPath,
             FindTransform<TResult> transform,
-            FindPredicate predicate,
+            FindPredicate<TState> predicate,
+            TState state,
             bool recursive)
         {
             _originalUserPath = originalUserPath;
             _originalFullPath = originalFullPath;
             _predicate = predicate;
             _transform = transform;
+            _state = state;
             _recursive = recursive;
             _threadId = Environment.CurrentManagedThreadId;
         }
@@ -90,13 +96,13 @@ namespace System.IO
 
         public IEnumerator<TResult> GetEnumerator()
         {
-            if (Interlocked.Exchange(ref _state, 1) == 0 && _threadId == Environment.CurrentManagedThreadId)
+            if (Interlocked.Exchange(ref _enumeratorCreated, 1) == 0 && _threadId == Environment.CurrentManagedThreadId)
             {
                 InitEnumeration();
                 return this;
             }
 
-            FindEnumerable<TResult> clone = new FindEnumerable<TResult>(_originalUserPath, _originalFullPath, _transform, _predicate, _recursive);
+            FindEnumerable<TResult, TState> clone = new FindEnumerable<TResult, TState>(_originalUserPath, _originalFullPath, _transform, _predicate, _state, _recursive);
             clone.InitEnumeration();
             return clone;
         }
@@ -140,7 +146,7 @@ namespace System.IO
                 if (!_lastEntryFound && _info != null)
                 {
                     // If needed, stash any subdirectories to process later
-                    if (_pending != null && (_info->FileAttributes & FileAttributes.Directory) != 0
+                    if (_recursive && (_info->FileAttributes & FileAttributes.Directory) != 0
                         && !PathHelpers.IsDotOrDotDot(_info->FileName))
                     {
                         string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _info->FileName);
@@ -149,7 +155,7 @@ namespace System.IO
 
                     findData = new RawFindData(_info, _currentPath, _originalFullPath, _originalUserPath);
                 }
-            } while (!_lastEntryFound && !_predicate(ref findData));
+            } while (!_lastEntryFound && !_predicate(ref findData, _state));
 
             return !_lastEntryFound;
         }

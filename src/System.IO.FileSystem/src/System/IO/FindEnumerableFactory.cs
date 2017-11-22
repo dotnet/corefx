@@ -33,101 +33,107 @@ namespace System.IO
                 expression = "*";
         }
 
-        internal static FindEnumerable<string> UserFiles(string directory,
+        internal static FindEnumerable<string, string> UserFiles(string directory,
             string expression = "*",
             bool recursive = false)
         {
-            expression = DosMatcher.TranslateExpression(expression);
-
-            bool predicate(ref RawFindData findData)
-            {
-                return FindPredicates.NotDotOrDotDot(ref findData)
-                    && !FindPredicates.IsDirectory(ref findData)
-                    && DosMatcher.MatchPattern(expression, findData.FileName, ignoreCase: true);
-            }
-
-            return new FindEnumerable<string>(directory, FindTransforms.AsUserFullPath, predicate, recursive);
+            return new FindEnumerable<string, string>(
+                directory,
+                (ref RawFindData findData) => FindTransforms.AsUserFullPath(ref findData),
+                (ref RawFindData findData, string expr) =>
+                {
+                    return FindPredicates.NotDotOrDotDot(ref findData)
+                        && !FindPredicates.IsDirectory(ref findData)
+                        && DosMatcher.MatchPattern(expr, findData.FileName, ignoreCase: true);
+                },
+                DosMatcher.TranslateExpression(expression),
+                recursive);
         }
 
-        internal static FindEnumerable<string> UserDirectories(string directory,
+        internal static FindEnumerable<string, string> UserDirectories(string directory,
             string expression = "*",
             bool recursive = false)
         {
-            expression = DosMatcher.TranslateExpression(expression);
-
-            bool predicate(ref RawFindData findData)
-            {
-                return FindPredicates.NotDotOrDotDot(ref findData)
-                    && FindPredicates.IsDirectory(ref findData)
-                    && DosMatcher.MatchPattern(expression, findData.FileName, ignoreCase: true);
-            }
-
-            return new FindEnumerable<string>(directory, FindTransforms.AsUserFullPath, predicate, recursive);
+            return new FindEnumerable<string, string>(
+                directory,
+                (ref RawFindData findData) => FindTransforms.AsUserFullPath(ref findData),
+                (ref RawFindData findData, string expr) =>
+                {
+                    return FindPredicates.NotDotOrDotDot(ref findData)
+                        && FindPredicates.IsDirectory(ref findData)
+                        && DosMatcher.MatchPattern(expr, findData.FileName, ignoreCase: true);
+                },
+                DosMatcher.TranslateExpression(expression),
+                recursive);
         }
 
-        internal static FindEnumerable<string> UserEntries(string directory,
+        internal static FindEnumerable<string, string> UserEntries(string directory,
             string expression = "*",
             bool recursive = false)
         {
-            expression = DosMatcher.TranslateExpression(expression);
-
-            bool predicate(ref RawFindData findData)
-            {
-                return FindPredicates.NotDotOrDotDot(ref findData)
-                    && DosMatcher.MatchPattern(expression, findData.FileName, ignoreCase: true);
-            }
-
-            return new FindEnumerable<string>(directory, FindTransforms.AsUserFullPath, predicate, recursive);
+            return new FindEnumerable<string, string>(
+                directory,
+                (ref RawFindData findData) => FindTransforms.AsUserFullPath(ref findData),
+                (ref RawFindData findData, string expr) =>
+                {
+                    return FindPredicates.NotDotOrDotDot(ref findData)
+                        && DosMatcher.MatchPattern(expr, findData.FileName, ignoreCase: true);
+                },
+                DosMatcher.TranslateExpression(expression),
+                recursive);
         }
 
-        internal static FindEnumerable<FileInfo> FileInfos(
+        internal static FindEnumerable<FileInfo, string> FileInfos(
             string directory,
             string expression = "*",
             bool recursive = false)
         {
-            expression = DosMatcher.TranslateExpression(expression);
-
-            bool predicate(ref RawFindData findData)
-            {
-                return FindPredicates.NotDotOrDotDot(ref findData)
-                    && !FindPredicates.IsDirectory(ref findData)
-                    && DosMatcher.MatchPattern(expression, findData.FileName, ignoreCase: true);
-            }
-
-            return new FindEnumerable<FileInfo>(directory, FindTransforms.AsFileInfo, predicate, recursive);
+             return new FindEnumerable<FileInfo, string>(
+                directory,
+                (ref RawFindData findData) => FindTransforms.AsFileInfo(ref findData),
+                (ref RawFindData findData, string expr) =>
+                {
+                    return FindPredicates.NotDotOrDotDot(ref findData)
+                        && !FindPredicates.IsDirectory(ref findData)
+                        && DosMatcher.MatchPattern(expr, findData.FileName, ignoreCase: true);
+                },
+                DosMatcher.TranslateExpression(expression),
+                recursive);
         }
 
-        internal static FindEnumerable<DirectoryInfo> DirectoryInfos(
+        internal static FindEnumerable<DirectoryInfo, string> DirectoryInfos(
             string directory,
             string expression = "*",
             bool recursive = false)
         {
-            expression = DosMatcher.TranslateExpression(expression);
-
-            bool predicate(ref RawFindData findData)
-            {
-                return FindPredicates.NotDotOrDotDot(ref findData)
-                    && FindPredicates.IsDirectory(ref findData)
-                    && DosMatcher.MatchPattern(expression, findData.FileName, ignoreCase: true);
-            }
-
-            return new FindEnumerable<DirectoryInfo>(directory, FindTransforms.AsDirectoryInfo, predicate, recursive);
+            return new FindEnumerable<DirectoryInfo, string>(
+               directory,
+               (ref RawFindData findData) => FindTransforms.AsDirectoryInfo(ref findData),
+               (ref RawFindData findData, string expr) =>
+               {
+                   return FindPredicates.NotDotOrDotDot(ref findData)
+                       && FindPredicates.IsDirectory(ref findData)
+                       && DosMatcher.MatchPattern(expr, findData.FileName, ignoreCase: true);
+               },
+               DosMatcher.TranslateExpression(expression),
+               recursive);
         }
 
-        internal static FindEnumerable<FileSystemInfo> FileSystemInfos(
+        internal static FindEnumerable<FileSystemInfo, string> FileSystemInfos(
             string directory,
             string expression = "*",
             bool recursive = false)
         {
-            expression = DosMatcher.TranslateExpression(expression);
-
-            bool predicate(ref RawFindData findData)
-            {
-                return FindPredicates.NotDotOrDotDot(ref findData)
-                    && DosMatcher.MatchPattern(expression, findData.FileName, ignoreCase: true);
-            }
-
-            return new FindEnumerable<FileSystemInfo>(directory, FindTransforms.AsFileSystemInfo, predicate, recursive);
+            return new FindEnumerable<FileSystemInfo, string>(
+               directory,
+               (ref RawFindData findData) => FindTransforms.AsFileSystemInfo(ref findData),
+               (ref RawFindData findData, string expr) =>
+               {
+                   return FindPredicates.NotDotOrDotDot(ref findData)
+                       && DosMatcher.MatchPattern(expr, findData.FileName, ignoreCase: true);
+               },
+               DosMatcher.TranslateExpression(expression),
+               recursive);
         }
     }
 }

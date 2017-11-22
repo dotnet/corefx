@@ -96,7 +96,7 @@ namespace System.IO
             if (path == null)
                 return true;
 
-            return !(path.Length > 0 && path[0] == Path.DirectorySeparatorChar);
+            return (path.Length == 0 || path[0] != Path.DirectorySeparatorChar);
         }
     }
 }

@@ -32,7 +32,13 @@ namespace System.IO
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool EqualsOrdinal(ReadOnlySpan<char> first, ReadOnlySpan<char> second, bool ignoreCase = false)
         {
-            return first.Length == second.Length && CompareOrdinal(first, second, ignoreCase) == 0;
+            if (first.Length != second.Length)
+                return false;
+
+            if (!ignoreCase)
+                return first.SequenceEqual(second);
+
+            return CompareOrdinal(first, second, ignoreCase) == 0;
         }
     }
 }

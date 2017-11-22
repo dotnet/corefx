@@ -3,10 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace System.IO
 {
-    internal partial class FindEnumerable<T>
+    internal partial class FindEnumerable<TResult, TState>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe bool GetData()
