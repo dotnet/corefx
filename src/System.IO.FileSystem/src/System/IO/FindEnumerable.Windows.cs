@@ -12,39 +12,56 @@ using System.Threading;
 
 namespace System.IO
 {
-    internal partial class FindEnumerable<T> : IEnumerable<T>
+    internal unsafe partial class FindEnumerable<TResult> : CriticalFinalizerObject, IEnumerable<TResult>, IEnumerator<TResult>
     {
-        private string _directory;
-        private string _originalUserPath;
-        private bool _recursive;
-        private FindTransform<T> _transform;
-        private FindPredicate _predicate;
+        private readonly string _originalFullPath;
+        private readonly string _originalUserPath;
+        private readonly bool _recursive;
+        private readonly FindTransform<TResult> _transform;
+        private readonly FindPredicate _predicate;
+        private readonly int _threadId;
+        private int _state;
+
+        private Interop.NtDll.FILE_FULL_DIR_INFORMATION* _info;
+        private byte[] _buffer;
+        private IntPtr _directoryHandle;
+        private string _currentPath;
+        private bool _lastEntryFound;
+        private Queue<(IntPtr Handle, string Path)> _pending;
+        private GCHandle _pinnedBuffer;
 
         /// <summary>
-        /// Encapsulates a find operation. Will strip trailing separator as FindFile will not take it.
+        /// Encapsulates a find operation.
         /// </summary>
         /// <param name="directory">The directory to search in.</param>
-        /// <param name="expression">
-        /// The filter. Can contain wildcards, full details can be found at
-        /// <a href="https://msdn.microsoft.com/en-us/library/ff469270.aspx">[MS-FSA] 2.1.4.4 Algorithm for Determining if a FileName Is in an Expression</a>.
-        /// </param>
-        /// <param name="getAlternateName">Returns the alternate (short) file name in the FindResult.AlternateName field if it exists.</param>
         public FindEnumerable(
             string directory,
-            bool recursive = false,
-            FindTransform<T> transform = null,
-            FindPredicate predicate = null)
+            FindTransform<TResult> transform,
+            FindPredicate predicate,
+            bool recursive = false)
         {
             _originalUserPath = directory;
-            _directory = Path.GetFullPath(directory);
+            _originalFullPath = Path.GetFullPath(directory);
             _recursive = recursive;
             _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
             _transform = transform ?? throw new ArgumentNullException(nameof(transform));
+            _threadId = Environment.CurrentManagedThreadId;
         }
 
-        public IEnumerator<T> GetEnumerator() => new FindEnumerator(CreateDirectoryHandle(_directory), this);
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        private FindEnumerable(
+            string originalUserPath,
+            string originalFullPath,
+            FindTransform<TResult> transform,
+            FindPredicate predicate,
+            bool recursive)
+        {
+            _originalUserPath = originalUserPath;
+            _originalFullPath = originalFullPath;
+            _predicate = predicate;
+            _transform = transform;
+            _recursive = recursive;
+            _threadId = Environment.CurrentManagedThreadId;
+        }
 
         /// <summary>
         /// Simple wrapper to allow creating a file handle for an existing directory.
@@ -71,137 +88,138 @@ namespace System.IO
             return handle;
         }
 
-        private unsafe partial class FindEnumerator : CriticalFinalizerObject, IEnumerator<T>
+        public IEnumerator<TResult> GetEnumerator()
         {
-            private Interop.NtDll.FILE_FULL_DIR_INFORMATION* _info;
-            private byte[] _buffer;
-            private IntPtr _directoryHandle;
-            private string _currentPath;
-            private string _originalUserPath;
-            private string _originalPath;
-            private bool _lastEntryFound;
-            private Queue<(IntPtr Handle, string Path)> _pending;
-            private FindTransform<T> _transform;
-            private FindPredicate _predicate;
-            private GCHandle _pinnedBuffer;
-
-            public FindEnumerator(IntPtr directoryHandle, FindEnumerable<T> findEnumerable)
+            if (Interlocked.Exchange(ref _state, 1) == 0 && _threadId == Environment.CurrentManagedThreadId)
             {
-                // Set the handle first to ensure we always dispose of it
-                _directoryHandle = directoryHandle;
-                _currentPath = findEnumerable._directory;
-                _originalPath = _currentPath;
-                _originalUserPath = findEnumerable._originalUserPath;
-                _buffer = ArrayPool<byte>.Shared.Rent(4096);
-                _pinnedBuffer = GCHandle.Alloc(_buffer, GCHandleType.Pinned);
-                _transform = findEnumerable._transform;
-                _predicate = findEnumerable._predicate;
-                if (findEnumerable._recursive)
-                    _pending = new Queue<(IntPtr, string)>();
+                InitEnumeration();
+                return this;
             }
 
-            public T Current
+            FindEnumerable<TResult> clone = new FindEnumerable<TResult>(_originalUserPath, _originalFullPath, _transform, _predicate, _recursive);
+            clone.InitEnumeration();
+            return clone;
+        }
+
+        private void InitEnumeration()
+        {
+            // We want to delay creating any handles until the enumerator is actually created to
+            // avoid keeping handles open any longer than needed. Once we actually start enumerating
+            // it's fair game to stash handles until we've finished processing the given directory.
+
+            _directoryHandle = CreateDirectoryHandle(_originalFullPath);
+            _currentPath = _originalFullPath;
+            _buffer = ArrayPool<byte>.Shared.Rent(4096);
+            _pinnedBuffer = GCHandle.Alloc(_buffer, GCHandleType.Pinned);
+            if (_recursive)
+                _pending = new Queue<(IntPtr, string)>();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public TResult Current
+        {
+            get
             {
-                get
-                {
-                    RawFindData findData = new RawFindData(_info, _currentPath, _originalPath, _originalUserPath);
-                    return _transform(ref findData);
-                }
+                RawFindData findData = new RawFindData(_info, _currentPath, _originalFullPath, _originalUserPath);
+                return _transform(ref findData);
             }
+        }
 
-            object IEnumerator.Current => Current;
+        object IEnumerator.Current => Current;
 
-            public bool MoveNext()
+        public bool MoveNext()
+        {
+            if (_lastEntryFound)
+                return false;
+
+            RawFindData findData = default;
+            do
             {
-                if (_lastEntryFound)
-                    return false;
-
-                RawFindData findData = default;
-                do
+                FindNextFile();
+                if (!_lastEntryFound && _info != null)
                 {
-                    FindNextFile();
-                    if (!_lastEntryFound && _info != null)
+                    // If needed, stash any subdirectories to process later
+                    if (_pending != null && (_info->FileAttributes & FileAttributes.Directory) != 0
+                        && !PathHelpers.IsDotOrDotDot(_info->FileName))
                     {
-                        // If needed, stash any subdirectories to process later
-                        if (_pending != null && (_info->FileAttributes & FileAttributes.Directory) != 0
-                            && !PathHelpers.IsDotOrDotDot(_info->FileName))
-                        {
-                            string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _info->FileName);
-                            _pending.Enqueue((CreateDirectoryHandle(subDirectory), subDirectory));
-                        }
-
-                        findData = new RawFindData(_info, _currentPath, _originalPath, _originalUserPath);
+                        string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _info->FileName);
+                        _pending.Enqueue((CreateDirectoryHandle(subDirectory), subDirectory));
                     }
-                } while (!_lastEntryFound && !_predicate(ref findData));
 
-                return !_lastEntryFound;
-            }
-
-            private unsafe void FindNextFile()
-            {
-                Interop.NtDll.FILE_FULL_DIR_INFORMATION* info = _info;
-                if (info != null && info->NextEntryOffset != 0)
-                {
-                    // We're already in a buffer and have another entry
-                    _info = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)((byte*)info + info->NextEntryOffset);
-                    return;
+                    findData = new RawFindData(_info, _currentPath, _originalFullPath, _originalUserPath);
                 }
+            } while (!_lastEntryFound && !_predicate(ref findData));
 
-                // We need more data
-                if (GetData())
-                    _info = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)_pinnedBuffer.AddrOfPinnedObject();
+            return !_lastEntryFound;
+        }
+
+        private unsafe void FindNextFile()
+        {
+            Interop.NtDll.FILE_FULL_DIR_INFORMATION* info = _info;
+            if (info != null && info->NextEntryOffset != 0)
+            {
+                // We're already in a buffer and have another entry
+                _info = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)((byte*)info + info->NextEntryOffset);
+                return;
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void NoMoreFiles()
+            // We need more data
+            if (GetData())
+                _info = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)_pinnedBuffer.AddrOfPinnedObject();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void NoMoreFiles()
+        {
+            _info = null;
+            if (_pending == null || _pending.Count == 0)
             {
-                _info = null;
-                if (_pending == null || _pending.Count == 0)
-                {
-                    _lastEntryFound = true;
-                }
-                else
-                {
-                    // Grab the next directory to parse
-                    var next = _pending.Dequeue();
-                    Interop.Kernel32.CloseHandle(_directoryHandle);
-                    _directoryHandle = next.Handle;
-                    _currentPath = next.Path;
-                    FindNextFile();
-                }
+                _lastEntryFound = true;
             }
-
-            public void Reset()
+            else
             {
-                throw new NotSupportedException();
-            }
-
-            public void Dispose()
-            {
-                Dispose(disposing: true);
-                GC.SuppressFinalize(this);
-            }
-
-            protected void Dispose(bool disposing)
-            {
-                byte[] buffer = Interlocked.Exchange(ref _buffer, null);
-                if (buffer != null)
-                    ArrayPool<byte>.Shared.Return(buffer);
-
-                var queue = Interlocked.Exchange(ref _pending, null);
-                if (queue != null)
-                {
-                    while (queue.Count > 0)
-                        Interop.Kernel32.CloseHandle(queue.Dequeue().Handle);
-                }
-
+                // Grab the next directory to parse
+                (IntPtr Handle, string Path) next = _pending.Dequeue();
                 Interop.Kernel32.CloseHandle(_directoryHandle);
+                _directoryHandle = next.Handle;
+                _currentPath = next.Path;
+                FindNextFile();
+            }
+        }
+
+        public void Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected void Dispose(bool disposing)
+        {
+            byte[] buffer = Interlocked.Exchange(ref _buffer, null);
+            if (buffer != null)
+            {
+                _pinnedBuffer.Free();
+                Interop.Kernel32.CloseHandle(_directoryHandle);
+                ArrayPool<byte>.Shared.Return(buffer);
             }
 
-            ~FindEnumerator()
+            Queue<(IntPtr Handle, string Path)> queue = Interlocked.Exchange(ref _pending, null);
+            if (queue != null)
             {
-                Dispose(disposing: false);
+                while (queue.Count > 0)
+                    Interop.Kernel32.CloseHandle(queue.Dequeue().Handle);
             }
+        }
+
+        ~FindEnumerable()
+        {
+            Dispose(disposing: false);
         }
     }
 }

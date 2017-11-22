@@ -27,34 +27,32 @@ namespace System.IO
 
             StringBuilder sb = StringBuilderCache.Acquire(expression.Length);
             int length = expression.Length;
-            fixed (char* c = expression)
+            for (int i = 0; i < length; i++)
             {
-                for (int i = 0; i < length; i++)
+                char c = expression[i];
+                switch (c)
                 {
-                    switch (c[i])
-                    {
-                        case '.':
-                            if (i > 1 && i == length - 1 && c[i - 1] == '*')
-                            {
-                                sb.Length--;
-                                sb.Append('<'); // DOS_STAR (ends in *.)
-                            }
-                            else if (i < length - 1 && (c[i + 1] == '?' || c[i + 1] == '*'))
-                            {
-                                sb.Append('\"'); // DOS_DOT
-                            }
-                            else
-                            {
-                                sb.Append('.');
-                            }
-                            break;
-                        case '?':
-                            sb.Append('>'); // DOS_QM
-                            break;
-                        default:
-                            sb.Append(c[i]);
-                            break;
-                    }
+                    case '.':
+                        if (i > 1 && i == length - 1 && expression[i - 1] == '*')
+                        {
+                            sb.Length--;
+                            sb.Append('<'); // DOS_STAR (ends in *.)
+                        }
+                        else if (i < length - 1 && (expression[i + 1] == '?' || expression[i + 1] == '*'))
+                        {
+                            sb.Append('\"'); // DOS_DOT
+                        }
+                        else
+                        {
+                            sb.Append('.');
+                        }
+                        break;
+                    case '?':
+                        sb.Append('>'); // DOS_QM
+                        break;
+                    default:
+                        sb.Append(c);
+                        break;
                 }
             }
 
@@ -76,8 +74,6 @@ namespace System.IO
         /// </remarks>
         public unsafe static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
         {
-            string debug = new string(name);
-
             // The idea behind the algorithm is pretty simple. We keep track of all possible locations
             // in the regular expression that are matching the name. When the name has been exhausted,
             // if one of the locations in the expression is also just exhausted, the name is in the
@@ -94,7 +90,7 @@ namespace System.IO
 
                 if (expression.IndexOfAny(s_wildcardChars, startIndex: 1) == -1)
                 {
-                    // Handle the special case of a single  starting *, which essentially means "ends with"
+                    // Handle the special case of a single starting *, which essentially means "ends with"
 
                     // If the name doesn't have enough characters to match the remaining expression, it can't be a match.
                     if (name.Length < expression.Length - 1)
@@ -104,8 +100,6 @@ namespace System.IO
                     return name.EndsWithOrdinal(expression.AsReadOnlySpan().Slice(1), ignoreCase);
                 }
             }
-
-            Span<int> temp;
 
             int nameOffset = 0;
             int expressionOffset;
@@ -118,10 +112,9 @@ namespace System.IO
             char nameChar = '\0';
             char expressionChar;
 
-            int* priorStack = stackalloc int[16];
-            int* currentStack = stackalloc int[16];
-            Span<int> priorMatches = new Span<int>(priorStack, 16);
-            Span<int> currentMatches = new Span<int>(currentStack, 16);
+            Span<int> temp = stackalloc int[0];
+            Span<int> priorMatches = stackalloc int[16];
+            Span<int> currentMatches = stackalloc int[16];
 
             int maxState = expression.Length * 2;
             int currentState;

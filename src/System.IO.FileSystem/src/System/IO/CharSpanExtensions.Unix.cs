@@ -13,7 +13,7 @@ namespace System.IO
             if (first.Length != second.Length)
                 return false;
 
-            if (ignoreCase == true)
+            if (!ignoreCase)
                 return first.SequenceEqual(second);
 
             fixed (char* fp = &first.DangerousGetPinnableReference())

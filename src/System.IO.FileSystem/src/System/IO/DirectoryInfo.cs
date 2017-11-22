@@ -25,14 +25,18 @@ namespace System.IO
 
         private void Init(string originalPath, string fullPath = null, string fileName = null, bool isNormalized = false)
         {
-            Debug.Assert(!isNormalized || !PathInternal.IsPartiallyQualified(fullPath ?? originalPath), "should be fully qualified if normalized");
-
             // Want to throw the original argument name
             OriginalPath = originalPath ?? throw new ArgumentNullException("path");
-            FullPath = isNormalized ? fullPath ?? originalPath : Path.GetFullPath(fullPath ?? originalPath);
-            _name = fileName ?? (PathHelpers.IsRoot(FullPath) ?
-                    FullPath :
-                    Path.GetFileName(PathHelpers.TrimEndingDirectorySeparator(FullPath)));
+
+            fullPath = fullPath ?? originalPath;
+            Debug.Assert(!isNormalized || !PathInternal.IsPartiallyQualified(fullPath), "should be fully qualified if normalized");
+            fullPath = isNormalized ? fullPath : Path.GetFullPath(fullPath);
+
+            _name = fileName ?? (PathHelpers.IsRoot(fullPath) ?
+                    fullPath :
+                    Path.GetFileName(PathHelpers.TrimEndingDirectorySeparator(fullPath)));
+
+            FullPath = fullPath;
             DisplayPath = PathHelpers.ShouldReviseDirectoryPathToCurrent(originalPath) ? "." : originalPath;
         }
 

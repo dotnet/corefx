@@ -10,7 +10,7 @@ namespace System.IO
         {
             if (value.Length == 0)
                 return true;
-            else if (span.Length == 0 || value.Length > span.Length)
+            else if (value.Length > span.Length)
                 return false;
 
             if (span.Length != value.Length)

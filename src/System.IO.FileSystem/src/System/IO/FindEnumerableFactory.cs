@@ -46,7 +46,7 @@ namespace System.IO
                     && DosMatcher.MatchPattern(expression, findData.FileName, ignoreCase: true);
             }
 
-            return new FindEnumerable<string>(directory, recursive, FindTransforms.AsUserFullPath, predicate);
+            return new FindEnumerable<string>(directory, FindTransforms.AsUserFullPath, predicate, recursive);
         }
 
         internal static FindEnumerable<string> UserDirectories(string directory,
@@ -62,7 +62,7 @@ namespace System.IO
                     && DosMatcher.MatchPattern(expression, findData.FileName, ignoreCase: true);
             }
 
-            return new FindEnumerable<string>(directory, recursive, FindTransforms.AsUserFullPath, predicate);
+            return new FindEnumerable<string>(directory, FindTransforms.AsUserFullPath, predicate, recursive);
         }
 
         internal static FindEnumerable<string> UserEntries(string directory,
@@ -77,7 +77,7 @@ namespace System.IO
                     && DosMatcher.MatchPattern(expression, findData.FileName, ignoreCase: true);
             }
 
-            return new FindEnumerable<string>(directory, recursive, FindTransforms.AsUserFullPath, predicate);
+            return new FindEnumerable<string>(directory, FindTransforms.AsUserFullPath, predicate, recursive);
         }
 
         internal static FindEnumerable<FileInfo> FileInfos(
@@ -94,7 +94,7 @@ namespace System.IO
                     && DosMatcher.MatchPattern(expression, findData.FileName, ignoreCase: true);
             }
 
-            return new FindEnumerable<FileInfo>(directory, recursive, FindTransforms.AsFileInfo, predicate);
+            return new FindEnumerable<FileInfo>(directory, FindTransforms.AsFileInfo, predicate, recursive);
         }
 
         internal static FindEnumerable<DirectoryInfo> DirectoryInfos(
@@ -111,7 +111,7 @@ namespace System.IO
                     && DosMatcher.MatchPattern(expression, findData.FileName, ignoreCase: true);
             }
 
-            return new FindEnumerable<DirectoryInfo>(directory, recursive, FindTransforms.AsDirectoryInfo, predicate);
+            return new FindEnumerable<DirectoryInfo>(directory, FindTransforms.AsDirectoryInfo, predicate, recursive);
         }
 
         internal static FindEnumerable<FileSystemInfo> FileSystemInfos(
@@ -127,7 +127,7 @@ namespace System.IO
                     && DosMatcher.MatchPattern(expression, findData.FileName, ignoreCase: true);
             }
 
-            return new FindEnumerable<FileSystemInfo>(directory, recursive, FindTransforms.AsFileSystemInfo, predicate);
+            return new FindEnumerable<FileSystemInfo>(directory, FindTransforms.AsFileSystemInfo, predicate, recursive);
         }
     }
 }

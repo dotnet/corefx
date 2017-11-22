@@ -56,8 +56,7 @@ namespace System.IO
             if (second.Length == 0)
                 return first;
 
-            string result = CombineNoChecksInternal(first.AsReadOnlySpan(), second);
-            return result;
+            return CombineNoChecksInternal(first.AsReadOnlySpan(), second);
         }
 
         /// <summary>
@@ -74,8 +73,7 @@ namespace System.IO
             if (second.Length == 0)
                 return new string(first);
 
-            string result = CombineNoChecksInternal(first, second);
-            return result;
+            return CombineNoChecksInternal(first, second);
         }
 
         /// <summary>
@@ -108,8 +106,7 @@ namespace System.IO
             if (string.IsNullOrEmpty(second))
                 return first;
 
-            string result = CombineNoChecksInternal(first.AsReadOnlySpan(), second.AsReadOnlySpan());
-            return result;
+            return CombineNoChecksInternal(first.AsReadOnlySpan(), second.AsReadOnlySpan());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

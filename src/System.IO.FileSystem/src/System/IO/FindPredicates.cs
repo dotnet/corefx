@@ -12,7 +12,7 @@ namespace System.IO
         {
             FileAttributes attributes = findData.Attributes;
             return attributes != (FileAttributes)(-1)
-                && (findData.Attributes & FileAttributes.Directory) != 0;
+                && (attributes & FileAttributes.Directory) != 0;
         }
     }
 }
