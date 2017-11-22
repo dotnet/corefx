@@ -89,9 +89,6 @@
     <Compile Include="System\ComponentModel\Composition\Diagnostics\SilverlightTraceWriter.cs" />
     <Compile Include="System\ComponentModel\Composition\Diagnostics\TraceSourceTraceWriter.cs" />
     <Compile Include="System\ComponentModel\Composition\Diagnostics\TraceWriter.cs" />
-    <Compile Include="System\ComponentModel\Composition\Hosting\AdaptingCompositionContainer.cs" />
-    <Compile Include="System\ComponentModel\Composition\Hosting\AdaptingExportProvider.AdapterDefinition.cs" />
-    <Compile Include="System\ComponentModel\Composition\Hosting\AdaptingExportProvider.cs" />
     <Compile Include="System\ComponentModel\Composition\Hosting\AggregateCatalog.cs" />
     <Compile Include="System\ComponentModel\Composition\Hosting\AggregateExportProvider.cs" />
     <Compile Include="System\ComponentModel\Composition\Hosting\ApplicationCatalog.cs" />
@@ -190,7 +187,6 @@
     <Compile Include="System\ComponentModel\Composition\ReflectionModel\ReflectionProperty.cs" />
     <Compile Include="System\ComponentModel\Composition\ReflectionModel\ReflectionType.cs" />
     <Compile Include="System\ComponentModel\Composition\ReflectionModel\ReflectionWritableMember.cs" />
-    <Compile Include="System\Strings.Designer.cs" />
     <Compile Include="$(CommonPath)\Microsoft\Internal\Assumes.cs">
       <Link>Microsoft\Internal\Assumes.cs</Link>
     </Compile>
@@ -236,9 +232,6 @@
     <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Text.Encoding.Extensions" />
     <Reference Include="System.Security.Permissions" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="System\Strings.resx" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
