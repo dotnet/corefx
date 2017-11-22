@@ -9,8 +9,6 @@ namespace Microsoft.Win32.SafeHandles
 {
     internal sealed class SafeDirectoryHandle : SafeHandle
     {
-        internal int ReadDirCounter;
-
         private SafeDirectoryHandle() : base(IntPtr.Zero, true)
         {
         }

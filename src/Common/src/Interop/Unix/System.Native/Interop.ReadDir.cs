@@ -63,12 +63,7 @@ internal static partial class Interop
                 // - If the platform does not support reading into a buffer, the information returned in
                 // InternalDirectoryEntry points to native memory owned by the SafeDirectoryHandle.
                 // We extend the reference until we have copied all data from that native memory to ensure
-                // it does not become invalid by a CloseDir; or by a concurrent ReadDir call.
-                int readerCount = Interlocked.Increment(ref dir.ReadDirCounter);
-                if (readerCount != 1)
-                {
-                    ThrowConcurrentReadNotSupported();
-                }
+                // it does not become invalid by a CloseDir.
                 dir.DangerousAddRef(ref addedRef);
 
                 unsafe
@@ -90,7 +85,6 @@ internal static partial class Interop
                 {
                     dir.DangerousRelease();
                 }
-                Interlocked.Decrement(ref dir.ReadDirCounter);
             }
         }
 
@@ -100,11 +94,6 @@ internal static partial class Interop
                 return Marshal.PtrToStringAnsi(dirEnt.Name);
             else
                 return Marshal.PtrToStringAnsi(dirEnt.Name, dirEnt.NameLength);
-        }
-
-        private static void ThrowConcurrentReadNotSupported()
-        {
-            throw new NotSupportedException("Concurrent directory enumeration is not supported.");
         }
     }
 }
