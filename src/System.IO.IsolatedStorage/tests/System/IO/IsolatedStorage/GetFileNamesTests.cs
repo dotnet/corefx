@@ -53,6 +53,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
+        [ActiveIssue(25428, TestPlatforms.AnyUnix)]
         public void GetFileNames_RaisesInvalidPath()
         {
             // We are no longer as agressive with filters for enumerating files
