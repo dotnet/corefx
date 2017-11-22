@@ -17,7 +17,7 @@ namespace System.IO
         {
             if (_temporaryDirectory == null)
             {
-#if FEATURE_FILEIO
+#if  FEATURE_FILEIO
                 string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, RootTemporaryDirectoryName);
 #else
                 string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), RootTemporaryDirectoryName);

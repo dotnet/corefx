@@ -176,7 +176,7 @@ namespace System.ComponentModel.Composition
             yield return new ReadOnlyDictionary<string, object>(new Dictionary<string, object>(0));
             yield return new Dictionary<string, object>();
 
-#if FEATURE_ADVANCEDCOLLECTIONS
+#if  FEATURE_ADVANCEDCOLLECTIONS
 
             yield return new SortedDictionary<string, object>();
             yield return new SortedList<string, object>();

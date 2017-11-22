@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Factories;
 using Xunit;
-#if MEF_FEATURE_REGISTRATION
+#if  MEF_FEATURE_REGISTRATION
 using System.ComponentModel.Composition.Registration;
 #endif //MEF_FEATURE_REGISTRATION
 namespace System.ComponentModel.Composition
