@@ -11,14 +11,14 @@ internal partial class Interop
     internal partial class Kernel32
     {
         [DllImport(Libraries.Kernel32, EntryPoint = "CreateFile2", SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
-        internal unsafe static extern SafeFileHandle CreateFile2(
+        internal unsafe static extern IntPtr CreateFile2(
             string lpFileName,
             int dwDesiredAccess,
             System.IO.FileShare dwShareMode,
             System.IO.FileMode dwCreationDisposition,
             [In] ref CREATEFILE2_EXTENDED_PARAMETERS parameters);
 
-        private static unsafe SafeFileHandle CreateFile(
+        private static unsafe IntPtr CreateFile(
             string lpFileName,
             int dwDesiredAccess,
             System.IO.FileShare dwShareMode,
@@ -36,7 +36,7 @@ internal partial class Interop
 
             parameters.hTemplateFile = hTemplateFile;
             parameters.lpSecurityAttributes = securityAttrs;
-            
+
             return CreateFile2(lpFileName, dwDesiredAccess, dwShareMode, dwCreationDisposition, ref parameters);
         }
 
@@ -51,11 +51,25 @@ internal partial class Interop
         {
             fixed (SECURITY_ATTRIBUTES* lpSecurityAttributes = &securityAttrs)
             {
-                return CreateFile(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+                return new SafeFileHandle(
+                    CreateFile(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile),
+                    ownsHandle: true);
             }
         }
 
         internal static unsafe SafeFileHandle CreateFile(
+            string lpFileName,
+            int dwDesiredAccess,
+            System.IO.FileShare dwShareMode,
+            System.IO.FileMode dwCreationDisposition,
+            int dwFlagsAndAttributes)
+        {
+            return new SafeFileHandle(
+                CreateFile(lpFileName, dwDesiredAccess, dwShareMode, null, dwCreationDisposition, dwFlagsAndAttributes, IntPtr.Zero),
+                ownsHandle: true);
+        }
+
+        internal unsafe static IntPtr CreateFile_IntPtr(
             string lpFileName,
             int dwDesiredAccess,
             System.IO.FileShare dwShareMode,

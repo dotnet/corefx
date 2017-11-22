@@ -42,31 +42,5 @@ internal partial class Interop
             internal long ChangeTime;
             internal uint FileAttributes;
         }
-
-        internal enum FILE_INFO_BY_HANDLE_CLASS : uint
-        {
-            FileBasicInfo = 0x0u,
-            FileStandardInfo = 0x1u,
-            FileNameInfo = 0x2u,
-            FileRenameInfo = 0x3u,
-            FileDispositionInfo = 0x4u,
-            FileAllocationInfo = 0x5u,
-            FileEndOfFileInfo = 0x6u,
-            FileStreamInfo = 0x7u,
-            FileCompressionInfo = 0x8u,
-            FileAttributeTagInfo = 0x9u,
-            FileIdBothDirectoryInfo = 0xAu,
-            FileIdBothDirectoryRestartInfo = 0xBu,
-            FileIoPriorityHintInfo = 0xCu,
-            FileRemoteProtocolInfo = 0xDu,
-            FileFullDirectoryInfo = 0xEu,
-            FileFullDirectoryRestartInfo = 0xFu,
-            FileStorageInfo = 0x10u,
-            FileAlignmentInfo = 0x11u,
-            FileIdInfo = 0x12u,
-            FileIdExtdDirectoryInfo = 0x13u,
-            FileIdExtdDirectoryRestartInfo = 0x14u,
-            MaximumFileInfoByHandleClass = 0x15u,
-        }
     }
 }

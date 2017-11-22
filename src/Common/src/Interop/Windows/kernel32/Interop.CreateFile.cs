@@ -15,7 +15,7 @@ internal partial class Interop
         /// WARNING: The private methods do not implicitly handle long paths. Use CreateFile.
         /// </summary>
         [DllImport(Libraries.Kernel32, EntryPoint = "CreateFileW", SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false, ExactSpelling = true)]
-        private unsafe static extern SafeFileHandle CreateFilePrivate(
+        private unsafe static extern IntPtr CreateFilePrivate(
             string lpFileName,
             int dwDesiredAccess,
             FileShare dwShareMode,
@@ -36,11 +36,25 @@ internal partial class Interop
             lpFileName = PathInternal.EnsureExtendedPrefixOverMaxPath(lpFileName);
             fixed (SECURITY_ATTRIBUTES* sa = &securityAttrs)
             {
-                return CreateFilePrivate(lpFileName, dwDesiredAccess, dwShareMode, sa, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+                return new SafeFileHandle(
+                    CreateFilePrivate(lpFileName, dwDesiredAccess, dwShareMode, sa, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile),
+                    ownsHandle: true);
             }
         }
 
         internal unsafe static SafeFileHandle CreateFile(
+            string lpFileName,
+            int dwDesiredAccess,
+            FileShare dwShareMode,
+            FileMode dwCreationDisposition,
+            int dwFlagsAndAttributes)
+        {
+            return new SafeFileHandle(
+                CreateFile_IntPtr(lpFileName, dwDesiredAccess, dwShareMode, dwCreationDisposition, dwFlagsAndAttributes),
+                ownsHandle: true);
+        }
+
+        internal unsafe static IntPtr CreateFile_IntPtr(
             string lpFileName,
             int dwDesiredAccess,
             FileShare dwShareMode,

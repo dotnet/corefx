@@ -55,9 +55,10 @@ namespace System.IO.IsolatedStorage
         [Fact]
         public void GetFileNames_RaisesInvalidPath()
         {
+            // We are no longer as agressive with filters for enumerating files
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.GetFileNames("\0bad"));
+                isf.GetFileNames("\0bad");
             }
         }
 

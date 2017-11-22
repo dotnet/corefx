@@ -191,7 +191,7 @@ namespace System.IO.Tests
         [Fact]
         public void SearchPatternIgnoreSubDirectories()
         {
-            //Shouldn't get files on full path by default
+            // Shouldn't get files on full path by default
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             Directory.CreateDirectory(Path.Combine(testDir.FullName, GetTestFileName()));
             using (File.Create(Path.Combine(testDir.FullName, GetTestFileName())))
@@ -607,24 +607,21 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsSearchPatternLongSegment()
         {
             // Create a path segment longer than the normal max of 255
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             string longName = new string('k', 257);
-            
-            // Long path segment in search pattern throws PathTooLongException on Desktop,
-            // otherwise it is an IOException.
+
+            // Long path segment in search pattern throws PathTooLongException on Desktop
             if (PlatformDetection.IsFullFramework)
             {
                 Assert.Throws<PathTooLongException>(() => GetEntries(testDir.FullName, longName));
             }
             else
             {
-                var exception = Assert.Throws<IOException>(() => GetEntries(testDir.FullName, longName));
-                // Should be Interop.Errors.ERROR_INVALID_PARAMETER converted to a HResult
-                Assert.Equal(unchecked((int)0x80070057), exception.HResult);
+                GetEntries(testDir.FullName, longName);
             }
         }
 
@@ -652,11 +649,23 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Search pattern with double dots throws ArgumentException
-        public void WindowsSearchPatternWithDoubleDots()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void WindowsSearchPatternWithDoubleDots_Desktop()
         {
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "abc..")));
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, ".."));
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, @".." + Path.DirectorySeparatorChar));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Search pattern with double dots throws ArgumentException
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void WindowsSearchPatternWithDoubleDots_Core()
+        {
+            string directory = Directory.CreateDirectory(GetTestFilePath()).FullName;
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(directory, Path.Combine("..ab ab.. .. abc..d", "abc..")));
+            GetEntries(directory, "..");
+            GetEntries(directory, @".." + Path.DirectorySeparatorChar);
         }
 
         private static char[] OldWildcards = new char[] { '*', '?' };
@@ -664,7 +673,8 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid search patterns throw
-        public void WindowsSearchPatternInvalid()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void WindowsSearchPatternInvalid_Desktop()
         {
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, "\0"));
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, "|"));
@@ -695,6 +705,29 @@ namespace System.IO.Tests
                         break;
                     default:
                         Assert.Throws<ArgumentException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString())));
+                        break;
+                }
+            });
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void WindowsSearchPatternInvalid_Core()
+        {
+            GetEntries(TestDirectory, "\0");
+            GetEntries(TestDirectory, "|");
+
+            Assert.All(Path.GetInvalidFileNameChars().Except(OldWildcards).Except(NewWildcards), invalidChar =>
+            {
+                switch (invalidChar)
+                {
+                    case '\\':
+                    case '/':
+                        Assert.Throws<DirectoryNotFoundException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString())));
+                        break;
+                    default:
+                        GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
                         break;
                 }
             });
