@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0"?>
 <rss version="2.0">
-  <channel customAttribute="customAtt">
+  <channel xml:base="ChannelBase" customAttribute="customAtt">
     <title>FeedTitle</title>
     <link>FeedLink</link>
     <description>FeedDescription</description>
@@ -12,6 +12,9 @@
     <category>FeedCategory</category>
     <copyright>FeedCopyright</copyright>
     <ttl>60</ttl>
+    <image>
+      <url>ImageUrl</url>
+    </image>
     <item>
       <title>ItemTitle</title>
       <link>ItemLink</link>

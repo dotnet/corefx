@@ -18,6 +18,6 @@
     <title type="text">SyndicationFeed released for .net Core</title>
     <updated>2017-06-26T21:41:43Z</updated>
     <link rel="alternate" href="EntryLinkHref" />
-    <content type="text">A lot of text describing the release of .net core feature</content>
+    <content src="EntryContentSrc" />
   </entry>
 </feed>

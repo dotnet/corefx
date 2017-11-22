@@ -728,7 +728,7 @@ namespace System.ServiceModel.Syndication
 
             if (!string.IsNullOrEmpty(src))
             {
-                result = new UrlSyndicationContent(new Uri(src, UriKind.RelativeOrAbsolute), type);
+                result = new UrlSyndicationContent(UriParser(src, UriKind.RelativeOrAbsolute, Atom10Constants.ContentTag, Atom10Constants.Atom10Namespace), type);
                 bool isEmpty = reader.IsEmptyElement;
                 if (reader.HasAttributes)
                 {
@@ -1081,7 +1081,7 @@ namespace System.ServiceModel.Syndication
             link.MediaType = mediaType;
             link.RelationshipType = relationship;
             link.Title = title;
-            link.Uri = (val != null) ? UriParser(val, UriKind.RelativeOrAbsolute, Atom10Constants.LinkTag, string.Empty) : null;
+            link.Uri = (val != null) ? UriParser(val, UriKind.RelativeOrAbsolute, Atom10Constants.LinkTag, Atom10Constants.Atom10Namespace) : null;
         }
 
         private SyndicationLink ReadLinkFrom(XmlReader reader, SyndicationFeed feed)

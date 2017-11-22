@@ -302,10 +302,8 @@ namespace System.ServiceModel.Syndication
                 }
             }
 
-            string localName = reader.LocalName;
-            string namespaceUri = reader.NamespaceURI;
             string uri = reader.ReadElementString();
-            link.Uri = UriParser(uri, UriKind.RelativeOrAbsolute, localName, namespaceUri);
+            link.Uri = UriParser(uri, UriKind.RelativeOrAbsolute, Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace);
             return link;
         }
 
@@ -408,6 +406,8 @@ namespace System.ServiceModel.Syndication
                 if (!isEmpty)
                 {
                     string fallbackAlternateLink = null;
+                    string fallbackAlternateLinkLocalName = null;
+                    string fallbackAlternateLinkNamespace = null;
                     XmlDictionaryWriter extWriter = null;
                     bool readAlternateLink = false;
                     try
@@ -453,6 +453,8 @@ namespace System.ServiceModel.Syndication
                                 if (isPermalink)
                                 {
                                     fallbackAlternateLink = result.Id;
+                                    fallbackAlternateLinkLocalName = Rss20Constants.GuidTag;
+                                    fallbackAlternateLinkNamespace = Rss20Constants.Rss20Namespace;
                                 }
                             }
                             else if (reader.IsStartElement(Rss20Constants.PubDateTag, Rss20Constants.Rss20Namespace))
@@ -545,7 +547,7 @@ namespace System.ServiceModel.Syndication
                     reader.ReadEndElement(); // item
                     if (!readAlternateLink && fallbackAlternateLink != null)
                     {
-                        result.Links.Add(SyndicationLink.CreateAlternateLink(new Uri(fallbackAlternateLink, UriKind.RelativeOrAbsolute)));
+                        result.Links.Add(SyndicationLink.CreateAlternateLink(UriParser(fallbackAlternateLink, UriKind.RelativeOrAbsolute, fallbackAlternateLinkLocalName, fallbackAlternateLinkNamespace)));
                         readAlternateLink = true;
                     }
 
@@ -591,7 +593,7 @@ namespace System.ServiceModel.Syndication
                     string val = reader.Value;
                     if (name == Rss20Constants.UrlTag && ns == Rss20Constants.Rss20Namespace)
                     {
-                        link.Uri = UriParser(val, UriKind.RelativeOrAbsolute, Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace);
+                        link.Uri = UriParser(val, UriKind.RelativeOrAbsolute, Rss20Constants.EnclosureTag, Rss20Constants.Rss20Namespace);
                     }
                     else if (name == Rss20Constants.TypeTag && ns == Rss20Constants.Rss20Namespace)
                     {
@@ -677,7 +679,11 @@ namespace System.ServiceModel.Syndication
             try
             {
                 string baseUri = null;
+                string baseUriLocalName = null;
+                string baseUriNamespace = null;
                 reader.MoveToContent();
+                string elementLocalName = reader.LocalName;
+                string elementNamespace = reader.NamespaceURI;
                 string version = reader.GetAttribute(Rss20Constants.VersionTag, Rss20Constants.Rss20Namespace);
                 if (version != Rss20Constants.Version)
                 {
@@ -689,10 +695,14 @@ namespace System.ServiceModel.Syndication
                     if (!string.IsNullOrEmpty(tmp))
                     {
                         baseUri = tmp;
+                        baseUriLocalName = elementLocalName;
+                        baseUriNamespace = elementNamespace;
                     }
                 }
                 reader.ReadStartElement();
                 reader.MoveToContent();
+                elementLocalName = reader.LocalName;
+                elementNamespace = reader.NamespaceURI;
                 if (reader.HasAttributes)
                 {
                     while (reader.MoveToNextAttribute())
@@ -702,6 +712,8 @@ namespace System.ServiceModel.Syndication
                         if (name == "base" && ns == Atom10FeedFormatter.XmlNs)
                         {
                             baseUri = reader.Value;
+                            baseUriLocalName = elementLocalName;
+                            baseUriNamespace = elementNamespace;
                             continue;
                         }
                         if (FeedUtils.IsXmlns(name, ns) || FeedUtils.IsXmlSchemaType(name, ns))
@@ -722,10 +734,12 @@ namespace System.ServiceModel.Syndication
                         }
                     }
                 }
+
                 if (!string.IsNullOrEmpty(baseUri))
                 {
-                    result.BaseUri = new Uri(baseUri, UriKind.RelativeOrAbsolute);
+                    result.BaseUri = UriParser(baseUri, UriKind.RelativeOrAbsolute, baseUriLocalName, baseUriNamespace);
                 }
+
                 bool areAllItemsRead = true;
                 reader.ReadStartElement(Rss20Constants.ChannelTag, Rss20Constants.Rss20Namespace);
 
