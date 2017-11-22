@@ -45,7 +45,15 @@ namespace System.ServiceModel.Syndication
         // Different DateTimeParsers are needed for Atom and Rss so can't set inline
         public Func<string, string, string, DateTimeOffset> DateTimeParser { get; set; }
 
-        internal abstract Func<string, string, string, DateTimeOffset> GetDefaultDateTimeParser();
+        internal virtual Func<string, string, string, DateTimeOffset> GetDefaultDateTimeParser()
+        {
+            return NotImplementedDateTimeParser;
+        }
+
+        private DateTimeOffset NotImplementedDateTimeParser(string dtoString, string localName, string ns)
+        {
+            throw new NotImplementedException();
+        }
 
         public abstract string Version
         { get; }

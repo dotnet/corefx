@@ -227,22 +227,22 @@ namespace System.ServiceModel.Syndication
             set { _language = value; }
         }
 
-        internal Exception LastUpdatedTimeError { get; set; }
+        internal Exception LastUpdatedTimeException { get; set; }
 
         public DateTimeOffset LastUpdatedTime
         {
             get
             {
-                if (LastUpdatedTimeError != null)
+                if (LastUpdatedTimeException != null)
                 {
-                    throw LastUpdatedTimeError;
+                    throw LastUpdatedTimeException;
                 }
 
                 return _lastUpdatedTime;
             }
             set
             {
-                LastUpdatedTimeError = null;
+                LastUpdatedTimeException = null;
                 _lastUpdatedTime = value;
             }
         }

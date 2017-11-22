@@ -470,7 +470,7 @@ namespace System.ServiceModel.Syndication
                                         }
                                         catch (XmlException e)
                                         {
-                                            result.PublishDateError = e;
+                                            result.PublishDateException = e;
                                         }
                                     }
                                     reader.ReadEndElement();
@@ -776,7 +776,7 @@ namespace System.ServiceModel.Syndication
                                     }
                                     catch (XmlException e)
                                     {
-                                        result.LastUpdatedTimeError = e;
+                                        result.LastUpdatedTimeException = e;
                                     }
                                 }
                                 reader.ReadEndElement();

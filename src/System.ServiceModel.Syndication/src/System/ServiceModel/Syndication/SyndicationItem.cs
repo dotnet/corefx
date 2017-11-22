@@ -158,22 +158,22 @@ namespace System.ServiceModel.Syndication
             set { _id = value; }
         }
 
-        internal Exception LastUpdatedTimeError { get; set; }
+        internal Exception LastUpdatedTimeException { get; set; }
 
         public DateTimeOffset LastUpdatedTime
         {
             get
             {
-                if (LastUpdatedTimeError != null)
+                if (LastUpdatedTimeException != null)
                 {
-                    throw LastUpdatedTimeError;
+                    throw LastUpdatedTimeException;
                 }
 
                 return _lastUpdatedTime;
             }
             set
             {
-                LastUpdatedTimeError = null;
+                LastUpdatedTimeException = null;
                 _lastUpdatedTime = value;
             }
         }
@@ -190,22 +190,22 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        internal Exception PublishDateError { get; set; }
+        internal Exception PublishDateException { get; set; }
 
         public DateTimeOffset PublishDate
         {
             get
             {
-                if (PublishDateError != null)
+                if (PublishDateException != null)
                 {
-                    throw PublishDateError;
+                    throw PublishDateException;
                 }
 
                 return _publishDate;
             }
             set
             {
-                PublishDateError = null;
+                PublishDateException = null;
                 _publishDate = value;
             }
         }
