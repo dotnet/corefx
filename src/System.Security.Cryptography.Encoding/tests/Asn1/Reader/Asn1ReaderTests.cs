@@ -22,12 +22,5 @@ namespace System.Security.Cryptography.Tests.Asn1
             CER = AsnEncodingRules.CER,
             DER = AsnEncodingRules.DER,
         }
-
-        public enum PublicNamedBitListMode
-        {
-            NamedZeroIsOne = NamedBitListMode.NamedZeroIsOne,
-            NamedZeroIs128LittleEndian = NamedBitListMode.NamedZeroIs128LittleEndian,
-            NamedZeroIs128BigEndian = NamedBitListMode.NamedZeroIs128BigEndian,
-        }
     }
 }

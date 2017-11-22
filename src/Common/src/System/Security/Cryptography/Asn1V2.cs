@@ -65,22 +65,6 @@ namespace System.Security.Cryptography.Asn1
         Duration = 34,
     }
 
-    internal enum NamedBitListMode
-    {
-        /// <summary>
-        /// In <c>BIT STRING { a(0), j(9) }</c> map <c>a | j</c> to the value <c>0x0201</c>
-        /// </summary>
-        NamedZeroIsOne,
-        /// <summary>
-        /// In <c>BIT STRING { a(0), j(9) }</c> map <c>a | j</c> to the value <c>0x4080</c>
-        /// </summary>
-        NamedZeroIs128LittleEndian,
-        /// <summary>
-        /// In <c>BIT STRING { a(0), j(9) }</c> map <c>a | j</c> to the value <c>0x8040</c>
-        /// </summary>
-        NamedZeroIs128BigEndian,
-    }
-
     internal struct Asn1Tag
     {
         private const byte ClassMask = 0b1100_0000;
@@ -1338,20 +1322,20 @@ namespace System.Security.Cryptography.Asn1
             return read;
         }
 
-        public TFlagsEnum GetNamedBitListValue<TFlagsEnum>(NamedBitListMode mode) where TFlagsEnum : struct =>
-            GetNamedBitListValue<TFlagsEnum>(new Asn1Tag(UniversalTagNumber.BitString), mode);
+        public TFlagsEnum GetNamedBitListValue<TFlagsEnum>() where TFlagsEnum : struct =>
+            GetNamedBitListValue<TFlagsEnum>(new Asn1Tag(UniversalTagNumber.BitString));
 
-        public TFlagsEnum GetNamedBitListValue<TFlagsEnum>(Asn1Tag expectedTag, NamedBitListMode mode) where TFlagsEnum : struct
+        public TFlagsEnum GetNamedBitListValue<TFlagsEnum>(Asn1Tag expectedTag) where TFlagsEnum : struct
         {
             Type tFlagsEnum = typeof(TFlagsEnum);
 
-            return (TFlagsEnum)Enum.ToObject(tFlagsEnum, GetNamedBitListValue(expectedTag, tFlagsEnum, mode));
+            return (TFlagsEnum)Enum.ToObject(tFlagsEnum, GetNamedBitListValue(expectedTag, tFlagsEnum));
         }
 
-        public Enum GetNamedBitListValue(Type tFlagsEnum, NamedBitListMode mode) =>
-            GetNamedBitListValue(new Asn1Tag(UniversalTagNumber.BitString), tFlagsEnum, mode);
+        public Enum GetNamedBitListValue(Type tFlagsEnum) =>
+            GetNamedBitListValue(new Asn1Tag(UniversalTagNumber.BitString), tFlagsEnum);
 
-        public Enum GetNamedBitListValue(Asn1Tag expectedTag, Type tFlagsEnum, NamedBitListMode mode)
+        public Enum GetNamedBitListValue(Asn1Tag expectedTag, Type tFlagsEnum)
         {
             // This will throw an ArgumentException if TEnum isn't an enum type,
             // so we don't need to validate it.
@@ -1362,13 +1346,6 @@ namespace System.Security.Cryptography.Asn1
                 throw new ArgumentException(
                     SR.Cryptography_Asn_NamedBitListRequiresFlagsEnum,
                     nameof(tFlagsEnum));
-            }
-
-            if (mode != NamedBitListMode.NamedZeroIsOne &&
-                mode != NamedBitListMode.NamedZeroIs128LittleEndian &&
-                mode != NamedBitListMode.NamedZeroIs128BigEndian)
-            {
-                throw new ArgumentOutOfRangeException(nameof(mode));
             }
 
             int sizeLimit = Marshal.SizeOf(backingType);
@@ -1420,10 +1397,10 @@ namespace System.Security.Cryptography.Asn1
             //   unusedBitCount = 6,
             //   contents: 0x80 0x40  (0b10000000_01000000)
             //
-            // A reasonable C# exposure of this structure is
+            // A the C# exposure of this structure we adhere to is
             //
             // [Flags]
-            // enum SomeList : ushort
+            // enum SomeList
             // {
             //     A = 1,
             //     B = 1 << 1,
@@ -1431,70 +1408,9 @@ namespace System.Security.Cryptography.Asn1
             //     ...
             // }
             //
-            // In NamedZeroIsOne we will make that enum work.
-            //
-            // In NamedZeroIs128LittleEndian the enum would be
-            //
-            // [Flags]
-            // enum SomeList : ushort
-            // {
-            //     A = 0x80,
-            //     B = 0x40,
-            //     C = 0x20,
-            //     ...
-            //     H = 0x01,
-            //     I = 0x8000,
-            //     ...
-            // }
-            //
-            // In NamedZeroIs128BigEndian the enum would be
-            //
-            // [Flags]
-            // enum SomeList : ushort
-            // {
-            //     A = 0x8000,
-            //     B = 0x4000,
-            //     C = 0x2000,
-            //     ...
-            //     H = 0x0100,
-            //     I = 0x0080,
-            //     ...
-            // }
-            //
-            // NamedZeroIs128BigEndian is the most brittle, because if additional
-            // values increase the number of bytes required in the encoding everything
-            // needs to be renumbered.
-            //
-            // NamedZeroIs128LittleEndian requires a bit of mental gymnastics to understand,
-            // but it is (up to 64 bits) a sensibly extensible model.
-            //
-            // NamedZeroIsOne matches the way that enumerations grow in C#, but it happens
-            // to be exactly backward from the storage mechanism.
-            //
-            // (There should be a fourth ordering, where bits increase in value left to right,
-            // but bytes decrease in value.  But it's not obvious why anyone would want it, or
-            // what to call it)
-
-            long value;
-
-            switch (mode)
-            {
-                case NamedBitListMode.NamedZeroIsOne:
-                    value = InterpretNamedBitListReversed(valueSpan);
-                    break;
-                case NamedBitListMode.NamedZeroIs128LittleEndian:
-                    value = InterpretNamedBitListBytesLE(valueSpan);
-                    break;
-                case NamedBitListMode.NamedZeroIs128BigEndian:
-                    value = InterpretNamedBitListBytesBE(valueSpan, sizeLimit);
-                    break;
-                default:
-                    Debug.Fail($"Unhandled mode ({mode}) did not already trigger an ArgumentOutOfRangeException");
-                    _data = saveData;
-                    throw new ArgumentOutOfRangeException(nameof(mode));
-            }
-
-            return (Enum)Enum.ToObject(tFlagsEnum, value);
+            // Which happens to be exactly backwards from how the bits are encoded, but the complexity
+            // only needs to live here.
+            return (Enum)Enum.ToObject(tFlagsEnum, InterpretNamedBitListReversed(valueSpan));
         }
 
         private static long InterpretNamedBitListReversed(ReadOnlySpan<byte> valueSpan)
@@ -1520,42 +1436,6 @@ namespace System.Security.Cryptography.Asn1
                     currentBitValue <<= 1;
                 }
             }
-
-            return accum;
-        }
-
-        private static long InterpretNamedBitListBytesLE(ReadOnlySpan<byte> valueSpan)
-        {
-            Debug.Assert(valueSpan.Length <= sizeof(long));
-
-            long accum = 0;
-
-            for (int byteIdx = 0; byteIdx < valueSpan.Length; byteIdx++)
-            {
-                long positionValue = valueSpan[byteIdx];
-
-                positionValue <<= (8 * byteIdx);
-                accum |= positionValue;
-            }
-
-            return accum;
-        }
-
-        private static long InterpretNamedBitListBytesBE(ReadOnlySpan<byte> valueSpan, int sizeLimit)
-        {
-            Debug.Assert(valueSpan.Length <= sizeof(long));
-
-            long accum = 0;
-
-            for (int byteIdx = 0; byteIdx < valueSpan.Length; byteIdx++)
-            {
-                long positionValue = valueSpan[byteIdx];
-
-                accum <<= 8;
-                accum |= positionValue;
-            }
-
-            accum <<= 8 * (sizeLimit - valueSpan.Length);
 
             return accum;
         }
@@ -4030,46 +3910,39 @@ namespace System.Security.Cryptography.Asn1
             Debug.Assert(_buffer == ensureNoExtraCopy, $"_buffer was replaced during {nameof(WriteCERBitString)}");
         }
 
-        public void WriteNamedBitList(object enumValue, NamedBitListMode mode)
+        public void WriteNamedBitList(object enumValue)
         {
             if (enumValue == null)
                 throw new ArgumentNullException(nameof(enumValue));
 
-            WriteNamedBitList(new Asn1Tag(UniversalTagNumber.BitString), enumValue, mode);
+            WriteNamedBitList(new Asn1Tag(UniversalTagNumber.BitString), enumValue);
         }
 
-        public void WriteNamedBitList<TEnum>(TEnum enumValue, NamedBitListMode mode) where TEnum : struct
+        public void WriteNamedBitList<TEnum>(TEnum enumValue) where TEnum : struct
         {
-            WriteNamedBitList(new Asn1Tag(UniversalTagNumber.BitString), enumValue, mode);
+            WriteNamedBitList(new Asn1Tag(UniversalTagNumber.BitString), enumValue);
         }
 
-        public void WriteNamedBitList(Asn1Tag tag, object enumValue, NamedBitListMode mode)
+        public void WriteNamedBitList(Asn1Tag tag, object enumValue)
         {
             if (enumValue == null)
                 throw new ArgumentNullException(nameof(enumValue));
 
-            WriteNamedBitList(tag, enumValue.GetType(), enumValue, mode);
+            WriteNamedBitList(tag, enumValue.GetType(), enumValue);
         }
 
-        public void WriteNamedBitList<TEnum>(Asn1Tag tag, TEnum enumValue, NamedBitListMode mode) where TEnum : struct 
+        public void WriteNamedBitList<TEnum>(Asn1Tag tag, TEnum enumValue) where TEnum : struct 
         {
-            WriteNamedBitList(tag, typeof(TEnum), enumValue, mode);
+            WriteNamedBitList(tag, typeof(TEnum), enumValue);
         }
 
-        private void WriteNamedBitList(Asn1Tag tag, Type tEnum, object enumValue, NamedBitListMode mode)
+        private void WriteNamedBitList(Asn1Tag tag, Type tEnum, object enumValue)
         {
             Type backingType = tEnum.GetEnumUnderlyingType();
 
             if (!tEnum.IsDefined(typeof(FlagsAttribute), false))
             {
                 throw new ArgumentException(SR.Cryptography_Asn_NamedBitListRequiresFlagsEnum, nameof(tEnum));
-            }
-
-            if (mode != NamedBitListMode.NamedZeroIsOne &&
-                mode != NamedBitListMode.NamedZeroIs128LittleEndian &&
-                mode != NamedBitListMode.NamedZeroIs128BigEndian)
-            {
-                throw new ArgumentOutOfRangeException(nameof(mode));
             }
 
             ulong integralValue;
@@ -4085,74 +3958,46 @@ namespace System.Security.Cryptography.Asn1
                 integralValue = unchecked((ulong)numericValue);
             }
 
-            if (integralValue == 0)
+            WriteNamedBitList(tag, integralValue);
+        }
+
+        private void WriteNamedBitList(Asn1Tag tag, ulong integralValue)
+        {
+            Span<byte> temp = stackalloc byte[sizeof(ulong)];
+            // Reset to all zeros, since we're just going to or-in bits we need.
+            temp.Clear();
+
+            int indexOfHighestSetBit = -1;
+
+            for (int i = 0; integralValue != 0; integralValue >>= 1, i++)
             {
+                if ((integralValue & 1) != 0)
+                {
+                    temp[i / 8] |= (byte)(0x80 >> (i % 8));
+                    indexOfHighestSetBit = i;
+                }
+            }
+
+            if (indexOfHighestSetBit < 0)
+            {
+                // No bits were set; this is an empty bit string.
                 WriteBitString(tag, ReadOnlySpan<byte>.Empty);
-                return;
             }
-
-            if (mode == NamedBitListMode.NamedZeroIs128BigEndian)
+            else
             {
-                // The conversion to ulong will have left-filled with zeros,
-                // but we want to right-fill.
-                integralValue <<= 8 * (sizeof(ulong) - Marshal.SizeOf(backingType));
-            }
+                // At least one bit was set.
+                // Determine the shortest length necessary to represent the bit string.
 
-            if (mode == NamedBitListMode.NamedZeroIsOne)
-            {
-                ulong testBit = 0x8000000000000000UL;
-                ulong setBit = 1UL;
-                ulong accum = 0;
+                // Since "bit 0" gets written down 0 => 1.
+                // Since "bit 8" is in the second byte 8 => 2.
+                // That makes the formula ((bit / 8) + 1) instead of ((bit + 7) / 8).
+                int byteLen = (indexOfHighestSetBit / 8) + 1;
+                int unusedBitCount = 7 - (indexOfHighestSetBit % 8);
 
-                while (testBit > 0)
-                {
-                    if ((integralValue & testBit) != 0)
-                    {
-                        accum |= setBit;
-                    }
-
-                    setBit <<= 1;
-                    testBit >>= 1;
-                }
-
-                integralValue = accum;
-                mode = NamedBitListMode.NamedZeroIs128BigEndian;
-            }
-
-            bool wantsLittleEndian = mode == NamedBitListMode.NamedZeroIs128LittleEndian;
-            bool wrongEndian = wantsLittleEndian != BitConverter.IsLittleEndian;
-
-            unsafe
-            {
-                ulong accum = integralValue;
-                ulong* accumAddr = &accum;
-                byte* accumByteAddr = (byte*)accumAddr;
-                Span<byte> dataSpan = new Span<byte>(accumByteAddr, sizeof(ulong));
-
-                if (wrongEndian)
-                {
-                    Reverse(dataSpan);
-                }
-
-                int spanEnd = sizeof(ulong) - 1;
-
-                // This will eventually end (at or above 0) because the integer wasn't 0.
-                while (dataSpan[spanEnd] == 0)
-                {
-                    spanEnd--;
-                }
-
-                dataSpan = dataSpan.Slice(0, spanEnd + 1);
-
-                int unusedBits = 0;
-                byte lastByte = dataSpan[spanEnd];
-
-                while ((lastByte & (1 << unusedBits)) == 0)
-                {
-                    unusedBits++;
-                }
-
-                WriteBitString(tag, dataSpan, unusedBits);
+                WriteBitString(
+                    tag,
+                    temp.Slice(0, byteLen),
+                    unusedBitCount);
             }
         }
 

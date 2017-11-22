@@ -4,9 +4,10 @@
 
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.Asn1;
-using System.Security.Cryptography.X509Certificates;
 using Test.Cryptography;
 using Xunit;
+
+using X509KeyUsageCSharpStyle=System.Security.Cryptography.Tests.Asn1.ReadNamedBitList.X509KeyUsageCSharpStyle;
 
 namespace System.Security.Cryptography.Tests.Asn1
 {
@@ -137,8 +138,8 @@ namespace System.Security.Cryptography.Tests.Asn1
             AsnReader keyUsagePayload = new AsnReader(keyUsageBytes, AsnEncodingRules.DER);
 
             Assert.Equal(
-                X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.KeyEncipherment,
-                keyUsagePayload.GetNamedBitListValue<X509KeyUsageFlags>(NamedBitListMode.NamedZeroIs128LittleEndian));
+                X509KeyUsageCSharpStyle.DigitalSignature | X509KeyUsageCSharpStyle.KeyEncipherment,
+                keyUsagePayload.GetNamedBitListValue<X509KeyUsageCSharpStyle>());
 
             Assert.False(keyUsagePayload.HasData, "keyUsagePayload.HasData");
 

@@ -4,9 +4,10 @@
 
 using System.Numerics;
 using System.Security.Cryptography.Asn1;
-using System.Security.Cryptography.X509Certificates;
 using Test.Cryptography;
 using Xunit;
+
+using X509KeyUsageCSharpStyle = System.Security.Cryptography.Tests.Asn1.ReadNamedBitList.X509KeyUsageCSharpStyle;
 
 namespace System.Security.Cryptography.Tests.Asn1
 {
@@ -121,8 +122,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             extensionValueWriter = new AsnWriter(AsnEncodingRules.DER);
             // This extension doesn't use a sequence at all, just Named Bit List.
             extensionValueWriter.WriteNamedBitList(
-                X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.KeyEncipherment,
-                NamedBitListMode.NamedZeroIs128LittleEndian);
+                X509KeyUsageCSharpStyle.DigitalSignature | X509KeyUsageCSharpStyle.KeyEncipherment);
 
             writer.PushSequence();
             writer.WriteObjectIdentifier("2.5.29.15");
