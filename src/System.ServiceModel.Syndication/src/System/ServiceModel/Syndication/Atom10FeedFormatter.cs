@@ -249,7 +249,7 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        internal TextSyndicationContent ReadTextContentFrom(XmlReader reader, string context, bool preserveAttributeExtensions)
+        internal static TextSyndicationContent ReadTextContentFrom(XmlReader reader, string context, bool preserveAttributeExtensions)
         {
             string type = reader.GetAttribute(Atom10Constants.TypeTag);
             return ReadTextContentFromHelper(reader, type, context, preserveAttributeExtensions);
@@ -297,11 +297,11 @@ namespace System.ServiceModel.Syndication
             }
             else if (reader.IsStartElement(Atom10Constants.GeneratorTag, Atom10Constants.Atom10Namespace))
             {
-                result.Generator = StringParser(reader.ReadElementString(), Atom10Constants.GeneratorTag, Atom10Constants.Atom10Namespace);
+                result.Generator = reader.ReadElementString();
             }
             else if (reader.IsStartElement(Atom10Constants.IdTag, Atom10Constants.Atom10Namespace))
             {
-                result.Id = StringParser(reader.ReadElementString(), Atom10Constants.IdTag, Atom10Constants.Atom10Namespace);
+                result.Id = reader.ReadElementString();
             }
             else if (reader.IsStartElement(Atom10Constants.LinkTag, Atom10Constants.Atom10Namespace))
             {
@@ -365,7 +365,7 @@ namespace System.ServiceModel.Syndication
             }
             else if (reader.IsStartElement(Atom10Constants.IdTag, Atom10Constants.Atom10Namespace))
             {
-                result.Id = StringParser(reader.ReadElementString(), Atom10Constants.IdTag, Atom10Constants.Atom10Namespace);
+                result.Id = reader.ReadElementString();
             }
             else if (reader.IsStartElement(Atom10Constants.LinkTag, Atom10Constants.Atom10Namespace))
             {
@@ -602,7 +602,7 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        private TextSyndicationContent ReadTextContentFromHelper(XmlReader reader, string type, string context, bool preserveAttributeExtensions)
+        private static TextSyndicationContent ReadTextContentFromHelper(XmlReader reader, string type, string context, bool preserveAttributeExtensions)
         {
             if (string.IsNullOrEmpty(type))
             {
@@ -658,7 +658,7 @@ namespace System.ServiceModel.Syndication
             reader.MoveToElement();
             string localName = reader.LocalName;
             string nameSpace = reader.NamespaceURI;
-            string val = (kind == TextSyndicationContentKind.XHtml) ? reader.ReadInnerXml() : StringParser(reader.ReadElementString(), localName, nameSpace); // cant custom parse because its static
+            string val = (kind == TextSyndicationContentKind.XHtml) ? reader.ReadInnerXml() : reader.ReadElementString();
             TextSyndicationContent result = new TextSyndicationContent(val, kind);
             if (attrs != null)
             {
@@ -1152,15 +1152,15 @@ namespace System.ServiceModel.Syndication
                     {
                         if (reader.IsStartElement(Atom10Constants.NameTag, Atom10Constants.Atom10Namespace))
                         {
-                            result.Name = StringParser(reader.ReadElementString(), Atom10Constants.NameTag, reader.NamespaceURI);
+                            result.Name = reader.ReadElementString();
                         }
                         else if (reader.IsStartElement(Atom10Constants.UriTag, Atom10Constants.Atom10Namespace))
                         {
-                            result.Uri = StringParser(reader.ReadElementString(), Atom10Constants.UriTag, reader.NamespaceURI);
+                            result.Uri = reader.ReadElementString();
                         }
                         else if (reader.IsStartElement(Atom10Constants.EmailTag, Atom10Constants.Atom10Namespace))
                         {
-                            result.Email = StringParser(reader.ReadElementString(), Atom10Constants.EmailTag, reader.NamespaceURI);
+                            result.Email = reader.ReadElementString();
                         }
                         else
                         {

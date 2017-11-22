@@ -475,7 +475,7 @@ namespace System.ServiceModel.Syndication
                 {
                     if (reader.IsStartElement(Atom10Constants.TitleTag, Atom10Constants.Atom10Namespace))
                     {
-                        result.Title = new Atom10FeedFormatter().ReadTextContentFrom(reader, "//app:service/app:workspace/app:collection/atom:title[@type]", _preserveAttributeExtensions);
+                        result.Title = Atom10FeedFormatter.ReadTextContentFrom(reader, "//app:service/app:workspace/app:collection/atom:title[@type]", _preserveAttributeExtensions);
                     }
                     else if (reader.IsStartElement(App10Constants.Categories, App10Constants.Namespace))
                     {
@@ -663,7 +663,7 @@ namespace System.ServiceModel.Syndication
                 {
                     if (reader.IsStartElement(Atom10Constants.TitleTag, Atom10Constants.Atom10Namespace))
                     {
-                        result.Title = new Atom10FeedFormatter().ReadTextContentFrom(reader, "//app:service/app:workspace/atom:title[@type]", _preserveAttributeExtensions);
+                        result.Title = Atom10FeedFormatter.ReadTextContentFrom(reader, "//app:service/app:workspace/atom:title[@type]", _preserveAttributeExtensions);
                     }
                     else if (reader.IsStartElement(App10Constants.Collection, App10Constants.Namespace))
                     {

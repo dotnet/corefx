@@ -40,8 +40,6 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        public Func<string, string, string, string> StringParser { get; set; } = DefaultStringParser;
-
         public Func<string, UriKind, string, string, Uri> UriParser { get; set; } = DefaultUriParser;
 
         // Different DateTimeParsers are needed for Atom and Rss so can't set inline
@@ -396,11 +394,6 @@ namespace System.ServiceModel.Syndication
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(
                     new XmlException(FeedUtils.AddLineInfo(reader, SR.ErrorParsingDateTime), e));
             }
-        }
-
-        private static string DefaultStringParser(string value, string localName, string ns)
-        {
-            return value;
         }
 
         private static Uri DefaultUriParser(string value, UriKind kind, string localName, string ns)
