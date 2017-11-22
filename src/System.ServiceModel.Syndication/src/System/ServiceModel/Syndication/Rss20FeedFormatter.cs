@@ -301,8 +301,11 @@ namespace System.ServiceModel.Syndication
                     }
                 }
             }
+
+            string localName = reader.LocalName;
+            string namespaceUri = reader.NamespaceURI;
             string uri = reader.ReadElementString();
-            link.Uri = new Uri(uri, UriKind.RelativeOrAbsolute);
+            link.Uri = UriParser(uri, UriKind.RelativeOrAbsolute, localName, namespaceUri);
             return link;
         }
 
@@ -489,7 +492,7 @@ namespace System.ServiceModel.Syndication
                                         string val = reader.Value;
                                         if (name == Rss20Constants.UrlTag && ns == Rss20Constants.Rss20Namespace)
                                         {
-                                            feed.Links.Add(SyndicationLink.CreateSelfLink(new Uri(val, UriKind.RelativeOrAbsolute)));
+                                            feed.Links.Add(SyndicationLink.CreateSelfLink(UriParser(val, UriKind.RelativeOrAbsolute, Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace)));
                                         }
                                         else if (!FeedUtils.IsXmlns(name, ns))
                                         {
@@ -588,7 +591,7 @@ namespace System.ServiceModel.Syndication
                     string val = reader.Value;
                     if (name == Rss20Constants.UrlTag && ns == Rss20Constants.Rss20Namespace)
                     {
-                        link.Uri = new Uri(val, UriKind.RelativeOrAbsolute);
+                        link.Uri = UriParser(val, UriKind.RelativeOrAbsolute, Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace);
                     }
                     else if (name == Rss20Constants.TypeTag && ns == Rss20Constants.Rss20Namespace)
                     {
@@ -794,7 +797,7 @@ namespace System.ServiceModel.Syndication
                             {
                                 if (reader.IsStartElement(Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace))
                                 {
-                                    result.ImageUrl = new Uri(reader.ReadElementString(), UriKind.RelativeOrAbsolute);
+                                    result.ImageUrl = UriParser(reader.ReadElementString(), UriKind.RelativeOrAbsolute, Rss20Constants.UrlTag, Rss20Constants.Rss20Namespace);
                                 }
                                 else
                                 {

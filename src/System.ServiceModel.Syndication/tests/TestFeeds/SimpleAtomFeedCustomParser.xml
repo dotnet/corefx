@@ -4,7 +4,7 @@
   <subtitle type="text">FeedSubtitle</subtitle>
   <id>FeedID</id>
   <updated>2017-06-26T14:41:43-07:00</updated>
-  <logo>http://contoso.com/123.jpg</logo>
+  <logo>FeedLogo</logo>
   <generator>FeedGenerator</generator>
   <author>
     <name>AuthorName</name>
@@ -17,7 +17,7 @@
     <id>EntryId</id>
     <title type="text">SyndicationFeed released for .net Core</title>
     <updated>2017-06-26T21:41:43Z</updated>
-    <link rel="alternate" href="http://contoso.com/news/path" />
+    <link rel="alternate" href="EntryLinkHref" />
     <content type="text">A lot of text describing the release of .net core feature</content>
   </entry>
 </feed>

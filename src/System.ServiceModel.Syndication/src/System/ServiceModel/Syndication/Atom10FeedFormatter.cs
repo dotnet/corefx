@@ -309,7 +309,7 @@ namespace System.ServiceModel.Syndication
             }
             else if (reader.IsStartElement(Atom10Constants.LogoTag, Atom10Constants.Atom10Namespace))
             {
-                result.ImageUrl = new Uri(reader.ReadElementString(), UriKind.RelativeOrAbsolute);
+                result.ImageUrl = UriParser(reader.ReadElementString(), UriKind.RelativeOrAbsolute, Atom10Constants.LogoTag, Atom10Constants.Atom10Namespace);
             }
             else if (reader.IsStartElement(Atom10Constants.RightsTag, Atom10Constants.Atom10Namespace))
             {
@@ -656,7 +656,9 @@ namespace System.ServiceModel.Syndication
                 }
             }
             reader.MoveToElement();
-            string val = (kind == TextSyndicationContentKind.XHtml) ? reader.ReadInnerXml() : StringParser(reader.ReadElementString(), reader.LocalName, reader.NamespaceURI); // cant custom parse because its static
+            string localName = reader.LocalName;
+            string nameSpace = reader.NamespaceURI;
+            string val = (kind == TextSyndicationContentKind.XHtml) ? reader.ReadInnerXml() : StringParser(reader.ReadElementString(), localName, nameSpace); // cant custom parse because its static
             TextSyndicationContent result = new TextSyndicationContent(val, kind);
             if (attrs != null)
             {
@@ -993,6 +995,7 @@ namespace System.ServiceModel.Syndication
             string title = null;
             string lengthStr = null;
             string val = null;
+            string ns = null;
             link.BaseUri = baseUri;
             if (reader.HasAttributes)
             {
@@ -1021,6 +1024,7 @@ namespace System.ServiceModel.Syndication
                     else if (reader.LocalName == Atom10Constants.HrefTag && reader.NamespaceURI == string.Empty)
                     {
                         val = reader.Value;
+                        ns = reader.NamespaceURI;
                     }
                     else if (!FeedUtils.IsXmlns(reader.LocalName, reader.NamespaceURI))
                     {
@@ -1079,7 +1083,7 @@ namespace System.ServiceModel.Syndication
             link.MediaType = mediaType;
             link.RelationshipType = relationship;
             link.Title = title;
-            link.Uri = (val != null) ? new Uri(val, UriKind.RelativeOrAbsolute) : null;
+            link.Uri = (val != null) ? UriParser(val, UriKind.RelativeOrAbsolute, Atom10Constants.LinkTag, ns) : null;
         }
 
         private SyndicationLink ReadLinkFrom(XmlReader reader, SyndicationFeed feed)
