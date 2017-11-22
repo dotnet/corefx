@@ -836,6 +836,14 @@ namespace System.Tests
             Assert.Equal(expected, s.Contains(value));
         }
 
+        [Theory]
+        [InlineData("Hello", 'H', true)]
+        public static void Contains(string s, char value, bool expected)
+        {
+            Assert.Equal(expected, s.Contains(value));
+        }
+
+
         [Fact]
         public static void Contains_NullValue_ThrowsArgumentNullException()
         {
