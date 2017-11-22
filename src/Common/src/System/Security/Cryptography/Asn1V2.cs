@@ -356,12 +356,6 @@ namespace System.Security.Cryptography.Asn1
         // ITU-T-REC-X.690-201508 sec 8.1.5 says only 0000 is legal.
         private const int EndOfContentsEncodedLength = 2;
 
-        private static readonly Text.Encoding s_utf8Encoding = new UTF8Encoding(false, true);
-        private static readonly Text.Encoding s_bmpEncoding = new BMPEncoding();
-        private static readonly Text.Encoding s_ia5Encoding = new IA5Encoding();
-        private static readonly Text.Encoding s_visibleStringEncoding = new VisibleStringEncoding();
-        private static readonly Text.Encoding s_printableStringEncoding = new PrintableStringEncoding();
-
         private ReadOnlyMemory<byte> _data;
         private readonly AsnEncodingRules _ruleSet;
 
@@ -2294,16 +2288,14 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
-        public bool TryGetUTF8StringBytes(out ReadOnlyMemory<byte> contents) =>
-            TryGetUTF8StringBytes(new Asn1Tag(UniversalTagNumber.UTF8String), out contents);
-
         /// <summary>
-        /// Gets the source data for a UTF8String under a primitive encoding.
+        /// Gets the source data for a character string under a primitive encoding and tagged as
+        /// the universal class tag for the encoding type.
         /// </summary>
-        /// <param name="expectedTag">The expected tag</param>
+        /// <param name="encodingType">The UniversalTagNumber for the string encoding type.</param>
         /// <param name="contents">The content bytes for the UTF8String payload.</param>
         /// <returns>
-        ///   <c>true</c> if the octet string uses a primitive encoding, <c>false</c> otherwise.
+        ///   <c>true</c> if the character string uses a primitive encoding, <c>false</c> otherwise.
         /// </returns>
         /// <exception cref="CryptographicException">
         ///  <ul>
@@ -2313,19 +2305,64 @@ namespace System.Security.Cryptography.Asn1
         ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
         /// </ul>
         /// </exception>
-        public bool TryGetUTF8StringBytes(Asn1Tag expectedTag, out ReadOnlyMemory<byte> contents)
+        public bool TryGetCharacterStringBytes(UniversalTagNumber encodingType, out ReadOnlyMemory<byte> contents)
         {
-            return TryGetOctetStringBytes(expectedTag, UniversalTagNumber.UTF8String, out contents);
+            return TryGetCharacterStringBytes(new Asn1Tag(encodingType), encodingType, out contents);
         }
 
-        public bool TryCopyUTF8StringBytes(Span<byte> destination, out int bytesWritten) =>
-            TryCopyUTF8StringBytes(new Asn1Tag(UniversalTagNumber.UTF8String), destination, out bytesWritten);
-
-        public bool TryCopyUTF8StringBytes(Asn1Tag expectedTag, Span<byte> destination, out int bytesWritten)
+        /// <summary>
+        /// Gets the source data for a character string under a primitive encoding.  The contents
+        /// are not validated as belonging to the requested encoding type.
+        /// </summary>
+        /// <param name="expectedTag">The expected tag</param>
+        /// <param name="encodingType">The UniversalTagNumber for the string encoding type.</param>
+        /// <param name="contents">The content bytes for the UTF8String payload.</param>
+        /// <returns>
+        ///   <c>true</c> if the character string uses a primitive encoding, <c>false</c> otherwise.
+        /// </returns>
+        /// <exception cref="CryptographicException">
+        ///  <ul>
+        ///   <li>No data remains</li>
+        ///   <li>The tag read does not match the expected tag</li>
+        ///   <li>The length is invalid under the chosen encoding rules</li>
+        ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
+        /// </ul>
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///   <paramref name="encodingType"/> is not a known character string encoding type.
+        /// </exception>
+        public bool TryGetCharacterStringBytes(
+            Asn1Tag expectedTag,
+            UniversalTagNumber encodingType,
+            out ReadOnlyMemory<byte> contents)
         {
+            CheckCharacterStringEncodingType(encodingType);
+            return TryGetOctetStringBytes(expectedTag, encodingType, out contents);
+        }
+
+        public bool TryCopyCharacterStringBytes(
+            UniversalTagNumber encodingType,
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            return TryCopyCharacterStringBytes(
+                new Asn1Tag(encodingType),
+                encodingType,
+                destination,
+                out bytesWritten);
+        }
+
+        public bool TryCopyCharacterStringBytes(
+            Asn1Tag expectedTag,
+            UniversalTagNumber encodingType,
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            CheckCharacterStringEncodingType(encodingType);
+
             bool copied = TryCopyCharacterStringBytes(
                 expectedTag,
-                UniversalTagNumber.UTF8String,
+                encodingType,
                 destination,
                 true,
                 out int bytesRead,
@@ -2339,48 +2376,35 @@ namespace System.Security.Cryptography.Asn1
             return copied;
         }
 
+        public bool TryCopyCharacterString(
+            UniversalTagNumber encodingType,
+            Span<char> destination,
+            out int charsWritten)
+        {
+            return TryCopyCharacterString(
+                new Asn1Tag(encodingType),
+                encodingType,
+                destination,
+                out charsWritten);
+        }
+
+        public bool TryCopyCharacterString(
+            Asn1Tag expectedTag,
+            UniversalTagNumber encodingType,
+            Span<char> destination,
+            out int charsWritten)
+        {
+            Text.Encoding encoding = AsnCharacterStringEncodings.GetEncoding(encodingType);
+            return TryCopyCharacterString(expectedTag, encodingType, encoding, destination, out charsWritten);
+        }
+
         public string GetCharacterString(UniversalTagNumber encodingType) =>
             GetCharacterString(new Asn1Tag(encodingType), encodingType);
             
         public string GetCharacterString(Asn1Tag expectedTag, UniversalTagNumber encodingType)
         {
-            Text.Encoding encoding;
-
-            switch (encodingType)
-            {
-                case UniversalTagNumber.UTF8String:
-                    encoding = s_utf8Encoding;
-                    break;
-                case UniversalTagNumber.PrintableString:
-                    encoding = s_printableStringEncoding;
-                    break;
-                case UniversalTagNumber.IA5String:
-                    encoding = s_ia5Encoding;
-                    break;
-                case UniversalTagNumber.VisibleString:
-                    encoding = s_visibleStringEncoding;
-                    break;
-                case UniversalTagNumber.BMPString:
-                    encoding = s_bmpEncoding;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(encodingType), encodingType, null);
-            }
-
+            Text.Encoding encoding = AsnCharacterStringEncodings.GetEncoding(encodingType);
             return GetCharacterString(expectedTag, encodingType, encoding);
-        }
-
-        public bool TryCopyUTF8String(Span<char> destination, out int charsWritten) =>
-            TryCopyUTF8String(new Asn1Tag(UniversalTagNumber.UTF8String), destination, out charsWritten);
-
-        public bool TryCopyUTF8String(Asn1Tag expectedTag, Span<char> destination, out int charsWritten)
-        {
-            return TryCopyCharacterString(
-                expectedTag,
-                UniversalTagNumber.UTF8String,
-                s_utf8Encoding,
-                destination,
-                out charsWritten);
         }
 
         public AsnReader ReadSequence() => ReadSequence(new Asn1Tag(UniversalTagNumber.Sequence));
@@ -2517,122 +2541,6 @@ namespace System.Security.Cryptography.Asn1
 
             _data = _data.Slice(headerLength + contents.Length + suffix);
             return new AsnReader(contents, _ruleSet);
-        }
-
-        public bool TryGetIA5StringBytes(out ReadOnlyMemory<byte> contents) =>
-            TryGetIA5StringBytes(new Asn1Tag(UniversalTagNumber.IA5String), out contents);
-
-        /// <summary>
-        /// Gets the source data for an IA5String under a primitive encoding.
-        /// </summary>
-        /// <param name="expectedTag">The expected tag</param>
-        /// <param name="contents">The content bytes for the IA5String payload.</param>
-        /// <returns>
-        ///   <c>true</c> if the octet string uses a primitive encoding, <c>false</c> otherwise.
-        /// </returns>
-        /// <exception cref="CryptographicException">
-        ///  <ul>
-        ///   <li>No data remains</li>
-        ///   <li>The tag read does not match the expected tag</li>
-        ///   <li>The length is invalid under the chosen encoding rules</li>
-        ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
-        /// </ul>
-        /// </exception>
-        public bool TryGetIA5StringBytes(Asn1Tag expectedTag, out ReadOnlyMemory<byte> contents)
-        {
-            return TryGetOctetStringBytes(expectedTag, UniversalTagNumber.IA5String, out contents);
-        }
-
-        public bool TryCopyIA5StringBytes(Span<byte> destination, out int bytesWritten) =>
-            TryCopyIA5StringBytes(new Asn1Tag(UniversalTagNumber.IA5String), destination, out bytesWritten);
-
-        public bool TryCopyIA5StringBytes(Asn1Tag expectedTag, Span<byte> destination, out int bytesWritten)
-        {
-            bool copied = TryCopyCharacterStringBytes(
-                expectedTag,
-                UniversalTagNumber.IA5String,
-                destination,
-                true,
-                out int bytesRead,
-                out bytesWritten);
-
-            if (copied)
-            {
-                _data = _data.Slice(bytesRead);
-            }
-
-            return copied;
-        }
-
-        public bool TryCopyIA5String(Span<char> destination, out int charsWritten) =>
-            TryCopyIA5String(new Asn1Tag(UniversalTagNumber.IA5String), destination, out charsWritten);
-
-        public bool TryCopyIA5String(Asn1Tag expectedTag, Span<char> destination, out int charsWritten)
-        {
-            return TryCopyCharacterString(
-                expectedTag,
-                UniversalTagNumber.IA5String,
-                s_ia5Encoding,
-                destination,
-                out charsWritten);
-        }
-
-        public bool TryGetBMPStringBytes(out ReadOnlyMemory<byte> contents) =>
-            TryGetBMPStringBytes(new Asn1Tag(UniversalTagNumber.BMPString), out contents);
-
-        /// <summary>
-        /// Gets the source data for a BMPString under a primitive encoding.
-        /// </summary>
-        /// <param name="expectedTag">The expected tag</param>
-        /// <param name="contents">The content bytes for the BMPString payload.</param>
-        /// <returns>
-        ///   <c>true</c> if the octet string uses a primitive encoding, <c>false</c> otherwise.
-        /// </returns>
-        /// <exception cref="CryptographicException">
-        ///  <ul>
-        ///   <li>No data remains</li>
-        ///   <li>The tag read is does not match the expected tag</li>
-        ///   <li>The length is invalid under the chosen encoding rules</li>
-        ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
-        /// </ul>
-        /// </exception>
-        public bool TryGetBMPStringBytes(Asn1Tag expectedTag, out ReadOnlyMemory<byte> contents)
-        {
-            return TryGetOctetStringBytes(expectedTag, UniversalTagNumber.BMPString, out contents);
-        }
-
-        public bool TryCopyBMPStringBytes(Span<byte> destination, out int bytesWritten) =>
-            TryCopyBMPStringBytes(new Asn1Tag(UniversalTagNumber.BMPString), destination, out bytesWritten);
-
-        public bool TryCopyBMPStringBytes(Asn1Tag expectedTag, Span<byte> destination, out int bytesWritten)
-        {
-            bool copied = TryCopyCharacterStringBytes(
-                expectedTag,
-                UniversalTagNumber.BMPString,
-                destination,
-                true,
-                out int bytesRead,
-                out bytesWritten);
-
-            if (copied)
-            {
-                _data = _data.Slice(bytesRead);
-            }
-
-            return copied;
-        }
-
-        public bool TryCopyBMPString(Span<char> destination, out int charsWritten) =>
-            TryCopyBMPString(new Asn1Tag(UniversalTagNumber.BMPString), destination, out charsWritten);
-
-        public bool TryCopyBMPString(Asn1Tag expectedTag, Span<char> destination, out int charsWritten)
-        {
-            return TryCopyCharacterString(
-                expectedTag,
-                UniversalTagNumber.BMPString,
-                s_bmpEncoding,
-                destination,
-                out charsWritten);
         }
 
         private static byte GetDigit(byte b)
@@ -3262,6 +3170,58 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
         }
+
+        private static void CheckCharacterStringEncodingType(UniversalTagNumber encodingType)
+        {
+            // ITU-T-REC-X.680-201508 sec 41
+            switch (encodingType)
+            {
+                case UniversalTagNumber.BMPString:
+                case UniversalTagNumber.GeneralString:
+                case UniversalTagNumber.GraphicString:
+                case UniversalTagNumber.IA5String:
+                case UniversalTagNumber.ISO646String:
+                case UniversalTagNumber.NumericString:
+                case UniversalTagNumber.PrintableString:
+                case UniversalTagNumber.TeletexString:
+                // T61String is an alias for TeletexString (already listed)
+                case UniversalTagNumber.UniversalString:
+                case UniversalTagNumber.UTF8String:
+                case UniversalTagNumber.VideotexString:
+                // VisibleString is an alias for ISO646String (already listed)
+                    return;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(encodingType));
+        }
+    }
+
+    internal static class AsnCharacterStringEncodings
+    {
+        private static readonly Text.Encoding s_utf8Encoding = new UTF8Encoding(false, true);
+        private static readonly Text.Encoding s_bmpEncoding = new BMPEncoding();
+        private static readonly Text.Encoding s_ia5Encoding = new IA5Encoding();
+        private static readonly Text.Encoding s_visibleStringEncoding = new VisibleStringEncoding();
+        private static readonly Text.Encoding s_printableStringEncoding = new PrintableStringEncoding();
+
+        internal static Text.Encoding GetEncoding(UniversalTagNumber encodingType)
+        {
+            switch (encodingType)
+            {
+                case UniversalTagNumber.UTF8String:
+                    return s_utf8Encoding;
+                case UniversalTagNumber.PrintableString:
+                    return s_printableStringEncoding;
+                case UniversalTagNumber.IA5String:
+                    return s_ia5Encoding;
+                case UniversalTagNumber.VisibleString:
+                    return s_visibleStringEncoding;
+                case UniversalTagNumber.BMPString:
+                    return s_bmpEncoding;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(encodingType), encodingType, null);
+            }
+        }
     }
 
     internal abstract class SpanBasedEncoding : Text.Encoding
@@ -3633,12 +3593,6 @@ namespace System.Security.Cryptography.Asn1
 
     internal class AsnWriter
     {
-        private static readonly Text.Encoding s_bmpEncoding = new BMPEncoding();
-        private static readonly Text.Encoding s_ia5Encoding = new IA5Encoding();
-        private static readonly Text.Encoding s_utf8Encoding = new UTF8Encoding(false, true);
-        private static readonly Text.Encoding s_printableStringEncoding = new PrintableStringEncoding();
-        private static readonly Text.Encoding s_visibleStringEncoding = new VisibleStringEncoding();
-
         private byte[] _buffer;
         private int _offset;
         private Stack<(Asn1Tag,int)> _nestingStack;
@@ -4540,36 +4494,6 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
-        public void WriteUtf8String(string str)
-        {
-            if (str == null)
-                throw new ArgumentNullException(nameof(str));
-
-            WriteUtf8String(new Asn1Tag(UniversalTagNumber.UTF8String), str);
-        }
-
-        public void WriteUtf8String(ReadOnlySpan<char> str)
-        {
-            WriteUtf8String(new Asn1Tag(UniversalTagNumber.UTF8String), str);
-        }
-
-        public void WriteUtf8String(Asn1Tag tag, string str)
-        {
-            CheckUniversalTag(tag, UniversalTagNumber.UTF8String);
-
-            if (str == null)
-                throw new ArgumentNullException(nameof(str));
-
-            WriteUtf8String(tag, str.AsReadOnlySpan());
-        }
-
-        public void WriteUtf8String(Asn1Tag tag, ReadOnlySpan<char> str)
-        {
-            CheckUniversalTag(tag, UniversalTagNumber.UTF8String);
-
-            WriteCharacterString(tag, s_utf8Encoding, str);
-        }
-
         public void PushSequence()
         {
             PushSequence(new Asn1Tag(UniversalTagNumber.Sequence, isConstructed: true));
@@ -4622,36 +4546,6 @@ namespace System.Security.Cryptography.Asn1
             bool sortContents = RuleSet == AsnEncodingRules.CER || RuleSet == AsnEncodingRules.DER;
 
             PopTag(tag, sortContents);
-        }
-
-        public void WriteIA5String(string str)
-        {
-            if (str == null)
-                throw new ArgumentNullException(nameof(str));
-
-            WriteIA5String(new Asn1Tag(UniversalTagNumber.IA5String), str.AsReadOnlySpan());
-        }
-
-        public void WriteIA5String(ReadOnlySpan<char> str)
-        {
-            WriteIA5String(new Asn1Tag(UniversalTagNumber.IA5String), str);
-        }
-
-        public void WriteIA5String(Asn1Tag tag, string str)
-        {
-            CheckUniversalTag(tag, UniversalTagNumber.IA5String);
-
-            if (str == null)
-                throw new ArgumentNullException(nameof(str));
-
-            WriteIA5String(tag, str.AsReadOnlySpan());
-        }
-
-        public void WriteIA5String(Asn1Tag tag, ReadOnlySpan<char> str)
-        {
-            CheckUniversalTag(tag, UniversalTagNumber.IA5String);
-
-            WriteCharacterString(tag, s_ia5Encoding, str);
         }
         
         public void WriteUtcTime(DateTimeOffset value)
@@ -4852,36 +4746,6 @@ namespace System.Security.Cryptography.Asn1
             _offset++;
         }
 
-        public void WriteBMPString(string str)
-        {
-            if (str == null)
-                throw new ArgumentNullException(nameof(str));
-
-            WriteBMPString(new Asn1Tag(UniversalTagNumber.BMPString), str.AsReadOnlySpan());
-        }
-
-        public void WriteBMPString(ReadOnlySpan<char> str)
-        {
-            WriteBMPString(new Asn1Tag(UniversalTagNumber.BMPString), str);
-        }
-
-        public void WriteBMPString(Asn1Tag tag, string str)
-        {
-            CheckUniversalTag(tag, UniversalTagNumber.BMPString);
-
-            if (str == null)
-                throw new ArgumentNullException(nameof(str));
-
-            WriteBMPString(tag, str.AsReadOnlySpan());
-        }
-
-        public void WriteBMPString(Asn1Tag tag, ReadOnlySpan<char> str)
-        {
-            CheckUniversalTag(tag, UniversalTagNumber.BMPString);
-
-            WriteCharacterString(tag, s_bmpEncoding, str);
-        }
-
         public bool TryEncode(Span<byte> dest, out int bytesWritten)
         {
             if ((_nestingStack?.Count ?? 0) != 0)
@@ -5007,29 +4871,9 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteCharacterString(Asn1Tag tag, UniversalTagNumber encodingType, ReadOnlySpan<char> str)
         {
-            Text.Encoding encoding;
+            CheckUniversalTag(tag, encodingType);
 
-            switch (encodingType)
-            {
-                case UniversalTagNumber.UTF8String:
-                    encoding = s_utf8Encoding;
-                    break;
-                case UniversalTagNumber.PrintableString:
-                    encoding = s_printableStringEncoding;
-                    break;
-                case UniversalTagNumber.IA5String:
-                    encoding = s_ia5Encoding;
-                    break;
-                case UniversalTagNumber.VisibleString:
-                    encoding = s_visibleStringEncoding;
-                    break;
-                case UniversalTagNumber.BMPString:
-                    encoding = s_bmpEncoding;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(encodingType), encodingType, null);
-            }
-
+            Text.Encoding encoding = AsnCharacterStringEncodings.GetEncoding(encodingType);
             WriteCharacterString(tag, encoding, str);
         }
 

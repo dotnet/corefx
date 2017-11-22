@@ -63,10 +63,18 @@ namespace System.Security.Cryptography.Tests.Asn1
             new object[] { "\uD801\uDC37" },
         };
 
-        internal override void WriteString(AsnWriter writer, string s) => writer.WriteBMPString(s);
-        internal override void WriteString(AsnWriter writer, Asn1Tag tag, string s) => writer.WriteBMPString(tag, s);
-        internal override void WriteSpan(AsnWriter writer, ReadOnlySpan<char> s) => writer.WriteBMPString(s);
-        internal override void WriteSpan(AsnWriter writer, Asn1Tag tag, ReadOnlySpan<char> s) => writer.WriteBMPString(tag, s);
+        internal override void WriteString(AsnWriter writer, string s) =>
+            writer.WriteCharacterString(UniversalTagNumber.BMPString, s);
+
+        internal override void WriteString(AsnWriter writer, Asn1Tag tag, string s) =>
+            writer.WriteCharacterString(tag, UniversalTagNumber.BMPString, s);
+
+        internal override void WriteSpan(AsnWriter writer, ReadOnlySpan<char> s) =>
+            writer.WriteCharacterString(UniversalTagNumber.BMPString, s);
+
+        internal override void WriteSpan(AsnWriter writer, Asn1Tag tag, ReadOnlySpan<char> s) =>
+            writer.WriteCharacterString(tag, UniversalTagNumber.BMPString, s);
+
         internal override Asn1Tag StandardTag => new Asn1Tag(UniversalTagNumber.BMPString);
 
         [Theory]

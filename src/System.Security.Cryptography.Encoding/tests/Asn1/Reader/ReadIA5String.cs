@@ -673,4 +673,49 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Equal(val1.ByteArrayToHex(), val2.ByteArrayToHex());
         }
     }
+
+    internal static class ReaderIA5Extensions
+    {
+        public static bool TryGetIA5StringBytes(
+            this AsnReader reader,
+            out ReadOnlyMemory<byte> contents)
+        {
+            return reader.TryGetCharacterStringBytes(
+                UniversalTagNumber.IA5String,
+                out contents);
+        }
+
+        public static bool TryGetIA5StringBytes(
+            this AsnReader reader,
+            Asn1Tag expectedTag,
+            out ReadOnlyMemory<byte> contents)
+        {
+            return reader.TryGetCharacterStringBytes(
+                expectedTag,
+                UniversalTagNumber.IA5String,
+                out contents);
+        }
+
+        public static bool TryCopyIA5StringBytes(
+            this AsnReader reader,
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            return reader.TryCopyCharacterStringBytes(
+                UniversalTagNumber.IA5String,
+                destination,
+                out bytesWritten);
+        }
+
+        public static bool TryCopyIA5String(
+            this AsnReader reader,
+            Span<char> destination,
+            out int charsWritten)
+        {
+            return reader.TryCopyCharacterString(
+                UniversalTagNumber.IA5String,
+                destination,
+                out charsWritten);
+        }
+    }
 }

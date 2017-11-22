@@ -707,4 +707,49 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Equal(val1.ByteArrayToHex(), val2.ByteArrayToHex());
         }
     }
+
+    internal static class ReaderBMPExtensions
+    {
+        public static bool TryGetBMPStringBytes(
+            this AsnReader reader,
+            out ReadOnlyMemory<byte> contents)
+        {
+            return reader.TryGetCharacterStringBytes(
+                UniversalTagNumber.BMPString,
+                out contents);
+        }
+
+        public static bool TryGetBMPStringBytes(
+            this AsnReader reader,
+            Asn1Tag expectedTag,
+            out ReadOnlyMemory<byte> contents)
+        {
+            return reader.TryGetCharacterStringBytes(
+                expectedTag,
+                UniversalTagNumber.BMPString,
+                out contents);
+        }
+
+        public static bool TryCopyBMPStringBytes(
+            this AsnReader reader,
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            return reader.TryCopyCharacterStringBytes(
+                UniversalTagNumber.BMPString,
+                destination,
+                out bytesWritten);
+        }
+
+        public static bool TryCopyBMPString(
+            this AsnReader reader,
+            Span<char> destination,
+            out int charsWritten)
+        {
+            return reader.TryCopyCharacterString(
+                UniversalTagNumber.BMPString,
+                destination,
+                out charsWritten);
+        }
+    }
 }

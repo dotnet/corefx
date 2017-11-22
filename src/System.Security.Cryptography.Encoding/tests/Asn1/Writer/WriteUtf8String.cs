@@ -56,10 +56,18 @@ namespace System.Security.Cryptography.Tests.Asn1
 
         public static IEnumerable<object[]> InvalidInputs => Array.Empty<object[]>();
 
-        internal override void WriteString(AsnWriter writer, string s) => writer.WriteUtf8String(s);
-        internal override void WriteString(AsnWriter writer, Asn1Tag tag, string s) => writer.WriteUtf8String(tag, s);
-        internal override void WriteSpan(AsnWriter writer, ReadOnlySpan<char> s) => writer.WriteUtf8String(s);
-        internal override void WriteSpan(AsnWriter writer, Asn1Tag tag, ReadOnlySpan<char> s) => writer.WriteUtf8String(tag, s);
+        internal override void WriteString(AsnWriter writer, string s) =>
+            writer.WriteCharacterString(UniversalTagNumber.UTF8String, s);
+
+        internal override void WriteString(AsnWriter writer, Asn1Tag tag, string s) =>
+            writer.WriteCharacterString(tag, UniversalTagNumber.UTF8String, s);
+
+        internal override void WriteSpan(AsnWriter writer, ReadOnlySpan<char> s) =>
+            writer.WriteCharacterString(UniversalTagNumber.UTF8String, s);
+
+        internal override void WriteSpan(AsnWriter writer, Asn1Tag tag, ReadOnlySpan<char> s) =>
+            writer.WriteCharacterString(tag, UniversalTagNumber.UTF8String, s);
+
         internal override Asn1Tag StandardTag => new Asn1Tag(UniversalTagNumber.UTF8String);
 
         [Theory]

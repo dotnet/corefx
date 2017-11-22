@@ -57,10 +57,18 @@ namespace System.Security.Cryptography.Tests.Asn1
             new object[] { "Dr. & Mrs. Smith\u2010Jones \uFE60 children", },
         };
 
-        internal override void WriteString(AsnWriter writer, string s) => writer.WriteIA5String(s);
-        internal override void WriteString(AsnWriter writer, Asn1Tag tag, string s) => writer.WriteIA5String(tag, s);
-        internal override void WriteSpan(AsnWriter writer, ReadOnlySpan<char> s) => writer.WriteIA5String(s);
-        internal override void WriteSpan(AsnWriter writer, Asn1Tag tag, ReadOnlySpan<char> s) => writer.WriteIA5String(tag, s);
+        internal override void WriteString(AsnWriter writer, string s) =>
+            writer.WriteCharacterString(UniversalTagNumber.IA5String, s);
+
+        internal override void WriteString(AsnWriter writer, Asn1Tag tag, string s) =>
+            writer.WriteCharacterString(tag, UniversalTagNumber.IA5String, s);
+
+        internal override void WriteSpan(AsnWriter writer, ReadOnlySpan<char> s) =>
+            writer.WriteCharacterString(UniversalTagNumber.IA5String, s);
+
+        internal override void WriteSpan(AsnWriter writer, Asn1Tag tag, ReadOnlySpan<char> s) =>
+            writer.WriteCharacterString(tag, UniversalTagNumber.IA5String, s);
+
         internal override Asn1Tag StandardTag => new Asn1Tag(UniversalTagNumber.IA5String);
 
         [Theory]
