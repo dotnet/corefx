@@ -283,7 +283,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         .GetArray(LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars), 1, true);
 
                 case MethodSignatureEnum.SIG_METH_TYVAR:
-
                     return GetTypeManager().GetStdMethTypeVar(signature[indexIntoSignatures++]);
 
                 case MethodSignatureEnum.SIG_CLASS_TYVAR:
@@ -301,14 +300,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         typeArgs[iTypeArg] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
                     }
 
-                    AggregateType type = GetTypeManager()
-                        .GetAggregate(agg, getBSymmgr().AllocParams(agg.GetTypeVars().Count, typeArgs));
-                    if (type.isPredefType(PredefinedType.PT_G_OPTIONAL))
-                    {
-                        return GetTypeManager().GetNubFromNullable(type);
-                    }
-
-                    return type;
+                    return GetTypeManager().GetAggregate(agg, getBSymmgr().AllocParams(typeArgs));
             }
         }
 
