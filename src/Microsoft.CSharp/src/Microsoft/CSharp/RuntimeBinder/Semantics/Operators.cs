@@ -44,15 +44,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 (enum,      under)      :       + -
                 (under,     enum)       :       +
          
-                (ptr,       ptr)        :         -
-                (ptr,       int)        :       + -
-                (ptr,       uint)       :       + -
-                (ptr,       long)       :       + -
-                (ptr,       ulong)      :       + -
-                (int,       ptr)        :       +
-                (uint,      ptr)        :       +
-                (long,      ptr)        :       +
-                (ulong,     ptr)        :       +
+                (ptr,       ptr)        :         -     Not callable through dynamic
+                (ptr,       int)        :       + -     Not callable through dynamic
+                (ptr,       uint)       :       + -     Not callable through dynamic
+                (ptr,       long)       :       + -     Not callable through dynamic
+                (ptr,       ulong)      :       + -     Not callable through dynamic
+                (int,       ptr)        :       +       Not callable through dynamic
+                (uint,      ptr)        :       +       Not callable through dynamic
+                (long,      ptr)        :       +       Not callable through dynamic
+                (ulong,     ptr)        :       +       Not callable through dynamic
          
                 (void,     void)      :                   == != < > <= >=
          
@@ -73,7 +73,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 enum    :       ~
                 ptr     :          
          
-            Note that pointer operators cannot be lifted over nullable.
+            Note that pointer operators cannot be lifted over nullable and are not callable through dynamic
         */
 
         // BinOpBindMethod and UnaOpBindMethod are method pointer arrays to dispatch the appropriate operator binder.
