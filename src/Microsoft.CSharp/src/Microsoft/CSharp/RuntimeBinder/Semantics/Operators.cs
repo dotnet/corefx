@@ -1618,6 +1618,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 type = GetPredefindType(PredefinedType.PT_INT);
             }
 
+            Debug.Assert(type.fundType() != FUNDTYPE.FT_PTR); // Can't have a pointer.
             switch (type.fundType())
             {
                 default:
@@ -1635,9 +1636,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
 
                     return CreateUnaryOpForPredefMethodCall(ek, predefMeth, type, exprVal);
-
-                case FUNDTYPE.FT_PTR:
-                    return BindPtrBinOp(ek, flags, exprVal, GetExprFactory().CreateConstant(GetPredefindType(PredefinedType.PT_INT), ConstVal.Get(1)));
 
                 case FUNDTYPE.FT_I1:
                 case FUNDTYPE.FT_I2:
@@ -2117,15 +2115,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             return mustCastInUncheckedContext(exprRes, typeEnum, CONVERTTYPE.NOUDC);
-        }
-
-
-        /*
-            Handles pointer binary operators (+ and -).
-        */
-        private Expr BindPtrBinOp(ExpressionKind ek, EXPRFLAG flags, Expr arg1, Expr arg2)
-        {
-            return null;
         }
 
         /*
