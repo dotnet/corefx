@@ -208,7 +208,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private AggregateSymbol GetMethParent(PREDEFMETH method)
         {
-            return GetOptPredefAgg(GetMethPredefType(method));
+            return GetPredefAgg(GetMethPredefType(method));
         }
 
         private PropertySymbol LoadProperty(PREDEFPROP property)
@@ -232,7 +232,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(propertyGetter >= 0 && propertyGetter < PREDEFMETH.PM_COUNT);
 
             RuntimeBinderSymbolTable.AddPredefinedPropertyToSymbolTable(
-                GetOptPredefAgg(GetPropPredefType(predefProp)), propertyName);
+                GetPredefAgg(GetPropPredefType(predefProp)), propertyName);
             MethodSymbol getter = GetMethod(propertyGetter);
 
             getter.SetMethKind(MethodKindEnum.PropAccessor);
@@ -264,7 +264,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return NameManager.GetPredefinedName(pn);
         }
-        private AggregateSymbol GetOptPredefAgg(PredefinedType pt)
+        private AggregateSymbol GetPredefAgg(PredefinedType pt)
         {
             return GetSymbolLoader().GetPredefAgg(pt);
         }
@@ -302,33 +302,29 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case (MethodSignatureEnum)PredefinedType.PT_VOID:
                     return GetTypeManager().GetVoid();
                 default:
+                {
+                    Debug.Assert(current >= 0 && (int)current < (int)PredefinedType.PT_COUNT);
+                    AggregateSymbol agg = GetPredefAgg((PredefinedType)current);
+                    CType[] typeArgs = new CType[agg.GetTypeVars().Count];
+                    for (int iTypeArg = 0; iTypeArg < agg.GetTypeVars().Count; iTypeArg++)
                     {
-                        Debug.Assert(current >= 0 && (int)current < (int)PredefinedType.PT_COUNT);
-                        AggregateSymbol agg = GetOptPredefAgg((PredefinedType)current);
-                        if (agg != null)
+                        typeArgs[iTypeArg] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
+                        if (typeArgs[iTypeArg] == null)
                         {
-                            CType[] typeArgs = new CType[agg.GetTypeVars().Count];
-                            for (int iTypeArg = 0; iTypeArg < agg.GetTypeVars().Count; iTypeArg++)
-                            {
-                                typeArgs[iTypeArg] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                                if (typeArgs[iTypeArg] == null)
-                                {
-                                    return null;
-                                }
-                            }
-                            AggregateType type = GetTypeManager().GetAggregate(agg, getBSymmgr().AllocParams(agg.GetTypeVars().Count, typeArgs));
-                            if (type.isPredefType(PredefinedType.PT_G_OPTIONAL))
-                            {
-                                return GetTypeManager().GetNubFromNullable(type);
-                            }
-
-                            return type;
+                            return null;
                         }
                     }
-                    break;
-            }
 
-            return null;
+                    AggregateType type = GetTypeManager()
+                        .GetAggregate(agg, getBSymmgr().AllocParams(agg.GetTypeVars().Count, typeArgs));
+                    if (type.isPredefType(PredefinedType.PT_G_OPTIONAL))
+                    {
+                        return GetTypeManager().GetNubFromNullable(type);
+                    }
+
+                    return type;
+                }
+            }
         }
         private TypeArray LoadTypeArrayFromSignature(int[] signature, ref int indexIntoSignatures, TypeArray classTyVars)
         {
