@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Net.Test.Common;
-
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -33,16 +33,15 @@ namespace System.Net.Sockets.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Fact]
-        public void ConnectWithV4_Success()
+        public async Task ConnectWithV4_Success()
         {
-            int port;
-            TcpListener listener = SocketTestExtensions.CreateAndStartTcpListenerOnAnonymousPort(out port);
-            IAsyncResult asyncResult = listener.BeginAcceptTcpClient(null, null);
+            TcpListener listener = SocketTestExtensions.CreateAndStartTcpListenerOnAnonymousPort(out int port);
+            Task<TcpClient> acceptTask = Task.Factory.FromAsync(listener.BeginAcceptTcpClient(null, null), listener.EndAcceptTcpClient);
 
             TcpClient client = new TcpClient(AddressFamily.InterNetwork);
-            client.ConnectAsync(IPAddress.Loopback, port).GetAwaiter().GetResult();
+            await client.ConnectAsync(IPAddress.Loopback, port);
 
-            TcpClient acceptedClient = listener.EndAcceptTcpClient(asyncResult);
+            TcpClient acceptedClient = await acceptTask;
             client.Dispose();
             acceptedClient.Dispose();
             listener.Stop();
@@ -50,16 +49,15 @@ namespace System.Net.Sockets.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Fact]
-        public void ConnectWithV6_Success()
+        public async Task ConnectWithV6_Success()
         {
-            int port;
-            TcpListener listener = SocketTestExtensions.CreateAndStartTcpListenerOnAnonymousPort(out port);
-            IAsyncResult asyncResult = listener.BeginAcceptTcpClient(null, null);
+            TcpListener listener = SocketTestExtensions.CreateAndStartTcpListenerOnAnonymousPort(out int port);
+            Task<TcpClient> acceptTask = Task.Factory.FromAsync(listener.BeginAcceptTcpClient(null, null), listener.EndAcceptTcpClient);
 
             TcpClient client = new TcpClient(AddressFamily.InterNetworkV6);
-            client.ConnectAsync(IPAddress.IPv6Loopback, port).GetAwaiter().GetResult();
+            await client.ConnectAsync(IPAddress.IPv6Loopback, port);
 
-            TcpClient acceptedClient = listener.EndAcceptTcpClient(asyncResult);
+            TcpClient acceptedClient = await acceptTask;
             client.Dispose();
             acceptedClient.Dispose();
             listener.Stop();
@@ -67,25 +65,24 @@ namespace System.Net.Sockets.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Fact]
-        public void ConnectWithV4AndV6_Success()
+        public async Task ConnectWithV4AndV6_Success()
         {
-            int port;
-            TcpListener listener = SocketTestExtensions.CreateAndStartTcpListenerOnAnonymousPort(out port);
-            IAsyncResult asyncResult = listener.BeginAcceptTcpClient(null, null);
+            TcpListener listener = SocketTestExtensions.CreateAndStartTcpListenerOnAnonymousPort(out int port);
+            Task<TcpClient> acceptTask = Task.Factory.FromAsync(listener.BeginAcceptTcpClient(null, null), listener.EndAcceptTcpClient);
 
             TcpClient v6Client = new TcpClient(AddressFamily.InterNetworkV6);
-            v6Client.ConnectAsync(IPAddress.IPv6Loopback, port).GetAwaiter().GetResult();
+            await v6Client.ConnectAsync(IPAddress.IPv6Loopback, port);
 
-            TcpClient acceptedV6Client = listener.EndAcceptTcpClient(asyncResult);
+            TcpClient acceptedV6Client = await acceptTask;
             Assert.Equal(AddressFamily.InterNetworkV6, acceptedV6Client.Client.RemoteEndPoint.AddressFamily);
             Assert.Equal(AddressFamily.InterNetworkV6, v6Client.Client.RemoteEndPoint.AddressFamily);
 
-            asyncResult = listener.BeginAcceptTcpClient(null, null);
+            acceptTask = Task.Factory.FromAsync(listener.BeginAcceptTcpClient(null, null), listener.EndAcceptTcpClient);
 
             TcpClient v4Client = new TcpClient(AddressFamily.InterNetwork);
-            v4Client.ConnectAsync(IPAddress.Loopback, port).GetAwaiter().GetResult();
+            await v4Client.ConnectAsync(IPAddress.Loopback, port);
 
-            TcpClient acceptedV4Client = listener.EndAcceptTcpClient(asyncResult);
+            TcpClient acceptedV4Client = await acceptTask;
             Assert.Equal(AddressFamily.InterNetworkV6, acceptedV4Client.Client.RemoteEndPoint.AddressFamily);
             Assert.Equal(AddressFamily.InterNetwork, v4Client.Client.RemoteEndPoint.AddressFamily);
 
