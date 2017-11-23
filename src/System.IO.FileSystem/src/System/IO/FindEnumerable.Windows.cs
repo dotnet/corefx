@@ -213,13 +213,12 @@ namespace System.IO
                 _pinnedBuffer.Free();
                 Interop.Kernel32.CloseHandle(_directoryHandle);
                 ArrayPool<byte>.Shared.Return(buffer);
-            }
 
-            Queue<(IntPtr Handle, string Path)> queue = Interlocked.Exchange(ref _pending, null);
-            if (queue != null)
-            {
-                while (queue.Count > 0)
-                    Interop.Kernel32.CloseHandle(queue.Dequeue().Handle);
+                if (_recursive && _pending != null)
+                {
+                    while (_pending.Count > 0)
+                        Interop.Kernel32.CloseHandle(_pending.Dequeue().Handle);
+                }
             }
         }
 

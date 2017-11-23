@@ -114,20 +114,22 @@ namespace System.IO
         {
             Debug.Assert(first.Length > 0 && second.Length > 0, "should have dealt with empty paths");
 
-            bool hasSeparator = first[first.Length - 1] == Path.DirectorySeparatorChar
-                || second[0] == Path.DirectorySeparatorChar;
+            bool hasSeparator = PathInternal.IsDirectorySeparator(first[first.Length - 1])
+                || PathInternal.IsDirectorySeparator(second[0]);
 
-            int totalLength = first.Length + second.Length + (hasSeparator ? 0 : 1);
-            string fullPath = new string('\0', totalLength);
-            fixed (char* f = fullPath)
+            fixed (char* f = &first.DangerousGetPinnableReference(), s = &second.DangerousGetPinnableReference())
             {
-                Span<char> pathSpan = new Span<char>(f, totalLength);
-                first.CopyTo(pathSpan);
-                if (!hasSeparator)
-                    pathSpan[first.Length] = Path.DirectorySeparatorChar;
-                second.CopyTo(pathSpan.Slice(first.Length + (hasSeparator ? 0 : 1)));
+                return string.Create(
+                    first.Length + second.Length + (hasSeparator ? 0 : 1),
+                    (First: (IntPtr)f, FirstLength: first.Length, Second: (IntPtr)s, SecondLength: second.Length, HasSeparator: hasSeparator),
+                    (destination, state) =>
+                    {
+                        new Span<char>((char*)state.First, state.FirstLength).CopyTo(destination);
+                        if (!state.HasSeparator)
+                            destination[state.FirstLength] = Path.DirectorySeparatorChar;
+                        new Span<char>((char*)state.Second, state.SecondLength).CopyTo(destination.Slice(state.FirstLength + (state.HasSeparator ? 0 : 1)));
+                    });
             }
-            return fullPath;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -135,25 +137,28 @@ namespace System.IO
         {
             Debug.Assert(first.Length > 0 && second.Length > 0 && third.Length > 0, "should have dealt with empty paths");
 
-            bool firstHasSeparator = first[first.Length - 1] == Path.DirectorySeparatorChar
-                || second[0] == Path.DirectorySeparatorChar;
-            bool thirdHasSeparator = second[second.Length - 1] == Path.DirectorySeparatorChar
-                || third[0] == Path.DirectorySeparatorChar;
+            bool firstHasSeparator = PathInternal.IsDirectorySeparator(first[first.Length - 1])
+                || PathInternal.IsDirectorySeparator(second[0]);
+            bool thirdHasSeparator = PathInternal.IsDirectorySeparator(second[second.Length - 1])
+                || PathInternal.IsDirectorySeparator(third[0]);
 
-            int totalLength = first.Length + second.Length + third.Length + (firstHasSeparator ? 0 : 1) + (thirdHasSeparator ? 0 : 1);
-            string fullPath = new string('\0', totalLength);
-            fixed (char* f = fullPath)
+            fixed (char* f = &first.DangerousGetPinnableReference(), s = &second.DangerousGetPinnableReference(), t = &third.DangerousGetPinnableReference())
             {
-                Span<char> pathSpan = new Span<char>(f, totalLength);
-                first.CopyTo(pathSpan);
-                if (!firstHasSeparator)
-                    pathSpan[first.Length] = Path.DirectorySeparatorChar;
-                second.CopyTo(pathSpan.Slice(first.Length + (firstHasSeparator ? 0 : 1)));
-                if (!thirdHasSeparator)
-                    pathSpan[pathSpan.Length - third.Length - 1] = Path.DirectorySeparatorChar;
-                third.CopyTo(pathSpan.Slice(pathSpan.Length - third.Length));
+                return string.Create(
+                    first.Length + second.Length + third.Length + (firstHasSeparator ? 0 : 1) + (thirdHasSeparator ? 0 : 1),
+                    (First: (IntPtr)f, FirstLength: first.Length, Second: (IntPtr)s, SecondLength: second.Length,
+                        Third: (IntPtr)t, ThirdLength: third.Length, FirstHasSeparator: firstHasSeparator, ThirdHasSeparator: thirdHasSeparator),
+                    (destination, state) =>
+                    {
+                        new Span<char>((char*)state.First, state.FirstLength).CopyTo(destination);
+                        if (!state.FirstHasSeparator)
+                            destination[state.FirstLength] = Path.DirectorySeparatorChar;
+                        new Span<char>((char*)state.Second, state.SecondLength).CopyTo(destination.Slice(state.FirstLength + (state.FirstHasSeparator ? 0 : 1)));
+                        if (!state.ThirdHasSeparator)
+                            destination[destination.Length - state.ThirdLength - 1] = Path.DirectorySeparatorChar;
+                        new Span<char>((char*)state.Third, state.ThirdLength).CopyTo(destination.Slice(destination.Length - state.ThirdLength));
+                    });
             }
-            return fullPath;
         }
 
         /// <summary>
