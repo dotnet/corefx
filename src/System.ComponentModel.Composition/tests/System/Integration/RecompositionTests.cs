@@ -413,7 +413,8 @@ namespace Tests.Integration
             public int Property { get { return 42; } }
         }
         
-        [Fact(Skip = "WorkItem(733533)")]
+        [Fact]
+        [ActiveIssue(733533)]
         public void RemoveCatalogWithNonSharedPartWithRequiredImport()
         {
             var typeCatalog = new TypeCatalog(typeof(NonSharedImporter), typeof(SimpleImport));
@@ -432,8 +433,9 @@ namespace Tests.Integration
 
             Assert.Null(root.Importer);            
         }
-        
-        [Fact(Skip = "WorkItem(734123)")]
+
+        [Fact]
+        [ActiveIssue(734123)]
         public void GetExportResultShouldBePromise()
         {
             var typeCatalog = new TypeCatalog(typeof(RootImporter), typeof(SimpleImport));
@@ -508,8 +510,9 @@ namespace Tests.Integration
         {
 
         }
-        
-        [Fact(Skip = "WorkItem(762215)")]
+
+        [Fact]
+        [ActiveIssue(762215)]
         public void TestPartCreatorResurrection()
         {
             var container = new CompositionContainer(new TypeCatalog(typeof(NonDisposableImportsDisposable), typeof(PartImporter<NonDisposableImportsDisposable>)));

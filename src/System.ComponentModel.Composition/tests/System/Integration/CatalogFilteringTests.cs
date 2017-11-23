@@ -51,8 +51,9 @@ namespace System.ComponentModel.Composition
             Assert.True(contC.IsPresent<ScopeBComponent>());
             Assert.True(contC.IsPresent<ScopeCComponent>());
         }
-        
-        [Fact(Skip = "WorkItem(812029)")]
+
+        [Fact]
+        [ActiveIssue(812029)]
         public void FilteredCatalog_EventsFired()
         {
             var aggCatalog = CatalogFactory.CreateAggregateCatalog();

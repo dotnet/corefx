@@ -109,8 +109,9 @@ namespace System.ComponentModel.Composition
 
         [Export]
         public class SampleCatalogExport2 { }
-        
-        [Fact(Skip = "WorkItem(812029)")]
+
+        [Fact]
+        [ActiveIssue(812029)]
         public void CatalogMultipleAdds_ShouldFireEvents()
         {
             var catalog = new TypeCatalog(typeof(SampleCatalogExport));

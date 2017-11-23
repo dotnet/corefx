@@ -143,7 +143,8 @@ namespace Microsoft.Internal
             this.TestSuccessfulEnumerableGeneration<string>(enumerable);
         }
         
-        [Fact(Skip = "WorkItem(507696)")]
+        [Fact]
+        [ActiveIssue(507696)]
         public void EnumTypeEnumerable()
         {
             TestEnum[] enumerable = new TestEnum[] { TestEnum.First, TestEnum.Second };
