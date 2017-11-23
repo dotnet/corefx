@@ -1303,16 +1303,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else if (unaryOpKind == UnaOpKind.IncDec)
                 {
-                    // Check for pointers
-                    if (pArgumentType is PointerType)
-                    {
-                        pSignatures.Add(new UnaOpFullSig(
-                                pArgumentType,
-                                null,
-                                LiftFlags.None,
-                                UnaOpFuncKind.None));
-                        return UnaryOperatorSignatureFindResult.Match;
-                    }
+                    Debug.Assert(!(pArgumentType is PointerType));
 
                     // Check for user defined inc/dec
                     ExprMultiGet exprGet = GetExprFactory().CreateMultiGet(0, pArgumentType, null);
