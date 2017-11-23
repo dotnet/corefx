@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Net.Test.Common;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -299,6 +300,25 @@ namespace System.Net.WebSockets.Client.Tests
 
                 Array.Reverse(receiveBuffer);
                 Assert.Equal<byte>(sendBuffer, receiveBuffer);
+            }
+        }
+
+        // Restrict this test to Uap platform due to: https://github.com/dotnet/corefx/issues/14103
+        public static bool WebSocketsSupportedAndUap { get { return WebSocketsSupported && PlatformDetection.IsUap; } }
+
+        [OuterLoop] // TODO: Issue #11345
+        [ConditionalTheory(nameof(WebSocketsSupportedAndUap)), MemberData(nameof(EchoServers))]
+        public async Task SendReceive_ConnectionClosedPrematurely_ReceiveAsyncFailsAndWebSocketStateUpdated(Uri server)
+        {
+            using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(".abort");
+                var sendBuffer = new ArraySegment<byte>(bytes, 0, bytes.Length);
+                await cws.SendAsync(sendBuffer, WebSocketMessageType.Text, true, CancellationToken.None);
+
+                byte[] receivedBytes = new byte[256];
+                var receiveBuffer = new ArraySegment<byte>(receivedBytes, 0, receivedBytes.Length);
+                await Assert.ThrowsAsync<WebSocketException>(() => cws.ReceiveAsync(receiveBuffer, CancellationToken.None));
             }
         }
     }
