@@ -495,7 +495,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             bool fConstrained;
             Expr pObject = pMemGroup.OptionalObject;
             CType callingObjectType = pObject?.Type;
-            PostBindMethod(ref mwi);
+            PostBindMethod(mwi);
             pObject = AdjustMemberObject(mwi, pObject, out fConstrained);
             pMemGroup.OptionalObject = pObject;
 
@@ -1124,24 +1124,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        private void PostBindMethod(ref MethWithInst pMWI)
+        private void PostBindMethod(MethWithInst pMWI)
         {
-            if (pMWI.Meth().RetType != null)
+            MethodSymbol meth = pMWI.Meth();
+            if (meth.RetType != null)
             {
-                checkUnsafe(pMWI.Meth().RetType);
+                checkUnsafe(meth.RetType);
 
                 // We need to check unsafe on the parameters as well, since we cannot check in conversion.
-                TypeArray pParams = pMWI.Meth().Params;
-
-                for (int i = 0; i < pParams.Count; i++)
+                foreach (CType type in meth.Params.Items)
                 {
-                    // This is an optimization: don't call this in the vast majority of cases
-                    CType type = pParams[i];
-
-                    if (type.isUnsafe())
-                    {
-                        checkUnsafe(type);
-                    }
+                    checkUnsafe(type);
                 }
             }
         }
