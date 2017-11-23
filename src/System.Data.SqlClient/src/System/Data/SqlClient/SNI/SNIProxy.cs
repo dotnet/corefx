@@ -136,24 +136,21 @@ namespace System.Data.SqlClient.SNI
             sspiClientContextStatus.ContextFlags = contextFlags;
             sspiClientContextStatus.CredentialsHandle = credentialsHandle;
 
-
-            throw new InvalidOperationException("IsErrorStatus(statusCode.ErrorCode) == true");
-
-            //if (IsErrorStatus(statusCode.ErrorCode))
-            //{
-            //    // Could not access Kerberos Ticket.
-            //    //
-            //    // SecurityStatusPalErrorCode.InternalError only occurs in Unix and always comes with a GssApiException,
-            //    // so we don't need to check for a GssApiException here.
-            //    if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError)
-            //    {
-            //        throw new InvalidOperationException(SQLMessage.KerberosTicketMissingError() + "\n" + statusCode);
-            //    }
-            //    else
-            //    {
-            //        throw new InvalidOperationException(SQLMessage.SSPIGenerateError() + "\n" + statusCode);
-            //    }
-            //}
+            if (IsErrorStatus(statusCode.ErrorCode))
+            {
+                // Could not access Kerberos Ticket.
+                //
+                // SecurityStatusPalErrorCode.InternalError only occurs in Unix and always comes with a GssApiException,
+                // so we don't need to check for a GssApiException here.
+                if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError)
+                {
+                    throw new Exception(SQLMessage.KerberosTicketMissingError() + "\n" + statusCode);
+                }
+                else
+                {
+                    throw new Exception(SQLMessage.SSPIGenerateError() + "\n" + statusCode);
+                }
+            }
         }
 
         private static bool IsErrorStatus(SecurityStatusPalErrorCode errorCode)

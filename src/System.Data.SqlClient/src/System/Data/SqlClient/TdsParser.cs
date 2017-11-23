@@ -6339,7 +6339,7 @@ namespace System.Data.SqlClient
                 {
                     _physicalStateObj.GenerateSspiClientContext(receivedBuff, receivedLength, ref sendBuff, ref sendLength, _sniSpnBuffer);
                 }
-                catch (InvalidOperationException e)
+                catch (Exception e)
                 {
                     SSPIError(e.Message + Environment.NewLine + e.StackTrace, TdsEnums.GEN_CLIENT_CONTEXT);
                 }
