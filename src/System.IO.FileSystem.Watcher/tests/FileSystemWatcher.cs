@@ -265,7 +265,5 @@ namespace System.IO.Tests
                 Thread.Sleep(WaitForExpectedEventTimeout);
             }
         }
-
-        
     }
 }
