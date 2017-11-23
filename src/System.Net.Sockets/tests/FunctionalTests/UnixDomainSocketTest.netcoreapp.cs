@@ -422,13 +422,13 @@ namespace System.Net.Sockets.Tests
             // Bind
             using (Socket socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified))
             {
-                Assert.Throws<SocketException>(() => socket.Bind(new UnixDomainSocketEndPoint(address)));
+                Assert.ThrowsAny<SocketException>(() => socket.Bind(new UnixDomainSocketEndPoint(address)));
             }
 
             // Connect
             using (Socket socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified))
             {
-                Assert.Throws<SocketException>(() => socket.Connect(new UnixDomainSocketEndPoint(address)));
+                Assert.ThrowsAny<SocketException>(() => socket.Connect(new UnixDomainSocketEndPoint(address)));
             }
         }
 
