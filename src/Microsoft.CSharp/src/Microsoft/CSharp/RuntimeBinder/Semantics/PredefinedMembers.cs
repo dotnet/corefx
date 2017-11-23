@@ -294,7 +294,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 default:
                     Debug.Assert(current >= 0 && (int)current < (int)PredefinedType.PT_COUNT);
                     AggregateSymbol agg = GetPredefAgg((PredefinedType)current);
-                    CType[] typeArgs = new CType[agg.GetTypeVars().Count];
+                    int typeCount = agg.GetTypeVars().Count;
+                    if (typeCount == 0)
+                    {
+                        return GetTypeManager().GetAggregate(agg, BSYMMGR.EmptyTypeArray());
+                    }
+
+                    CType[] typeArgs = new CType[typeCount];
                     for (int iTypeArg = 0; iTypeArg < typeArgs.Length; iTypeArg++)
                     {
                         typeArgs[iTypeArg] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
