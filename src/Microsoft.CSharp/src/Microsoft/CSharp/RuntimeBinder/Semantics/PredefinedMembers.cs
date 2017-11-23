@@ -150,9 +150,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // start next value at PredefinedType.PT_VOID + 1,
         SIG_CLASS_TYVAR = (int)PredefinedType.PT_VOID + 1,          // next element in signature is index of class tyvar
         SIG_METH_TYVAR,                         // next element in signature is index of method tyvar
-        SIG_SZ_ARRAY,                           // must be followed by signature type of array elements
-        SIG_REF,                                // must be followed by signature of ref type
-        SIG_OUT,                                // must be followed by signature of out type
+        SIG_SZ_ARRAY                            // must be followed by signature type of array elements
     }
 
     // A description of a method the compiler uses while compiling.
@@ -280,24 +278,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             switch (current)
             {
-                case MethodSignatureEnum.SIG_REF:
-                    {
-                        CType refType = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                        if (refType == null)
-                        {
-                            return null;
-                        }
-                        return GetTypeManager().GetParameterModifier(refType, false);
-                    }
-                case MethodSignatureEnum.SIG_OUT:
-                    {
-                        CType outType = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                        if (outType == null)
-                        {
-                            return null;
-                        }
-                        return GetTypeManager().GetParameterModifier(outType, true);
-                    }
                 case MethodSignatureEnum.SIG_SZ_ARRAY:
                     {
                         CType elementType = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
