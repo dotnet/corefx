@@ -117,8 +117,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         DelBinOp,
         EnumBinOp,
         IntBinOp,
-        PtrBinOp,
-        PtrCmpOp,
         RealBinOp,
         RefCmpOp,
         ShiftOp,

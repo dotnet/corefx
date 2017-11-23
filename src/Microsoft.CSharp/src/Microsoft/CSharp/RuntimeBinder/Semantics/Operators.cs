@@ -144,7 +144,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             return GetDelBinOpSigs(prgbofs, info) ||
                    GetEnumBinOpSigs(prgbofs, info) ||
-                   GetPtrBinOpSigs(prgbofs, info) ||
                    GetRefEqualSigs(prgbofs, info);
         }
 
@@ -855,103 +854,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return info.typeRaw1.isEnumType() | info.typeRaw2.isEnumType();
             }
 
-            return false;
-        }
-
-
-        /*
-            Get the special signatures when at least one of the args is a pointer. Since pointers can't be
-            type arguments, a nullable pointer is illegal, so no sense trying to lift any of these.
-         
-            NOTE: We don't filter out bad operators on void pointers since BindPtrBinOp gives better
-            error messages than the operator overload resolution does.
-        */
-        private bool GetPtrBinOpSigs(List<BinOpFullSig> prgbofs, BinOpArgInfo info)
-        {
-            if (!(info.type1 is PointerType) && !(info.type2 is PointerType))
-            {
-                return false;
-            }
-
-            // (ptr,       ptr)        :         -
-            // (ptr,       int)        :       + -
-            // (ptr,       uint)       :       + -
-            // (ptr,       long)       :       + -
-            // (ptr,       ulong)      :       + -
-            // (int,       ptr)        :       +
-            // (uint,      ptr)        :       +
-            // (long,      ptr)        :       +
-            // (ulong,     ptr)        :       +
-            // (void,     void)      :                   == != < > <= >=
-
-            // Check the common case first.
-            if (info.type1 is PointerType && info.type2 is PointerType)
-            {
-                if (info.ValidForVoidPointer())
-                {
-                    prgbofs.Add(new BinOpFullSig(info.type1, info.type2, BindPtrCmpOp, OpSigFlags.None, LiftFlags.None, BinOpFuncKind.PtrCmpOp));
-                    return true;
-                }
-                if (info.type1 == info.type2 && info.ValidForPointer())
-                {
-                    prgbofs.Add(new BinOpFullSig(info.type1, info.type2, BindPtrBinOp, OpSigFlags.None, LiftFlags.None, BinOpFuncKind.PtrBinOp));
-                    return true;
-                }
-                return false;
-            }
-
-            CType typeT;
-
-            if (info.type1 is PointerType)
-            {
-                if (info.type2 is NullType)
-                {
-                    if (!info.ValidForVoidPointer())
-                    {
-                        return false;
-                    }
-                    prgbofs.Add(new BinOpFullSig(info.type1, info.type1, BindPtrCmpOp, OpSigFlags.Convert, LiftFlags.None, BinOpFuncKind.PtrCmpOp));
-                    return true;
-                }
-                if (!info.ValidForPointerAndNumber())
-                {
-                    return false;
-                }
-
-                for (uint i = 0; i < s_rgptIntOp.Length; i++)
-                {
-                    if (canConvert(info.arg2, typeT = GetPredefindType(s_rgptIntOp[i])))
-                    {
-                        prgbofs.Add(new BinOpFullSig(info.type1, typeT, BindPtrBinOp, OpSigFlags.Convert, LiftFlags.None, BinOpFuncKind.PtrBinOp));
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            Debug.Assert(info.type2 is PointerType);
-            if (info.type1 is NullType)
-            {
-                if (!info.ValidForVoidPointer())
-                {
-                    return false;
-                }
-                prgbofs.Add(new BinOpFullSig(info.type2, info.type2, BindPtrCmpOp, OpSigFlags.Convert, LiftFlags.None, BinOpFuncKind.PtrCmpOp));
-                return true;
-            }
-            if (!info.ValidForNumberAndPointer())
-            {
-                return false;
-            }
-
-            for (uint i = 0; i < s_rgptIntOp.Length; i++)
-            {
-                if (canConvert(info.arg1, typeT = GetPredefindType(s_rgptIntOp[i])))
-                {
-                    prgbofs.Add(new BinOpFullSig(typeT, info.type2, BindPtrBinOp, OpSigFlags.Convert, LiftFlags.None, BinOpFuncKind.PtrBinOp));
-                    return true;
-                }
-            }
             return false;
         }
 
@@ -2225,16 +2127,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return null;
         }
-
-
-        /*
-            Handles pointer comparison operators.
-        */
-        private Expr BindPtrCmpOp(ExpressionKind ek, EXPRFLAG flags, Expr arg1, Expr arg2)
-        {
-            return null;
-        }
-
 
         /*
             Given a binary operator EXPRKIND, get the BinOpKind and flags.
