@@ -266,8 +266,7 @@ namespace System.IO.Tests
             }
         }
 
-        [Fact]
-        //[Trait("MyTrait","MyTrait")]
+        [Fact]        
         public void Change_Path_Runtime()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))

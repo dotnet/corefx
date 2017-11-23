@@ -485,8 +485,7 @@ namespace System.IO.Tests
             }
         }
 
-        [Fact]
-        [Trait("MyTrait", "MyTrait")]
+        [Fact]        
         public void FileSystemWatcher_Path()
         {
             FileSystemWatcher watcher = new FileSystemWatcher();
