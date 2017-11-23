@@ -279,40 +279,26 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (current)
             {
                 case MethodSignatureEnum.SIG_SZ_ARRAY:
-                    {
-                        CType elementType = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                        if (elementType == null)
-                        {
-                            return null;
-                        }
-                        return GetTypeManager().GetArray(elementType, 1, true);
-                    }
+                    return GetTypeManager()
+                        .GetArray(LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars), 1, true);
+
                 case MethodSignatureEnum.SIG_METH_TYVAR:
-                    {
-                        int index = signature[indexIntoSignatures];
-                        indexIntoSignatures++;
-                        return GetTypeManager().GetStdMethTypeVar(index);
-                    }
+
+                    return GetTypeManager().GetStdMethTypeVar(signature[indexIntoSignatures++]);
+
                 case MethodSignatureEnum.SIG_CLASS_TYVAR:
-                    {
-                        int index = signature[indexIntoSignatures];
-                        indexIntoSignatures++;
-                        return classTyVars[index];
-                    }
+                    return classTyVars[signature[indexIntoSignatures++]];
+
                 case (MethodSignatureEnum)PredefinedType.PT_VOID:
                     return GetTypeManager().GetVoid();
+
                 default:
-                {
                     Debug.Assert(current >= 0 && (int)current < (int)PredefinedType.PT_COUNT);
                     AggregateSymbol agg = GetPredefAgg((PredefinedType)current);
                     CType[] typeArgs = new CType[agg.GetTypeVars().Count];
-                    for (int iTypeArg = 0; iTypeArg < agg.GetTypeVars().Count; iTypeArg++)
+                    for (int iTypeArg = 0; iTypeArg < typeArgs.Length; iTypeArg++)
                     {
                         typeArgs[iTypeArg] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                        if (typeArgs[iTypeArg] == null)
-                        {
-                            return null;
-                        }
                     }
 
                     AggregateType type = GetTypeManager()
@@ -323,9 +309,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
 
                     return type;
-                }
             }
         }
+
         private TypeArray LoadTypeArrayFromSignature(int[] signature, ref int indexIntoSignatures, TypeArray classTyVars)
         {
             Debug.Assert(signature != null);
@@ -336,14 +322,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(count >= 0);
 
             CType[] ptypes = new CType[count];
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < ptypes.Length; i++)
             {
                 ptypes[i] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                if (ptypes[i] == null)
-                {
-                    return null;
-                }
             }
+
             return getBSymmgr().AllocParams(count, ptypes);
         }
 
