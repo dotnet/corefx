@@ -2044,7 +2044,7 @@ namespace System.Drawing.Tests
             {
                 graphics.PageScale = 10;
                 graphics.Transform = transform;
-                
+
                 graphics.TransformPoints(destSpace, srcSpace, points);
                 Assert.Equal(expected, points);
             }
@@ -3519,5 +3519,28 @@ namespace System.Drawing.Tests
             Assert.Equal(new Matrix(), graphics.Transform);
             Assert.Equal(expectedVisibleClipBounds, graphics.VisibleClipBounds);
         }
+
+        /*
+           C:\Users\Marco\Source\Repos\forks\corefx\src\Common\src\System\Drawing\ColorConverterCommon.cs(131):                throw new Exception(SR.Format(SR.ConvertInvalidPrimitive, text, typeof(int).Name), e);
+           C:\Users\Marco\Source\Repos\forks\corefx\src\System.Drawing.Common\src\System\Drawing\Graphics.Unix.cs(1734):                throw new Exception("Cannot create Graphics from an indexed bitmap.");
+           C:\Users\Marco\Source\Repos\forks\corefx\src\System.Drawing.Common\src\System\Drawing\Graphics.Windows.cs(166):                throw new Exception(SR.Format(SR.GdiplusCannotCreateGraphicsFromIndexedPixelFormat));
+           C:\Users\Marco\Source\Repos\forks\corefx\src\System.Drawing.Common\src\System\Drawing\Icon.Unix.cs(556):                    throw new Exception(msg);
+           C:\Users\Marco\Source\Repos\forks\corefx\src\System.Drawing.Common\src\System\Drawing\ToolboxBitmapAttribute.Unix.cs(138):                //    throw new Exception ("ToolboxBitmap must be 16x16 pixels"); 
+        */
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [Trait("MyTrait", "MyTrait")]
+        public void Graphics_FromImage_GenericException()
+        {
+            using (var image = new Bitmap(10, 10, PixelFormat.Format1bppIndexed))
+            {
+                Assert.Throws<ArgumentException>(() =>
+                {
+                    using (Graphics graphics = Graphics.FromImage(image))
+                    {
+                    }
+                });
+            }
+        }
+
     }
 }
