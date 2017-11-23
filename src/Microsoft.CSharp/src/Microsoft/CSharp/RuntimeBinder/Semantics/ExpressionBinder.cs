@@ -561,14 +561,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             checkUnsafe(pFieldType); // added to the binder so we don't bind to pointer ops
 
-            bool isLValue = pOptionalObject?.Type is PointerType || objectIsLvalue(pOptionalObject);
-
-            // Exception: a readonly field is not an lvalue unless we're in the constructor/static constructor appropriate
-            // for the field.
-            if (fwt.Field().isReadOnly)
-            {
-                isLValue = false;
-            }
+            // lvalue if the object is an lvalue (or it's static) and the field is not readonly.
+            bool isLValue = objectIsLvalue(pOptionalObject) && !fwt.Field().isReadOnly;
 
             AggregateType fieldType = null;
             // If this field is the backing field of a WindowsRuntime event then we need to bind to its
