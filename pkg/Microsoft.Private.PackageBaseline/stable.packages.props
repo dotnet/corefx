@@ -1479,5 +1479,9 @@
     <StablePackage Include="System.Security.Cryptography.X509Certificates">
       <Version>4.1.2</Version>
     </StablePackage>
+
+    <StablePackage Include="System.Net.WebSockets.Client">
+      <Version>4.0.2</Version>
+    </StablePackage>
   </ItemGroup>
 </Project>
