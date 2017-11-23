@@ -352,12 +352,14 @@ namespace System.Net.Sockets.Tests
         }
 
         [Theory]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         [InlineData(false)]
         [InlineData(true)]
         public void UnixDomainSocketEndPoint_RemoteEndPointEqualsBindAddress(bool abstractAddress)
         {
             string serverAddress;
             string clientAddress;
+            string expectedClientAddress;
             if (abstractAddress)
             {
                 // abstract socket addresses are a Linux feature.
@@ -368,11 +370,13 @@ namespace System.Net.Sockets.Tests
                 // An abstract socket address starts with a zero byte.
                 serverAddress = '\0' + Guid.NewGuid().ToString();
                 clientAddress = '\0' + Guid.NewGuid().ToString();
+                expectedClientAddress = '@' + clientAddress.Substring(1);
             }
             else
             {
                 serverAddress = GetRandomNonExistingFilePath();
                 clientAddress = GetRandomNonExistingFilePath();
+                expectedClientAddress = clientAddress;
             }
 
             try
@@ -391,7 +395,7 @@ namespace System.Net.Sockets.Tests
                         {
                             // Verify the client address on the server.
                             EndPoint clientAddressOnServer = acceptedClient.RemoteEndPoint;
-                            Assert.True(string.CompareOrdinal(clientAddress, clientAddressOnServer.ToString()) == 0);
+                            Assert.True(string.CompareOrdinal(expectedClientAddress, clientAddressOnServer.ToString()) == 0);
                         }
                     }
                 }
@@ -405,6 +409,26 @@ namespace System.Net.Sockets.Tests
                     try { File.Delete(clientAddress); }
                     catch { }
                 }
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix & ~TestPlatforms.Linux)] // Don't support abstract socket addresses.
+        public void UnixDomainSocketEndPoint_UsingAbstractSocketAddressOnUnsupported_Throws()
+        {
+            // An abstract socket address starts with a zero byte.
+            string address = '\0' + Guid.NewGuid().ToString();
+
+            // Bind
+            using (Socket socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified))
+            {
+                Assert.Throws<SocketException>(() => socket.Bind(new UnixDomainSocketEndPoint(address)));
+            }
+
+            // Connect
+            using (Socket socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified))
+            {
+                Assert.Throws<SocketException>(() => socket.Connect(new UnixDomainSocketEndPoint(address)));
             }
         }
 

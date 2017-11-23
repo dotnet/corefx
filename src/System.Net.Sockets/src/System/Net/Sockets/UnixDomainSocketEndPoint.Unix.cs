@@ -36,25 +36,27 @@ namespace System.Net.Sockets
                 throw new ArgumentNullException(nameof(path));
             }
 
-            _path = path;
-
             // Pathname socket addresses should be null-terminated.
             // Linux abstract socket addresses start with a zero byte, they must not be null-terminated.
-            bool isAbstract = path.Length > 0 && path[0] == '\0';
-            int length = s_pathEncoding.GetByteCount(path);
+            bool isAbstract = IsAbstract(path);
+            int bufferLength = s_pathEncoding.GetByteCount(path);
             if (!isAbstract)
             {
-                length++;
+                // for null terminator
+                bufferLength++;
             }
-            _encodedPath = new byte[length];
-            s_pathEncoding.GetBytes(path, 0, path.Length, _encodedPath, 0);
 
-            if (path.Length == 0 || _encodedPath.Length > s_nativePathLength)
+            if (path.Length == 0 || bufferLength > s_nativePathLength)
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(path), path, 
                     SR.Format(SR.ArgumentOutOfRange_PathLengthInvalid, path, s_nativePathLength));
             }
+
+            _path = path;
+            _encodedPath = new byte[bufferLength];
+            int bytesEncoded = s_pathEncoding.GetBytes(path, 0, path.Length, _encodedPath, 0);
+            Debug.Assert(bufferLength - (isAbstract ? 0 : 1) == bytesEncoded);
         }
 
         internal UnixDomainSocketEndPoint(SocketAddress socketAddress)
@@ -80,10 +82,10 @@ namespace System.Net.Sockets
 
                 // Strip trailing null of pathname socket addresses.
                 int length = _encodedPath.Length;
-                bool isAbstract = _encodedPath[0] == 0;
-                if (!isAbstract)
+                if (!IsAbstract(_encodedPath))
                 {
-                    if (_encodedPath[length - 1] == 0)
+                    // Since this isn't an abstract path, we're sure our first byte isn't 0.
+                    while (_encodedPath[length - 1] == 0)
                     {
                         length--;
                     }
@@ -113,6 +115,21 @@ namespace System.Net.Sockets
 
         public override AddressFamily AddressFamily => EndPointAddressFamily;
 
-        public override string ToString() => _path;
+        public override string ToString()
+        {
+            bool isAbstract = IsAbstract(_path);
+            if (isAbstract)
+            {
+                return "@" + _path.Substring(1);
+            }
+            else
+            {
+                return _path;
+            }
+        }
+
+        private static bool IsAbstract(string path) => path.Length > 0 && path[0] == '\0';
+
+        private static bool IsAbstract(byte[] encodedPath) => encodedPath.Length > 0 && encodedPath[0] == 0;
     }
 }
