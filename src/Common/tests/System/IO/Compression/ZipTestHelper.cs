@@ -163,6 +163,7 @@ namespace System.IO.Compression.Tests
                             string crc = CRC.CalculateCRC(buffer);
                             Assert.Equal(file.Length, givenLength);
                             Assert.Equal(file.CRC, crc);
+                            Assert.Equal(file.CRC, entry.Crc32.ToString());
                         }
 
                         if (checkTimes)

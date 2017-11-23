@@ -161,6 +161,11 @@ namespace System.IO.Compression
             }
         }
 
+        /// <summary>
+        /// It is the CRC32 of the file's original content before being compressed.
+        /// </summary>
+        public int Crc32 => (int)_crc32;
+
         public int ExternalAttributes
         {
             get
