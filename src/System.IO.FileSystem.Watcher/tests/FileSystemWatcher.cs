@@ -265,5 +265,25 @@ namespace System.IO.Tests
                 Thread.Sleep(WaitForExpectedEventTimeout);
             }
         }
+
+        [Fact]
+        //[Trait("MyTrait","MyTrait")]
+        public void Change_Path_Runtime()
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            using (var watcher = new TestFileSystemWatcher(testDirectory.Path, "*"))
+            {
+                Assert.Throws<ArgumentException>(() =>
+                {
+                    watcher.Path = "";
+                });
+
+                Assert.Throws<ArgumentException>(() =>
+                {
+                    watcher.Path = GetTestFilePath();
+                });
+
+            }
+        }
     }
 }
