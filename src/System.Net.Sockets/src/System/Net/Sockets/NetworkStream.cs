@@ -381,9 +381,16 @@ namespace System.Net.Sockets
 
                 try
                 {
-                    // Since the socket is in blocking mode this will always complete
+                    // Since the socket is in blocking mode this should complete
                     // after ALL the requested number of bytes was transferred.
-                    _streamSocket.Send(buffer, offset, size, SocketFlags.None);
+                    // On UNIX systems we can be interrupted by a signal, so we
+                    // have to make sure it really was.
+                    while (size > 0)
+                    {
+                        int result = _streamSocket.Send(buffer, offset, size, SocketFlags.None);
+                        size -= result;
+                        offset += result;
+                    }
                 }
                 catch (Exception exception) when (!(exception is OutOfMemoryException))
                 {
