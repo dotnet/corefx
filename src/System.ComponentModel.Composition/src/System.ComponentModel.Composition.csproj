@@ -203,6 +203,14 @@
       <Link>Microsoft\Internal\Requires.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(CommonPath)\Microsoft\Internal\CommonStrings.resx">
+      <Link>Microsoft\Internal\CommonStrings.resx</Link>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CommonStrings.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>Microsoft.Internal</CustomToolNamespace>
+    </EmbeddedResource>
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.Collections" />
