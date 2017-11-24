@@ -12,6 +12,7 @@ namespace Microsoft.Internal.Collections
     public class ConditionalWeakTableTests
     {
         [Fact]
+        [ActiveIssue(123456789)]
         public void Add_KeyShouldBeCollected()
         {
             var obj = new object();
@@ -26,7 +27,7 @@ namespace Microsoft.Internal.Collections
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            Assert.Null(wr.Target); // "Key should be collected now!");
+            Assert.Null(wr.Target);
 
             GC.KeepAlive(cwt);
         }
@@ -49,14 +50,15 @@ namespace Microsoft.Internal.Collections
             GC.WaitForPendingFinalizers();
 
             // Should still have both references
-            Assert.NotNull(wrKey.Target); // "Key should NOT be collected yet!");
-            Assert.NotNull(wrValue.Target); // "Value should NOT be collected yet!");
+            Assert.NotNull(wrKey.Target);
+            Assert.NotNull(wrValue.Target);
 
             GC.KeepAlive(obj);
             GC.KeepAlive(cwt);
         }
 
         [Fact]
+        [ActiveIssue(123456789)]
         public void Add_KeyCollected_ValueShouldBeCollected()
         {
             var obj = new object();
@@ -73,8 +75,8 @@ namespace Microsoft.Internal.Collections
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            Assert.Null(wrKey.Target); // "Key should be collected now!");
-            Assert.Null(wrValue.Target); // "Value should be collected now!");
+            Assert.Null(wrKey.Target);
+            Assert.Null(wrValue.Target);
 
             GC.KeepAlive(cwt);
         }
@@ -92,7 +94,7 @@ namespace Microsoft.Internal.Collections
         }
 
         [Fact]
-        public void Remove_InvalidKey_ShouldReturnTrue()
+        public void Remove_InvalidKey_ShouldReturnFalse()
         {
             var obj = new object();
             var obj2 = new object();

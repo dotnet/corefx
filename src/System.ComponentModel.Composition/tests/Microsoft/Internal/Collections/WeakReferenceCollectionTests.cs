@@ -12,6 +12,7 @@ namespace Microsoft.Internal.Collections
     public class WeakReferenceCollectionTests
     {
         [Fact]
+        [ActiveIssue(123456789)]
         public void Add_ObjectShouldGetCollected()
         {
             var obj = new object();
@@ -22,12 +23,12 @@ namespace Microsoft.Internal.Collections
             var wr = new WeakReference(obj);
             obj = null;
 
-            Assert.NotNull(wr.Target); // "Object should NOT have been collected yet!");
+            Assert.NotNull(wr.Target);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            Assert.Null(wr.Target); // "Object should have been collected!");
+            Assert.Null(wr.Target);
 
             GC.KeepAlive(wrc);
         }
@@ -40,11 +41,11 @@ namespace Microsoft.Internal.Collections
 
             wrc.Add(obj);
 
-            Assert.Equal(1, wrc.AliveItemsToList().Count); // "Should have 1 item!");
+            Assert.Equal(1, wrc.AliveItemsToList().Count);
             
             wrc.Remove(obj);
 
-            Assert.Equal(0, wrc.AliveItemsToList().Count); // "Should have 0 item!");
+            Assert.Equal(0, wrc.AliveItemsToList().Count);
         }
 
         [Fact]
@@ -58,10 +59,11 @@ namespace Microsoft.Internal.Collections
                 wrc.Add(obj);
             }
 
-            Assert.Equal(list.Length, wrc.AliveItemsToList().Count); // "Should have same number of items!");
+            Assert.Equal(list.Length, wrc.AliveItemsToList().Count);
         }
 
         [Fact]
+        [ActiveIssue(123456789)]
         public void AliveItemsToList_ShouldReturnAllAliveItems()
         {
             var list = new object[] { new object(), new object(), new object() };
@@ -78,7 +80,7 @@ namespace Microsoft.Internal.Collections
             var obj2 = new object();
             wrc.Add(obj2);
 
-            Assert.Equal(list.Length + 2, wrc.AliveItemsToList().Count); // "Should have same number of items!");
+            Assert.Equal(list.Length + 2, wrc.AliveItemsToList().Count);
 
             obj1 = obj2 = null;
 
@@ -86,7 +88,7 @@ namespace Microsoft.Internal.Collections
             GC.WaitForPendingFinalizers();
 
             var aliveItems = wrc.AliveItemsToList();
-            Assert.Equal(list.Length, aliveItems.Count); // "Should have 2 less items!");
+            Assert.Equal(list.Length, aliveItems.Count);
 
             Assert.Equal(list[0], aliveItems[0]);
             Assert.Equal(list[1], aliveItems[1]);
@@ -97,7 +99,7 @@ namespace Microsoft.Internal.Collections
         public void AliveItemsToList_ShouldReturnEmpty()
         {
             var wrc = new WeakReferenceCollection<object>();
-            Assert.Equal(0, wrc.AliveItemsToList().Count); // "Should have 0 items!");
+            Assert.Equal(0, wrc.AliveItemsToList().Count);
         }
     }
 }

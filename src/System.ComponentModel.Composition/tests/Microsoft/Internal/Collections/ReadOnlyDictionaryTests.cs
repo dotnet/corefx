@@ -13,6 +13,7 @@ namespace Microsoft.Internal.Collections
     public class ReadOnlyDictionaryTests
     {
         [Fact]
+        [ActiveIssue(123456789)]
         public void Constructor_WritableDictionaryAsDictionaryArgument_ShouldPopulateCollection()
         {
             var dictionary = GetWritableDictionaryWithData();
@@ -88,6 +89,7 @@ namespace Microsoft.Internal.Collections
         }
 
         [Fact]
+        [ActiveIssue(123456789)]
         public void Keys_ShouldReturnWrappedDictionaryKeys()
         {
             var dictionary = GetWritableDictionaryWithData();
@@ -156,6 +158,7 @@ namespace Microsoft.Internal.Collections
         }
 
         [Fact]
+        [ActiveIssue(123456789)]
         public void GetEnumerator()
         {
             var dictionary = GetWritableDictionaryWithData();
@@ -171,7 +174,7 @@ namespace Microsoft.Internal.Collections
         {
             var dictionary = GetWritableDictionaryWithData();
             var readOnlyDictionary = GetReadOnlyDictionary(dictionary);
-            Assert.Equal("Value1", readOnlyDictionary["Key1"]); // "Expecting to read wrapped value");
+            Assert.Equal("Value1", readOnlyDictionary["Key1"]);
         }
 
         [Fact]
@@ -182,7 +185,7 @@ namespace Microsoft.Internal.Collections
             object result;
             bool ret = readOnlyDictionary.TryGetValue("Key1", out result);
             Assert.True(ret, "Expecting TryGetExportedValue to return true for wrapped key");
-            Assert.Equal("Value1", result); // "Expecting TryGetExportedValue to return wrapped value");
+            Assert.Equal("Value1", result);
         }
 
         private static IDictionary<String, object> GetReadOnlyDictionaryWithData()

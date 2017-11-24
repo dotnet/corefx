@@ -374,7 +374,7 @@ for (int i = 0; i < 20; i++)
                     {
                         if (parentQuery != null)
                             return !parentQuery(parameter);
-                        Assert.False(true); // Should never have no parent
+                        Assert.False(true);
                         return false;
                     });
                     TestQuery(contextB, key, 21, true);
@@ -388,7 +388,7 @@ for (int i = 0; i < 20; i++)
                                 return true;
                             if (parentQuery != null)
                                 return !parentQuery(parameter);
-                            Assert.False(true); // Should never have no parent
+                            Assert.False(true);
                             return false;
                         });
                         TestQuery(contextC, key, 21, false);
@@ -403,7 +403,7 @@ for (int i = 0; i < 20; i++)
                         {
                             if (parentQuery != null)
                                 return parentQuery(parameter + 1);
-                            Assert.False(true); // Should never have no parent
+                            Assert.False(true);
                             return false;
                         });
                         TestQuery(contextD, key, 21, true);

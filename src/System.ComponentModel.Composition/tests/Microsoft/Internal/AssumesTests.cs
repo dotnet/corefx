@@ -10,6 +10,7 @@ using Xunit;
 
 namespace Microsoft.Internal
 {
+    [ActiveIssue(123456789)]
     public class AssumesTests
     {
         [Fact]
@@ -221,32 +222,16 @@ namespace Microsoft.Internal
 
                 var result = SerializationTestServices.RoundTrip(exception);
 
-                Assert.AreEqual(exception.Message, result.Message);
+                Assert.Equal(exception.Message, result.Message);
             }
         }
 
 #endif //FEATURE_SERIALIZATION
-
         private static Exception CreateInternalErrorException()
         {
             return CreateInternalErrorException((string)null);
         }
 
-        private static Exception CreateInternalErrorException(string message)
-        {
-            Exception exception = null;
-
-            try
-            {
-                Assumes.IsTrue(false, message);
-            }
-            catch (Exception ex)
-            {
-                exception = ex;
-            }
-
-            Assert.NotNull(exception);
-            return exception;
-        }
+        private static Exception CreateInternalErrorException(string message) => Assert.ThrowsAny<Exception>(() => Assumes.IsTrue(false, message));
     }
 }
