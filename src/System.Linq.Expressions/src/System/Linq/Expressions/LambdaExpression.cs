@@ -107,10 +107,7 @@ namespace System.Linq.Expressions
         /// Produces a delegate that represents the lambda expression.
         /// </summary>
         /// <returns>A delegate containing the compiled version of the lambda.</returns>
-        public Delegate Compile()
-        {
-            return Compile(preferInterpretation: false);
-        }
+        public Delegate Compile() => Compile(preferInterpretation: false);
 
         /// <summary>
         /// Produces a delegate that represents the lambda expression.
@@ -120,16 +117,12 @@ namespace System.Linq.Expressions
         public Delegate Compile(bool preferInterpretation)
         {
 #if FEATURE_COMPILE
-#if FEATURE_INTERPRET
-            if (preferInterpretation)
+            if (!preferInterpretation)
             {
-                return new Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
+                return Compiler.LambdaCompiler.Compile(this);
             }
 #endif
-            return Compiler.LambdaCompiler.Compile(this);
-#else
             return new Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
-#endif
         }
 
 #if FEATURE_COMPILE_TO_METHODBUILDER
@@ -187,30 +180,14 @@ namespace System.Linq.Expressions
         /// Produces a delegate that represents the lambda expression.
         /// </summary>
         /// <returns>A delegate containing the compiled version of the lambda.</returns>
-        public new TDelegate Compile()
-        {
-            return Compile(preferInterpretation: false);
-        }
+        public new TDelegate Compile() => Compile(preferInterpretation: false);
 
         /// <summary>
         /// Produces a delegate that represents the lambda expression.
         /// </summary>
         /// <param name="preferInterpretation">A <see cref="bool"/> that indicates if the expression should be compiled to an interpreted form, if available.</param>
         /// <returns>A delegate containing the compiled version of the lambda.</returns>
-        public new TDelegate Compile(bool preferInterpretation)
-        {
-#if FEATURE_COMPILE
-#if FEATURE_INTERPRET
-            if (preferInterpretation)
-            {
-                return (TDelegate)(object)new Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
-            }
-#endif
-            return (TDelegate)(object)Compiler.LambdaCompiler.Compile(this);
-#else
-            return (TDelegate)(object)new Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
-#endif
-        }
+        public new TDelegate Compile(bool preferInterpretation) => (TDelegate)(object)base.Compile(preferInterpretation);
 
         /// <summary>
         /// Creates a new expression that is like this one, but using the

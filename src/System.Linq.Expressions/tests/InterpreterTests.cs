@@ -4,7 +4,7 @@
 
 // FEATURE_COMPILE is not directly required, 
 // but this functionality relies on private reflection and that would not work with AOT
-#if FEATURE_INTERPRET && FEATURE_COMPILE
+#if FEATURE_COMPILE
 
 using System.Linq.Expressions.Interpreter;
 using System.Reflection;

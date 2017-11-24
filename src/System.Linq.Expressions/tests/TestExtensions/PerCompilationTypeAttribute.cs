@@ -37,17 +37,13 @@ namespace System.Linq.Expressions.Tests
                 object[] withFalse = new object[received.Length + 1];
 #endif
 
-#if FEATURE_INTERPRET
                 object[] withTrue = new object[received.Length + 1];
-#endif
 
 #if FEATURE_COMPILE
                 withFalse[received.Length] = s_boxedFalse;
 #endif
 
-#if FEATURE_INTERPRET
                 withTrue[received.Length] = s_boxedTrue;
-#endif
 
                 for (int i = 0; i != received.Length; ++i)
                 {
@@ -57,18 +53,14 @@ namespace System.Linq.Expressions.Tests
                     withFalse[i] = arg;
 #endif
 
-#if FEATURE_INTERPRET
                     withTrue[i] = arg;
-#endif
                 }
 
 #if FEATURE_COMPILE
                 yield return withFalse;
 #endif
 
-#if  FEATURE_INTERPRET
                 yield return withTrue;
-#endif
             }
         }
     }
