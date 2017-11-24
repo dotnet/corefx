@@ -938,15 +938,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                     // Try to infer. If we have an errorsym in the type arguments, we know we cant infer,
                     // but we want to attempt it anyway. We'll mark this as "cant infer" so that we can
-                    // report the appropriate error, but we'll continue inferring, since we want 
+                    // report the appropriate error, but we'll continue inferring, since we want
                     // error sym to go to any type.
 
-                    bool inferenceSucceeded;
-
-                    inferenceSucceeded = MethodTypeInferrer.Infer(
-                                _pExprBinder, GetSymbolLoader(),
-                                methSym, _pCurrentType.GetTypeArgsAll(), _pCurrentParameters,
-                                _pArguments, out _pCurrentTypeArgs);
+                    bool inferenceSucceeded = MethodTypeInferrer.Infer(
+                        _pExprBinder, GetSymbolLoader(), methSym, _pCurrentParameters, _pArguments,
+                        out _pCurrentTypeArgs);
 
                     if (!inferenceSucceeded)
                     {

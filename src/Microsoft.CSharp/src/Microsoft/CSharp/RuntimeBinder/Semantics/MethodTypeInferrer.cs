@@ -30,7 +30,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private readonly SymbolLoader _symbolLoader;
         private readonly ExpressionBinder _binder;
         private readonly TypeArray _pMethodTypeParameters;
-        private readonly TypeArray _pClassTypeArguments;
         private readonly TypeArray _pMethodFormalParameterTypes;
         private readonly ArgInfos _pMethodArguments;
         private readonly List<CType>[] _pExactBounds;
@@ -84,7 +83,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             ExpressionBinder binder,
             SymbolLoader symbolLoader,
             MethodSymbol pMethod,
-            TypeArray pClassTypeArguments,
             TypeArray pMethodFormalParameterTypes,
             ArgInfos pMethodArguments,
             out TypeArray ppInferredTypeArguments)
@@ -103,7 +101,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             var inferrer = new MethodTypeInferrer(binder, symbolLoader,
                 pMethodFormalParameterTypes, pMethodArguments,
-                pMethod.typeVars, pClassTypeArguments);
+                pMethod.typeVars);
             bool success;
             if (pMethodArguments.fHasExprs)
             {
@@ -130,14 +128,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private MethodTypeInferrer(
             ExpressionBinder exprBinder, SymbolLoader symLoader,
             TypeArray pMethodFormalParameterTypes, ArgInfos pMethodArguments,
-            TypeArray pMethodTypeParameters, TypeArray pClassTypeArguments)
+            TypeArray pMethodTypeParameters)
         {
             _binder = exprBinder;
             _symbolLoader = symLoader;
             _pMethodFormalParameterTypes = pMethodFormalParameterTypes;
             _pMethodArguments = pMethodArguments;
             _pMethodTypeParameters = pMethodTypeParameters;
-            _pClassTypeArguments = pClassTypeArguments;
             _pFixedResults = new CType[pMethodTypeParameters.Count];
             _pLowerBounds = new List<CType>[pMethodTypeParameters.Count];
             _pUpperBounds = new List<CType>[pMethodTypeParameters.Count];
