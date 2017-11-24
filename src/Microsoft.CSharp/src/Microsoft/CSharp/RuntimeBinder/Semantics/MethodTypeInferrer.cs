@@ -102,15 +102,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             var inferrer = new MethodTypeInferrer(binder, symbolLoader,
                 pMethodFormalParameterTypes, pMethodArguments,
                 pMethod.typeVars);
-            bool success;
-            if (pMethodArguments.fHasExprs)
-            {
-                success = inferrer.InferTypeArgs();
-            }
-            else
-            {
-                success = inferrer.InferForMethodGroupConversion();
-            }
+            bool success = inferrer.InferTypeArgs();
 
             ppInferredTypeArguments = inferrer.GetResults();
             return success;
@@ -1767,64 +1759,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _pFixedResults[iParam] = pBest;
             UpdateDependenciesAfterFix(iParam);
             return true;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-        //
-        // CType inference for conversion of method groups
-        //
-        private bool InferForMethodGroupConversion()
-        {
-            // SPEC: Similar to calls of generic methods, CType inference must
-            // SPEC: also be applied when a method group M containing a generic
-            // SPEC: method is converted to a given delegate CType D.  Given a method
-            // SPEC: Tr M<X1...Xn>(T1 x1, ... Tm xm) and the method group M being
-            // SPEC: assigned to the delegate CType D the task of CType inference is
-            // SPEC: to find CType arguments S1...Sn so that the expression M<S1...Sn>
-            // SPEC: becomes compatible with D.
-            // SPEC: Unlike the CType inference algorithm for generic method calls, in
-            // SPEC: this case there are only argument types, no argument expressions.
-            // SPEC: In particular, there are no anonymous functions and hence no need
-            // SPEC: for multiple phases of inference.
-            // SPEC: Instead, all Xi are considered unfixed and a lower-bound inference
-            // SPEC: is made from each argument CType Uj of D to the corresponding parameter
-            // SPEC: CType Tj of M.  If for any of the Xi no bounds were found, CType
-            // SPEC: inference fails. Otherwise, all Xi are fixed to corresponding Si,
-            // SPEC: which are the result of CType inference.
-
-            Debug.Assert(_pMethodFormalParameterTypes != null);
-            Debug.Assert(_pMethodArguments != null);
-            Debug.Assert(_pMethodArguments.carg <= _pMethodFormalParameterTypes.Count);
-
-            for (int iArg = 0; iArg < _pMethodArguments.carg; iArg++)
-            {
-                CType pDest = _pMethodFormalParameterTypes[iArg];
-                CType pSource = _pMethodArguments.types[iArg];
-                if (pDest is ParameterModifierType modDest)
-                {
-                    pDest = modDest.GetParameterType();
-                }
-                if (pSource is ParameterModifierType modSource)
-                {
-                    pSource = modSource.GetParameterType();
-                }
-
-                LowerBoundInference(pSource, pDest);
-            }
-
-            bool success = true;
-
-            // In the event of failure we still want to fix as much as we can, so
-            // that intellisense gives the best possible result.
-
-            for (int iParam = 0; iParam < _pMethodTypeParameters.Count; iParam++)
-            {
-                if (!HasBound(iParam) || !Fix(iParam))
-                {
-                    success = false;
-                }
-            }
-            return success;
         }
 
         ////////////////////////////////////////////////////////////////////////////////

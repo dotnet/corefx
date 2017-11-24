@@ -26,7 +26,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         public int carg;
         public TypeArray types;
-        public bool fHasExprs;
         public List<Expr> prgexpr;
     }
 
@@ -1597,7 +1596,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         internal void FillInArgInfoFromArgList(ArgInfos argInfo, Expr args)
         {
             CType[] prgtype = new CType[argInfo.carg];
-            argInfo.fHasExprs = true;
             argInfo.prgexpr = new List<Expr>();
 
             int iarg = 0;
