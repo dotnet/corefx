@@ -259,7 +259,7 @@ namespace System.IO
 
         /// <devdoc>
         ///    Gets or sets the path of the directory to watch.
-        /// </devdoc>
+        /// </devdoc>cls
         /// 
         public string Path
         {
