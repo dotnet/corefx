@@ -127,7 +127,7 @@
     <value>Too many changes at once in directory:{0}.</value>
   </data>
   <data name="InvalidDirName" xml:space="preserve">
-    <value>The directory name {0} is invalid.</value>
+    <value>The directory name '{0}' is invalid.</value>
   </data>
   <data name="InvalidDirName_NotExists" xml:space="preserve">
     <value>The directory name '{0}' does not exist.</value>
