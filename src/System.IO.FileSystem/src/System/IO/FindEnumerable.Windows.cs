@@ -50,6 +50,7 @@ namespace System.IO
             _transform = transform ?? throw new ArgumentNullException(nameof(transform));
             _threadId = Environment.CurrentManagedThreadId;
             _state = state;
+            Initialize();
         }
 
         private FindEnumerable(
@@ -67,6 +68,7 @@ namespace System.IO
             _state = state;
             _recursive = recursive;
             _threadId = Environment.CurrentManagedThreadId;
+            Initialize();
         }
 
         /// <summary>
@@ -98,22 +100,18 @@ namespace System.IO
         {
             if (Interlocked.Exchange(ref _enumeratorCreated, 1) == 0 && _threadId == Environment.CurrentManagedThreadId)
             {
-                InitEnumeration();
                 return this;
             }
-
-            FindEnumerable<TResult, TState> clone = new FindEnumerable<TResult, TState>(_originalUserPath, _originalFullPath, _transform, _predicate, _state, _recursive);
-            clone.InitEnumeration();
-            return clone;
+            else
+            {
+                return new FindEnumerable<TResult, TState>(_originalUserPath, _originalFullPath, _transform, _predicate, _state, _recursive);
+            }
         }
 
-        private void InitEnumeration()
+        private void Initialize()
         {
-            // We want to delay creating any handles until the enumerator is actually created to
-            // avoid keeping handles open any longer than needed. Once we actually start enumerating
-            // it's fair game to stash handles until we've finished processing the given directory.
-
             _directoryHandle = CreateDirectoryHandle(_originalFullPath);
+
             _currentPath = _originalFullPath;
             _buffer = ArrayPool<byte>.Shared.Rent(4096);
             _pinnedBuffer = GCHandle.Alloc(_buffer, GCHandleType.Pinned);
@@ -207,17 +205,20 @@ namespace System.IO
 
         protected void Dispose(bool disposing)
         {
-            byte[] buffer = Interlocked.Exchange(ref _buffer, null);
-            if (buffer != null)
+            IntPtr currentHandle = Interlocked.Exchange(ref _directoryHandle, IntPtr.Zero);
+            if (currentHandle != IntPtr.Zero)
             {
-                _pinnedBuffer.Free();
                 Interop.Kernel32.CloseHandle(_directoryHandle);
-                ArrayPool<byte>.Shared.Return(buffer);
-
                 if (_recursive && _pending != null)
                 {
                     while (_pending.Count > 0)
                         Interop.Kernel32.CloseHandle(_pending.Dequeue().Handle);
+                }
+
+                if (_buffer != null)
+                {
+                    _pinnedBuffer.Free();
+                    ArrayPool<byte>.Shared.Return(_buffer);
                 }
             }
         }

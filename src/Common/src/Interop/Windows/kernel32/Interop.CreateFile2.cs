@@ -52,9 +52,16 @@ internal partial class Interop
         {
             fixed (SECURITY_ATTRIBUTES* lpSecurityAttributes = &securityAttrs)
             {
-                return new SafeFileHandle(
-                    CreateFile(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile),
-                    ownsHandle: true);
+                IntPtr handle = CreateFile(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+                try
+                {
+                    return new SafeFileHandle(handle, ownsHandle: true);
+                }
+                catch
+                {
+                    CloseHandle(handle);
+                    throw;
+                }
             }
         }
 
@@ -65,9 +72,16 @@ internal partial class Interop
             FileMode dwCreationDisposition,
             int dwFlagsAndAttributes)
         {
-            return new SafeFileHandle(
-                CreateFile(lpFileName, dwDesiredAccess, dwShareMode, null, dwCreationDisposition, dwFlagsAndAttributes, IntPtr.Zero),
-                ownsHandle: true);
+            IntPtr handle = CreateFile(lpFileName, dwDesiredAccess, dwShareMode, null, dwCreationDisposition, dwFlagsAndAttributes, IntPtr.Zero);
+            try
+            {
+                return new SafeFileHandle(handle, ownsHandle: true);
+            }
+            catch
+            {
+                CloseHandle(handle);
+                throw;
+            }
         }
 
         internal unsafe static IntPtr CreateFile_IntPtr(

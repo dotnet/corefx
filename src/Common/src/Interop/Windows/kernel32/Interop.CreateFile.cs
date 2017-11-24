@@ -36,9 +36,16 @@ internal partial class Interop
             lpFileName = PathInternal.EnsureExtendedPrefixOverMaxPath(lpFileName);
             fixed (SECURITY_ATTRIBUTES* sa = &securityAttrs)
             {
-                return new SafeFileHandle(
-                    CreateFilePrivate(lpFileName, dwDesiredAccess, dwShareMode, sa, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile),
-                    ownsHandle: true);
+                IntPtr handle = CreateFilePrivate(lpFileName, dwDesiredAccess, dwShareMode, sa, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+                try
+                {
+                    return new SafeFileHandle(handle, ownsHandle: true);
+                }
+                catch
+                {
+                    CloseHandle(handle);
+                    throw;
+                }
             }
         }
 
@@ -49,9 +56,16 @@ internal partial class Interop
             FileMode dwCreationDisposition,
             int dwFlagsAndAttributes)
         {
-            return new SafeFileHandle(
-                CreateFile_IntPtr(lpFileName, dwDesiredAccess, dwShareMode, dwCreationDisposition, dwFlagsAndAttributes),
-                ownsHandle: true);
+            IntPtr handle = CreateFile_IntPtr(lpFileName, dwDesiredAccess, dwShareMode, dwCreationDisposition, dwFlagsAndAttributes);
+            try
+            {
+                return new SafeFileHandle(handle, ownsHandle: true);
+            }
+            catch
+            {
+                CloseHandle(handle);
+                throw;
+            }
         }
 
         internal unsafe static IntPtr CreateFile_IntPtr(
