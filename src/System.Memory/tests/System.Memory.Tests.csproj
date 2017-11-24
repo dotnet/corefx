@@ -58,6 +58,8 @@
     <Compile Include="ReadOnlySpan\DangerousCreate.cs" />
     <Compile Include="ReadOnlySpan\DangerousGetPinnableReference.cs" />
     <Compile Include="ReadOnlySpan\Empty.cs" />
+    <Compile Include="ReadOnlySpan\EndsWith.byte.cs" />
+    <Compile Include="ReadOnlySpan\EndsWith.T.cs" />
     <Compile Include="ReadOnlySpan\Equality.cs" />
     <Compile Include="ReadOnlySpan\GetEnumerator.cs" />
     <Compile Include="ReadOnlySpan\GetHashCode.cs" />
