@@ -21,7 +21,6 @@
     <Compile Include="IMetadataView.cs" />
     <Compile Include="ISimpleMetadataView.cs" />
     <Compile Include="MetadataTests_IMetadataView.cs" />
-    <Compile Include="Microsoft\Internal\AssumesTests.cs" />
     <Compile Include="Microsoft\Internal\Collections\ConditionalWeakTableTests.cs" />
     <Compile Include="Microsoft\Internal\Collections\ReadOnlyDictionaryTests.cs" />
     <Compile Include="Microsoft\Internal\Collections\WeakReferenceCollectionTests.cs" />
