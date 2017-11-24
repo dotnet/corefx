@@ -56,7 +56,7 @@ namespace System.Net.Sockets.Tests
             Task<TcpClient> acceptTask = Task.Factory.FromAsync(listener.BeginAcceptTcpClient(null, null), listener.EndAcceptTcpClient);
 
             TcpClient client = new TcpClient(AddressFamily.InterNetworkV6);
-            Task connectTask = client.ConnectAsync(IPAddress.Loopback, port);
+            Task connectTask = client.ConnectAsync(IPAddress.IPv6Loopback, port);
 
             await (new Task[] { acceptTask, connectTask }).WhenAllOrAnyFailed(TestSettings.PassingTestTimeout);
 
