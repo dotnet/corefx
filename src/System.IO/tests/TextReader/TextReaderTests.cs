@@ -73,9 +73,12 @@ namespace System.IO.Tests
         [Fact]
         public void ReadZeroCharcters()
         {
-            using (CharArrayTextReader tr = GetCharArray().textReader)
+            if (!PlatformDetection.IsFullFramework)
             {
-                Assert.Equal(0, tr.Read(new char[0], 0, 0));
+                using (CharArrayTextReader tr = GetCharArray().textReader)
+                {
+                    Assert.Equal(0, tr.Read(new char[0], 0, 0));
+                }
             }
         }
 
