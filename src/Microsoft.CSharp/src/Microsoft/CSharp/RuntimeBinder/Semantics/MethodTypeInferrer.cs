@@ -25,7 +25,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Unknown = 0x00,
             NotDependent = 0x01,
             DependsMask = 0x10,
-            Direct = 0x11,
             Indirect = 0x12
         }
         private readonly SymbolLoader _symbolLoader;
@@ -481,7 +480,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:       CType parameter Xj,
             // SPEC:   then an output CType inference is made from all such Ei to Ti.
 
-            MakeOutputTypeInferences();
+            // Irrelevant to dynamic binding.
 
             // SPEC:  Whether or not the previous step actually made an inference, we
             // SPEC:   must now fix at least one CType parameter, as follows:
@@ -511,37 +510,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:  Otherwise, we are unable to make progress and there are
             // SPEC:   unfixed parameters. CType inference fails.
             return NewInferenceResult.InferenceFailed;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        private void MakeOutputTypeInferences()
-        {
-            // SPEC: Otherwise, for all arguments Ei with corresponding parameter CType Ti
-            // SPEC: where the output types contain unfixed CType parameters but the input
-            // SPEC: types do not, an output CType inference is made from Ei to Ti.
-
-            for (int iArg = 0; iArg < _pMethodArguments.carg; iArg++)
-            {
-                CType pDest = _pMethodFormalParameterTypes[iArg];
-                if (pDest is ParameterModifierType modDest)
-                {
-                    pDest = modDest.GetParameterType();
-                }
-                Expr pExpr = _pMethodArguments.prgexpr[iArg];
-                if (HasUnfixedParamInOutputType(pExpr, pDest) &&
-                    !HasUnfixedParamInInputType(pExpr, pDest))
-                {
-                    CType pSource = _pMethodArguments.types[iArg];
-                    if (pSource is ParameterModifierType modSource)
-                    {
-                        pSource = modSource.GetParameterType();
-                    }
-
-                    Debug.Assert(!(pExpr is ExprMemberGroup));
-                    OutputTypeInference(pSource, pDest);
-                }
-            }
         }
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -622,149 +590,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return res;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-        //
-        // Input types
-        //
-        private bool DoesInputTypeContain(Expr pSource, CType pDest,
-            TypeParameterType pParam)
-        {
-            // SPEC: If E is a method group or an anonymous function and T is a delegate
-            // SPEC: CType or expression tree CType then all the parameter types of T are
-            // SPEC: input types of E with CType T.
-
-            pDest = pDest.GetDelegateTypeOfPossibleExpression();
-            if (pDest.isDelegateType())
-            {
-                switch (pSource.Kind)
-                {
-                    case ExpressionKind.MemberGroup:
-                    case ExpressionKind.BoundLambda:
-                        TypeArray pDelegateParameters = (pDest as AggregateType).GetDelegateParameters(GetSymbolLoader());
-                        if (pDelegateParameters != null)
-                        {
-                            return TypeManager.ParametersContainTyVar(pDelegateParameters, pParam);
-                        }
-
-                        break;
-                }
-            }
-
-            return false;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        private bool HasUnfixedParamInInputType(Expr pSource, CType pDest)
-        {
-            for (int iParam = 0; iParam < _pMethodTypeParameters.Count; iParam++)
-            {
-                if (IsUnfixed(iParam))
-                {
-                    if (DoesInputTypeContain(pSource, pDest,
-                        _pMethodTypeParameters[iParam] as TypeParameterType))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-        //
-        // Output types
-        //
-        private bool DoesOutputTypeContain(Expr pSource, CType pDest, TypeParameterType pParam)
-        {
-            // SPEC: If E is a method group or an anonymous function and T is a delegate
-            // SPEC: CType or expression tree CType then the return CType of T is an output CType
-            // SPEC: of E with CType T.
-
-            pDest = pDest.GetDelegateTypeOfPossibleExpression();
-            if (pDest.isDelegateType())
-            {
-                switch (pSource.Kind)
-                {
-                    case ExpressionKind.MemberGroup:
-                    case ExpressionKind.BoundLambda:
-                        CType pDelegateReturn = ((AggregateType)pDest).GetDelegateReturnType(GetSymbolLoader());
-                        if (pDelegateReturn != null)
-                        {
-                            return TypeManager.TypeContainsType(pDelegateReturn, pParam);
-                        }
-
-                        break;
-                }
-            }
-
-            return false;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        private bool HasUnfixedParamInOutputType(Expr pSource, CType pDest)
-        {
-            for (int iParam = 0; iParam < _pMethodTypeParameters.Count; iParam++)
-            {
-                if (IsUnfixed(iParam))
-                {
-                    if (DoesOutputTypeContain(pSource, pDest,
-                        _pMethodTypeParameters[iParam] as TypeParameterType))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-        //
-        // Dependence
-        //
-
-        private bool DependsDirectlyOn(int iParam, int jParam)
-        {
-            Debug.Assert(0 <= iParam && iParam < _pMethodTypeParameters.Count);
-            Debug.Assert(0 <= jParam && jParam < _pMethodTypeParameters.Count);
-
-            // SPEC: An unfixed CType parameter Xi depends directly on an unfixed CType
-            // SPEC: parameter Xj if for some argument Ek with CType Tk, Xj occurs
-            // SPEC: in an input CType of Ek and Xi occurs in an output CType of Ek
-            // SPEC: with CType Tk.
-
-            // We compute and record the Depends Directly On relationship once, in
-            // InitializeDependencies, below.
-
-            // At this point, everything should be unfixed.
-
-            Debug.Assert(IsUnfixed(iParam));
-            Debug.Assert(IsUnfixed(jParam));
-
-            for (int iArg = 0; iArg < _pMethodArguments.carg; iArg++)
-            {
-                CType pDest = _pMethodFormalParameterTypes[iArg];
-                if (pDest is ParameterModifierType modDest)
-                {
-                    pDest = modDest.GetParameterType();
-                }
-
-                Expr pExpr = _pMethodArguments.prgexpr[iArg];
-
-                if (DoesInputTypeContain(pExpr, pDest,
-                        _pMethodTypeParameters[jParam] as TypeParameterType) &&
-                    DoesOutputTypeContain(pExpr, pDest,
-                        _pMethodTypeParameters[iParam] as TypeParameterType))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-
         private void InitializeDependencies()
         {
             // We track dependencies by a two-d square array that gives the known
@@ -807,13 +632,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             for (int iParam = 0; iParam < _pMethodTypeParameters.Count; ++iParam)
             {
                 _ppDependencies[iParam] = new Dependency[_pMethodTypeParameters.Count];
-                for (int jParam = 0; jParam < _pMethodTypeParameters.Count; ++jParam)
-                {
-                    if (DependsDirectlyOn(iParam, jParam))
-                    {
-                        _ppDependencies[iParam][jParam] = Dependency.Direct;
-                    }
-                }
             }
 
             DeduceAllDependencies();
@@ -982,42 +800,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
             return false;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-        //
-        // Output CType inferences
-        //
-
-
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        private void OutputTypeInference(CType pSource, CType pDest)
-        {
-            // Skipped part of spec: We can never have a method group expression here, so this
-            // never applies.
-            // SPEC: An output CType inference is made from an expression E to a CType T
-            // SPEC: in the following way:
-
-            // SPEC:  If E is an anonymous function with inferred return CType U and
-            // SPEC:   T is a delegate CType or expression tree with return CType Tb
-            // SPEC:   then a lower bound inference is made from U to Tb.
-
-            // SPEC:  Otherwise, if E is a method group and T is a delegate CType or
-            // SPEC:   expression tree CType with parameter types T1...Tk and return
-            // SPEC:   CType Tb and overload resolution of E with the types T1...Tk
-            // SPEC:   yields a single method with return CType U then a lower-bound
-            // SPEC:   inference is made from U to Tb.
-            // End of skipped part.
-
-            // SPEC:  Otherwise, if E is an expression with CType U then a lower-bound
-            // SPEC:   inference is made from U to T.
-            if (IsReallyAType(pSource))
-            {
-                LowerBoundInference(pSource, pDest);
-            }
-            // SPEC:  Otherwise, no inferences are made.
         }
 
         ////////////////////////////////////////////////////////////////////////////////
