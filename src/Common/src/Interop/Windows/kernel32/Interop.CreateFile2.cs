@@ -4,6 +4,7 @@
 
 using Microsoft.Win32.SafeHandles;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 internal partial class Interop
@@ -14,16 +15,16 @@ internal partial class Interop
         internal unsafe static extern IntPtr CreateFile2(
             string lpFileName,
             int dwDesiredAccess,
-            System.IO.FileShare dwShareMode,
-            System.IO.FileMode dwCreationDisposition,
+            FileShare dwShareMode,
+            FileMode dwCreationDisposition,
             [In] ref CREATEFILE2_EXTENDED_PARAMETERS parameters);
 
         private static unsafe IntPtr CreateFile(
             string lpFileName,
             int dwDesiredAccess,
-            System.IO.FileShare dwShareMode,
+            FileShare dwShareMode,
             SECURITY_ATTRIBUTES* securityAttrs,
-            System.IO.FileMode dwCreationDisposition,
+            FileMode dwCreationDisposition,
             int dwFlagsAndAttributes,
             IntPtr hTemplateFile)
         {
@@ -43,9 +44,9 @@ internal partial class Interop
         internal static unsafe SafeFileHandle CreateFile(
             string lpFileName,
             int dwDesiredAccess,
-            System.IO.FileShare dwShareMode,
+            FileShare dwShareMode,
             ref SECURITY_ATTRIBUTES securityAttrs,
-            System.IO.FileMode dwCreationDisposition,
+            FileMode dwCreationDisposition,
             int dwFlagsAndAttributes,
             IntPtr hTemplateFile)
         {
@@ -60,8 +61,8 @@ internal partial class Interop
         internal static unsafe SafeFileHandle CreateFile(
             string lpFileName,
             int dwDesiredAccess,
-            System.IO.FileShare dwShareMode,
-            System.IO.FileMode dwCreationDisposition,
+            FileShare dwShareMode,
+            FileMode dwCreationDisposition,
             int dwFlagsAndAttributes)
         {
             return new SafeFileHandle(
@@ -72,10 +73,11 @@ internal partial class Interop
         internal unsafe static IntPtr CreateFile_IntPtr(
             string lpFileName,
             int dwDesiredAccess,
-            System.IO.FileShare dwShareMode,
-            System.IO.FileMode dwCreationDisposition,
+            FileShare dwShareMode,
+            FileMode dwCreationDisposition,
             int dwFlagsAndAttributes)
         {
+            lpFileName = PathInternal.EnsureExtendedPrefixOverMaxPath(lpFileName);
             return CreateFile(lpFileName, dwDesiredAccess, dwShareMode, null, dwCreationDisposition, dwFlagsAndAttributes, IntPtr.Zero);
         }
     }
