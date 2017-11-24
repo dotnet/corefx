@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
 namespace System.ComponentModel.Composition.Diagnostics
 {
     // We need a public version of CompositionTraceId, so that the QA tests can access and verify the trace.
