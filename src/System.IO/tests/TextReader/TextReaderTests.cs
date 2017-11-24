@@ -71,15 +71,13 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void ReadZeroCharcters()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "#23810 not fixed on .NET Framework")]
+        public void ReadZeroCharacters()
         {
-            if (!PlatformDetection.IsFullFramework)
+            using (CharArrayTextReader tr = GetCharArray().textReader)
             {
-                using (CharArrayTextReader tr = GetCharArray().textReader)
-                {
-                    Assert.Equal(0, tr.Read(new char[0], 0, 0));
-                }
-            }
+                Assert.Equal(0, tr.Read(new char[0], 0, 0));
+            }            
         }
 
         [Fact]
