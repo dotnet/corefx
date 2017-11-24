@@ -3,14 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Internal;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using Xunit;
 
 namespace System.ComponentModel.Composition.ReflectionModel

@@ -2,10 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace System.ComponentModel.Composition
 {
@@ -30,7 +26,7 @@ namespace System.ComponentModel.Composition
         string Id { get; }
     }
 
-public interface ITrans_MetadataTests_CustomMetadata
+    public interface ITrans_MetadataTests_CustomMetadata
     {
         bool PropertyName { get; }
     }

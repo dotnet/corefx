@@ -2,15 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.ComponentModel.Composition;
-using System.Linq;
-using System.Linq.Expressions;
-using System.UnitTesting;
-using System.Reflection;
-using System.ComponentModel.Composition.Hosting;
 using System.Collections.Generic;
+using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
+using System.Linq.Expressions;
+using System.Reflection;
 
 // NOTE : this is a helper class for exosig the EditorFactory functionality to tests until ExportFactory can be moved where it belongs
 namespace System.ComponentModel.Composition.ReflectionModel

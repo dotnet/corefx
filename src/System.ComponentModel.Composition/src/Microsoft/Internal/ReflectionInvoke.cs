@@ -4,8 +4,6 @@
 
 using System;
 using System.Reflection;
-using System.Security;
-using System.Security.Permissions;
 
 namespace Microsoft.Internal
 {
