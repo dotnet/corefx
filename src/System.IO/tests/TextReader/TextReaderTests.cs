@@ -71,6 +71,15 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        public void ReadZeroCharcters()
+        {
+            using (CharArrayTextReader tr = GetCharArray().textReader)
+            {
+                Assert.Equal(0, tr.Read(new char[0], 0, 0));
+            }
+        }
+
+        [Fact]
         public void ArgumentNullOnNullArray()
         {
             (char[] chArr, CharArrayTextReader textReader) baseInfo = GetCharArray();
