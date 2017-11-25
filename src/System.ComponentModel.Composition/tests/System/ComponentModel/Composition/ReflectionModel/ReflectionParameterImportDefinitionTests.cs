@@ -65,14 +65,14 @@ Assert.NotNull(definition.RequiredMetadata);
         {
             var names = Expectations.GetContractNamesWithEmpty();
 
-            foreach (var name in names)
+            Assert.All(names, name =>
             {
                 var definition = CreateReflectionParameterImportDefinition(name);
 
                 var e = CreateDisplayNameExpectationFromParameterName(definition, name);
 
                 Assert.Equal(e, ((ICompositionElement)definition).DisplayName);
-            }
+            });
         }
 
         [Fact]
@@ -80,14 +80,14 @@ Assert.NotNull(definition.RequiredMetadata);
         {
             var types = Expectations.GetTypes();
 
-            foreach (var type in types)
+            Assert.All(types, type =>
             {
                 var definition = CreateReflectionParameterImportDefinition(type);
 
                 var e = CreateDisplayNameExpectationFromContractName(definition, type);
 
                 Assert.Equal(e, ((ICompositionElement)definition).DisplayName);
-            }
+            });
         }
 
         private Lazy<ParameterInfo> CreateLazyParameter()

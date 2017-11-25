@@ -36,18 +36,16 @@ namespace System
             GC.WaitForPendingFinalizers();
 
             Assert.NotNull(ReferencesExpectedToBeCollected);
-
-            foreach (WeakReference wr in ReferencesExpectedToBeCollected)
+            Assert.All(ReferencesExpectedToBeCollected, wr =>
             {
                 Assert.True(wr.Target == null, "Object should have been collected.");
-            }
+            });
 
             Assert.NotNull(ReferencesExpectedToBeCollected);
-
-            foreach (WeakReference wr in ReferencesExpectedToBeCollected)
+            Assert.All(ReferencesExpectedToBeCollected, wr =>
             {
                 Assert.True(wr.Target != null, "Object should be have NOT been collected.");
-            }
+            });
         }
     }
 }

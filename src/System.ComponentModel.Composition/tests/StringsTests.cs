@@ -19,12 +19,11 @@ namespace System
 
             Assert.True(properties.Length > 0, "Expected to find at least one string property in Strings.cs.");
 
-            foreach (PropertyInfo property in properties)
+            Assert.All(properties, property =>
             {
                 object value = property.GetValue(null, (object[])null);
-
                 Assert.NotNull(value);
-            }
+            });
         }
 
         private static PropertyInfo[] GetStringProperties()
