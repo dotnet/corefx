@@ -553,7 +553,7 @@ namespace System.Drawing
                     break;
                 default:
                     string msg = string.Format("Unexpected number of bits: {0}", bih.biBitCount);
-                    throw new InvalidOperationException(msg);
+                    throw new Exception(msg);
             }
 
             if (bih.biBitCount < 24)
