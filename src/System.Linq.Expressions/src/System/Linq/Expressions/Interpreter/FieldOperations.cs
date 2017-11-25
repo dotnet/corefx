@@ -51,10 +51,10 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int Run(InterpretedFrame frame)
         {
-            object self = frame.Pop();
+            object self = frame.Peek();
 
             NullCheck(self);
-            frame.Push(_field.GetValue(self));
+            frame.Replace(_field.GetValue(self));
             return 1;
         }
     }

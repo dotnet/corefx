@@ -32,15 +32,16 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object right = frame.Pop();
-                object left = frame.Pop();
-                if (left == null || right == null)
+                object left = frame.Peek();
+                if (left == null | right == null)
                 {
-                    frame.Push(_nullValue);
+                    frame.Replace(_nullValue);
                 }
                 else
                 {
-                    frame.Push((sbyte)left < (sbyte)right);
+                    frame.Replace((sbyte)left < (sbyte)right);
                 }
+
                 return 1;
             }
         }
@@ -55,15 +56,16 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object right = frame.Pop();
-                object left = frame.Pop();
-                if (left == null || right == null)
+                object left = frame.Peek();
+                if (left == null | right == null)
                 {
-                    frame.Push(_nullValue);
+                    frame.Replace(_nullValue);
                 }
                 else
                 {
-                    frame.Push((short)left < (short)right);
+                    frame.Replace((short)left < (short)right);
                 }
+
                 return 1;
             }
         }
@@ -78,15 +80,16 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object right = frame.Pop();
-                object left = frame.Pop();
-                if (left == null || right == null)
+                object left = frame.Peek();
+                if (left == null | right == null)
                 {
-                    frame.Push(_nullValue);
+                    frame.Replace(_nullValue);
                 }
                 else
                 {
-                    frame.Push((char)left < (char)right);
+                    frame.Replace((char)left < (char)right);
                 }
+
                 return 1;
             }
         }
@@ -101,15 +104,16 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object right = frame.Pop();
-                object left = frame.Pop();
-                if (left == null || right == null)
+                object left = frame.Peek();
+                if (left == null | right == null)
                 {
-                    frame.Push(_nullValue);
+                    frame.Replace(_nullValue);
                 }
                 else
                 {
-                    frame.Push((int)left < (int)right);
+                    frame.Replace((int)left < (int)right);
                 }
+
                 return 1;
             }
         }
@@ -124,15 +128,16 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object right = frame.Pop();
-                object left = frame.Pop();
-                if (left == null || right == null)
+                object left = frame.Peek();
+                if (left == null | right == null)
                 {
-                    frame.Push(_nullValue);
+                    frame.Replace(_nullValue);
                 }
                 else
                 {
-                    frame.Push((long)left < (long)right);
+                    frame.Replace((long)left < (long)right);
                 }
+
                 return 1;
             }
         }
@@ -147,15 +152,16 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object right = frame.Pop();
-                object left = frame.Pop();
-                if (left == null || right == null)
+                object left = frame.Peek();
+                if (left == null | right == null)
                 {
-                    frame.Push(_nullValue);
+                    frame.Replace(_nullValue);
                 }
                 else
                 {
-                    frame.Push((byte)left < (byte)right);
+                    frame.Replace((byte)left < (byte)right);
                 }
+
                 return 1;
             }
         }
@@ -170,15 +176,16 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object right = frame.Pop();
-                object left = frame.Pop();
-                if (left == null || right == null)
+                object left = frame.Peek();
+                if (left == null | right == null)
                 {
-                    frame.Push(_nullValue);
+                    frame.Replace(_nullValue);
                 }
                 else
                 {
-                    frame.Push((ushort)left < (ushort)right);
+                    frame.Replace((ushort)left < (ushort)right);
                 }
+
                 return 1;
             }
         }
@@ -193,15 +200,16 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object right = frame.Pop();
-                object left = frame.Pop();
-                if (left == null || right == null)
+                object left = frame.Peek();
+                if (left == null | right == null)
                 {
-                    frame.Push(_nullValue);
+                    frame.Replace(_nullValue);
                 }
                 else
                 {
-                    frame.Push((uint)left < (uint)right);
+                    frame.Replace((uint)left < (uint)right);
                 }
+
                 return 1;
             }
         }
@@ -216,15 +224,16 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object right = frame.Pop();
-                object left = frame.Pop();
-                if (left == null || right == null)
+                object left = frame.Peek();
+                if (left == null | right == null)
                 {
-                    frame.Push(_nullValue);
+                    frame.Replace(_nullValue);
                 }
                 else
                 {
-                    frame.Push((ulong)left < (ulong)right);
+                    frame.Replace((ulong)left < (ulong)right);
                 }
+
                 return 1;
             }
         }
@@ -239,15 +248,16 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object right = frame.Pop();
-                object left = frame.Pop();
-                if (left == null || right == null)
+                object left = frame.Peek();
+                if (left == null | right == null)
                 {
-                    frame.Push(_nullValue);
+                    frame.Replace(_nullValue);
                 }
                 else
                 {
-                    frame.Push((float)left < (float)right);
+                    frame.Replace((float)left < (float)right);
                 }
+
                 return 1;
             }
         }
@@ -262,15 +272,16 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object right = frame.Pop();
-                object left = frame.Pop();
-                if (left == null || right == null)
+                object left = frame.Peek();
+                if (left == null | right == null)
                 {
-                    frame.Push(_nullValue);
+                    frame.Replace(_nullValue);
                 }
                 else
                 {
-                    frame.Push((double)left < (double)right);
+                    frame.Replace((double)left < (double)right);
                 }
+
                 return 1;
             }
         }

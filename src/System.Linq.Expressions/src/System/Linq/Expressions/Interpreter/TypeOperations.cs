@@ -61,7 +61,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int Run(InterpretedFrame frame)
         {
-            frame.Push(_type.IsInstanceOfType(frame.Pop()));
+            frame.Replace(_type.IsInstanceOfType(frame.Peek()));
             return 1;
         }
 
@@ -83,8 +83,11 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int Run(InterpretedFrame frame)
         {
-            object value = frame.Pop();
-            frame.Push(_type.IsInstanceOfType(value) ? value : null);
+            if (!_type.IsInstanceOfType(frame.Peek()))
+            {
+                frame.Replace(null);
+            }
+
             return 1;
         }
 
@@ -104,8 +107,7 @@ namespace System.Linq.Expressions.Interpreter
         public override int Run(InterpretedFrame frame)
         {
             object type = frame.Pop();
-            object obj = frame.Pop();
-            frame.Push((object)obj?.GetType() == type);
+            frame.Replace(ReferenceEquals(frame.Peek()?.GetType(), type));
             return 1;
         }
     }
@@ -124,8 +126,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                frame.Push(obj != null);
+                frame.Replace(frame.Peek() != null);
                 return 1;
             }
         }
@@ -157,9 +158,9 @@ namespace System.Linq.Expressions.Interpreter
             {
                 if (frame.Peek() == null)
                 {
-                    frame.Pop();
-                    frame.Push(Activator.CreateInstance(_defaultValueType));
+                    frame.Replace(Activator.CreateInstance(_defaultValueType));
                 }
+
                 return 1;
             }
         }
@@ -171,8 +172,7 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object dflt = frame.Pop();
-                object obj = frame.Pop();
-                frame.Push(obj ?? dflt);
+                frame.Replace(frame.Peek() ?? dflt);
                 return 1;
             }
         }
@@ -184,19 +184,8 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object other = frame.Pop();
-                object obj = frame.Pop();
-                if (obj == null)
-                {
-                    frame.Push(other == null);
-                }
-                else if (other == null)
-                {
-                    frame.Push(Utils.BoxedFalse);
-                }
-                else
-                {
-                    frame.Push(obj.Equals(other));
-                }
+                object obj = frame.Peek();
+                frame.Replace(obj == null ? other == null : other != null && obj.Equals(other));
                 return 1;
             }
         }
@@ -205,8 +194,8 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                frame.Push(obj == null ? "" : obj.ToString());
+                object obj = frame.Peek();
+                frame.Replace(obj == null ? "" : obj.ToString());
                 return 1;
             }
         }
@@ -215,8 +204,8 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                frame.Push(obj?.GetHashCode() ?? 0);
+                object obj = frame.Peek();
+                frame.Replace(obj?.GetHashCode() ?? 0);
                 return 1;
             }
         }
@@ -263,8 +252,7 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object value = frame.Pop();
-                frame.Push((T)value);
+                frame.Replace((T)frame.Peek());
                 return 1;
             }
         }
@@ -292,28 +280,23 @@ namespace System.Linq.Expressions.Interpreter
 
             public override int Run(InterpretedFrame frame)
             {
-                object value = frame.Pop();
+                object value = frame.Peek();
                 if (value != null)
                 {
                     Type valueType = value.GetType();
-
-                    if (!valueType.HasReferenceConversionTo(_t) &&
-                        !valueType.HasIdentityPrimitiveOrNullableConversionTo(_t))
+                    if (!valueType.HasReferenceConversionTo(_t) && !valueType.HasIdentityPrimitiveOrNullableConversionTo(_t)
+                        || !_t.IsAssignableFrom(valueType))
                     {
                         throw new InvalidCastException();
                     }
 
-                    if (!_t.IsAssignableFrom(valueType))
-                    {
-                        throw new InvalidCastException();
-                    }
-
-                    frame.Push(value);
+                    frame.Replace(value);
                 }
                 else
                 {
                     ConvertNull(frame);
                 }
+
                 return 1;
             }
 
@@ -328,7 +311,7 @@ namespace System.Linq.Expressions.Interpreter
 
                 protected override void ConvertNull(InterpretedFrame frame)
                 {
-                    frame.Push(null);
+                    frame.Replace(null);
                 }
             }
 
@@ -384,14 +367,14 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int Run(InterpretedFrame frame)
         {
-            object from = frame.Pop();
+            object from = frame.Peek();
             Debug.Assert(
                 new[]
                 {
                     TypeCode.Empty, TypeCode.Int32, TypeCode.SByte, TypeCode.Int16, TypeCode.Int64, TypeCode.UInt32,
                     TypeCode.Byte, TypeCode.UInt16, TypeCode.UInt64, TypeCode.Char, TypeCode.Boolean
                 }.Contains(Convert.GetTypeCode(from)));
-            frame.Push(from == null ? null : Enum.ToObject(_t, from));
+            frame.Replace(from == null ? null : Enum.ToObject(_t, from));
             return 1;
         }
     }
@@ -408,7 +391,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int Run(InterpretedFrame frame)
         {
-            object from = frame.Pop();
+            object from = frame.Peek();
             Debug.Assert(from != null);
 
             // If from is neither a T nor a type assignable to T (viz. an T-backed enum)
@@ -418,38 +401,38 @@ namespace System.Linq.Expressions.Interpreter
             switch (_t.GetTypeCode())
             {
                 case TypeCode.Int32:
-                    frame.Push(Enum.ToObject(_t, (int)from));
+                    frame.Replace(Enum.ToObject(_t, (int)from));
                     break;
                 case TypeCode.Int64:
-                    frame.Push(Enum.ToObject(_t, (long)from));
+                    frame.Replace(Enum.ToObject(_t, (long)from));
                     break;
                 case TypeCode.UInt32:
-                    frame.Push(Enum.ToObject(_t, (uint)from));
+                    frame.Replace(Enum.ToObject(_t, (uint)from));
                     break;
                 case TypeCode.UInt64:
-                    frame.Push(Enum.ToObject(_t, (ulong)from));
+                    frame.Replace(Enum.ToObject(_t, (ulong)from));
                     break;
                 case TypeCode.Byte:
-                    frame.Push(Enum.ToObject(_t, (byte)from));
+                    frame.Replace(Enum.ToObject(_t, (byte)from));
                     break;
                 case TypeCode.SByte:
-                    frame.Push(Enum.ToObject(_t, (sbyte)from));
+                    frame.Replace(Enum.ToObject(_t, (sbyte)from));
                     break;
                 case TypeCode.Int16:
-                    frame.Push(Enum.ToObject(_t, (short)from));
+                    frame.Replace(Enum.ToObject(_t, (short)from));
                     break;
                 case TypeCode.UInt16:
-                    frame.Push(Enum.ToObject(_t, (ushort)from));
+                    frame.Replace(Enum.ToObject(_t, (ushort)from));
                     break;
                 case TypeCode.Char:
                     // Disallowed in C#, but allowed in CIL
-                    frame.Push(Enum.ToObject(_t, (char)from));
+                    frame.Replace(Enum.ToObject(_t, (char)from));
                     break;
                 default:
                     // Only remaining possible type.
                     // Disallowed in C#, but allowed in CIL
                     Debug.Assert(_t.GetTypeCode() == TypeCode.Boolean);
-                    frame.Push(Enum.ToObject(_t, (bool)from));
+                    frame.Replace(Enum.ToObject(_t, (bool)from));
                     break;
             }
 

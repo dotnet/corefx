@@ -21,15 +21,19 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object shift = frame.Pop();
-                object value = frame.Pop();
-                if (value == null || shift == null)
+                if (shift == null)
                 {
-                    frame.Push(null);
+                    frame.Replace(null);
                 }
                 else
                 {
-                    frame.Push(unchecked((sbyte)((sbyte)value << (int)shift)));
+                    object value = frame.Peek();
+                    if (value != null)
+                    {
+                        frame.Replace(unchecked((sbyte)((sbyte)value << (int)shift)));
+                    }
                 }
+
                 return 1;
             }
         }
@@ -39,15 +43,19 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object shift = frame.Pop();
-                object value = frame.Pop();
-                if (value == null || shift == null)
+                if (shift == null)
                 {
-                    frame.Push(null);
+                    frame.Replace(null);
                 }
                 else
                 {
-                    frame.Push(unchecked((short)((short)value << (int)shift)));
+                    object value = frame.Peek();
+                    if (value != null)
+                    {
+                        frame.Replace(unchecked((short)((short)value << (int)shift)));
+                    }
                 }
+
                 return 1;
             }
         }
@@ -57,15 +65,19 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object shift = frame.Pop();
-                object value = frame.Pop();
-                if (value == null || shift == null)
+                if (shift == null)
                 {
-                    frame.Push(null);
+                    frame.Replace(null);
                 }
                 else
                 {
-                    frame.Push((int)value << (int)shift);
+                    object value = frame.Peek();
+                    if (value != null)
+                    {
+                        frame.Replace((int)value << (int)shift);
+                    }
                 }
+
                 return 1;
             }
         }
@@ -75,15 +87,19 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object shift = frame.Pop();
-                object value = frame.Pop();
-                if (value == null || shift == null)
+                if (shift == null)
                 {
-                    frame.Push(null);
+                    frame.Replace(null);
                 }
                 else
                 {
-                    frame.Push((long)value << (int)shift);
+                    object value = frame.Peek();
+                    if (value != null)
+                    {
+                        frame.Replace((long)value << (int)shift);
+                    }
                 }
+
                 return 1;
             }
         }
@@ -93,15 +109,19 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object shift = frame.Pop();
-                object value = frame.Pop();
-                if (value == null || shift == null)
+                if (shift == null)
                 {
-                    frame.Push(null);
+                    frame.Replace(null);
                 }
                 else
                 {
-                    frame.Push(unchecked((byte)((byte)value << (int)shift)));
+                    object value = frame.Peek();
+                    if (value != null)
+                    {
+                        frame.Replace(unchecked((byte)((byte)value << (int)shift)));
+                    }
                 }
+
                 return 1;
             }
         }
@@ -111,15 +131,19 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object shift = frame.Pop();
-                object value = frame.Pop();
-                if (value == null || shift == null)
+                if (shift == null)
                 {
-                    frame.Push(null);
+                    frame.Replace(null);
                 }
                 else
                 {
-                    frame.Push(unchecked((ushort)((ushort)value << (int)shift)));
+                    object value = frame.Peek();
+                    if (value != null)
+                    {
+                        frame.Replace(unchecked((ushort)((ushort)value << (int)shift)));
+                    }
                 }
+
                 return 1;
             }
         }
@@ -129,15 +153,19 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object shift = frame.Pop();
-                object value = frame.Pop();
-                if (value == null || shift == null)
+                if (shift == null)
                 {
-                    frame.Push(null);
+                    frame.Replace(null);
                 }
                 else
                 {
-                    frame.Push((uint)value << (int)shift);
+                    object value = frame.Peek();
+                    if (value != null)
+                    {
+                        frame.Replace((uint)value << (int)shift);
+                    }
                 }
+
                 return 1;
             }
         }
@@ -147,15 +175,19 @@ namespace System.Linq.Expressions.Interpreter
             public override int Run(InterpretedFrame frame)
             {
                 object shift = frame.Pop();
-                object value = frame.Pop();
-                if (value == null || shift == null)
+                if (shift == null)
                 {
-                    frame.Push(null);
+                    frame.Replace(null);
                 }
                 else
                 {
-                    frame.Push((ulong)value << (int)shift);
+                    object value = frame.Peek();
+                    if (value != null)
+                    {
+                        frame.Replace((ulong)value << (int)shift);
+                    }
                 }
+
                 return 1;
             }
         }

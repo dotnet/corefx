@@ -46,11 +46,11 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int Run(InterpretedFrame frame)
         {
-            int length = ConvertHelper.ToInt32NoNull(frame.Pop());
+            int length = ConvertHelper.ToInt32NoNull(frame.Peek());
             // To make behavior aligned with array creation emitted by C# compiler if length is less than
             // zero we try to use it to create an array, which will throw an OverflowException with the
             // correct localized error message.
-            frame.Push(length < 0 ? new int[length] : Array.CreateInstance(_elementType, length));
+            frame.Replace(length < 0 ? new int[length] : Array.CreateInstance(_elementType, length));
             return 1;
         }
     }
@@ -104,8 +104,7 @@ namespace System.Linq.Expressions.Interpreter
         public override int Run(InterpretedFrame frame)
         {
             int index = ConvertHelper.ToInt32NoNull(frame.Pop());
-            Array array = (Array)frame.Pop();
-            frame.Push(array.GetValue(index));
+            frame.Replace(((Array)frame.Peek()).GetValue(index));
             return 1;
         }
     }
@@ -141,8 +140,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public override int Run(InterpretedFrame frame)
         {
-            object obj = frame.Pop();
-            frame.Push(((Array)obj).Length);
+            frame.Replace(((Array)frame.Peek()).Length);
             return 1;
         }
     }

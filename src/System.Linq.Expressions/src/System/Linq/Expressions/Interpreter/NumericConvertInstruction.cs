@@ -20,15 +20,10 @@ namespace System.Linq.Expressions.Interpreter
 
         public sealed override int Run(InterpretedFrame frame)
         {
-            object obj = frame.Pop();
-            object converted;
+            object obj = frame.Peek();
             if (obj == null)
             {
-                if (_isLiftedToNull)
-                {
-                    converted = null;
-                }
-                else
+                if (!_isLiftedToNull)
                 {
                     // We cannot have null in a non-lifted numeric context. Throw the exception
                     // about not Nullable object requiring a value.
@@ -37,10 +32,9 @@ namespace System.Linq.Expressions.Interpreter
             }
             else
             {
-                converted = Convert(obj);
+                frame.Replace(Convert(obj));
             }
 
-            frame.Push(converted);
             return 1;
         }
 

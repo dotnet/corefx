@@ -21,15 +21,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object obj = frame.Peek();
+                if (obj != null)
                 {
-                    frame.Push(null);
+                    frame.Replace(unchecked((short)(1 + (short)obj)));
                 }
-                else
-                {
-                    frame.Push(unchecked((short)(1 + (short)obj)));
-                }
+
                 return 1;
             }
         }
@@ -38,15 +35,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object obj = frame.Peek();
+                if (obj != null)
                 {
-                    frame.Push(null);
+                    frame.Replace(unchecked(1 + (int)obj));
                 }
-                else
-                {
-                    frame.Push(unchecked(1 + (int)obj));
-                }
+
                 return 1;
             }
         }
@@ -55,15 +49,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object obj = frame.Peek();
+                if (obj != null)
                 {
-                    frame.Push(null);
+                    frame.Replace(unchecked(1 + (long)obj));
                 }
-                else
-                {
-                    frame.Push(unchecked(1 + (long)obj));
-                }
+
                 return 1;
             }
         }
@@ -72,15 +63,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object obj = frame.Peek();
+                if (obj != null)
                 {
-                    frame.Push(null);
+                    frame.Replace(unchecked((ushort)(1 + (ushort)obj)));
                 }
-                else
-                {
-                    frame.Push(unchecked((ushort)(1 + (ushort)obj)));
-                }
+
                 return 1;
             }
         }
@@ -89,15 +77,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object obj = frame.Peek();
+                if (obj != null)
                 {
-                    frame.Push(null);
+                    frame.Replace(unchecked(1 + (uint)obj));
                 }
-                else
-                {
-                    frame.Push(unchecked(1 + (uint)obj));
-                }
+
                 return 1;
             }
         }
@@ -106,15 +91,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object obj = frame.Peek();
+                if (obj != null)
                 {
-                    frame.Push(null);
+                    frame.Replace(unchecked(1 + (ulong)obj));
                 }
-                else
-                {
-                    frame.Push(unchecked(1 + (ulong)obj));
-                }
+
                 return 1;
             }
         }
@@ -123,15 +105,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object obj = frame.Peek();
+                if (obj != null)
                 {
-                    frame.Push(null);
+                    frame.Replace(1 + (float)obj);
                 }
-                else
-                {
-                    frame.Push(unchecked(1 + (float)obj));
-                }
+
                 return 1;
             }
         }
@@ -140,15 +119,12 @@ namespace System.Linq.Expressions.Interpreter
         {
             public override int Run(InterpretedFrame frame)
             {
-                object obj = frame.Pop();
-                if (obj == null)
+                object obj = frame.Peek();
+                if (obj != null)
                 {
-                    frame.Push(null);
+                    frame.Replace(1 + (double)obj);
                 }
-                else
-                {
-                    frame.Push(unchecked(1 + (double)obj));
-                }
+
                 return 1;
             }
         }
