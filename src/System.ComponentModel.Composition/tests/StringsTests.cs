@@ -12,7 +12,7 @@ namespace System
     public class StringsTests
     {
         [Fact]
-        [ActiveIssue(123456789)]
+        [ActiveIssue(25498)]
         public void PropertiesAreInsyncWithResources()
         {
             var properties = GetStringProperties();
