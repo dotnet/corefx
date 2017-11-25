@@ -41,7 +41,7 @@ namespace System.Net.Sockets.Tests
             TcpClient client = new TcpClient(AddressFamily.InterNetwork);
             Task connectTask = client.ConnectAsync(IPAddress.Loopback, port);
 
-            await (new Task[] { acceptTask, connectTask }).WhenAllOrAnyFailed(TestSettings.PassingTestTimeout);
+            await (new Task[] { acceptTask, connectTask }).WhenAllOrAnyFailed();
                         
             client.Dispose();
             acceptTask.Result.Dispose();
@@ -58,7 +58,7 @@ namespace System.Net.Sockets.Tests
             TcpClient client = new TcpClient(AddressFamily.InterNetworkV6);
             Task connectTask = client.ConnectAsync(IPAddress.IPv6Loopback, port);
 
-            await (new Task[] { acceptTask, connectTask }).WhenAllOrAnyFailed(TestSettings.PassingTestTimeout);
+            await (new Task[] { acceptTask, connectTask }).WhenAllOrAnyFailed();
 
             client.Dispose();
             acceptTask.Result.Dispose();
@@ -76,7 +76,7 @@ namespace System.Net.Sockets.Tests
             Task connectTask = v6Client.ConnectAsync(IPAddress.IPv6Loopback, port);
 
             Task[] tasks = new Task[] { acceptTask, connectTask };
-            await tasks.WhenAllOrAnyFailed(TestSettings.PassingTestTimeout);
+            await tasks.WhenAllOrAnyFailed();
 
             TcpClient acceptedV6Client = acceptTask.Result;
             Assert.Equal(AddressFamily.InterNetworkV6, acceptedV6Client.Client.RemoteEndPoint.AddressFamily);
@@ -88,7 +88,7 @@ namespace System.Net.Sockets.Tests
             connectTask = v4Client.ConnectAsync(IPAddress.Loopback, port);
             tasks[0] = acceptTask;
             tasks[1] = connectTask;
-            await tasks.WhenAllOrAnyFailed(TestSettings.PassingTestTimeout);
+            await tasks.WhenAllOrAnyFailed();
 
             TcpClient acceptedV4Client = acceptTask.Result;
             Assert.Equal(AddressFamily.InterNetworkV6, acceptedV4Client.Client.RemoteEndPoint.AddressFamily);
