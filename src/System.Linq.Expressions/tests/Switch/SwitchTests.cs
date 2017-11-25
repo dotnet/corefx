@@ -251,6 +251,60 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [ClassData(typeof(CompilationTypes))]
+        public void SparseULongSwitch(bool useInterpreter)
+        {
+            ParameterExpression p = Expression.Parameter(typeof(ulong));
+            ParameterExpression p1 = Expression.Parameter(typeof(string));
+            SwitchExpression s = Expression.Switch(p,
+                Expression.Assign(p1, Expression.Constant("default")),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("hello")), Expression.Constant(1UL)),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("two")), Expression.Constant(2UL)),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("three")), Expression.Constant(203212UL)),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("four")), Expression.Constant(10212UL)),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("five")), Expression.Constant(5021029121UL)),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("six")), Expression.Constant(690219291UL)),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("lala")), Expression.Constant(1UL)),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("wow")), Expression.Constant(ulong.MaxValue)));
+
+            BlockExpression block = Expression.Block(new[] { p1 }, s, p1);
+
+            Func<ulong, string> f = Expression.Lambda<Func<ulong, string>>(block, p).Compile(useInterpreter);
+
+            Assert.Equal("hello", f(1));
+            Assert.Equal("three", f(203212UL));
+            Assert.Equal("two", f(2));
+            Assert.Equal("default", f(3));
+        }
+
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void SparseLongSwitch(bool useInterpreter)
+        {
+            ParameterExpression p = Expression.Parameter(typeof(long));
+            ParameterExpression p1 = Expression.Parameter(typeof(string));
+            SwitchExpression s = Expression.Switch(p,
+                Expression.Assign(p1, Expression.Constant("default")),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("hello")), Expression.Constant(1L)),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("two")), Expression.Constant(2L)),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("three")), Expression.Constant(203212L)),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("four")), Expression.Constant(10212L)),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("five")), Expression.Constant(5021029121L)),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("six")), Expression.Constant(690219291L)),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("lala")), Expression.Constant(1L)),
+                Expression.SwitchCase(Expression.Assign(p1, Expression.Constant("wow")), Expression.Constant(long.MaxValue)));
+
+            BlockExpression block = Expression.Block(new[] { p1 }, s, p1);
+
+            Func<long, string> f = Expression.Lambda<Func<long, string>>(block, p).Compile(useInterpreter);
+
+            Assert.Equal("hello", f(1));
+            Assert.Equal("three", f(203212L));
+            Assert.Equal("two", f(2));
+            Assert.Equal("default", f(3));
+        }
+
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
         public void StringSwitch(bool useInterpreter)
         {
             ParameterExpression p = Expression.Parameter(typeof(string));
