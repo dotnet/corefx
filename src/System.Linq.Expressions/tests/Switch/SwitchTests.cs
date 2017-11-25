@@ -323,6 +323,43 @@ namespace System.Linq.Expressions.Tests
 
         [Theory]
         [ClassData(typeof(CompilationTypes))]
+        public void StringSwitchTailCall(bool useInterpreter)
+        {
+            ParameterExpression p = Expression.Parameter(typeof(string));
+            SwitchExpression s = Expression.Switch(p,
+                Expression.Constant("default"),
+                Expression.SwitchCase(Expression.Constant("hello"), Expression.Constant("hi")),
+                Expression.SwitchCase(Expression.Constant("lala"), Expression.Constant("bye")));
+
+            Func<string, string> f = Expression.Lambda<Func<string, string>>(s, true, p).Compile(useInterpreter);
+
+            Assert.Equal("hello", f("hi"));
+            Assert.Equal("lala", f("bye"));
+            Assert.Equal("default", f("hi2"));
+            Assert.Equal("default", f(null));
+        }
+
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void StringSwitchTailCallButNotLast(bool useInterpreter)
+        {
+            ParameterExpression p = Expression.Parameter(typeof(string));
+            SwitchExpression s = Expression.Switch(p,
+                Expression.Constant("default"),
+                Expression.SwitchCase(Expression.Constant("hello"), Expression.Constant("hi")),
+                Expression.SwitchCase(Expression.Constant("lala"), Expression.Constant("bye")));
+            BlockExpression block = Expression.Block(s, Expression.Constant("Not from the switch"));
+
+            Func<string, string> f = Expression.Lambda<Func<string, string>>(block, true, p).Compile(useInterpreter);
+
+            Assert.Equal("Not from the switch", f("hi"));
+            Assert.Equal("Not from the switch", f("bye"));
+            Assert.Equal("Not from the switch", f("hi2"));
+            Assert.Equal("Not from the switch", f(null));
+        }
+
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
         public void StringSwitch1(bool useInterpreter)
         {
             ParameterExpression p = Expression.Parameter(typeof(string));
