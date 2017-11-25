@@ -71,34 +71,44 @@ namespace System.Linq.Expressions.Interpreter
             Data[StackIndex++] = value;
         }
 
-        public void Push(bool value)
-        {
-            Data[StackIndex++] = value ? Utils.BoxedTrue : Utils.BoxedFalse;
-        }
-
         public void Push(int value)
         {
             Data[StackIndex++] = ScriptingRuntimeHelpers.Int32ToObject(value);
         }
 
-        public void Push(byte value)
+        public void Replace(object value)
         {
-            Data[StackIndex++] = value;
+            Data[StackIndex - 1] = value;
         }
 
-        public void Push(sbyte value)
+        public void Replace(bool value)
         {
-            Data[StackIndex++] = value;
+            Data[StackIndex - 1] = value ? Utils.BoxedTrue : Utils.BoxedFalse;
         }
 
-        public void Push(short value)
+        public void Replace(int value)
         {
-            Data[StackIndex++] = value;
+            Data[StackIndex - 1] = ScriptingRuntimeHelpers.Int32ToObject(value);
         }
 
-        public void Push(ushort value)
+        public void Replace(byte value)
         {
-            Data[StackIndex++] = value;
+            Data[StackIndex - 1] = value;
+        }
+
+        public void Replace(sbyte value)
+        {
+            Data[StackIndex - 1] = value;
+        }
+
+        public void Replace(short value)
+        {
+            Data[StackIndex - 1] = value;
+        }
+
+        public void Replace(ushort value)
+        {
+            Data[StackIndex - 1] = value;
         }
 
         public object Pop()
