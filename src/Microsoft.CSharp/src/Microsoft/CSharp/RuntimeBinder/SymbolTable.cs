@@ -1589,7 +1589,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             methodSymbol.SetAccess(access);
             methodSymbol.isVirtual = member.IsVirtual;
-            methodSymbol.isAbstract = member.IsAbstract;
             methodSymbol.isStatic = member.IsStatic;
 
             if (method != null)
@@ -1598,7 +1597,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 methodSymbol.isOverride = method.IsVirtual && method.IsHideBySig && method.GetRuntimeBaseDefinition() != method;
                 methodSymbol.isOperator = IsOperator(method);
                 methodSymbol.swtSlot = GetSlotForOverride(method);
-                methodSymbol.isVarargs = (method.CallingConvention & CallingConventions.VarArgs) == CallingConventions.VarArgs;
                 methodSymbol.RetType = GetCTypeFromType(method.ReturnType);
             }
             else
@@ -1607,7 +1605,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 methodSymbol.isOverride = false;
                 methodSymbol.isOperator = false;
                 methodSymbol.swtSlot = null;
-                methodSymbol.isVarargs = (((ConstructorInfo)member).CallingConvention & CallingConventions.VarArgs) != 0;
                 methodSymbol.RetType = _typeManager.GetVoid();
             }
 

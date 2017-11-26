@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
@@ -1349,7 +1350,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethodSymbol m = mp as MethodSymbol;
             int argCount = ExpressionIterator.Count(argsPtr);
 
-            Debug.Assert(m == null || !m.isVarargs); // We should never have picked a varargs method to bind to.
+            Debug.Assert(!@params.Items.Any(p => p is ArgumentListType)); // We should never have picked a varargs method to bind to.
 
             bool bDontFixParamArray = false;
 
