@@ -157,14 +157,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool MarshalAsObject(int index)
         {
-            UnmanagedType marshalAsType = default(UnmanagedType);
-
             if (IsMarshalAsParameter(index))
             {
-                marshalAsType = GetMarshalAsParameterValue(index);
+                UnmanagedType marshalAsType = GetMarshalAsParameterValue(index);
+                return marshalAsType == UnmanagedType.Interface || marshalAsType == UnmanagedType.IUnknown || marshalAsType == UnmanagedType.IDispatch;
             }
 
-            return marshalAsType == UnmanagedType.Interface || marshalAsType == UnmanagedType.IUnknown;
+            return false;
         }
 
         public AggregateSymbol getClass() => parent as AggregateSymbol;
