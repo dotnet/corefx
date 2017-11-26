@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -61,14 +62,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // Should only be set once!
                 _Params = value;
-                _optionalParameterIndex = new bool[_Params.Count];
-                _defaultParameterIndex = new bool[_Params.Count];
-                _defaultParameters = new ConstVal[_Params.Count];
-                _defaultParameterConstValTypes = new CType[_Params.Count];
-                _marshalAsIndex = new bool[_Params.Count];
-                _marshalAsBuffer = new UnmanagedType[_Params.Count];
+                int count = value.Count;
+                if (count == 0)
+                {
+                    _optionalParameterIndex = _defaultParameterIndex = _marshalAsIndex = Array.Empty<bool>();
+                    _defaultParameters = Array.Empty<ConstVal>();
+                    _defaultParameterConstValTypes = Array.Empty<CType>();
+                    _marshalAsBuffer = Array.Empty<UnmanagedType>();
+                }
+                else
+                {
+                    _optionalParameterIndex = new bool[count];
+                    _defaultParameterIndex = new bool[count];
+                    _defaultParameters = new ConstVal[count];
+                    _defaultParameterConstValTypes = new CType[count];
+                    _marshalAsIndex = new bool[count];
+                    _marshalAsBuffer = new UnmanagedType[count];
+                }
             }
-        }             // array of cParams parameter types.
+        }
 
         public MethodOrPropertySymbol()
         {
