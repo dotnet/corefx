@@ -61,8 +61,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         public void FailBindOnlyVarargsAvailable()
         {
             dynamic d = new HasVarargs();
-            Assert.Throws<RuntimeBinderException>(() => d.OnlyVarargs());
-            Assert.Throws<RuntimeBinderException>(() => d.OnlyVarargs(1));
+            string errorMessage = Assert.Throws<RuntimeBinderException>(() => d.OnlyVarargs()).Message;
+            // No overload for method 'OnlyVarargs' takes '0' arguments
+            // Localized forms should contain the name and count.
+            Assert.Contains("OnlyVarargs", errorMessage);
+            Assert.Contains("0", errorMessage);
+            errorMessage = Assert.Throws<RuntimeBinderException>(() => d.OnlyVarargs(1)).Message;
+            // "The best overloaded method match for 'Microsoft.CSharp.RuntimeBinder.Tests.VarArgsTests.HasVarargs.OnlyVarargs(__arglist)' has some invalid arguments"
+            // Localized form should contain the name,
+            Assert.Contains("Microsoft.CSharp.RuntimeBinder.Tests.VarArgsTests.HasVarargs.OnlyVarargs(__arglist)", errorMessage);
         }
 
         [Fact]
