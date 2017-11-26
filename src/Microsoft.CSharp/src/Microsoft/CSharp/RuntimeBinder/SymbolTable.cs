@@ -1705,6 +1705,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     {
                         object defValue = parameter.DefaultValue;
 #endif
+                        Debug.Assert(Type.GetTypeCode(defValue.GetType()) != TypeCode.Decimal); // Handled above
                         switch (Type.GetTypeCode(defValue.GetType()))
                         {
 
@@ -1736,11 +1737,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                             case TypeCode.Double:
                                 cv = ConstVal.Get((double)defValue);
                                 cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DOUBLE);
-                                break;
-
-                            case TypeCode.Decimal:
-                                cv = ConstVal.Get((decimal)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DECIMAL);
                                 break;
 
                             case TypeCode.Char:
