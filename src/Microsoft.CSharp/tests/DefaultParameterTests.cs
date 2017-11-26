@@ -3,8 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -124,6 +123,169 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             Assert.Same(Type.Missing, d.U8());
             Assert.Same(Type.Missing, d.VariantBool());
             Assert.Same(Type.Missing, d.VBByRefStr());
+        }
+
+        public class TypeWithDefaults
+        {
+            public DateTime GetDate([Optional, DateTimeConstant(630823790456780000)] DateTime value) => value;
+
+            public decimal GetDecimal(decimal value = 12.3m) => value;
+
+            public byte GetByte(byte value = 123) => value;
+            public short GetInt16(short value = 123) => value;
+
+            public int GetInt32(int value = 123) => value;
+
+            public long GetInt64(long value = 123) => value;
+
+            public float GetSingle(float value = 123) => value;
+
+            public double GetDouble(double value = 123) => value;
+
+            public char GetChar(char value = 'X') => value;
+
+            public bool GetBoolean(bool value = true) => value;
+
+            public sbyte GetSByte(sbyte value = 123) => value;
+
+            public ushort GetUInt16(ushort value = 123) => value;
+
+            public uint GetUInt32(uint value = 123) => value;
+
+            public ulong GetUInt64(ulong value = 123) => value;
+
+            public string GetString(string value = "123") => value;
+
+            public Uri GetURI(Uri value = null) => value;
+        }
+
+        [Fact]
+        public void DefaultDateTime()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal(new DateTime(2000, 1, 2, 3, 4, 5, 678), d.GetDate());
+            Assert.Equal(new DateTime(9876, 5, 4, 3, 2, 1), d.GetDate(new DateTime(9876, 5, 4, 3, 2, 1)));
+        }
+
+        [Fact]
+        public void DefaultDecimal()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal(12.3m, d.GetDecimal());
+            Assert.Equal(49m, d.GetDecimal(49m));
+        }
+
+        [Fact]
+        public void DefaultByte()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal(123, d.GetByte());
+            Assert.Equal(49, d.GetByte(49));
+        }
+
+        [Fact]
+        public void DefaultInt16()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal(123, d.GetInt16());
+            Assert.Equal(49, d.GetInt16(49));
+        }
+
+        [Fact]
+        public void DefaultInt32()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal(123, d.GetInt32());
+            Assert.Equal(49, d.GetInt32(49));
+        }
+
+        [Fact]
+        public void DefaultInt64()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal(123, d.GetInt64());
+            Assert.Equal(49, d.GetInt64(49));
+        }
+
+        [Fact]
+        public void DefaultSingle()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal(123, d.GetSingle());
+            Assert.Equal(49, d.GetSingle(49));
+        }
+
+        [Fact]
+        public void DefaultDouble()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal(123, d.GetDouble());
+            Assert.Equal(49, d.GetDouble(49));
+        }
+
+        [Fact]
+        public void DefaultChar()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal('X', d.GetChar());
+            Assert.Equal('!', d.GetChar('!'));
+        }
+
+        [Fact]
+        public void DefaultBoolean()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.True(d.GetBoolean());
+            Assert.True(d.GetBoolean(true));
+            Assert.False(d.GetBoolean(false));
+        }
+
+        [Fact]
+        public void DefaultSByte()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal(123, d.GetSByte());
+            Assert.Equal(49, d.GetSByte(49));
+        }
+
+        [Fact]
+        public void DefaultUInt16()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal(123, d.GetUInt16());
+            Assert.Equal(49, d.GetUInt16(49));
+        }
+
+        [Fact]
+        public void DefaultUInt32()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal<uint>(123, d.GetUInt32());
+            Assert.Equal<uint>(49, d.GetUInt32(49));
+        }
+
+        [Fact]
+        public void DefaultUInt64()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal<ulong>(123, d.GetUInt64());
+            Assert.Equal<ulong>(49, d.GetUInt64(49));
+        }
+
+        [Fact]
+        public void DefaultString()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal("123", d.GetString());
+            Assert.Equal("something else", d.GetString("something else"));
+        }
+
+        [Fact]
+        public void DefaultUri()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Null(d.GetURI());
+            Assert.Equal(new Uri("http://example.net/"), d.GetURI(new Uri("http://example.net/")));
         }
     }
 }
