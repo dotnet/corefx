@@ -1349,10 +1349,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethodSymbol m = mp as MethodSymbol;
             int argCount = ExpressionIterator.Count(argsPtr);
 
-            if (m != null && m.isVarargs)
-            {
-                paramCount--; // we don't care about the vararg sentinel
-            }
+            Debug.Assert(m == null || !m.isVarargs); // We should never have picked a varargs method to bind to.
 
             bool bDontFixParamArray = false;
 
