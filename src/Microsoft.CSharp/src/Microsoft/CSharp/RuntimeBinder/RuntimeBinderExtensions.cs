@@ -61,6 +61,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
 
                 return method1 != method2
+                    && method1.CallingConvention == method2.CallingConvention
                     && method1.Name == method2.Name
                     && method1.DeclaringType.IsGenericallyEqual(method2.DeclaringType)
                     && method1.ReturnType.IsGenericallyEquivalentTo(method2.ReturnType, method1, method2)
@@ -76,6 +77,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 ParameterInfo[] pis2;
 
                 return ctor1 != ctor2
+                    && ctor1.CallingConvention == ctor2.CallingConvention
                     && ctor1.DeclaringType.IsGenericallyEqual(ctor2.DeclaringType)
                     && (pis1 = ctor1.GetParameters()).Length == (pis2 = ctor2.GetParameters()).Length
                     && Enumerable.All(Enumerable.Zip(pis1, pis2, (pi1, pi2) => pi1.IsEquivalentTo(pi2, ctor1, ctor2)), x => x);
