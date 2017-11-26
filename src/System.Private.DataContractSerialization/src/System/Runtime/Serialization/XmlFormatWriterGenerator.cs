@@ -274,6 +274,7 @@ namespace System.Runtime.Serialization
                 {
                     _ilg.LoadArrayElement(_contractNamespacesLocal, _typeIndex - 1);
                 }
+
                 _ilg.Store(namespaceLocal);
 
                 int classMemberCount = classContract.Members.Count;
@@ -286,7 +287,9 @@ namespace System.Runtime.Serialization
                     LocalBuilder memberValue = null;
 
                     _ilg.Load(_contextArg);
-                    _ilg.Call(methodInfo: member.IsGetOnlyCollection ? XmlFormatGeneratorStatics.StoreIsGetOnlyCollectionMethod : XmlFormatGeneratorStatics.ResetIsGetOnlyCollectionMethod);
+                    _ilg.Call(methodInfo: member.IsGetOnlyCollection ? 
+                        XmlFormatGeneratorStatics.StoreIsGetOnlyCollectionMethod : 
+                        XmlFormatGeneratorStatics.ResetIsGetOnlyCollectionMethod);
 
                     if (!member.EmitDefaultValue)
                     {

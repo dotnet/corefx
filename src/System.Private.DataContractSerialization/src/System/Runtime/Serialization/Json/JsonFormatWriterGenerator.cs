@@ -223,7 +223,9 @@ namespace System.Runtime.Serialization.Json
                     LocalBuilder memberValue = null;
 
                     _ilg.Load(_contextArg);
-                    _ilg.Call(methodInfo: member.IsGetOnlyCollection ? XmlFormatGeneratorStatics.StoreIsGetOnlyCollectionMethod : XmlFormatGeneratorStatics.ResetIsGetOnlyCollectionMethod);
+                    _ilg.Call(methodInfo: member.IsGetOnlyCollection ? 
+                        XmlFormatGeneratorStatics.StoreIsGetOnlyCollectionMethod : 
+                        XmlFormatGeneratorStatics.ResetIsGetOnlyCollectionMethod);
 
                     if (!member.EmitDefaultValue)
                     {
