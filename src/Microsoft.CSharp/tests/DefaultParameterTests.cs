@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Xunit;
@@ -132,6 +133,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             public decimal GetDecimal(decimal value = 12.3m) => value;
 
             public byte GetByte(byte value = 123) => value;
+
             public short GetInt16(short value = 123) => value;
 
             public int GetInt32(int value = 123) => value;
@@ -157,6 +159,50 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             public string GetString(string value = "123") => value;
 
             public Uri GetURI(Uri value = null) => value;
+
+            public StringComparison GetEnum(StringComparison value = StringComparison.InvariantCulture) => value;
+
+            public KeyValuePair<int, string> GetStruct(KeyValuePair<int, string> value = default) => value;
+
+        }
+
+        public class TypeWithOptionalsWithoutDefaults
+        {
+            public DateTime GetDate([Optional] DateTime value) => value;
+
+            public decimal GetDecimal([Optional] decimal value) => value;
+
+            public byte GetByte([Optional] byte value) => value;
+
+            public short GetInt16([Optional] short value) => value;
+
+            public int GetInt32([Optional] int value) => value;
+
+            public long GetInt64([Optional] long value) => value;
+
+            public float GetSingle([Optional] float value) => value;
+
+            public double GetDouble([Optional] double value) => value;
+
+            public char GetChar([Optional] char value) => value;
+
+            public bool GetBoolean([Optional] bool value) => value;
+
+            public sbyte GetSByte([Optional] sbyte value) => value;
+
+            public ushort GetUInt16([Optional] ushort value) => value;
+
+            public uint GetUInt32([Optional] uint value) => value;
+
+            public ulong GetUInt64([Optional] ulong value) => value;
+
+            public string GetString([Optional] string value) => value;
+
+            public Uri GetURI([Optional] Uri value) => value;
+
+            public StringComparison GetEnum([Optional] StringComparison value) => value;
+
+            public KeyValuePair<int, string> GetStruct([Optional] KeyValuePair<int, string> value) => value;
         }
 
         [Fact]
@@ -260,16 +306,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         public void DefaultUInt32()
         {
             dynamic d = new TypeWithDefaults();
-            Assert.Equal<uint>(123, d.GetUInt32());
-            Assert.Equal<uint>(49, d.GetUInt32(49));
+            Assert.Equal(123U, d.GetUInt32());
+            Assert.Equal(49U, d.GetUInt32(49));
         }
 
         [Fact]
         public void DefaultUInt64()
         {
             dynamic d = new TypeWithDefaults();
-            Assert.Equal<ulong>(123, d.GetUInt64());
-            Assert.Equal<ulong>(49, d.GetUInt64(49));
+            Assert.Equal(123UL, d.GetUInt64());
+            Assert.Equal(49UL, d.GetUInt64(49));
         }
 
         [Fact]
@@ -286,6 +332,176 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             dynamic d = new TypeWithDefaults();
             Assert.Null(d.GetURI());
             Assert.Equal(new Uri("http://example.net/"), d.GetURI(new Uri("http://example.net/")));
+        }
+
+        [Fact]
+        public void DefaultEnum()
+        {
+            dynamic d = new TypeWithDefaults();
+            Assert.Equal(StringComparison.InvariantCulture, d.GetEnum());
+            Assert.Equal(StringComparison.OrdinalIgnoreCase, d.GetEnum(StringComparison.OrdinalIgnoreCase));
+        }
+
+
+        [Fact]
+        public void DefaultStruct()
+        {
+            dynamic d = new TypeWithDefaults();
+            KeyValuePair<int, string> kvp = d.GetStruct();
+            Assert.Equal(0, kvp.Key);
+            Assert.Null(kvp.Value);
+            kvp = d.GetStruct(new KeyValuePair<int, string>(23, "value"));
+            Assert.Equal(23, kvp.Key);
+            Assert.Equal("value", kvp.Value);
+        }
+
+        [Fact]
+        public void OptionalDateTime()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Equal(default(DateTime), d.GetDate());
+            Assert.Equal(new DateTime(9876, 5, 4, 3, 2, 1), d.GetDate(new DateTime(9876, 5, 4, 3, 2, 1)));
+        }
+
+        [Fact]
+        public void OptionalDecimal()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Equal(0m, d.GetDecimal());
+            Assert.Equal(49m, d.GetDecimal(49m));
+        }
+
+        [Fact]
+        public void OptionalByte()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Equal(0, d.GetByte());
+            Assert.Equal(49, d.GetByte(49));
+        }
+
+        [Fact]
+        public void OptionalInt16()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Equal(0, d.GetInt16());
+            Assert.Equal(49, d.GetInt16(49));
+        }
+
+        [Fact]
+        public void OptionalInt32()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Equal(0, d.GetInt32());
+            Assert.Equal(49, d.GetInt32(49));
+        }
+
+        [Fact]
+        public void OptionalInt64()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Equal(0, d.GetInt64());
+            Assert.Equal(49, d.GetInt64(49));
+        }
+
+        [Fact]
+        public void OptionalSingle()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Equal(0.0f, d.GetSingle());
+            Assert.Equal(49, d.GetSingle(49));
+        }
+
+        [Fact]
+        public void OptionalDouble()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Equal(0.0, d.GetDouble());
+            Assert.Equal(49, d.GetDouble(49));
+        }
+
+        [Fact]
+        public void OptionalChar()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Equal('\0', d.GetChar());
+            Assert.Equal('!', d.GetChar('!'));
+        }
+
+        [Fact]
+        public void OptionalBoolean()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.False(d.GetBoolean());
+            Assert.True(d.GetBoolean(true));
+            Assert.False(d.GetBoolean(false));
+        }
+
+        [Fact]
+        public void OptionalSByte()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Equal(0, d.GetSByte());
+            Assert.Equal(49, d.GetSByte(49));
+        }
+
+        [Fact]
+        public void OptionalUInt16()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Equal(0, d.GetUInt16());
+            Assert.Equal(49, d.GetUInt16(49));
+        }
+
+        [Fact]
+        public void OptionalUInt32()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Equal(0U, d.GetUInt32());
+            Assert.Equal(49U, d.GetUInt32(49));
+        }
+
+        [Fact]
+        public void OptionalUInt64()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Equal(0UL, d.GetUInt64());
+            Assert.Equal(49UL, d.GetUInt64(49));
+        }
+
+        [Fact]
+        public void OptionalString()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Null(d.GetString());
+            Assert.Equal("something else", d.GetString("something else"));
+        }
+
+        [Fact]
+        public void OptionalUri()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Null(d.GetURI());
+            Assert.Equal(new Uri("http://example.net/"), d.GetURI(new Uri("http://example.net/")));
+        }
+
+        [Fact]
+        public void OptionalEnum()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            Assert.Equal(default(StringComparison), d.GetEnum());
+            Assert.Equal(StringComparison.OrdinalIgnoreCase, d.GetEnum(StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public void OptionalStruct()
+        {
+            dynamic d = new TypeWithOptionalsWithoutDefaults();
+            KeyValuePair<int, string> kvp = d.GetStruct();
+            Assert.Equal(0, kvp.Key);
+            Assert.Null(kvp.Value);
+            kvp = d.GetStruct(new KeyValuePair<int, string>(23, "value"));
+            Assert.Equal(23, kvp.Key);
+            Assert.Equal("value", kvp.Value);
         }
     }
 }
