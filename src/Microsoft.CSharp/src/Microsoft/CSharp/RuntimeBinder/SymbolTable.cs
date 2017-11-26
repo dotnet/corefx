@@ -1607,7 +1607,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 methodSymbol.isOverride = false;
                 methodSymbol.isOperator = false;
                 methodSymbol.swtSlot = null;
-                methodSymbol.isVarargs = false;
+                methodSymbol.isVarargs = (((ConstructorInfo)member).CallingConvention & CallingConventions.VarArgs) != 0;
                 methodSymbol.RetType = _typeManager.GetVoid();
             }
 
@@ -1832,9 +1832,10 @@ namespace Microsoft.CSharp.RuntimeBinder
                 types.Add(GetTypeOfParameter(p, associatedInfo));
             }
 
-            MethodInfo mi = associatedInfo as MethodInfo;
 
-            if (mi != null && (mi.CallingConvention & CallingConventions.VarArgs) == CallingConventions.VarArgs)
+            if (associatedInfo is MethodInfo mi
+                ? (mi.CallingConvention & CallingConventions.VarArgs) != 0
+                : associatedInfo is ConstructorInfo ci && (ci.CallingConvention & CallingConventions.VarArgs) != 0)
             {
                 types.Add(_typeManager.GetArgListType());
             }
