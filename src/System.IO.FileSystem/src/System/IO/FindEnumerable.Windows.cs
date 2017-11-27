@@ -110,13 +110,13 @@ namespace System.IO
 
         private void Initialize()
         {
-            _directoryHandle = CreateDirectoryHandle(_originalFullPath);
-
             _currentPath = _originalFullPath;
             _buffer = ArrayPool<byte>.Shared.Rent(4096);
             _pinnedBuffer = GCHandle.Alloc(_buffer, GCHandleType.Pinned);
             if (_recursive)
                 _pending = new Queue<(IntPtr, string)>();
+
+            _directoryHandle = CreateDirectoryHandle(_originalFullPath);
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -205,8 +205,8 @@ namespace System.IO
 
         protected void Dispose(bool disposing)
         {
-            IntPtr currentHandle = Interlocked.Exchange(ref _directoryHandle, IntPtr.Zero);
-            if (currentHandle != IntPtr.Zero)
+            byte[] buffer = Interlocked.Exchange(ref _buffer, null);
+            if (buffer != null)
             {
                 Interop.Kernel32.CloseHandle(_directoryHandle);
                 if (_recursive && _pending != null)
@@ -215,11 +215,8 @@ namespace System.IO
                         Interop.Kernel32.CloseHandle(_pending.Dequeue().Handle);
                 }
 
-                if (_buffer != null)
-                {
-                    _pinnedBuffer.Free();
-                    ArrayPool<byte>.Shared.Return(_buffer);
-                }
+                _pinnedBuffer.Free();
+                ArrayPool<byte>.Shared.Return(buffer);
             }
         }
 
