@@ -1019,6 +1019,7 @@ namespace System
         [System.CLSCompliantAttribute(false)]
         public static ulong ToUInt64(decimal d) { throw null; }
         public static decimal Truncate(decimal d) { throw null; }
+        public bool TryFormat(Span<char> destination, out int charsWritten, string format = null, System.IFormatProvider provider = null) { throw null; }
         public static bool TryParse(string s, out decimal result) { throw null; }
         public static bool TryParse(string s, System.Globalization.NumberStyles style, System.IFormatProvider provider, out decimal result) { throw null; }
         public static bool TryParse(System.ReadOnlySpan<char> s, out decimal result) { throw null; }
@@ -2322,6 +2323,7 @@ namespace System
         public string TrimStart() { throw null; }
         public string TrimStart(char trimChar) { throw null; }
         public string TrimStart(params char[] trimChars) { throw null; }
+        public static implicit operator System.ReadOnlySpan<char>(string value) { throw null; }
     }
     public enum StringComparison
     {
@@ -6105,12 +6107,15 @@ namespace System.Reflection
         public virtual System.Type ResolveType(int metadataToken, System.Type[] genericTypeArguments, System.Type[] genericMethodArguments) { throw null; }
     }
     public delegate System.Reflection.Module ModuleResolveEventHandler(object sender, System.ResolveEventArgs e);
+    [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple = false, Inherited = false)]
     public sealed class ObfuscateAssemblyAttribute : System.Attribute
     {
         public ObfuscateAssemblyAttribute(bool assemblyIsPrivate) { }
         public bool AssemblyIsPrivate { get { throw null; } }
         public bool StripAfterObfuscation { get { throw null; } set { } }
     }
+    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Method | System.AttributeTargets.Parameter | System.AttributeTargets.Field | System.AttributeTargets.Property | System.AttributeTargets.Event | System.AttributeTargets.Interface | System.AttributeTargets.Enum | System.AttributeTargets.Delegate,
+        AllowMultiple = true, Inherited = false)]
     public sealed class ObfuscationAttribute : System.Attribute
     {
         public ObfuscationAttribute() { }
