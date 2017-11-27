@@ -8,6 +8,6 @@ namespace System
 {
     public static partial class PlatformDetection
     {
-        public static bool IsFullFramework452OrDownTargeting => false;
+        public static bool TargetsNetFx452OrLower => false;
     }
 }

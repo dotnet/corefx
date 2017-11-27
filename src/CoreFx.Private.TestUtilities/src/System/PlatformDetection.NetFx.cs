@@ -10,8 +10,8 @@ namespace System
     public static partial class PlatformDetection
     {
         private static string FrameworkName => AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName;
-        private static Version TargetVersion => new FrameworkName(FrameworkName).Version;
+        private static Version TargetVersion => String.IsNullOrEmpty(FrameworkName) ? new Version(4, 5, 0, 0) : new FrameworkName(FrameworkName).Version;
 
-        public static bool IsFullFramework452OrDownTargeting => TargetVersion.CompareTo(new Version(4, 5, 3, 0)) < 0;
+        public static bool TargetsNetFx452OrLower => TargetVersion.CompareTo(new Version(4, 5, 3, 0)) < 0;
     }
 }

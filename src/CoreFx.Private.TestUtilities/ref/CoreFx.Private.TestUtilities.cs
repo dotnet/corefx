@@ -101,7 +101,7 @@ namespace System
         public static bool IsNetfx462OrNewer() { throw null; }
         public static bool IsNetfx470OrNewer() { throw null; }
         public static bool IsNetfx471OrNewer() { throw null; }
-        public static bool IsFullFramework452OrDownTargeting { get { throw null; } }
+        public static bool TargetsNetFx452OrLower { get { throw null; } }
 
         public partial class Range
         {
