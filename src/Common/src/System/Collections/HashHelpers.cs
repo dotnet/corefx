@@ -73,7 +73,7 @@ namespace System.Collections
         {
             int newSize = 2 * oldSize;
 
-            // Allow the hashtables to grow to maximum possible size (~2G elements) before encoutering capacity overflow.
+            // Allow the hashtables to grow to maximum possible size (~2G elements) before encountering capacity overflow.
             // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
             if ((uint)newSize > MaxPrimeArrayLength && MaxPrimeArrayLength > oldSize)
             {
