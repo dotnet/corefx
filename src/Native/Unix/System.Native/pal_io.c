@@ -329,7 +329,8 @@ int32_t SystemNative_GetReadDirRBufferSize(void)
 #if HAVE_READDIR_R
     // dirent should be under 2k in size
     assert(sizeof(struct dirent) < 2048);
-    return sizeof(struct dirent);
+    // add some extra space so we can align the buffer to dirent.
+    return sizeof(struct dirent) + alignof(struct dirent) - 1;
 #else
     return 0;
 #endif
@@ -348,14 +349,17 @@ int32_t SystemNative_ReadDirR(DIR* dir, void* buffer, int32_t bufferSize, struct
 #if HAVE_READDIR_R
     assert(buffer != NULL);
 
-    if (bufferSize < (int32_t)sizeof(struct dirent))
+    // align to dirent
+    struct dirent* entry = (struct dirent*)((buffer + alignof(struct dirent) - 1) & ~(alignof(struct dirent) - 1));
+
+    // check there is dirent size available at entry
+    if ((buffer + bufferSize) < (entry + 1))
     {
         assert(false && "Buffer size too small; use GetReadDirRBufferSize to get required buffer size");
         return ERANGE;
     }
 
     struct dirent* result = NULL;
-    struct dirent* entry = (struct dirent*)buffer;
     int error = readdir_r(dir, entry, &result);
 
     // positive error number returned -> failure
