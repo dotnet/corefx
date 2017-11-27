@@ -682,6 +682,15 @@ namespace System.Tests
         }
 
         [Fact]
+        public static void CreateDelegate2_Target_GenericTypeParameter()
+        {
+
+            Type theT = typeof(G<>).GetTypeInfo().GenericTypeParameters[0];
+            Type delegateType = typeof(Func<object, object, bool>);
+            AssertExtensions.Throws<ArgumentException>("target", () => Delegate.CreateDelegate(delegateType, theT, "ReferenceEquals"));
+        }
+
+        [Fact]
         public static void CreateDelegate2_Type_Null()
         {
             C c = new C();
