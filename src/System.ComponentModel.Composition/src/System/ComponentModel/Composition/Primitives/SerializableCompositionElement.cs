@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if FEATURE_SERIALIZATION 
 using Microsoft.Internal;
-#endif
 
 namespace System.ComponentModel.Composition.Primitives
 {
@@ -19,9 +17,7 @@ namespace System.ComponentModel.Composition.Primitives
 
         public SerializableCompositionElement(string displayName, ICompositionElement origin)
         {
-#if FEATURE_SERIALIZATION
             Assumes.IsTrue(origin == null || origin.GetType().IsSerializable);
-#endif
             _displayName = displayName ?? string.Empty;
             _origin = origin;
         }
