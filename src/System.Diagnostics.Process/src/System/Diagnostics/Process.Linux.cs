@@ -232,11 +232,9 @@ namespace System.Diagnostics
                 Interop.procfs.SelfExeFilePath :
                 Interop.procfs.GetExeFilePathForProcess(processId);
 
-            // Determine the maximum size of a path
-            int maxPath = Interop.Sys.MaxPath;
-
-            // Start small with a buffer allocation, and grow only up to the max path
-            for (int pathLen = 256; pathLen < maxPath; pathLen *= 2)
+            // Start small with a buffer allocation
+            int pathLen = 256;
+            do
             {
                 // Read from procfs the symbolic link to this process' executable
                 byte[] buffer = new byte[pathLen + 1]; // +1 for null termination
@@ -255,7 +253,9 @@ namespace System.Diagnostics
                 {
                     break;
                 }
-            }
+
+                pathLen *= 2;
+            } while (true);
 
             // Could not get a path
             return null;

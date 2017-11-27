@@ -14,8 +14,6 @@ namespace System.IO
         private const char InvalidPathChar = '\0';
         internal static char[] GetInvalidPathChars() => new char[] { InvalidPathChar };
 
-        internal static readonly int MaxComponentLength = Interop.Sys.MaxName;
-
         internal const string ParentDirectoryPrefix = @"../";
 
         /// <summary>Returns a value indicating if the given path contains invalid characters.</summary>
