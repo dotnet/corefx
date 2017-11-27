@@ -11,7 +11,8 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
-        private static readonly int s_readBufferSize = GetReadDirRBufferSize();
+        // We'll allocate the read buffer in 'long's to have 8-byte alignment.
+        private static readonly int s_readBufferLongSize = (GetReadDirRBufferSize() + sizeof(long) - 1) / sizeof(long);
 
         internal enum NodeType : int
         {
@@ -70,10 +71,11 @@ internal static partial class Interop
 
                 unsafe
                 {
-                    // s_readBufferSize is zero when the native implementation does not support reading into a buffer.
-                    byte* buffer = stackalloc byte[s_readBufferSize];
+                    // s_readBufferLongSize is zero when the native implementation does not support reading into a buffer.
+                    // Align the buffer at 8 bytes by allocating as 'long'.
+                    long* buffer = stackalloc long[s_readBufferLongSize];
                     InternalDirectoryEntry temp;
-                    int ret = ReadDirR(dir.DangerousGetHandle(), buffer, s_readBufferSize, out temp);
+                    int ret = ReadDirR(dir.DangerousGetHandle(), (byte*)buffer, s_readBufferLongSize * sizeof(long), out temp);
                     // We copy data into DirectoryEntry to ensure there are no dangling references.
                     outputEntry = ret == 0 ?
                                 new DirectoryEntry() { InodeName = GetDirectoryEntryName(temp), InodeType = temp.InodeType } : 
