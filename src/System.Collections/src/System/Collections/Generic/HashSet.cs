@@ -1162,6 +1162,8 @@ namespace System.Collections.Generic
         /// </summary>
         private void SetCapacity(int newSize)
         {
+            Debug.Assert(HashHelpers.IsPrime(newSize), "New size is not prime!");
+
             Debug.Assert(_buckets != null, "SetCapacity called on a set with no elements");
 
             Slot[] newSlots = new Slot[newSize];
