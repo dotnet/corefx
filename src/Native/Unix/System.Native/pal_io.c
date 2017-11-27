@@ -351,10 +351,10 @@ int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, str
     assert(buffer != NULL);
 
     // align to dirent
-    struct dirent* entry = (struct dirent*)((buffer + alignof(struct dirent) - 1) & ~(alignof(struct dirent) - 1));
+    struct dirent* entry = (struct dirent*)((size_t)(buffer + alignof(struct dirent) - 1) & ~(alignof(struct dirent) - 1));
 
     // check there is dirent size available at entry
-    if ((buffer + bufferSize) < (entry + 1))
+    if ((buffer + bufferSize) < (uint8_t*)(entry + 1))
     {
         assert(false && "Buffer size too small; use GetReadDirRBufferSize to get required buffer size");
         return ERANGE;
