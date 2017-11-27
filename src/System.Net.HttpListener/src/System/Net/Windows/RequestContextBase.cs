@@ -55,6 +55,10 @@ namespace System.Net
         ~RequestContextBase()
         {
             Dispose(false);
+            if (_backingBuffer != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(_backingBuffer);
+            }
         }
 
         internal Interop.HttpApi.HTTP_REQUEST* RequestBlob
@@ -130,7 +134,7 @@ namespace System.Net
             {
                 Marshal.WriteByte(_backingBuffer + i, 0);
             }
-            Debug.Assert(size == 0 || _backingBuffer.ToInt64() % 8 == 0);
+            //Debug.Assert(size == 0 || _backingBuffer.ToInt64() % 8 == 0);
         }
     }
 }

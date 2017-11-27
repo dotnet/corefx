@@ -24,7 +24,7 @@ namespace System.Net
                 {
                     return RequestBlob;
                 }
-                _pinnedHandle.Free();
+                //_pinnedHandle.Free();
             }
             SetBuffer(size);
             if (RequestBuffer == IntPtr.Zero)
@@ -44,7 +44,7 @@ namespace System.Net
         {
             if (_pinnedHandle.IsAllocated)
             {
-                _pinnedHandle.Free();
+                //_pinnedHandle.Free();
             }
         }
 
