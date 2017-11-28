@@ -41,5 +41,12 @@ namespace System.Diagnostics.Tests
             Assert.Equal(instanceId, eventInstance.InstanceId);
             Assert.Equal(EventLogEntryType.Warning, eventInstance.EntryType);
         }
+
+        [Fact]
+        public void HungProcess()
+        {
+            while (true)
+                ;
+        }
     }
 }
