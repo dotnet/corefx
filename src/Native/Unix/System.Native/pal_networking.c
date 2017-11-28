@@ -1987,6 +1987,10 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
                     *optName = IPV6_RECVPKTINFO;
                     return true;
 
+                case SocketOptionName_SO_IP_MULTICAST_IF:
+                    *optName = IPV6_MULTICAST_IF;
+                    return true;
+
                 default:
                     return false;
             }
