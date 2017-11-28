@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime.CompilerServices;
-
 namespace System.Buffers.Text
 {
     /// <summary>
@@ -13,50 +11,45 @@ namespace System.Buffers.Text
     {
         private static bool TryFormatInt64Default(long value, Span<byte> buffer, out int bytesWritten)
         {
-            ref byte utf8Bytes = ref buffer.DangerousGetPinnableReference();
             int idx = 0;
 
             if (value < 0)
             {
                 if (buffer.Length < 2) goto FalseExit;  // Buffer of length 1 won't have space for the digits after the minus sign
-                Unsafe.Add(ref utf8Bytes, idx++) = Utf8Constants.Minus;
+                buffer[idx++] = Utf8Constants.Minus;
 
                 // Abs(long.MinValue) == long.MaxValue + 1, so we need to handle this specially.
                 if (value == long.MinValue)
                 {
-                    if (buffer.Length < 20) goto FalseExit; // WriteDigits does not do bounds checks
-                    Unsafe.Add(ref utf8Bytes, 1) = (byte)'9';
-                    FormattingHelpers.WriteDigits(223372036854775808L, 18, ref utf8Bytes, 2);
-                    bytesWritten = 20;
+                    // digitCount + idx = 19 + 1 = 20
+                    if (buffer.Length < 19 + idx) goto FalseExit;  // WriteDigits does not do bounds checks
+                    buffer[idx] = (byte)'9';
+                    // Already wrote '9', 19 - 1 = 18 digits left
+                    FormattingHelpers.WriteDigits(223372036854775808L, 18, ref buffer.DangerousGetPinnableReference(), idx + 1);
+                    bytesWritten = 19 + idx;
                     return true;
                 }
 
                 value = -value;
             }
 
-            long left = value;
-            for (int i = idx; i < buffer.Length; i++)
+            if (value < 10)
             {
-                left = FormattingHelpers.DivMod(left, 10, out long num);
-                Unsafe.Add(ref utf8Bytes, i) = (byte)('0' + num);
-                if (left == 0)
-                {
-                    i++;
-                    // Reverse the bytes
-                    for (int j = 0; j < ((i - idx) >> 1); j++)
-                    {
-                        byte temp = Unsafe.Add(ref utf8Bytes, j + idx);
-                        Unsafe.Add(ref utf8Bytes, j + idx) = Unsafe.Add(ref utf8Bytes, i - j - 1);
-                        Unsafe.Add(ref utf8Bytes, i - j - 1) = temp;
-                    }
-                    bytesWritten = i;
-                    return true;
-                }
+                if (buffer.Length == 0) goto FalseExit;
+                buffer[idx] = (byte)('0' + value);
+                bytesWritten = 1 + idx;
+                return true;
             }
 
+            int digitCount = FormattingHelpers.CountDigits((ulong)value);
+            if (buffer.Length < digitCount + idx) goto FalseExit;  // WriteDigits does not do bounds checks
+            FormattingHelpers.WriteDigits(value, digitCount, ref buffer.DangerousGetPinnableReference(), idx);
+            bytesWritten = digitCount + idx;
+            return true;
+
+        FalseExit:
             // Buffer too small, clean up what has been written
             buffer.Clear();
-        FalseExit:
             bytesWritten = 0;
             return false;
         }

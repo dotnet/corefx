@@ -31,16 +31,46 @@ namespace System.Buffers.Text
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int WriteFractionDigits(long value, int digitCount, ref byte buffer, int index)
+        public static void WriteFractionDigits(long value, int digitCount, ref byte buffer, int index)
         {
             for (int i = FractionDigits; i > digitCount; i--)
                 value /= 10;
 
-            return WriteDigits(value, digitCount, ref buffer, index);
+            WriteDigits(value, digitCount, ref buffer, index);
+        }
+
+        // Passing the span and using the indexer is 5-10% slower than using Unsafe APIs on ref byte.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteDigits(long value, int digitCount, Span<byte> buffer, int index)
+        {
+            long left = value;
+
+            for (int i = digitCount - 1; i >= 0; i--)
+            {
+                left = DivMod(left, 10, out long num);
+                buffer[index + i] = (byte)('0' + num);
+            }
+            
+            Debug.Assert(left == 0);
+        }
+
+        // Passing the span and using the indexer is 5-10% slower than using Unsafe APIs on ref byte.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteDigits(ulong value, int digitCount, Span<byte> buffer, int index)
+        {
+            ulong left = value;
+
+            for (int i = digitCount - 1; i >= 0; i--)
+            {
+                left = DivMod(left, 10, out ulong num);
+                buffer[index + i] = (byte)('0' + num);
+            }
+
+            Debug.Assert(left == 0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int WriteDigits(long value, int digitCount, ref byte buffer, int index)
+        public static void WriteDigits(long value, int digitCount, ref byte buffer, int index)
         {
             long left = value;
 
@@ -50,7 +80,7 @@ namespace System.Buffers.Text
                 Unsafe.Add(ref buffer, index + i) = (byte)('0' + num);
             }
 
-            return digitCount;
+            Debug.Assert(left == 0);
         }
 
         /// <summary>
@@ -59,7 +89,7 @@ namespace System.Buffers.Text
         /// you definitely need to deal with numbers larger than long.MaxValue.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int WriteDigits(ulong value, int digitCount, ref byte buffer, int index)
+        public static void WriteDigits(ulong value, int digitCount, ref byte buffer, int index)
         {
             ulong left = value;
 
@@ -68,8 +98,8 @@ namespace System.Buffers.Text
                 left = DivMod(left, 10, out ulong num);
                 Unsafe.Add(ref buffer, index + i) = (byte)('0' + num);
             }
-
-            return digitCount;
+            
+            Debug.Assert(left == 0);
         }
 
         #endregion UTF-8 Helper methods
@@ -113,6 +143,61 @@ namespace System.Buffers.Text
             {
                 n /= 10;
                 digits++;
+            }
+
+            return digits;
+        }
+
+        public static int CountDigits(ulong value)
+        {
+            int digits = 1;
+            uint part;
+            if (value >= 10000000)
+            {
+                if (value >= 100000000000000)
+                {
+                    part = (uint)(value / 100000000000000);
+                    digits += 14;
+                }
+                else
+                {
+                    part = (uint)(value / 10000000);
+                    digits += 7;
+                }
+            }
+            else
+            {
+                part = (uint)value;
+            }
+
+            if (part < 10) 
+            { 
+                // no-op
+            }
+            else if (part < 100) 
+            {
+                digits += 1;
+            }
+            else if (part < 1000)
+            {
+                digits += 2;
+            }
+            else if (part < 10000) 
+            {
+                digits += 3;
+            }
+            else if (part < 100000) 
+            {
+                digits += 4;
+            }
+            else if (part < 1000000) 
+            {
+                digits += 5;
+            }
+            else 
+            { 
+                Debug.Assert(part < 10000000);
+                digits += 6;
             }
 
             return digits;
