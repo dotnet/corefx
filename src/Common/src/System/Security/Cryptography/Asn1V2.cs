@@ -7,6 +7,7 @@
 //#define CHECK_ACCURATE_ENSURE
 
 using System.Buffers;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
@@ -4056,46 +4057,64 @@ namespace System.Security.Cryptography.Asn1
         {
             CheckUniversalTag(tag, UniversalTagNumber.OctetString);
 
+            // Primitive or constructed, doesn't matter.
+            WriteOctetStringCore(tag, octetString);
+        }
+
+        // T-REC-X.690-201508 sec 8.7
+        private void WriteOctetStringCore(Asn1Tag tag, ReadOnlySpan<byte> octetString)
+        {
             if (RuleSet == AsnEncodingRules.CER)
             {
                 // If it's bigger than a primitive segment, use the constructed encoding
+                // T-REC-X.690-201508 sec 9.2
                 if (octetString.Length > AsnReader.MaxCERSegmentSize)
                 {
-                    WriteCEROctetString(tag, octetString);
+                    WriteConstructedCerOctetString(tag, octetString);
                     return;
                 }
             }
 
             // Clear the constructed flag, if present.
-            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
+            WriteTag(tag.AsPrimitive());
             WriteLength(octetString.Length);
             octetString.CopyTo(_buffer.AsSpan().Slice(_offset));
             _offset += octetString.Length;
         }
 
-        private void WriteCEROctetString(Asn1Tag tag, ReadOnlySpan<byte> payload)
+        // T-REC-X.690-201508 sec 9.2, 8.7
+        private void WriteConstructedCerOctetString(Asn1Tag tag, ReadOnlySpan<byte> payload)
         {
             const int MaxCERSegmentSize = AsnReader.MaxCERSegmentSize;
             Debug.Assert(payload.Length > MaxCERSegmentSize);
 
-            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue, isConstructed: true));
+            WriteTag(tag.AsConstructed());
             WriteLength(-1);
 
             int fullSegments = Math.DivRem(payload.Length, MaxCERSegmentSize, out int lastSegmentSize);
-            // The tag size of primitive OCTET STRING is 1 byte.
-            // The lengthOrLengthLength byte is always 1 byte.
-            int fullSegmentEncodedSize = 1 + 1 + MaxCERSegmentSize + GetEncodedLengthSubsequentByteCount(MaxCERSegmentSize);
-            Debug.Assert(fullSegmentEncodedSize == 1004);
-            int remainingEncodedSize = 1 + 1 + lastSegmentSize + GetEncodedLengthSubsequentByteCount(lastSegmentSize);
+
+            // The tag size is 1 byte.
+            // The length will always be encoded as 82 03 E8 (3 bytes)
+            // And 1000 content octets (by T-REC-X.690-201508 sec 9.2)
+            const int FullSegmentEncodedSize = 1004;
+            Debug.Assert(
+                FullSegmentEncodedSize == 1 + 1 + MaxCERSegmentSize + GetEncodedLengthSubsequentByteCount(MaxCERSegmentSize));
+
+            int remainingEncodedSize;
 
             if (lastSegmentSize == 0)
             {
                 remainingEncodedSize = 0;
             }
+            else
+            {
+                // One byte of tag, and minimum one byte of length.
+                remainingEncodedSize = 2 + lastSegmentSize + GetEncodedLengthSubsequentByteCount(lastSegmentSize);
+            }
 
             // Reduce the number of copies by pre-calculating the size.
             // +2 for End-Of-Contents
-            int expectedSize = fullSegments * fullSegmentEncodedSize + remainingEncodedSize + 2;
+            int expectedSize = fullSegments * FullSegmentEncodedSize + remainingEncodedSize + 2;
             EnsureWriteCapacity(expectedSize);
 
             byte[] ensureNoExtraCopy = _buffer;
@@ -4107,6 +4126,7 @@ namespace System.Security.Cryptography.Asn1
 
             while (remainingData.Length > MaxCERSegmentSize)
             {
+                // T-REC-X.690-201508 sec 8.7.3.2-note2
                 WriteTag(primitiveOctetString);
                 WriteLength(MaxCERSegmentSize);
 
@@ -4123,24 +4143,29 @@ namespace System.Security.Cryptography.Asn1
             remainingData.CopyTo(dest);
             _offset += remainingData.Length;
 
-            WriteTag(Asn1Tag.EndOfContents);
-            WriteLength(0);
+            WriteEndOfContents();
 
             Debug.Assert(_offset - savedOffset == expectedSize, $"expected size was {expectedSize}, actual was {_offset - savedOffset}");
-            Debug.Assert(_buffer == ensureNoExtraCopy, $"_buffer was replaced during {nameof(WriteCEROctetString)}");
+            Debug.Assert(_buffer == ensureNoExtraCopy, $"_buffer was replaced during {nameof(WriteConstructedCerOctetString)}");
         }
 
         public void WriteNull()
         {
-            WriteNull(Asn1Tag.Null);
+            WriteNullCore(Asn1Tag.Null);
         }
 
         public void WriteNull(Asn1Tag tag)
         {
             CheckUniversalTag(tag, UniversalTagNumber.Null);
 
-            // Clear the constructed flag, if present.
-            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
+            WriteNullCore(tag.AsPrimitive());
+        }
+
+        // T-REC-X.690-201508 sec 8.8
+        private void WriteNullCore(Asn1Tag tag)
+        {
+            Debug.Assert(!tag.IsConstructed);
+            WriteTag(tag);
             WriteLength(0);
         }
 
@@ -4162,7 +4187,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteObjectIdentifier(ReadOnlySpan<char> oidValue)
         {
-            WriteObjectIdentifier(new Asn1Tag(UniversalTagNumber.ObjectIdentifier), oidValue);
+            WriteObjectIdentifierCore(new Asn1Tag(UniversalTagNumber.ObjectIdentifier), oidValue);
         }
 
         public void WriteObjectIdentifier(Asn1Tag tag, Oid oid)
@@ -4185,7 +4210,16 @@ namespace System.Security.Cryptography.Asn1
         {
             CheckUniversalTag(tag, UniversalTagNumber.ObjectIdentifier);
 
-            if (oidValue.Length < 3 /* "1.1" is the shortest value */)
+            WriteObjectIdentifierCore(tag.AsPrimitive(), oidValue);
+        }
+
+        // T-REC-X.690-201508 sec 8.19
+        private void WriteObjectIdentifierCore(Asn1Tag tag, ReadOnlySpan<char> oidValue)
+        {
+            // T-REC-X.690-201508 sec 8.19.4
+            // The first character is in { 0, 1, 2 }, the second will be a '.', and a third (digit)
+            // will also exist.
+            if (oidValue.Length < 3)
                 throw new CryptographicException(SR.Argument_InvalidOidValue);
             if (oidValue[1] != '.')
                 throw new CryptographicException(SR.Argument_InvalidOidValue);
@@ -4222,11 +4256,11 @@ namespace System.Security.Cryptography.Asn1
                 //       (X*40) + Y
                 //   where X is the value of the first object identifier component and Y is the value of the
                 //   second object identifier component.
-                //       NOTE – This packing of the first two object identifier components recognizes that only
+                //       NOTE - This packing of the first two object identifier components recognizes that only
                 //          three values are allocated from the root node, and at most 39 subsequent values from
                 //          nodes reached by X = 0 and X = 1.
 
-                // skip firstRid and the trailing .
+                // skip firstComponent and the trailing .
                 ReadOnlySpan<char> remaining = oidValue.Slice(2);
 
                 BigInteger subIdentifier = ParseSubIdentifier(ref remaining);
@@ -4242,8 +4276,8 @@ namespace System.Security.Cryptography.Asn1
                     tmpOffset += localLen;
                 }
 
-                // Clear the constructed flag, if present.
-                WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
+                Debug.Assert(!tag.IsConstructed);
+                WriteTag(tag);
                 WriteLength(tmpOffset);
                 Buffer.BlockCopy(tmp, 0, _buffer, _offset, tmpOffset);
                 _offset += tmpOffset;
@@ -4299,6 +4333,7 @@ namespace System.Security.Cryptography.Asn1
             throw new CryptographicException(SR.Argument_InvalidOidValue);
         }
 
+        // ITU-T-X.690-201508 sec 8.19.5
         private static int EncodeSubIdentifier(Span<byte> dest, ref BigInteger subIdentifier)
         {
             Debug.Assert(dest.Length > 0);
@@ -4312,7 +4347,6 @@ namespace System.Security.Cryptography.Asn1
             BigInteger unencoded = subIdentifier;
             int idx = 0;
 
-            // ITU-T-X.690-201508 sec 8.19.5
             do
             {
                 BigInteger cur = unencoded & 0x7F;
@@ -4351,14 +4385,15 @@ namespace System.Security.Cryptography.Asn1
             if (enumValue == null)
                 throw new ArgumentNullException(nameof(enumValue));
 
-            WriteEnumeratedValue(tag, enumValue.GetType(), enumValue);
+            WriteEnumeratedValue(tag.AsPrimitive(), enumValue.GetType(), enumValue);
         }
 
         public void WriteEnumeratedValue<TEnum>(Asn1Tag tag, TEnum value) where TEnum : struct
         {
-            WriteEnumeratedValue(tag, typeof(TEnum), value);
+            WriteEnumeratedValue(tag.AsPrimitive(), typeof(TEnum), value);
         }
 
+        // T-REC-X.690-201508 sec 8.4
         private void WriteEnumeratedValue(Asn1Tag tag, Type tEnum, object enumValue)
         {
             CheckUniversalTag(tag, UniversalTagNumber.Enumerated);
@@ -4389,7 +4424,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void PushSequence()
         {
-            PushSequence(new Asn1Tag(UniversalTagNumber.Sequence, isConstructed: true));
+            PushSequenceCore(new Asn1Tag(UniversalTagNumber.Sequence, isConstructed: true));
         }
 
         public void PushSequence(Asn1Tag tag)
@@ -4397,7 +4432,13 @@ namespace System.Security.Cryptography.Asn1
             CheckUniversalTag(tag, UniversalTagNumber.Sequence);
 
             // Assert the constructed flag, in case it wasn't.
-            PushTag(new Asn1Tag(tag.TagClass, tag.TagValue, isConstructed: true));
+            PushSequenceCore(tag.AsConstructed());
+        }
+
+        // T-REC-X.690-201508 sec 8.9, 8.10
+        private void PushSequenceCore(Asn1Tag tag)
+        {
+            PushTag(tag.AsConstructed());
         }
 
         public void PopSequence()
@@ -4410,6 +4451,13 @@ namespace System.Security.Cryptography.Asn1
             // PopSequence shouldn't be used to pop a SetOf.
             CheckUniversalTag(tag, UniversalTagNumber.Sequence);
 
+            // Assert the constructed flag, in case it wasn't.
+            PopSequenceCore(tag.AsConstructed());
+        }
+
+        // T-REC-X.690-201508 sec 8.9, 8.10
+        private void PopSequenceCore(Asn1Tag tag)
+        {
             PopTag(tag);
         }
 
@@ -4421,20 +4469,35 @@ namespace System.Security.Cryptography.Asn1
         public void PushSetOf(Asn1Tag tag)
         {
             CheckUniversalTag(tag, UniversalTagNumber.SetOf);
-            
+
             // Assert the constructed flag, in case it wasn't.
-            PushTag(new Asn1Tag(tag.TagClass, tag.TagValue, isConstructed: true));
+            PushSetOfCore(tag.AsConstructed());
+        }
+
+        // T-REC-X.690-201508 sec 8.12
+        // The writer claims SetOf, and not Set, so as to avoid the field
+        // ordering clause of T-REC-X.690-201508 sec 9.3
+        private void PushSetOfCore(Asn1Tag tag)
+        {
+            PushTag(tag);
         }
 
         public void PopSetOf()
         {
-            PopSetOf(new Asn1Tag(UniversalTagNumber.SetOf, isConstructed: true));
+            PopSetOfCore(new Asn1Tag(UniversalTagNumber.SetOf, isConstructed: true));
         }
 
         public void PopSetOf(Asn1Tag tag)
         {
             CheckUniversalTag(tag, UniversalTagNumber.SetOf);
 
+            // Assert the constructed flag, in case it wasn't.
+            PopSetOfCore(tag.AsConstructed());
+        }
+
+        // T-REC-X.690-201508 sec 8.12
+        private void PopSetOfCore(Asn1Tag tag)
+        {
             // T-REC-X.690-201508 sec 11.6
             bool sortContents = RuleSet == AsnEncodingRules.CER || RuleSet == AsnEncodingRules.DER;
 
@@ -4687,8 +4750,11 @@ namespace System.Security.Cryptography.Asn1
                 _nestingStack = new Stack<(Asn1Tag,int)>();
             }
 
+            Debug.Assert(tag.IsConstructed);
             WriteTag(tag);
             _nestingStack.Push((tag, _offset));
+            // Indicate that the length is indefinite.
+            // We'll come back and clean this up (as appropriate) in PopTag.
             WriteLength(-1);
         }
 
@@ -4701,7 +4767,8 @@ namespace System.Security.Cryptography.Asn1
 
             (Asn1Tag stackTag, int lenOffset) = _nestingStack.Peek();
 
-            if (stackTag != new Asn1Tag(tag.TagClass, tag.TagValue, true))
+            Debug.Assert(tag.IsConstructed);
+            if (stackTag != tag)
             {
                 throw new ArgumentException(SR.Cryptography_AsnWriter_PopWrongTag, nameof(tag));
             }
@@ -4861,7 +4928,7 @@ namespace System.Security.Cryptography.Asn1
                 }
             }
 
-            WriteCEROctetString(tag, tmp.AsSpan().Slice(0, size));
+            WriteConstructedCerOctetString(tag, tmp.AsSpan().Slice(0, size));
             Array.Clear(tmp, 0, size);
             ArrayPool<byte>.Shared.Return(tmp);
         }

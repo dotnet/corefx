@@ -379,5 +379,24 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             Verify(objWriter, genWriter.Encode().ByteArrayToHex());
         }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        [InlineData(PublicEncodingRules.DER)]
+        public void VerifyWriteEnumeratedValue_ConstructedIgnored(PublicEncodingRules ruleSet)
+        {
+            AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet);
+
+            writer.WriteEnumeratedValue(
+                new Asn1Tag(UniversalTagNumber.Enumerated, isConstructed: true),
+                ReadEnumerated.ULongBacked.Fluff);
+
+            writer.WriteEnumeratedValue(
+                new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true),
+                (object)ReadEnumerated.SByteBacked.Fluff);
+
+            Verify(writer, "0A0900FACEF00DCAFEBEEF" + "800153");
+        }
     }
 }
