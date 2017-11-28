@@ -665,7 +665,6 @@ namespace System.Tests
                 string s = "Turkish I \u0131s TROUBL\u0130NG!";
                 char value = '\u0130';
 
-                value = '\u0130';
                 Assert.Equal(19, s.IndexOf(value));
                 Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(19, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
