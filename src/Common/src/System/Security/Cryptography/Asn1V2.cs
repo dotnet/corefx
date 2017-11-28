@@ -4506,7 +4506,7 @@ namespace System.Security.Cryptography.Asn1
         
         public void WriteUtcTime(DateTimeOffset value)
         {
-            WriteUtcTime(new Asn1Tag(UniversalTagNumber.UtcTime), value);
+            WriteUtcTimeCore(new Asn1Tag(UniversalTagNumber.UtcTime), value);
         }
 
         public void WriteUtcTime(Asn1Tag tag, DateTimeOffset value)
@@ -4514,7 +4514,20 @@ namespace System.Security.Cryptography.Asn1
             CheckUniversalTag(tag, UniversalTagNumber.UtcTime);
 
             // Clear the constructed flag, if present.
-            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
+            WriteUtcTimeCore(tag.AsPrimitive(), value);
+        }
+
+        // T-REC-X.680-201508 sec 47
+        // T-REC-X.690-201508 sec 11.8
+        private void WriteUtcTimeCore(Asn1Tag tag, DateTimeOffset value)
+        { 
+            // Because UtcTime is IMPLICIT VisibleString it technically can have
+            // a constructed form.
+            // DER says character strings must be primitive.
+            // CER says character strings <= 1000 encoded bytes must be primitive.
+            // So we'll just make BER be primitive, too.
+            Debug.Assert(!tag.IsConstructed);
+            WriteTag(tag);
 
             // BER allows for omitting the seconds, but that's not an option we need to expose.
             // BER allows for non-UTC values, but that's also not an option we need to expose.
@@ -4531,24 +4544,20 @@ namespace System.Security.Cryptography.Asn1
             int minute = normalized.Minute;
             int second = normalized.Second;
 
-            year = WriteLeastSigificantDigitAndShift(year, _offset + 1);
-            WriteLeastSigificantDigitAndShift(year, _offset);
+            Span<byte> baseSpan = _buffer.AsSpan().Slice(_offset);
+            StandardFormat format = new StandardFormat('D', 2);
 
-            month = WriteLeastSigificantDigitAndShift(month, _offset + 3);
-            WriteLeastSigificantDigitAndShift(month, _offset + 2);
-
-            day = WriteLeastSigificantDigitAndShift(day, _offset + 5);
-            WriteLeastSigificantDigitAndShift(day, _offset + 4);
-
-            hour = WriteLeastSigificantDigitAndShift(hour, _offset + 7);
-            WriteLeastSigificantDigitAndShift(hour, _offset + 6);
-
-            minute = WriteLeastSigificantDigitAndShift(minute, _offset + 9);
-            WriteLeastSigificantDigitAndShift(minute, _offset + 8);
-
-            second = WriteLeastSigificantDigitAndShift(second, _offset + 11);
-            WriteLeastSigificantDigitAndShift(second, _offset + 10);
-
+            if (!Utf8Formatter.TryFormat(year % 100, baseSpan.Slice(0, 2), out _, format) ||
+                !Utf8Formatter.TryFormat(month, baseSpan.Slice(2, 2), out _, format) ||
+                !Utf8Formatter.TryFormat(day, baseSpan.Slice(4, 2), out _, format) ||
+                !Utf8Formatter.TryFormat(hour, baseSpan.Slice(6, 2), out _, format) ||
+                !Utf8Formatter.TryFormat(minute, baseSpan.Slice(8, 2), out _, format) ||
+                !Utf8Formatter.TryFormat(second, baseSpan.Slice(10, 2), out _, format))
+            {
+                Debug.Fail($"Utf8Formatter.TryFormat failed to build components of {normalized:O}");
+                throw new CryptographicException();
+            }
+            
             _buffer[_offset + 12] = (byte)'Z';
 
             _offset += UtcTimeValueLength;
@@ -4556,13 +4565,21 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteGeneralizedTime(DateTimeOffset value, bool omitFractionalSeconds = false)
         {
-            WriteGeneralizedTime(new Asn1Tag(UniversalTagNumber.GeneralizedTime), value, omitFractionalSeconds);
+            WriteGeneralizedTimeCore(new Asn1Tag(UniversalTagNumber.GeneralizedTime), value, omitFractionalSeconds);
         }
 
         public void WriteGeneralizedTime(Asn1Tag tag, DateTimeOffset value, bool omitFractionalSeconds = false)
         {
             CheckUniversalTag(tag, UniversalTagNumber.GeneralizedTime);
 
+            // Clear the constructed flag, if present.
+            WriteGeneralizedTimeCore(tag.AsPrimitive(), value, omitFractionalSeconds);
+        }
+
+        // T-REC-X.680-201508 sec 46
+        // T-REC-X.690-201508 sec 11.7
+        private void WriteGeneralizedTimeCore(Asn1Tag tag, DateTimeOffset value, bool omitFractionalSeconds)
+        {
             // GeneralizedTime under BER allows many different options:
             // * (HHmmss), (HHmm), (HH)
             // * "(value).frac", "(value),frac"
@@ -4582,72 +4599,55 @@ namespace System.Security.Cryptography.Asn1
 
             if (normalized.Year > 9999)
             {
-                Exception messageSource = new ArgumentOutOfRangeException();
-
                 // This is unreachable since DateTimeOffset guards against this internally.
-                throw new ArgumentOutOfRangeException(
-                    nameof(value),
-                    value,
-                    messageSource.Message);
+                throw new ArgumentOutOfRangeException(nameof(value));
             }
 
-            long fracValue = 0;
-            int fracLength;
+            // We're only loading in sub-second ticks.
+            // Ticks are defined as 1e-7 seconds, so their printed form
+            // is at the longest "0.1234567", or 9 bytes.
+            Span<byte> fraction = stackalloc byte[0];
 
-            if (omitFractionalSeconds)
+            if (!omitFractionalSeconds)
             {
-                fracLength = 0;
-            }
-            else
-            {
-                DateTimeOffset hhmmss = new DateTimeOffset(
-                    normalized.Year,
-                    normalized.Month,
-                    normalized.Day,
-                    normalized.Hour,
-                    normalized.Minute,
-                    normalized.Second,
-                    normalized.Offset);
-
-                long floatingTicks = normalized.Ticks - hhmmss.Ticks;
-
-                if (floatingTicks == 0)
+                long floatingTicks = normalized.Ticks % TimeSpan.TicksPerSecond;
+                
+                if (floatingTicks != 0)
                 {
-                    fracLength = 0;
-                }
-                else
-                {
-                    fracLength = 7;
-                    long tickTest = floatingTicks;
+                    // We're only loading in sub-second ticks.
+                    // Ticks are defined as 1e-7 seconds, so their printed form
+                    // is at the longest "0.1234567", or 9 bytes.
+                    fraction = stackalloc byte[9];
 
-                    while (true)
+                    decimal decimalTicks = floatingTicks;
+                    decimalTicks /= TimeSpan.TicksPerSecond;
+
+                    if (!Utf8Formatter.TryFormat(decimalTicks, fraction, out int bytesWritten, new StandardFormat('G')))
                     {
-                        long rem;
-                        long div = Math.DivRem(tickTest, 10, out rem);
-
-                        if (div * 10 != tickTest)
-                        {
-                            fracValue = tickTest;
-                            break;
-                        }
-
-                        tickTest = div;
-                        fracLength--;
+                        Debug.Fail($"Utf8Formatter.TryFormat could not format {floatingTicks} / TicksPerSecond");
+                        throw new CryptographicException();
                     }
+
+                    Debug.Assert(bytesWritten > 2, $"{bytesWritten} should be > 2");
+                    Debug.Assert(fraction[0] == (byte)'0');
+                    Debug.Assert(fraction[1] == (byte)'.');
+
+                    fraction = fraction.Slice(1, bytesWritten - 1);
                 }
             }
 
-            // yyyy, MM, dd, hh, mm, ss, Z
-            int totalLength = 4 + 2 + 2 + 2 + 2 + 2 + 1;
+            // yyyy, MM, dd, hh, mm, ss
+            const int IntegerPortionLength = 4 + 2 + 2 + 2 + 2 + 2;
+            // Z, and the optional fraction.
+            int totalLength = IntegerPortionLength + 1 + fraction.Length;
 
-            if (fracLength != 0)
-            {
-                // . and the fraction
-                totalLength += 1 + fracLength;
-            }
-
-            // Clear the constructed flag, if present.
-            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
+            // Because GeneralizedTime is IMPLICIT VisibleString it technically can have
+            // a constructed form.
+            // DER says character strings must be primitive.
+            // CER says character strings <= 1000 encoded bytes must be primitive.
+            // So we'll just make BER be primitive, too.
+            Debug.Assert(!tag.IsConstructed);
+            WriteTag(tag);
             WriteLength(totalLength);
 
             int year = normalized.Year;
@@ -4657,46 +4657,24 @@ namespace System.Security.Cryptography.Asn1
             int minute = normalized.Minute;
             int second = normalized.Second;
 
-            year = WriteLeastSigificantDigitAndShift(year, _offset + 3);
-            year = WriteLeastSigificantDigitAndShift(year, _offset + 2);
-            year = WriteLeastSigificantDigitAndShift(year, _offset + 1);
-            WriteLeastSigificantDigitAndShift(year, _offset);
+            Span<byte> baseSpan = _buffer.AsSpan().Slice(_offset);
+            StandardFormat d4 = new StandardFormat('D', 4);
+            StandardFormat d2 = new StandardFormat('D', 2);
 
-            month = WriteLeastSigificantDigitAndShift(month, _offset + 5);
-            WriteLeastSigificantDigitAndShift(month, _offset + 4);
-
-            day = WriteLeastSigificantDigitAndShift(day, _offset + 7);
-            WriteLeastSigificantDigitAndShift(day, _offset + 6);
-
-            hour = WriteLeastSigificantDigitAndShift(hour, _offset + 9);
-            WriteLeastSigificantDigitAndShift(hour, _offset + 8);
-
-            minute = WriteLeastSigificantDigitAndShift(minute, _offset + 11);
-            WriteLeastSigificantDigitAndShift(minute, _offset + 10);
-
-            second = WriteLeastSigificantDigitAndShift(second, _offset + 13);
-            WriteLeastSigificantDigitAndShift(second, _offset + 12);
-
-            _offset += 14;
-
-            if (fracLength > 0)
+            if (!Utf8Formatter.TryFormat(year, baseSpan.Slice(0, 4), out _, d4) ||
+                !Utf8Formatter.TryFormat(month, baseSpan.Slice(4, 2), out _, d2) ||
+                !Utf8Formatter.TryFormat(day, baseSpan.Slice(6, 2), out _, d2) ||
+                !Utf8Formatter.TryFormat(hour, baseSpan.Slice(8, 2), out _, d2) ||
+                !Utf8Formatter.TryFormat(minute, baseSpan.Slice(10, 2), out _, d2) ||
+                !Utf8Formatter.TryFormat(second, baseSpan.Slice(12, 2), out _, d2))
             {
-                _buffer[_offset] = (byte)'.';
-
-                int fracWrite = (int)fracValue;
-
-                for (int i = 0; i < fracLength; i++)
-                {
-                    // a "-1" is not needed here because we didn't increment after the decimal point.
-                    fracWrite = WriteLeastSigificantDigitAndShift(fracWrite, _offset - i + fracLength);
-                }
-
-                Debug.Assert(fracWrite == 0);
-                Debug.Assert(_buffer[_offset + fracLength] != (byte)'0');
-
-                // Digits and the decimal point.
-                _offset += fracLength + 1;
+                Debug.Fail($"Utf8Formatter.TryFormat failed to build components of {normalized:O}");
+                throw new CryptographicException();
             }
+            
+            _offset += IntegerPortionLength;
+            fraction.CopyTo(baseSpan.Slice(IntegerPortionLength));
+            _offset += fraction.Length;
 
             _buffer[_offset] = (byte)'Z';
             _offset++;
@@ -4931,17 +4909,6 @@ namespace System.Security.Cryptography.Asn1
             WriteConstructedCerOctetString(tag, tmp.AsSpan().Slice(0, size));
             Array.Clear(tmp, 0, size);
             ArrayPool<byte>.Shared.Return(tmp);
-        }
-
-        private int WriteLeastSigificantDigitAndShift(int value, int offset)
-        {
-            Debug.Assert(offset >= _offset);
-
-            int div = Math.DivRem(value, 10, out int rem);
-
-            const byte Char0 = (byte)'0';
-            _buffer[offset] = (byte)(Char0 + rem);
-            return div;
         }
 
         private static void SortContents(byte[] buffer, int start, int end)
