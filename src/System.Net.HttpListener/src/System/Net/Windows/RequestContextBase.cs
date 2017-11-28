@@ -130,11 +130,11 @@ namespace System.Net
             _backingBuffer = size == 0 ? IntPtr.Zero : Marshal.AllocHGlobal(size);
             _backingBufferLength = size;
 
+            // Zero out the contents of the buffer.
             for(int i = 0; i < size; ++i)
             {
                 Marshal.WriteByte(_backingBuffer + i, 0);
             }
-            //Debug.Assert(size == 0 || _backingBuffer.ToInt64() % 8 == 0);
         }
     }
 }

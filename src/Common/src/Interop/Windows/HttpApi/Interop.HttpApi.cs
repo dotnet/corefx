@@ -800,52 +800,51 @@ internal static partial class Interop
             // Return value.
             WebHeaderCollection headerCollection = new WebHeaderCollection();
             byte* pMemoryBlob = (byte*)memoryBlob;
+            
+            HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
+            long fixup = pMemoryBlob - (byte*)originalAddress;
+            int index;
+
+            // unknown headers
+            if (request->Headers.UnknownHeaderCount != 0)
             {
-                HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
-                long fixup = pMemoryBlob - (byte*)originalAddress;
-                int index;
-
-                // unknown headers
-                if (request->Headers.UnknownHeaderCount != 0)
+                HTTP_UNKNOWN_HEADER* pUnknownHeader = (HTTP_UNKNOWN_HEADER*)(fixup + (byte*)request->Headers.pUnknownHeaders);
+                for (index = 0; index < request->Headers.UnknownHeaderCount; index++)
                 {
-                    HTTP_UNKNOWN_HEADER* pUnknownHeader = (HTTP_UNKNOWN_HEADER*)(fixup + (byte*)request->Headers.pUnknownHeaders);
-                    for (index = 0; index < request->Headers.UnknownHeaderCount; index++)
+                    // For unknown headers, when header value is empty, RawValueLength will be 0 and 
+                    // pRawValue will be null.
+                    if (pUnknownHeader->pName != null && pUnknownHeader->NameLength > 0)
                     {
-                        // For unknown headers, when header value is empty, RawValueLength will be 0 and 
-                        // pRawValue will be null.
-                        if (pUnknownHeader->pName != null && pUnknownHeader->NameLength > 0)
+                        string headerName = new string(pUnknownHeader->pName + fixup, 0, pUnknownHeader->NameLength);
+                        string headerValue;
+                        if (pUnknownHeader->pRawValue != null && pUnknownHeader->RawValueLength > 0)
                         {
-                            string headerName = new string(pUnknownHeader->pName + fixup, 0, pUnknownHeader->NameLength);
-                            string headerValue;
-                            if (pUnknownHeader->pRawValue != null && pUnknownHeader->RawValueLength > 0)
-                            {
-                                headerValue = new string(pUnknownHeader->pRawValue + fixup, 0, pUnknownHeader->RawValueLength);
-                            }
-                            else
-                            {
-                                headerValue = string.Empty;
-                            }
-                            headerCollection.Add(headerName, headerValue);
+                            headerValue = new string(pUnknownHeader->pRawValue + fixup, 0, pUnknownHeader->RawValueLength);
                         }
-                        pUnknownHeader++;
+                        else
+                        {
+                            headerValue = string.Empty;
+                        }
+                        headerCollection.Add(headerName, headerValue);
                     }
-                }
-
-                // known headers
-                HTTP_KNOWN_HEADER* pKnownHeader = &request->Headers.KnownHeaders;
-                for (index = 0; index < HttpHeaderRequestMaximum; index++)
-                {
-                    // For known headers, when header value is empty, RawValueLength will be 0 and 
-                    // pRawValue will point to empty string ("\0")
-                    if (pKnownHeader->pRawValue != null)
-                    {
-                        string headerValue = new string(pKnownHeader->pRawValue + fixup, 0, pKnownHeader->RawValueLength);
-                        headerCollection.Add(HTTP_REQUEST_HEADER_ID.ToString(index), headerValue);
-                    }
-                    pKnownHeader++;
+                    pUnknownHeader++;
                 }
             }
 
+            // known headers
+            HTTP_KNOWN_HEADER* pKnownHeader = &request->Headers.KnownHeaders;
+            for (index = 0; index < HttpHeaderRequestMaximum; index++)
+            {
+                // For known headers, when header value is empty, RawValueLength will be 0 and 
+                // pRawValue will point to empty string ("\0")
+                if (pKnownHeader->pRawValue != null)
+                {
+                    string headerValue = new string(pKnownHeader->pRawValue + fixup, 0, pKnownHeader->RawValueLength);
+                    headerCollection.Add(HTTP_REQUEST_HEADER_ID.ToString(index), headerValue);
+                }
+                pKnownHeader++;
+            }
+            
             NetEventSource.Exit(null);
             return headerCollection;
         }
@@ -861,52 +860,51 @@ internal static partial class Interop
             // Return value.
             uint dataRead = 0;
             byte* pMemoryBlob = (byte*)memoryBlob;
+            
+            HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
+            long fixup = pMemoryBlob - (byte*)originalAddress;
+
+            if (request->EntityChunkCount > 0 && dataChunkIndex < request->EntityChunkCount && dataChunkIndex != -1)
             {
-                HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
-                long fixup = pMemoryBlob - (byte*)originalAddress;
+                HTTP_DATA_CHUNK* pDataChunk = (HTTP_DATA_CHUNK*)(fixup + (byte*)&request->pEntityChunks[dataChunkIndex]);
 
-                if (request->EntityChunkCount > 0 && dataChunkIndex < request->EntityChunkCount && dataChunkIndex != -1)
+                fixed (byte* pReadBuffer = buffer)
                 {
-                    HTTP_DATA_CHUNK* pDataChunk = (HTTP_DATA_CHUNK*)(fixup + (byte*)&request->pEntityChunks[dataChunkIndex]);
+                    byte* pTo = &pReadBuffer[offset];
 
-                    fixed (byte* pReadBuffer = buffer)
+                    while (dataChunkIndex < request->EntityChunkCount && dataRead < size)
                     {
-                        byte* pTo = &pReadBuffer[offset];
-
-                        while (dataChunkIndex < request->EntityChunkCount && dataRead < size)
+                        if (dataChunkOffset >= pDataChunk->BufferLength)
                         {
-                            if (dataChunkOffset >= pDataChunk->BufferLength)
-                            {
-                                dataChunkOffset = 0;
-                                dataChunkIndex++;
-                                pDataChunk++;
-                            }
-                            else
-                            {
-                                byte* pFrom = pDataChunk->pBuffer + dataChunkOffset + fixup;
+                            dataChunkOffset = 0;
+                            dataChunkIndex++;
+                            pDataChunk++;
+                        }
+                        else
+                        {
+                            byte* pFrom = pDataChunk->pBuffer + dataChunkOffset + fixup;
 
-                                uint bytesToRead = pDataChunk->BufferLength - (uint)dataChunkOffset;
-                                if (bytesToRead > (uint)size)
-                                {
-                                    bytesToRead = (uint)size;
-                                }
-                                for (uint i = 0; i < bytesToRead; i++)
-                                {
-                                    *(pTo++) = *(pFrom++);
-                                }
-                                dataRead += bytesToRead;
-                                dataChunkOffset += bytesToRead;
+                            uint bytesToRead = pDataChunk->BufferLength - (uint)dataChunkOffset;
+                            if (bytesToRead > (uint)size)
+                            {
+                                bytesToRead = (uint)size;
                             }
+                            for (uint i = 0; i < bytesToRead; i++)
+                            {
+                                *(pTo++) = *(pFrom++);
+                            }
+                            dataRead += bytesToRead;
+                            dataChunkOffset += bytesToRead;
                         }
                     }
                 }
-                //we're finished.
-                if (dataChunkIndex == request->EntityChunkCount)
-                {
-                    dataChunkIndex = -1;
-                }
             }
-
+            //we're finished.
+            if (dataChunkIndex == request->EntityChunkCount)
+            {
+                dataChunkIndex = -1;
+            }
+            
             if (NetEventSource.IsEnabled)
             {
                 NetEventSource.Exit(null);
@@ -969,11 +967,10 @@ internal static partial class Interop
             SocketAddress v6address = new SocketAddress(AddressFamily.InterNetworkV6, IPv6AddressSize);
 
             byte* pMemoryBlob = (byte*)memoryBlob;
-            {
-                HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
-                IntPtr address = request->Address.pLocalAddress != null ? (IntPtr)(pMemoryBlob - (byte*)originalAddress + (byte*)request->Address.pLocalAddress) : IntPtr.Zero;
-                CopyOutAddress(address, ref v4address, ref v6address);
-            }
+            
+            HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
+            IntPtr address = request->Address.pLocalAddress != null ? (IntPtr)(pMemoryBlob - (byte*)originalAddress + (byte*)request->Address.pLocalAddress) : IntPtr.Zero;
+            CopyOutAddress(address, ref v4address, ref v6address);
 
             IPEndPoint endpoint = null;
             if (v4address != null)
