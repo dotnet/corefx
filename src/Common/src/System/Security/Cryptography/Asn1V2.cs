@@ -80,8 +80,18 @@ namespace System.Security.Cryptography.Asn1
         private const byte ControlMask = ClassMask | ConstructedMask;
         private const byte TagNumberMask = 0b0001_1111;
 
-        internal static readonly Asn1Tag EndOfContents = new Asn1Tag(0);
-        internal static readonly Asn1Tag Null = new Asn1Tag(5);
+        internal static readonly Asn1Tag EndOfContents = new Asn1Tag(0, (int)UniversalTagNumber.EndOfContents);
+        internal static readonly Asn1Tag Boolean = new Asn1Tag(0, (int)UniversalTagNumber.Boolean);
+        internal static readonly Asn1Tag Integer = new Asn1Tag(0, (int)UniversalTagNumber.Integer);
+        internal static readonly Asn1Tag PrimitiveBitString = new Asn1Tag(0, (int)UniversalTagNumber.BitString);
+        internal static readonly Asn1Tag PrimitiveOctetString = new Asn1Tag(0, (int)UniversalTagNumber.OctetString);
+        internal static readonly Asn1Tag Null = new Asn1Tag(0, (int)UniversalTagNumber.Null);
+        internal static readonly Asn1Tag ObjectIdentifier = new Asn1Tag(0, (int)UniversalTagNumber.ObjectIdentifier);
+        internal static readonly Asn1Tag Enumerated = new Asn1Tag(0, (int)UniversalTagNumber.Enumerated);
+        internal static readonly Asn1Tag Sequence = new Asn1Tag(ConstructedMask, (int)UniversalTagNumber.Sequence);
+        internal static readonly Asn1Tag SetOf = new Asn1Tag(ConstructedMask, (int)UniversalTagNumber.SetOf);
+        internal static readonly Asn1Tag UtcTime = new Asn1Tag(0, (int)UniversalTagNumber.UtcTime);
+        internal static readonly Asn1Tag GeneralizedTime = new Asn1Tag(0, (int)UniversalTagNumber.GeneralizedTime);
 
         private readonly byte _controlFlags;
         private readonly int _tagValue;
@@ -648,7 +658,7 @@ namespace System.Security.Cryptography.Asn1
             return true;
         }
 
-        public bool ReadBoolean() => ReadBoolean(new Asn1Tag(UniversalTagNumber.Boolean));
+        public bool ReadBoolean() => ReadBoolean(Asn1Tag.Boolean);
 
         public bool ReadBoolean(Asn1Tag expectedTag)
         {
@@ -705,7 +715,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public ReadOnlyMemory<byte> GetIntegerBytes() =>
-            GetIntegerBytes(new Asn1Tag(UniversalTagNumber.Integer));
+            GetIntegerBytes(Asn1Tag.Integer);
 
         public ReadOnlyMemory<byte> GetIntegerBytes(Asn1Tag expectedTag)
         {
@@ -795,7 +805,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public bool TryReadInt32(out int value) =>
-            TryReadInt32(new Asn1Tag(UniversalTagNumber.Integer), out value);
+            TryReadInt32(Asn1Tag.Integer, out value);
 
         public bool TryReadInt32(Asn1Tag expectedTag, out int value)
         {
@@ -810,7 +820,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public bool TryReadUInt32(out uint value) =>
-            TryReadUInt32(new Asn1Tag(UniversalTagNumber.Integer), out value);
+            TryReadUInt32(Asn1Tag.Integer, out value);
 
         public bool TryReadUInt32(Asn1Tag expectedTag, out uint value)
         {
@@ -825,7 +835,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public bool TryReadInt64(out long value) =>
-            TryReadInt64(new Asn1Tag(UniversalTagNumber.Integer), out value);
+            TryReadInt64(Asn1Tag.Integer, out value);
         
         public bool TryReadInt64(Asn1Tag expectedTag, out long value)
         {
@@ -833,7 +843,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public bool TryReadUInt64(out ulong value) =>
-            TryReadUInt64(new Asn1Tag(UniversalTagNumber.Integer), out value);
+            TryReadUInt64(Asn1Tag.Integer, out value);
 
         public bool TryReadUInt64(Asn1Tag expectedTag, out ulong value)
         {
@@ -841,7 +851,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public bool TryReadInt16(out short value) =>
-            TryReadInt16(new Asn1Tag(UniversalTagNumber.Integer), out value);
+            TryReadInt16(Asn1Tag.Integer, out value);
 
         public bool TryReadInt16(Asn1Tag expectedTag, out short value)
         {
@@ -856,7 +866,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public bool TryReadUInt16(out ushort value) =>
-            TryReadUInt16(new Asn1Tag(UniversalTagNumber.Integer), out value);
+            TryReadUInt16(Asn1Tag.Integer, out value);
 
         public bool TryReadUInt16(Asn1Tag expectedTag, out ushort value)
         {
@@ -871,7 +881,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public bool TryReadInt8(out sbyte value) =>
-            TryReadInt8(new Asn1Tag(UniversalTagNumber.Integer), out value);
+            TryReadInt8(Asn1Tag.Integer, out value);
 
         public bool TryReadInt8(Asn1Tag expectedTag, out sbyte value)
         {
@@ -886,7 +896,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public bool TryReadUInt8(out byte value) =>
-            TryReadUInt8(new Asn1Tag(UniversalTagNumber.Integer), out value);
+            TryReadUInt8(Asn1Tag.Integer, out value);
 
         public bool TryReadUInt8(Asn1Tag expectedTag, out byte value)
         {
@@ -1229,7 +1239,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public bool TryGetBitStringBytes(out int unusedBitCount, out ReadOnlyMemory<byte> contents)
-            => TryGetBitStringBytes(new Asn1Tag(UniversalTagNumber.BitString), out unusedBitCount, out contents);
+            => TryGetBitStringBytes(Asn1Tag.PrimitiveBitString, out unusedBitCount, out contents);
 
         /// <summary>
         /// Gets the source data for a BitString under a primitive encoding.
@@ -1273,7 +1283,7 @@ namespace System.Security.Cryptography.Asn1
             out int bytesWritten)
         {
             return TryCopyBitStringBytes(
-                new Asn1Tag(UniversalTagNumber.BitString),
+                Asn1Tag.PrimitiveBitString,
                 destination,
                 out unusedBitCount,
                 out bytesWritten);
@@ -1341,7 +1351,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public TFlagsEnum GetNamedBitListValue<TFlagsEnum>() where TFlagsEnum : struct =>
-            GetNamedBitListValue<TFlagsEnum>(new Asn1Tag(UniversalTagNumber.BitString));
+            GetNamedBitListValue<TFlagsEnum>(Asn1Tag.PrimitiveBitString);
 
         public TFlagsEnum GetNamedBitListValue<TFlagsEnum>(Asn1Tag expectedTag) where TFlagsEnum : struct
         {
@@ -1351,7 +1361,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public Enum GetNamedBitListValue(Type tFlagsEnum) =>
-            GetNamedBitListValue(new Asn1Tag(UniversalTagNumber.BitString), tFlagsEnum);
+            GetNamedBitListValue(Asn1Tag.PrimitiveBitString, tFlagsEnum);
 
         public Enum GetNamedBitListValue(Asn1Tag expectedTag, Type tFlagsEnum)
         {
@@ -1459,7 +1469,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public ReadOnlyMemory<byte> GetEnumeratedBytes() =>
-            GetEnumeratedBytes(new Asn1Tag(UniversalTagNumber.Enumerated));
+            GetEnumeratedBytes(Asn1Tag.Enumerated);
 
         public ReadOnlyMemory<byte> GetEnumeratedBytes(Asn1Tag expectedTag)
         {
@@ -1486,7 +1496,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public Enum GetEnumeratedValue(Type tEnum) =>
-            GetEnumeratedValue(new Asn1Tag(UniversalTagNumber.Enumerated), tEnum);
+            GetEnumeratedValue(Asn1Tag.Enumerated, tEnum);
 
         public Enum GetEnumeratedValue(Asn1Tag expectedTag, Type tEnum)
         {
@@ -1583,7 +1593,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public bool TryGetOctetStringBytes(out ReadOnlyMemory<byte> contents) =>
-            TryGetOctetStringBytes(new Asn1Tag(UniversalTagNumber.OctetString), out contents);
+            TryGetOctetStringBytes(Asn1Tag.PrimitiveOctetString, out contents);
 
         /// <summary>
         /// Gets the source data for an OctetString under a primitive encoding.
@@ -1793,7 +1803,7 @@ namespace System.Security.Cryptography.Asn1
             out int bytesWritten)
         {
             return TryCopyOctetStringBytes(
-                new Asn1Tag(UniversalTagNumber.OctetString),
+                Asn1Tag.PrimitiveOctetString,
                 destination,
                 out bytesWritten);
         }
@@ -1950,7 +1960,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public string ReadObjectIdentifierAsString() =>
-            ReadObjectIdentifierAsString(new Asn1Tag(UniversalTagNumber.ObjectIdentifier));
+            ReadObjectIdentifierAsString(Asn1Tag.ObjectIdentifier);
         
         public string ReadObjectIdentifierAsString(Asn1Tag expectedTag)
         {
@@ -1962,7 +1972,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public Oid ReadObjectIdentifier(bool skipFriendlyName = false) =>
-            ReadObjectIdentifier(new Asn1Tag(UniversalTagNumber.ObjectIdentifier), skipFriendlyName);
+            ReadObjectIdentifier(Asn1Tag.ObjectIdentifier, skipFriendlyName);
 
         public Oid ReadObjectIdentifier(Asn1Tag expectedTag, bool skipFriendlyName=false)
         {
@@ -2305,7 +2315,7 @@ namespace System.Security.Cryptography.Asn1
             return GetCharacterString(expectedTag, encodingType, encoding);
         }
 
-        public AsnReader ReadSequence() => ReadSequence(new Asn1Tag(UniversalTagNumber.Sequence));
+        public AsnReader ReadSequence() => ReadSequence(Asn1Tag.Sequence);
 
         public AsnReader ReadSequence(Asn1Tag expectedTag)
         {
@@ -2347,7 +2357,7 @@ namespace System.Security.Cryptography.Asn1
         /// </param>
         /// <returns>An AsnReader over the current position, bounded by the contained length value.</returns>
         public AsnReader ReadSetOf(bool skipSortOrderValidation = false) =>
-            ReadSetOf(new Asn1Tag(UniversalTagNumber.SetOf), skipSortOrderValidation);
+            ReadSetOf(Asn1Tag.SetOf, skipSortOrderValidation);
 
         public AsnReader ReadSetOf(Asn1Tag expectedTag, bool skipSortOrderValidation = false)
         {
@@ -2556,7 +2566,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public DateTimeOffset GetUtcTime(int twoDigitYearMax = 2049) =>
-            GetUtcTime(new Asn1Tag(UniversalTagNumber.UtcTime), twoDigitYearMax);
+            GetUtcTime(Asn1Tag.UtcTime, twoDigitYearMax);
 
         /// <summary>
         /// Gets the DateTimeOffset represented by a UTCTime value.
@@ -2959,7 +2969,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
         public DateTimeOffset GetGeneralizedTime(bool disallowFractions=false) =>
-            GetGeneralizedTime(new Asn1Tag(UniversalTagNumber.GeneralizedTime), disallowFractions);
+            GetGeneralizedTime(Asn1Tag.GeneralizedTime, disallowFractions);
 
         public DateTimeOffset GetGeneralizedTime(Asn1Tag expectedTag, bool disallowFractions=false)
         {
@@ -3627,7 +3637,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteBoolean(bool value)
         {
-            WriteBooleanCore(new Asn1Tag(UniversalTagNumber.Boolean), value);
+            WriteBooleanCore(Asn1Tag.Boolean, value);
         }
 
         public void WriteBoolean(Asn1Tag tag, bool value)
@@ -3651,17 +3661,17 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteInteger(long value)
         {
-            WriteIntegerCore(new Asn1Tag(UniversalTagNumber.Integer), value);
+            WriteIntegerCore(Asn1Tag.Integer, value);
         }
 
         public void WriteInteger(ulong value)
         {
-            WriteNonNegativeIntegerCore(new Asn1Tag(UniversalTagNumber.Integer), value);
+            WriteNonNegativeIntegerCore(Asn1Tag.Integer, value);
         }
 
         public void WriteInteger(BigInteger value)
         {
-            WriteIntegerCore(new Asn1Tag(UniversalTagNumber.Integer), value);
+            WriteIntegerCore(Asn1Tag.Integer, value);
         }
 
         public void WriteInteger(Asn1Tag tag, long value)
@@ -3807,7 +3817,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteBitString(ReadOnlySpan<byte> bitString, int unusedBitCount=0)
         {
-            WriteBitStringCore(new Asn1Tag(UniversalTagNumber.BitString), bitString, unusedBitCount);
+            WriteBitStringCore(Asn1Tag.PrimitiveBitString, bitString, unusedBitCount);
         }
 
         public void WriteBitString(Asn1Tag tag, ReadOnlySpan<byte> bitString, int unusedBitCount=0)
@@ -3920,7 +3930,7 @@ namespace System.Security.Cryptography.Asn1
 
             ReadOnlySpan<byte> remainingData = payload;
             Span<byte> dest;
-            Asn1Tag primitiveBitString = new Asn1Tag(UniversalTagNumber.BitString);
+            Asn1Tag primitiveBitString = Asn1Tag.PrimitiveBitString;
 
             while (remainingData.Length > MaxCERContentSize)
             {
@@ -3959,12 +3969,12 @@ namespace System.Security.Cryptography.Asn1
             if (enumValue == null)
                 throw new ArgumentNullException(nameof(enumValue));
 
-            WriteNamedBitList(new Asn1Tag(UniversalTagNumber.BitString), enumValue);
+            WriteNamedBitList(Asn1Tag.PrimitiveBitString, enumValue);
         }
 
         public void WriteNamedBitList<TEnum>(TEnum enumValue) where TEnum : struct
         {
-            WriteNamedBitList(new Asn1Tag(UniversalTagNumber.BitString), enumValue);
+            WriteNamedBitList(Asn1Tag.PrimitiveBitString, enumValue);
         }
 
         public void WriteNamedBitList(Asn1Tag tag, object enumValue)
@@ -4050,7 +4060,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteOctetString(ReadOnlySpan<byte> octetString)
         {
-            WriteOctetString(new Asn1Tag(UniversalTagNumber.OctetString), octetString);
+            WriteOctetString(Asn1Tag.PrimitiveOctetString, octetString);
         }
 
         public void WriteOctetString(Asn1Tag tag, ReadOnlySpan<byte> octetString)
@@ -4122,7 +4132,7 @@ namespace System.Security.Cryptography.Asn1
 
             ReadOnlySpan<byte> remainingData = payload;
             Span<byte> dest;
-            Asn1Tag primitiveOctetString = new Asn1Tag(UniversalTagNumber.OctetString);
+            Asn1Tag primitiveOctetString = Asn1Tag.PrimitiveOctetString;
 
             while (remainingData.Length > MaxCERSegmentSize)
             {
@@ -4187,7 +4197,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteObjectIdentifier(ReadOnlySpan<char> oidValue)
         {
-            WriteObjectIdentifierCore(new Asn1Tag(UniversalTagNumber.ObjectIdentifier), oidValue);
+            WriteObjectIdentifierCore(Asn1Tag.ObjectIdentifier, oidValue);
         }
 
         public void WriteObjectIdentifier(Asn1Tag tag, Oid oid)
@@ -4372,12 +4382,12 @@ namespace System.Security.Cryptography.Asn1
             if (enumValue == null)
                 throw new ArgumentNullException(nameof(enumValue));
 
-            WriteEnumeratedValue(new Asn1Tag(UniversalTagNumber.Enumerated), enumValue);
+            WriteEnumeratedValue(Asn1Tag.Enumerated, enumValue);
         }
 
         public void WriteEnumeratedValue<TEnum>(TEnum value) where TEnum : struct
         {
-            WriteEnumeratedValue(new Asn1Tag(UniversalTagNumber.Enumerated), value);
+            WriteEnumeratedValue(Asn1Tag.Enumerated, value);
         }
 
         public void WriteEnumeratedValue(Asn1Tag tag, object enumValue)
@@ -4424,7 +4434,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void PushSequence()
         {
-            PushSequenceCore(new Asn1Tag(UniversalTagNumber.Sequence, isConstructed: true));
+            PushSequenceCore(Asn1Tag.Sequence);
         }
 
         public void PushSequence(Asn1Tag tag)
@@ -4443,7 +4453,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void PopSequence()
         {
-            PopSequence(new Asn1Tag(UniversalTagNumber.Sequence, isConstructed: true));
+            PopSequence(Asn1Tag.Sequence);
         }
 
         public void PopSequence(Asn1Tag tag)
@@ -4463,7 +4473,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void PushSetOf()
         {
-            PushSetOf(new Asn1Tag(UniversalTagNumber.SetOf, isConstructed: true));
+            PushSetOf(Asn1Tag.SetOf);
         }
 
         public void PushSetOf(Asn1Tag tag)
@@ -4484,7 +4494,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void PopSetOf()
         {
-            PopSetOfCore(new Asn1Tag(UniversalTagNumber.SetOf, isConstructed: true));
+            PopSetOfCore(Asn1Tag.SetOf);
         }
 
         public void PopSetOf(Asn1Tag tag)
@@ -4506,7 +4516,7 @@ namespace System.Security.Cryptography.Asn1
         
         public void WriteUtcTime(DateTimeOffset value)
         {
-            WriteUtcTimeCore(new Asn1Tag(UniversalTagNumber.UtcTime), value);
+            WriteUtcTimeCore(Asn1Tag.UtcTime, value);
         }
 
         public void WriteUtcTime(Asn1Tag tag, DateTimeOffset value)
@@ -4565,7 +4575,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteGeneralizedTime(DateTimeOffset value, bool omitFractionalSeconds = false)
         {
-            WriteGeneralizedTimeCore(new Asn1Tag(UniversalTagNumber.GeneralizedTime), value, omitFractionalSeconds);
+            WriteGeneralizedTimeCore(Asn1Tag.GeneralizedTime, value, omitFractionalSeconds);
         }
 
         public void WriteGeneralizedTime(Asn1Tag tag, DateTimeOffset value, bool omitFractionalSeconds = false)
