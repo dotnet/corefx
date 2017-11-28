@@ -176,7 +176,7 @@ namespace System.Data.SqlClient.Tests
             TException ex = Assert.Throws<TException>(connectAction);
 
             // Some exception messages are different between Framework and Core
-            if (!PlatformDetection.IsFullFramework)
+            if(!PlatformDetection.IsFullFramework)
             {
                 Assert.Contains(expectedExceptionMessage, ex.Message);
             }
@@ -238,22 +238,6 @@ namespace System.Data.SqlClient.Tests
             }
 
             return true;
-        }
-
-        [Fact]
-        [Trait("MyTrait", "MyTrait")]
-        public void ExceptionTestsSNI()
-        {
-
-            Assert.Throws<SqlException>(() =>
-            {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(
-                    @"Data Source=.\SQLEXPRESS14,1433;Initial Catalog=master;Integrated Security=SSPI;");
-                using (SqlConnection conn = new SqlConnection(builder.ToString()))
-                {
-                    conn.Open();
-                }
-            });
         }
     }
 }
