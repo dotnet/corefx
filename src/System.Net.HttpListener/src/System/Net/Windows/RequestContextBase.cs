@@ -50,15 +50,18 @@ namespace System.Net
             Dispose(true);
         }
 
-        protected virtual void Dispose(bool disposing) { }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_backingBuffer != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(_backingBuffer);
+                _backingBuffer = IntPtr.Zero;
+            }
+        }
 
         ~RequestContextBase()
         {
             Dispose(false);
-            if (_backingBuffer != IntPtr.Zero)
-            {
-                Marshal.FreeHGlobal(_backingBuffer);
-            }
         }
 
         internal Interop.HttpApi.HTTP_REQUEST* RequestBlob
