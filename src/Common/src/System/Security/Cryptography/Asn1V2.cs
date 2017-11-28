@@ -3515,14 +3515,14 @@ namespace System.Security.Cryptography.Asn1
             _offset += spaceRequired;
         }
 
-        // T-REC-X.680-201508 sec 8.1.3
+        // T-REC-X.690-201508 sec 8.1.3
         private void WriteLength(int length)
         {
             const byte MultiByteMarker = 0x80;
             Debug.Assert(length >= -1);
 
             // If the indefinite form has been requested.
-            // T-REC-X.680-201508 sec 8.1.3.6
+            // T-REC-X.690-201508 sec 8.1.3.6
             if (length == -1)
             {
                 EnsureWriteCapacity(1);
@@ -3533,7 +3533,7 @@ namespace System.Security.Cryptography.Asn1
 
             Debug.Assert(length >= 0);
 
-            // T-REC-X.680-201508 sec 8.1.3.3, 8.1.3.4
+            // T-REC-X.690-201508 sec 8.1.3.3, 8.1.3.4
             if (length < MultiByteMarker)
             {
                 // Pre-allocate the pending data since we know how much.
@@ -3566,7 +3566,7 @@ namespace System.Security.Cryptography.Asn1
             _offset += lengthLength + 1;
         }
 
-        // T-REC-X.680-201508 sec 8.1.3.5
+        // T-REC-X.690-201508 sec 8.1.3.5
         private static int GetEncodedLengthSubsequentByteCount(int length)
         {
             if (length <= 0x7F)
