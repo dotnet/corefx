@@ -170,6 +170,24 @@ namespace System.Reflection.Tests
             Assert.Throws<ArgumentNullException>("type", () => default(Type).GetRuntimeProperties());
 
         [Fact]
+        public void GetRuntimeInterfaceMap()
+        {
+            InterfaceMapping map = typeof(TestType).GetTypeInfo().GetRuntimeInterfaceMap(typeof(IDisposable));
+            Assert.Same(typeof(TestType), map.TargetType);
+            Assert.Same(typeof(IDisposable), map.InterfaceType);
+            Assert.Equal(1, map.InterfaceMethods.Length);
+            Assert.Equal(1, map.TargetMethods.Length);
+            MethodInfo ifaceDispose = map.InterfaceMethods[0];
+            MethodInfo targetDispose = map.TargetMethods[0];
+            Assert.Equal(ifaceDispose.CallingConvention, targetDispose.CallingConvention);
+            Assert.Equal(ifaceDispose.Name, targetDispose.Name);
+            Assert.Same(ifaceDispose.ReturnType, targetDispose.ReturnType);
+            Assert.Equal(ifaceDispose.GetParameters().Length, targetDispose.GetParameters().Length);
+            Assert.Same(typeof(TestTypeBase), targetDispose.DeclaringType);
+            Assert.Same(typeof(IDisposable), ifaceDispose.DeclaringType);
+        }
+
+        [Fact]
         public void GetRuntimeInterfaceMapOnNull() =>
             Assert.Throws<ArgumentNullException>("typeInfo", () => default(TypeInfo).GetRuntimeInterfaceMap(typeof(ICloneable)));
 
