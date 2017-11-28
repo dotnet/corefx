@@ -176,11 +176,11 @@ namespace System.Threading.Tests
 
         [Fact]
         public static void SetSafeWaitHandleOnNull() =>
-            Assert.Throws<ArgumentNullException>("waitHandle", () => default(WaitHandle).SetSafeWaitHandle(null));
+            AssertExtensions.Throws<ArgumentNullException>("waitHandle", () => default(WaitHandle).SetSafeWaitHandle(null));
 
         [Fact]
         public static void GetSafeWaitHandleOnNull() =>
-            Assert.Throws<ArgumentNullException>("waitHandle", () => default(WaitHandle).GetSafeWaitHandle());
+            AssertExtensions.Throws<ArgumentNullException>("waitHandle", () => default(WaitHandle).GetSafeWaitHandle());
 
         private static void Unsignal(WaitHandle wh)
         {
