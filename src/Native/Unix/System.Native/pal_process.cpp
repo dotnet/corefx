@@ -21,9 +21,6 @@
 #if HAVE_CRT_EXTERNS_H
 #include <crt_externs.h>
 #endif
-#if HAVE_PIPE2
-#include <fcntl.h>
-#endif
 
 #if HAVE_SCHED_SETAFFINITY || HAVE_SCHED_GETAFFINITY
 #include <sched.h>
@@ -147,15 +144,13 @@ extern "C" int32_t SystemNative_ForkAndExecProcess(const char* filename,
         goto done;
     }
 
-    // If we have pipe2 and can use O_CLOEXEC, we create a pipe purely for the benefit
-    // of knowing when the child process has called exec.  We can use that to block waiting
-    // on the pipe to be closed, which lets us block the parent from returning until the
-    // child process is actually transitioned to the target program.  This avoids problems
-    // where the parent process uses members of Process, like ProcessName, when the Process
-    // is still the clone of this one. This is a best-effort attempt, so ignore any errors.
-#if HAVE_PIPE2
-    pipe2(waitForChildToExecPipe, O_CLOEXEC);
-#endif
+    // We create a pipe purely for the benefit of knowing when the child process has called
+    // exec. We can use that to block waiting on the pipe to be closed, which lets us block
+    // the parent from returning until the child process is actually transitioned to the
+    // target program.  This avoids problems where the parent process uses members of Process,
+    // like ProcessName, when the Process is still the clone of this one. This is a best-effort
+    // attempt, so ignore any errors.
+    SystemNative_Pipe(waitForChildToExecPipe, PAL_O_CLOEXEC);
 
     // Fork the child process
     if ((processId = fork()) == -1)
