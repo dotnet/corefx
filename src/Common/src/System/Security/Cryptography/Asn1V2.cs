@@ -3600,6 +3600,7 @@ namespace System.Security.Cryptography.Asn1
             _offset += preEncodedValue.Length;
         }
 
+        // T-REC-X.690-201508 sec 8.1.5
         private void WriteEndOfContents()
         {
             EnsureWriteCapacity(2);
@@ -3619,6 +3620,7 @@ namespace System.Security.Cryptography.Asn1
             WriteBooleanCore(tag.AsPrimitive(), value);
         }
 
+        // T-REC-X.690-201508 sec 11.1, 8.2
         private void WriteBooleanCore(Asn1Tag tag, bool value)
         { 
             Debug.Assert(!tag.IsConstructed);
@@ -3652,6 +3654,7 @@ namespace System.Security.Cryptography.Asn1
             WriteIntegerCore(tag.AsPrimitive(), value);
         }
 
+        // T-REC-X.690-201508 sec 8.3
         private void WriteIntegerCore(Asn1Tag tag, long value)
         {
             if (value >= 0)
@@ -3712,6 +3715,7 @@ namespace System.Security.Cryptography.Asn1
             WriteNonNegativeIntegerCore(tag.AsPrimitive(), value);
         }
 
+        // T-REC-X.690-201508 sec 8.3
         private void WriteNonNegativeIntegerCore(Asn1Tag tag, ulong value)
         {
             int valueLength;
@@ -3770,6 +3774,7 @@ namespace System.Security.Cryptography.Asn1
             WriteIntegerCore(tag.AsPrimitive(), value);
         }
 
+        // T-REC-X.690-201508 sec 8.3
         private void WriteIntegerCore(Asn1Tag tag, BigInteger value)
         {
             // TODO: Split this for netstandard vs netcoreapp for span-perf?.
@@ -3796,6 +3801,7 @@ namespace System.Security.Cryptography.Asn1
             WriteBitStringCore(tag, bitString, unusedBitCount);
         }
 
+        // T-REC-X.690-201508 sec 8.6
         private void WriteBitStringCore(Asn1Tag tag, ReadOnlySpan<byte> bitString, int unusedBitCount)
         {
             // T-REC-X.690-201508 sec 8.6.2.2
@@ -3982,6 +3988,8 @@ namespace System.Security.Cryptography.Asn1
             WriteNamedBitList(tag, integralValue);
         }
 
+        // T-REC-X.680-201508 sec 22
+        // T-REC-X.690-201508 sec 8.6, 11.2.2
         private void WriteNamedBitList(Asn1Tag tag, ulong integralValue)
         {
             Span<byte> temp = stackalloc byte[sizeof(ulong)];
@@ -4002,6 +4010,7 @@ namespace System.Security.Cryptography.Asn1
             if (indexOfHighestSetBit < 0)
             {
                 // No bits were set; this is an empty bit string.
+                // T-REC-X.690-201508 sec 11.2.2-note2
                 WriteBitString(tag, ReadOnlySpan<byte>.Empty);
             }
             else
