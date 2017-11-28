@@ -574,15 +574,15 @@ namespace System.IO.Tests
         [ActiveIssue(20781, TestPlatforms.AnyUnix)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [OuterLoop("These are pretty corner, don't need to run all the time.")]
-        // Can't do these without extended path support on Windows, UsingNewNormalization filters appropriately
-        [ConditionalTheory(nameof(UsingNewNormalization)),
+        [Theory,
             // "foo*." actually becomes "foo<" when passed to NT. It matches all characters up to, and including, the final period.
             //
             // There is a "bug" somewhere in the Windows stack where *some* files with trailing spaces after the final period will be returned when
             // using "*." at the end of a string (which becomes "<"). According to the rules (and the actual pattern matcher used FsRtlIsNameInExpression)
             // *nothing* should match after the final period.
             //
-            // The results as passed to RtlIsNameInExpression (after changing *. to <) are in comments.
+            // We've made Core effectively call RtlIsNameInExpression directly, so this test validates the normally buggy cases. See the test above
+            // for what Windows really does. These are super obscure and the bug pattern isn't obvious so we're just going with "correct".
             InlineData(
                 "foo*.",
                 new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo..", @"foo...", @"foo. ", @"foo.  ", @"foo .", @"foo. . .", @"foo. t" },
