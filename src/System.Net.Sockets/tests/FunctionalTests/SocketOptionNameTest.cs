@@ -159,17 +159,66 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
-        public void MulticastInterface_Set_WithIPv6()
+        public async Task MulticastInterface_Set_AnyInterfaceWithIPv6_Succeeds()
         {
-            using (Socket s = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
+            if (PlatformDetection.IsFedora)
             {
-                s.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, 1);
+                return; // [ActiveIssue(24008)]
+            }
+
+            // On all platforms, index 0 means "any interface"
+            await MulticastInterface_Set_WithIPv6Helper(0);
+        }
+
+        [Fact]
+        public async void MulticastInterface_Set_WithIPv6()
+        {
+            if (PlatformDetection.IsFedora)
+            {
+                return; // [ActiveIssue(24008)]
+            }
+
+            await MulticastInterface_Set_WithIPv6Helper(1);
+        }
+
+        private async Task MulticastInterface_Set_WithIPv6Helper(int interfaceIndex)
+        {
+            IPAddress multicastAddress = IPAddress.Parse("ff15::1:1");
+            string message = "hello";
+            int port;
+
+            using (Socket receiveSocket = CreateBoundUdpIPv6Socket(out port),
+                          sendSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
+            {
+                receiveSocket.ReceiveTimeout = 1000;
+                receiveSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.AddMembership, new IPv6MulticastOption(multicastAddress, interfaceIndex));
+
+                // https://github.com/Microsoft/BashOnWindows/issues/990
+                if (!PlatformDetection.IsWindowsSubsystemForLinux)
+                {
+                    sendSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, 1);
+                }
+
+                var receiveBuffer = new byte[1024];
+                var receiveTask = receiveSocket.ReceiveAsync(new ArraySegment<byte>(receiveBuffer), SocketFlags.None);
+
+                for (int i = 0; i < TestSettings.UDPRedundancy; i++)
+                {
+                    sendSocket.SendTo(Encoding.UTF8.GetBytes(message), new IPEndPoint(multicastAddress, port));
+                }
+
+                var cts = new CancellationTokenSource();
+                Assert.True(await Task.WhenAny(receiveTask, Task.Delay(20_000, cts.Token)) == receiveTask, "Waiting for received data timed out");
+                cts.Cancel();
+
+                int bytesReceived = await receiveTask;
+                string receivedMessage = Encoding.UTF8.GetString(receiveBuffer, 0, bytesReceived);
+
+                Assert.Equal(receivedMessage, message);
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void MulticastInterface_Set_InvalidIndexWithIPv6_Throws()
         {
@@ -177,7 +226,7 @@ namespace System.Net.Sockets.Tests
             using (Socket s = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
             {
                 Assert.Throws<SocketException>(() =>
-                                               s.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, interfaceIndex);
+                                               s.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, interfaceIndex));
             }
         }
 
@@ -240,6 +289,21 @@ namespace System.Net.Sockets.Tests
             string sendMessage = "dummy message";
             int port = 54320;
             IPAddress multicastAddress = IPAddress.Parse("239.1.1.1");
+            receiveSocket.SendTo(Encoding.UTF8.GetBytes(sendMessage), new IPEndPoint(multicastAddress, port));
+
+            localPort = (receiveSocket.LocalEndPoint as IPEndPoint).Port;
+            return receiveSocket;
+        }
+
+        // Create an Udp Socket and binds it to an available port
+        private static Socket CreateBoundUdpIPv6Socket(out int localPort)
+        {
+            Socket receiveSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp);
+
+            // sending a message will bind the socket to an available port
+            string sendMessage = "dummy message";
+            int port = 54320;
+            IPAddress multicastAddress = IPAddress.Parse("ff15::1:1");
             receiveSocket.SendTo(Encoding.UTF8.GetBytes(sendMessage), new IPEndPoint(multicastAddress, port));
 
             localPort = (receiveSocket.LocalEndPoint as IPEndPoint).Port;
