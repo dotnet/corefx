@@ -1023,20 +1023,61 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.NotNull(@this);
             Assert.NotNull(other);
             Assert.True(@this.Data.CheckSequenceEquals(other.Data));
-            Assert.Equal(@this.Message, other.Message);
-            Assert.Equal(@this.Source, other.Source);
+
+            // Different by design for those exceptions
+            if (!(@this is ActiveDirectoryServerDownException ||
+                @this is SecurityException ||
+                @this is NetworkInformationException ||
+                @this is SocketException ||
+                @this is XmlSyntaxException ||
+                @this is ThreadAbortException ||
+                @this is SqlException))
+            {
+                Assert.Equal(@this.Message, other.Message);
+            }
+
+            // Different by design for those exceptions
+            if (!(@this is SqlException))
+            {
+                Assert.Equal(@this.Source, other.Source);
+            }
+
             Assert.Equal(@this.HelpLink, other.HelpLink);
-            Assert.True(CheckEquals(@this.InnerException, other.InnerException));
+
+            // Different by design for those exceptions
+            if (!(@this is XmlSyntaxException))
+            {
+                Assert.True(CheckEquals(@this.InnerException, other.InnerException));
+            }
 
             if (!PlatformDetection.IsFullFramework && !PlatformDetection.IsNetNative)
             {
-                Assert.Equal(@this.StackTrace, other.StackTrace);
-                Assert.Equal(@this.ToString(), other.ToString());
+                // Different by design for those exceptions
+                if (!(@this is NetworkInformationException || @this is SocketException))
+                {
+                    Assert.Equal(@this.StackTrace, other.StackTrace);
+                }
+
+                // Different by design for those exceptions
+                if (!(@this is ActiveDirectoryServerDownException ||
+                    @this is SecurityException ||
+                    @this is NetworkInformationException ||
+                    @this is SocketException ||
+                    @this is XmlSyntaxException ||
+                    @this is ThreadAbortException ||
+                    @this is SqlException))
+                {
+                    Assert.Equal(@this.ToString(), other.ToString());
+                }
             }
 
             if (!PlatformDetection.IsNetNative)
             {
-                Assert.Equal(@this.HResult, other.HResult);
+                // Different by design for those exceptions
+                if (!(@this is NetworkInformationException || @this is SocketException))
+                {
+                    Assert.Equal(@this.HResult, other.HResult);
+                }
             }
 
             return true;
@@ -1046,134 +1087,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             return IsEqual(@this as Exception, other as Exception) &&
                 @this.InnerExceptions.CheckSequenceEquals(other.InnerExceptions);
-        }
-
-        public static bool IsEqual(this ActiveDirectoryServerDownException @this, ActiveDirectoryServerDownException other)
-        {
-            // Name and ToString are different by design
-
-            return @this != null &&
-                other != null &&
-                // On full framework, line number may be method body start
-                // On Net Native we can't reflect on Exceptions and change its StackTrace
-                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
-                (@this.StackTrace == other.StackTrace)) &&
-                @this.Data.CheckSequenceEquals(other.Data) &&
-                @this.Source == other.Source &&
-                // On Net Native we can't reflect on Exceptions and change its HResult
-                (PlatformDetection.IsNetNative ? true : @this.HResult == other.HResult) &&
-                @this.HelpLink == other.HelpLink &&
-                CheckEquals(@this.InnerException, other.InnerException);
-        }
-
-        public static bool IsEqual(this SecurityException @this, SecurityException other)
-        {
-            // Name and ToString are different by design
-
-            return @this != null &&
-                other != null &&
-                // On full framework, line number may be method body start
-                // On Net Native we can't reflect on Exceptions and change its StackTrace
-                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
-                (@this.StackTrace == other.StackTrace)) &&
-                @this.Data.CheckSequenceEquals(other.Data) &&
-                @this.Source == other.Source &&
-                // On Net Native we can't reflect on Exceptions and change its HResult
-                (PlatformDetection.IsNetNative ? true : @this.HResult == other.HResult) &&
-                @this.HelpLink == other.HelpLink &&
-                CheckEquals(@this.InnerException, other.InnerException);
-        }
-
-        public static bool IsEqual(this NetworkInformationException @this, NetworkInformationException other)
-        {
-            // NetworkInformationException has a different StackTrace and HResult on Unix and OSX.
-
-            return @this != null &&
-                other != null &&
-                @this.Data.CheckSequenceEquals(other.Data) &&
-                // @this.Message == other.Message &&    // Message is platform dependent, as it is generated by the platform from the error code
-                @this.Source == other.Source &&
-                @this.HelpLink == other.HelpLink &&
-                CheckEquals(@this.InnerException, other.InnerException);
-        }
-
-        public static bool IsEqual(this SocketException @this, SocketException other)
-        {
-            // SocketException has a different StackTrace and HResult on Unix and OSX.
-
-            return @this != null &&
-                other != null &&
-                @this.Data.CheckSequenceEquals(other.Data) &&
-                // @this.Message == other.Message &&    // Message is platform dependent, as it is generated by the platform from the error code
-                @this.Source == other.Source &&
-                @this.HelpLink == other.HelpLink &&
-                CheckEquals(@this.InnerException, other.InnerException);
-        }
-
-        public static bool IsEqual(this PolicyException @this, PolicyException other)
-        {
-            // PolicyException is stubbed out in Core therefore we are skipping some equality checks.
-
-            return @this != null &&
-                other != null &&
-                // On full framework, line number may be method body start
-                // On Net Native we can't reflect on Exceptions and change its StackTrace
-                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
-                (@this.StackTrace == other.StackTrace &&
-                @this.ToString() == other.ToString())) &&
-                @this.Data.CheckSequenceEquals(other.Data) &&
-                @this.Source == other.Source &&
-                @this.HelpLink == other.HelpLink &&
-                CheckEquals(@this.InnerException, other.InnerException);
-        }
-
-        public static bool IsEqual(this XmlSyntaxException @this, XmlSyntaxException other)
-        {
-            // XmlSyntaxException is stubbed out in Core therefore we are skipping some equality checks.
-
-            return @this != null &&
-                other != null &&
-                // On full framework, line number may be method body start
-                // On Net Native we can't reflect on Exceptions and change its StackTrace
-                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
-                (@this.StackTrace == other.StackTrace)) &&
-                @this.Data.CheckSequenceEquals(other.Data) &&
-                @this.Source == other.Source &&
-                @this.HelpLink == other.HelpLink;
-        }
-
-        public static bool IsEqual(this ThreadAbortException @this, ThreadAbortException other)
-        {
-            // PolicyException is stubbed out in Core therefore we are skipping some equality checks.
-
-            return @this != null &&
-                other != null &&
-                // On full framework, line number may be method body start
-                // On Net Native we can't reflect on Exceptions and change its StackTrace
-                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
-                (@this.StackTrace == other.StackTrace)) &&
-                @this.Data.CheckSequenceEquals(other.Data) &&
-                @this.Source == other.Source &&
-                @this.HelpLink == other.HelpLink &&
-                CheckEquals(@this.InnerException, other.InnerException);
-        }
-
-        public static bool IsEqual(this SqlException @this, SqlException other)
-        {
-            // Source and ToString are different by design
-
-            return @this != null &&
-                other != null &&
-                // On full framework, line number may be method body start
-                // On Net Native we can't reflect on Exceptions and change its StackTrace
-                ((PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? true :
-                (@this.StackTrace == other.StackTrace)) &&
-                @this.Data.CheckSequenceEquals(other.Data) &&
-                @this.Message == other.Message &&
-                // On Net Native we can't reflect on Exceptions and change its HResult
-                (PlatformDetection.IsNetNative ? true : @this.HResult == other.HResult) &&
-                @this.HelpLink == other.HelpLink &&
-                CheckEquals(@this.InnerException, other.InnerException);
         }
 
         public class ReferenceComparer<T> : IEqualityComparer<T> where T: class
