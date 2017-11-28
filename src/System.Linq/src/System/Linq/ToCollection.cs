@@ -30,6 +30,22 @@ namespace System.Linq
             return source is IIListProvider<TSource> listProvider ? listProvider.ToList() : new List<TSource>(source);
         }
 
+        public static List<TSource> ToList<TSource>(this IEnumerable<TSource> source, int capacity)
+        {
+            if (source == null)
+            {
+                throw Error.ArgumentNull(nameof(source));
+            }
+            if (capacity < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(capacity), "Non-negative number required.");
+            }
+
+            var list = new List<TSource>(capacity);
+            list.AddRange(source);
+            return list;
+        }
+
         public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector) =>
             ToDictionary(source, keySelector, null);
 
