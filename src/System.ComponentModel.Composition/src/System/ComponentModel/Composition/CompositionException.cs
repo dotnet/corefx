@@ -25,17 +25,6 @@ namespace System.ComponentModel.Composition
     {
         private const string ErrorsKey = "Errors";
         private ReadOnlyCollection<CompositionError> _errors;
-        private struct CompositionExceptionData : ISafeSerializationData
-        {
-            public CompositionError[] _errors;
-
-            void ISafeSerializationData.CompleteDeserialization(object obj)
-            {
-                CompositionException exception = obj as CompositionException;
-
-                exception._errors = new ReadOnlyCollection<CompositionError>(_errors);
-            }
-        }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="CompositionException"/> class.
@@ -106,24 +95,6 @@ namespace System.ComponentModel.Composition
                     : base(message, innerException)
         {
             Requires.NullOrNotNullElements(errors, "errors");
-            SerializeObjectState += delegate (object exception, SafeSerializationEventArgs eventArgs)
-            {
-                var data = new CompositionExceptionData();
-                if (_errors != null)
-                {
-                    data._errors = _errors.Select(error => new CompositionError(
-                    error.Id,
-                    error.Description,
-                    error.Element.ToSerializableElement(),
-                    error.Exception)).ToArray();
-                }
-                else
-                {
-                    data._errors = new CompositionError[0];
-                }
-
-                eventArgs.AddSerializedState(data);
-            };
             _errors = new ReadOnlyCollection<CompositionError>(errors == null ? new CompositionError[0] : errors.ToArray<CompositionError>());
         }
 
