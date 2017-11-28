@@ -15,7 +15,6 @@
 #include <fcntl.h>
 #include <fnmatch.h>
 #include <poll.h>
-#include <stdalign.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
@@ -325,13 +324,18 @@ static void ConvertDirent(const struct dirent* entry, struct DirectoryEntry* out
 #endif
 }
 
+#if HAVE_READDIR_R
+// struct dirent typically contains 64-bit numbers (e.g. d_ino), so we align it at 8-byte.
+static const size_t dirent_alignment = 8;
+#endif
+
 int32_t SystemNative_GetReadDirRBufferSize(void)
 {
 #if HAVE_READDIR_R
     // dirent should be under 2k in size
     assert(sizeof(struct dirent) < 2048);
     // add some extra space so we can align the buffer to dirent.
-    return sizeof(struct dirent) + alignof(struct dirent) - 1;
+    return sizeof(struct dirent) + dirent_alignment - 1;
 #else
     return 0;
 #endif
@@ -351,7 +355,7 @@ int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, str
     assert(buffer != NULL);
 
     // align to dirent
-    struct dirent* entry = (struct dirent*)((size_t)(buffer + alignof(struct dirent) - 1) & ~(alignof(struct dirent) - 1));
+    struct dirent* entry = (struct dirent*)((size_t)(buffer + dirent_alignment - 1) & ~(dirent_alignment - 1));
 
     // check there is dirent size available at entry
     if ((buffer + bufferSize) < (uint8_t*)(entry + 1))
