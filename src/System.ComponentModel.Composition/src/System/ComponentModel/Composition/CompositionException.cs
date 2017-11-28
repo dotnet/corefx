@@ -25,7 +25,6 @@ namespace System.ComponentModel.Composition
     {
         private const string ErrorsKey = "Errors";
         private ReadOnlyCollection<CompositionError> _errors;
-#if FEATURE_SERIALIZATION
         private struct CompositionExceptionData : ISafeSerializationData
         {
             public CompositionError[] _errors;
@@ -37,7 +36,6 @@ namespace System.ComponentModel.Composition
                 exception._errors = new ReadOnlyCollection<CompositionError>(_errors);
             }
         }
-#endif
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="CompositionException"/> class.
@@ -108,7 +106,6 @@ namespace System.ComponentModel.Composition
                     : base(message, innerException)
         {
             Requires.NullOrNotNullElements(errors, "errors");
-#if FEATURE_SERIALIZATION
             SerializeObjectState += delegate (object exception, SafeSerializationEventArgs eventArgs)
             {
                 var data = new CompositionExceptionData();
@@ -127,7 +124,6 @@ namespace System.ComponentModel.Composition
 
                 eventArgs.AddSerializedState(data);
             };
-#endif
             _errors = new ReadOnlyCollection<CompositionError>(errors == null ? new CompositionError[0] : errors.ToArray<CompositionError>());
         }
 
