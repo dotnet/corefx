@@ -165,7 +165,7 @@ namespace System.Net.Sockets.Tests
         {
             using (Socket s = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
             {
-                s.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, IPAddress.HostToNetworkOrder(1));
+                s.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, 1);
             }
         }
 
@@ -177,7 +177,7 @@ namespace System.Net.Sockets.Tests
             using (Socket s = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
             {
                 Assert.Throws<SocketException>(() =>
-                    s.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, IPAddress.HostToNetworkOrder(interfaceIndex)));
+                                               s.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, interfaceIndex);
             }
         }
 
