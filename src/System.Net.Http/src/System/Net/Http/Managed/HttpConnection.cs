@@ -308,7 +308,7 @@ namespace System.Net.Http
                 }
 
                 // Parse the response status line.
-                var response = new HttpResponseMessage() { RequestMessage = request, Content = new HttpConnectionContent(CancellationToken.None) };
+                var response = new HttpResponseMessage() { RequestMessage = request, Content = new HttpConnectionContent(cancellationToken) };
                 ParseStatusLine(await ReadNextLineAsync(cancellationToken).ConfigureAwait(false), response);
                 
                 // If we sent an Expect: 100-continue header, handle the response accordingly.

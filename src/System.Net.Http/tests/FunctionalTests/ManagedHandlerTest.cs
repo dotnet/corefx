@@ -104,16 +104,11 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseManagedHandler => true;
     }
 
-    // TODO #23141: Socket's don't support canceling individual operations, so ReadStream on NetworkStream
-    // isn't cancelable once the operation has started.  We either need to wrap the operation with one that's
-    // "cancelable", meaning that the underlying operation will still be running even though we've returned "canceled",
-    // or we need to just recognize that cancellation in such situations can be left up to the caller to do the
-    // same thing if it's really important.
-    //public sealed class ManagedHandler_CancellationTest : CancellationTest
-    //{
-    //    public ManagedHandler_CancellationTest(ITestOutputHelper output) : base(output) { }
-    //    protected override bool UseManagedHandler => true;
-    //}
+    public sealed class ManagedHandler_CancellationTest : CancellationTest
+    {
+        public ManagedHandler_CancellationTest(ITestOutputHelper output) : base(output) { }
+        protected override bool UseManagedHandler => true;
+    }
 
     // TODO #23142: The managed handler doesn't currently track how much data was written for the response headers.
     //public sealed class ManagedHandler_HttpClientHandler_MaxResponseHeadersLength_Test : HttpClientHandler_MaxResponseHeadersLength_Test
