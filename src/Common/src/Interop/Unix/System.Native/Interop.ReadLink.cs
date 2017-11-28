@@ -38,11 +38,10 @@ internal static partial class Interop
                 byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
                 try
                 {
-                    int resultLength = Interop.Sys.ReadLink(path, buffer, buffer.Length - 1); // -1 for null termination
+                    int resultLength = Interop.Sys.ReadLink(path, buffer, buffer.Length);
                     if (resultLength > 0)
                     {
-                        // success, null terminate
-                        buffer[resultLength] = (byte)'\0';
+                        // success
                         return Encoding.UTF8.GetString(buffer, 0, resultLength);
                     }
                     else if (resultLength < 0)
