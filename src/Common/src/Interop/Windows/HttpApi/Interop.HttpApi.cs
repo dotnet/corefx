@@ -799,8 +799,7 @@ internal static partial class Interop
 
             // Return value.
             WebHeaderCollection headerCollection = new WebHeaderCollection();
-            byte* pMemoryBlob = (byte*)memoryBlob;
-            
+            byte* pMemoryBlob = (byte*)memoryBlob;       
             HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
             long fixup = pMemoryBlob - (byte*)originalAddress;
             int index;
@@ -859,8 +858,7 @@ internal static partial class Interop
 
             // Return value.
             uint dataRead = 0;
-            byte* pMemoryBlob = (byte*)memoryBlob;
-            
+            byte* pMemoryBlob = (byte*)memoryBlob;            
             HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
             long fixup = pMemoryBlob - (byte*)originalAddress;
 
@@ -918,13 +916,11 @@ internal static partial class Interop
 
             // Return value.
             HTTP_VERB verb = HTTP_VERB.HttpVerbUnknown;
-            byte* pMemoryBlob = (byte*)memoryBlob;
+
+            HTTP_REQUEST* request = (HTTP_REQUEST*)memoryBlob.ToPointer();
+            if ((int)request->Verb > (int)HTTP_VERB.HttpVerbUnparsed && (int)request->Verb < (int)HTTP_VERB.HttpVerbMaximum)
             {
-                HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
-                if ((int)request->Verb > (int)HTTP_VERB.HttpVerbUnparsed && (int)request->Verb < (int)HTTP_VERB.HttpVerbMaximum)
-                {
-                    verb = request->Verb;
-                }
+                verb = request->Verb;
             }
 
             NetEventSource.Exit(null);
@@ -938,12 +934,10 @@ internal static partial class Interop
             SocketAddress v4address = new SocketAddress(AddressFamily.InterNetwork, IPv4AddressSize);
             SocketAddress v6address = new SocketAddress(AddressFamily.InterNetworkV6, IPv6AddressSize);
 
-            byte* pMemoryBlob = (byte*)memoryBlob;
-            {
-                HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
-                IntPtr address = request->Address.pRemoteAddress != null ? (IntPtr)(pMemoryBlob - (byte*)originalAddress + (byte*)request->Address.pRemoteAddress) : IntPtr.Zero;
-                CopyOutAddress(address, ref v4address, ref v6address);
-            }
+            byte* pMemoryBlob = (byte*)memoryBlob;       
+            HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
+            IntPtr address = request->Address.pRemoteAddress != null ? (IntPtr)(pMemoryBlob - (byte*)originalAddress + (byte*)request->Address.pRemoteAddress) : IntPtr.Zero;
+            CopyOutAddress(address, ref v4address, ref v6address);
 
             IPEndPoint endpoint = null;
             if (v4address != null)
@@ -966,8 +960,7 @@ internal static partial class Interop
             SocketAddress v4address = new SocketAddress(AddressFamily.InterNetwork, IPv4AddressSize);
             SocketAddress v6address = new SocketAddress(AddressFamily.InterNetworkV6, IPv6AddressSize);
 
-            byte* pMemoryBlob = (byte*)memoryBlob;
-            
+            byte* pMemoryBlob = (byte*)memoryBlob;        
             HTTP_REQUEST* request = (HTTP_REQUEST*)pMemoryBlob;
             IntPtr address = request->Address.pLocalAddress != null ? (IntPtr)(pMemoryBlob - (byte*)originalAddress + (byte*)request->Address.pLocalAddress) : IntPtr.Zero;
             CopyOutAddress(address, ref v4address, ref v6address);

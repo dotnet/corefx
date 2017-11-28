@@ -16,7 +16,7 @@ namespace System.Net
 
         // Must call this from derived class' constructors.
         protected void BaseConstruction(Interop.HttpApi.HTTP_REQUEST* requestBlob)
-        {          
+        {
             if (requestBlob == null)
             {
                 GC.SuppressFinalize(this);
@@ -33,7 +33,7 @@ namespace System.Net
         {
             Debug.Assert(_memoryBlob != null || _backingBuffer == IntPtr.Zero, "RequestContextBase::ReleasePins()|ReleasePins() called twice.");
             _originalBlobAddress = _memoryBlob;
-            UnsetBlob();         
+            UnsetBlob();
             OnReleasePins();
         }
 
