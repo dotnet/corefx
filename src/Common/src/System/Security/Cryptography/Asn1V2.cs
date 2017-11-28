@@ -4680,6 +4680,16 @@ namespace System.Security.Cryptography.Asn1
             _offset++;
         }
 
+        /// <summary>
+        /// Transfer the encoded representation of the data to <paramref name="dest"/>.
+        /// </summary>
+        /// <param name="dest">Write destination.</param>
+        /// <param name="bytesWritten">The number of bytes which were written to <paramref name="dest"/>.</param>
+        /// <returns><c>true</c> if the encode succeeded, <c>false</c> if <paramref name="dest"/> is too small.</returns>
+        /// <exception cref="InvalidOperationException">
+        ///   A <see cref="PushSequence()"/> or <see cref="PushSetOf()"/> has not been closed via
+        ///   <see cref="PopSequence()"/> or <see cref="PopSetOf()"/>.
+        /// </exception>
         public bool TryEncode(Span<byte> dest, out int bytesWritten)
         {
             if ((_nestingStack?.Count ?? 0) != 0)
@@ -4758,11 +4768,18 @@ namespace System.Security.Cryptography.Asn1
                 SortContents(_buffer, lenOffset + 1, _offset);
             }
 
+            // BER could use the indefinite encoding that CER does.
+            // But since the definite encoding form is easier to read (doesn't require a contextual
+            // parser to find the end-of-contents marker) some ASN.1 readers (including the previous
+            // incarnation of AsnReader) may choose not to support it.
+            //
+            // So, BER will use the DER rules here, in the interest of broader compatibility.
+
+            // T-REC-X.690-201508 sec 9.1 (constructed CER => indefinite length)
+            // T-REC-X.690-201508 sec 8.1.3.6
             if (RuleSet == AsnEncodingRules.CER)
             {
-                // Write EndOfContents
-                WriteTag(Asn1Tag.EndOfContents);
-                WriteLength(0);
+                WriteEndOfContents();
                 return;
             }
 
@@ -4788,7 +4805,7 @@ namespace System.Security.Cryptography.Asn1
             int tmp = _offset;
             _offset = lenOffset;
             WriteLength(containedLength);
-            Debug.Assert(_offset - lenOffset - 1== shiftSize);
+            Debug.Assert(_offset - lenOffset - 1 == shiftSize);
             _offset = tmp + shiftSize;
         }
 
@@ -4797,22 +4814,20 @@ namespace System.Security.Cryptography.Asn1
             if (str == null)
                 throw new ArgumentNullException(nameof(str));
 
-            WriteCharacterString(new Asn1Tag(encodingType), encodingType, str.AsReadOnlySpan());
+            WriteCharacterString(encodingType, str.AsReadOnlySpan());
         }
 
         public void WriteCharacterString(UniversalTagNumber encodingType, ReadOnlySpan<char> str)
         {
-            WriteCharacterString(new Asn1Tag(encodingType), encodingType, str);
+            Text.Encoding encoding = AsnCharacterStringEncodings.GetEncoding(encodingType);
+
+            WriteCharacterStringCore(new Asn1Tag(encodingType), encoding, str);
         }
 
         public void WriteCharacterString(Asn1Tag tag, UniversalTagNumber encodingType, string str)
         {   
-            CheckUniversalTag(tag, encodingType);
-
             if (str == null)
-            {
                 throw new ArgumentNullException(nameof(str));
-            }
 
             WriteCharacterString(tag, encodingType, str.AsReadOnlySpan());
         }
@@ -4822,13 +4837,15 @@ namespace System.Security.Cryptography.Asn1
             CheckUniversalTag(tag, encodingType);
 
             Text.Encoding encoding = AsnCharacterStringEncodings.GetEncoding(encodingType);
-            WriteCharacterString(tag, encoding, str);
+            WriteCharacterStringCore(tag, encoding, str);
         }
 
-        private void WriteCharacterString(Asn1Tag tag, Text.Encoding encoding, ReadOnlySpan<char> str)
+        // T-REC-X.690-201508 sec 8.23
+        private void WriteCharacterStringCore(Asn1Tag tag, Text.Encoding encoding, ReadOnlySpan<char> str)
         {
             int size = -1;
 
+            // T-REC-X.690-201508 sec 9.2
             if (RuleSet == AsnEncodingRules.CER)
             {
                 // TODO: Split this for netstandard vs netcoreapp for span?.
@@ -4841,7 +4858,7 @@ namespace System.Security.Cryptography.Asn1
                         // If it exceeds the primitive segment size, use the constructed encoding.
                         if (size > AsnReader.MaxCERSegmentSize)
                         {
-                            WriteCERCharacterString(tag, encoding, str);
+                            WriteConstructedCerCharacterString(tag, encoding, str, size);
                             return;
                         }
                     }
@@ -4859,7 +4876,7 @@ namespace System.Security.Cryptography.Asn1
                     }
 
                     // Clear the constructed tag, if present.
-                    WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
+                    WriteTag(tag.AsPrimitive());
                     WriteLength(size);
                     Span<byte> dest = _buffer.AsSpan().Slice(_offset, size);
 
@@ -4879,17 +4896,17 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
-        private void WriteCERCharacterString(Asn1Tag tag, Text.Encoding encoding, ReadOnlySpan<char> str)
+        private void WriteConstructedCerCharacterString(Asn1Tag tag, Text.Encoding encoding, ReadOnlySpan<char> str, int size)
         {
+            Debug.Assert(size > AsnReader.MaxCERSegmentSize);
+
             byte[] tmp;
-            int size;
 
             // TODO: Split this for netstandard vs netcoreapp for span?.
             unsafe
             {
                 fixed (char* strPtr = &str.DangerousGetPinnableReference())
                 {
-                    size = encoding.GetByteCount(strPtr, str.Length);
                     tmp = ArrayPool<byte>.Shared.Rent(size);
 
                     fixed (byte* destPtr = tmp)
@@ -4919,8 +4936,16 @@ namespace System.Security.Cryptography.Asn1
             int len = end - start;
 
             if (len == 0)
+            {
                 return;
+            }
 
+            // Since BER can read everything and the reader does not mutate data
+            // just use a BER reader for identifying the positions of the values
+            // within this memory segment.
+            //
+            // Since it's not mutating, any restrictions imposed by CER or DER will
+            // still be maintained.
             var reader = new AsnReader(new ReadOnlyMemory<byte>(buffer, start, len), AsnEncodingRules.BER);
 
             List<(int, int)> positions = new List<(int, int)>();
