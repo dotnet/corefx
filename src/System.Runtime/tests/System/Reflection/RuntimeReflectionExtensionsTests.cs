@@ -18,6 +18,9 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        public void GetMethodInfoOnNull() => Assert.Throws<ArgumentNullException>("del", () => default(Action).GetMethodInfo());
+
+        [Fact]
         public void GetRuntimeBaseDefinition()
         {
             MethodInfo derivedFoo = typeof(TestDerived).GetMethod(nameof(TestDerived.Foo));
@@ -25,6 +28,10 @@ namespace System.Reflection.Tests
             MethodInfo actual = derivedFoo.GetRuntimeBaseDefinition();
             Assert.Equal(baseFoo, actual);
         }
+
+        [Fact]
+        public void GetRuntimeBaseDefinitionOnNull() =>
+            Assert.Throws<ArgumentNullException>(() => default(MethodInfo).GetRuntimeBaseDefinition());
 
         private abstract class TestBase
         {
@@ -43,10 +50,30 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        public void GetRuntimeEventOnNull() => Assert.Throws<ArgumentNullException>("type", () => default(Type).GetRuntimeEvent(""));
+
+        [Fact]
+        public void GetRuntimeEventWithNull() =>
+            Assert.Throws<ArgumentNullException>(null, () => typeof(TestType).GetRuntimeEvent(null));
+
+        [Fact]
+        public void GetRuntimeEventEmptyName() => Assert.Null(typeof(TestType).GetRuntimeEvent(""));
+
+        [Fact]
         public void GetRuntimeField()
         {
             Assert.Equal(typeof(TestType).GetField("_pizzaSize"), typeof(TestType).GetRuntimeField("_pizzaSize"));
         }
+
+        [Fact]
+        public void GetRuntimeFieldOnNull() => Assert.Throws<ArgumentNullException>("type", () => default(Type).GetRuntimeField(""));
+
+        [Fact]
+        public void GetRuntimeFieldWithNull() =>
+            Assert.Throws<ArgumentNullException>(null, () => typeof(TestType).GetRuntimeField(null));
+
+        [Fact]
+        public void GetRuntimeFieldEmptyName() => Assert.Null(typeof(TestType).GetRuntimeField(""));
 
         [Fact]
         public void GetRuntimeMethod()
@@ -55,10 +82,33 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        public void GetRuntimeMethodOnNull() => Assert.Throws<ArgumentNullException>("type", () => default(Type).GetRuntimeMethod("", Type.EmptyTypes));
+
+        [Fact]
+        public void GetRuntimeMethodWithNullName() => Assert.Throws<ArgumentNullException>("name", () => typeof(TestType).GetRuntimeMethod(null, Type.EmptyTypes));
+
+        [Fact]
+        public void GetRuntimeMethodWithNullTypes() => Assert.Throws<ArgumentNullException>("types", () => typeof(TestType).GetRuntimeMethod("", null));
+
+        [Fact]
+        public void GetRuntimeMethodEmptyName() => Assert.Null(typeof(TestType).GetRuntimeMethod("", Type.EmptyTypes));
+
+        [Fact]
         public void GetRuntimeProperty()
         {
             Assert.Equal(typeof(TestType).GetProperty("Length"), typeof(TestType).GetRuntimeProperty("Length"));
         }
+
+        [Fact]
+        public void GetRuntimePropertyOnNull() =>
+            Assert.Throws<ArgumentNullException>("type", () => default(Type).GetRuntimeProperty(""));
+
+        [Fact]
+        public void GetRuntimePropertyWithNull() =>
+            Assert.Throws<ArgumentNullException>("name", () => typeof(TestType).GetRuntimeProperty(null));
+
+        [Fact]
+        public void GetRuntimePropertyEmptyName() => Assert.Null(typeof(TestType).GetRuntimeProperty(""));
 
         [Fact]
         public void GetRuntimeEvents()
@@ -69,6 +119,10 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        public void GetRuntimeEventsOnNull() => Assert.Throws<ArgumentNullException>("type", () => default(Type).GetRuntimeEvents());
+
+
+        [Fact]
         public void GetRuntimeFields()
         {
             List<FieldInfo> fields = typeof(TestType).GetRuntimeFields().ToList();
@@ -77,6 +131,9 @@ namespace System.Reflection.Tests
             Assert.Contains("StuffHappened", fieldNames);
             Assert.Contains("_pizzaSize", fieldNames);
         }
+
+        [Fact]
+        public void GetRuntimeFieldsOnNull() => Assert.Throws<ArgumentNullException>("type", () => default(Type).GetRuntimeFields());
 
         [Fact]
         public void GetRuntimeMethods()
@@ -93,6 +150,9 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        public void GetRuntimeMethodsOnNull() => Assert.Throws<ArgumentNullException>("type", () => default(Type).GetRuntimeMethods());
+
+        [Fact]
         public void GetRuntimeProperties()
         {
             List<PropertyInfo> properties = typeof(TestType).GetRuntimeProperties().ToList();
@@ -104,5 +164,25 @@ namespace System.Reflection.Tests
             Assert.Contains("CanWrite", propertyNames);
             Assert.Contains("CanSeek", propertyNames);
         }
+
+        [Fact]
+        public void GetRuntimePropertiesOnNull() =>
+            Assert.Throws<ArgumentNullException>("type", () => default(Type).GetRuntimeProperties());
+
+        [Fact]
+        public void GetRuntimeInterfaceMapOnNull() =>
+            Assert.Throws<ArgumentNullException>("typeInfo", () => default(TypeInfo).GetRuntimeInterfaceMap(typeof(ICloneable)));
+
+        [Fact]
+        public void GetRuntimeInterfaceMapWithNull() =>
+            Assert.Throws<ArgumentNullException>("ifaceType", () => typeof(TestType).GetTypeInfo().GetRuntimeInterfaceMap(null));
+
+        [Fact]
+        public void GetRuntimeInterfaceMapNotImplemented() =>
+            Assert.Throws<ArgumentException>(() => typeof(TestType).GetTypeInfo().GetRuntimeInterfaceMap(typeof(ICloneable)));
+
+        [Fact]
+        public void GetRuntimeInterfaceMapNotInterface() =>
+            Assert.Throws<ArgumentException>(() => typeof(TestType).GetTypeInfo().GetRuntimeInterfaceMap(typeof(string)));
     }
 }
