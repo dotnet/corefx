@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
+using System.Buffers;
+using System.Text;
 
 internal static partial class Interop
 {
@@ -19,6 +21,44 @@ internal static partial class Interop
         /// Returns the number of bytes placed into the buffer on success; 0 if the buffer is too small; and -1 on error.
         /// </returns>
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_ReadLink", SetLastError = true)]
-        internal static extern unsafe int ReadLink(string path, byte[] buffer, int bufferSize);
+        private static extern unsafe int ReadLink(string path, byte[] buffer, int bufferSize);
+
+        /// <summary>
+        /// Takes a path to a symbolic link and returns the link target path.
+        /// </summary>
+        /// <param name="path">The path to the symlink</param>
+        /// <returns>
+        /// Returns the link to the target path on success; and null otherwise.
+        /// </returns>
+        public static string ReadLink(string path)
+        {
+            int bufferSize = 256;
+            do
+            {
+                byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+                try
+                {
+                    int resultLength = Interop.Sys.ReadLink(path, buffer, buffer.Length - 1); // -1 for null termination
+                    if (resultLength > 0)
+                    {
+                        // success, null terminate
+                        buffer[resultLength] = (byte)'\0';
+                        return Encoding.UTF8.GetString(buffer, 0, resultLength);
+                    }
+                    else if (resultLength < 0)
+                    {
+                        // error
+                        return null;
+                    }
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
+
+                // buffer was too small, loop around again and try with a larger buffer.
+                bufferSize *= 2;
+            } while (true);
+        }
     }
 }
