@@ -12,7 +12,7 @@ namespace System.IO
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe bool GetData()
         {
-            uint status = Interop.NtDll.NtQueryDirectoryFile(
+            int status = Interop.NtDll.NtQueryDirectoryFile(
                 FileHandle: _directoryHandle,
                 Event: IntPtr.Zero,
                 ApcRoutine: IntPtr.Zero,
@@ -25,7 +25,7 @@ namespace System.IO
                 FileName: null,
                 RestartScan: false);
 
-            switch (status)
+            switch ((uint)status)
             {
                 case Interop.StatusOptions.STATUS_NO_MORE_FILES:
                     NoMoreFiles();
@@ -34,7 +34,7 @@ namespace System.IO
                     Debug.Assert(statusBlock.Information.ToInt64() != 0);
                     return true;
                 default:
-                    throw Win32Marshal.GetExceptionForWin32Error((int)Interop.Advapi32.LsaNtStatusToWinError(status), _currentPath);
+                    throw Win32Marshal.GetExceptionForWin32Error((int)Interop.NtDll.RtlNtStatusToDosError(status), _currentPath);
             }
         }
     }

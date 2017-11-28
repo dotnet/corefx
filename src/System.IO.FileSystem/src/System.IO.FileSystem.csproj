@@ -268,8 +268,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.NtStatus.cs">
       <Link>Common\Interop\Windows\Interop.NtStatus.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.LsaNtStatusToWinError.cs">
-      <Link>Common\Interop\Windows\Interop.LsaNtStatusToWinError.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.RtlNtStatusToDosError.cs">
+      <Link>Common\Interop\Windows\Interop.RtlNtStatusToDosError.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Windows : UAP - Win32 + WinRT -->
