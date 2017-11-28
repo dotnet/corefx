@@ -2,6 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// Enable CHECK_ACCURATE_ENSURE to ensure that the AsnWriter is not ever
+// abusing the normal EnsureWriteCapacity + ArrayPool behaviors of rounding up.
+//#define CHECK_ACCURATE_ENSURE
+
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -3468,6 +3472,17 @@ namespace System.Security.Cryptography.Asn1
 
             if (_buffer == null || _buffer.Length - _offset < pendingCount)
             {
+#if CHECK_ACCURATE_ENSURE
+                // A debug paradigm to make sure that throughout the execution nothing ever writes
+                // past where the buffer was "allocated".  This causes quite a number of reallocs
+                // and copies, so it's a #define opt-in.
+                byte[] newBytes = new byte[_offset + pendingCount];
+                
+                if (_buffer != null)
+                {
+                    Buffer.BlockCopy(_buffer, 0, newBytes, 0, _offset);
+                }
+#else
                 const int BlockSize = 1024;
                 // While the ArrayPool may have similar logic, make sure we don't run into a lot of
                 // "grow a little" by asking in 1k steps.
@@ -3487,6 +3502,7 @@ namespace System.Security.Cryptography.Asn1
                     Array.Clear(_buffer, 0, _offset);
                     ArrayPool<byte>.Shared.Return(_buffer);
                 }
+#endif
 
 #if DEBUG
                 // Ensure no "implicit 0" is happening
