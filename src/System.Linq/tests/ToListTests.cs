@@ -25,6 +25,16 @@ namespace System.Linq.Tests
         }
 
 
+        [Fact]
+        public void ToList_Capacity()
+        {
+            List<int> sourceList = new List<int>() { 1, 2, 3, 4, 5 };
+            List<int> resultList = sourceList.ToList(20);
+
+            Assert.Equal(20, resultList.Capacity);
+            Assert.Equal(sourceList, resultList);
+        }
+
         private void RunToListOnAllCollectionTypes<T>(T[] items, Action<List<T>> validation)
         {
             validation(Enumerable.ToList(items));
@@ -63,7 +73,9 @@ namespace System.Linq.Tests
                 {
                     Assert.Equal(sourceStringArray.Length, resultStringList.Count);
                     for (int i = 0; i < sourceStringArray.Length; i++)
+                    {
                         Assert.Same(sourceStringArray[i], resultStringList[i]);
+                    }
                 });
         }
 
