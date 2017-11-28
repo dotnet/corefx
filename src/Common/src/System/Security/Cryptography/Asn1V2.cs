@@ -3197,96 +3197,28 @@ namespace System.Security.Cryptography.Asn1
         }
     }
 
-    internal abstract class RangedAsciiEncoding : SpanBasedEncoding
+    internal class IA5Encoding : RestrictedAsciiStringEncoding
     {
-        private readonly byte _minValue;
-        private readonly byte _maxValue;
-
-        protected RangedAsciiEncoding(byte minCharAllowed, byte maxCharAllowed)
-        {
-            Debug.Assert(maxCharAllowed >= minCharAllowed);
-            _minValue = minCharAllowed;
-            _maxValue = maxCharAllowed;
-        }
-
-        public override int GetMaxByteCount(int charCount)
-        {
-            return charCount;
-        }
-
-        public override int GetMaxCharCount(int byteCount)
-        {
-            return byteCount;
-        }
-
-        protected override int GetBytes(ReadOnlySpan<char> chars, Span<byte> bytes, bool write)
-        {
-            if (chars.IsEmpty)
-                return 0;
-
-            for (int i = 0; i < chars.Length; i++)
-            {
-                char c = chars[i];
-
-                if (c > _maxValue || c < _minValue)
-                {
-                    EncoderFallback.CreateFallbackBuffer().Fallback(c, i);
-
-                    Debug.Fail("Fallback should have thrown");
-                    throw new CryptographicException();
-                }
-
-                if (write)
-                {
-                    bytes[i] = (byte)c;
-                }
-            }
-
-            return chars.Length;
-        }
-
-        protected override int GetChars(ReadOnlySpan<byte> bytes, Span<char> chars, bool write)
-        {
-            if (bytes.IsEmpty)
-                return 0;
-
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                byte b = bytes[i];
-
-                if (b > _maxValue || b < _minValue)
-                {
-                    DecoderFallback.CreateFallbackBuffer().Fallback(
-                        new[] { b }, 
-                        i);
-
-                    Debug.Fail("Fallback should have thrown");
-                    throw new CryptographicException();
-                }
-
-                if (write)
-                {
-                    chars[i] = (char)b;
-                }
-            }
-
-            return bytes.Length;
-        }
-    }
-
-    internal class IA5Encoding : RangedAsciiEncoding
-    {
-        // All of 7-bit ASCII
+        // T-REC-X.680-201508 sec 41, Table 8.
+        // ISO International Register of Coded Character Sets to be used with Escape Sequences 001
+        //   is ASCII 0x00 - 0x1F
+        // ISO International Register of Coded Character Sets to be used with Escape Sequences 006
+        //   is ASCII 0x21 - 0x7E
+        // Space is ASCII 0x20, delete is ASCII 0x7F.
+        //
+        // The net result is all of 7-bit ASCII
         internal IA5Encoding()
             : base(0x00, 0x7F)
         {
         }
     }
 
-    internal class VisibleStringEncoding : RangedAsciiEncoding
+    internal class VisibleStringEncoding : RestrictedAsciiStringEncoding
     {
-        // Space (0x20) through tilde (0x7E)
-        // Removes the 0x00-0x1F and the 0x7F control codes.
+        // T-REC-X.680-201508 sec 41, Table 8.
+        // ISO International Register of Coded Character Sets to be used with Escape Sequences 006
+        //   is ASCII 0x21 - 0x7E
+        // Space is ASCII 0x20.
         internal VisibleStringEncoding()
             : base(0x20, 0x7E)
         {
@@ -3305,6 +3237,21 @@ namespace System.Security.Cryptography.Asn1
     internal abstract class RestrictedAsciiStringEncoding : SpanBasedEncoding
     {
         private readonly bool[] _isAllowed;
+
+        protected RestrictedAsciiStringEncoding(byte minCharAllowed, byte maxCharAllowed)
+        {
+            Debug.Assert(minCharAllowed <= maxCharAllowed);
+            Debug.Assert(maxCharAllowed <= 0x7F);
+
+            bool[] isAllowed = new bool[0x80];
+
+            for (byte charCode = minCharAllowed; charCode <= maxCharAllowed; charCode++)
+            {
+                isAllowed[charCode] = true;
+            }
+
+            _isAllowed = isAllowed;
+        }
 
         protected RestrictedAsciiStringEncoding(IEnumerable<char> allowedChars)
         {
@@ -3337,13 +3284,15 @@ namespace System.Security.Cryptography.Asn1
         protected override int GetBytes(ReadOnlySpan<char> chars, Span<byte> bytes, bool write)
         {
             if (chars.IsEmpty)
+            {
                 return 0;
+            }
 
             for (int i = 0; i < chars.Length; i++)
             {
                 char c = chars[i];
 
-                if (c > 0x7F || !_isAllowed[c])
+                if ((uint)c > (uint)_isAllowed.Length || !_isAllowed[c])
                 {
                     EncoderFallback.CreateFallbackBuffer().Fallback(c, i);
 
@@ -3363,13 +3312,15 @@ namespace System.Security.Cryptography.Asn1
         protected override int GetChars(ReadOnlySpan<byte> bytes, Span<char> chars, bool write)
         {
             if (bytes.IsEmpty)
+            {
                 return 0;
+            }
 
             for (int i = 0; i < bytes.Length; i++)
             {
                 byte b = bytes[i];
 
-                if (b >= 0x7F || !_isAllowed[b])
+                if ((uint)b > (uint)_isAllowed.Length || !_isAllowed[b])
                 {
                     DecoderFallback.CreateFallbackBuffer().Fallback(
                         new[] { b },
@@ -3397,7 +3348,9 @@ namespace System.Security.Cryptography.Asn1
         protected override int GetBytes(ReadOnlySpan<char> chars, Span<byte> bytes, bool write)
         {
             if (chars.IsEmpty)
+            {
                 return 0;
+            }
 
             int writeIdx = 0;
 
@@ -3508,12 +3461,24 @@ namespace System.Security.Cryptography.Asn1
 
         private void EnsureWriteCapacity(int pendingCount)
         {
+            if (pendingCount < 0)
+            {
+                throw new OverflowException();
+            }
+
             if (_buffer == null || _buffer.Length - _offset < pendingCount)
             {
                 const int BlockSize = 1024;
                 // While the ArrayPool may have similar logic, make sure we don't run into a lot of
                 // "grow a little" by asking in 1k steps.
-                int blocks = (_offset + pendingCount + (BlockSize - 1)) / BlockSize;
+                int inflatedBytes = _offset + pendingCount + (BlockSize - 1);
+
+                if (inflatedBytes < 0)
+                {
+                    throw new OverflowException();
+                }
+
+                int blocks = inflatedBytes / BlockSize;
                 byte[] newBytes = ArrayPool<byte>.Shared.Rent(BlockSize * blocks);
 
                 if (_buffer != null)
@@ -3550,11 +3515,14 @@ namespace System.Security.Cryptography.Asn1
             _offset += spaceRequired;
         }
 
+        // T-REC-X.680-201508 sec 8.1.3
         private void WriteLength(int length)
         {
             const byte MultiByteMarker = 0x80;
             Debug.Assert(length >= -1);
 
+            // If the indefinite form has been requested.
+            // T-REC-X.680-201508 sec 8.1.3.6
             if (length == -1)
             {
                 EnsureWriteCapacity(1);
@@ -3565,6 +3533,7 @@ namespace System.Security.Cryptography.Asn1
 
             Debug.Assert(length >= 0);
 
+            // T-REC-X.680-201508 sec 8.1.3.3, 8.1.3.4
             if (length < MultiByteMarker)
             {
                 // Pre-allocate the pending data since we know how much.
@@ -3574,7 +3543,8 @@ namespace System.Security.Cryptography.Asn1
                 return;
             }
 
-            var lengthLength = GetLengthLength(length);
+            // The rest of the method implements T-REC-X.680-201508 sec 8.1.3.5
+            int lengthLength = GetEncodedLengthSubsequentByteCount(length);
 
             // Pre-allocate the pending data since we know how much.
             EnsureWriteCapacity(lengthLength + 1 + length);
@@ -3596,7 +3566,8 @@ namespace System.Security.Cryptography.Asn1
             _offset += lengthLength + 1;
         }
 
-        private static int GetLengthLength(int length)
+        // T-REC-X.680-201508 sec 8.1.3.5
+        private static int GetEncodedLengthSubsequentByteCount(int length)
         {
             if (length <= 0x7F)
                 return 0;
@@ -3618,7 +3589,9 @@ namespace System.Security.Cryptography.Asn1
             ReadOnlyMemory<byte> parsedBack = reader.GetEncodedValue();
 
             if (reader.HasData)
+            {
                 throw new ArgumentException(SR.Cryptography_WriteEncodedValue_OneValueAtATime, nameof(preEncodedValue));
+            }
 
             Debug.Assert(parsedBack.Length == preEncodedValue.Length);
 
@@ -3627,17 +3600,29 @@ namespace System.Security.Cryptography.Asn1
             _offset += preEncodedValue.Length;
         }
 
+        private void WriteEndOfContents()
+        {
+            EnsureWriteCapacity(2);
+            _buffer[_offset++] = 0;
+            _buffer[_offset++] = 0;
+        }
+
         public void WriteBoolean(bool value)
         {
-            WriteBoolean(new Asn1Tag(UniversalTagNumber.Boolean), value);
+            WriteBooleanCore(new Asn1Tag(UniversalTagNumber.Boolean), value);
         }
 
         public void WriteBoolean(Asn1Tag tag, bool value)
         {
             CheckUniversalTag(tag, UniversalTagNumber.Boolean);
-            
-            // Clear the constructed bit, if it was set.
-            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
+
+            WriteBooleanCore(tag.AsPrimitive(), value);
+        }
+
+        private void WriteBooleanCore(Asn1Tag tag, bool value)
+        { 
+            Debug.Assert(!tag.IsConstructed);
+            WriteTag(tag);
             WriteLength(1);
             // Ensured by WriteLength
             Debug.Assert(_offset < _buffer.Length);
@@ -3647,31 +3632,31 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteInteger(long value)
         {
-            WriteInteger(new Asn1Tag(UniversalTagNumber.Integer), value);
+            WriteIntegerCore(new Asn1Tag(UniversalTagNumber.Integer), value);
         }
 
         public void WriteInteger(ulong value)
         {
-            WriteInteger(new Asn1Tag(UniversalTagNumber.Integer), value);
+            WriteNonNegativeIntegerCore(new Asn1Tag(UniversalTagNumber.Integer), value);
         }
 
         public void WriteInteger(BigInteger value)
         {
-            WriteInteger(new Asn1Tag(UniversalTagNumber.Integer), value);
+            WriteIntegerCore(new Asn1Tag(UniversalTagNumber.Integer), value);
         }
 
         public void WriteInteger(Asn1Tag tag, long value)
         {
             CheckUniversalTag(tag, UniversalTagNumber.Integer);
 
-            WriteIntegerAnyTag(tag, value);
+            WriteIntegerCore(tag.AsPrimitive(), value);
         }
 
-        private void WriteIntegerAnyTag(Asn1Tag tag, long value)
+        private void WriteIntegerCore(Asn1Tag tag, long value)
         {
             if (value >= 0)
             {
-                WriteIntegerAnyTag(tag, (ulong)value);
+                WriteNonNegativeIntegerCore(tag, (ulong)value);
                 return;
             }
 
@@ -3694,8 +3679,8 @@ namespace System.Security.Cryptography.Asn1
             else
                 valueLength = 8;
 
-            // Clear the constructed bit, if it was set.
-            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
+            Debug.Assert(!tag.IsConstructed);
+            WriteTag(tag);
             WriteLength(valueLength);
 
             long remaining = value;
@@ -3703,7 +3688,7 @@ namespace System.Security.Cryptography.Asn1
 
             do
             {
-                _buffer[idx] = (byte)(remaining & 0xFF);
+                _buffer[idx] = (byte)remaining;
                 remaining >>= 8;
                 idx--;
             } while (idx >= _offset);
@@ -3724,10 +3709,10 @@ namespace System.Security.Cryptography.Asn1
         {
             CheckUniversalTag(tag, UniversalTagNumber.Integer);
 
-            WriteIntegerAnyTag(tag, value);
+            WriteNonNegativeIntegerCore(tag.AsPrimitive(), value);
         }
 
-        private void WriteIntegerAnyTag(Asn1Tag tag, ulong value)
+        private void WriteNonNegativeIntegerCore(Asn1Tag tag, ulong value)
         {
             int valueLength;
             
@@ -3752,7 +3737,8 @@ namespace System.Security.Cryptography.Asn1
                 valueLength = 9;
 
             // Clear the constructed bit, if it was set.
-            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
+            Debug.Assert(!tag.IsConstructed);
+            WriteTag(tag);
             WriteLength(valueLength);
 
             ulong remaining = value;
@@ -3781,12 +3767,17 @@ namespace System.Security.Cryptography.Asn1
         {
             CheckUniversalTag(tag, UniversalTagNumber.Integer);
 
+            WriteIntegerCore(tag.AsPrimitive(), value);
+        }
+
+        private void WriteIntegerCore(Asn1Tag tag, BigInteger value)
+        {
             // TODO: Split this for netstandard vs netcoreapp for span-perf?.
             byte[] encoded = value.ToByteArray();
             Array.Reverse(encoded);
 
-            // Clear the constructed bit, if it was set.
-            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
+            Debug.Assert(!tag.IsConstructed);
+            WriteTag(tag);
             WriteLength(encoded.Length);
             Buffer.BlockCopy(encoded, 0, _buffer, _offset, encoded.Length);
             _offset += encoded.Length;
@@ -3794,13 +3785,19 @@ namespace System.Security.Cryptography.Asn1
 
         public void WriteBitString(ReadOnlySpan<byte> bitString, int unusedBitCount=0)
         {
-            WriteBitString(new Asn1Tag(UniversalTagNumber.BitString), bitString, unusedBitCount);
+            WriteBitStringCore(new Asn1Tag(UniversalTagNumber.BitString), bitString, unusedBitCount);
         }
 
         public void WriteBitString(Asn1Tag tag, ReadOnlySpan<byte> bitString, int unusedBitCount=0)
         {
             CheckUniversalTag(tag, UniversalTagNumber.BitString);
 
+            // Primitive or constructed, doesn't matter.
+            WriteBitStringCore(tag, bitString, unusedBitCount);
+        }
+
+        private void WriteBitStringCore(Asn1Tag tag, ReadOnlySpan<byte> bitString, int unusedBitCount)
+        {
             // T-REC-X.690-201508 sec 8.6.2.2
             if (unusedBitCount < 0 || unusedBitCount > 7)
             {
@@ -3816,38 +3813,38 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            // If 3 bits are "unused" then build a mask for the top 5 bits.
-            // 0b1111_1111 >> (8 - 3)
-            // 0b1111_1111 >> 5
-            // 0b0000_0111
-            // (then invert that)
-            // 0b1111_1000
-            byte mask = (byte)~(0xFF >> (8 - unusedBitCount));
+            // If 3 bits are "unused" then build a mask for them to check for 0.
+            // 1 << 3 => 0b0000_1000
+            // subtract 1 => 0b000_0111
+            int mask = (1 << unusedBitCount) - 1;
             byte lastByte = bitString.IsEmpty ? (byte)0 : bitString[bitString.Length - 1];
 
-            if ((lastByte & mask) != lastByte)
+            if ((lastByte & mask) != 0)
             {
-                // TODO: Probably warrants a distinct message.
                 // T-REC-X.690-201508 sec 11.2
+                //
                 // This could be ignored for BER, but since DER is more common and
                 // it likely suggests a program error on the caller, leave it enabled for
                 // BER for now.
+                // TODO: Probably warrants a distinct message.
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
             if (RuleSet == AsnEncodingRules.CER)
             {
+                // T-REC-X.690-201508 sec 9.2
+                //
                 // If it's not within a primitive segment, use the constructed encoding.
                 // (>= instead of > because of the unused bit count byte)
                 if (bitString.Length >= AsnReader.MaxCERSegmentSize)
                 {
-                    WriteCERBitString(tag, bitString, unusedBitCount);
+                    WriteConstructedCerBitString(tag, bitString, unusedBitCount);
                     return;
                 }
             }
 
             // Clear the constructed flag, if present.
-            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue));
+            WriteTag(tag.AsPrimitive());
             // The unused bits byte requires +1.
             WriteLength(bitString.Length + 1);
             _buffer[_offset] = (byte)unusedBitCount;
@@ -3856,34 +3853,43 @@ namespace System.Security.Cryptography.Asn1
             _offset += bitString.Length;
         }
 
-        private void WriteCERBitString(Asn1Tag tag, ReadOnlySpan<byte> payload, int unusedBitCount)
+        // T-REC-X.690-201508 sec 9.2, 8.6
+        private void WriteConstructedCerBitString(Asn1Tag tag, ReadOnlySpan<byte> payload, int unusedBitCount)
         {
             const int MaxCERSegmentSize = AsnReader.MaxCERSegmentSize;
             // Every segment has an "unused bit count" byte.
             const int MaxCERContentSize = MaxCERSegmentSize - 1;
             Debug.Assert(payload.Length > MaxCERContentSize);
 
-            WriteTag(new Asn1Tag(tag.TagClass, tag.TagValue, isConstructed: true));
+            WriteTag(tag.AsConstructed());
+            // T-REC-X.690-201508 sec 9.1
+            // Constructed CER uses the indefinite form.
             WriteLength(-1);
 
             int fullSegments = Math.DivRem(payload.Length, MaxCERContentSize, out int lastContentSize);
-            // +Unused bit count byte.
-            int lastSegmentSize = lastContentSize + 1;
-            // The tag size of primitive OCTET STRING is 1 byte.
-            // The lengthOrLengthLength byte is always 1 byte.
-            // These calculations use segment size (vs content size) to pre-account for the unused count byte.
-            int fullSegmentEncodedSize = 1 + 1 + MaxCERSegmentSize + GetLengthLength(MaxCERSegmentSize);
-            Debug.Assert(fullSegmentEncodedSize == 1004);
-            int remainingEncodedSize = 1 + 1 + lastSegmentSize + GetLengthLength(lastSegmentSize);
+
+            // The tag size is 1 byte.
+            // The length will always be encoded as 82 03 E8 (3 bytes)
+            // And 1000 content octets (by T-REC-X.690-201508 sec 9.2)
+            const int FullSegmentEncodedSize = 1004;
+            Debug.Assert(
+                FullSegmentEncodedSize == 1 + 1 + MaxCERSegmentSize + GetEncodedLengthSubsequentByteCount(MaxCERSegmentSize));
+
+            int remainingEncodedSize;
 
             if (lastContentSize == 0)
             {
-                lastSegmentSize = remainingEncodedSize = 0;
+                remainingEncodedSize = 0;
+            }
+            else
+            {
+                // One byte of tag, minimum one byte of length, and one byte of unused bit count.
+                remainingEncodedSize = 3 + lastContentSize + GetEncodedLengthSubsequentByteCount(lastContentSize);
             }
 
             // Reduce the number of copies by pre-calculating the size.
             // +2 for End-Of-Contents
-            int expectedSize = fullSegments * fullSegmentEncodedSize + remainingEncodedSize + 2;
+            int expectedSize = fullSegments * FullSegmentEncodedSize + remainingEncodedSize + 2;
             EnsureWriteCapacity(expectedSize);
 
             byte[] ensureNoExtraCopy = _buffer;
@@ -3895,6 +3901,7 @@ namespace System.Security.Cryptography.Asn1
 
             while (remainingData.Length > MaxCERContentSize)
             {
+                // T-REC-X.690-201508 sec 8.6.4.1
                 WriteTag(primitiveBitString);
                 WriteLength(MaxCERSegmentSize);
                 // 0 unused bits in this segment.
@@ -3918,11 +3925,10 @@ namespace System.Security.Cryptography.Asn1
             remainingData.CopyTo(dest);
             _offset += remainingData.Length;
 
-            WriteTag(Asn1Tag.EndOfContents);
-            WriteLength(0);
+            WriteEndOfContents();
 
             Debug.Assert(_offset - savedOffset == expectedSize, $"expected size was {expectedSize}, actual was {_offset - savedOffset}");
-            Debug.Assert(_buffer == ensureNoExtraCopy, $"_buffer was replaced during {nameof(WriteCERBitString)}");
+            Debug.Assert(_buffer == ensureNoExtraCopy, $"_buffer was replaced during {nameof(WriteConstructedCerBitString)}");
         }
 
         public void WriteNamedBitList(object enumValue)
@@ -4053,9 +4059,9 @@ namespace System.Security.Cryptography.Asn1
             int fullSegments = Math.DivRem(payload.Length, MaxCERSegmentSize, out int lastSegmentSize);
             // The tag size of primitive OCTET STRING is 1 byte.
             // The lengthOrLengthLength byte is always 1 byte.
-            int fullSegmentEncodedSize = 1 + 1 + MaxCERSegmentSize + GetLengthLength(MaxCERSegmentSize);
+            int fullSegmentEncodedSize = 1 + 1 + MaxCERSegmentSize + GetEncodedLengthSubsequentByteCount(MaxCERSegmentSize);
             Debug.Assert(fullSegmentEncodedSize == 1004);
-            int remainingEncodedSize = 1 + 1 + lastSegmentSize + GetLengthLength(lastSegmentSize);
+            int remainingEncodedSize = 1 + 1 + lastSegmentSize + GetEncodedLengthSubsequentByteCount(lastSegmentSize);
 
             if (lastSegmentSize == 0)
             {
@@ -4345,14 +4351,14 @@ namespace System.Security.Cryptography.Asn1
             {
                 ulong numericValue = Convert.ToUInt64(enumValue);
                 // T-REC-X.690-201508 sec 8.4
-                WriteIntegerAnyTag(tag, numericValue);
+                WriteNonNegativeIntegerCore(tag, numericValue);
             }
             else
             {
                 // All other types fit in a (signed) long.
                 long numericValue = Convert.ToInt64(enumValue);
                 // T-REC-X.690-201508 sec 8.4
-                WriteIntegerAnyTag(tag, numericValue);
+                WriteIntegerCore(tag, numericValue);
             }
         }
 
@@ -4693,7 +4699,7 @@ namespace System.Security.Cryptography.Asn1
             int containedLength = _offset - 1 - lenOffset;
             Debug.Assert(containedLength >= 0);
 
-            int shiftSize = GetLengthLength(containedLength);
+            int shiftSize = GetEncodedLengthSubsequentByteCount(containedLength);
 
             // Best case, length fits in the compact byte
             if (shiftSize == 0)
