@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
@@ -10,7 +11,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
 {
     public sealed class BinaryFormatter : IFormatter
     {
-        private static readonly Dictionary<Type, TypeInformation> s_typeNameCache = new Dictionary<Type, TypeInformation>();
+        private static readonly ConcurrentDictionary<Type, TypeInformation> s_typeNameCache = new ConcurrentDictionary<Type, TypeInformation>();
 
         internal ISurrogateSelector _surrogates;
         internal StreamingContext _context;
@@ -91,18 +92,15 @@ namespace System.Runtime.Serialization.Formatters.Binary
 
         internal static TypeInformation GetTypeInformation(Type type)
         {
-            lock (s_typeNameCache)
+            TypeInformation typeInformation;
+            if (!s_typeNameCache.TryGetValue(type, out typeInformation))
             {
-                TypeInformation typeInformation;
-                if (!s_typeNameCache.TryGetValue(type, out typeInformation))
-                {
-                    bool hasTypeForwardedFrom;
-                    string assemblyName = FormatterServices.GetClrAssemblyName(type, out hasTypeForwardedFrom);
-                    typeInformation = new TypeInformation(FormatterServices.GetClrTypeFullName(type), assemblyName, hasTypeForwardedFrom);
-                    s_typeNameCache.Add(type, typeInformation);
-                }
-                return typeInformation;
+                bool hasTypeForwardedFrom;
+                string assemblyName = FormatterServices.GetClrAssemblyName(type, out hasTypeForwardedFrom);
+                typeInformation = new TypeInformation(FormatterServices.GetClrTypeFullName(type), assemblyName, hasTypeForwardedFrom);
+                s_typeNameCache.TryAdd(type, typeInformation);
             }
+            return typeInformation;
         }
     }
 }
