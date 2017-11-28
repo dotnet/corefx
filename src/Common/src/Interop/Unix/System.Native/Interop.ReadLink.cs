@@ -16,7 +16,7 @@ internal static partial class Interop
         /// <param name="buffer">The buffer to hold the output path</param>
         /// <param name="bufferSize">The size of the buffer</param>
         /// <returns>
-        /// Returns the number of bytes placed into the buffer on success; otherwise, -1 is returned
+        /// Returns the number of bytes placed into the buffer on success; 0 if the buffer is too small; and -1 on error.
         /// </returns>
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_ReadLink", SetLastError = true)]
         internal static extern unsafe int ReadLink(string path, byte[] buffer, int bufferSize);
