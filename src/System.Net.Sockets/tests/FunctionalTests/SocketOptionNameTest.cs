@@ -160,6 +160,28 @@ namespace System.Net.Sockets.Tests
         }
 
         [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public void MulticastInterface_Set_WithIPv6()
+        {
+            using (Socket s = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
+            {
+                s.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, IPAddress.HostToNetworkOrder(1));
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public void MulticastInterface_Set_InvalidIndexWithIPv6_Throws()
+        {
+            int interfaceIndex = 31415;
+            using (Socket s = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
+            {
+                Assert.Throws<SocketException>(() =>
+                    s.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, IPAddress.HostToNetworkOrder(interfaceIndex)));
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // In WSL, the connect() call fails immediately.
         [InlineData(false)]
         [InlineData(true)]

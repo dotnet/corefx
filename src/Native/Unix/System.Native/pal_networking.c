@@ -1273,7 +1273,7 @@ static int8_t GetMulticastOptionName(int32_t multicastOption, int8_t isIPv6, int
             return true;
 
         case MulticastOption_MULTICAST_IF:
-            *optionName = IP_MULTICAST_IF;
+            *optionName = isIPv6 ? IPV6_MULTICAST_IF : IP_MULTICAST_IF;
             return true;
 
         default:
