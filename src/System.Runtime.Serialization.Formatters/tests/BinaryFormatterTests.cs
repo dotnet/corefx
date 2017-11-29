@@ -29,7 +29,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 Assert.NotSame(obj, clone);
             }
 
-            EqualityExtensions.CheckEquals(obj, clone);
+            EqualityExtensions.CheckEquals(obj, clone, true);
         }
 
         // Used for updating blobs in BinaryFormatterTestData.cs
@@ -82,17 +82,22 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 blobs = tmpList.ToArray();
             }
 
-            foreach (string blob in blobs)
+            // We store our framework blobs in index 1
+            int platformBlobIndex = PlatformDetection.IsFullFramework ? 1 : 0;
+            for (int i = 0; i < blobs.Length; i++)
             {
+                // Check if the current blob is from the current running platform.
+                bool isSamePlatform = i == platformBlobIndex;
+
                 if (isEqualityComparer)
                 {
-                    ValidateEqualityComparer(BinaryFormatterHelpers.FromBase64String(blob, FormatterAssemblyStyle.Simple));
-                    ValidateEqualityComparer(BinaryFormatterHelpers.FromBase64String(blob, FormatterAssemblyStyle.Full));
+                    ValidateEqualityComparer(BinaryFormatterHelpers.FromBase64String(blobs[i], FormatterAssemblyStyle.Simple));
+                    ValidateEqualityComparer(BinaryFormatterHelpers.FromBase64String(blobs[i], FormatterAssemblyStyle.Full));
                 }
                 else
                 {
-                    EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blob, FormatterAssemblyStyle.Simple));
-                    EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blob, FormatterAssemblyStyle.Full));
+                    EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i], FormatterAssemblyStyle.Simple), isSamePlatform);
+                    EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i], FormatterAssemblyStyle.Full), isSamePlatform);
                 }
             }
         }
@@ -105,8 +110,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
             object obj = new ArraySegment<int>();
             string corefxBlob = "AAEAAAD/////AQAAAAAAAAAEAQAAAHJTeXN0ZW0uQXJyYXlTZWdtZW50YDFbW1N5c3RlbS5JbnQzMiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9hcnJheQdfb2Zmc2V0Bl9jb3VudAcAAAgICAoAAAAAAAAAAAs=";
             string netfxBlob = "AAEAAAD/////AQAAAAAAAAAEAQAAAHJTeXN0ZW0uQXJyYXlTZWdtZW50YDFbW1N5c3RlbS5JbnQzMiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9hcnJheQdfb2Zmc2V0Bl9jb3VudAcAAAgICAoAAAAAAAAAAAs=";
-            EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(corefxBlob, FormatterAssemblyStyle.Full));
-            EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(netfxBlob, FormatterAssemblyStyle.Full));
+            EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(corefxBlob, FormatterAssemblyStyle.Full), true);
+            EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(netfxBlob, FormatterAssemblyStyle.Full), true);
         }
 
         [Fact]
@@ -148,7 +153,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             foreach (object[] obj in objects)
             {
                 object clone = f.Deserialize(s);
-                EqualityExtensions.CheckEquals(obj[0], clone);
+                EqualityExtensions.CheckEquals(obj[0], clone, true);
             }
         }
 
