@@ -69,10 +69,12 @@ namespace System.Security.Cryptography.Asn1
         TimeOfDay = 32,
         DateTime = 33,
         Duration = 34,
+        ObjectIdentifierIRI = 35,
+        RelativeObjectIdentifierIRI = 36,
     }
 
     // Represents a BER-family encoded tag.
-    // T-REC-X.690 sec 8.1.2
+    // T-REC-X.690-201508 sec 8.1.2
     internal struct Asn1Tag : IEquatable<Asn1Tag>
     {
         private const byte ClassMask = 0b1100_0000;
@@ -109,10 +111,11 @@ namespace System.Security.Cryptography.Asn1
         public Asn1Tag(UniversalTagNumber universalTagNumber, bool isConstructed = false)
             : this(isConstructed ? ConstructedMask : (byte)0, (int)universalTagNumber)
         {
+            // T-REC-X.680-201508 sec 8.6 (Table 1)
             const UniversalTagNumber ReservedIndex = (UniversalTagNumber)15;
 
             if (universalTagNumber < UniversalTagNumber.EndOfContents ||
-                universalTagNumber > UniversalTagNumber.Duration ||
+                universalTagNumber > UniversalTagNumber.RelativeObjectIdentifierIRI ||
                 universalTagNumber == ReservedIndex)
             {
                 throw new ArgumentOutOfRangeException(nameof(universalTagNumber), universalTagNumber, null);
@@ -198,7 +201,7 @@ namespace System.Security.Cryptography.Asn1
                     if (tagValue >= TooBigToShift)
                     {
                         bytesRead = 0;
-                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                        return false;
                     }
 
                     tagValue <<= 7;
@@ -208,7 +211,7 @@ namespace System.Security.Cryptography.Asn1
                     if (tagValue == 0)
                     {
                         bytesRead = 0;
-                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                        return false;
                     }
                 }
                 while ((current & ContinuationFlag) == ContinuationFlag);
@@ -218,17 +221,18 @@ namespace System.Security.Cryptography.Asn1
                 if (tagValue <= 30)
                 {
                     bytesRead = 0;
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    return false;
                 }
 
                 // There's not really any ambiguity, but prevent negative numbers from showing up.
                 if (tagValue > int.MaxValue)
                 {
                     bytesRead = 0;
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    return false;
                 }
             }
 
+            Debug.Assert(bytesRead > 0);
             tag = new Asn1Tag(first, (int)tagValue);
             return true;
         }

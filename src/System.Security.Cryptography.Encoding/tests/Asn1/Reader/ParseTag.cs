@@ -42,6 +42,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicTagClass.Private, false, 1 << 27, "DFC0808000")]
         [InlineData(PublicTagClass.Private, false, 1 << 28, "DF8180808000")]
         [InlineData(PublicTagClass.Private, true, int.MaxValue, "FF87FFFFFF7F")]
+        [InlineData(PublicTagClass.Universal, false, 119, "1F77")]
         public static void ParseValidTag(
             PublicTagClass tagClass,
             bool isConstructed,
@@ -80,20 +81,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("MultiByte-NoFollow", "1F")]
         [InlineData("MultiByte-NoFollow2", "1F81")]
         [InlineData("MultiByte-NoFollow3", "1F8180")]
-        public static void ParseInvalidTag(string description, string inputHex)
-        {
-            byte[] inputBytes = inputHex.HexToByteArray();
-
-            bool parsed = Asn1Tag.TryParse(inputBytes, out Asn1Tag tag, out int bytesRead);
-
-            Assert.False(parsed, "Asn1Tag.TryParse");
-            Assert.Equal(0, bytesRead);
-            Assert.Equal(TagClass.Universal, tag.TagClass);
-            Assert.Equal(0, tag.TagValue);
-            Assert.False(tag.IsConstructed, "tag.IsConstructed");
-        }
-
-        [Theory]
         [InlineData("MultiByte-TooLow", "1F01")]
         [InlineData("MultiByte-TooLowMax", "1F1E")]
         [InlineData("MultiByte-Leading0", "1F807F")]
@@ -103,11 +90,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             byte[] inputBytes = inputHex.HexToByteArray();
 
-            Asn1Tag tag = default(Asn1Tag);
-            int bytesRead = -1;
-
-            Assert.Throws<CryptographicException>(
-                () => Asn1Tag.TryParse(inputBytes, out tag, out bytesRead));
+            Assert.False(Asn1Tag.TryParse(inputBytes, out Asn1Tag tag, out var bytesRead));
 
             Assert.Equal(default(Asn1Tag), tag);
             Assert.Equal(0, bytesRead);
