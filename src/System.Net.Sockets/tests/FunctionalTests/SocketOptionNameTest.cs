@@ -184,7 +184,7 @@ namespace System.Net.Sockets.Tests
 
         private async Task MulticastInterface_Set_WithIPv6Helper(int interfaceIndex)
         {
-            IPAddress multicastAddress = IPAddress.Parse("ff15::1:1");
+            IPAddress multicastAddress = IPAddress.Parse("ff11::1:1");
             string message = "hello";
             int port;
 
@@ -197,7 +197,7 @@ namespace System.Net.Sockets.Tests
                 // https://github.com/Microsoft/BashOnWindows/issues/990
                 if (!PlatformDetection.IsWindowsSubsystemForLinux)
                 {
-                    sendSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, 1);
+                    sendSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, interfaceIndex);
                 }
 
                 var receiveBuffer = new byte[1024];
@@ -303,7 +303,7 @@ namespace System.Net.Sockets.Tests
             // sending a message will bind the socket to an available port
             string sendMessage = "dummy message";
             int port = 54320;
-            IPAddress multicastAddress = IPAddress.Parse("ff15::1:1");
+            IPAddress multicastAddress = IPAddress.Parse("ff11::1:1");
             receiveSocket.SendTo(Encoding.UTF8.GetBytes(sendMessage), new IPEndPoint(multicastAddress, port));
 
             localPort = (receiveSocket.LocalEndPoint as IPEndPoint).Port;
