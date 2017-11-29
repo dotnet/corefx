@@ -29,7 +29,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 Assert.NotSame(obj, clone);
             }
 
-            CheckForAnyEquals(obj, clone);
+            EqualityExtensions.CheckEquals(obj, clone);
         }
 
         // Used for updating blobs in BinaryFormatterTestData.cs
@@ -91,8 +91,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 }
                 else
                 {
-                    CheckForAnyEquals(obj, BinaryFormatterHelpers.FromBase64String(blob, FormatterAssemblyStyle.Simple));
-                    CheckForAnyEquals(obj, BinaryFormatterHelpers.FromBase64String(blob, FormatterAssemblyStyle.Full));
+                    EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blob, FormatterAssemblyStyle.Simple));
+                    EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blob, FormatterAssemblyStyle.Full));
                 }
             }
         }
@@ -105,8 +105,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
             object obj = new ArraySegment<int>();
             string corefxBlob = "AAEAAAD/////AQAAAAAAAAAEAQAAAHJTeXN0ZW0uQXJyYXlTZWdtZW50YDFbW1N5c3RlbS5JbnQzMiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9hcnJheQdfb2Zmc2V0Bl9jb3VudAcAAAgICAoAAAAAAAAAAAs=";
             string netfxBlob = "AAEAAAD/////AQAAAAAAAAAEAQAAAHJTeXN0ZW0uQXJyYXlTZWdtZW50YDFbW1N5c3RlbS5JbnQzMiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9hcnJheQdfb2Zmc2V0Bl9jb3VudAcAAAgICAoAAAAAAAAAAAs=";
-            CheckForAnyEquals(obj, BinaryFormatterHelpers.FromBase64String(corefxBlob, FormatterAssemblyStyle.Full));
-            CheckForAnyEquals(obj, BinaryFormatterHelpers.FromBase64String(netfxBlob, FormatterAssemblyStyle.Full));
+            EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(corefxBlob, FormatterAssemblyStyle.Full));
+            EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(netfxBlob, FormatterAssemblyStyle.Full));
         }
 
         [Fact]
@@ -148,7 +148,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             foreach (object[] obj in objects)
             {
                 object clone = f.Deserialize(s);
-                CheckForAnyEquals(obj[0], clone);
+                EqualityExtensions.CheckEquals(obj[0], clone);
             }
         }
 
@@ -425,7 +425,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             for (long i = s.Length - 1; i >= 0; i--)
             {
                 s.Position = 0;
-                var data = new byte[i];
+                byte[] data = new byte[i];
                 Assert.Equal(data.Length, s.Read(data, 0, data.Length));
                 Assert.Throws<SerializationException>(() => f.Deserialize(new MemoryStream(data)));
             }
@@ -471,11 +471,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public void Roundtrip_ArrayContainingArrayAtNonZeroLowerBound()
         {
             BinaryFormatterHelpers.Clone(Array.CreateInstance(typeof(uint[]), new[] { 5 }, new[] { 1 }));
-        }
-
-        private static void CheckForAnyEquals(object obj, object deserializedObj)
-        {
-            Assert.True(EqualityExtensions.CheckEquals(obj, deserializedObj), "Error during equality check of type " + obj?.GetType()?.FullName);
         }
 
         private static void ValidateEqualityComparer(object obj)
