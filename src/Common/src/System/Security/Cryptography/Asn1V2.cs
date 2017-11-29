@@ -412,7 +412,8 @@ namespace System.Security.Cryptography.Asn1
                 // T-REC-X.690-201508 sec 10.1 (DER: Length forms)
                 if (ruleSet == AsnEncodingRules.DER)
                 {
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    bytesRead = 0;
+                    return false;
                 }
 
                 // Null length == indefinite.
@@ -428,7 +429,7 @@ namespace System.Security.Cryptography.Asn1
             if (lengthOrLengthLength == 0xFF)
             {
                 bytesRead = 0;
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                return false;
             }
 
             byte lengthLength = (byte)(lengthOrLengthLength & ~MultiByteMarker);
@@ -466,7 +467,7 @@ namespace System.Security.Cryptography.Asn1
                     if (minimalRepresentation && current == 0)
                     {
                         bytesRead = 0;
-                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                        return false;
                     }
 
                     if (!minimalRepresentation && current != 0)
@@ -478,7 +479,7 @@ namespace System.Security.Cryptography.Asn1
                         if (lengthLength - i > sizeof(int))
                         {
                             bytesRead = 0;
-                            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                            return false;
                         }
                     }
                 }
@@ -490,14 +491,17 @@ namespace System.Security.Cryptography.Asn1
             // This value cannot be represented as a Span length.
             if (parsedLength > int.MaxValue)
             {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                bytesRead = 0;
+                return false;
             }
 
             if (minimalRepresentation && parsedLength < MultiByteMarker)
             {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                bytesRead = 0;
+                return false;
             }
 
+            Debug.Assert(bytesRead > 0);
             length = (int)parsedLength;
             return true;
         }
