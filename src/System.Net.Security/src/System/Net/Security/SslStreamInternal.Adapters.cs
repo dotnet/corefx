@@ -13,12 +13,14 @@ namespace System.Net.Security
         {
             Task LockAsync();
             Task WriteAsync(byte[] buffer, int offset, int count);
+            Task ThrottleAsync();
         }
 
         private interface ISslReadAdapter
         {
             ValueTask<int> ReadAsync(byte[] buffer, int offset, int count);
             ValueTask<int> LockAsync(Memory<byte> buffer);
+            Task ThrottleAsync();
         }
 
         private readonly struct SslReadAsync : ISslReadAdapter
@@ -35,6 +37,8 @@ namespace System.Net.Security
             public ValueTask<int> ReadAsync(byte[] buffer, int offset, int count) => _sslState.InnerStream.ReadAsync(new Memory<byte>(buffer, offset, count), _cancellationToken);
 
             public ValueTask<int> LockAsync(Memory<byte> buffer) => _sslState.CheckEnqueueReadAsync(buffer);
+
+            public Task ThrottleAsync() => s_throttle.WaitAsync();
         }
 
         private readonly struct SslReadSync : ISslReadAdapter
@@ -46,6 +50,12 @@ namespace System.Net.Security
             public ValueTask<int> ReadAsync(byte[] buffer, int offset, int count) => new ValueTask<int>(_sslState.InnerStream.Read(buffer, offset, count));
 
             public ValueTask<int> LockAsync(Memory<byte> buffer) => new ValueTask<int>(_sslState.CheckEnqueueRead(buffer));
+
+            public Task ThrottleAsync()
+            {
+                s_throttle.Wait();
+                return Task.CompletedTask;
+            }
         }
 
         private readonly struct SslWriteAsync : ISslWriteAdapter
@@ -62,6 +72,8 @@ namespace System.Net.Security
             public Task LockAsync() => _sslState.CheckEnqueueWriteAsync();
 
             public Task WriteAsync(byte[] buffer, int offset, int count) => _sslState.InnerStream.WriteAsync(buffer, offset, count, _cancellationToken);
+
+            public Task ThrottleAsync() => s_throttle.WaitAsync();
         }
 
         private readonly struct SslWriteSync : ISslWriteAdapter
@@ -79,6 +91,12 @@ namespace System.Net.Security
             public Task WriteAsync(byte[] buffer, int offset, int count)
             {
                 _sslState.InnerStream.Write(buffer, offset, count);
+                return Task.CompletedTask;
+            }
+
+            public Task ThrottleAsync()
+            {
+                s_throttle.Wait();
                 return Task.CompletedTask;
             }
         }

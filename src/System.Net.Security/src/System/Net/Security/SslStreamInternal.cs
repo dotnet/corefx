@@ -16,6 +16,8 @@ namespace System.Net.Security
     //
     internal partial class SslStreamInternal
     {
+        private static readonly SemaphoreSlim s_throttle = new SemaphoreSlim(Environment.ProcessorCount);
+
         private const int FrameOverhead = 32;
         private const int ReadBufferSize = 4096 * 4 + FrameOverhead;         // We read in 16K chunks + headers.
 
@@ -248,7 +250,10 @@ namespace System.Net.Security
                     // DecryptData will decrypt in-place and modify these to point to the actual decrypted data, which may be smaller.
                     _decryptedBytesOffset = _internalOffset;
                     _decryptedBytesCount = readBytes;
+                    
+                    await adapter.ThrottleAsync().ConfigureAwait(false);
                     SecurityStatusPal status = _sslState.DecryptData(_internalBuffer, ref _decryptedBytesOffset, ref _decryptedBytesCount);
+                    s_throttle.Release();
 
                     // Treat the bytes we just decrypted as consumed
                     // Note, we won't do another buffer read until the decrypted bytes are processed
@@ -359,11 +364,38 @@ namespace System.Net.Security
                 return WaitForWriteIOSlot(writeAdapter, ioSlot, buffer);
             }
 
-            byte[] rentedBuffer = ArrayPool<byte>.Shared.Rent(buffer.Length + FrameOverhead);
-            byte[] outBuffer = rentedBuffer;
+            Task semaphoreTask = writeAdapter.ThrottleAsync();
 
-            SecurityStatusPal status = _sslState.EncryptData(buffer, ref outBuffer, out int encryptedBytes);
+            return semaphoreTask.IsCompletedSuccessfully ?
+                EncryptAndWriteDataAsync(writeAdapter, buffer) :
+                CompleteAsync(writeAdapter, semaphoreTask, buffer);
 
+            async Task CompleteAsync(TWriteAdapter wAdapter, Task sTask, ReadOnlyMemory<byte> buff)
+            {
+                await sTask.ConfigureAwait(false);
+                await EncryptAndWriteDataAsync(wAdapter, buffer).ConfigureAwait(false);
+            }
+
+            Task EncryptAndWriteDataAsync(TWriteAdapter wAdapter, ReadOnlyMemory<byte> buff)
+            {
+                byte[] rentedBuffer = ArrayPool<byte>.Shared.Rent(buff.Length + FrameOverhead);
+                byte[] outBuffer = rentedBuffer;
+
+                SecurityStatusPal status = _sslState.EncryptData(buff, ref outBuffer, out int encryptedBytes);
+                s_throttle.Release();
+                return WriteEncryptedDataAsync(wAdapter, outBuffer, rentedBuffer, encryptedBytes, status);
+            }
+
+            async Task WaitForWriteIOSlot(TWriteAdapter wAdapter, Task lockTask, ReadOnlyMemory<byte> buff)
+            {
+                await lockTask.ConfigureAwait(false);
+                await WriteSingleChunk(wAdapter, buff).ConfigureAwait(false);
+            }
+        }
+
+        private Task WriteEncryptedDataAsync<TWriteAdapter>(TWriteAdapter writeAdapter, byte[] outBuffer, byte[] rentedBuffer, int encryptedBytes, SecurityStatusPal status)
+            where TWriteAdapter : struct, ISslWriteAdapter
+        {
             if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
             {
                 // Re-handshake status is not supported.
@@ -382,12 +414,6 @@ namespace System.Net.Security
             else
             {
                 return CompleteAsync(t, rentedBuffer);
-            }
-
-            async Task WaitForWriteIOSlot(TWriteAdapter wAdapter, Task lockTask, ReadOnlyMemory<byte> buff)
-            {
-                await lockTask.ConfigureAwait(false);
-                await WriteSingleChunk(wAdapter, buff).ConfigureAwait(false);
             }
 
             async Task CompleteAsync(Task writeTask, byte[] bufferToReturn)
