@@ -11,45 +11,36 @@ namespace System.Buffers.Text
     {
         private static bool TryFormatInt64Default(long value, Span<byte> buffer, out int bytesWritten)
         {
-            int idx = 0;
-
-            if (value < 0)
-            {
-                if (buffer.Length < 2) goto FalseExit;  // Buffer of length 1 won't have space for the digits after the minus sign
-                buffer[idx++] = Utf8Constants.Minus;
-
-                // Abs(long.MinValue) == long.MaxValue + 1, so we need to handle this specially.
-                if (value == long.MinValue)
-                {
-                    // digitCount + idx = 19 + 1 = 20
-                    if (buffer.Length < 19 + idx) goto FalseExit;  // WriteDigits does not do bounds checks
-                    buffer[idx] = (byte)'9';
-                    // Already wrote '9', 19 - 1 = 18 digits left
-                    FormattingHelpers.WriteDigits(223372036854775808L, 18, ref buffer.DangerousGetPinnableReference(), idx + 1);
-                    bytesWritten = 19 + idx;
-                    return true;
-                }
-
-                value = -value;
-            }
-
-            if (value < 10)
+            if ((ulong)value < 10)
             {
                 if (buffer.Length == 0) goto FalseExit;
-                buffer[idx] = (byte)('0' + value);
-                bytesWritten = 1 + idx;
+                buffer[0] = (byte)('0' + value);
+                bytesWritten = 1;
                 return true;
             }
+            
+            if (value < 0)
+            {
+                value = -value;
+                int digitCount = FormattingHelpers.CountDigits((ulong)value);
+                if (digitCount >= buffer.Length) goto FalseExit;
+                bytesWritten = digitCount + 1;
+                buffer[0] = Utf8Constants.Minus;
+                buffer = buffer.Slice(1, digitCount);
+            }
+            else
+            {
+                int digitCount = FormattingHelpers.CountDigits((ulong)value);
+                if (digitCount > buffer.Length) goto FalseExit;
+                bytesWritten = digitCount;
+                buffer = buffer.Slice(0, digitCount);
+            }
 
-            int digitCount = FormattingHelpers.CountDigits((ulong)value);
-            if (buffer.Length < digitCount + idx) goto FalseExit;  // WriteDigits does not do bounds checks
-            FormattingHelpers.WriteDigits(value, digitCount, ref buffer.DangerousGetPinnableReference(), idx);
-            bytesWritten = digitCount + idx;
+            // WriteDigits does not do bounds checks
+            FormattingHelpers.WriteDigits((ulong)value, buffer);
             return true;
 
         FalseExit:
-            // Buffer too small, clean up what has been written
-            buffer.Clear();
             bytesWritten = 0;
             return false;
         }

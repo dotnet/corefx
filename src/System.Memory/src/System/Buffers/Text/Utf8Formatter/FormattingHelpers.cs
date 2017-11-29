@@ -39,34 +39,19 @@ namespace System.Buffers.Text
             WriteDigits(value, digitCount, ref buffer, index);
         }
 
-        // Passing the span and using the indexer is 5-10% slower than using Unsafe APIs on ref byte.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteDigits(long value, int digitCount, Span<byte> buffer, int index)
-        {
-            long left = value;
-
-            for (int i = digitCount - 1; i >= 0; i--)
-            {
-                left = DivMod(left, 10, out long num);
-                buffer[index + i] = (byte)('0' + num);
-            }
-            
-            Debug.Assert(left == 0);
-        }
-
-        // Passing the span and using the indexer is 5-10% slower than using Unsafe APIs on ref byte.
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteDigits(ulong value, int digitCount, Span<byte> buffer, int index)
+        public static void WriteDigits(ulong value, Span<byte> buffer)
         {
             ulong left = value;
 
-            for (int i = digitCount - 1; i >= 0; i--)
+            for (int i = buffer.Length - 1; i >= 1; i--)
             {
                 left = DivMod(left, 10, out ulong num);
-                buffer[index + i] = (byte)('0' + num);
+                buffer[i] = (byte)('0' + num);
             }
 
-            Debug.Assert(left == 0);
+            Debug.Assert(left < 10);
+            buffer[0] = (byte)('0' + left);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -148,6 +133,7 @@ namespace System.Buffers.Text
             return digits;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CountDigits(ulong value)
         {
             int digits = 1;

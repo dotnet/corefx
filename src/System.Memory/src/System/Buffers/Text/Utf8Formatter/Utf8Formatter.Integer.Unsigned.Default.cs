@@ -20,9 +20,10 @@ namespace System.Buffers.Text
             }
 
             int digitCount = FormattingHelpers.CountDigits(value);
-            if (buffer.Length < digitCount) goto FalseExit;  // WriteDigits does not do bounds checks
-            FormattingHelpers.WriteDigits(value, digitCount, ref buffer.DangerousGetPinnableReference(), 0);
+            if (digitCount > buffer.Length) goto FalseExit;
             bytesWritten = digitCount;
+            // WriteDigits does not do bounds checks
+            FormattingHelpers.WriteDigits(value, buffer.Slice(0, digitCount));
             return true;
 
         FalseExit:
