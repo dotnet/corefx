@@ -38,7 +38,7 @@ namespace System.Net.Security
 
             public ValueTask<int> LockAsync(Memory<byte> buffer) => _sslState.CheckEnqueueReadAsync(buffer);
 
-            public Task ThrottleAsync() => s_throttle.WaitAsync();
+            public Task ThrottleAsync() => SslStreamPal.AcquireThrottleLockAsync();
         }
 
         private readonly struct SslReadSync : ISslReadAdapter
@@ -53,7 +53,7 @@ namespace System.Net.Security
 
             public Task ThrottleAsync()
             {
-                s_throttle.Wait();
+                SslStreamPal.AcquireThrottleLock();
                 return Task.CompletedTask;
             }
         }
@@ -73,7 +73,7 @@ namespace System.Net.Security
 
             public Task WriteAsync(byte[] buffer, int offset, int count) => _sslState.InnerStream.WriteAsync(buffer, offset, count, _cancellationToken);
 
-            public Task ThrottleAsync() => s_throttle.WaitAsync();
+            public Task ThrottleAsync() => SslStreamPal.AcquireThrottleLockAsync();
         }
 
         private readonly struct SslWriteSync : ISslWriteAdapter
@@ -96,7 +96,7 @@ namespace System.Net.Security
 
             public Task ThrottleAsync()
             {
-                s_throttle.Wait();
+                SslStreamPal.AcquireThrottleLock();
                 return Task.CompletedTask;
             }
         }

@@ -16,8 +16,6 @@ namespace System.Net.Security
     //
     internal partial class SslStreamInternal
     {
-        private static readonly SemaphoreSlim s_throttle = new SemaphoreSlim(Environment.ProcessorCount);
-
         private const int FrameOverhead = 32;
         private const int ReadBufferSize = 4096 * 4 + FrameOverhead;         // We read in 16K chunks + headers.
 
@@ -253,7 +251,7 @@ namespace System.Net.Security
                     
                     await adapter.ThrottleAsync().ConfigureAwait(false);
                     SecurityStatusPal status = _sslState.DecryptData(_internalBuffer, ref _decryptedBytesOffset, ref _decryptedBytesCount);
-                    s_throttle.Release();
+                    SslStreamPal.ReleaseThrottle();
 
                     // Treat the bytes we just decrypted as consumed
                     // Note, we won't do another buffer read until the decrypted bytes are processed
@@ -382,7 +380,7 @@ namespace System.Net.Security
                 byte[] outBuffer = rentedBuffer;
 
                 SecurityStatusPal status = _sslState.EncryptData(buff, ref outBuffer, out int encryptedBytes);
-                s_throttle.Release();
+                SslStreamPal.ReleaseThrottle();
                 return WriteEncryptedDataAsync(wAdapter, outBuffer, rentedBuffer, encryptedBytes, status);
             }
 
