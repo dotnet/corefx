@@ -131,23 +131,6 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
-        public Asn1Tag(byte singleByteEncoding)
-        {
-            Span<byte> span = stackalloc byte[1];
-            span[0] = singleByteEncoding;
-
-            if (TryParse(span, out Asn1Tag parsed, out int bytesRead))
-            {
-                Debug.Assert(bytesRead == 1);
-                _controlFlags = parsed._controlFlags;
-                _tagValue = parsed._tagValue;
-            }
-            else
-            {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-        }
-
         public Asn1Tag AsConstructed()
         {
             return new Asn1Tag((byte)(_controlFlags | ConstructedMask), _tagValue);

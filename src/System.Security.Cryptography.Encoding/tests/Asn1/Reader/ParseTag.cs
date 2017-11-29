@@ -96,46 +96,6 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Equal(0, bytesRead);
         }
 
-        [Theory]
-        [InlineData(PublicTagClass.Universal, false, 0, 0x00)]
-        [InlineData(PublicTagClass.Universal, false, 1, 0x01)]
-        [InlineData(PublicTagClass.Application, true, 1, 0x61)]
-        [InlineData(PublicTagClass.ContextSpecific, false, 1, 0x81)]
-        [InlineData(PublicTagClass.ContextSpecific, true, 1, 0xA1)]
-        [InlineData(PublicTagClass.Private, false, 1, 0xC1)]
-        [InlineData(PublicTagClass.Universal, false, 30, 0x1E)]
-        [InlineData(PublicTagClass.Application, false, 30, 0x5E)]
-        [InlineData(PublicTagClass.ContextSpecific, false, 30, 0x9E)]
-        [InlineData(PublicTagClass.Private, false, 30, 0xDE)]
-        public static void SimpleCtor(
-            PublicTagClass tagClass,
-            bool isConstructed,
-            int tagValue,
-            byte tagByte)
-        {
-            Asn1Tag tag = new Asn1Tag(tagByte);
-
-            Assert.Equal((TagClass)tagClass, tag.TagClass);
-            Assert.Equal(tagValue, tag.TagValue);
-
-            if (isConstructed)
-            {
-                Assert.True(tag.IsConstructed, "tag.IsConstructed");
-            }
-            else
-            {
-                Assert.False(tag.IsConstructed, "tag.IsConstructed");
-            }
-        }
-
-        [Fact]
-        public static void SimpleCtor_InvalidInput()
-        {
-            Assert.Throws<CryptographicException>(() => new Asn1Tag(0x1F));
-            Assert.Throws<CryptographicException>(() => new Asn1Tag(0x3F));
-            Assert.Throws<CryptographicException>(() => new Asn1Tag(0xBF));
-        }
-
         [Fact]
         public static void TestEquals()
         {
