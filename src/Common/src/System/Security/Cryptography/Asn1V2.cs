@@ -932,7 +932,7 @@ namespace System.Security.Cryptography.Asn1
             }
 
             // T-REC-X.690-201508 sec 8.6.2.3
-            if (source.Length < 1)
+            if (source.Length == 0)
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
@@ -954,7 +954,7 @@ namespace System.Security.Cryptography.Asn1
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                unusedBitCount = 0;
+                Debug.Assert(unusedBitCount == 0);
                 bytesWritten = 0;
                 return true;
             }
@@ -1067,6 +1067,8 @@ namespace System.Security.Cryptography.Asn1
 
                 if (length == null)
                 {
+                    Debug.Assert(tag.IsConstructed);
+
                     totalContent += CopyConstructedBitString(
                         cur,
                         ref destination,
@@ -1377,7 +1379,7 @@ namespace System.Security.Cryptography.Asn1
             }
 
             int sizeLimit = Marshal.SizeOf(backingType);
-            Span<byte> stackSpan = stackalloc byte[1 + sizeLimit];
+            Span<byte> stackSpan = stackalloc byte[sizeLimit];
             ReadOnlyMemory<byte> saveData = _data;
 
             if (!TryCopyBitStringBytes(expectedTag, stackSpan, out int unusedBitCount, out int bytesWritten))
@@ -1679,6 +1681,8 @@ namespace System.Security.Cryptography.Asn1
 
                 if (length == null)
                 {
+                    Debug.Assert(tag.IsConstructed);
+
                     totalContent += CopyConstructedOctetString(
                         cur,
                         ref destination,
@@ -3026,9 +3030,8 @@ namespace System.Security.Cryptography.Asn1
         private static ReadOnlySpan<byte> Slice(ReadOnlySpan<byte> source, int offset, int length)
         {
             Debug.Assert(offset >= 0);
-            Debug.Assert(length >= 0);
 
-            if (source.Length - offset < length)
+            if (length < 0 || source.Length - offset < length)
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
@@ -3046,9 +3049,8 @@ namespace System.Security.Cryptography.Asn1
             }
 
             int lengthVal = length.Value;
-            Debug.Assert(lengthVal >= 0);
 
-            if (source.Length - offset < lengthVal)
+            if (lengthVal < 0 || source.Length - offset < lengthVal)
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
@@ -3108,7 +3110,7 @@ namespace System.Security.Cryptography.Asn1
 
     internal static class AsnCharacterStringEncodings
     {
-        private static readonly Text.Encoding s_utf8Encoding = new UTF8Encoding(false, true);
+        private static readonly Text.Encoding s_utf8Encoding = new UTF8Encoding(false, throwOnInvalidBytes: true);
         private static readonly Text.Encoding s_bmpEncoding = new BMPEncoding();
         private static readonly Text.Encoding s_ia5Encoding = new IA5Encoding();
         private static readonly Text.Encoding s_visibleStringEncoding = new VisibleStringEncoding();
@@ -3274,7 +3276,7 @@ namespace System.Security.Cryptography.Asn1
 
             foreach (char c in allowedChars)
             {
-                if (c > isAllowed.Length)
+                if (c >= isAllowed.Length)
                 {
                     throw new ArgumentOutOfRangeException(nameof(allowedChars));
                 }
