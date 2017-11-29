@@ -47,7 +47,7 @@ namespace System.Net.Security
         public static void AcquireThrottleLock()
         { }
 
-        public static void ReleaseThrottle()
+        public static void ReleaseThrottleLock()
         {
             // Also a no-op as per acquire
         }

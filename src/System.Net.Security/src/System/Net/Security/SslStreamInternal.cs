@@ -251,7 +251,7 @@ namespace System.Net.Security
                     
                     await adapter.ThrottleAsync().ConfigureAwait(false);
                     SecurityStatusPal status = _sslState.DecryptData(_internalBuffer, ref _decryptedBytesOffset, ref _decryptedBytesCount);
-                    SslStreamPal.ReleaseThrottle();
+                    SslStreamPal.ReleaseThrottleLock();
 
                     // Treat the bytes we just decrypted as consumed
                     // Note, we won't do another buffer read until the decrypted bytes are processed
@@ -380,7 +380,7 @@ namespace System.Net.Security
                 byte[] outBuffer = rentedBuffer;
 
                 SecurityStatusPal status = _sslState.EncryptData(buff, ref outBuffer, out int encryptedBytes);
-                SslStreamPal.ReleaseThrottle();
+                SslStreamPal.ReleaseThrottleLock();
                 return WriteEncryptedDataAsync(wAdapter, outBuffer, rentedBuffer, encryptedBytes, status);
             }
 

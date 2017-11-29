@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
@@ -33,9 +34,9 @@ namespace System.Net.Security
 
         public static Task AcquireThrottleLockAsync() => s_throttle.WaitAsync();      
 
-        public static void AcquireThrottle() => s_throttle.Wait();
+        public static void AcquireThrottleLock() => s_throttle.Wait();
 
-        public static void ReleaseThrottle() => s_throttle.Release();
+        public static void ReleaseThrottleLock() => s_throttle.Release();
 
         public static SecurityStatusPal AcceptSecurityContext(ref SafeFreeCredentials credential, ref SafeDeleteContext context,
             SecurityBuffer[] inputBuffers, SecurityBuffer outputBuffer, SslAuthenticationOptions sslAuthenticationOptions)

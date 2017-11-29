@@ -38,7 +38,7 @@ namespace System.Net.Security
             // Only OpenSsl currently requires the throttle so this is a no-op
         }
 
-        public static void ReleaseThrottle()
+        public static void ReleaseThrottleLock()
         {
             // Also a no-op as per acquire
         }
