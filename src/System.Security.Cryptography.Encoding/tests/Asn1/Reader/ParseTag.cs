@@ -139,20 +139,29 @@ namespace System.Security.Cryptography.Tests.Asn1
         [Fact]
         public static void TestEquals()
         {
-            Asn1Tag tag1 = new Asn1Tag(0x02);
-            Asn1Tag tag2 = new Asn1Tag(0x02);
-            Asn1Tag tag3 = new Asn1Tag(0xB2);
+            Asn1Tag integer = new Asn1Tag(TagClass.Universal, 2);
+            Asn1Tag integerAgain = new Asn1Tag(TagClass.Universal, 2);
+            Asn1Tag context2 = new Asn1Tag(TagClass.ContextSpecific, 2);
+            Asn1Tag constructedContext2 = new Asn1Tag(TagClass.ContextSpecific, 2, true);
+            Asn1Tag application2 = new Asn1Tag(TagClass.Application, 2);
 
-            Assert.False(tag1.Equals(null));
-            Assert.False(tag1.Equals(0x02));
-            Assert.False(tag1.Equals(tag3));
-            Assert.Equal(tag1, tag2);
-            Assert.True(tag1 == tag2);
-            Assert.True(tag1 != tag3);
-            Assert.False(tag1 == tag3);
+            Assert.False(integer.Equals(null));
+            Assert.False(integer.Equals(0x02));
+            Assert.False(integer.Equals(context2));
+            Assert.False(context2.Equals(constructedContext2));
+            Assert.False(context2.Equals(application2));
 
-            Assert.NotEqual(tag1.GetHashCode(), tag3.GetHashCode());
-            Assert.Equal(tag1.GetHashCode(), tag2.GetHashCode());
+            Assert.Equal(integer, integerAgain);
+            Assert.True(integer == integerAgain);
+            Assert.True(integer != context2);
+            Assert.False(integer == context2);
+            Assert.False(context2 == constructedContext2);
+            Assert.False(context2 == application2);
+
+            Assert.NotEqual(integer.GetHashCode(), context2.GetHashCode());
+            Assert.NotEqual(context2.GetHashCode(), constructedContext2.GetHashCode());
+            Assert.NotEqual(context2.GetHashCode(), application2.GetHashCode());
+            Assert.Equal(integer.GetHashCode(), integerAgain.GetHashCode());
         }
 
         [Theory]
