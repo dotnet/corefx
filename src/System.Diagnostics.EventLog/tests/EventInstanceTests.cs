@@ -43,6 +43,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void HungProcess()
         {
             while (true)
