@@ -848,7 +848,6 @@ internal static partial class Interop
             return headerCollection;
         }
 
-
         internal static unsafe uint GetChunks(IntPtr memoryBlob, IntPtr originalAddress, ref int dataChunkIndex, ref uint dataChunkOffset, byte[] buffer, int offset, int size)
         {
             if (NetEventSource.IsEnabled)

@@ -18,7 +18,7 @@ namespace System.Net
         {
             if (Size > 0 && Size == newSize)
             {
-                 return RequestBlob;
+                return RequestBlob;
             }
             SetBuffer(newSize);
 

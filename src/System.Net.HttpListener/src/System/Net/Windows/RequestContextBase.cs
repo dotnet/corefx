@@ -125,7 +125,7 @@ namespace System.Net
 
         protected void SetBuffer(int size)
         {
-            if(_backingBuffer != IntPtr.Zero)
+            if (_backingBuffer != IntPtr.Zero)
             {
                 Marshal.FreeHGlobal(_backingBuffer);
             }
@@ -134,10 +134,7 @@ namespace System.Net
             _backingBufferLength = size;
 
             // Zero out the contents of the buffer.
-            for(int i = 0; i < size; ++i)
-            {
-                Marshal.WriteByte(_backingBuffer + i, 0);
-            }
+            new Span<byte>(_backingBuffer.ToPointer(), size).Fill(0);
         }
     }
 }
