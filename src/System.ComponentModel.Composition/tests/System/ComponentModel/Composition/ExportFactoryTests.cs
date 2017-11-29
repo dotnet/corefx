@@ -27,7 +27,7 @@ namespace Tests.Integration
             string ExportTypeIdentity { get; }
         }
 
-[Export(typeof(IId))]
+        [Export(typeof(IId))]
         [ExportMetadata("IdType", "PostiveIncrement")]
         public class UniqueExport : IId, IDisposable
         {
@@ -81,7 +81,7 @@ namespace Tests.Integration
 
             public void AssertValid()
             {
-                var ids = new int[] 
+                var ids = new int[]
                 {
                     VerifyExportFactory(this._idCreatorTCtor),
                     VerifyExportFactory(this._idCreatorTMCtor),
@@ -284,7 +284,7 @@ namespace Tests.Integration
             Assert.Equal(0, part.FooCreator.Length);
         }
 
-[Fact]
+        [Fact]
         public void ExportFactory_QueryContainerDirectly_ShouldWork()
         {
             var container = CreateWithAttributedCatalog(typeof(Foo));
@@ -353,15 +353,15 @@ namespace Tests.Integration
             Assert.Equal(1, exports.Count());
         }
 
-private static CompositionContainer CreateWithAttributedCatalog(params Type[] types)
+        private static CompositionContainer CreateWithAttributedCatalog(params Type[] types)
         {
             var catalog = new TypeCatalog(types);
             return new CompositionContainer(catalog);
         }
 
-[Export] 
-        class Apple {}
-        
+        [Export]
+        class Apple { }
+
         [Export]
         class Tree : IDisposable
         {

@@ -22,11 +22,11 @@ namespace System.ComponentModel.Composition
         public struct FooStruct
         { }
 
-public interface IFoo { }
+        public interface IFoo { }
         public interface IFoo2 : IFoo { }
         public interface IBar { }
         public interface IExport<T1, T2> { }
-        public class ExportImpl<T1, T2> : IExport<T1, T2> {}
+        public class ExportImpl<T1, T2> : IExport<T1, T2> { }
 
         public interface IExport<T> { }
         public interface IImport<T1, T2> { }
@@ -42,7 +42,7 @@ public interface IFoo { }
             object GetValue();
         }
 
-[Export(typeof(IImport<,>))]
+        [Export(typeof(IImport<,>))]
         public class SelfImport<T1, T2> : IImport<T1, T2>
         {
 
@@ -57,7 +57,7 @@ public interface IFoo { }
         [Export(typeof(IExport<,>))]
         public class SelfExport<T1, T2> : IExport<T1, T2>
         {
-            
+
         }
 
         public class PropertyExport<T1, T2> : IExport<T1, T2>
@@ -66,7 +66,7 @@ public interface IFoo { }
             IExport<T1, T2> Property { get { return this; } }
         }
 
-public class PropertyExportWithContractInferred<T1, T2> : IExport<T1, T2>
+        public class PropertyExportWithContractInferred<T1, T2> : IExport<T1, T2>
         {
             [Export]
             IExport<T1, T2> PropertyExport { get { return this; } }
@@ -76,7 +76,7 @@ public class PropertyExportWithContractInferred<T1, T2> : IExport<T1, T2>
         public class SelfExportWithPropertyImport<T1, T2> : IExport<T1, T2>, IPartWithImport
         {
             [Import(typeof(IImport<,>))]
-            IImport<T1, T2> Value { get;  set; }
+            IImport<T1, T2> Value { get; set; }
 
             public object GetValue()
             {
@@ -107,7 +107,7 @@ public class PropertyExportWithContractInferred<T1, T2> : IExport<T1, T2>
             }
         }
 
-[Export(typeof(IExport<>))]
+        [Export(typeof(IExport<>))]
         public class SelfExportWithNakedLazyPropertyImport<T> : IExport<T>, IPartWithImport
         {
             [Import]
@@ -143,7 +143,7 @@ public class PropertyExportWithContractInferred<T1, T2> : IExport<T1, T2>
             }
         }
 
-[Export(typeof(IExport<,>))]
+        [Export(typeof(IExport<,>))]
         public class SelfExportWithExportFactoryParameterImport<T1, T2> : IExport<T1, T2>, IPartWithImport
         {
             [ImportingConstructor]
@@ -246,7 +246,7 @@ public class PropertyExportWithContractInferred<T1, T2> : IExport<T1, T2>
             public static int Count { get; set; }
         }
 
-[Export(typeof(IExport<,>))]
+        [Export(typeof(IExport<,>))]
         public class SingletonExport<T1, T2> : IExport<T1, T2>
         {
             public SingletonExport()
@@ -271,12 +271,12 @@ public class PropertyExportWithContractInferred<T1, T2> : IExport<T1, T2>
         {
         }
 
-[Export(typeof(IExport<>))]
+        [Export(typeof(IExport<>))]
         public class PartWithRefTypeConstraint<T> : IExport<T> where T : class
         {
         }
 
-[Export(typeof(IExport<>))]
+        [Export(typeof(IExport<>))]
         public class PartWithStructTypeConstraint<T> : IExport<T> where T : struct
         {
         }
@@ -316,7 +316,7 @@ public class PropertyExportWithContractInferred<T1, T2> : IExport<T1, T2>
             Assert.NotNull(impl);
             Assert.NotNull(impl.ClosedImport);
         }
-       
+
         [Fact]
         public void SelfExportTest()
         {
@@ -413,9 +413,9 @@ public class PropertyExportWithContractInferred<T1, T2> : IExport<T1, T2>
             var value = partWithImport.GetValue() as ExportFactory<IImport<IFoo, IBar>>;
             Assert.NotNull(value);
 
-            using (var efv  = value.CreateExport())
+            using (var efv = value.CreateExport())
             {
-                 Assert.NotNull(efv.Value);
+                Assert.NotNull(efv.Value);
             }
         }
 
@@ -455,9 +455,9 @@ public class PropertyExportWithContractInferred<T1, T2> : IExport<T1, T2>
             var value = partWithImport.GetValue() as ExportFactory<IImport<IFoo, IBar>>;
             Assert.NotNull(value);
 
-            using (var efv  = value.CreateExport())
+            using (var efv = value.CreateExport())
             {
-                 Assert.NotNull(efv.Value);
+                Assert.NotNull(efv.Value);
             }
         }
 
@@ -475,7 +475,7 @@ public class PropertyExportWithContractInferred<T1, T2> : IExport<T1, T2>
             Assert.NotNull(partWithImport.GetValue());
         }
 
-[Fact]
+        [Fact]
         public void SelfExportWithLazyCollectionPropertyImportTest()
         {
             TypeCatalog catalog = new TypeCatalog(typeof(SelfExportWithLazyCollectionPropertyImport<,>), typeof(SelfImport<,>));
@@ -517,7 +517,7 @@ public class PropertyExportWithContractInferred<T1, T2> : IExport<T1, T2>
             Assert.NotNull(partWithImport.GetValue());
         }
 
-[Fact]
+        [Fact]
         public void SelfExportWithMultipleGenericImportsTest()
         {
             TypeCatalog catalog = new TypeCatalog(typeof(SelfExportWithMultipleGenericImports<,>), typeof(SelfImport<,>), typeof(SelfImport<>), typeof(Foo));
@@ -561,7 +561,7 @@ public class PropertyExportWithContractInferred<T1, T2> : IExport<T1, T2>
             // only one instance of the SingletonExport<,> is created
             Assert.Equal(1, SingletonExportExportCount.Count);
 
-exports = container.GetExportedValues<IExport<IFoo, IBar>>();
+            exports = container.GetExportedValues<IExport<IFoo, IBar>>();
             Assert.Equal(1, exports.Count());
             // still only one instance of the SingletonExport<,> is created
             Assert.Equal(1, SingletonExportExportCount.Count);
@@ -576,7 +576,7 @@ exports = container.GetExportedValues<IExport<IFoo, IBar>>();
             // still only one instance of the SingletonExport<,> is created
             Assert.Equal(1, SingletonExportExportCount.Count);
 
-var import2 = new SingletonImport<IBar, IFoo>();
+            var import2 = new SingletonImport<IBar, IFoo>();
             container.SatisfyImportsOnce(import2);
             // two instances of the SingletonExport<,> is created
             Assert.Equal(2, SingletonExportExportCount.Count);
@@ -629,7 +629,7 @@ var import2 = new SingletonImport<IBar, IFoo>();
             // int shouldn't
             Assert.Equal(0, container.GetExportedValues<IExport<int>>().Count());
 
-// FooStruct shouldn't
+            // FooStruct shouldn't
             Assert.Equal(0, container.GetExportedValues<IExport<FooStruct>>().Count());
         }
 
@@ -717,10 +717,10 @@ var import2 = new SingletonImport<IBar, IFoo>();
 
         public interface IA<T> { }
         public interface IB<T> { }
-         
+
         [Export(typeof(IA<>)), Export(typeof(IB<>))]
         public class AB<T> : IA<T>, IB<T> { }
-         
+
         [Fact]
         public void PartWithMultipleExportsOfASingleOrder_One_ShouldSucceed()
         {
@@ -738,15 +738,15 @@ var import2 = new SingletonImport<IBar, IFoo>();
         [Fact]
         public void NonGenericExportOnGenericPartIsNotAllowed()
         {
-            var catalog =new TypeCatalog(typeof(ANonGenericB<>));
+            var catalog = new TypeCatalog(typeof(ANonGenericB<>));
             var container = new CompositionContainer(catalog);
-            Assert.Throws<ImportCardinalityMismatchException>( () =>
-            {
-                var b = container.GetExportedValue<IBar>();
-            });
+            Assert.Throws<ImportCardinalityMismatchException>(() =>
+           {
+               var b = container.GetExportedValue<IBar>();
+           });
 
         }
-        
+
         [Fact]
         public void MultipleGenericExportsFromTheSameSharedPartProvideTheSameInstance()
         {
@@ -762,7 +762,7 @@ var import2 = new SingletonImport<IBar, IFoo>();
         {
             void Execute();
         }
-        
+
         class TestClass1<T> : ITest1<T>
         {
             public void Execute() { }
@@ -773,7 +773,7 @@ var import2 = new SingletonImport<IBar, IFoo>();
         {
             public abstract void Execute();
         }
-    
+
         class TestClass2<T> : BaseClass<T>
         {
             public override void Execute() { }

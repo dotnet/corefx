@@ -23,7 +23,7 @@ namespace System.ComponentModel.Composition
             container.Compose(batch);
             var export = container.GetExport<BasicTestComponent, IDictionary<string, object>>();
 
-Assert.NotNull(export.Metadata);
+            Assert.NotNull(export.Metadata);
             Assert.Equal("One", export.Metadata["String1"]);
             Assert.Equal("Two", export.Metadata["String2"]);
             var e = export.Metadata["Numbers"] as IList<int>;
@@ -34,7 +34,7 @@ Assert.NotNull(export.Metadata);
             Assert.Equal(3, e.Count);
         }
 
-		// Silverlight doesn't support strongly typed metadata
+        // Silverlight doesn't support strongly typed metadata
         [Fact]
         [Trait("Type", "Integration")]
         public void StronglyTypedStructureTest()
@@ -93,11 +93,11 @@ Assert.NotNull(export.Metadata);
             ComposablePart part = AttributedModelServices.CreatePart(new BasicTestComponentWithInvalidMetadata());
             ExportDefinition export = part.ExportDefinitions.First();
 
-            var ex = Assert.Throws<InvalidOperationException>(() => 
+            var ex = Assert.Throws<InvalidOperationException>(() =>
             {
                 var metadata = export.Metadata;
             });
-            
+
             Assert.True(ex.Message.Contains("Bar"));
         }
 
@@ -127,7 +127,7 @@ Assert.NotNull(export.Metadata);
         {
             ComposablePart part = AttributedModelServices.CreatePart(new ClassWithInvalidCustomAttributeType());
             ExportDefinition export = part.ExportDefinitions.First();
-            
+
             // Should throw InvalidOperationException during discovery because
             // the person class is an invalid metadata type
             Assert.Throws<InvalidOperationException>(() =>
@@ -160,7 +160,7 @@ Assert.NotNull(export.Metadata);
         {
             ComposablePart part = AttributedModelServices.CreatePart(new ClassWithInvalidVersionPropertyAttributeType());
             ExportDefinition export = part.ExportDefinitions.First();
-            
+
             // Should throw InvalidOperationException during discovery because
             // the person class is an invalid metadata type
             Assert.Throws<InvalidOperationException>(() =>

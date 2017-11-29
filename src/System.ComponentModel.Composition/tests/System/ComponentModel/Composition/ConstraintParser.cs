@@ -49,7 +49,7 @@ namespace System.ComponentModel.Composition
             return true;
         }
 
-private static IEnumerable<Expression> SplitConstraintBody(Expression expression)
+        private static IEnumerable<Expression> SplitConstraintBody(Expression expression)
         {
             Assert.NotNull(expression);
 
@@ -155,9 +155,9 @@ private static IEnumerable<Expression> SplitConstraintBody(Expression expression
             }
             Assumes.IsTrue(outerMethodCall.Arguments.Count == 1);
 
-// 'this' should be a constant expression pointing at a Type object
+            // 'this' should be a constant expression pointing at a Type object
             ConstantExpression targetType = outerMethodCall.Object as ConstantExpression;
-            if(!TryParseConstant<Type>(targetType, out requiredMetadataType))
+            if (!TryParseConstant<Type>(targetType, out requiredMetadataType))
             {
                 return false;
             }

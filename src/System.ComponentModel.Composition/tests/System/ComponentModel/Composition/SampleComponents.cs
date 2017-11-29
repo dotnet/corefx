@@ -397,7 +397,7 @@ namespace System.ComponentModel.Composition
             return i1 + i2 + i3 + i4;
         }
 
-[Export("ActionWith0Args")]
+        [Export("ActionWith0Args")]
         public void MyAction0()
         {
         }
@@ -752,7 +752,8 @@ namespace System.ComponentModel.Composition
     }
 
     public class GenericContract7 :
-        GenericContract4<string, string>.GenericContract5<int, int>.GenericContract6<double, double> { }
+        GenericContract4<string, string>.GenericContract5<int, int>.GenericContract6<double, double>
+    { }
 
     public class GenericContract8<T> : GenericContract1<string>.GenericContract2.GenericContract3<T> { }
 
@@ -961,7 +962,7 @@ namespace System.ComponentModel.Composition
     [Export]
     public class BaseExportForImportingConstructors
     {
-        
+
     }
 
     public class ClassWithOnlyHasImportingConstructorButInherits : BaseExportForImportingConstructors
@@ -979,7 +980,7 @@ namespace System.ComponentModel.Composition
         public ClassWithOnlyHasMultipleImportingConstructorButInherits(string blah) { }
     }
 
-[Export]
+    [Export]
     public class ClassWithMultipleMarkedConstructors
     {
         [ImportingConstructor]

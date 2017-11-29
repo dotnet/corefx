@@ -15,14 +15,14 @@ namespace System.ComponentModel.Composition.Hosting
         public interface IContract3 { }
         public interface IOther { }
 
-[Fact]
+        [Fact]
         public void IncludeDependentsSimpleChain()
         {
             var catalog = CreateCatalog(
-                typeof(Exporter1), 
-                typeof(Exporter2), 
-                typeof(Exporter2Import1), 
-                typeof(Exporter3Import2), 
+                typeof(Exporter1),
+                typeof(Exporter2),
+                typeof(Exporter2Import1),
+                typeof(Exporter3Import2),
                 typeof(Other));
             var filteredCatalog = catalog.Filter(p => p.Exports<IContract1>());
             Assert.Equal(1, filteredCatalog.Parts.Count());
@@ -49,12 +49,12 @@ namespace System.ComponentModel.Composition.Hosting
         public void IncludeDependentsChainWithCycles()
         {
             var catalog = CreateCatalog(
-                typeof(Exporter1), 
-                typeof(Exporter2), 
+                typeof(Exporter1),
+                typeof(Exporter2),
                 typeof(Exporter2Import1),
-                typeof(Exporter1Import2), 
+                typeof(Exporter1Import2),
                 typeof(Exporter3Import2),
-                typeof(Exporter2Import3), 
+                typeof(Exporter2Import3),
                 typeof(Other));
             var filteredCatalog = catalog.Filter(p => p.Exports<IContract1>());
             Assert.Equal(2, filteredCatalog.Parts.Count());
@@ -99,7 +99,7 @@ namespace System.ComponentModel.Composition.Hosting
             Assert.Equal(5, dependentsCatalog.Parts.Count());
         }
 
-[Fact]
+        [Fact]
         public void IncludeDependentsSimpleChainOptionalOnly()
         {
             var catalog = CreateCatalog(
@@ -149,7 +149,7 @@ namespace System.ComponentModel.Composition.Hosting
             Assert.Equal(2, dependentsCatalog.Parts.Count());
         }
 
-[Fact]
+        [Fact]
         public void IncludeDependentsOpenGenericToOpenGenericReverse()
         {
             var catalog = CreateCatalog(
@@ -221,7 +221,7 @@ namespace System.ComponentModel.Composition.Hosting
             Assert.Equal(2, dependenciesCatalog.Parts.Count());
         }
 
-[Fact]
+        [Fact]
         public void IncludeDependenciesChainWithCycles()
         {
             var catalog = CreateCatalog(
@@ -325,7 +325,7 @@ namespace System.ComponentModel.Composition.Hosting
             Assert.Equal(2, dependentsCatalog.Parts.Count());
         }
 
-[Fact]
+        [Fact]
         public void IncludeDependenciesOpenGenericToOpenGenericReverse()
         {
             var catalog = CreateCatalog(
@@ -367,7 +367,7 @@ namespace System.ComponentModel.Composition.Hosting
             Assert.Equal(2, dependentsCatalog.Parts.Count());
         }
 
-[Export(typeof(IOther))]
+        [Export(typeof(IOther))]
         public class Other : IOther
         {
             [Import]
@@ -403,14 +403,14 @@ namespace System.ComponentModel.Composition.Hosting
             public ExportFactory<IContract1> Import { get; set; }
         }
 
-[Export(typeof(IContract2))]
+        [Export(typeof(IContract2))]
         public class Exporter2OptionalImport1 : IContract2
         {
-            [Import(AllowDefault=true)]
+            [Import(AllowDefault = true)]
             public IContract1 Import { get; set; }
         }
 
-[Export(typeof(IContract1))]
+        [Export(typeof(IContract1))]
         public class Exporter1OptionalImport3 : IContract1
         {
             [Import(AllowDefault = true)]
@@ -465,17 +465,17 @@ namespace System.ComponentModel.Composition.Hosting
         public class OpenGenericExporter<T1, T2> : IContract<T1, T2>
         {
             [Import]
-            public IContract2 Import { get; set;  }
+            public IContract2 Import { get; set; }
         }
 
-[Export(typeof(IContract3))]
+        [Export(typeof(IContract3))]
         public class OpenGenericImporter<T1, T2> : IContract3
         {
             [Import]
-            IContract<T1, T2> Import { get; set;  }
+            IContract<T1, T2> Import { get; set; }
         }
 
-[Export(typeof(IContract3))]
+        [Export(typeof(IContract3))]
         public class OpenGenericImporterReverseOrder<T1, T2> : IContract3
         {
             [Import]
@@ -496,7 +496,7 @@ namespace System.ComponentModel.Composition.Hosting
             public IContract2 Import { get; set; }
         }
 
-public ComposablePartCatalog CreateCatalog(params Type[] types)
+        public ComposablePartCatalog CreateCatalog(params Type[] types)
         {
             return new TypeCatalog(types);
         }

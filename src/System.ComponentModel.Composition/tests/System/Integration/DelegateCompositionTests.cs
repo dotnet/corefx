@@ -46,7 +46,7 @@ namespace Tests.Integration
             [Export("FunctionWithDefaultValue")]
             public int FunctionWithDefaultValue(int i, string s = "")
             {
-                return i; 
+                return i;
             }
         }
 
@@ -118,7 +118,7 @@ namespace Tests.Integration
             Assert.Null(export3);
         }
 
-public delegate int DelegateOneArg(int i);
+        public delegate int DelegateOneArg(int i);
         public delegate int DelegateTwoArgs(int i, int j);
 
         public class CustomExportedDelegate : ExportedDelegate
@@ -208,13 +208,13 @@ public delegate int DelegateOneArg(int i);
             int i = 0;
 
             var export1 = container.GetExportedValue<GetRef>();
-            
+
             export1(ref i);
             Assert.Equal(29, i);
             i = 0;
 
             var export2 = container.GetExportedValue<GetOut>();
-            
+
             export2(out i);
             Assert.Equal(29, i);
         }

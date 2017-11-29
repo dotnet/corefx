@@ -34,7 +34,7 @@ namespace System.ComponentModel.Composition
 
     public class AdaptingCollection<T> : AdaptingCollection<T, IDictionary<string, object>>
     {
-        public AdaptingCollection(Func<IEnumerable<Lazy<T, IDictionary<string, object>>>, 
+        public AdaptingCollection(Func<IEnumerable<Lazy<T, IDictionary<string, object>>>,
                                        IEnumerable<Lazy<T, IDictionary<string, object>>>> adaptor)
             : base(adaptor)
         {
@@ -154,7 +154,7 @@ namespace System.ComponentModel.Composition
         }
         #endregion
     }
-    
+
     public class AdaptingCollectionTests
     {
         public interface IContract { }
@@ -271,7 +271,7 @@ namespace System.ComponentModel.Composition
             public AdaptingCollection<IContract> OrderedItems { get; set; }
         }
 
-[Fact]
+        [Fact]
         public void TestOrderingImportsByTypeName()
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(BExport), typeof(AExport), typeof(CExport));
@@ -316,10 +316,10 @@ namespace System.ComponentModel.Composition
             }
 
             private bool _includeDynamic = false;
-            public bool IncludeDynamic 
+            public bool IncludeDynamic
             {
                 get { return this._includeDynamic; }
-                set 
+                set
                 {
                     if (this._includeDynamic != value)
                     {

@@ -19,11 +19,11 @@ namespace System.ComponentModel.Composition.Factories
             private readonly Func<IEnumerable<ImportDefinition>> _importsCreator;
             private readonly Func<IEnumerable<ExportDefinition>> _exportsCreator;
 
-public DerivedComposablePartDefinition(
-                IDictionary<string, object> metadata,
-                Func<ComposablePart> partCreator,
-                Func<IEnumerable<ImportDefinition>> importsCreator,
-                Func<IEnumerable<ExportDefinition>> exportsCreator)
+            public DerivedComposablePartDefinition(
+                            IDictionary<string, object> metadata,
+                            Func<ComposablePart> partCreator,
+                            Func<IEnumerable<ImportDefinition>> importsCreator,
+                            Func<IEnumerable<ExportDefinition>> exportsCreator)
             {
                 this._metadata = metadata.AsReadOnly();
                 this._partCreator = partCreator;
@@ -38,13 +38,13 @@ public DerivedComposablePartDefinition(
 
             public override IEnumerable<ExportDefinition> ExportDefinitions
             {
-                get 
+                get
                 {
                     if (this._exportDefinitions == null)
                     {
                         this._exportDefinitions = this._exportsCreator.Invoke() ?? Enumerable.Empty<ExportDefinition>();
                     }
-                    return this._exportDefinitions; 
+                    return this._exportDefinitions;
                 }
             }
 

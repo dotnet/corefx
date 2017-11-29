@@ -34,7 +34,7 @@ namespace System.ComponentModel.Composition
             this.callback = callback;
         }
 
-        [Import(AllowDefault=true)]
+        [Import(AllowDefault = true)]
         public ICompositionService ImportSomethingSoIGetImportCompletedCalled { get; set; }
 
         public void OnImportsSatisfied()
@@ -55,7 +55,7 @@ namespace System.ComponentModel.Composition
         }
     }
 
-public class ExportValueTypeSingleton
+    public class ExportValueTypeSingleton
     {
         [Export("{AssemblyCatalogResolver}SingletonValueType")]
         public int Value
