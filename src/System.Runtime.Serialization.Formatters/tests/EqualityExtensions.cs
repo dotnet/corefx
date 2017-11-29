@@ -1116,13 +1116,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
             // Different by design for those exceptions
             if (!((@this is SecurityException ||
-                @this is NetworkInformationException ||
-                @this is SocketException ||
                 @this is XmlSyntaxException ||
                 @this is ThreadAbortException ||
                 @this is SqlException) && !isSamePlatform))
             {
-                if (!(@this is ActiveDirectoryServerDownException))
+                if (!(@this is ActiveDirectoryServerDownException ||
+                    @this is SocketException ||
+                    @this is NetworkInformationException))
                 {
                     Assert.Equal(@this.Message, other.Message);
                 }
@@ -1153,12 +1153,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
                 // Different by design for those exceptions
                 if (!((@this is SecurityException ||
-                    @this is NetworkInformationException ||
-                    @this is SocketException ||
                     @this is XmlSyntaxException ||
                     @this is ThreadAbortException) && !isSamePlatform))
                 {
-                    if (!(@this is ActiveDirectoryServerDownException || @this is SqlException))
+                    if (!(@this is ActiveDirectoryServerDownException || 
+                        @this is SqlException || 
+                        @this is NetworkInformationException || 
+                        @this is SocketException))
                     {
                         Assert.Equal(@this.ToString(), other.ToString());
                     }
