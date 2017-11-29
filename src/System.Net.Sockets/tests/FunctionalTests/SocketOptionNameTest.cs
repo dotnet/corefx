@@ -172,6 +172,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)] // Multicast does not work on Linux loopback by default
         public async void MulticastInterface_Set_WithIPv6()
         {
             if (PlatformDetection.IsFedora)
