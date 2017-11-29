@@ -15,14 +15,14 @@ namespace System.ComponentModel.Composition
         string String2 { get; }
     }
 
-    public class MetadataViewWithImplementation: IMetadataViewWithImplementation
+    public class MetadataViewWithImplementation : IMetadataViewWithImplementation
     {
         public MetadataViewWithImplementation(IDictionary<string, object> metadata)
         {
             this.String1 = (string)metadata["String1"];
             this.String2 = (string)metadata["String2"];
         }
-           
+
         public string String1 { get; private set; }
         public string String2 { get; private set; }
     }
@@ -40,12 +40,12 @@ namespace System.ComponentModel.Composition
             this.String1 = (string)metadata["String1"];
             this.String2 = (string)metadata["String2"];
         }
-           
+
         public string String1 { get; private set; }
         public string String2 { get; private set; }
     }
 
-public class MetadataViewProviderTests
+    public class MetadataViewProviderTests
     {
 
         [Fact]
@@ -140,7 +140,7 @@ public class MetadataViewProviderTests
             Assert.Same(metadata, result);
         }
 
-[Fact]
+        [Fact]
         public void GetMetadataView_DictionaryAsTMetadataViewTypeArgument_ShouldNotThrow()
         {
             var metadata = new Dictionary<string, object>();
@@ -180,7 +180,7 @@ public class MetadataViewProviderTests
             Assert.Throws<CompositionContractMismatchException>(() =>
             {
                 MetadataViewProvider.GetMetadataView<ITrans_MetadataTests_MetadataView2>(metadata);
-            });            
+            });
         }
 
         [Fact]
@@ -207,7 +207,7 @@ public class MetadataViewProviderTests
             Assert.Equal("value2", view.Value2);
         }
 
-[Fact]
+        [Fact]
         public void GetMetadataView_CachesViewType()
         {
             var metadata1 = new Dictionary<string, object>();
@@ -242,7 +242,7 @@ public class MetadataViewProviderTests
 
         public abstract class AbstractClassWithConstructorMetadataView
         {
-            public AbstractClassWithConstructorMetadataView(IDictionary<string, object> metadata) {}
+            public AbstractClassWithConstructorMetadataView(IDictionary<string, object> metadata) { }
             public abstract object Value { get; }
         }
 
@@ -253,7 +253,7 @@ public class MetadataViewProviderTests
             Assert.Equal(120, view.MyInt);
         }
 
-[Fact]
+        [Fact]
         public void GetMetadataView_IMetadataViewWithDefaultedIntInTranparentType()
         {
             var view = MetadataViewProvider.GetMetadataView<ITrans_MetadataViewWithDefaultedInt>(new Dictionary<string, object>());
@@ -276,7 +276,7 @@ public class MetadataViewProviderTests
             Assert.Equal(120, view2.MyInt);
         }
 
-[Fact]
+        [Fact]
         public void GetMetadataView_MetadataViewWithImplementation()
         {
             Dictionary<string, object> metadata = new Dictionary<string, object>();

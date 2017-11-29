@@ -23,7 +23,7 @@ namespace System.ComponentModel.Composition
 
             MetadataStore.AddAttribute(
                 typeof(DynamicMetadataTestClass),
-                ( type, attributes) => 
+                (type, attributes) =>
                     Enumerable.Concat(
                         attributes,
                         new Attribute[] { new TypeConverterAttribute(typeof(DynamicMetadataTestClassConverter)) }
@@ -43,7 +43,7 @@ namespace System.ComponentModel.Composition
             container1.Compose(batch);
             MetadataStore.AddAttribute(
                 typeof(DynamicMetadataTestClass),
-                ( type, attributes) => 
+                (type, attributes) =>
                     Enumerable.Concat(
                         attributes,
                         new Attribute[] { new TypeConverterAttribute(typeof(DynamicMetadataTestClassConverter)) }
@@ -69,7 +69,7 @@ namespace System.ComponentModel.Composition
             container1.Compose(batch);
             MetadataStore.AddAttribute(
                 typeof(DynamicMetadataTestClass),
-                ( type, attributes) => 
+                (type, attributes) =>
                     Enumerable.Concat(
                         attributes,
                         new Attribute[] { new TypeConverterAttribute(typeof(DynamicMetadataTestClassConverter)) }
@@ -77,7 +77,7 @@ namespace System.ComponentModel.Composition
                 container1
             );
 
-var container2 = new CompositionContainer();
+            var container2 = new CompositionContainer();
             CompositionBatch batch2 = new CompositionBatch();
             TypeDescriptorServices dat2 = new TypeDescriptorServices();
             batch2.AddPart(dat2);
@@ -91,14 +91,14 @@ var container2 = new CompositionContainer();
             var attached2 = dat2.GetConverter(val.GetType());
             Assert.False(attached2.CanConvertFrom(typeof(string)), "The default type converter for DynamicMetadataTestClass shouldn't support round tripping");
         }
-        
+
         public void Dispose()
         {
             MetadataStore.Container = null;
         }
     }
 
-[Export]
+    [Export]
     public class TypeDescriptorServices
     {
         Dictionary<Type, TypeDescriptionProvider> providers = new Dictionary<Type, TypeDescriptionProvider>();
@@ -181,7 +181,7 @@ var container2 = new CompositionContainer();
                     container.Compose(batch);
                     return v;
                 }
-                
+
                 return result;
             }
             return null;

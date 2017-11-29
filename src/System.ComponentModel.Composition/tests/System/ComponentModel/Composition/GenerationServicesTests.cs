@@ -123,7 +123,7 @@ namespace Microsoft.Internal
             this.TestSuccessfulValueGeneration(TestEnum.Second);
         }
 
-[Fact]
+        [Fact]
         public void TypeType()
         {
             this.TestSuccessfulValueGeneration(typeof(TestEnum));
@@ -142,7 +142,7 @@ namespace Microsoft.Internal
             string[] enumerable = new string[] { "1", "2", "3", "4", "5" };
             this.TestSuccessfulEnumerableGeneration<string>(enumerable);
         }
-        
+
         [Fact]
         [ActiveIssue(507696)]
         public void EnumTypeEnumerable()
@@ -151,7 +151,7 @@ namespace Microsoft.Internal
             this.TestSuccessfulEnumerableGeneration<string>(enumerable);
         }
 
-[Fact]
+        [Fact]
         public void MixedEnumerable()
         {
             List<object> list = new List<object>();

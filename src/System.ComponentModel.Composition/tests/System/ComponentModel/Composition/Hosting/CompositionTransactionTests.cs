@@ -112,7 +112,7 @@ namespace System.ComponentModel.Composition.Hosting
             var keys = new List<object>();
             var values = new List<object>();
 
-for (int i = 0; i < 20; i++)
+            for (int i = 0; i < 20; i++)
             {
                 var key = new object();
                 keys.Add(key);
@@ -245,7 +245,7 @@ for (int i = 0; i < 20; i++)
             Assert.False(innerAtomicComposition.TryGetValue(this, out value));
         }
 
-[Fact]
+        [Fact]
         public void AtomicComposition_CompleteActions()
         {
             var setMe = false;
@@ -507,5 +507,5 @@ for (int i = 0; i < 20; i++)
             Assert.True(stack.Count == 0);
         }
 
-}
+    }
 }

@@ -119,7 +119,7 @@ namespace Tests.Integration
             Assert.Equal(1, catalog.LoadedTypes.Count());
         }
 
-[Fact]
+        [Fact]
         public void PartTypeLoadedLazilyLazyLoopLoadsLazily()
         {
             var catalog = new TypeLoadNotifyingCatalog(typeof(LazyLoopImporter), typeof(LazyLoopExporter));
@@ -181,7 +181,7 @@ namespace Tests.Integration
             public IEnumerable<IExporter> Exporters { get; set; }
         }
 
-[Export(typeof(IImporter))]
+        [Export(typeof(IImporter))]
         public class LazyLoopImporter : IImporter
         {
             [Import]
@@ -195,7 +195,7 @@ namespace Tests.Integration
             public Lazy<IImporter> Importer { get; set; }
         }
 
-private class TypeLoadNotifyingCatalog : ComposablePartCatalog
+        private class TypeLoadNotifyingCatalog : ComposablePartCatalog
         {
             ComposablePartDefinition[] _definitions;
             public HashSet<Type> LoadedTypes { get; private set; }
@@ -280,7 +280,7 @@ private class TypeLoadNotifyingCatalog : ComposablePartCatalog
                 }
             }
 
-private void OnTypeLoaded(Type type)
+            private void OnTypeLoaded(Type type)
             {
                 this.LoadedTypes.Add(type);
             }

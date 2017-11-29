@@ -22,8 +22,8 @@ namespace System.ComponentModel.Composition.ReflectionModel
             IDictionary<string, object> metadata = new Dictionary<string, object>();
             metadata["Key"] = "value";
 
-ReflectionParameterImportDefinition definition = new ReflectionParameterImportDefinition(
-                parameter, "Contract", (string)null, requiredMetadata, ImportCardinality.ZeroOrMore, CreationPolicy.NonShared, metadata, null);
+            ReflectionParameterImportDefinition definition = new ReflectionParameterImportDefinition(
+                            parameter, "Contract", (string)null, requiredMetadata, ImportCardinality.ZeroOrMore, CreationPolicy.NonShared, metadata, null);
 
             Assert.Same(parameter, definition.ImportingLazyParameter);
             Assert.Equal("Contract", definition.ContractName);
@@ -44,7 +44,7 @@ ReflectionParameterImportDefinition definition = new ReflectionParameterImportDe
             ReflectionParameterImportDefinition definition = new ReflectionParameterImportDefinition(
                 parameter, "Contract", (string)null, null, ImportCardinality.ZeroOrMore, CreationPolicy.NonShared, null, null);
 
-Assert.NotNull(definition.RequiredMetadata);
+            Assert.NotNull(definition.RequiredMetadata);
             Assert.Equal(0, definition.RequiredMetadata.Count());
         }
 
@@ -60,7 +60,7 @@ Assert.NotNull(definition.RequiredMetadata);
             Assert.Same(expectedPartDefinition, ((ICompositionElement)definition).Origin);
         }
 
-[Fact]
+        [Fact]
         public void ICompositionElementDisplayName_ValueAsParameter_ShouldIncludeParameterName()
         {
             var names = Expectations.GetContractNamesWithEmpty();

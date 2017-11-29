@@ -40,16 +40,16 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return ReflectionModelServices.CreateImportDefinition(parameter, contractName, requiredTypeIdentity, requiredMetadata, cardinality, requiredCreationPolicy, metadata, isExportFactory, origin);
         }
 
-public static ContractBasedImportDefinition CreateImportDefinition(
-                LazyMemberInfo importingMember,
-                string contractName,
-                string requiredTypeIdentity,
-                IEnumerable<KeyValuePair<string, Type>> requiredMetadata,
-                ImportCardinality cardinality,
-                bool isRecomposable,
-                CreationPolicy requiredCreationPolicy,
-                bool isExportFactory,
-                ICompositionElement origin)
+        public static ContractBasedImportDefinition CreateImportDefinition(
+                        LazyMemberInfo importingMember,
+                        string contractName,
+                        string requiredTypeIdentity,
+                        IEnumerable<KeyValuePair<string, Type>> requiredMetadata,
+                        ImportCardinality cardinality,
+                        bool isRecomposable,
+                        CreationPolicy requiredCreationPolicy,
+                        bool isExportFactory,
+                        ICompositionElement origin)
         {
             return ReflectionModelServicesEx.CreateImportDefinition(importingMember, contractName, requiredTypeIdentity, requiredMetadata, cardinality, isRecomposable, requiredCreationPolicy, MetadataServices.EmptyMetadata, isExportFactory, origin);
         }

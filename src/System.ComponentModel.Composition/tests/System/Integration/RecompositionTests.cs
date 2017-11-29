@@ -63,7 +63,7 @@ namespace Tests.Integration
             Assert.Equal(21, importer.Value);
 
             // Reset value to ensure it doesn't get set to same value again
-            importer.Value = -21; 
+            importer.Value = -21;
 
             // Recompose Value to be 42
             batch = new CompositionBatch();
@@ -100,7 +100,7 @@ namespace Tests.Integration
             Assert.Equal(21, importer.Value);
 
             // Reset value to ensure it doesn't get set to same value again
-            importer.Value = -21; 
+            importer.Value = -21;
 
             // Recompose Value to be 42
             batch = new CompositionBatch();
@@ -346,7 +346,7 @@ namespace Tests.Integration
         {
             private FooWithSimpleImport _optionalImport;
 
-            [Import(AllowDefault=true, AllowRecomposition=true)]
+            [Import(AllowDefault = true, AllowRecomposition = true)]
             public FooWithSimpleImport OptionalImport
             {
                 get
@@ -377,7 +377,7 @@ namespace Tests.Integration
         {
             var container = new CompositionContainer();
             var fooOptional = new FooWithOptionalImport();
-            
+
             container.ComposeParts(fooOptional);
             container.ComposeExportedValue<string>("FooSimpleImport", "NotNullOrEmpty");
             container.ComposeParts(new FooWithSimpleImport());
@@ -385,7 +385,7 @@ namespace Tests.Integration
             Assert.True(!string.IsNullOrEmpty(fooOptional.OptionalImport.SimpleValue));
         }
 
-[Export]
+        [Export]
         public class RootImportRecomposable
         {
             [Import(AllowDefault = true, AllowRecomposition = true)]
@@ -412,7 +412,7 @@ namespace Tests.Integration
         {
             public int Property { get { return 42; } }
         }
-        
+
         [Fact]
         [ActiveIssue(733533)]
         public void RemoveCatalogWithNonSharedPartWithRequiredImport()
@@ -431,7 +431,7 @@ namespace Tests.Integration
 
             aggCatalog.Catalogs.Remove(typeCatalog);
 
-            Assert.Null(root.Importer);            
+            Assert.Null(root.Importer);
         }
 
         [Fact]
@@ -482,7 +482,7 @@ namespace Tests.Integration
         [Export]
         public class RootMultipleImporter
         {
-            [ImportMany(AllowRecomposition=true)]
+            [ImportMany(AllowRecomposition = true)]
             public IExportedInterface[] Imports { get; set; }
         }
 

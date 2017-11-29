@@ -35,7 +35,7 @@ namespace System.ComponentModel.Composition.Factories
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();
 
-            return Create(catalog);            
+            return Create(catalog);
         }
 
         public static CompositionContainer CreateWithAttributedCatalog(params Type[] types)
@@ -94,7 +94,7 @@ namespace System.ComponentModel.Composition.Factories
             return Create(parent, part);
         }
 
-public static CompositionContainer CreateDisposable(Action<bool> disposeCallback)
+        public static CompositionContainer CreateDisposable(Action<bool> disposeCallback)
         {
             return new DisposableCompositionContainer(disposeCallback);
         }
