@@ -506,7 +506,7 @@ namespace System.Security.Cryptography.Asn1
             return true;
         }
 
-        internal (Asn1Tag, int?) ReadTagAndLength(out int bytesRead)
+        internal Asn1Tag ReadTagAndLength(out int? contentsLength, out int bytesRead)
         {
             if (TryPeekTag(_data.Span, out Asn1Tag tag, out int tagBytesRead) &&
                 TryReadLength(_data.Slice(tagBytesRead).Span, _ruleSet, out int? length, out int lengthBytesRead))
@@ -528,7 +528,8 @@ namespace System.Security.Cryptography.Asn1
                 }
 
                 bytesRead = allBytesRead;
-                return (tag, length);
+                contentsLength = length;
+                return tag;
             }
 
             throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
@@ -554,7 +555,7 @@ namespace System.Security.Cryptography.Asn1
             while (!cur.IsEmpty)
             {
                 AsnReader reader = new AsnReader(cur, ruleSet);
-                (Asn1Tag tag, int? length) = reader.ReadTagAndLength(out int bytesRead);
+                Asn1Tag tag = reader.ReadTagAndLength(out int ? length, out int bytesRead);
                 ReadOnlyMemory<byte> nestedContents = reader.PeekContentBytes();
 
                 int localLen = bytesRead + nestedContents.Length;
@@ -585,22 +586,43 @@ namespace System.Security.Cryptography.Asn1
             throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
         }
 
+        /// <summary>
+        /// Get a ReadOnlyMemory view of the next encoded value without consuming it.
+        /// For indefinite length encodings this includes the End of Contents marker.
+        /// </summary>
+        /// <returns>A ReadOnlyMemory view of the next encoded value.</returns>
+        /// <exception cref="CryptographicException">
+        /// The reader is positioned at a point where the tag or length is invalid
+        /// under the current encoding rules.
+        /// </exception>
+        /// <seealso cref="PeekContentBytes"/>
+        /// <seealso cref="GetEncodedValue"/>
         public ReadOnlyMemory<byte> PeekEncodedValue()
         {
-            (Asn1Tag tag, int? length) = ReadTagAndLength(out int bytesRead);
+            Asn1Tag tag = ReadTagAndLength(out int ? length, out int bytesRead);
 
             if (length == null)
             {
-                var tagLengthAndContents = SeekEndOfContents(_data, _ruleSet, bytesRead);
+                ReadOnlyMemory<byte> tagLengthAndContents = SeekEndOfContents(_data, _ruleSet, bytesRead);
                 return Slice(_data, 0, tagLengthAndContents.Length + EndOfContentsEncodedLength);
             }
 
             return Slice(_data, 0, bytesRead + length.Value);
         }
 
+        /// <summary>
+        /// Get a ReadOnlyMemory view of the content octets (bytes) of the next encoded
+        /// value without consuming it.
+        /// </summary>
+        /// <returns>A ReadOnlyMemory view of the contents octets of the next encoded value.</returns>
+        /// <exception cref="CryptographicException">
+        /// The reader is positioned at a point where the tag or length is invalid
+        /// under the current encoding rules.
+        /// </exception>
+        /// <seealso cref="PeekEncodedValue"/>
         public ReadOnlyMemory<byte> PeekContentBytes()
         {
-            (Asn1Tag tag, int? length) = ReadTagAndLength(out int bytesRead);
+            Asn1Tag tag = ReadTagAndLength(out int ? length, out int bytesRead);
 
             if (length == null)
             {
@@ -615,6 +637,12 @@ namespace System.Security.Cryptography.Asn1
             GetEncodedValue();
         }
 
+        /// <summary>
+        /// Get a ReadOnlyMemory view of the next encoded value, and move the reader past it.
+        /// For an indefinite length encoding this includes the End of Contents marker.
+        /// </summary>
+        /// <returns>A ReadOnlyMemory view of the next encoded value.</returns>
+        /// <seealso cref="PeekEncodedValue"/>
         public ReadOnlyMemory<byte> GetEncodedValue()
         {
             ReadOnlyMemory<byte> encodedValue = PeekEncodedValue();
@@ -653,7 +681,7 @@ namespace System.Security.Cryptography.Asn1
 
         public bool ReadBoolean(Asn1Tag expectedTag)
         {
-            (Asn1Tag tag, int? length) = ReadTagAndLength(out int headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int ? length, out int headerLength);
             CheckExpectedTag(tag, expectedTag, UniversalTagNumber.Boolean);
 
             // T-REC-X.690-201508 sec 8.2.1
@@ -675,7 +703,7 @@ namespace System.Security.Cryptography.Asn1
             UniversalTagNumber tagNumber,
             out int headerLength)
         {
-            (Asn1Tag tag, int? length) = ReadTagAndLength(out headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int ? length, out headerLength);
             CheckExpectedTag(tag, expectedTag, tagNumber);
 
             // T-REC-X.690-201508 sec 8.3.1
@@ -1022,7 +1050,7 @@ namespace System.Security.Cryptography.Asn1
             while (!cur.IsEmpty)
             {
                 AsnReader reader = new AsnReader(cur, ruleSet);
-                (Asn1Tag tag, int? length) = reader.ReadTagAndLength(out int headerLength);
+                Asn1Tag tag = reader.ReadTagAndLength(out int? length, out int headerLength);
 
                 if (tag.TagClass != TagClass.Universal)
                 {
@@ -1196,7 +1224,7 @@ namespace System.Security.Cryptography.Asn1
             out ReadOnlyMemory<byte> contents,
             out int headerLength)
         {
-            (Asn1Tag tag, int? length) = ReadTagAndLength(out headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int ? length, out headerLength);
             CheckExpectedTag(tag, expectedTag, UniversalTagNumber.BitString);
 
             if (tag.IsConstructed)
@@ -1310,7 +1338,7 @@ namespace System.Security.Cryptography.Asn1
 
             // Expected vs actual tag was already checked in TryGetBitStringBytes.
             // Either constructed, or a BER payload with "unused" bits not set to 0.
-            (Asn1Tag tag, int? length) = ReadTagAndLength(out headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int ? length, out headerLength);
 
             if (!tag.IsConstructed)
             {
@@ -1545,7 +1573,7 @@ namespace System.Security.Cryptography.Asn1
             out int headerLength,
             UniversalTagNumber universalTagNumber = UniversalTagNumber.OctetString)
         {
-            (Asn1Tag tag, int? length) = ReadTagAndLength(out headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int ? length, out headerLength);
             CheckExpectedTag(tag, expectedTag, universalTagNumber);
 
             if (tag.IsConstructed)
@@ -1636,7 +1664,7 @@ namespace System.Security.Cryptography.Asn1
             while (!cur.IsEmpty)
             {
                 AsnReader reader = new AsnReader(cur, ruleSet);
-                (Asn1Tag tag, int? length) = reader.ReadTagAndLength(out int headerLength);
+                Asn1Tag tag = reader.ReadTagAndLength(out int? length, out int headerLength);
                 
                 if (tag.TagClass != TagClass.Universal)
                 {
@@ -1825,7 +1853,7 @@ namespace System.Security.Cryptography.Asn1
                 return true;
             }
 
-            (Asn1Tag tag, int? length) = ReadTagAndLength(out headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int ? length, out headerLength);
 
             bool copied = TryCopyConstructedOctetStringValue(
                 Slice(_data, headerLength, length),
@@ -1848,7 +1876,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void ReadNull(Asn1Tag expectedTag)
         {
-            (Asn1Tag tag, int? length) = ReadTagAndLength(out int headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int ? length, out int headerLength);
             CheckExpectedTag(tag, expectedTag, UniversalTagNumber.Null);
 
             // T-REC-X.690-201508 sec 8.8.1
@@ -1895,7 +1923,7 @@ namespace System.Security.Cryptography.Asn1
 
         private string ReadObjectIdentifierAsString(Asn1Tag expectedTag, out int totalBytesRead)
         {
-            (Asn1Tag tag, int? length) = ReadTagAndLength(out int headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int ? length, out int headerLength);
             CheckExpectedTag(tag, expectedTag, UniversalTagNumber.ObjectIdentifier);
 
             // T-REC-X.690-201508 sec 8.19.1
@@ -2012,7 +2040,7 @@ namespace System.Security.Cryptography.Asn1
                 return true;
             }
 
-            (Asn1Tag tag, int? length) = ReadTagAndLength(out headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int ? length, out headerLength);
 
             bool copied = TryCopyConstructedOctetStringValue(
                 Slice(_data, headerLength, length),
@@ -2314,7 +2342,7 @@ namespace System.Security.Cryptography.Asn1
 
         public AsnReader ReadSequence(Asn1Tag expectedTag)
         {
-            (Asn1Tag tag, int? length) = ReadTagAndLength(out int headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int ? length, out int headerLength);
             CheckExpectedTag(tag, expectedTag, UniversalTagNumber.Sequence);
 
             // T-REC-X.690-201508 sec 8.9.1
@@ -2356,7 +2384,7 @@ namespace System.Security.Cryptography.Asn1
 
         public AsnReader ReadSetOf(Asn1Tag expectedTag, bool skipSortOrderValidation = false)
         {
-            (Asn1Tag tag, int? length) = ReadTagAndLength(out int headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int ? length, out int headerLength);
             CheckExpectedTag(tag, expectedTag, UniversalTagNumber.SetOf);
 
             // T-REC-X.690-201508 sec 8.12.1

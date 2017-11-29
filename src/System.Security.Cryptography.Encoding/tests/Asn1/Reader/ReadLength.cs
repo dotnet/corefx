@@ -26,7 +26,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             {
                 AsnReader reader = new AsnReader(inputBytes, (AsnEncodingRules)rules);
 
-                (Asn1Tag tag, int? parsedLength) = reader.ReadTagAndLength(out int bytesRead);
+                Asn1Tag tag = reader.ReadTagAndLength(out int ? parsedLength, out int bytesRead);
 
                 Assert.Equal(inputBytes.Length, bytesRead);
                 Assert.False(tag.IsConstructed, "tag.IsConstructed");
@@ -61,7 +61,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, AsnEncodingRules.DER);
 
-            Assert.Throws<CryptographicException>(() => reader.ReadTagAndLength(out int _));
+            Assert.Throws<CryptographicException>(() => reader.ReadTagAndLength(out _, out _));
         }
 
         [Theory]
@@ -99,7 +99,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)rules);
 
-            Assert.Throws<CryptographicException>(() => reader.ReadTagAndLength(out int _));
+            Assert.Throws<CryptographicException>(() => reader.ReadTagAndLength(out _, out _));
         }
 
         [Theory]
@@ -113,7 +113,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] data = { 0x30, 0x80, 0x05, 0x00, 0x00, 0x00 };
             AsnReader reader = new AsnReader(data, (AsnEncodingRules)ruleSet);
 
-            (Asn1Tag tag, int? length) = reader.ReadTagAndLength(out int bytesRead);
+            Asn1Tag tag = reader.ReadTagAndLength(out int? length, out int bytesRead);
 
             Assert.Equal(2, bytesRead);
             Assert.False(length.HasValue, "length.HasValue");
@@ -130,7 +130,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, AsnEncodingRules.BER);
 
-            (Asn1Tag _, int? length) = reader.ReadTagAndLength(out int bytesRead);
+            Asn1Tag tag = reader.ReadTagAndLength(out int? length, out int bytesRead);
 
             Assert.Equal(inputData.Length, bytesRead);
             Assert.Equal(expectedLength, length.Value);
@@ -152,7 +152,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            (Asn1Tag tag, int? length) = reader.ReadTagAndLength(out int bytesRead);
+            Asn1Tag tag = reader.ReadTagAndLength(out int? length, out int bytesRead);
 
             Assert.Equal(expectedBytesRead, bytesRead);
             Assert.Equal(tagValue, tag.TagValue);
