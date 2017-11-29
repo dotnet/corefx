@@ -843,7 +843,7 @@ internal static partial class Interop
                 }
                 pKnownHeader++;
             }
-            
+
             NetEventSource.Exit(null);
             return headerCollection;
         }
