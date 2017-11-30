@@ -34,7 +34,6 @@ namespace System.IO
         private Queue<(IntPtr Handle, string Path)> _pending;
         private GCHandle _pinnedBuffer;
 
-
         /// <summary>
         /// Encapsulates a find operation.
         /// </summary>
@@ -216,20 +215,32 @@ namespace System.IO
 
         protected void Dispose(bool disposing)
         {
-            byte[] buffer = Interlocked.Exchange(ref _buffer, null);
-            if (buffer != null)
+            // It is possible to fail to allocate the lock, but the finalizer will still run
+            if (_lock != null)
             {
-                Interop.Kernel32.CloseHandle(_directoryHandle);
-                if (_recursive && _pending != null)
+                lock (_lock)
                 {
-                    while (_pending.Count > 0)
-                        Interop.Kernel32.CloseHandle(_pending.Dequeue().Handle);
+                    _lastEntryFound = true;
+
+                    // Don't ever close a valid handle twice as they can be reused- set to zero to ensure this
+                    Interop.Kernel32.CloseHandle(_directoryHandle);
+                    _directoryHandle = IntPtr.Zero;
+
+                    if (_recursive && _pending != null)
+                    {
+                        while (_pending.Count > 0)
+                            Interop.Kernel32.CloseHandle(_pending.Dequeue().Handle);
+                        _pending = null;
+                    }
+
+                    if (_pinnedBuffer.IsAllocated)
+                        _pinnedBuffer.Free();
+
+                    if (_buffer != null)
+                        ArrayPool<byte>.Shared.Return(_buffer);
+
+                    _buffer = null;
                 }
-
-                if (_pinnedBuffer.IsAllocated)
-                    _pinnedBuffer.Free();
-
-                ArrayPool<byte>.Shared.Return(buffer);
             }
         }
 

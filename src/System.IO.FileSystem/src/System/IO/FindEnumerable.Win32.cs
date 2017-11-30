@@ -12,6 +12,8 @@ namespace System.IO
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe bool GetData()
         {
+            Debug.Assert(_directoryHandle != (IntPtr)(-1) && _directoryHandle != IntPtr.Zero && !_lastEntryFound);
+
             int status = Interop.NtDll.NtQueryDirectoryFile(
                 FileHandle: _directoryHandle,
                 Event: IntPtr.Zero,
