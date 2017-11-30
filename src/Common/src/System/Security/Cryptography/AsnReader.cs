@@ -2121,14 +2121,12 @@ namespace System.Security.Cryptography.Asn1
             return new AsnReader(contents, _ruleSet);
         }
 
-        private static byte GetDigit(byte b)
+        private static int ParseNonNegativeIntAndShift(ref ReadOnlySpan<byte> data, int bytesToRead)
         {
-            if (b >= '0' && b <= '9')
-            {
-                return (byte)(b - '0');
-            }
+            int value = ParseNonNegativeInt(Slice(data, 0, bytesToRead));
+            data = data.Slice(bytesToRead);
 
-            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            return value;
         }
 
         private static int ParseNonNegativeInt(ReadOnlySpan<byte> data)
@@ -2165,11 +2163,13 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            int year = ParseNonNegativeInt(contentOctets.Slice(0, 2));
-            int month = ParseNonNegativeInt(contentOctets.Slice(2, 2));
-            int day = ParseNonNegativeInt(contentOctets.Slice(4, 2));
-            int hour = ParseNonNegativeInt(contentOctets.Slice(6, 2));
-            int minute = ParseNonNegativeInt(contentOctets.Slice(8, 2));
+            ReadOnlySpan<byte> contents = contentOctets;
+
+            int year = ParseNonNegativeIntAndShift(ref contents, 2);
+            int month = ParseNonNegativeIntAndShift(ref contents, 2);
+            int day = ParseNonNegativeIntAndShift(ref contents, 2);
+            int hour = ParseNonNegativeIntAndShift(ref contents, 2);
+            int minute = ParseNonNegativeIntAndShift(ref contents, 2);
             int second = 0;
             int offsetHour = 0;
             int offsetMinute = 0;
@@ -2177,32 +2177,34 @@ namespace System.Security.Cryptography.Asn1
 
             if (contentOctets.Length == AB1C1Length)
             {
-                if (contentOctets[10] != 'Z')
+                if (contents[0] != 'Z')
                 {
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
             }
             else if (contentOctets.Length == AB1C2Length)
             {
-                if (contentOctets[10] == '-')
+                if (contents[0] == '-')
                 {
                     minus = true;
                 }
-                else if (contentOctets[10] != '+')
+                else if (contents[0] != '+')
                 {
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                offsetHour = ParseNonNegativeInt(contentOctets.Slice(11, 2));
-                offsetMinute = ParseNonNegativeInt(contentOctets.Slice(13, 2));
+                contents = contents.Slice(1);
+                offsetHour = ParseNonNegativeIntAndShift(ref contents, 2);
+                offsetMinute = ParseNonNegativeIntAndShift(ref contents, 2);
+                Debug.Assert(contents.IsEmpty);
             }
             else
             {
-                second = ParseNonNegativeInt(contentOctets.Slice(10, 2));
+                second = ParseNonNegativeIntAndShift(ref contents, 2);
 
                 if (contentOctets.Length == AB2C1Length)
                 {
-                    if (contentOctets[12] != 'Z')
+                    if (contents[0] != 'Z')
                     {
                         throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                     }
@@ -2211,17 +2213,19 @@ namespace System.Security.Cryptography.Asn1
                 {
                     Debug.Assert(contentOctets.Length == AB2C2Length);
 
-                    if (contentOctets[12] == '-')
+                    if (contents[0] == '-')
                     {
                         minus = true;
                     }
-                    else if (contentOctets[12] != '+')
+                    else if (contents[0] != '+')
                     {
                         throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                     }
 
-                    offsetHour = ParseNonNegativeInt(contentOctets.Slice(13, 2));
-                    offsetMinute = ParseNonNegativeInt(contentOctets.Slice(15, 2));
+                    contents = contents.Slice(1);
+                    offsetHour = ParseNonNegativeIntAndShift(ref contents, 2);
+                    offsetMinute = ParseNonNegativeIntAndShift(ref contents, 2);
+                    Debug.Assert(contents.IsEmpty);
                 }
             }
 
@@ -2383,16 +2387,12 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            int offset = 0;
-            int year =
-                1000 * GetDigit(contentOctets[offset++]) +
-                100 * GetDigit(contentOctets[offset++]) +
-                10 * GetDigit(contentOctets[offset++]) +
-                GetDigit(contentOctets[offset++]);
+            ReadOnlySpan<byte> contents = contentOctets;
 
-            int month = 10 * GetDigit(contentOctets[offset++]) + GetDigit(contentOctets[offset++]);
-            int day = 10 * GetDigit(contentOctets[offset++]) + GetDigit(contentOctets[offset++]);
-            int hour = 10 * GetDigit(contentOctets[offset++]) + GetDigit(contentOctets[offset++]);
+            int year = ParseNonNegativeIntAndShift(ref contents, 4);
+            int month = ParseNonNegativeIntAndShift(ref contents, 2);
+            int day = ParseNonNegativeIntAndShift(ref contents, 2);
+            int hour = ParseNonNegativeIntAndShift(ref contents, 2);
             int? minute = null;
             int? second = null;
             ulong fraction = 0;
@@ -2404,10 +2404,10 @@ namespace System.Security.Cryptography.Asn1
             const byte FracState = 1;
             const byte SuffixState = 2;
             byte state = HmsState;
-            
-            if (contentOctets.Length > offset)
+
+            if (!contents.IsEmpty)
             {
-                byte octet = contentOctets[offset];
+                byte octet = contents[0];
 
                 if (octet == 'Z' || octet == '-' || octet == '+')
                 {
@@ -2417,19 +2417,15 @@ namespace System.Security.Cryptography.Asn1
                 {
                     state = FracState;
                 }
-                else if (contentOctets.Length - 1 <= offset)
-                {
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                }
                 else
                 {
-                    minute = 10 * GetDigit(contentOctets[offset++]) + GetDigit(contentOctets[offset++]);
+                    minute = ParseNonNegativeIntAndShift(ref contents, 2);
                 }
             }
 
-            if (state == HmsState && contentOctets.Length > offset)
+            if (state == HmsState && !contents.IsEmpty)
             {
-                byte octet = contentOctets[offset];
+                byte octet = contents[0];
 
                 if (octet == 'Z' || octet == '-' || octet == '+')
                 {
@@ -2439,19 +2435,15 @@ namespace System.Security.Cryptography.Asn1
                 {
                     state = FracState;
                 }
-                else if (contentOctets.Length - 1 <= offset)
-                {
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                }
                 else
                 {
-                    second = 10 * GetDigit(contentOctets[offset++]) + GetDigit(contentOctets[offset++]);
+                    second = ParseNonNegativeIntAndShift(ref contents, 2);
                 }
             }
 
-            if (state == HmsState && contentOctets.Length > offset)
+            if (state == HmsState && !contents.IsEmpty)
             {
-                byte octet = contentOctets[offset];
+                byte octet = contents[0];
 
                 if (octet == 'Z' || octet == '-' || octet == '+')
                 {
@@ -2474,8 +2466,8 @@ namespace System.Security.Cryptography.Asn1
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                Debug.Assert(contentOctets.Length > offset);
-                byte octet = contentOctets[offset++];
+                Debug.Assert(!contents.IsEmpty);
+                byte octet = contents[0];
 
                 if (octet == '.')
                 {
@@ -2484,6 +2476,7 @@ namespace System.Security.Cryptography.Asn1
                 else if (octet == ',')
                 {
                     // Valid for BER, but not CER or DER.
+                    // T-REC-X.690-201510 sec 11.7.4
                     if (strict)
                     {
                         throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
@@ -2495,43 +2488,58 @@ namespace System.Security.Cryptography.Asn1
                     throw new CryptographicException();
                 }
 
-                // There are 36,000,000,000 ticks per hour, and hour is our largest scale.
-                // In case the double -> Ticks conversion allows for rounding up we can allow
-                // for a 12th digit.
-                const ulong MaxScale = 1_000_000_000_000;
+                contents = contents.Slice(1);
 
-                if (contentOctets.Length <= offset)
+                if (contents.IsEmpty)
                 {
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                for (; offset < contentOctets.Length; offset++)
+                // There are 36,000,000,000 ticks per hour, and hour is our largest scale.
+                // In case the double -> Ticks conversion allows for rounding up we can allow
+                // for a 12th digit.
+                
+                if (!Utf8Parser.TryParse(SliceAtMost(contents, 12), out fraction, out int fracLength) || fracLength == 0)
                 {
-                    octet = contentOctets[offset];
+                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                }
+
+                for (int i = 0; i < fracLength; i++)
+                {
+                    fractionScale *= 10;
+                }
+
+                contents = contents.Slice(fracLength);
+
+                // Drain off any remaining digits.
+                // The unsigned parsers will not accept + or - as a leading character, so
+                // they won't eat timezone suffix.
+                // But Utf8Parser.TryParse reports false on overflow, so limit it to 9 digits at a time.
+                while (Utf8Parser.TryParse(SliceAtMost(contents, 9), out uint _, out fracLength))
+                {
+                    contents = contents.Slice(fracLength);
+                }
+
+                if (!contents.IsEmpty)
+                {
+                    octet = contents[0];
 
                     if (octet == 'Z' || octet == '-' || octet == '+')
                     {
                         state = SuffixState;
-                        break;
-                    }
-
-                    if (fractionScale < MaxScale)
-                    {
-                        fraction *= 10;
-                        fraction += GetDigit(contentOctets[offset]);
-                        fractionScale *= 10;
                     }
                     else
                     {
-                        GetDigit(contentOctets[offset]);
+                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                     }
                 }
             }
 
             if (state == SuffixState)
             {
-                Debug.Assert(contentOctets.Length > offset);
-                byte octet = contentOctets[offset++];
+                Debug.Assert(!contents.IsEmpty);
+                byte octet = contents[0];
+                contents = contents.Slice(1);
 
                 if (octet == 'Z')
                 {
@@ -2556,25 +2564,25 @@ namespace System.Security.Cryptography.Asn1
                         throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                     }
 
-                    if (contentOctets.Length - 1 <= offset)
+                    if (contents.IsEmpty)
                     {
                         throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                     }
 
-                    int offsetHour = 10 * GetDigit(contentOctets[offset++]) + GetDigit(contentOctets[offset++]);
+                    int offsetHour = ParseNonNegativeIntAndShift(ref contents, 2);
                     int offsetMinute = 0;
 
-                    if (contentOctets.Length > offset)
+                    if (!contents.IsEmpty)
                     {
-                        if (contentOctets[offset] == ':')
+                        if (contents[0] == ':')
                         {
-                            offset++;
+                            contents = contents.Slice(1);
                         }
                     }
 
-                    if (contentOctets.Length - 1 > offset)
+                    if (!contents.IsEmpty)
                     {
-                        offsetMinute = 10 * GetDigit(contentOctets[offset++]) + GetDigit(contentOctets[offset++]);
+                        offsetMinute = ParseNonNegativeIntAndShift(ref contents, 2);
                     }
 
                     TimeSpan tmp = new TimeSpan(offsetHour, offsetMinute, 0);
@@ -2589,7 +2597,7 @@ namespace System.Security.Cryptography.Asn1
             }
 
             // Was there data after a suffix?
-            if (offset != contentOctets.Length)
+            if (!contents.IsEmpty)
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
@@ -2709,6 +2717,12 @@ namespace System.Security.Cryptography.Asn1
             }
 
             throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+        }
+
+        private static ReadOnlySpan<byte> SliceAtMost(ReadOnlySpan<byte> source, int longestPermitted)
+        {
+            int len = Math.Min(longestPermitted, source.Length);
+            return source.Slice(0, len);
         }
 
         private static ReadOnlySpan<byte> Slice(ReadOnlySpan<byte> source, int offset, int length)
