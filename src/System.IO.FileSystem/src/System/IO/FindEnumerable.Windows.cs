@@ -19,18 +19,21 @@ namespace System.IO
         private readonly bool _recursive;
         private readonly FindTransform<TResult> _transform;
         private readonly FindPredicate<TState> _predicate;
-        private readonly int _threadId;
         private readonly TState _state;
 
+        private object _lock = new object();
         private int _enumeratorCreated;
 
         private Interop.NtDll.FILE_FULL_DIR_INFORMATION* _info;
+        TResult _current;
+
         private byte[] _buffer;
         private IntPtr _directoryHandle;
         private string _currentPath;
         private bool _lastEntryFound;
         private Queue<(IntPtr Handle, string Path)> _pending;
         private GCHandle _pinnedBuffer;
+
 
         /// <summary>
         /// Encapsulates a find operation.
@@ -48,7 +51,6 @@ namespace System.IO
             _recursive = recursive;
             _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
             _transform = transform ?? throw new ArgumentNullException(nameof(transform));
-            _threadId = Environment.CurrentManagedThreadId;
             _state = state;
             Initialize();
         }
@@ -67,7 +69,6 @@ namespace System.IO
             _transform = transform;
             _state = state;
             _recursive = recursive;
-            _threadId = Environment.CurrentManagedThreadId;
             Initialize();
         }
 
@@ -98,7 +99,7 @@ namespace System.IO
 
         public IEnumerator<TResult> GetEnumerator()
         {
-            if (Interlocked.Exchange(ref _enumeratorCreated, 1) == 0 && _threadId == Environment.CurrentManagedThreadId)
+            if (Interlocked.Exchange(ref _enumeratorCreated, 1) == 0)
             {
                 return this;
             }
@@ -115,20 +116,12 @@ namespace System.IO
             _pinnedBuffer = GCHandle.Alloc(_buffer, GCHandleType.Pinned);
             if (_recursive)
                 _pending = new Queue<(IntPtr, string)>();
-
             _directoryHandle = CreateDirectoryHandle(_originalFullPath);
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public TResult Current
-        {
-            get
-            {
-                RawFindData findData = new RawFindData(_info, _currentPath, _originalFullPath, _originalUserPath);
-                return _transform(ref findData);
-            }
-        }
+        public TResult Current => _current;
 
         object IEnumerator.Current => Current;
 
@@ -137,25 +130,43 @@ namespace System.IO
             if (_lastEntryFound)
                 return false;
 
-            RawFindData findData = default;
-            do
+            lock (_lock)
             {
-                FindNextFile();
-                if (!_lastEntryFound && _info != null)
+                if (_lastEntryFound)
+                    return false;
+
+                RawFindData findData = default;
+                do
                 {
-                    // If needed, stash any subdirectories to process later
-                    if (_recursive && (_info->FileAttributes & FileAttributes.Directory) != 0
-                        && !PathHelpers.IsDotOrDotDot(_info->FileName))
+                    FindNextFile();
+                    if (!_lastEntryFound && _info != null)
                     {
-                        string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _info->FileName);
-                        _pending.Enqueue((CreateDirectoryHandle(subDirectory), subDirectory));
+                        // If needed, stash any subdirectories to process later
+                        if (_recursive && (_info->FileAttributes & FileAttributes.Directory) != 0
+                            && !PathHelpers.IsDotOrDotDot(_info->FileName))
+                        {
+                            string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _info->FileName);
+                            IntPtr subDirectoryHandle = CreateDirectoryHandle(subDirectory);
+                            try
+                            {
+                                _pending.Enqueue((subDirectoryHandle, subDirectory));
+                            }
+                            catch
+                            {
+                                Interop.Kernel32.CloseHandle(subDirectoryHandle);
+                                throw;
+                            }
+                        }
+
+                        findData = new RawFindData(_info, _currentPath, _originalFullPath, _originalUserPath);
                     }
+                } while (!_lastEntryFound && !_predicate(ref findData, _state));
 
-                    findData = new RawFindData(_info, _currentPath, _originalFullPath, _originalUserPath);
-                }
-            } while (!_lastEntryFound && !_predicate(ref findData, _state));
+                if (!_lastEntryFound)
+                    _current = _transform(ref findData);
 
-            return !_lastEntryFound;
+                return !_lastEntryFound;
+            }
         }
 
         private unsafe void FindNextFile()
@@ -215,7 +226,9 @@ namespace System.IO
                         Interop.Kernel32.CloseHandle(_pending.Dequeue().Handle);
                 }
 
-                _pinnedBuffer.Free();
+                if (_pinnedBuffer.IsAllocated)
+                    _pinnedBuffer.Free();
+
                 ArrayPool<byte>.Shared.Return(buffer);
             }
         }
