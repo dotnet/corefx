@@ -3,10 +3,6 @@
 
   <Import Project="..\dir.traversal.targets" />
 
-  <PropertyGroup>
-    <BuildingAnOfficialBuildLeg Condition="'$(OfficialBuildId)' != '' AND '$(DotNetBuildOffline)' != 'true'">true</BuildingAnOfficialBuildLeg>
-  </PropertyGroup>
-
   <PropertyGroup Condition="'$(BuildingAnOfficialBuildLeg)' != ''">   
     <!-- During an official build, only build identity packages in the AllConfigurations build -->
     <SkipBuildIdentityPackage Condition="'$(BuildAllConfigurations)' != 'true'">true</SkipBuildIdentityPackage>

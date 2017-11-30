@@ -3,6 +3,10 @@
   <Import Project="..\dir.props" />
 
   <PropertyGroup>
+    <BuildingAnOfficialBuildLeg Condition="'$(OfficialBuildId)' != '' AND '$(DotNetBuildOffline)' != 'true'">true</BuildingAnOfficialBuildLeg>
+  </PropertyGroup>
+  
+  <PropertyGroup>
     <_runtimeOSVersionIndex>$(RuntimeOS.IndexOfAny(".-0123456789"))</_runtimeOSVersionIndex>
     <_runtimeOSFamily Condition="'$(_runtimeOSVersionIndex)' != '-1'">$(RuntimeOS.SubString(0, $(_runtimeOSVersionIndex)))</_runtimeOSFamily>
   </PropertyGroup>
