@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Numerics.Tests
 {
-    public class ToStringTest
+    public partial class ToStringTest
     {
         private static bool s_noZeroOut = true;
 
@@ -1447,7 +1447,11 @@ namespace System.Numerics.Tests
             {
                 Assert.True(expectError && e.GetType() == typeof(FormatException), "Unexpected Exception:" + e);
             }
+
+            VerifyTryFormat(test, format, provider, expectError, expectedResult);
         }
+
+        static partial void VerifyTryFormat(string test, string format, IFormatProvider provider, bool expectError, string expectedResult);
 
         private static String GetDigitSequence(int min, int max, Random random)
         {
