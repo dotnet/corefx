@@ -1462,6 +1462,11 @@ namespace System.Numerics
             return BigNumber.FormatBigInteger(this, format, NumberFormatInfo.GetInstance(provider));
         }
 
+        public bool TryFormat(Span<char> destination, out int charsWritten, string format = default, IFormatProvider provider = null) // TODO: change format to ReadOnlySpan<char>
+        {
+            return BigNumber.TryFormatBigInteger(this, format, NumberFormatInfo.GetInstance(provider), destination, out charsWritten);
+        }
+
         private static BigInteger Add(uint[] leftBits, int leftSign, uint[] rightBits, int rightSign)
         {
             bool trivialLeft = leftBits == null;

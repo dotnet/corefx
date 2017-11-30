@@ -668,11 +668,9 @@ namespace System.Globalization
                 return 'G';
             }
 
-            internal static unsafe string NumberToString(NumberBuffer number, char format, int nMaxDigits, NumberFormatInfo info, bool isDecimal)
+            internal static unsafe void NumberToString(StringBuilder sb, NumberBuffer number, char format, int nMaxDigits, NumberFormatInfo info, bool isDecimal)
             {
                 int nMinDigits = -1;
-
-                StringBuilder sb = new StringBuilder(MIN_SB_BUFFER_SIZE);
 
                 switch (format)
                 {
@@ -802,8 +800,6 @@ namespace System.Globalization
                     default:
                         throw new FormatException(SR.Argument_BadFormatSpecifier);
                 }
-
-                return sb.ToString();
             }
 
             private static void FormatCurrency(StringBuilder sb, NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info)
@@ -1153,7 +1149,7 @@ namespace System.Globalization
                 }
             }
 
-            internal static unsafe string NumberToStringFormat(NumberBuffer number, string format, NumberFormatInfo info)
+            internal static unsafe void NumberToStringFormat(StringBuilder sb, NumberBuffer number, string format, NumberFormatInfo info)
             {
                 int digitCount;
                 int decimalPos;
@@ -1346,8 +1342,6 @@ namespace System.Globalization
                     }
                 }
 
-                StringBuilder sb = new StringBuilder(MIN_SB_BUFFER_SIZE);
-
                 if (number.sign && section == 0)
                     sb.Append(info.NegativeSign);
 
@@ -1503,8 +1497,6 @@ namespace System.Globalization
                         }
                     }
                 }
-
-                return sb.ToString();
             }
         }
     }
