@@ -110,7 +110,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             AsnReader sanExtension = extensions.ReadSequence();
             Assert.Equal("2.5.29.17", sanExtension.ReadObjectIdentifierAsString());
-            Assert.True(sanExtension.TryGetOctetStringBytes(out ReadOnlyMemory<byte> sanExtensionBytes));
+            Assert.True(sanExtension.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> sanExtensionBytes));
             Assert.False(sanExtension.HasData, "sanExtension.HasData");
 
             AsnReader sanExtensionPayload = new AsnReader(sanExtensionBytes, AsnEncodingRules.DER);
@@ -123,7 +123,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             AsnReader basicConstraints = extensions.ReadSequence();
             Assert.Equal("2.5.29.19", basicConstraints.ReadObjectIdentifierAsString());
-            Assert.True(basicConstraints.TryGetOctetStringBytes(out ReadOnlyMemory<byte> basicConstraintsBytes));
+            Assert.True(basicConstraints.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> basicConstraintsBytes));
 
             AsnReader basicConstraintsPayload = new AsnReader(basicConstraintsBytes, AsnEncodingRules.DER);
             AsnReader basicConstraintsValue = basicConstraintsPayload.ReadSequence();
@@ -133,7 +133,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             AsnReader keyUsageExtension = extensions.ReadSequence();
             Assert.Equal("2.5.29.15", keyUsageExtension.ReadObjectIdentifierAsString());
             Assert.True(keyUsageExtension.ReadBoolean(), "keyUsageExtension.ReadBoolean() (IsCritical)");
-            Assert.True(keyUsageExtension.TryGetOctetStringBytes(out ReadOnlyMemory<byte> keyUsageBytes));
+            Assert.True(keyUsageExtension.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> keyUsageBytes));
 
             AsnReader keyUsagePayload = new AsnReader(keyUsageBytes, AsnEncodingRules.DER);
 
@@ -165,7 +165,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.True(extension.ReadBoolean(), $"{oid} is critical");
             }
 
-            Assert.True(extension.TryGetOctetStringBytes(out ReadOnlyMemory<byte> extensionBytes));
+            Assert.True(extension.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> extensionBytes));
             AssertRefSame(extensionBytes, ref bytes[index], $"{oid} extension value is at byte {index}");
         }
 

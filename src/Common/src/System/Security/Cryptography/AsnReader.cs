@@ -1211,16 +1211,18 @@ namespace System.Security.Cryptography.Asn1
             throw new CryptographicException();
         }
 
-        private bool TryGetOctetStringBytes(
+        private bool TryGetPrimitiveOctetStringBytes(
             Asn1Tag expectedTag,
-            out ReadOnlyMemory<byte> contents,
+            out Asn1Tag actualTag,
+            out int? contentLength,
             out int headerLength,
+            out ReadOnlyMemory<byte> contents,
             UniversalTagNumber universalTagNumber = UniversalTagNumber.OctetString)
         {
-            Asn1Tag tag = ReadTagAndLength(out int ? length, out headerLength);
-            CheckExpectedTag(tag, expectedTag, universalTagNumber);
+            actualTag = ReadTagAndLength(out contentLength, out headerLength);
+            CheckExpectedTag(actualTag, expectedTag, universalTagNumber);
 
-            if (tag.IsConstructed)
+            if (actualTag.IsConstructed)
             {
                 if (_ruleSet == AsnEncodingRules.DER)
                 {
@@ -1231,8 +1233,8 @@ namespace System.Security.Cryptography.Asn1
                 return false;
             }
 
-            Debug.Assert(length.HasValue);
-            ReadOnlyMemory<byte> encodedValue = Slice(_data, headerLength, length.Value);
+            Debug.Assert(contentLength.HasValue);
+            ReadOnlyMemory<byte> encodedValue = Slice(_data, headerLength, contentLength.Value);
 
             if (_ruleSet == AsnEncodingRules.CER && encodedValue.Length > MaxCERSegmentSize)
             {
@@ -1243,12 +1245,12 @@ namespace System.Security.Cryptography.Asn1
             return true;
         }
 
-        private bool TryGetOctetStringBytes(
+        private bool TryGetPrimitiveOctetStringBytes(
             Asn1Tag expectedTag,
             UniversalTagNumber universalTagNumber,
             out ReadOnlyMemory<byte> contents)
         {
-            if (TryGetOctetStringBytes(expectedTag, out contents, out int headerLength, universalTagNumber))
+            if (TryGetPrimitiveOctetStringBytes(expectedTag, out _, out _, out int headerLength, out contents, universalTagNumber))
             {
                 _data = _data.Slice(headerLength + contents.Length);
                 return true;
@@ -1257,14 +1259,14 @@ namespace System.Security.Cryptography.Asn1
             return false;
         }
 
-        public bool TryGetOctetStringBytes(out ReadOnlyMemory<byte> contents) =>
-            TryGetOctetStringBytes(Asn1Tag.PrimitiveOctetString, out contents);
+        public bool TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> contents) =>
+            TryGetPrimitiveOctetStringBytes(Asn1Tag.PrimitiveOctetString, out contents);
 
         /// <summary>
-        /// Gets the source data for an OctetString under a primitive encoding.
+        /// Gets the contents for an octet string under a primitive encoding.
         /// </summary>
         /// <param name="expectedTag">The expected tag value</param>
-        /// <param name="contents">The content bytes for the OctetString payload.</param>
+        /// <param name="contents">The contents for the octet string.</param>
         /// <returns>
         ///   <c>true</c> if the octet string uses a primitive encoding, <c>false</c> otherwise.
         /// </returns>
@@ -1276,16 +1278,56 @@ namespace System.Security.Cryptography.Asn1
         ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
         /// </ul>
         /// </exception>
-        public bool TryGetOctetStringBytes(Asn1Tag expectedTag, out ReadOnlyMemory<byte> contents)
+        public bool TryGetPrimitiveOctetStringBytes(Asn1Tag expectedTag, out ReadOnlyMemory<byte> contents)
         {
-            return TryGetOctetStringBytes(expectedTag, UniversalTagNumber.OctetString, out contents);
+            return TryGetPrimitiveOctetStringBytes(expectedTag, UniversalTagNumber.OctetString, out contents);
         }
 
-        private static int CopyConstructedOctetString(
+        private int CountConstructedOctetString(ReadOnlyMemory<byte> source, bool isIndefinite)
+        {
+            Span<byte> destination = Span<byte>.Empty;
+            int lastSegmentLength = MaxCERSegmentSize;
+
+            int contentLength = CopyConstructedOctetString(
+                source,
+                ref destination,
+                false,
+                isIndefinite,
+                ref lastSegmentLength,
+                out _);
+
+            // T-REC-X.690-201508 sec 9.2
+            if (_ruleSet == AsnEncodingRules.CER && contentLength <= MaxCERSegmentSize)
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+
+            return contentLength;
+        }
+
+        private void CopyConstructedOctetString(
+            ReadOnlyMemory<byte> source,
+            Span<byte> destination,
+            bool isIndefinite,
+            out int bytesRead,
+            out int bytesWritten)
+        {
+            int lastSegmentLength = MaxCERSegmentSize;
+            Span<byte> dest = destination;
+
+            bytesWritten = CopyConstructedOctetString(
+                source,
+                ref dest,
+                true,
+                isIndefinite,
+                ref lastSegmentLength,
+                out bytesRead);
+        }
+
+        private int CopyConstructedOctetString(
             ReadOnlyMemory<byte> source,
             ref Span<byte> destination,
             bool write,
-            AsnEncodingRules ruleSet,
             bool isIndefinite,
             ref int lastSegmentLength,
             out int bytesRead)
@@ -1307,7 +1349,7 @@ namespace System.Security.Cryptography.Asn1
 
             while (!cur.IsEmpty)
             {
-                AsnReader reader = new AsnReader(cur, ruleSet);
+                AsnReader reader = new AsnReader(cur, _ruleSet);
                 Asn1Tag tag = reader.ReadTagAndLength(out int? length, out int headerLength);
                 
                 if (tag.TagClass != TagClass.Universal)
@@ -1331,7 +1373,7 @@ namespace System.Security.Cryptography.Asn1
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                if (ruleSet == AsnEncodingRules.CER)
+                if (_ruleSet == AsnEncodingRules.CER)
                 {
                     if (tag.IsConstructed || lastSegmentLength != MaxCERSegmentSize)
                     {
@@ -1342,30 +1384,13 @@ namespace System.Security.Cryptography.Asn1
 
                 cur = cur.Slice(headerLength);
 
-                if (length == null)
-                {
-                    Debug.Assert(tag.IsConstructed);
-
-                    totalContent += CopyConstructedOctetString(
-                        cur,
-                        ref destination,
-                        write,
-                        ruleSet,
-                        true,
-                        ref lastSegmentLength,
-                        out int nestedBytesRead);
-
-                    totalRead += nestedBytesRead;
-                    cur = cur.Slice(nestedBytesRead);
-                }
-                else if (tag.IsConstructed)
+                if (tag.IsConstructed)
                 {
                     totalContent += CopyConstructedOctetString(
-                        Slice(cur, 0, length.Value),
+                        Slice(cur, 0, length),
                         ref destination,
                         write,
-                        ruleSet,
-                        false,
+                        length == null,
                         ref lastSegmentLength,
                         out int nestedContentRead);
 
@@ -1377,7 +1402,7 @@ namespace System.Security.Cryptography.Asn1
                     int lengthValue = length.Value;
 
                     // T-REC-X.690-201508 sec 9.2
-                    if (ruleSet == AsnEncodingRules.CER && lengthValue > MaxCERSegmentSize)
+                    if (_ruleSet == AsnEncodingRules.CER && lengthValue > MaxCERSegmentSize)
                     {
                         throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                     }
@@ -1406,62 +1431,26 @@ namespace System.Security.Cryptography.Asn1
             return totalContent;
         }
 
-        private static bool TryCopyConstructedOctetStringValue(
+        private bool TryCopyConstructedOctetStringContents(
             ReadOnlyMemory<byte> source,
             Span<byte> dest,
-            bool write,
-            AsnEncodingRules ruleSet,
             bool isIndefinite,
             out int bytesRead,
             out int bytesWritten)
         {
-            int lastSegmentSize = MaxCERSegmentSize;
+            bytesRead = 0;
 
-            Span<byte> tmpDest = dest;
-
-            int contentLength = CopyConstructedOctetString(
-                source,
-                ref tmpDest,
-                false,
-                ruleSet,
-                isIndefinite,
-                ref lastSegmentSize,
-                out int encodedLength);
-
-            // T-REC-X.690-201508 sec 9.2
-            if (ruleSet == AsnEncodingRules.CER && contentLength <= MaxCERSegmentSize)
-            {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-
-            if (!write)
-            {
-                bytesRead = encodedLength;
-                bytesWritten = contentLength;
-                return true;
-            }
+            int contentLength = CountConstructedOctetString(source, isIndefinite);
 
             if (dest.Length < contentLength)
             {
-                bytesRead = 0;
                 bytesWritten = 0;
                 return false;
             }
 
-            tmpDest = dest;
-            lastSegmentSize = MaxCERSegmentSize;
-
-            bytesWritten = CopyConstructedOctetString(
-                source,
-                ref tmpDest,
-                true,
-                ruleSet,
-                isIndefinite,
-                ref lastSegmentSize,
-                out bytesRead);
+            CopyConstructedOctetString(source, dest, isIndefinite, out bytesRead, out bytesWritten);
 
             Debug.Assert(bytesWritten == contentLength);
-            Debug.Assert(bytesRead == encodedLength);
             return true;
         }
 
@@ -1480,10 +1469,12 @@ namespace System.Security.Cryptography.Asn1
             Span<byte> destination,
             out int bytesWritten)
         {
-            if (TryGetOctetStringBytes(
+            if (TryGetPrimitiveOctetStringBytes(
                 expectedTag,
-                out ReadOnlyMemory<byte> contents,
-                out int headerLength))
+                out Asn1Tag actualTag,
+                out int? contentLength,
+                out int headerLength,
+                out ReadOnlyMemory<byte> contents))
             {
                 if (contents.Length > destination.Length)
                 {
@@ -1497,14 +1488,12 @@ namespace System.Security.Cryptography.Asn1
                 return true;
             }
 
-            Asn1Tag tag = ReadTagAndLength(out int ? length, out headerLength);
+            Debug.Assert(actualTag.IsConstructed);
 
-            bool copied = TryCopyConstructedOctetStringValue(
-                Slice(_data, headerLength, length),
+            bool copied = TryCopyConstructedOctetStringContents(
+                Slice(_data, headerLength, contentLength),
                 destination,
-                true,
-                _ruleSet,
-                length == null,
+                contentLength == null,
                 out int bytesRead,
                 out bytesWritten);
 
@@ -1656,46 +1645,49 @@ namespace System.Security.Cryptography.Asn1
             Asn1Tag expectedTag,
             UniversalTagNumber universalTagNumber,
             Span<byte> destination,
-            bool write,
             out int bytesRead,
             out int bytesWritten)
         {
-            if (TryGetOctetStringBytes(
+            if (TryGetPrimitiveOctetStringBytes(
                 expectedTag,
-                out ReadOnlyMemory<byte> contents,
+                out Asn1Tag actualTag,
+                out int? contentLength,
                 out int headerLength,
+                out ReadOnlyMemory<byte> contents,
                 universalTagNumber))
             {
                 bytesWritten = contents.Length;
 
-                if (write)
+                if (destination.Length < bytesWritten)
                 {
-                    if (destination.Length < bytesWritten)
-                    {
-                        bytesWritten = 0;
-                        bytesRead = 0;
-                        return false;
-                    }
-
-                    contents.Span.CopyTo(destination);
+                    bytesWritten = 0;
+                    bytesRead = 0;
+                    return false;
                 }
 
+                contents.Span.CopyTo(destination);
                 bytesRead = headerLength + bytesWritten;
                 return true;
             }
 
-            Asn1Tag tag = ReadTagAndLength(out int ? length, out headerLength);
+            Debug.Assert(actualTag.IsConstructed);
 
-            bool copied = TryCopyConstructedOctetStringValue(
-                Slice(_data, headerLength, length),
+            bool copied = TryCopyConstructedOctetStringContents(
+                Slice(_data, headerLength, contentLength),
                 destination,
-                write,
-                _ruleSet,
-                length == null,
+                contentLength == null,
                 out int contentBytesRead,
                 out bytesWritten);
 
-            bytesRead = headerLength + contentBytesRead;
+            if (copied)
+            {
+                bytesRead = headerLength + contentBytesRead;
+            }
+            else
+            {
+                bytesRead = 0;
+            }
+
             return copied;
         }
 
@@ -1718,8 +1710,8 @@ namespace System.Security.Cryptography.Asn1
 
         private static unsafe bool TryCopyCharacterString(
             ReadOnlyMemory<byte> source,
-            Text.Encoding encoding,
             Span<char> destination,
+            Text.Encoding encoding,
             out int charsWritten)
         {
             fixed (byte* bytePtr = &source.Span.DangerousGetPinnableReference())
@@ -1747,58 +1739,103 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
+        private delegate bool CharacterStringProcessor(
+            ReadOnlyMemory<byte> data,
+            Span<char> dest,
+            Text.Encoding encoding);
+
+        private bool ProcessConstructedCharacterString(
+            ReadOnlyMemory<byte> source,
+            Span<char> dest,
+            bool isIndefinite,
+            Text.Encoding encoding,
+            CharacterStringProcessor processor)
+        {
+            int bytesLength = CountConstructedOctetString(source, isIndefinite);
+
+            byte[] rented = ArrayPool<byte>.Shared.Rent(bytesLength);
+
+            try
+            {
+                CopyConstructedOctetString(source, rented, isIndefinite, out int bytesRead, out int bytesWritten);
+                Debug.Assert(bytesWritten == bytesLength);
+
+                bool processed = processor(
+                    new ReadOnlyMemory<byte>(rented, 0, bytesWritten),
+                    dest,
+                    encoding);
+
+                if (processed)
+                {
+                    _data = _data.Slice(bytesRead);
+                }
+
+                return processed;
+            }
+            finally
+            {
+                Array.Clear(rented, 0, bytesLength);
+                ArrayPool<byte>.Shared.Return(rented);
+            }
+        }
+
+        private bool ProcessCharacterString(
+            Asn1Tag expectedTag,
+            UniversalTagNumber universalTagNumber,
+            Text.Encoding encoding,
+            Span<char> dest,
+            CharacterStringProcessor processor)
+        {
+            if (TryGetPrimitiveOctetStringBytes(
+                expectedTag,
+                out Asn1Tag actualTag,
+                out int? contentLength,
+                out int headerLength,
+                out ReadOnlyMemory<byte> contents,
+                universalTagNumber))
+            {
+                bool processed = processor(contents, dest, encoding);
+
+                if (processed)
+                {
+                    _data = _data.Slice(headerLength + contents.Length);
+                }
+
+                return processed;
+            }
+
+            Debug.Assert(actualTag.IsConstructed);
+
+            return ProcessConstructedCharacterString(
+                Slice(_data, headerLength, contentLength),
+                dest,
+                contentLength == null,
+                encoding,
+                processor);
+        }
+
         private string GetCharacterString(
             Asn1Tag expectedTag,
             UniversalTagNumber universalTagNumber,
             Text.Encoding encoding)
         {
-            if (TryGetOctetStringBytes(
-                expectedTag,
-                out ReadOnlyMemory<byte> contents,
-                out int headerLength,
-                universalTagNumber))
-            {
-                string s = GetCharacterString(contents, encoding);
+            string str = null;
 
-                _data = _data.Slice(headerLength + contents.Length);
-
-                return s;
-            }
-
-            bool parsed = TryCopyCharacterStringBytes(
+            bool processed = ProcessCharacterString(
                 expectedTag,
                 universalTagNumber,
-                Span<byte>.Empty,
-                false,
-                out int bytesRead,
-                out int bytesWritten);
-
-            Debug.Assert(parsed, "TryCopyCharacterStringBytes returned false in counting mode");
-
-            byte[] rented = ArrayPool<byte>.Shared.Rent(bytesWritten);
-
-            try
-            {
-                if (!TryCopyCharacterStringBytes(expectedTag, universalTagNumber, rented, true, out bytesRead, out bytesWritten))
+                encoding,
+                Span<char>.Empty,
+                (mem, dest, enc) =>
                 {
-                    Debug.Fail("TryCopyCharacterStringBytes failed with a precomputed size");
-                    throw new CryptographicException();
-                }
+                    str = GetCharacterString(mem, enc);
+                    return true;
+                });
 
-                string s = GetCharacterString(
-                    new ReadOnlyMemory<byte>(rented, 0, bytesWritten),
-                    encoding);
-
-                _data = _data.Slice(bytesRead);
-
-                return s;
-            }
-            finally
-            {
-                Array.Clear(rented, 0, bytesWritten);
-                ArrayPool<byte>.Shared.Return(rented);
-            }
-        }
+            Debug.Assert(processed);
+            Debug.Assert(str != null);
+            return str;
+       }
 
         private bool TryCopyCharacterString(
             Asn1Tag expectedTag,
@@ -1807,60 +1844,19 @@ namespace System.Security.Cryptography.Asn1
             Span<char> destination,
             out int charsWritten)
         {
-            if (TryGetOctetStringBytes(
-                expectedTag,
-                out ReadOnlyMemory<byte> contents,
-                out int headerLength,
-                universalTagNumber))
-            {
-                bool copied = TryCopyCharacterString(contents, encoding, destination, out charsWritten);
+            int written = -1;
 
-                if (copied)
-                {
-                    _data = _data.Slice(headerLength + contents.Length);
-                }
-
-                return copied;
-            }
-
-            bool parsed = TryCopyCharacterStringBytes(
+            bool copied = ProcessCharacterString(
                 expectedTag,
                 universalTagNumber,
-                Span<byte>.Empty,
-                false,
-                out int bytesRead,
-                out int bytesWritten);
+                encoding,
+                destination,
+                (mem, dest, enc) => TryCopyCharacterString(mem, dest, enc, out written));
 
-            Debug.Assert(parsed, "TryCopyCharacterStringBytes returned false in counting mode");
+            Debug.Assert(written >= 0);
+            charsWritten = written;
 
-            byte[] rented = ArrayPool<byte>.Shared.Rent(bytesWritten);
-
-            try
-            {
-                if (!TryCopyCharacterStringBytes(expectedTag, universalTagNumber, rented, true, out bytesRead, out bytesWritten))
-                {
-                    Debug.Fail("TryCopyCharacterStringBytes failed with a precomputed size");
-                    throw new CryptographicException();
-                }
-
-                bool copied = TryCopyCharacterString(
-                    new ReadOnlyMemory<byte>(rented, 0, bytesWritten), 
-                    encoding,
-                    destination,
-                    out charsWritten);
-
-                if (copied)
-                {
-                    _data = _data.Slice(bytesRead);
-                }
-
-                return copied;
-            }
-            finally
-            {
-                Array.Clear(rented, 0, bytesWritten);
-                ArrayPool<byte>.Shared.Return(rented);
-            }
+            return copied;
         }
 
         /// <summary>
@@ -1880,18 +1876,18 @@ namespace System.Security.Cryptography.Asn1
         ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
         /// </ul>
         /// </exception>
-        public bool TryGetCharacterStringBytes(UniversalTagNumber encodingType, out ReadOnlyMemory<byte> contents)
+        public bool TryGetPrimitiveCharacterStringBytes(UniversalTagNumber encodingType, out ReadOnlyMemory<byte> contents)
         {
-            return TryGetCharacterStringBytes(new Asn1Tag(encodingType), encodingType, out contents);
+            return TryGetPrimitiveCharacterStringBytes(new Asn1Tag(encodingType), encodingType, out contents);
         }
 
         /// <summary>
-        /// Gets the source data for a character string under a primitive encoding.  The contents
-        /// are not validated as belonging to the requested encoding type.
+        /// Gets the uninterpreted contents for a character string under a primitive encoding.
+        /// The contents are not validated as belonging to the requested encoding type.
         /// </summary>
         /// <param name="expectedTag">The expected tag</param>
         /// <param name="encodingType">The UniversalTagNumber for the string encoding type.</param>
-        /// <param name="contents">The content bytes for the UTF8String payload.</param>
+        /// <param name="contents">The contents for the character string.</param>
         /// <returns>
         ///   <c>true</c> if the character string uses a primitive encoding, <c>false</c> otherwise.
         /// </returns>
@@ -1906,13 +1902,13 @@ namespace System.Security.Cryptography.Asn1
         /// <exception cref="ArgumentOutOfRangeException">
         ///   <paramref name="encodingType"/> is not a known character string encoding type.
         /// </exception>
-        public bool TryGetCharacterStringBytes(
+        public bool TryGetPrimitiveCharacterStringBytes(
             Asn1Tag expectedTag,
             UniversalTagNumber encodingType,
             out ReadOnlyMemory<byte> contents)
         {
             CheckCharacterStringEncodingType(encodingType);
-            return TryGetOctetStringBytes(expectedTag, encodingType, out contents);
+            return TryGetPrimitiveOctetStringBytes(expectedTag, encodingType, out contents);
         }
 
         public bool TryCopyCharacterStringBytes(
@@ -1939,7 +1935,6 @@ namespace System.Security.Cryptography.Asn1
                 expectedTag,
                 encodingType,
                 destination,
-                true,
                 out int bytesRead,
                 out bytesWritten);
 
@@ -2264,10 +2259,12 @@ namespace System.Security.Cryptography.Asn1
             // T-REC-X.690-201510 sec 11.8
             
             // Optimize for the CER/DER primitive encoding:
-            if (TryGetOctetStringBytes(
+            if (TryGetPrimitiveOctetStringBytes(
                 expectedTag,
-                out ReadOnlyMemory<byte> primitiveOctets,
+                out Asn1Tag actualTag,
+                out _,
                 out int headerLength,
+                out ReadOnlyMemory<byte> primitiveOctets,
                 UniversalTagNumber.UtcTime))
             {
                 if (primitiveOctets.Length == 13)
@@ -2277,6 +2274,8 @@ namespace System.Security.Cryptography.Asn1
                     return value;
                 }
             }
+
+            Debug.Assert(actualTag.IsConstructed);
 
             // T-REC-X.690-201510 sec 11.8
             if (_ruleSet == AsnEncodingRules.DER || _ruleSet == AsnEncodingRules.CER)
@@ -2294,7 +2293,6 @@ namespace System.Security.Cryptography.Asn1
                     expectedTag,
                     UniversalTagNumber.UtcTime,
                     rented,
-                    true,
                     out int bytesRead,
                     out int contentLength))
                 {
@@ -2640,16 +2638,20 @@ namespace System.Security.Cryptography.Asn1
 
         public DateTimeOffset GetGeneralizedTime(Asn1Tag expectedTag, bool disallowFractions=false)
         {
-            if (TryGetOctetStringBytes(
+            if (TryGetPrimitiveOctetStringBytes(
                 expectedTag,
-                out ReadOnlyMemory<byte> primitiveOctets,
+                out Asn1Tag actualTag,
+                out _,
                 out int headerLength,
+                out ReadOnlyMemory<byte> primitiveOctets,
                 UniversalTagNumber.GeneralizedTime))
             {
                 DateTimeOffset value = ParseGeneralizedTime(_ruleSet, primitiveOctets.Span, disallowFractions);
                 _data = _data.Slice(headerLength + primitiveOctets.Length);
                 return value;
             }
+
+            Debug.Assert(actualTag.IsConstructed);
 
             // T-REC-X.690-201510 sec 9.2
             // T-REC-X.690-201510 sec 10.2
@@ -2669,7 +2671,6 @@ namespace System.Security.Cryptography.Asn1
                     expectedTag,
                     UniversalTagNumber.GeneralizedTime,
                     rented,
-                    true,
                     out int bytesRead,
                     out int contentLength))
                 {

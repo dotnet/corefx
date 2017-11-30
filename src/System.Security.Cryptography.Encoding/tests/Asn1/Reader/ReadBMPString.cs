@@ -714,7 +714,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             this AsnReader reader,
             out ReadOnlyMemory<byte> contents)
         {
-            return reader.TryGetCharacterStringBytes(
+            return reader.TryGetPrimitiveCharacterStringBytes(
                 UniversalTagNumber.BMPString,
                 out contents);
         }
@@ -724,7 +724,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Asn1Tag expectedTag,
             out ReadOnlyMemory<byte> contents)
         {
-            return reader.TryGetCharacterStringBytes(
+            return reader.TryGetPrimitiveCharacterStringBytes(
                 expectedTag,
                 UniversalTagNumber.BMPString,
                 out contents);
