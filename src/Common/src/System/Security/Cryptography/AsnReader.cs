@@ -430,7 +430,7 @@ namespace System.Security.Cryptography.Asn1
 
             ReadOnlySpan<byte> contentSpan = contents.Span;
 
-            bool isNegative = contentSpan[0] >= 0x80;
+            bool isNegative = (contentSpan[0] & 0x80) != 0;
             long accum = isNegative ? -1 : 0;
 
             for (int i = 0; i < contents.Length; i++)
@@ -456,11 +456,10 @@ namespace System.Security.Cryptography.Asn1
             ReadOnlySpan<byte> contentSpan = contents.Span;
             int contentLength = contents.Length;
 
-            bool isNegative = contentSpan[0] >= 0x80;
+            bool isNegative = (contentSpan[0] & 0x80) != 0;
 
             if (isNegative)
             {
-                // TODO/Review: Should this be "false", an Exception, or not a scenario?
                 value = 0;
                 return false;
             }
