@@ -47,8 +47,14 @@ namespace System.Net.Http
 
                 using (HttpContentStream contentStream = ConsumeStream())
                 {
-                    const int BufferSize = 8192;
-                    await contentStream.CopyToAsync(stream, BufferSize, _cancellationToken).ConfigureAwait(false);
+                    using (_cancellationToken.Register(() =>
+                    {
+                        contentStream.Dispose();
+                    }))
+                    {
+                        const int BufferSize = 8192;
+                        await contentStream.CopyToAsync(stream, BufferSize, _cancellationToken).ConfigureAwait(false);
+                    }
                 }
             }
 

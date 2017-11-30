@@ -14,6 +14,7 @@ namespace System.Net.Http
         private sealed class ContentLengthReadStream : HttpContentReadStream
         {
             private ulong _contentBytesRemaining;
+            private object _asyncReadLock = new object();
 
             public ContentLengthReadStream(HttpConnection connection, ulong contentLength)
                 : base(connection)
@@ -30,38 +31,52 @@ namespace System.Net.Http
 
             public override async ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default)
             {
-                if (_connection == null || destination.Length == 0)
+                if (_connection == null || destination.Length == 0 || cancellationToken.IsCancellationRequested)
                 {
-                    // Response body fully consumed or the caller didn't ask for any data
+                    // Response body fully consumed or the caller didn't ask for any data or cancellation requested
                     return 0;
                 }
 
-                Debug.Assert(_contentBytesRemaining > 0);
-
-                if ((ulong)destination.Length > _contentBytesRemaining)
+                try
                 {
-                    destination = destination.Slice(0, (int)_contentBytesRemaining);
+                    using (cancellationToken.Register(action => ((ContentLengthReadStream)action).CancelPendingResponseStreamReadOperation(), this))
+                    {
+                        Debug.Assert(_contentBytesRemaining > 0);
+
+                        if ((ulong)destination.Length > _contentBytesRemaining)
+                        {
+                            destination = destination.Slice(0, (int)_contentBytesRemaining);
+                        }
+
+                        int bytesRead = await _connection.ReadAsync(destination, cancellationToken).ConfigureAwait(false);
+
+                        if (bytesRead <= 0)
+                        {
+                            // Unexpected end of response stream
+                            throw new IOException(SR.net_http_invalid_response);
+                        }
+
+                        Debug.Assert((ulong)bytesRead <= _contentBytesRemaining);
+                        _contentBytesRemaining -= (ulong)bytesRead;
+
+                        if (_contentBytesRemaining == 0)
+                        {
+                            lock (_asyncReadLock)
+                            {
+                                // End of response body
+                                _connection.ReturnConnectionToPool();
+                                _connection = null;
+                            }
+                        }
+
+                        return bytesRead;
+                    }
                 }
-
-                int bytesRead = await _connection.ReadAsync(destination, cancellationToken).ConfigureAwait(false);
-
-                if (bytesRead <= 0)
+                catch (IOException)
                 {
-                    // Unexpected end of response stream
-                    throw new IOException(SR.net_http_invalid_response);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    throw;
                 }
-
-                Debug.Assert((ulong)bytesRead <= _contentBytesRemaining);
-                _contentBytesRemaining -= (ulong)bytesRead;
-
-                if (_contentBytesRemaining == 0)
-                {
-                    // End of response body
-                    _connection.ReturnConnectionToPool();
-                    _connection = null;
-                }
-
-                return bytesRead;
             }
 
             public override async Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
@@ -71,17 +86,40 @@ namespace System.Net.Http
                     throw new ArgumentNullException(nameof(destination));
                 }
 
-                if (_connection == null)
+                if (_connection == null || cancellationToken.IsCancellationRequested)
                 {
-                    // Response body fully consumed
+                    // Response body fully consumed or cancellation requested
                     return;
                 }
 
-                await _connection.CopyToAsync(destination, _contentBytesRemaining, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    using (cancellationToken.Register(action => ((ContentLengthReadStream)action).CancelPendingResponseStreamReadOperation(), this))
+                    {
+                        await _connection.CopyToAsync(destination, _contentBytesRemaining, cancellationToken).ConfigureAwait(false);
 
-                _contentBytesRemaining = 0;
-                _connection.ReturnConnectionToPool();
-                _connection = null;
+                        _contentBytesRemaining = 0;
+                        lock (_asyncReadLock)
+                        {
+                            _connection.ReturnConnectionToPool();
+                            _connection = null;
+                        }
+                    }
+
+                }
+                catch (IOException)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    throw;
+                }
+            }
+
+            private void CancelPendingResponseStreamReadOperation()
+            {
+                lock (_asyncReadLock)
+                {
+                    _connection?.Dispose();
+                }
             }
         }
     }
