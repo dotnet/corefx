@@ -11,6 +11,7 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
+        // https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858.aspx
         /// <summary>
         /// WARNING: The private methods do not implicitly handle long paths. Use CreateFile.
         /// </summary>

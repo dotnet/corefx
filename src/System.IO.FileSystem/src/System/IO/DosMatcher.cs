@@ -22,10 +22,12 @@ namespace System.IO
         /// </summary>
         internal static string TranslateExpression(string expression)
         {
-            if (string.IsNullOrEmpty(expression) || expression == "*.*")
+            if (string.IsNullOrEmpty(expression) || expression == "*" || expression == "*.*")
                 return "*";
 
-            StringBuilder sb = StringBuilderCache.Acquire(expression.Length);
+            bool modified = false;
+            Span<char> stackSpace = stackalloc char[expression.Length];
+            ValueStringBuilder sb = new ValueStringBuilder(stackSpace);
             int length = expression.Length;
             for (int i = 0; i < length; i++)
             {
@@ -33,6 +35,7 @@ namespace System.IO
                 switch (c)
                 {
                     case '.':
+                        modified = true;
                         if (i > 1 && i == length - 1 && expression[i - 1] == '*')
                         {
                             sb.Length--;
@@ -48,6 +51,7 @@ namespace System.IO
                         }
                         break;
                     case '?':
+                        modified = true;
                         sb.Append('>'); // DOS_QM
                         break;
                     default:
@@ -56,7 +60,7 @@ namespace System.IO
                 }
             }
 
-            return StringBuilderCache.GetStringAndRelease(sb);
+            return modified ? sb.ToString() : expression;
         }
 
         /// <summary>
@@ -159,11 +163,11 @@ namespace System.IO
                         if (currentMatch >= currentMatches.Length - 2)
                         {
                             int newSize = currentMatches.Length * 2;
-                            temp = new Span<int>(new int[newSize]);
+                            temp = new int[newSize];
                             currentMatches.CopyTo(temp);
                             currentMatches = temp;
 
-                            temp = new Span<int>(new int[newSize]);
+                            temp = new int[newSize];
                             priorMatches.CopyTo(temp);
                             priorMatches = temp;
                         }
@@ -182,12 +186,16 @@ namespace System.IO
 
                             bool notLastPeriod = false;
                             if (!nameFinished && nameChar == '.')
+                            {
                                 for (int offset = nameOffset; offset < name.Length; offset++)
+                                {
                                     if (name[offset] == '.')
                                     {
                                         notLastPeriod = true;
                                         break;
                                     }
+                                }
+                            }
 
                             if (nameFinished || nameChar != '.' || notLastPeriod)
                             {

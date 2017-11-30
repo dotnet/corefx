@@ -9,6 +9,7 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
+        // https://msdn.microsoft.com/en-us/library/windows/desktop/aa364953.aspx
         [DllImport(Libraries.Kernel32, SetLastError = true, CharSet = CharSet.Unicode, ExactSpelling = true)]
         public unsafe static extern bool GetFileInformationByHandleEx(
             IntPtr hFile,

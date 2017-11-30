@@ -22,10 +22,10 @@ namespace System.IO
                 switch (error)
                 {
                     case Interop.Errors.ERROR_NO_MORE_FILES:
-                        NoMoreFiles();
+                        DirectoryFinished();
                         return false;
                     default:
-                        throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error(), _currentPath);
+                        throw Win32Marshal.GetExceptionForWin32Error(error, _currentPath);
                 }
             }
 

@@ -783,20 +783,21 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Search pattern with double dots throws ArgumentException
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void WindowsSearchPatternWithDoubleDots_Desktop()
         {
+            // Search pattern with double dots throws ArgumentException
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "abc..")));
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, ".."));
             Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, @".." + Path.DirectorySeparatorChar));
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Search pattern with double dots throws ArgumentException
+        [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void WindowsSearchPatternWithDoubleDots_Core()
         {
+            // Search pattern with double dots no longer throws ArgumentException
             string directory = Directory.CreateDirectory(GetTestFilePath()).FullName;
             Assert.Throws<DirectoryNotFoundException>(() => GetEntries(directory, Path.Combine("..ab ab.. .. abc..d", "abc..")));
             GetEntries(directory, "..");
@@ -1015,13 +1016,13 @@ namespace System.IO.Tests
             // search pattern is valid but directory doesn't exist
             Assert.Throws<DirectoryNotFoundException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "abc..")));
 
-            // invalid search pattern trying to go up a directory with ..
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, ".."));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, @".." + Path.DirectorySeparatorChar));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "abc", "..")));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "..", "abc")));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..", "..ab ab.. .. abc..d", "abc")));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..", "..ab ab.. .. abc..d", "abc") + Path.DirectorySeparatorChar));
+            string directory = Directory.CreateDirectory(GetTestFilePath()).FullName;
+            GetEntries(directory, "..");
+            GetEntries(directory, @".." + Path.DirectorySeparatorChar);
+            GetEntries(directory, Path.Combine("..ab ab.. .. abc..d", "abc", ".."));
+            GetEntries(directory, Path.Combine("..ab ab.. .. abc..d", "..", "abc"));
+            GetEntries(directory, Path.Combine("..", "..ab ab.. .. abc..d", "abc"));
+            GetEntries(directory, Path.Combine("..", "..ab ab.. .. abc..d", "abc") + Path.DirectorySeparatorChar);
         }
 
         #endregion

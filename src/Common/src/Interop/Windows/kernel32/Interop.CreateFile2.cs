@@ -11,6 +11,7 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
+        // https://msdn.microsoft.com/en-us/library/windows/desktop/hh449422.aspx
         [DllImport(Libraries.Kernel32, EntryPoint = "CreateFile2", SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
         internal unsafe static extern IntPtr CreateFile2(
             string lpFileName,

@@ -30,7 +30,7 @@ namespace System.IO
             switch ((uint)status)
             {
                 case Interop.StatusOptions.STATUS_NO_MORE_FILES:
-                    NoMoreFiles();
+                    DirectoryFinished();
                     return false;
                 case Interop.StatusOptions.STATUS_SUCCESS:
                     Debug.Assert(statusBlock.Information.ToInt64() != 0);

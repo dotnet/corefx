@@ -10,7 +10,8 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
-        [DllImport(Libraries.Kernel32, SetLastError = true)]
+        // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365539.aspx
+        [DllImport(Libraries.Kernel32, SetLastError = true, ExactSpelling = true)]
         internal static extern bool SetFileInformationByHandle(SafeFileHandle hFile, FILE_INFO_BY_HANDLE_CLASS FileInformationClass, ref FILE_BASIC_INFO lpFileInformation, uint dwBufferSize);
 
         // Default values indicate "no change".  Use defaults so that we don't force callsites to be aware of the default values

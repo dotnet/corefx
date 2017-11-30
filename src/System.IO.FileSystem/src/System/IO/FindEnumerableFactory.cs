@@ -28,8 +28,7 @@ namespace System.IO
             }
 
             // Historically we always treated "." as "*"
-            if (string.IsNullOrEmpty(expression)
-                || expression == "." || expression == "*.*")
+            if (string.IsNullOrEmpty(expression) || expression == "." || expression == "*.*")
                 expression = "*";
         }
 

@@ -13,8 +13,7 @@ namespace System.IO
             else if (value.Length > span.Length)
                 return false;
 
-            if (span.Length != value.Length)
-                span = span.Slice(span.Length - value.Length);
+            span = span.Slice(span.Length - value.Length);
 
             if (ignoreCase == false)
                 return span.SequenceEqual(value);

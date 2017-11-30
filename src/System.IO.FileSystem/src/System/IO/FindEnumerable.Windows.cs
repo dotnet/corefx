@@ -25,7 +25,7 @@ namespace System.IO
         private int _enumeratorCreated;
 
         private Interop.NtDll.FILE_FULL_DIR_INFORMATION* _info;
-        TResult _current;
+        private TResult _current;
 
         private byte[] _buffer;
         private IntPtr _directoryHandle;
@@ -148,6 +148,7 @@ namespace System.IO
                             IntPtr subDirectoryHandle = CreateDirectoryHandle(subDirectory);
                             try
                             {
+                                // It is possible this might allocate and run out of memory
                                 _pending.Enqueue((subDirectoryHandle, subDirectory));
                             }
                             catch
@@ -184,7 +185,7 @@ namespace System.IO
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void NoMoreFiles()
+        public void DirectoryFinished()
         {
             _info = null;
             if (_pending == null || _pending.Count == 0)
@@ -194,10 +195,8 @@ namespace System.IO
             else
             {
                 // Grab the next directory to parse
-                (IntPtr Handle, string Path) next = _pending.Dequeue();
                 Interop.Kernel32.CloseHandle(_directoryHandle);
-                _directoryHandle = next.Handle;
-                _currentPath = next.Path;
+                (_directoryHandle, _currentPath) = _pending.Dequeue();
                 FindNextFile();
             }
         }

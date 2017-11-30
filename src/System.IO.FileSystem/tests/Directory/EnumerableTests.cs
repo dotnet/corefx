@@ -9,9 +9,10 @@ using Xunit;
 
 namespace System.IO.Tests
 {
-    public class Regressions : FileSystemTest
+    public class EnumerableTests : FileSystemTest
     {
         [Fact]
+        [ActiveIssue(25613, TestPlatforms.AnyUnix)]
         public void FileEnumeratorIsThreadSafe()
         {
             string directory = Directory.CreateDirectory(GetTestFilePath()).FullName;
@@ -25,32 +26,35 @@ namespace System.IO.Tests
         {
             volatile IEnumerator<string> _enumerator;
 
-            void Race(IEnumerator<string> s)
+            void Enumerate(IEnumerator<string> s)
             {
                 while (s.MoveNext())
                 { }
                 s.Dispose();
             }
 
-            void Work()
-            {
-                do
-                {
-                    IEnumerator<string> x = _enumerator;
-                    if (x != null)
-                        Race(x);
-                } while (true);
-            }
-
             public void Execute(string directory)
             {
                 CancellationTokenSource source = new CancellationTokenSource();
-                new Task(Work, source.Token).Start();
-                new Task(Work, source.Token).Start();
+                CancellationToken token = source.Token;
+
+                void Work()
+                {
+                    do
+                    {
+                        IEnumerator<string> x = _enumerator;
+                        if (x != null)
+                            Enumerate(x);
+                    } while (!token.IsCancellationRequested);
+                    token.ThrowIfCancellationRequested();
+                }
+
+                new Task(Work, token).Start();
+                new Task(Work, token).Start();
                 for (int i = 0; i < 1000; i++)
                 {
                     _enumerator = Directory.EnumerateFiles(directory).GetEnumerator();
-                    Race(_enumerator);
+                    Enumerate(_enumerator);
                 }
                 source.Cancel();
             }

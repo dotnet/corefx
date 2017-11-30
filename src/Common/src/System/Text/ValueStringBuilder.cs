@@ -21,7 +21,18 @@ namespace System.Text
             _pos = 0;
         }
 
-        public int Length => _pos;
+        public int Length
+        {
+            get => _pos;
+            set
+            {
+                if (value > _chars.Length)
+                {
+                    Grow(value - _chars.Length);
+                }
+                _pos = value;
+            }
+        }
 
         public override string ToString()
         {

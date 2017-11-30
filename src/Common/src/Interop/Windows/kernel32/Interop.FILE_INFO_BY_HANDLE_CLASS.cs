@@ -6,6 +6,7 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
+        // https://msdn.microsoft.com/en-us/library/windows/desktop/aa364228.aspx
         internal enum FILE_INFO_BY_HANDLE_CLASS : uint
         {
             // Up to FileRemoteProtocolInfo available in Windows 7
