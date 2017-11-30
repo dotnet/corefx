@@ -2,34 +2,33 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
-    <ProjectGuid>{A622B2C0-DD74-4218-9CF0-F9B2E52F4E91}</ProjectGuid>
+    <ProjectGuid>{CEA807FB-1F86-4674-B5C1-95FCFC54519D}</ProjectGuid>
+    <TestFeedFolder>$(MsBuildThisFileDirectory)\..\TestFeeds\</TestFeedFolder>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="$(MsBuildThisFileDirectory)**\*.cs" Exclude="$(MsBuildThisFileDirectory)netcoreapp\**\*.cs" />
+    <Compile Include="$(MsBuildThisFileDirectory)\..\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\*.xml">
+    <Content Include="$(TestFeedFolder)*.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\AtomFeeds\*.xml">
+    <Content Include="$(TestFeedFolder)AtomFeeds\*.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\RssFeeds\*.xml">
+    <Content Include="$(TestFeedFolder)RssFeeds\*.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\FailureFeeds\*.xml">
+    <Content Include="$(TestFeedFolder)FailureFeeds\*.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="$(MsBuildThisFileDirectory)\TestFeeds\atom_feeds.dat">
+    <Content Include="$(TestFeedFolder)atom_feeds.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="$(MsBuildThisFileDirectory)\TestFeeds\rss_feeds.dat">
+    </Content>
+    <Content Include="$(TestFeedFolder)rss_feeds.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
