@@ -851,47 +851,59 @@ namespace System.Net.Http
             return _stream.WriteAsync(source, cancellationToken);
         }
 
-        private async ValueTask<ArraySegment<byte>> ReadNextLineAsync(CancellationToken cancellationToken)
+        private (bool, ArraySegment<byte>) TryReadNextLine()
         {
-            int searchOffset = 0;
+            int pos = Array.IndexOf(_readBuffer, (byte)'\r', _readOffset, _readLength - _readOffset);
+            if (pos < 0 || pos + 1 >= _readLength)
+            {
+                return (false, default(ArraySegment<byte>));
+            }
+
+            if (_readBuffer[pos + 1] == '\n')
+            {
+                // We found a \r\n.  Return the data up to and including it.
+                int lineLength = pos - _readOffset + 2;
+                var result = new ArraySegment<byte>(_readBuffer, _readOffset, lineLength);
+                _readOffset += lineLength;
+                return (true, result);
+            }
+            else
+            {
+                // Found CR without LF
+                throw new HttpRequestException(SR.net_http_invalid_response);
+            }
+        }
+
+        private async ValueTask<ArraySegment<byte>> ReadNextLineSlowAsync(CancellationToken cancellationToken)
+        {
             while (true)
             {
-                int startIndex = _readOffset + searchOffset;
-                int length = _readLength - startIndex;
-                int crPos = Array.IndexOf(_readBuffer, (byte)'\r', startIndex, length);
-                if (crPos < 0)
+                await FillAsync(cancellationToken).ConfigureAwait(false);
+                (bool success, ArraySegment<byte> result) = TryReadNextLine();
+                if (success)
                 {
-                    // Couldn't find a \r.  Read more.
-                    searchOffset = length;
-                    await FillAsync(cancellationToken).ConfigureAwait(false);
-                }
-                else if (crPos + 1 >= _readLength)
-                {
-                    // We found a \r, but we don't have enough data buffered to read the \n.
-                    searchOffset = length - 1;
-                    await FillAsync(cancellationToken).ConfigureAwait(false);
-                }
-                else if (_readBuffer[crPos + 1] == '\n')
-                {
-                    // We found a \r\n.  Return the data up to and including it.
-                    int lineLength = crPos - _readOffset + 2;
-                    var result = new ArraySegment<byte>(_readBuffer, _readOffset, lineLength);
-                    _readOffset += lineLength;
                     return result;
-                }
-                else
-                {
-                    ThrowInvalidHttpResponse();
                 }
             }
         }
 
-        private async Task ReadCrLfAsync(CancellationToken cancellationToken)
+        private ValueTask<ArraySegment<byte>> ReadNextLineAsync(CancellationToken cancellationToken)
         {
-            while (_readLength - _readOffset < 2)
+            (bool success, ArraySegment<byte> result) = TryReadNextLine();
+            if (success)
             {
-                // We have fewer than 2 chars buffered.  Get more.
-                await FillAsync(cancellationToken).ConfigureAwait(false);
+                return new ValueTask<ArraySegment<byte>>(result);
+            }
+
+            return ReadNextLineSlowAsync(cancellationToken);
+        }
+
+        private bool TryReadCrLf()
+        {
+            if (_readLength - _readOffset < 2)
+            {
+                // Need more data
+                return false;
             }
 
             // We expect \r\n.  If so, consume them.  If not, it's an error.
@@ -901,6 +913,29 @@ namespace System.Net.Http
             }
 
             _readOffset += 2;
+            return true;
+        }
+
+        private async Task ReadCrLfSlowAsync(CancellationToken cancellationToken)
+        {
+            while (true)
+            {
+                await FillAsync(cancellationToken).ConfigureAwait(false);
+                if (TryReadCrLf())
+                {
+                    return;
+                }
+            }
+        }
+
+        private Task ReadCrLfAsync(CancellationToken cancellationToken)
+        {
+            if (TryReadCrLf())
+            {
+                return Task.CompletedTask;
+            }
+
+            return ReadCrLfSlowAsync(cancellationToken);
         }
 
         // Throws IOException on EOF.  This is only called when we expect more data.
