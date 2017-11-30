@@ -249,7 +249,7 @@ namespace System.Linq.Expressions.Tests
     {
         private static readonly IEnumerable<object[]> Booleans = new[]
         {
-#if FEATURE_COMPILE && FEATURE_INTERPRET
+#if FEATURE_COMPILE
             new object[] {false},
 #endif
             new object[] {true},
@@ -457,11 +457,9 @@ namespace System.Linq.Expressions.Tests
         {
 #if FEATURE_COMPILE
             expression.VerifyIL(il);
-#endif
 
             // FEATURE_COMPILE is not directly required, 
             // but this functionality relies on private reflection and that would not work with AOT
-#if FEATURE_INTERPRET && FEATURE_COMPILE
             expression.VerifyInstructions(instructions);
 #endif
         }

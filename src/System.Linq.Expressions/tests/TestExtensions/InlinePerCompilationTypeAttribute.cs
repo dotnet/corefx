@@ -12,10 +12,10 @@ namespace System.Linq.Expressions.Tests
     {
         private static readonly object[] s_boxedBooleans =
         {
+#if FEATURE_COMPILE
             false,
-#if FEATURE_COMPILE && FEATURE_INTERPRET
-            true
 #endif
+            true
         };
 
         private readonly object[] _data;
