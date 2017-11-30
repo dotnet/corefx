@@ -27,11 +27,7 @@ namespace System.IO.Tests
             {
                 new ThreadSafeRepro().Execute(directory);
             }
-            catch (IOException)
-            {
-                throw;
-            }
-            catch (Exception)
+            catch (Exception e) when (!(e is IOException))
             {
             }
         }

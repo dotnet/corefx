@@ -26,11 +26,15 @@ namespace System.Text
             get => _pos;
             set
             {
-                if (value > _chars.Length)
+                int delta = value - _pos;
+                if (delta > 0)
                 {
-                    Grow(value - _chars.Length);
+                    Append('\0', delta);
                 }
-                _pos = value;
+                else
+                {
+                    _pos = value;
+                }
             }
         }
 
