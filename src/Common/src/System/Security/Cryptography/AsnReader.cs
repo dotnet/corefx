@@ -1641,6 +1641,7 @@ namespace System.Security.Cryptography.Asn1
             return oid;
         }
 
+        // T-REC-X.690-201508 sec 8.23
         private bool TryCopyCharacterStringBytes(
             Asn1Tag expectedTag,
             UniversalTagNumber universalTagNumber,
@@ -1648,6 +1649,7 @@ namespace System.Security.Cryptography.Asn1
             out int bytesRead,
             out int bytesWritten)
         {
+            // T-REC-X.690-201508 sec 8.23.3, all character strings are encoded as octet strings.
             if (TryGetPrimitiveOctetStringBytes(
                 expectedTag,
                 out Asn1Tag actualTag,
@@ -1757,6 +1759,7 @@ namespace System.Security.Cryptography.Asn1
 
             try
             {
+                // T-REC-X.690-201508 sec 8.23.3, all character strings are encoded as octet strings.
                 CopyConstructedOctetString(source, rented, isIndefinite, out int bytesRead, out int bytesWritten);
                 Debug.Assert(bytesWritten == bytesLength);
 
@@ -1786,6 +1789,8 @@ namespace System.Security.Cryptography.Asn1
             Span<char> dest,
             CharacterStringProcessor processor)
         {
+            // T-REC-X.690-201508 sec 8.23.3, all character strings are encoded as octet strings.
+
             if (TryGetPrimitiveOctetStringBytes(
                 expectedTag,
                 out Asn1Tag actualTag,
@@ -1908,6 +1913,8 @@ namespace System.Security.Cryptography.Asn1
             out ReadOnlyMemory<byte> contents)
         {
             CheckCharacterStringEncodingType(encodingType);
+
+            // T-REC-X.690-201508 sec 8.23.3, all character strings are encoded as octet strings.
             return TryGetPrimitiveOctetStringBytes(expectedTag, encodingType, out contents);
         }
 

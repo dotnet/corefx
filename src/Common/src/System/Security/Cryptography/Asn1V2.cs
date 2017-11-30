@@ -590,6 +590,9 @@ namespace System.Security.Cryptography.Asn1
     /// <summary>
     /// Big-Endian UCS-2 encoding (the same as UTF-16BE, but disallowing surrogate pairs to leave plane 0)
     /// </summary>
+    // T-REC-X.690-201508 sec 8.23.8 says to see ISO/IEC 10646:2003 section 13.1.
+    // ISO/IEC 10646:2003 sec 13.1 says each character is represented by "two octets".
+    // ISO/IEC 10646:2003 sec 6.3 says that when serialized as octets to use big endian.
     internal class BMPEncoding : SpanBasedEncoding
     {
         protected override int GetBytes(ReadOnlySpan<char> chars, Span<byte> bytes, bool write)
