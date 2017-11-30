@@ -1,5 +1,4 @@
-# Using BenchmarkDotNet
-In this example we are using BenchmarkDotNet (https://github.com/dotnet/BenchmarkDotNet) for our testing. Make sure to use the latest version which allows to specify a custom SKD path.
+In this example we are using **BenchmarkDotNet** (https://github.com/dotnet/BenchmarkDotNet) for our testing. Make sure to use the latest version which allows to specify a custom SKD path.
 
 ```
 <ItemGroup>
@@ -18,12 +17,12 @@ In this tutorial we won't modify the `PATH` variable and instead always explicit
 Check which version of the shared framework is bundled with the downloaded SDK and remember it for later. At the time writing this documentation it was `2.1.0-preview1-25919-02`.
 > C:\Program Files\dotnet-nightly\shared\Microsoft.NETCore.App\2.1.0-preview1-25919-02
 
+## Shared framework
 You can either decide to use your local self-compiled shared framework package or use the one from the .NET Core 2.1 SDK.
 
-## Using the shared framework from the .NET Core 2.1 SDK
+### Using the shared framework from the .NET Core 2.1 SDK
 Follow the instructions described here https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/dogfooding.md#advanced-scenario---using-a-nightly-build-of-microsoftnetcoreapp and skip the last part which calls the `dotnet.exe`.
 
-### Configuring BenchmarkDotNet to use the .NET Core 2.1 SDK
 Now we are going to create a BenchmarkDotNet configuration file to set the path to the .NET Core 2.1 SDK
 
 ```
@@ -54,24 +53,12 @@ public class MainConfig : ManualConfig
 }
 ```
 
-Pass the configuration to the BenchmarkRunner.
 
-### Executing
 
-As mentioned before, instead of calling the dotnet in the `PATH` we call the `dotnet.exe` explicitely from the downloaded SDK folder:
-
-```
-> cd "path/to/your/benchmark/project"
-> "C:\Program Files\dotnet-nightly\dotnet.exe" restore
-> "C:\Program Files\dotnet-nightly\dotnet.exe" build -c Release
-> "C:\Program Files\dotnet-nightly\dotnet.exe" run -c Release
-```
-
-## Using your self-compiled shared framework
+### Using your self-compiled shared framework
 Follow the instructions described here https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/dogfooding.md#more-advanced-scenario---using-your-local-corefx-build and skip the last part which calls the `dotnet.exe`.
 Make sure to build your local corefx repository in RELEASE mode `.\build -release`! You currently need to have a self-contained application to inject your local shared framework package.
 
-### Configuring BenchmarkDotNet to use the .NET Core 2.1 SDK
 Now we are going to create a BenchmarkDotNet configuration file. Currently there is no easy way to run your BenchmarkDotNet application in a dedicated process, therefore we are using the InProcess switch:
 
 ```
@@ -97,9 +84,13 @@ public class MainConfig : ManualConfig
 }
 ```
 
-### Executing
+## Running the benchmark
 
-As mentioned before, instead of calling the dotnet in the `PATH` we call the `dotnet.exe` explicitely from the downloaded SDK folder:
+In your application entry point pass the configuration to the BenchmarkRunner:
+`BenchmarkRunner.Run<T>(new MainConfig()); // <-- Configuration class`
+
+As mentioned before, instead of calling the dotnet in the `PATH` we call the `dotnet.exe` explicitely from the downloaded SDK folder.
+To get valid results make sure to compile and run your project with RELEASE configuration:
 
 ```
 > cd "path/to/your/benchmark/project"
