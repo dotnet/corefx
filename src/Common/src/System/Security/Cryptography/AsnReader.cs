@@ -220,7 +220,7 @@ namespace System.Security.Cryptography.Asn1
             while (!cur.IsEmpty)
             {
                 AsnReader reader = new AsnReader(cur, ruleSet);
-                Asn1Tag tag = reader.ReadTagAndLength(out int ? length, out int bytesRead);
+                Asn1Tag tag = reader.ReadTagAndLength(out int? length, out int bytesRead);
                 ReadOnlyMemory<byte> nestedContents = reader.PeekContentBytes();
 
                 int localLen = bytesRead + nestedContents.Length;
@@ -264,7 +264,7 @@ namespace System.Security.Cryptography.Asn1
         /// <seealso cref="GetEncodedValue"/>
         public ReadOnlyMemory<byte> PeekEncodedValue()
         {
-            Asn1Tag tag = ReadTagAndLength(out int ? length, out int bytesRead);
+            Asn1Tag tag = ReadTagAndLength(out int? length, out int bytesRead);
 
             if (length == null)
             {
@@ -287,7 +287,7 @@ namespace System.Security.Cryptography.Asn1
         /// <seealso cref="PeekEncodedValue"/>
         public ReadOnlyMemory<byte> PeekContentBytes()
         {
-            Asn1Tag tag = ReadTagAndLength(out int ? length, out int bytesRead);
+            Asn1Tag tag = ReadTagAndLength(out int? length, out int bytesRead);
 
             if (length == null)
             {
@@ -346,7 +346,7 @@ namespace System.Security.Cryptography.Asn1
 
         public bool ReadBoolean(Asn1Tag expectedTag)
         {
-            Asn1Tag tag = ReadTagAndLength(out int ? length, out int headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int? length, out int headerLength);
             CheckExpectedTag(tag, expectedTag, UniversalTagNumber.Boolean);
 
             // T-REC-X.690-201508 sec 8.2.1
@@ -368,7 +368,7 @@ namespace System.Security.Cryptography.Asn1
             UniversalTagNumber tagNumber,
             out int headerLength)
         {
-            Asn1Tag tag = ReadTagAndLength(out int ? length, out headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int? length, out headerLength);
             CheckExpectedTag(tag, expectedTag, tagNumber);
 
             // T-REC-X.690-201508 sec 8.3.1
@@ -1509,7 +1509,7 @@ namespace System.Security.Cryptography.Asn1
 
         public void ReadNull(Asn1Tag expectedTag)
         {
-            Asn1Tag tag = ReadTagAndLength(out int ? length, out int headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int? length, out int headerLength);
             CheckExpectedTag(tag, expectedTag, UniversalTagNumber.Null);
 
             // T-REC-X.690-201508 sec 8.8.1
@@ -1556,7 +1556,7 @@ namespace System.Security.Cryptography.Asn1
 
         private string ReadObjectIdentifierAsString(Asn1Tag expectedTag, out int totalBytesRead)
         {
-            Asn1Tag tag = ReadTagAndLength(out int ? length, out int headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int? length, out int headerLength);
             CheckExpectedTag(tag, expectedTag, UniversalTagNumber.ObjectIdentifier);
 
             // T-REC-X.690-201508 sec 8.19.1
@@ -1981,7 +1981,7 @@ namespace System.Security.Cryptography.Asn1
 
         public AsnReader ReadSequence(Asn1Tag expectedTag)
         {
-            Asn1Tag tag = ReadTagAndLength(out int ? length, out int headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int? length, out int headerLength);
             CheckExpectedTag(tag, expectedTag, UniversalTagNumber.Sequence);
 
             // T-REC-X.690-201508 sec 8.9.1
@@ -2023,7 +2023,7 @@ namespace System.Security.Cryptography.Asn1
 
         public AsnReader ReadSetOf(Asn1Tag expectedTag, bool skipSortOrderValidation = false)
         {
-            Asn1Tag tag = ReadTagAndLength(out int ? length, out int headerLength);
+            Asn1Tag tag = ReadTagAndLength(out int? length, out int headerLength);
             CheckExpectedTag(tag, expectedTag, UniversalTagNumber.SetOf);
 
             // T-REC-X.690-201508 sec 8.12.1
