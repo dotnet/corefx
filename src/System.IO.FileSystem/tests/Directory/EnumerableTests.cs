@@ -19,7 +19,21 @@ namespace System.IO.Tests
             for (int i = 0; i < 100; i++)
                 File.Create(Path.Combine(directory, GetTestFileName())).Dispose();
 
-            new ThreadSafeRepro().Execute(directory);
+            // We are really only trying to make sure we don't terminate the process.
+            // Throwing IOException at this point to try and flush out other problems
+            // like bad handles. Can narrow the throw if this isn't reliable.
+
+            try
+            {
+                new ThreadSafeRepro().Execute(directory);
+            }
+            catch (IOException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+            }
         }
 
         class ThreadSafeRepro
@@ -46,17 +60,24 @@ namespace System.IO.Tests
                         if (x != null)
                             Enumerate(x);
                     } while (!token.IsCancellationRequested);
-                    token.ThrowIfCancellationRequested();
                 }
 
-                new Task(Work, token).Start();
-                new Task(Work, token).Start();
-                for (int i = 0; i < 1000; i++)
+                Task taskOne = Task.Run(action: Work);
+                Task taskTwo = Task.Run(action: Work);
+
+                try
                 {
-                    _enumerator = Directory.EnumerateFiles(directory).GetEnumerator();
-                    Enumerate(_enumerator);
+                    for (int i = 0; i < 1000; i++)
+                    {
+                        _enumerator = Directory.EnumerateFiles(directory).GetEnumerator();
+                        Enumerate(_enumerator);
+                    }
                 }
-                source.Cancel();
+                finally
+                {
+                    source.Cancel();
+                    Task.WaitAll(taskOne, taskTwo);
+                }
             }
         }
     }

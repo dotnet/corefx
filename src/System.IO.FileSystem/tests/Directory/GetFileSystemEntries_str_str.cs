@@ -793,15 +793,19 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public void WindowsSearchPatternWithDoubleDots_Core()
+        public void SearchPatternWithDoubleDots_Core()
         {
             // Search pattern with double dots no longer throws ArgumentException
             string directory = Directory.CreateDirectory(GetTestFilePath()).FullName;
             Assert.Throws<DirectoryNotFoundException>(() => GetEntries(directory, Path.Combine("..ab ab.. .. abc..d", "abc..")));
             GetEntries(directory, "..");
             GetEntries(directory, @".." + Path.DirectorySeparatorChar);
+
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(directory, Path.Combine("..ab ab.. .. abc..d", "abc", "..")));
+            GetEntries(directory, Path.Combine("..ab ab.. .. abc..d", "..", "abc"));
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(directory, Path.Combine("..", "..ab ab.. .. abc..d", "abc")));
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(directory, Path.Combine("..", "..ab ab.. .. abc..d", "abc") + Path.DirectorySeparatorChar));
         }
 
         private static char[] OldWildcards = new char[] { '*', '?' };
@@ -1007,22 +1011,6 @@ namespace System.IO.Tests
 
                 Assert.Contains(Path.Combine(testDir.FullName, valid), GetEntries(testDir.FullName, valid));
             }
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Search pattern with DoubleDots on Unix
-        public void UnixSearchPatternWithDoubleDots()
-        {
-            // search pattern is valid but directory doesn't exist
-            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "abc..")));
-
-            string directory = Directory.CreateDirectory(GetTestFilePath()).FullName;
-            GetEntries(directory, "..");
-            GetEntries(directory, @".." + Path.DirectorySeparatorChar);
-            GetEntries(directory, Path.Combine("..ab ab.. .. abc..d", "abc", ".."));
-            GetEntries(directory, Path.Combine("..ab ab.. .. abc..d", "..", "abc"));
-            GetEntries(directory, Path.Combine("..", "..ab ab.. .. abc..d", "abc"));
-            GetEntries(directory, Path.Combine("..", "..ab ab.. .. abc..d", "abc") + Path.DirectorySeparatorChar);
         }
 
         #endregion
