@@ -1,3 +1,5 @@
+# Benchmarking .NET Core 2.0 / 2.1 applications
+
 In this example we are using **BenchmarkDotNet** (https://github.com/dotnet/BenchmarkDotNet) for our testing. Make sure to use the latest version which allows to specify a custom SKD path.
 
 ```
