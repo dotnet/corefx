@@ -4,31 +4,18 @@
 
 internal partial class Interop
 {
-    internal struct BOOLEAN
+    /// <summary>
+    /// Blittable version of Windows BOOLEAN type. It is convenient in situations where
+    /// manual marshalling is required, or to avoid overhead of regular bool marshalling.
+    /// </summary>
+    /// <remarks>
+    /// Some Windows APIs return arbitrary integer values although the return type is defined
+    /// as BOOLEAN. It is best to never compare BOOLEAN to TRUE. Always use bResult != BOOLEAN.FALSE
+    /// or bResult == BOOLEAN.FALSE .
+    /// </remarks>
+    internal enum BOOLEAN : byte
     {
-        internal byte RawValue;
-
-        internal BOOLEAN(bool b)
-        {
-            RawValue = b ? (byte)1 : (byte)0;
-        }
-
-        internal BOOLEAN(byte value)
-        {
-            RawValue = value;
-        }
-
-        internal bool IsTrue => RawValue != 0;
-
-        internal bool IsFalse => RawValue == 0;
-
-        public static implicit operator bool(BOOLEAN b) => b.IsTrue;
-
-        public static implicit operator BOOLEAN(bool b) => new BOOLEAN(b);
-
-        public override string ToString()
-        {
-            return IsTrue.ToString();
-        }
+        FALSE = 0,
+        TRUE = 1,
     }
 }

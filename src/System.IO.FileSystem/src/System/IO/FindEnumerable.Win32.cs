@@ -21,9 +21,9 @@ namespace System.IO
                 FileInformation: _buffer,
                 Length: (uint)_buffer.Length,
                 FileInformationClass: Interop.NtDll.FILE_INFORMATION_CLASS.FileFullDirectoryInformation,
-                ReturnSingleEntry: false,
+                ReturnSingleEntry: Interop.BOOLEAN.FALSE,
                 FileName: null,
-                RestartScan: false);
+                RestartScan: Interop.BOOLEAN.FALSE);
 
             switch ((uint)status)
             {

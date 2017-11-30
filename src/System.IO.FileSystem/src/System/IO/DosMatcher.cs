@@ -20,7 +20,7 @@ namespace System.IO
         /// Change '*' and '?' to '&lt;', '&gt;' and '"' to match Win32 behavior. For compatibility, Windows
         /// changes some wildcards to provide a closer match to historical DOS 8.3 filename matching.
         /// </summary>
-        public unsafe static string TranslateExpression(string expression)
+        internal static string TranslateExpression(string expression)
         {
             if (string.IsNullOrEmpty(expression) || expression == "*.*")
                 return "*";
@@ -72,7 +72,7 @@ namespace System.IO
         /// Like PatternMatcher, matching will not line up with Win32 behavior unless you transform the expression
         /// using <see cref="TranslateExpression(string)"/>
         /// </remarks>
-        public unsafe static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
+        internal static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
         {
             // The idea behind the algorithm is pretty simple. We keep track of all possible locations
             // in the regular expression that are matching the name. When the name has been exhausted,
