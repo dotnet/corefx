@@ -3,7 +3,7 @@
   <Import Project="..\dir.props" />
 
   <PropertyGroup>
-    <BuildingAnOfficialBuildLeg Condition="'$(OfficialBuildId)' != '' AND '$(DotNetBuildOffline)' != 'true'">true</BuildingAnOfficialBuildLeg>
+    <BuildingAnOfficialBuildLeg Condition="'$(BuildingAnOfficialBuildLeg)' == '' AND '$(OfficialBuildId)' != '' AND '$(DotNetBuildOffline)' != 'true'">true</BuildingAnOfficialBuildLeg>
   </PropertyGroup>
   
   <PropertyGroup>
