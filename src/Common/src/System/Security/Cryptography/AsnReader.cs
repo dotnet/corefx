@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Buffers.Text;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -2130,6 +2131,16 @@ namespace System.Security.Cryptography.Asn1
             throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
         }
 
+        private static int ParseNonNegativeInt(ReadOnlySpan<byte> data)
+        {
+            if (Utf8Parser.TryParse(data, out int value, out int consumed) && value >= 0 && consumed == data.Length)
+            {
+                return value;
+            }
+
+            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+        }
+
         private static DateTimeOffset ParseUtcTime(ReadOnlySpan<byte> contentOctets, int twoDigitYearMax)
         {
             // The full allowed formats (T-REC-X.680-201510 sec 47.3)
@@ -2154,11 +2165,11 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            int year = 10 * GetDigit(contentOctets[0]) + GetDigit(contentOctets[1]);
-            int month = 10 * GetDigit(contentOctets[2]) + GetDigit(contentOctets[3]);
-            int day = 10 * GetDigit(contentOctets[4]) + GetDigit(contentOctets[5]);
-            int hour = 10 * GetDigit(contentOctets[6]) + GetDigit(contentOctets[7]);
-            int minute = 10 * GetDigit(contentOctets[8]) + GetDigit(contentOctets[9]);
+            int year = ParseNonNegativeInt(contentOctets.Slice(0, 2));
+            int month = ParseNonNegativeInt(contentOctets.Slice(2, 2));
+            int day = ParseNonNegativeInt(contentOctets.Slice(4, 2));
+            int hour = ParseNonNegativeInt(contentOctets.Slice(6, 2));
+            int minute = ParseNonNegativeInt(contentOctets.Slice(8, 2));
             int second = 0;
             int offsetHour = 0;
             int offsetMinute = 0;
@@ -2182,12 +2193,12 @@ namespace System.Security.Cryptography.Asn1
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                offsetHour = 10 * GetDigit(contentOctets[11]) + GetDigit(contentOctets[12]);
-                offsetMinute = 10 * GetDigit(contentOctets[13]) + GetDigit(contentOctets[14]);
+                offsetHour = ParseNonNegativeInt(contentOctets.Slice(11, 2));
+                offsetMinute = ParseNonNegativeInt(contentOctets.Slice(13, 2));
             }
             else
             {
-                second = 10 * GetDigit(contentOctets[10]) + GetDigit(contentOctets[11]);
+                second = ParseNonNegativeInt(contentOctets.Slice(10, 2));
 
                 if (contentOctets.Length == AB2C1Length)
                 {
@@ -2209,8 +2220,8 @@ namespace System.Security.Cryptography.Asn1
                         throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                     }
 
-                    offsetHour = 10 * GetDigit(contentOctets[13]) + GetDigit(contentOctets[14]);
-                    offsetMinute = 10 * GetDigit(contentOctets[15]) + GetDigit(contentOctets[16]);
+                    offsetHour = ParseNonNegativeInt(contentOctets.Slice(13, 2));
+                    offsetMinute = ParseNonNegativeInt(contentOctets.Slice(15, 2));
                 }
             }
 
@@ -2268,7 +2279,7 @@ namespace System.Security.Cryptography.Asn1
             // Optimize for the CER/DER primitive encoding:
             if (TryGetPrimitiveOctetStringBytes(
                 expectedTag,
-                out Asn1Tag actualTag,
+                out _,
                 out _,
                 out int headerLength,
                 out ReadOnlyMemory<byte> primitiveOctets,
@@ -2280,9 +2291,11 @@ namespace System.Security.Cryptography.Asn1
                     _data = _data.Slice(headerLength + primitiveOctets.Length);
                     return value;
                 }
-            }
 
-            Debug.Assert(actualTag.IsConstructed);
+                // A BER UtcTime with a format other than A1B2C1 will fall to the copy path,
+                // but it's not very common and it saves duplicating the "CER and DER prohibit this"
+                // checks.
+            }
 
             // T-REC-X.690-201510 sec 11.8
             if (_ruleSet == AsnEncodingRules.DER || _ruleSet == AsnEncodingRules.CER)
