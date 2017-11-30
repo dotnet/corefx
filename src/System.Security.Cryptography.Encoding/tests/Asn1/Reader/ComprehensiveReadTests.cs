@@ -26,7 +26,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             AsnReader sigAlgReader = certReader.ReadSequence();
 
             Assert.True(
-                certReader.TryGetBitStringBytes(
+                certReader.TryGetPrimitiveBitStringValue(
                     out int unusedBitCount,
                     out ReadOnlyMemory<byte> signature),
                 "certReader.TryGetBitStringBytes");
@@ -86,7 +86,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.False(spkiAlgorithm.HasData, "spkiAlgorithm.HasData");
 
             Assert.True(
-                subjectPublicKeyInfo.TryGetBitStringBytes(
+                subjectPublicKeyInfo.TryGetPrimitiveBitStringValue(
                     out unusedBitCount,
                     out ReadOnlyMemory<byte> encodedPublicKey),
                 "subjectPublicKeyInfo.TryGetBitStringBytes");

@@ -107,7 +107,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             ReadOnlyMemory<byte> publicKeyValue;
             int unusedBitCount;
 
-            if (!spkiReader.TryGetBitStringBytes(out unusedBitCount, out publicKeyValue))
+            if (!spkiReader.TryGetPrimitiveBitStringValue(out unusedBitCount, out publicKeyValue))
             {
                 // The correct answer is 65 bytes.
                 for (int i = 10; ; i *= 2)

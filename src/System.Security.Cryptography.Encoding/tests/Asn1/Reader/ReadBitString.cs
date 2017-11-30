@@ -26,7 +26,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            bool didRead = reader.TryGetBitStringBytes(
+            bool didRead = reader.TryGetPrimitiveBitStringValue(
                 out int unusedBitCount,
                 out ReadOnlyMemory<byte> contents);
 
@@ -50,7 +50,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            bool didRead = reader.TryGetBitStringBytes(
+            bool didRead = reader.TryGetPrimitiveBitStringValue(
                 out int unusedBitCount,
                 out ReadOnlyMemory<byte> contents);
 
@@ -81,7 +81,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Throws<CryptographicException>(
                 () =>
                 {
-                    reader.TryGetBitStringBytes(
+                    reader.TryGetPrimitiveBitStringValue(
                         out int unusedBitCount,
                         out ReadOnlyMemory<byte> contents);
                 });
@@ -107,7 +107,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Throws<CryptographicException>(
                 () =>
                 {
-                    reader.TryGetBitStringBytes(
+                    reader.TryGetPrimitiveBitStringValue(
                         out int unusedBitCount,
                         out ReadOnlyMemory<byte> contents);
                 });
@@ -138,7 +138,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             AsnReader reader = new AsnReader(input, AsnEncodingRules.CER);
 
-            bool success = reader.TryGetBitStringBytes(
+            bool success = reader.TryGetPrimitiveBitStringValue(
                 out int unusedBitCount,
                 out ReadOnlyMemory<byte> contents);
 
@@ -532,16 +532,16 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             AssertExtensions.Throws<ArgumentException>(
                 "expectedTag",
-                () => reader.TryGetBitStringBytes(Asn1Tag.Null, out _, out _));
+                () => reader.TryGetPrimitiveBitStringValue(Asn1Tag.Null, out _, out _));
 
             Assert.True(reader.HasData, "HasData after bad universal tag");
 
             Assert.Throws<CryptographicException>(
-                () => reader.TryGetBitStringBytes(new Asn1Tag(TagClass.ContextSpecific, 0), out _, out _));
+                () => reader.TryGetPrimitiveBitStringValue(new Asn1Tag(TagClass.ContextSpecific, 0), out _, out _));
 
             Assert.True(reader.HasData, "HasData after wrong tag");
 
-            Assert.True(reader.TryGetBitStringBytes(out int unusedBitCount, out ReadOnlyMemory<byte> contents));
+            Assert.True(reader.TryGetPrimitiveBitStringValue(out int unusedBitCount, out ReadOnlyMemory<byte> contents));
             Assert.Equal("7E", contents.ByteArrayToHex());
             Assert.Equal(1, unusedBitCount);
             Assert.False(reader.HasData, "HasData after read");
@@ -558,26 +558,26 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             AssertExtensions.Throws<ArgumentException>(
                 "expectedTag",
-                () => reader.TryGetBitStringBytes(Asn1Tag.Null, out _, out _));
+                () => reader.TryGetPrimitiveBitStringValue(Asn1Tag.Null, out _, out _));
 
             Assert.True(reader.HasData, "HasData after bad universal tag");
 
-            Assert.Throws<CryptographicException>(() => reader.TryGetBitStringBytes(out _, out _));
+            Assert.Throws<CryptographicException>(() => reader.TryGetPrimitiveBitStringValue(out _, out _));
 
             Assert.True(reader.HasData, "HasData after default tag");
 
             Assert.Throws<CryptographicException>(
-                () => reader.TryGetBitStringBytes(new Asn1Tag(TagClass.Application, 0), out _, out _));
+                () => reader.TryGetPrimitiveBitStringValue(new Asn1Tag(TagClass.Application, 0), out _, out _));
 
             Assert.True(reader.HasData, "HasData after wrong custom class");
 
             Assert.Throws<CryptographicException>(
-                () => reader.TryGetBitStringBytes(new Asn1Tag(TagClass.ContextSpecific, 1), out _, out _));
+                () => reader.TryGetPrimitiveBitStringValue(new Asn1Tag(TagClass.ContextSpecific, 1), out _, out _));
 
             Assert.True(reader.HasData, "HasData after wrong custom tag value");
 
             Assert.True(
-                reader.TryGetBitStringBytes(
+                reader.TryGetPrimitiveBitStringValue(
                     new Asn1Tag(TagClass.ContextSpecific, 7),
                     out int unusedBitCount,
                     out ReadOnlyMemory<byte> contents));
@@ -604,7 +604,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
             Assert.True(
-                reader.TryGetBitStringBytes(
+                reader.TryGetPrimitiveBitStringValue(
                     new Asn1Tag((TagClass)tagClass, tagValue, true),
                     out int ubc1,
                     out ReadOnlyMemory<byte> val1));
@@ -614,7 +614,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
             Assert.True(
-                reader.TryGetBitStringBytes(
+                reader.TryGetPrimitiveBitStringValue(
                     new Asn1Tag((TagClass)tagClass, tagValue, false),
                     out int ubc2,
                     out ReadOnlyMemory<byte> val2));

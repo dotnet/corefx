@@ -929,25 +929,16 @@ namespace System.Security.Cryptography.Asn1
             return false;
         }
 
-        private static bool TryCopyPrimitiveBitStringValue(
+        private void ParsePrimitiveBitStringContents(
             ReadOnlyMemory<byte> source,
-            Span<byte> destination,
-            bool write,
-            bool requireBerMaskMatch,
-            AsnEncodingRules ruleSet,
             out int unusedBitCount,
-            out int bytesWritten)
+            out ReadOnlyMemory<byte> value,
+            out byte? normalizedLastByte)
         {
             // T-REC-X.690-201508 sec 9.2
-            if (ruleSet == AsnEncodingRules.CER && source.Length > MaxCERSegmentSize)
+            if (_ruleSet == AsnEncodingRules.CER && source.Length > MaxCERSegmentSize)
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-
-            if (write && destination.Length < source.Length - 1)
-            {
-                unusedBitCount = bytesWritten = 0;
-                return false;
             }
 
             // T-REC-X.690-201508 sec 8.6.2.3
@@ -958,6 +949,7 @@ namespace System.Security.Cryptography.Asn1
 
             ReadOnlySpan<byte> sourceSpan = source.Span;
             unusedBitCount = sourceSpan[0];
+            normalizedLastByte = null;
 
             // T-REC-X.690-201508 sec 8.6.2.2
             if (unusedBitCount > 7)
@@ -974,59 +966,66 @@ namespace System.Security.Cryptography.Asn1
                 }
 
                 Debug.Assert(unusedBitCount == 0);
-                bytesWritten = 0;
-                return true;
+                value = ReadOnlyMemory<byte>.Empty;
+                return;
             }
 
-            // If 3 bits are "unused" then build a mask for the top 5 bits.
-            // 0b1111_1111 >> (8 - 3)
-            // 0b1111_1111 >> 5
-            // 0b0000_0111
-            // (then invert that)
-            // 0b1111_1000
-            byte mask = (byte)~(0xFF >> (8 - unusedBitCount));
+            // Build a mask for the bits that are used so the normalized value can be computed
+            //
+            // If 3 bits are "unused" then build a mask for them to check for 0.
+            // 1 << 3 => 0b0000_1000
+            // subtract 1 => 0b0000_0111
+            // Invert that to be the positive mask: 0b111_1000
+            int mask = ~((1 << unusedBitCount) - 1);
             byte lastByte = sourceSpan[sourceSpan.Length - 1];
             byte maskedByte = (byte)(lastByte & mask);
 
-            if (maskedByte == lastByte)
+            if (maskedByte != lastByte)
             {
-                if (write)
+                // T-REC-X.690-201508 sec 11.2.1
+                if (_ruleSet == AsnEncodingRules.DER || _ruleSet == AsnEncodingRules.CER)
                 {
-                    sourceSpan.Slice(1).CopyTo(destination);
+                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                bytesWritten = source.Length - 1;
-                return true;
+                normalizedLastByte = maskedByte;
             }
 
-            // T-REC-X.690-201508 sec 11.2.1
-            if (ruleSet == AsnEncodingRules.DER || ruleSet == AsnEncodingRules.CER)
-            {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-
-            if (requireBerMaskMatch)
-            {
-                bytesWritten = 0;
-                unusedBitCount = 0;
-                return false;
-            }
-
-            if (write)
-            {
-                sourceSpan.Slice(1, sourceSpan.Length - 2).CopyTo(destination);
-                destination[source.Length - 2] = maskedByte;
-            }
-
-            bytesWritten = source.Length - 1;
-            return true;
+            value = source.Slice(1);
         }
 
-        private static int CopyConstructedBitString(
+        private delegate void BitStringCopyAction(
+            ReadOnlyMemory<byte> value,
+            byte? normalizedLastByte,
+            Span<byte> destination);
+
+        private static void CopyBitStringValue(
+            ReadOnlyMemory<byte> value,
+            byte? normalizedLastByte,
+            Span<byte> destination)
+        {
+            if (value.Length == 0)
+            {
+                return;
+            }
+
+            if (normalizedLastByte == null)
+            {
+                value.Span.CopyTo(destination);
+            }
+            else
+            {
+                int lastIdx = value.Length - 1;
+
+                value.Span.Slice(0, lastIdx).CopyTo(destination);
+                destination[lastIdx] = normalizedLastByte.Value;
+            }
+        }
+
+        private int ProcessConstructedBitString(
             ReadOnlyMemory<byte> source,
             ref Span<byte> destination,
-            bool write,
-            AsnEncodingRules ruleSet,
+            BitStringCopyAction copyAction,
             bool isIndefinite,
             ref int lastUnusedBitCount,
             ref int lastSegmentLength,
@@ -1049,7 +1048,7 @@ namespace System.Security.Cryptography.Asn1
 
             while (!cur.IsEmpty)
             {
-                AsnReader reader = new AsnReader(cur, ruleSet);
+                AsnReader reader = new AsnReader(cur, _ruleSet);
                 Asn1Tag tag = reader.ReadTagAndLength(out int? length, out int headerLength);
 
                 if (tag.TagClass != TagClass.Universal)
@@ -1073,7 +1072,7 @@ namespace System.Security.Cryptography.Asn1
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                if (ruleSet == AsnEncodingRules.CER)
+                if (_ruleSet == AsnEncodingRules.CER)
                 {
                     if (tag.IsConstructed || lastSegmentLength != MaxCERSegmentSize)
                     {
@@ -1084,31 +1083,13 @@ namespace System.Security.Cryptography.Asn1
 
                 cur = cur.Slice(headerLength);
 
-                if (length == null)
+                if (tag.IsConstructed)
                 {
-                    Debug.Assert(tag.IsConstructed);
-
-                    totalContent += CopyConstructedBitString(
-                        cur,
+                    totalContent += ProcessConstructedBitString(
+                        Slice(cur, 0, length),
                         ref destination,
-                        write,
-                        ruleSet,
-                        true,
-                        ref lastUnusedBitCount,
-                        ref lastSegmentLength,
-                        out int nestedBytesRead);
-
-                    totalRead += nestedBytesRead;
-                    cur = cur.Slice(nestedBytesRead);
-                }
-                else if (tag.IsConstructed)
-                {
-                    totalContent += CopyConstructedBitString(
-                        Slice(cur, 0, length.Value),
-                        ref destination,
-                        write,
-                        ruleSet,
-                        false,
+                        copyAction,
+                        length == null,
                         ref lastUnusedBitCount,
                         ref lastSegmentLength,
                         out int nestedContentRead);
@@ -1126,23 +1107,22 @@ namespace System.Security.Cryptography.Asn1
 
                     int lengthValue = length.Value;
 
-                    TryCopyPrimitiveBitStringValue(
+                    ParsePrimitiveBitStringContents(
                         Slice(cur, 0, lengthValue),
-                        destination,
-                        write,
-                        false,
-                        ruleSet,
                         out lastUnusedBitCount,
-                        out int pretendWritten);
+                        out ReadOnlyMemory<byte> value,
+                        out byte? normalizedLastByte);
 
                     totalRead += lengthValue;
-                    totalContent += pretendWritten;
+                    totalContent += value.Length;
                     lastSegmentLength = lengthValue;
                     cur = cur.Slice(lengthValue);
 
-                    if (write)
+                    if (copyAction != null)
                     {
-                        destination = destination.Slice(pretendWritten);
+                        copyAction(value, normalizedLastByte, destination);
+
+                        destination = destination.Slice(value.Length);
                     }
                 }
             }
@@ -1156,10 +1136,9 @@ namespace System.Security.Cryptography.Asn1
             return totalContent;
         }
 
-        private static bool TryCopyConstructedBitStringValue(
+        private bool TryCopyConstructedBitStringValue(
             ReadOnlyMemory<byte> source,
             Span<byte> dest,
-            AsnEncodingRules ruleSet,
             bool isIndefinite,
             out int unusedBitCount,
             out int bytesRead,
@@ -1170,11 +1149,12 @@ namespace System.Security.Cryptography.Asn1
 
             Span<byte> tmpDest = dest;
 
-            int contentLength = CopyConstructedBitString(
+            // Call ProcessConstructedBitString with a null copy-action to get the required byte
+            // count and verify that the data is well-formed before copying into dest.
+            int contentLength = ProcessConstructedBitString(
                 source,
                 ref tmpDest,
-                false,
-                ruleSet,
+                null,
                 isIndefinite,
                 ref lastUnusedBitCount,
                 ref lastSegmentSize,
@@ -1184,7 +1164,7 @@ namespace System.Security.Cryptography.Asn1
             // returns 999 (or less), the second segment bumps the count to 1000, and is legal.
             //
             // T-REC-X.690-201508 sec 9.2
-            if (ruleSet == AsnEncodingRules.CER && contentLength < MaxCERSegmentSize)
+            if (_ruleSet == AsnEncodingRules.CER && contentLength < MaxCERSegmentSize)
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
@@ -1197,16 +1177,16 @@ namespace System.Security.Cryptography.Asn1
                 return false;
             }
 
-            tmpDest = dest;
             unusedBitCount = lastUnusedBitCount;
+            tmpDest = dest;
             lastSegmentSize = MaxCERSegmentSize;
             lastUnusedBitCount = 0;
 
-            bytesWritten = CopyConstructedBitString(
+            // Now call it again with the method which fixes the normalized byte in the last segment.
+            bytesWritten = ProcessConstructedBitString(
                 source,
                 ref tmpDest,
-                true,
-                ruleSet,
+                (value, lastByte, destination) => CopyBitStringValue(value, lastByte, destination),
                 isIndefinite,
                 ref lastUnusedBitCount,
                 ref lastSegmentSize,
@@ -1218,56 +1198,52 @@ namespace System.Security.Cryptography.Asn1
             return true;
         }
 
-        private bool TryGetBitStringBytes(
+        private bool TryGetPrimitiveBitStringValue(
             Asn1Tag expectedTag,
+            out Asn1Tag actualTag,
+            out int? contentsLength,
+            out int headerLength,
             out int unusedBitCount,
-            out ReadOnlyMemory<byte> contents,
-            out int headerLength)
+            out ReadOnlyMemory<byte> value,
+            out byte? normalizedLastByte)
         {
-            Asn1Tag tag = ReadTagAndLength(out int ? length, out headerLength);
-            CheckExpectedTag(tag, expectedTag, UniversalTagNumber.BitString);
+            actualTag = ReadTagAndLength(out contentsLength, out headerLength);
+            CheckExpectedTag(actualTag, expectedTag, UniversalTagNumber.BitString);
 
-            if (tag.IsConstructed)
+            if (actualTag.IsConstructed)
             {
                 if (_ruleSet == AsnEncodingRules.DER)
                 {
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                contents = default(ReadOnlyMemory<byte>);
                 unusedBitCount = 0;
+                value = default(ReadOnlyMemory<byte>);
+                normalizedLastByte = null;
                 return false;
             }
 
-            Debug.Assert(length.HasValue);
-            ReadOnlyMemory<byte> encodedValue = Slice(_data, headerLength, length.Value);
+            Debug.Assert(contentsLength.HasValue);
+            ReadOnlyMemory<byte> encodedValue = Slice(_data, headerLength, contentsLength.Value);
 
-            if (TryCopyPrimitiveBitStringValue(
+            ParsePrimitiveBitStringContents(
                 encodedValue,
-                Span<byte>.Empty,
-                false,
-                true,
-                _ruleSet,
                 out unusedBitCount,
-                out int bytesWritten))
-            {
-                contents = encodedValue.Slice(1);
-                return true;
-            }
+                out value,
+                out normalizedLastByte);
 
-            contents = default(ReadOnlyMemory<byte>);
-            return false;
+            return true;
         }
 
-        public bool TryGetBitStringBytes(out int unusedBitCount, out ReadOnlyMemory<byte> contents)
-            => TryGetBitStringBytes(Asn1Tag.PrimitiveBitString, out unusedBitCount, out contents);
+        public bool TryGetPrimitiveBitStringValue(out int unusedBitCount, out ReadOnlyMemory<byte> contents)
+            => TryGetPrimitiveBitStringValue(Asn1Tag.PrimitiveBitString, out unusedBitCount, out contents);
 
         /// <summary>
-        /// Gets the source data for a BitString under a primitive encoding.
+        /// Gets a ReadOnlyMemory view over the data value portion of the contents of a bit string.
         /// </summary>
         /// <param name="expectedTag">The expected tag to read</param>
         /// <param name="unusedBitCount">The encoded value for the number of unused bits.</param>
-        /// <param name="contents">The content bytes for the BitString payload.</param>
+        /// <param name="value">The data value portion of the bit string contents.</param>
         /// <returns>
         ///   <c>true</c> if the bit string uses a primitive encoding and the "unused" bits have value 0,
         ///   <c>false</c> otherwise.
@@ -1282,20 +1258,36 @@ namespace System.Security.Cryptography.Asn1
         ///   <li>A CER encoding was chosen and the primitive content length exceeds the maximum allowed</li>
         /// </ul>
         /// </exception>
-        public bool TryGetBitStringBytes(
+        public bool TryGetPrimitiveBitStringValue(
             Asn1Tag expectedTag,
             out int unusedBitCount,
-            out ReadOnlyMemory<byte> contents)
+            out ReadOnlyMemory<byte> value)
         {
-            bool didGet = TryGetBitStringBytes(expectedTag, out unusedBitCount, out contents, out int headerLength);
+            bool isPrimitive = TryGetPrimitiveBitStringValue(
+                expectedTag,
+                out Asn1Tag actualTag,
+                out int? contentsLength,
+                out int headerLength,
+                out unusedBitCount,
+                out value,
+                out byte? normalizedLastByte);
 
-            if (didGet)
+            if (isPrimitive)
             {
+                // A BER reader which encountered a situation where an "unused" bit was not
+                // set to 0.
+                if (normalizedLastByte != null)
+                {
+                    unusedBitCount = 0;
+                    value = default(ReadOnlyMemory<byte>);
+                    return false;
+                }
+
                 // Skip the tag+length (header) and the unused bit count byte (1) and the contents.
-                _data = _data.Slice(headerLength + contents.Length + 1);
+                _data = _data.Slice(headerLength + value.Length + 1);
             }
 
-            return didGet;
+            return isPrimitive;
         }
 
         public bool TryCopyBitStringBytes(
@@ -1316,49 +1308,36 @@ namespace System.Security.Cryptography.Asn1
             out int unusedBitCount,
             out int bytesWritten)
         {
-            if (TryGetBitStringBytes(
+            if (TryGetPrimitiveBitStringValue(
                 expectedTag,
+                out Asn1Tag actualTag,
+                out int? contentsLength,
+                out int headerLength,
                 out unusedBitCount,
-                out ReadOnlyMemory<byte> contents,
-                out int headerLength))
+                out ReadOnlyMemory<byte> value,
+                out byte? normalizedLastByte))
             {
-                if (contents.Length > destination.Length)
+                if (value.Length > destination.Length)
                 {
                     bytesWritten = 0;
                     unusedBitCount = 0;
                     return false;
                 }
 
-                contents.Span.CopyTo(destination);
-                bytesWritten = contents.Length;
+                CopyBitStringValue(value, normalizedLastByte, destination);
+
+                bytesWritten = value.Length;
                 // contents doesn't include the unusedBitCount value, so add one byte for that.
-                _data = _data.Slice(headerLength + contents.Length + 1);
+                _data = _data.Slice(headerLength + value.Length + 1);
                 return true;
             }
 
-            // Expected vs actual tag was already checked in TryGetBitStringBytes.
-            // Either constructed, or a BER payload with "unused" bits not set to 0.
-            Asn1Tag tag = ReadTagAndLength(out int ? length, out headerLength);
-
-            if (!tag.IsConstructed)
-            {
-                Debug.Assert(_ruleSet == AsnEncodingRules.BER);
-
-                return TryCopyPrimitiveBitStringValue(
-                    Slice(_data, headerLength, length),
-                    destination,
-                    true,
-                    false,
-                    _ruleSet,
-                    out unusedBitCount,
-                    out bytesWritten);
-            }
+            Debug.Assert(actualTag.IsConstructed);
 
             bool read = TryCopyConstructedBitStringValue(
-                Slice(_data, headerLength, length),
+                Slice(_data, headerLength, contentsLength),
                 destination,
-                _ruleSet,
-                length == null,
+                contentsLength == null,
                 out unusedBitCount,
                 out int bytesRead,
                 out bytesWritten);
