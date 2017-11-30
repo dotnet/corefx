@@ -8,6 +8,10 @@ We recommend using [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet) 
 </ItemGroup>
 ```
 
+## Defining your benchmark
+
+See [BenchmarkDotNet](http://benchmarkdotnet.org/Guides/GettingStarted.htm) documentation -- minimally you need to adorn a public method with the `[Benchmark]` attribute but there are many other ways to customize what is done such as using parameter sets or setup/cleanup methods. Of course, you'll want to bracket just the relevant code in your benchmark, ensure there are sufficient iterations that you minimise noise, as well as leaving the machine otherwise idle while you measure.
+
 # Benchmarking .NET Core 2.0 applications
 For benchmarking .NET Core 2.0 applications you only need the .NET Core 2.0 SDK installed: https://dotnetcli.blob.core.windows.net/dotnet/Runtime/release/2.0.0/dotnet-runtime-latest-win-x64.exe. Make sure that your `TargetFramework` property in your csproj is set to `netcoreapp2.0` and follow the official BenchmarkDotNet instructions: https://github.com/dotnet/BenchmarkDotNet/blob/master/docs/guide/Configs/Toolchains.md
 
@@ -84,10 +88,6 @@ public class MainConfig : ManualConfig
 }
 ```
 
-## Defining your benchmark
-
-See [BenchmarkDotNet](http://benchmarkdotnet.org/Guides/GettingStarted.htm) documentation -- minimally you need to adorn a public method with the `[Benchmark]` attribute but there are many other ways to customize what is done such as using parameter sets or setup/cleanup methods. Of course, you'll want to bracket just the relevant code in your benchmark, ensure there are sufficient iterations that you minimise noise, as well as leaving the machine otherwise idle while you measure.
-
 ## Running the benchmark
 
 In your application entry point pass the configuration to the BenchmarkRunner:
@@ -103,11 +103,11 @@ To get valid results make sure to compile and run your project with RELEASE conf
 > "C:\Program Files\dotnet-nightly\dotnet.exe" run -c Release
 ```
 
-## Reporting results
+# Reporting results
 
 Often in a Github Pull Request or issue you will want to share performance results to justify a change. If you add the `MarkdownExporter` job in the configuration (as you can see in the example), BenchmarkDotNet will have created a Markdown (*.md) file in the `BenchmarkDotNet.Artifacts` folder which you can paste in, along with the code you benchmarked.
 
 # References
-[BenchmarkDotNet](http://benchmarkdotnet.org/)
-[BenchmarkDotNet Github](https://github.com/dotnet/BenchmarkDotNet)
-[.NET Core SDK](https://github.com/dotnet/core-setup)
+- [BenchmarkDotNet](http://benchmarkdotnet.org/)
+- [BenchmarkDotNet Github](https://github.com/dotnet/BenchmarkDotNet)
+- [.NET Core SDK](https://github.com/dotnet/core-setup)
