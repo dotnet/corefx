@@ -210,17 +210,18 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
-        private static ReadOnlyMemory<byte> SeekEndOfContents(
-            ReadOnlyMemory<byte> source,
-            AsnEncodingRules ruleSet,
-            int initialSliceOffset = 0)
+        /// <summary>
+        /// Get the number of bytes between the start of <paramref name="source" /> and
+        /// the End-of-Contents marker
+        /// </summary>
+        private int SeekEndOfContents(ReadOnlyMemory<byte> source)
         {
-            ReadOnlyMemory<byte> cur = source.Slice(initialSliceOffset);
+            ReadOnlyMemory<byte> cur = source;
             int totalLen = 0;
 
             while (!cur.IsEmpty)
             {
-                AsnReader reader = new AsnReader(cur, ruleSet);
+                AsnReader reader = new AsnReader(cur, _ruleSet);
                 Asn1Tag tag = reader.ReadTagAndLength(out int? length, out int bytesRead);
                 ReadOnlyMemory<byte> nestedContents = reader.PeekContentBytes();
 
@@ -230,7 +231,7 @@ namespace System.Security.Cryptography.Asn1
                 {
                     ValidateEndOfContents(tag, length, bytesRead);
 
-                    return source.Slice(0, totalLen + initialSliceOffset);
+                    return totalLen;
                 }
 
                 // If the current value was an indefinite-length-encoded value
@@ -238,7 +239,7 @@ namespace System.Security.Cryptography.Asn1
                 // include it as part of the content span.
                 //
                 // T-REC-X.690-201508 sec 8.1.1.1 / 8.1.1.3 indicate that the
-                // End -of-Contents octets are "after" the contents octets, not
+                // End-of-Contents octets are "after" the contents octets, not
                 // "at the end" of them.
                 if (length == null)
                 {
@@ -269,8 +270,8 @@ namespace System.Security.Cryptography.Asn1
 
             if (length == null)
             {
-                ReadOnlyMemory<byte> tagLengthAndContents = SeekEndOfContents(_data, _ruleSet, bytesRead);
-                return Slice(_data, 0, tagLengthAndContents.Length + EndOfContentsEncodedLength);
+                int contentsLength = SeekEndOfContents(_data.Slice(bytesRead));
+                return Slice(_data, 0, bytesRead + contentsLength + EndOfContentsEncodedLength);
             }
 
             return Slice(_data, 0, bytesRead + length.Value);
@@ -292,7 +293,7 @@ namespace System.Security.Cryptography.Asn1
 
             if (length == null)
             {
-                return SeekEndOfContents(_data.Slice(bytesRead), _ruleSet);
+                return Slice(_data, bytesRead, SeekEndOfContents(_data.Slice(bytesRead)));
             }
 
             return Slice(_data, bytesRead, length.Value);
@@ -1999,18 +2000,15 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            ReadOnlyMemory<byte> contents;
             int suffix = 0;
 
-            if (length != null)
+            if (length == null)
             {
-                contents = Slice(_data, headerLength, length.Value);
-            }
-            else
-            {
-                contents = SeekEndOfContents(_data.Slice(headerLength), _ruleSet, 0);
+                length = SeekEndOfContents(_data.Slice(headerLength));
                 suffix = EndOfContentsEncodedLength;
             }
+
+            ReadOnlyMemory<byte> contents = Slice(_data, headerLength, length.Value);
 
             _data = _data.Slice(headerLength + contents.Length + suffix);
             return new AsnReader(contents, _ruleSet);
@@ -2040,18 +2038,15 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            ReadOnlyMemory<byte> contents;
             int suffix = 0;
 
-            if (length != null)
+            if (length == null)
             {
-                contents = Slice(_data, headerLength, length.Value);
-            }
-            else
-            {
-                contents = SeekEndOfContents(_data.Slice(headerLength), _ruleSet);
+                length = SeekEndOfContents(_data.Slice(headerLength));
                 suffix = EndOfContentsEncodedLength;
             }
+
+            ReadOnlyMemory<byte> contents = Slice(_data, headerLength, length.Value);
 
             if (!skipSortOrderValidation)
             {
