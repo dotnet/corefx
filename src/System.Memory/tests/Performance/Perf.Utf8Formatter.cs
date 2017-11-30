@@ -11,14 +11,17 @@ namespace System.Buffers.Text.Tests
 {
     public static partial class Utf8FormatterTests
     {
-        private const int InnerCount = 100000;
+        private const int InnerCount = 1000000;
 
         // There are really only two integer formatters: Int64/UInt64. Benchmarking the others won't provide any extra code coverage.
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(12837467L)] // standard format
+        [InlineData(1283L)] // standard format short
         [InlineData(-9223372036854775808L)] // min value
         [InlineData(9223372036854775807L)] // max value
+        [InlineData(-2147483648)] // int32 min value
+        [InlineData(2147483647)] // int32 max value
         private static void FormatterInt64(long value)
         {
             byte[] utf8ByteArray = new byte[40];
@@ -39,8 +42,10 @@ namespace System.Buffers.Text.Tests
 
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(12837467LU)] // standard format
+        [InlineData(1283LU)] // standard format short
         [InlineData(0LU)] // min value
         [InlineData(18446744073709551615LU)] // max value
+        [InlineData(2147483647)] // int32 max value
         private static void FormatterUInt64(ulong value)
         {
             byte[] utf8ByteArray = new byte[40];
