@@ -271,6 +271,7 @@
 // NaNs or Infinities.
 //
 
+using System.Buffers;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -502,41 +503,23 @@ namespace System.Numerics
             return (char)0; // Custom format
         }
 
-        private static string FormatBigIntegerToHex(BigInteger value, char format, int digits, NumberFormatInfo info)
-        {
-            // Get the bytes that make up the BigInteger.
-            Span<byte> bits = stackalloc byte[64]; // arbitrary limit to switch from stack to heap
-            bits = value.TryWriteBytes(bits, out int bytesWritten) ?
-                bits.Slice(0, bytesWritten) :
-                value.ToByteArray();
-
-            Span<char> stackSpace = stackalloc char[128]; // each byte is typically two chars
-            var sb = new ValueStringBuilder(stackSpace);
-
-            FormatBigIntegerToHex(bits, ref sb, value, format, digits, info);
-
-            return sb.ToString();
-        }
-
-        private static bool TryFormatBigIntegerToHex(BigInteger value, char format, int digits, NumberFormatInfo info, Span<char> destination, out int charsWritten)
-        {
-            // Get the bytes that make up the BigInteger.
-            Span<byte> bits = stackalloc byte[64]; // arbitrary limit to switch from stack to heap
-            bits = value.TryWriteBytes(bits, out int bytesWritten) ?
-                bits.Slice(0, bytesWritten) :
-                value.ToByteArray();
-
-            Span<char> stackSpace = stackalloc char[128]; // each byte is typically two chars
-            var sb = new ValueStringBuilder(stackSpace);
-
-            FormatBigIntegerToHex(bits, ref sb, value, format, digits, info);
-
-            return sb.TryCopyTo(destination, out charsWritten);
-        }
-
-        private static void FormatBigIntegerToHex(Span<byte> bits, ref ValueStringBuilder sb, BigInteger value, char format, int digits, NumberFormatInfo info)
+        private static string FormatBigIntegerToHex(bool targetSpan, BigInteger value, char format, int digits, NumberFormatInfo info, Span<char> destination, out int charsWritten, out bool spanSuccess)
         {
             Debug.Assert(format == 'x' || format == 'X');
+
+            // Get the bytes that make up the BigInteger.
+            byte[] arrayToReturnToPool = null;
+            Span<byte> bits = stackalloc byte[64]; // arbitrary threshold
+            if (!value.TryWriteOrCountBytes(bits, out int bytesWrittenOrNeeded))
+            {
+                bits = arrayToReturnToPool = ArrayPool<byte>.Shared.Rent(bytesWrittenOrNeeded);
+                bool success = value.TryWriteBytes(bits, out bytesWrittenOrNeeded);
+                Debug.Assert(success);
+            }
+            bits = bits.Slice(0, bytesWrittenOrNeeded);
+
+            Span<char> stackSpace = stackalloc char[128]; // each byte is typically two chars
+            var sb = new ValueStringBuilder(stackSpace);
 
             int cur = bits.Length - 1;
             if (cur > -1)
@@ -585,6 +568,23 @@ namespace System.Numerics
                     value._sign >= 0 ? '0' : (format == 'x') ? 'f' : 'F',
                     digits - sb.Length);
             }
+
+            if (arrayToReturnToPool != null)
+            {
+                ArrayPool<byte>.Shared.Return(arrayToReturnToPool);
+            }
+
+            if (targetSpan)
+            {
+                spanSuccess = sb.TryCopyTo(destination, out charsWritten);
+                return null;
+            }
+            else
+            {
+                charsWritten = 0;
+                spanSuccess = false;
+                return sb.ToString();
+            }
         }
 
         internal static string FormatBigInteger(BigInteger value, string format, NumberFormatInfo info)
@@ -604,17 +604,7 @@ namespace System.Numerics
             char fmt = ParseFormatSpecifier(format, out digits);
             if (fmt == 'x' || fmt == 'X')
             {
-                if (targetSpan)
-                {
-                    spanSuccess = TryFormatBigIntegerToHex(value, fmt, digits, info, destination, out charsWritten);
-                    return null;
-                }
-                else
-                {
-                    charsWritten = 0;
-                    spanSuccess = false;
-                    return FormatBigIntegerToHex(value, fmt, digits, info);
-                }
+                return FormatBigIntegerToHex(targetSpan, value, fmt, digits, info, destination, out charsWritten, out spanSuccess);
             }
 
 
