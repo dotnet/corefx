@@ -9,7 +9,7 @@ namespace System.Globalization
 {
     internal partial class FormatProvider
     {
-        internal static void FormatBigInteger(StringBuilder sb, int precision, int scale, bool sign, string format, NumberFormatInfo numberFormatInfo, char[] digits, int startIndex)
+        internal static void FormatBigInteger(ref ValueStringBuilder sb, int precision, int scale, bool sign, string format, NumberFormatInfo numberFormatInfo, char[] digits, int startIndex)
         {
             unsafe
             {
@@ -24,11 +24,11 @@ namespace System.Globalization
                     char fmt = Number.ParseFormatSpecifier(format, out int maxDigits);
                     if (fmt != 0)
                     {
-                        Number.NumberToString(sb, numberBuffer, fmt, maxDigits, numberFormatInfo, isDecimal: false);
+                        Number.NumberToString(ref sb, numberBuffer, fmt, maxDigits, numberFormatInfo, isDecimal: false);
                     }
                     else
                     {
-                        Number.NumberToStringFormat(sb, numberBuffer, format, numberFormatInfo);
+                        Number.NumberToStringFormat(ref sb, numberBuffer, format, numberFormatInfo);
                     }
                 }
             }

@@ -733,27 +733,20 @@ namespace System.Numerics
                 int precision = 29;
                 int scale = cchMax - ichDst;
 
-                var sb = new StringBuilder();
-                FormatProvider.FormatBigInteger(sb, precision, scale, sign, format, info, rgch, ichDst);
+                Span<char> stackSpace = stackalloc char[128]; // arbitrary stack cut-off
+                var sb = new ValueStringBuilder(stackSpace);
+                FormatProvider.FormatBigInteger(ref sb, precision, scale, sign, format, info, rgch, ichDst);
 
-                if (!targetSpan)
+                if (targetSpan)
                 {
-                    charsWritten = 0;
-                    spanSuccess = false;
-                    return sb.ToString();
-                }
-                else if (sb.Length <= destination.Length)
-                {
-                    sb.CopyTo(0, destination, sb.Length);
-                    charsWritten = sb.Length;
-                    spanSuccess = true;
+                    spanSuccess = sb.TryCopyTo(destination, out charsWritten);
                     return null;
                 }
                 else
                 {
                     charsWritten = 0;
                     spanSuccess = false;
-                    return null;
+                    return sb.ToString();
                 }
             }
 
