@@ -89,18 +89,11 @@ namespace System.Runtime.Serialization.Formatters.Binary
             _crossAppDomainArray = sow._crossAppDomainArray;
         }
 
-
-        internal static TypeInformation GetTypeInformation(Type type)
-        {
-            TypeInformation typeInformation;
-            if (!s_typeNameCache.TryGetValue(type, out typeInformation))
+        internal static TypeInformation GetTypeInformation(Type type) =>
+            s_typeNameCache.GetOrAdd(type, t =>
             {
-                bool hasTypeForwardedFrom;
-                string assemblyName = FormatterServices.GetClrAssemblyName(type, out hasTypeForwardedFrom);
-                typeInformation = new TypeInformation(FormatterServices.GetClrTypeFullName(type), assemblyName, hasTypeForwardedFrom);
-                s_typeNameCache.TryAdd(type, typeInformation);
-            }
-            return typeInformation;
-        }
+                string assemblyName = FormatterServices.GetClrAssemblyName(t, out bool hasTypeForwardedFrom);
+                return new TypeInformation(FormatterServices.GetClrTypeFullName(t), assemblyName, hasTypeForwardedFrom);
+            });
     }
 }
