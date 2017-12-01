@@ -82,8 +82,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(true)]
         public void ProxySetViaEnvironmentVariable_DefaultProxyCredentialsUsed(bool useProxy)
         {
-            //bool envVarsSupported = UseManagedHandler || !RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-	    // TODO: Issue #25640
+            // TODO: Issue #25640 It should be enabled for managed Handler on all platforms
             bool envVarsSupported = !RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
             if (!envVarsSupported)
             {
