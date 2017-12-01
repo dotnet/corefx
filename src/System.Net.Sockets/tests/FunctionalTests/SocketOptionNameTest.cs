@@ -160,7 +160,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        public async Task MulticastInterface_Set_AnyInterfaceWithIPv6_Succeeds()
+        public async Task MulticastInterface_Set_IPv6_AnyInterface_Succeeds()
         {
             if (PlatformDetection.IsFedora)
             {
@@ -168,22 +168,23 @@ namespace System.Net.Sockets.Tests
             }
 
             // On all platforms, index 0 means "any interface"
-            await MulticastInterface_Set_WithIPv6Helper(0);
+            await MulticastInterface_Set_IPv6_Helper(0);
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)] // Multicast does not work on Linux loopback by default
-        public async void MulticastInterface_Set_WithIPv6()
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [ActiveIssue(21327, TargetFrameworkMonikers.Uap)] // UWP Apps are forbidden to send network traffic to the local Computer.
+        public async void MulticastInterface_Set_IPv6_Loopback_Succeeds()
         {
-            if (PlatformDetection.IsFedora)
-            {
-                return; // [ActiveIssue(24008)]
-            }
-
-            await MulticastInterface_Set_WithIPv6Helper(1);
+            // On Windows, we can apparently assume interface 1 is "loopback." On other platforms, this is not a
+            // valid assumption. We could maybe use NetworkInterface.LoopbackInterfaceIndex to get the index, but
+            // this would introduce a dependency on System.Net.NetworkInformation, which depends on System.Net.Sockets,
+            // which is what we're testing here....  So for now, we'll just assume "loopback == 1" and run this on
+            // Windows only.
+            await MulticastInterface_Set_IPv6_Helper(1);
         }
 
-        private async Task MulticastInterface_Set_WithIPv6Helper(int interfaceIndex)
+        private async Task MulticastInterface_Set_IPv6_Helper(int interfaceIndex)
         {
             IPAddress multicastAddress = IPAddress.Parse("ff11::1:1");
             string message = "hello";
@@ -221,7 +222,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        public void MulticastInterface_Set_InvalidIndexWithIPv6_Throws()
+        public void MulticastInterface_Set_IPv6_InvalidIndex_Throws()
         {
             int interfaceIndex = 31415;
             using (Socket s = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
