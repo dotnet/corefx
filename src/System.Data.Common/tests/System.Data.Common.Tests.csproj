@@ -77,7 +77,9 @@
     <Compile Include="System\Data\InRowChangingEventExceptionTest.cs" />
     <Compile Include="System\Data\InvalidConstraintExceptionTest.cs" />
     <Compile Include="System\Data\MissingPrimaryKeyExceptionTest.cs" />
-    <Compile Include="System\Data\MonkeyDataSet.cs" />
+    <Compile Include="System\Data\MonkeyDataSet.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="System\Data\NoNullAllowedExceptionTest.cs" />
     <Compile Include="System\Data\ReadOnlyExceptionTest.cs" />
     <Compile Include="System\Data\RowNotInTableExceptionTest.cs" />

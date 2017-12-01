@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 
 namespace System.Data.Common
@@ -32,12 +33,12 @@ namespace System.Data.Common
         }
 
         private static ConcurrentDictionary<string, ProviderRegistration> _registeredFactories = new ConcurrentDictionary<string, ProviderRegistration>();
-        private const string AssemblyQualifiedName = "AssemblyQualifiedName";
-        private const string InvariantName = "InvariantName";
-        private const string Name = "Name";
-        private const string Description = "Description";
-        private const string ProviderGroup = "DbProviderFactories";
-        private const string Instance = "Instance";
+        private const string AssemblyQualifiedNameColumnName = "AssemblyQualifiedName";
+        private const string InvariantNameColumnName = "InvariantName";
+        private const string NameColumnName = "Name";
+        private const string DescriptionColumnName = "Description";
+        private const string ProviderGroupColumnName = "DbProviderFactories";
+        private const string Instance = nameof(Instance);
 
         public static bool TryGetFactory(string providerInvariantName, out DbProviderFactory factory)
         {
@@ -54,7 +55,7 @@ namespace System.Data.Common
         {
             ADP.CheckArgumentNull(providerRow, nameof(providerRow));
 
-            DataColumn assemblyQualifiedNameColumn = providerRow.Table.Columns[AssemblyQualifiedName];
+            DataColumn assemblyQualifiedNameColumn = providerRow.Table.Columns[AssemblyQualifiedNameColumnName];
             if (null == assemblyQualifiedNameColumn)
             {
                 throw ADP.Argument(SR.ADP_DbProviderFactories_NoAssemblyQualifiedName);
@@ -83,21 +84,21 @@ namespace System.Data.Common
 
         public static DataTable GetFactoryClasses()
         {
-            DataColumn nameColumn = new DataColumn(Name, typeof(string)) { ReadOnly = true };
-            DataColumn descriptionColumn = new DataColumn(Description, typeof(string)) { ReadOnly = true };
-            DataColumn invariantNameColumn = new DataColumn(InvariantName, typeof(string)) { ReadOnly = true };
-            DataColumn assemblyQualifiedNameColumn = new DataColumn(AssemblyQualifiedName, typeof(string)) { ReadOnly = true };
+            DataColumn nameColumn = new DataColumn(NameColumnName, typeof(string)) { ReadOnly = true };
+            DataColumn descriptionColumn = new DataColumn(DescriptionColumnName, typeof(string)) { ReadOnly = true };
+            DataColumn invariantNameColumn = new DataColumn(InvariantNameColumnName, typeof(string)) { ReadOnly = true };
+            DataColumn assemblyQualifiedNameColumn = new DataColumn(AssemblyQualifiedNameColumnName, typeof(string)) { ReadOnly = true };
 
-            DataTable toReturn = new DataTable(ProviderGroup) { Locale = CultureInfo.InvariantCulture };
+            DataTable toReturn = new DataTable(ProviderGroupColumnName) { Locale = CultureInfo.InvariantCulture };
             toReturn.Columns.AddRange(new[] { nameColumn, descriptionColumn, invariantNameColumn, assemblyQualifiedNameColumn });
             toReturn.PrimaryKey = new[] { invariantNameColumn };
             foreach(var kvp in _registeredFactories)
             {
                 DataRow newRow = toReturn.NewRow();
-                newRow[InvariantName] = kvp.Key;
-                newRow[AssemblyQualifiedName] = kvp.Value.FactoryTypeAssemblyQualifiedName;
-                newRow[Name] = string.Empty;
-                newRow[Description] = string.Empty;
+                newRow[InvariantNameColumnName] = kvp.Key;
+                newRow[AssemblyQualifiedNameColumnName] = kvp.Value.FactoryTypeAssemblyQualifiedName;
+                newRow[NameColumnName] = string.Empty;
+                newRow[DescriptionColumnName] = string.Empty;
                 toReturn.AddRow(newRow);
             }
             return toReturn;
@@ -178,8 +179,7 @@ namespace System.Data.Common
                 throw ADP.Argument(SR.Format(SR.ADP_DbProviderFactories_NotAFactoryType, providerFactoryClass.FullName));
             }
 
-            System.Reflection.FieldInfo providerInstance = providerFactoryClass.GetField(Instance, System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | 
-                                                                                                   System.Reflection.BindingFlags.Static);
+            FieldInfo providerInstance = providerFactoryClass.GetField(Instance, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Static);
             if (null == providerInstance)
             {
                 throw ADP.InvalidOperation(SR.ADP_DbProviderFactories_NoInstance);
