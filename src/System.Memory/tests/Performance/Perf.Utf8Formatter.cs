@@ -18,10 +18,13 @@ namespace System.Buffers.Text.Tests
         [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData(12837467L)] // standard format
         [InlineData(1283L)] // standard format short
+        [InlineData(0L)]
         [InlineData(-9223372036854775808L)] // min value
         [InlineData(9223372036854775807L)] // max value
         [InlineData(-2147483648)] // int32 min value
         [InlineData(2147483647)] // int32 max value
+        [InlineData(1000000000000000000)] // quintillion
+        [InlineData(-1000000000000000000)] // negative quintillion
         private static void FormatterInt64(long value)
         {
             byte[] utf8ByteArray = new byte[40];
@@ -46,6 +49,7 @@ namespace System.Buffers.Text.Tests
         [InlineData(0LU)] // min value
         [InlineData(18446744073709551615LU)] // max value
         [InlineData(2147483647)] // int32 max value
+        [InlineData(1000000000000000000)] // quintillion
         private static void FormatterUInt64(ulong value)
         {
             byte[] utf8ByteArray = new byte[40];
