@@ -2391,6 +2391,7 @@ namespace System.Security.Cryptography.Asn1
             int? second = null;
             ulong fraction = 0;
             ulong fractionScale = 1;
+            byte lastFracDigit = 0xFF;
             TimeSpan? timeOffset = null;
             bool isZulu = false;
 
@@ -2498,6 +2499,8 @@ namespace System.Security.Cryptography.Asn1
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
+                lastFracDigit = (byte)(fraction % 10);
+
                 for (int i = 0; i < fracLength; i++)
                 {
                     fractionScale *= 10;
@@ -2509,9 +2512,10 @@ namespace System.Security.Cryptography.Asn1
                 // The unsigned parsers will not accept + or - as a leading character, so
                 // they won't eat timezone suffix.
                 // But Utf8Parser.TryParse reports false on overflow, so limit it to 9 digits at a time.
-                while (Utf8Parser.TryParse(SliceAtMost(contents, 9), out uint _, out fracLength))
+                while (Utf8Parser.TryParse(SliceAtMost(contents, 9), out uint nonSemantic, out fracLength))
                 {
                     contents = contents.Slice(fracLength);
+                    lastFracDigit = (byte)(nonSemantic % 10);
                 }
 
                 if (!contents.IsEmpty)
@@ -2604,7 +2608,7 @@ namespace System.Security.Cryptography.Asn1
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
 
-                if (fraction != 0 && fraction % 10 == 0)
+                if (lastFracDigit == 0)
                 {
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }

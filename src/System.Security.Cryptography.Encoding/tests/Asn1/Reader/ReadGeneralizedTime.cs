@@ -252,6 +252,38 @@ namespace System.Security.Cryptography.Tests.Asn1
         }
 
         [Fact]
+        public static void ExcessivelyPreciseFraction_OneTenthPlusEpsilon()
+        {
+            byte[] inputData = Text.Encoding.ASCII.GetBytes("\u0018\u002A20170921180044.10000000000000000000000001Z");
+
+            AsnReader derReader = new AsnReader(inputData, AsnEncodingRules.DER);
+            DateTimeOffset value = derReader.GetGeneralizedTime();
+            Assert.False(derReader.HasData, "derReader.HasData");
+
+            DateTimeOffset expected = new DateTimeOffset(2017, 9, 21, 18, 0, 44, 100, TimeSpan.Zero);
+
+            Assert.Equal(expected, value);
+        }
+
+        [Fact]
+        public static void ExcessivelyPreciseFraction_OneTenthPlusEpsilonAndZero()
+        {
+            byte[] inputData = Text.Encoding.ASCII.GetBytes("\u0018\u002A20170921180044.10000000000000000000000010Z");
+
+            AsnReader berReader = new AsnReader(inputData, AsnEncodingRules.BER);
+            DateTimeOffset value = berReader.GetGeneralizedTime();
+            Assert.False(berReader.HasData, "berReader.HasData");
+
+            DateTimeOffset expected = new DateTimeOffset(2017, 9, 21, 18, 0, 44, 100, TimeSpan.Zero);
+            Assert.Equal(expected, value);
+
+            AsnReader cerReader = new AsnReader(inputData, AsnEncodingRules.CER);
+            AsnReader derReader = new AsnReader(inputData, AsnEncodingRules.DER);
+            Assert.Throws<CryptographicException>(() => cerReader.GetGeneralizedTime());
+            Assert.Throws<CryptographicException>(() => derReader.GetGeneralizedTime());
+        }
+
+        [Fact]
         public static void ExcessivelyPreciseNonFraction()
         {
             byte[] inputData = Text.Encoding.ASCII.GetBytes("\u0018\u002A2017092118.012345678901234567890123Q56789Z");
