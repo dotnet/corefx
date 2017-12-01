@@ -57,9 +57,7 @@
     <Compile Include="System\Data\ConstraintCollection.cs" />
     <Compile Include="System\Data\ConstraintConverter.cs" />
     <Compile Include="System\Data\ConstraintEnumerator.cs" />
-    <Compile Include="System\Data\DataColumn.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="System\Data\DataColumn.cs"/>
     <Compile Include="System\Data\DataColumnChangeEvent.cs" />
     <Compile Include="System\Data\DataColumnChangeEventHandler.cs" />
     <Compile Include="System\Data\DataColumnCollection.cs" />
