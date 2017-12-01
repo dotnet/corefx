@@ -64,7 +64,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private readonly SymWithType _swtBad;       // If we're looking for a constructor or indexer, this matched on name, but isn't the right thing.
         private readonly SymWithType _swtBogus;     // A bogus member - such as an indexed property.
         private readonly SymWithType _swtBadArity;  // An symbol with the wrong arity.
-        private SymWithType _swtAmbigWarn; // An ambiguous symbol, but only warn.
 
         // We have an override symbol, which we've errored on in SymbolPrepare. If we have nothing better, use this.
         // This is because if we have:
@@ -313,7 +312,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // Give method groups priority.
                         if (!(symCur is MethodSymbol))
                             goto LAmbig;
-                        _swtAmbigWarn = _swtFirst;
                         // Erase previous results so we'll record this method as the first.
                         _prgtype = new List<AggregateType>();
                         _csym = 0;
@@ -327,8 +325,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // Give method groups priority.
                             if (!(_swtFirst.Sym is MethodSymbol))
                                 goto LAmbig;
-                            if (!_swtAmbigWarn)
-                                _swtAmbigWarn.Set(symCur, typeCur);
                         }
                         // This one is hidden by another. This one also hides any more in base types.
                         pfHideByName = true;
@@ -549,7 +545,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _swtBad = new SymWithType();
             _swtBogus = new SymWithType();
             _swtBadArity = new SymWithType();
-            _swtAmbigWarn = new SymWithType();
             _swtOverride = new SymWithType();
         }
 
