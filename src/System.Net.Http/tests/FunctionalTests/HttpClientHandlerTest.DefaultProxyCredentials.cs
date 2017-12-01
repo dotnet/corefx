@@ -82,7 +82,9 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(true)]
         public void ProxySetViaEnvironmentVariable_DefaultProxyCredentialsUsed(bool useProxy)
         {
-            bool envVarsSupported = UseManagedHandler || !RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            //bool envVarsSupported = UseManagedHandler || !RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+	    // TODO: Issue #25640
+            bool envVarsSupported = !RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
             if (!envVarsSupported)
             {
                 return;
