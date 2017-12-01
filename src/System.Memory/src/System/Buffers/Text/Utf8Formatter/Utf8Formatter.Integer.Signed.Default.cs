@@ -52,40 +52,14 @@ namespace System.Buffers.Text
 
 
         // TODO: Use this instead of TryFormatInt64Default to format numbers less than int.MaxValue for BIT32
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TryFormatInt32Default(int value, Span<byte> buffer, out int bytesWritten)
         {
             if ((uint)value < 10)
             {
-                if (buffer.Length == 0) goto FalseExit;
-                buffer[0] = (byte)('0' + value);
-                bytesWritten = 1;
-                return true;
+                return TryFormatUInt32SingleDigit((uint)value, buffer, out bytesWritten);
             }
-            
-            if (value < 0)
-            {
-                value = -value;
-                int digitCount = FormattingHelpers.CountDigits((uint)value);
-                if (digitCount >= buffer.Length) goto FalseExit;
-                bytesWritten = digitCount + 1;
-                buffer[0] = Utf8Constants.Minus;
-                buffer = buffer.Slice(1, digitCount);
-            }
-            else
-            {
-                int digitCount = FormattingHelpers.CountDigits((uint)value);
-                if (digitCount > buffer.Length) goto FalseExit;
-                bytesWritten = digitCount;
-                buffer = buffer.Slice(0, digitCount);
-            }
-
-            // WriteDigits does not do bounds checks
-            FormattingHelpers.WriteDigits((uint)value, buffer);
-            return true;
-
-        FalseExit:
-            bytesWritten = 0;
-            return false;
+            return TryFormatInt32MultipleDigits(value, buffer, out bytesWritten);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

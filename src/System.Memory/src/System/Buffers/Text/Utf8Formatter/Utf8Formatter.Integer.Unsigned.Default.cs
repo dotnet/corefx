@@ -51,6 +51,7 @@ namespace System.Buffers.Text
 #endif // BIT32
 
         // TODO: Use this instead of TryFormatUInt64Default to format numbers less than uint.MaxValue for BIT32
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TryFormatUInt32Default(uint value, Span<byte> buffer, out int bytesWritten)
         {
             if (value < 10)

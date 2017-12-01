@@ -15,6 +15,7 @@ namespace System.Buffers.Text
         //
         // Common worker for all signed integer TryFormat overloads
         //
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TryFormatInt64(long value, ulong mask, Span<byte> buffer, out int bytesWritten, StandardFormat format)
         {
             if (format.IsDefault)
