@@ -921,6 +921,12 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        public void GetProcesses_InvalidMachineName_ThrowsInvalidOperationException()
+        {
+            Assert.Throws<InvalidOperationException>(() => Process.GetProcesses(Guid.NewGuid().ToString()));
+        }
+
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void GetProcessesByName_ProcessName_ReturnsExpected()
         {

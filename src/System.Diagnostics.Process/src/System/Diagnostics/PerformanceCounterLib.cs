@@ -205,7 +205,14 @@ namespace System.Diagnostics
             private void Init()
             {
 #if FEATURE_REGISTRY
-                _perfDataKey = Registry.PerformanceData;
+                if (_machineName != "." && String.Compare(_machineName, PerformanceCounterLib.ComputerName, StringComparison.OrdinalIgnoreCase) != 0)
+                {
+                    _perfDataKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.PerformanceData, _machineName);
+                }
+                else
+                {
+                    _perfDataKey = Registry.PerformanceData;
+                }
 #endif
             }
 
