@@ -42,7 +42,8 @@ namespace System.IO.Tests
         }
 
         [Theory,
-            InlineData(" ")]
+            InlineData(" "),
+            InlineData("\r\n")]
         public static void GetDirectoryName_SpaceOrControlCharsThrowOnWindows(string path)
         {
             Action action = () => Path.GetDirectoryName(path);
@@ -334,10 +335,18 @@ namespace System.IO.Tests
             Assert.All(Path.GetInvalidPathChars(), c =>
             {
                 string bad = c.ToString();
-                Assert.Equal(string.Empty, Path.GetExtension(bad));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.ChangeExtension(bad, "ok"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.Combine(bad, "ok"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.Combine("ok", "ok", bad));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.Combine("ok", "ok", bad, "ok"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.Combine(bad, bad, bad, bad, bad));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(bad));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetExtension(bad));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetFileName(bad));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetFileNameWithoutExtension(bad));
                 AssertExtensions.Throws<ArgumentException>(c == 124 ? null : "path", null, () => Path.GetFullPath(bad));
-                Assert.Equal(string.Empty, Path.GetPathRoot(bad));
-                Assert.False(Path.IsPathRooted(bad));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetPathRoot(bad));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.IsPathRooted(bad));
             });
         }
 
