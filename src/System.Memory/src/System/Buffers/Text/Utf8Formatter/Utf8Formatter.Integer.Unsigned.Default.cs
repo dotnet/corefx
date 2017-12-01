@@ -12,8 +12,6 @@ namespace System.Buffers.Text
     /// </summary>
     public static partial class Utf8Formatter
     {
-
-#if BIT32
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TryFormatUInt64Default(ulong value, Span<byte> buffer, out int bytesWritten)
         {
@@ -21,7 +19,7 @@ namespace System.Buffers.Text
             {
                 return TryFormatUInt32SingleDigit((uint)value, buffer, out bytesWritten);
             }
-
+#if BIT32
             if (value <= uint.MaxValue)
             {
                 return TryFormatUInt32MultipleDigits((uint)value, buffer, out bytesWritten);
@@ -37,18 +35,10 @@ namespace System.Buffers.Text
                     return TryFormatUInt64MoreThanQuintillion(value, buffer, out bytesWritten);
                 }
             }
-        }
 #else
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool TryFormatUInt64Default(ulong value, Span<byte> buffer, out int bytesWritten)
-        {
-            if (value < 10)
-            {
-                return TryFormatUInt32SingleDigit((uint)value, buffer, out bytesWritten);
-            }
             return TryFormatUInt64MultipleDigits(value, buffer, out bytesWritten);
-        }
 #endif // BIT32
+        }
 
         // TODO: Use this instead of TryFormatUInt64Default to format numbers less than uint.MaxValue for BIT32
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
