@@ -2221,18 +2221,28 @@ namespace Microsoft.XmlSerializer.Generator
                     string ns = e.Form == XmlSchemaForm.Qualified ? e.Namespace : "";
                     if (!isSequence && e.Any && (e.Name == null || e.Name.Length == 0)) continue;
 
-                    if(!firstElement && isSequence)
+                    if (!isSequence)
                     {
-                        Writer.Write("else ");
+                        if (firstElement && count == 0)
+                        {
+                            Writer.WriteLine("do {");
+                            Writer.Indent++;
+                        }
                     }
-                    else if (isSequence)
+                    else
                     {
-                        Writer.Write("case ");
-                        Writer.Write(cases.ToString(CultureInfo.InvariantCulture));
-                        Writer.WriteLine(":");
-                        Writer.Indent++;
+                        if (!firstElement || (!isSequence && count > 0))
+                        {
+                            Writer.Write("else ");
+                        }
+                        else if (isSequence)
+                        {
+                            Writer.Write("case ");
+                            Writer.Write(cases.ToString(CultureInfo.InvariantCulture));
+                            Writer.WriteLine(":");
+                            Writer.Indent++;
+                        }
                     }
-
                     count++;
                     firstElement = false;
                     Writer.Write("if (");
@@ -2323,7 +2333,7 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     if (!isSequence)
                     {
-                        Writer.WriteLine("goto Finish;");
+                        Writer.WriteLine("break;");
                     }
                     Writer.Indent--;
                     Writer.WriteLine("}");
@@ -2352,12 +2362,6 @@ namespace Microsoft.XmlSerializer.Generator
             {
                 if (isSequence)
                     Writer.WriteLine("default:");
-                else
-                {
-                    Writer.WriteLine("Finish:");
-                }
-
-                Writer.Indent++;
             }
             WriteMemberElementsElse(anyElement, elementElseString);
             if (count > 0)
@@ -2365,12 +2369,15 @@ namespace Microsoft.XmlSerializer.Generator
                 if (isSequence)
                 {
                     Writer.WriteLine("break;");
-                    Writer.Indent--;
-                    Writer.WriteLine("}");
+                }
+                Writer.Indent--;
+                if (!isSequence)
+                {
+                    Writer.WriteLine("} while (false);");
                 }
                 else
                 {
-                    Writer.Indent--;
+                    Writer.WriteLine("}");
                 }
             }
         }
