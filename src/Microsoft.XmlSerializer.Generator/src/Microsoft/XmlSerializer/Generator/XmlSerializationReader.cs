@@ -2200,8 +2200,6 @@ namespace Microsoft.XmlSerializer.Generator
                 Writer.WriteLine("switch (state) {");
             }
             int cases = 0;
-            bool largeNumberOfMembers = (members.Length > 1000);
-            bool useDoWhile = largeNumberOfMembers && !isSequence;
 
             for (int i = 0; i < members.Length; i++)
             {
@@ -2223,28 +2221,18 @@ namespace Microsoft.XmlSerializer.Generator
                     string ns = e.Form == XmlSchemaForm.Qualified ? e.Namespace : "";
                     if (!isSequence && e.Any && (e.Name == null || e.Name.Length == 0)) continue;
 
-                    if (useDoWhile)
+                    if(!firstElement && isSequence)
                     {
-                        if (firstElement && count == 0)
-                        {
-                            Writer.WriteLine("do {");
-                            Writer.Indent++;
-                        }
+                        Writer.Write("else ");
                     }
-                    else
+                    else if (isSequence)
                     {
-                        if (!firstElement || (!isSequence && count > 0))
-                        {
-                            Writer.Write("else ");
-                        }
-                        else if (isSequence)
-                        {
-                            Writer.Write("case ");
-                            Writer.Write(cases.ToString(CultureInfo.InvariantCulture));
-                            Writer.WriteLine(":");
-                            Writer.Indent++;
-                        }
+                        Writer.Write("case ");
+                        Writer.Write(cases.ToString(CultureInfo.InvariantCulture));
+                        Writer.WriteLine(":");
+                        Writer.Indent++;
                     }
+
                     count++;
                     firstElement = false;
                     Writer.Write("if (");
@@ -2333,9 +2321,9 @@ namespace Microsoft.XmlSerializer.Generator
                         Writer.Write(member.ParamsReadSource);
                         Writer.WriteLine(" = true;");
                     }
-                    if (useDoWhile)
+                    if (!isSequence)
                     {
-                        Writer.WriteLine("break;");
+                        Writer.WriteLine("goto Finish;");
                     }
                     Writer.Indent--;
                     Writer.WriteLine("}");
@@ -2364,11 +2352,12 @@ namespace Microsoft.XmlSerializer.Generator
             {
                 if (isSequence)
                     Writer.WriteLine("default:");
-                else if (!useDoWhile)
+                else
                 {
-                    Writer.WriteLine("else {");
-                    Writer.Indent++;
+                    Writer.WriteLine("Finish:");
                 }
+
+                Writer.Indent++;
             }
             WriteMemberElementsElse(anyElement, elementElseString);
             if (count > 0)
@@ -2376,15 +2365,12 @@ namespace Microsoft.XmlSerializer.Generator
                 if (isSequence)
                 {
                     Writer.WriteLine("break;");
-                }
-                Writer.Indent--;
-                if (useDoWhile)
-                {
-                    Writer.WriteLine("} while (false);");
+                    Writer.Indent--;
+                    Writer.WriteLine("}");
                 }
                 else
                 {
-                    Writer.WriteLine("}");
+                    Writer.Indent--;
                 }
             }
         }
