@@ -140,6 +140,11 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(~TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
         public void TestStartWithBadWorkingDirectory()
         {
+            if (PlatformDetection.IsUap) // UWP overrides WorkingDirectory (https://github.com/dotnet/corefx/pull/25266#issuecomment-347719832).
+            {
+                return;
+            }
+
             string program;
             string workingDirectory;
             if (PlatformDetection.IsWindows)
