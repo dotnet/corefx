@@ -42,8 +42,7 @@ namespace System.IO.Tests
         }
 
         [Theory,
-            InlineData(" "),
-            InlineData("\r\n")]
+            InlineData(" ")]
         public static void GetDirectoryName_SpaceOrControlCharsThrowOnWindows(string path)
         {
             Action action = () => Path.GetDirectoryName(path);
