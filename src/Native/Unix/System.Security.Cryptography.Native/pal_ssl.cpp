@@ -94,6 +94,10 @@ extern "C" SSL* CryptoNative_SslCreate(SSL_CTX* ctx)
 
 extern "C" int32_t CryptoNative_SslGetError(SSL* ssl, int32_t ret)
 {
+    while(ERR_peek_error() != ERR_peek_last_error())
+    {
+        ERR_get_error();
+    }
     return SSL_get_error(ssl, ret);
 }
 
