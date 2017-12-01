@@ -47,7 +47,7 @@ namespace System.Data.Common
 
         public static DbProviderFactory GetFactory(string providerInvariantName)
         {
-            return GetFactory(providerInvariantName, throwOnError:true);
+            return GetFactory(providerInvariantName, throwOnError: true);
         }
 
         public static DbProviderFactory GetFactory(DataRow providerRow)
@@ -86,7 +86,7 @@ namespace System.Data.Common
             DataColumn nameColumn = new DataColumn(Name, typeof(string)) { ReadOnly = true };
             DataColumn descriptionColumn = new DataColumn(Description, typeof(string)) { ReadOnly = true };
             DataColumn invariantNameColumn = new DataColumn(InvariantName, typeof(string)) { ReadOnly = true };
-            DataColumn assemblyQualifiedNameColumn = new DataColumn(AssemblyQualifiedName, typeof(string)) { ReadOnly = true};
+            DataColumn assemblyQualifiedNameColumn = new DataColumn(AssemblyQualifiedName, typeof(string)) { ReadOnly = true };
 
             DataTable toReturn = new DataTable(ProviderGroup) { Locale = CultureInfo.InvariantCulture };
             toReturn.Columns.AddRange(new[] { nameColumn, descriptionColumn, invariantNameColumn, assemblyQualifiedNameColumn });
