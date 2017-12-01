@@ -388,13 +388,11 @@ err:
 
 extern "C" int32_t CryptoNative_SslWrite(SSL* ssl, const void* buf, int32_t num)
 {
-    ERR_clear_error();
     return SSL_write(ssl, buf, num);
 }
 
 extern "C" int32_t CryptoNative_SslRead(SSL* ssl, void* buf, int32_t num)
 {
-    ERR_clear_error();
     return SSL_read(ssl, buf, num);
 }
 
