@@ -80,7 +80,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-	[ActiveIssue(25640, TestPlatforms.Windows)] // TODO It should be enabled for managed Handler on all platforms
+        [ActiveIssue(25640, TestPlatforms.Windows)] // TODO It should be enabled for managed Handler on all platforms
         public void ProxySetViaEnvironmentVariable_DefaultProxyCredentialsUsed(bool useProxy)
         {
             int port = 0;
