@@ -7,6 +7,10 @@
 
 namespace System.ServiceModel.Syndication
 {
+    public partial class SyndicationFeed
+    {
+        public SyndicationLink Documentation { get{ throw null; } set{ } }
+    }
     public abstract partial class SyndicationFeedFormatter
     {
         public System.Func<string, string, string, System.DateTimeOffset> DateTimeParser { get { throw null; } set { } }

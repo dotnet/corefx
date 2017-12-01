@@ -275,7 +275,7 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        private SyndicationLink ReadAlternateLink(XmlReader reader, Uri baseUri)
+        internal SyndicationLink ReadAlternateLink(XmlReader reader, Uri baseUri)
         {
             SyndicationLink link = new SyndicationLink();
             link.BaseUri = baseUri;
@@ -1023,6 +1023,13 @@ namespace System.ServiceModel.Syndication
                 string imgAlternateLink = (alternateLink != null) ? FeedUtils.GetUriString(alternateLink.Uri) : string.Empty;
                 writer.WriteElementString(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace, imgAlternateLink);
                 writer.WriteEndElement(); // image
+            }
+
+            // Optional spec items
+            // docs
+            if (Feed.GetDocumentation() != null)
+            {
+                writer.WriteElementString(Rss20Constants.DocumentationTag, Feed.GetDocumentation().Uri.ToString());
             }
 
             if (_serializeExtensionsAsAtom)
