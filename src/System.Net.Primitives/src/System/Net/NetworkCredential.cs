@@ -133,6 +133,8 @@ namespace System.Net
             get { return _domain; }
             set { _domain = value ?? string.Empty; }
         }
+        
+        public bool RememberMe { get; set; }
 
         internal string InternalGetDomainUserName()
         {
