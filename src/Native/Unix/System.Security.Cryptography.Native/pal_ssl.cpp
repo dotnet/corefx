@@ -97,7 +97,7 @@ extern "C" int32_t CryptoNative_SslGetError(SSL* ssl, int32_t ret)
     // This pops off "old" errors left by other operations
     // until the first and last error are the same
     // this should be looked at again when OpenSsl 1.1 is migrated to
-    while(ERR_peek_error() != ERR_peek_last_error())
+    while (ERR_peek_error() != ERR_peek_last_error())
     {
         ERR_get_error();
     }
@@ -228,7 +228,10 @@ static ExchangeAlgorithmType MapExchangeAlgorithmType(const char* keyExchange, s
     return ExchangeAlgorithmType::None;
 }
 
-static void GetHashAlgorithmTypeAndSize(const char* mac, size_t macLength, HashAlgorithmType& dataHashAlg, DataHashSize& hashKeySize)
+static void GetHashAlgorithmTypeAndSize(const char* mac,
+                                        size_t macLength,
+                                        HashAlgorithmType& dataHashAlg,
+                                        DataHashSize& hashKeySize)
 {
     if (StringSpanEquals(mac, "MD5", macLength))
     {
@@ -283,7 +286,8 @@ Given a keyName string like "Enc=XXX", parses the description string and returns
 
 Returns a value indicating whether the pattern starting with keyName was found in description.
 */
-static bool GetDescriptionValue(const char* description, const char* keyName, size_t keyNameLength, const char** value, size_t& valueLength)
+static bool GetDescriptionValue(
+    const char* description, const char* keyName, size_t keyNameLength, const char** value, size_t& valueLength)
 {
     // search for keyName in description
     const char* keyNameStart = strstr(description, keyName);
@@ -588,4 +592,3 @@ extern "C" int32_t CryptoNative_SslSetTlsExtHostName(SSL* ssl, const uint8_t* na
 {
     return static_cast<int32_t>(SSL_set_tlsext_host_name(ssl, name));
 }
-
