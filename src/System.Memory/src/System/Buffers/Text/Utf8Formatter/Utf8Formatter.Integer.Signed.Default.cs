@@ -19,28 +19,36 @@ namespace System.Buffers.Text
             {
                 return TryFormatUInt32SingleDigit((uint)value, buffer, out bytesWritten);
             }
-#if BIT32
-            if (value <= int.MaxValue && value >= int.MinValue)
+            
+            if (IntPtr.Size == 8)    // x64
             {
-                return TryFormatInt32MultipleDigits((int)value, buffer, out bytesWritten);
+                return TryFormatInt64MultipleDigits(value, buffer, out bytesWritten);
             }
-            else
+            else    // x86
             {
-                if (value <= Utf8Constants.Quintillion && value >= -Utf8Constants.Quintillion)
+                if (value <= int.MaxValue && value >= int.MinValue)
                 {
-                    return TryFormatInt64LessThanQuintillion(value, buffer, out bytesWritten);
+                    return TryFormatInt32MultipleDigits((int)value, buffer, out bytesWritten);
                 }
                 else
                 {
-                    return TryFormatInt64MoreThanQuintillion(value, buffer, out bytesWritten);
+                    if (value <= (long)Utf8Constants.BillionMaxUIntValue && value >= -(long)Utf8Constants.BillionMaxUIntValue)
+                    {
+                        return value < 0 ? 
+                        TryFormatInt64MoreThanNegativeBillionMaxUInt(-value, buffer, out bytesWritten) :
+                        TryFormatUInt64LessThanBillionMaxUInt((ulong)value, buffer, out bytesWritten); 
+                    }
+                    else
+                    {
+                        return value < 0 ? 
+                        TryFormatInt64LessThanNegativeBillionMaxUInt(-value, buffer, out bytesWritten) :
+                        TryFormatUInt64MoreThanBillionMaxUInt((ulong)value, buffer, out bytesWritten);
+                    }
                 }
             }
-#else
-            return TryFormatInt64MultipleDigits(value, buffer, out bytesWritten);
-#endif // BIT32
         }
 
-        // TODO: Use this instead of TryFormatInt64Default to format numbers less than int.MaxValue for BIT32
+        // TODO: Use this instead of TryFormatInt64Default to format numbers less than int.MaxValue
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TryFormatInt32Default(int value, Span<byte> buffer, out int bytesWritten)
         {
@@ -65,8 +73,8 @@ namespace System.Buffers.Text
                     return false;
                 }
                 buffer[0] = Utf8Constants.Minus;
-                FormattingHelpers.WriteDigits((uint)value, buffer.Slice(1, digitCount));
                 bytesWritten = digitCount + 1;
+                FormattingHelpers.WriteDigits((uint)value, buffer.Slice(1, digitCount));
                 return true;
             }
             else
@@ -89,8 +97,8 @@ namespace System.Buffers.Text
                     return false;
                 }
                 buffer[0] = Utf8Constants.Minus;
-                FormattingHelpers.WriteDigits((ulong)value, buffer.Slice(1, digitCount));
                 bytesWritten = digitCount + 1;
+                FormattingHelpers.WriteDigits((ulong)value, buffer.Slice(1, digitCount));
                 return true;
             }
             else
@@ -99,69 +107,53 @@ namespace System.Buffers.Text
             }
         }
 
-        // Split long into two parts that can each fit in a uint - {1-9 digits}{9 digits}
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool TryFormatInt64LessThanQuintillion(long value, Span<byte> buffer, out int bytesWritten)
+        // Split long into two parts that can each fit in a uint - {1-10 digits}{9 digits}
+        private static bool TryFormatInt64MoreThanNegativeBillionMaxUInt(long value, Span<byte> buffer, out int bytesWritten)
         {
-            if (value < 0)
-            {
-                value = -value;
-                ulong OverNineDigits = (ulong)value / Utf8Constants.Billion;
-                ulong LastNineDigits = (ulong)value - (OverNineDigits * Utf8Constants.Billion);
+            uint OverNineDigits = (uint)(value / Utf8Constants.Billion);
+            uint LastNineDigits = (uint)(value - (OverNineDigits * Utf8Constants.Billion));
 
-                int digitCountOverNineDigits = FormattingHelpers.CountDigits((uint)OverNineDigits);
-                Debug.Assert(digitCountOverNineDigits >= 1 && digitCountOverNineDigits <= 9);
-                int digitCount = digitCountOverNineDigits + 9;
-                // WriteDigits does not do bounds checks
-                if (digitCount >= buffer.Length)
-                {
-                    bytesWritten = 0;
-                    return false;
-                }
-                buffer[0] = Utf8Constants.Minus;
-                FormattingHelpers.WriteDigits((uint)OverNineDigits, buffer.Slice(1, digitCountOverNineDigits));
-                FormattingHelpers.WriteDigits((uint)LastNineDigits, buffer.Slice(digitCountOverNineDigits + 1, 9));
-                bytesWritten = digitCount + 1;
-                return true;
-            }
-            else
+            int digitCountOverNineDigits = FormattingHelpers.CountDigits(OverNineDigits);
+            Debug.Assert(digitCountOverNineDigits >= 1 && digitCountOverNineDigits <= 10);
+            int digitCount = digitCountOverNineDigits + 9;
+            // WriteDigits does not do bounds checks
+            if (digitCount >= buffer.Length)
             {
-                return TryFormatUInt64LessThanQuintillion((ulong)value, buffer, out bytesWritten); 
+                bytesWritten = 0;
+                return false;
             }
+            buffer[0] = Utf8Constants.Minus;
+            bytesWritten = digitCount + 1;
+            FormattingHelpers.WriteDigits(OverNineDigits, buffer.Slice(1, digitCountOverNineDigits));
+            FormattingHelpers.WriteDigits(LastNineDigits, buffer.Slice(digitCountOverNineDigits + 1, 9));
+            return true;
         }
 
         // Split long into three parts that can each fit in a uint - {1 digit}{9 digits}{9 digits}
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool TryFormatInt64MoreThanQuintillion(long value, Span<byte> buffer, out int bytesWritten)
+        private static bool TryFormatInt64LessThanNegativeBillionMaxUInt(long value, Span<byte> buffer, out int bytesWritten)
         {
-            if (value < 0)
-            {
-                value = -value;
-                ulong OverEighteenDigits = (ulong)value / Utf8Constants.Quintillion;
-                ulong LastEighteenDigits = (ulong)value - (OverEighteenDigits * Utf8Constants.Quintillion);
-                ulong MiddleNineDigits = LastEighteenDigits / Utf8Constants.Billion;
-                ulong LastNineDigits = LastEighteenDigits - (MiddleNineDigits * Utf8Constants.Billion);
+            // value can still be negative if value == long.MinValue
+            // Therefore, cast to ulong, since (ulong)value actually equals abs(long.MinValue)
+            ulong OverNineDigits = (ulong)value / Utf8Constants.Billion;
+            uint LastNineDigits = (uint)((ulong)value - (OverNineDigits * Utf8Constants.Billion));
+            uint OverEighteenDigits = (uint)(OverNineDigits / Utf8Constants.Billion);
+            uint MiddleNineDigits = (uint)(OverNineDigits - (OverEighteenDigits * Utf8Constants.Billion));
 
-                int digitCountOverEighteenDigits = FormattingHelpers.CountDigits((uint)OverEighteenDigits);
-                Debug.Assert(digitCountOverEighteenDigits == 1);
-                int digitCount = digitCountOverEighteenDigits + 18;
-                // WriteDigits does not do bounds checks
-                if (digitCount >= buffer.Length)
-                {
-                    bytesWritten = 0;
-                    return false;
-                }
-                buffer[0] = Utf8Constants.Minus;
-                FormattingHelpers.WriteDigits((uint)OverEighteenDigits, buffer.Slice(1, digitCountOverEighteenDigits));
-                FormattingHelpers.WriteDigits((uint)MiddleNineDigits, buffer.Slice(digitCountOverEighteenDigits + 1, 9));
-                FormattingHelpers.WriteDigits((uint)LastNineDigits, buffer.Slice(digitCountOverEighteenDigits + 1 + 9, 9));
-                bytesWritten = digitCount + 1;
-                return true;
-            }
-            else
+            int digitCountOverEighteenDigits = FormattingHelpers.CountDigits(OverEighteenDigits);
+            Debug.Assert(digitCountOverEighteenDigits == 1);
+            int digitCount = digitCountOverEighteenDigits + 18;
+            // WriteDigits does not do bounds checks
+            if (digitCount >= buffer.Length)
             {
-                return TryFormatUInt64MoreThanQuintillion((ulong)value, buffer, out bytesWritten);
+                bytesWritten = 0;
+                return false;
             }
+            buffer[0] = Utf8Constants.Minus;
+            bytesWritten = digitCount + 1;
+            FormattingHelpers.WriteDigits(OverEighteenDigits, buffer.Slice(1, digitCountOverEighteenDigits));
+            FormattingHelpers.WriteDigits(MiddleNineDigits, buffer.Slice(digitCountOverEighteenDigits + 1, 9));
+            FormattingHelpers.WriteDigits(LastNineDigits, buffer.Slice(digitCountOverEighteenDigits + 1 + 9, 9));
+            return true;
         }
     }
 }

@@ -219,19 +219,12 @@ namespace System.Buffers.Text
         public static int CountDigits(uint value)
         {
             int digits = 1;
-            if (value >= 1000)
+            if (value >= 100000)
             {
-                if (value >= 1000000)
-                {
-                    value = value / 1000000;
-                    digits += 6;
-                }
-                else
-                {
-                    value = value / 1000;
-                    digits += 3;
-                }
+                value = value / 100000;
+                digits += 5;
             }
+
             if (value < 10) 
             { 
                 // no-op
@@ -244,10 +237,14 @@ namespace System.Buffers.Text
             {
                 digits += 2;
             }
+            else if (value < 10000)
+            {
+                digits += 3;
+            }
             else
             {
-                Debug.Assert(value < 1000);
-                digits += 3;
+                Debug.Assert(value < 10000);
+                digits += 4;
             }
 
             return digits;

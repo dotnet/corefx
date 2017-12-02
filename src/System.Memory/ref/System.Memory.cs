@@ -336,9 +336,9 @@ namespace System.Buffers
 {
     public readonly struct StandardFormat : IEquatable<StandardFormat>
     {
-        public const byte MaxPrecision = (byte)99;
-        public const byte NoPrecision = (byte)255;
-        public StandardFormat(char symbol, byte precision=(byte)255) => throw null;
+        public const byte MaxPrecision = 99;
+        public const byte NoPrecision = 255;
+        public StandardFormat(char symbol, byte precision= 255) => throw null;
         public bool HasPrecision => throw null;
         public bool IsDefault => throw null;
         public byte Precision => throw null;
@@ -388,6 +388,10 @@ namespace System.Buffers.Text
         public static bool TryFormat(uint value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
         [CLSCompliant(false)]
         public static bool TryFormat(ulong value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+
+        public static bool TryFormatB(long value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
+        [CLSCompliant(false)]
+        public static bool TryFormatB(ulong value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
     }
     public static class Utf8Parser
     {
