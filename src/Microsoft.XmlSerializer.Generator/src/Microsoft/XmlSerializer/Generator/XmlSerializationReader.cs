@@ -2361,7 +2361,10 @@ namespace Microsoft.XmlSerializer.Generator
             if (count > 0)
             {
                 if (isSequence)
+                {
                     Writer.WriteLine("default:");
+                    Writer.Indent++;
+                }
             }
             WriteMemberElementsElse(anyElement, elementElseString);
             if (count > 0)
