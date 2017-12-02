@@ -10,6 +10,7 @@ using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
+using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.Net.Security
@@ -41,6 +42,16 @@ namespace System.Net.Security
             SSPIWrapper.GetVerifyPackageInfo(GlobalSSPI.SSPISecureChannel, SecurityPackage, true);
         }
 
+        public static Task AcquireThrottleLockAsync() => Task.CompletedTask;
+
+        public static void AcquireThrottleLock()
+        { }
+
+        public static void ReleaseThrottleLock()
+        {
+            // Also a no-op as per acquire
+        }
+        
         public static byte[] ConvertAlpnProtocolListToByteArray(List<SslApplicationProtocol> protocols)
         {
             return Interop.Sec_Application_Protocols.ToByteArray(protocols);

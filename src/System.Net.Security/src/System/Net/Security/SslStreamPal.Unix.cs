@@ -9,6 +9,8 @@ using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.Net.Security
@@ -16,6 +18,7 @@ namespace System.Net.Security
     internal static class SslStreamPal
     {
         private static readonly StreamSizes s_streamSizes = new StreamSizes();
+        private static readonly SemaphoreSlim s_throttle = new SemaphoreSlim(Environment.ProcessorCount);
 
         public static Exception GetException(SecurityStatusPal status)
         {
@@ -28,6 +31,12 @@ namespace System.Net.Security
         public static void VerifyPackageInfo()
         {
         }
+
+        public static Task AcquireThrottleLockAsync() => s_throttle.WaitAsync();      
+
+        public static void AcquireThrottleLock() => s_throttle.Wait();
+
+        public static void ReleaseThrottleLock() => s_throttle.Release();
 
         public static SecurityStatusPal AcceptSecurityContext(ref SafeFreeCredentials credential, ref SafeDeleteContext context,
             SecurityBuffer[] inputBuffers, SecurityBuffer outputBuffer, SslAuthenticationOptions sslAuthenticationOptions)

@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 
 using PAL_TlsHandshakeState = Interop.AppleCrypto.PAL_TlsHandshakeState;
 using PAL_TlsIo = Interop.AppleCrypto.PAL_TlsIo;
@@ -29,6 +30,18 @@ namespace System.Net.Security
         // Since ST is not producing the framed empty message just call this false and avoid the
         // special case of an empty array being passed to the `fixed` statement.
         internal const bool CanEncryptEmptyMessage = false;
+
+        public static Task AcquireThrottleLockAsync() => Task.CompletedTask;
+
+        public static void AcquireThrottleLock()
+        {
+            // Only OpenSsl currently requires the throttle so this is a no-op
+        }
+
+        public static void ReleaseThrottleLock()
+        {
+            // Also a no-op as per acquire
+        }
 
         public static void VerifyPackageInfo()
         {
