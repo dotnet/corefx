@@ -243,7 +243,7 @@ namespace System.Buffers.Text
             }
             else
             {
-                Debug.Assert(value < 10000);
+                Debug.Assert(value < 100000);
                 digits += 4;
             }
 
