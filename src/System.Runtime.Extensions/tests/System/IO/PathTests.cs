@@ -44,10 +44,29 @@ namespace System.IO.Tests
         [Theory,
             InlineData(" "),
             InlineData("\r\n")]
-        public static void GetDirectoryName_SpaceOrControlCharsThrowOnWindows(string path)
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public static void GetDirectoryName_SpaceOrControlCharsThrowOnWindows_Desktop(string path)
         {
             Action action = () => Path.GetDirectoryName(path);
             if (PlatformDetection.IsWindows)
+            {
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(path));
+            }
+            else
+            {
+                // These are valid paths on Unix
+                action();
+            }
+        }
+
+        [Theory,
+            InlineData(" "),
+            InlineData("\r\n")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void GetDirectoryName_SpaceOrControlCharsThrowOnWindows_Core(string path)
+        {
+            Action action = () => Path.GetDirectoryName(path);
+            if (PlatformDetection.IsWindows && path.Equals(" "))
             {
                 AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(path));
             }
