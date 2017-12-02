@@ -184,7 +184,14 @@ namespace System.IO.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void ContainsInvalidCharWithRootedAfterArgumentNull_Core()
         {
-            Assert.Equal("\\abc", Path.Combine("ab\0cd", s_separator + "abc"));
+            if (PlatformDetection.IsWindows)
+            {
+                Assert.Equal("\\abc", Path.Combine("ab\0cd", s_separator + "abc"));
+            }
+            else
+            {
+                Assert.Equal("/abc", Path.Combine("ab\0cd", s_separator + "abc"));
+            }
         }
 
         [Fact]
