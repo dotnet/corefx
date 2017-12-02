@@ -19,7 +19,6 @@ namespace System.Data.Common
         {
             internal ProviderRegistration(string factoryTypeAssemblyQualifiedName, DbProviderFactory factoryInstance)
             {
-                ADP.CheckArgumentLength(factoryTypeAssemblyQualifiedName, nameof(factoryTypeAssemblyQualifiedName));
                 this.FactoryTypeAssemblyQualifiedName = factoryTypeAssemblyQualifiedName;
                 this.FactoryInstance = factoryInstance;
             }
@@ -38,7 +37,7 @@ namespace System.Data.Common
         private const string NameColumnName = "Name";
         private const string DescriptionColumnName = "Description";
         private const string ProviderGroupColumnName = "DbProviderFactories";
-        private const string Instance = nameof(Instance);
+        private const string InstanceFieldName = "Instance";
 
         public static bool TryGetFactory(string providerInvariantName, out DbProviderFactory factory)
         {
@@ -67,13 +66,9 @@ namespace System.Data.Common
                 throw ADP.Argument(SR.ADP_DbProviderFactories_NoAssemblyQualifiedName);
             }
 
-            Type providerType = Type.GetType(assemblyQualifiedName);
-            if (null == providerType)
-            {
-                throw ADP.Argument(SR.Format(SR.ADP_DbProviderFactories_FactoryNotLoadable, assemblyQualifiedName));
-            }
-            return GetFactoryInstance(providerType);
+            return DbProviderFactories.GetFactoryInstance(DbProviderFactories.GetProviderTypeFromTypeName(assemblyQualifiedName));
         }
+
 
         public static DbProviderFactory GetFactory(DbConnection connection)
         {
@@ -160,12 +155,7 @@ namespace System.Data.Common
                 // Deferred registration, do checks now on the type specified and register instance in storage.
                 // Even in the case of throwOnError being false, this will throw when an exception occurs checking the registered type as the user has to be notified the 
                 // registration is invalid, even though the registration is there.
-                Type providerType = Type.GetType(registration.FactoryTypeAssemblyQualifiedName);
-                if (null == providerType)
-                {
-                    throw ADP.Argument(SR.Format(SR.ADP_DbProviderFactories_FactoryNotLoadable, registration.FactoryTypeAssemblyQualifiedName));
-                }
-                toReturn = GetFactoryInstance(providerType);
+                toReturn = GetFactoryInstance(GetProviderTypeFromTypeName(registration.FactoryTypeAssemblyQualifiedName));
                 RegisterFactory(providerInvariantName, toReturn);
             }
             return toReturn;
@@ -179,7 +169,7 @@ namespace System.Data.Common
                 throw ADP.Argument(SR.Format(SR.ADP_DbProviderFactories_NotAFactoryType, providerFactoryClass.FullName));
             }
 
-            FieldInfo providerInstance = providerFactoryClass.GetField(Instance, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Static);
+            FieldInfo providerInstance = providerFactoryClass.GetField(InstanceFieldName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Static);
             if (null == providerInstance)
             {
                 throw ADP.InvalidOperation(SR.ADP_DbProviderFactories_NoInstance);
@@ -194,6 +184,17 @@ namespace System.Data.Common
                 throw ADP.InvalidOperation(SR.ADP_DbProviderFactories_NoInstance);
             }
             return (DbProviderFactory)factory;
+        }
+
+
+        private static Type GetProviderTypeFromTypeName(string assemblyQualifiedName)
+        {
+            Type providerType = Type.GetType(assemblyQualifiedName);
+            if (null == providerType)
+            {
+                throw ADP.Argument(SR.Format(SR.ADP_DbProviderFactories_FactoryNotLoadable, assemblyQualifiedName));
+            }
+            return providerType;
         }
     }
 }
