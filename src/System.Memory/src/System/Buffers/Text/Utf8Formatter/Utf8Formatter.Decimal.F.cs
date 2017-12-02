@@ -68,7 +68,7 @@ namespace System.Buffers.Text
                 int numDigitsEmitted = 0;
                 if (scale < 0)
                 {
-                    int numLeadingZeroesToEmit = Math.Min(precision, -scale);
+                    int numLeadingZeroesToEmit = Math.Min((int)precision, -scale);
                     for (int i = 0; i < numLeadingZeroesToEmit; i++)
                     {
                         buffer[dstIndex++] = (byte)'0';

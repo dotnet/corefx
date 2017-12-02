@@ -388,10 +388,6 @@ namespace System.Buffers.Text
         public static bool TryFormat(uint value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
         [CLSCompliant(false)]
         public static bool TryFormat(ulong value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
-
-        public static bool TryFormatB(long value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
-        [CLSCompliant(false)]
-        public static bool TryFormatB(ulong value, Span<byte> buffer, out int bytesWritten, StandardFormat format = default) => throw null;
     }
     public static class Utf8Parser
     {
