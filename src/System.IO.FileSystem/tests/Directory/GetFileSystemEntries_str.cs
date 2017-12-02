@@ -184,7 +184,7 @@ namespace System.IO.Tests
         {
             foreach (char invalid in Path.GetInvalidFileNameChars())
             {
-                if (invalid == '/' || invalid == '\\')
+                if (invalid == '/' || invalid == '\\' || !PlatformDetection.IsWindows )
                 {
                     Assert.Throws<DirectoryNotFoundException>(() => GetEntries(Path.Combine(TestDirectory, string.Format("te{0}st", invalid.ToString()))));
                 }

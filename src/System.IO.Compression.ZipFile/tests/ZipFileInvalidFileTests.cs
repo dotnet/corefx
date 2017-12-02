@@ -219,7 +219,9 @@ namespace System.IO.Compression.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Checks Unix-specific invalid file path
         public void Unix_ZipWithInvalidFileNames_ThrowsArgumentException(string zipName)
         {
-            AssertExtensions.Throws<ArgumentException>("path", () => ZipFile.ExtractToDirectory(compat(zipName) + ".zip", GetTestFilePath()));
+            string directoryPath = GetTestFilePath();
+            ZipFile.ExtractToDirectory(compat(zipName) + ".zip", directoryPath);
+            Assert.True(Directory.Exists("\0bad"));
         }
 
         [Theory]
