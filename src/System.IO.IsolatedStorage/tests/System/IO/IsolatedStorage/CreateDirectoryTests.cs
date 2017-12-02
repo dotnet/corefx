@@ -50,11 +50,22 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void CreateDirectory_RaisesArgumentException()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void CreateDirectory_RaisesArgumentException_Desktop()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.CreateDirectory("\0bad"));
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void CreateDirectory_RaisesArgumentException_Core()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
+            {
+                Assert.Throws<IsolatedStorageException>(() => isf.CreateDirectory("\0bad"));
             }
         }
 

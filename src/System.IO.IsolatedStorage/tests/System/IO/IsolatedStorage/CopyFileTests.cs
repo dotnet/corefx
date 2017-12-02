@@ -65,12 +65,24 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void CopyFile_RaisesInvalidPath()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)] 
+        public void CopyFile_RaisesInvalidPath_Desktop()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.CopyFile("\0bad", "bar"));
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.CopyFile("foo", "\0bad"));
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] 
+        public void CopyFile_RaisesInvalidPath_Core()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
+            {
+                Assert.Throws<IsolatedStorageException>(() => isf.CopyFile("\0bad", "bar"));
+                Assert.Throws<IsolatedStorageException>(() => isf.CopyFile("foo", "\0bad"));
             }
         }
 

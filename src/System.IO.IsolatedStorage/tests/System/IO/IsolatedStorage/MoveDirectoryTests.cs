@@ -61,12 +61,24 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void MoveDirectory_RaisesInvalidPath()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void MoveDirectory_RaisesInvalidPath_Desktop()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.MoveDirectory("\0bad", "bar"));
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.MoveDirectory("foo", "\0bad"));
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void MoveDirectory_RaisesInvalidPath_Core()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
+            {
+                Assert.Throws<IsolatedStorageException>(() => isf.MoveDirectory("\0bad", "bar"));
+                Assert.Throws<IsolatedStorageException>(() => isf.MoveDirectory("foo", "\0bad"));
             }
         }
 
