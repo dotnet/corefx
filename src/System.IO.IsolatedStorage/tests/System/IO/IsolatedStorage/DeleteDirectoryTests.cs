@@ -66,7 +66,7 @@ namespace System.IO.IsolatedStorage
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.DeleteDirectory("\0bad");
-                Assert.Throwa<InvalidOperationException>(() => isf.DirectoryExists("\0bad"));
+                Assert.Throws<InvalidOperationException>(() => isf.DirectoryExists("\0bad"));
             }
         }
 
