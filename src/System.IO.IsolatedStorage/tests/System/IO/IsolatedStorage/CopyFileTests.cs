@@ -81,16 +81,8 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                if (PlatformDetection.IsWindows)
-                {
-                    Assert.Throws<IsolatedStorageException>(() => isf.CopyFile("\0bad", "bar"));
-                    Assert.Throws<IsolatedStorageException>(() => isf.CopyFile("foo", "\0bad"));
-                }
-                else
-                {
-                    Assert.Throws<FileNotFoundException>(() => isf.CopyFile("\0bad", "bar"));
-                    Assert.Throws<FileNotFoundException>(() => isf.CopyFile("foo", "\0bad"));
-                }
+                Assert.Throws<IsolatedStorageException>(() => isf.CopyFile("\0bad", "bar"));
+                Assert.Throws<IsolatedStorageException>(() => isf.CopyFile("foo", "\0bad"));
             }
         }
 
