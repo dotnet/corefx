@@ -138,9 +138,8 @@ namespace System.Net.Sockets.Tests
 
         private void DualModeConnect_IPAddressToHost_Helper(IPAddress connectTo, IPAddress listenOn, bool dualModeServer)
         {
-            int port;
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
-            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out port))
+            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out int port))
             {
                 socket.Connect(connectTo, port);
                 Assert.True(socket.Connected);
@@ -230,9 +229,8 @@ namespace System.Net.Sockets.Tests
 
         private void DualModeConnect_IPEndPointToHost_Helper(IPAddress connectTo, IPAddress listenOn, bool dualModeServer)
         {
-            int port;
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
-            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out port))
+            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out int port))
             {
                 socket.Connect(new IPEndPoint(connectTo, port));
                 Assert.True(socket.Connected);
@@ -266,8 +264,7 @@ namespace System.Net.Sockets.Tests
             {
                 socket.DualMode = false;
 
-                int port;
-                using (SocketServer server = new SocketServer(_log, IPAddress.Loopback, false, out port))
+                using (SocketServer server = new SocketServer(_log, IPAddress.Loopback, false, out int port))
                 {
                     AssertExtensions.Throws<ArgumentException>("addresses", () =>
                     {
@@ -289,9 +286,8 @@ namespace System.Net.Sockets.Tests
         [MemberData(nameof(DualMode_IPAddresses_ListenOn_DualMode_Success_Data))]
         public void DualModeConnect_IPAddressListToHost_Success(IPAddress[] connectTo, IPAddress listenOn, bool dualModeServer)
         {
-            int port;
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
-            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out port))
+            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out int port))
             {
                 socket.Connect(connectTo, port);
                 Assert.True(socket.Connected);
@@ -307,9 +303,8 @@ namespace System.Net.Sockets.Tests
         [MemberData(nameof(DualMode_Connect_IPAddress_DualMode_Data))]
         public void DualModeConnect_LoopbackDnsToHost_Helper(IPAddress listenOn, bool dualModeServer)
         {
-            int port;
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
-            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out port))
+            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out int port))
             {
                 socket.Connect("localhost", port);
                 Assert.True(socket.Connected);
@@ -325,9 +320,8 @@ namespace System.Net.Sockets.Tests
         [MemberData(nameof(DualMode_Connect_IPAddress_DualMode_Data))]
         public void DualModeConnect_DnsEndPointToHost_Helper(IPAddress listenOn, bool dualModeServer)
         {
-            int port;
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
-            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out port))
+            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out int port))
             {
                 socket.Connect(new DnsEndPoint("localhost", port, AddressFamily.Unspecified));
                 Assert.True(socket.Connected);
@@ -376,7 +370,7 @@ namespace System.Net.Sockets.Tests
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
             using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out int port))
             {
-                await Task.Factory.FromAsync(socket.BeginConnect(connectTo, port, null, null), socket.EndConnect);
+                await Task.Factory.FromAsync(socket.BeginConnect, socket.EndConnect, connectTo, port, null);
                 Assert.True(socket.Connected);
             }
         }
@@ -432,7 +426,7 @@ namespace System.Net.Sockets.Tests
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
             using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out int port))
             {
-                await Task.Factory.FromAsync(socket.BeginConnect(new IPEndPoint(connectTo, port), null, null), socket.EndConnect);
+                await Task.Factory.FromAsync(socket.BeginConnect, socket.EndConnect, new IPEndPoint(connectTo, port), null);
                 Assert.True(socket.Connected);
             }
         }
@@ -447,11 +441,10 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(TestPlatforms.Windows)]  // Connecting sockets to DNS endpoints via the instance Connect and ConnectAsync methods not supported on Unix
         private async Task DualModeBeginConnect_IPAddressListToHost_Helper(IPAddress[] connectTo, IPAddress listenOn, bool dualModeServer)
         {
-            int port;
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
-            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out port))
+            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out int port))
             {
-                await Task.Factory.FromAsync(socket.BeginConnect(connectTo, port, null, null), socket.EndConnect);
+                await Task.Factory.FromAsync(socket.BeginConnect, socket.EndConnect, connectTo, port, null);
                 Assert.True(socket.Connected);
             }
         }
@@ -461,11 +454,10 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(TestPlatforms.Windows)]  // Connecting sockets to DNS endpoints via the instance Connect and ConnectAsync methods not supported on Unix
         public async Task DualModeBeginConnect_LoopbackDnsToHost_Helper(IPAddress listenOn, bool dualModeServer)
         {
-            int port;
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
-            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out port))
+            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out int port))
             {
-                await Task.Factory.FromAsync(socket.BeginConnect("localhost", port, null, null), socket.EndConnect);
+                await Task.Factory.FromAsync(socket.BeginConnect, socket.EndConnect, "localhost", port, null);
                 Assert.True(socket.Connected);
             }
         }
@@ -478,7 +470,7 @@ namespace System.Net.Sockets.Tests
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
             using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out int port))
             {
-                await Task.Factory.FromAsync(socket.BeginConnect(new DnsEndPoint("localhost", port), null, null), socket.EndConnect);
+                await Task.Factory.FromAsync(socket.BeginConnect, socket.EndConnect, new DnsEndPoint("localhost", port), null);
                 Assert.True(socket.Connected);
             }
         }
@@ -540,9 +532,8 @@ namespace System.Net.Sockets.Tests
 
         private void DualModeConnectAsync_IPEndPointToHost_Helper(IPAddress connectTo, IPAddress listenOn, bool dualModeServer)
         {
-            int port;
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
-            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out port))
+            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out int port))
             {
                 ManualResetEvent waitHandle = new ManualResetEvent(false);
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -581,9 +572,8 @@ namespace System.Net.Sockets.Tests
         [MemberData(nameof(DualMode_Connect_IPAddress_DualMode_Data))]
         public void DualModeConnectAsync_DnsEndPointToHost_Helper(IPAddress listenOn, bool dualModeServer)
         {
-            int port;
             using (Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp))
-            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out port))
+            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out int port))
             {
                 ManualResetEvent waitHandle = new ManualResetEvent(false);
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -608,8 +598,7 @@ namespace System.Net.Sockets.Tests
         [MemberData(nameof(DualMode_Connect_IPAddress_DualMode_Data))]
         public void DualModeConnectAsync_Static_DnsEndPointToHost_Helper(IPAddress listenOn, bool dualModeServer)
         {
-            int port;
-            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out port))
+            using (SocketServer server = new SocketServer(_log, listenOn, dualModeServer, out int port))
             {
                 ManualResetEvent waitHandle = new ManualResetEvent(false);
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
@@ -1103,9 +1092,8 @@ namespace System.Net.Sockets.Tests
 
         private void DualModeSendTo_IPEndPointToHost_Helper(IPAddress connectTo, IPAddress listenOn, bool dualModeServer, bool expectedToTimeout = false)
         {
-            int port;
             using (Socket client = new Socket(SocketType.Dgram, ProtocolType.Udp))
-            using (SocketUdpServer server = new SocketUdpServer(_log, listenOn, dualModeServer, out port))
+            using (SocketUdpServer server = new SocketUdpServer(_log, listenOn, dualModeServer, out int port))
             {
                 // Send a few packets, in case they aren't delivered reliably.
                 for (int i = 0; i < (expectedToTimeout ? 1 : TestSettings.UDPRedundancy); i++)
@@ -1203,9 +1191,8 @@ namespace System.Net.Sockets.Tests
 
         private void DualModeBeginSendTo_EndPointToHost_Helper(IPAddress connectTo, IPAddress listenOn, bool dualModeServer, bool expectedToTimeout = false)
         {
-            int port;
             using (Socket client = new Socket(SocketType.Dgram, ProtocolType.Udp))
-            using (SocketUdpServer server = new SocketUdpServer(_log, listenOn, dualModeServer, out port))
+            using (SocketUdpServer server = new SocketUdpServer(_log, listenOn, dualModeServer, out int port))
             {
                 // Send a few packets, in case they aren't delivered reliably.
                 for (int i = 0; i < (expectedToTimeout ? 1 : TestSettings.UDPRedundancy); i++)
@@ -1326,9 +1313,8 @@ namespace System.Net.Sockets.Tests
 
         private void DualModeSendToAsync_IPEndPointToHost_Helper(IPAddress connectTo, IPAddress listenOn, bool dualModeServer, bool expectedToTimeout = false)
         {
-            int port;
             using (Socket client = new Socket(SocketType.Dgram, ProtocolType.Udp))
-            using (SocketUdpServer server = new SocketUdpServer(_log, listenOn, dualModeServer, out port))
+            using (SocketUdpServer server = new SocketUdpServer(_log, listenOn, dualModeServer, out int port))
             {
                 // Send a few packets, in case they aren't delivered reliably.
                 for (int i = 0; i < (expectedToTimeout ? 1 : TestSettings.UDPRedundancy); i++)
@@ -1825,9 +1811,8 @@ namespace System.Net.Sockets.Tests
 
                 byte[] buf = new byte[1];
                 SocketFlags flags = SocketFlags.None;
-                IPPacketInformation packetInfo;
 
-                Assert.Throws<PlatformNotSupportedException>(() => sock.ReceiveMessageFrom(buf, 0, buf.Length, ref flags, ref ep, out packetInfo));
+                Assert.Throws<PlatformNotSupportedException>(() => sock.ReceiveMessageFrom(buf, 0, buf.Length, ref flags, ref ep, out IPPacketInformation packetInfo));
             }
         }
 
@@ -1859,10 +1844,9 @@ namespace System.Net.Sockets.Tests
 
                 EndPoint receivedFrom = new IPEndPoint(IPAddress.Loopback, UnusedPort);
                 SocketFlags socketFlags = SocketFlags.None;
-                IPPacketInformation ipPacketInformation;
                 AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
-                    int received = socket.ReceiveMessageFrom(new byte[1], 0, 1, ref socketFlags, ref receivedFrom, out ipPacketInformation);
+                    int received = socket.ReceiveMessageFrom(new byte[1], 0, 1, ref socketFlags, ref receivedFrom, out IPPacketInformation ipPacketInformation);
                 });
             }
         }
@@ -1877,11 +1861,10 @@ namespace System.Net.Sockets.Tests
                 int port = socket.BindToAnonymousPort(IPAddress.IPv6Loopback);
                 EndPoint receivedFrom = new DnsEndPoint("localhost", port, AddressFamily.InterNetworkV6);
                 SocketFlags socketFlags = SocketFlags.None;
-                IPPacketInformation ipPacketInformation;
 
                 AssertExtensions.Throws<ArgumentException>("remoteEP", () =>
                 {
-                    int received = socket.ReceiveMessageFrom(new byte[1], 0, 1, ref socketFlags, ref receivedFrom, out ipPacketInformation);
+                    int received = socket.ReceiveMessageFrom(new byte[1], 0, 1, ref socketFlags, ref receivedFrom, out IPPacketInformation ipPacketInformation);
                 });
             }
         }
@@ -2164,7 +2147,6 @@ namespace System.Net.Sockets.Tests
 
                 EndPoint receivedFrom = new IPEndPoint(connectTo, port);
                 SocketFlags socketFlags = SocketFlags.None;
-                IPPacketInformation ipPacketInformation;
                 IAsyncResult async = serverSocket.BeginReceiveMessageFrom(new byte[1], 0, 1, socketFlags, ref receivedFrom, null, null);
 
                 // Behavior difference from Desktop: receivedFrom will _not_ change during the synchronous phase.
@@ -2181,7 +2163,7 @@ namespace System.Net.Sockets.Tests
                 }
 
                 receivedFrom = new IPEndPoint(connectTo, port);
-                int received = serverSocket.EndReceiveMessageFrom(async, ref socketFlags, ref receivedFrom, out ipPacketInformation);
+                int received = serverSocket.EndReceiveMessageFrom(async, ref socketFlags, ref receivedFrom, out IPPacketInformation ipPacketInformation);
 
                 Assert.Equal(1, received);
                 Assert.Equal<Type>(receivedFrom.GetType(), typeof(IPEndPoint));
