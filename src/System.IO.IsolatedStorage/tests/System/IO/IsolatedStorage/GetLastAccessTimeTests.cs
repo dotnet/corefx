@@ -66,8 +66,6 @@ namespace System.IO.IsolatedStorage
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 string file = "\0bad";
-                isf.CreateTestFile(file);
-
                 Assert.True(TestHelper.IsTimeCloseToNow(isf.GetLastAccessTime(file)));
             }
         }
