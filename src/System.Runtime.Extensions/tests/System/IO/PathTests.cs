@@ -315,7 +315,7 @@ namespace System.IO.Tests
         {
             Assert.False(Path.IsPathRooted(path));
         }
-
+      
         // Testing invalid drive letters !(a-zA-Z)
         [PlatformSpecific(TestPlatforms.Windows)]
         [Theory]
@@ -418,7 +418,7 @@ namespace System.IO.Tests
                 Assert.Equal(string.Empty, Path.GetExtension(bad));
                 Assert.Equal(bad, Path.GetFileName(bad));
                 Assert.Equal(bad, Path.GetFileNameWithoutExtension(bad));
-                AssertExtensions.Throws<ArgumentException>(c == 124 ? null : "path", null, () => Path.GetFullPath(bad));
+                Assert.Equal(bad, Path.GetFullPath(bad));
                 Assert.Equal(string.Empty, Path.GetPathRoot(bad));
                 Assert.False(Path.IsPathRooted(bad));
             });
