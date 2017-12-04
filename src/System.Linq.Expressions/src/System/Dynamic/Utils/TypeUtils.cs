@@ -778,25 +778,34 @@ namespace System.Dynamic.Utils
             // that allows mscorlib types to be specialized by types in other
             // assemblies.
 
-            Assembly asm = t.Assembly;
-            if (asm != MsCorLib & asm != ThisAssembly)
+            for (;;)
             {
-                // Not in mscorlib or our assembly
-                return false;
-            }
-
-            if (t.IsGenericType)
-            {
-                foreach (Type g in t.GetGenericArguments())
+                Assembly asm = t.Assembly;
+                if (asm != MsCorLib & asm != ThisAssembly)
                 {
-                    if (!g.CanCache())
+                    // Not in mscorlib or our assembly
+                    return false;
+                }
+
+                if (t.IsGenericType)
+                {
+                    Type[] arguments = t.GetGenericArguments();
+                    for (int i = 1; i < arguments.Length; i++)
                     {
-                        return false;
+                        if (!arguments[i].CanCache())
+                        {
+                            return false;
+                        }
                     }
+
+                    // Iterate rather than recurse on the first argument (often the only argument).
+                    t = arguments[0];
+                }
+                else
+                {
+                    return true;
                 }
             }
-
-            return true;
         }
 
         public static MethodInfo GetInvokeMethod(this Type delegateType)
