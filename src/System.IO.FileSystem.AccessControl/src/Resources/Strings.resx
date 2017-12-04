@@ -120,6 +120,9 @@
   <data name="AccessControl_InvalidHandle" xml:space="preserve">
     <value>The supplied handle is invalid. This can happen when trying to set an ACL on an anonymous kernel object.</value>
   </data>
+  <data name="AccessControl_TypeUnrecognized" xml:space="preserve">
+    <value>AccessControlType '{0}' unrecognized</value>
+  </data>
   <data name="Arg_MustBeIdentityReferenceType" xml:space="preserve">
     <value>Type must be an IdentityReference, such as NTAccount or SecurityIdentifier.</value>
   </data>

@@ -348,7 +348,7 @@ namespace System.Security.AccessControl
                         result = _securityDescriptor.DiscretionaryAcl.RemoveAccess(AccessControlType.Allow, sid, -1, InheritanceFlags.ContainerInherit, 0, ObjectAceFlags.None, Guid.Empty, Guid.Empty);
                         if (result == false)
                         {
-                            Debug.Assert(false, "Invalid operation");
+                            Debug.Assert(false, "Invalid operation");                            
                             throw new InvalidOperationException();
                         }
 
@@ -414,7 +414,7 @@ nameof(modification),
             else
             {
                 Debug.Assert(false, "rule.AccessControlType unrecognized");
-                throw new ArgumentException($"AccessControlType unrecognized, '{rule.AccessControlType}'");
+                throw new ArgumentException(SR.Format(SR.AccessControl_TypeUnrecognized, rule.AccessControlType));
             }
 
             modified = result;
