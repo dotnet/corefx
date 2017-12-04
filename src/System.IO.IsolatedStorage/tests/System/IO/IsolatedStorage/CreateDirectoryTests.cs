@@ -59,10 +59,9 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        // Active Issue(25665) for Unix
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [ActiveIssue(25665, ~TestPlatforms.Windows)]
         public void CreateDirectory_RaisesIsolatedStorageException_Core()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())

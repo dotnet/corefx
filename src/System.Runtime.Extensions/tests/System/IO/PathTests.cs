@@ -370,10 +370,9 @@ namespace System.IO.Tests
             });
         }
 
-        // Active Issue(25665) for Unix
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [ActiveIssue(25665, ~TestPlatforms.Windows)]
         public static void GetInvalidPathChars_Core_Windows()
         {
             Assert.NotNull(Path.GetInvalidPathChars());

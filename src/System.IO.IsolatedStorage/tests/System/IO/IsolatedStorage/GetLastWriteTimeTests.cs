@@ -49,9 +49,8 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        // Active Issue(25665) for Unix
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [ActiveIssue(25665, ~TestPlatforms.Windows)]
         public void GetLastWriteTime_RaisesArgumentException_Windows()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
