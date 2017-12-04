@@ -66,7 +66,7 @@ namespace System.Data.Common
                 throw ADP.Argument(SR.ADP_DbProviderFactories_NoAssemblyQualifiedName);
             }
 
-            return DbProviderFactories.GetFactoryInstance(DbProviderFactories.GetProviderTypeFromTypeName(assemblyQualifiedName));
+            return GetFactoryInstance(GetProviderTypeFromTypeName(assemblyQualifiedName));
         }
 
 
@@ -128,7 +128,7 @@ namespace System.Data.Common
         
         public static bool UnregisterFactory(string providerInvariantName)
         {
-            return !string.IsNullOrWhiteSpace(providerInvariantName) && _registeredFactories.TryRemove(providerInvariantName, out ProviderRegistration providerRegistration);
+            return !string.IsNullOrWhiteSpace(providerInvariantName) && _registeredFactories.TryRemove(providerInvariantName, out _);
         }
         
         private static DbProviderFactory GetFactory(string providerInvariantName, bool throwOnError)
