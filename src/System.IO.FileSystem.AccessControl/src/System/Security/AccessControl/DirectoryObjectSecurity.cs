@@ -349,7 +349,7 @@ namespace System.Security.AccessControl
                         if (result == false)
                         {
                             Debug.Assert(false, "Invalid operation");
-                            throw new Exception();
+                            throw new InvalidOperationException();
                         }
 
                         break;
@@ -395,7 +395,7 @@ nameof(modification),
                         if (result == false)
                         {
                             Debug.Assert(false, "Invalid operation");
-                            throw new Exception();
+                            throw new InvalidOperationException();
                         }
 
                         break;
@@ -414,7 +414,7 @@ nameof(modification),
             else
             {
                 Debug.Assert(false, "rule.AccessControlType unrecognized");
-                throw new Exception();
+                throw new ArgumentException($"AccessControlType unrecognized, '{rule.AccessControlType}'");
             }
 
             modified = result;
@@ -490,7 +490,7 @@ nameof(modification),
                     if (result == false)
                     {
                         Debug.Assert(false, "Invalid operation");
-                        throw new Exception();
+                        throw new InvalidOperationException();
                     }
 
                     break;
