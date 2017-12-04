@@ -80,8 +80,7 @@ namespace System.Xml.Tests
         {
             using (XmlReader reader = XmlReader.Create("http://test.test/test.html", new XmlReaderSettings() { Async = true }))
             {
-                AggregateException ae = Assert.Throws<System.AggregateException>(() => reader.Read());
-                Assert.Equal(typeof(System.Net.WebException), ae.InnerException.GetType());
+                Assert.Throws<System.Net.WebException>(() => reader.Read());
             }
         }
     }
