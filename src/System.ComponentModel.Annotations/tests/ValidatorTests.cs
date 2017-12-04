@@ -191,6 +191,25 @@ namespace System.ComponentModel.DataAnnotations.Tests
         }
 
         [Fact]
+        public void TryValidateObject_IValidatableObject_Null()
+        {
+            var instance = new ValidatableNull();
+            var context = new ValidationContext(instance);
+
+            var results = new List<ValidationResult>();
+            Assert.True(Validator.TryValidateObject(instance, context, results));
+            Assert.Equal(0, results.Count);
+        }
+
+        public class ValidatableNull : IValidatableObject
+        {
+            public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+            {
+                return null;
+            }
+        }
+
+        [Fact]
         public void TryValidateObject_RequiredNonNull_Success()
         {
             var instance = new RequiredFailure { Required = "Text" };
@@ -318,6 +337,33 @@ namespace System.ComponentModel.DataAnnotations.Tests
             Assert.Equal(objectToBeValidated, exception.Value);
         }
 
+        [Fact]
+        public void ValidateObject_IValidatableObject_Success()
+        {
+            var instance = new ValidatableSuccess();
+            var context = new ValidationContext(instance);
+
+            Validator.ValidateObject(instance, context);
+        }
+
+        [Fact]
+        public void ValidateObject_IValidatableObject_Error()
+        {
+            var instance = new ValidatableError();
+            var context = new ValidationContext(instance);
+            var exception = Assert.Throws<ValidationException>(
+                () => Validator.ValidateObject(instance, context));
+            Assert.Equal("error", exception.ValidationResult.ErrorMessage);
+        }
+
+        [Fact]
+        public void ValidateObject_IValidatableObject_Null()
+        {
+            var instance = new ValidatableNull();
+            var context = new ValidationContext(instance);
+
+            Validator.ValidateObject(instance, context);
+        }
         #endregion ValidateObject
 
         #region TryValidateProperty
