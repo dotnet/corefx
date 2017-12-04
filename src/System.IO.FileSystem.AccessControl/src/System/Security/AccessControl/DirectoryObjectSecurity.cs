@@ -349,7 +349,7 @@ namespace System.Security.AccessControl
                         if (result == false)
                         {
                             Debug.Assert(false, "Invalid operation");
-                            throw new Exception();
+                            throw new System.Security.SecurityException(SR.InvalidOperation_AccessControl);
                         }
 
                         break;
@@ -395,7 +395,7 @@ nameof(modification),
                         if (result == false)
                         {
                             Debug.Assert(false, "Invalid operation");
-                            throw new Exception();
+                            throw new System.Security.SecurityException(SR.InvalidOperation_AccessControl);
                         }
 
                         break;
@@ -490,7 +490,7 @@ nameof(modification),
                     if (result == false)
                     {
                         Debug.Assert(false, "Invalid operation");
-                        throw new Exception();
+                        throw new System.Security.SecurityException(SR.InvalidOperation_AccessControl);
                     }
 
                     break;

@@ -141,4 +141,7 @@
   <data name="TypeUnrecognized_AccessControl" xml:space="preserve">
     <value>AccessControlType '{0}' unrecognized</value>
   </data>
+  <data name="InvalidOperation_AccessControl" xml:space="preserve">
+    <value>Invalid operation</value>
+  </data>
 </root>
