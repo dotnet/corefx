@@ -191,6 +191,23 @@ public static class HashCodeTests
         Assert.Equal(hc.ToHashCode(), HashCode.Combine(1, 2, 3, 4, 5, 6, 7, 8));
     }
 
+    [Fact]
+    public static void HashCode_GetHashCode()
+    {
+        var hc = new HashCode();
+
+        Assert.Throws<NotSupportedException>(() => hc.GetHashCode());
+    }
+
+
+    [Fact]
+    public static void HashCode_Equals()
+    {
+        var hc = new HashCode();
+
+        Assert.Throws<NotSupportedException>(() => hc.Equals(hc));
+    }
+
     public class ConstComparer : System.Collections.Generic.IEqualityComparer<string>
     {
         public const int ConstantValue = 1234;
