@@ -1,4 +1,4 @@
-# Manually build and run your application with csc and corerun
+# Build and run your application with csc and corerun
 
 This tutorial describes how to build and run an application that targets self-compiled .NET Core binaries. We won't use be using Visual Studio,  the .NET Core SDK Host (`dotnet.exe`) or a product file. Follow these steps to quickly validate changes you make in the product e.g. by running benchmarks or tests on it. Do not consider to use this instruction for production scenarios. At the time of writing required tools like `csc` are not accessible on Unix/MacOS machines, therefore make sure to __use a Windows environment__.
 
