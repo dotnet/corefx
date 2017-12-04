@@ -755,14 +755,19 @@ namespace System.Dynamic.Utils
         }
 
         private static Assembly s_mscorlib;
+        private static Assembly s_thisAssembly;
 
         private static Assembly MsCorLib => s_mscorlib ?? (s_mscorlib = typeof(object).Assembly);
+
+        private static Assembly ThisAssembly => s_thisAssembly ?? (s_thisAssembly = typeof(TypeUtils).Assembly);
 
         /// <summary>
         /// We can cache references to types, as long as they aren't in
         /// collectible assemblies. Unfortunately, we can't really distinguish
         /// between different flavors of assemblies. But, we can at least
         /// create a cache for types in mscorlib (so we get the primitives, etc).
+        /// We can also cache types from this assembly, as if this assembly is
+        /// loaded in a collectible way, then the cache can be collected too.
         /// </summary>
         public static bool CanCache(this Type t)
         {
@@ -773,25 +778,34 @@ namespace System.Dynamic.Utils
             // that allows mscorlib types to be specialized by types in other
             // assemblies.
 
-            Assembly asm = t.Assembly;
-            if (asm != MsCorLib)
+            for (;;)
             {
-                // Not in mscorlib or our assembly
-                return false;
-            }
-
-            if (t.IsGenericType)
-            {
-                foreach (Type g in t.GetGenericArguments())
+                Assembly asm = t.Assembly;
+                if (asm != MsCorLib & asm != ThisAssembly)
                 {
-                    if (!g.CanCache())
+                    // Not in mscorlib or our assembly
+                    return false;
+                }
+
+                if (t.IsGenericType)
+                {
+                    Type[] arguments = t.GetGenericArguments();
+                    for (int i = 1; i < arguments.Length; i++)
                     {
-                        return false;
+                        if (!arguments[i].CanCache())
+                        {
+                            return false;
+                        }
                     }
+
+                    // Iterate rather than recurse on the first argument (often the only argument).
+                    t = arguments[0];
+                }
+                else
+                {
+                    return true;
                 }
             }
-
-            return true;
         }
 
         public static MethodInfo GetInvokeMethod(this Type delegateType)
