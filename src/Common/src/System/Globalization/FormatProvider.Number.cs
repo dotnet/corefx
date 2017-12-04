@@ -412,9 +412,14 @@ namespace System.Globalization
                             if (digCount < maxParseDigits)
                             {
                                 if (bigNumber)
+                                {
                                     sb.Append(ch);
+                                }
                                 else
+                                {
                                     dig[digCount++] = ch;
+                                }
+
                                 if (ch != '0' || parseDecimal)
                                 {
                                     digEnd = digCount;
@@ -704,7 +709,9 @@ namespace System.Globalization
                         {
                             nMinDigits = nMaxDigits >= 0 ? nMaxDigits : info.CurrencyDecimalDigits;
                             if (nMaxDigits < 0)
+                            {
                                 nMaxDigits = info.CurrencyDecimalDigits;
+                            }
 
                             RoundNumber(ref number, number.scale + nMaxDigits); // Don't change this line to use digPos since digCount could have its sign changed.
 
@@ -717,14 +724,20 @@ namespace System.Globalization
                     case 'f':
                         {
                             if (nMaxDigits < 0)
+                            {
                                 nMaxDigits = nMinDigits = info.NumberDecimalDigits;
+                            }
                             else
+                            {
                                 nMinDigits = nMaxDigits;
+                            }
 
                             RoundNumber(ref number, number.scale + nMaxDigits);
 
                             if (number.sign)
+                            {
                                 sb.Append(info.NegativeSign);
+                            }
 
                             FormatFixed(ref sb, ref number, nMinDigits, nMaxDigits, info, null, info.NumberDecimalSeparator, null);
 
@@ -735,9 +748,13 @@ namespace System.Globalization
                     case 'n':
                         {
                             if (nMaxDigits < 0)
+                            {
                                 nMaxDigits = nMinDigits = info.NumberDecimalDigits; // Since we are using digits in our calculation
+                            }
                             else
+                            {
                                 nMinDigits = nMaxDigits;
+                            }
 
                             RoundNumber(ref number, number.scale + nMaxDigits);
 
@@ -750,15 +767,21 @@ namespace System.Globalization
                     case 'e':
                         {
                             if (nMaxDigits < 0)
+                            {
                                 nMaxDigits = nMinDigits = 6;
+                            }
                             else
+                            {
                                 nMinDigits = nMaxDigits;
+                            }
                             nMaxDigits++;
 
                             RoundNumber(ref number, nMaxDigits);
 
                             if (number.sign)
+                            {
                                 sb.Append(info.NegativeSign);
+                            }
 
                             FormatScientific(ref sb, ref number, nMinDigits, nMaxDigits, info, format);
 
@@ -788,7 +811,9 @@ namespace System.Globalization
                                 nMinDigits = nMaxDigits;
 
                             if (enableRounding) // Don't round for G formatting without precision
+                            {
                                 RoundNumber(ref number, nMaxDigits); // This also fixes up the minus zero case
+                            }
                             else
                             {
                                 if (isDecimal && (number.digits[0] == 0))
@@ -799,7 +824,9 @@ namespace System.Globalization
                             }
 
                             if (number.sign)
+                            {
                                 sb.Append(info.NegativeSign);
+                            }
 
                             FormatGeneral(ref sb, ref number, nMinDigits, nMaxDigits, info, (char)(format - ('G' - 'E')), !enableRounding);
 
@@ -810,9 +837,13 @@ namespace System.Globalization
                     case 'p':
                         {
                             if (nMaxDigits < 0)
+                            {
                                 nMaxDigits = nMinDigits = info.PercentDecimalDigits;
+                            }
                             else
+                            {
                                 nMinDigits = nMaxDigits;
+                            }
                             number.scale += 2;
 
                             RoundNumber(ref number, number.scale + nMaxDigits);
@@ -857,7 +888,9 @@ namespace System.Globalization
             {
                 int result = 0;
                 while (*s++ != '\0')
+                {
                     result++;
+                }
                 return result;
             }
 
@@ -885,20 +918,31 @@ namespace System.Globalization
                             {
                                 groupSize = groupDigits[groupSizeIndex];
                                 if (groupSize == 0)
+                                {
                                     break;
+                                }
 
                                 bufferSize += groupSeparatorLen;
                                 if (groupSizeIndex < groupSizeLen - 1)
+                                {
                                     groupSizeIndex++;
+                                }
 
                                 groupSizeCount += groupDigits[groupSizeIndex];
                                 if (groupSizeCount < 0 || bufferSize < 0)
+                                {
                                     throw new ArgumentOutOfRangeException(); // If we overflow
+                                }
                             }
+
                             if (groupSizeCount == 0) // If you passed in an array with one entry as 0, groupSizeCount == 0
+                            {
                                 groupSize = 0;
+                            }
                             else
+                            {
                                 groupSize = groupDigits[0];
+                            }
                         }
 
                         char* tmpBuffer = stackalloc char[bufferSize];
@@ -917,7 +961,9 @@ namespace System.Globalization
                                 if ((digitCount == groupSize) && (i != 0))
                                 {
                                     for (int j = groupSeparatorLen - 1; j >= 0; j--)
+                                    {
                                         *(p--) = sGroup[j];
+                                    }
 
                                     if (groupSizeIndex < groupSizeLen - 1)
                                     {
@@ -938,7 +984,9 @@ namespace System.Globalization
                         sb.Append(dig, digits);
                         dig += digits;
                         if (digPos > digLength)
+                        {
                             sb.Append('0', digPos - digLength);
+                        }
                     }
                 }
                 else
@@ -995,10 +1043,14 @@ namespace System.Globalization
                 sb.Append((*dig != 0) ? *dig++ : '0');
 
                 if (nMaxDigits != 1) // For E0 we would like to suppress the decimal point
+                {
                     sb.Append(info.NumberDecimalSeparator);
+                }
 
                 while (--nMaxDigits > 0)
+                {
                     sb.Append((*dig != 0) ? *dig++ : '0');
+                }
 
                 int e = number.digits[0] == 0 ? 0 : number.scale - 1;
                 FormatExponent(ref sb, info, e, expChar, 3, true);
@@ -1016,7 +1068,9 @@ namespace System.Globalization
                 else
                 {
                     if (positiveSign)
+                    {
                         sb.Append(info.PositiveSign);
+                    }
                 }
 
                 char* digits = stackalloc char[11];
@@ -1024,7 +1078,9 @@ namespace System.Globalization
                 Int32ToDecChars(digits, ref index, (uint)value, minDigits);
                 int i = 10 - index;
                 while (--i >= 0)
+                {
                     sb.Append(digits[index++]);
+                }
             }
 
             private static unsafe void FormatGeneral(ref ValueStringBuilder sb, ref NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info, char expChar, bool bSuppressScientific)
@@ -1067,11 +1123,15 @@ namespace System.Globalization
                     }
 
                     while (*dig != 0)
+                    {
                         sb.Append(*dig++);
+                    }
                 }
 
                 if (scientific)
+                {
                     FormatExponent(ref sb, info, number.scale - 1, expChar, 2, true);
+                }
             }
 
             private static void FormatPercent(ref ValueStringBuilder sb, ref NumberBuffer number, int nMinDigits, int nMaxDigits, NumberFormatInfo info)
@@ -1106,12 +1166,16 @@ namespace System.Globalization
 
                 int i = 0;
                 while (i < pos && dig[i] != 0)
+                {
                     i++;
+                }
 
                 if (i == pos && dig[i] >= '5')
                 {
                     while (i > 0 && dig[i - 1] == '9')
+                    {
                         i--;
+                    }
 
                     if (i > 0)
                     {
@@ -1127,8 +1191,11 @@ namespace System.Globalization
                 else
                 {
                     while (i > 0 && dig[i - 1] == '0')
+                    {
                         i--;
+                    }
                 }
+
                 if (i == 0)
                 {
                     number.scale = 0;
@@ -1140,7 +1207,9 @@ namespace System.Globalization
             private static unsafe int FindSection(ReadOnlySpan<char> format, int section)
             {
                 if (section == 0)
+                {
                     return 0;
+                }
 
                 fixed (char* pFormat = &format.DangerousGetPinnableReference())
                 {
@@ -1162,13 +1231,21 @@ namespace System.Globalization
                                 break;
                             case '\\':
                                 if (src < format.Length && pFormat[src] != 0)
+                                {
                                     src++;
+                                }
                                 break;
                             case ';':
                                 if (--section != 0)
+                                {
                                     break;
+                                }
+
                                 if (src < format.Length && pFormat[src] != 0 && pFormat[src] != ';')
+                                {
                                     return src;
+                                }
+
                                 goto case '\0';
                             case '\0':
                                 return 0;
@@ -1221,13 +1298,17 @@ namespace System.Globalization
                                     break;
                                 case '0':
                                     if (firstDigit == 0x7FFFFFFF)
+                                    {
                                         firstDigit = digitCount;
+                                    }
                                     digitCount++;
                                     lastDigit = digitCount;
                                     break;
                                 case '.':
                                     if (decimalPos < 0)
+                                    {
                                         decimalPos = digitCount;
+                                    }
                                     break;
                                 case ',':
                                     if (digitCount > 0 && decimalPos < 0)
@@ -1258,7 +1339,9 @@ namespace System.Globalization
                                     break;
                                 case '\\':
                                     if (src < format.Length && pFormat[src] != 0)
+                                    {
                                         src++;
+                                    }
                                     break;
                                 case 'E':
                                 case 'e':
@@ -1274,14 +1357,20 @@ namespace System.Globalization
                     }
 
                     if (decimalPos < 0)
+                    {
                         decimalPos = digitCount;
+                    }
 
                     if (thousandPos >= 0)
                     {
                         if (thousandPos == decimalPos)
+                        {
                             scaleAdjust -= thousandCount * 3;
+                        }
                         else
+                        {
                             thousandSeps = true;
+                        }
                     }
 
                     if (dig[0] != 0)
@@ -1346,7 +1435,10 @@ namespace System.Globalization
                         int groupTotalSizeCount = 0;
                         int groupSizeLen = groupDigits.Length;    // The length of groupDigits array.
                         if (groupSizeLen != 0)
+                        {
                             groupTotalSizeCount = groupDigits[groupSizeIndex];   // The current running total of group size.
+                        }
+
                         int groupSize = groupTotalSizeCount;
 
                         int totalDigits = digPos + ((adjust < 0) ? adjust : 0); // Actual number of digits in o/p
@@ -1354,7 +1446,10 @@ namespace System.Globalization
                         while (numDigits > groupTotalSizeCount)
                         {
                             if (groupSize == 0)
+                            {
                                 break;
+                            }
+
                             ++thousandsSepCtr;
                             if (thousandsSepCtr >= thousandsSepPos.Length)
                             {
@@ -1374,9 +1469,11 @@ namespace System.Globalization
                         }
                     }
                 }
-            
+
                 if (number.sign && section == 0)
+                {
                     sb.Append(info.NegativeSign);
+                }
 
                 bool decimalWritten = false;
 
@@ -1469,13 +1566,20 @@ namespace System.Globalization
                             case '\'':
                             case '"':
                                 while (src < format.Length && pFormat[src] != 0 && pFormat[src] != ch)
+                                {
                                     sb.Append(pFormat[src++]);
+                                }
+
                                 if (src < format.Length && pFormat[src] != 0)
+                                {
                                     src++;
+                                }
                                 break;
                             case '\\':
                                 if (src < format.Length && pFormat[src] != 0)
+                                {
                                     sb.Append(pFormat[src++]);
+                                }
                                 break;
                             case 'E':
                             case 'e':
@@ -1506,9 +1610,13 @@ namespace System.Globalization
                                         }
 
                                         while (++src < format.Length && pFormat[src] == '0')
+                                        {
                                             i++;
+                                        }
                                         if (i > 10)
+                                        {
                                             i = 10;
+                                        }
 
                                         int exp = dig[0] == 0 ? 0 : number.scale - decimalPos;
                                         FormatExponent(ref sb, info, exp, ch, i, positiveSign);
@@ -1520,9 +1628,13 @@ namespace System.Globalization
                                         if (src < format.Length)
                                         {
                                             if (pFormat[src] == '+' || pFormat[src] == '-')
+                                            {
                                                 sb.Append(pFormat[src++]);
+                                            }
                                             while (src < format.Length && pFormat[src] == '0')
+                                            {
                                                 sb.Append(pFormat[src++]);
+                                            }
                                         }
                                     }
                                     break;
