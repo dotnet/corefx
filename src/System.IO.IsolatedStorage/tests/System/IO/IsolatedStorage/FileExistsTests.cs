@@ -61,7 +61,7 @@ namespace System.IO.IsolatedStorage
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public void FileExists_Core()
+        public void FileExists_InvalidPath_Core()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {

@@ -134,7 +134,6 @@ namespace System.IO.Tests
             CommonCasesException<ArgumentNullException>(null);
         }
 
-        [ActiveIssue(25665)]
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public static void ContainsInvalidCharWithoutRootedAfterArgumentNull_Desktop()
@@ -143,7 +142,6 @@ namespace System.IO.Tests
             CommonCasesException<ArgumentException>("ab\0cd");
         }
 
-        [ActiveIssue(25665)]
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void ContainsInvalidCharWithoutRootedAfterArgumentNull_Core()
