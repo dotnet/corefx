@@ -61,7 +61,6 @@ namespace System.IO.IsolatedStorage
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        [ActiveIssue(25665, ~TestPlatforms.Windows)]
         public void CreateFile_RaisesIsolatedStorageException_Core()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())

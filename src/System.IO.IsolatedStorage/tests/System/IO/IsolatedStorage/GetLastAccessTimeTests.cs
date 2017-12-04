@@ -50,12 +50,23 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        [ActiveIssue(25665, ~TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void GetLastAccessTime_RaisesArgumentException_Windows()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.GetLastAccessTime("\0bad"));
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void GetLastAccessTime_SpecialCharacter_Unix()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
+            {
+                string file = "\0bad";
+                Assert.True(TestHelper.IsTimeCloseToNow(isf.GetLastAccessTime(file)));
             }
         }
 
