@@ -162,7 +162,7 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public async Task MulticastInterface_Set_IPv6_AnyInterface_Succeeds()
         {
-            if (PlatformDetection.IsFedora)
+            if (PlatformDetection.IsFedora || PlatformDetection.IsRedHatFamily7 || PlatformDetection.IsOSX)
             {
                 return; // [ActiveIssue(24008)]
             }
