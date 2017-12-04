@@ -75,7 +75,7 @@ namespace System.Xml.Tests
             }
         }
 
-        [Fact]
+        [Fact, SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".Net Framework throws AggregateException")]
         public static void ReadAfterInitializationWithUriOnAsyncReaderTrows()
         {
             using (XmlReader reader = XmlReader.Create("http://test.test/test.html", new XmlReaderSettings() { Async = true }))
