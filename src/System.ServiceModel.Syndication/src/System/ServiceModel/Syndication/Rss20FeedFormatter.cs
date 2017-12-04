@@ -275,7 +275,7 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        internal SyndicationLink ReadAlternateLink(XmlReader reader, Uri baseUri)
+        internal static SyndicationLink ReadAlternateLink(XmlReader reader, Uri baseUri, Func<string, UriKind, string, string, Uri> uriParser, bool preserveAttributeExtensions)
         {
             SyndicationLink link = new SyndicationLink();
             link.BaseUri = baseUri;
@@ -290,7 +290,7 @@ namespace System.ServiceModel.Syndication
                     }
                     else if (!FeedUtils.IsXmlns(reader.LocalName, reader.NamespaceURI))
                     {
-                        if (this.PreserveAttributeExtensions)
+                        if (preserveAttributeExtensions)
                         {
                             link.AttributeExtensions.Add(new XmlQualifiedName(reader.LocalName, reader.NamespaceURI), reader.Value);
                         }
@@ -303,7 +303,7 @@ namespace System.ServiceModel.Syndication
             }
 
             string uri = reader.ReadElementString();
-            link.Uri = UriParser(uri, UriKind.RelativeOrAbsolute, Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace);
+            link.Uri = uriParser(uri, UriKind.RelativeOrAbsolute, Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace);
             return link;
         }
 
@@ -421,7 +421,7 @@ namespace System.ServiceModel.Syndication
                             }
                             else if (reader.IsStartElement(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace))
                             {
-                                result.Links.Add(ReadAlternateLink(reader, result.BaseUri));
+                                result.Links.Add(ReadAlternateLink(reader, result.BaseUri, UriParser, PreserveAttributeExtensions));
                                 readAlternateLink = true;
                             }
                             else if (reader.IsStartElement(Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace))
@@ -757,7 +757,7 @@ namespace System.ServiceModel.Syndication
                         }
                         else if (reader.IsStartElement(Rss20Constants.LinkTag, Rss20Constants.Rss20Namespace))
                         {
-                            result.Links.Add(ReadAlternateLink(reader, result.BaseUri));
+                            result.Links.Add(ReadAlternateLink(reader, result.BaseUri, UriParser, PreserveAttributeExtensions));
                         }
                         else if (reader.IsStartElement(Rss20Constants.DescriptionTag, Rss20Constants.Rss20Namespace))
                         {

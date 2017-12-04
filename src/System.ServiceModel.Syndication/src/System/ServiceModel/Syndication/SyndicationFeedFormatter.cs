@@ -404,7 +404,7 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        private static Uri DefaultUriParser(string value, UriKind kind, string localName, string ns)
+        internal static Uri DefaultUriParser(string value, UriKind kind, string localName, string ns)
         {
             return new Uri(value, kind);
         }
