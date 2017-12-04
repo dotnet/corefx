@@ -34,7 +34,7 @@ namespace System.Data.SqlClient.SNI
             }
             catch (SocketException se)
             {
-                throw new InvalidOperationException(SQLMessage.SqlServerBrowserNotAccessible(), se);
+                throw new System.InvalidOperationException(SQLMessage.SqlServerBrowserNotAccessible(), se);
             }
 
             const byte SvrResp = 0x05;
