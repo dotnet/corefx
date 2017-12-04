@@ -110,10 +110,10 @@ namespace System.Buffers.Text
         // Split long into two parts that can each fit in a uint - {1-10 digits}{9 digits}
         private static bool TryFormatInt64MoreThanNegativeBillionMaxUInt(long value, Span<byte> buffer, out int bytesWritten)
         {
-            uint OverNineDigits = (uint)(value / Utf8Constants.Billion);
-            uint LastNineDigits = (uint)(value - (OverNineDigits * Utf8Constants.Billion));
+            uint overNineDigits = (uint)(value / Utf8Constants.Billion);
+            uint lastNineDigits = (uint)(value - (overNineDigits * Utf8Constants.Billion));
 
-            int digitCountOverNineDigits = FormattingHelpers.CountDigits(OverNineDigits);
+            int digitCountOverNineDigits = FormattingHelpers.CountDigits(overNineDigits);
             Debug.Assert(digitCountOverNineDigits >= 1 && digitCountOverNineDigits <= 10);
             int digitCount = digitCountOverNineDigits + 9;
             // WriteDigits does not do bounds checks
@@ -124,8 +124,8 @@ namespace System.Buffers.Text
             }
             buffer[0] = Utf8Constants.Minus;
             bytesWritten = digitCount + 1;
-            FormattingHelpers.WriteDigits(OverNineDigits, buffer.Slice(1, digitCountOverNineDigits));
-            FormattingHelpers.WriteDigits(LastNineDigits, buffer.Slice(digitCountOverNineDigits + 1, 9));
+            FormattingHelpers.WriteDigits(overNineDigits, buffer.Slice(1, digitCountOverNineDigits));
+            FormattingHelpers.WriteDigits(lastNineDigits, buffer.Slice(digitCountOverNineDigits + 1, 9));
             return true;
         }
 
@@ -134,12 +134,12 @@ namespace System.Buffers.Text
         {
             // value can still be negative if value == long.MinValue
             // Therefore, cast to ulong, since (ulong)value actually equals abs(long.MinValue)
-            ulong OverNineDigits = (ulong)value / Utf8Constants.Billion;
-            uint LastNineDigits = (uint)((ulong)value - (OverNineDigits * Utf8Constants.Billion));
-            uint OverEighteenDigits = (uint)(OverNineDigits / Utf8Constants.Billion);
-            uint MiddleNineDigits = (uint)(OverNineDigits - (OverEighteenDigits * Utf8Constants.Billion));
+            ulong overNineDigits = (ulong)value / Utf8Constants.Billion;
+            uint lastNineDigits = (uint)((ulong)value - (overNineDigits * Utf8Constants.Billion));
+            uint overEighteenDigits = (uint)(overNineDigits / Utf8Constants.Billion);
+            uint middleNineDigits = (uint)(overNineDigits - (overEighteenDigits * Utf8Constants.Billion));
 
-            int digitCountOverEighteenDigits = FormattingHelpers.CountDigits(OverEighteenDigits);
+            int digitCountOverEighteenDigits = FormattingHelpers.CountDigits(overEighteenDigits);
             Debug.Assert(digitCountOverEighteenDigits == 1);
             int digitCount = digitCountOverEighteenDigits + 18;
             // WriteDigits does not do bounds checks
@@ -150,9 +150,9 @@ namespace System.Buffers.Text
             }
             buffer[0] = Utf8Constants.Minus;
             bytesWritten = digitCount + 1;
-            FormattingHelpers.WriteDigits(OverEighteenDigits, buffer.Slice(1, digitCountOverEighteenDigits));
-            FormattingHelpers.WriteDigits(MiddleNineDigits, buffer.Slice(digitCountOverEighteenDigits + 1, 9));
-            FormattingHelpers.WriteDigits(LastNineDigits, buffer.Slice(digitCountOverEighteenDigits + 1 + 9, 9));
+            FormattingHelpers.WriteDigits(overEighteenDigits, buffer.Slice(1, digitCountOverEighteenDigits));
+            FormattingHelpers.WriteDigits(middleNineDigits, buffer.Slice(digitCountOverEighteenDigits + 1, 9));
+            FormattingHelpers.WriteDigits(lastNineDigits, buffer.Slice(digitCountOverEighteenDigits + 1 + 9, 9));
             return true;
         }
     }
