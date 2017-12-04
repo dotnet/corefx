@@ -349,7 +349,7 @@ namespace System.Security.AccessControl
                         if (result == false)
                         {
                             Debug.Assert(false, "Invalid operation");                            
-                            throw new InvalidOperationException();
+                            throw new Exception();
                         }
 
                         break;
@@ -394,8 +394,8 @@ nameof(modification),
                         result = _securityDescriptor.DiscretionaryAcl.RemoveAccess(AccessControlType.Deny, sid, -1, InheritanceFlags.ContainerInherit, 0, ObjectAceFlags.None, Guid.Empty, Guid.Empty);
                         if (result == false)
                         {
-                            Debug.Assert(false, "Invalid operation");
-                            throw new InvalidOperationException();
+                            Debug.Assert(false, "Invalid operation");                            
+                            throw new Exception();
                         }
 
                         break;
@@ -490,7 +490,7 @@ nameof(modification),
                     if (result == false)
                     {
                         Debug.Assert(false, "Invalid operation");
-                        throw new InvalidOperationException();
+                        throw new Exception();
                     }
 
                     break;
