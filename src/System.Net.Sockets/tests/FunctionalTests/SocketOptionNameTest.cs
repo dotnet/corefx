@@ -159,6 +159,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task MulticastInterface_Set_IPv6_AnyInterface_Succeeds()
         {
@@ -171,6 +172,7 @@ namespace System.Net.Sockets.Tests
             await MulticastInterface_Set_IPv6_Helper(0);
         }
 
+        [OuterLoop] // TODO: Issue #11345
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
         [ActiveIssue(21327, TargetFrameworkMonikers.Uap)] // UWP Apps are forbidden to send network traffic to the local Computer.
