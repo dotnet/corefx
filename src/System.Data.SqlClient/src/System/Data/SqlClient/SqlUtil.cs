@@ -194,7 +194,7 @@ namespace System.Data.SqlClient
         }
         internal static Exception SynchronousCallMayNotPend()
         {
-            return new Exception(SR.GetString(SR.Sql_InternalError));
+            return new InvalidOperationException(SR.GetString(SR.Sql_InternalError));
         }
         internal static Exception ConnectionLockedForBcpEvent()
         {

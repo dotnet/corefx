@@ -101,7 +101,7 @@ namespace Microsoft.SqlServer.Server
                     {
                         FieldInfo fi = t.GetField("Null", BindingFlags.Public | BindingFlags.Static);
                         if (fi == null || fi.FieldType != t)
-                            throw new Exception("could not find Null field/property in nullable type " + t);
+                            throw new InvalidOperationException("could not find Null field/property in nullable type " + t);
                         else
                             NullInstance = fi.GetValue(null);
                     }
@@ -243,7 +243,7 @@ namespace Microsoft.SqlServer.Server
                 n = new BinaryOrderedUdtNormalizer(t, false);
             }
             if (n == null)
-                throw new Exception(SR.GetString(SR.SQL_CannotCreateNormalizer, t.FullName));
+                throw new InvalidOperationException(SR.GetString(SR.SQL_CannotCreateNormalizer, t.FullName));
             n._skipNormalize = false;
             return n;
         }

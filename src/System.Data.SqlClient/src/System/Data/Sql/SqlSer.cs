@@ -196,7 +196,7 @@ namespace Microsoft.SqlServer.Server
 
         private void DontDoIt()
         {
-            throw new Exception(SR.GetString(SR.Sql_InternalError));
+            throw new InvalidOperationException(SR.GetString(SR.Sql_InternalError));
         }
 
         public override bool CanRead => false;
