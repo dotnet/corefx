@@ -38,12 +38,12 @@ namespace System.IO
         {
             return new FindEnumerable<string, string>(
                 directory,
-                (ref RawFindData findData) => FindTransforms.AsUserFullPath(ref findData),
-                (ref RawFindData findData, string expr) =>
+                (ref RawFindData<string> findData) => FindTransforms.AsUserFullPath<string>(ref findData),
+                (ref RawFindData<string> findData) =>
                 {
                     return FindPredicates.NotDotOrDotDot(ref findData)
                         && !FindPredicates.IsDirectory(ref findData)
-                        && DosMatcher.MatchPattern(expr, findData.FileName, ignoreCase: true);
+                        && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
                 DosMatcher.TranslateExpression(expression),
                 recursive);
@@ -55,12 +55,12 @@ namespace System.IO
         {
             return new FindEnumerable<string, string>(
                 directory,
-                (ref RawFindData findData) => FindTransforms.AsUserFullPath(ref findData),
-                (ref RawFindData findData, string expr) =>
+                (ref RawFindData<string> findData) => FindTransforms.AsUserFullPath(ref findData),
+                (ref RawFindData<string> findData) =>
                 {
                     return FindPredicates.NotDotOrDotDot(ref findData)
                         && FindPredicates.IsDirectory(ref findData)
-                        && DosMatcher.MatchPattern(expr, findData.FileName, ignoreCase: true);
+                        && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
                 DosMatcher.TranslateExpression(expression),
                 recursive);
@@ -72,11 +72,11 @@ namespace System.IO
         {
             return new FindEnumerable<string, string>(
                 directory,
-                (ref RawFindData findData) => FindTransforms.AsUserFullPath(ref findData),
-                (ref RawFindData findData, string expr) =>
+                (ref RawFindData<string> findData) => FindTransforms.AsUserFullPath(ref findData),
+                (ref RawFindData<string> findData) =>
                 {
                     return FindPredicates.NotDotOrDotDot(ref findData)
-                        && DosMatcher.MatchPattern(expr, findData.FileName, ignoreCase: true);
+                        && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
                 DosMatcher.TranslateExpression(expression),
                 recursive);
@@ -89,12 +89,12 @@ namespace System.IO
         {
              return new FindEnumerable<FileInfo, string>(
                 directory,
-                (ref RawFindData findData) => FindTransforms.AsFileInfo(ref findData),
-                (ref RawFindData findData, string expr) =>
+                (ref RawFindData<string> findData) => FindTransforms.AsFileInfo(ref findData),
+                (ref RawFindData<string> findData) =>
                 {
                     return FindPredicates.NotDotOrDotDot(ref findData)
                         && !FindPredicates.IsDirectory(ref findData)
-                        && DosMatcher.MatchPattern(expr, findData.FileName, ignoreCase: true);
+                        && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
                 DosMatcher.TranslateExpression(expression),
                 recursive);
@@ -107,12 +107,12 @@ namespace System.IO
         {
             return new FindEnumerable<DirectoryInfo, string>(
                directory,
-               (ref RawFindData findData) => FindTransforms.AsDirectoryInfo(ref findData),
-               (ref RawFindData findData, string expr) =>
+               (ref RawFindData<string> findData) => FindTransforms.AsDirectoryInfo(ref findData),
+               (ref RawFindData<string> findData) =>
                {
                    return FindPredicates.NotDotOrDotDot(ref findData)
                        && FindPredicates.IsDirectory(ref findData)
-                       && DosMatcher.MatchPattern(expr, findData.FileName, ignoreCase: true);
+                       && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                },
                DosMatcher.TranslateExpression(expression),
                recursive);
@@ -125,11 +125,11 @@ namespace System.IO
         {
             return new FindEnumerable<FileSystemInfo, string>(
                directory,
-               (ref RawFindData findData) => FindTransforms.AsFileSystemInfo(ref findData),
-               (ref RawFindData findData, string expr) =>
+               (ref RawFindData<string> findData) => FindTransforms.AsFileSystemInfo(ref findData),
+               (ref RawFindData<string> findData) =>
                {
                    return FindPredicates.NotDotOrDotDot(ref findData)
-                       && DosMatcher.MatchPattern(expr, findData.FileName, ignoreCase: true);
+                       && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                },
                DosMatcher.TranslateExpression(expression),
                recursive);

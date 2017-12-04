@@ -17,7 +17,7 @@ namespace System.IO
         private readonly string _originalFullPath;
         private readonly string _originalUserPath;
         private readonly bool _recursive;
-        private readonly FindTransform<TResult> _transform;
+        private readonly FindTransform<TResult, TState> _transform;
         private readonly FindPredicate<TState> _predicate;
         private readonly TState _state;
 
@@ -40,7 +40,7 @@ namespace System.IO
         /// <param name="directory">The directory to search in.</param>
         public FindEnumerable(
             string directory,
-            FindTransform<TResult> transform,
+            FindTransform<TResult, TState> transform,
             FindPredicate<TState> predicate,
             TState state = default,
             bool recursive = false)
@@ -57,7 +57,7 @@ namespace System.IO
         private FindEnumerable(
             string originalUserPath,
             string originalFullPath,
-            FindTransform<TResult> transform,
+            FindTransform<TResult, TState> transform,
             FindPredicate<TState> predicate,
             TState state,
             bool recursive)
@@ -134,7 +134,7 @@ namespace System.IO
                 if (_lastEntryFound)
                     return false;
 
-                RawFindData findData = default;
+                RawFindData<TState> findData = default;
                 do
                 {
                     FindNextFile();
@@ -158,9 +158,9 @@ namespace System.IO
                             }
                         }
 
-                        findData = new RawFindData(_info, _currentPath, _originalFullPath, _originalUserPath);
+                        findData = new RawFindData<TState>(_info, _currentPath, _originalFullPath, _originalUserPath, _state);
                     }
-                } while (!_lastEntryFound && !_predicate(ref findData, _state));
+                } while (!_lastEntryFound && !_predicate(ref findData));
 
                 if (!_lastEntryFound)
                     _current = _transform(ref findData);
