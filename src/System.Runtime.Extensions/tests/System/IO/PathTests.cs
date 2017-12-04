@@ -59,22 +59,31 @@ namespace System.IO.Tests
             }
         }
 
-        [Theory,
-            InlineData(" "),
-            InlineData("\r\n")]
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public static void GetDirectoryName_SpaceOrControlCharsThrowOnWindows_Core(string path)
+        public static void GetDirectoryName_SpaceThrowOnWindows_Core()
         {
+            string path = " ";
             Action action = () => Path.GetDirectoryName(path);
-            if (PlatformDetection.IsWindows && path.Equals(" "))
+            if (PlatformDetection.IsWindows)
             {
                 AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(path));
             }
             else
             {
-                // These are valid paths on Unix
+                // This is a valid path on Unix
                 action();
             }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void GetDirectoryName_ControlCharsOnWindows_Core()
+        {
+            string path = "\r\n";
+            Action action = () => Path.GetDirectoryName(path);
+            // This is valid path on unix and windows
+            action(); 
         }
 
         [Theory]
