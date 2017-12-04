@@ -1,4 +1,4 @@
-# Build and run your application with csc and corerun
+# Build and run your .NET Core application with csc and CoreRun
 
 This tutorial describes how to build and run an application that targets self-compiled .NET Core binaries. We won't be using Visual Studio,  the .NET Core SDK Host (`dotnet.exe`), nor a C# project file (`*.csproj`). Follow these steps to quickly validate changes you made in the product e.g. by running benchmarks or tests on it. Don't consider using these instructions for production scenarios. At the time of writing required tools like `csc` are not accessible on Unix/MacOS machines, therefore make sure to __use a Windows environment__.
 
@@ -49,7 +49,7 @@ You won't need all the assemblies but copying the entire directory makes it easi
 - CoreFx assemblies: `System.Runtime.dll`, `System.Runtime.Extensions.dll`, `System.Runtime.InteropServices.dll`, `System.Text.Encoding.Extensions.dll`, `System.Threading.dll`
 
 ## Compile your application
-Compile your application with the C# Compiler (`csc`) against the copied assemblies.
+Use the C# Compiler (`csc`) to compile your C# code (`Program.cs`) against the copied assemblies. For our Hello World example we need to compile our program code against `System.Runtime.dll`, `System.Runtime.Extensions.dll` and `System.Console.dll`. As described above these assemblies have dependencies on two other assemblies: `System.Text.Encoding.Extensions.dll` and `System.Threading.dll`.
 ```
 csc /nostdlib /noconfig /r:runtime\System.Runtime.dll /r:runtime\System.Runtime.Extensions.dll /r:runtime\System.Console.dll /out:runtime\Program.dll Program.cs
 ```
