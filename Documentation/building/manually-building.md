@@ -45,7 +45,7 @@ xcopy d:\git\corefx\bin\testhost\netcoreapp-Windows_NT-Release-x64\shared\Micros
 
 You won't need all the assemblies but copying the entire directory makes it easier if you want to reference additional ones. For __running__ our Hello World application the following assemblies are needed:
 
-- CoreClr assemblies: `clrjit.dll`, `CoreRun.exe`, `coreclr.dll`, `System.Private.CoreLib.dll`
+- CoreClr assemblies: `clrjit.dll`, `CoreRun.exe`, `coreclr.dll`, `System.Private.CoreLib.dll`. For more information about the CoreClr parts, visit [Using your build](https://github.com/dotnet/coreclr/blob/master/Documentation/workflow/UsingYourBuild.md)
 - CoreFx assemblies: `System.Runtime.dll`, `System.Runtime.Extensions.dll`, `System.Runtime.InteropServices.dll`, `System.Text.Encoding.Extensions.dll`, `System.Threading.dll`
 
 ## Compile your application
@@ -55,7 +55,7 @@ csc /nostdlib /noconfig /r:runtime\System.Runtime.dll /r:runtime\System.Runtime.
 ```
 
 ## Run your application
-`Corerun.exe` is part of the coreclr binaries and is best described as the host of your .NET Core application.
+`Corerun.exe` is part of the coreclr binaries and is best described as the host of your .NET Core application. Find more information at [Using CoreRun](https://github.com/dotnet/coreclr/blob/master/Documentation/workflow/UsingCoreRun.md).
 ```
 cd runtime
 .\corerun Program.dll
