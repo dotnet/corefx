@@ -20,13 +20,28 @@ namespace System.Buffers.Text
                 return TryFormatUInt32SingleDigit((uint)value, buffer, out bytesWritten);
             }
 
-            return
-                // x64
-                IntPtr.Size == 8 ? TryFormatUInt64MultipleDigits(value, buffer, out bytesWritten) :
-                // x86
-                value <= uint.MaxValue ? TryFormatUInt32MultipleDigits((uint)value, buffer, out bytesWritten) :
-                value <= Utf8Constants.BillionMaxUIntValue ? TryFormatUInt64LessThanBillionMaxUInt(value, buffer, out bytesWritten) :
-                TryFormatUInt64MoreThanBillionMaxUInt(value, buffer, out bytesWritten);
+            if (IntPtr.Size == 8)    // x64
+            {
+                return TryFormatUInt64MultipleDigits(value, buffer, out bytesWritten);
+            }
+            else    // x86
+            {
+                if (value <= uint.MaxValue)
+                {
+                    return TryFormatUInt32MultipleDigits((uint)value, buffer, out bytesWritten);
+                }
+                else
+                {
+                    if (value <= Utf8Constants.BillionMaxUIntValue)
+                    {
+                        return TryFormatUInt64LessThanBillionMaxUInt(value, buffer, out bytesWritten);
+                    }
+                    else
+                    {
+                        return TryFormatUInt64MoreThanBillionMaxUInt(value, buffer, out bytesWritten);
+                    }
+                }
+            }
         }
 
         // TODO: Use this instead of TryFormatUInt64Default to format numbers less than uint.MaxValue
