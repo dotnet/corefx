@@ -754,45 +754,43 @@ namespace System.Dynamic.Utils
             return true;
         }
 
-        private static Assembly s_mscorlib;
-
-        private static Assembly MsCorLib => s_mscorlib ?? (s_mscorlib = typeof(object).Assembly);
-
         /// <summary>
         /// We can cache references to types, as long as they aren't in
-        /// collectible assemblies. Unfortunately, we can't really distinguish
-        /// between different flavors of assemblies. But, we can at least
-        /// create a cache for types in mscorlib (so we get the primitives, etc).
+        /// collectible assemblies.
         /// </summary>
-        public static bool CanCache(this Type t)
+#if FEATURE_COMPILE
+        private static Func<Type, bool> s_canCache;
+        private static bool s_buildingDelegate;
+
+        public static bool CanCache(this Type t) => s_canCache?.Invoke(t) ?? BuildAndInvokeCanCacheDelegate(t);
+
+        private static bool BuildAndInvokeCanCacheDelegate(Type t)
         {
-            // Note: we don't have to scan base or declaring types here.
-            // There's no way for a type in mscorlib to derive from or be
-            // contained in a type from another assembly. The only thing we
-            // need to look at is the generic arguments, which are the thing
-            // that allows mscorlib types to be specialized by types in other
-            // assemblies.
-
-            Assembly asm = t.Assembly;
-            if (asm != MsCorLib)
+            Type runtimeType = typeof(object).GetType(); // We can't typeof(RuntimeType), but we can do this
+            MethodInfo meth = runtimeType.GetMethod("IsCollectible", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (s_buildingDelegate)
             {
-                // Not in mscorlib or our assembly
-                return false;
+                // We've called ourselves in the course of building the delegate,
+                // so we need to fall back to reflection to bootstrap this.
+                return !(bool)meth.Invoke(t, Array.Empty<object>());
             }
 
-            if (t.IsGenericType)
-            {
-                foreach (Type g in t.GetGenericArguments())
-                {
-                    if (!g.CanCache())
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
+            s_buildingDelegate = true;
+            ParameterExpression param = Expression.Parameter(typeof(Type));
+            s_canCache = Expression.Lambda<Func<Type, bool>>(
+                    Expression.Not(Expression.Call(Expression.Convert(param, runtimeType), meth)), param)
+                .Compile();
+            return s_canCache(t);
         }
+#else
+        // If we can't compile to IL, use reflection directly.
+        private static MethodInfo s_isCollectible;
+
+        private static MethodInfo IsCollectible => s_isCollectible ??
+            (s_isCollectible = typeof(object).GetType().GetMethod("IsCollectible", BindingFlags.NonPublic | BindingFlags.Instance));
+
+        public static bool CanCache(this Type t) => !(bool)IsCollectible.Invoke(t, Array.Empty<object>());
+#endif
 
         public static MethodInfo GetInvokeMethod(this Type delegateType)
         {
