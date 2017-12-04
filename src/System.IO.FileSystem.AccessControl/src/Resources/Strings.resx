@@ -120,9 +120,6 @@
   <data name="AccessControl_InvalidHandle" xml:space="preserve">
     <value>The supplied handle is invalid. This can happen when trying to set an ACL on an anonymous kernel object.</value>
   </data>
-  <data name="AccessControl_TypeUnrecognized" xml:space="preserve">
-    <value>AccessControlType '{0}' unrecognized</value>
-  </data>
   <data name="Arg_MustBeIdentityReferenceType" xml:space="preserve">
     <value>Type must be an IdentityReference, such as NTAccount or SecurityIdentifier.</value>
   </data>
@@ -140,5 +137,8 @@
   </data>
   <data name="PlatformNotSupported_AccessControl" xml:space="preserve">
     <value>Access Control List (ACL) APIs are part of resource management on Windows and are not supported on this platform.</value>
+  </data>
+  <data name="TypeUnrecognized_AccessControl" xml:space="preserve">
+    <value>AccessControlType '{0}' unrecognized</value>
   </data>
 </root>

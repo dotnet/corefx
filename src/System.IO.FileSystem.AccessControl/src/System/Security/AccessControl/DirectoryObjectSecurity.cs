@@ -414,7 +414,7 @@ nameof(modification),
             else
             {
                 Debug.Assert(false, "rule.AccessControlType unrecognized");
-                throw new ArgumentException(SR.Format(SR.AccessControl_TypeUnrecognized, rule.AccessControlType));
+                throw new ArgumentException(SR.Format(SR.TypeUnrecognized_AccessControl, rule.AccessControlType));
             }
 
             modified = result;
