@@ -49,7 +49,6 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [ActiveIssue(25665)]
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void DirectoryExists_RaisesArgumentException_Desktop()
@@ -63,7 +62,7 @@ namespace System.IO.IsolatedStorage
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public void DirectoryExists_RaisesArgumentException_Core_Windows()
+        public void DirectoryExists_Core_Windows()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -73,8 +72,7 @@ namespace System.IO.IsolatedStorage
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void DirectoryExists_RaisesArgumentException_Core_Unix()
+        public void DirectoryExists_Core_Unix()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {

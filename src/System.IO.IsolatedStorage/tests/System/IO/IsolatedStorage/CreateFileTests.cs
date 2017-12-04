@@ -49,7 +49,6 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [ActiveIssue(25665)]
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void CreateFile_RaisesArgumentException_Desktop()
@@ -60,9 +59,11 @@ namespace System.IO.IsolatedStorage
             }
         }
 
+        // Active Issue(25665) for Unix
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public void CreateFile_RaisesArgumentException_Core()
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void CreateFile_RaisesIsolatedStorageException_Core()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {

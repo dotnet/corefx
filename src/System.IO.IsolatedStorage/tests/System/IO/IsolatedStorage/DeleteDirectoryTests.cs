@@ -49,25 +49,14 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [ActiveIssue(25665)]
+        // Active Issue(25665) for Unix
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public void DeleteDirectory_RaisesInvalidPath_Windows()
+        public void DeleteDirectory_IsolatedStorageException_Windows()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 Assert.Throws<IsolatedStorageException>(() => isf.DeleteDirectory("\0bad"));
-            }
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void DeleteDirectory_RaisesInvalidPath_Unix()
-        {
-            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
-            {
-                isf.DeleteDirectory("\0bad");
-                Assert.Throws<InvalidOperationException>(() => isf.DirectoryExists("\0bad"));
             }
         }
 

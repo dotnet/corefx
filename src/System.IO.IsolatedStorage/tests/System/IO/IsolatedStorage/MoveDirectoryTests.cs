@@ -60,7 +60,6 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [ActiveIssue(25665)]
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void MoveDirectory_RaisesInvalidPath_Desktop()
@@ -72,9 +71,11 @@ namespace System.IO.IsolatedStorage
             }
         }
 
+        // Active Issue(25665) for Unix
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public void MoveDirectory_RaisesInvalidPath_Core()
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void MoveDirectory_RaisesIsolatedStorageException_Core()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {

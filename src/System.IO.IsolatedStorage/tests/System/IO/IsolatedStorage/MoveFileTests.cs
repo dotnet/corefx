@@ -61,7 +61,6 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [ActiveIssue(25665)]
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void MoveFile_RaisesInvalidPath_Desktop()
@@ -73,22 +72,16 @@ namespace System.IO.IsolatedStorage
             }
         }
 
+        // Active Issue(25665) for Unix
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void MoveFile_RaisesInvalidPath_Core()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                if (PlatformDetection.IsWindows)
-                {
-                    Assert.Throws<IsolatedStorageException>(() => isf.MoveFile("\0bad", "bar"));
-                    Assert.Throws<IsolatedStorageException>(() => isf.MoveFile("foo", "\0bad"));
-                }
-                else
-                {
-                    Assert.Throws<FileNotFoundException>(() => isf.MoveFile("\0bad", "bar"));
-                    Assert.Throws<FileNotFoundException>(() => isf.MoveFile("foo", "\0bad"));
-                }
+                Assert.Throws<IsolatedStorageException>(() => isf.MoveFile("\0bad", "bar"));
+                Assert.Throws<IsolatedStorageException>(() => isf.MoveFile("foo", "\0bad"));
             }
         }
 

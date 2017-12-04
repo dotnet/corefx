@@ -57,7 +57,6 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [ActiveIssue(25665)]
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void OpenFile_RaisesArgumentException_Desktop()
@@ -72,7 +71,7 @@ namespace System.IO.IsolatedStorage
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public void OpenFile_RaisesArgumentException_Core()
+        public void OpenFile_RaisesIsolatedStorageException_Core()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {

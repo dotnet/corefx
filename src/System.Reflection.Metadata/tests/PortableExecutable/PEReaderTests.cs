@@ -297,7 +297,6 @@ namespace System.Reflection.PortableExecutable.Tests
             }
         }
 
-        [ActiveIssue(25665)]
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void TryOpenAssociatedPortablePdb_Args_Desktop()

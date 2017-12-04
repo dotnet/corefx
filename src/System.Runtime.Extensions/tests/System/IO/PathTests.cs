@@ -41,7 +41,6 @@ namespace System.IO.Tests
             AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(string.Empty));
         }
 
-        [ActiveIssue(25665)]
         [Theory,
             InlineData(" "),
             InlineData("\r\n")]
@@ -316,7 +315,7 @@ namespace System.IO.Tests
         {
             Assert.False(Path.IsPathRooted(path));
         }
-      
+
         // Testing invalid drive letters !(a-zA-Z)
         [PlatformSpecific(TestPlatforms.Windows)]
         [Theory]
@@ -345,7 +344,6 @@ namespace System.IO.Tests
             }
         }
 
-        [ActiveIssue(25665)]
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public static void GetInvalidPathChars_Desktop()
@@ -372,6 +370,7 @@ namespace System.IO.Tests
             });
         }
 
+        // Active Issue(25665) for Unix
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [PlatformSpecific(TestPlatforms.Windows)]
@@ -394,33 +393,6 @@ namespace System.IO.Tests
                 Assert.Equal(bad, Path.GetFileName(bad));
                 Assert.Equal(bad, Path.GetFileNameWithoutExtension(bad));
                 AssertExtensions.Throws<ArgumentException>(c == 124 ? null : "path", null, () => Path.GetFullPath(bad));
-                Assert.Equal(string.Empty, Path.GetPathRoot(bad));
-                Assert.False(Path.IsPathRooted(bad));
-            });
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public static void GetInvalidPathChars_Core_Unix()
-        {
-            Assert.NotNull(Path.GetInvalidPathChars());
-            Assert.NotSame(Path.GetInvalidPathChars(), Path.GetInvalidPathChars());
-            Assert.Equal((IEnumerable<char>)Path.GetInvalidPathChars(), Path.GetInvalidPathChars());
-            Assert.True(Path.GetInvalidPathChars().Length > 0);
-            Assert.All(Path.GetInvalidPathChars(), c =>
-            {
-                string bad = c.ToString();
-                Assert.Equal(bad + ".ok", Path.ChangeExtension(bad, "ok"));
-                Assert.Equal(bad + "/ok", Path.Combine(bad, "ok"));
-                Assert.Equal("ok/ok/" + bad, Path.Combine("ok", "ok", bad));
-                Assert.Equal("ok/ok/" + bad + "/ok", Path.Combine("ok", "ok", bad, "ok"));
-                Assert.Equal(bad + "/" + bad + "/" + bad + "/" + bad + "/" + bad, Path.Combine(bad, bad, bad, bad, bad));
-                Assert.Equal("", Path.GetDirectoryName(bad));
-                Assert.Equal(string.Empty, Path.GetExtension(bad));
-                Assert.Equal(bad, Path.GetFileName(bad));
-                Assert.Equal(bad, Path.GetFileNameWithoutExtension(bad));
-                Assert.Equal(bad, Path.GetFullPath(bad));
                 Assert.Equal(string.Empty, Path.GetPathRoot(bad));
                 Assert.False(Path.IsPathRooted(bad));
             });

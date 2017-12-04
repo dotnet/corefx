@@ -163,7 +163,6 @@ namespace System.IO.Tests
             CommonCasesException<ArgumentException>("ab\tcd");
         }
 
-        [ActiveIssue(25665)]
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [PlatformSpecific(TestPlatforms.Windows)]
@@ -183,7 +182,6 @@ namespace System.IO.Tests
             CommonCasesException<ArgumentException>("ab\0cd", s_separator + "abc");
         }
 
-        [ActiveIssue(25665)]
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void ContainsInvalidCharWithRootedAfterArgumentNull_Core()

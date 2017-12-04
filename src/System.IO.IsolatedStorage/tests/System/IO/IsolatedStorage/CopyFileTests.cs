@@ -64,7 +64,6 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [ActiveIssue(25665)]
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)] 
         public void CopyFile_RaisesInvalidPath_Desktop()
@@ -76,8 +75,10 @@ namespace System.IO.IsolatedStorage
             }
         }
 
+        // Active Issue(25665) for Unix
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void CopyFile_RaisesInvalidPath_Core()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
