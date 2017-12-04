@@ -189,8 +189,19 @@ namespace System.Net.Http
             _agent = s_singletonSharedAgent ?? new MultiAgent(this);
         }
 
-        /// <summary>Overridden by another partial implementation to set <see cref="result"/> to true if a single MultiAgent should be used.</summary>
-        static partial void UseSingletonMultiAgent(ref bool result);
+        /// <summary>Set <see cref="result"/> to true if a single MultiAgent should be used.</summary>
+        static void UseSingletonMultiAgent(ref bool result)
+        {
+            // Some backends other than OpenSSL need locks initialized in order to use them in a
+            // multithreaded context, which would happen with multiple HttpClients and thus multiple
+            // MultiAgents. Since we don't currently have the ability to do so initialization, instead we
+            // restrict all HttpClients to use the same MultiAgent instance in this case.  We know LibreSSL
+            // is in this camp, so we currently special-case it.
+            string curlSslVersion = Interop.Http.GetSslVersionDescription();
+            result =
+                !string.IsNullOrEmpty(curlSslVersion) &&
+                curlSslVersion.StartsWith(Interop.Http.LibreSslDescription, StringComparison.OrdinalIgnoreCase);
+        }
 
         #region Properties
 
