@@ -136,7 +136,8 @@ namespace System.IO.Tests
 
         [ActiveIssue(25665)]
         [Fact]
-        public static void ContainsInvalidCharWithoutRootedAfterArgumentNull()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public static void ContainsInvalidCharWithoutRootedAfterArgumentNull_Desktop()
         {
             //any path contains invalid character without rooted after (AE)
             CommonCasesException<ArgumentException>("ab\0cd");
@@ -144,8 +145,16 @@ namespace System.IO.Tests
 
         [ActiveIssue(25665)]
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void ContainsInvalidCharWithoutRootedAfterArgumentNull_Core()
+        {
+            Assert.Equal("ab\0cd", Path.Combine("ab\0cd"));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific invalid paths
-        public static void ContainsInvalidCharWithoutRootedAfterArgumentNull_Windows()
+        public static void ContainsInvalidCharWithoutRootedAfterArgumentNull_Windows_Desktop()
         {
             //any path contains invalid character without rooted after (AE)
             CommonCasesException<ArgumentException>("ab|cd");
@@ -156,7 +165,19 @@ namespace System.IO.Tests
 
         [ActiveIssue(25665)]
         [Fact]
-        public static void ContainsInvalidCharWithRootedAfterArgumentNull()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void ContainsInvalidCharWithoutRootedAfterArgumentNull_Windows_Core()
+        {
+            Assert.Equal("ab|cd", Path.Combine("ab|cd"));
+            Assert.Equal("ab\bcd", Path.Combine("ab\bcd"));
+            Assert.Equal("ab\0cd", Path.Combine("ab\0cd"));
+            Assert.Equal("ab\tcd", Path.Combine("ab\tcd"));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public static void ContainsInvalidCharWithRootedAfterArgumentNull_Desktop()
         {
             //any path contains invalid character with rooted after (AE)
             CommonCasesException<ArgumentException>("ab\0cd", s_separator + "abc");
@@ -164,13 +185,38 @@ namespace System.IO.Tests
 
         [ActiveIssue(25665)]
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void ContainsInvalidCharWithRootedAfterArgumentNull_Core()
+        {
+            if (PlatformDetection.IsWindows)
+            {
+                Assert.Equal("\\abc", Path.Combine("ab\0cd", s_separator + "abc"));
+            }
+            else
+            {
+                Assert.Equal("/abc", Path.Combine("ab\0cd", s_separator + "abc"));
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific invalid paths
-        public static void ContainsInvalidCharWithRootedAfterArgumentNull_Windows()
+        public static void ContainsInvalidCharWithRootedAfterArgumentNull_Windows_Desktop()
         {
             //any path contains invalid character with rooted after (AE)
             CommonCasesException<ArgumentException>("ab|cd", s_separator + "abc");
             CommonCasesException<ArgumentException>("ab\bcd", s_separator + "abc");
             CommonCasesException<ArgumentException>("ab\tcd", s_separator + "abc");
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [PlatformSpecific(TestPlatforms.Windows)]  
+        public static void ContainsInvalidCharWithRootedAfterArgumentNull_Windows_Core()
+        {
+            Assert.Equal("\\abc", Path.Combine("ab|cd", s_separator + "abc"));
+            Assert.Equal("\\abc", Path.Combine("ab\bcd", s_separator + "abc"));
+            Assert.Equal("\\abc", Path.Combine("ab\tcd", s_separator + "abc"));
         }
 
         private static void VerifyException<T>(string[] paths) where T : Exception
