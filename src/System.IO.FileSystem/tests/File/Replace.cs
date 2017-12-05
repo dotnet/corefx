@@ -93,8 +93,12 @@ namespace System.IO.Tests
             Assert.Throws<FileNotFoundException>(() => Replace(src, GetTestFilePath(), null));
         }
 
-        [ActiveIssue(25665)]
+        #endregion
+
+        #region PlatformSpecfic
+
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void InvalidFileNames()
         {
             string testFile = GetTestFilePath();
@@ -109,6 +113,24 @@ namespace System.IO.Tests
 
             Assert.Throws<ArgumentException>(() => Replace(testFile, testFile2, "\0"));
             Assert.Throws<ArgumentException>(() => Replace(testFile, testFile2, "*\0*"));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void SpecialFileNames()
+        {
+            string testFile = GetTestFilePath();
+            string testFile2 = GetTestFilePath();
+            File.Create(testFile).Dispose();
+
+            Assert.Throws<IOException>(() => Replace(testFile, "\0", null));
+            Assert.Throws<IOException>(() => Replace(testFile, "*\0*", null));
+
+            Assert.Throws<IOException>(() => Replace("*\0*", testFile, null));
+            Assert.Throws<IOException>(() => Replace("\0", testFile, null));
+
+            Assert.Throws<IOException>(() => Replace(testFile, testFile2, "\0"));
+            Assert.Throws<IOException>(() => Replace(testFile, testFile2, "*\0*"));
         }
 
         #endregion
