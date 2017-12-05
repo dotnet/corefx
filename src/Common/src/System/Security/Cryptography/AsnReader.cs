@@ -1694,30 +1694,19 @@ namespace System.Security.Cryptography.Asn1
             return copied;
         }
 
-        private static unsafe string GetCharacterString(
-            ReadOnlyMemory<byte> source,
-            Text.Encoding encoding)
-        {
-            fixed (byte* bytePtr = &source.Span.DangerousGetPinnableReference())
-            {
-                try
-                {
-                    return encoding.GetString(bytePtr, source.Length);
-                }
-                catch (DecoderFallbackException e)
-                {
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding, e);
-                }
-            }
-        }
-
         private static unsafe bool TryCopyCharacterString(
-            ReadOnlyMemory<byte> source,
+            ReadOnlySpan<byte> source,
             Span<char> destination,
             Text.Encoding encoding,
             out int charsWritten)
         {
-            fixed (byte* bytePtr = &source.Span.DangerousGetPinnableReference())
+            if (source.Length == 0)
+            {
+                charsWritten = 0;
+                return true;
+            }
+
+            fixed (byte* bytePtr = &source.DangerousGetPinnableReference())
             fixed (char* charPtr = &destination.DangerousGetPinnableReference())
             {
                 try
@@ -1742,106 +1731,58 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
-        private delegate bool CharacterStringProcessor(
-            ReadOnlyMemory<byte> data,
-            Span<char> dest,
-            Text.Encoding encoding);
-
-        private bool ProcessConstructedCharacterString(
-            ReadOnlyMemory<byte> source,
-            Span<char> dest,
-            bool isIndefinite,
-            Text.Encoding encoding,
-            CharacterStringProcessor processor)
-        {
-            int bytesLength = CountConstructedOctetString(source, isIndefinite);
-
-            byte[] rented = ArrayPool<byte>.Shared.Rent(bytesLength);
-
-            try
-            {
-                // T-REC-X.690-201508 sec 8.23.3, all character strings are encoded as octet strings.
-                CopyConstructedOctetString(source, rented, isIndefinite, out int bytesRead, out int bytesWritten);
-                Debug.Assert(bytesWritten == bytesLength);
-
-                bool processed = processor(
-                    new ReadOnlyMemory<byte>(rented, 0, bytesWritten),
-                    dest,
-                    encoding);
-
-                if (processed)
-                {
-                    _data = _data.Slice(bytesRead);
-                }
-
-                return processed;
-            }
-            finally
-            {
-                Array.Clear(rented, 0, bytesLength);
-                ArrayPool<byte>.Shared.Return(rented);
-            }
-        }
-
-        private bool ProcessCharacterString(
-            Asn1Tag expectedTag,
-            UniversalTagNumber universalTagNumber,
-            Text.Encoding encoding,
-            Span<char> dest,
-            CharacterStringProcessor processor)
-        {
-            // T-REC-X.690-201508 sec 8.23.3, all character strings are encoded as octet strings.
-
-            if (TryGetPrimitiveOctetStringBytes(
-                expectedTag,
-                out Asn1Tag actualTag,
-                out int? contentLength,
-                out int headerLength,
-                out ReadOnlyMemory<byte> contents,
-                universalTagNumber))
-            {
-                bool processed = processor(contents, dest, encoding);
-
-                if (processed)
-                {
-                    _data = _data.Slice(headerLength + contents.Length);
-                }
-
-                return processed;
-            }
-
-            Debug.Assert(actualTag.IsConstructed);
-
-            return ProcessConstructedCharacterString(
-                Slice(_data, headerLength, contentLength),
-                dest,
-                contentLength == null,
-                encoding,
-                processor);
-        }
-
         private string GetCharacterString(
             Asn1Tag expectedTag,
             UniversalTagNumber universalTagNumber,
             Text.Encoding encoding)
         {
-            string str = null;
+            byte[] rented = null;
 
-            bool processed = ProcessCharacterString(
+            // T-REC-X.690-201508 sec 8.23.3, all character strings are encoded as octet strings.
+            ReadOnlySpan<byte> contents = GetOctetStringContents(
                 expectedTag,
                 universalTagNumber,
-                encoding,
-                Span<char>.Empty,
-                (mem, dest, enc) =>
-                {
-                    str = GetCharacterString(mem, enc);
-                    return true;
-                });
+                out int bytesRead,
+                ref rented);
 
-            Debug.Assert(processed);
-            Debug.Assert(str != null);
-            return str;
-       }
+            try
+            {
+                string str;
+
+                if (contents.Length == 0)
+                {
+                    str = string.Empty;
+                }
+                else
+                {
+                    unsafe
+                    {
+                        fixed (byte* bytePtr = &contents.DangerousGetPinnableReference())
+                        {
+                            try
+                            {
+                                str = encoding.GetString(bytePtr, contents.Length);
+                            }
+                            catch (DecoderFallbackException e)
+                            {
+                                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding, e);
+                            }
+                        }
+                    }
+                }
+
+                _data = _data.Slice(bytesRead);
+                return str;
+            }
+            finally
+            {
+                if (rented != null)
+                {
+                    Array.Clear(rented, 0, contents.Length);
+                    ArrayPool<byte>.Shared.Return(rented);
+                }
+            }
+        }
 
         private bool TryCopyCharacterString(
             Asn1Tag expectedTag,
@@ -1850,19 +1791,38 @@ namespace System.Security.Cryptography.Asn1
             Span<char> destination,
             out int charsWritten)
         {
-            int written = -1;
+            byte[] rented = null;
 
-            bool copied = ProcessCharacterString(
+            // T-REC-X.690-201508 sec 8.23.3, all character strings are encoded as octet strings.
+            ReadOnlySpan<byte> contents = GetOctetStringContents(
                 expectedTag,
                 universalTagNumber,
-                encoding,
-                destination,
-                (mem, dest, enc) => TryCopyCharacterString(mem, dest, enc, out written));
+                out int bytesRead,
+                ref rented);
 
-            Debug.Assert(written >= 0);
-            charsWritten = written;
+            try
+            {
+                bool copied = TryCopyCharacterString(
+                    contents,
+                    destination,
+                    encoding,
+                    out charsWritten);
 
-            return copied;
+                if (copied)
+                {
+                    _data = _data.Slice(bytesRead);
+                }
+
+                return copied;
+            }
+            finally
+            {
+                if (rented != null)
+                {
+                    Array.Clear(rented, 0, contents.Length);
+                    ArrayPool<byte>.Shared.Return(rented);
+                }
+            }
         }
 
         /// <summary>
@@ -2133,7 +2093,7 @@ namespace System.Security.Cryptography.Asn1
             throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
         }
 
-        private static DateTimeOffset ParseUtcTime(ReadOnlySpan<byte> contentOctets, int twoDigitYearMax)
+        private DateTimeOffset ParseUtcTime(ReadOnlySpan<byte> contentOctets, int twoDigitYearMax)
         {
             // The full allowed formats (T-REC-X.680-201510 sec 47.3)
             // a) YYMMDD
@@ -2153,6 +2113,15 @@ namespace System.Security.Cryptography.Asn1
             const int NoSecondsOffset = 15;
             const int HasSecondsZulu = 13;
             const int HasSecondsOffset = 17;
+
+            // T-REC-X.690-201510 sec 11.8
+            if (_ruleSet == AsnEncodingRules.DER || _ruleSet == AsnEncodingRules.CER)
+            {
+                if (contentOctets.Length != HasSecondsZulu)
+                {
+                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                }
+            }
 
             // 11, 13, 15, 17 are legal.
             // Range check + odd.
@@ -2276,62 +2245,29 @@ namespace System.Security.Cryptography.Asn1
 
             // CER and DER are restricted to YYMMDDhhmmssZ
             // T-REC-X.690-201510 sec 11.8
-            
-            // Optimize for the CER/DER primitive encoding:
-            if (TryGetPrimitiveOctetStringBytes(
+
+            byte[] rented = null;
+            // The longest format is 17 bytes.
+            Span<byte> tmpSpace = stackalloc byte[17];
+
+            ReadOnlySpan<byte> contents = GetOctetStringContents(
                 expectedTag,
-                out _,
-                out _,
-                out int headerLength,
-                out ReadOnlyMemory<byte> primitiveOctets,
-                UniversalTagNumber.UtcTime))
+                UniversalTagNumber.UtcTime,
+                out int bytesRead,
+                ref rented,
+                tmpSpace);
+
+            DateTimeOffset value = ParseUtcTime(contents, twoDigitYearMax);
+
+            if (rented != null)
             {
-                if (primitiveOctets.Length == 13)
-                {
-                    DateTimeOffset value = ParseUtcTime(primitiveOctets.Span, twoDigitYearMax);
-                    _data = _data.Slice(headerLength + primitiveOctets.Length);
-                    return value;
-                }
-
-                // A BER UtcTime with a format other than A1B2C1 will fall to the copy path,
-                // but it's not very common and it saves duplicating the "CER and DER prohibit this"
-                // checks.
-            }
-
-            // T-REC-X.690-201510 sec 11.8
-            if (_ruleSet == AsnEncodingRules.DER || _ruleSet == AsnEncodingRules.CER)
-            {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-
-            // The longest legal format is (a, b2, c2), which comes out to 17 characters/bytes.
-            byte[] rented = ArrayPool<byte>.Shared.Rent(17);
-            ReadOnlySpan<byte> contentOctets = ReadOnlySpan<byte>.Empty;
-
-            try
-            {
-                if (TryCopyCharacterStringBytes(
-                    expectedTag,
-                    UniversalTagNumber.UtcTime,
-                    rented,
-                    out int bytesRead,
-                    out int contentLength))
-                {
-                    contentOctets = Slice(rented, 0, contentLength);
-
-                    DateTimeOffset value = ParseUtcTime(contentOctets, twoDigitYearMax);
-                    // Includes the header
-                    _data = _data.Slice(bytesRead);
-                    return value;
-                }
-            }
-            finally
-            {
-                Array.Clear(rented, 0, contentOctets.Length);
+                Debug.Fail($"UtcTime did not fit in tmpSpace ({contents.Length} total)");
+                Array.Clear(rented, 0, contents.Length);
                 ArrayPool<byte>.Shared.Return(rented);
             }
 
-            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            _data = _data.Slice(bytesRead);
+            return value;
         }
 
         private static DateTimeOffset ParseGeneralizedTime(
@@ -2667,57 +2603,64 @@ namespace System.Security.Cryptography.Asn1
 
         public DateTimeOffset GetGeneralizedTime(Asn1Tag expectedTag, bool disallowFractions=false)
         {
+            byte[] rented = null;
+
+            ReadOnlySpan<byte> contents = GetOctetStringContents(
+                expectedTag,
+                UniversalTagNumber.GeneralizedTime,
+                out int bytesRead,
+                ref rented);
+
+            DateTimeOffset value = ParseGeneralizedTime(_ruleSet, contents, disallowFractions);
+
+            if (rented != null)
+            {
+                Array.Clear(rented, 0, contents.Length);
+                ArrayPool<byte>.Shared.Return(rented);
+            }
+
+            _data = _data.Slice(bytesRead);
+            return value;
+        }
+
+        private ReadOnlySpan<byte> GetOctetStringContents(
+            Asn1Tag expectedTag,
+            UniversalTagNumber universalTagNumber,
+            out int bytesRead,
+            ref byte[] rented,
+            Span<byte> tmpSpace = default)
+        {
+            Debug.Assert(rented == null);
+
             if (TryGetPrimitiveOctetStringBytes(
                 expectedTag,
                 out Asn1Tag actualTag,
-                out _,
+                out int? contentLength,
                 out int headerLength,
-                out ReadOnlyMemory<byte> primitiveOctets,
-                UniversalTagNumber.GeneralizedTime))
+                out ReadOnlyMemory<byte> contentsOctets,
+                universalTagNumber))
             {
-                DateTimeOffset value = ParseGeneralizedTime(_ruleSet, primitiveOctets.Span, disallowFractions);
-                _data = _data.Slice(headerLength + primitiveOctets.Length);
-                return value;
+                bytesRead = headerLength + contentsOctets.Length;
+                return contentsOctets.Span;
             }
 
             Debug.Assert(actualTag.IsConstructed);
 
-            // T-REC-X.690-201510 sec 9.2
-            // T-REC-X.690-201510 sec 10.2
-            if (_ruleSet == AsnEncodingRules.DER || _ruleSet == AsnEncodingRules.CER)
+            ReadOnlyMemory<byte> source = Slice(_data, headerLength, contentLength);
+            bool isIndefinite = contentLength == null;
+            int octetStringLength = CountConstructedOctetString(source, isIndefinite);
+
+            if (tmpSpace.Length < octetStringLength)
             {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                rented = ArrayPool<byte>.Shared.Rent(octetStringLength);
+                tmpSpace = rented;
             }
 
-            int upperBound = PeekContentBytes().Length;
+            CopyConstructedOctetString(source, tmpSpace, isIndefinite, out int localBytesRead, out int bytesWritten);
+            Debug.Assert(bytesWritten == octetStringLength);
 
-            byte[] rented = ArrayPool<byte>.Shared.Rent(upperBound);
-            ReadOnlySpan<byte> contentOctets = ReadOnlySpan<byte>.Empty;
-
-            try
-            {
-                if (TryCopyCharacterStringBytes(
-                    expectedTag,
-                    UniversalTagNumber.GeneralizedTime,
-                    rented,
-                    out int bytesRead,
-                    out int contentLength))
-                {
-                    contentOctets = Slice(rented, 0, contentLength);
-
-                    DateTimeOffset value = ParseGeneralizedTime(_ruleSet, contentOctets, disallowFractions);
-                    // Includes the header
-                    _data = _data.Slice(bytesRead);
-                    return value;
-                }
-            }
-            finally
-            {
-                Array.Clear(rented, 0, contentOctets.Length);
-                ArrayPool<byte>.Shared.Return(rented);
-            }
-
-            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            bytesRead = headerLength + localBytesRead;
+            return tmpSpace.Slice(0, bytesWritten);
         }
 
         private static ReadOnlySpan<byte> SliceAtMost(ReadOnlySpan<byte> source, int longestPermitted)
