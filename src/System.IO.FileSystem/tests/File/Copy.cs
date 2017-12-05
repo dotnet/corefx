@@ -188,6 +188,7 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [ActiveIssue(25665)]
         public void SpecialFileNames()
         {
             string testFile = GetTestFilePath();

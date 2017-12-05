@@ -227,7 +227,8 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void CreateNullValidPath_Unix()
+        [ActiveIssue(25665)]
+        public void CreateNullThrows_Unix()
         {
             Create("\0");
         }

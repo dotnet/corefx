@@ -274,7 +274,8 @@ namespace System.IO.Tests
 
         [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void PathWithInvalidCharactersAsPath_ReturnsTrue(string invalidPath)
+        [ActiveIssue(25665)]
+        public void PathWithSpecialCharactersAsPath_ReturnsTrue(string invalidPath)
         {
             // Checks that errors aren't thrown when calling Exists() on paths with impossible to create characters
             Assert.True(Exists(invalidPath));

@@ -245,6 +245,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [ActiveIssue(25665)]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void InvalidFileNames_Unix()
         {
