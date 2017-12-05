@@ -51,7 +51,7 @@ You don't need all the assemblies that are built by corefx but copying the entir
 - CoreFx assemblies: `System.Runtime.dll`, `System.Runtime.Extensions.dll`, `System.Runtime.InteropServices.dll`, `System.Text.Encoding.Extensions.dll`, `System.Threading.dll`
 
 ## Compile your application
-Use the C# Compiler (`csc`) to compile your C# code (`Program.cs`) against the copied assemblies. For our Hello World example we need to compile our application code against `System.Runtime.dll`, `System.Runtime.Extensions.dll` and `System.Console.dll`. As described above these assemblies have dependencies on two other assemblies: `System.Text.Encoding.Extensions.dll` and `System.Threading.dll`.
+Use the C# Compiler (`csc`) to compile your C# code (`Program.cs`) against the copied assemblies. For our Hello World example we need to compile our application code against `System.Private.Corelib.dll`, `System.Runtime.dll`, `System.Runtime.Extensions.dll` and `System.Console.dll`. As described above these assemblies have dependencies on two other assemblies: `System.Text.Encoding.Extensions.dll` and `System.Threading.dll`.
 ```
 .\runtime\corerun ..\corefx\tools\csc.dll /noconfig /r:runtime\System.Private.Corelib.dll /r:runtime\System.Runtime.dll /r:runtime\System.Runtime.Extensions.dll /r:runtime\System.Console.dll /out:runtime\Program.dll Program.cs
 ```
