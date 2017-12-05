@@ -47,14 +47,6 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => GetEntries(string.Empty));
         }
 
-        [ActiveIssue(25665)]
-        [Fact]
-        public void InvalidFileNames()
-        {
-            Assert.Throws<DirectoryNotFoundException>(() => GetEntries("DoesNotExist"));
-            Assert.Throws<ArgumentException>(() => GetEntries("\0"));
-        }
-
         [Fact]
         public void EmptyDirectory()
         {
@@ -242,6 +234,22 @@ namespace System.IO.Tests
                  
                 Assert.Contains(Path.Combine(testDir.FullName, valid), results);
             }
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void InvalidFileNames()
+        {
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries("DoesNotExist"));
+            Assert.Throws<ArgumentException>(() => GetEntries("\0"));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void InvalidFileNames_Unix()
+        {
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries("DoesNotExist"));
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries("\0"));
         }
 
         #endregion

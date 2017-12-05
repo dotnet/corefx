@@ -407,7 +407,7 @@ namespace System.IO.Tests
             char[] trimmed = { (char)0x9, (char)0xA, (char)0xB, (char)0xC, (char)0xD, (char)0x20, (char)0x85, (char)0xA0 };
             Assert.True(Exists(invalidPath));
             if (!trimmed.Contains(invalidPath.ToCharArray()[0]))
-                Assert.True(Exists(TestDirectory + Path.DirectorySeparatorChar + invalidPath));
+                Assert.False(Exists(TestDirectory + Path.DirectorySeparatorChar + invalidPath));
         }
 
         #endregion
