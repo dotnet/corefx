@@ -14,6 +14,10 @@ public static class HashCodeTests
     // 3. Find the hash for "abcd1234". ASCII [ "abcd", "1234"] and bit convert to 2 uints.
     // n. Continue until "abcd0123efgh4567ijkl8901mnop2345qrst6789uvwx0123yzab".
 
+    // HashCode is not deterministic across AppDomains by design. This means that
+    // these tests can not be executed against the version that exists within
+    // CoreCLR. Copy HashCode and set m_seed to 0 in order to execute these tests.
+
     [Theory]
     [InlineData(0x02cc5d05U)]
     [InlineData(0xa3643705U, 0x64636261U)]
