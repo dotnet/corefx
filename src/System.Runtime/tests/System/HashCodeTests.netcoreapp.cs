@@ -7,7 +7,7 @@ using Xunit;
 
 public static class HashCodeTests
 {
-#   if SYSTEM_HASHCODE_TESTVECTORS
+#if SYSTEM_HASHCODE_TESTVECTORS
     // These test vectors were created using https://asecuritysite.com/encryption/xxHash
     // 1. Find the hash for "".
     // 2. Find the hash for "abcd". ASCII "abcd" and bit convert to uint.
@@ -37,7 +37,7 @@ public static class HashCodeTests
 
         Assert.Equal(expected, (uint)hc.ToHashCode());
     }
-#   endif
+#endif
 
     [Fact]
     public static void HashCode_Add_Generic()
