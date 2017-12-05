@@ -49,12 +49,31 @@ namespace System.IO.Tests
         }
 
         [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void PathWithInvalidCharactersAsPath_ReturnsFalse(string invalidPath)
         {
             // Checks that errors aren't thrown when calling Exists() on paths with impossible to create characters
             Assert.False(Exists(invalidPath));
 
             Assert.False(Exists(".."));
+            Assert.False(Exists("."));
+        }
+
+        [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void PathWithSpecialCharactersAsPath_ReturnsFalse(string invalidPath)
+        {
+            // Checks that errors aren't thrown when calling Exists() on paths with impossible to create characters
+            if (invalidPath == "\0")
+                Assert.False(Exists(invalidPath));
+            else 
+                Assert.True(Exists(invalidPath));
+
+            if (invalidPath == "\0" || invalidPath == "middle\0path" || invalidPath == "trailing\0")
+                Assert.False(Exists(".."));
+            else 
+                Assert.True(Exists(".."));
+            
             Assert.False(Exists("."));
         }
 

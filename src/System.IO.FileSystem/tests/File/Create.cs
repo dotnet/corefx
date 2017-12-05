@@ -227,10 +227,9 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [ActiveIssue(25665)]
         public void CreateNullThrows_Unix()
         {
-            Create("\0");
+            Assert.Throws<UnauthorizedAccessException>(() => Create("\0"));
         }
 
         [Theory,

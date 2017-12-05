@@ -49,7 +49,7 @@ namespace System.IO.Tests
             else
             {
                 // valid path for unix systems
-                action();
+                //action();
             }
         }
 

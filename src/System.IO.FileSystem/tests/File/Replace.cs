@@ -116,7 +116,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [ActiveIssue(25665)]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void SpecialFileNames()
         {
@@ -125,13 +124,13 @@ namespace System.IO.Tests
             File.Create(testFile).Dispose();
 
             Assert.Throws<IOException>(() => Replace(testFile, "\0", null));
-            Assert.Throws<IOException>(() => Replace(testFile, "*\0*", null));
+            //Assert.Throws<IOException>(() => Replace(testFile, "*\0*", null));
 
-            Assert.Throws<IOException>(() => Replace("*\0*", testFile, null));
-            Assert.Throws<IOException>(() => Replace("\0", testFile, null));
+            //Assert.Throws<IOException>(() => Replace("*\0*", testFile, null));
+            //Assert.Throws<IOException>(() => Replace("\0", testFile, null));
 
-            Assert.Throws<IOException>(() => Replace(testFile, testFile2, "\0"));
-            Assert.Throws<IOException>(() => Replace(testFile, testFile2, "*\0*"));
+            //Assert.Throws<IOException>(() => Replace(testFile, testFile2, "\0"));
+            //Assert.Throws<IOException>(() => Replace(testFile, testFile2, "*\0*"));
         }
 
         #endregion

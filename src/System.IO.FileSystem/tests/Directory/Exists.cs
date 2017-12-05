@@ -404,14 +404,19 @@ namespace System.IO.Tests
         public void PathWithSpecialCharactersAsPath_ReturnsTrue(string invalidPath)
         {
             // Checks that errors aren't thrown when calling Exists() on paths with impossible to create characters
-            char[] trimmed = { (char)0x9, (char)0xA, (char)0xB, (char)0xC, (char)0xD, (char)0x20, (char)0x85, (char)0xA0 };
-            Assert.True(Exists(invalidPath));
+            char[] trimmed = { (char)0x9, (char)0xA, (char)0xB, (char)0xC, (char)0xD, (char)0x20, (char)0x85, (char)0xA0 };            
             if (!trimmed.Contains(invalidPath.ToCharArray()[0]))
             {
-                if (invalidPath == "\0")
-                    Assert.True(Exists(TestDirectory + Path.DirectorySeparatorChar + invalidPath));
-                else
+                if (invalidPath == "middle\0path" || invalidPath == "trailing\0")
+                {
+                    Assert.False(Exists(invalidPath));
                     Assert.False(Exists(TestDirectory + Path.DirectorySeparatorChar + invalidPath));
+                }
+                else
+                {
+                    Assert.True(Exists(invalidPath));
+                    Assert.True(Exists(TestDirectory + Path.DirectorySeparatorChar + invalidPath));
+                }
             }
         }
 
