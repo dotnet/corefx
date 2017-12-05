@@ -961,33 +961,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             pOperand1 = UnwrapExpression(pOperand1);
 
-            if (pOperand1 != null)
+            Debug.Assert(pOperand1 != null);
+            Debug.Assert(pOperand1.Type != null);
+            Debug.Assert(!(pOperand1.Type is ErrorType));
+
+            if (pOperand2 != null)
             {
-                if (pOperand2 != null)
-                {
-                    pOperand2 = UnwrapExpression(pOperand2);
-                    if (pOperand1.Type != null &&
-                            !(pOperand1.Type is ErrorType) &&
-                            pOperand2.Type != null &&
-                            !(pOperand2.Type is ErrorType))
-                    {
-                        throw ErrorContext.Error(ErrorCode.ERR_BadBinaryOps, strOp, pOperand1.Type, pOperand2.Type);
-                    }
-                }
-                else if (pOperand1.Type != null && !(pOperand1.Type is ErrorType))
-                {
-                    throw ErrorContext.Error(ErrorCode.ERR_BadUnaryOp, strOp, pOperand1.Type);
-                }
+                pOperand2 = UnwrapExpression(pOperand2);
+
+                Debug.Assert(pOperand2.Type != null);
+                Debug.Assert(!(pOperand2.Type is ErrorType));
+
+                throw ErrorContext.Error(ErrorCode.ERR_BadBinaryOps, strOp, pOperand1.Type, pOperand2.Type);
             }
 
-            if (pTypeErr == null)
-            {
-                pTypeErr = GetPredefindType(PredefinedType.PT_OBJECT);
-            }
-
-            ExprOperator rval = GetExprFactory().CreateOperator(ek, pTypeErr, pOperand1, pOperand2);
-            rval.SetError();
-            return rval;
+            throw ErrorContext.Error(ErrorCode.ERR_BadUnaryOp, strOp, pOperand1.Type);
         }
 
         private Expr UnwrapExpression(Expr pExpression)
