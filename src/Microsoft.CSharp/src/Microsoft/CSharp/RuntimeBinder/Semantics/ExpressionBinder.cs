@@ -858,7 +858,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         ////////////////////////////////////////////////////////////////////////////////
         // Given a method group or indexer group, bind it to the arguments for an 
         // invocation.
-        private GroupToArgsBinderResult BindMethodGroupToArgumentsCore(BindingFlag bindFlags, ExprMemberGroup grp, ref Expr args, int carg, bool bHasNamedArgumentSpecifiers)
+        private GroupToArgsBinderResult BindMethodGroupToArgumentsCore(BindingFlag bindFlags, ExprMemberGroup grp, Expr args, int carg, bool bHasNamedArgumentSpecifiers)
         {
             ArgInfos pargInfo = new ArgInfos {carg = carg};
             FillInArgInfoFromArgList(pargInfo, args);
@@ -892,11 +892,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return rval;
             }
 
-            // If we have named arguments specified, make sure we have them all appearing after 
+            // If we have named arguments specified, make sure we have them all appearing after
             // fixed arguments.
             bool seenNamed = VerifyNamedArgumentsAfterFixed(args);
 
-            MethPropWithInst mpwiBest = BindMethodGroupToArgumentsCore(bindFlags, grp, ref args, carg, seenNamed)
+            MethPropWithInst mpwiBest = BindMethodGroupToArgumentsCore(bindFlags, grp, args, carg, seenNamed)
                 .GetBestResult();
             if (grp.SymKind == SYMKIND.SK_PropertySymbol)
             {
