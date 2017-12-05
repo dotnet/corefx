@@ -1,8 +1,10 @@
 # Advanced scenario - Build and run application code with csc/vbc and CoreRun
 
-This tutorial describes how to build and run application code that targets self-compiled .NET Core binaries without using Visual Studio,  the .NET Core SDK Host (`dotnet.exe`) or a project file (e.g. `csproj`). Follow these steps to quickly validate changes you made in the product e.g. by running benchmarks or tests on it. __Don't consider using this technique for anything else than inner-loop tests and instead use the [official instructions](https://docs.microsoft.com/en-us/dotnet/core/tools/?tabs=netcore2x)__
+ __Don't consider using this tutorial for anything else than inner-loop testing of corefx/coreclr binaries. Prefer using the official .NET Core SDK: https://docs.microsoft.com/en-us/dotnet/core/tools/?tabs=netcore2x__
 
-If you are on Windows use the `Developer Command Prompt for VS 2017` which is necessary for building corefx/coreclr. For the sake of completeness, we have placed our repositories under `d:\git\`.
+This tutorial describes how to build and run application code that targets self-compiled .NET Core binaries without using Visual Studio,  the .NET Core SDK Host (`dotnet.exe`) or a project file (e.g. `csproj`). Follow these steps to quickly validate changes you've made in the product e.g. by running benchmarks or tests on it.
+
+If you are on Windows you currently need to use the `Developer Command Prompt for VS 2017` to build corefx/coreclr! For the sake of completeness, we have placed our repositories under `d:\git\`.
 
 ## Compile corefx with self-compiled coreclr binaries
 If you've made changes to coreclr make sure to also build it and pass its binaries to corefx.
