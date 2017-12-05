@@ -440,13 +440,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(arg1 != null);
             Debug.Assert(arg2 != null);
 
-            BinOpArgInfo info = new BinOpArgInfo(arg1, arg2);
-            if (!GetBinopKindAndFlags(ek, out info.binopKind, out EXPRFLAG flags))
+            (BinOpKind kind, EXPRFLAG flags) = GetBinopKindAndFlags(ek);
+            BinOpArgInfo info = new BinOpArgInfo(arg1, arg2)
             {
-                // If we don't get the BinopKind and the flags, then we must have had some bad operator types.
-
-                throw BadOperatorTypesError(arg1, arg2);
-            }
+                binopKind = kind
+            };
 
             info.mask = (BinOpMask)(1 << (int)info.binopKind);
 
@@ -2121,22 +2119,23 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /*
             Given a binary operator EXPRKIND, get the BinOpKind and flags.
         */
-        private bool GetBinopKindAndFlags(ExpressionKind ek, out BinOpKind pBinopKind, out EXPRFLAG flags)
+        private (BinOpKind, EXPRFLAG) GetBinopKindAndFlags(ExpressionKind ek)
         {
-            flags = 0;
+            BinOpKind pBinopKind;
+            EXPRFLAG flags = 0;
             switch (ek)
             {
                 case ExpressionKind.Add:
                     if (Context.Checked)
                     {
-                        flags |= EXPRFLAG.EXF_CHECKOVERFLOW;
+                        flags = EXPRFLAG.EXF_CHECKOVERFLOW;
                     }
                     pBinopKind = BinOpKind.Add;
                     break;
                 case ExpressionKind.Subtract:
                     if (Context.Checked)
                     {
-                        flags |= EXPRFLAG.EXF_CHECKOVERFLOW;
+                        flags = EXPRFLAG.EXF_CHECKOVERFLOW;
                     }
                     pBinopKind = BinOpKind.Sub;
                     break;
@@ -2144,7 +2143,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case ExpressionKind.Modulo:
                     // EXPRKIND.EK_DIV and EXPRKIND.EK_MOD need to be treated special for hasSideEffects, 
                     // hence the EXPRFLAG.EXF_ASSGOP. Yes, this is a hack.
-                    flags |= EXPRFLAG.EXF_ASSGOP;
+                    flags = EXPRFLAG.EXF_ASSGOP;
                     if (Context.Checked)
                     {
                         flags |= EXPRFLAG.EXF_CHECKOVERFLOW;
@@ -2154,7 +2153,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case ExpressionKind.Multiply:
                     if (Context.Checked)
                     {
-                        flags |= EXPRFLAG.EXF_CHECKOVERFLOW;
+                        flags = EXPRFLAG.EXF_CHECKOVERFLOW;
                     }
                     pBinopKind = BinOpKind.Mul;
                     break;
@@ -2185,10 +2184,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
                 default:
                     Debug.Fail($"Bad ek: {ek}");
-                    pBinopKind = BinOpKind.Add;
-                    return false;
+                    throw Error.InternalCompilerError();
             }
-            return true;
+
+            return (pBinopKind, flags);
         }
 
         /*
