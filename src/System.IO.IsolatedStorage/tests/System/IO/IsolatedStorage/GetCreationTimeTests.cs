@@ -51,7 +51,7 @@ namespace System.IO.IsolatedStorage
 
         [Fact] 
         [ActiveIssue(25665, ~TestPlatforms.Windows)]
-        public void GetCreationTime_RaisesArgumentException_Windows()
+        public void GetCreationTime_RaisesArgumentException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {

@@ -381,7 +381,6 @@ namespace System.IO.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        [ActiveIssue(25665, ~TestPlatforms.Windows)]
         public static void GetInvalidPathChars_Core_Windows()
         {
             Assert.NotNull(Path.GetInvalidPathChars());
@@ -392,15 +391,18 @@ namespace System.IO.Tests
             {
                 string bad = c.ToString();
                 Assert.Equal(bad + ".ok", Path.ChangeExtension(bad, "ok"));
-                Assert.Equal(bad + "\\ok", Path.Combine(bad, "ok"));
-                Assert.Equal("ok\\ok\\" + bad, Path.Combine("ok", "ok", bad));
-                Assert.Equal("ok\\ok\\" + bad + "\\ok", Path.Combine("ok", "ok", bad, "ok"));
-                Assert.Equal(bad + "\\" + bad + "\\" + bad + "\\" + bad + "\\" + bad, Path.Combine(bad, bad, bad, bad, bad));
+                Assert.Equal(bad + Path.DirectorySeparatorChar + "ok", Path.Combine(bad, "ok"));
+                Assert.Equal("ok" + Path.DirectorySeparatorChar + "ok" + Path.DirectorySeparatorChar + bad, Path.Combine("ok", "ok", bad));
+                Assert.Equal("ok" + Path.DirectorySeparatorChar + "ok" + Path.DirectorySeparatorChar + bad + Path.DirectorySeparatorChar + "ok", Path.Combine("ok", "ok", bad, "ok"));
+                Assert.Equal(bad + Path.DirectorySeparatorChar + bad + Path.DirectorySeparatorChar + bad + Path.DirectorySeparatorChar + bad + Path.DirectorySeparatorChar + bad, Path.Combine(bad, bad, bad, bad, bad));
                 Assert.Equal("", Path.GetDirectoryName(bad));
                 Assert.Equal(string.Empty, Path.GetExtension(bad));
                 Assert.Equal(bad, Path.GetFileName(bad));
                 Assert.Equal(bad, Path.GetFileNameWithoutExtension(bad));
-                AssertExtensions.Throws<ArgumentException>(c == 124 ? null : "path", null, () => Path.GetFullPath(bad));
+
+                // This is valid path for unix hence Path.GetFullPath return string pointing to the actuals path in helix machine
+                if (PlatformDetection.IsWindows)
+                    AssertExtensions.Throws<ArgumentException>(c == 124 ? null : "path", null, () => Path.GetFullPath(bad));
                 Assert.Equal(string.Empty, Path.GetPathRoot(bad));
                 Assert.False(Path.IsPathRooted(bad));
             });

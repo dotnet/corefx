@@ -62,7 +62,7 @@ namespace System.IO.IsolatedStorage
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public void DirectoryExists__Invalid_Path_Core_Windows()
+        public void DirectoryExists__Invalid_Path_Core()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -73,7 +73,7 @@ namespace System.IO.IsolatedStorage
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void DirectoryExists__SpecialCharacter_Core_Unix()
+        public void DirectoryExists__SpecialCharacter_Core()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {

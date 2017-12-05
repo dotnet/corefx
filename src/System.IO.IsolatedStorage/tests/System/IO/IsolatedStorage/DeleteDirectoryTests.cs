@@ -51,7 +51,7 @@ namespace System.IO.IsolatedStorage
 
         [Fact]
         [ActiveIssue(25665, ~TestPlatforms.Windows)]
-        public void DeleteDirectory_IsolatedStorageException_Windows()
+        public void DeleteDirectory_IsolatedStorageException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
