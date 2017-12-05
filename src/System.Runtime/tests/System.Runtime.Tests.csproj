@@ -212,6 +212,7 @@
     <Compile Include="System\Reflection\TypeInfoTests.netcoreapp.cs" />
     <Compile Include="System\Runtime\CompilerServices\ConditionalWeakTableTests.netcoreapp.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.netcoreapp.cs" />
+    <Compile Include="System\Runtime\CompilerServices\RuntimeWrappedExceptionTests.cs" />
     <Compile Include="System\Runtime\ExceptionServices\ExceptionDispatchInfoTests.netcoreapp.cs" />
     <Compile Include="System\Text\StringBuilderTests.netcoreapp.cs" />
   </ItemGroup>
@@ -221,7 +222,6 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp'">
     <Compile Include="System\StringSplitExtensions.cs" />
-    <Compile Include="System\Runtime\CompilerServices\RuntimeWrappedExceptionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Collections\IEnumerable.Generic.Serialization.Tests.cs">
