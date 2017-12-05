@@ -479,6 +479,31 @@ namespace System.Collections.Immutable.Tests
             Debug.WriteLine("Timing_Empty:{0}{1}", Environment.NewLine, timingText);
         }
 
+        [Fact]
+        public void ValueRef()
+        {
+            var dictionary = new Dictionary<string, int>()
+            {
+                { "a", 1 },
+                { "b", 2 }
+            }.ToImmutableSortedDictionary();
+
+            ref readonly var valueRef = ref dictionary.ValueRef("a");
+            Assert.Equal(1, valueRef);
+        }
+
+        [Fact]
+        public void ValueRef_NonExistentKey()
+        {
+            var dictionary = new Dictionary<string, int>()
+            {
+                { "a", 1 },
+                { "b", 2 }
+            }.ToImmutableSortedDictionary();
+
+            Assert.Throws<KeyNotFoundException>(() => dictionary.ValueRef("c"));
+        }
+
         protected override IImmutableDictionary<TKey, TValue> Empty<TKey, TValue>()
         {
             return ImmutableSortedDictionaryTest.Empty<TKey, TValue>();

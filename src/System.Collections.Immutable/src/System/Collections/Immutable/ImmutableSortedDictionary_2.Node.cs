@@ -331,6 +331,25 @@ namespace System.Collections.Immutable
             }
 
             /// <summary>
+            /// Returns a read-only reference to the value associated with the provided key.
+            /// </summary>
+            /// <exception cref="KeyNotFoundException">If the key is not present.</exception>
+            [Pure]
+            internal ref readonly TValue ValueRef(TKey key, IComparer<TKey> keyComparer)
+            {
+                Requires.NotNullAllowStructs(key, nameof(key));
+                Requires.NotNull(keyComparer, nameof(keyComparer));
+
+                var match = this.Search(key, keyComparer);
+                if (match.IsEmpty)
+                {
+                    throw new KeyNotFoundException(SR.Format(SR.Arg_KeyNotFoundWithKey, key.ToString()));
+                }
+
+                return ref match._value;
+            }
+
+            /// <summary>
             /// Tries to get the value.
             /// </summary>
             /// <param name="key">The key.</param>

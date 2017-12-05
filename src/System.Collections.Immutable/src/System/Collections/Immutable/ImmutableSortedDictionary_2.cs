@@ -212,6 +212,17 @@ namespace System.Collections.Immutable
             }
         }
 
+        /// <summary>
+        /// Returns a read-only reference to the value associated with the provided key.
+        /// </summary>
+        /// <exception cref="KeyNotFoundException">If the key is not present.</exception>
+        public ref readonly TValue ValueRef(TKey key)
+        {
+            Requires.NotNullAllowStructs(key, nameof(key));
+
+            return ref _root.ValueRef(key, _keyComparer);
+        }
+
         #endregion
 
         /// <summary>

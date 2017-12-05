@@ -744,6 +744,7 @@ namespace System.Collections.Immutable
         public int Count { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public TValue this[TKey key] { get { throw null; } }
+        public ref readonly TValue ValueRef(TKey key) { throw null; }
         public System.Collections.Generic.IComparer<TKey> KeyComparer { get { throw null; } }
         public System.Collections.Generic.IEnumerable<TKey> Keys { get { throw null; } }
         bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey,TValue>>.IsReadOnly { get { throw null; } }
@@ -801,6 +802,7 @@ namespace System.Collections.Immutable
             internal Builder() { }
             public int Count { get { throw null; } }
             public TValue this[TKey key] { get { throw null; } set { } }
+            public ref readonly TValue ValueRef(TKey key) { throw null; }
             public System.Collections.Generic.IComparer<TKey> KeyComparer { get { throw null; } set { } }
             public System.Collections.Generic.IEnumerable<TKey> Keys { get { throw null; } }
             bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey,TValue>>.IsReadOnly { get { throw null; } }

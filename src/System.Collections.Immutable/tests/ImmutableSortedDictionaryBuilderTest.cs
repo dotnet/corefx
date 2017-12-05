@@ -278,6 +278,31 @@ namespace System.Collections.Immutable.Tests
             Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
+        [Fact]
+        public void ValueRef()
+        {
+            var builder = new Dictionary<string, int>()
+            {
+                { "a", 1 },
+                { "b", 2 }
+            }.ToImmutableSortedDictionary().ToBuilder();
+
+            ref readonly var valueRef = ref builder.ValueRef("a");
+            Assert.Equal(1, valueRef);
+        }
+
+        [Fact]
+        public void ValueRef_NonExistentKey()
+        {
+            var builder = new Dictionary<string, int>()
+            {
+                { "a", 1 },
+                { "b", 2 }
+            }.ToImmutableSortedDictionary().ToBuilder();
+
+            Assert.Throws<KeyNotFoundException>(() => builder.ValueRef("c"));
+        }
+
         protected override IImmutableDictionary<TKey, TValue> GetEmptyImmutableDictionary<TKey, TValue>()
         {
             return ImmutableSortedDictionary.Create<TKey, TValue>();
