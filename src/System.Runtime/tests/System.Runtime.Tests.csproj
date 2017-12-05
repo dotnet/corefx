@@ -165,6 +165,7 @@
     <Compile Include="System\Runtime\CompilerServices\ConditionalWeakTableTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\StrongBoxTests.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeHelpersTests.cs" />
+    <Compile Include="System\Runtime\CompilerServices\RuntimeWrappedExceptionTests.cs" />
     <Compile Include="System\Runtime\ExceptionServices\HandleProcessCorruptedStateExceptions.cs" />
     <Compile Include="System\Security\SecurityAttributeTests.cs" />
     <Compile Include="System\Text\StringBuilderTests.cs" />
