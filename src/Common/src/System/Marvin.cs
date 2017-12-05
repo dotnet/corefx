@@ -40,6 +40,7 @@ namespace System
 
                 // byteOffset = data.Length - data.Length % 4
                 // is equivalent to clearing last 2 bits of length
+                // Using it directly gives a perf hit for short strings making it at least 5% or more slower.
                 int byteOffset = data.Length & (~3);
                 data = data.Slice(byteOffset);
             }
