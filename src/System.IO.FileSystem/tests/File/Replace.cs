@@ -117,20 +117,21 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [ActiveIssue(25665)]
         public void SpecialFileNames()
         {
             string testFile = GetTestFilePath();
             string testFile2 = GetTestFilePath();
             File.Create(testFile).Dispose();
 
-            Assert.Throws<IOException>(() => Replace(testFile, "\0", null));
-            //Assert.Throws<IOException>(() => Replace(testFile, "*\0*", null));
+            //Assert.Throws<IOException>(() => Replace(testFile, "\0", null));
+            //Replace(testFile, "*\0*", null);
 
-            //Assert.Throws<IOException>(() => Replace("*\0*", testFile, null));
-            //Assert.Throws<IOException>(() => Replace("\0", testFile, null));
+            //Replace("*\0*", testFile, null);
+            //Assert.Throws<FileNotFoundException>(() => Replace("\0", testFile, null));
 
             //Assert.Throws<IOException>(() => Replace(testFile, testFile2, "\0"));
-            //Assert.Throws<IOException>(() => Replace(testFile, testFile2, "*\0*"));
+            //Replace(testFile, testFile2, "*\0*");
         }
 
         #endregion
