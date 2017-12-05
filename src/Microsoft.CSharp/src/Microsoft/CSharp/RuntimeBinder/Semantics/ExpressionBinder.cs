@@ -882,15 +882,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Count the args.
             int carg = CountArguments(args);
 
-            // If we weren't given a pName, then we couldn't bind the method pName, so we should
-            // just bail out of here.
-
-            if (grp.Name == null)
-            {
-                ExprCall rval = GetExprFactory().CreateCall(0, GetTypes().GetErrorSym(), args, grp, null);
-                rval.SetError();
-                return rval;
-            }
+            Debug.Assert(grp.Name != null);
 
             // If we have named arguments specified, make sure we have them all appearing after
             // fixed arguments.
