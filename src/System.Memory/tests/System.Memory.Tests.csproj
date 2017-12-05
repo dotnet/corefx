@@ -25,6 +25,8 @@
     <Compile Include="Span\DangerousCreate.cs" />
     <Compile Include="Span\DangerousGetPinnableReference.cs" />
     <Compile Include="Span\Empty.cs" />
+    <Compile Include="Span\EndsWith.byte.cs" />
+    <Compile Include="Span\EndsWith.T.cs" />
     <Compile Include="Span\Equality.cs" />
     <Compile Include="Span\GcReporting.cs" />
     <Compile Include="Span\GetEnumerator.cs" />
@@ -56,6 +58,8 @@
     <Compile Include="ReadOnlySpan\DangerousCreate.cs" />
     <Compile Include="ReadOnlySpan\DangerousGetPinnableReference.cs" />
     <Compile Include="ReadOnlySpan\Empty.cs" />
+    <Compile Include="ReadOnlySpan\EndsWith.byte.cs" />
+    <Compile Include="ReadOnlySpan\EndsWith.T.cs" />
     <Compile Include="ReadOnlySpan\Equality.cs" />
     <Compile Include="ReadOnlySpan\GetEnumerator.cs" />
     <Compile Include="ReadOnlySpan\GetHashCode.cs" />
@@ -68,6 +72,7 @@
     <Compile Include="ReadOnlySpan\IndexOfSequence.char.cs" />
     <Compile Include="ReadOnlySpan\NonPortableCast.cs" />
     <Compile Include="ReadOnlySpan\Overflow.cs" />
+    <Compile Include="ReadOnlySpan\Overlaps.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.T.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.byte.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.char.cs" />
@@ -77,6 +82,7 @@
     <Compile Include="ReadOnlySpan\ToArray.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Memory\AsReadOnlyMemory.cs" />
     <Compile Include="Memory\CopyTo.cs" />
     <Compile Include="Memory\CtorArray.cs" />
     <Compile Include="Memory\CtorArrayIntInt.cs" />

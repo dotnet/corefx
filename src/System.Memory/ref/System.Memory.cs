@@ -101,6 +101,9 @@ namespace System
         
         public static bool StartsWith<T>(this Span<T> span, ReadOnlySpan<T> value) where T : IEquatable<T> { throw null; }
 
+        public static bool EndsWith<T>(this Span<T> span, ReadOnlySpan<T> value) where T : IEquatable<T> { throw null; }
+        public static bool EndsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value) where T : IEquatable<T> { throw null; }
+
         public static Span<byte> AsBytes<T>(this Span<T> source) where T : struct { throw null; }
 
         public static Span<TTo> NonPortableCast<TFrom, TTo>(this Span<TFrom> source) where TFrom : struct where TTo : struct { throw null; }
@@ -111,7 +114,9 @@ namespace System
         public static Span<T> AsSpan<T>(this T[] array) { throw null; }
         public static Span<T> AsSpan<T>(this ArraySegment<T> arraySegment) { throw null; }
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this T[] array) { throw null; }
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this Span<T> span) { throw null; }
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this ArraySegment<T> arraySegment) { throw null; }
+        public static ReadOnlyMemory<T> AsReadOnlyMemory<T>(this Memory<T> memory) { throw null; }
 
         public static void CopyTo<T>(this T[] array, Span<T> destination) { throw null; }
         public static void CopyTo<T>(this T[] array, Memory<T> destination) { throw null; }
@@ -132,6 +137,11 @@ namespace System
         public static ReadOnlySpan<TTo> NonPortableCast<TFrom, TTo>(this ReadOnlySpan<TFrom> source) where TFrom : struct where TTo : struct { throw null; }
 
         public static bool TryGetString(this ReadOnlyMemory<char> readOnlyMemory, out string text, out int start, out int length) { throw null; }
+
+        public static bool Overlaps<T>(this Span<T> first, ReadOnlySpan<T> second) { throw null; }
+        public static bool Overlaps<T>(this Span<T> first, ReadOnlySpan<T> second, out int elementOffset) { throw null; }
+        public static bool Overlaps<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second) { throw null; }
+        public static bool Overlaps<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second, out int elementOffset) { throw null; }
     }
 
     public readonly struct ReadOnlyMemory<T>
@@ -336,9 +346,9 @@ namespace System.Buffers
 {
     public readonly struct StandardFormat : IEquatable<StandardFormat>
     {
-        public const byte MaxPrecision = (byte)99;
-        public const byte NoPrecision = (byte)255;
-        public StandardFormat(char symbol, byte precision=(byte)255) => throw null;
+        public const byte MaxPrecision = 99;
+        public const byte NoPrecision = 255;
+        public StandardFormat(char symbol, byte precision= 255) => throw null;
         public bool HasPrecision => throw null;
         public bool IsDefault => throw null;
         public byte Precision => throw null;
