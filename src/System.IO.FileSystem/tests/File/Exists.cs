@@ -48,17 +48,6 @@ namespace System.IO.Tests
             Assert.True(Exists(path));
         }
 
-        [ActiveIssue(25665)]
-        [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
-        public void PathWithInvalidCharactersAsPath_ReturnsFalse(string invalidPath)
-        {
-            // Checks that errors aren't thrown when calling Exists() on paths with impossible to create characters
-            Assert.False(Exists(invalidPath));
-
-            Assert.False(Exists(".."));
-            Assert.False(Exists("."));
-        }
-
         [Fact]
         public void PathAlreadyExistsAsFile()
         {
@@ -270,6 +259,28 @@ namespace System.IO.Tests
             string fileName = GetTestFilePath();
             Assert.Equal(0, mkfifo(fileName, 0));
             Assert.True(File.Exists(fileName));
+        }
+
+        [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void PathWithInvalidCharactersAsPath_ReturnsFalse(string invalidPath)
+        {
+            // Checks that errors aren't thrown when calling Exists() on paths with impossible to create characters
+            Assert.False(Exists(invalidPath));
+
+            Assert.False(Exists(".."));
+            Assert.False(Exists("."));
+        }
+
+        [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void PathWithInvalidCharactersAsPath_ReturnsTrue(string invalidPath)
+        {
+            // Checks that errors aren't thrown when calling Exists() on paths with impossible to create characters
+            Assert.True(Exists(invalidPath));
+
+            Assert.True(Exists(".."));
+            Assert.True(Exists("."));
         }
 
         #endregion

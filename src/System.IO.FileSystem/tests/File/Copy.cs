@@ -90,10 +90,10 @@ namespace System.IO.Tests
         {
             string testFile = GetTestFilePath();
             File.Create(testFile).Dispose();
-            Assert.Throws<ArgumentException>(() => Copy(testFile, "\0"));
-            Assert.Throws<ArgumentException>(() => Copy(testFile, "*\0*"));
-            Assert.Throws<ArgumentException>(() => Copy("*\0*", testFile));
-            Assert.Throws<ArgumentException>(() => Copy("\0", testFile));
+            Assert.Throws<IOException>(() => Copy(testFile, "\0"));
+            Assert.Throws<IOException>(() => Copy(testFile, "*\0*"));
+            Assert.Throws<IOException>(() => Copy("*\0*", testFile));
+            Assert.Throws<IOException>(() => Copy("\0", testFile));
         }
 
         public static IEnumerable<object[]> CopyFileWithData_MemberData()

@@ -43,21 +43,6 @@ namespace System.IO.Tests
             Assert.Throws<FileNotFoundException>(() => Move(Path.Combine(TestDirectory, GetTestFileName(), GetTestFileName()), testFile.FullName));
         }
 
-        [ActiveIssue(25665)]
-        [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
-        public void PathWithIllegalCharacters(string invalidPath)
-        {
-            FileInfo testFile = new FileInfo(GetTestFilePath());
-            testFile.Create().Dispose();
-
-            // Under legacy normalization we kick \\?\ paths back as invalid with ArgumentException
-            // New style we don't prevalidate \\?\ at all
-            if (invalidPath.Contains(@"\\?\") && !PathFeatures.IsUsingLegacyPathNormalization())
-                Assert.Throws<IOException>(() => Move(testFile.FullName, invalidPath));
-            else
-                Assert.Throws<ArgumentException>(() => Move(testFile.FullName, invalidPath));
-        }
-
         [Fact]
         public void BasicMove()
         {
@@ -288,6 +273,36 @@ namespace System.IO.Tests
             Move(testFileSource.FullName, Path.Combine(TestDirectory, whitespace));
             Move(Path.Combine(TestDirectory, whitespace), testFileSource.FullName);
 
+        }
+
+        [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void PathWithIllegalCharacters(string invalidPath)
+        {
+            FileInfo testFile = new FileInfo(GetTestFilePath());
+            testFile.Create().Dispose();
+
+            // Under legacy normalization we kick \\?\ paths back as invalid with ArgumentException
+            // New style we don't prevalidate \\?\ at all
+            if (invalidPath.Contains(@"\\?\") && !PathFeatures.IsUsingLegacyPathNormalization())
+                Assert.Throws<IOException>(() => Move(testFile.FullName, invalidPath));
+            else
+                Assert.Throws<ArgumentException>(() => Move(testFile.FullName, invalidPath));
+        }
+
+        [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void PathWithSpecialCharacters(string invalidPath)
+        {
+            FileInfo testFile = new FileInfo(GetTestFilePath());
+            testFile.Create().Dispose();
+
+            // Under legacy normalization we kick \\?\ paths back as invalid with ArgumentException
+            // New style we don't prevalidate \\?\ at all
+            if (invalidPath.Contains(@"\\?\") && !PathFeatures.IsUsingLegacyPathNormalization())
+                Assert.Throws<IOException>(() => Move(testFile.FullName, invalidPath));
+            else
+                Assert.Throws<IOException>(() => Move(testFile.FullName, invalidPath));
         }
 
         #endregion
