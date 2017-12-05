@@ -64,12 +64,12 @@ namespace System.IO.Tests
         public void PathWithSpecialCharactersAsPath_ReturnsFalse(string invalidPath)
         {
             // Checks that errors aren't thrown when calling Exists() on paths with impossible to create characters
-            if (invalidPath == "\0")
+            if (invalidPath == "\0" || invalidPath == @"middle\0path" || invalidPath == @"trailing\0")
                 Assert.False(Exists(invalidPath));
             else 
                 Assert.True(Exists(invalidPath));
 
-            if (invalidPath == "\0" || invalidPath == "middle\0path" || invalidPath == "trailing\0")
+            if (invalidPath == "\0" || invalidPath == @"middle\0path" || invalidPath == @"trailing\0")
                 Assert.False(Exists(".."));
             else 
                 Assert.True(Exists(".."));

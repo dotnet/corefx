@@ -187,7 +187,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.NetBSD | TestPlatforms.FreeBSD)]
         public void SpecialFileNames()
         {
             string testFile = GetTestFilePath();
@@ -196,6 +196,18 @@ namespace System.IO.Tests
             Assert.Throws<IOException>(() => Copy(testFile, "*\0*"));
             Assert.Throws<IOException>(() => Copy("*\0*", testFile));
             Assert.Throws<UnauthorizedAccessException>(() => Copy("\0", testFile)); 
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.OSX)]
+        public void SpecialFileNames_OSX()
+        {
+            string testFile = GetTestFilePath();
+            File.Create(testFile).Dispose();
+            Assert.Throws<UnauthorizedAccessException>(() => Copy(testFile, "\0"));
+            Assert.Throws<IOException>(() => Copy(testFile, "*\0*"));
+            Assert.Throws<IOException>(() => Copy("*\0*", testFile));
+            Assert.Throws<UnauthorizedAccessException>(() => Copy("\0", testFile));
         }
 
         #endregion
