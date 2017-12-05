@@ -33,16 +33,24 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => Create(string.Empty));
         }
 
-        [ActiveIssue(25665)]
         [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
         public void PathWithInvalidCharactersAsPath_ThrowsArgumentException(string invalidPath)
         {
-            if (invalidPath.Equals(@"\\?\") && !PathFeatures.IsUsingLegacyPathNormalization())
-                AssertExtensions.ThrowsAny<IOException, UnauthorizedAccessException>(() => Create(invalidPath));
-            else if (invalidPath.Contains(@"\\?\") && !PathFeatures.IsUsingLegacyPathNormalization())
-                Assert.Throws<DirectoryNotFoundException>(() => Create(invalidPath));
+            Action action = () => Create(invalidPath);
+            if (PlatformDetection.IsWindows)
+            {
+                if (invalidPath.Equals(@"\\?\") && !PathFeatures.IsUsingLegacyPathNormalization())
+                    AssertExtensions.ThrowsAny<IOException, UnauthorizedAccessException>(action);
+                else if (invalidPath.Contains(@"\\?\") && !PathFeatures.IsUsingLegacyPathNormalization())
+                    Assert.Throws<DirectoryNotFoundException>(action);
+                else
+                    Assert.Throws<ArgumentException>(() => Create(invalidPath));
+            }
             else
-                Assert.Throws<ArgumentException>(() => Create(invalidPath));
+            {
+                // valid path for unix systems
+                action();
+            }
         }
 
         [Fact]
