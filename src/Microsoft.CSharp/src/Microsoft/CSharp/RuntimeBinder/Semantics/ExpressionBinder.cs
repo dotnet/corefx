@@ -880,7 +880,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(grp.SymKind == SYMKIND.SK_MethodSymbol || grp.SymKind == SYMKIND.SK_PropertySymbol && ((grp.Flags & EXPRFLAG.EXF_INDEXER) != 0));
 
             // Count the args.
-            int carg = CountArguments(args, out bool _);
+            int carg = CountArguments(args);
 
             // If we weren't given a pName, then we couldn't bind the method pName, so we should
             // just bail out of here.
@@ -1891,10 +1891,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GetExprFactory().CreateAssignment(op1, op2);
         }
 
-        internal static int CountArguments(Expr args, out bool typeErrors)
+        internal static int CountArguments(Expr args)
         {
             int carg = 0;
-            typeErrors = false;
             for (Expr list = args; list != null; carg++)
             {
                 Expr arg;
@@ -1911,12 +1910,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 Debug.Assert(arg != null);
-
-                if (arg.Type == null || arg.Type is ErrorType)
-                {
-                    typeErrors = true;
-                }
             }
+
             return carg;
         }
     }
