@@ -14,7 +14,6 @@ namespace System.Runtime.CompilerServices.Tests
         public static void Ctor_Null()
         {
             var exception = new RuntimeWrappedException(null);
-            Assert.NotNull(exception);
             Assert.NotEmpty(exception.Message);
             Assert.Equal(COR_E_RUNTIMEWRAPPED, exception.HResult);
             Assert.Null(exception.WrappedException);
@@ -25,21 +24,19 @@ namespace System.Runtime.CompilerServices.Tests
         {
             var wrappedException = new Exception("Created inner exception");
             var exception = new RuntimeWrappedException(wrappedException);
-            Assert.NotNull(exception);
             Assert.NotEmpty(exception.Message);
             Assert.Equal(COR_E_RUNTIMEWRAPPED, exception.HResult);
-            Assert.Equal(wrappedException, exception.WrappedException);
+            Assert.Same(wrappedException, exception.WrappedException);
         }
 
         [Fact]
         public static void Ctor_Not_Exception()
         {
-            var runtimeWrappedExceptionArgument = 1;
+            object runtimeWrappedExceptionArgument = 1;
             var exception = new RuntimeWrappedException(runtimeWrappedExceptionArgument);
-            Assert.NotNull(exception);
             Assert.NotEmpty(exception.Message);
             Assert.Equal(COR_E_RUNTIMEWRAPPED, exception.HResult);
-            Assert.Equal(runtimeWrappedExceptionArgument, exception.WrappedException);
+            Assert.Same(runtimeWrappedExceptionArgument, exception.WrappedException);
         }
     }
 }
