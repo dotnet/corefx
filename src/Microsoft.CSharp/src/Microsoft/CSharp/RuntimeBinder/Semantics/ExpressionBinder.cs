@@ -948,12 +948,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         ////////////////////////////////////////////////////////////////////////////////
         // Report a bad operator types error to the user.
-        private ExprOperator BadOperatorTypesError(ExpressionKind ek, Expr pOperand1, Expr pOperand2)
-        {
-            return BadOperatorTypesError(ek, pOperand1, pOperand2, null);
-        }
-
-        private ExprOperator BadOperatorTypesError(ExpressionKind ek, Expr pOperand1, Expr pOperand2, CType pTypeErr)
+        private ExprOperator BadOperatorTypesError(Expr pOperand1, Expr pOperand2)
         {
             // This is a hack, but we need to store the operation somewhere... the first argument's as 
             // good a place as any.
