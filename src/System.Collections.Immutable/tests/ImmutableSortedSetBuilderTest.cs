@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Collections.Immutable.Tests
@@ -382,8 +383,14 @@ namespace System.Collections.Immutable.Tests
             var array = new[] { 1, 2, 3 }.ToImmutableSortedSet();
             var builder = new ImmutableSortedSet<int>.Builder(array);
 
-            ref readonly var itemRef = ref builder.ItemRef(1);
-            Assert.Equal(2, itemRef);
+            ref readonly var safeRef = ref builder.ItemRef(1);
+            ref var unsafeRef = ref Unsafe.AsRef(safeRef);
+
+            Assert.Equal(2, builder.ItemRef(1));
+
+            unsafeRef = 4;
+
+            Assert.Equal(4, builder.ItemRef(1));
         }
 
         [Fact]

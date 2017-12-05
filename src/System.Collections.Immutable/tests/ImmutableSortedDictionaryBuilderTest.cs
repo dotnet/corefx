@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Collections.Immutable.Tests
@@ -287,8 +288,14 @@ namespace System.Collections.Immutable.Tests
                 { "b", 2 }
             }.ToImmutableSortedDictionary().ToBuilder();
 
-            ref readonly var valueRef = ref builder.ValueRef("a");
-            Assert.Equal(1, valueRef);
+            ref readonly var safeRef = ref builder.ValueRef("a");
+            ref var unsafeRef = ref Unsafe.AsRef(safeRef);
+
+            Assert.Equal(1, builder.ValueRef("a"));
+
+            unsafeRef = 5;
+
+            Assert.Equal(5, builder.ValueRef("a"));
         }
 
         [Fact]

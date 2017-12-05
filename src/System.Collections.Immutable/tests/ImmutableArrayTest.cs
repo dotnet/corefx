@@ -2193,8 +2193,14 @@ namespace System.Collections.Immutable.Tests
         {
             var array = new[] { 1, 2, 3 }.ToImmutableArray();
 
-            ref readonly var itemRef = ref array.ItemRef(1);
-            Assert.Equal(2, itemRef);
+            ref readonly var safeRef = ref array.ItemRef(1);
+            ref var unsafeRef = ref Unsafe.AsRef(safeRef);
+
+            Assert.Equal(2, array.ItemRef(1));
+
+            unsafeRef = 4;
+
+            Assert.Equal(4, array.ItemRef(1));
         }
 
         [Fact]

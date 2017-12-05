@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Collections.Immutable.Tests
@@ -265,8 +266,14 @@ namespace System.Collections.Immutable.Tests
                 .Enqueue(2)
                 .Enqueue(3);
 
-            ref readonly var peekRef = ref queue.PeekRef();
-            Assert.Equal(1, peekRef);
+            ref readonly var safeRef = ref queue.PeekRef();
+            ref var unsafeRef = ref Unsafe.AsRef(safeRef);
+
+            Assert.Equal(1, queue.PeekRef());
+
+            unsafeRef = 4;
+
+            Assert.Equal(4, queue.PeekRef());
         }
 
         [Fact]
