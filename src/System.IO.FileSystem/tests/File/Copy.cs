@@ -205,7 +205,7 @@ namespace System.IO.Tests
             string testFile = GetTestFilePath();
             File.Create(testFile).Dispose();
             Assert.Throws<IOException>(() => Copy(testFile, "\0"));
-            Assert.Throws<IOException>(() => Copy("\0", testFile));
+            Assert.Throws<UnauthorizedAccessException>(() => Copy("\0", testFile));
         }
 
         #endregion
