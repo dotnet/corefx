@@ -954,16 +954,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // good a place as any.
             string strOp = pOperand1.ErrorString;
 
-            pOperand1 = UnwrapExpression(pOperand1);
-
             Debug.Assert(pOperand1 != null);
             Debug.Assert(pOperand1.Type != null);
             Debug.Assert(!(pOperand1.Type is ErrorType));
 
             if (pOperand2 != null)
             {
-                pOperand2 = UnwrapExpression(pOperand2);
-
                 Debug.Assert(pOperand2.Type != null);
                 Debug.Assert(!(pOperand2.Type is ErrorType));
 
@@ -971,22 +967,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             return ErrorContext.Error(ErrorCode.ERR_BadUnaryOp, strOp, pOperand1.Type);
-        }
-
-        private Expr UnwrapExpression(Expr pExpression)
-        {
-            while (pExpression is ExprWrap wrap)
-            {
-                Expr wrapped = wrap.OptionalExpression;
-                if (wrapped == null)
-                {
-                    break;
-                }
-
-                pExpression = wrapped;
-            }
-
-            return pExpression;
         }
 
         private static ErrorCode GetStandardLvalueError(CheckLvalueKind kind)
