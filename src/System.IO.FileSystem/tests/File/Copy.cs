@@ -84,18 +84,6 @@ namespace System.IO.Tests
             Assert.Throws<IOException>(() => Copy(testFileSource, testFileDest));
         }
 
-        [ActiveIssue(25665)]
-        [Fact]
-        public void InvalidFileNames()
-        {
-            string testFile = GetTestFilePath();
-            File.Create(testFile).Dispose();
-            Assert.Throws<IOException>(() => Copy(testFile, "\0"));
-            Assert.Throws<IOException>(() => Copy(testFile, "*\0*"));
-            Assert.Throws<IOException>(() => Copy("*\0*", testFile));
-            Assert.Throws<IOException>(() => Copy("\0", testFile));
-        }
-
         public static IEnumerable<object[]> CopyFileWithData_MemberData()
         {
             var rand = new Random();
@@ -185,6 +173,31 @@ namespace System.IO.Tests
             Assert.True(File.Exists(testFile));
             Assert.True(File.Exists(Path.Combine(TestDirectory, valid)));
         }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void InvalidFileNames()
+        {
+            string testFile = GetTestFilePath();
+            File.Create(testFile).Dispose();
+            Assert.Throws<ArgumentException>(() => Copy(testFile, "\0"));
+            Assert.Throws<ArgumentException>(() => Copy(testFile, "*\0*"));
+            Assert.Throws<ArgumentException>(() => Copy("*\0*", testFile));
+            Assert.Throws<ArgumentException>(() => Copy("\0", testFile));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void SpecialFileNames()
+        {
+            string testFile = GetTestFilePath();
+            File.Create(testFile).Dispose();
+            Assert.Throws<IOException>(() => Copy(testFile, "\0"));
+            Assert.Throws<IOException>(() => Copy(testFile, "*\0*"));
+            Assert.Throws<IOException>(() => Copy("*\0*", testFile));
+            Assert.Throws<IOException>(() => Copy("\0", testFile));
+        }
+
         #endregion
     }
 
