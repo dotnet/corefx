@@ -25,7 +25,6 @@ We will build a sample application which outputs `Hello World!` to the console.
 mkdir core-demo
 cd core-demo
 ```
-
 2. Save the following C# code to a file called `Program.cs` into your application folder:
 ```csharp
 using System;
@@ -55,7 +54,7 @@ Use the C# Compiler (`csc`) to compile your C# code (`Program.cs`) against the c
 .\runtime\corerun ..\corefx\tools\csc.dll /noconfig /r:runtime\System.Private.Corelib.dll /r:runtime\System.Runtime.dll /r:runtime\System.Runtime.Extensions.dll /r:runtime\System.Console.dll /out:runtime\Program.dll Program.cs
 ```
 
-If y ou want to compile Visual Basic code simply replace `csc.dll` with `vbc.dll`.
+If you want to compile Visual Basic code simply replace `csc.dll` with `vbc.dll`.
 
 ## Run your application
 `Corerun.exe` is part of the coreclr binaries and is best described as the host of your .NET Core application. Find more information at [Using CoreRun](https://github.com/dotnet/coreclr/blob/master/Documentation/workflow/UsingCoreRun.md).
