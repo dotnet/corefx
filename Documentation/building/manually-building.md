@@ -1,31 +1,32 @@
-# Build and run your .NET Core application with csc and CoreRun
+# Advanced scenario - Build and run application code with csc/vbc and CoreRun
 
-This tutorial describes how to build and run an application that targets self-compiled .NET Core binaries without using Visual Studio,  the .NET Core SDK Host (`dotnet.exe`) or a C# project file (`*.csproj`). Follow these steps to quickly validate changes you made in the product e.g. by running benchmarks or tests on it. Don't consider using these instructions for production scenarios! At the time of writing, required tools like `csc` are not accessible on Unix/MacOS machines, therefore make sure to __use a Windows environment__.
+This tutorial describes how to build and run application code that targets self-compiled .NET Core binaries without using Visual Studio,  the .NET Core SDK Host (`dotnet.exe`) or a project file (e.g. `csproj`). Follow these steps to quickly validate changes you made in the product e.g. by running benchmarks or tests on it. __Don't consider using this technique for anything else than inner-loop tests and instead use the [official instructions](https://docs.microsoft.com/en-us/dotnet/core/tools/?tabs=netcore2x)__
 
-Use the `Developer Command Prompt for VS 2017` which is necessary for building .NET Core and later for using `csc`.
+If you are on Windows use the `Developer Command Prompt for VS 2017` which is necessary for building corefx/coreclr. For the sake of completeness, we have placed our repositories under `d:\git\`.
 
 ## Compile corefx with self-compiled coreclr binaries
-If you have made changes to coreclr you'll also want to build it and pass its binaries to corefx.
+If you've made changes to coreclr make sure to also build it and pass its binaries to corefx.
 ```
-d:\git\coreclr\build -release
-d:\git\corefx\build -release -- /p:CoreCLROverridePath=d:\git\coreclr\bin\Product\Windows_NT.x64.Release\
+coreclr\build -release
+corefx\build -release -- /p:CoreCLROverridePath=d:\git\coreclr\bin\Product\Windows_NT.x64.Release\
 ```
 
 ## Compile corefx with pre-compiled coreclr binaries
-If you haven't made any changes to coreclr you're fine with just building corefx. This will automatically pick pre-compiled coreclr binaries from MyGet.
+If you haven't made any changes to coreclr you're fine with just building corefx. This automatically picks pre-compiled coreclr binaries from MyGet.
 ```
-d:\git\corefx\build -release
+corefx\build -release
 ```
 
 ## Create and prepare your application
 We will build a sample application which outputs `Hello World!` to the console.
 
-1. Create an application directory.
+1. Create an application directory (in our example under `d:\git\`):
 ```
-mkdir d:\git\core-demo
+mkdir core-demo
+cd core-demo
 ```
 
-2. Save the following C# code to a file called `Program.cs` in your application folder.
+2. Save the following C# code to a file called `Program.cs` into your application folder:
 ```csharp
 using System;
 
@@ -38,21 +39,23 @@ public class Program
 }
 ```
 
-3. Copy the just built corefx assemblies into your application directory. When using Visual Studio or the .NET Core SDK Host (`dotnet.exe`) you usually compile against *reference assemblies*. For simplicity we'll compile against the same assembly set that we'll use during run time. 
+3. Copy the just built corefx assemblies into your application directory. When using Visual Studio or the .NET Core SDK Host (`dotnet.exe`) you usually compile against *reference assemblies*. For simplicity we compile against the same assembly set that we use during run time.
 ```
-xcopy d:\git\corefx\bin\testhost\netcoreapp-Windows_NT-Release-x64\shared\Microsoft.NETCore.App\9.9.9 d:\git\core-demo\runtime
+xcopy ..\corefx\bin\testhost\netcoreapp-Windows_NT-Release-x64\shared\Microsoft.NETCore.App\9.9.9 runtime /e /i /y /s
 ```
 
-You won't need all the assemblies but copying the entire directory makes it easier if you want to reference additional ones. For __running__ our Hello World application the following assemblies are needed:
+You don't need all the assemblies that are built by corefx but copying the entire directory makes it easier if you want to reference additional ones. At a minimum, this app will need the following assemblies to run:
 
 - CoreClr assemblies: `clrjit.dll`, `CoreRun.exe`, `coreclr.dll`, `System.Private.CoreLib.dll`. For more information about the CoreClr parts, visit [Using your build](https://github.com/dotnet/coreclr/blob/master/Documentation/workflow/UsingYourBuild.md)
 - CoreFx assemblies: `System.Runtime.dll`, `System.Runtime.Extensions.dll`, `System.Runtime.InteropServices.dll`, `System.Text.Encoding.Extensions.dll`, `System.Threading.dll`
 
 ## Compile your application
-Use the C# Compiler (`csc`) to compile your C# code (`Program.cs`) against the copied assemblies. For our Hello World example we need to compile our program code against `System.Runtime.dll`, `System.Runtime.Extensions.dll` and `System.Console.dll`. As described above these assemblies have dependencies on two other assemblies: `System.Text.Encoding.Extensions.dll` and `System.Threading.dll`.
+Use the C# Compiler (`csc`) to compile your C# code (`Program.cs`) against the copied assemblies. For our Hello World example we need to compile our application code against `System.Runtime.dll`, `System.Runtime.Extensions.dll` and `System.Console.dll`. As described above these assemblies have dependencies on two other assemblies: `System.Text.Encoding.Extensions.dll` and `System.Threading.dll`.
 ```
-csc /nostdlib /noconfig /r:runtime\System.Runtime.dll /r:runtime\System.Runtime.Extensions.dll /r:runtime\System.Console.dll /out:runtime\Program.dll Program.cs
+.\runtime\corerun ..\corefx\tools\csc.dll /noconfig /r:runtime\System.Private.Corelib.dll /r:runtime\System.Runtime.dll /r:runtime\System.Runtime.Extensions.dll /r:runtime\System.Console.dll /out:runtime\Program.dll Program.cs
 ```
+
+If y ou want to compile Visual Basic code simply replace `csc.dll` with `vbc.dll`.
 
 ## Run your application
 `Corerun.exe` is part of the coreclr binaries and is best described as the host of your .NET Core application. Find more information at [Using CoreRun](https://github.com/dotnet/coreclr/blob/master/Documentation/workflow/UsingCoreRun.md).
