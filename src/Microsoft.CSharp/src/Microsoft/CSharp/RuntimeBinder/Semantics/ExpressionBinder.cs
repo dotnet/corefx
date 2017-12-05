@@ -948,9 +948,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         ////////////////////////////////////////////////////////////////////////////////
         // Report a bad operator types error to the user.
-        private ExprOperator BadOperatorTypesError(Expr pOperand1, Expr pOperand2)
+        private RuntimeBinderException BadOperatorTypesError(Expr pOperand1, Expr pOperand2)
         {
-            // This is a hack, but we need to store the operation somewhere... the first argument's as 
+            // This is a hack, but we need to store the operation somewhere... the first argument's as
             // good a place as any.
             string strOp = pOperand1.ErrorString;
 
@@ -967,10 +967,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(pOperand2.Type != null);
                 Debug.Assert(!(pOperand2.Type is ErrorType));
 
-                throw ErrorContext.Error(ErrorCode.ERR_BadBinaryOps, strOp, pOperand1.Type, pOperand2.Type);
+                return ErrorContext.Error(ErrorCode.ERR_BadBinaryOps, strOp, pOperand1.Type, pOperand2.Type);
             }
 
-            throw ErrorContext.Error(ErrorCode.ERR_BadUnaryOp, strOp, pOperand1.Type);
+            return ErrorContext.Error(ErrorCode.ERR_BadUnaryOp, strOp, pOperand1.Type);
         }
 
         private Expr UnwrapExpression(Expr pExpression)

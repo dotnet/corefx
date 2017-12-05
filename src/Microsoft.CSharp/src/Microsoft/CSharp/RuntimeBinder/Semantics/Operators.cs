@@ -427,9 +427,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return exprRes;
                 }
             }
-            Expr pExpr = BadOperatorTypesError(info.arg1, info.arg2);
-            pExpr.AssertIsBin();
-            return (ExprBinOp)pExpr;
+
+            throw BadOperatorTypesError(info.arg1, info.arg2);
         }
 
         /*
@@ -446,7 +445,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // If we don't get the BinopKind and the flags, then we must have had some bad operator types.
 
-                return BadOperatorTypesError(arg1, arg2);
+                throw BadOperatorTypesError(arg1, arg2);
             }
 
             info.mask = (BinOpMask)(1 << (int)info.binopKind);
@@ -516,7 +515,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (bofs.pfn == null)
             {
-                return BadOperatorTypesError(info.arg1, info.arg2);
+                throw BadOperatorTypesError(info.arg1, info.arg2);
             }
 
             if (!bofs.isLifted() || !bofs.AutoLift())
@@ -1169,7 +1168,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                            out unaryOpKind/*out*/,
                            out flags/*out*/))
             {
-                return BadOperatorTypesError(pArgument, null);
+                throw BadOperatorTypesError(pArgument, null);
             }
 
             UnaOpMask unaryOpMask = (UnaOpMask)(1 << (int)unaryOpKind);
@@ -1197,7 +1196,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     if (pSignatures.Count == 0)
                     {
-                        return BadOperatorTypesError(pArgument, null);
+                        throw BadOperatorTypesError(pArgument, null);
                     }
 
                     nBestSignature = 0;
@@ -1261,7 +1260,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return BindIncOp(ek, flags, pArgument, uofs);
                 }
 
-                return BadOperatorTypesError(pArgument, null);
+                throw BadOperatorTypesError(pArgument, null);
             }
 
             if (uofs.isLifted())
@@ -1508,7 +1507,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(arg?.Type != null);
             if (arg.Type is NullType)
             {
-                return BadOperatorTypesError(arg, null);
+                throw BadOperatorTypesError(arg, null);
             }
 
             LiftArgument(arg, uofs.GetType(), uofs.Convert(), out Expr pArgument, out Expr nonLiftedArg);
@@ -2273,7 +2272,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (ptOp == PredefinedType.PT_ULONG)
             {
-                return BadOperatorTypesError(op, null);
+                throw BadOperatorTypesError(op, null);
             }
 
             if (ptOp == PredefinedType.PT_UINT && op.Type.fundType() == FUNDTYPE.FT_U4)
