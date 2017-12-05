@@ -122,6 +122,24 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
+        /// Gets a read-only reference to the element on the top of the stack.
+        /// </summary>
+        /// <returns>
+        /// A read-only reference to the element on the top of the stack. 
+        /// </returns>
+        /// <exception cref="InvalidOperationException">Thrown when the stack is empty.</exception>
+        [Pure]
+        public ref readonly T PeekRef()
+        {
+            if (this.IsEmpty)
+            {
+                throw new InvalidOperationException(SR.InvalidEmptyOperation);
+            }
+
+            return ref _head;
+        }
+
+        /// <summary>
         /// Pushes an element onto a stack and returns the new stack.
         /// </summary>
         /// <param name="value">The element to push onto the stack.</param>

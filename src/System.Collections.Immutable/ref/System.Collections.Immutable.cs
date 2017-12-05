@@ -705,6 +705,7 @@ namespace System.Collections.Immutable
         public System.Collections.Immutable.ImmutableQueue<T> Enqueue(T value) { throw null; }
         public System.Collections.Immutable.ImmutableQueue<T>.Enumerator GetEnumerator() { throw null; }
         public T Peek() { throw null; }
+        public ref readonly T PeekRef() { throw null; }
         System.Collections.Generic.IEnumerator<T> System.Collections.Generic.IEnumerable<T>.GetEnumerator() { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         System.Collections.Immutable.IImmutableQueue<T> System.Collections.Immutable.IImmutableQueue<T>.Clear() { throw null; }
@@ -993,6 +994,7 @@ namespace System.Collections.Immutable
         public System.Collections.Immutable.ImmutableStack<T> Clear() { throw null; }
         public System.Collections.Immutable.ImmutableStack<T>.Enumerator GetEnumerator() { throw null; }
         public T Peek() { throw null; }
+        public ref readonly T PeekRef() { throw null; }
         public System.Collections.Immutable.ImmutableStack<T> Pop() { throw null; }
         public System.Collections.Immutable.ImmutableStack<T> Pop(out T value) { value = default(T); throw null; }
         public System.Collections.Immutable.ImmutableStack<T> Push(T value) { throw null; }

@@ -274,6 +274,26 @@ namespace System.Collections.Immutable.Tests
             Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
+        [Fact]
+        public void PeekRef()
+        {
+            var stack = ImmutableStack<int>.Empty
+                .Push(1)
+                .Push(2)
+                .Push(3);
+
+            ref readonly var peekRef = ref stack.PeekRef();
+            Assert.Equal(3, peekRef);
+        }
+
+        [Fact]
+        public void PeekRef_Empty()
+        {
+            var stack = ImmutableStack<int>.Empty;
+
+            Assert.Throws<InvalidOperationException>(() => stack.PeekRef());
+        }
+
         protected override IEnumerable<T> GetEnumerableOf<T>(params T[] contents)
         {
             var stack = ImmutableStack<T>.Empty;

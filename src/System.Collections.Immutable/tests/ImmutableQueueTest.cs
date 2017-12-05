@@ -257,6 +257,26 @@ namespace System.Collections.Immutable.Tests
             Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
+        [Fact]
+        public void PeekRef()
+        {
+            var queue = ImmutableQueue<int>.Empty
+                .Enqueue(1)
+                .Enqueue(2)
+                .Enqueue(3);
+
+            ref readonly var peekRef = ref queue.PeekRef();
+            Assert.Equal(1, peekRef);
+        }
+
+        [Fact]
+        public void PeekRef_Empty()
+        {
+            var queue = ImmutableQueue<int>.Empty;
+
+            Assert.Throws<InvalidOperationException>(() => queue.PeekRef());
+        }
+
         protected override IEnumerable<T> GetEnumerableOf<T>(params T[] contents)
         {
             var queue = ImmutableQueue<T>.Empty;
