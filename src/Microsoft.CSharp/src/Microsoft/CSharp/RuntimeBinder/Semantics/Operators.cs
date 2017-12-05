@@ -1038,16 +1038,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // Bind a standard unary operator. Takes care of user defined operators, predefined operators
         // and lifting over nullable.
 
-        private static bool CalculateExprAndUnaryOpKinds(
-                OperatorKind op,
-                bool bChecked,
-                out /*out*/ ExpressionKind ek,
-                out /*out*/ UnaOpKind uok,
-                out /*out*/ EXPRFLAG flags)
+        private static (ExpressionKind, UnaOpKind, EXPRFLAG) CalculateExprAndUnaryOpKinds(OperatorKind op, bool bChecked)
         {
-            flags = 0;
-            ek = 0;
-            uok = 0;
+            ExpressionKind ek;
+            UnaOpKind uok;
+            EXPRFLAG flags = 0;
             switch (op)
             {
                 case OperatorKind.OP_UPLUS:
@@ -1058,7 +1053,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case OperatorKind.OP_NEG:
                     if (bChecked)
                     {
-                        flags |= EXPRFLAG.EXF_CHECKOVERFLOW;
+                        flags = EXPRFLAG.EXF_CHECKOVERFLOW;
                     }
                     uok = UnaOpKind.Minus;
                     ek = ExpressionKind.Negate;
@@ -1075,7 +1070,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     break;
 
                 case OperatorKind.OP_POSTINC:
-                    flags |= EXPRFLAG.EXF_ISPOSTOP;
+                    flags = EXPRFLAG.EXF_ISPOSTOP;
                     if (bChecked)
                     {
                         flags |= EXPRFLAG.EXF_CHECKOVERFLOW;
@@ -1087,14 +1082,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case OperatorKind.OP_PREINC:
                     if (bChecked)
                     {
-                        flags |= EXPRFLAG.EXF_CHECKOVERFLOW;
+                        flags = EXPRFLAG.EXF_CHECKOVERFLOW;
                     }
                     uok = UnaOpKind.IncDec;
                     ek = ExpressionKind.Add;
                     break;
 
                 case OperatorKind.OP_POSTDEC:
-                    flags |= EXPRFLAG.EXF_ISPOSTOP;
+                    flags = EXPRFLAG.EXF_ISPOSTOP;
                     if (bChecked)
                     {
                         flags |= EXPRFLAG.EXF_CHECKOVERFLOW;
@@ -1106,7 +1101,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case OperatorKind.OP_PREDEC:
                     if (bChecked)
                     {
-                        flags |= EXPRFLAG.EXF_CHECKOVERFLOW;
+                        flags = EXPRFLAG.EXF_CHECKOVERFLOW;
                     }
                     uok = UnaOpKind.IncDec;
                     ek = ExpressionKind.Subtract;
@@ -1114,20 +1109,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 default:
                     Debug.Fail($"Bad op: {op}");
-                    return false;
+                    throw Error.InternalCompilerError();
             }
-            return true;
+
+            return (ek, uok, flags);
         }
 
         public Expr BindStandardUnaryOperator(OperatorKind op, Expr pArgument)
         {
             Debug.Assert(pArgument != null);
 
-            ExpressionKind ek;
-            UnaOpKind unaryOpKind;
-            EXPRFLAG flags;
-
             CType type = pArgument.Type;
+            Debug.Assert(type != null);
             if (type is NullableType nub)
             {
                 CType nonNub = nub.UnderlyingType;
@@ -1160,16 +1153,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            if (type == null ||
-                !CalculateExprAndUnaryOpKinds(
-                           op,
-                           Context.Checked,
-                           out ek/*out*/,
-                           out unaryOpKind/*out*/,
-                           out flags/*out*/))
-            {
-                throw BadOperatorTypesError(pArgument, null);
-            }
+            (ExpressionKind ek, UnaOpKind unaryOpKind, EXPRFLAG flags) =
+                CalculateExprAndUnaryOpKinds(op, Context.Checked);
 
             UnaOpMask unaryOpMask = (UnaOpMask)(1 << (int)unaryOpKind);
 
