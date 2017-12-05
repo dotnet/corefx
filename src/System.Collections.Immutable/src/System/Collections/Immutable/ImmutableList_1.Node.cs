@@ -163,28 +163,25 @@ namespace System.Collections.Immutable
             internal T Key => _key;
 
             /// <summary>
-            /// Gets the element of the set at the given index.
+            /// Gets a read-only reference to the element of the set at the given index.
             /// </summary>
             /// <param name="index">The 0-based index of the element in the set to return.</param>
-            /// <returns>The element at the given position.</returns>
-            internal T this[int index]
+            /// <returns>A read-only reference to the element at the given position.</returns>
+            internal ref readonly T ItemRef(int index)
             {
-                get
+                Requires.Range(index >= 0 && index < this.Count, nameof(index));
+
+                if (index < _left._count)
                 {
-                    Requires.Range(index >= 0 && index < this.Count, nameof(index));
-
-                    if (index < _left._count)
-                    {
-                        return _left[index];
-                    }
-
-                    if (index > _left._count)
-                    {
-                        return _right[index - _left._count - 1];
-                    }
-
-                    return _key;
+                    return ref _left.ItemRef(index);
                 }
+
+                if (index > _left._count)
+                {
+                    return ref _right.ItemRef(index - _left._count - 1);
+                }
+
+                return ref _key;
             }
 
             #region IEnumerable<T> Members
@@ -500,8 +497,8 @@ namespace System.Collections.Immutable
                 int end = index + count - 1;
                 while (start < end)
                 {
-                    T a = result[start];
-                    T b = result[end];
+                    T a = result.ItemRef(start);
+                    T b = result.ItemRef(end);
                     result = result
                         .ReplaceAt(end, a)
                         .ReplaceAt(start, b);

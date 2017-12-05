@@ -815,6 +815,23 @@ namespace System.Collections.Immutable.Tests
         }
 #endif // netcoreapp
 
+        [Fact]
+        public void ItemRef()
+        {
+            var list = new[] { 1, 2, 3 }.ToImmutableList();
+
+            ref readonly var itemRef = ref list.ItemRef(1);
+            Assert.Equal(2, itemRef);
+        }
+
+        [Fact]
+        public void ItemRef_OutOfBounds()
+        {
+            var list = new[] { 1, 2, 3 }.ToImmutableList();
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => list.ItemRef(5));
+        }
+
         protected override IEnumerable<T> GetEnumerableOf<T>(params T[] contents)
         {
             return ImmutableList<T>.Empty.AddRange(contents);

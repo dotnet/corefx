@@ -186,7 +186,7 @@ namespace System.Collections.Immutable
                             result = OperationResult.NoChangeRequired;
                             return this;
                         case KeyCollisionBehavior.ThrowIfValueDifferent:
-                            var existingEntry = _additionalElements[keyCollisionIndex];
+                            ref readonly var existingEntry = ref _additionalElements.ItemRef(keyCollisionIndex);
                             if (!valueComparer.Equals(existingEntry.Value, value))
                             {
                                 throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, SR.DuplicateKey, key));
@@ -277,7 +277,7 @@ namespace System.Collections.Immutable
                     return false;
                 }
 
-                value = _additionalElements[index].Value;
+                value = _additionalElements.ItemRef(index).Value;
                 return true;
             }
 
@@ -316,7 +316,7 @@ namespace System.Collections.Immutable
                     return false;
                 }
 
-                actualKey = _additionalElements[index].Key;
+                actualKey = _additionalElements.ItemRef(index).Key;
                 return true;
             }
 

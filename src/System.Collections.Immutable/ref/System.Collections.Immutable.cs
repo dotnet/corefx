@@ -526,6 +526,7 @@ namespace System.Collections.Immutable
         public int Count { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public T this[int index] { get { throw null; } }
+        public ref readonly T ItemRef(int index) { throw null; }
         bool System.Collections.Generic.ICollection<T>.IsReadOnly { get { throw null; } }
         T System.Collections.Generic.IList<T>.this[int index] { get { throw null; } set { } }
         bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
@@ -612,6 +613,7 @@ namespace System.Collections.Immutable
             internal Builder() { }
             public int Count { get { throw null; } }
             public T this[int index] { get { throw null; } set { } }
+            public ref readonly T ItemRef(int index) { throw null; }
             bool System.Collections.Generic.ICollection<T>.IsReadOnly { get { throw null; } }
             bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
             object System.Collections.ICollection.SyncRoot { get { throw null; } }

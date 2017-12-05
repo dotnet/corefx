@@ -364,6 +364,25 @@ namespace System.Collections.Immutable.Tests
             Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
+        [Fact]
+        public void ItemRef()
+        {
+            var list = new[] { 1, 2, 3 }.ToImmutableList();
+            var builder = new ImmutableList<int>.Builder(list);
+
+            ref readonly var itemRef = ref builder.ItemRef(1);
+            Assert.Equal(2, itemRef);
+        }
+
+        [Fact]
+        public void ItemRef_OutOfBounds()
+        {
+            var list = new[] { 1, 2, 3 }.ToImmutableList();
+            var builder = new ImmutableList<int>.Builder(list);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder.ItemRef(5));
+        }
+
         protected override IEnumerable<T> GetEnumerableOf<T>(params T[] contents)
         {
             return ImmutableList<T>.Empty.AddRange(contents).ToBuilder();
