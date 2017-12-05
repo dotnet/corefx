@@ -539,7 +539,7 @@ namespace System.Security.Cryptography.Asn1
             {
                 char c = chars[i];
 
-                if ((uint)c > (uint)_isAllowed.Length || !_isAllowed[c])
+                if ((uint)c >= (uint)_isAllowed.Length || !_isAllowed[c])
                 {
                     EncoderFallback.CreateFallbackBuffer().Fallback(c, i);
 
@@ -567,7 +567,7 @@ namespace System.Security.Cryptography.Asn1
             {
                 byte b = bytes[i];
 
-                if ((uint)b > (uint)_isAllowed.Length || !_isAllowed[b])
+                if ((uint)b >= (uint)_isAllowed.Length || !_isAllowed[b])
                 {
                     DecoderFallback.CreateFallbackBuffer().Fallback(
                         new[] { b },

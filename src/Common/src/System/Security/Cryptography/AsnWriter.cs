@@ -57,14 +57,7 @@ namespace System.Security.Cryptography.Asn1
                 const int BlockSize = 1024;
                 // While the ArrayPool may have similar logic, make sure we don't run into a lot of
                 // "grow a little" by asking in 1k steps.
-                int inflatedBytes = _offset + pendingCount + (BlockSize - 1);
-
-                if (inflatedBytes < 0)
-                {
-                    throw new OverflowException();
-                }
-
-                int blocks = inflatedBytes / BlockSize;
+                int blocks = checked(_offset + pendingCount + (BlockSize - 1)) / BlockSize;
                 byte[] newBytes = ArrayPool<byte>.Shared.Rent(BlockSize * blocks);
 
                 if (_buffer != null)

@@ -2115,7 +2115,7 @@ namespace System.Security.Cryptography.Asn1
             return new AsnReader(contents, _ruleSet);
         }
 
-        private static int ParseNonNegativeIntAndShift(ref ReadOnlySpan<byte> data, int bytesToRead)
+        private static int ParseNonNegativeIntAndSlice(ref ReadOnlySpan<byte> data, int bytesToRead)
         {
             int value = ParseNonNegativeInt(Slice(data, 0, bytesToRead));
             data = data.Slice(bytesToRead);
@@ -2136,6 +2136,12 @@ namespace System.Security.Cryptography.Asn1
         private static DateTimeOffset ParseUtcTime(ReadOnlySpan<byte> contentOctets, int twoDigitYearMax)
         {
             // The full allowed formats (T-REC-X.680-201510 sec 47.3)
+            // a) YYMMDD
+            // b1) hhmm
+            // b2) hhmmss
+            // c1) Z
+            // c2) {+|-}hhmm
+            //
             // YYMMDDhhmmZ  (a, b1, c1)
             // YYMMDDhhmm+hhmm (a, b1, c2+)
             // YYMMDDhhmm-hhmm (a, b1, c2-)
@@ -2143,15 +2149,15 @@ namespace System.Security.Cryptography.Asn1
             // YYMMDDhhmmss+hhmm (a, b2, c2+)
             // YYMMDDhhmmss-hhmm (a, b2, c2-)
 
-            const int AB1C1Length = 11;
-            const int AB1C2Length = AB1C1Length + 4;
-            const int AB2C1Length = AB1C1Length + 2;
-            const int AB2C2Length = AB2C1Length + 4;
+            const int NoSecondsZulu = 11;
+            const int NoSecondsOffset = 15;
+            const int HasSecondsZulu = 13;
+            const int HasSecondsOffset = 17;
 
             // 11, 13, 15, 17 are legal.
             // Range check + odd.
-            if (contentOctets.Length < AB1C1Length ||
-                contentOctets.Length > AB2C2Length ||
+            if (contentOctets.Length < NoSecondsZulu ||
+                contentOctets.Length > HasSecondsOffset ||
                 (contentOctets.Length & 1) != 1)
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
@@ -2159,25 +2165,36 @@ namespace System.Security.Cryptography.Asn1
 
             ReadOnlySpan<byte> contents = contentOctets;
 
-            int year = ParseNonNegativeIntAndShift(ref contents, 2);
-            int month = ParseNonNegativeIntAndShift(ref contents, 2);
-            int day = ParseNonNegativeIntAndShift(ref contents, 2);
-            int hour = ParseNonNegativeIntAndShift(ref contents, 2);
-            int minute = ParseNonNegativeIntAndShift(ref contents, 2);
+            int year = ParseNonNegativeIntAndSlice(ref contents, 2);
+            int month = ParseNonNegativeIntAndSlice(ref contents, 2);
+            int day = ParseNonNegativeIntAndSlice(ref contents, 2);
+            int hour = ParseNonNegativeIntAndSlice(ref contents, 2);
+            int minute = ParseNonNegativeIntAndSlice(ref contents, 2);
             int second = 0;
             int offsetHour = 0;
             int offsetMinute = 0;
             bool minus = false;
 
-            if (contentOctets.Length == AB1C1Length)
+            if (contentOctets.Length == HasSecondsOffset ||
+                contentOctets.Length == HasSecondsZulu)
+            {
+                second = ParseNonNegativeIntAndSlice(ref contents, 2);
+            }
+
+            if (contentOctets.Length == NoSecondsZulu ||
+                contentOctets.Length == HasSecondsZulu)
             {
                 if (contents[0] != 'Z')
                 {
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
             }
-            else if (contentOctets.Length == AB1C2Length)
+            else
             {
+                Debug.Assert(
+                    contentOctets.Length == NoSecondsOffset ||
+                    contentOctets.Length == HasSecondsOffset);
+
                 if (contents[0] == '-')
                 {
                     minus = true;
@@ -2188,39 +2205,9 @@ namespace System.Security.Cryptography.Asn1
                 }
 
                 contents = contents.Slice(1);
-                offsetHour = ParseNonNegativeIntAndShift(ref contents, 2);
-                offsetMinute = ParseNonNegativeIntAndShift(ref contents, 2);
+                offsetHour = ParseNonNegativeIntAndSlice(ref contents, 2);
+                offsetMinute = ParseNonNegativeIntAndSlice(ref contents, 2);
                 Debug.Assert(contents.IsEmpty);
-            }
-            else
-            {
-                second = ParseNonNegativeIntAndShift(ref contents, 2);
-
-                if (contentOctets.Length == AB2C1Length)
-                {
-                    if (contents[0] != 'Z')
-                    {
-                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                    }
-                }
-                else
-                {
-                    Debug.Assert(contentOctets.Length == AB2C2Length);
-
-                    if (contents[0] == '-')
-                    {
-                        minus = true;
-                    }
-                    else if (contents[0] != '+')
-                    {
-                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                    }
-
-                    contents = contents.Slice(1);
-                    offsetHour = ParseNonNegativeIntAndShift(ref contents, 2);
-                    offsetMinute = ParseNonNegativeIntAndShift(ref contents, 2);
-                    Debug.Assert(contents.IsEmpty);
-                }
             }
 
             TimeSpan offset = new TimeSpan(offsetHour, offsetMinute, 0);
@@ -2230,8 +2217,24 @@ namespace System.Security.Cryptography.Asn1
                 offset = TimeSpan.Zero - offset;
             }
 
-            int y = year % 100;
-            int scaledYear = ((twoDigitYearMax / 100 - (y > twoDigitYearMax % 100 ? 1 : 0)) * 100 + y);
+            // Apply the twoDigitYearMax value.
+            // Example: year=50, TDYM=2049
+            //  century = 20
+            //  year > 49 => century = 19
+            //  scaledYear = 1900 + 50 = 1950
+            //
+            // Example: year=49, TDYM=2049
+            //  century = 20
+            //  year is not > 49 => century = 20
+            //  scaledYear = 2000 + 49 = 2049
+            int century = twoDigitYearMax / 100;
+
+            if (year > twoDigitYearMax % 100)
+            {
+                century--;
+            }
+
+            int scaledYear = century * 100 + year;
 
             try
             {
@@ -2383,10 +2386,10 @@ namespace System.Security.Cryptography.Asn1
 
             ReadOnlySpan<byte> contents = contentOctets;
 
-            int year = ParseNonNegativeIntAndShift(ref contents, 4);
-            int month = ParseNonNegativeIntAndShift(ref contents, 2);
-            int day = ParseNonNegativeIntAndShift(ref contents, 2);
-            int hour = ParseNonNegativeIntAndShift(ref contents, 2);
+            int year = ParseNonNegativeIntAndSlice(ref contents, 4);
+            int month = ParseNonNegativeIntAndSlice(ref contents, 2);
+            int day = ParseNonNegativeIntAndSlice(ref contents, 2);
+            int hour = ParseNonNegativeIntAndSlice(ref contents, 2);
             int? minute = null;
             int? second = null;
             ulong fraction = 0;
@@ -2414,7 +2417,7 @@ namespace System.Security.Cryptography.Asn1
                 }
                 else
                 {
-                    minute = ParseNonNegativeIntAndShift(ref contents, 2);
+                    minute = ParseNonNegativeIntAndSlice(ref contents, 2);
                 }
             }
 
@@ -2432,7 +2435,7 @@ namespace System.Security.Cryptography.Asn1
                 }
                 else
                 {
-                    second = ParseNonNegativeIntAndShift(ref contents, 2);
+                    second = ParseNonNegativeIntAndSlice(ref contents, 2);
                 }
             }
 
@@ -2567,7 +2570,7 @@ namespace System.Security.Cryptography.Asn1
                         throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                     }
 
-                    int offsetHour = ParseNonNegativeIntAndShift(ref contents, 2);
+                    int offsetHour = ParseNonNegativeIntAndSlice(ref contents, 2);
                     int offsetMinute = 0;
 
                     if (!contents.IsEmpty)
@@ -2580,7 +2583,7 @@ namespace System.Security.Cryptography.Asn1
 
                     if (!contents.IsEmpty)
                     {
-                        offsetMinute = ParseNonNegativeIntAndShift(ref contents, 2);
+                        offsetMinute = ParseNonNegativeIntAndSlice(ref contents, 2);
                     }
 
                     TimeSpan tmp = new TimeSpan(offsetHour, offsetMinute, 0);
