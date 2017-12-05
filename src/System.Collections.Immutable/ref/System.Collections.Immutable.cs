@@ -101,6 +101,7 @@ namespace System.Collections.Immutable
         public bool IsDefaultOrEmpty { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public T this[int index] { get { throw null; } }
+        public ref readonly T ItemRef(int index) { throw null; }
         public int Length { get { throw null; } }
         int System.Collections.Generic.ICollection<T>.Count { get { throw null; } }
         bool System.Collections.Generic.ICollection<T>.IsReadOnly { get { throw null; } }
@@ -198,6 +199,7 @@ namespace System.Collections.Immutable
             public int Capacity { get { throw null; } set { } }
             public int Count { get { throw null; } set { } }
             public T this[int index] { get { throw null; } set { } }
+            public ref readonly T ItemRef(int index) { throw null; }
             bool System.Collections.Generic.ICollection<T>.IsReadOnly { get { throw null; } }
             public void Add(T item) { }
             public void AddRange(System.Collections.Generic.IEnumerable<T> items) { }
@@ -868,6 +870,7 @@ namespace System.Collections.Immutable
         public int Count { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public T this[int index] { get { throw null; } }
+        public ref readonly T ItemRef(int index) { throw null; }
         public System.Collections.Generic.IComparer<T> KeyComparer { get { throw null; } }
         public T Max { get { throw null; } }
         public T Min { get { throw null; } }
@@ -931,6 +934,7 @@ namespace System.Collections.Immutable
             internal Builder() { }
             public int Count { get { throw null; } }
             public T this[int index] { get { throw null; } }
+            public ref readonly T ItemRef(int index) { throw null; }
             public System.Collections.Generic.IComparer<T> KeyComparer { get { throw null; } set { } }
             public T Max { get { throw null; } }
             public T Min { get { throw null; } }

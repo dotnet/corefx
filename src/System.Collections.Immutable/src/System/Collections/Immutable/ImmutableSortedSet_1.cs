@@ -150,8 +150,18 @@ namespace System.Collections.Immutable
         {
             get
             {
-                return _root[index];
+                return _root.ItemRef(index);
             }
+        }
+
+        /// <summary>
+        /// Gets a read-only reference of the element of the set at the given index.
+        /// </summary>
+        /// <param name="index">The 0-based index of the element in the set to return.</param>
+        /// <returns>A read-only reference of the element at the given position.</returns>
+        public ref readonly T ItemRef(int index)
+        {
+            return ref _root.ItemRef(index);
         }
 
         #endregion

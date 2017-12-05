@@ -375,5 +375,24 @@ namespace System.Collections.Immutable.Tests
             TargetInvocationException tie = Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(proxyType, (object)null));
             Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
+
+        [Fact]
+        public void ItemRef()
+        {
+            var array = new[] { 1, 2, 3 }.ToImmutableSortedSet();
+            var builder = new ImmutableSortedSet<int>.Builder(array);
+
+            ref readonly var itemRef = ref builder.ItemRef(1);
+            Assert.Equal(2, itemRef);
+        }
+
+        [Fact]
+        public void ItemRef_OutOfBounds()
+        {
+            var array = new[] { 1, 2, 3 }.ToImmutableSortedSet();
+            var builder = new ImmutableSortedSet<int>.Builder(array);
+
+            Assert.Throws<ArgumentOutOfRangeException> (() => builder.ItemRef(5));
+        }
     }
 }

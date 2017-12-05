@@ -407,6 +407,23 @@ namespace System.Collections.Immutable.Tests
             CollectionAssertAreEquivalent(expectedSet.ToList(), actualSet.ToList());
         }
 
+        [Fact]
+        public void ItemRef()
+        {
+            var array = new[] { 1, 2, 3 }.ToImmutableSortedSet();
+
+            ref readonly var itemRef = ref array.ItemRef(1);
+            Assert.Equal(2, itemRef);
+        }
+
+        [Fact]
+        public void ItemRef_OutOfBounds()
+        {
+            var array = new[] { 1, 2, 3 }.ToImmutableSortedSet();
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => array.ItemRef(5));
+        }
+
         protected override IImmutableSet<T> Empty<T>()
         {
             return ImmutableSortedSet<T>.Empty;

@@ -726,6 +726,29 @@ namespace System.Collections.Immutable.Tests
             Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
+        [Fact]
+        public void ItemRef()
+        {
+            var builder = new ImmutableArray<int>.Builder();
+            builder.Add(1);
+            builder.Add(2);
+            builder.Add(3);
+
+            ref readonly var itemRef = ref builder.ItemRef(1);
+            Assert.Equal(2, itemRef);
+        }
+
+        [Fact]
+        public void ItemRef_OutOfBounds()
+        {
+            var builder = new ImmutableArray<int>.Builder();
+            builder.Add(1);
+            builder.Add(2);
+            builder.Add(3);
+
+            Assert.Throws<IndexOutOfRangeException>(() => builder.ItemRef(5));
+        }
+
         private static ImmutableArray<T>.Builder CreateBuilderWithCount<T>(int count)
         {
             var builder = ImmutableArray.CreateBuilder<T>(count);
