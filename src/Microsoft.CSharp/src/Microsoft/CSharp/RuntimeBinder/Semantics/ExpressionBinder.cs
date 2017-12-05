@@ -1585,15 +1585,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 Debug.Assert(arg != null);
+                Debug.Assert(arg.Type != null);
 
-                if (arg.Type != null)
-                {
-                    prgtype[iarg] = arg.Type;
-                }
-                else
-                {
-                    prgtype[iarg] = GetTypes().GetErrorSym();
-                }
+                prgtype[iarg] = arg.Type;
                 argInfo.prgexpr.Add(arg);
             }
 
