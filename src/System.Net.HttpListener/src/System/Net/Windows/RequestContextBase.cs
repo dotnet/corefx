@@ -134,9 +134,10 @@ namespace System.Net
             _backingBufferLength = size;
 
             // Zero out the contents of the buffer.
-            for(int i = 0; i < size; ++i)
+            byte* buffer = (byte*)_backingBuffer;
+            for (int i = 0; i < size; i++)
             {
-                Marshal.WriteByte(_backingBuffer + i, 0);
+                buffer[i] = 0;
             }
         }
     }
