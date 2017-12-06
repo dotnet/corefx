@@ -1445,12 +1445,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             int indexOfLast = arguments.Length - 1;
             Expr rhs = CreateArgumentEXPR(arguments[indexOfLast], locals[indexOfLast]);
-
-            if (arguments[0].Type == null)
-            {
-                throw Error.BindBinaryAssignmentFailedNullReference();
-            }
-
             return _binder.BindAssignment(lhs, rhs, bIsCompound);
         }
         #endregion
