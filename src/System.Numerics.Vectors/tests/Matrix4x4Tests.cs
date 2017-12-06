@@ -138,6 +138,17 @@ namespace System.Numerics.Tests
             // Make sure M*M is identity matrix
             Matrix4x4 i = mtx * actual;
             Assert.True(MathHelper.Equal(i, Matrix4x4.Identity), "Matrix4x4.Invert did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            bool succeeded;
+            Matrix4x4.Invert(in mtx, out succeeded, out actual);
+            Assert.True(succeeded, "Inversion should have succeeded.");
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.Invert did not return the expected value.");
+
+            // Make sure M*M is identity matrix
+            Matrix4x4.Multiply(in mtx, in actual, out i);
+            Assert.True(MathHelper.Equal(i, Matrix4x4.Identity), "Matrix4x4.Invert did not return the expected value.");
+#endif
         }
 
         // A test for Invert (Matrix4x4)
@@ -148,8 +159,14 @@ namespace System.Numerics.Tests
 
             Matrix4x4 actual;
             Assert.True(Matrix4x4.Invert(mtx, out actual));
-
             Assert.True(MathHelper.Equal(actual, Matrix4x4.Identity));
+
+#if FEATURE_REF_OVERLOADS
+            bool succeeded;
+            Matrix4x4.Invert(in mtx, out succeeded, out actual);
+            Assert.True(succeeded, "Inversion should have succeeded.");
+            Assert.True(MathHelper.Equal(actual, Matrix4x4.Identity));
+#endif
         }
 
         // A test for Invert (Matrix4x4)
@@ -160,9 +177,16 @@ namespace System.Numerics.Tests
 
             Matrix4x4 actual;
             Assert.True(Matrix4x4.Invert(mtx, out actual));
-
             Matrix4x4 i = mtx * actual;
             Assert.True(MathHelper.Equal(i, Matrix4x4.Identity));
+
+#if FEATURE_REF_OVERLOADS
+            bool succeeded;
+            Matrix4x4.Invert(in mtx, out succeeded, out actual);
+            Assert.True(succeeded);
+            Matrix4x4.Multiply(in mtx, in actual, out i);
+            Assert.True(MathHelper.Equal(i, Matrix4x4.Identity));
+#endif
         }
 
         // A test for Invert (Matrix4x4)
@@ -173,9 +197,16 @@ namespace System.Numerics.Tests
 
             Matrix4x4 actual;
             Assert.True(Matrix4x4.Invert(mtx, out actual));
-
             Matrix4x4 i = mtx * actual;
             Assert.True(MathHelper.Equal(i, Matrix4x4.Identity));
+
+#if FEATURE_REF_OVERLOADS
+            bool succeeded;
+            Matrix4x4.Invert(in mtx, out succeeded, out actual);
+            Assert.True(succeeded, "Inversion should have succeeded.");
+            Matrix4x4.Multiply(in mtx, in actual, out i);
+            Assert.True(MathHelper.Equal(i, Matrix4x4.Identity));
+#endif
         }
 
         // A test for Invert (Matrix4x4)
@@ -186,9 +217,16 @@ namespace System.Numerics.Tests
 
             Matrix4x4 actual;
             Assert.True(Matrix4x4.Invert(mtx, out actual));
-
             Matrix4x4 i = mtx * actual;
             Assert.True(MathHelper.Equal(i, Matrix4x4.Identity));
+
+#if FEATURE_REF_OVERLOADS
+            bool succeeded;
+            Matrix4x4.Invert(in mtx, out succeeded, out actual);
+            Assert.True(succeeded, "Inversion should have succeeded.");
+            Matrix4x4.Multiply(in mtx, in actual, out i);
+            Assert.True(MathHelper.Equal(i, Matrix4x4.Identity));
+#endif
         }
 
         // A test for Invert (Matrix4x4)
@@ -199,9 +237,16 @@ namespace System.Numerics.Tests
 
             Matrix4x4 actual;
             Assert.True(Matrix4x4.Invert(mtx, out actual));
-
             Matrix4x4 i = mtx * actual;
             Assert.True(MathHelper.Equal(i, Matrix4x4.Identity));
+
+#if FEATURE_REF_OVERLOADS
+            bool succeeded;
+            Matrix4x4.Invert(in mtx, out succeeded, out actual);
+            Assert.True(succeeded, "Inversion should have succeeded.");
+            Matrix4x4.Multiply(in mtx, in actual, out i);
+            Assert.True(MathHelper.Equal(i, Matrix4x4.Identity));
+#endif
         }
 
         // A test for Invert (Matrix4x4)
@@ -214,12 +259,27 @@ namespace System.Numerics.Tests
 
             Matrix4x4 actual;
             Assert.True(Matrix4x4.Invert(mtx, out actual));
-
             Matrix4x4 i = mtx * actual;
             Assert.True(MathHelper.Equal(i, Matrix4x4.Identity));
+
+#if FEATURE_REF_OVERLOADS
+            bool succeeded;
+            Matrix4x4.Invert(in mtx, out succeeded, out actual);
+            Assert.True(succeeded, "Inversion should have succeeded.");
+            Matrix4x4.Multiply(in mtx, in actual, out i);
+            Assert.True(MathHelper.Equal(i, Matrix4x4.Identity));
+#endif
         }
 
         void DecomposeTest(float yaw, float pitch, float roll, Vector3 expectedTranslation, Vector3 expectedScales)
+        {
+#if FEATURE_REF_OVERLOADS
+            DecomposeTest(yaw, pitch, roll, expectedTranslation, expectedScales, byRef: true);
+#endif
+            DecomposeTest(yaw, pitch, roll, expectedTranslation, expectedScales, byRef: false);
+        }
+
+        void DecomposeTest(float yaw, float pitch, float roll, Vector3 expectedTranslation, Vector3 expectedScales, bool byRef)
         {
             Quaternion expectedRotation = Quaternion.CreateFromYawPitchRoll(MathHelper.ToRadians(yaw),
                                                                             MathHelper.ToRadians(pitch),
@@ -233,7 +293,20 @@ namespace System.Numerics.Tests
             Quaternion rotation;
             Vector3 translation;
 
-            bool actualResult = Matrix4x4.Decompose(m, out scales, out rotation, out translation);
+            bool actualResult;
+            if (!byRef)
+            {
+                actualResult = Matrix4x4.Decompose(m, out scales, out rotation, out translation);
+            }
+            else
+            {
+#if FEATURE_REF_OVERLOADS
+                Matrix4x4.Decompose(in m, out actualResult, out scales, out rotation, out translation);
+#else
+                throw new NotSupportedException("byRef overloads are not supported on this platform");
+#endif
+            }
+
             Assert.True(actualResult, "Matrix4x4.Decompose did not return expected value.");
 
             bool scaleIsZeroOrNegative = expectedScales.X <= 0 ||
@@ -332,6 +405,14 @@ namespace System.Numerics.Tests
             Assert.True(MathHelper.Equal(expectedScales, scales), "Matrix4x4.Decompose did not return expected value.");
             Assert.True(MathHelper.EqualRotation(Quaternion.Identity, rotation), "Matrix4x4.Decompose did not return expected value.");
             Assert.True(MathHelper.Equal(Vector3.Zero, translation), "Matrix4x4.Decompose did not return expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.Decompose(in m, out actualResult, out scales, out rotation, out translation);
+            Assert.True(actualResult, "Matrix4x4.Decompose did not return expected value.");
+            Assert.True(MathHelper.Equal(expectedScales, scales), "Matrix4x4.Decompose did not return expected value.");
+            Assert.True(MathHelper.EqualRotation(Quaternion.Identity, rotation), "Matrix4x4.Decompose did not return expected value.");
+            Assert.True(MathHelper.Equal(Vector3.Zero, translation), "Matrix4x4.Decompose did not return expected value.");
+#endif
         }
 
         // Tiny scale decompose test.
@@ -355,6 +436,17 @@ namespace System.Numerics.Tests
 
             Assert.False(Matrix4x4.Decompose(GenerateMatrixNumberFrom1To16(), out scales, out rotation, out translation), "decompose should have failed.");
             Assert.False(Matrix4x4.Decompose(new Matrix4x4(Matrix3x2.CreateSkew(1, 2)), out scales, out rotation, out translation), "decompose should have failed.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4 testMat = GenerateMatrixNumberFrom1To16();
+            bool succeeded;
+            Matrix4x4.Decompose(in testMat, out succeeded, out scales, out rotation, out translation);
+            Assert.False(succeeded, "decompose should have failed.");
+            Matrix3x2 skew3x2 = Matrix3x2.CreateSkew(1, 2);
+            Matrix4x4 skew4x4 = new Matrix4x4(skew3x2);
+            Matrix4x4.Decompose(in skew4x4, out succeeded, out scales, out rotation, out translation);
+            Assert.False(succeeded, "decompose should have failed.");
+#endif
         }
 
         // Transform by quaternion test
@@ -374,6 +466,11 @@ namespace System.Numerics.Tests
             Matrix4x4 actual;
             actual = Matrix4x4.Transform(target, q);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.Transform did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.Transform(in target, in q, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.Transform did not return the expected value.");
+#endif
         }
 
         // A test for CreateRotationX (float)
@@ -395,6 +492,11 @@ namespace System.Numerics.Tests
 
             actual = Matrix4x4.CreateRotationX(radians);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateRotationX did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateRotationX(radians, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateRotationX did not return the expected value.");
+#endif
         }
 
         // A test for CreateRotationX (float)
@@ -407,6 +509,11 @@ namespace System.Numerics.Tests
             Matrix4x4 expected = Matrix4x4.Identity;
             Matrix4x4 actual = Matrix4x4.CreateRotationX(radians);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateRotationX did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateRotationX(radians, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateRotationX did not return the expected value.");
+#endif
         }
 
         // A test for CreateRotationX (float, Vector3f)
@@ -414,15 +521,34 @@ namespace System.Numerics.Tests
         public void Matrix4x4CreateRotationXCenterTest()
         {
             float radians = MathHelper.ToRadians(30.0f);
+            Vector3 zero = Vector3.Zero;
             Vector3 center = new Vector3(23, 42, 66);
+            Vector3 negCenter = -center;
 
-            Matrix4x4 rotateAroundZero = Matrix4x4.CreateRotationX(radians, Vector3.Zero);
+            Matrix4x4 rotateAroundZero = Matrix4x4.CreateRotationX(radians, zero);
             Matrix4x4 rotateAroundZeroExpected = Matrix4x4.CreateRotationX(radians);
             Assert.True(MathHelper.Equal(rotateAroundZero, rotateAroundZeroExpected));
 
             Matrix4x4 rotateAroundCenter = Matrix4x4.CreateRotationX(radians, center);
             Matrix4x4 rotateAroundCenterExpected = Matrix4x4.CreateTranslation(-center) * Matrix4x4.CreateRotationX(radians) * Matrix4x4.CreateTranslation(center);
             Assert.True(MathHelper.Equal(rotateAroundCenter, rotateAroundCenterExpected));
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateRotationX(radians, in zero, out rotateAroundZero);
+            Matrix4x4.CreateRotationX(radians, out rotateAroundZeroExpected);
+            Assert.True(MathHelper.Equal(rotateAroundZero, rotateAroundZeroExpected));
+
+            Matrix4x4.CreateRotationX(radians, in center, out rotateAroundCenter);
+
+            Matrix4x4 negTranslation, rotation, translation;
+            Matrix4x4.CreateTranslation(in negCenter, out negTranslation);
+            Matrix4x4.CreateRotationX(radians, out rotation);
+            Matrix4x4.CreateTranslation(in center, out translation);
+            Matrix4x4.Multiply(in negTranslation, in rotateAroundZero, out rotateAroundCenterExpected);
+            Matrix4x4.Multiply(in rotateAroundCenterExpected, in translation, out rotateAroundCenterExpected);
+
+            Assert.True(MathHelper.Equal(rotateAroundCenter, rotateAroundCenterExpected));
+#endif
         }
 
         // A test for CreateRotationY (float)
@@ -443,6 +569,11 @@ namespace System.Numerics.Tests
             Matrix4x4 actual;
             actual = Matrix4x4.CreateRotationY(radians);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateRotationY did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateRotationY(radians, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateRotationY did not return the expected value.");
+#endif
         }
 
         // A test for RotationY (float)
@@ -463,6 +594,11 @@ namespace System.Numerics.Tests
 
             Matrix4x4 actual = Matrix4x4.CreateRotationY(radians);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateRotationY did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateRotationY(radians, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateRotationY did not return the expected value.");
+#endif
         }
 
         // A test for CreateRotationY (float, Vector3f)
@@ -470,7 +606,9 @@ namespace System.Numerics.Tests
         public void Matrix4x4CreateRotationYCenterTest()
         {
             float radians = MathHelper.ToRadians(30.0f);
+            Vector3 zero = Vector3.Zero;
             Vector3 center = new Vector3(23, 42, 66);
+            Vector3 negCenter = -center;
 
             Matrix4x4 rotateAroundZero = Matrix4x4.CreateRotationY(radians, Vector3.Zero);
             Matrix4x4 rotateAroundZeroExpected = Matrix4x4.CreateRotationY(radians);
@@ -479,6 +617,23 @@ namespace System.Numerics.Tests
             Matrix4x4 rotateAroundCenter = Matrix4x4.CreateRotationY(radians, center);
             Matrix4x4 rotateAroundCenterExpected = Matrix4x4.CreateTranslation(-center) * Matrix4x4.CreateRotationY(radians) * Matrix4x4.CreateTranslation(center);
             Assert.True(MathHelper.Equal(rotateAroundCenter, rotateAroundCenterExpected));
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateRotationY(radians, in zero, out rotateAroundZero);
+            Matrix4x4.CreateRotationY(radians, out rotateAroundZeroExpected);
+            Assert.True(MathHelper.Equal(rotateAroundZero, rotateAroundZeroExpected));
+
+            Matrix4x4.CreateRotationY(radians, in center, out rotateAroundCenter);
+
+            Matrix4x4 negTranslation, rotation, translation;
+            Matrix4x4.CreateTranslation(in negCenter, out negTranslation);
+            Matrix4x4.CreateRotationY(radians, out rotation);
+            Matrix4x4.CreateTranslation(in center, out translation);
+            Matrix4x4.Multiply(in negTranslation, in rotateAroundZero, out rotateAroundCenterExpected);
+            Matrix4x4.Multiply(in rotateAroundCenterExpected, in translation, out rotateAroundCenterExpected);
+
+            Assert.True(MathHelper.Equal(rotateAroundCenter, rotateAroundCenterExpected));
+#endif
         }
 
         // A test for CreateFromAxisAngle(Vector3f,float)
@@ -486,22 +641,46 @@ namespace System.Numerics.Tests
         public void Matrix4x4CreateFromAxisAngleTest()
         {
             float radians = MathHelper.ToRadians(-30.0f);
+            Vector3 unitX = Vector3.UnitX;
+            Vector3 unitY = Vector3.UnitY;
+            Vector3 unitZ = Vector3.UnitZ;
+            Vector3 normalizedOne = Vector3.Normalize(Vector3.One);
 
             Matrix4x4 expected = Matrix4x4.CreateRotationX(radians);
             Matrix4x4 actual = Matrix4x4.CreateFromAxisAngle(Vector3.UnitX, radians);
             Assert.True(MathHelper.Equal(expected, actual));
 
-            expected = Matrix4x4.CreateRotationY(radians);
-            actual = Matrix4x4.CreateFromAxisAngle(Vector3.UnitY, radians);
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateFromAxisAngle(in unitX, radians, out actual);
             Assert.True(MathHelper.Equal(expected, actual));
+#endif
+
+            expected = Matrix4x4.CreateRotationY(radians);
+            actual = Matrix4x4.CreateFromAxisAngle(unitY, radians);
+            Assert.True(MathHelper.Equal(expected, actual));
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateFromAxisAngle(in unitY, radians, out actual);
+            Assert.True(MathHelper.Equal(expected, actual));
+#endif
 
             expected = Matrix4x4.CreateRotationZ(radians);
-            actual = Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, radians);
+            actual = Matrix4x4.CreateFromAxisAngle(unitZ, radians);
             Assert.True(MathHelper.Equal(expected, actual));
 
-            expected = Matrix4x4.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.Normalize(Vector3.One), radians));
-            actual = Matrix4x4.CreateFromAxisAngle(Vector3.Normalize(Vector3.One), radians);
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateFromAxisAngle(in unitZ, radians, out actual);
             Assert.True(MathHelper.Equal(expected, actual));
+#endif
+
+            expected = Matrix4x4.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.Normalize(Vector3.One), radians));
+            actual = Matrix4x4.CreateFromAxisAngle(normalizedOne, radians);
+            Assert.True(MathHelper.Equal(expected, actual));
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateFromAxisAngle(in normalizedOne, radians, out actual);
+            Assert.True(MathHelper.Equal(expected, actual));
+#endif
 
             const int rotCount = 16;
             for (int i = 0; i < rotCount; ++i)
@@ -519,6 +698,11 @@ namespace System.Numerics.Tests
                         expected = Matrix4x4.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(axis, rot));
                         actual = Matrix4x4.CreateFromAxisAngle(axis, rot);
                         Assert.True(MathHelper.Equal(expected, actual));
+
+#if FEATURE_REF_OVERLOADS
+                        Matrix4x4.CreateFromAxisAngle(in axis, rot, out actual);
+                        Assert.True(MathHelper.Equal(expected, actual));
+#endif
                     }
                 }
             }
@@ -540,7 +724,7 @@ namespace System.Numerics.Tests
             Assert.True(MathHelper.Equal(expected, actual));
         }
 
-        // Covers more numeric rigions
+        // Covers more numeric regions
         [Fact]
         public void Matrix4x4CreateFromYawPitchRollTest2()
         {
@@ -562,6 +746,11 @@ namespace System.Numerics.Tests
                         Matrix4x4 expected = roll * pitch * yaw;
                         Matrix4x4 actual = Matrix4x4.CreateFromYawPitchRoll(yawRad, pitchRad, rollRad);
                         Assert.True(MathHelper.Equal(expected, actual), String.Format("Yaw:{0} Pitch:{1} Roll:{2}", yawAngle, pitchAngle, rollAngle));
+
+#if FEATURE_REF_OVERLOADS
+                        Matrix4x4.CreateFromYawPitchRoll(yawRad, pitchRad, rollRad, out actual);
+                        Assert.True(MathHelper.Equal(expected, actual), String.Format("Yaw:{0} Pitch:{1} Roll:{2}", yawAngle, pitchAngle, rollAngle));
+#endif
                     }
                 }
             }
@@ -578,6 +767,11 @@ namespace System.Numerics.Tests
 
             Matrix4x4 actual = Matrix4x4.CreateShadow(lightDir, plane);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateShadow did not returned expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateShadow(in lightDir, in plane, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateShadow did not returned expected value.");
+#endif
         }
 
         // Various plane projections.
@@ -649,28 +843,48 @@ namespace System.Numerics.Tests
                     if (Plane.DotNormal(plane, lightDir) < 0.1f)
                         continue;
 
-                    Matrix4x4 m = Matrix4x4.CreateShadow(lightDir, plane);
-                    Vector3 pp = -plane.D * plane.Normal; // origin of the plane.
+                    RunCreateShadowTestCases(points, plane, lightDir, byRef: false);
+#if FEATURE_REF_OVERLOADS
+                    RunCreateShadowTestCases(points, plane, lightDir, byRef: true);
+#endif
+                }
+            }
+        }
 
-                    //
-                    foreach (Vector3 point in points)
-                    {
-                        Vector4 v4 = Vector4.Transform(point, m);
+        private static void RunCreateShadowTestCases(Vector3[] points, Plane plane, Vector3 lightDir, bool byRef)
+        {
+            Matrix4x4 m;
+            if (!byRef)
+            {
+                m = Matrix4x4.CreateShadow(lightDir, plane);
+            }
+            else
+            {
+#if FEATURE_REF_OVERLOADS
+                Matrix4x4.CreateShadow(in lightDir, in plane, out m);
+#else
+                throw new NotSupportedException("byRef overloads are not supported on this platform");
+#endif
+            }
 
-                        Vector3 sp = new Vector3(v4.X, v4.Y, v4.Z) / v4.W;
+            Vector3 pp = -plane.D * plane.Normal; // origin of the plane.
 
-                        // Make sure transformed position is on the plane.
-                        Vector3 v = sp - pp;
-                        float d = Vector3.Dot(v, plane.Normal);
-                        Assert.True(MathHelper.Equal(d, 0), "Matrix4x4.CreateShadow did not provide expected value.");
+            foreach (Vector3 point in points)
+            {
+                Vector4 v4 = Vector4.Transform(point, m);
 
-                        // make sure direction between transformed position and original position are same as light direction.
-                        if (Vector3.Dot(point - pp, plane.Normal) > 0.0001f)
-                        {
-                            Vector3 dir = Vector3.Normalize(point - sp);
-                            Assert.True(MathHelper.Equal(dir, lightDir), "Matrix4x4.CreateShadow did not provide expected value.");
-                        }
-                    }
+                Vector3 sp = new Vector3(v4.X, v4.Y, v4.Z) / v4.W;
+
+                // Make sure transformed position is on the plane.
+                Vector3 v = sp - pp;
+                float d = Vector3.Dot(v, plane.Normal);
+                Assert.True(MathHelper.Equal(d, 0), "Matrix4x4.CreateShadow did not provide expected value.");
+
+                // make sure direction between transformed position and original position are same as light direction.
+                if (Vector3.Dot(point - pp, plane.Normal) > 0.0001f)
+                {
+                    Vector3 dir = Vector3.Normalize(point - sp);
+                    Assert.True(MathHelper.Equal(dir, lightDir), "Matrix4x4.CreateShadow did not provide expected value.");
                 }
             }
         }
@@ -679,6 +893,11 @@ namespace System.Numerics.Tests
         {
             Matrix4x4 actual = Matrix4x4.CreateReflection(plane);
             Assert.True(MathHelper.Equal(actual, expected), "Matrix4x4.CreateReflection did not return expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateReflection(in plane, out actual);
+            Assert.True(MathHelper.Equal(actual, expected), "Matrix4x4.CreateReflection did not return expected value.");
+#endif
         }
 
         [Fact]
@@ -710,20 +929,40 @@ namespace System.Numerics.Tests
             foreach (Plane p in planes)
             {
                 Plane plane = Plane.Normalize(p);
-                Matrix4x4 m = Matrix4x4.CreateReflection(plane);
-                Vector3 pp = -plane.D * plane.Normal; // Position on the plane.
+                RunManualCreateReflectionTestCases(points, plane, byRef: false);
+#if FEATURE_REF_OVERLOADS
+                RunManualCreateReflectionTestCases(points, plane, byRef: true);
+#endif
+            }
+        }
 
-                //
-                foreach (Vector3 point in points)
-                {
-                    Vector3 rp = Vector3.Transform(point, m);
+        private static void RunManualCreateReflectionTestCases(Vector3[] points, Plane plane, bool byRef)
+        {
+            Matrix4x4 m;
+            if (!byRef)
+            {
+                m = Matrix4x4.CreateReflection(plane);
+            }
+            else
+            {
+#if FEATURE_REF_OVERLOADS
+                Matrix4x4.CreateReflection(in plane, out m);
+#else
+                throw new NotSupportedException("byRef overloads are not supported on this platform");
+#endif
+            }
+            Vector3 pp = -plane.D * plane.Normal; // Position on the plane.
 
-                    // Manually compute reflection point and compare results.
-                    Vector3 v = point - pp;
-                    float d = Vector3.Dot(v, plane.Normal);
-                    Vector3 vp = point - 2.0f * d * plane.Normal;
-                    Assert.True(MathHelper.Equal(rp, vp), "Matrix4x4.Reflection did not provide expected value.");
-                }
+            //
+            foreach (Vector3 point in points)
+            {
+                Vector3 rp = Vector3.Transform(point, m);
+
+                // Manually compute reflection point and compare results.
+                Vector3 v = point - pp;
+                float d = Vector3.Dot(v, plane.Normal);
+                Vector3 vp = point - 2.0f * d * plane.Normal;
+                Assert.True(MathHelper.Equal(rp, vp), "Matrix4x4.Reflection did not provide expected value.");
             }
         }
 
@@ -744,6 +983,11 @@ namespace System.Numerics.Tests
             Matrix4x4 actual;
             actual = Matrix4x4.CreateRotationZ(radians);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateRotationZ did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateRotationZ(radians, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateRotationZ did not return the expected value.");
+#endif
         }
 
         // A test for CreateRotationZ (float, Vector3f)
@@ -751,7 +995,9 @@ namespace System.Numerics.Tests
         public void Matrix4x4CreateRotationZCenterTest()
         {
             float radians = MathHelper.ToRadians(30.0f);
+            Vector3 zero = Vector3.Zero;
             Vector3 center = new Vector3(23, 42, 66);
+            Vector3 negCenter = -center;
 
             Matrix4x4 rotateAroundZero = Matrix4x4.CreateRotationZ(radians, Vector3.Zero);
             Matrix4x4 rotateAroundZeroExpected = Matrix4x4.CreateRotationZ(radians);
@@ -760,9 +1006,26 @@ namespace System.Numerics.Tests
             Matrix4x4 rotateAroundCenter = Matrix4x4.CreateRotationZ(radians, center);
             Matrix4x4 rotateAroundCenterExpected = Matrix4x4.CreateTranslation(-center) * Matrix4x4.CreateRotationZ(radians) * Matrix4x4.CreateTranslation(center);
             Assert.True(MathHelper.Equal(rotateAroundCenter, rotateAroundCenterExpected));
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateRotationZ(radians, in zero, out rotateAroundZero);
+            Matrix4x4.CreateRotationZ(radians, out rotateAroundZeroExpected);
+            Assert.True(MathHelper.Equal(rotateAroundZero, rotateAroundZeroExpected));
+
+            Matrix4x4.CreateRotationZ(radians, in center, out rotateAroundCenter);
+
+            Matrix4x4 negTranslation, rotation, translation;
+            Matrix4x4.CreateTranslation(in negCenter, out negTranslation);
+            Matrix4x4.CreateRotationY(radians, out rotation);
+            Matrix4x4.CreateTranslation(in center, out translation);
+            Matrix4x4.Multiply(in negTranslation, in rotateAroundZero, out rotateAroundCenterExpected);
+            Matrix4x4.Multiply(in rotateAroundCenterExpected, in translation, out rotateAroundCenterExpected);
+
+            Assert.True(MathHelper.Equal(rotateAroundCenter, rotateAroundCenterExpected));
+#endif
         }
 
-        // A test for CrateLookAt (Vector3f, Vector3f, Vector3f)
+        // A test for CreateLookAt (Vector3f, Vector3f, Vector3f)
         [Fact]
         public void Matrix4x4CreateLookAtTest()
         {
@@ -790,6 +1053,11 @@ namespace System.Numerics.Tests
 
             Matrix4x4 actual = Matrix4x4.CreateLookAt(cameraPosition, cameraTarget, cameraUpVector);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateLookAt did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateLookAt(in cameraPosition, in cameraTarget, in cameraUpVector, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateLookAt did not return the expected value.");
+#endif
         }
 
         // A test for CreateWorld (Vector3f, Vector3f, Vector3f)
@@ -827,6 +1095,15 @@ namespace System.Numerics.Tests
             Assert.Equal(objectPosition, actual.Translation);
             Assert.True(Vector3.Dot(Vector3.Normalize(objectUpVector), new Vector3(actual.M21, actual.M22, actual.M23)) > 0);
             Assert.True(Vector3.Dot(Vector3.Normalize(objectForwardDirection), new Vector3(-actual.M31, -actual.M32, -actual.M33)) > 0.999f);
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateWorld(in objectPosition, in objectForwardDirection, in objectUpVector, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateWorld did not return the expected value.");
+
+            Assert.Equal(objectPosition, actual.Translation);
+            Assert.True(Vector3.Dot(Vector3.Normalize(objectUpVector), new Vector3(actual.M21, actual.M22, actual.M23)) > 0);
+            Assert.True(Vector3.Dot(Vector3.Normalize(objectForwardDirection), new Vector3(-actual.M31, -actual.M32, -actual.M33)) > 0.999f);
+#endif
         }
 
         // A test for CreateOrtho (float, float, float, float)
@@ -848,6 +1125,11 @@ namespace System.Numerics.Tests
             Matrix4x4 actual;
             actual = Matrix4x4.CreateOrthographic(width, height, zNearPlane, zFarPlane);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateOrtho did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateOrthographic(width, height, zNearPlane, zFarPlane, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateOrtho did not return the expected value.");
+#endif
         }
 
         // A test for CreateOrthoOffCenter (float, float, float, float, float, float)
@@ -873,6 +1155,11 @@ namespace System.Numerics.Tests
             Matrix4x4 actual;
             actual = Matrix4x4.CreateOrthographicOffCenter(left, right, bottom, top, zNearPlane, zFarPlane);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateOrthoOffCenter did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateOrthographicOffCenter(left, right, bottom, top, zNearPlane, zFarPlane, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateOrthoOffCenter did not return the expected value.");
+#endif
         }
 
         // A test for CreatePerspective (float, float, float, float)
@@ -894,6 +1181,11 @@ namespace System.Numerics.Tests
             Matrix4x4 actual;
             actual = Matrix4x4.CreatePerspective(width, height, zNearPlane, zFarPlane);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreatePerspective did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreatePerspective(width, height, zNearPlane, zFarPlane, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreatePerspective did not return the expected value.");
+#endif
         }
 
         // A test for CreatePerspective (float, float, float, float)
@@ -910,6 +1202,19 @@ namespace System.Numerics.Tests
 
                 Matrix4x4 actual = Matrix4x4.CreatePerspective(width, height, zNearPlane, zFarPlane);
             });
+
+#if FEATURE_REF_OVERLOADS
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                float width = 100.0f;
+                float height = 200.0f;
+                float zNearPlane = 0.0f;
+                float zFarPlane = 0.0f;
+
+                Matrix4x4 actual;
+                Matrix4x4.CreatePerspective(width, height, zNearPlane, zFarPlane, out actual);
+            });
+#endif
         }
 
         // A test for CreatePerspective (float, float, float, float)
@@ -921,6 +1226,14 @@ namespace System.Numerics.Tests
             {
                 Matrix4x4 actual = Matrix4x4.CreatePerspective(10, 10, -10, 10);
             });
+
+#if FEATURE_REF_OVERLOADS
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                Matrix4x4 actual;
+                Matrix4x4.CreatePerspective(10, 10, -10, 10, out actual);
+            });
+#endif
         }
 
         // A test for CreatePerspective (float, float, float, float)
@@ -932,6 +1245,14 @@ namespace System.Numerics.Tests
             {
                 Matrix4x4 actual = Matrix4x4.CreatePerspective(10, 10, 10, -10);
             });
+
+#if FEATURE_REF_OVERLOADS
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                Matrix4x4 actual;
+                Matrix4x4.CreatePerspective(10, 10, 10, -10, out actual);
+            });
+#endif
         }
 
         // A test for CreatePerspective (float, float, float, float)
@@ -943,6 +1264,14 @@ namespace System.Numerics.Tests
             {
                 Matrix4x4 actual = Matrix4x4.CreatePerspective(10, 10, 10, 1);
             });
+
+#if FEATURE_REF_OVERLOADS
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                Matrix4x4 actual;
+                Matrix4x4.CreatePerspective(10, 10, 10, 1, out actual);
+            });
+#endif
         }
 
         // A test for CreatePerspectiveFieldOfView (float, float, float, float)
@@ -964,6 +1293,11 @@ namespace System.Numerics.Tests
 
             actual = Matrix4x4.CreatePerspectiveFieldOfView(fieldOfView, aspectRatio, zNearPlane, zFarPlane);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreatePerspectiveFieldOfView did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreatePerspectiveFieldOfView(fieldOfView, aspectRatio, zNearPlane, zFarPlane, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreatePerspectiveFieldOfView did not return the expected value.");
+#endif
         }
 
         // A test for CreatePerspectiveFieldOfView (float, float, float, float)
@@ -975,6 +1309,14 @@ namespace System.Numerics.Tests
             {
                 Matrix4x4 mtx = Matrix4x4.CreatePerspectiveFieldOfView(-1, 1, 1, 10);
             });
+
+#if FEATURE_REF_OVERLOADS
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                Matrix4x4 mtx;
+                Matrix4x4.CreatePerspectiveFieldOfView(-1, 1, 1, 10, out mtx);
+            });
+#endif
         }
 
         // A test for CreatePerspectiveFieldOfView (float, float, float, float)
@@ -986,6 +1328,14 @@ namespace System.Numerics.Tests
             {
                 Matrix4x4 mtx = Matrix4x4.CreatePerspectiveFieldOfView(MathHelper.Pi + 0.01f, 1, 1, 10);
             });
+
+#if FEATURE_REF_OVERLOADS
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                Matrix4x4 mtx;
+                Matrix4x4.CreatePerspectiveFieldOfView(MathHelper.Pi + 0.01f, 1, 1, 10, out mtx);
+            });
+#endif
         }
 
         // A test for CreatePerspectiveFieldOfView (float, float, float, float)
@@ -997,6 +1347,14 @@ namespace System.Numerics.Tests
             {
                 Matrix4x4 mtx = Matrix4x4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, 1, -1, 10);
             });
+
+#if FEATURE_REF_OVERLOADS
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                Matrix4x4 mtx;
+                Matrix4x4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, 1, -1, 10, out mtx);
+            });
+#endif
         }
 
         // A test for CreatePerspectiveFieldOfView (float, float, float, float)
@@ -1008,6 +1366,14 @@ namespace System.Numerics.Tests
             {
                 Matrix4x4 mtx = Matrix4x4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, 1, 1, -10);
             });
+
+#if FEATURE_REF_OVERLOADS
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                Matrix4x4 mtx;
+                Matrix4x4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, 1, 1, -10, out mtx);
+            });
+#endif
         }
 
         // A test for CreatePerspectiveFieldOfView (float, float, float, float)
@@ -1019,6 +1385,14 @@ namespace System.Numerics.Tests
             {
                 Matrix4x4 mtx = Matrix4x4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, 1, 10, 1);
             });
+
+#if FEATURE_REF_OVERLOADS
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                Matrix4x4 mtx;
+                Matrix4x4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, 1, 10, 1, out mtx);
+            });
+#endif
         }
 
         // A test for CreatePerspectiveOffCenter (float, float, float, float, float, float)
@@ -1044,6 +1418,11 @@ namespace System.Numerics.Tests
             Matrix4x4 actual;
             actual = Matrix4x4.CreatePerspectiveOffCenter(left, right, bottom, top, zNearPlane, zFarPlane);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreatePerspectiveOffCenter did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreatePerspectiveOffCenter(left, right, bottom, top, zNearPlane, zFarPlane, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreatePerspectiveOffCenter did not return the expected value.");
+#endif
         }
 
         // A test for CreatePerspectiveOffCenter (float, float, float, float, float, float)
@@ -1056,6 +1435,15 @@ namespace System.Numerics.Tests
                 float left = 10.0f, right = 90.0f, bottom = 20.0f, top = 180.0f;
                 Matrix4x4 actual = Matrix4x4.CreatePerspectiveOffCenter(left, right, bottom, top, -1, 10);
             });
+
+#if FEATURE_REF_OVERLOADS
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                float left = 10.0f, right = 90.0f, bottom = 20.0f, top = 180.0f;
+                Matrix4x4 actual;
+                Matrix4x4.CreatePerspectiveOffCenter(left, right, bottom, top, -1, 10, out actual);
+            });
+#endif
         }
 
         // A test for CreatePerspectiveOffCenter (float, float, float, float, float, float)
@@ -1068,6 +1456,15 @@ namespace System.Numerics.Tests
                 float left = 10.0f, right = 90.0f, bottom = 20.0f, top = 180.0f;
                 Matrix4x4 actual = Matrix4x4.CreatePerspectiveOffCenter(left, right, bottom, top, 1, -10);
             });
+
+#if FEATURE_REF_OVERLOADS
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                float left = 10.0f, right = 90.0f, bottom = 20.0f, top = 180.0f;
+                Matrix4x4 actual;
+                Matrix4x4.CreatePerspectiveOffCenter(left, right, bottom, top, 1, -10, out actual);
+            });
+#endif
         }
 
         // A test for CreatePerspectiveOffCenter (float, float, float, float, float, float)
@@ -1080,6 +1477,15 @@ namespace System.Numerics.Tests
                 float left = 10.0f, right = 90.0f, bottom = 20.0f, top = 180.0f;
                 Matrix4x4 actual = Matrix4x4.CreatePerspectiveOffCenter(left, right, bottom, top, 10, 1);
             });
+
+#if FEATURE_REF_OVERLOADS
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                float left = 10.0f, right = 90.0f, bottom = 20.0f, top = 180.0f;
+                Matrix4x4 actual;
+                Matrix4x4.CreatePerspectiveOffCenter(left, right, bottom, top, 10, 1, out actual);
+            });
+#endif
         }
 
         // A test for Invert (Matrix4x4)
@@ -1118,6 +1524,20 @@ namespace System.Numerics.Tests
                 float.IsNaN(actual.M31) && float.IsNaN(actual.M32) && float.IsNaN(actual.M33) && float.IsNaN(actual.M34) &&
                 float.IsNaN(actual.M41) && float.IsNaN(actual.M42) && float.IsNaN(actual.M43) && float.IsNaN(actual.M44)
                 , "Matrix4x4.Invert did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            bool succeeded;
+            Matrix4x4.Invert(in a, out succeeded, out actual);
+            Assert.False(succeeded, "Inversion should not have succeeded.");
+
+            // all the elements in Actual is NaN
+            Assert.True(
+                float.IsNaN(actual.M11) && float.IsNaN(actual.M12) && float.IsNaN(actual.M13) && float.IsNaN(actual.M14) &&
+                float.IsNaN(actual.M21) && float.IsNaN(actual.M22) && float.IsNaN(actual.M23) && float.IsNaN(actual.M24) &&
+                float.IsNaN(actual.M31) && float.IsNaN(actual.M32) && float.IsNaN(actual.M33) && float.IsNaN(actual.M34) &&
+                float.IsNaN(actual.M41) && float.IsNaN(actual.M42) && float.IsNaN(actual.M43) && float.IsNaN(actual.M44)
+                , "Matrix4x4.Invert did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Matrix4x4, Matrix4x4, float)
@@ -1170,6 +1590,11 @@ namespace System.Numerics.Tests
             Matrix4x4 actual;
             actual = Matrix4x4.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.Lerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.Lerp(in a, in b, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for operator - (Matrix4x4)
@@ -1334,6 +1759,11 @@ namespace System.Numerics.Tests
 
             Matrix4x4 actual = Matrix4x4.Transpose(a);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.Transpose did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.Transpose(in a, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.Transpose did not return the expected value.");
+#endif
         }
 
         // A test for Transpose (Matrix4x4)
@@ -1346,6 +1776,11 @@ namespace System.Numerics.Tests
 
             Matrix4x4 actual = Matrix4x4.Transpose(a);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.Transpose did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.Transpose(in a, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.Transpose did not return the expected value.");
+#endif
         }
 
         // A test for Matrix4x4 (Quaternion)
@@ -1378,6 +1813,11 @@ namespace System.Numerics.Tests
 
             Matrix4x4 target = Matrix4x4.CreateFromQuaternion(q);
             Assert.True(MathHelper.Equal(expected, target), "Matrix4x4.Matrix4x4(Quaternion) did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateFromQuaternion(in q, out target);
+            Assert.True(MathHelper.Equal(expected, target), "Matrix4x4.Matrix4x4(Quaternion) did not return the expected value.");
+#endif
         }
 
         // A test for FromQuaternion (Matrix4x4)
@@ -1387,19 +1827,10 @@ namespace System.Numerics.Tests
         {
             for (float angle = 0.0f; angle < 720.0f; angle += 10.0f)
             {
-                Quaternion quat = Quaternion.CreateFromAxisAngle(Vector3.UnitX, angle);
-
-                Matrix4x4 expected = Matrix4x4.CreateRotationX(angle);
-                Matrix4x4 actual = Matrix4x4.CreateFromQuaternion(quat);
-                Assert.True(MathHelper.Equal(expected, actual),
-                    string.Format("Quaternion.FromQuaternion did not return the expected value. angle:{0}",
-                    angle.ToString()));
-
-                // make sure convert back to quaternion is same as we passed quaternion.
-                Quaternion q2 = Quaternion.CreateFromRotationMatrix(actual);
-                Assert.True(MathHelper.EqualRotation(quat, q2),
-                    string.Format("Quaternion.FromQuaternion did not return the expected value. angle:{0}",
-                    angle.ToString()));
+                CreateFromQuaternionTestCase(Vector3.UnitX, angle, byRef: false);
+#if FEATURE_REF_OVERLOADS
+                CreateFromQuaternionTestCase(Vector3.UnitX, angle, byRef: true);
+#endif
             }
         }
 
@@ -1410,19 +1841,10 @@ namespace System.Numerics.Tests
         {
             for (float angle = 0.0f; angle < 720.0f; angle += 10.0f)
             {
-                Quaternion quat = Quaternion.CreateFromAxisAngle(Vector3.UnitY, angle);
-
-                Matrix4x4 expected = Matrix4x4.CreateRotationY(angle);
-                Matrix4x4 actual = Matrix4x4.CreateFromQuaternion(quat);
-                Assert.True(MathHelper.Equal(expected, actual),
-                    string.Format("Quaternion.FromQuaternion did not return the expected value. angle:{0}",
-                    angle.ToString()));
-
-                // make sure convert back to quaternion is same as we passed quaternion.
-                Quaternion q2 = Quaternion.CreateFromRotationMatrix(actual);
-                Assert.True(MathHelper.EqualRotation(quat, q2),
-                    string.Format("Quaternion.FromQuaternion did not return the expected value. angle:{0}",
-                    angle.ToString()));
+                CreateFromQuaternionTestCase(Vector3.UnitY, angle, byRef: false);
+#if FEATURE_REF_OVERLOADS
+                CreateFromQuaternionTestCase(Vector3.UnitY, angle, byRef: true);
+#endif
             }
         }
 
@@ -1433,20 +1855,42 @@ namespace System.Numerics.Tests
         {
             for (float angle = 0.0f; angle < 720.0f; angle += 10.0f)
             {
-                Quaternion quat = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, angle);
-
-                Matrix4x4 expected = Matrix4x4.CreateRotationZ(angle);
-                Matrix4x4 actual = Matrix4x4.CreateFromQuaternion(quat);
-                Assert.True(MathHelper.Equal(expected, actual),
-                    string.Format("Quaternion.FromQuaternion did not return the expected value. angle:{0}",
-                    angle.ToString()));
-
-                // make sure convert back to quaternion is same as we passed quaternion.
-                Quaternion q2 = Quaternion.CreateFromRotationMatrix(actual);
-                Assert.True(MathHelper.EqualRotation(quat, q2),
-                    string.Format("Quaternion.FromQuaternion did not return the expected value. angle:{0}",
-                    angle.ToString()));
+                CreateFromQuaternionTestCase(Vector3.UnitZ, angle, byRef: false);
+#if FEATURE_REF_OVERLOADS
+                CreateFromQuaternionTestCase(Vector3.UnitZ, angle, byRef: true);
+#endif
             }
+        }
+
+        private static void CreateFromQuaternionTestCase(Vector3 axis, float angle, bool byRef)
+        {
+            Quaternion quat = Quaternion.CreateFromAxisAngle(axis, angle);
+
+            Matrix4x4 expected = Matrix4x4.CreateFromAxisAngle(axis, angle);
+            Matrix4x4 actual;
+
+            if (!byRef)
+            {
+                actual = Matrix4x4.CreateFromQuaternion(quat);
+            }
+            else
+            {
+#if FEATURE_REF_OVERLOADS
+                Matrix4x4.CreateFromQuaternion(in quat, out actual);
+#else
+                throw new NotSupportedException("byRef overloads are not supported on this platform");
+#endif
+            }
+
+            Assert.True(MathHelper.Equal(expected, actual),
+                string.Format("Quaternion.FromQuaternion did not return the expected value. angle:{0} axis:{1}",
+                angle.ToString(), axis.ToString()));
+
+            // make sure convert back to quaternion is same as we passed quaternion.
+            Quaternion q2 = Quaternion.CreateFromRotationMatrix(actual);
+            Assert.True(MathHelper.EqualRotation(quat, q2),
+                string.Format("Quaternion.FromQuaternion did not return the expected value. angle:{0} axis:{1}",
+                angle.ToString(), axis.ToString()));
         }
 
         // A test for FromQuaternion (Matrix4x4)
@@ -1465,6 +1909,7 @@ namespace System.Numerics.Tests
                     Matrix4x4.CreateRotationX(angle) *
                     Matrix4x4.CreateRotationY(angle) *
                     Matrix4x4.CreateRotationZ(angle);
+
                 Matrix4x4 actual = Matrix4x4.CreateFromQuaternion(quat);
                 Assert.True(MathHelper.Equal(expected, actual),
                     string.Format("Quaternion.FromQuaternion did not return the expected value. angle:{0}",
@@ -1475,6 +1920,19 @@ namespace System.Numerics.Tests
                 Assert.True(MathHelper.EqualRotation(quat, q2),
                     string.Format("Quaternion.FromQuaternion did not return the expected value. angle:{0}",
                     angle.ToString()));
+
+#if FEATURE_REF_OVERLOADS
+                Matrix4x4.CreateFromQuaternion(in quat, out actual);
+                Assert.True(MathHelper.Equal(expected, actual),
+                    string.Format("Quaternion.FromQuaternion did not return the expected value. angle:{0}",
+                    angle.ToString()));
+
+                // make sure convert back to quaternion is same as we passed quaternion.
+                q2 = Quaternion.CreateFromRotationMatrix(actual);
+                Assert.True(MathHelper.EqualRotation(quat, q2),
+                    string.Format("Quaternion.FromQuaternion did not return the expected value. angle:{0}",
+                    angle.ToString()));
+#endif
             }
         }
 
@@ -1540,6 +1998,11 @@ namespace System.Numerics.Tests
 
             actual = Matrix4x4.Add(a, b);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.Add(in a, in b, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Equals (object)
@@ -1620,9 +2083,14 @@ namespace System.Numerics.Tests
             expected.M43 = a.M41 * b.M13 + a.M42 * b.M23 + a.M43 * b.M33 + a.M44 * b.M43;
             expected.M44 = a.M41 * b.M14 + a.M42 * b.M24 + a.M43 * b.M34 + a.M44 * b.M44;
             Matrix4x4 actual;
-            actual = Matrix4x4.Multiply(a, b);
 
+            actual = Matrix4x4.Multiply(a, b);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.Multiply(in a, in b, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Multiply (Matrix4x4, float)
@@ -1631,9 +2099,14 @@ namespace System.Numerics.Tests
         {
             Matrix4x4 a = GenerateMatrixNumberFrom1To16();
             Matrix4x4 expected = new Matrix4x4(3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48);
-            Matrix4x4 actual = Matrix4x4.Multiply(a, 3);
 
+            Matrix4x4 actual = Matrix4x4.Multiply(a, 3);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.Multiply(in a, 3, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Multiply (Matrix4x4, float)
@@ -1674,6 +2147,11 @@ namespace System.Numerics.Tests
 
             actual = Matrix4x4.Negate(m);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.Negate(in m, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for operator != (Matrix4x4, Matrix4x4)
@@ -1725,6 +2203,11 @@ namespace System.Numerics.Tests
 
             actual = Matrix4x4.Subtract(a, b);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.Subtract(in a, in b, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         private void CreateBillboardFact(Vector3 placeDirection, Vector3 cameraUpVector, Matrix4x4 expectedRotation)
@@ -1732,8 +2215,15 @@ namespace System.Numerics.Tests
             Vector3 cameraPosition = new Vector3(3.0f, 4.0f, 5.0f);
             Vector3 objectPosition = cameraPosition + placeDirection * 10.0f;
             Matrix4x4 expected = expectedRotation * Matrix4x4.CreateTranslation(objectPosition);
-            Matrix4x4 actual = Matrix4x4.CreateBillboard(objectPosition, cameraPosition, cameraUpVector, new Vector3(0, 0, -1));
+            Vector3 negUnitZ = new Vector3(0, 0, -1);
+
+            Matrix4x4 actual = Matrix4x4.CreateBillboard(objectPosition, cameraPosition, cameraUpVector, negUnitZ);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateBillboard did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateBillboard(in objectPosition, in cameraPosition, in cameraUpVector, in negUnitZ, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateBillboard did not return the expected value.");
+#endif
         }
 
         // A test for CreateBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
@@ -1860,11 +2350,17 @@ namespace System.Numerics.Tests
             Vector3 objectPosition = new Vector3(3.0f, 4.0f, 5.0f);
             Vector3 cameraPosition = objectPosition;
             Vector3 cameraUpVector = new Vector3(0, 1, 0);
+            Vector3 unitZ = new Vector3(0, 0, 1);
 
             // Doesn't pass camera face direction. CreateBillboard uses new Vector3f(0, 0, -1) direction. Result must be same as 180 degrees rotate along y-axis.
             Matrix4x4 expected = Matrix4x4.CreateRotationY(MathHelper.ToRadians(180.0f)) * Matrix4x4.CreateTranslation(objectPosition);
-            Matrix4x4 actual = Matrix4x4.CreateBillboard(objectPosition, cameraPosition, cameraUpVector, new Vector3(0, 0, 1));
+            Matrix4x4 actual = Matrix4x4.CreateBillboard(objectPosition, cameraPosition, cameraUpVector, unitZ);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateBillboard did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateBillboard(in objectPosition, in cameraPosition, in cameraUpVector, in unitZ, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateBillboard did not return the expected value.");
+#endif
         }
 
         // A test for CreateBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
@@ -1875,29 +2371,52 @@ namespace System.Numerics.Tests
             Vector3 objectPosition = new Vector3(3.0f, 4.0f, 5.0f);
             Vector3 cameraPosition = objectPosition;
             Vector3 cameraUpVector = new Vector3(0, 1, 0);
+            Vector3 unitX = new Vector3(1, 0, 0);
 
             // Passes Vector3f.Right as camera face direction. Result must be same as -90 degrees rotate along y-axis.
             Matrix4x4 expected = Matrix4x4.CreateRotationY(MathHelper.ToRadians(-90.0f)) * Matrix4x4.CreateTranslation(objectPosition);
-            Matrix4x4 actual = Matrix4x4.CreateBillboard(objectPosition, cameraPosition, cameraUpVector, new Vector3(1, 0, 0));
+            Matrix4x4 actual = Matrix4x4.CreateBillboard(objectPosition, cameraPosition, cameraUpVector, unitX);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateBillboard did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateBillboard(in objectPosition, in cameraPosition, in cameraUpVector, in unitX, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateBillboard did not return the expected value.");
+#endif
         }
 
         private void CreateConstrainedBillboardFact(Vector3 placeDirection, Vector3 rotateAxis, Matrix4x4 expectedRotation)
         {
             Vector3 cameraPosition = new Vector3(3.0f, 4.0f, 5.0f);
             Vector3 objectPosition = cameraPosition + placeDirection * 10.0f;
+            Vector3 zeroZeroNegOne = new Vector3(0, 0, -1);
             Matrix4x4 expected = expectedRotation * Matrix4x4.CreateTranslation(objectPosition);
-            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, new Vector3(0, 0, -1), new Vector3(0, 0, -1));
+
+            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, zeroZeroNegOne, zeroZeroNegOne);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateConstrainedBillboard(in objectPosition, in cameraPosition, in rotateAxis, in zeroZeroNegOne, in zeroZeroNegOne, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+#endif
 
             // When you move camera along rotateAxis, result must be same.
             cameraPosition += rotateAxis * 10.0f;
-            actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, new Vector3(0, 0, -1), new Vector3(0, 0, -1));
+            actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, zeroZeroNegOne, zeroZeroNegOne);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
 
-            cameraPosition -= rotateAxis * 30.0f;
-            actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, new Vector3(0, 0, -1), new Vector3(0, 0, -1));
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateConstrainedBillboard(in objectPosition, in cameraPosition, in rotateAxis, in zeroZeroNegOne, in zeroZeroNegOne, out actual);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+#endif
+
+            cameraPosition -= rotateAxis * 30.0f;
+            actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, zeroZeroNegOne, zeroZeroNegOne);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateConstrainedBillboard(in objectPosition, in cameraPosition, in rotateAxis, in zeroZeroNegOne, in zeroZeroNegOne, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+#endif
         }
 
         // A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
@@ -2024,11 +2543,18 @@ namespace System.Numerics.Tests
             Vector3 objectPosition = new Vector3(3.0f, 4.0f, 5.0f);
             Vector3 cameraPosition = objectPosition;
             Vector3 cameraUpVector = new Vector3(0, 1, 0);
+            Vector3 unitZ = new Vector3(0, 0, 1);
+            Vector3 negUnitZ = new Vector3(0, 0, -1);
 
             // Doesn't pass camera face direction. CreateConstrainedBillboard uses new Vector3f(0, 0, -1) direction. Result must be same as 180 degrees rotate along y-axis.
             Matrix4x4 expected = Matrix4x4.CreateRotationY(MathHelper.ToRadians(180.0f)) * Matrix4x4.CreateTranslation(objectPosition);
-            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, cameraUpVector, new Vector3(0, 0, 1), new Vector3(0, 0, -1));
+            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, cameraUpVector, unitZ, negUnitZ);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateConstrainedBillboard(in objectPosition, in cameraPosition, in cameraUpVector, in unitZ, in negUnitZ, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+#endif
         }
 
         // A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
@@ -2039,11 +2565,18 @@ namespace System.Numerics.Tests
             Vector3 objectPosition = new Vector3(3.0f, 4.0f, 5.0f);
             Vector3 cameraPosition = objectPosition;
             Vector3 cameraUpVector = new Vector3(0, 1, 0);
+            Vector3 unitX = new Vector3(1, 0, 0);
+            Vector3 negUnitZ = new Vector3(0, 0, -1);
 
             // Passes Vector3f.Right as camera face direction. Result must be same as -90 degrees rotate along y-axis.
             Matrix4x4 expected = Matrix4x4.CreateRotationY(MathHelper.ToRadians(-90.0f)) * Matrix4x4.CreateTranslation(objectPosition);
-            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, cameraUpVector, new Vector3(1, 0, 0), new Vector3(0, 0, -1));
+            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, cameraUpVector, unitX, negUnitZ);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateConstrainedBillboard(in objectPosition, in cameraPosition, in cameraUpVector, in unitX, in negUnitZ, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+#endif
         }
 
         // A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
@@ -2055,11 +2588,17 @@ namespace System.Numerics.Tests
             Vector3 objectPosition = new Vector3(3.0f, 4.0f, 5.0f);
             Vector3 rotateAxis = new Vector3(0, 1, 0);
             Vector3 cameraPosition = objectPosition + rotateAxis * 10.0f;
+            Vector3 negUnitZ = new Vector3(0, 0, -1);
 
             // In this case, CreateConstrainedBillboard picks new Vector3f(0, 0, -1) as object forward vector.
             Matrix4x4 expected = Matrix4x4.CreateRotationY(MathHelper.ToRadians(180.0f)) * Matrix4x4.CreateTranslation(objectPosition);
-            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, new Vector3(0, 0, -1), new Vector3(0, 0, -1));
+            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, negUnitZ, negUnitZ);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateConstrainedBillboard(in objectPosition, in cameraPosition, in rotateAxis, in negUnitZ, in negUnitZ, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+#endif
         }
 
         // A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
@@ -2071,11 +2610,17 @@ namespace System.Numerics.Tests
             Vector3 objectPosition = new Vector3(3.0f, 4.0f, 5.0f);
             Vector3 rotateAxis = new Vector3(0, 0, -1);
             Vector3 cameraPosition = objectPosition + rotateAxis * 10.0f;
+            Vector3 negUnitZ = new Vector3(0, 0, -1);
 
             // In this case, CreateConstrainedBillboard picks new Vector3f(1, 0, 0) as object forward vector.
             Matrix4x4 expected = Matrix4x4.CreateRotationX(MathHelper.ToRadians(-90.0f)) * Matrix4x4.CreateRotationZ(MathHelper.ToRadians(-90.0f)) * Matrix4x4.CreateTranslation(objectPosition);
-            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, new Vector3(0, 0, -1), new Vector3(0, 0, -1));
+            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, negUnitZ, negUnitZ);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateConstrainedBillboard(in objectPosition, in cameraPosition, in rotateAxis, in negUnitZ, in negUnitZ, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+#endif
         }
 
         // A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
@@ -2087,11 +2632,17 @@ namespace System.Numerics.Tests
             Vector3 objectPosition = new Vector3(3.0f, 4.0f, 5.0f);
             Vector3 rotateAxis = new Vector3(0, 1, 0);
             Vector3 cameraPosition = objectPosition + rotateAxis * 10.0f;
+            Vector3 negUnitZ = new Vector3(0, 0, -1);
 
             // User passes correct objectForwardVector.
             Matrix4x4 expected = Matrix4x4.CreateRotationY(MathHelper.ToRadians(180.0f)) * Matrix4x4.CreateTranslation(objectPosition);
-            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, new Vector3(0, 0, -1), new Vector3(0, 0, -1));
+            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, negUnitZ, negUnitZ);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateConstrainedBillboard(in objectPosition, in cameraPosition, in rotateAxis, in negUnitZ, in negUnitZ, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+#endif
         }
 
         // A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
@@ -2101,13 +2652,20 @@ namespace System.Numerics.Tests
         {
             // Place camera at up side of object.
             Vector3 objectPosition = new Vector3(3.0f, 4.0f, 5.0f);
-            Vector3 rotateAxis = new Vector3(0, 1, 0);
+            Vector3 unitY = new Vector3(0, 1, 0);
+            Vector3 rotateAxis = unitY;
             Vector3 cameraPosition = objectPosition + rotateAxis * 10.0f;
+            Vector3 negUnitZ = new Vector3(0, 0, -1);
 
             // User passes correct objectForwardVector.
             Matrix4x4 expected = Matrix4x4.CreateRotationY(MathHelper.ToRadians(180.0f)) * Matrix4x4.CreateTranslation(objectPosition);
-            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, new Vector3(0, 0, -1), new Vector3(0, 1, 0));
+            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, negUnitZ, unitY);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateConstrainedBillboard(in objectPosition, in cameraPosition, in rotateAxis, in negUnitZ, in unitY, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+#endif
         }
 
         // A test for CreateConstrainedBillboard (Vector3f, Vector3f, Vector3f, Vector3f?)
@@ -2117,13 +2675,19 @@ namespace System.Numerics.Tests
         {
             // Place camera at up side of object.
             Vector3 objectPosition = new Vector3(3.0f, 4.0f, 5.0f);
-            Vector3 rotateAxis = new Vector3(0, 0, -1);
+            Vector3 negUnitZ = new Vector3(0, 0, -1);
+            Vector3 rotateAxis = negUnitZ;
             Vector3 cameraPosition = objectPosition + rotateAxis * 10.0f;
 
             // In this case, CreateConstrainedBillboard picks Vector3f.Right as object forward vector.
             Matrix4x4 expected = Matrix4x4.CreateRotationX(MathHelper.ToRadians(-90.0f)) * Matrix4x4.CreateRotationZ(MathHelper.ToRadians(-90.0f)) * Matrix4x4.CreateTranslation(objectPosition);
-            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, new Vector3(0, 0, -1), new Vector3(0, 0, -1));
+            Matrix4x4 actual = Matrix4x4.CreateConstrainedBillboard(objectPosition, cameraPosition, rotateAxis, negUnitZ, negUnitZ);
             Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateConstrainedBillboard(in objectPosition, in cameraPosition, in rotateAxis, in negUnitZ, in negUnitZ, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Matrix4x4.CreateConstrainedBillboard did not return the expected value.");
+#endif
         }
 
         // A test for CreateScale (Vector3f)
@@ -2138,6 +2702,11 @@ namespace System.Numerics.Tests
                 0.0f, 0.0f, 0.0f, 1.0f);
             Matrix4x4 actual = Matrix4x4.CreateScale(scales);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateScale(in scales, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for CreateScale (Vector3f, Vector3f)
@@ -2146,14 +2715,32 @@ namespace System.Numerics.Tests
         {
             Vector3 scale = new Vector3(3, 4, 5);
             Vector3 center = new Vector3(23, 42, 666);
+            Vector3 negCenter = -center;
+            Vector3 zero = Vector3.Zero;
 
-            Matrix4x4 scaleAroundZero = Matrix4x4.CreateScale(scale, Vector3.Zero);
+            Matrix4x4 scaleAroundZero = Matrix4x4.CreateScale(scale, zero);
             Matrix4x4 scaleAroundZeroExpected = Matrix4x4.CreateScale(scale);
             Assert.True(MathHelper.Equal(scaleAroundZero, scaleAroundZeroExpected));
 
             Matrix4x4 scaleAroundCenter = Matrix4x4.CreateScale(scale, center);
             Matrix4x4 scaleAroundCenterExpected = Matrix4x4.CreateTranslation(-center) * Matrix4x4.CreateScale(scale) * Matrix4x4.CreateTranslation(center);
             Assert.True(MathHelper.Equal(scaleAroundCenter, scaleAroundCenterExpected));
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateScale(in scale, in zero, out scaleAroundZero);
+            Matrix4x4.CreateScale(in scale, out scaleAroundZeroExpected);
+            Assert.True(MathHelper.Equal(scaleAroundZero, scaleAroundZeroExpected));
+
+            Matrix4x4.CreateScale(in scale, in center, out scaleAroundCenter);
+
+            Matrix4x4 negTranslation, scaleMat, translation;
+            Matrix4x4.CreateTranslation(in negCenter, out negTranslation);
+            Matrix4x4.CreateScale(in scale, out scaleMat);
+            Matrix4x4.CreateTranslation(in center, out translation);
+            Matrix4x4.Multiply(in negTranslation, in scaleMat, out scaleAroundCenterExpected);
+            Matrix4x4.Multiply(in scaleAroundCenterExpected, in translation, out scaleAroundCenterExpected);
+            Assert.True(MathHelper.Equal(scaleAroundCenter, scaleAroundCenterExpected));
+#endif
         }
 
         // A test for CreateScale (float)
@@ -2168,6 +2755,11 @@ namespace System.Numerics.Tests
                 0.0f, 0.0f, 0.0f, 1.0f);
             Matrix4x4 actual = Matrix4x4.CreateScale(scale);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateScale(scale, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for CreateScale (float, Vector3f)
@@ -2208,14 +2800,33 @@ namespace System.Numerics.Tests
         {
             Vector3 scale = new Vector3(3, 4, 5);
             Vector3 center = new Vector3(23, 42, 666);
+            Vector3 negCenter = -center;
+            Vector3 zero = Vector3.Zero;
 
-            Matrix4x4 scaleAroundZero = Matrix4x4.CreateScale(scale.X, scale.Y, scale.Z, Vector3.Zero);
+            Matrix4x4 scaleAroundZero = Matrix4x4.CreateScale(scale.X, scale.Y, scale.Z, zero);
             Matrix4x4 scaleAroundZeroExpected = Matrix4x4.CreateScale(scale.X, scale.Y, scale.Z);
             Assert.True(MathHelper.Equal(scaleAroundZero, scaleAroundZeroExpected));
 
             Matrix4x4 scaleAroundCenter = Matrix4x4.CreateScale(scale.X, scale.Y, scale.Z, center);
             Matrix4x4 scaleAroundCenterExpected = Matrix4x4.CreateTranslation(-center) * Matrix4x4.CreateScale(scale.X, scale.Y, scale.Z) * Matrix4x4.CreateTranslation(center);
             Assert.True(MathHelper.Equal(scaleAroundCenter, scaleAroundCenterExpected));
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateScale(scale.X, scale.Y, scale.Z, in zero, out scaleAroundZero);
+            Matrix4x4.CreateScale(scale.X, scale.Y, scale.Z, out scaleAroundZeroExpected);
+            Assert.True(MathHelper.Equal(scaleAroundZero, scaleAroundZeroExpected));
+
+            Matrix4x4.CreateScale(scale.X, scale.Y, scale.Z, in center, out scaleAroundCenter);
+
+            Matrix4x4 negTranslation, scaleMat, translation;
+            Matrix4x4.CreateTranslation(in negCenter, out negTranslation);
+            Matrix4x4.CreateScale(scale.X, scale.Y, scale.Z, out scaleMat);
+            Matrix4x4.CreateTranslation(in center, out translation);
+            Matrix4x4.Multiply(in negTranslation, in scaleMat, out scaleAroundCenterExpected);
+            Matrix4x4.Multiply(in scaleAroundCenterExpected, in translation, out scaleAroundCenterExpected);
+
+            Assert.True(MathHelper.Equal(scaleAroundCenter, scaleAroundCenterExpected));
+#endif
         }
 
         // A test for CreateTranslation (Vector3f)
@@ -2231,6 +2842,11 @@ namespace System.Numerics.Tests
 
             Matrix4x4 actual = Matrix4x4.CreateTranslation(position);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateTranslation(in position, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for CreateTranslation (float, float, float)
@@ -2249,6 +2865,11 @@ namespace System.Numerics.Tests
 
             Matrix4x4 actual = Matrix4x4.CreateTranslation(xPosition, yPosition, zPosition);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Matrix4x4.CreateTranslation(xPosition, yPosition, zPosition, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Translation

@@ -52,6 +52,27 @@ namespace System.Numerics
         public static System.Numerics.Matrix3x2 operator -(System.Numerics.Matrix3x2 value) { throw null; }
         public static System.Numerics.Matrix3x2 Subtract(System.Numerics.Matrix3x2 value1, System.Numerics.Matrix3x2 value2) { throw null; }
         public override string ToString() { throw null; }
+#if FEATURE_REF_OVERLOADS
+        public static void Add(in System.Numerics.Matrix3x2 value1, in System.Numerics.Matrix3x2 value2, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void CreateRotation(float radians, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void CreateRotation(float radians, in System.Numerics.Vector2 centerPoint, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void CreateScale(in System.Numerics.Vector2 scales, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void CreateScale(in System.Numerics.Vector2 scales, in System.Numerics.Vector2 centerPoint, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void CreateScale(float scale, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void CreateScale(float scale, in System.Numerics.Vector2 centerPoint, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void CreateScale(float xScale, float yScale, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void CreateScale(float xScale, float yScale, in System.Numerics.Vector2 centerPoint, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void CreateSkew(float radiansX, float radiansY, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void CreateSkew(float radiansX, float radiansY, in System.Numerics.Vector2 centerPoint, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void CreateTranslation(in System.Numerics.Vector2 position, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void CreateTranslation(float xPosition, float yPosition, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void Invert(in System.Numerics.Matrix3x2 matrix, out bool succeeded, out System.Numerics.Matrix3x2 result) { succeeded = default(bool); result = default(System.Numerics.Matrix3x2); }
+        public static void Lerp(in System.Numerics.Matrix3x2 matrix1, in System.Numerics.Matrix3x2 matrix2, float amount, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void Multiply(in System.Numerics.Matrix3x2 value1, in System.Numerics.Matrix3x2 value2, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void Multiply(in System.Numerics.Matrix3x2 value1, float value2, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void Negate(in System.Numerics.Matrix3x2 value, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+        public static void Subtract(in System.Numerics.Matrix3x2 value1, in System.Numerics.Matrix3x2 value2, out System.Numerics.Matrix3x2 result) { result = default(System.Numerics.Matrix3x2); }
+#endif
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct Matrix4x4 : System.IEquatable<System.Numerics.Matrix4x4>
@@ -127,6 +148,46 @@ namespace System.Numerics
         public override string ToString() { throw null; }
         public static System.Numerics.Matrix4x4 Transform(System.Numerics.Matrix4x4 value, System.Numerics.Quaternion rotation) { throw null; }
         public static System.Numerics.Matrix4x4 Transpose(System.Numerics.Matrix4x4 matrix) { throw null; }
+#if FEATURE_REF_OVERLOADS
+        public static void Add(in System.Numerics.Matrix4x4 value1, in System.Numerics.Matrix4x4 value2, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateBillboard(in System.Numerics.Vector3 objectPosition, in System.Numerics.Vector3 cameraPosition, in System.Numerics.Vector3 cameraUpVector, in System.Numerics.Vector3 cameraForwardVector, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateConstrainedBillboard(in System.Numerics.Vector3 objectPosition, in System.Numerics.Vector3 cameraPosition, in System.Numerics.Vector3 rotateAxis, in System.Numerics.Vector3 cameraForwardVector, in System.Numerics.Vector3 objectForwardVector, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateFromAxisAngle(in System.Numerics.Vector3 axis, float angle, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateFromQuaternion(in System.Numerics.Quaternion quaternion, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateFromYawPitchRoll(float yaw, float pitch, float roll, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateLookAt(in System.Numerics.Vector3 cameraPosition, in System.Numerics.Vector3 cameraTarget, in System.Numerics.Vector3 cameraUpVector, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateOrthographic(float width, float height, float zNearPlane, float zFarPlane, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateOrthographicOffCenter(float left, float right, float bottom, float top, float zNearPlane, float zFarPlane, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreatePerspective(float width, float height, float nearPlaneDistance, float farPlaneDistance, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreatePerspectiveFieldOfView(float fieldOfView, float aspectRatio, float nearPlaneDistance, float farPlaneDistance, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreatePerspectiveOffCenter(float left, float right, float bottom, float top, float nearPlaneDistance, float farPlaneDistance, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateReflection(in System.Numerics.Plane value, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateRotationX(float radians, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateRotationX(float radians, in System.Numerics.Vector3 centerPoint, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateRotationY(float radians, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateRotationY(float radians, in System.Numerics.Vector3 centerPoint, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateRotationZ(float radians, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateRotationZ(float radians, in System.Numerics.Vector3 centerPoint, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateScale(in System.Numerics.Vector3 scales, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateScale(in System.Numerics.Vector3 scales, in System.Numerics.Vector3 centerPoint, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateScale(float scale, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateScale(float scale, in System.Numerics.Vector3 centerPoint, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateScale(float xScale, float yScale, float zScale, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateScale(float xScale, float yScale, float zScale, in System.Numerics.Vector3 centerPoint, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateShadow(in System.Numerics.Vector3 lightDirection, in System.Numerics.Plane plane, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateTranslation(in System.Numerics.Vector3 position, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateTranslation(float xPosition, float yPosition, float zPosition, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void CreateWorld(in System.Numerics.Vector3 position, in System.Numerics.Vector3 forward, in System.Numerics.Vector3 up, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void Decompose(in System.Numerics.Matrix4x4 matrix, out bool succeeded, out System.Numerics.Vector3 scale, out System.Numerics.Quaternion rotation, out System.Numerics.Vector3 translation) { succeeded = default(bool); scale = default(System.Numerics.Vector3); rotation = default(System.Numerics.Quaternion); translation = default(System.Numerics.Vector3); }
+        public static void Invert(in System.Numerics.Matrix4x4 matrix, out bool succeeded, out System.Numerics.Matrix4x4 result) { succeeded = default(bool); result = default(System.Numerics.Matrix4x4); }
+        public static void Lerp(in System.Numerics.Matrix4x4 matrix1, in System.Numerics.Matrix4x4 matrix2, float amount, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void Multiply(in System.Numerics.Matrix4x4 value1, in System.Numerics.Matrix4x4 value2, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void Multiply(in System.Numerics.Matrix4x4 value1, float value2, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void Negate(in System.Numerics.Matrix4x4 value, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void Subtract(in System.Numerics.Matrix4x4 value1, in System.Numerics.Matrix4x4 value2, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void Transform(in System.Numerics.Matrix4x4 value, in System.Numerics.Quaternion rotation, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+        public static void Transpose(in System.Numerics.Matrix4x4 matrix, out System.Numerics.Matrix4x4 result) { result = default(System.Numerics.Matrix4x4); }
+#endif
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct Plane : System.IEquatable<System.Numerics.Plane>
@@ -149,6 +210,15 @@ namespace System.Numerics
         public override string ToString() { throw null; }
         public static System.Numerics.Plane Transform(System.Numerics.Plane plane, System.Numerics.Matrix4x4 matrix) { throw null; }
         public static System.Numerics.Plane Transform(System.Numerics.Plane plane, System.Numerics.Quaternion rotation) { throw null; }
+#if FEATURE_REF_OVERLOADS
+        public static void CreateFromVertices(in System.Numerics.Vector3 point1, in System.Numerics.Vector3 point2, in System.Numerics.Vector3 point3, out System.Numerics.Plane result) { result = default(System.Numerics.Plane); }
+        public static void Dot(in System.Numerics.Plane plane, in System.Numerics.Vector4 value, out float result) { result = default(float); }
+        public static void DotCoordinate(in System.Numerics.Plane plane, in System.Numerics.Vector3 value, out float result) { result = default(float); }
+        public static void DotNormal(in System.Numerics.Plane plane, in System.Numerics.Vector3 value, out float result) { result = default(float); }
+        public static void Normalize(in System.Numerics.Plane value, out System.Numerics.Plane result) { result = default(System.Numerics.Plane); }
+        public static void Transform(in System.Numerics.Plane plane, in System.Numerics.Matrix4x4 matrix, out System.Numerics.Plane result) { result = default(System.Numerics.Plane); }
+        public static void Transform(in System.Numerics.Plane plane, in System.Numerics.Quaternion rotation, out System.Numerics.Plane result) { result = default(System.Numerics.Plane); }
+#endif
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct Quaternion : System.IEquatable<System.Numerics.Quaternion>
@@ -191,6 +261,24 @@ namespace System.Numerics
         public static System.Numerics.Quaternion Slerp(System.Numerics.Quaternion quaternion1, System.Numerics.Quaternion quaternion2, float amount) { throw null; }
         public static System.Numerics.Quaternion Subtract(System.Numerics.Quaternion value1, System.Numerics.Quaternion value2) { throw null; }
         public override string ToString() { throw null; }
+#if FEATURE_REF_OVERLOADS
+        public static void Add(in System.Numerics.Quaternion value1, in System.Numerics.Quaternion value2, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+        public static void Concatenate(in System.Numerics.Quaternion value1, in System.Numerics.Quaternion value2, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+        public static void Conjugate(in System.Numerics.Quaternion value, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+        public static void CreateFromAxisAngle(in System.Numerics.Vector3 axis, float angle, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+        public static void CreateFromRotationMatrix(in System.Numerics.Matrix4x4 matrix, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+        public static void CreateFromYawPitchRoll(float yaw, float pitch, float roll, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+        public static void Divide(in System.Numerics.Quaternion value1, in System.Numerics.Quaternion value2, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+        public static void Dot(in System.Numerics.Quaternion quaternion1, in System.Numerics.Quaternion quaternion2, out float result) { result = default(float); }
+        public static void Inverse(in System.Numerics.Quaternion value, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+        public static void Lerp(in System.Numerics.Quaternion quaternion1, in System.Numerics.Quaternion quaternion2, float amount, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+        public static void Multiply(in System.Numerics.Quaternion value1, in System.Numerics.Quaternion value2, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+        public static void Multiply(in System.Numerics.Quaternion value1, float value2, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+        public static void Negate(in System.Numerics.Quaternion value, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+        public static void Normalize(in System.Numerics.Quaternion value, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+        public static void Slerp(in System.Numerics.Quaternion quaternion1, in System.Numerics.Quaternion quaternion2, float amount, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+        public static void Subtract(in System.Numerics.Quaternion value1, in System.Numerics.Quaternion value2, out System.Numerics.Quaternion result) { result = default(System.Numerics.Quaternion); }
+#endif
     }
     public static partial class Vector
     {
@@ -400,6 +488,32 @@ namespace System.Numerics
         public static System.Numerics.Vector2 Transform(System.Numerics.Vector2 value, System.Numerics.Quaternion rotation) { throw null; }
         public static System.Numerics.Vector2 TransformNormal(System.Numerics.Vector2 normal, System.Numerics.Matrix3x2 matrix) { throw null; }
         public static System.Numerics.Vector2 TransformNormal(System.Numerics.Vector2 normal, System.Numerics.Matrix4x4 matrix) { throw null; }
+#if FEATURE_REF_OVERLOADS
+        public static void Abs(in System.Numerics.Vector2 value, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Add(in System.Numerics.Vector2 left, in System.Numerics.Vector2 right, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Clamp(in System.Numerics.Vector2 value1, in System.Numerics.Vector2 min, in System.Numerics.Vector2 max, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Distance(in System.Numerics.Vector2 value1, in System.Numerics.Vector2 value2, out float result) { result = default(float); }
+        public static void DistanceSquared(in System.Numerics.Vector2 value1, in System.Numerics.Vector2 value2, out float result) { result = default(float); }
+        public static void Divide(in System.Numerics.Vector2 left, in System.Numerics.Vector2 right, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Divide(in System.Numerics.Vector2 left, float divisor, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Dot(in System.Numerics.Vector2 value1, in System.Numerics.Vector2 value2, out float result) { result = default(float); }
+        public static void Lerp(in System.Numerics.Vector2 value1, in System.Numerics.Vector2 value2, float amount, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Max(in System.Numerics.Vector2 value1, in System.Numerics.Vector2 value2, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Min(in System.Numerics.Vector2 value1, in System.Numerics.Vector2 value2, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Multiply(in System.Numerics.Vector2 left, in System.Numerics.Vector2 right, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Multiply(in System.Numerics.Vector2 left, float right, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Multiply(float left, in System.Numerics.Vector2 right, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Negate(in System.Numerics.Vector2 value, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Normalize(in System.Numerics.Vector2 value, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Reflect(in System.Numerics.Vector2 vector, in System.Numerics.Vector2 normal, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void SquareRoot(in System.Numerics.Vector2 value, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Subtract(in System.Numerics.Vector2 left, in System.Numerics.Vector2 right, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Transform(in System.Numerics.Vector2 position, in System.Numerics.Matrix3x2 matrix, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Transform(in System.Numerics.Vector2 position, in System.Numerics.Matrix4x4 matrix, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void Transform(in System.Numerics.Vector2 value, in System.Numerics.Quaternion rotation, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void TransformNormal(in System.Numerics.Vector2 normal, in System.Numerics.Matrix3x2 matrix, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+        public static void TransformNormal(in System.Numerics.Vector2 normal, in System.Numerics.Matrix4x4 matrix, out System.Numerics.Vector2 result) { result = default(System.Numerics.Vector2); }
+#endif
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct Vector3 : System.IEquatable<System.Numerics.Vector3>, System.IFormattable
@@ -458,6 +572,31 @@ namespace System.Numerics
         public static System.Numerics.Vector3 Transform(System.Numerics.Vector3 position, System.Numerics.Matrix4x4 matrix) { throw null; }
         public static System.Numerics.Vector3 Transform(System.Numerics.Vector3 value, System.Numerics.Quaternion rotation) { throw null; }
         public static System.Numerics.Vector3 TransformNormal(System.Numerics.Vector3 normal, System.Numerics.Matrix4x4 matrix) { throw null; }
+#if FEATURE_REF_OVERLOADS
+        public static void Abs(in System.Numerics.Vector3 value, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Add(in System.Numerics.Vector3 left, in System.Numerics.Vector3 right, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Clamp(in System.Numerics.Vector3 value1, in System.Numerics.Vector3 min, in System.Numerics.Vector3 max, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Cross(in System.Numerics.Vector3 vector1, in System.Numerics.Vector3 vector2, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Distance(in System.Numerics.Vector3 value1, in System.Numerics.Vector3 value2, out float result) { result = default(float); }
+        public static void DistanceSquared(in System.Numerics.Vector3 value1, in System.Numerics.Vector3 value2, out float result) { result = default(float); }
+        public static void Divide(in System.Numerics.Vector3 left, in System.Numerics.Vector3 right, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Divide(in System.Numerics.Vector3 left, float divisor, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Dot(in System.Numerics.Vector3 vector1, in System.Numerics.Vector3 vector2, out float result) { result = default(float); }
+        public static void Lerp(in System.Numerics.Vector3 value1, in System.Numerics.Vector3 value2, float amount, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Max(in System.Numerics.Vector3 value1, in System.Numerics.Vector3 value2, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Min(in System.Numerics.Vector3 value1, in System.Numerics.Vector3 value2, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Multiply(in System.Numerics.Vector3 left, in System.Numerics.Vector3 right, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Multiply(in System.Numerics.Vector3 left, float right, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Multiply(float left, in System.Numerics.Vector3 right, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Negate(in System.Numerics.Vector3 value, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Normalize(in System.Numerics.Vector3 value, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Reflect(in System.Numerics.Vector3 vector, in System.Numerics.Vector3 normal, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void SquareRoot(in System.Numerics.Vector3 value, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Subtract(in System.Numerics.Vector3 left, in System.Numerics.Vector3 right, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Transform(in System.Numerics.Vector3 position, in System.Numerics.Matrix4x4 matrix, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void Transform(in System.Numerics.Vector3 value, in System.Numerics.Quaternion rotation, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+        public static void TransformNormal(in System.Numerics.Vector3 normal, in System.Numerics.Matrix4x4 matrix, out System.Numerics.Vector3 result) { result = default(System.Numerics.Vector3); }
+#endif
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct Vector4 : System.IEquatable<System.Numerics.Vector4>, System.IFormattable
@@ -520,5 +659,31 @@ namespace System.Numerics
         public static System.Numerics.Vector4 Transform(System.Numerics.Vector3 value, System.Numerics.Quaternion rotation) { throw null; }
         public static System.Numerics.Vector4 Transform(System.Numerics.Vector4 vector, System.Numerics.Matrix4x4 matrix) { throw null; }
         public static System.Numerics.Vector4 Transform(System.Numerics.Vector4 value, System.Numerics.Quaternion rotation) { throw null; }
+#if FEATURE_REF_OVERLOADS
+        public static void Abs(in System.Numerics.Vector4 value, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Add(in System.Numerics.Vector4 left, in System.Numerics.Vector4 right, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Clamp(in System.Numerics.Vector4 value1, in System.Numerics.Vector4 min, in System.Numerics.Vector4 max, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Distance(in System.Numerics.Vector4 value1, in System.Numerics.Vector4 value2, out float result) { result = default(float); }
+        public static void DistanceSquared(in System.Numerics.Vector4 value1, in System.Numerics.Vector4 value2, out float result) { result = default(float); }
+        public static void Divide(in System.Numerics.Vector4 left, in System.Numerics.Vector4 right, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Divide(in System.Numerics.Vector4 left, float divisor, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Dot(in System.Numerics.Vector4 vector1, in System.Numerics.Vector4 vector2, out float result) { result = default(float); }
+        public static void Lerp(in System.Numerics.Vector4 value1, in System.Numerics.Vector4 value2, float amount, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Max(in System.Numerics.Vector4 value1, in System.Numerics.Vector4 value2, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Min(in System.Numerics.Vector4 value1, in System.Numerics.Vector4 value2, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Multiply(in System.Numerics.Vector4 left, in System.Numerics.Vector4 right, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Multiply(in System.Numerics.Vector4 left, float right, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Multiply(float left, in System.Numerics.Vector4 right, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Negate(in System.Numerics.Vector4 value, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Normalize(in System.Numerics.Vector4 vector, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void SquareRoot(in System.Numerics.Vector4 value, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Subtract(in System.Numerics.Vector4 left, in System.Numerics.Vector4 right, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Transform(in System.Numerics.Vector2 position, in System.Numerics.Matrix4x4 matrix, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Transform(in System.Numerics.Vector2 value, in System.Numerics.Quaternion rotation, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Transform(in System.Numerics.Vector3 position, in System.Numerics.Matrix4x4 matrix, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Transform(in System.Numerics.Vector3 value, in System.Numerics.Quaternion rotation, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Transform(in System.Numerics.Vector4 vector, in System.Numerics.Matrix4x4 matrix, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+        public static void Transform(in System.Numerics.Vector4 value, in System.Numerics.Quaternion rotation, out System.Numerics.Vector4 result) { result = default(System.Numerics.Vector4); }
+#endif
     }
 }

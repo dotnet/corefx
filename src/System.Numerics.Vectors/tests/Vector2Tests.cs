@@ -115,6 +115,11 @@ namespace System.Numerics.Tests
 
             actual = Vector2.Distance(a, b);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Distance did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Distance(in a, in b, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Distance did not return the expected value.");
+#endif
         }
 
         // A test for Distance (Vector2f, Vector2f)
@@ -127,6 +132,11 @@ namespace System.Numerics.Tests
 
             float actual = Vector2.Distance(a, b);
             Assert.Equal(0.0f, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Distance(in a, in b, out actual);
+            Assert.Equal(0.0f, actual);
+#endif
         }
 
         // A test for DistanceSquared (Vector2f, Vector2f)
@@ -141,6 +151,11 @@ namespace System.Numerics.Tests
 
             actual = Vector2.DistanceSquared(a, b);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.DistanceSquared did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.DistanceSquared(in a, in b, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.DistanceSquared did not return the expected value.");
+#endif
         }
 
         // A test for Dot (Vector2f, Vector2f)
@@ -155,6 +170,11 @@ namespace System.Numerics.Tests
 
             actual = Vector2.Dot(a, b);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Dot did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Dot(in a, in b, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Dot did not return the expected value.");
+#endif
         }
 
         // A test for Dot (Vector2f, Vector2f)
@@ -168,6 +188,11 @@ namespace System.Numerics.Tests
             float expected = 0.0f;
             float actual = Vector2.Dot(a, b);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Dot(in a, in b, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Dot (Vector2f, Vector2f)
@@ -180,6 +205,11 @@ namespace System.Numerics.Tests
 
             float actual = Vector2.Dot(a, b);
             Assert.True(float.IsNegativeInfinity(actual), "Vector2f.Dot did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Dot(in a, in b, out actual);
+            Assert.True(float.IsNegativeInfinity(actual), "Vector2f.Dot did not return the expected value.");
+#endif
         }
 
         // A test for Length ()
@@ -255,6 +285,11 @@ namespace System.Numerics.Tests
             Vector2 actual;
             actual = Vector2.Min(a, b);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Min did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Min(in a, in b, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Min did not return the expected value.");
+#endif
         }
 
         [Fact]
@@ -268,15 +303,35 @@ namespace System.Numerics.Tests
             actual = Vector2.Min(min, max);
             Assert.Equal(actual, min);
 
+#if FEATURE_REF_OVERLOADS
+            Vector2.Min(in min, in max, out actual);
+            Assert.Equal(actual, min);
+#endif
+
             actual = Vector2.Min(max, min);
             Assert.Equal(actual, min);
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Min(in max, in min, out actual);
+            Assert.Equal(actual, min);
+#endif
 
             // Max.
             actual = Vector2.Max(min, max);
             Assert.Equal(actual, max);
 
+#if FEATURE_REF_OVERLOADS
+            Vector2.Max(in min, in max, out actual);
+            Assert.Equal(actual, max);
+#endif
+
             actual = Vector2.Max(max, min);
             Assert.Equal(actual, max);
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Max(in max, in min, out actual);
+            Assert.Equal(actual, max);
+#endif
         }
 
         // A test for Max (Vector2f, Vector2f)
@@ -290,6 +345,11 @@ namespace System.Numerics.Tests
             Vector2 actual;
             actual = Vector2.Max(a, b);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Max did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Max(in a, in b, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Max did not return the expected value.");
+#endif
         }
 
         // A test for Clamp (Vector2f, Vector2f, Vector2f)
@@ -305,22 +365,46 @@ namespace System.Numerics.Tests
             Vector2 expected = new Vector2(0.5f, 0.3f);
             Vector2 actual = Vector2.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Clamp(in a, in min, in max, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
+#endif
+
             // Normal case.
             // Case N2: specified value is bigger than max value.
             a = new Vector2(2.0f, 3.0f);
             expected = max;
             actual = Vector2.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Clamp(in a, in min, in max, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
+#endif
+
             // Case N3: specified value is smaller than max value.
             a = new Vector2(-1.0f, -2.0f);
             expected = min;
             actual = Vector2.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Clamp(in a, in min, in max, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
+#endif
+
             // Case N4: combination case.
             a = new Vector2(-2.0f, 4.0f);
             expected = new Vector2(min.X, max.Y);
             actual = Vector2.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Clamp(in a, in min, in max, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
+#endif
+
             // User specified min value is bigger than max value.
             max = new Vector2(0.0f, 0.1f);
             min = new Vector2(1.0f, 1.1f);
@@ -331,6 +415,11 @@ namespace System.Numerics.Tests
             actual = Vector2.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
 
+#if FEATURE_REF_OVERLOADS
+            Vector2.Clamp(in a, in min, in max, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
+#endif
+
             // Normal case.
             // Case W2: specified value is bigger than max and min value.
             a = new Vector2(2.0f, 3.0f);
@@ -338,11 +427,21 @@ namespace System.Numerics.Tests
             actual = Vector2.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
 
+#if FEATURE_REF_OVERLOADS
+            Vector2.Clamp(in a, in min, in max, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
+#endif
+
             // Case W3: specified value is smaller than min and max value.
             a = new Vector2(-1.0f, -2.0f);
             expected = min;
             actual = Vector2.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Clamp(in a, in min, in max, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Vector2f, Vector2f, float)
@@ -358,6 +457,11 @@ namespace System.Numerics.Tests
             Vector2 actual;
             actual = Vector2.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Lerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Lerp(in a, in b, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Vector2f, Vector2f, float)
@@ -372,6 +476,11 @@ namespace System.Numerics.Tests
             Vector2 expected = Vector2.Zero;
             Vector2 actual = Vector2.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Lerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Lerp(in a, in b, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Vector2f, Vector2f, float)
@@ -386,6 +495,11 @@ namespace System.Numerics.Tests
             Vector2 expected = new Vector2(3.18f, 4.25f);
             Vector2 actual = Vector2.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Lerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Lerp(in a, in b, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Vector2f, Vector2f, float)
@@ -400,6 +514,11 @@ namespace System.Numerics.Tests
             Vector2 expected = b * 2.0f;
             Vector2 actual = Vector2.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Lerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Lerp(in a, in b, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Vector2f, Vector2f, float)
@@ -414,6 +533,11 @@ namespace System.Numerics.Tests
             Vector2 expected = -(b * 2.0f);
             Vector2 actual = Vector2.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Lerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Lerp(in a, in b, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Vector2f, Vector2f, float)
@@ -428,6 +552,12 @@ namespace System.Numerics.Tests
             Vector2 actual = Vector2.Lerp(a, b, t);
             Assert.True(float.IsPositiveInfinity(actual.X), "Vector2f.Lerp did not return the expected value.");
             Assert.True(float.IsNegativeInfinity(actual.Y), "Vector2f.Lerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Lerp(in a, in b, t, out actual);
+            Assert.True(float.IsPositiveInfinity(actual.X), "Vector2f.Lerp did not return the expected value.");
+            Assert.True(float.IsNegativeInfinity(actual.Y), "Vector2f.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Vector2f, Vector2f, float)
@@ -443,6 +573,11 @@ namespace System.Numerics.Tests
             Vector2 expected = new Vector2(1.0f, 2.0f);
             Vector2 actual = Vector2.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Lerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Lerp(in a, in b, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Transform(Vector2f, Matrix4x4)
@@ -463,6 +598,11 @@ namespace System.Numerics.Tests
 
             actual = Vector2.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Transform did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in v, in m, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform(Vector2f, Matrix3x2)
@@ -479,6 +619,11 @@ namespace System.Numerics.Tests
 
             actual = Vector2.Transform(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Transform did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in v, in m, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for TransformNormal (Vector2f, Matrix4x4)
@@ -499,6 +644,11 @@ namespace System.Numerics.Tests
 
             actual = Vector2.TransformNormal(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Tranform did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.TransformNormal(in v, in m, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Tranform(ref, ref, out) did not return the expected value.");
+#endif
         }
 
         // A test for TransformNormal (Vector2f, Matrix3x2)
@@ -515,6 +665,11 @@ namespace System.Numerics.Tests
 
             actual = Vector2.TransformNormal(v, m);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Transform did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.TransformNormal(in v, in m, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Transform(ref, ref, out) did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector2f, Quaternion)
@@ -532,6 +687,12 @@ namespace System.Numerics.Tests
             Vector2 expected = Vector2.Transform(v, m);
             Vector2 actual = Vector2.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Transform did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in v, in m, out expected);
+            Vector2.Transform(in v, in q, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector2f, Quaternion)
@@ -545,6 +706,11 @@ namespace System.Numerics.Tests
 
             Vector2 actual = Vector2.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Transform did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in v, in q, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Transform (Vector2f, Quaternion)
@@ -558,6 +724,11 @@ namespace System.Numerics.Tests
 
             Vector2 actual = Vector2.Transform(v, q);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Transform did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Transform(in v, in q, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Transform did not return the expected value.");
+#endif
         }
 
         // A test for Normalize (Vector2f)
@@ -570,6 +741,11 @@ namespace System.Numerics.Tests
 
             actual = Vector2.Normalize(a);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Normalize did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Normalize(in a, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Normalize did not return the expected value.");
+#endif
         }
 
         // A test for Normalize (Vector2f)
@@ -580,6 +756,11 @@ namespace System.Numerics.Tests
             Vector2 a = new Vector2(); // no parameter, default to 0.0f
             Vector2 actual = Vector2.Normalize(a);
             Assert.True(float.IsNaN(actual.X) && float.IsNaN(actual.Y), "Vector2f.Normalize did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Normalize(in a, out actual);
+            Assert.True(float.IsNaN(actual.X) && float.IsNaN(actual.Y), "Vector2f.Normalize did not return the expected value.");
+#endif
         }
 
         // A test for Normalize (Vector2f)
@@ -588,9 +769,14 @@ namespace System.Numerics.Tests
         public void Vector2NormalizeTest2()
         {
             Vector2 a = new Vector2(float.MaxValue, float.MaxValue);
-            Vector2 actual = Vector2.Normalize(a);
             Vector2 expected = new Vector2(0, 0);
+            Vector2 actual = Vector2.Normalize(a);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Normalize(in a, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for operator - (Vector2f)
@@ -826,6 +1012,11 @@ namespace System.Numerics.Tests
 
             actual = Vector2.Add(a, b);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Add(in a, in b, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Divide (Vector2f, float)
@@ -838,6 +1029,11 @@ namespace System.Numerics.Tests
             Vector2 actual;
             actual = Vector2.Divide(a, div);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Divide(in a, div, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Divide (Vector2f, Vector2f)
@@ -852,6 +1048,11 @@ namespace System.Numerics.Tests
 
             actual = Vector2.Divide(a, b);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Divide(in a, in b, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Equals (object)
@@ -897,6 +1098,11 @@ namespace System.Numerics.Tests
             Vector2 expected = new Vector2(2.0f, 4.0f);
             Vector2 actual = Vector2.Multiply(a, factor);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Multiply(in a, factor, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Multiply (float, Vector2f)
@@ -908,6 +1114,11 @@ namespace System.Numerics.Tests
             Vector2 expected = new Vector2(2.0f, 4.0f);
             Vector2 actual = Vector2.Multiply(factor, a);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Multiply(factor, in a, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Multiply (Vector2f, Vector2f)
@@ -922,6 +1133,11 @@ namespace System.Numerics.Tests
 
             actual = Vector2.Multiply(a, b);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Multiply(in a, in b, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Negate (Vector2f)
@@ -935,6 +1151,11 @@ namespace System.Numerics.Tests
 
             actual = Vector2.Negate(a);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Negate(in a, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for operator != (Vector2f, Vector2f)
@@ -987,6 +1208,11 @@ namespace System.Numerics.Tests
 
             actual = Vector2.Subtract(a, b);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Subtract(in a, in b, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for UnitX
@@ -1073,17 +1299,32 @@ namespace System.Numerics.Tests
             Vector2 actual = Vector2.Reflect(a, n);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Reflect did not return the expected value.");
 
+#if FEATURE_REF_OVERLOADS
+            Vector2.Reflect(in a, in n, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Reflect did not return the expected value.");
+#endif
+
             // Reflect on XY plane.
             n = new Vector2(0.0f, 0.0f);
             expected = new Vector2(a.X, a.Y);
             actual = Vector2.Reflect(a, n);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Reflect did not return the expected value.");
 
+#if FEATURE_REF_OVERLOADS
+            Vector2.Reflect(in a, in n, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Reflect did not return the expected value.");
+#endif
+
             // Reflect on YZ plane.
             n = new Vector2(1.0f, 0.0f);
             expected = new Vector2(-a.X, a.Y);
             actual = Vector2.Reflect(a, n);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Reflect did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Reflect(in a, in n, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Reflect did not return the expected value.");
+#endif
         }
 
         // A test for Reflect (Vector2f, Vector2f)
@@ -1098,6 +1339,11 @@ namespace System.Numerics.Tests
             Vector2 expected = -n;
             Vector2 actual = Vector2.Reflect(a, n);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Reflect did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Reflect(in a, in n, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Reflect did not return the expected value.");
+#endif
         }
 
         // A test for Reflect (Vector2f, Vector2f)
@@ -1112,6 +1358,11 @@ namespace System.Numerics.Tests
             Vector2 expected = n;
             Vector2 actual = Vector2.Reflect(a, n);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Reflect did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Vector2.Reflect(in a, in n, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Reflect did not return the expected value.");
+#endif
         }
 
         [Fact]
@@ -1124,6 +1375,16 @@ namespace System.Numerics.Tests
             Assert.Equal(2.0f, v.Y);
             Assert.Equal(0.0f, v3.X);
             Assert.Equal(Single.PositiveInfinity, v3.Y);
+
+#if FEATURE_REF_OVERLOADS
+            var zeroNegInf = new Vector2(0.0f, Single.NegativeInfinity);
+            Vector2.Abs(in zeroNegInf, out v3);
+            Vector2.Abs(in v1, out v);
+            Assert.Equal(2.5f, v.X);
+            Assert.Equal(2.0f, v.Y);
+            Assert.Equal(0.0f, v3.X);
+            Assert.Equal(Single.PositiveInfinity, v3.Y);
+#endif
         }
 
         [Fact]
@@ -1134,6 +1395,16 @@ namespace System.Numerics.Tests
             Assert.Equal(2, (int)Vector2.SquareRoot(v2).X);
             Assert.Equal(2, (int)Vector2.SquareRoot(v2).Y);
             Assert.Equal(Single.NaN, Vector2.SquareRoot(v1).X);
+
+#if FEATURE_REF_OVERLOADS
+            Vector2 v3;
+            Vector2.SquareRoot(in v2, out v3);
+            Assert.Equal(2, (int)v3.X);
+            Assert.Equal(2, (int)v3.Y);
+            Vector2 v5;
+            Vector2.SquareRoot(in v1, out v5);
+            Assert.Equal(float.NaN, v5.X);
+#endif
         }
 
         // A test to make sure these types are blittable directly into GPU buffer memory layouts

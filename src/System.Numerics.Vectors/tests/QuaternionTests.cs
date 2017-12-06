@@ -22,6 +22,11 @@ namespace System.Numerics.Tests
 
             actual = Quaternion.Dot(a, b);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Dot did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Dot(in a, in b, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Dot did not return the expected value.");
+#endif
         }
 
         // A test for Length ()
@@ -75,10 +80,20 @@ namespace System.Numerics.Tests
             actual = Quaternion.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Lerp did not return the expected value.");
 
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Lerp(in a, in b, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Lerp did not return the expected value.");
+#endif
+
             // Case a and b are same.
             expected = a;
             actual = Quaternion.Lerp(a, a, t);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Lerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Lerp(in a, in a, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Quaternion, Quaternion, float)
@@ -95,6 +110,11 @@ namespace System.Numerics.Tests
             Quaternion expected = new Quaternion(a.X, a.Y, a.Z, a.W);
             Quaternion actual = Quaternion.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Lerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Lerp(in a, in b, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Quaternion, Quaternion, float)
@@ -111,6 +131,11 @@ namespace System.Numerics.Tests
             Quaternion expected = new Quaternion(b.X, b.Y, b.Z, b.W);
             Quaternion actual = Quaternion.Lerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Lerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Lerp(in a, in b, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Lerp (Quaternion, Quaternion, float)
@@ -129,6 +154,11 @@ namespace System.Numerics.Tests
             // one of the quaternion will be flipped to compute the shortest distance. When t = 1, we
             // expect the result to be the same as quaternion b but flipped.
             Assert.True(actual == a, "Quaternion.Lerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Lerp(in a, in b, t, out actual);
+            Assert.True(actual == a, "Quaternion.Lerp did not return the expected value.");
+#endif
         }
 
         // A test for Conjugate(Quaternion)
@@ -142,6 +172,11 @@ namespace System.Numerics.Tests
 
             actual = Quaternion.Conjugate(a);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Conjugate did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Conjugate(in a, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Conjugate did not return the expected value.");
+#endif
         }
 
         // A test for Normalize (Quaternion)
@@ -155,6 +190,11 @@ namespace System.Numerics.Tests
 
             actual = Quaternion.Normalize(a);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Normalize did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Normalize(in a, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Normalize did not return the expected value.");
+#endif
         }
 
         // A test for Normalize (Quaternion)
@@ -167,6 +207,12 @@ namespace System.Numerics.Tests
             Quaternion actual = Quaternion.Normalize(a);
             Assert.True(float.IsNaN(actual.X) && float.IsNaN(actual.Y) && float.IsNaN(actual.Z) && float.IsNaN(actual.W)
                 , "Quaternion.Normalize did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Normalize(in a, out actual);
+            Assert.True(float.IsNaN(actual.X) && float.IsNaN(actual.Y) && float.IsNaN(actual.Z) && float.IsNaN(actual.W)
+                , "Quaternion.Normalize did not return the expected value.");
+#endif
         }
 
         // A test for Concatenate(Quaternion, Quaternion)
@@ -181,6 +227,11 @@ namespace System.Numerics.Tests
 
             actual = Quaternion.Concatenate(a, b);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Concatenate did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Concatenate(in a, in b, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Concatenate did not return the expected value.");
+#endif
         }
 
         // A test for operator - (Quaternion, Quaternion)
@@ -297,6 +348,11 @@ namespace System.Numerics.Tests
 
             actual = Quaternion.CreateFromAxisAngle(axis, angle);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.CreateFromAxisAngle did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.CreateFromAxisAngle(in axis, angle, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.CreateFromAxisAngle did not return the expected value.");
+#endif
         }
 
         // A test for CreateFromAxisAngle (Vector3f, float)
@@ -309,9 +365,14 @@ namespace System.Numerics.Tests
 
             float cos = (float)System.Math.Cos(angle / 2.0f);
             Quaternion actual = Quaternion.CreateFromAxisAngle(axis, angle);
-
             Assert.True(actual.X == 0.0f && actual.Y == 0.0f && actual.Z == 0.0f && MathHelper.Equal(cos, actual.W)
                 , "Quaternion.CreateFromAxisAngle did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.CreateFromAxisAngle(in axis, angle, out actual);
+            Assert.True(actual.X == 0.0f && actual.Y == 0.0f && actual.Z == 0.0f && MathHelper.Equal(cos, actual.W)
+                , "Quaternion.CreateFromAxisAngle did not return the expected value.");
+#endif
         }
 
         // A test for CreateFromAxisAngle (Vector3f, float)
@@ -326,6 +387,12 @@ namespace System.Numerics.Tests
             Quaternion actual1 = Quaternion.CreateFromAxisAngle(axis, angle1);
             Quaternion actual2 = Quaternion.CreateFromAxisAngle(axis, angle2);
             Assert.True(MathHelper.Equal(actual1, actual2), "Quaternion.CreateFromAxisAngle did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.CreateFromAxisAngle(in axis, angle1, out actual1);
+            Quaternion.CreateFromAxisAngle(in axis, angle2, out actual2);
+            Assert.True(MathHelper.Equal(actual1, actual2), "Quaternion.CreateFromAxisAngle did not return the expected value.");
+#endif
         }
 
         // A test for CreateFromAxisAngle (Vector3f, float)
@@ -343,6 +410,15 @@ namespace System.Numerics.Tests
             actual1.W = -actual1.W;
 
             Assert.True(MathHelper.Equal(actual1, actual2), "Quaternion.CreateFromAxisAngle did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.CreateFromAxisAngle(in axis, angle1, out actual1);
+            Quaternion.CreateFromAxisAngle(in axis, angle2, out actual2);
+            actual1.X = -actual1.X;
+            actual1.W = -actual1.W;
+
+            Assert.True(MathHelper.Equal(actual1, actual2), "Quaternion.CreateFromAxisAngle did not return the expected value.");
+#endif
         }
 
         [Fact]
@@ -359,6 +435,21 @@ namespace System.Numerics.Tests
             Quaternion expected = yaw * pitch * roll;
             Quaternion actual = Quaternion.CreateFromYawPitchRoll(yawAngle, pitchAngle, rollAngle);
             Assert.True(MathHelper.Equal(expected, actual));
+
+#if FEATURE_REF_OVERLOADS
+            Vector3 unitX = Vector3.UnitX;
+            Vector3 unitY = Vector3.UnitY;
+            Vector3 unitZ = Vector3.UnitZ;
+            Quaternion.CreateFromAxisAngle(in unitY, yawAngle, out yaw);
+            Quaternion.CreateFromAxisAngle(in unitX, pitchAngle, out pitch);
+            Quaternion.CreateFromAxisAngle(in unitZ, rollAngle, out roll);
+
+            Quaternion.Multiply(in yaw, in pitch, out expected);
+            Quaternion.Multiply(in expected, in roll, out expected);
+
+            Quaternion.CreateFromYawPitchRoll(yawAngle, pitchAngle, rollAngle, out actual);
+            Assert.True(MathHelper.Equal(expected, actual));
+#endif
         }
 
         // Covers more numeric rigions
@@ -384,6 +475,21 @@ namespace System.Numerics.Tests
                         Quaternion expected = yaw * pitch * roll;
                         Quaternion actual = Quaternion.CreateFromYawPitchRoll(yawRad, pitchRad, rollRad);
                         Assert.True(MathHelper.Equal(expected, actual), String.Format("Yaw:{0} Pitch:{1} Roll:{2}", yawAngle, pitchAngle, rollAngle));
+
+#if FEATURE_REF_OVERLOADS
+                        Vector3 unitX = Vector3.UnitX;
+                        Vector3 unitY = Vector3.UnitY;
+                        Vector3 unitZ = Vector3.UnitZ;
+                        Quaternion.CreateFromAxisAngle(in unitY, yawRad, out yaw);
+                        Quaternion.CreateFromAxisAngle(in unitX, pitchRad, out pitch);
+                        Quaternion.CreateFromAxisAngle(in unitZ, rollRad, out roll);
+
+                        Quaternion.Multiply(in yaw, in pitch, out expected);
+                        Quaternion.Multiply(in expected, in roll, out expected);
+
+                        Quaternion.CreateFromYawPitchRoll(yawRad, pitchRad, rollRad, out actual);
+                        Assert.True(MathHelper.Equal(expected, actual), String.Format("Yaw:{0} Pitch:{1} Roll:{2}", yawAngle, pitchAngle, rollAngle));
+#endif
                     }
                 }
             }
@@ -409,6 +515,18 @@ namespace System.Numerics.Tests
             expected = a;
             actual = Quaternion.Slerp(a, a, t);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Slerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            expected = Quaternion.CreateFromAxisAngle(axis, MathHelper.ToRadians(20.0f));
+
+            Quaternion.Slerp(in a, in b, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Slerp did not return the expected value.");
+
+            // Case a and b are same.
+            expected = a;
+            Quaternion.Slerp(in a, in a, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Slerp did not return the expected value.");
+#endif
         }
 
         // A test for Slerp (Quaternion, Quaternion, float)
@@ -425,6 +543,11 @@ namespace System.Numerics.Tests
             Quaternion expected = new Quaternion(a.X, a.Y, a.Z, a.W);
             Quaternion actual = Quaternion.Slerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Slerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Slerp(in a, in b, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Slerp did not return the expected value.");
+#endif
         }
 
         // A test for Slerp (Quaternion, Quaternion, float)
@@ -441,6 +564,11 @@ namespace System.Numerics.Tests
             Quaternion expected = new Quaternion(b.X, b.Y, b.Z, b.W);
             Quaternion actual = Quaternion.Slerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Slerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Slerp(in a, in b, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Slerp did not return the expected value.");
+#endif
         }
 
         // A test for Slerp (Quaternion, Quaternion, float)
@@ -460,6 +588,11 @@ namespace System.Numerics.Tests
             // one of the quaternion will be flipped to compute the shortest distance. When t = 1, we
             // expect the result to be the same as quaternion b but flipped.
             Assert.True(actual == expected, "Quaternion.Slerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Slerp(in a, in b, t, out actual);
+            Assert.True(actual == expected, "Quaternion.Slerp did not return the expected value.");
+#endif
         }
 
         // A test for Slerp (Quaternion, Quaternion, float)
@@ -476,6 +609,11 @@ namespace System.Numerics.Tests
             Quaternion expected = new Quaternion(a.X, a.Y, a.Z, a.W);
             Quaternion actual = Quaternion.Slerp(a, b, t);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Slerp did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Slerp(in a, in b, t, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Slerp did not return the expected value.");
+#endif
         }
 
         // A test for operator - (Quaternion)
@@ -503,6 +641,11 @@ namespace System.Numerics.Tests
 
             actual = Quaternion.Inverse(a);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Inverse(in a, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Inverse (Quaternion)
@@ -512,9 +655,12 @@ namespace System.Numerics.Tests
         {
             Quaternion a = new Quaternion();
             Quaternion actual = Quaternion.Inverse(a);
+            Assert.True(float.IsNaN(actual.X) && float.IsNaN(actual.Y) && float.IsNaN(actual.Z) && float.IsNaN(actual.W));
 
-            Assert.True(float.IsNaN(actual.X) && float.IsNaN(actual.Y) && float.IsNaN(actual.Z) && float.IsNaN(actual.W)
-                );
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Inverse(in a, out actual);
+            Assert.True(float.IsNaN(actual.X) && float.IsNaN(actual.Y) && float.IsNaN(actual.Z) && float.IsNaN(actual.W));
+#endif
         }
 
         // A test for ToString ()
@@ -543,6 +689,11 @@ namespace System.Numerics.Tests
 
             actual = Quaternion.Add(a, b);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Add(in a, in b, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Divide (Quaternion, Quaternion)
@@ -557,6 +708,11 @@ namespace System.Numerics.Tests
 
             actual = Quaternion.Divide(a, b);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Divide did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Divide(in a, in b, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Divide did not return the expected value.");
+#endif
         }
 
         // A test for Equals (object)
@@ -616,6 +772,11 @@ namespace System.Numerics.Tests
 
             actual = Quaternion.Multiply(a, factor);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Multiply did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Multiply(in a, factor, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Multiply did not return the expected value.");
+#endif
         }
 
         // A test for Multiply (Quaternion, Quaternion)
@@ -630,6 +791,11 @@ namespace System.Numerics.Tests
 
             actual = Quaternion.Multiply(a, b);
             Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Multiply did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Multiply(in a, in b, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.Multiply did not return the expected value.");
+#endif
         }
 
         // A test for Negate (Quaternion)
@@ -643,6 +809,11 @@ namespace System.Numerics.Tests
 
             actual = Quaternion.Negate(a);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Negate(in a, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for Subtract (Quaternion, Quaternion)
@@ -657,6 +828,11 @@ namespace System.Numerics.Tests
 
             actual = Quaternion.Subtract(a, b);
             Assert.Equal(expected, actual);
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.Subtract(in a, in b, out actual);
+            Assert.Equal(expected, actual);
+#endif
         }
 
         // A test for operator != (Quaternion, Quaternion)
@@ -711,6 +887,15 @@ namespace System.Numerics.Tests
             // make sure convert back to matrix is same as we passed matrix.
             Matrix4x4 m2 = Matrix4x4.CreateFromQuaternion(actual);
             Assert.True(MathHelper.Equal(matrix, m2), "Quaternion.CreateFromRotationMatrix did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.CreateFromRotationMatrix(in matrix, out actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Quaternion.CreateFromRotationMatrix did not return the expected value.");
+
+            // make sure convert back to matrix is same as we passed matrix.
+            Matrix4x4.CreateFromQuaternion(in actual, out m2);
+            Assert.True(MathHelper.Equal(matrix, m2), "Quaternion.CreateFromRotationMatrix did not return the expected value.");
+#endif
         }
 
         // A test for CreateFromRotationMatrix (Matrix4x4)
@@ -733,6 +918,23 @@ namespace System.Numerics.Tests
                 Assert.True(MathHelper.Equal(matrix, m2),
                     string.Format("Quaternion.CreateFromRotationMatrix did not return the expected value. angle:{0} expected:{1} actual:{2}",
                     angle.ToString(), matrix.ToString(), m2.ToString()));
+
+#if FEATURE_REF_OVERLOADS
+                Matrix4x4.CreateRotationX(angle, out matrix);
+
+                Vector3 unitX = Vector3.UnitX;
+                Quaternion.CreateFromAxisAngle(in unitX, angle, out expected);
+                Quaternion.CreateFromRotationMatrix(in matrix, out actual);
+                Assert.True(MathHelper.EqualRotation(expected, actual),
+                    string.Format("Quaternion.CreateFromRotationMatrix did not return the expected value. angle:{0} expected:{1} actual:{2}",
+                    angle.ToString(), expected.ToString(), actual.ToString()));
+
+                // make sure convert back to matrix is same as we passed matrix.
+                Matrix4x4.CreateFromQuaternion(in actual, out m2);
+                Assert.True(MathHelper.Equal(matrix, m2),
+                    string.Format("Quaternion.CreateFromRotationMatrix did not return the expected value. angle:{0} expected:{1} actual:{2}",
+                    angle.ToString(), matrix.ToString(), m2.ToString()));
+#endif
             }
         }
 
@@ -756,6 +958,19 @@ namespace System.Numerics.Tests
                 Assert.True(MathHelper.Equal(matrix, m2),
                     string.Format("Quaternion.CreateFromRotationMatrix did not return the expected value. angle:{0}",
                     angle.ToString()));
+
+#if FEATURE_REF_OVERLOADS
+                Quaternion.CreateFromRotationMatrix(in matrix, out actual);
+                Assert.True(MathHelper.EqualRotation(expected, actual),
+                    string.Format("Quaternion.CreateFromRotationMatrix did not return the expected value. angle:{0}",
+                    angle.ToString()));
+
+                // make sure convert back to matrix is same as we passed matrix.
+                Matrix4x4.CreateFromQuaternion(in actual, out m2);
+                Assert.True(MathHelper.Equal(matrix, m2),
+                    string.Format("Quaternion.CreateFromRotationMatrix did not return the expected value. angle:{0}",
+                    angle.ToString()));
+#endif
             }
         }
 
@@ -779,6 +994,19 @@ namespace System.Numerics.Tests
                 Assert.True(MathHelper.Equal(matrix, m2),
                     string.Format("Quaternion.CreateFromRotationMatrix did not return the expected value. angle:{0} expected:{1} actual:{2}",
                     angle.ToString(), matrix.ToString(), m2.ToString()));
+
+#if FEATURE_REF_OVERLOADS
+                Quaternion.CreateFromRotationMatrix(in matrix, out actual);
+                Assert.True(MathHelper.EqualRotation(expected, actual),
+                    string.Format("Quaternion.CreateFromRotationMatrix did not return the expected value. angle:{0} expected:{1} actual:{2}",
+                    angle.ToString(), expected.ToString(), actual.ToString()));
+
+                // make sure convert back to matrix is same as we passed matrix.
+                Matrix4x4.CreateFromQuaternion(in actual, out m2);
+                Assert.True(MathHelper.Equal(matrix, m2),
+                    string.Format("Quaternion.CreateFromRotationMatrix did not return the expected value. angle:{0} expected:{1} actual:{2}",
+                    angle.ToString(), matrix.ToString(), m2.ToString()));
+#endif
             }
         }
 
@@ -806,6 +1034,19 @@ namespace System.Numerics.Tests
                 Assert.True(MathHelper.Equal(matrix, m2),
                     string.Format("Quaternion.CreateFromRotationMatrix did not return the expected value. angle:{0} expected:{1} actual:{2}",
                     angle.ToString(), matrix.ToString(), m2.ToString()));
+
+#if FEATURE_REF_OVERLOADS
+                Quaternion.CreateFromRotationMatrix(in matrix, out actual);
+                Assert.True(MathHelper.EqualRotation(expected, actual),
+                    string.Format("Quaternion.CreateFromRotationMatrix did not return the expected value. angle:{0} expected:{1} actual:{2}",
+                    angle.ToString(), expected.ToString(), actual.ToString()));
+
+                // make sure convert back to matrix is same as we passed matrix.
+                Matrix4x4.CreateFromQuaternion(in actual, out m2);
+                Assert.True(MathHelper.Equal(matrix, m2),
+                    string.Format("Quaternion.CreateFromRotationMatrix did not return the expected value. angle:{0} expected:{1} actual:{2}",
+                    angle.ToString(), matrix.ToString(), m2.ToString()));
+#endif
             }
         }
 
@@ -824,6 +1065,15 @@ namespace System.Numerics.Tests
             // make sure convert back to matrix is same as we passed matrix.
             Matrix4x4 m2 = Matrix4x4.CreateFromQuaternion(actual);
             Assert.True(MathHelper.Equal(matrix, m2), "Quaternion.CreateFromRotationMatrix did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.CreateFromRotationMatrix(in matrix, out actual);
+            Assert.True(MathHelper.EqualRotation(expected, actual), "Quaternion.CreateFromRotationMatrix did not return the expected value.");
+
+            // make sure convert back to matrix is same as we passed matrix.
+            Matrix4x4.CreateFromQuaternion(in actual, out m2);
+            Assert.True(MathHelper.Equal(matrix, m2), "Quaternion.CreateFromRotationMatrix did not return the expected value.");
+#endif
         }
 
         // A test for CreateFromRotationMatrix (Matrix4x4)
@@ -841,6 +1091,15 @@ namespace System.Numerics.Tests
             // make sure convert back to matrix is same as we passed matrix.
             Matrix4x4 m2 = Matrix4x4.CreateFromQuaternion(actual);
             Assert.True(MathHelper.Equal(matrix, m2), "Quaternion.CreateFromRotationMatrix did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.CreateFromRotationMatrix(in matrix, out actual);
+            Assert.True(MathHelper.EqualRotation(expected, actual), "Quaternion.CreateFromRotationMatrix did not return the expected value.");
+
+            // make sure convert back to matrix is same as we passed matrix.
+            Matrix4x4.CreateFromQuaternion(in actual, out m2);
+            Assert.True(MathHelper.Equal(matrix, m2), "Quaternion.CreateFromRotationMatrix did not return the expected value.");
+#endif
         }
 
         // A test for CreateFromRotationMatrix (Matrix4x4)
@@ -858,6 +1117,15 @@ namespace System.Numerics.Tests
             // make sure convert back to matrix is same as we passed matrix.
             Matrix4x4 m2 = Matrix4x4.CreateFromQuaternion(actual);
             Assert.True(MathHelper.Equal(matrix, m2), "Quaternion.CreateFromRotationMatrix did not return the expected value.");
+
+#if FEATURE_REF_OVERLOADS
+            Quaternion.CreateFromRotationMatrix(in matrix, out actual);
+            Assert.True(MathHelper.EqualRotation(expected, actual), "Quaternion.CreateFromRotationMatrix did not return the expected value.");
+
+            // make sure convert back to matrix is same as we passed matrix.
+            Matrix4x4.CreateFromQuaternion(in actual, out m2);
+            Assert.True(MathHelper.Equal(matrix, m2), "Quaternion.CreateFromRotationMatrix did not return the expected value.");
+#endif
         }
 
         // A test for Equals (Quaternion)
