@@ -219,35 +219,50 @@ namespace System.Security.Cryptography.Asn1
             ReadOnlyMemory<byte> cur = source;
             int totalLen = 0;
 
-            while (!cur.IsEmpty)
-            {
-                AsnReader reader = new AsnReader(cur, _ruleSet);
-                Asn1Tag tag = reader.ReadTagAndLength(out int? length, out int bytesRead);
-                ReadOnlyMemory<byte> nestedContents = reader.PeekContentBytes();
+            AsnReader tmpReader = new AsnReader(cur, _ruleSet);
+            // Our reader is bounded by int.MaxValue.
+            // The most aggressive data input would be a one-byte tag followed by
+            // indefinite length "ad infinitum", which would be half the input.
+            // So the depth marker can never overflow the signed integer space.
+            int depth = 1;
 
-                int localLen = bytesRead + nestedContents.Length;
+            while (tmpReader.HasData)
+            {
+                Asn1Tag tag = tmpReader.ReadTagAndLength(out int? length, out int bytesRead);
 
                 if (tag == Asn1Tag.EndOfContents)
                 {
                     ValidateEndOfContents(tag, length, bytesRead);
 
-                    return totalLen;
+                    depth--;
+
+                    if (depth == 0)
+                    {
+                        // T-REC-X.690-201508 sec 8.1.1.1 / 8.1.1.3 indicate that the
+                        // End-of-Contents octets are "after" the contents octets, not
+                        // "at the end" of them, so we don't include these bytes in the
+                        // accumulator.
+                        return totalLen;
+                    }
                 }
 
-                // If the current value was an indefinite-length-encoded value
-                // then we need to skip over the EOC as well.  But we didn't want to
-                // include it as part of the content span.
-                //
-                // T-REC-X.690-201508 sec 8.1.1.1 / 8.1.1.3 indicate that the
-                // End-of-Contents octets are "after" the contents octets, not
-                // "at the end" of them.
+                // We found another indefinite length, that means we need to find another
+                // EndOfContents marker to balance it out.
                 if (length == null)
                 {
-                    localLen += EndOfContentsEncodedLength;
+                    depth++;
+                    tmpReader._data = tmpReader._data.Slice(bytesRead);
+                    totalLen += bytesRead;
                 }
-
-                totalLen += localLen;
-                cur = cur.Slice(localLen);
+                else
+                {
+                    // This will throw a CryptographicException if the length exceeds our bounds.
+                    ReadOnlyMemory<byte> tlv = Slice(tmpReader._data, 0, bytesRead + length.Value);
+                    
+                    // No exception? Then slice the data and continue.
+                    tmpReader._data = tmpReader._data.Slice(tlv.Length);
+                    totalLen += tlv.Length;
+                }
             }
 
             throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.Asn1;
 using Test.Cryptography;
 using Xunit;
@@ -132,6 +133,81 @@ namespace System.Security.Cryptography.Tests.Asn1
                     AsnReader reader = new AsnReader(data, AsnEncodingRules.BER);
                     reader.PeekContentBytes();
                 });
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void PeekContentSpan_ExtremelyNested(bool fullArray)
+        {
+            byte[] dataBytes = new byte[4 * 16384];
+
+            // For a full array this will build 2^14 nested indefinite length values.
+            // PeekContentBytes should return dataBytes.Slice(2, dataBytes.Length - 4)
+            //
+            // For what it's worth, the initial algorithm succeeded at 1650, and StackOverflowed with 1651.
+            //
+            // With the counter-and-no-recursion algorithm a nesting depth of 534773759 was verified,
+            // at a cost of 10 minutes of execution and a 2139095036 byte array.
+            // (The size was "a little bit less than int.MaxValue, since that OOMed my 32-bit process")
+            int end = dataBytes.Length / 2;
+            int expectedLength = dataBytes.Length - 4;
+
+            if (!fullArray)
+            {
+                // Use 3/4 of what's available, just to prove we're not counting from the end.
+                // So with "full" being a nesting value 16384 this will use 12288
+                end = end / 4 * 3;
+                expectedLength = 2 * end - 4;
+            }
+
+            for (int i = 0; i < end; i += 2)
+            {
+                // Context-Specific 0 [Constructed]
+                dataBytes[i] = 0xA0;
+                // Indefinite length
+                dataBytes[i + 1] = 0x80;
+            }
+
+            AsnReader reader = new AsnReader(dataBytes, AsnEncodingRules.BER);
+            ReadOnlyMemory<byte> contents = reader.PeekContentBytes();
+            Assert.Equal(expectedLength, contents.Length);
+            Assert.True(Unsafe.AreSame(ref dataBytes[2], ref contents.Span.DangerousGetPinnableReference()));
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void PeekEncodedValue_ExtremelyNested(bool fullArray)
+        {
+            byte[] dataBytes = new byte[4 * 16384];
+
+            // For a full array this will build 2^14 nested indefinite length values.
+            // PeekEncodedValue should return the whole array.
+            int end = dataBytes.Length / 2;
+            int expectedLength = dataBytes.Length;
+
+            if (!fullArray)
+            {
+                // Use 3/4 of what's available, just to prove we're not counting from the end.
+                // So with "full" being a nesting value 16384 this will use 12288, and
+                // PeekEncodedValue should give us back 48k, not 64k.
+                end = end / 4 * 3;
+                expectedLength = 2 * end;
+            }
+
+            for (int i = 0; i < end; i += 2)
+            {
+                // Context-Specific 0 [Constructed]
+                dataBytes[i] = 0xA0;
+                // Indefinite length
+                dataBytes[i + 1] = 0x80;
+            }
+
+            AsnReader reader = new AsnReader(dataBytes, AsnEncodingRules.BER);
+            ReadOnlyMemory<byte> contents = reader.PeekEncodedValue();
+            Assert.Equal(expectedLength, contents.Length);
+            Assert.True(Unsafe.AreSame(ref dataBytes[0], ref contents.Span.DangerousGetPinnableReference()));
         }
     }
 }
