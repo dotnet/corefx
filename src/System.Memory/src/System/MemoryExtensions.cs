@@ -48,6 +48,41 @@ namespace System
         }
 
         /// <summary>
+        /// Searches for the specified value and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value">The value to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOf<T>(this Span<T> span, T value)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.LastIndexOf(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    Unsafe.As<T, byte>(ref value),
+                    span.Length);
+            return SpanHelpers.LastIndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the specified sequence and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value">The sequence to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOf<T>(this Span<T> span, ReadOnlySpan<T> value)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.LastIndexOf(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    span.Length,
+                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    value.Length);
+            return SpanHelpers.LastIndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
+        }
+
+        /// <summary>
         /// Determines whether two sequences are equal by comparing the elements using IEquatable{T}.Equals(T). 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -97,6 +132,41 @@ namespace System
                     ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()), 
                     value.Length);
             return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
+        }
+
+        /// <summary>
+        /// Searches for the specified value and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value">The value to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOf<T>(this ReadOnlySpan<T> span, T value)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.LastIndexOf(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    Unsafe.As<T, byte>(ref value),
+                    span.Length);
+            return SpanHelpers.LastIndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the specified sequence and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value">The sequence to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOf<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.LastIndexOf(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    span.Length,
+                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    value.Length);
+            return SpanHelpers.LastIndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
         }
 
         /// <summary>

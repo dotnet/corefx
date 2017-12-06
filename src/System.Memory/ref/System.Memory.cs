@@ -97,6 +97,9 @@ namespace System
         public static int IndexOfAny(this Span<byte> span, byte value0, byte value1, byte value2) { throw null; }
         public static int IndexOfAny(this Span<byte> span, ReadOnlySpan<byte> values) { throw null; }
 
+        public static int LastIndexOf<T>(this Span<T> span, T value) where T : IEquatable<T> { throw null; }
+        public static int LastIndexOf<T>(this Span<T> span, ReadOnlySpan<T> value) where T : IEquatable<T> { throw null; }
+
         public static bool SequenceEqual<T>(this Span<T> first, ReadOnlySpan<T> second) where T : IEquatable<T> { throw null; }
         
         public static bool StartsWith<T>(this Span<T> span, ReadOnlySpan<T> value) where T : IEquatable<T> { throw null; }
@@ -127,6 +130,9 @@ namespace System
         public static int IndexOfAny(this ReadOnlySpan<byte> span, byte value0, byte value1) { throw null; }
         public static int IndexOfAny(this ReadOnlySpan<byte> span, byte value0, byte value1, byte value2) { throw null; }
         public static int IndexOfAny(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> values) { throw null; }
+
+        public static int LastIndexOf<T>(this ReadOnlySpan<T> span, T value) where T : IEquatable<T> { throw null; }
+        public static int LastIndexOf<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value) where T : IEquatable<T> { throw null; }
 
         public static bool SequenceEqual<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second) where T : IEquatable<T> { throw null; }
 
