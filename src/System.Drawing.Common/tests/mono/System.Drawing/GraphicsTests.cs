@@ -358,7 +358,22 @@ namespace MonoTests.System.Drawing
         }
 
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Difference in behavior, netfx throws Exception")]
         public void LoadIndexed_BmpFile()
+        {
+            // Tests that we can load an indexed file, but...
+            string sInFile = Helpers.GetTestBitmapPath("almogaver1bit.bmp");
+            // note: file is misnamed (it's a 4bpp bitmap)
+            using (Image img = Image.FromFile(sInFile))
+            {
+                Assert.Equal(PixelFormat.Format4bppIndexed, img.PixelFormat);
+                AssertExtensions.Throws<ArgumentException>("image", () => Graphics.FromImage(img));
+            }
+        }
+
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Difference in behavior, netcoreapp throws ArgumentException")]
+        public void LoadIndexed_BmpFile_Netfx()
         {
             // Tests that we can load an indexed file, but...
             string sInFile = Helpers.GetTestBitmapPath("almogaver1bit.bmp");

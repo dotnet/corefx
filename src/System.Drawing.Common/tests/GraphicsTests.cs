@@ -322,7 +322,21 @@ namespace System.Drawing.Tests
         [InlineData(PixelFormat.Format1bppIndexed)]
         [InlineData(PixelFormat.Format4bppIndexed)]
         [InlineData(PixelFormat.Format8bppIndexed)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Difference in behavior, netfx throws Exception")]
         public void FromImage_IndexedImage_ThrowsException(PixelFormat format)
+        {
+            using (var image = new Bitmap(10, 10, format))
+            {
+                AssertExtensions.Throws<ArgumentException>("image", () => Graphics.FromImage(image));
+            }
+        }
+
+        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [InlineData(PixelFormat.Format1bppIndexed)]
+        [InlineData(PixelFormat.Format4bppIndexed)]
+        [InlineData(PixelFormat.Format8bppIndexed)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Difference in behavior, netcoreapp throws ArgumentException")]
+        public void FromImage_IndexedImage_ThrowsException_Netfx(PixelFormat format)
         {
             using (var image = new Bitmap(10, 10, format))
             {
@@ -2044,7 +2058,7 @@ namespace System.Drawing.Tests
             {
                 graphics.PageScale = 10;
                 graphics.Transform = transform;
-                
+
                 graphics.TransformPoints(destSpace, srcSpace, points);
                 Assert.Equal(expected, points);
             }
