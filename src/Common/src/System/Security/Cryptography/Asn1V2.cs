@@ -86,6 +86,7 @@ namespace System.Security.Cryptography.Asn1
         internal static readonly Asn1Tag Boolean = new Asn1Tag(0, (int)UniversalTagNumber.Boolean);
         internal static readonly Asn1Tag Integer = new Asn1Tag(0, (int)UniversalTagNumber.Integer);
         internal static readonly Asn1Tag PrimitiveBitString = new Asn1Tag(0, (int)UniversalTagNumber.BitString);
+        internal static readonly Asn1Tag ConstructedBitString = new Asn1Tag(ConstructedMask, (int)UniversalTagNumber.BitString);
         internal static readonly Asn1Tag PrimitiveOctetString = new Asn1Tag(0, (int)UniversalTagNumber.OctetString);
         internal static readonly Asn1Tag Null = new Asn1Tag(0, (int)UniversalTagNumber.Null);
         internal static readonly Asn1Tag ObjectIdentifier = new Asn1Tag(0, (int)UniversalTagNumber.ObjectIdentifier);

@@ -200,6 +200,16 @@ namespace System.Security.Cryptography.Tests.Asn1
             0)]
         [InlineData(
             PublicEncodingRules.BER,
+            "230C" +
+              "2380" +
+                "2380" +
+                  "0000" +
+                "03020000" +
+                "0000",
+            "00",
+            0)]
+        [InlineData(
+            PublicEncodingRules.BER,
             "2380" +
               "2308" +
                 "030200FA" +
@@ -623,6 +633,39 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             Assert.Equal(val1.ByteArrayToHex(), val2.ByteArrayToHex());
             Assert.Equal(ubc1, ubc2);
+        }
+
+        [Fact]
+        public static void TryCopyBitStringBytes_ExtremelyNested()
+        {
+            byte[] dataBytes = new byte[4 * 16384];
+
+            // This will build 2^14 nested indefinite length values.
+            // In the end, none of them contain any content.
+            //
+            // For what it's worth, the initial algorithm succeeded at 1017, and StackOverflowed with 1018.
+            int end = dataBytes.Length / 2;
+
+            // UNIVERSAL BIT STRING [Constructed]
+            const byte Tag = 0x20 | (byte)UniversalTagNumber.BitString;
+
+            for (int i = 0; i < end; i += 2)
+            {
+                dataBytes[i] = Tag;
+                // Indefinite length
+                dataBytes[i + 1] = 0x80;
+            }
+
+            AsnReader reader = new AsnReader(dataBytes, AsnEncodingRules.BER);
+
+            int bytesWritten;
+            int unusedBitCount;
+
+            Assert.True(
+                reader.TryCopyBitStringBytes(Span<byte>.Empty, out unusedBitCount, out bytesWritten));
+
+            Assert.Equal(0, bytesWritten);
+            Assert.Equal(0, unusedBitCount);
         }
     }
 }

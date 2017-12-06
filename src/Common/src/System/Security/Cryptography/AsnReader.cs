@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.Buffers.Text;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -705,17 +706,14 @@ namespace System.Security.Cryptography.Asn1
 
         private int CountConstructedBitString(ReadOnlyMemory<byte> source, bool isIndefinite)
         {
-            int lastUnusedBitCount = 0;
-            int lastSegmentLength = MaxCERSegmentSize;
             Span<byte> destination = Span<byte>.Empty;
 
             return ProcessConstructedBitString(
                 source,
-                ref destination,
+                destination,
                 null,
                 isIndefinite,
-                ref lastUnusedBitCount,
-                ref lastSegmentLength,
+                out _,
                 out _);
         }
 
@@ -727,132 +725,148 @@ namespace System.Security.Cryptography.Asn1
             out int bytesRead,
             out int bytesWritten)
         {
-            unusedBitCount = 0;
             Span<byte> tmpDest = destination;
-            int lastSegmentSize = MaxCERSegmentSize;
 
             bytesWritten = ProcessConstructedBitString(
                 source,
-                ref tmpDest,
+                tmpDest,
                 (value, lastByte, dest) => CopyBitStringValue(value, lastByte, dest),
                 isIndefinite,
-                ref unusedBitCount,
-                ref lastSegmentSize,
+                out unusedBitCount,
                 out bytesRead);
         }
 
         private int ProcessConstructedBitString(
             ReadOnlyMemory<byte> source,
-            ref Span<byte> destination,
+            Span<byte> destination,
             BitStringCopyAction copyAction,
             bool isIndefinite,
-            ref int lastUnusedBitCount,
-            ref int lastSegmentLength,
+            out int lastUnusedBitCount,
             out int bytesRead)
         {
-            if (source.IsEmpty)
+            lastUnusedBitCount = 0;
+            bytesRead = 0;
+            int lastSegmentLength = MaxCERSegmentSize;
+
+            AsnReader tmpReader = new AsnReader(source, _ruleSet);
+            Stack<(AsnReader, bool, int)> readerStack = null;
+            int totalLength = 0;
+            Asn1Tag tag = Asn1Tag.ConstructedBitString;
+            Span<byte> curDest = destination;
+
+            do
             {
-                if (isIndefinite)
+                while (tmpReader.HasData)
                 {
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                }
+                    tag = tmpReader.ReadTagAndLength(out int? length, out int headerLength);
 
-                bytesRead = 0;
-                return 0;
-            }
-
-            int totalRead = 0;
-            int totalContent = 0;
-            ReadOnlyMemory<byte> cur = source;
-
-            while (!cur.IsEmpty)
-            {
-                AsnReader reader = new AsnReader(cur, _ruleSet);
-                Asn1Tag tag = reader.ReadTagAndLength(out int? length, out int headerLength);
-
-                if (tag.TagClass != TagClass.Universal)
-                {
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                }
-
-                totalRead += headerLength;
-
-                if (isIndefinite && tag.TagValue == (int)UniversalTagNumber.EndOfContents)
-                {
-                    ValidateEndOfContents(tag, length, headerLength);
-
-                    bytesRead = totalRead;
-                    return totalContent;
-                }
-
-                if (tag.TagValue != (int)UniversalTagNumber.BitString)
-                {
-                    // T-REC-X.690-201508 sec 8.6.4.1 (in particular, Note 2)
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                }
-
-                if (_ruleSet == AsnEncodingRules.CER)
-                {
-                    if (tag.IsConstructed || lastSegmentLength != MaxCERSegmentSize)
+                    if (tag == Asn1Tag.PrimitiveBitString)
                     {
-                        // T-REC-X.690-201508 sec 9.2
+                        if (lastUnusedBitCount != 0)
+                        {
+                            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                        }
+
+                        if (_ruleSet == AsnEncodingRules.CER && lastSegmentLength != MaxCERSegmentSize)
+                        {
+                            // T-REC-X.690-201508 sec 9.2
+                            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                        }
+
+                        Debug.Assert(length != null);
+                        ReadOnlyMemory<byte> encodedValue = Slice(tmpReader._data, headerLength, length.Value);
+
+                        ParsePrimitiveBitStringContents(
+                            encodedValue,
+                            out lastUnusedBitCount,
+                            out ReadOnlyMemory<byte> contents,
+                            out byte? normalizedLastByte);
+
+                        int localLen = headerLength + encodedValue.Length;
+                        tmpReader._data = tmpReader._data.Slice(localLen);
+
+                        bytesRead += localLen;
+                        totalLength += contents.Length;
+                        lastSegmentLength = encodedValue.Length;
+
+                        if (copyAction != null)
+                        {
+                            copyAction(contents, normalizedLastByte, curDest);
+                            curDest = curDest.Slice(contents.Length);
+                        }
+                    }
+                    else if (tag == Asn1Tag.EndOfContents && isIndefinite)
+                    {
+                        ValidateEndOfContents(tag, length, headerLength);
+
+                        bytesRead += headerLength;
+
+                        if (readerStack?.Count > 0)
+                        {
+                            (AsnReader topReader, bool wasIndefinite, int pushedBytesRead) = readerStack.Pop();
+                            topReader._data = topReader._data.Slice(bytesRead);
+
+                            bytesRead += pushedBytesRead;
+                            isIndefinite = wasIndefinite;
+                            tmpReader = topReader;
+                        }
+                        else
+                        {
+                            // We have matched the EndOfContents that brought us here.
+                            break;
+                        }
+                    }
+                    else if (tag == Asn1Tag.ConstructedBitString)
+                    {
+                        if (_ruleSet == AsnEncodingRules.CER)
+                        {
+                            // T-REC-X.690-201508 sec 9.2
+                            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                        }
+
+                        if (readerStack == null)
+                        {
+                            readerStack = new Stack<(AsnReader, bool, int)>();
+                        }
+
+                        readerStack.Push((tmpReader, isIndefinite, bytesRead));
+
+                        tmpReader = new AsnReader(
+                            Slice(tmpReader._data, headerLength, length),
+                            _ruleSet);
+
+                        bytesRead = headerLength;
+                        isIndefinite = (length == null);
+                    }
+                    else
+                    {
+                        // T-REC-X.690-201508 sec 8.6.4.1 (in particular, Note 2)
                         throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                     }
                 }
 
-                cur = cur.Slice(headerLength);
-
-                if (tag.IsConstructed)
+                if (isIndefinite && tag != Asn1Tag.EndOfContents)
                 {
-                    totalContent += ProcessConstructedBitString(
-                        Slice(cur, 0, length),
-                        ref destination,
-                        copyAction,
-                        length == null,
-                        ref lastUnusedBitCount,
-                        ref lastSegmentLength,
-                        out int nestedContentRead);
+                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                }
 
-                    totalRead += nestedContentRead;
-                    cur = cur.Slice(nestedContentRead);
+                if (readerStack?.Count > 0)
+                {
+                    (AsnReader topReader, bool wasIndefinite, int pushedBytesRead) = readerStack.Pop();
+
+                    tmpReader = topReader;
+                    tmpReader._data = tmpReader._data.Slice(bytesRead);
+
+                    isIndefinite = wasIndefinite;
+                    bytesRead += pushedBytesRead;
                 }
                 else
                 {
-                    if (lastUnusedBitCount != 0)
-                    {
-                        // T-REC-X.690-201508 sec 8.6.4 (only the last segment can have unused bits)
-                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                    }
-
-                    int lengthValue = length.Value;
-
-                    ParsePrimitiveBitStringContents(
-                        Slice(cur, 0, lengthValue),
-                        out lastUnusedBitCount,
-                        out ReadOnlyMemory<byte> value,
-                        out byte? normalizedLastByte);
-
-                    totalRead += lengthValue;
-                    totalContent += value.Length;
-                    lastSegmentLength = lengthValue;
-                    cur = cur.Slice(lengthValue);
-
-                    if (copyAction != null)
-                    {
-                        copyAction(value, normalizedLastByte, destination);
-
-                        destination = destination.Slice(value.Length);
-                    }
+                    tmpReader = null;
                 }
-            }
+            } while (tmpReader != null);
 
-            if (isIndefinite)
-            {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-
-            bytesRead = totalRead;
-            return totalContent;
+            return totalLength;
         }
 
         private bool TryCopyConstructedBitStringValue(
