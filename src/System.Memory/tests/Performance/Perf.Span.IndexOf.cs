@@ -86,5 +86,81 @@ namespace System.Memory.Tests
             }
             Assert.Equal(size/2, index);
         }
+
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData(1)]
+        [InlineData(10)]
+        [InlineData(100)]
+        [InlineData(1000)]
+        public void SpanLastIndexOfChar(int size)
+        {
+            Span<char> charSpan = new char[size];
+            charSpan[size / 2] = '5';
+
+            int index = 0;
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        index |= charSpan.LastIndexOf('5');
+                    }
+                }
+            }
+            Assert.Equal(size / 2, index);
+        }
+
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData(1)]
+        [InlineData(10)]
+        [InlineData(100)]
+        [InlineData(1000)]
+        public void SpanLastIndexOfCharAsBytes(int size)
+        {
+            Span<char> charSpan = new char[size];
+            charSpan[size / 2] = '5';
+            Span<byte> byteSpan = charSpan.AsBytes();
+
+            int index = 0;
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        index |= byteSpan.LastIndexOf<byte>(53);        // '5' = 53
+                    }
+                }
+            }
+            Assert.Equal(size > 1 ? size : 0, index);
+        }
+
+        [Benchmark(InnerIterationCount = InnerCount)]
+        [InlineData(1)]
+        [InlineData(10)]
+        [InlineData(100)]
+        [InlineData(1000)]
+        public void StringLastIndexOfChar(int size)
+        {
+            string str = new string('0', size / 2) + "5";
+            if (size > 1)
+            {
+                str += new string('0', size / 2 - 1);
+            }
+
+            int index = 0;
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        index |= str.LastIndexOf('5');
+                    }
+                }
+            }
+            Assert.Equal(size / 2, index);
+        }
     }
 }
