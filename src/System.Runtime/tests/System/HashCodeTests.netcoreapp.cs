@@ -7,41 +7,65 @@ using Xunit;
 
 public static class HashCodeTests
 {
-#if SYSTEM_HASHCODE_TESTVECTORS
-    // These test vectors were created using https://asecuritysite.com/encryption/xxHash
-    // 1. Find the hash for "".
-    // 2. Find the hash for "abcd". ASCII "abcd" and bit convert to uint.
-    // 3. Find the hash for "abcd1234". ASCII [ "abcd", "1234"] and bit convert to 2 uints.
-    // n. Continue until "abcd0123efgh4567ijkl8901mnop2345qrst6789uvwx0123yzab".
-
-    // HashCode is not deterministic across AppDomains by design. This means that
-    // these tests can not be executed against the version that exists within
-    // CoreCLR. Copy HashCode and set m_seed to 0 in order to execute these tests.
-
-    [Theory]
-    [InlineData(0x02cc5d05U)]
-    [InlineData(0xa3643705U, 0x64636261U)]
-    [InlineData(0x4603e94cU, 0x64636261U, 0x33323130U)]
-    [InlineData(0xd8a1e80fU, 0x64636261U, 0x33323130U, 0x68676665U)]
-    [InlineData(0x4b62a7cfU, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U)]
-    [InlineData(0xc33a7641U, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U)]
-    [InlineData(0x1a794705U, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U)]
-    [InlineData(0x4d79177dU, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U, 0x706f6e6dU)]
-    [InlineData(0x59d79205U, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U, 0x706f6e6dU, 0x35343332U)]
-    [InlineData(0x49585aaeU, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U, 0x706f6e6dU, 0x35343332U, 0x74737271U)]
-    [InlineData(0x2f005ff1U, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U, 0x706f6e6dU, 0x35343332U, 0x74737271U, 0x39383736U)]
-    [InlineData(0x0ce339bdU, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U, 0x706f6e6dU, 0x35343332U, 0x74737271U, 0x39383736U, 0x78777675U)]
-    [InlineData(0xb31bd2ffU, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U, 0x706f6e6dU, 0x35343332U, 0x74737271U, 0x39383736U, 0x78777675U, 0x33323130U)]
-    [InlineData(0xa821efa3U, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U, 0x706f6e6dU, 0x35343332U, 0x74737271U, 0x39383736U, 0x78777675U, 0x33323130U, 0x62617a79U)]
-    public static void HashCode_Add(uint expected, params uint[] vector)
+    [Fact]
+    public static void HashCode_Add()
     {
-        var hc = new HashCode();
-        for (int i = 0; i < vector.Length; i++)
-            hc.Add(vector[i]);
+        // The version of xUnit used by corefx does not support params theories.
+        void Theory(uint expected, params uint[] vector)
+        {
+            var hc = new HashCode();
+            for (int i = 0; i < vector.Length; i++)
+                hc.Add(vector[i]);
 
-        Assert.Equal(expected, (uint)hc.ToHashCode());
-    }
+#if SYSTEM_HASHCODE_TESTVECTORS
+            // HashCode is not deterministic across AppDomains by design. This means
+            // that these tests can not be executed against the version that exists
+            // within CoreCLR. Copy HashCode and set m_seed to 0 in order to execute
+            // these tests.
+        
+            Assert.Equal(expected, (uint)hc.ToHashCode());
+#else
+            // Validate that the HashCode.m_seed is randomized. This has a 1 in 4
+            // billion chance of resulting in a false negative, as HashCode.m_seed
+            // can be 0.
+
+            Assert.NotEqual(expected, (uint)hc.ToHashCode());
 #endif
+        }
+
+        // These test vectors were created using https://asecuritysite.com/encryption/xxHash
+        // 1. Find the hash for "".
+        // 2. Find the hash for "abcd". ASCII "abcd" and bit convert to uint.
+        // 3. Find the hash for "abcd1234". ASCII [ "abcd", "1234"] and bit convert to 2 uints.
+        // n. Continue until "abcd0123efgh4567ijkl8901mnop2345qrst6789uvwx0123yzab".
+
+        Theory(0x02cc5d05U);
+        Theory(0xa3643705U, 0x64636261U );
+        Theory(0x4603e94cU, 0x64636261U, 0x33323130U );
+        Theory(0xd8a1e80fU, 0x64636261U, 0x33323130U, 0x68676665U );
+        Theory(0x4b62a7cfU, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U );
+        Theory(0xc33a7641U, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U );
+        Theory(0x1a794705U, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U );
+        Theory(0x4d79177dU, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U, 0x706f6e6dU );
+        Theory(0x59d79205U, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U, 0x706f6e6dU, 0x35343332U );
+        Theory(0x49585aaeU, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U, 0x706f6e6dU, 0x35343332U, 0x74737271U );
+        Theory(0x2f005ff1U, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U, 0x706f6e6dU, 0x35343332U, 0x74737271U, 0x39383736U );
+        Theory(0x0ce339bdU, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U, 0x706f6e6dU, 0x35343332U, 0x74737271U, 0x39383736U, 0x78777675U );
+        Theory(0xb31bd2ffU, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U, 0x706f6e6dU, 0x35343332U, 0x74737271U, 0x39383736U, 0x78777675U, 0x33323130U );
+        Theory(0xa821efa3U, 0x64636261U, 0x33323130U, 0x68676665U, 0x37363534U, 0x6c6b6a69U, 0x31303938U, 0x706f6e6dU, 0x35343332U, 0x74737271U, 0x39383736U, 0x78777675U, 0x33323130U, 0x62617a79U );
+    }
+
+    [Fact]
+    public static void HashCode_Add_HashCode()
+    {        
+        var hc1 = new HashCode();
+        hc1.Add("Hello");
+
+        var hc2 = new HashCode();
+        hc2.Add("Hello".GetHashCode());
+
+        Assert.Equal(hc1.ToHashCode(), hc2.ToHashCode());
+    }
 
     [Fact]
     public static void HashCode_Add_Generic()
@@ -67,6 +91,20 @@ public static class HashCodeTests
         var expected = new HashCode();
         expected.Add(1);
         expected.Add(ConstComparer.ConstantValue);
+
+        Assert.Equal(expected.ToHashCode(), hc.ToHashCode());
+    }
+
+    [Fact]
+    public static void HashCode_Add_NullEqualityComparer()
+    {
+        var hc = new HashCode();
+        hc.Add(1);
+        hc.Add("Hello", null);
+
+        var expected = new HashCode();
+        expected.Add(1);
+        expected.Add("Hello");
 
         Assert.Equal(expected.ToHashCode(), hc.ToHashCode());
     }
@@ -202,7 +240,6 @@ public static class HashCodeTests
 
         Assert.Throws<NotSupportedException>(() => hc.GetHashCode());
     }
-
 
     [Fact]
     public static void HashCode_Equals()
