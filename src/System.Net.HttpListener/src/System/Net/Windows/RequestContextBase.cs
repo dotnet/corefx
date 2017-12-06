@@ -134,7 +134,10 @@ namespace System.Net
             _backingBufferLength = size;
 
             // Zero out the contents of the buffer.
-            new Span<byte>(_backingBuffer.ToPointer(), size).Fill(0);
+            for(int i = 0; i < size; ++i)
+            {
+                Marshal.WriteByte(_backingBuffer + i, 0);
+            }
         }
     }
 }
