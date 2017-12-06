@@ -703,6 +703,44 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
+        private int CountConstructedBitString(ReadOnlyMemory<byte> source, bool isIndefinite)
+        {
+            int lastUnusedBitCount = 0;
+            int lastSegmentLength = MaxCERSegmentSize;
+            Span<byte> destination = Span<byte>.Empty;
+
+            return ProcessConstructedBitString(
+                source,
+                ref destination,
+                null,
+                isIndefinite,
+                ref lastUnusedBitCount,
+                ref lastSegmentLength,
+                out _);
+        }
+
+        private void CopyConstructedBitString(
+            ReadOnlyMemory<byte> source,
+            Span<byte> destination,
+            bool isIndefinite,
+            out int unusedBitCount,
+            out int bytesRead,
+            out int bytesWritten)
+        {
+            unusedBitCount = 0;
+            Span<byte> tmpDest = destination;
+            int lastSegmentSize = MaxCERSegmentSize;
+
+            bytesWritten = ProcessConstructedBitString(
+                source,
+                ref tmpDest,
+                (value, lastByte, dest) => CopyBitStringValue(value, lastByte, dest),
+                isIndefinite,
+                ref unusedBitCount,
+                ref lastSegmentSize,
+                out bytesRead);
+        }
+
         private int ProcessConstructedBitString(
             ReadOnlyMemory<byte> source,
             ref Span<byte> destination,
@@ -825,21 +863,9 @@ namespace System.Security.Cryptography.Asn1
             out int bytesRead,
             out int bytesWritten)
         {
-            int lastUnusedBitCount = 0;
-            int lastSegmentSize = MaxCERSegmentSize;
-
-            Span<byte> tmpDest = dest;
-
-            // Call ProcessConstructedBitString with a null copy-action to get the required byte
-            // count and verify that the data is well-formed before copying into dest.
-            int contentLength = ProcessConstructedBitString(
-                source,
-                ref tmpDest,
-                null,
-                isIndefinite,
-                ref lastUnusedBitCount,
-                ref lastSegmentSize,
-                out int encodedLength);
+            // Call CountConstructedBitString to get the required byte and to verify that the
+            // data is well-formed before copying into dest.
+            int contentLength = CountConstructedBitString(source, isIndefinite);
 
             // Since the unused bits byte from the segments don't count, only one segment
             // returns 999 (or less), the second segment bumps the count to 1000, and is legal.
@@ -858,24 +884,15 @@ namespace System.Security.Cryptography.Asn1
                 return false;
             }
 
-            unusedBitCount = lastUnusedBitCount;
-            tmpDest = dest;
-            lastSegmentSize = MaxCERSegmentSize;
-            lastUnusedBitCount = 0;
-
-            // Now call it again with the method which fixes the normalized byte in the last segment.
-            bytesWritten = ProcessConstructedBitString(
+            CopyConstructedBitString(
                 source,
-                ref tmpDest,
-                (value, lastByte, destination) => CopyBitStringValue(value, lastByte, destination),
+                dest,
                 isIndefinite,
-                ref lastUnusedBitCount,
-                ref lastSegmentSize,
-                out bytesRead);
+                out unusedBitCount,
+                out bytesRead,
+                out bytesWritten);
 
-            Debug.Assert(unusedBitCount == lastUnusedBitCount);
             Debug.Assert(bytesWritten == contentLength);
-            Debug.Assert(bytesRead == encodedLength);
             return true;
         }
 
