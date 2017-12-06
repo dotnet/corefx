@@ -2272,29 +2272,15 @@ int32_t SystemNative_Socket(int32_t addressFamily, int32_t socketType, int32_t p
     return *createdSocket != -1 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
 }
 
-int32_t SystemNative_GetAtOutOfBandMark(intptr_t socket, int32_t* atMark)
-{
-    if (atMark == NULL)
-    {
-        return Error_EFAULT;
-    }
 
-    int fd = ToFileDescriptor(socket);
-
-    int result;
-    int err;
-    while ((err = ioctl(fd, SIOCATMARK, &result)) < 0 && errno == EINTR);
-    if (err == -1)
-    {
-        *atMark = 0;
-        return SystemNative_ConvertErrorPlatformToPal(errno);
-    }
-
-    *atMark = (int32_t)result;
-    return Error_SUCCESS;
-}
-
-int32_t SystemNative_GetBytesAvailable(intptr_t socket, int32_t* available)
+// Posix defines the prototype for ioctl as ioctl(int, int, ...). 
+// However, Glibc implements it as ioctl(int, unsigned long, ...) and the
+// MUSL library (used by the Alpine OS) implements it as ioctl(int, int, ...)
+#if defined(__GLIBC__) && defined(__GLIBC_MINOR__)
+int32_t GetInt32Ioctl(intptr_t socket, unsigned long request, int32_t* available)
+#else
+int32_t GetInt32Ioctl(intptr_t socket, int request, int32_t* available)
+#endif
 {
     if (available == NULL)
     {
@@ -2303,17 +2289,26 @@ int32_t SystemNative_GetBytesAvailable(intptr_t socket, int32_t* available)
 
     int fd = ToFileDescriptor(socket);
 
-    int result;
+    int avail;
     int err;
-    while ((err = ioctl(fd, FIONREAD, &result)) < 0 && errno == EINTR);
+    while ((err = ioctl(fd, request, &avail)) < 0 && errno == EINTR);
     if (err == -1)
     {
-        *available = 0;
         return SystemNative_ConvertErrorPlatformToPal(errno);
     }
 
-    *available = (int32_t)result;
+    *available = (int32_t)avail;
     return Error_SUCCESS;
+}
+
+int32_t SystemNative_GetAtOutOfBandMark(intptr_t socket, int32_t* available)
+{
+    return GetInt32Ioctl(socket, SIOCATMARK, available);
+}
+
+int32_t SystemNative_GetBytesAvailable(intptr_t socket, int32_t* available)
+{
+    return GetInt32Ioctl(socket, FIONREAD, available);
 }
 
 #if HAVE_EPOLL
