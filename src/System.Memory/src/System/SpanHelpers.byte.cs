@@ -203,16 +203,15 @@ namespace System
                     break;  // The unsearched portion is now shorter than the sequence we're looking for. So it can't be there.
 
                 // Do a quick search for the first element of "value".
-                int relativeIndex = LastIndexOf(ref Unsafe.Add(ref searchSpace, index), valueHead, remainingSearchSpaceLength);
+                int relativeIndex = LastIndexOf(ref searchSpace, valueHead, remainingSearchSpaceLength);
                 if (relativeIndex == -1)
                     break;
-                index += relativeIndex;
 
                 // Found the first element of "value". See if the tail matches.
-                if (SequenceEqual(ref Unsafe.Add(ref searchSpace, index + 1), ref valueTail, valueTailLength))
-                    return index;  // The tail matched. Return a successful find.
+                if (SequenceEqual(ref Unsafe.Add(ref searchSpace, relativeIndex + 1), ref valueTail, valueTailLength))
+                    return relativeIndex;  // The tail matched. Return a successful find.
 
-                index++;
+                index += remainingSearchSpaceLength - relativeIndex;
             }
             return -1;
         }
