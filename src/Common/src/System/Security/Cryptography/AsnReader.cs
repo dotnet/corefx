@@ -2396,57 +2396,46 @@ namespace System.Security.Cryptography.Asn1
             const byte SuffixState = 2;
             byte state = HmsState;
 
-            if (!contents.IsEmpty)
+            byte? GetNextState(byte octet)
             {
-                byte octet = contents[0];
-
                 if (octet == 'Z' || octet == '-' || octet == '+')
                 {
-                    state = SuffixState;
+                    return SuffixState;
                 }
-                else if (octet == '.' || octet == ',')
+
+                if (octet == '.' || octet == ',')
                 {
-                    state = FracState;
+                    return FracState;
                 }
-                else
-                {
-                    minute = ParseNonNegativeIntAndSlice(ref contents, 2);
-                }
+
+                return null;
             }
 
-            if (state == HmsState && !contents.IsEmpty)
+            // This while loop could be rewritten to include the FracState and Suffix
+            // processing steps.  But since there's a forward flow to the state machine
+            // the loop body then needs to account for that.
+            while (state == HmsState && contents.Length != 0)
             {
-                byte octet = contents[0];
+                byte? nextState = GetNextState(contents[0]);
 
-                if (octet == 'Z' || octet == '-' || octet == '+')
+                if (nextState == null)
                 {
-                    state = SuffixState;
-                }
-                else if (octet == '.' || octet == ',')
-                {
-                    state = FracState;
+                    if (minute == null)
+                    {
+                        minute = ParseNonNegativeIntAndSlice(ref contents, 2);
+                    }
+                    else if (second == null)
+                    {
+                        second = ParseNonNegativeIntAndSlice(ref contents, 2);
+                    }
+                    else
+                    {
+                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    }
                 }
                 else
                 {
-                    second = ParseNonNegativeIntAndSlice(ref contents, 2);
-                }
-            }
-
-            if (state == HmsState && !contents.IsEmpty)
-            {
-                byte octet = contents[0];
-
-                if (octet == 'Z' || octet == '-' || octet == '+')
-                {
-                    state = SuffixState;
-                }
-                else if (octet == '.' || octet == ',')
-                {
-                    state = FracState;
-                }
-                else
-                {
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    state = nextState.Value;
                 }
             }
 
@@ -2459,6 +2448,7 @@ namespace System.Security.Cryptography.Asn1
 
                 Debug.Assert(!contents.IsEmpty);
                 byte octet = contents[0];
+                Debug.Assert(state == GetNextState(octet));
 
                 if (octet == '.')
                 {
@@ -2514,18 +2504,17 @@ namespace System.Security.Cryptography.Asn1
                     lastFracDigit = (byte)(nonSemantic % 10);
                 }
 
-                if (!contents.IsEmpty)
+                if (contents.Length != 0)
                 {
-                    octet = contents[0];
+                    byte? nextState = GetNextState(contents[0]);
 
-                    if (octet == 'Z' || octet == '-' || octet == '+')
-                    {
-                        state = SuffixState;
-                    }
-                    else
+                    if (nextState == null)
                     {
                         throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                     }
+
+                    // If this produces FracState we'll finish with a non-empty contents, and still throw.
+                    state = nextState.Value;
                 }
             }
 
@@ -2533,6 +2522,7 @@ namespace System.Security.Cryptography.Asn1
             {
                 Debug.Assert(!contents.IsEmpty);
                 byte octet = contents[0];
+                Debug.Assert(state == GetNextState(octet));
                 contents = contents.Slice(1);
 
                 if (octet == 'Z')
@@ -2566,15 +2556,12 @@ namespace System.Security.Cryptography.Asn1
                     int offsetHour = ParseNonNegativeIntAndSlice(ref contents, 2);
                     int offsetMinute = 0;
 
-                    if (!contents.IsEmpty)
+                    if (contents.Length != 0 && contents[0] == ':')
                     {
-                        if (contents[0] == ':')
-                        {
-                            contents = contents.Slice(1);
-                        }
+                        contents = contents.Slice(1);
                     }
 
-                    if (!contents.IsEmpty)
+                    if (contents.Length != 0)
                     {
                         offsetMinute = ParseNonNegativeIntAndSlice(ref contents, 2);
                     }
@@ -2590,7 +2577,7 @@ namespace System.Security.Cryptography.Asn1
                 }
             }
 
-            // Was there data after a suffix?
+            // Was there data after a suffix, or fracstate went re-entrant?
             if (!contents.IsEmpty)
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
@@ -2644,6 +2631,7 @@ namespace System.Security.Cryptography.Asn1
 
             if (timeOffset == null)
             {
+                // Use the local timezone offset since there's no information in the contents.
                 value = new DateTimeOffset(new DateTime(year, month, day, hour, minute.Value, second.Value));
             }
             else

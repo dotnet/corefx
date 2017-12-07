@@ -400,6 +400,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("yyyyMMddHHmm+Q", "180E3230313631313036303132332D51")]
         [InlineData("yyyyMMddHHmm.Q", "180E3230313631313036303132332E51")]
         [InlineData("yyyyMMddHHmm..", "180E3230313631313036303132332E2E")]
+        [InlineData("yyyyMMddHHmm.ss,", "18103230313631313036303132332E31312E")]
         [InlineData("yyyyMMddHHmms", "180D32303136313130363031323334")]
         [InlineData("yyyyMMddHHmmsQ", "180E3230313631313036303132333451")]
         [InlineData("yyyyMMddHHmmss-", "180F32303136313130363031323334352B")]
