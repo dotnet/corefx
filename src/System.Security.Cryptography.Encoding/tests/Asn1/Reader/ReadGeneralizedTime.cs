@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Linq;
 using System.Security.Cryptography.Asn1;
 using Test.Cryptography;
 using Xunit;
@@ -262,6 +263,35 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             DateTimeOffset expected = new DateTimeOffset(2017, 9, 21, 18, 0, 44, 100, TimeSpan.Zero);
 
+            Assert.Equal(expected, value);
+        }
+
+        [Theory]
+        [InlineData(PublicEncodingRules.BER)]
+        [InlineData(PublicEncodingRules.CER)]
+        public static void MultiSegmentExcessivelyPreciseFraction(PublicEncodingRules ruleSet)
+        {
+            // This builds "20171207173522.0000...0001Z" where the Z required a second CER segment.
+            // This is a bit of nonsense, really, because it is encoding 1e-985 seconds, which is
+            // oodles of orders of magnitude smaller than Planck time (~5e-44).
+            // But, the spec says "any number of decimal places", and 985 is a number.
+
+            // A0 80 (context specifc 0, constructed, indefinite length)
+            //    04 82 03 E8 (octet string, primitive, 1000 bytes)
+            //       ASCII("20171207173522." + new string('0', 984) + '1')
+            //    04 01 (octet string, primitive, 1 byte)
+            //       ASCII("Z")
+            //    00 00 (end of contents)
+            //
+            // 1001 content bytes + 10 bytes of structure.
+            byte[] header = "A080048203E8".HexToByteArray();
+            byte[] contents0 = Text.Encoding.ASCII.GetBytes("20171207173522." + new string('0', 984) + "1");
+            byte[] cdr = { 0x04, 0x01, (byte)'Z', 0x00, 0x00 };
+            byte[] inputData = header.Concat(contents0).Concat(cdr).ToArray();
+
+            AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
+            DateTimeOffset value = reader.GetGeneralizedTime(new Asn1Tag(TagClass.ContextSpecific, 0));
+            DateTimeOffset expected = new DateTimeOffset(2017, 12, 7, 17, 35, 22, TimeSpan.Zero);
             Assert.Equal(expected, value);
         }
 
