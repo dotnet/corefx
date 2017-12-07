@@ -112,7 +112,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         public void ClassInterfaceArrayElementExplicitConversions()
         {
             AssertExplicitConvert(new SealedClass[0], default(IInterface[]), ExpectedConversionResult.CompileError);
-            AssertExplicitConvert(new UnsealedClass[0], default(IInterface[]), ExpectedConversionResult.RuntimeError);
             var ic = new ImplementingClass[0];
             AssertExplicitConvert(ic, (IInterface[])ic, ExpectedConversionResult.Succeed);
             var isc = new ImplementingSealedClass[0];
@@ -121,6 +120,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             AssertExplicitConvert(new SealedClass[0], default(UnrelatedNonInterface[]), ExpectedConversionResult.CompileError);
             AssertExplicitConvert(new UnsealedClass[0], default(UnrelatedNonInterface[]), ExpectedConversionResult.CompileError);
             AssertExplicitConvert(new Struct[0], default(UnrelatedNonInterface[]), ExpectedConversionResult.CompileError);
+        }
+
+        [Fact, SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "25754 is not fixed in NetFX")]
+        public void ClassInterfaceArrayElementExplicitConversionsCoreFX()
+        {
+            AssertExplicitConvert(new UnsealedClass[0], default(IInterface[]), ExpectedConversionResult.RuntimeError);
         }
 
         [Fact]
