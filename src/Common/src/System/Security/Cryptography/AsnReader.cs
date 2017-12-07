@@ -655,10 +655,8 @@ namespace System.Security.Cryptography.Asn1
             // Build a mask for the bits that are used so the normalized value can be computed
             //
             // If 3 bits are "unused" then build a mask for them to check for 0.
-            // 1 << 3 => 0b0000_1000
-            // subtract 1 => 0b0000_0111
-            // Invert that to be the positive mask: 0b111_1000
-            int mask = ~((1 << unusedBitCount) - 1);
+            // -1 << 3 => 0b1111_1111 << 3 => 0b1111_1000
+            int mask = -1 << unusedBitCount;
             byte lastByte = sourceSpan[sourceSpan.Length - 1];
             byte maskedByte = (byte)(lastByte & mask);
 
