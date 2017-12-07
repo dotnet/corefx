@@ -27,7 +27,7 @@ namespace System.SpanTests
                     a[i] = 10 * (i + 1);
                 }
                 ReadOnlySpan<int> span = new ReadOnlySpan<int>(a);
-                
+
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
                 {
                     int target = a[targetIndex];

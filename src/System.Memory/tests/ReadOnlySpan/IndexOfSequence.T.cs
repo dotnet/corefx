@@ -226,7 +226,7 @@ namespace System.SpanTests
         public static void IndexOfSequenceLengthOneValueJustPasttVeryEnd_String()
         {
             // A zero-length value is always "found" at the start of the span.
-            ReadOnlySpan<string> span = new ReadOnlySpan<string>(new string[] { "0", "1", "2", "3", "4", "5" }, 0, 5 );
+            ReadOnlySpan<string> span = new ReadOnlySpan<string>(new string[] { "0", "1", "2", "3", "4", "5" }, 0, 5);
             ReadOnlySpan<string> value = new ReadOnlySpan<string>(new string[] { "5" });
             int index = span.IndexOf(value);
             Assert.Equal(-1, index);

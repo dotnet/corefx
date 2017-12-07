@@ -84,7 +84,7 @@ namespace System.Buffers.Text.Tests
                     if (OffsetNegative)
                         offset = -offset;
                     DateTimeOffset dto = new DateTimeOffset(year: Year, month: Month, day: Day, hour: Hour, minute: Minute, second: Second, offset: offset);
-                    dayAbbreviation = s_DayAbbreviations[(int)(dto.DayOfWeek)];
+                    dayAbbreviation = s_dayAbbreviations[(int)(dto.DayOfWeek)];
                 }
                 else
                 {
@@ -95,7 +95,7 @@ namespace System.Buffers.Text.Tests
                 string monthAbbrevation;
                 if (Month >= 1 && Month <= 12)
                 {
-                    monthAbbrevation = s_MonthAbbreviations[Month - 1];
+                    monthAbbrevation = s_monthAbbreviations[Month - 1];
                 }
                 else
                 {
@@ -124,7 +124,7 @@ namespace System.Buffers.Text.Tests
             }
         }
 
-        public string OFormatStringZ => (OffsetHours != 0 || OffsetMinutes != 0)? null : OFormatStringNoOffset + "Z";
+        public string OFormatStringZ => (OffsetHours != 0 || OffsetMinutes != 0) ? null : OFormatStringNoOffset + "Z";
         public string OFormatStringOffset
         {
             get
@@ -148,7 +148,7 @@ namespace System.Buffers.Text.Tests
         public int OffsetMinutes { get; }
         public bool ExpectSuccess { get; }
 
-        private static readonly string[] s_DayAbbreviations = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
-        private static readonly string[] s_MonthAbbreviations = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+        private static readonly string[] s_dayAbbreviations = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+        private static readonly string[] s_monthAbbreviations = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
     }
 }

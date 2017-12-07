@@ -228,7 +228,6 @@ namespace System.Buffers.Text
                 return false; // 12 digits
             }
 
-
             if (ends && text[justConsumed] != end)
             {
                 value = default;

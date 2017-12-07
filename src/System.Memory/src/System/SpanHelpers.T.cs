@@ -23,7 +23,7 @@ namespace System
             int valueTailLength = valueLength - 1;
 
             int index = 0;
-            for (;;)
+            for (; ; )
             {
                 Debug.Assert(0 <= index && index <= searchSpaceLength); // Ensures no deceptive underflows in the computation of "remainingSearchSpaceLength".
                 int remainingSearchSpaceLength = searchSpaceLength - index - valueTailLength;
@@ -133,7 +133,7 @@ namespace System
             int valueTailLength = valueLength - 1;
 
             int index = 0;
-            for (;;)
+            for (; ; )
             {
                 Debug.Assert(0 <= index && index <= searchSpaceLength); // Ensures no deceptive underflows in the computation of "remainingSearchSpaceLength".
                 int remainingSearchSpaceLength = searchSpaceLength - index - valueTailLength;
@@ -158,7 +158,7 @@ namespace System
             where T : IEquatable<T>
         {
             Debug.Assert(length >= 0);
-            
+
             while (length >= 8)
             {
                 length -= 8;
@@ -204,21 +204,21 @@ namespace System
             }
             return -1;
 
-Found: // Workaround for https://github.com/dotnet/coreclr/issues/13549
+        Found: // Workaround for https://github.com/dotnet/coreclr/issues/13549
             return length;
-Found1:
+        Found1:
             return length + 1;
-Found2:
+        Found2:
             return length + 2;
-Found3:
+        Found3:
             return length + 3;
-Found4:
+        Found4:
             return length + 4;
-Found5:
+        Found5:
             return length + 5;
-Found6:
+        Found6:
             return length + 6;
-Found7:
+        Found7:
             return length + 7;
         }
 

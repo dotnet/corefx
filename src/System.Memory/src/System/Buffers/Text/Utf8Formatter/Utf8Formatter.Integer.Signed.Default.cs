@@ -13,17 +13,19 @@ namespace System.Buffers.Text
         {
             if ((ulong)value < 10)
             {
-                if (buffer.Length == 0) goto FalseExit;
+                if (buffer.Length == 0)
+                    goto FalseExit;
                 buffer[0] = (byte)('0' + value);
                 bytesWritten = 1;
                 return true;
             }
-            
+
             if (value < 0)
             {
                 value = -value;
                 int digitCount = FormattingHelpers.CountDigits((ulong)value);
-                if (digitCount >= buffer.Length) goto FalseExit;
+                if (digitCount >= buffer.Length)
+                    goto FalseExit;
                 bytesWritten = digitCount + 1;
                 buffer[0] = Utf8Constants.Minus;
                 buffer = buffer.Slice(1, digitCount);
@@ -31,7 +33,8 @@ namespace System.Buffers.Text
             else
             {
                 int digitCount = FormattingHelpers.CountDigits((ulong)value);
-                if (digitCount > buffer.Length) goto FalseExit;
+                if (digitCount > buffer.Length)
+                    goto FalseExit;
                 bytesWritten = digitCount;
                 buffer = buffer.Slice(0, digitCount);
             }

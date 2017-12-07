@@ -131,7 +131,6 @@ namespace System.SpanTests
             Assert.Equal<IntPtr>(expected, actual);
         }
 
-
         [Fact]
         public static void ClearValueTypeWithoutReferences()
         {
@@ -202,8 +201,8 @@ namespace System.SpanTests
         [Fact]
         public static void ClearEnumType()
         {
-            TestEnum[] actual = {TestEnum.e0, TestEnum.e1, TestEnum.e2};
-            TestEnum[] expected = {default, default, default };
+            TestEnum[] actual = { TestEnum.e0, TestEnum.e1, TestEnum.e2 };
+            TestEnum[] expected = { default, default, default };
 
             var span = new Span<TestEnum>(actual);
             span.Clear();

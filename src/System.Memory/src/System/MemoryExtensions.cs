@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace System
@@ -21,10 +20,10 @@ namespace System
         public static int IndexOf<T>(this Span<T> span, T value)
             where T : IEquatable<T>
         {
-            if (typeof(T) == typeof(byte)) 
+            if (typeof(T) == typeof(byte))
                 return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()), 
-                    Unsafe.As<T, byte>(ref value), 
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    Unsafe.As<T, byte>(ref value),
                     span.Length);
             return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
         }
@@ -38,11 +37,11 @@ namespace System
         public static int IndexOf<T>(this Span<T> span, ReadOnlySpan<T> value)
             where T : IEquatable<T>
         {
-            if (typeof(T) == typeof(byte)) 
+            if (typeof(T) == typeof(byte))
                 return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()), 
-                    span.Length, 
-                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()), 
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    span.Length,
+                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
                     value.Length);
             return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
         }
@@ -108,10 +107,10 @@ namespace System
         public static int IndexOf<T>(this ReadOnlySpan<T> span, T value)
             where T : IEquatable<T>
         {
-            if (typeof(T) == typeof(byte)) 
+            if (typeof(T) == typeof(byte))
                 return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()), 
-                    Unsafe.As<T, byte>(ref value), 
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    Unsafe.As<T, byte>(ref value),
                     span.Length);
             return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
         }
@@ -125,11 +124,11 @@ namespace System
         public static int IndexOf<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
             where T : IEquatable<T>
         {
-            if (typeof(T) == typeof(byte)) 
+            if (typeof(T) == typeof(byte))
                 return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()), 
-                    span.Length, 
-                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()), 
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    span.Length,
+                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
                     value.Length);
             return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
         }
@@ -267,7 +266,7 @@ namespace System
         {
             int valueLength = value.Length;
             if (typeof(T) == typeof(byte))
-                return valueLength <= span.Length && 
+                return valueLength <= span.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
                     ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
@@ -284,7 +283,7 @@ namespace System
         {
             int valueLength = value.Length;
             if (typeof(T) == typeof(byte))
-                return valueLength <= span.Length && 
+                return valueLength <= span.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
                     ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
@@ -307,10 +306,10 @@ namespace System
                     ref Unsafe.As<T, byte>(ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength)),
                     ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
                     valueLength);
-            return valueLength <= spanLength && 
+            return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
-                    ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength), 
-                    ref value.DangerousGetPinnableReference(), 
+                    ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength),
+                    ref value.DangerousGetPinnableReference(),
                     valueLength);
         }
 
@@ -332,7 +331,7 @@ namespace System
             return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength),
-                    ref value.DangerousGetPinnableReference(), 
+                    ref value.DangerousGetPinnableReference(),
                     valueLength);
         }
 

@@ -125,7 +125,7 @@ namespace System.Buffers.Text.Tests
                         }
                         catch (ArgumentOutOfRangeException)
                         {
-                            throw new Exception($"Failed on converting {expectedDto.DateTime} to local time. This is probably a piece of data that fails only in certain time zones. Time zone on this machine is {TimeZoneInfo.Local}");  
+                            throw new Exception($"Failed on converting {expectedDto.DateTime} to local time. This is probably a piece of data that fails only in certain time zones. Time zone on this machine is {TimeZoneInfo.Local}");
                         }
                     }
                     else

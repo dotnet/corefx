@@ -13,14 +13,16 @@ namespace System.Buffers.Text
         {
             if (value < 10)
             {
-                if (buffer.Length == 0) goto FalseExit;
+                if (buffer.Length == 0)
+                    goto FalseExit;
                 buffer[0] = (byte)('0' + value);
                 bytesWritten = 1;
                 return true;
             }
 
             int digitCount = FormattingHelpers.CountDigits(value);
-            if (digitCount > buffer.Length) goto FalseExit;
+            if (digitCount > buffer.Length)
+                goto FalseExit;
             bytesWritten = digitCount;
             // WriteDigits does not do bounds checks
             FormattingHelpers.WriteDigits(value, buffer.Slice(0, digitCount));

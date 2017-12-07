@@ -105,7 +105,7 @@ namespace System.SpanTests
                 var span = new Span<byte>(array, i, 3 * Vector<byte>.Count);
                 int idx = span.LastIndexOf<byte>(5);
                 Assert.Equal(span.Length - 1, idx);
-                
+
                 span = new Span<byte>(array, i, 3 * Vector<byte>.Count - 3);
                 idx = span.LastIndexOf<byte>(5);
                 Assert.Equal(span.Length - 1, idx);
