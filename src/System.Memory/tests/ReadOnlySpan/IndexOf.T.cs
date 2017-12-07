@@ -116,5 +116,74 @@ namespace System.SpanTests
                 Assert.Equal(-1, idx);
             }
         }
+
+        [Fact]
+        public static void ZeroLengthIndexOf_String()
+        {
+            ReadOnlySpan<string> sp = new ReadOnlySpan<string>(Array.Empty<string>());
+            int idx = sp.IndexOf("a");
+            Assert.Equal(-1, idx);
+        }
+
+        [Fact]
+        public static void TestMatchIndexOf_String()
+        {
+            for (int length = 0; length < 32; length++)
+            {
+                string[] a = new string[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = (10 * (i + 1)).ToString();
+                }
+                ReadOnlySpan<string> span = new ReadOnlySpan<string>(a);
+
+                for (int targetIndex = 0; targetIndex < length; targetIndex++)
+                {
+                    string target = a[targetIndex];
+                    int idx = span.IndexOf(target);
+                    Assert.Equal(targetIndex, idx);
+                }
+            }
+        }
+
+        [Fact]
+        public static void TestNoMatchIndexOf_String()
+        {
+            var rnd = new Random(42);
+            for (int length = 0; length <= byte.MaxValue; length++)
+            {
+                string[] a = new string[length];
+                string target = (rnd.Next(0, 256)).ToString();
+                for (int i = 0; i < length; i++)
+                {
+                    string val = (i + 1).ToString();
+                    a[i] = val == target ? (target + 1) : val;
+                }
+                ReadOnlySpan<string> span = new ReadOnlySpan<string>(a);
+
+                int idx = span.IndexOf(target);
+                Assert.Equal(-1, idx);
+            }
+        }
+
+        [Fact]
+        public static void TestMultipleMatchIndexOf_String()
+        {
+            for (int length = 2; length < 32; length++)
+            {
+                string[] a = new string[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = (10 * (i + 1)).ToString();
+                }
+
+                a[length - 1] = "5555";
+                a[length - 2] = "5555";
+
+                ReadOnlySpan<string> span = new ReadOnlySpan<string>(a);
+                int idx = span.IndexOf("5555");
+                Assert.Equal(length - 2, idx);
+            }
+        }
     }
 }
