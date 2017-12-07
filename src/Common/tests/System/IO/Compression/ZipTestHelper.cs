@@ -115,7 +115,14 @@ namespace System.IO.Compression.Tests
                 ac = ast.Read(ad, 0, 4096);
                 bc = bst.Read(bd, 0, 4096);
 
-                Assert.Equal(ac, bc);
+                if (ac != bc)
+                {
+                    string rep = Text.Encoding.Default.GetString(bd);
+                    rep = rep.Replace("\r\n", "\n");
+                    rep = rep.Replace("\n", "\r\n");
+                    bd = Text.Encoding.Default.GetBytes(rep);
+                }
+
                 Assert.True(ArraysEqual<byte>(ad, bd, ac), "Stream contents not equal: " + ast.ToString() + ", " + bst.ToString());
 
                 blocksRead++;
@@ -160,8 +167,17 @@ namespace System.IO.Compression.Tests
                         using (Stream entrystream = entry.Open())
                         {
                             entrystream.Read(buffer, 0, buffer.Length);
+
+                            if (file.Length != givenLength)
+                            {
+                                string rep = Text.Encoding.Default.GetString(buffer);
+                                rep = rep.Replace("\r\n", "\n");
+                                rep = rep.Replace("\n", "\r\n");
+                                buffer = Text.Encoding.Default.GetBytes(rep);
+                            }
+
+                            Assert.Equal(file.Length, buffer.Length);
                             string crc = CRC.CalculateCRC(buffer);
-                            Assert.Equal(file.Length, givenLength);
                             Assert.Equal(file.CRC, crc);
                         }
 
