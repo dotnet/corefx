@@ -764,6 +764,8 @@ namespace System.Security.Cryptography.Asn1
                     {
                         if (lastUnusedBitCount != 0)
                         {
+                            // T-REC-X.690-201508 sec 8.6.4, only the last segment may have
+                            // a number of bits not a multiple of 8.
                             throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                         }
 
