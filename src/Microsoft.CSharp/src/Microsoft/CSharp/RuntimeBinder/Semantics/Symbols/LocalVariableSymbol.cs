@@ -14,8 +14,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ExprWrap wrap;
 
-        // movedToField should have iIteratorLocal set appropriately
-
         public void SetType(CType pType)
         {
             type = pType;
