@@ -526,5 +526,34 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             Assert.Equal(val1.ByteArrayToHex(), val2.ByteArrayToHex());
         }
+
+        [Fact]
+        public static void TryCopyOctetStringBytes_ExtremelyNested()
+        {
+            byte[] dataBytes = new byte[4 * 16384];
+
+            // This will build 2^14 nested indefinite length values.
+            // In the end, none of them contain any content.
+            //
+            // For what it's worth, the initial algorithm succeeded at 1061, and StackOverflowed with 1062.
+            int end = dataBytes.Length / 2;
+
+            // UNIVERSAL OCTET STRING [Constructed]
+            const byte Tag = 0x20 | (byte)UniversalTagNumber.OctetString;
+
+            for (int i = 0; i < end; i += 2)
+            {
+                dataBytes[i] = Tag;
+                // Indefinite length
+                dataBytes[i + 1] = 0x80;
+            }
+
+            AsnReader reader = new AsnReader(dataBytes, AsnEncodingRules.BER);
+
+            int bytesWritten;
+
+            Assert.True(reader.TryCopyOctetStringBytes(Span<byte>.Empty, out bytesWritten));
+            Assert.Equal(0, bytesWritten);
+        }
     }
 }

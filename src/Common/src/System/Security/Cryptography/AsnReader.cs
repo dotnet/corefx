@@ -1332,15 +1332,11 @@ namespace System.Security.Cryptography.Asn1
 
         private int CountConstructedOctetString(ReadOnlyMemory<byte> source, bool isIndefinite)
         {
-            Span<byte> destination = Span<byte>.Empty;
-            int lastSegmentLength = MaxCERSegmentSize;
-
             int contentLength = CopyConstructedOctetString(
                 source,
-                ref destination,
+                Span<byte>.Empty,
                 false,
                 isIndefinite,
-                ref lastSegmentLength,
                 out _);
 
             // T-REC-X.690-201508 sec 9.2
@@ -1359,123 +1355,138 @@ namespace System.Security.Cryptography.Asn1
             out int bytesRead,
             out int bytesWritten)
         {
-            int lastSegmentLength = MaxCERSegmentSize;
-            Span<byte> dest = destination;
-
             bytesWritten = CopyConstructedOctetString(
                 source,
-                ref dest,
+                destination,
                 true,
                 isIndefinite,
-                ref lastSegmentLength,
                 out bytesRead);
         }
 
         private int CopyConstructedOctetString(
             ReadOnlyMemory<byte> source,
-            ref Span<byte> destination,
+            Span<byte> destination,
             bool write,
             bool isIndefinite,
-            ref int lastSegmentLength,
             out int bytesRead)
         {
-            if (source.IsEmpty)
+            bytesRead = 0;
+            int lastSegmentLength = MaxCERSegmentSize;
+
+            AsnReader tmpReader = new AsnReader(source, _ruleSet);
+            Stack<(AsnReader, bool, int)> readerStack = null;
+            int totalLength = 0;
+            Asn1Tag tag = Asn1Tag.ConstructedBitString;
+            Span<byte> curDest = destination;
+
+            do
             {
-                if (isIndefinite)
+                while (tmpReader.HasData)
                 {
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                }
+                    tag = tmpReader.ReadTagAndLength(out int? length, out int headerLength);
 
-                bytesRead = 0;
-                return 0;
-            }
-
-            int totalRead = 0;
-            int totalContent = 0;
-            ReadOnlyMemory<byte> cur = source;
-
-            while (!cur.IsEmpty)
-            {
-                AsnReader reader = new AsnReader(cur, _ruleSet);
-                Asn1Tag tag = reader.ReadTagAndLength(out int? length, out int headerLength);
-                
-                if (tag.TagClass != TagClass.Universal)
-                {
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                }
-
-                totalRead += headerLength;
-
-                if (isIndefinite && tag.TagValue == (int)UniversalTagNumber.EndOfContents)
-                {
-                    ValidateEndOfContents(tag, length, headerLength);
-
-                    bytesRead = totalRead;
-                    return totalContent;
-                }
-
-                if (tag.TagValue != (int)UniversalTagNumber.OctetString)
-                {
-                    // T-REC-X.690-201508 sec 8.7.3.2 (in particular, Note 2)
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                }
-
-                if (_ruleSet == AsnEncodingRules.CER)
-                {
-                    if (tag.IsConstructed || lastSegmentLength != MaxCERSegmentSize)
+                    if (tag == Asn1Tag.PrimitiveOctetString)
                     {
-                        // T-REC-X.690-201508 sec 9.2
+                        if (_ruleSet == AsnEncodingRules.CER && lastSegmentLength != MaxCERSegmentSize)
+                        {
+                            // T-REC-X.690-201508 sec 9.2
+                            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                        }
+
+                        Debug.Assert(length != null);
+                        ReadOnlyMemory<byte> contents = Slice(tmpReader._data, headerLength, length.Value);
+                        
+                        int localLen = headerLength + contents.Length;
+                        tmpReader._data = tmpReader._data.Slice(localLen);
+
+                        bytesRead += localLen;
+                        totalLength += contents.Length;
+                        lastSegmentLength = contents.Length;
+
+                        if (_ruleSet == AsnEncodingRules.CER && lastSegmentLength > MaxCERSegmentSize)
+                        {
+                            // T-REC-X.690-201508 sec 9.2
+                            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                        }
+
+                        if (write)
+                        {
+                            contents.Span.CopyTo(curDest);
+                            curDest = curDest.Slice(contents.Length);
+                        }
+                    }
+                    else if (tag == Asn1Tag.EndOfContents && isIndefinite)
+                    {
+                        ValidateEndOfContents(tag, length, headerLength);
+
+                        bytesRead += headerLength;
+
+                        if (readerStack?.Count > 0)
+                        {
+                            (AsnReader topReader, bool wasIndefinite, int pushedBytesRead) = readerStack.Pop();
+                            topReader._data = topReader._data.Slice(bytesRead);
+
+                            bytesRead += pushedBytesRead;
+                            isIndefinite = wasIndefinite;
+                            tmpReader = topReader;
+                        }
+                        else
+                        {
+                            // We have matched the EndOfContents that brought us here.
+                            break;
+                        }
+                    }
+                    else if (tag == Asn1Tag.ConstructedOctetString)
+                    {
+                        if (_ruleSet == AsnEncodingRules.CER)
+                        {
+                            // T-REC-X.690-201508 sec 9.2
+                            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                        }
+
+                        if (readerStack == null)
+                        {
+                            readerStack = new Stack<(AsnReader, bool, int)>();
+                        }
+
+                        readerStack.Push((tmpReader, isIndefinite, bytesRead));
+
+                        tmpReader = new AsnReader(
+                            Slice(tmpReader._data, headerLength, length),
+                            _ruleSet);
+
+                        bytesRead = headerLength;
+                        isIndefinite = (length == null);
+                    }
+                    else
+                    {
+                        // T-REC-X.690-201508 sec 8.6.4.1 (in particular, Note 2)
                         throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                     }
                 }
 
-                cur = cur.Slice(headerLength);
-
-                if (tag.IsConstructed)
+                if (isIndefinite && tag != Asn1Tag.EndOfContents)
                 {
-                    totalContent += CopyConstructedOctetString(
-                        Slice(cur, 0, length),
-                        ref destination,
-                        write,
-                        length == null,
-                        ref lastSegmentLength,
-                        out int nestedContentRead);
+                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                }
 
-                    totalRead += nestedContentRead;
-                    cur = cur.Slice(nestedContentRead);
+                if (readerStack?.Count > 0)
+                {
+                    (AsnReader topReader, bool wasIndefinite, int pushedBytesRead) = readerStack.Pop();
+
+                    tmpReader = topReader;
+                    tmpReader._data = tmpReader._data.Slice(bytesRead);
+
+                    isIndefinite = wasIndefinite;
+                    bytesRead += pushedBytesRead;
                 }
                 else
                 {
-                    int lengthValue = length.Value;
-
-                    // T-REC-X.690-201508 sec 9.2
-                    if (_ruleSet == AsnEncodingRules.CER && lengthValue > MaxCERSegmentSize)
-                    {
-                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                    }
-
-                    totalRead += lengthValue;
-                    totalContent += lengthValue;
-                    lastSegmentLength = lengthValue;
-
-                    ReadOnlyMemory<byte> segment = Slice(cur, 0, lengthValue);
-                    cur = cur.Slice(lengthValue);
-
-                    if (write)
-                    {
-                        segment.Span.CopyTo(destination);
-                        destination = destination.Slice(lengthValue);
-                    }
+                    tmpReader = null;
                 }
-            }
+            } while (tmpReader != null);
 
-            if (isIndefinite)
-            {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-
-            bytesRead = totalRead;
-            return totalContent;
+            return totalLength;
         }
 
         private bool TryCopyConstructedOctetStringContents(
