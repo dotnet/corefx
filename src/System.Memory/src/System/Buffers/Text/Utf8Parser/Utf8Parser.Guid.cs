@@ -31,7 +31,7 @@ namespace System.Buffers.Text
         {
             switch (standardFormat)
             {
-                case default(char):
+                case (default):
                 case 'D':
                     return TryParseGuidCore(text, false, ' ', ' ', out value, out bytesConsumed);
                 case 'B':

@@ -203,7 +203,7 @@ namespace System.SpanTests
         public static void ClearEnumType()
         {
             TestEnum[] actual = {TestEnum.e0, TestEnum.e1, TestEnum.e2};
-            TestEnum[] expected = {default(TestEnum), default(TestEnum), default(TestEnum) };
+            TestEnum[] expected = {default, default, default };
 
             var span = new Span<TestEnum>(actual);
             span.Clear();
@@ -218,9 +218,9 @@ namespace System.SpanTests
                 new TestValueTypeWithReference() { I = 2, S = "b" },
                 new TestValueTypeWithReference() { I = 3, S = "c" } };
             TestValueTypeWithReference[] expected = {
-                default(TestValueTypeWithReference),
-                default(TestValueTypeWithReference),
-                default(TestValueTypeWithReference) };
+                default,
+                default,
+                default };
 
             var span = new Span<TestValueTypeWithReference>(actual);
             span.Clear();

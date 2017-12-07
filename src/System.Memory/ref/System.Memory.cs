@@ -206,7 +206,7 @@ namespace System.Buffers
     public unsafe struct MemoryHandle : IDisposable 
     {
         [CLSCompliant(false)]
-        public MemoryHandle(IRetainable owner, void* pointer = null,  System.Runtime.InteropServices.GCHandle handle = default(System.Runtime.InteropServices.GCHandle))  { throw null; }
+        public MemoryHandle(IRetainable owner, void* pointer = null,  System.Runtime.InteropServices.GCHandle handle = default)  { throw null; }
         [CLSCompliant(false)]
         public void* Pointer { get { throw null; } }
         public bool HasPointer { get { throw null; } }

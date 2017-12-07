@@ -33,7 +33,7 @@ namespace System.Buffers.Text
             ParseNumberOptions options;
             switch (standardFormat)
             {
-                case default(char):
+                case (default):
                 case 'G':
                 case 'g':
                 case 'E':
@@ -43,7 +43,7 @@ namespace System.Buffers.Text
 
                 case 'F':
                 case 'f':
-                    options = default(ParseNumberOptions);
+                    options = default;
                     break;
 
                 default:

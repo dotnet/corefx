@@ -28,7 +28,7 @@ namespace System.SpanTests
 
                 for (int i = 0; i < length; i++)
                 {
-                    byte target0 = default(byte);
+                    byte target0 = default;
                     int idx = span.LastIndexOf<byte>(target0);
                     Assert.Equal(length - 1, idx);
                 }

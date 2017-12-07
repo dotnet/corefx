@@ -62,7 +62,7 @@ namespace System.Buffers.Text.Tests
                 // Wrong day of week.
                 yield return new ParserTestData<DateTimeOffset>("Thu, 13 Jan 2017 03:45:32 GMT", default, 'R', expectedSuccess: false);
 
-                foreach (ParserTestData<DateTimeOffset> bad in GenerateCorruptedDateTimeText("05/08/2017 10:30:45 +00:00", default(char)))
+                foreach (ParserTestData<DateTimeOffset> bad in GenerateCorruptedDateTimeText("05/08/2017 10:30:45 +00:00", default))
                 {
                     yield return bad;
                 }
@@ -136,7 +136,7 @@ namespace System.Buffers.Text.Tests
                     string text;
                     if ((text = pseudoDateTime.DefaultString) != null)
                     {
-                        yield return new ParserTestData<DateTimeOffset>(text, expectedDto, default(char), pseudoDateTime.ExpectSuccess);
+                        yield return new ParserTestData<DateTimeOffset>(text, expectedDto, default, pseudoDateTime.ExpectSuccess);
                     }
 
                     if ((text = pseudoDateTime.GFormatString) != null)

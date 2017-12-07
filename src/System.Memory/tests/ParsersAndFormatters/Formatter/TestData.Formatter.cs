@@ -85,7 +85,7 @@ namespace System.Buffers.Text.Tests
                     if (format.IsDefault)
                     {
                         string expectedOutput = ComputeExpectedOutput<T>(value, format.Symbol, StandardFormat.NoPrecision);
-                        yield return new FormatterTestData<T>(value, new SupportedFormat(default(char), format.SupportsPrecision), default(byte), expectedOutput);
+                        yield return new FormatterTestData<T>(value, new SupportedFormat(default, format.SupportsPrecision), default, expectedOutput);
                     }
 
                     if (!format.NoRepresentation)
