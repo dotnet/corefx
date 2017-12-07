@@ -29,7 +29,7 @@ namespace System.SpanTests
                 for (int i = 0; i < length; i++)
                 {
                     byte target0 = default;
-                    int idx = span.LastIndexOf<byte>(target0);
+                    int idx = span.LastIndexOf(target0);
                     Assert.Equal(length - 1, idx);
                 }
             }
@@ -50,7 +50,7 @@ namespace System.SpanTests
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
                 {
                     byte target = a[targetIndex];
-                    int idx = span.LastIndexOf<byte>(target);
+                    int idx = span.LastIndexOf(target);
                     Assert.Equal(targetIndex, idx);
                 }
             }
@@ -71,7 +71,7 @@ namespace System.SpanTests
                 }
                 ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a);
 
-                int idx = span.LastIndexOf<byte>(target);
+                int idx = span.LastIndexOf(target);
                 Assert.Equal(-1, idx);
             }
         }
