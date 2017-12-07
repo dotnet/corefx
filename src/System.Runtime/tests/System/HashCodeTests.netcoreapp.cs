@@ -82,6 +82,18 @@ public static class HashCodeTests
     }
 
     [Fact]
+    public static void HashCode_Add_Null()
+    {
+        var hc = new HashCode();
+        hc.Add<string>(null);
+
+        var expected = new HashCode();
+        expected.Add(EqualityComparer<string>.Default.GetHashCode(null));
+
+        Assert.Equal(expected.ToHashCode(), hc.ToHashCode());
+    }
+
+    [Fact]
     public static void HashCode_Add_GenericEqualityComparer()
     {
         var hc = new HashCode();
@@ -247,6 +259,24 @@ public static class HashCodeTests
         var hc = new HashCode();
 
         Assert.Throws<NotSupportedException>(() => hc.Equals(hc));
+    }
+
+    [Fact]
+    public static void HashCode_GetHashCode_Boxed()
+    {
+        var hc = new HashCode();
+        var obj = (object)hc;
+
+        Assert.Throws<NotSupportedException>(() => obj.GetHashCode());
+    }
+
+    [Fact]
+    public static void HashCode_Equals_Boxed()
+    {
+        var hc = new HashCode();
+        var obj = (object)hc;
+
+        Assert.Throws<NotSupportedException>(() => obj.Equals(obj));
     }
 
     public class ConstComparer : System.Collections.Generic.IEqualityComparer<string>
