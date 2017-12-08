@@ -18,7 +18,7 @@
         "scriptName": "",
         "arguments": "-path $(build.SourcesDirectory)\\corefx",
         "workingFolder": "",
-        "inlineScript": "param($path)\n\nif (Test-Path $path){\n    Stop-Process -processname msbuild -ErrorAction Ignore -Verbose\n    Stop-Process -processname dotnet -ErrorAction Ignore -Verbose\n    Stop-Process -processname vbcscompiler -ErrorAction Ignore -Verbose\n    # this will print out an error each time a file can't be deleted.\n    Remove-Item -Recurse -Force $path\n }\n",
+        "inlineScript": "param($path)\n\nif (Test-Path $path){\n    Stop-Process -processname msbuild -ErrorAction Ignore -Verbose\n    Stop-Process -processname dotnet -ErrorAction Ignore -Verbose\n    Stop-Process -processname vbcscompiler -ErrorAction Ignore -Verbose\n    # this will print out an error each time a file can't be deleted.\n    # Remove-Item -Recurse has a known issue (https://docs.microsoft.com/en-us/powershell/module/Microsoft.PowerShell.Management/Remove-Item?view=powershell-6).\n    # Instead, get all the items, sort by full path length so we delete innermost children first, then delete them.\n    Get-ChildItem $path -Recurse | Sort-Object -Property FullName -Descending | Remove-Item -Force\n }\n",
         "failOnStandardError": "true"
       }
     },
