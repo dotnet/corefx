@@ -128,7 +128,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public static void PathIsNullWihtoutRootedAfterArgumentNull()
+        public static void PathIsNullWihtoutRooted()
         {
             //any path is null without rooted after (ANE)
             CommonCasesException<ArgumentNullException>(null);
@@ -136,14 +136,14 @@ namespace System.IO.Tests
 
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void ContainsInvalidCharWithoutRootedAfterArgumentNull()
+        public static void ContainsInvalidCharWithoutRooted()
         {
             CommonCasesException<ArgumentException>("ab\0cd");
         }
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public static void ContainsInvalidCharWithoutRootedAfterArgumentNull_Core()
+        public static void ContainsInvalidCharWithoutRooted_Core()
         {
             Assert.Equal("ab\0cd", Path.Combine("ab\0cd"));
         }
@@ -151,7 +151,7 @@ namespace System.IO.Tests
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific invalid paths
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void ContainsInvalidCharWithoutRootedAfterArgumentNull_Windows()
+        public static void ContainsInvalidCharWithoutRooted_Windows()
         {
             //any path contains invalid character without rooted after (AE)
             CommonCasesException<ArgumentException>("ab|cd");
@@ -163,7 +163,7 @@ namespace System.IO.Tests
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific invalid paths
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public static void ContainsInvalidCharWithoutRootedAfterArgumentNull_Windows_Core()
+        public static void ContainsInvalidCharWithoutRooted_Windows_Core()
         {
             Assert.Equal("ab|cd", Path.Combine("ab|cd"));
             Assert.Equal("ab\bcd", Path.Combine("ab\bcd"));
@@ -173,7 +173,7 @@ namespace System.IO.Tests
 
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void ContainsInvalidCharWithRootedAfterArgumentNull()
+        public static void ContainsInvalidCharWithRooted()
         {
             //any path contains invalid character with rooted after (AE)
             CommonCasesException<ArgumentException>("ab\0cd", s_separator + "abc");
@@ -181,7 +181,7 @@ namespace System.IO.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public static void ContainsInvalidCharWithRootedAfterArgumentNull_Core()
+        public static void ContainsInvalidCharWithRooted_Core()
         {
             Assert.Equal(s_separator + "abc", Path.Combine("ab\0cd", s_separator + "abc"));
         }
@@ -189,7 +189,7 @@ namespace System.IO.Tests
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific invalid paths
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void ContainsInvalidCharWithRootedAfterArgumentNull_Windows()
+        public static void ContainsInvalidCharWithRooted_Windows()
         {
             //any path contains invalid character with rooted after (AE)
             CommonCasesException<ArgumentException>("ab|cd", s_separator + "abc");
@@ -200,7 +200,7 @@ namespace System.IO.Tests
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific invalid paths
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public static void ContainsInvalidCharWithRootedAfterArgumentNull_Windows_core()
+        public static void ContainsInvalidCharWithRooted_Windows_core()
         {
             Assert.Equal(s_separator + "abc", Path.Combine("ab|cd", s_separator + "abc"));
             Assert.Equal(s_separator + "abc", Path.Combine("ab\bcd", s_separator + "abc"));
