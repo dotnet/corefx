@@ -1524,7 +1524,7 @@ namespace System.Security.Cryptography.Asn1
 
             Debug.Assert(pos == end);
 
-            var comparer = new SetOfValueComparer(buffer);
+            var comparer = new ArrayIndexSetOfValueComparer(buffer);
             positions.Sort(comparer);
 
             byte[] tmp = ArrayPool<byte>.Shared.Rent(len);
@@ -1570,11 +1570,11 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
-        private class SetOfValueComparer : IComparer<(int, int)>
+        private class ArrayIndexSetOfValueComparer : IComparer<(int, int)>
         {
             private readonly byte[] _data;
 
-            public SetOfValueComparer(byte[] data)
+            public ArrayIndexSetOfValueComparer(byte[] data)
             {
                 _data = data;
             }
@@ -1584,40 +1584,18 @@ namespace System.Security.Cryptography.Asn1
                 (int xOffset, int xLength) = x;
                 (int yOffset, int yLength) = y;
 
-                int min = Math.Min(xLength, yLength);
-                int diff;
+                int value =
+                    SetOfValueComparer.Instance.Compare(
+                        new ReadOnlyMemory<byte>(_data, xOffset, xLength),
+                        new ReadOnlyMemory<byte>(_data, yOffset, yLength));
 
-                for (int i = 0; i < min; i++)
+                if (value == 0)
                 {
-                    int xVal = _data[xOffset + i];
-                    byte yVal = _data[yOffset + i];
-                    diff = xVal - yVal;
-
-                    if (diff != 0)
-                    {
-                        return diff;
-                    }
+                    // Whichever had the lowest index wins (once sorted, stay sorted)
+                    return xOffset - yOffset;
                 }
 
-                // The sorting rules (T-REC-X.690-201508 sec 11.6) say that the shorter one
-                // counts as if it are padded with as many 0x00s on the right as required for
-                // comparison.
-                //
-                // But, since a shorter definite value will have already had the length bytes
-                // compared, it was already different.  And a shorter indefinite value will
-                // have hit end-of-contents, making it already different.
-                //
-                // This is here because the spec says it should be, but no values are known
-                // which will make diff != 0.
-                diff = xLength - yLength;
-
-                if (diff != 0)
-                {
-                    return diff;
-                }
-
-                // Whichever had the lowest index wins (once sorted, stay sorted)
-                return xOffset - yOffset;
+                return value;
             }
         }
     }

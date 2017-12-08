@@ -2209,57 +2209,17 @@ namespace System.Security.Cryptography.Asn1
                     _ruleSet == AsnEncodingRules.CER)
                 {
                     AsnReader reader = new AsnReader(contents, _ruleSet);
-
-                    ReadOnlySpan<byte> current = ReadOnlySpan<byte>.Empty;
+                    ReadOnlyMemory<byte> current = ReadOnlyMemory<byte>.Empty;
+                    SetOfValueComparer comparer = SetOfValueComparer.Instance;
 
                     while (reader.HasData)
                     {
-                        ReadOnlySpan<byte> previous = current;
-                        current = reader.GetEncodedValue().Span;
+                        ReadOnlyMemory<byte> previous = current;
+                        current = reader.GetEncodedValue();
 
-                        int end = Math.Min(previous.Length, current.Length);
-                        int i;
-
-                        for (i = 0; i < end; i++)
+                        if (comparer.Compare(current, previous) < 0)
                         {
-                            byte currentVal = current[i];
-                            byte previousVal = previous[i];
-
-                            if (currentVal > previousVal)
-                            {
-                                break;
-                            }
-
-                            if (currentVal < previousVal)
-                            {
-                                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                            }
-                        }
-
-                        if (i == end)
-                        {
-                            // If everything was a tie then we treat the shorter thing as if it were
-                            // followed by an infinite number of 0x00s.  So "previous" better not have
-                            // more data, or if it does, none of it can be non-zero.
-                            //
-                            // Note: It doesn't seem possible for the tiebreaker to matter.
-                            // In DER everything is length prepended, so the content is only compared
-                            // if the tag and length were the same.
-                            //
-                            // In CER you could have an indefinite octet string, but it will contain
-                            // primitive octet strings and EoC. So at some point an EoC is compared
-                            // against a tag, and the sort order is determined.
-                            //
-                            // But since the spec calls it out, maybe there's something degenerate, so
-                            // we'll guard against it anyways.
-
-                            for (; i < previous.Length; i++)
-                            {
-                                if (previous[i] != 0)
-                                {
-                                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                                }
-                            }
+                            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                         }
                     }
                 }
