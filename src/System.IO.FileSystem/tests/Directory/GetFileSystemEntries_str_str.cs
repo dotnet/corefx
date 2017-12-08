@@ -904,12 +904,11 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [ActiveIssue(25665)]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-invalid sarch patterns throw ArgumentException
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-invalid search patterns throws no exception 
         public void UnixSearchPatternInvalid()
         {
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, "\0"));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, string.Format("te{0}st", "\0".ToString())));
+            GetEntries(TestDirectory, "\0");
+            GetEntries(TestDirectory, string.Format("te{0}st", "\0".ToString()));
         }
 
         [Fact]
