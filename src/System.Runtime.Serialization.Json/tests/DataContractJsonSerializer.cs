@@ -2931,7 +2931,48 @@ public static partial class DataContractJsonSerializerTests
         
         Assert.Equal(value.MyIntProperty, actual.MyIntProperty);
         Assert.Equal(value.MyStringProperty, actual.MyStringProperty);
-    } 
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "On netfx throws System.Runtime.CallbackException")]
+    public static void DSJS_ThrowExceptionOnDispose()
+    {
+        using (MemoryStream ms = new MemoryStream(System.Text.Encoding.Unicode.GetBytes("{}")))
+        {
+            XmlDictionaryReader jsonReader = JsonReaderWriterFactory.CreateJsonReader(ms, System.Text.Encoding.Unicode, XmlDictionaryReaderQuotas.Max,
+                reader =>
+                {
+                    //sample exception on reader close
+                    throw new DivideByZeroException();
+                });
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => jsonReader.Dispose());
+            Assert.IsType(typeof(DivideByZeroException), exception.InnerException);
+        }
+    }
+
+    [Fact]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "On netcoreapp throws InvalidOperationException")]
+    public static void DSJS_ThrowExceptionOnDispose_Netfx()
+    {
+        using (MemoryStream ms = new MemoryStream(System.Text.Encoding.Unicode.GetBytes("{}")))
+        {
+            XmlDictionaryReader jsonReader = JsonReaderWriterFactory.CreateJsonReader(ms, System.Text.Encoding.Unicode, XmlDictionaryReaderQuotas.Max,
+                reader =>
+                {
+                    //sample exception on reader close
+                    throw new DivideByZeroException();
+                });
+            try
+            {
+                jsonReader.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Assert.Equal("System.Runtime.CallbackException", ex.GetType().FullName);
+            }
+        }
+    }
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
