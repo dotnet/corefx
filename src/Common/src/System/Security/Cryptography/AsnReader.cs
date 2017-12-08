@@ -1092,65 +1092,74 @@ namespace System.Security.Cryptography.Asn1
             Span<byte> stackSpan = stackalloc byte[sizeLimit];
             ReadOnlyMemory<byte> saveData = _data;
 
-            if (!TryCopyBitStringBytes(expectedTag, stackSpan, out int unusedBitCount, out int bytesWritten))
+            // If TryCopyBitStringBytes succeeds but anything else fails _data will have moved,
+            // so if anything throws here just move _data back to what it was.
+            try
             {
-                throw new CryptographicException(
-                    SR.Format(SR.Cryptography_Asn_NamedBitListValueTooBig, tFlagsEnum.Name));
-            }
-
-            if (bytesWritten == 0)
-            {
-                // The mode isn't relevant, zero is always zero.
-                return (Enum)Enum.ToObject(tFlagsEnum, 0);
-            }
-
-            ReadOnlySpan<byte> valueSpan = stackSpan.Slice(0, bytesWritten);
-
-            // Now that the 0-bounds check is out of the way:
-            // 
-            // T-REC-X.690-201508 sec 11.2.2
-            if (_ruleSet == AsnEncodingRules.DER ||
-                _ruleSet == AsnEncodingRules.CER)
-            {
-                byte lastByte = valueSpan[bytesWritten - 1];
-
-                // No unused bits tests 0x01, 1 is 0x02, 2 is 0x04, etc.
-                // We already know that TryCopyBitStringBytes checked that the
-                // declared unused bits were 0, this checks that the last "used" bit
-                // isn't also zero.
-                byte testBit = (byte)(1 << unusedBitCount);
-
-                if ((lastByte & testBit) == 0)
+                if (!TryCopyBitStringBytes(expectedTag, stackSpan, out int unusedBitCount, out int bytesWritten))
                 {
-                    _data = saveData;
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    throw new CryptographicException(
+                        SR.Format(SR.Cryptography_Asn_NamedBitListValueTooBig, tFlagsEnum.Name));
                 }
-            }
 
-            // Consider a NamedBitList defined as
-            //
-            //   SomeList ::= BIT STRING {
-            //     a(0), b(1), c(2), d(3), e(4), f(5), g(6), h(7), i(8), j(9), k(10)
-            //   }
-            //
-            // The BIT STRING encoding of (a | j) is
-            //   unusedBitCount = 6,
-            //   contents: 0x80 0x40  (0b10000000_01000000)
-            //
-            // A the C# exposure of this structure we adhere to is
-            //
-            // [Flags]
-            // enum SomeList
-            // {
-            //     A = 1,
-            //     B = 1 << 1,
-            //     C = 1 << 2,
-            //     ...
-            // }
-            //
-            // Which happens to be exactly backwards from how the bits are encoded, but the complexity
-            // only needs to live here.
-            return (Enum)Enum.ToObject(tFlagsEnum, InterpretNamedBitListReversed(valueSpan));
+                if (bytesWritten == 0)
+                {
+                    // The mode isn't relevant, zero is always zero.
+                    return (Enum)Enum.ToObject(tFlagsEnum, 0);
+                }
+
+                ReadOnlySpan<byte> valueSpan = stackSpan.Slice(0, bytesWritten);
+
+                // Now that the 0-bounds check is out of the way:
+                // 
+                // T-REC-X.690-201508 sec 11.2.2
+                if (_ruleSet == AsnEncodingRules.DER ||
+                    _ruleSet == AsnEncodingRules.CER)
+                {
+                    byte lastByte = valueSpan[bytesWritten - 1];
+
+                    // No unused bits tests 0x01, 1 is 0x02, 2 is 0x04, etc.
+                    // We already know that TryCopyBitStringBytes checked that the
+                    // declared unused bits were 0, this checks that the last "used" bit
+                    // isn't also zero.
+                    byte testBit = (byte)(1 << unusedBitCount);
+
+                    if ((lastByte & testBit) == 0)
+                    {
+                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    }
+                }
+
+                // Consider a NamedBitList defined as
+                //
+                //   SomeList ::= BIT STRING {
+                //     a(0), b(1), c(2), d(3), e(4), f(5), g(6), h(7), i(8), j(9), k(10)
+                //   }
+                //
+                // The BIT STRING encoding of (a | j) is
+                //   unusedBitCount = 6,
+                //   contents: 0x80 0x40  (0b10000000_01000000)
+                //
+                // A the C# exposure of this structure we adhere to is
+                //
+                // [Flags]
+                // enum SomeList
+                // {
+                //     A = 1,
+                //     B = 1 << 1,
+                //     C = 1 << 2,
+                //     ...
+                // }
+                //
+                // Which happens to be exactly backwards from how the bits are encoded, but the complexity
+                // only needs to live here.
+                return (Enum)Enum.ToObject(tFlagsEnum, InterpretNamedBitListReversed(valueSpan));
+            }
+            catch
+            {
+                _data = saveData;
+                throw;
+            }
         }
 
         private static long InterpretNamedBitListReversed(ReadOnlySpan<byte> valueSpan)
@@ -1394,6 +1403,9 @@ namespace System.Security.Cryptography.Asn1
                         }
 
                         Debug.Assert(length != null);
+
+                        // The call to Slice here sanity checks the data bounds, length.Value is not
+                        // reliable unless this call has succeeded.
                         ReadOnlyMemory<byte> contents = Slice(tmpReader._data, headerLength, length.Value);
                         
                         int localLen = headerLength + contents.Length;
@@ -1653,7 +1665,18 @@ namespace System.Security.Cryptography.Asn1
                 firstIdentifier -= 80;
             }
 
-            StringBuilder builder = new StringBuilder(contents.Length * 4);
+            // Each byte can contribute a 3 digit value and a '.' (e.g. "126."), but usually
+            // they convey one digit and a separator.
+            //
+            // The OID with the most arcs which were found after a 30 minute search is
+            // "1.3.6.1.4.1.311.60.2.1.1" (EV cert jurisdiction of incorporation - locality)
+            // which has 11 arcs.
+            // The longest "known" segment is 16 bytes, a UUID-as-an-arc value.
+            // 16 * 11 = 176 bytes for an "extremely long" OID.
+            //
+            // So pre-allocate the StringBuilder with at most 1020 characters, an input longer than
+            // 255 encoded bytes will just have to re-allocate.
+            StringBuilder builder = new StringBuilder(((byte)contents.Length) * 4);
             builder.Append(firstArc);
             builder.Append('.');
             builder.Append(firstIdentifier.ToString());
