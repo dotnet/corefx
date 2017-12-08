@@ -19,12 +19,15 @@
     <_contract Include="System.ComponentModel.Annotations"/>
     <_contract Include="System.ComponentModel"/>
     <_contract Include="System.ComponentModel.EventBasedAsync"/>
+    <_contract Include="System.Data.Common"/>
     <_contract Include="System.Diagnostics.Contracts"/>
     <_contract Include="System.Diagnostics.Debug"/>
+    <_contract Include="System.Diagnostics.StackTrace"/>
     <_contract Include="System.Diagnostics.Tools"/>
     <_contract Include="System.Diagnostics.Tracing"/>
     <_contract Include="System.Dynamic.Runtime"/>
     <_contract Include="System.Globalization"/>
+    <_contract Include="System.Globalization.Extensions"/>
     <_contract Include="System.IO"/>
     <_contract Include="System.IO.Compression"/>
     <_contract Include="System.Linq"/>
@@ -35,6 +38,7 @@
     <_contract Include="System.Net.NetworkInformation"/>
     <_contract Include="System.Net.Primitives"/>
     <_contract Include="System.Net.Requests"/>
+    <_contract Include="System.Net.Sockets"/>
     <_contract Include="System.Net.WebHeaderCollection"/>
     <_contract Include="System.ObjectModel"/>
     <_contract Include="System.Reflection"/>
@@ -54,7 +58,9 @@
     <_contract Include="System.Runtime.Serialization.Json"/>
     <_contract Include="System.Runtime.Serialization.Primitives"/>
     <_contract Include="System.Runtime.Serialization.Xml"/>
+    <_contract Include="System.Security.Cryptography.Algorithms"/>
     <_contract Include="System.Security.Principal"/>
+    <_contract Include="System.Security.SecureString"/>
     <_contract Include="System.ServiceModel.Duplex"/>
     <_contract Include="System.ServiceModel.Http"/>
     <_contract Include="System.ServiceModel.NetTcp"/>
@@ -64,12 +70,14 @@
     <_contract Include="System.Text.Encoding.Extensions"/>
     <_contract Include="System.Text.RegularExpressions"/>
     <_contract Include="System.Threading"/>
+    <_contract Include="System.Threading.Overlapped"/>
     <_contract Include="System.Threading.Tasks"/>
     <_contract Include="System.Threading.Tasks.Parallel"/>
     <_contract Include="System.Threading.Timer"/>
     <_contract Include="System.Xml.ReaderWriter"/>
     <_contract Include="System.Xml.XDocument"/>
     <_contract Include="System.Xml.XmlSerializer"/>
+    <_contract Include="System.Xml.XPath.XDocument"/>
     <PackageReference Include="@(_contract)">
       <Version>4.3.0</Version>
     </PackageReference>
