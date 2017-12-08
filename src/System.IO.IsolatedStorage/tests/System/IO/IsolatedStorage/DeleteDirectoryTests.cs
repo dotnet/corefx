@@ -49,9 +49,9 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [ActiveIssue(25665)]
         [Fact]
-        public void DeleteDirectory_RaisesInvalidPath()
+        [ActiveIssue(25665, ~TestPlatforms.Windows)]
+        public void DeleteDirectory_IsolatedStorageException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {

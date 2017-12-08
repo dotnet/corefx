@@ -57,15 +57,27 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [ActiveIssue(25665)]
         [Fact]
-        public void OpenFile_RaisesArgumentException()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void OpenFile_RaisesArgumentException_Desktop()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.OpenFile("\0bad", FileMode.Create));
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.OpenFile("\0bad", FileMode.Create, FileAccess.ReadWrite));
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.OpenFile("\0bad", FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite));
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void OpenFile_RaisesIsolatedStorageException_Core()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
+            {
+                Assert.Throws<IsolatedStorageException>(() => isf.OpenFile("\0bad", FileMode.Create));
+                Assert.Throws<IsolatedStorageException>(() => isf.OpenFile("\0bad", FileMode.Create, FileAccess.ReadWrite));
+                Assert.Throws<IsolatedStorageException>(() => isf.OpenFile("\0bad", FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite));
             }
         }
 

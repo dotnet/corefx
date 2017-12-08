@@ -180,13 +180,13 @@ namespace System.IO.Tests
 
         #region PlatformSpecific
 
-        [ActiveIssue(25665)]
         [Fact]
         public void InvalidPath()
         {
             foreach (char invalid in Path.GetInvalidFileNameChars())
             {
-                if (invalid == '/' || invalid == '\\')
+                // On Non-Windows System Invalid-Path throws Directory Not Found Exception
+                if (invalid == '/' || invalid == '\\' || !PlatformDetection.IsWindows )
                 {
                     Assert.Throws<DirectoryNotFoundException>(() => GetEntries(Path.Combine(TestDirectory, string.Format("te{0}st", invalid.ToString()))));
                 }
