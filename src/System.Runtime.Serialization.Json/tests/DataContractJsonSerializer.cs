@@ -1339,7 +1339,7 @@ public static partial class DataContractJsonSerializerTests
         Assert.StrictEqual(((SimpleKnownTypeValue)actual.SimpleTypeValue).StrProperty, "PropertyValue");
     }
 
-    #region private type has to be in with in the class
+#region private type has to be in with in the class
     [DataContract]
     private class PrivateType
     {
@@ -1365,7 +1365,7 @@ public static partial class DataContractJsonSerializerTests
             return PrivateProperty;
         }
     }
-    #endregion
+#endregion
 
     [Fact]
     public static void DCJS_EmptyString_Throws()
@@ -1869,8 +1869,7 @@ public static partial class DataContractJsonSerializerTests
     public static void DCJS_EnumerableInterfaceGetOnlyCollection()
     {
         // Expect exception in deserialization process
-        Assert.Throws<InvalidDataContractException>(() =>
-        {
+        Assert.Throws<InvalidDataContractException>(() => {
             var obj = new TypeWithEnumerableInterfaceGetOnlyCollection(new List<string>() { "item1", "item2", "item3" });
             SerializeAndDeserialize(obj, @"{""Items"":[""item1"",""item2"",""item3""]}");
         });
@@ -1987,7 +1986,7 @@ public static partial class DataContractJsonSerializerTests
         Assert.StrictEqual(x.IntMember, y.IntMember);
     }
 
-    #region Array of primitive types
+#region Array of primitive types
 
     [Fact]
     public static void DCJS_ArrayOfBoolean()
@@ -2074,9 +2073,9 @@ public static partial class DataContractJsonSerializerTests
         Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
     }
 
-    #endregion
+#endregion
 
-    #region Collection
+#region Collection
 
     [Fact]
     public static void DCJS_GenericICollectionOfBoolean()
@@ -2158,9 +2157,9 @@ public static partial class DataContractJsonSerializerTests
         Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
     }
 
-    #endregion
+#endregion
 
-    #region Generic Dictionary
+#region Generic Dictionary
 
     [Fact]
     public static void DCJS_GenericDictionaryOfInt32Boolean()
@@ -2195,9 +2194,9 @@ public static partial class DataContractJsonSerializerTests
         Assert.StrictEqual(true, Enumerable.SequenceEqual(value.ToArray(), deserialized.ToArray()));
     }
 
-    #endregion
+#endregion
 
-    #region Non-Generic Dictionary
+#region Non-Generic Dictionary
 
     [Fact]
     public static void DCJS_NonGenericDictionaryOfInt32Boolean()
@@ -2247,7 +2246,7 @@ public static partial class DataContractJsonSerializerTests
         Assert.Equal(value.ID, actual.ID);
     }
 
-    #endregion
+#endregion
 
     [Fact]
     public static void DCJS_CreateJsonReaderTest()
@@ -2379,7 +2378,7 @@ public static partial class DataContractJsonSerializerTests
             Utils.CompareResult result2 = Utils.Compare(baseline2, actualOutput2);
             Assert.True(result2.Equal, $"{nameof(actualOutput2)} was not as expected: {Environment.NewLine}Expected: {baseline2}{Environment.NewLine}Actual: {actualOutput2}");
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             Assert.True(false, $"Error occurred when comparing results: {Environment.NewLine}{e.Message}{Environment.NewLine}Expected: {baseline2}{Environment.NewLine}Actual: {actualOutput2}");
         }
@@ -2594,13 +2593,13 @@ public static partial class DataContractJsonSerializerTests
         var actual3 = SerializeAndDeserialize(graph, "{\"DateTime\":\"1, mayo\",\"OffsetMinutes\":60}", dcjsSettings);
         Assert.NotNull(actual3);
         var expected3 = new DateTimeOffset(DateTime.Now.Year, 5, 1, 0, 0, 0, new TimeSpan(1, 0, 0));
-        Assert.True(actual3 == expected3,
+        Assert.True(actual3 == expected3, 
             $"{nameof(actual3)} was not as expected.\r\nExpected: {expected3} \r\n Actual: {actual3}");
 
         var dt35832 = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 3, 58, 32);
         var dt = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
         dcjsSettings = new DataContractJsonSerializerSettings() { DateTimeFormat = jsonTypes.DTF_hmsFt };
-        string actualam = GetAmString(jsonTypes.DTF_hmsFt);
+        string actualam = GetAmString(jsonTypes.DTF_hmsFt); 
         string baselinelist = $"[\"03:58:32.00 {actualam}\",\"12:00:00.00 {actualam}\",\"12:00:00.00 {actualam}\",\"03:58:32.00 {actualam}\"]";
         var actual4 = SerializeAndDeserialize(jsonTypes.DT_List, baselinelist, dcjsSettings);
         Assert.NotNull(actual4);
@@ -2645,7 +2644,7 @@ public static partial class DataContractJsonSerializerTests
         {
             DateTimeFormat = jsonTypes.DTF_hmsFt,
             UseSimpleDictionaryFormat = true,
-            EmitTypeInformation = EmitTypeInformation.AsNeeded,
+            EmitTypeInformation = EmitTypeInformation.AsNeeded, 
             KnownTypes = new List<Type>()
         };
         string actualam = GetAmString(jsonTypes.DTF_hmsFt);
@@ -2929,37 +2928,11 @@ public static partial class DataContractJsonSerializerTests
         var value = new UnspecifiedRootSerializationType();
         string baseline = "{\"MyIntProperty\":0,\"MyStringProperty\":null}";
         var actual = SerializeAndDeserialize(value, baseline);
-
+        
         Assert.Equal(value.MyIntProperty, actual.MyIntProperty);
         Assert.Equal(value.MyStringProperty, actual.MyStringProperty);
-    }
+    } 
 
-    [Fact]
-    public static void DSJS_ThrowExceptionOnDispose()
-    {
-        using (MemoryStream ms = new MemoryStream(System.Text.Encoding.Unicode.GetBytes("{}")))
-        {
-            XmlDictionaryReader jsonReader = JsonReaderWriterFactory.CreateJsonReader(ms, System.Text.Encoding.Unicode, XmlDictionaryReaderQuotas.Max,
-                reader =>
-                {
-                    //sample exception on reader close
-                    throw new DivideByZeroException();
-                });
-            try
-            {
-                jsonReader.Dispose();
-                Assert.False(true);
-            }
-            catch (Exception ex)
-            {
-                Assert.True(
-                    ex is InvalidOperationException ||
-                    //Netfx throws System.Runtime.CallbackException
-                    ex.GetType().FullName == "System.Runtime.CallbackException"
-                    );
-            }
-        }
-    }
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null, bool skipStringCompare = false)
     {
         DataContractJsonSerializer dcjs;
