@@ -20,8 +20,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER, "180D323031373039303832312D3031", 2017, 9, 8, 21, 0, 0, 0, -1, 0)]
         // yyyyMMddHH+HHmm (2017090821+0118)
         [InlineData(PublicEncodingRules.BER, "180F323031373039303832312B30313138", 2017, 9, 8, 21, 0, 0, 0, 1, 18)]
-        // yyyyMMddHH-HH:mm (2017090821-01:18)
-        [InlineData(PublicEncodingRules.BER, "1810323031373039303832312D30313A3138", 2017, 9, 8, 21, 0, 0, 0, -1, -18)]
         // yyyyMMddHH,hourFrac (2017090821.1)
         [InlineData(PublicEncodingRules.BER, "180C323031373039303832312C31", 2017, 9, 8, 21, 6, 0, 0, null, 0)]
         // yyyyMMddHH.hourFracZ (2017090821.2010Z)
@@ -30,8 +28,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER, "1812323031373039303832312C333039392D3031", 2017, 9, 8, 21, 18, 35, 640, -1, 0)]
         // yyyyMMddHH.hourFrac+HHmm (2017090821.201+0118)
         [InlineData(PublicEncodingRules.BER, "1813323031373039303832312E3230312B30313138", 2017, 9, 8, 21, 12, 3, 600, 1, 18)]
-        // yyyyMMddHH.hourFrac-HH:mm (2017090821.1-01:18)
-        [InlineData(PublicEncodingRules.BER, "1812323031373039303832312E312D30313A3138", 2017, 9, 8, 21, 6, 0, 0, -1, -18)]
         // yyyyMMddHHmm (201709082358)
         [InlineData(PublicEncodingRules.BER, "180C323031373039303832333538", 2017, 9, 8, 23, 58, 0, 0, null, 0)]
         // yyyyMMddHHmmZ (201709082358Z)
@@ -40,8 +36,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER, "180F3230313730393038323335382D3031", 2017, 9, 8, 23, 58, 0, 0, -1, 0)]
         // yyyyMMddHHmm+HHmm (201709082358+0118)
         [InlineData(PublicEncodingRules.BER, "18113230313730393038323335382B30313138", 2017, 9, 8, 23, 58, 0, 0, 1, 18)]
-        // yyyyMMddHHmm-HH:mm (201709082358-01:18)
-        [InlineData(PublicEncodingRules.BER, "18123230313730393038323335382D30313A3138", 2017, 9, 8, 23, 58, 0, 0, -1, -18)]
         // yyyyMMddHHmm.minuteFrac (201709082358.01)
         [InlineData(PublicEncodingRules.BER, "180F3230313730393038323335382E3031", 2017, 9, 8, 23, 58, 0, 600, null, 0)]
         // yyyyMMddHHmm,minuteFracZ (201709082358,11Z)
@@ -50,8 +44,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER, "18123230313730393038323335382E30352D3031", 2017, 9, 8, 23, 58, 3, 0, -1, 0)]
         // yyyyMMddHHmm,minuteFrac+HHmm (201709082358,007+0118)
         [InlineData(PublicEncodingRules.BER, "18153230313730393038323335382C3030372B30313138", 2017, 9, 8, 23, 58, 0, 420, 1, 18)]
-        // yyyyMMddHHmm.minuteFrac-HH:mm (201709082358.00005-01:18)
-        [InlineData(PublicEncodingRules.BER, "18183230313730393038323335382E30303030352D30313A3138", 2017, 9, 8, 23, 58, 0, 3, -1, -18)]
         // yyyyMMddHHmmss (20161106012345) - Ambiguous time due to DST "fall back" in US & Canada
         [InlineData(PublicEncodingRules.BER, "180E3230313631313036303132333435", 2016, 11, 6, 1, 23, 45, 0, null, 0)]
         // yyyyMMddHHmmssZ (20161106012345Z)
@@ -60,8 +52,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER, "181132303136313130363031323334352D3031", 2016, 11, 6, 1, 23, 45, 0, -1, 0)]
         // yyyyMMddHHmmss+HHmm (20161106012345+0118)
         [InlineData(PublicEncodingRules.BER, "181332303136313130363031323334352B30313138", 2016, 11, 6, 1, 23, 45, 0, 1, 18)]
-        // yyyyMMddHHmmss-HH:mm (20161106012345-01:18)
-        [InlineData(PublicEncodingRules.BER, "181432303136313130363031323334352D30313A3138", 2016, 11, 6, 1, 23, 45, 0, -1, -18)]
         // yyyyMMddHHmmss.secondFrac (20161106012345.6789) - Ambiguous time due to DST "fall back" in US & Canada
         [InlineData(PublicEncodingRules.BER, "181332303136313130363031323334352E36373839", 2016, 11, 6, 1, 23, 45, 679, null, 0)]
         // yyyyMMddHHmmss,secondFracZ (20161106012345,7654Z)
@@ -70,8 +60,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER, "181532303136313130363031323334352E3030312D3031", 2016, 11, 6, 1, 23, 45, 1, -1, 0)]
         // yyyyMMddHHmmss,secondFrac+HHmm (20161106012345,0009+0118)
         [InlineData(PublicEncodingRules.BER, "181832303136313130363031323334352C303030392B30313138", 2016, 11, 6, 1, 23, 45, 1, 1, 18)]
-        // yyyyMMddHHmmss.secondFrac-HH:mm (20161106012345.9999-01:18)
-        [InlineData(PublicEncodingRules.BER, "181932303136313130363031323334352E393939392D30313A3138", 2016, 11, 6, 1, 23, 46, 0, -1, -18)]
 
         // yyyyMMddHHmmssZ (20161106012345Z)
         [InlineData(PublicEncodingRules.CER, "180F32303136313130363031323334355A", 2016, 11, 6, 1, 23, 45, 0, 0, 0)]
@@ -132,8 +120,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("180D323031373039303832312D3031")]
         // yyyyMMddHH+HHmm (2017090821+0118)
         [InlineData("180F323031373039303832312B30313138")]
-        // yyyyMMddHH-HH:mm (2017090821-01:18)
-        [InlineData("1810323031373039303832312D30313A3138")]
         // yyyyMMddHH,hourFrac (2017090821,1)
         [InlineData("180C323031373039303832312C31")]
         // yyyyMMddHH.hourFrac (2017090821.1)
@@ -150,10 +136,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("1813323031373039303832312C3230312B30313138")]
         // yyyyMMddHH.hourFrac+HHmm (2017090821.201+0118)
         [InlineData("1813323031373039303832312E3230312B30313138")]
-        // yyyyMMddHH,hourFrac-HH:mm (2017090821,1-01:18)
-        [InlineData("1812323031373039303832312C312D30313A3138")]
-        // yyyyMMddHH.hourFrac-HH:mm (2017090821.1-01:18)
-        [InlineData("1812323031373039303832312E312D30313A3138")]
         // yyyyMMddHHmm (201709082358)
         [InlineData("180C323031373039303832333538")]
         // yyyyMMddHHmmZ (201709082358Z)
@@ -162,8 +144,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("180F3230313730393038323335382D3031")]
         // yyyyMMddHHmm+HHmm (201709082358+0118)
         [InlineData("18113230313730393038323335382B30313138")]
-        // yyyyMMddHHmm-HH:mm (201709082358-01:18)
-        [InlineData("18123230313730393038323335382D30313A3138")]
         // yyyyMMddHHmm,minuteFrac (201709082358,01)
         [InlineData("180F3230313730393038323335382C3031")]
         // yyyyMMddHHmm.minuteFrac (201709082358.01)
@@ -180,18 +160,12 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("18153230313730393038323335382C3030372B30313138")]
         // yyyyMMddHHmm.minuteFrac+HHmm (201709082358.007+0118)
         [InlineData("18153230313730393038323335382E3030372B30313138")]
-        // yyyyMMddHHmm,minuteFrac-HH:mm (201709082358,00005-01:18)
-        [InlineData("18183230313730393038323335382C30303030352D30313A3138")]
-        // yyyyMMddHHmm.minuteFrac-HH:mm (201709082358.00005-01:18)
-        [InlineData("18183230313730393038323335382E30303030352D30313A3138")]
         // yyyyMMddHHmmss (20161106012345)
         [InlineData("180E3230313631313036303132333435")]
         // yyyyMMddHHmmss-HH (20161106012345-01)
         [InlineData("181132303136313130363031323334352D3031")]
         // yyyyMMddHHmmss+HHmm (20161106012345+0118)
         [InlineData("181332303136313130363031323334352B30313138")]
-        // yyyyMMddHHmmss-HH:mm (20161106012345-01:18)
-        [InlineData("181432303136313130363031323334352D30313A3138")]
         // yyyyMMddHHmmss,secondFrac (20161106012345,6789)
         [InlineData("181332303136313130363031323334352C36373839")]
         // yyyyMMddHHmmss.secondFrac (20161106012345.6789)
@@ -206,10 +180,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("181832303136313130363031323334352C303030392B30313138")]
         // yyyyMMddHHmmss.secondFrac+HHmm (20161106012345.0009+0118)
         [InlineData("181832303136313130363031323334352E303030392B30313138")]
-        // yyyyMMddHHmmss,secondFrac-HH:mm (20161106012345,9999-01:18)
-        [InlineData("181932303136313130363031323334352C393939392D30313A3138")]
-        // yyyyMMddHHmmss.secondFrac-HH:mm (20161106012345.9999-01:18)
-        [InlineData("181932303136313130363031323334352E393939392D30313A3138")]
         // yyyyMMddHHmmss.secondFrac0Z (20161106012345.76540Z)
         [InlineData("181532303136313130363031323334352E37363534305A")]
         // Constructed encoding of yyyyMMddHHmmssZ
@@ -339,10 +309,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("1813323031373039303832312C3230312B30313138")]
         // yyyyMMddHH.hourFrac+HHmm (2017090821.201+0118)
         [InlineData("1813323031373039303832312E3230312B30313138")]
-        // yyyyMMddHH,hourFrac-HH:mm (2017090821,1-01:18)
-        [InlineData("1812323031373039303832312C312D30313A3138")]
-        // yyyyMMddHH.hourFrac-HH:mm (2017090821.1-01:18)
-        [InlineData("1812323031373039303832312E312D30313A3138")]
         // yyyyMMddHHmm,minuteFrac (201709082358,01)
         [InlineData("180F3230313730393038323335382C3031")]
         // yyyyMMddHHmm.minuteFrac (201709082358.01)
@@ -359,10 +325,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("18153230313730393038323335382C3030372B30313138")]
         // yyyyMMddHHmm.minuteFrac+HHmm (201709082358.007+0118)
         [InlineData("18153230313730393038323335382E3030372B30313138")]
-        // yyyyMMddHHmm,minuteFrac-HH:mm (201709082358,00005-01:18)
-        [InlineData("18183230313730393038323335382C30303030352D30313A3138")]
-        // yyyyMMddHHmm.minuteFrac-HH:mm (201709082358.00005-01:18)
-        [InlineData("18183230313730393038323335382E30303030352D30313A3138")]
         // yyyyMMddHHmmss,secondFrac (20161106012345,6789)
         [InlineData("181332303136313130363031323334352C36373839")]
         // yyyyMMddHHmmss.secondFrac (20161106012345.6789)
@@ -377,10 +339,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("181832303136313130363031323334352C303030392B30313138")]
         // yyyyMMddHHmmss.secondFrac+HHmm (20161106012345.0009+0118)
         [InlineData("181832303136313130363031323334352E303030392B30313138")]
-        // yyyyMMddHHmmss,secondFrac-HH:mm (20161106012345,9999-01:18)
-        [InlineData("181932303136313130363031323334352C393939392D30313A3138")]
-        // yyyyMMddHHmmss.secondFrac-HH:mm (20161106012345.9999-01:18)
-        [InlineData("181932303136313130363031323334352E393939392D30313A3138")]
         // yyyyMMddHHmmss.secondFrac0Z (20161106012345.76540Z)
         [InlineData("181532303136313130363031323334352E37363534305A")]
         public static void VerifyDisallowFraction_BER(string inputHex)
@@ -448,8 +406,17 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("yyyyMMddHH+HHQ", "180E323031363131303630312D303051")]
         [InlineData("yyyyMMddHH+HHmQ", "180F323031363131303630312D30303051")]
         [InlineData("yyyyMMddHH+HHmmQ", "1810323031363131303630312D3030303151")]
-        [InlineData("yyyyMMddHH+HH:mQ", "1810323031363131303630312D30303A3051")]
-        [InlineData("yyyyMMddHH+HH:mmQ", "1811323031363131303630312D30303A303051")]
+        [InlineData("yyyyMMddHH+0060", "180F323031373132303830392D30303630")]
+        [InlineData("yyyyMMddHH-2400", "180F323031373132303830392D32343030")]
+        [InlineData("yyyyMMddHH-HH:mm", "1810323031373039303832312D30313A3138")]
+        [InlineData("yyyyMMddHHmm-HH:mm", "18123230313730393038323131302D30313A3138")]
+        [InlineData("yyyyMMddHHmmss-HH:mm", "181432303137303930383231313032302D30313A3138")]
+        [InlineData("yyyyMMddHH,hourFrac-HH:mm", "1812323031373039303832312C312D30313A3138")]
+        [InlineData("yyyyMMddHH.hourFrac-HH:mm", "1812323031373039303832312E312D30313A3138")]
+        [InlineData("yyyyMMddHHmm,minuteFrac-HH:mm", "18183230313730393038323335382C30303030352D30313A3138")]
+        [InlineData("yyyyMMddHHmm.minuteFrac-HH:mm", "18183230313730393038323335382E30303030352D30313A3138")]
+        [InlineData("yyyyMMddHHmmss,secondFrac-HH:mm", "181932303136313130363031323334352C393939392D30313A3138")]
+        [InlineData("yyyyMMddHHmmss.secondFrac-HH:mm", "181932303136313130363031323334352E393939392D30313A3138")]
         public static void GetGeneralizedTime_Throws(string description, string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();

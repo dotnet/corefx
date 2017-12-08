@@ -2494,13 +2494,11 @@ namespace System.Security.Cryptography.Asn1
             //  +HHmm
             //  -HH
             //  -HHmm
-            // Additionally, it us unclear if the following formats are supposed to be supported,
-            // because the ISO 8601:2004 spec is behind a paywall.
-            //  +HH:mm
-            //  -HH:mm
             //
-            // Also, every instance of '.' is actually "period or comma".
-
+            // Since T-REC-X.680-201510 46.3(a)(1) and 46.3(a)(2) both specify the ISO 8601:2004
+            // Basic format, we shall presume that 46.3(a)(3) also meant only the Basic format,
+            // and therefore [+/-]HH:mm (with the colon) are prohibited. (based on ISO 8601:201x-DIS)
+            
             // Since DateTimeOffset doesn't have a notion of
             // "I'm a local time, but with an unknown offset", the computer's current offset will
             // be used.
@@ -2701,11 +2699,6 @@ namespace System.Security.Cryptography.Asn1
 
                     int offsetHour = ParseNonNegativeIntAndSlice(ref contents, 2);
                     int offsetMinute = 0;
-
-                    if (contents.Length != 0 && contents[0] == ':')
-                    {
-                        contents = contents.Slice(1);
-                    }
 
                     if (contents.Length != 0)
                     {
