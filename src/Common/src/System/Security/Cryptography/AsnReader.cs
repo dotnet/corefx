@@ -34,6 +34,14 @@ namespace System.Security.Cryptography.Asn1
             _ruleSet = ruleSet;
         }
 
+        public void ThrowIfNotEmpty()
+        {
+            if (HasData)
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+        }
+
         public static bool TryPeekTag(ReadOnlySpan<byte> source, out Asn1Tag tag, out int bytesRead)
         {
             return Asn1Tag.TryParse(source, out tag, out bytesRead);
@@ -314,11 +322,6 @@ namespace System.Security.Cryptography.Asn1
             }
 
             return Slice(_data, bytesRead, length.Value);
-        }
-
-        public void SkipValue()
-        {
-            GetEncodedValue();
         }
 
         /// <summary>

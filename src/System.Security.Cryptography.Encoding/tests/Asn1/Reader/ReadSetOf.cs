@@ -145,7 +145,8 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Asn1Tag tag = setOf.PeekTag();
                 lastTag = tag.TagValue;
 
-                setOf.SkipValue();
+                // Ignore the return, just drain it.
+                setOf.GetEncodedValue();
             }
 
             Assert.Equal(lastTagValue, lastTag);
