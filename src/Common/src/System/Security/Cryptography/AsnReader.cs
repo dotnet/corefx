@@ -616,7 +616,7 @@ namespace System.Security.Cryptography.Asn1
             ReadOnlyMemory<byte> source,
             out int unusedBitCount,
             out ReadOnlyMemory<byte> value,
-            out byte? normalizedLastByte)
+            out byte normalizedLastByte)
         {
             // T-REC-X.690-201508 sec 9.2
             if (_ruleSet == AsnEncodingRules.CER && source.Length > MaxCERSegmentSize)
@@ -632,7 +632,6 @@ namespace System.Security.Cryptography.Asn1
 
             ReadOnlySpan<byte> sourceSpan = source.Span;
             unusedBitCount = sourceSpan[0];
-            normalizedLastByte = null;
 
             // T-REC-X.690-201508 sec 8.6.2.2
             if (unusedBitCount > 7)
@@ -650,6 +649,7 @@ namespace System.Security.Cryptography.Asn1
 
                 Debug.Assert(unusedBitCount == 0);
                 value = ReadOnlyMemory<byte>.Empty;
+                normalizedLastByte = 0;
                 return;
             }
 
@@ -668,21 +668,20 @@ namespace System.Security.Cryptography.Asn1
                 {
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                 }
-
-                normalizedLastByte = maskedByte;
             }
 
+            normalizedLastByte = maskedByte;
             value = source.Slice(1);
         }
 
         private delegate void BitStringCopyAction(
             ReadOnlyMemory<byte> value,
-            byte? normalizedLastByte,
+            byte normalizedLastByte,
             Span<byte> destination);
 
         private static void CopyBitStringValue(
             ReadOnlyMemory<byte> value,
-            byte? normalizedLastByte,
+            byte normalizedLastByte,
             Span<byte> destination)
         {
             if (value.Length == 0)
@@ -690,17 +689,9 @@ namespace System.Security.Cryptography.Asn1
                 return;
             }
 
-            if (normalizedLastByte == null)
-            {
-                value.Span.CopyTo(destination);
-            }
-            else
-            {
-                int lastIdx = value.Length - 1;
-
-                value.Span.Slice(0, lastIdx).CopyTo(destination);
-                destination[lastIdx] = normalizedLastByte.Value;
-            }
+            value.Span.CopyTo(destination);
+            // Replace the last byte with the normalized answer.
+            destination[value.Length - 1] = normalizedLastByte;
         }
 
         private int CountConstructedBitString(ReadOnlyMemory<byte> source, bool isIndefinite)
@@ -781,7 +772,7 @@ namespace System.Security.Cryptography.Asn1
                             encodedValue,
                             out lastUnusedBitCount,
                             out ReadOnlyMemory<byte> contents,
-                            out byte? normalizedLastByte);
+                            out byte normalizedLastByte);
 
                         int localLen = headerLength + encodedValue.Length;
                         tmpReader._data = tmpReader._data.Slice(localLen);
@@ -918,7 +909,7 @@ namespace System.Security.Cryptography.Asn1
             out int headerLength,
             out int unusedBitCount,
             out ReadOnlyMemory<byte> value,
-            out byte? normalizedLastByte)
+            out byte normalizedLastByte)
         {
             actualTag = ReadTagAndLength(out contentsLength, out headerLength);
             CheckExpectedTag(actualTag, expectedTag, UniversalTagNumber.BitString);
@@ -932,7 +923,7 @@ namespace System.Security.Cryptography.Asn1
 
                 unusedBitCount = 0;
                 value = default(ReadOnlyMemory<byte>);
-                normalizedLastByte = null;
+                normalizedLastByte = 0;
                 return false;
             }
 
@@ -983,13 +974,13 @@ namespace System.Security.Cryptography.Asn1
                 out int headerLength,
                 out unusedBitCount,
                 out value,
-                out byte? normalizedLastByte);
+                out byte normalizedLastByte);
 
             if (isPrimitive)
             {
                 // A BER reader which encountered a situation where an "unused" bit was not
                 // set to 0.
-                if (normalizedLastByte != null)
+                if (value.Length != 0 && normalizedLastByte != value.Span[value.Length - 1])
                 {
                     unusedBitCount = 0;
                     value = default(ReadOnlyMemory<byte>);
@@ -1028,7 +1019,7 @@ namespace System.Security.Cryptography.Asn1
                 out int headerLength,
                 out unusedBitCount,
                 out ReadOnlyMemory<byte> value,
-                out byte? normalizedLastByte))
+                out byte normalizedLastByte))
             {
                 if (value.Length > destination.Length)
                 {
@@ -2288,9 +2279,9 @@ namespace System.Security.Cryptography.Asn1
 
         private static int ParseNonNegativeInt(ReadOnlySpan<byte> data)
         {
-            if (Utf8Parser.TryParse(data, out int value, out int consumed) && value >= 0 && consumed == data.Length)
+            if (Utf8Parser.TryParse(data, out uint value, out int consumed) && value <= int.MaxValue && consumed == data.Length)
             {
-                return value;
+                return (int)value;
             }
 
             throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
@@ -2382,11 +2373,19 @@ namespace System.Security.Cryptography.Asn1
                 Debug.Assert(contents.IsEmpty);
             }
 
+            // ISO 8601:2004 4.2.1 restricts a "minute" value to [00,59].
+            // The "hour" value is effectively bound to [00,23] by the same section, but
+            // is bound to [00,14] by DateTimeOffset, so no additional check is required here.
+            if (offsetMinute > 59)
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+
             TimeSpan offset = new TimeSpan(offsetHour, offsetMinute, 0);
 
             if (minus)
             {
-                offset = TimeSpan.Zero - offset;
+                offset = -offset;
             }
 
             // Apply the twoDigitYearMax value.
@@ -2705,11 +2704,19 @@ namespace System.Security.Cryptography.Asn1
                         offsetMinute = ParseNonNegativeIntAndSlice(ref contents, 2);
                     }
 
+                    // ISO 8601:2004 4.2.1 restricts a "minute" value to [00,59].
+                    // The "hour" value is effectively bound to [00,23] by the same section, but
+                    // is bound to [00,14] by DateTimeOffset, so no additional check is required here.
+                    if (offsetMinute > 59)
+                    {
+                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    }
+
                     TimeSpan tmp = new TimeSpan(offsetHour, offsetMinute, 0);
 
                     if (isMinus)
                     {
-                        tmp = TimeSpan.Zero - tmp;
+                        tmp = -tmp;
                     }
 
                     timeOffset = tmp;
@@ -2768,18 +2775,27 @@ namespace System.Security.Cryptography.Asn1
             
             DateTimeOffset value;
 
-            if (timeOffset == null)
+            try
             {
-                // Use the local timezone offset since there's no information in the contents.
-                value = new DateTimeOffset(new DateTime(year, month, day, hour, minute.Value, second.Value));
-            }
-            else
-            {
-                value = new DateTimeOffset(year, month, day, hour, minute.Value, second.Value, timeOffset.Value);
-            }
+                if (timeOffset == null)
+                {
+                    // Use the local timezone offset since there's no information in the contents.
+                    // T-REC-X.680-201510 sec 46.2(a).
+                    value = new DateTimeOffset(new DateTime(year, month, day, hour, minute.Value, second.Value));
+                }
+                else
+                {
+                    // T-REC-X.680-201510 sec 46.2(b) or 46.2(c).
+                    value = new DateTimeOffset(year, month, day, hour, minute.Value, second.Value, timeOffset.Value);
+                }
 
-            value += fractionSpan;
-            return value;
+                value += fractionSpan;
+                return value;
+            }
+            catch (Exception e)
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding, e);
+            }
         }
 
         public DateTimeOffset GetGeneralizedTime(bool disallowFractions=false) =>

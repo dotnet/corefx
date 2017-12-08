@@ -68,7 +68,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [Fact]
         public static void ParseTime_InvalidValue_LegalString()
         {
-            byte[] inputData = "17113030303030303030303030302D33333030".HexToByteArray();
+            byte[] inputData = "17113030303030303030303030302D31353030".HexToByteArray();
 
             var exception = Assert.Throws<CryptographicException>(
                 () =>
@@ -111,6 +111,8 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("A,B1,C1-NotZ", PublicEncodingRules.BER, "170B313230313032323335392B")]
         [InlineData("A,B1,C2-NotPlusMinus", PublicEncodingRules.BER, "170F313730393038313033352C30373030")]
         [InlineData("A,B2,C2-NotPlusMinus", PublicEncodingRules.BER, "17113137303930383130333530332C30373030")]
+        [InlineData("A,B2,C2-MinuteOutOfRange", PublicEncodingRules.BER, "17113030303030303030303030302D31353630")]
+        [InlineData("A,B1,C2-MinuteOutOfRange", PublicEncodingRules.BER, "170F303030303030303030302D31353630")]
         [InlineData("A1,B2,C1-NotZ", PublicEncodingRules.DER, "170D3530303130323132333435365B")]
         [InlineData("A,B2,C2-MissingDigit", PublicEncodingRules.BER, "17103137303930383130333530332C303730")]
         [InlineData("A,B2,C2-TooLong", PublicEncodingRules.BER, "17123137303930383130333530332B3037303030")]

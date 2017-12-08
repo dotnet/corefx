@@ -406,6 +406,8 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("yyyyMMddHH+HHQ", "180E323031363131303630312D303051")]
         [InlineData("yyyyMMddHH+HHmQ", "180F323031363131303630312D30303051")]
         [InlineData("yyyyMMddHH+HHmmQ", "1810323031363131303630312D3030303151")]
+        [InlineData("yyyyMMdd+H", "180A32303137313230382D30")]
+        [InlineData("yyyyMMddH+", "180A3230313731323038302D")]
         [InlineData("yyyyMMddHH+0060", "180F323031373132303830392D30303630")]
         [InlineData("yyyyMMddHH-2400", "180F323031373132303830392D32343030")]
         [InlineData("yyyyMMddHH-HH:mm", "1810323031373039303832312D30313A3138")]
