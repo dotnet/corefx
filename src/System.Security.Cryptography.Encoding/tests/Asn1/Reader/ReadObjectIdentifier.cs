@@ -53,12 +53,12 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER, "06080992268993F22C63", "0.9.2342.19200300.99")]
         [InlineData(
             PublicEncodingRules.DER,
-            "06156983F09DA7EBCFDEE0C7A1A7B2C0948CC8F9D77603",
+            "0616824F83F09DA7EBCFDEE0C7A1A7B2C0948CC8F9D77603",
             // Using the rules of ITU-T-REC-X.667-201210 for 2.25.{UUID} unregistered arcs, and
             // their sample value of f81d4fae-7dec-11d0-a765-00a0c91e6bf6
             // this is
             // { joint-iso-itu-t(2) uuid(255) thatuuid(329800735698586629295641978511506172918) three(3) }
-            "2.25.329800735698586629295641978511506172918.3")]
+            "2.255.329800735698586629295641978511506172918.3")]
         public static void ReadObjectIdentifierAsString_Success(
             PublicEncodingRules ruleSet,
             string inputHex,
