@@ -213,14 +213,15 @@ namespace System.IO.Compression.Tests
         /// This test ensures that a zipfile with path names that are invalid to this OS will throw errors
         /// when an attempt is made to extract them.
         /// </summary>
-        [ActiveIssue(25665)]
         [Theory]
         [InlineData("NullCharFileName_FromWindows")]
         [InlineData("NullCharFileName_FromUnix")]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Checks Unix-specific invalid file path
-        public void Unix_ZipWithInvalidFileNames_ThrowsArgumentException(string zipName)
+        public void Unix_ZipWithInvalidFileNames(string zipName)
         {
-            AssertExtensions.Throws<ArgumentException>("path", () => ZipFile.ExtractToDirectory(compat(zipName) + ".zip", GetTestFilePath()));
+            string directoryPath = GetTestFilePath();
+            ZipFile.ExtractToDirectory(compat(zipName) + ".zip", directoryPath);
+            Assert.True(Directory.Exists("\0bad"));
         }
 
         [Theory]

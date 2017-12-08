@@ -49,13 +49,24 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [ActiveIssue(25665)]
         [Fact]
-        public void GetLastWriteTime_RaisesArgumentException()
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void GetLastWriteTime_RaisesArgumentException_Windows()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.GetLastWriteTime("\0bad"));
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void GetLastWriteTime_RaisesArgumentException_Unix()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
+            {
+                string file = "\0bad";
+                Assert.True(TestHelper.IsTimeCloseToNow(isf.GetLastWriteTime(file)));
             }
         }
 

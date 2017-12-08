@@ -49,13 +49,23 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [ActiveIssue(25665)]
         [Fact]
-        public void CreateFile_RaisesArgumentException()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public void CreateFile_RaisesArgumentException_Desktop()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.CreateFile("\0bad"));
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void CreateFile_RaisesIsolatedStorageException_Core()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
+            {
+                Assert.Throws<IsolatedStorageException>(() => isf.CreateFile("\0bad"));
             }
         }
 

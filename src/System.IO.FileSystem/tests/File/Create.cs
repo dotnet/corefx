@@ -225,12 +225,11 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentException>(() => Create(path));
         }
 
-        [ActiveIssue(25665)]
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void CreateNullThrows_Unix()
         {
-            Assert.Throws<ArgumentException>(() => Create("\0"));
+            Assert.Throws<UnauthorizedAccessException>(() => Create("\0"));
         }
 
         [Theory,

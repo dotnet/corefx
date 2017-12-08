@@ -49,13 +49,32 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [ActiveIssue(25665)]
         [Fact]
-        public void GetCreationTime_RaisesArgumentException()
+        [PlatformSpecific(TestPlatforms.Windows)] 
+        public void GetCreationTime_RaisesArgumentException_Windows()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.GetCreationTime("\0bad"));
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] 
+        public void GetCreationTime_SpecialCharacterPath()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
+            {
+                DateTimeOffset before = DateTimeOffset.Now;
+
+                string file = "/0bad";
+                isf.CreateTestFile(file);
+
+                DateTimeOffset after = DateTimeOffset.Now;
+
+                DateTimeOffset creationTime = isf.GetCreationTime(file);
+                Assert.InRange(creationTime, before.AddSeconds(-10), after.AddSeconds(10)); // +/- 10 for some wiggle room
+                Assert.Equal(creationTime, isf.GetCreationTime(file));
             }
         }
 
