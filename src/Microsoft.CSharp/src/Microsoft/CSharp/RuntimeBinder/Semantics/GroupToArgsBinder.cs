@@ -1014,13 +1014,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 }
                             }
 
-                            if (_pCurrentSym is MethodSymbol meth)
-                            {
-                                // Do not store the result if we have an extension method and the instance 
-                                // parameter isn't convertible.
-
-                                _results.AddInconvertibleResult(meth, _pCurrentType, _pCurrentTypeArgs);
-                            }
                             return false;
                         }
                     }
@@ -1033,18 +1026,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // If we're an instance method then mark us down.
                         _results.UninferableResult.Set(meth, _pCurrentType, _pCurrentTypeArgs);
                     }
-                }
-                else
-                {
-                    if (_pCurrentSym is MethodSymbol meth)
-                    {
-                        // Do not store the result if we have an extension method and the instance 
-                        // parameter isn't convertible.
 
-                        _results.AddInconvertibleResult(meth, _pCurrentType, _pCurrentTypeArgs);
-                    }
+                    return false;
                 }
-                return !containsErrorSym;
+
+                return true;
             }
 
             private void UpdateArguments()
