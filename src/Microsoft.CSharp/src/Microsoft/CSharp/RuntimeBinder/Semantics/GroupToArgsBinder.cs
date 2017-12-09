@@ -1169,7 +1169,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     List<Name> paramNames = _misnamed.MethProp().ParameterNames;
                     for (int i = 0; ; ++i)
                     {
-                        Debug.Assert(i != _pOriginalArguments.carg);
+                        if (i == _pOriginalArguments.carg)
+                        {
+                            // If we're here we had the correct name used for the first params argument.
+                            // Report it as not matching the correct number of arguments below.
+                            break;
+                        }
+
                         if (_pOriginalArguments.prgexpr[i] is ExprNamedArgumentSpecification named)
                         {
                             Name name = named.Name;

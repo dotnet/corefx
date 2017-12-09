@@ -110,9 +110,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     List<Expr> argExpressions = args.prgexpr;
                     for (int i = 0; i < args.carg; i++)
                     {
-                        if (argExpressions[i] is ExprNamedArgumentSpecification named && paramNames[i] != named.Name)
+                        if (argExpressions[i] is ExprNamedArgumentSpecification named)
                         {
-                            return true;
+                            // Either wrong name, or correct name but we have more params arguments to follow.
+                            if (paramNames[i] != named.Name || i == paramNames.Count - 1 && i != args.carg - 1)
+                            {
+                                return true;
+                            }
                         }
                     }
                 }
