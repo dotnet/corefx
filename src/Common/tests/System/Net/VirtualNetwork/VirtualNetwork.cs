@@ -4,6 +4,7 @@
 
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 
 namespace System.Net.Test.Common
@@ -11,12 +12,37 @@ namespace System.Net.Test.Common
     public class VirtualNetwork
     {
         private readonly int WaitForReadDataTimeoutMilliseconds = 30 * 1000;
-        
+
         private readonly ConcurrentQueue<byte[]> _clientWriteQueue = new ConcurrentQueue<byte[]>();
         private readonly ConcurrentQueue<byte[]> _serverWriteQueue = new ConcurrentQueue<byte[]>();
 
         private readonly SemaphoreSlim _clientDataAvailable = new SemaphoreSlim(0);
         private readonly SemaphoreSlim _serverDataAvailable = new SemaphoreSlim(0);
+
+        private bool _isOpen = true;
+
+        private void EnsureNetworkOpen()
+        {
+            if (!_isOpen)
+                throw new IOException("VirtualNetwork: Connection was disconnected.");
+        }
+
+        public void Dispose(bool server)
+        {
+            SemaphoreSlim semaphore;
+
+            if (server)
+            {
+                semaphore = _serverDataAvailable;
+            }
+            else
+            {
+                semaphore = _clientDataAvailable;
+            }
+
+            _isOpen = false;
+            semaphore.Release();
+        }
 
         public void ReadFrame(bool server, out byte[] buffer)
         {
@@ -38,6 +64,8 @@ namespace System.Net.Test.Common
             {
                 throw new TimeoutException("VirtualNetwork: Timeout reading the next frame.");
             }
+
+            EnsureNetworkOpen();
 
             bool dequeueSucceeded = false;
             int remainingTries = 3;

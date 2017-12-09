@@ -34,12 +34,15 @@ namespace System.Net
         public LazyAsyncResult UserAsyncResult;
         public int Result;
         public object AsyncState;
+        public readonly CancellationToken CancellationToken;
 
         public byte[] Buffer; // Temporary buffer reused by a protocol.
         public int Offset;
         public int Count;
 
-        public AsyncProtocolRequest(LazyAsyncResult userAsyncResult)
+        public AsyncProtocolRequest(LazyAsyncResult userAsyncResult) : this(userAsyncResult, CancellationToken.None) { }
+
+        public AsyncProtocolRequest(LazyAsyncResult userAsyncResult, CancellationToken cancellationToken)
         {
             if (userAsyncResult == null)
             {
@@ -50,6 +53,7 @@ namespace System.Net
                 NetEventSource.Fail(this, "userAsyncResult is already completed.");
             }
             UserAsyncResult = userAsyncResult;
+            CancellationToken = cancellationToken;
         }
 
         public void Reset(LazyAsyncResult userAsyncResult)
