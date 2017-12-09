@@ -11,16 +11,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         public partial class CMethodIterator
         {
-            private SymbolLoader _pSymbolLoader;
-            private CSemanticChecker _pSemanticChecker;
+            private readonly SymbolLoader _pSymbolLoader;
+            private readonly CSemanticChecker _pSemanticChecker;
             // Inputs.
-            private AggregateDeclaration _pContext;
-            private TypeArray _pContainingTypes;
-            private CType _pQualifyingType;
-            private Name _pName;
-            private int _nArity;
-            private symbmask_t _mask;
-            private EXPRFLAG _flags;
+            private readonly AggregateDeclaration _pContext;
+            private readonly TypeArray _pContainingTypes;
+            private readonly CType _pQualifyingType;
+            private readonly Name _pName;
+            private readonly int _nArity;
+            private readonly symbmask_t _mask;
+            private readonly EXPRFLAG _flags;
             // Internal state.
             private int _nCurrentTypeCount;
 
