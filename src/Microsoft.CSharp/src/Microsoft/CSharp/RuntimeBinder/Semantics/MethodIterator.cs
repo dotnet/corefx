@@ -11,18 +11,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         public partial class CMethodIterator
         {
-            private readonly SymbolLoader _pSymbolLoader;
-            private readonly CSemanticChecker _pSemanticChecker;
+            private readonly SymbolLoader _symbolLoader;
+            private readonly CSemanticChecker _semanticChecker;
             // Inputs.
-            private readonly AggregateDeclaration _pContext;
-            private readonly TypeArray _pContainingTypes;
-            private readonly CType _pQualifyingType;
-            private readonly Name _pName;
-            private readonly int _nArity;
+            private readonly AggregateDeclaration _context;
+            private readonly TypeArray _containingTypes;
+            private readonly CType _qualifyingType;
+            private readonly Name _name;
+            private readonly int _arity;
             private readonly symbmask_t _mask;
             private readonly EXPRFLAG _flags;
             // Internal state.
-            private int _nCurrentTypeCount;
+            private int _currentTypeIndex;
 
             public CMethodIterator(CSemanticChecker checker, SymbolLoader symLoader, Name name, TypeArray containingTypes, CType qualifyingType, AggregateDeclaration context, int arity, EXPRFLAG flags, symbmask_t mask)
             {
@@ -31,20 +31,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(checker != null);
                 Debug.Assert(containingTypes != null);
                 Debug.Assert(containingTypes.Count != 0);
-                _pSemanticChecker = checker;
-                _pSymbolLoader = symLoader;
-                CurrentType = null;
-                CurrentSymbol = null;
-                _pName = name;
-                _pContainingTypes = containingTypes;
-                _pQualifyingType = qualifyingType;
-                _pContext = context;
-                _nArity = arity;
+                _semanticChecker = checker;
+                _symbolLoader = symLoader;
+                _name = name;
+                _containingTypes = containingTypes;
+                _qualifyingType = qualifyingType;
+                _context = context;
+                _arity = arity;
                 _flags = flags;
                 _mask = mask;
-                _nCurrentTypeCount = 0;
-                IsCurrentSymbolBogus = false;
-                IsCurrentSymbolInaccessible = false;
             }
 
             public MethodOrPropertySymbol CurrentSymbol { get; private set; }
@@ -75,7 +70,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
 
                     // If our arity is non-0, we must match arity with this symbol.
-                    if (_nArity > 0 & _mask == symbmask_t.MASK_MethodSymbol && ((MethodSymbol)CurrentSymbol).typeVars.Count != _nArity)
+                    if (_arity > 0 & _mask == symbmask_t.MASK_MethodSymbol && ((MethodSymbol)CurrentSymbol).typeVars.Count != _arity)
                     {
                         return false;
                     }
@@ -87,7 +82,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
 
                     // Check access. If Sym is not accessible, then let it through and mark it.
-                    IsCurrentSymbolInaccessible = !_pSemanticChecker.CheckAccess(CurrentSymbol, CurrentType, _pContext, _pQualifyingType);
+                    IsCurrentSymbolInaccessible = !_semanticChecker.CheckAccess(CurrentSymbol, CurrentType, _context, _qualifyingType);
 
                     // Check bogus. If Sym is bogus, then let it through and mark it.
                     IsCurrentSymbolBogus = CSemanticChecker.CheckBogus(CurrentSymbol);
@@ -101,7 +96,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 for (;;)
                 {
                     CurrentSymbol = (CurrentSymbol == null
-                        ? _pSymbolLoader.LookupAggMember(_pName, CurrentType.getAggregate(), _mask)
+                        ? _symbolLoader.LookupAggMember(_name, CurrentType.getAggregate(), _mask)
                         : SymbolLoader.LookupNextSym(CurrentSymbol, CurrentType.getAggregate(), _mask)) as MethodOrPropertySymbol;
 
                     // If we couldn't find a sym, we look up the type chain and get the next type.
@@ -127,14 +122,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             private bool FindNextTypeForInstanceMethods()
             {
-                if (_nCurrentTypeCount >= _pContainingTypes.Count)
+                if (_currentTypeIndex >= _containingTypes.Count)
                 {
                     // No more types to check.
                     CurrentType = null;
                     return false;
                 }
 
-                CurrentType = _pContainingTypes[_nCurrentTypeCount++] as AggregateType;
+                CurrentType = _containingTypes[_currentTypeIndex++] as AggregateType;
                 return true;
             }
         }
