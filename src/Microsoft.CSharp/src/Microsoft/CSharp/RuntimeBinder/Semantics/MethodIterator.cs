@@ -14,8 +14,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private SymbolLoader _pSymbolLoader;
             private CSemanticChecker _pSemanticChecker;
             // Inputs.
-            private AggregateType _pCurrentType;
-            private MethodOrPropertySymbol _pCurrentSym;
             private AggregateDeclaration _pContext;
             private TypeArray _pContainingTypes;
             private CType _pQualifyingType;
@@ -27,8 +25,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private int _nCurrentTypeCount;
             private bool _bIsCheckingInstanceMethods;
             // Flags for the current sym.
-            private bool _bCurrentSymIsBogus;
-            private bool _bCurrentSymIsInaccessible;
 
             public CMethodIterator(CSemanticChecker checker, SymbolLoader symLoader, Name name, TypeArray containingTypes, CType qualifyingType, AggregateDeclaration context, int arity, EXPRFLAG flags, symbmask_t mask)
             {
@@ -39,8 +35,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(containingTypes.Count != 0);
                 _pSemanticChecker = checker;
                 _pSymbolLoader = symLoader;
-                _pCurrentType = null;
-                _pCurrentSym = null;
+                CurrentType = null;
+                CurrentSymbol = null;
                 _pName = name;
                 _pContainingTypes = containingTypes;
                 _pQualifyingType = qualifyingType;
@@ -50,82 +46,74 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _mask = mask;
                 _nCurrentTypeCount = 0;
                 _bIsCheckingInstanceMethods = true;
-                _bCurrentSymIsBogus = false;
-                _bCurrentSymIsInaccessible = false;
-            }
-            public MethodOrPropertySymbol GetCurrentSymbol()
-            {
-                return _pCurrentSym;
-            }
-            public AggregateType GetCurrentType()
-            {
-                return _pCurrentType;
-            }
-            public bool IsCurrentSymbolInaccessible()
-            {
-                return _bCurrentSymIsInaccessible;
-            }
-            public bool IsCurrentSymbolBogus()
-            {
-                return _bCurrentSymIsBogus;
+                IsCurrentSymbolBogus = false;
+                IsCurrentSymbolInaccessible = false;
             }
 
-            public bool MoveNext() => (_pCurrentType != null || FindNextTypeForInstanceMethods()) && FindNextMethod();
+            public MethodOrPropertySymbol CurrentSymbol { get; private set; }
 
-            public bool AtEnd()
-            {
-                return _pCurrentSym == null;
-            }
+            public AggregateType CurrentType { get; private set; }
 
-            public bool CanUseCurrentSymbol()
+            public bool IsCurrentSymbolInaccessible { get; private set; }
+
+            public bool IsCurrentSymbolBogus { get; private set; }
+
+            public bool MoveNext() => (CurrentType != null || FindNextTypeForInstanceMethods()) && FindNextMethod();
+
+            public bool AtEnd => CurrentSymbol == null;
+
+            public bool CanUseCurrentSymbol
             {
-                // Make sure that whether we're seeing a ctor is consistent with the flag.
-                // The only properties we handle are indexers.
-                if (_mask == symbmask_t.MASK_MethodSymbol && (
-                        0 == (_flags & EXPRFLAG.EXF_CTOR) != !((MethodSymbol)_pCurrentSym).IsConstructor() ||
-                        0 == (_flags & EXPRFLAG.EXF_OPERATOR) != !((MethodSymbol)_pCurrentSym).isOperator) ||
-                    _mask == symbmask_t.MASK_PropertySymbol && !(_pCurrentSym is IndexerSymbol))
+                get
                 {
-                    // Get the next symbol.
-                    return false;
+                    // Make sure that whether we're seeing a ctor is consistent with the flag.
+                    // The only properties we handle are indexers.
+                    if (_mask == symbmask_t.MASK_MethodSymbol && (
+                            0 == (_flags & EXPRFLAG.EXF_CTOR) != !((MethodSymbol)CurrentSymbol).IsConstructor() ||
+                            0 == (_flags & EXPRFLAG.EXF_OPERATOR) != !((MethodSymbol)CurrentSymbol).isOperator) ||
+                        _mask == symbmask_t.MASK_PropertySymbol && !(CurrentSymbol is IndexerSymbol))
+                    {
+                        // Get the next symbol.
+                        return false;
+                    }
+
+                    // If our arity is non-0, we must match arity with this symbol.
+                    if (_nArity > 0 & _mask == symbmask_t.MASK_MethodSymbol && ((MethodSymbol)CurrentSymbol).typeVars.Count != _nArity)
+                    {
+                        return false;
+                    }
+
+                    // If this guy's not callable, no good.
+                    if (!ExpressionBinder.IsMethPropCallable(CurrentSymbol, (_flags & EXPRFLAG.EXF_USERCALLABLE) != 0))
+                    {
+                        return false;
+                    }
+
+                    // Check access. If Sym is not accessible, then let it through and mark it.
+                    IsCurrentSymbolInaccessible = !_pSemanticChecker.CheckAccess(CurrentSymbol, CurrentType, _pContext, _pQualifyingType);
+
+                    // Check bogus. If Sym is bogus, then let it through and mark it.
+                    IsCurrentSymbolBogus = CSemanticChecker.CheckBogus(CurrentSymbol);
+
+                    return _bIsCheckingInstanceMethods;
                 }
-
-                // If our arity is non-0, we must match arity with this symbol.
-                if (_nArity > 0 & _mask == symbmask_t.MASK_MethodSymbol && ((MethodSymbol)_pCurrentSym).typeVars.Count != _nArity)
-                {
-                    return false;
-                }
-
-                // If this guy's not callable, no good.
-                if (!ExpressionBinder.IsMethPropCallable(_pCurrentSym, (_flags & EXPRFLAG.EXF_USERCALLABLE) != 0))
-                {
-                    return false;
-                }
-
-                // Check access. If Sym is not accessible, then let it through and mark it.
-                _bCurrentSymIsInaccessible = !_pSemanticChecker.CheckAccess(_pCurrentSym, _pCurrentType, _pContext, _pQualifyingType);
-
-                // Check bogus. If Sym is bogus, then let it through and mark it.
-                _bCurrentSymIsBogus = CSemanticChecker.CheckBogus(_pCurrentSym);
-
-                return _bIsCheckingInstanceMethods;
             }
 
             private bool FindNextMethod()
             {
                 while (true)
                 {
-                    _pCurrentSym = (_pCurrentSym == null
-                        ? _pSymbolLoader.LookupAggMember(_pName, _pCurrentType.getAggregate(), _mask)
-                        : SymbolLoader.LookupNextSym(_pCurrentSym, _pCurrentType.getAggregate(), _mask)) as MethodOrPropertySymbol;
+                    CurrentSymbol = (CurrentSymbol == null
+                        ? _pSymbolLoader.LookupAggMember(_pName, CurrentType.getAggregate(), _mask)
+                        : SymbolLoader.LookupNextSym(CurrentSymbol, CurrentType.getAggregate(), _mask)) as MethodOrPropertySymbol;
 
                     // If we couldn't find a sym, we look up the type chain and get the next type.
-                    if (_pCurrentSym == null)
+                    if (CurrentSymbol == null)
                     {
                         if (_bIsCheckingInstanceMethods)
                         {
                             FindNextTypeForInstanceMethods();
-                            if (_pCurrentType == null)
+                            if (CurrentType == null)
                             {
                                 return false;
                             }
@@ -151,11 +139,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_nCurrentTypeCount >= _pContainingTypes.Count)
                 {
                     // No more types to check.
-                    _pCurrentType = null;
+                    CurrentType = null;
                     return false;
                 }
 
-                _pCurrentType = _pContainingTypes[_nCurrentTypeCount++] as AggregateType;
+                CurrentType = _pContainingTypes[_nCurrentTypeCount++] as AggregateType;
                 return true;
             }
         }

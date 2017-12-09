@@ -201,7 +201,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                     // If we cant use the current symbol, then we've filtered it, so get the next one.
 
-                    if (!iterator.CanUseCurrentSymbol())
+                    if (!iterator.CanUseCurrentSymbol)
                     {
                         continue;
                     }
@@ -215,7 +215,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
 
                     // Check access.
-                    bool fCanAccess = !iterator.IsCurrentSymbolInaccessible();
+                    bool fCanAccess = !iterator.IsCurrentSymbolInaccessible;
                     if (!fCanAccess && (!_methList.IsEmpty() || _results.GetInaccessibleResult()))
                     {
                         // We'll never use this one for error reporting anyway, so just skip it.
@@ -224,7 +224,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
 
                     // Check bogus.
-                    bool fBogus = fCanAccess && iterator.IsCurrentSymbolBogus();
+                    bool fBogus = fCanAccess && iterator.IsCurrentSymbolBogus;
                     if (fBogus && (!_methList.IsEmpty() || _results.GetInaccessibleResult() || _mpwiBogus))
                     {
                         // We'll never use this one for error reporting anyway, so just skip it.
@@ -826,8 +826,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     return false;
                 }
-                _pCurrentSym = iterator.GetCurrentSymbol();
-                AggregateType type = iterator.GetCurrentType();
+                _pCurrentSym = iterator.CurrentSymbol;
+                AggregateType type = iterator.CurrentType;
 
                 // If our current type is null, this is our first iteration, so set the type.
                 // If our current type is not null, and we've got a new type now, and we've already matched
@@ -848,11 +848,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 while (_HiddenTypes.Contains(_pCurrentType))
                 {
                     // Move through this type and get the next one.
-                    for (; iterator.GetCurrentType() == _pCurrentType; iterator.MoveNext()) ;
-                    _pCurrentSym = iterator.GetCurrentSymbol();
-                    _pCurrentType = iterator.GetCurrentType();
+                    for (; iterator.CurrentType == _pCurrentType; iterator.MoveNext()) ;
+                    _pCurrentSym = iterator.CurrentSymbol;
+                    _pCurrentType = iterator.CurrentType;
 
-                    if (iterator.AtEnd())
+                    if (iterator.AtEnd)
                     {
                         return false;
                     }
