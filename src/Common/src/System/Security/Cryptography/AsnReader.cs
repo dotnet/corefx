@@ -1654,7 +1654,7 @@ namespace System.Security.Cryptography.Asn1
             Array.Clear(tmpBytes, 0, tmpBytes.Length);
 
             Span<byte> writeSpan = tmpBytes;
-            Span<byte> bigEndianBytes = stackalloc byte[sizeof(long)];
+            Span<byte> accumValueBytes = stackalloc byte[sizeof(long)];
             int nextStop = bytesRead;
             idx = bytesRead - ContentByteCount;
 
@@ -1672,9 +1672,9 @@ namespace System.Security.Cryptography.Asn1
                     Debug.Assert(idx == nextStop);
                     Debug.Assert(writeSpan.Length >= SemanticByteCount);
 
-                    BinaryPrimitives.WriteInt64LittleEndian(bigEndianBytes, accum);
-                    Debug.Assert(bigEndianBytes[7] == 0);
-                    bigEndianBytes.Slice(0, SemanticByteCount).CopyTo(writeSpan);
+                    BinaryPrimitives.WriteInt64LittleEndian(accumValueBytes, accum);
+                    Debug.Assert(accumValueBytes[7] == 0);
+                    accumValueBytes.Slice(0, SemanticByteCount).CopyTo(writeSpan);
                     writeSpan = writeSpan.Slice(SemanticByteCount);
 
                     accum = 0;
@@ -1696,15 +1696,10 @@ namespace System.Security.Cryptography.Asn1
             int paddingByteCount = bytesRequired - bytesWritten;
             Debug.Assert(paddingByteCount >= 0 && paddingByteCount < sizeof(long));
 
-            // Convert the semantic bytes from big endian to little endian, since the netstandard20
-            // BigInteger only knows little-endian.
-            Span<byte> semanticBytes = new Span<byte>(tmpBytes, 0, bytesWritten);
-            //AsnWriter.Reverse(semanticBytes);
-
             largeValue = new BigInteger(tmpBytes);
             smallValue = null;
 
-            semanticBytes.Clear();
+            Array.Clear(tmpBytes, 0, bytesWritten);
             ArrayPool<byte>.Shared.Return(tmpBytes);
         }
 
