@@ -27,7 +27,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private int _nCurrentTypeCount;
             private bool _bIsCheckingInstanceMethods;
             private bool _bAtEnd;
-            private bool _bAllowBogusAndInaccessible;
             // Flags for the current sym.
             private bool _bCurrentSymIsBogus;
             private bool _bCurrentSymIsInaccessible;
@@ -46,7 +45,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _pContainingTypes = containingTypes;
                 _pQualifyingType = qualifyingType;
                 _pContext = context;
-                _bAllowBogusAndInaccessible = allowBogusAndInaccessible;
                 _nArity = arity;
                 _flags = flags;
                 _mask = mask;
@@ -120,9 +118,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             public bool CanUseCurrentSymbol()
             {
-                _bCurrentSymIsInaccessible = false;
-                _bCurrentSymIsBogus = false;
-
                 // Make sure that whether we're seeing a ctor is consistent with the flag.
                 // The only properties we handle are indexers.
                 if (_mask == symbmask_t.MASK_MethodSymbol && (
@@ -135,12 +130,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 // If our arity is non-0, we must match arity with this symbol.
-                if (_nArity > 0)
+                if (_nArity > 0 & _mask == symbmask_t.MASK_MethodSymbol && ((MethodSymbol)_pCurrentSym).typeVars.Count != _nArity)
                 {
-                    if (_mask == symbmask_t.MASK_MethodSymbol && ((MethodSymbol)_pCurrentSym).typeVars.Count != _nArity)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
 
                 // If this guy's not callable, no good.
@@ -149,33 +141,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
 
-                // Check access.
-                if (!GetSemanticChecker().CheckAccess(_pCurrentSym, _pCurrentType, _pContext, _pQualifyingType))
-                {
-                    // Sym is not accessible. However, if we're allowing inaccessible, then let it through and mark it.
-                    if (_bAllowBogusAndInaccessible)
-                    {
-                        _bCurrentSymIsInaccessible = true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
+                // Check access. If Sym is not accessible, then let it through and mark it.
+                _bCurrentSymIsInaccessible = !GetSemanticChecker().CheckAccess(_pCurrentSym, _pCurrentType, _pContext, _pQualifyingType);
 
-                // Check bogus.
-                if (CSemanticChecker.CheckBogus(_pCurrentSym))
-                {
-                    // Sym is bogus, but if we're allow it, then let it through and mark it.
-                    if (_bAllowBogusAndInaccessible)
-                    {
-                        _bCurrentSymIsBogus = true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
+                // Check bogus. If Sym is bogus, then let it through and mark it.
+                _bCurrentSymIsBogus = CSemanticChecker.CheckBogus(_pCurrentSym);
 
                 return _bIsCheckingInstanceMethods;
             }
