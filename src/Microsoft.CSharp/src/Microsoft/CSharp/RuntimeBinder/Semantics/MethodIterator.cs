@@ -31,9 +31,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Flags for the current sym.
             private bool _bCurrentSymIsBogus;
             private bool _bCurrentSymIsInaccessible;
-            // if Extension can be part of the results that are returned by the iterator
-            // this may be false if an applicable instance method was found by bindgrptoArgs
-            private bool _bcanIncludeExtensionsInResults;
 
             public CMethodIterator(CSemanticChecker checker, SymbolLoader symLoader, Name name, TypeArray containingTypes, CType @object, CType qualifyingType, AggregateDeclaration context, bool allowBogusAndInaccessible, bool allowExtensionMethods, int arity, EXPRFLAG flags, symbmask_t mask)
             {
@@ -58,7 +55,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _bAtEnd = false;
                 _bCurrentSymIsBogus = false;
                 _bCurrentSymIsInaccessible = false;
-                _bcanIncludeExtensionsInResults = allowExtensionMethods;
             }
             public MethodOrPropertySymbol GetCurrentSymbol()
             {
@@ -78,11 +74,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             public bool MoveNext(bool canIncludeExtensionsInResults)
             {
-                if (_bcanIncludeExtensionsInResults)
-                {
-                    _bcanIncludeExtensionsInResults = canIncludeExtensionsInResults;
-                }
-
                 if (_bAtEnd)
                 {
                     return false;
@@ -193,50 +184,35 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 while (true)
                 {
-                    if (_pCurrentSym == null)
-                    {
-                        _pCurrentSym = GetSymbolLoader().LookupAggMember(
-                                _pName, _pCurrentType.getAggregate(), _mask) as MethodOrPropertySymbol;
-                    }
-                    else
-                    {
-                        _pCurrentSym = SymbolLoader.LookupNextSym(
-                                _pCurrentSym, _pCurrentType.getAggregate(), _mask) as MethodOrPropertySymbol;
-                    }
+                    _pCurrentSym = (_pCurrentSym == null
+                        ? GetSymbolLoader().LookupAggMember(_pName, _pCurrentType.getAggregate(), _mask)
+                        : SymbolLoader.LookupNextSym(_pCurrentSym, _pCurrentType.getAggregate(), _mask)) as MethodOrPropertySymbol;
 
                     // If we couldn't find a sym, we look up the type chain and get the next type.
                     if (_pCurrentSym == null)
                     {
                         if (_bIsCheckingInstanceMethods)
                         {
-                            if (!FindNextTypeForInstanceMethods() && _bcanIncludeExtensionsInResults)
-                            {
-                                // We didn't find any more instance methods, set us into extension mode.
-
-                                _bIsCheckingInstanceMethods = false;
-                            }
-                            else if (_pCurrentType == null && !_bcanIncludeExtensionsInResults)
+                            FindNextTypeForInstanceMethods();
+                            if (_pCurrentType == null)
                             {
                                 return false;
                             }
-                            else
-                            {
-                                // Found an instance method.
-                                continue;
-                            }
+
+                            // Found an instance method.
                         }
-                        continue;
                     }
+                    else
+                    {
+                        // Note that we do not filter the current symbol for the user. They must do that themselves.
+                        // This is because for instance, BindGrpToArgs wants to filter on arguments before filtering
+                        // on bogosity.
 
-                    // Note that we do not filter the current symbol for the user. They must do that themselves.
-                    // This is because for instance, BindGrpToArgs wants to filter on arguments before filtering
-                    // on bogosity.
+                        // If we're here, we're good to go.
 
-                    // If we're here, we're good to go.
-
-                    break;
+                        return true;
+                    }
                 }
-                return true;
             }
 
             private bool FindNextTypeForInstanceMethods()
