@@ -219,6 +219,136 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             Assert.Contains("'nada'", message);
         }
 
+        class BaseClass
+        {
+            public virtual int Adder(int x, int y) => x + y;
+        }
+
+        class Derived : BaseClass
+        {
+            public override int Adder(int a, int b) => base.Adder(a, b);
+        }
+
+        [Fact]
+        public void OverrideChangesName()
+        {
+            // Static compilation behavior is to use the name of the type of the variable the object is accessed through.
+            // Dynamic behavior matches that when the argument is UseCompileTimeType
+            // Otherwise it depends on the actual type of the object.
+
+            // Defined in terms of base class. Using "x"
+            CallSite<Func<CallSite, BaseClass, int, int, object>> callSite =
+                CallSite<Func<CallSite, BaseClass, int, int, object>>.Create(
+                    Binder.InvokeMember(
+                        CSharpBinderFlags.None, nameof(BaseClass.Adder), Type.EmptyTypes, GetType(),
+                        new[]
+                        {
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null),
+                            CSharpArgumentInfo.Create(
+                                CSharpArgumentInfoFlags.NamedArgument | CSharpArgumentInfoFlags.UseCompileTimeType,
+                                "x"),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null),
+                        }));
+            Assert.Equal(9, callSite.Target(callSite, new Derived(), 4, 5));
+            Assert.Equal(9, callSite.Target(callSite, new BaseClass(), 4, 5));
+
+            // Defined in terms of base class. Using "a"
+            callSite = CallSite<Func<CallSite, BaseClass, int, int, object>>.Create(
+                Binder.InvokeMember(
+                    CSharpBinderFlags.None, nameof(BaseClass.Adder), Type.EmptyTypes, GetType(),
+                    new[]
+                    {
+                        CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null),
+                        CSharpArgumentInfo.Create(
+                            CSharpArgumentInfoFlags.NamedArgument | CSharpArgumentInfoFlags.UseCompileTimeType, "a"),
+                        CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null),
+                    }));
+            string message = Assert.Throws<RuntimeBinderException>(() => callSite.Target(callSite, new Derived(), 4, 5))
+                .Message;
+
+            //  The best overload for 'Adder' does not have a parameter named 'a'
+            Assert.Contains("'Adder'", message);
+            Assert.Contains("'a'", message);
+            Assert.Equal(
+                message,
+                Assert.Throws<RuntimeBinderException>(() => callSite.Target(callSite, new BaseClass(), 4, 5)).Message);
+
+            // Defined in terms of Derived, using "a"
+            CallSite<Func<CallSite, Derived, int, int, object>> callSiteDerived =
+                CallSite<Func<CallSite, Derived, int, int, object>>.Create(
+                    Binder.InvokeMember(
+                        CSharpBinderFlags.None, nameof(BaseClass.Adder), Type.EmptyTypes, GetType(),
+                        new[]
+                        {
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null),
+                            CSharpArgumentInfo.Create(
+                                CSharpArgumentInfoFlags.NamedArgument | CSharpArgumentInfoFlags.UseCompileTimeType,
+                                "a"),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null),
+                        }));
+            Assert.Equal(9, callSiteDerived.Target(callSiteDerived, new Derived(), 4, 5));
+
+            // Defined in terms of Derived, using "x"
+            callSiteDerived = CallSite<Func<CallSite, Derived, int, int, object>>.Create(
+                Binder.InvokeMember(
+                    CSharpBinderFlags.None, nameof(BaseClass.Adder), Type.EmptyTypes, GetType(),
+                    new[]
+                    {
+                        CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null),
+                        CSharpArgumentInfo.Create(
+                            CSharpArgumentInfoFlags.NamedArgument | CSharpArgumentInfoFlags.UseCompileTimeType, "x"),
+                        CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null),
+                    }));
+            message = Assert
+                .Throws<RuntimeBinderException>(() => callSiteDerived.Target(callSiteDerived, new Derived(), 4, 5))
+                .Message;
+
+            //  The best overload for 'Adder' does not have a parameter named 'x'
+            Assert.Contains("'Adder'", message);
+            Assert.Contains("'x'", message);
+
+            // Using runtime types, and "a"
+            CallSite<Func<CallSite, object, object, object, object>> callSiteRuntime =
+                CallSite<Func<CallSite, object, object, object, object>>.Create(
+                    Binder.InvokeMember(
+                        CSharpBinderFlags.None, nameof(BaseClass.Adder), Type.EmptyTypes, GetType(),
+                        new[]
+                        {
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.NamedArgument, "a"),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
+                        }));
+
+            Assert.Equal(9, callSiteRuntime.Target(callSiteRuntime, new Derived(), 4, 5));
+            message = Assert
+                .Throws<RuntimeBinderException>(() => callSiteRuntime.Target(callSiteRuntime, new BaseClass(), 4, 5))
+                .Message;
+
+            //  The best overload for 'Adder' does not have a parameter named 'a'
+            Assert.Contains("'Adder'", message);
+            Assert.Contains("'a'", message);
+
+            // Using runtime types, and "x"
+            callSiteRuntime = CallSite<Func<CallSite, object, object, object, object>>.Create(
+                Binder.InvokeMember(
+                    CSharpBinderFlags.None, nameof(BaseClass.Adder), Type.EmptyTypes, GetType(),
+                    new[]
+                    {
+                        CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
+                        CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.NamedArgument, "x"),
+                        CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
+                    }));
+
+            Assert.Equal(9, callSiteRuntime.Target(callSiteRuntime, new BaseClass(), 4, 5));
+            message = Assert
+                .Throws<RuntimeBinderException>(() => callSiteRuntime.Target(callSiteRuntime, new Derived(), 4, 5))
+                .Message;
+
+            //  The best overload for 'Adder' does not have a parameter named 'x'
+            Assert.Contains("'Adder'", message);
+            Assert.Contains("'x'", message);
+        }
+
         // Tests based on the static tests for Roslyn.
         class C1
         {

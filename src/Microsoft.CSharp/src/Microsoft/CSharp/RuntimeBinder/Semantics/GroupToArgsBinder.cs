@@ -1166,7 +1166,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     // Get exception immediately for the non-trailing named argument being misplaced.
                     // Handle below for the name not being present at all.
-                    List<Name> paramNames = _misnamed.MethProp().ParameterNames;
+                    List<Name> paramNames = FindMostDerivedMethod(_misnamed.MethProp(), _pGroup.OptionalObject).ParameterNames;
                     for (int i = 0; ; ++i)
                     {
                         if (i == _pOriginalArguments.carg)
