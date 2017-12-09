@@ -32,7 +32,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private readonly ExprMemberGroup _pGroup;
             private readonly ArgInfos _pArguments;
             private readonly ArgInfos _pOriginalArguments;
-            private readonly bool _bHasNamedArguments;
+            private readonly NamedArgumentsType _namedArgumentsType;
             private AggregateType _pCurrentType;
             private MethodOrPropertySymbol _pCurrentSym;
             private TypeArray _pCurrentTypeArgs;
@@ -55,7 +55,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private readonly List<CType> _HiddenTypes;
             private bool _bArgumentsChangedForNamedOrOptionalArguments;
 
-            public GroupToArgsBinder(ExpressionBinder exprBinder, BindingFlag bindFlags, ExprMemberGroup grp, ArgInfos args, ArgInfos originalArgs, bool bHasNamedArguments)
+            public GroupToArgsBinder(ExpressionBinder exprBinder, BindingFlag bindFlags, ExprMemberGroup grp, ArgInfos args, ArgInfos originalArgs, NamedArgumentsType namedArgumentsType)
             {
                 Debug.Assert(grp != null);
                 Debug.Assert(exprBinder != null);
@@ -67,7 +67,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _pGroup = grp;
                 _pArguments = args;
                 _pOriginalArguments = originalArgs;
-                _bHasNamedArguments = bHasNamedArguments;
+                _namedArgumentsType = namedArgumentsType;
                 _pCurrentType = null;
                 _pCurrentSym = null;
                 _pCurrentTypeArgs = null;
@@ -170,7 +170,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // If we have named arguments, reorder them for this method.
                     // If we don't have Exprs, its because we're doing a method group conversion.
                     // In those scenarios, we never want to add named arguments or optional arguments.
-                    if (_bHasNamedArguments)
+                    if (_namedArgumentsType == NamedArgumentsType.Positioning)
                     {
                         if (!ReOrderArgsForNamedArguments())
                         {

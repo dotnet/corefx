@@ -63,7 +63,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         ERR_AssgReadonly2 = 1648,
         ERR_AssgReadonlyStatic2 = 1650,
         ERR_BadCtorArgCount = 1729,
-        ERR_NamedArgumentSpecificationBeforeFixedArgument = 1738,
         ERR_BadNamedArgument = 1739,
         ERR_DuplicateNamedArgument = 1740,
         ERR_NamedArgumentUsedInPositional = 1744,

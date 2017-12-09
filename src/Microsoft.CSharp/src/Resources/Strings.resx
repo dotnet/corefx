@@ -256,9 +256,6 @@
   <data name="NonInvocableMemberCalled" xml:space="preserve">
     <value>Non-invocable member '{0}' cannot be used like a method.</value>
   </data>
-  <data name="NamedArgumentSpecificationBeforeFixedArgument" xml:space="preserve">
-    <value>Named argument specifications must appear after all fixed arguments have been specified</value>
-  </data>
   <data name="BadNamedArgument" xml:space="preserve">
     <value>The best overload for '{0}' does not have a parameter named '{1}'</value>
   </data>

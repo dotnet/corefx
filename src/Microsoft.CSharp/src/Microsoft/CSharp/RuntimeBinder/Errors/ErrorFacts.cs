@@ -188,9 +188,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_NonInvocableMemberCalled:
                     codeStr = SR.NonInvocableMemberCalled;
                     break;
-                case ErrorCode.ERR_NamedArgumentSpecificationBeforeFixedArgument:
-                    codeStr = SR.NamedArgumentSpecificationBeforeFixedArgument;
-                    break;
                 case ErrorCode.ERR_BadNamedArgument:
                     codeStr = SR.BadNamedArgument;
                     break;
