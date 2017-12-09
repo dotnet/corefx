@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
@@ -1145,6 +1146,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
+            private Name NameOrErrorForBadNonTrailingName()
+            {
+                List<Name> paramNames = _misnamed.MethProp().ParameterNames;
+                Name missingName = _pOriginalArguments.prgexpr.OfType<ExprNamedArgumentSpecification>()
+                    .Select(enas => enas.Name)
+                    .FirstOrDefault(n => !paramNames.Contains(n));
+                if (missingName != null)
+                {
+                    // Let this be handled by _pInvalidSpecifiedName handling.
+                    return missingName;
+                }
+
+                // TODO: Appropriate exception.
+                throw new NotImplementedException();
+            }
+
             private RuntimeBinderException ReportErrorsOnFailure()
             {
                 // First and foremost, report if the user specified a name more than once.
@@ -1161,8 +1178,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return GetSemanticChecker().ReportAccessError(_results.InaccessibleResult, _pExprBinder.ContextForMemberLookup(), GetTypeQualifier(_pGroup));
                 }
 
-                // Report bogus.
-                if (_mpwiBogus)
+                if (_misnamed)
+                {
+                    // Throw immediately for the non-trailing named argument–specific errors.
+                    // Handle below for the name not being present at all.
+                    _pInvalidSpecifiedName = NameOrErrorForBadNonTrailingName();
+                }
+                else if (_mpwiBogus)
                 {
                     // We might have called this, but it is bogus...
                     return GetErrorContext().Error(ErrorCode.ERR_BindToBogus, _mpwiBogus);
