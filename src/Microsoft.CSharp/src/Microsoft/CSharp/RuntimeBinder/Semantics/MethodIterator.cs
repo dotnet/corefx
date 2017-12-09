@@ -23,8 +23,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private EXPRFLAG _flags;
             // Internal state.
             private int _nCurrentTypeCount;
-            private bool _bIsCheckingInstanceMethods;
-            // Flags for the current sym.
 
             public CMethodIterator(CSemanticChecker checker, SymbolLoader symLoader, Name name, TypeArray containingTypes, CType qualifyingType, AggregateDeclaration context, int arity, EXPRFLAG flags, symbmask_t mask)
             {
@@ -45,7 +43,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _flags = flags;
                 _mask = mask;
                 _nCurrentTypeCount = 0;
-                _bIsCheckingInstanceMethods = true;
                 IsCurrentSymbolBogus = false;
                 IsCurrentSymbolInaccessible = false;
             }
@@ -95,13 +92,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // Check bogus. If Sym is bogus, then let it through and mark it.
                     IsCurrentSymbolBogus = CSemanticChecker.CheckBogus(CurrentSymbol);
 
-                    return _bIsCheckingInstanceMethods;
+                    return true;
                 }
             }
 
             private bool FindNextMethod()
             {
-                while (true)
+                for (;;)
                 {
                     CurrentSymbol = (CurrentSymbol == null
                         ? _pSymbolLoader.LookupAggMember(_pName, CurrentType.getAggregate(), _mask)
@@ -110,15 +107,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // If we couldn't find a sym, we look up the type chain and get the next type.
                     if (CurrentSymbol == null)
                     {
-                        if (_bIsCheckingInstanceMethods)
+                        if (!FindNextTypeForInstanceMethods())
                         {
-                            FindNextTypeForInstanceMethods();
-                            if (CurrentType == null)
-                            {
-                                return false;
-                            }
-
-                            // Found an instance method.
+                            return false;
                         }
                     }
                     else
