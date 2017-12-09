@@ -76,14 +76,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return _pCurrentSym == null;
             }
-            private CSemanticChecker GetSemanticChecker()
-            {
-                return _pSemanticChecker;
-            }
-            private SymbolLoader GetSymbolLoader()
-            {
-                return _pSymbolLoader;
-            }
+
             public bool CanUseCurrentSymbol()
             {
                 // Make sure that whether we're seeing a ctor is consistent with the flag.
@@ -110,7 +103,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 // Check access. If Sym is not accessible, then let it through and mark it.
-                _bCurrentSymIsInaccessible = !GetSemanticChecker().CheckAccess(_pCurrentSym, _pCurrentType, _pContext, _pQualifyingType);
+                _bCurrentSymIsInaccessible = !_pSemanticChecker.CheckAccess(_pCurrentSym, _pCurrentType, _pContext, _pQualifyingType);
 
                 // Check bogus. If Sym is bogus, then let it through and mark it.
                 _bCurrentSymIsBogus = CSemanticChecker.CheckBogus(_pCurrentSym);
@@ -123,7 +116,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 while (true)
                 {
                     _pCurrentSym = (_pCurrentSym == null
-                        ? GetSymbolLoader().LookupAggMember(_pName, _pCurrentType.getAggregate(), _mask)
+                        ? _pSymbolLoader.LookupAggMember(_pName, _pCurrentType.getAggregate(), _mask)
                         : SymbolLoader.LookupNextSym(_pCurrentSym, _pCurrentType.getAggregate(), _mask)) as MethodOrPropertySymbol;
 
                     // If we couldn't find a sym, we look up the type chain and get the next type.
