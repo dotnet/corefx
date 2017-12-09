@@ -92,6 +92,20 @@ namespace System.Reflection.Metadata.Tests
             return pinned;
         }
 
+        internal static unsafe int findIndex(byte[] peImage, byte[] toFind, int start)
+        {
+            byte[] toTest = new byte[toFind.Length];
+            for (int i = 0; i < start - toFind.Length; i++)
+            {
+                Array.Copy(peImage, i + start, toTest, 0, toTest.Length);
+                if (toTest.SequenceEqual(toFind))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
         #endregion
 
         [Fact]
@@ -121,39 +135,18 @@ namespace System.Reflection.Metadata.Tests
 
             // mutate CLR to reach MetadataKind.WindowsMetadata
             // find CLR
-            byte[] clr = Encoding.ASCII.GetBytes("CLR");
-            byte[] toTest = new byte[clr.Length];
-            int clrIndex = 0;
-            bool found = false;
-            for (int i = 0; i < headers.MetadataSize - clr.Length; i++)
-            {
-                Array.Copy(peImage, i + headers.MetadataStartOffset, toTest, 0, toTest.Length);
-                if(toTest.SequenceEqual(clr))
-                {
-                    clrIndex = i;
-                    found = true;
-                    break;
-                }
-            }
-            Assert.True(found);
-            
+            int clrIndex = findIndex(peImage, Encoding.ASCII.GetBytes("CLR"), headers.MetadataStartOffset);
+            Assert.NotEqual(clrIndex, -1);
             //find 5, This is the streamcount and is the last thing that should be read befor the test.
-            int fiveIndex = 0;
-            found = false;
-            for (int i = clrIndex; i < headers.MetadataSize - clr.Length; i++)
-            {
-                if (peImage[i + headers.MetadataStartOffset] == 5)
-                {
-                    fiveIndex = i;
-                    found = true;
-                    break;
-                }
-            }
-            Assert.True(found);
+            int fiveIndex = findIndex(peImage, new byte[] {5}, headers.MetadataStartOffset + clrIndex);
+            Assert.NotEqual(fiveIndex, -1);
+
             peImage[clrIndex + headers.MetadataStartOffset] = 0xFF;
 
+            //StreamHeaderTooSmall for index of five + uint16.
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + 2, MetadataReaderOptions.Default));
-            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + 10, MetadataReaderOptions.Default));
+            //NotEnoughSpaceForStreamHeaderName for index of five + uint16 + COR20Constants.MinimumSizeofStreamHeader
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + clrIndex + COR20Constants.MinimumSizeofStreamHeader + 2, MetadataReaderOptions.Default));
 
         }
 
