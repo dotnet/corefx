@@ -67,6 +67,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         ERR_DuplicateNamedArgument = 1740,
         ERR_NamedArgumentUsedInPositional = 1744,
         ERR_BadNamedArgumentForDelegateInvoke = 1746,
-        ERR_NonInvocableMemberCalled = 1955
+        ERR_NonInvocableMemberCalled = 1955,
+        ERR_BadNonTrailingNamedArgument = 8323
     }
 }

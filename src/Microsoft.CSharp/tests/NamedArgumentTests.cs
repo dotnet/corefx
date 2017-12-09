@@ -17,6 +17,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             public long DoStuff(long z, long a) => z * a;
 
             public int DoStuff(string s, int i) => i;
+
+            public int DoOtherStuff(int x, int y, int z) => x * y + z;
         }
 
         [Fact]
@@ -96,6 +98,107 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             string message = Assert.Throws<RuntimeBinderException>(() => target(callsite, new TypeWithMethods(), 9, 14)).Message;
             //  The best overload for 'DoStuff' does not have a parameter named 'nada'
             Assert.Contains("'DoStuff'", message);
+            Assert.Contains("'nada'", message);
+        }
+
+        [Fact]
+        public void NameOnlyFirstArgumentWrongPlace()
+        {
+            CallSite<Func<CallSite, object, object, object, object>> callsite =
+                CallSite<Func<CallSite, object, object, object, object>>.Create(
+                    Binder.InvokeMember(
+                        CSharpBinderFlags.None, nameof(TypeWithMethods.DoStuff), Type.EmptyTypes, GetType(),
+                        new[]
+                        {
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, ""),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.NamedArgument, "y"),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, "")
+                        }));
+            Func<CallSite, object, object, object, object> target = callsite.Target;
+            string message = Assert.Throws<RuntimeBinderException>(() => target(callsite, new TypeWithMethods(), 9, 14)).Message;
+            //  Named argument 'y' is used out-of-position but is followed by an unnamed argument
+            Assert.Contains("'y'", message);
+        }
+
+        [Fact]
+        public void NameOnlyFirstAndSecondWithSecondArgumentWrongPlace()
+        {
+            CallSite<Func<CallSite, object, object, object, object, object>> callsite =
+                CallSite<Func<CallSite, object, object, object, object, object>>.Create(
+                    Binder.InvokeMember(
+                        CSharpBinderFlags.None, nameof(TypeWithMethods.DoOtherStuff), Type.EmptyTypes, GetType(),
+                        new[]
+                        {
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, ""),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.NamedArgument, "x"),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.NamedArgument, "z"),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, "")
+                        }));
+            Func<CallSite, object, object, object, object, object> target = callsite.Target;
+            string message = Assert.Throws<RuntimeBinderException>(() => target(callsite, new TypeWithMethods(), 9, 14, 13)).Message;
+            //  Named argument 'z' is used out-of-position but is followed by an unnamed argument
+            Assert.Contains("'z'", message);
+        }
+
+        [Fact]
+        public void NameOnlyFirstAndSecondWithSecondArgumentNotFound()
+        {
+            CallSite<Func<CallSite, object, object, object, object, object>> callsite =
+                CallSite<Func<CallSite, object, object, object, object, object>>.Create(
+                    Binder.InvokeMember(
+                        CSharpBinderFlags.None, nameof(TypeWithMethods.DoOtherStuff), Type.EmptyTypes, GetType(),
+                        new[]
+                        {
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, ""),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.NamedArgument, "x"),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.NamedArgument, "nada"),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, "")
+                        }));
+            Func<CallSite, object, object, object, object, object> target = callsite.Target;
+            string message = Assert.Throws<RuntimeBinderException>(() => target(callsite, new TypeWithMethods(), 9, 14, 12)).Message;
+            //  The best overload for 'DoMoreStuff' does not have a parameter named 'nada'
+            Assert.Contains("'DoOtherStuff'", message);
+            Assert.Contains("'nada'", message);
+        }
+
+        [Fact]
+        public void NameOnlySecondWithSecondArgumentWrongPlace()
+        {
+            CallSite<Func<CallSite, object, object, object, object, object>> callsite =
+                CallSite<Func<CallSite, object, object, object, object, object>>.Create(
+                    Binder.InvokeMember(
+                        CSharpBinderFlags.None, nameof(TypeWithMethods.DoOtherStuff), Type.EmptyTypes, GetType(),
+                        new[]
+                        {
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, ""),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, ""),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.NamedArgument, "z"),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, "")
+                        }));
+            Func<CallSite, object, object, object, object, object> target = callsite.Target;
+            string message = Assert.Throws<RuntimeBinderException>(() => target(callsite, new TypeWithMethods(), 9, 14, 13)).Message;
+            //  Named argument 'z' is used out-of-position but is followed by an unnamed argument
+            Assert.Contains("'z'", message);
+        }
+
+        [Fact]
+        public void NameOnlySecondWithSecondArgumentNotFound()
+        {
+            CallSite<Func<CallSite, object, object, object, object, object>> callsite =
+                CallSite<Func<CallSite, object, object, object, object, object>>.Create(
+                    Binder.InvokeMember(
+                        CSharpBinderFlags.None, nameof(TypeWithMethods.DoOtherStuff), Type.EmptyTypes, GetType(),
+                        new[]
+                        {
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, ""),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, ""),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.NamedArgument, "nada"),
+                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, "")
+                        }));
+            Func<CallSite, object, object, object, object, object> target = callsite.Target;
+            string message = Assert.Throws<RuntimeBinderException>(() => target(callsite, new TypeWithMethods(), 9, 14, 12)).Message;
+            //  The best overload for 'DoMoreStuff' does not have a parameter named 'nada'
+            Assert.Contains("'DoOtherStuff'", message);
             Assert.Contains("'nada'", message);
         }
     }

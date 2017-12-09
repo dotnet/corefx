@@ -200,6 +200,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_NamedArgumentUsedInPositional:
                     codeStr = SR.NamedArgumentUsedInPositional;
                     break;
+                case ErrorCode.ERR_BadNonTrailingNamedArgument:
+                    codeStr = SR.BadNonTrailingNamedArgument;
+                    break;
+
                 default:
                     // means missing resources match the code entry
                     Debug.Assert(false, "Missing resources for the error " + code.ToString());

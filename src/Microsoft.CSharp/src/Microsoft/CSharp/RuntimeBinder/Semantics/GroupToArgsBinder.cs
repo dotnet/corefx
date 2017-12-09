@@ -1146,22 +1146,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            private Name NameOrErrorForBadNonTrailingName()
-            {
-                List<Name> paramNames = _misnamed.MethProp().ParameterNames;
-                Name missingName = _pOriginalArguments.prgexpr.OfType<ExprNamedArgumentSpecification>()
-                    .Select(enas => enas.Name)
-                    .FirstOrDefault(n => !paramNames.Contains(n));
-                if (missingName != null)
-                {
-                    // Let this be handled by _pInvalidSpecifiedName handling.
-                    return missingName;
-                }
-
-                // TODO: Appropriate exception.
-                throw new NotImplementedException();
-            }
-
             private RuntimeBinderException ReportErrorsOnFailure()
             {
                 // First and foremost, report if the user specified a name more than once.
@@ -1180,9 +1164,29 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 if (_misnamed)
                 {
-                    // Throw immediately for the non-trailing named argument–specific errors.
+                    // Get exception immediately for the non-trailing named argument being misplaced.
                     // Handle below for the name not being present at all.
-                    _pInvalidSpecifiedName = NameOrErrorForBadNonTrailingName();
+                    List<Name> paramNames = _misnamed.MethProp().ParameterNames;
+                    for (int i = 0; ; ++i)
+                    {
+                        Debug.Assert(i != _pOriginalArguments.carg);
+                        if (_pOriginalArguments.prgexpr[i] is ExprNamedArgumentSpecification named)
+                        {
+                            Name name = named.Name;
+                            if (paramNames[i] != name)
+                            {
+                                // We have the bad name. Is it misplaced or absent?
+                                if (paramNames.Contains(name))
+                                {
+                                    return GetErrorContext().Error(ErrorCode.ERR_BadNonTrailingNamedArgument, name);
+                                }
+
+                                // Let this be handled by _pInvalidSpecifiedName handling.
+                                _pInvalidSpecifiedName = name;
+                                break;
+                            }
+                        }
+                    }
                 }
                 else if (_mpwiBogus)
                 {
