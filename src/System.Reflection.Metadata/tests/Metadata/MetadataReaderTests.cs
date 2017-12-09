@@ -95,6 +95,70 @@ namespace System.Reflection.Metadata.Tests
         #endregion
 
         [Fact]
+        public unsafe void InvalidSignature()
+        {
+            byte* ptr = stackalloc byte[4];
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader(ptr, 16));
+        }
+
+        [Fact]
+        public unsafe void InvalidVersionStringLength()
+        {
+            GCHandle pinned = GetPinnedPEImage(NetModule.AppCS);
+            PEHeaders headers = new PEHeaders(new MemoryStream(NetModule.AppCS));
+
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, 16));
+        }
+
+        [Fact]
+        public unsafe void InvalidStreamHeaderLengths()
+        {
+            // start with a valid PE (cloned because we'll mutate it).
+            byte[] peImage = (byte[])WinRT.Lib.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+
+            // mutate CLR to reach MetadataKind.WindowsMetadata
+            // find CLR
+            byte[] clr = Encoding.ASCII.GetBytes("CLR");
+            byte[] toTest = new byte[clr.Length];
+            int clrIndex = 0;
+            bool found = false;
+            for (int i = 0; i < headers.MetadataSize - clr.Length; i++)
+            {
+                Array.Copy(peImage, i + headers.MetadataStartOffset, toTest, 0, toTest.Length);
+                if(toTest.SequenceEqual(clr))
+                {
+                    clrIndex = i;
+                    found = true;
+                    break;
+                }
+            }
+            Assert.True(found);
+            
+            //find 5, This is the streamcount and is the last thing that should be read befor the test.
+            int fiveIndex = 0;
+            found = false;
+            for (int i = clrIndex; i < headers.MetadataSize - clr.Length; i++)
+            {
+                if (peImage[i + headers.MetadataStartOffset] == 5)
+                {
+                    fiveIndex = i;
+                    found = true;
+                    break;
+                }
+            }
+            Assert.True(found);
+            peImage[clrIndex + headers.MetadataStartOffset] = 0xFF;
+
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + 2, MetadataReaderOptions.Default));
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + 10, MetadataReaderOptions.Default));
+
+        }
+
+
+        [Fact]
         public unsafe void EmptyMetadata()
         {
             byte* ptr = stackalloc byte[1];
