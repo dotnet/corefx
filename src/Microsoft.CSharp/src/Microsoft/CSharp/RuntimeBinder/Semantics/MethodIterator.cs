@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
@@ -21,10 +22,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private readonly int _arity;
             private readonly symbmask_t _mask;
             private readonly EXPRFLAG _flags;
+            private readonly ArgInfos _nonTrailingNamedArguments;
             // Internal state.
             private int _currentTypeIndex;
 
-            public CMethodIterator(CSemanticChecker checker, SymbolLoader symLoader, Name name, TypeArray containingTypes, CType qualifyingType, AggregateDeclaration context, int arity, EXPRFLAG flags, symbmask_t mask)
+            public CMethodIterator(CSemanticChecker checker, SymbolLoader symLoader, Name name, TypeArray containingTypes, CType qualifyingType, AggregateDeclaration context, int arity, EXPRFLAG flags, symbmask_t mask, ArgInfos nonTrailingNamedArguments)
             {
                 Debug.Assert(name != null);
                 Debug.Assert(symLoader != null);
@@ -40,6 +42,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _arity = arity;
                 _flags = flags;
                 _mask = mask;
+                _nonTrailingNamedArguments = nonTrailingNamedArguments;
             }
 
             public MethodOrPropertySymbol CurrentSymbol { get; private set; }
@@ -49,6 +52,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             public bool IsCurrentSymbolInaccessible { get; private set; }
 
             public bool IsCurrentSymbolBogus { get; private set; }
+
+            public bool IsCurrentSymbolMisnamed { get; private set; }
 
             public bool MoveNext() => (CurrentType != null || FindNextTypeForInstanceMethods()) && FindNextMethod();
 
@@ -87,8 +92,34 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // Check bogus. If Sym is bogus, then let it through and mark it.
                     IsCurrentSymbolBogus = CSemanticChecker.CheckBogus(CurrentSymbol);
 
+                    IsCurrentSymbolMisnamed = CheckArgumentNames();
+
                     return true;
                 }
+            }
+
+            private bool CheckArgumentNames()
+            {
+                ArgInfos args = _nonTrailingNamedArguments;
+                if (args == null)
+                {
+                    return true;
+                }
+
+                List<Name> paramNames = ExpressionBinder.GroupToArgsBinder
+                    .FindMostDerivedMethod(_symbolLoader, CurrentSymbol, CurrentSymbol.getType())
+                    .ParameterNames;
+
+                List<Expr> argExpressions = args.prgexpr;
+                for (int i = 0; i < args.carg; i++)
+                {
+                    if (argExpressions[i] is ExprNamedArgumentSpecification named && paramNames[i] != named.Name)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
             }
 
             private bool FindNextMethod()
