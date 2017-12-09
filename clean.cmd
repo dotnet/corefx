@@ -1,6 +1,6 @@
 @if not defined _echo @echo off
 setlocal EnableDelayedExpansion
-
+ 
 set NO_DASHES_ARG=%1
 if not defined NO_DASHES_ARG goto no_help
 if /I [%NO_DASHES_ARG:-=%] == [?] goto Usage
