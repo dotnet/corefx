@@ -26,7 +26,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Internal state.
             private int _nCurrentTypeCount;
             private bool _bIsCheckingInstanceMethods;
-            private bool _bAtEnd;
             // Flags for the current sym.
             private bool _bCurrentSymIsBogus;
             private bool _bCurrentSymIsInaccessible;
@@ -51,7 +50,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _mask = mask;
                 _nCurrentTypeCount = 0;
                 _bIsCheckingInstanceMethods = true;
-                _bAtEnd = false;
                 _bCurrentSymIsBogus = false;
                 _bCurrentSymIsInaccessible = false;
             }
@@ -71,28 +69,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return _bCurrentSymIsBogus;
             }
-            public bool MoveNext(bool canIncludeExtensionsInResults)
-            {
-                if (_bAtEnd)
-                {
-                    return false;
-                }
 
-                if (_pCurrentType == null && !FindNextTypeForInstanceMethods())
-                {
-                    // No instance or extensions.
+            public bool MoveNext(bool canIncludeExtensionsInResults) => (_pCurrentType != null || FindNextTypeForInstanceMethods()) && FindNextMethod();
 
-                    _bAtEnd = true;
-                    return false;
-                }
-
-                if (!FindNextMethod())
-                {
-                    _bAtEnd = true;
-                    return false;
-                }
-                return true;
-            }
             public bool AtEnd()
             {
                 return _pCurrentSym == null;
