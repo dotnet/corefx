@@ -101,25 +101,23 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private bool CheckArgumentNames()
             {
                 ArgInfos args = _nonTrailingNamedArguments;
-                if (args == null)
+                if (args != null)
                 {
-                    return true;
-                }
+                    List<Name> paramNames = ExpressionBinder.GroupToArgsBinder
+                        .FindMostDerivedMethod(_symbolLoader, CurrentSymbol, CurrentSymbol.getType())
+                        .ParameterNames;
 
-                List<Name> paramNames = ExpressionBinder.GroupToArgsBinder
-                    .FindMostDerivedMethod(_symbolLoader, CurrentSymbol, CurrentSymbol.getType())
-                    .ParameterNames;
-
-                List<Expr> argExpressions = args.prgexpr;
-                for (int i = 0; i < args.carg; i++)
-                {
-                    if (argExpressions[i] is ExprNamedArgumentSpecification named && paramNames[i] != named.Name)
+                    List<Expr> argExpressions = args.prgexpr;
+                    for (int i = 0; i < args.carg; i++)
                     {
-                        return false;
+                        if (argExpressions[i] is ExprNamedArgumentSpecification named && paramNames[i] != named.Name)
+                        {
+                            return true;
+                        }
                     }
                 }
 
-                return true;
+                return false;
             }
 
             private bool FindNextMethod()

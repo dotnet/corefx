@@ -43,6 +43,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private readonly List<CandidateFunctionMember> _methList;
             private readonly MethPropWithInst _mpwiParamTypeConstraints;
             private readonly MethPropWithInst _mpwiBogus;
+            private readonly MethPropWithInst _misnamed;
             private readonly MethPropWithInst _mpwiCantInferInstArg;
             private readonly MethWithType _mwtBadArity;
             private Name _pInvalidSpecifiedName;
@@ -77,6 +78,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _methList = new List<CandidateFunctionMember>();
                 _mpwiParamTypeConstraints = new MethPropWithInst();
                 _mpwiBogus = new MethPropWithInst();
+                _misnamed = new MethPropWithInst();
                 _mpwiCantInferInstArg = new MethPropWithInst();
                 _mwtBadArity = new MethWithType();
                 _HiddenTypes = new List<CType>();
@@ -223,9 +225,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         continue;
                     }
 
+                    // Check misnamed.
+                    bool misnamed = fCanAccess && iterator.IsCurrentSymbolMisnamed;
+                    if (misnamed && (!_methList.IsEmpty() || _results.InaccessibleResult || _misnamed))
+                    {
+                        bSearchForExpanded = false;
+                        continue;
+                    }
+
                     // Check bogus.
-                    bool fBogus = fCanAccess && iterator.IsCurrentSymbolBogus;
-                    if (fBogus && (!_methList.IsEmpty() || _results.InaccessibleResult || _mpwiBogus))
+                    bool fBogus = fCanAccess && !misnamed && iterator.IsCurrentSymbolBogus;
+                    if (fBogus && (!_methList.IsEmpty() || _results.InaccessibleResult || _mpwiBogus || _misnamed))
                     {
                         // We'll never use this one for error reporting anyway, so just skip it.
                         bSearchForExpanded = false;
@@ -246,6 +256,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // a better error...
                         Debug.Assert(!_results.InaccessibleResult);
                         _results.InaccessibleResult.Set(_pCurrentSym, _pCurrentType, _pCurrentTypeArgs);
+                    }
+                    else if (misnamed)
+                    {
+                        Debug.Assert(!_misnamed);
+                        _misnamed.Set(_pCurrentSym, _pCurrentType, _pCurrentTypeArgs);
                     }
                     else if (fBogus)
                     {
