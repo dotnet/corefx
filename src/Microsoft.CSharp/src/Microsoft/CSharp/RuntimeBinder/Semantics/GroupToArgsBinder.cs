@@ -134,9 +134,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // iterator will only return propsyms (or methsyms, or whatever)
                 symbmask_t mask = (symbmask_t)(1 << (int)_pGroup.SymKind);
 
-                CType pTypeThrough = _pGroup.OptionalObject?.Type;
-                CMemberLookupResults.CMethodIterator iterator = _pGroup.MemberLookupResults.GetMethodIterator(GetSemanticChecker(), GetSymbolLoader(), pTypeThrough, GetTypeQualifier(_pGroup), _pExprBinder.ContextForMemberLookup(), true, // AllowBogusAndInaccessible
-                    false, _pGroup.TypeArgs.Count, _pGroup.Flags, mask);
+                CMemberLookupResults.CMethodIterator iterator = _pGroup.MemberLookupResults.GetMethodIterator(GetSemanticChecker(), GetSymbolLoader(), GetTypeQualifier(_pGroup), _pExprBinder.ContextForMemberLookup(), _pGroup.TypeArgs.Count, _pGroup.Flags, mask);
                 while (true)
                 {
                     bool bFoundExpanded;
@@ -824,7 +822,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // return false.
             private bool GetNextSym(CMemberLookupResults.CMethodIterator iterator)
             {
-                if (!iterator.MoveNext(_methList.IsEmpty()))
+                if (!iterator.MoveNext())
                 {
                     return false;
                 }
@@ -850,7 +848,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 while (_HiddenTypes.Contains(_pCurrentType))
                 {
                     // Move through this type and get the next one.
-                    for (; iterator.GetCurrentType() == _pCurrentType; iterator.MoveNext(_methList.IsEmpty())) ;
+                    for (; iterator.GetCurrentType() == _pCurrentType; iterator.MoveNext()) ;
                     _pCurrentSym = iterator.GetCurrentSymbol();
                     _pCurrentType = iterator.GetCurrentType();
 

@@ -30,7 +30,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private bool _bCurrentSymIsBogus;
             private bool _bCurrentSymIsInaccessible;
 
-            public CMethodIterator(CSemanticChecker checker, SymbolLoader symLoader, Name name, TypeArray containingTypes, CType @object, CType qualifyingType, AggregateDeclaration context, bool allowBogusAndInaccessible, bool allowExtensionMethods, int arity, EXPRFLAG flags, symbmask_t mask)
+            public CMethodIterator(CSemanticChecker checker, SymbolLoader symLoader, Name name, TypeArray containingTypes, CType qualifyingType, AggregateDeclaration context, int arity, EXPRFLAG flags, symbmask_t mask)
             {
                 Debug.Assert(name != null);
                 Debug.Assert(symLoader != null);
@@ -70,7 +70,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return _bCurrentSymIsBogus;
             }
 
-            public bool MoveNext(bool canIncludeExtensionsInResults) => (_pCurrentType != null || FindNextTypeForInstanceMethods()) && FindNextMethod();
+            public bool MoveNext() => (_pCurrentType != null || FindNextTypeForInstanceMethods()) && FindNextMethod();
 
             public bool AtEnd()
             {
