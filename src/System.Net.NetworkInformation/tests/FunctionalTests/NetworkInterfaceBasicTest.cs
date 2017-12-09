@@ -20,6 +20,7 @@ namespace System.Net.NetworkInformation.Tests
             _log = TestLogging.GetInstance();
         }
 
+        [Fact]
         public void BasicTest_GetNetworkInterfaces_AtLeastOne()
         {
             Assert.NotEqual<int>(0, NetworkInterface.GetAllNetworkInterfaces().Length);
@@ -50,6 +51,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.Linux)]  // Some APIs are not supported on Linux
         public void BasicTest_AccessInstanceProperties_NoExceptions_Linux()
         {
@@ -107,6 +109,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
+        [Fact]
         [Trait("IPv4", "true")]
         public void BasicTest_StaticLoopbackIndex_MatchesLoopbackNetworkInterface()
         {
@@ -128,6 +131,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
+        [Fact]
         [Trait("IPv4", "true")]
         public void BasicTest_StaticLoopbackIndex_ExceptionIfV4NotSupported()
         {
@@ -136,6 +140,7 @@ namespace System.Net.NetworkInformation.Tests
             _log.WriteLine("Loopback IPv4 index: " + NetworkInterface.LoopbackInterfaceIndex);
         }
 
+        [Fact]
         [Trait("IPv6", "true")]
         public void BasicTest_StaticIPv6LoopbackIndex_MatchesLoopbackNetworkInterface()
         {
@@ -159,6 +164,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
+        [Fact]
         [Trait("IPv6", "true")]
         public void BasicTest_StaticIPv6LoopbackIndex_ExceptionIfV6NotSupported()
         {
@@ -190,6 +196,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.Linux)]  // Some APIs are not supported on Linux
         public void BasicTest_GetIPInterfaceStatistics_Success_Linux()
         {
@@ -237,11 +244,13 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
+        [Fact]
         public void BasicTest_GetIsNetworkAvailable_Success()
         {
             Assert.True(NetworkInterface.GetIsNetworkAvailable());
         }
 
+        [Fact]
         [PlatformSpecific(~TestPlatforms.OSX)]
         [InlineData(false)]
         [InlineData(true)]

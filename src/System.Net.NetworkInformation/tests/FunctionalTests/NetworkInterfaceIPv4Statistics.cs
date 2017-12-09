@@ -45,6 +45,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.Linux)]  // Some APIs are not supported on Linux
         public void BasicTest_GetIPv4InterfaceStatistics_Success_Linux()
         {

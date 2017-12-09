@@ -506,11 +506,13 @@ namespace System.Net.Sockets.Tests
             DualModeConnectAsync_IPEndPointToHost_Helper(IPAddress.IPv6Loopback, IPAddress.IPv6Loopback, false);
         }
 
+        [Fact]
         public void ConnectAsyncV4IPEndPointToV6Host_Fails()
         {
             DualModeConnectAsync_IPEndPointToHost_Fails_Helper(IPAddress.Loopback, IPAddress.IPv6Loopback);
         }
 
+        [Fact]
         public void ConnectAsyncV6IPEndPointToV4Host_Fails()
         {
             DualModeConnectAsync_IPEndPointToHost_Fails_Helper(IPAddress.IPv6Loopback, IPAddress.Loopback);

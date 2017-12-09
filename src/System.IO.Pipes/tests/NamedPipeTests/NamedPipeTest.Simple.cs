@@ -365,6 +365,7 @@ namespace System.IO.Pipes.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)] // Unix implemented on sockets, where disposal information doesn't propagate
         public async Task Unix_OperationsOnNamedServerWithDisposedClient()
         {

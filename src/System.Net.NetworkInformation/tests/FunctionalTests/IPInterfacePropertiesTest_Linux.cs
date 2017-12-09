@@ -20,6 +20,7 @@ namespace System.Net.NetworkInformation.Tests
             _log = TestLogging.GetInstance();
         }
 
+        [Fact]
         public void IPInfoTest_AccessAllProperties_NoErrors()
         {
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
@@ -101,6 +102,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
+        [Fact]
         public void IPInfoTest_AccessAllIPv4Properties_NoErrors()
         {
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
@@ -123,6 +125,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
+        [Fact]
         public void IPInfoTest_AccessAllIPv6Properties_NoErrors()
         {
             foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
@@ -147,6 +150,7 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
+        [Fact]
         [Trait("IPv6", "true")]
         public void IPv6ScopeId_AccessAllValues_Success()
         {
