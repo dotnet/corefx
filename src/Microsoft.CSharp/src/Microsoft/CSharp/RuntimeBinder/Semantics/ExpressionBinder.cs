@@ -1338,8 +1338,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             }
                             index++;
                         }
-                        //TODO: Put this assertion back when non-trailing named args fully implemented.
-                        //Debug.Assert(index != mp.Params.Count);
+
+                        Debug.Assert(index != mp.Params.Count);
                         CType substDestType = GetTypes().SubstType(@params[index], type, pTypeArgs);
 
                         // If we cant convert the argument and we're the param array argument, then deal with it.
