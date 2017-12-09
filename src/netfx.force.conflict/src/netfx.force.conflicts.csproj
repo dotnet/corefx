@@ -7,8 +7,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netfx-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netfx-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='net471-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='net471-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="TypeForwards.cs" />
+    <Compile Include="TypeForwards.cs" Condition="'$(TargetGroup)' == 'netfx'"/>
+    <Compile Include="TypeForwards.471.cs" Condition="'$(TargetGroup)' == 'net471'"/>
     <ProjectReference Include="..\..\..\external\netfx-conflicts\netfx-conflicts.depproj" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
