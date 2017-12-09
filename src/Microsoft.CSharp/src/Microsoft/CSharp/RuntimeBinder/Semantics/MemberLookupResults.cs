@@ -22,12 +22,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 TypeArray containingTypes,
                 Name name)
         {
+            Debug.Assert(containingTypes != null);
+            Debug.Assert(containingTypes.Count != 0);
             _pName = name;
             ContainingTypes = containingTypes;
-            if (ContainingTypes == null)
-            {
-                ContainingTypes = BSYMMGR.EmptyTypeArray();
-            }
         }
 
         public CMethodIterator GetMethodIterator(

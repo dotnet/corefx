@@ -37,6 +37,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(symLoader != null);
                 Debug.Assert(checker != null);
                 Debug.Assert(containingTypes != null);
+                Debug.Assert(containingTypes.Count != 0);
                 _pSemanticChecker = checker;
                 _pSymbolLoader = symLoader;
                 _pCurrentType = null;
@@ -77,26 +78,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
 
-                if (_pCurrentType == null) // First guy.
+                if (_pCurrentType == null && !FindNextTypeForInstanceMethods())
                 {
-                    if (_pContainingTypes.Count == 0)
-                    {
-                        // No instance methods, only extensions.
-                        _bIsCheckingInstanceMethods = false;
-                        _bAtEnd = true;
-                        return false;
-                    }
-                    else
-                    {
-                        if (!FindNextTypeForInstanceMethods())
-                        {
-                            // No instance or extensions.
+                    // No instance or extensions.
 
-                            _bAtEnd = true;
-                            return false;
-                        }
-                    }
+                    _bAtEnd = true;
+                    return false;
                 }
+
                 if (!FindNextMethod())
                 {
                     _bAtEnd = true;
@@ -187,26 +176,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             private bool FindNextTypeForInstanceMethods()
             {
-                // Otherwise, search through other types listed as well as our base class.
-                if (_pContainingTypes.Count > 0)
+                if (_nCurrentTypeCount >= _pContainingTypes.Count)
                 {
-                    if (_nCurrentTypeCount >= _pContainingTypes.Count)
-                    {
-                        // No more types to check.
-                        _pCurrentType = null;
-                    }
-                    else
-                    {
-                        _pCurrentType = _pContainingTypes[_nCurrentTypeCount++] as AggregateType;
-                    }
+                    // No more types to check.
+                    _pCurrentType = null;
+                    return false;
                 }
-                else
-                {
-                    // We have no more types to consider, so check out the base class.
 
-                    _pCurrentType = _pCurrentType.GetBaseClass();
-                }
-                return _pCurrentType != null;
+                _pCurrentType = _pContainingTypes[_nCurrentTypeCount++] as AggregateType;
+                return true;
             }
         }
     }
