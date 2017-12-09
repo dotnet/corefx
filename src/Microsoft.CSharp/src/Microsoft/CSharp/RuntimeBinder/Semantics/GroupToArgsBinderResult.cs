@@ -15,14 +15,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         internal sealed class GroupToArgsBinderResult
         {
-            public MethPropWithInst BestResult;
-            public MethPropWithInst GetBestResult() { return BestResult; }
-            public MethPropWithInst AmbiguousResult;
-            public MethPropWithInst GetAmbiguousResult() { return AmbiguousResult; }
-            private MethPropWithInst InaccessibleResult;
-            public MethPropWithInst GetInaccessibleResult() { return InaccessibleResult; }
-            private MethPropWithInst UninferableResult;
-            public MethPropWithInst GetUninferableResult() { return UninferableResult; }
+            public MethPropWithInst BestResult { get; set; }
+            public MethPropWithInst AmbiguousResult { get; set; }
+            public MethPropWithInst InaccessibleResult { get; }
+            public MethPropWithInst UninferableResult { get; }
             private MethPropWithInst InconvertibleResult;
             public GroupToArgsBinderResult()
             {

@@ -889,8 +889,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // fixed arguments.
             bool seenNamed = VerifyNamedArgumentsAfterFixed(args);
 
-            MethPropWithInst mpwiBest = BindMethodGroupToArgumentsCore(bindFlags, grp, args, carg, seenNamed)
-                .GetBestResult();
+            MethPropWithInst mpwiBest = BindMethodGroupToArgumentsCore(bindFlags, grp, args, carg, seenNamed).BestResult;
             if (grp.SymKind == SYMKIND.SK_PropertySymbol)
             {
                 Debug.Assert((grp.Flags & EXPRFLAG.EXF_INDEXER) != 0);

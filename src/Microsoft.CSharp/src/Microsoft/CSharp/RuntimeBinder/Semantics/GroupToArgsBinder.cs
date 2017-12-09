@@ -216,7 +216,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                     // Check access.
                     bool fCanAccess = !iterator.IsCurrentSymbolInaccessible;
-                    if (!fCanAccess && (!_methList.IsEmpty() || _results.GetInaccessibleResult()))
+                    if (!fCanAccess && (!_methList.IsEmpty() || _results.InaccessibleResult))
                     {
                         // We'll never use this one for error reporting anyway, so just skip it.
                         bSearchForExpanded = false;
@@ -225,7 +225,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                     // Check bogus.
                     bool fBogus = fCanAccess && iterator.IsCurrentSymbolBogus;
-                    if (fBogus && (!_methList.IsEmpty() || _results.GetInaccessibleResult() || _mpwiBogus))
+                    if (fBogus && (!_methList.IsEmpty() || _results.InaccessibleResult || _mpwiBogus))
                     {
                         // We'll never use this one for error reporting anyway, so just skip it.
                         bSearchForExpanded = false;
@@ -244,8 +244,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     {
                         // In case we never get an accessible method, this will allow us to give
                         // a better error...
-                        Debug.Assert(!_results.GetInaccessibleResult());
-                        _results.GetInaccessibleResult().Set(_pCurrentSym, _pCurrentType, _pCurrentTypeArgs);
+                        Debug.Assert(!_results.InaccessibleResult);
+                        _results.InaccessibleResult.Set(_pCurrentSym, _pCurrentType, _pCurrentTypeArgs);
                     }
                     else if (fBogus)
                     {
@@ -990,9 +990,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 _nArgBest = ivar;
 
                                 // If we already have best method for instance methods don't overwrite with extensions
-                                if (!_results.GetBestResult())
+                                if (!_results.BestResult)
                                 {
-                                    _results.GetBestResult().Set(_pCurrentSym, _pCurrentType, _pCurrentTypeArgs);
+                                    _results.BestResult.Set(_pCurrentSym, _pCurrentType, _pCurrentTypeArgs);
                                 }
                             }
                             else if (ivar == _nArgBest && _pArguments.types[ivar] != var)
@@ -1007,9 +1007,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 if (argStripped == varStripped)
                                 {
                                     // If we already have best method for instance methods don't overwrite with extensions
-                                    if (!_results.GetBestResult())
+                                    if (!_results.BestResult)
                                     {
-                                        _results.GetBestResult().Set(_pCurrentSym, _pCurrentType, _pCurrentTypeArgs);
+                                        _results.BestResult.Set(_pCurrentSym, _pCurrentType, _pCurrentTypeArgs);
                                     }
                                 }
                             }
@@ -1031,7 +1031,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (_results.IsBetterUninferableResult(_pCurrentTypeArgs) && _pCurrentSym is MethodSymbol meth)
                     {
                         // If we're an instance method then mark us down.
-                        _results.GetUninferableResult().Set(meth, _pCurrentType, _pCurrentTypeArgs);
+                        _results.UninferableResult.Set(meth, _pCurrentType, _pCurrentTypeArgs);
                     }
                 }
                 else
@@ -1130,16 +1130,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // used for Methods and Indexers
                 Debug.Assert(_pGroup.SymKind == SYMKIND.SK_MethodSymbol || _pGroup.SymKind == SYMKIND.SK_PropertySymbol && 0 != (_pGroup.Flags & EXPRFLAG.EXF_INDEXER));
                 Debug.Assert(_pGroup.TypeArgs.Count == 0 || _pGroup.SymKind == SYMKIND.SK_MethodSymbol);
-                Debug.Assert(0 == (_pGroup.Flags & EXPRFLAG.EXF_USERCALLABLE) || _results.GetBestResult().MethProp().isUserCallable());
+                Debug.Assert(0 == (_pGroup.Flags & EXPRFLAG.EXF_USERCALLABLE) || _results.BestResult.MethProp().isUserCallable());
 
                 if (_pGroup.SymKind == SYMKIND.SK_MethodSymbol)
                 {
-                    Debug.Assert(_results.GetBestResult().MethProp() is MethodSymbol);
+                    Debug.Assert(_results.BestResult.MethProp() is MethodSymbol);
 
-                    if (_results.GetBestResult().TypeArgs.Count > 0)
+                    if (_results.BestResult.TypeArgs.Count > 0)
                     {
                         // Check method type variable constraints.
-                        TypeBind.CheckMethConstraints(GetSemanticChecker(), GetErrorContext(), new MethWithInst(_results.GetBestResult()));
+                        TypeBind.CheckMethConstraints(GetSemanticChecker(), GetErrorContext(), new MethWithInst(_results.BestResult));
                     }
                 }
             }
@@ -1154,10 +1154,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 Debug.Assert(_methList.IsEmpty());
                 // Report inaccessible.
-                if (_results.GetInaccessibleResult())
+                if (_results.InaccessibleResult)
                 {
                     // We might have called this, but it is inaccessible...
-                    return GetSemanticChecker().ReportAccessError(_results.GetInaccessibleResult(), _pExprBinder.ContextForMemberLookup(), GetTypeQualifier(_pGroup));
+                    return GetSemanticChecker().ReportAccessError(_results.InaccessibleResult, _pExprBinder.ContextForMemberLookup(), GetTypeQualifier(_pGroup));
                 }
 
                 // Report bogus.
@@ -1176,29 +1176,29 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         _pGroup.OptionalObject.Type.isDelegateType() &&
                         _pGroup.Name == NameManager.GetPredefinedName(PredefinedName.PN_INVOKE))
                 {
-                    Debug.Assert(!_results.GetBestResult() || _results.GetBestResult().MethProp().getClass().IsDelegate());
-                    Debug.Assert(!_results.GetBestResult() || _results.GetBestResult().GetType().getAggregate().IsDelegate());
+                    Debug.Assert(!_results.BestResult || _results.BestResult.MethProp().getClass().IsDelegate());
+                    Debug.Assert(!_results.BestResult || _results.BestResult.GetType().getAggregate().IsDelegate());
                     bUseDelegateErrors = true;
                     nameErr = _pGroup.OptionalObject.Type.getAggregate().name;
                 }
 
-                if (_results.GetBestResult())
+                if (_results.BestResult)
                 {
                     // If we had some invalid arguments for best matching.
                     return ReportErrorsForBestMatching(bUseDelegateErrors);
                 }
 
-                if (_results.GetUninferableResult() || _mpwiCantInferInstArg)
+                if (_results.UninferableResult || _mpwiCantInferInstArg)
                 {
-                    if (!_results.GetUninferableResult())
+                    if (!_results.UninferableResult)
                     {
                         //copy the extension method for which instance argument type inference failed
-                        _results.GetUninferableResult().Set(_mpwiCantInferInstArg.Sym as MethodSymbol, _mpwiCantInferInstArg.GetType(), _mpwiCantInferInstArg.TypeArgs);
+                        _results.UninferableResult.Set(_mpwiCantInferInstArg.Sym as MethodSymbol, _mpwiCantInferInstArg.GetType(), _mpwiCantInferInstArg.TypeArgs);
                     }
-                    Debug.Assert(_results.GetUninferableResult().Sym is MethodSymbol);
+                    Debug.Assert(_results.UninferableResult.Sym is MethodSymbol);
 
                     MethWithType mwtCantInfer = new MethWithType();
-                    mwtCantInfer.Set(_results.GetUninferableResult().Meth(), _results.GetUninferableResult().GetType());
+                    mwtCantInfer.Set(_results.UninferableResult.Meth(), _results.UninferableResult.GetType());
                     return GetErrorContext().Error(ErrorCode.ERR_CantInferMethTypeArgs, mwtCantInfer);
                 }
 
@@ -1259,10 +1259,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (bUseDelegateErrors)
                 {
                     // Point to the Delegate, not the Invoke method
-                    return GetErrorContext().Error(ErrorCode.ERR_BadDelArgTypes, _results.GetBestResult().GetType());
+                    return GetErrorContext().Error(ErrorCode.ERR_BadDelArgTypes, _results.BestResult.GetType());
                 }
 
-                return GetErrorContext().Error(ErrorCode.ERR_BadArgTypes, _results.GetBestResult());
+                return GetErrorContext().Error(ErrorCode.ERR_BadArgTypes, _results.BestResult);
             }
         }
     }
