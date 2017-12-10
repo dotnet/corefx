@@ -108,5 +108,35 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
                 Assert.Equal(result, ~operand);
             }
         }
+
+        [Theory]
+        [MemberData(nameof(ByteEnums))]
+        [MemberData(nameof(SByteEnums))]
+        [MemberData(nameof(Int32Enums))]
+        [MemberData(nameof(UInt32Enums))]
+        [MemberData(nameof(Int64Enums))]
+        public void ConstantEnumOnesComplement(object operand, object result)
+        {
+            CallSite<Func<CallSite, object, object>> cs = CallSite<Func<CallSite, object, object>>.Create(
+                Binder.UnaryOperation(
+                    CSharpBinderFlags.None, ExpressionType.OnesComplement, GetType(),
+                    new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.Constant, null) }));
+            Assert.Equal(result, cs.Target(cs, operand));
+        }
+
+        [Theory]
+        [MemberData(nameof(ByteEnums))]
+        [MemberData(nameof(SByteEnums))]
+        [MemberData(nameof(Int32Enums))]
+        [MemberData(nameof(UInt32Enums))]
+        [MemberData(nameof(Int64Enums))]
+        public void ConstantCheckedEnumOnesComplement(object operand, object result)
+        {
+            CallSite<Func<CallSite, object, object>> cs = CallSite<Func<CallSite, object, object>>.Create(
+                Binder.UnaryOperation(
+                    CSharpBinderFlags.CheckedContext, ExpressionType.OnesComplement, GetType(),
+                    new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.Constant, null) }));
+            Assert.Equal(result, cs.Target(cs, operand));
+        }
     }
 }
