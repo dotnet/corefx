@@ -92,7 +92,7 @@ namespace System.Reflection.Metadata.Tests
             return pinned;
         }
 
-        internal static unsafe int findIndex(byte[] peImage, byte[] toFind, int start)
+        internal static unsafe int FindIndex(byte[] peImage, byte[] toFind, int start)
         {
             byte[] toTest = new byte[toFind.Length];
             for (int i = 0; i < start - toFind.Length; i++)
@@ -104,6 +104,14 @@ namespace System.Reflection.Metadata.Tests
                 }
             }
             return -1;
+        }
+
+        internal static unsafe void InsertBytes(byte[] peImage, byte[] toInsert, int start)
+        {
+            for (int i = 0; i < toInsert.Length; i++)
+            {
+                peImage[start + i] = toInsert[i];
+            }
         }
 
         #endregion
@@ -135,10 +143,10 @@ namespace System.Reflection.Metadata.Tests
 
             // mutate CLR to reach MetadataKind.WindowsMetadata
             // find CLR
-            int clrIndex = findIndex(peImage, Encoding.ASCII.GetBytes("CLR"), headers.MetadataStartOffset);
+            int clrIndex = FindIndex(peImage, Encoding.ASCII.GetBytes("CLR"), headers.MetadataStartOffset);
             Assert.NotEqual(clrIndex, -1);
             //find 5, This is the streamcount and is the last thing that should be read befor the test.
-            int fiveIndex = findIndex(peImage, new byte[] {5}, headers.MetadataStartOffset + clrIndex);
+            int fiveIndex = FindIndex(peImage, new byte[] {5}, headers.MetadataStartOffset + clrIndex);
             Assert.NotEqual(fiveIndex, -1);
 
             peImage[clrIndex + headers.MetadataStartOffset] = 0xFF;
@@ -147,6 +155,41 @@ namespace System.Reflection.Metadata.Tests
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + 2, MetadataReaderOptions.Default));
             //NotEnoughSpaceForStreamHeaderName for index of five + uint16 + COR20Constants.MinimumSizeofStreamHeader
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + clrIndex + COR20Constants.MinimumSizeofStreamHeader + 2, MetadataReaderOptions.Default));
+
+        }
+
+        [Fact]
+        public unsafe void InvalidSpaceForStreams()
+        {
+            // start with a valid PE (cloned because we'll mutate it).
+            byte[] peImage = (byte[])NetModule.AppCS.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+
+            //find 5, This is the streamcount we'll change to one to leave out loops.
+            int fiveIndex = FindIndex(peImage, new byte[] { 5 }, headers.MetadataStartOffset);
+            Assert.NotEqual(fiveIndex, -1);
+            InsertBytes(peImage, BitConverter.GetBytes((ushort)1), fiveIndex + headers.MetadataStartOffset);
+
+            string[] streamNames= new string[]
+            {
+                COR20Constants.StringStreamName, COR20Constants.BlobStreamName, COR20Constants.GUIDStreamName,
+                COR20Constants.UserStringStreamName, COR20Constants.CompressedMetadataTableStreamName,
+                COR20Constants.UncompressedMetadataTableStreamName, COR20Constants.MinimalDeltaMetadataTableStreamName,
+                COR20Constants.StandalonePdbStreamName, "#invalid"
+            };
+
+            foreach (string name in streamNames)
+            {
+                InsertBytes(peImage, Encoding.ASCII.GetBytes(name), fiveIndex + 10 + headers.MetadataStartOffset);
+                InsertBytes(peImage, new byte[] { 0 }, fiveIndex + 10 + headers.MetadataStartOffset + name.Length);
+                Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + 15 + name.Length));
+            }
+
+            InsertBytes(peImage, Encoding.ASCII.GetBytes(COR20Constants.MinimalDeltaMetadataTableStreamName), fiveIndex + 10 + headers.MetadataStartOffset);
+            InsertBytes(peImage, new byte[] { 0 }, fiveIndex + 10 + headers.MetadataStartOffset + COR20Constants.MinimalDeltaMetadataTableStreamName.Length);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
 
         }
 
