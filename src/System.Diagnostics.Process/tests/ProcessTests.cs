@@ -927,6 +927,13 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        public void GetProcesses_RemoteMachinePath_ReturnsExpected()
+        {
+            Process[] processes = Process.GetProcesses(Environment.MachineName + "." + Domain.GetComputerDomain());
+            Assert.NotEmpty(processes);
+        }
+
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void GetProcessesByName_ProcessName_ReturnsExpected()
         {
