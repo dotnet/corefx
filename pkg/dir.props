@@ -3,6 +3,9 @@
   <Import Project="..\dir.props" />
 
   <PropertyGroup>
+    <!-- Used to determine if we should build some packages only once across multiple official build legs. 
+         For offline builds we still set OfficialBuildId but we need to build all the packages for a single 
+         leg only, so we also take DotNetBuildOffline into account. -->
     <BuildingAnOfficialBuildLeg Condition="'$(BuildingAnOfficialBuildLeg)' == '' AND '$(OfficialBuildId)' != '' AND '$(DotNetBuildOffline)' != 'true'">true</BuildingAnOfficialBuildLeg>
   </PropertyGroup>
   
