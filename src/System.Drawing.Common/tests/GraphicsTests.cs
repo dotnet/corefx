@@ -321,26 +321,14 @@ namespace System.Drawing.Tests
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [InlineData(PixelFormat.Format1bppIndexed)]
         [InlineData(PixelFormat.Format4bppIndexed)]
-        [InlineData(PixelFormat.Format8bppIndexed)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Difference in behavior, netfx throws Exception")]
+        [InlineData(PixelFormat.Format8bppIndexed)]     
         public void FromImage_IndexedImage_ThrowsException(PixelFormat format)
         {
             using (var image = new Bitmap(10, 10, format))
             {
-                AssertExtensions.Throws<ArgumentException>("image", () => Graphics.FromImage(image));
-            }
-        }
-
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
-        [InlineData(PixelFormat.Format1bppIndexed)]
-        [InlineData(PixelFormat.Format4bppIndexed)]
-        [InlineData(PixelFormat.Format8bppIndexed)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Difference in behavior, netcoreapp throws ArgumentException")]
-        public void FromImage_IndexedImage_ThrowsException_Netfx(PixelFormat format)
-        {
-            using (var image = new Bitmap(10, 10, format))
-            {
-                Assert.Throws<Exception>(() => Graphics.FromImage(image));
+                Exception exception = AssertExtensions.Throws<ArgumentException,Exception>(() => Graphics.FromImage(image));
+                if (exception is ArgumentException argumentException)
+                    Assert.Equal("image", argumentException.ParamName);
             }
         }
 
