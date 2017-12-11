@@ -930,8 +930,19 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void GetProcesses_RemoteMachinePath_ReturnsExpected()
         {
-            Process[] processes = Process.GetProcesses(Environment.MachineName + "." + Domain.GetComputerDomain());
-            Assert.NotEmpty(processes);
+            try
+            {
+                Process[] processes = Process.GetProcesses(Environment.MachineName + "." + Domain.GetComputerDomain());
+                Assert.NotEmpty(processes);
+            }
+            catch (ActiveDirectoryObjectNotFoundException)
+            {
+                //This will be thrown when the executing machine is not domain-joined, i.e. in CI
+            }
+            catch (PlatformNotSupportedException)
+            {
+                //System.DirectoryServices is not supported on all platforms
+            }
         }
 
         [Fact]

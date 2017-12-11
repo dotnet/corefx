@@ -205,7 +205,7 @@ namespace System.Diagnostics
             private void Init()
             {
 #if FEATURE_REGISTRY
-                if (_machineName != "." && ProcessManager.IsRemoteMachine(_machineName))
+                if (ProcessManager.IsRemoteMachine(_machineName))
                 {
                     _perfDataKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.PerformanceData, _machineName);
                 }
