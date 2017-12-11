@@ -211,10 +211,10 @@ namespace System.Net.Security
                 // Protecting from X509Certificate2 derived classes.
                 X509Certificate2 certEx = MakeEx(certificate);
 
-                certHash = certEx.Thumbprint;
-
                 if (certEx != null)
                 {
+                    certHash = certEx.Thumbprint;
+
                     if (certEx.HasPrivateKey)
                     {
                         if (NetEventSource.IsEnabled)
@@ -227,6 +227,10 @@ namespace System.Net.Security
                     {
                         certEx.Dispose();
                     }
+                }
+                else
+                {
+                    certHash = certificate.GetCertHashString();
                 }
 
                 X509Certificate2Collection collectionEx;
