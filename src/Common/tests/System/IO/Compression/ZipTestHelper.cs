@@ -117,10 +117,7 @@ namespace System.IO.Compression.Tests
 
                 if (ac != bc)
                 {
-                    string rep = Text.Encoding.Default.GetString(bd);
-                    rep = rep.Replace("\r\n", "\n");
-                    rep = rep.Replace("\n", "\r\n");
-                    bd = Text.Encoding.Default.GetBytes(rep);
+                    bd = NormalizeLineEndings(bd);
                 }
 
                 Assert.True(ArraysEqual<byte>(ad, bd, ac), "Stream contents not equal: " + ast.ToString() + ", " + bst.ToString());
@@ -138,6 +135,14 @@ namespace System.IO.Compression.Tests
         {
             var s = await StreamHelpers.CreateTempCopyStream(archiveFile);
             IsZipSameAsDir(s, directory, mode, requireExplicit, checkTimes);
+        }
+
+        public static byte[] NormalizeLineEndings(byte[] str)
+        {
+            string rep = Text.Encoding.Default.GetString(str);
+            rep = rep.Replace("\r\n", "\n");
+            rep = rep.Replace("\n", "\r\n");
+            return Text.Encoding.Default.GetBytes(rep);
         }
 
         public static void IsZipSameAsDir(Stream archiveFile, string directory, ZipArchiveMode mode, bool requireExplicit, bool checkTimes)
@@ -170,10 +175,7 @@ namespace System.IO.Compression.Tests
 
                             if (file.Length != givenLength)
                             {
-                                string rep = Text.Encoding.Default.GetString(buffer);
-                                rep = rep.Replace("\r\n", "\n");
-                                rep = rep.Replace("\n", "\r\n");
-                                buffer = Text.Encoding.Default.GetBytes(rep);
+                                buffer = NormalizeLineEndings(buffer);
                             }
 
                             Assert.Equal(file.Length, buffer.Length);
