@@ -1483,5 +1483,10 @@
     <StablePackage Include="System.Net.WebSockets.Client">
       <Version>4.0.2</Version>
     </StablePackage>
+
+    <!-- Servicing 1.0.9 wave -->
+    <StablePackage Include="System.Xml.ReaderWriter">
+      <Version>4.0.12</Version>
+    </StablePackage>
   </ItemGroup>
 </Project>
