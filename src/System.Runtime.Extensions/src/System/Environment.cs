@@ -65,35 +65,12 @@ namespace System
         {
             get
             {
-                StringBuilder sb = StringBuilderCache.Acquire();
-
-                foreach (string arg in GetCommandLineArgs())
-                {
-                    bool containsQuotes = false, containsWhitespace = false;
-                    foreach (char c in arg)
-                    {
-                        if (char.IsWhiteSpace(c))
-                        {
-                            containsWhitespace = true;
-                        }
-                        else if (c == '"')
-                        {
-                            containsQuotes = true;
-                        }
-                    }
-
-                    string quote = containsWhitespace ? "\"" : "";
-                    string formattedArg = containsQuotes && containsWhitespace ? arg.Replace("\"", "\\\"") : arg;
-
-                    sb.Append(quote).Append(formattedArg).Append(quote).Append(' ');
-                }
-
-                if (sb.Length > 0)
-                {
-                    sb.Length--;
-                }
-
-                return StringBuilderCache.GetStringAndRelease(sb);
+                var args = GetCommandLineArgs();
+                // Not to throw for quotes inside argv0. Since the input was constructed by the framework itself from the
+                // passed in command line, this shouldn't ever happen but if it ever does, throwing is a bit extreme here.
+                if (args.Length > 0 && !String.IsNullOrEmpty(args[0]))
+                    args[0].Replace(PasteArguments.Quote, '\'');
+                return PasteArguments.Paste(args, true);
             }
         }
 

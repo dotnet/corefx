@@ -136,7 +136,7 @@ namespace System
             return true;
         }
 
-        private const char Quote = '\"';
+        internal const char Quote = '\"';
         private const char Backslash = '\\';
     }
 }
