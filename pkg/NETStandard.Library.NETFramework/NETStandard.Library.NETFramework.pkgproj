@@ -109,6 +109,17 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="AddSupressedAssembliesForNetstandard" BeforeTargets="VerifyNETStandard">
+    <!-- 
+      Adding System.IO.Compression.ZipFile to the supression list as we don't crosscompile it for net461 
+      and we only need it in 4.7.1 folder of the support package because of a unification table bug which
+      has the wrong public key for this assembly. 
+    -->
+    <ItemGroup>
+      <SuppressNETStandardMissingFile Include="System.IO.Compression.ZipFile" />
+    </ItemGroup>
+  </Target>
+
   <Target Name="ExpandClosureFilesByTargetFramework"
           AfterTargets="GetClosureFiles"
           Inputs="%(ClosureFile.FileSet)"

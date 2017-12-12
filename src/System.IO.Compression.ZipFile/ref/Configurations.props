@@ -4,7 +4,6 @@
     <BuildConfigurations>
       netcoreapp;
       uap;
-      netfx;
       net471;
     </BuildConfigurations>
   </PropertyGroup>

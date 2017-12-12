@@ -5,7 +5,7 @@
     <AssemblyName>System.IO.Compression.ZipFile</AssemblyName>
     <ProjectGuid>{ACF967ED-7FC9-435C-B2C9-306626B7B6C6}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net471' Or '$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net471'">true</IsPartialFacadeAssembly>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
@@ -14,16 +14,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net471-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'net471' And '$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'net471'">
     <Compile Include="System\IO\Compression\ZipFile.cs" />
     <Compile Include="System\IO\Compression\ZipFileExtensions.cs" />
     <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseSensitivity.cs">
       <Link>Common\System\IO\PathInternal.CaseSensitivity.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'net471' And '$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' != 'net471'">
     <Reference Include="System.Buffers" />
     <Reference Include="System.Diagnostics.Contracts" />
     <Reference Include="System.Diagnostics.Debug" />
@@ -37,7 +35,7 @@
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Text.Encoding" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net471' Or '$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'net471'">
     <Reference Include="mscorlib" />
     <Reference Include="System.IO.Compression.FileSystem" />
   </ItemGroup>
