@@ -210,14 +210,6 @@ namespace System.Drawing.Tests
         [InlineData("0xG12")]
         [InlineData("&h")]
         [InlineData("&hG12")]
-        [InlineData("1,2")]
-        [InlineData("1,2,3,4,5")]
-        [InlineData("-1,2,3")]
-        [InlineData("256,2,3")]
-        [InlineData("1,-1,3")]
-        [InlineData("1,256,3")]
-        [InlineData("1,2,-1")]
-        [InlineData("1,2,256")]
         public void FromHtml_Invalid_Throws_ArgumentException(string htmlColor)
         {
             using (new ThreadCultureChange(CultureInfo.InvariantCulture))
@@ -228,13 +220,22 @@ namespace System.Drawing.Tests
             }
         }
 
-        [InlineData("#G12")]
-        [InlineData("#G12345")]
-        public void FromHtml_Invalid_Throws_FormatException(string htmlColor)
+        [InlineData("#G12", typeof(FormatException))]
+        [InlineData("#G12345", typeof(FormatException))]
+        [InlineData("1,2", typeof(ArgumentException))]
+        [InlineData("1,2,3,4,5", typeof(ArgumentException))]
+        [InlineData("-1,2,3", typeof(ArgumentException))]
+        [InlineData("256,2,3", typeof(ArgumentException))]
+        [InlineData("1,-1,3", typeof(ArgumentException))]
+        [InlineData("1,256,3", typeof(ArgumentException))]
+        [InlineData("1,2,-1", typeof(ArgumentException))]
+        [InlineData("1,2,256", typeof(ArgumentException))]
+
+        public void FromHtml_Invalid_Throw(string htmlColor, Type exception)
         {
             using (new ThreadCultureChange(CultureInfo.InvariantCulture))
             {
-                Exception exception = Assert.Throws<FormatException>(() => ColorTranslator.FromHtml(htmlColor));
+                Assert.Throws(exception, () => ColorTranslator.FromHtml(htmlColor));
             }
         }
 
