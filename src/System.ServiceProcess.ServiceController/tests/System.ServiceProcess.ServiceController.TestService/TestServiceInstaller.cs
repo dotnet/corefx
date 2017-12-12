@@ -154,10 +154,10 @@ namespace System.ServiceProcess.Tests
                     }
                     catch (InvalidOperationException)
                     {
-                        ServiceName == null;
+                        ServiceName = null;
                         return;
                     }
-                    
+
                     svc.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(30));
                 }
             }
