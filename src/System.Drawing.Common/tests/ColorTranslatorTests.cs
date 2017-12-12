@@ -198,68 +198,43 @@ namespace System.Drawing.Tests
         }
 
         [Theory]
-        [InlineData("'", typeof(ArgumentException))]
-        [InlineData("'\"", typeof(ArgumentException))]
-        [InlineData("\"'", typeof(ArgumentException))]
-        [InlineData("#", typeof(ArgumentException))]
-        [InlineData("#G12", typeof(FormatException))]
-        [InlineData("#G12345", typeof(FormatException))]
-        [InlineData("  #G12  ", typeof(ArgumentException))]
-        [InlineData("  #G12345  ", typeof(ArgumentException))]
-        [InlineData("#FFFFFFFFF", typeof(ArgumentException))]
-        [InlineData("0x", typeof(ArgumentException))]
-        [InlineData("0xFFFFFFFFF", typeof(ArgumentException))]
-        [InlineData("0xG12", typeof(ArgumentException))]
-        [InlineData("&h", typeof(ArgumentException))]
-        [InlineData("&hG12", typeof(ArgumentException))]
-        [InlineData("1,2", typeof(ArgumentException))]
-        [InlineData("1,2,3,4,5", typeof(ArgumentException))]
-        [InlineData("-1,2,3", typeof(ArgumentException))]
-        [InlineData("256,2,3", typeof(ArgumentException))]
-        [InlineData("1,-1,3", typeof(ArgumentException))]
-        [InlineData("1,256,3", typeof(ArgumentException))]
-        [InlineData("1,2,-1", typeof(ArgumentException))]
-        [InlineData("1,2,256", typeof(ArgumentException))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Difference in behavior, netfx throws Exception or ArgumentException")]
-        public void FromHtml_Invalid_Throws(string htmlColor, Type exception)
+        [InlineData("'")]
+        [InlineData("'\"")]
+        [InlineData("\"'")]
+        [InlineData("#")]
+        [InlineData("  #G12  ")]
+        [InlineData("  #G12345  ")]
+        [InlineData("#FFFFFFFFF")]
+        [InlineData("0x")]
+        [InlineData("0xFFFFFFFFF")]
+        [InlineData("0xG12")]
+        [InlineData("&h")]
+        [InlineData("&hG12")]
+        [InlineData("1,2")]
+        [InlineData("1,2,3,4,5")]
+        [InlineData("-1,2,3")]
+        [InlineData("256,2,3")]
+        [InlineData("1,-1,3")]
+        [InlineData("1,256,3")]
+        [InlineData("1,2,-1")]
+        [InlineData("1,2,256")]
+        public void FromHtml_Invalid_Throws_ArgumentException(string htmlColor)
         {
             using (new ThreadCultureChange(CultureInfo.InvariantCulture))
             {
-                Exception exceptionThrows = Assert.Throws(exception, () => ColorTranslator.FromHtml(htmlColor));
-                if (exceptionThrows is ArgumentException argumentException)
+                Exception exception = AssertExtensions.Throws<ArgumentException, Exception>(() => ColorTranslator.FromHtml(htmlColor));
+                if (exception is ArgumentException argumentException)
                     Assert.Equal("htmlColor", argumentException.ParamName);
             }
         }
 
-        [Theory]
-        [InlineData("'", typeof(Exception))]
-        [InlineData("'\"", typeof(Exception))]
-        [InlineData("\"'", typeof(Exception))]
-        [InlineData("#", typeof(Exception))]
-        [InlineData("#G12", typeof(FormatException))]
-        [InlineData("#G12345", typeof(FormatException))]
-        [InlineData("  #G12  ", typeof(Exception))]
-        [InlineData("  #G12345  ", typeof(Exception))]
-        [InlineData("#FFFFFFFFF", typeof(Exception))]
-        [InlineData("0x", typeof(Exception))]
-        [InlineData("0xFFFFFFFFF", typeof(Exception))]
-        [InlineData("0xG12", typeof(Exception))]
-        [InlineData("&h", typeof(Exception))]
-        [InlineData("&hG12", typeof(Exception))]
-        [InlineData("1,2", typeof(ArgumentException))]
-        [InlineData("1,2,3,4,5", typeof(ArgumentException))]
-        [InlineData("-1,2,3", typeof(ArgumentException))]
-        [InlineData("256,2,3", typeof(ArgumentException))]
-        [InlineData("1,-1,3", typeof(ArgumentException))]
-        [InlineData("1,256,3", typeof(ArgumentException))]
-        [InlineData("1,2,-1", typeof(ArgumentException))]
-        [InlineData("1,2,256", typeof(ArgumentException))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Difference in behavior, netcoreapp throws ArgumentException or FormatException")]
-        public void FromHtml_Invalid_Throws_Netfx(string htmlColor, Type exception)
+        [InlineData("#G12")]
+        [InlineData("#G12345")]
+        public void FromHtml_Invalid_Throws_FormatException(string htmlColor)
         {
             using (new ThreadCultureChange(CultureInfo.InvariantCulture))
             {
-                Assert.Throws(exception, () => ColorTranslator.FromHtml(htmlColor));
+                Exception exception = Assert.Throws<FormatException>(() => ColorTranslator.FromHtml(htmlColor));
             }
         }
 

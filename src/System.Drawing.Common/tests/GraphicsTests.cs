@@ -321,7 +321,7 @@ namespace System.Drawing.Tests
         [ConditionalTheory(Helpers.GdiplusIsAvailable)]
         [InlineData(PixelFormat.Format1bppIndexed)]
         [InlineData(PixelFormat.Format4bppIndexed)]
-        [InlineData(PixelFormat.Format8bppIndexed)]     
+        [InlineData(PixelFormat.Format8bppIndexed)]
         public void FromImage_IndexedImage_ThrowsException(PixelFormat format)
         {
             using (var image = new Bitmap(10, 10, format))
