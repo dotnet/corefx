@@ -1,24 +1,18 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition.Hosting;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.ComponentModel.Composition.Factories;
+using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
-using System.ComponentModel.Composition.UnitTesting;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Security;
-using System.Security.Permissions;
 using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-#if FEATURE_REFLECTIONCONTEXT
     // This is a glorious do nothing ReflectionContext
     public class AssemblyCatalogTestsReflectionContext : ReflectionContext
     {
@@ -27,17 +21,11 @@ namespace System.ComponentModel.Composition
             return assembly;
         }
 
-#if FEATURE_INTERNAL_REFLECTIONCONTEXT
-        public override Type MapType(Type type)
-#else
         public override TypeInfo MapType(TypeInfo type)
-#endif
         {
             return type;
         }
     }
-#endif //FEATURE_REFLECTIONCONTEXT
-
 
     public class AssemblyCatalogTestsHelper
     {
@@ -70,11 +58,8 @@ namespace System.ComponentModel.Composition
         }
     }
 
-
-    [TestClass]
     public class AssemblyCatalogConstructorTests : AssemblyCatalogTestsHelper
     {
-#if FEATURE_REFLECTIONFILEIO
         // Test Codebase variant of the APIs
         public static void Constructor_ValueAsCodebaseArgument_ShouldSetAssemblyProperty(Func<string, AssemblyCatalog> catalogCreator)
         {
@@ -84,27 +69,25 @@ namespace System.ComponentModel.Composition
             {
                 var catalog = catalogCreator(e.CodeBase);
 
-                Assert.AreSame(e, catalog.Assembly);
+                Assert.Same(e, catalog.Assembly);
             }
         }
 
         public static void Constructor_LockedFileAsCodeBaseArgument_ShouldThrowFileLoad(Func<string, AssemblyCatalog> catalogCreator)
         {
-            using (TemporaryFile file = new TemporaryFile())
+            string filename = Path.GetTempFileName();
+            using (FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.None))
             {
-                using (FileStream stream = new FileStream(file.FileName, FileMode.Open, FileAccess.Read, FileShare.None))
+                Assert.Throws<FileLoadException>(() =>
                 {
-                    ExceptionAssert.Throws<FileLoadException>(() =>
-                    {
-                        var catalog = catalogCreator(file.FileName);
-                    });
-                }
+                    var catalog = catalogCreator(filename);
+                });
             }
         }
 
         public static void Constructor_NullFileNameAsCodeBaseArgument_ShouldThrowArgumentNull(Func<string, AssemblyCatalog> catalogCreator)
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("codeBase", () =>
+            Assert.Throws<ArgumentNullException>("codeBase", () =>
             {
                 var catalog = catalogCreator((string)null);
             });
@@ -112,7 +95,7 @@ namespace System.ComponentModel.Composition
 
         public static void Constructor_EmptyFileNameAsCodeBaseArgument_ShouldThrowArgument(Func<string, AssemblyCatalog> catalogCreator)
         {
-            ExceptionAssert.ThrowsArgument<ArgumentException>("codeBase", () =>
+            Assert.Throws<ArgumentException>("codeBase", () =>
             {
                 var catalog = catalogCreator("");
             });
@@ -120,7 +103,7 @@ namespace System.ComponentModel.Composition
 
         public static void Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument(Func<string, AssemblyCatalog> catalogCreator)
         {
-            ExceptionAssert.Throws<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 var catalog = catalogCreator("??||>");
             });
@@ -129,9 +112,9 @@ namespace System.ComponentModel.Composition
         public static void Constructor_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad(Func<string, AssemblyCatalog> catalogCreator)
         {
             string directory = Environment.GetFolderPath(Environment.SpecialFolder.System);
-            Assert.IsTrue(Directory.Exists(directory));
+            Assert.True(Directory.Exists(directory));
 
-            ExceptionAssert.Throws<FileLoadException>(() =>
+            Assert.Throws<FileLoadException>(() =>
             {
                 var catalog = catalogCreator(directory);
             });
@@ -139,7 +122,7 @@ namespace System.ComponentModel.Composition
 
         public static void Constructor_TooLongFileNameAsCodeBaseArgument_ShouldThrowPathTooLong(Func<string, AssemblyCatalog> catalogCreator)
         {
-            ExceptionAssert.Throws<PathTooLongException>(() =>
+            Assert.Throws<PathTooLongException>(() =>
             {
                 var catalog = catalogCreator(@"c:\This is a very long path\And Just to make sure\We will continue to make it very long\This is a very long path\And Just to make sure\We will continue to make it very long\This is a very long path\And Just to make sure\We will continue to make it very long\myassembly.dll");
             });
@@ -147,23 +130,20 @@ namespace System.ComponentModel.Composition
 
         public static void Constructor_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat(Func<string, AssemblyCatalog> catalogCreator)
         {
-            using (TemporaryFile temporaryFile = new TemporaryFile())
+            string filename = Path.GetTempFileName();
+            Assert.Throws<BadImageFormatException>(() =>
             {
-                ExceptionAssert.Throws<BadImageFormatException>(() =>
-                {
-                    var catalog = catalogCreator(temporaryFile.FileName);
-                });
-            }
+                var catalog = catalogCreator(filename);
+            });
         }
 
         public static void Constructor_NonExistentFileNameAsCodeBaseArgument_ShouldThrowFileNotFound(Func<string, AssemblyCatalog> catalogCreator)
         {
-            ExceptionAssert.Throws<FileNotFoundException>(() =>
+            Assert.Throws<FileNotFoundException>(() =>
             {
                 var catalog = catalogCreator(@"FileThat should not ever exist");
             });
         }
-#endif //FEATURE_REFLECTIONFILEIO
 
         // Test Assembly variant of the APIs
         public static void Constructor_ValueAsAssemblyArgument_ShouldSetAssemblyProperty(Func<Assembly, AssemblyCatalog> catalogCreator)
@@ -174,34 +154,31 @@ namespace System.ComponentModel.Composition
             {
                 var catalog = catalogCreator(e);
 
-                Assert.AreSame(e, catalog.Assembly);
+                Assert.Same(e, catalog.Assembly);
             }
         }
 
-#if FEATURE_REFLECTIONCONTEXT
         public static void Constructor_NullReflectionContextArgument_ShouldThrowArgumentNull(Func<ReflectionContext, AssemblyCatalog> catalogCreator)
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("reflectionContext", () =>
+            AssertExtensions.Throws<ArgumentNullException>("reflectionContext", () =>
             {
                 var catalog = catalogCreator(null);
             });
         }
-#endif //FEATURE_REFLECTIONCONTEXT
-
 
         public static void Constructor_NullDefinitionOriginArgument_ShouldThrowArgumentNull(Func<ICompositionElement, AssemblyCatalog> catalogCreator)
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("definitionOrigin", () =>
+            AssertExtensions.Throws<ArgumentNullException>("definitionOrigin", () =>
             {
                 var catalog = catalogCreator(null);
             });
         }
 
-#if FEATURE_REFLECTIONFILEIO
         //=========================================================================================================================================
         //  Test cases for AssemblyCatalog(string codebase) constructor
         //=========================================================================================================================================
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void Constructor1_ValueAsCodebaseArgument_ShouldSetAssemblyProperty()
         {
             AssemblyCatalogConstructorTests.Constructor_ValueAsCodebaseArgument_ShouldSetAssemblyProperty((s) =>
@@ -210,7 +187,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_LockedFileAsCodeBaseArgument_ShouldThrowFileLoad()
         {
             AssemblyCatalogConstructorTests.Constructor_LockedFileAsCodeBaseArgument_ShouldThrowFileLoad((s) =>
@@ -219,7 +196,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_NullFileNameAsCodeBaseArgument_ShouldThrowArgumentNull()
         {
             AssemblyCatalogConstructorTests.Constructor_NullFileNameAsCodeBaseArgument_ShouldThrowArgumentNull((s) =>
@@ -228,7 +205,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_EmptyFileNameAsCodeBaseArgument_ShouldThrowArgument()
         {
             AssemblyCatalogConstructorTests.Constructor_EmptyFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
@@ -237,7 +214,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
@@ -246,7 +223,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad()
         {
             AssemblyCatalogConstructorTests.Constructor_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad((s) =>
@@ -255,7 +232,8 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void Constructor1_TooLongFileNameAsCodeBaseArgument_ShouldThrowPathTooLong()
         {
             AssemblyCatalogConstructorTests.Constructor_TooLongFileNameAsCodeBaseArgument_ShouldThrowPathTooLong((s) =>
@@ -264,7 +242,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat()
         {
             AssemblyCatalogConstructorTests.Constructor_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat((s) =>
@@ -273,7 +251,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_NonExistentFileNameAsCodeBaseArgument_ShouldThrowFileNotFound()
         {
             AssemblyCatalogConstructorTests.Constructor_NonExistentFileNameAsCodeBaseArgument_ShouldThrowFileNotFound((s) =>
@@ -282,19 +260,21 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void Constructor1_ShouldSetOriginToNull()
         {
             var catalog = (ICompositionElement)new AssemblyCatalog(GetAttributedAssemblyCodeBase());
 
-            Assert.IsNull(catalog.Origin);
+            Assert.Null(catalog.Origin);
         }
 
-#if FEATURE_REFLECTIONCONTEXT
         //=========================================================================================================================================
         //  Test cases for AssemblyCatalog(string codebase, ReflectionContext reflectionContext) constructor
         //=========================================================================================================================================
-        [TestMethod]
+
+        [Fact]
+        [ActiveIssue(25498)]
         public void Constructor2_ValueAsCodebaseArgument_ShouldSetAssemblyProperty()
         {
             AssemblyCatalogConstructorTests.Constructor_ValueAsCodebaseArgument_ShouldSetAssemblyProperty((s) =>
@@ -303,8 +283,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-
-        [TestMethod]
+        [Fact]
         public void Constructor2_LockedFileAsCodeBaseArgument_ShouldThrowFileLoad()
         {
             AssemblyCatalogConstructorTests.Constructor_LockedFileAsCodeBaseArgument_ShouldThrowFileLoad((s) =>
@@ -313,7 +292,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_NullFileNameAsCodeBaseArgument_ShouldThrowArgumentNull()
         {
             AssemblyCatalogConstructorTests.Constructor_NullFileNameAsCodeBaseArgument_ShouldThrowArgumentNull((s) =>
@@ -322,7 +301,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_EmptyFileNameAsCodeBaseArgument_ShouldThrowArgument()
         {
             AssemblyCatalogConstructorTests.Constructor_EmptyFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
@@ -331,7 +310,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
@@ -340,7 +319,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad()
         {
             AssemblyCatalogConstructorTests.Constructor_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad((s) =>
@@ -349,7 +328,8 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void Constructor2_TooLongFileNameAsCodeBaseArgument_ShouldThrowPathTooLong()
         {
             AssemblyCatalogConstructorTests.Constructor_TooLongFileNameAsCodeBaseArgument_ShouldThrowPathTooLong((s) =>
@@ -358,7 +338,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat()
         {
             AssemblyCatalogConstructorTests.Constructor_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat((s) =>
@@ -367,7 +347,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_NonExistentFileNameAsCodeBaseArgument_ShouldThrowFileNotFound()
         {
             AssemblyCatalogConstructorTests.Constructor_NonExistentFileNameAsCodeBaseArgument_ShouldThrowFileNotFound((s) =>
@@ -376,7 +356,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_NullReflectionContextArgument_ShouldThrowArgumentNull()
         {
             AssemblyCatalogConstructorTests.Constructor_NullReflectionContextArgument_ShouldThrowArgumentNull((rc) =>
@@ -384,12 +364,12 @@ namespace System.ComponentModel.Composition
                 return new AssemblyCatalog(GetAttributedAssemblyCodeBase(), rc);
             });
         }
-#endif //FEATURE_REFLECTIONCONTEXT
 
         //=========================================================================================================================================
         //  Test cases for AssemblyCatalog(string codebase, ICompositionElement definitonOrigin) constructor
         //=========================================================================================================================================
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void Constructor3_ValueAsCodebaseArgument_ShouldSetAssemblyProperty()
         {
             AssemblyCatalogConstructorTests.Constructor_ValueAsCodebaseArgument_ShouldSetAssemblyProperty((s) =>
@@ -398,7 +378,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_LockedFileAsCodeBaseArgument_ShouldThrowFileLoad()
         {
             AssemblyCatalogConstructorTests.Constructor_LockedFileAsCodeBaseArgument_ShouldThrowFileLoad((s) =>
@@ -407,7 +387,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_NullFileNameAsCodeBaseArgument_ShouldThrowArgumentNull()
         {
             AssemblyCatalogConstructorTests.Constructor_NullFileNameAsCodeBaseArgument_ShouldThrowArgumentNull((s) =>
@@ -416,7 +396,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_EmptyFileNameAsCodeBaseArgument_ShouldThrowArgument()
         {
             AssemblyCatalogConstructorTests.Constructor_EmptyFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
@@ -425,7 +405,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
@@ -434,7 +414,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad()
         {
             AssemblyCatalogConstructorTests.Constructor_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad((s) =>
@@ -443,7 +423,8 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void Constructor3_TooLongFileNameAsCodeBaseArgument_ShouldThrowPathTooLong()
         {
             AssemblyCatalogConstructorTests.Constructor_TooLongFileNameAsCodeBaseArgument_ShouldThrowPathTooLong((s) =>
@@ -452,7 +433,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat()
         {
             AssemblyCatalogConstructorTests.Constructor_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat((s) =>
@@ -461,7 +442,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_NonExistentFileNameAsCodeBaseArgument_ShouldThrowFileNotFound()
         {
             AssemblyCatalogConstructorTests.Constructor_NonExistentFileNameAsCodeBaseArgument_ShouldThrowFileNotFound((s) =>
@@ -470,7 +451,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_NullDefinitionOriginArgument_ShouldThrowArgumentNull()
         {
             AssemblyCatalogConstructorTests.Constructor_NullDefinitionOriginArgument_ShouldThrowArgumentNull((dO) =>
@@ -479,11 +460,10 @@ namespace System.ComponentModel.Composition
             });
         }
 
-#if FEATURE_REFLECTIONCONTEXT
         //=========================================================================================================================================
         //  Test cases for AssemblyCatalog(string codebase, ICompositionElement definitonOrigin, ReflectionContext reflectionContext) constructor
         //=========================================================================================================================================
-        [TestMethod]
+        [Fact]
         public void Constructor4_ValueAsCodebaseArgument_ShouldSetAssemblyProperty()
         {
             AssemblyCatalogConstructorTests.Constructor_ValueAsAssemblyArgument_ShouldSetAssemblyProperty((s) =>
@@ -492,7 +472,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_LockedFileAsCodeBaseArgument_ShouldThrowFileLoad()
         {
             AssemblyCatalogConstructorTests.Constructor_LockedFileAsCodeBaseArgument_ShouldThrowFileLoad((s) =>
@@ -501,7 +481,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_NullFileNameAsCodeBaseArgument_ShouldThrowArgumentNull()
         {
             AssemblyCatalogConstructorTests.Constructor_NullFileNameAsCodeBaseArgument_ShouldThrowArgumentNull((s) =>
@@ -510,7 +490,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_EmptyFileNameAsCodeBaseArgument_ShouldThrowArgument()
         {
             AssemblyCatalogConstructorTests.Constructor_EmptyFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
@@ -519,7 +499,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
@@ -528,7 +508,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad()
         {
             AssemblyCatalogConstructorTests.Constructor_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad((s) =>
@@ -537,7 +517,8 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void Constructor4_TooLongFileNameAsCodeBaseArgument_ShouldThrowPathTooLong()
         {
             AssemblyCatalogConstructorTests.Constructor_TooLongFileNameAsCodeBaseArgument_ShouldThrowPathTooLong((s) =>
@@ -546,7 +527,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat()
         {
             AssemblyCatalogConstructorTests.Constructor_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat((s) =>
@@ -555,7 +536,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_NonExistentFileNameAsCodeBaseArgument_ShouldThrowFileNotFound()
         {
             AssemblyCatalogConstructorTests.Constructor_NonExistentFileNameAsCodeBaseArgument_ShouldThrowFileNotFound((s) =>
@@ -564,7 +545,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_NullReflectionContextArgument_ShouldThrowArgumentNull()
         {
             AssemblyCatalogConstructorTests.Constructor_NullReflectionContextArgument_ShouldThrowArgumentNull((rc) =>
@@ -573,7 +554,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_NullDefinitionOriginArgument_ShouldThrowArgumentNull()
         {
             AssemblyCatalogConstructorTests.Constructor_NullDefinitionOriginArgument_ShouldThrowArgumentNull((dO) =>
@@ -581,11 +562,11 @@ namespace System.ComponentModel.Composition
                 return new AssemblyCatalog(GetAttributedAssemblyCodeBase(), new AssemblyCatalogTestsReflectionContext(), dO);
             });
         }
-#endif //FEATURE_REFLECTIONCONTEXT
         //=========================================================================================================================================
         //  Test cases for AssemblyCatalog(string codebase, ICompositionElement definitonOrigin) constructor
         //=========================================================================================================================================
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void Constructor7_ValueAsAssemblyArgument_ShouldSetAssemblyProperty()
         {
             AssemblyCatalogConstructorTests.Constructor_ValueAsCodebaseArgument_ShouldSetAssemblyProperty((a) =>
@@ -593,13 +574,11 @@ namespace System.ComponentModel.Composition
                 return new AssemblyCatalog(a, (ICompositionElement)new AssemblyCatalog(GetAttributedAssembly()));
             });
         }
-#endif //FEATURE_REFLECTIONFILEIO
-
 
         //=========================================================================================================================================
         //  Test cases for AssemblyCatalog(Assembly assembly) constructor
         //=========================================================================================================================================
-        [TestMethod]
+        [Fact]
         public void Constructor5_ValueAsAssemblyArgument_ShouldSetAssemblyProperty()
         {
             AssemblyCatalogConstructorTests.Constructor_ValueAsAssemblyArgument_ShouldSetAssemblyProperty((a) =>
@@ -608,11 +587,10 @@ namespace System.ComponentModel.Composition
             });
         }
 
-#if FEATURE_REFLECTIONCONTEXT
         //=========================================================================================================================================
         //  Test cases for AssemblyCatalog(Assembly assembly, ReflectionContext reflectionContext) constructor
         //=========================================================================================================================================
-        [TestMethod]
+        [Fact]
         public void Constructor6_ValueAsAssemblyArgument_ShouldSetAssemblyProperty()
         {
             AssemblyCatalogConstructorTests.Constructor_ValueAsAssemblyArgument_ShouldSetAssemblyProperty((a) =>
@@ -621,7 +599,8 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void Constructor6_NullReflectionContextArgument_ShouldThrowArgumentNull()
         {
             AssemblyCatalogConstructorTests.Constructor_NullReflectionContextArgument_ShouldThrowArgumentNull((rc) =>
@@ -629,9 +608,9 @@ namespace System.ComponentModel.Composition
                 return new AssemblyCatalog(GetAttributedAssembly(), rc);
             });
         }
-#endif //FEATURE_REFLECTIONCONTEXT
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void Constructor7_NullDefinitionOriginArgument_ShouldThrowArgumentNull()
         {
             AssemblyCatalogConstructorTests.Constructor_NullDefinitionOriginArgument_ShouldThrowArgumentNull((dO) =>
@@ -640,19 +619,18 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor7_ShouldSetOriginToNull()
         {
             var catalog = (ICompositionElement)new AssemblyCatalog(GetAttributedAssembly());
 
-            Assert.IsNull(catalog.Origin);
+            Assert.Null(catalog.Origin);
         }
 
-#if FEATURE_REFLECTIONCONTEXT
         //=========================================================================================================================================
         //  Test cases for AssemblyCatalog(string codebase, ICompositionElement definitonOrigin, ReflectionContext reflectionContext) constructor
         //=========================================================================================================================================
-        [TestMethod]
+        [Fact]
         public void Constructor8_ValueAsAssemblyArgument_ShouldSetAssemblyProperty()
         {
             AssemblyCatalogConstructorTests.Constructor_ValueAsAssemblyArgument_ShouldSetAssemblyProperty((a) =>
@@ -661,8 +639,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-#if FEATURE_FILEIO
-        [TestMethod]
+        [Fact]
         public void Constructor8_NullReflectionContextArgument_ShouldThrowArgumentNull()
         {
             AssemblyCatalogConstructorTests.Constructor_NullReflectionContextArgument_ShouldThrowArgumentNull((rc) =>
@@ -671,7 +648,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor8_NullDefinitionOriginArgument_ShouldThrowArgumentNull()
         {
             AssemblyCatalogConstructorTests.Constructor_NullDefinitionOriginArgument_ShouldThrowArgumentNull((dO) =>
@@ -679,73 +656,72 @@ namespace System.ComponentModel.Composition
                 return new AssemblyCatalog(GetAttributedAssembly().CodeBase, new AssemblyCatalogTestsReflectionContext(), dO);
             });
         }
-#endif //FEATURE_FILEIO
+
         //=========================================================================================================================================
         //  Test cases for Assemblies decorated with the CatalogDiscoveryAttribute
         //=========================================================================================================================================
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void DiscoverCatalogUsingReflectionContextCatalogDiscoveryAttribute()
         {
             var catalog = new AssemblyCatalog(typeof(TestAssemblyOne).Assembly);
-            Assert.IsTrue(catalog.Parts.Count() > 0);
+            Assert.True(catalog.Parts.Count() > 0);
 
             foreach (ICompositionElement definition in catalog.Parts)
             {
-                Assert.AreSame(catalog, definition.Origin);
+                Assert.Same(catalog, definition.Origin);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void DiscoverCatalogUsingDerivedReflectionContextCatalogDiscoveryAttribute()
         {
             var catalog = new AssemblyCatalog(typeof(TestAssemblyTwo).Assembly);
-            Assert.IsTrue(catalog.Parts.Count() > 0);
+            Assert.True(catalog.Parts.Count() > 0);
 
             foreach (ICompositionElement definition in catalog.Parts)
             {
-                Assert.AreSame(catalog, definition.Origin);
+                Assert.Same(catalog, definition.Origin);
             }
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void DiscoverCatalogUsingNoDefaultConstructorReflectionContextCatalogDiscoveryAttribute_ShouldThrowArgumentException()
         {
-
-            ExceptionAssert.Throws<MissingMethodException>(() =>
+            AssertExtensions.Throws<MissingMethodException>(() =>
             {
                 var catalog = new AssemblyCatalog(typeof(TestAssemblyThree).Assembly);
-                Assert.IsTrue(catalog.Parts.Count() > 0);
-            });  
+                Assert.True(catalog.Parts.Count() > 0);
+            }, string.Empty);
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void DiscoverCatalogUsingDerivedReflectionContextCatalogDiscoveryAttribute_ShouldThrowArgumentException()
         {
 
-            ExceptionAssert.Throws<InvalidOperationException>(() =>
+            AssertExtensions.Throws<InvalidOperationException>(() =>
             {
                 var catalog = new AssemblyCatalog(typeof(TestAssemblyFour).Assembly);
-                Assert.IsTrue(catalog.Parts.Count() > 0);
-            });  
+                Assert.True(catalog.Parts.Count() > 0);
+            }, string.Empty);
         }
-#endif //FEATURE_REFLECTIONCONTEXT
     }
 
-
-    [TestClass]
     public class AssemblyCatalogTests : AssemblyCatalogTestsHelper
     {
-        [TestMethod]
+        [Fact]
         public void Assembly_WhenCatalogDisposed_ShouldNotThrow()
         {
             var catalog = CreateAssemblyCatalog();
             catalog.Dispose();
 
-            Assert.IsNotNull(catalog.Assembly);
+            Assert.NotNull(catalog.Assembly);
         }
 
-        [TestMethod]
+        [Fact]
         public void ICompositionElementDisplayName_WhenCatalogDisposed_ShouldNotThrow()
         {
             var catalog = CreateAssemblyCatalog();
@@ -754,7 +730,7 @@ namespace System.ComponentModel.Composition
             var displayName = ((ICompositionElement)catalog).DisplayName;
         }
 
-        [TestMethod]
+        [Fact]
         public void ICompositionElementOrigin_WhenCatalogDisposed_ShouldNotThrow()
         {
             var catalog = CreateAssemblyCatalog();
@@ -763,7 +739,7 @@ namespace System.ComponentModel.Composition
             var origin = ((ICompositionElement)catalog).Origin;
         }
 
-        [TestMethod]
+        [Fact]
         public void ToString_WhenCatalogDisposed_ShouldNotThrow()
         {
             var catalog = CreateAssemblyCatalog();
@@ -771,8 +747,8 @@ namespace System.ComponentModel.Composition
 
             catalog.ToString();
         }
-        
-        [TestMethod]
+
+        [Fact]
         public void Parts_WhenCatalogDisposed_ShouldThrowObjectDisposed()
         {
             var catalog = CreateAssemblyCatalog();
@@ -784,7 +760,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports_WhenCatalogDisposed_ShouldThrowObjectDisposed()
         {
             var catalog = CreateAssemblyCatalog();
@@ -797,19 +773,19 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void GetExports_NullAsConstraintArgument_ShouldThrowArgumentNull()
         {
             var catalog = CreateAssemblyCatalog();
 
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("definition", () =>
+            AssertExtensions.Throws<ArgumentNullException>("definition", () =>
             {
                 catalog.GetExports((ImportDefinition)null);
             });
         }
 
-
-        [TestMethod]
+        [Fact]
         public void Dispose_ShouldNotThrow()
         {
             using (var catalog = CreateAssemblyCatalog())
@@ -817,7 +793,7 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_CanBeCalledMultipleTimes()
         {
             var catalog = CreateAssemblyCatalog();
@@ -826,71 +802,53 @@ namespace System.ComponentModel.Composition
             catalog.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Parts()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
-            Assert.IsNotNull(catalog.Parts);
-            Assert.IsTrue(catalog.Parts.Count()>0);
+            Assert.NotNull(catalog.Parts);
+            Assert.True(catalog.Parts.Count() > 0);
         }
 
-
-        [TestMethod]
+        [Fact]
         public void Parts_ShouldSetDefinitionOriginToCatalogItself()
         {
             var catalog = CreateAssemblyCatalog();
-            Assert.IsTrue(catalog.Parts.Count() > 0);
+            Assert.True(catalog.Parts.Count() > 0);
 
             foreach (ICompositionElement definition in catalog.Parts)
             {
-                Assert.AreSame(catalog, definition.Origin);
+                Assert.Same(catalog, definition.Origin);
             }
         }
 
-        [TestMethod]
-        public void GetExports()
-        {
-            var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
-            Expression<Func<ExportDefinition, bool>> constraint = (ExportDefinition exportDefinition) => exportDefinition.ContractName == AttributedModelServices.GetContractName(typeof(MyExport));
-            IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> matchingExports = catalog.GetExports(constraint);
-            Assert.IsNotNull(matchingExports);
-            Assert.IsTrue(matchingExports.Count() >= 0);
-
-            IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> expectedMatchingExports = catalog.Parts
-                .SelectMany(part => part.ExportDefinitions, (part, export) => new Tuple<ComposablePartDefinition, ExportDefinition>(part, export))
-                .Where(partAndExport => partAndExport.Item2.ContractName == AttributedModelServices.GetContractName(typeof(MyExport)));
-            Assert.IsTrue(matchingExports.SequenceEqual(expectedMatchingExports));
-        }
-
-#if FEATURE_REFLECTIONFILEIO
-        [TestMethod]
+        [Fact]
         public void AddAssemblyUsingFile()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly.Location);
             var container = new CompositionContainer(catalog);
 
-            Assert.IsNotNull(container.GetExportedValue<MyExport>());
+            Assert.NotNull(container.GetExportedValue<MyExport>());
         }
-#endif
 
-        [TestMethod]
+        [Fact]
         public void TwoTypesWithSameSimpleName()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
             var container = new CompositionContainer(catalog);
 
             NotSoUniqueName unique1 = container.GetExportedValue<NotSoUniqueName>();
-            Assert.IsNotNull(unique1);
+            Assert.NotNull(unique1);
 
-            Assert.AreEqual(23, unique1.MyIntProperty);
+            Assert.Equal(23, unique1.MyIntProperty);
 
             NotSoUniqueName2.NotSoUniqueName nestedUnique = container.GetExportedValue<NotSoUniqueName2.NotSoUniqueName>();
 
-            Assert.IsNotNull(nestedUnique);
-            Assert.AreEqual("MyStringProperty", nestedUnique.MyStringProperty);
+            Assert.NotNull(nestedUnique);
+            Assert.Equal("MyStringProperty", nestedUnique.MyStringProperty);
         }
 
-        [TestMethod]
+        [Fact]
         public void GettingFunctionExports()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
@@ -900,7 +858,8 @@ namespace System.ComponentModel.Composition
             import.VerifyIsBound();
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void AnExportOfAnInstanceThatFailsToCompose()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
@@ -909,13 +868,13 @@ namespace System.ComponentModel.Composition
             // Rejection causes the part in the catalog whose imports cannot be
             // satisfied to be ignored, resulting in a cardinality mismatch instead of a
             // composition exception
-            ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
+            AssertExtensions.Throws<ImportCardinalityMismatchException>(() =>
             {
                 container.GetExportedValue<string>("ExportMyString");
-            });
+            }, string.Empty);
         }
 
-        [TestMethod]
+        [Fact]
         public void SharedPartCreation()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
@@ -925,14 +884,14 @@ namespace System.ComponentModel.Composition
             container.Compose(batch);
 
             var sharedPart1 = container.GetExportedValue<MySharedPartExport>();
-            Assert.AreEqual(41, sharedPart1.Value);
+            Assert.Equal(41, sharedPart1.Value);
             var sharedPart2 = container.GetExportedValue<MySharedPartExport>();
-            Assert.AreEqual(41, sharedPart2.Value);
+            Assert.Equal(41, sharedPart2.Value);
 
-            Assert.AreEqual(sharedPart1, sharedPart2, "These should be the same instances");
+            Assert.Equal(sharedPart1, sharedPart2);
         }
 
-        [TestMethod]
+        [Fact]
         public void NonSharedPartCreation()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
@@ -942,14 +901,14 @@ namespace System.ComponentModel.Composition
             container.Compose(batch);
 
             var nonSharedPart1 = container.GetExportedValue<MyNonSharedPartExport>();
-            Assert.AreEqual(41, nonSharedPart1.Value);
+            Assert.Equal(41, nonSharedPart1.Value);
             var nonSharedPart2 = container.GetExportedValue<MyNonSharedPartExport>();
-            Assert.AreEqual(41, nonSharedPart2.Value);
+            Assert.Equal(41, nonSharedPart2.Value);
 
-            Assert.AreNotSame(nonSharedPart1, nonSharedPart2, "These should be different instances");
+            Assert.NotSame(nonSharedPart1, nonSharedPart2);
         }
 
-        [TestMethod]
+        [Fact]
         public void RecursiveNonSharedPartCreation()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
@@ -980,13 +939,13 @@ namespace System.ComponentModel.Composition
                 container.GetExportedValue<CycleWithSharedPartAndNonSharedPart>();
             });
 
-            Assert.IsNotNull(container.GetExportedValue<CycleSharedPart>());
-            Assert.IsNotNull(container.GetExportedValue<CycleSharedPart1>());
-            Assert.IsNotNull(container.GetExportedValue<CycleSharedPart2>());
-            Assert.IsNotNull(container.GetExportedValue<NoCycleNonSharedPart>());
+            Assert.NotNull(container.GetExportedValue<CycleSharedPart>());
+            Assert.NotNull(container.GetExportedValue<CycleSharedPart1>());
+            Assert.NotNull(container.GetExportedValue<CycleSharedPart2>());
+            Assert.NotNull(container.GetExportedValue<NoCycleNonSharedPart>());
         }
 
-        [TestMethod]
+        [Fact]
         public void RecursiveNonSharedPartCreationDisableSilentRejection()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
@@ -1017,26 +976,26 @@ namespace System.ComponentModel.Composition
                 container.GetExportedValue<CycleWithSharedPartAndNonSharedPart>();
             });
 
-            Assert.IsNotNull(container.GetExportedValue<CycleSharedPart>());
-            Assert.IsNotNull(container.GetExportedValue<CycleSharedPart1>());
-            Assert.IsNotNull(container.GetExportedValue<CycleSharedPart2>());
-            Assert.IsNotNull(container.GetExportedValue<NoCycleNonSharedPart>());
+            Assert.NotNull(container.GetExportedValue<CycleSharedPart>());
+            Assert.NotNull(container.GetExportedValue<CycleSharedPart1>());
+            Assert.NotNull(container.GetExportedValue<CycleSharedPart2>());
+            Assert.NotNull(container.GetExportedValue<NoCycleNonSharedPart>());
         }
 
-        [TestMethod]
+        [Fact]
         public void TryToDiscoverExportWithGenericParameter()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
             var container = new CompositionContainer(catalog);
 
             // Should find a type that inherits from an export
-            Assert.IsNotNull(container.GetExportedValueOrDefault<object>(AttributedModelServices.GetContractName(typeof(ExportWhichInheritsFromGeneric))));
+            Assert.NotNull(container.GetExportedValueOrDefault<object>(AttributedModelServices.GetContractName(typeof(ExportWhichInheritsFromGeneric))));
 
             // This should be exported because it is inherited by ExportWhichInheritsFromGeneric
-            Assert.IsNotNull(container.GetExportedValueOrDefault<object>(AttributedModelServices.GetContractName(typeof(ExportWithGenericParameter<string>))));
+            Assert.NotNull(container.GetExportedValueOrDefault<object>(AttributedModelServices.GetContractName(typeof(ExportWithGenericParameter<string>))));
         }
 
-        [TestMethod]
+        [Fact]
         public void ICompositionElementDisplayName_ShouldIncludeCatalogTypeNameAndAssemblyFullName()
         {
             var expectations = Expectations.GetAssemblies();
@@ -1047,11 +1006,11 @@ namespace System.ComponentModel.Composition
 
                 string expected = string.Format("AssemblyCatalog (Assembly=\"{0}\")", e.FullName);
 
-                Assert.AreEqual(expected, catalog.DisplayName);
+                Assert.Equal(expected, catalog.DisplayName);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ICompositionElementDisplayName_ShouldIncludeDerivedCatalogTypeNameAndAssemblyFullName()
         {
             var expectations = Expectations.GetAssemblies();
@@ -1062,11 +1021,11 @@ namespace System.ComponentModel.Composition
 
                 string expected = string.Format("DerivedAssemblyCatalog (Assembly=\"{0}\")", e.FullName);
 
-                Assert.AreEqual(expected, catalog.DisplayName);
+                Assert.Equal(expected, catalog.DisplayName);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ToString_ShouldReturnICompositionElementDisplayName()
         {
             var expectations = Expectations.GetAssemblies();
@@ -1075,7 +1034,7 @@ namespace System.ComponentModel.Composition
             {
                 var catalog = (ICompositionElement)CreateAssemblyCatalog(e);
 
-                Assert.AreEqual(catalog.DisplayName, catalog.ToString());
+                Assert.Equal(catalog.DisplayName, catalog.ToString());
             }
         }
     }
