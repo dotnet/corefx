@@ -399,6 +399,7 @@ namespace System.Linq.Expressions.Tests
             string nExpected = Normalize(expected);
             string nActual = Normalize(actual);
 
+
             Assert.Equal(nExpected, nActual);
         }
 
