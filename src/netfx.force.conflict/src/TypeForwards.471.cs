@@ -12,6 +12,8 @@ using System.Runtime.CompilerServices;
 [assembly: TypeForwardedTo(typeof(System.Diagnostics.Tracing.EventSource))]
 // System.Globalization.Extensions
 [assembly: TypeForwardedTo(typeof(System.Globalization.GlobalizationExtensions))]
+// System.IO.Compression.ZipFile
+[assembly: TypeForwardedTo(typeof(System.IO.Compression.ZipFile))]
 // System.IO.Compression
 [assembly: TypeForwardedTo(typeof(System.IO.Compression.GZipStream))]
 // System.Net.Http
