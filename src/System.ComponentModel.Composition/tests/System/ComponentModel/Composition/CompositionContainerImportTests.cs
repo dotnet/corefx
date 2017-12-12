@@ -1,24 +1,22 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
-using System.ComponentModel.Composition.UnitTesting;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class CompositionContainerImportTests
     {
         // Exporting collectin values is not supported
-        [TestMethod]
+        [Fact]
         public void ImportValues()
         {
             var container = ContainerFactory.Create();
@@ -33,10 +31,10 @@ namespace System.ComponentModel.Composition
                                           ErrorId.ReflectionModel_ImportNotAssignableFromExport, RetryMode.DoNotRetry, () =>
             {
                 container.Compose(batch);
-            });            
+            });
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportSingle()
         {
             var container = ContainerFactory.Create();
@@ -48,11 +46,11 @@ namespace System.ComponentModel.Composition
             batch.AddPart(exporter);
             container.Compose(batch);
 
-            Assert.AreEqual(42, importer.Value, "Expecting value to be imported");
+            Assert.Equal(42, importer.Value);
 
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportSingleFromInternal()
         {
             var container = ContainerFactory.Create();
@@ -64,10 +62,10 @@ namespace System.ComponentModel.Composition
             batch.AddPart(exporter);
             container.Compose(batch);
 
-            Assert.AreEqual(42, importer.Value, "Expecting value to be imported");
+            Assert.Equal(42, importer.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportSingleToInternal()
         {
             var container = ContainerFactory.Create();
@@ -79,10 +77,10 @@ namespace System.ComponentModel.Composition
             batch.AddPart(exporter);
             container.Compose(batch);
 
-            Assert.AreEqual(42, importer.Value, "Expecting value to be imported");
+            Assert.Equal(42, importer.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportSingleIntoCollection()
         {
             var container = ContainerFactory.Create();
@@ -97,7 +95,7 @@ namespace System.ComponentModel.Composition
             EnumerableAssert.AreEqual(importer.Values, 42);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValuesNameless()
         {
             var container = ContainerFactory.Create();
@@ -109,11 +107,11 @@ namespace System.ComponentModel.Composition
             batch.AddPart(exporter42);
             container.Compose(batch);
 
-            Assert.AreEqual(42, importer.ValueReadWrite);
-            Assert.AreEqual(42, importer.MetadataReadWrite.Value);
+            Assert.Equal(42, importer.ValueReadWrite);
+            Assert.Equal(42, importer.MetadataReadWrite.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValueExceptionMissing()
         {
             var container = ContainerFactory.Create();
@@ -123,14 +121,14 @@ namespace System.ComponentModel.Composition
             batch.AddPart(importer = new Importer());
 
             CompositionAssert.ThrowsChangeRejectedError(ErrorId.ImportEngine_PartCannotSetImport,
-                                          ErrorId.ImportEngine_ImportCardinalityMismatch, 
+                                          ErrorId.ImportEngine_ImportCardinalityMismatch,
                                           RetryMode.DoNotRetry, () =>
             {
                 container.Compose(batch);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValueExceptionMultiple()
         {
             var container = ContainerFactory.Create();
@@ -150,7 +148,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValueExceptionSetterException()
         {
             var container = ContainerFactory.Create();
@@ -162,14 +160,14 @@ namespace System.ComponentModel.Composition
             batch.AddPart(exporter42);
 
             CompositionAssert.ThrowsError(ErrorId.ImportEngine_PartCannotActivate,
-                                          ErrorId.ReflectionModel_ImportThrewException, 
+                                          ErrorId.ReflectionModel_ImportThrewException,
                                           RetryMode.DoNotRetry, () =>
             {
                 container.Compose(batch);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValueExceptionLazily()
         {
             var catalog = new AssemblyCatalog(typeof(ImportImporterInvalidSetterExceptionLazily).Assembly);
@@ -184,9 +182,9 @@ namespace System.ComponentModel.Composition
             });
         }
 
-#if FEATURE_COMINTEROP
 
-        [TestMethod]
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void ImportValueComComponent()
         {
             CTaskScheduler scheduler = new CTaskScheduler();
@@ -202,7 +200,7 @@ namespace System.ComponentModel.Composition
 
                 container.Compose(batch);
 
-                Assert.AreEqual(scheduler, importer.TaskScheduler);
+                Assert.Equal<object>(scheduler, importer.TaskScheduler);
             }
             finally
             {
@@ -210,7 +208,8 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [TestMethod]
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void DelayImportValueComComponent()
         {
             CTaskScheduler scheduler = new CTaskScheduler();
@@ -226,17 +225,16 @@ namespace System.ComponentModel.Composition
 
                 container.Compose(batch);
 
-                Assert.AreEqual(scheduler, importer.TaskScheduler.Value);
+                Assert.Equal<object>(scheduler, importer.TaskScheduler.Value);
             }
             finally
             {
                 Marshal.ReleaseComObject(scheduler);
             }
         }
-#endif //FEATURE_COMINTEROP
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfValueTypesAreBoundToDefaultWhenNotSatisfied()
         {
             var container = ContainerFactory.Create();
@@ -246,12 +244,12 @@ namespace System.ComponentModel.Composition
             batch.AddPart(importer);
             container.Compose(batch);
 
-            Assert.AreEqual(1, importer.ValueTypeSetCount);
-            Assert.AreEqual(0, importer.ValueType);
+            Assert.Equal(1, importer.ValueTypeSetCount);
+            Assert.Equal(0, importer.ValueType);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfNullableValueTypesAreBoundToDefaultWhenNotSatisfied()
         {
             var container = ContainerFactory.Create();
@@ -261,12 +259,12 @@ namespace System.ComponentModel.Composition
             batch.AddPart(importer);
             container.Compose(batch);
 
-            Assert.AreEqual(1, importer.NullableValueTypeSetCount);
-            Assert.IsNull(importer.NullableValueType);
+            Assert.Equal(1, importer.NullableValueTypeSetCount);
+            Assert.Null(importer.NullableValueType);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfReferenceTypesAreBoundToDefaultWhenNotSatisfied()
         {
             var container = ContainerFactory.Create();
@@ -276,12 +274,12 @@ namespace System.ComponentModel.Composition
             batch.AddPart(importer);
             container.Compose(batch);
 
-            Assert.AreEqual(1, importer.ReferenceTypeSetCount);
-            Assert.IsNull(importer.ReferenceType);
+            Assert.Equal(1, importer.ReferenceTypeSetCount);
+            Assert.Null(importer.ReferenceType);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfExportValueTypesAreBoundToDefaultWhenNotSatisfied()
         {
             var container = ContainerFactory.Create();
@@ -291,12 +289,12 @@ namespace System.ComponentModel.Composition
             batch.AddPart(importer);
             container.Compose(batch);
 
-            Assert.AreEqual(1, importer.ValueTypeSetCount);
-            Assert.IsNull(importer.ValueType);
+            Assert.Equal(1, importer.ValueTypeSetCount);
+            Assert.Null(importer.ValueType);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfExportNullableValueTypesAreBoundToDefaultWhenNotSatisfied()
         {
             var container = ContainerFactory.Create();
@@ -306,12 +304,12 @@ namespace System.ComponentModel.Composition
             batch.AddPart(importer);
             container.Compose(batch);
 
-            Assert.AreEqual(1, importer.NullableValueTypeSetCount);
-            Assert.IsNull(importer.NullableValueType);
+            Assert.Equal(1, importer.NullableValueTypeSetCount);
+            Assert.Null(importer.NullableValueType);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfExportReferenceTypesAreBoundToDefaultWhenNotSatisfied()
         {
             var container = ContainerFactory.Create();
@@ -321,12 +319,12 @@ namespace System.ComponentModel.Composition
             batch.AddPart(importer);
             container.Compose(batch);
 
-            Assert.AreEqual(1, importer.ReferenceTypeSetCount);
-            Assert.IsNull(importer.ReferenceType);
+            Assert.Equal(1, importer.ReferenceTypeSetCount);
+            Assert.Null(importer.ReferenceType);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfValueTypesAreReboundToDefaultWhenExportIsRemoved()
         {
             var container = ContainerFactory.Create();
@@ -338,19 +336,19 @@ namespace System.ComponentModel.Composition
 
             container.Compose(batch);
 
-            Assert.AreEqual(1, importer.ValueTypeSetCount);
-            Assert.AreEqual(10, importer.ValueType);
+            Assert.Equal(1, importer.ValueTypeSetCount);
+            Assert.Equal(10, importer.ValueType);
 
             batch = new CompositionBatch();
             batch.RemovePart(key);
             container.Compose(batch);
 
-            Assert.AreEqual(2, importer.ValueTypeSetCount);
-            Assert.AreEqual(0, importer.ValueType);
+            Assert.Equal(2, importer.ValueTypeSetCount);
+            Assert.Equal(0, importer.ValueType);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfNullableValueTypesAreReboundToDefaultWhenExportIsRemoved()
         {
             var container = ContainerFactory.Create();
@@ -361,19 +359,19 @@ namespace System.ComponentModel.Composition
             var key = batch.AddExportedValue<int?>("NullableValueType", 10);
 
             container.Compose(batch);
-            Assert.AreEqual(1, importer.NullableValueTypeSetCount);
-            Assert.AreEqual(10, importer.NullableValueType);
+            Assert.Equal(1, importer.NullableValueTypeSetCount);
+            Assert.Equal(10, importer.NullableValueType);
 
             batch = new CompositionBatch();
             batch.RemovePart(key);
             container.Compose(batch);
 
-            Assert.AreEqual(2, importer.NullableValueTypeSetCount);
-            Assert.IsNull(importer.NullableValueType);
+            Assert.Equal(2, importer.NullableValueTypeSetCount);
+            Assert.Null(importer.NullableValueType);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfReferenceTypesAreReboundToDefaultWhenExportIsRemoved()
         {
             var container = ContainerFactory.Create();
@@ -384,19 +382,19 @@ namespace System.ComponentModel.Composition
             var key = batch.AddExportedValue("ReferenceType", "Bar");
 
             container.Compose(batch);
-            Assert.AreEqual(1, importer.ReferenceTypeSetCount);
-            Assert.AreEqual("Bar", importer.ReferenceType);
+            Assert.Equal(1, importer.ReferenceTypeSetCount);
+            Assert.Equal("Bar", importer.ReferenceType);
 
             batch = new CompositionBatch();
             batch.RemovePart(key);
             container.Compose(batch);
 
-            Assert.AreEqual(2, importer.ReferenceTypeSetCount);
-            Assert.IsNull(importer.ReferenceType);
+            Assert.Equal(2, importer.ReferenceTypeSetCount);
+            Assert.Null(importer.ReferenceType);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfExportValueTypesAreReboundToDefaultWhenExportIsRemoved()
         {
             var container = ContainerFactory.Create();
@@ -408,19 +406,19 @@ namespace System.ComponentModel.Composition
 
             container.Compose(batch);
 
-            Assert.AreEqual(1, importer.ValueTypeSetCount);
-            Assert.AreEqual(10, importer.ValueType.Value);
+            Assert.Equal(1, importer.ValueTypeSetCount);
+            Assert.Equal(10, importer.ValueType.Value);
 
             batch = new CompositionBatch();
             batch.RemovePart(key);
             container.Compose(batch);
 
-            Assert.AreEqual(2, importer.ValueTypeSetCount);
-            Assert.IsNull(importer.ValueType);
+            Assert.Equal(2, importer.ValueTypeSetCount);
+            Assert.Null(importer.ValueType);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfExportNullableValueTypesAreReboundToDefaultWhenExportIsRemoved()
         {
             var container = ContainerFactory.Create();
@@ -431,19 +429,19 @@ namespace System.ComponentModel.Composition
             var key = batch.AddExportedValue<int?>("NullableValueType", 10);
 
             container.Compose(batch);
-            Assert.AreEqual(1, importer.NullableValueTypeSetCount);
-            Assert.AreEqual(10, importer.NullableValueType.Value);
+            Assert.Equal(1, importer.NullableValueTypeSetCount);
+            Assert.Equal(10, importer.NullableValueType.Value);
 
             batch = new CompositionBatch();
             batch.RemovePart(key);
             container.Compose(batch);
 
-            Assert.AreEqual(2, importer.NullableValueTypeSetCount);
-            Assert.IsNull(importer.NullableValueType);
+            Assert.Equal(2, importer.NullableValueTypeSetCount);
+            Assert.Null(importer.NullableValueType);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfExportReferenceTypesAreReboundToDefaultWhenExportIsRemoved()
         {
             var container = ContainerFactory.Create();
@@ -454,15 +452,15 @@ namespace System.ComponentModel.Composition
             var key = batch.AddExportedValue("ReferenceType", "Bar");
 
             container.Compose(batch);
-            Assert.AreEqual(1, importer.ReferenceTypeSetCount);
-            Assert.AreEqual("Bar", importer.ReferenceType.Value);
+            Assert.Equal(1, importer.ReferenceTypeSetCount);
+            Assert.Equal("Bar", importer.ReferenceType.Value);
 
             batch = new CompositionBatch();
             batch.RemovePart(key);
             container.Compose(batch);
 
-            Assert.AreEqual(2, importer.ReferenceTypeSetCount);
-            Assert.IsNull(importer.ReferenceType);
+            Assert.Equal(2, importer.ReferenceTypeSetCount);
+            Assert.Null(importer.ReferenceType);
         }
 
         public class OptionalImport
@@ -501,10 +499,10 @@ namespace System.ComponentModel.Composition
             public string ReferenceType
             {
                 get { return _referenceType; }
-                set 
+                set
                 {
                     ReferenceTypeSetCount++;
-                    _referenceType = value; 
+                    _referenceType = value;
                 }
             }
         }
@@ -583,10 +581,9 @@ namespace System.ComponentModel.Composition
 
         public interface IDuck
         {
-            string Quack();            
+            string Quack();
         }
-
-#if FEATURE_COMINTEROP
+        
         [ComImport]
         [Guid("148BD52A-A2AB-11CE-B11F-00AA00530503")]
         private class CTaskScheduler
@@ -620,9 +617,7 @@ namespace System.ComponentModel.Composition
                 set;
             }
         }
-
-#endif //FEATURE_COMINTEROP
-
+        
         public class Importer
         {
             public Importer()
@@ -678,7 +673,6 @@ namespace System.ComponentModel.Composition
             public Lazy<ImporterInvalidSetterException> Value { get; set; }
         }
 
-
         [PartNotDiscoverable]
         public class Exporter
         {
@@ -691,7 +685,6 @@ namespace System.ComponentModel.Composition
 
             [Export("Value")]
             public int Value { get; set; }
-
 
             [Export("CollectionValue")]
             public IList<int> CollectionValue { get { return collectionValue; } }
@@ -736,19 +729,19 @@ namespace System.ComponentModel.Composition
             public List<Lazy<string>> ExportedList { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportListOfExportWithOnlySingleElementsAvailable_ShouldNotFindExport()
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(ExportsString), typeof(ImportsListOfExportOfString));
             var importer = container.GetExportedValue<ImportsListOfExportOfString>();
-            Assert.IsNull(importer.ExportedList);
+            Assert.Null(importer.ExportedList);
 
             var part = AttributedModelServices.CreatePartDefinition(typeof(ImportsListOfExportOfString), null);
             var contract = AttributedModelServices.GetContractName(typeof(List<Lazy<string>>));
-            Assert.AreEqual(contract, ((ContractBasedImportDefinition)part.ImportDefinitions.First()).ContractName);
+            Assert.Equal(contract, ((ContractBasedImportDefinition)part.ImportDefinitions.First()).ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportListOfExportWithInvalidCollectionAvailable_ShouldThrowMismatch()
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(ExportsInvalidListOfExportOfString), typeof(ImportsListOfExportOfString));
@@ -757,12 +750,12 @@ namespace System.ComponentModel.Composition
                 container.GetExportedValue<ImportsListOfExportOfString>());
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportListOfExportWithValidCollectionAvailable_ShouldSatisfyImport()
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(ExportsValidListOfExportOfString), typeof(ImportsListOfExportOfString));
             var importer = container.GetExportedValue<ImportsListOfExportOfString>();
-            Assert.AreEqual(0, importer.ExportedList.Count);
+            Assert.Equal(0, importer.ExportedList.Count);
         }
     }
 }
