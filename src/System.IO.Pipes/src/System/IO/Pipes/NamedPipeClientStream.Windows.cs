@@ -72,7 +72,7 @@ namespace System.IO.Pipes
                         return false;
                     }
 
-                    throw Win32Marshal.GetExceptionForWin32Error(errorCode, errorCode.ToString("X8"));
+                    throw Win32Marshal.GetExceptionForWin32Error(errorCode);
                 }
 
                 // Pipe server should be free.  Let's try to connect to it.
