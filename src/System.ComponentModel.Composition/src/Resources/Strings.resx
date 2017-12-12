@@ -175,6 +175,15 @@
   <data name="CompositionElement_UnknownOrigin" xml:space="preserve">
     <value>Unknown Origin</value>
   </data>
+  <data name="CompositionException_ErrorPrefix" xml:space="preserve">
+    <value>Resulting in:</value>
+  </data>
+  <data name="CompositionException_OriginSeparator" xml:space="preserve">
+    <value>--&gt; </value>
+  </data>
+  <data name="CompositionException_PathsCountSeparator" xml:space="preserve">
+    <value>)</value>
+  </data>
   <data name="ImportEngine_PartCannotActivate" xml:space="preserve">
     <value>Cannot activate part '{0}'.</value>
   </data>
