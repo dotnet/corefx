@@ -148,7 +148,16 @@ namespace System.ServiceProcess.Tests
             {
                 if (svc.Status != ServiceControllerStatus.Stopped)
                 {
-                    svc.Stop();
+                    try
+                    {
+                        svc.Stop();
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        ServiceName == null;
+                        return;
+                    }
+                    
                     svc.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(30));
                 }
             }
