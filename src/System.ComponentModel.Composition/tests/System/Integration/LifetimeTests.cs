@@ -1,20 +1,19 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
-using System.ComponentModel.Composition.UnitTesting;
 using System.Linq;
 using System.Reflection;
 using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
+using Xunit;
 
 namespace Tests.Integration
 {
-    [TestClass]
     public class LifetimeTests
     {
         [Export]
@@ -29,7 +28,7 @@ namespace Tests.Integration
             public bool IsDisposed { get; set; }
             public void Dispose()
             {
-                Assert.IsFalse(IsDisposed);
+                Assert.False(IsDisposed);
                 IsDisposed = true;
             }
         }
@@ -50,12 +49,12 @@ namespace Tests.Integration
             public bool IsDisposed { get; set; }
             public void Dispose()
             {
-                Assert.IsFalse(IsDisposed);
+                Assert.False(IsDisposed);
                 IsDisposed = true;
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void PartAddedViaAddExportedValue_ShouldNotBeDisposedWithContainer()
         {
             var container = new CompositionContainer();
@@ -65,10 +64,10 @@ namespace Tests.Integration
             container.Compose(batch);
 
             container.Dispose();
-            Assert.IsFalse(disposablePart.IsDisposed);
+            Assert.False(disposablePart.IsDisposed);
         }
 
-        [TestMethod]
+        [Fact]
         public void PartAddedTwice_AppearsTwice()
         {
             //  You probably shouldn't be adding a part to the container twice, but it's not something we're going to check for and throw an exception on
@@ -84,12 +83,12 @@ namespace Tests.Integration
             container.Compose(batch);
 
             var exports = container.GetExports<AnyPartDisposable>();
-            Assert.AreEqual(2, exports.Count());
+            Assert.Equal(2, exports.Count());
 
             container.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void AnyPart_Simple_ShouldNotBeCollected()
         {
             var catalog = new TypeCatalog(typeof(AnyPartSimple));
@@ -105,7 +104,7 @@ namespace Tests.Integration
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
         public void AnyPart_Disposable_ShouldNotBeCollected()
         {
             var catalog = new TypeCatalog(typeof(AnyPartDisposable));
@@ -119,7 +118,7 @@ namespace Tests.Integration
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
         public void AnyPart_Disposable_ShouldBeDisposedWithContainer()
         {
             var catalog = new TypeCatalog(typeof(AnyPartDisposable));
@@ -127,14 +126,14 @@ namespace Tests.Integration
 
             var exportedValue = container.GetExportedValue<AnyPartDisposable>();
 
-            Assert.IsFalse(exportedValue.IsDisposed);
+            Assert.False(exportedValue.IsDisposed);
 
             container.Dispose();
 
-            Assert.IsTrue(exportedValue.IsDisposed, "AnyPart should be disposed with the container!");
+            Assert.True(exportedValue.IsDisposed, "AnyPart should be disposed with the container!");
         }
 
-        [TestMethod]
+        [Fact]
         public void AnyPart_RecomposabeImport_ShouldNotBeCollected()
         {
             var catalog = new TypeCatalog(typeof(AnyPartRecomposable));
@@ -160,12 +159,12 @@ namespace Tests.Integration
             batch = null;
 
             var exportedValue = (AnyPartRecomposable)refTracker.ReferencesNotExpectedToBeCollected[0].Target;
-            Assert.AreEqual(42, exportedValue.Value);
+            Assert.Equal(42, exportedValue.Value);
 
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
         public void AnyPart_DisposableRecomposabeImport_ShouldNotBeCollected()
         {
             var catalog = new TypeCatalog(typeof(AnyPartDisposableRecomposable));
@@ -192,13 +191,13 @@ namespace Tests.Integration
             batch = null;
 
             var exportedValue = (AnyPartDisposableRecomposable)refTracker.ReferencesNotExpectedToBeCollected[0].Target;
-            Assert.AreEqual(42, exportedValue.Value);
+            Assert.Equal(42, exportedValue.Value);
 
             GC.KeepAlive(container);
 
             container.Dispose();
 
-            Assert.IsTrue(exportedValue.IsDisposed, "Any parts should be disposed with the container!");
+            Assert.True(exportedValue.IsDisposed, "Any parts should be disposed with the container!");
         }
 
         [Export]
@@ -215,7 +214,7 @@ namespace Tests.Integration
             public bool IsDisposed { get; set; }
             public void Dispose()
             {
-                Assert.IsFalse(IsDisposed);
+                Assert.False(IsDisposed);
                 IsDisposed = true;
             }
         }
@@ -225,7 +224,7 @@ namespace Tests.Integration
         public class SharedPartRecomposable
         {
             [Import("Value", AllowRecomposition = true)]
-            public int Value { get; set; } 
+            public int Value { get; set; }
         }
 
         [Export]
@@ -238,12 +237,12 @@ namespace Tests.Integration
             public bool IsDisposed { get; set; }
             public void Dispose()
             {
-                Assert.IsFalse(IsDisposed);
+                Assert.False(IsDisposed);
                 IsDisposed = true;
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SharedPart_Simple_ShouldNotBeCollected()
         {
             var catalog = new TypeCatalog(typeof(SharedPartSimple));
@@ -259,7 +258,7 @@ namespace Tests.Integration
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
         public void SharedPart_Disposable_ShouldNotBeCollected()
         {
             var catalog = new TypeCatalog(typeof(SharedPartDisposable));
@@ -275,7 +274,7 @@ namespace Tests.Integration
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
         public void SharedPart_Disposable_ShouldBeDisposedWithContainer()
         {
             var catalog = new TypeCatalog(typeof(SharedPartDisposable));
@@ -283,14 +282,14 @@ namespace Tests.Integration
 
             var export = container.GetExportedValue<SharedPartDisposable>();
 
-            Assert.IsFalse(export.IsDisposed);
+            Assert.False(export.IsDisposed);
 
             container.Dispose();
 
-            Assert.IsTrue(export.IsDisposed, "SharedPart should be disposed with the container!");
+            Assert.True(export.IsDisposed, "SharedPart should be disposed with the container!");
         }
-       
-        [TestMethod]
+
+        [Fact]
         public void SharedPart_RecomposabeImport_ShouldNotBeCollected()
         {
             var catalog = new TypeCatalog(typeof(SharedPartRecomposable));
@@ -317,12 +316,12 @@ namespace Tests.Integration
             batch = null;
 
             var exportedValue = (SharedPartRecomposable)refTracker.ReferencesNotExpectedToBeCollected[0].Target;
-            Assert.AreEqual(42, exportedValue.Value);
+            Assert.Equal(42, exportedValue.Value);
 
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
         public void SharedPart_DisposableRecomposabeImport_ShouldNotBeCollected()
         {
             var catalog = new TypeCatalog(typeof(SharedPartDisposableRecomposable));
@@ -349,18 +348,18 @@ namespace Tests.Integration
             batch = null;
 
             var exportedValue = (SharedPartDisposableRecomposable)refTracker.ReferencesNotExpectedToBeCollected[0].Target;
-            Assert.AreEqual(42, exportedValue.Value);
+            Assert.Equal(42, exportedValue.Value);
 
             container.Dispose();
 
-            Assert.IsTrue(exportedValue.IsDisposed, "Any parts should be disposed with the container!");
+            Assert.True(exportedValue.IsDisposed, "Any parts should be disposed with the container!");
         }
 
         [Export]
         [PartCreationPolicy(CreationPolicy.NonShared)]
         public class NonSharedPartSimple
         {
-            
+
         }
 
         [Export]
@@ -378,7 +377,7 @@ namespace Tests.Integration
             public bool IsDisposed { get; set; }
             public void Dispose()
             {
-                Assert.IsFalse(IsDisposed);
+                Assert.False(IsDisposed);
                 IsDisposed = true;
             }
         }
@@ -394,12 +393,14 @@ namespace Tests.Integration
             {
                 get
                 {
-                    if (this.IsDisposed) throw new ObjectDisposedException(this.GetType().Name);
-                    return this._value; 
+                    if (this.IsDisposed)
+                        throw new ObjectDisposedException(this.GetType().Name);
+                    return this._value;
                 }
                 set
                 {
-                    if (this.IsDisposed) throw new ObjectDisposedException(this.GetType().Name);
+                    if (this.IsDisposed)
+                        throw new ObjectDisposedException(this.GetType().Name);
                     this._value = value;
                 }
             }
@@ -407,12 +408,12 @@ namespace Tests.Integration
             public bool IsDisposed { get; set; }
             public void Dispose()
             {
-                Assert.IsFalse(IsDisposed);
+                Assert.False(IsDisposed);
                 IsDisposed = true;
-            } 
+            }
         }
 
-        [TestMethod]
+        [Fact]
         public void NonSharedPart_Disposable_ShouldNotBeCollected()
         {
             var catalog = new TypeCatalog(typeof(NonSharedPartDisposable));
@@ -428,7 +429,7 @@ namespace Tests.Integration
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
         public void NonSharedPart_Disposable_ShouldBeDisposedWithContainer()
         {
             var catalog = new TypeCatalog(typeof(NonSharedPartDisposable));
@@ -436,14 +437,14 @@ namespace Tests.Integration
 
             var export = container.GetExportedValue<NonSharedPartDisposable>();
 
-            Assert.IsFalse(export.IsDisposed);
+            Assert.False(export.IsDisposed);
 
             container.Dispose();
 
-            Assert.IsTrue(export.IsDisposed, "NonSharedParts should be disposed with the container!");
+            Assert.True(export.IsDisposed, "NonSharedParts should be disposed with the container!");
         }
 
-        [TestMethod]
+        [Fact]
         public void NonSharedPart_RecomposableImport_WithReference_ShouldNotBeCollected()
         {
             var catalog = new TypeCatalog(typeof(NonSharedPartRecomposable));
@@ -470,12 +471,12 @@ namespace Tests.Integration
             container.Compose(batch);
             batch = null;
 
-            Assert.AreEqual(42, exportedValue.Value, "Value should have been recomposed");
+            Assert.Equal(42, exportedValue.Value);
 
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
         public void NonSharedPart_DisposableRecomposabeImport_NoReference_ShouldNotBeCollected()
         {
             var catalog = new TypeCatalog(typeof(NonSharedPartDisposableRecomposable));
@@ -502,8 +503,8 @@ namespace Tests.Integration
             batch = null;
 
             var exportedValue = (NonSharedPartDisposableRecomposable)refTracker.ReferencesNotExpectedToBeCollected[0].Target;
-            Assert.AreEqual(42, exportedValue.Value, "Value shoudl ahve been recomposed.");
-            
+            Assert.Equal(42, exportedValue.Value);
+
             GC.KeepAlive(container);
         }
 
@@ -529,7 +530,7 @@ namespace Tests.Integration
             public SharedState ExportState { get; private set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void NonSharedPart_TwoRecomposablePartsSameExportedValue()
         {
             // This test is primarily used to ensure that we allow for multiple parts to be associated
@@ -541,7 +542,7 @@ namespace Tests.Integration
             var export2 = container.GetExportedValue<SharedState>("SharedFromNonShared");
 
             // Same exported value that comes from two different recomposable part instances.
-            Assert.AreEqual(export1.MyInstanceNumber, export2.MyInstanceNumber, "Should be the same shared object!");
+            Assert.Equal(export1.MyInstanceNumber, export2.MyInstanceNumber);
         }
 
         [Export]
@@ -588,7 +589,7 @@ namespace Tests.Integration
             return container;
         }
 
-        [TestMethod]
+        [Fact]
         public void GetReleaseExport_SharedRoot_ShouldNotDisposeChain()
         {
             var container = GetContainer();
@@ -598,11 +599,11 @@ namespace Tests.Integration
 
             container.ReleaseExport(export);
 
-            Assert.IsFalse(exportedValue.AnyPartDisposable.IsDisposed);
-            Assert.IsFalse(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
+            Assert.False(exportedValue.AnyPartDisposable.IsDisposed);
+            Assert.False(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
         }
 
-        [TestMethod]
+        [Fact]
         public void AddRemovePart_SharedRoot_ShouldNotDisposeChain()
         {
             var container = GetContainer();
@@ -617,11 +618,11 @@ namespace Tests.Integration
             batch.RemovePart(part);
             container.Compose(batch);
 
-            Assert.IsFalse(exportedValue.AnyPartDisposable.IsDisposed);
-            Assert.IsFalse(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
+            Assert.False(exportedValue.AnyPartDisposable.IsDisposed);
+            Assert.False(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
         }
 
-        [TestMethod]
+        [Fact]
         public void ContainerDispose_SharedRoot_ShouldDisposeChain()
         {
             var container = GetContainer();
@@ -631,11 +632,11 @@ namespace Tests.Integration
 
             container.Dispose();
 
-            Assert.IsTrue(exportedValue.AnyPartDisposable.IsDisposed);
-            Assert.IsTrue(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
+            Assert.True(exportedValue.AnyPartDisposable.IsDisposed);
+            Assert.True(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetReleaseExport_NonSharedRoot_ShouldDisposeChain()
         {
             var container = GetContainer();
@@ -660,8 +661,8 @@ namespace Tests.Integration
 
                 container.ReleaseExport(export);
 
-                Assert.IsTrue(exportedValue.AnyPartDisposable.IsDisposed);
-                Assert.IsTrue(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
+                Assert.True(exportedValue.AnyPartDisposable.IsDisposed);
+                Assert.True(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
             }
         }
 
@@ -689,12 +690,12 @@ namespace Tests.Integration
 
                 container.ReleaseExport(export);
 
-                Assert.IsTrue(exportedValue.AnyPartDisposable.IsDisposed);
-                Assert.IsTrue(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
+                Assert.True(exportedValue.AnyPartDisposable.IsDisposed);
+                Assert.True(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ReleaseExports_ShouldDispose_NonSharedParts()
         {
             var container = GetContainer();
@@ -707,15 +708,14 @@ namespace Tests.Integration
 
             container.ReleaseExports(new[] { export1, export2 });
 
-            Assert.IsTrue(exportedValue1.AnyPartDisposable.IsDisposed);
-            Assert.IsTrue(exportedValue1.AnyPartDisposableRecomposable.IsDisposed);
+            Assert.True(exportedValue1.AnyPartDisposable.IsDisposed);
+            Assert.True(exportedValue1.AnyPartDisposableRecomposable.IsDisposed);
 
-            Assert.IsTrue(exportedValue2.AnyPartDisposable.IsDisposed);
-            Assert.IsTrue(exportedValue2.AnyPartDisposableRecomposable.IsDisposed);
+            Assert.True(exportedValue2.AnyPartDisposable.IsDisposed);
+            Assert.True(exportedValue2.AnyPartDisposableRecomposable.IsDisposed);
         }
 
-
-        [TestMethod]
+        [Fact]
         public void AddRemovePart_NonSharedRoot_ShouldDisposeChain()
         {
             var container = GetContainer();
@@ -730,11 +730,11 @@ namespace Tests.Integration
             batch.RemovePart(part);
             container.Compose(batch);
 
-            Assert.IsTrue(exportedValue.AnyPartDisposable.IsDisposed);
-            Assert.IsTrue(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
+            Assert.True(exportedValue.AnyPartDisposable.IsDisposed);
+            Assert.True(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
         }
 
-        [TestMethod]
+        [Fact]
         public void ContainerDispose_NonSharedRoot_ShouldNotDisposeChain()
         {
             var container = GetContainer();
@@ -744,11 +744,11 @@ namespace Tests.Integration
 
             container.Dispose();
 
-            Assert.IsTrue(exportedValue.AnyPartDisposable.IsDisposed);
-            Assert.IsTrue(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
+            Assert.True(exportedValue.AnyPartDisposable.IsDisposed);
+            Assert.True(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetReleaseExport_NonSharedPart_ShouldNotRecomposeAfterRelease()
         {
             var catalog = new TypeCatalog(typeof(NonSharedPartRecomposable));
@@ -758,11 +758,11 @@ namespace Tests.Integration
             CompositionBatch batch = new CompositionBatch();
             var valueKey = batch.AddExportedValue("Value", 21);
             container.Compose(batch);
-            
+
             var export = container.GetExport<NonSharedPartRecomposable>();
             var exportedValue = export.Value;
 
-            Assert.AreEqual(21, exportedValue.Value);
+            Assert.Equal(21, exportedValue.Value);
 
             container.ReleaseExport(export);
 
@@ -772,10 +772,10 @@ namespace Tests.Integration
             batch.AddExportedValue("Value", 42);
             container.Compose(batch);
 
-            Assert.AreEqual(21, exportedValue.Value, "Value should not be recomposed after ReleaseExport is called on it.");
+            Assert.Equal(21, exportedValue.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportManualDisposeThenRecompose_NonSharedDisposableRecomposablePart_ShouldThrowComposition()
         {
             var catalog = new TypeCatalog(typeof(NonSharedPartDisposableRecomposable));
@@ -785,11 +785,11 @@ namespace Tests.Integration
             CompositionBatch batch = new CompositionBatch();
             var valueKey = batch.AddExportedValue("Value", 21);
             container.Compose(batch);
-            
+
             var export = container.GetExport<NonSharedPartDisposableRecomposable>();
             var exportedValue = export.Value;
 
-            Assert.AreEqual(21, exportedValue.Value);
+            Assert.Equal(21, exportedValue.Value);
 
             exportedValue.Dispose();
 
@@ -802,12 +802,12 @@ namespace Tests.Integration
                               ErrorId.ImportEngine_PartCannotActivate,         // Cannot activate part because
                               ErrorId.ReflectionModel_ImportThrewException,         // Import threw an exception
                               RetryMode.DoNotRetry,
-                              () => 
+                              () =>
             {
                 container.Compose(batch);
             });
         }
- 
+
         [Export]
         public class MyImporter
         {
@@ -815,13 +815,13 @@ namespace Tests.Integration
             public AnyPartDisposable AnyPartDisposable { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void RecomposeCausesOldImportedValuesToBeDisposed()
         {
             var cat = new AggregateCatalog();
             var cat1 = new TypeCatalog(typeof(AnyPartDisposable));
 
-            cat.Catalogs.Add(new TypeCatalog(typeof (MyImporter)));
+            cat.Catalogs.Add(new TypeCatalog(typeof(MyImporter)));
             cat.Catalogs.Add(cat1);
 
             var container = new CompositionContainer(cat);
@@ -830,14 +830,14 @@ namespace Tests.Integration
 
             var anyPart = importer.AnyPartDisposable;
 
-            Assert.IsFalse(anyPart.IsDisposed);
-            Assert.IsInstanceOfType(anyPart, typeof(AnyPartDisposable));
+            Assert.False(anyPart.IsDisposed);
+            Assert.IsType<AnyPartDisposable>(anyPart);
 
             // Remove the instance of MyClass1
             cat.Catalogs.Remove(cat1);
 
-            Assert.IsNull(importer.AnyPartDisposable);
-            Assert.IsTrue(anyPart.IsDisposed);
+            Assert.Null(importer.AnyPartDisposable);
+            Assert.True(anyPart.IsDisposed);
         }
 
         private static CompositionContainer CreateParentChildContainerWithNonSharedImporter()
@@ -857,7 +857,7 @@ namespace Tests.Integration
             return child;
         }
 
-        [TestMethod]
+        [Fact]
         public void ChildContainerGetReleaseExport_NonSharedRoot_ShouldDisposeChain()
         {
             var child = CreateParentChildContainerWithNonSharedImporter();
@@ -867,11 +867,11 @@ namespace Tests.Integration
 
             child.ReleaseExport(export);
 
-            Assert.IsTrue(exportedValue.AnyPartDisposable.IsDisposed);
-            Assert.IsTrue(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
+            Assert.True(exportedValue.AnyPartDisposable.IsDisposed);
+            Assert.True(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
         }
 
-        [TestMethod]
+        [Fact]
         public void ChildContainerAddRemovePart_NonSharedRoot_ShouldDisposeChain()
         {
             var child = CreateParentChildContainerWithNonSharedImporter();
@@ -886,11 +886,11 @@ namespace Tests.Integration
             batch.RemovePart(part);
             child.Compose(batch);
 
-            Assert.IsTrue(exportedValue.AnyPartDisposable.IsDisposed);
-            Assert.IsTrue(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
+            Assert.True(exportedValue.AnyPartDisposable.IsDisposed);
+            Assert.True(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
         }
 
-        [TestMethod]
+        [Fact]
         public void ChildContainerAddRemovePart_NonSharedRoot_ShouldNotDisposeChain()
         {
             var child = CreateParentChildContainerWithNonSharedImporter();
@@ -899,13 +899,12 @@ namespace Tests.Integration
 
             child.Dispose();
 
-            Assert.IsFalse(exportedValue.AnyPartDisposable.IsDisposed);
-            Assert.IsFalse(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
+            Assert.False(exportedValue.AnyPartDisposable.IsDisposed);
+            Assert.False(exportedValue.AnyPartDisposableRecomposable.IsDisposed);
         }
 
-
-
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void NonSharedPart_Simple_ShouldBeCollected()
         {
             var catalog = new TypeCatalog(typeof(NonSharedPartSimple));
@@ -921,7 +920,8 @@ namespace Tests.Integration
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void ContainerDispose_SharedPart_ShouldCollectWholeObjectChain()
         {
             // Test only works properly with while using the real ConditionalWeakTable
@@ -949,11 +949,12 @@ namespace Tests.Integration
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void AddRemovePart_SharedPart_ShouldCollectOnlyRoot()
         {
             var container = GetContainer();
-            
+
             var exportedValue = new SharedImporter();
 
             CompositionBatch batch = new CompositionBatch();
@@ -985,7 +986,8 @@ namespace Tests.Integration
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void AddRemovePart_NonSharedPart_ShouldCollectWholeObjectChain()
         {
             var container = GetContainer();
@@ -1019,7 +1021,8 @@ namespace Tests.Integration
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void ContainerDispose_NonSharedPart_ShouldCollectWholeObjectChain()
         {
             // Test only works properly with while using the real ConditionalWeakTable
@@ -1047,7 +1050,8 @@ namespace Tests.Integration
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void NonSharedImporter_ReleaseReference_ShouldCollectWholeChain()
         {
             var container = GetContainer();
@@ -1076,7 +1080,8 @@ namespace Tests.Integration
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void ChildContainerDispose_NonSharedPart_ShouldOnlyCleanupChildAndSimpleNonShared()
         {
             var child = CreateParentChildContainerWithNonSharedImporter();
@@ -1104,7 +1109,8 @@ namespace Tests.Integration
             GC.KeepAlive(child);
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void ChildContainerGetReleaseExport_NonSharedPart_ShouldCollectWholeObjectChain()
         {
             var child = CreateParentChildContainerWithNonSharedImporter();
@@ -1131,7 +1137,8 @@ namespace Tests.Integration
             GC.KeepAlive(child);
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void NonSharedPart_RecomposableImport_NoReference_ShouldBeCollected()
         {
             var catalog = new TypeCatalog(typeof(NonSharedPartRecomposable));
@@ -1160,7 +1167,8 @@ namespace Tests.Integration
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void ChildContainerAddRemovePart_NonSharedPart_ShouldCollectWholeObjectChain()
         {
             var child = CreateParentChildContainerWithNonSharedImporter();
@@ -1194,7 +1202,8 @@ namespace Tests.Integration
             GC.KeepAlive(child);
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void GetReleaseExport_SharedPart_ShouldCollectOnlyRoot()
         {
             var container = GetContainer();
@@ -1223,7 +1232,8 @@ namespace Tests.Integration
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void GetReleaseExport_NonSharedPart_ShouldCollectWholeObjectChain()
         {
             var container = GetContainer();
@@ -1250,13 +1260,13 @@ namespace Tests.Integration
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
         public void ReleaseExports_ShouldWorkWithExportCollection()
         {
             var container = GetContainer();
             var exports = container.GetExports<NonSharedImporter>();
 
-            Assert.IsTrue(exports.Count() > 0);
+            Assert.True(exports.Count() > 0);
 
             var exportedValues = exports.Select(export => export.Value).ToList();
 
@@ -1264,8 +1274,8 @@ namespace Tests.Integration
 
             foreach (var obj in exportedValues)
             {
-                Assert.IsTrue(obj.AnyPartDisposable.IsDisposed);
-                Assert.IsTrue(obj.AnyPartDisposableRecomposable.IsDisposed);
+                Assert.True(obj.AnyPartDisposable.IsDisposed);
+                Assert.True(obj.AnyPartDisposableRecomposable.IsDisposed);
             }
         }
     }

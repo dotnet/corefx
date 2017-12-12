@@ -1,17 +1,17 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
-using System.Linq;
 using System.ComponentModel.Composition;
-using Microsoft.CLR.UnitTesting;
-using System.ComponentModel.Composition.UnitTesting;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Primitives;
+using System.Linq;
+using System.UnitTesting;
+using Xunit;
 
 namespace Tests.Integration
-{  
-    [TestClass]
+{
     public class CompositionContainerAttributedModelCycleTests
     {
         // There are nine possible scenarios that cause a part to have a dependency on another part, some of which
@@ -29,70 +29,77 @@ namespace Tests.Integration
         // ------------------------------
         //
 
-        [TestMethod]
+        [Fact]
         public void APrerequisiteDependsOnBPrerequisite_ShouldThrowComposition()
         {
-            AssertCycle(typeof(APrerequisiteDependsOnBPrerequisite), 
+            AssertCycle(typeof(APrerequisiteDependsOnBPrerequisite),
                         typeof(BPrerequisiteDependsOnAPrerequisite));
         }
 
-        [TestMethod]
+        [Fact]
         public void APrerequisiteDependsOnBPost_ShouldThrowComposition()
         {
             AssertCycle(typeof(APrerequisiteDependsOnBPost),
                         typeof(BPostDependsOnAPrerequisite));
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void APrerequisiteDependsOnBNone_ShouldNotThrow()
         {
-            AssertNotCycle(typeof(APrerequisiteDependsOnBNone), 
+            AssertNotCycle(typeof(APrerequisiteDependsOnBNone),
                            typeof(BNone));
         }
 
-        [TestMethod]
+        [Fact]
         public void APostDependsOnBPrerequisite_ShouldThrowComposition()
         {
-            AssertCycle(typeof(APostDependsOnBPrerequisite), 
+            AssertCycle(typeof(APostDependsOnBPrerequisite),
                         typeof(BPrerequisiteDependsOnAPost));
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void APostDependsOnBPost_ShouldNotThrow()
         {
-            AssertNotCycle(typeof(APostDependsOnBPost), 
+            AssertNotCycle(typeof(APostDependsOnBPost),
                            typeof(BPostDependsOnAPost));
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void APostDependsOnBNone_ShouldNotThrow()
         {
-            AssertNotCycle(typeof(APostDependsOnBNone), 
+            AssertNotCycle(typeof(APostDependsOnBNone),
                            typeof(BNone));
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void BPrerequisiteDependsOnANone_ShouldNotThrow()
         {
             AssertNotCycle(typeof(ANone),
                            typeof(BPrerequisiteDependsOnANone));
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void BPostDependsOnANone_ShouldNotThrow()
         {
             AssertNotCycle(typeof(ANone),
                            typeof(BPostDependsOnANone));
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void ANoneWithBNone_ShouldNotThrow()
         {
             AssertNotCycle(typeof(ANone),
                            typeof(BNone));
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void PartWithHasPrerequisteImportThatIsInAPostCycle_ShouldNotThrow()
         {
             AssertNotCycle(typeof(PartWithHasPrerequisteImportThatIsInAPostCycle)
@@ -118,7 +125,7 @@ namespace Tests.Integration
             {
                 var export = GetExport(type, types);
 
-                Assert.IsInstanceOfType(export.Value, type);
+                Assert.IsType<Type>(export.Value);
             }
         }
 
@@ -146,7 +153,6 @@ namespace Tests.Integration
             {
             }
         }
-
 
         [Export]
         public class APrerequisiteDependsOnBPost
@@ -182,7 +188,6 @@ namespace Tests.Integration
         {
         }
 
-
         [Export]
         public class ANone
         {
@@ -207,7 +212,6 @@ namespace Tests.Integration
             {
             }
         }
-
 
         [Export]
         public class APostDependsOnBPost

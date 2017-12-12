@@ -1,19 +1,17 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
 using System.Linq;
-using System.Linq.Expressions;
-using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
+using Xunit;
 
 namespace Tests.Integration
 {
-    [TestClass]
     public class RequiredCreationPolicyTests
     {
         // Matrix that details which policy to use for a given part to satisfy a given import.
@@ -91,69 +89,70 @@ namespace Tests.Integration
                 typeof(CreationPolicyAnyExportExplicit),
                 typeof(CreationPolicySharedExport),
                 typeof(CreationPolicyNonSharedExport),
-                
+
                 typeof(RequiredAnyImporterImplicit),
                 typeof(RequiredAnyImporterExplicit),
                 typeof(RequiredSharedImporter),
                 typeof(RequiredNonSharedImporter));
         }
 
-        [TestMethod]
+        [Fact]
         public void RequiredAnyImporterImplicit_ShouldIncludeAll()
         {
             var container = CreateDefaultContainer();
 
             var importer = container.GetExportedValue<RequiredAnyImporterImplicit>();
 
-            EnumerableAssert.AreEqual(
-                importer.Exports.Select(obj => obj.GetType()),
-                typeof(CreationPolicyAnyExportImplicit),
-                typeof(CreationPolicyAnyExportExplicit),
-                typeof(CreationPolicySharedExport),
-                typeof(CreationPolicyNonSharedExport));
+            Assert.Equal(new Type[] {
+                    typeof(CreationPolicyAnyExportImplicit),
+                    typeof(CreationPolicyAnyExportExplicit),
+                    typeof(CreationPolicySharedExport),
+                    typeof(CreationPolicyNonSharedExport) },
+                importer.Exports.Select(obj => obj.GetType()));
         }
 
-        [TestMethod]
+        [Fact]
         public void RequiredAnyImporterExplicit_ShouldIncludeAll()
         {
             var container = CreateDefaultContainer();
 
             var importer = container.GetExportedValue<RequiredAnyImporterExplicit>();
 
-            EnumerableAssert.AreEqual(
-                importer.Exports.Select(obj => obj.GetType()),
-                typeof(CreationPolicyAnyExportImplicit),
-                typeof(CreationPolicyAnyExportExplicit),
-                typeof(CreationPolicySharedExport),
-                typeof(CreationPolicyNonSharedExport));
+            Assert.Equal(new Type[] {
+                    typeof(CreationPolicyAnyExportImplicit),
+                    typeof(CreationPolicyAnyExportExplicit),
+                    typeof(CreationPolicySharedExport),
+                    typeof(CreationPolicyNonSharedExport) },
+                importer.Exports.Select(obj => obj.GetType()));
         }
 
-        [TestMethod]
+        [Fact]
         public void RequiredSharedImporter_ShouldFilterNonShared()
         {
             var container = CreateDefaultContainer();
 
             var importer = container.GetExportedValue<RequiredSharedImporter>();
 
-            EnumerableAssert.AreEqual(
-                importer.Exports.Select(obj => obj.GetType()),
-                typeof(CreationPolicyAnyExportImplicit),
-                typeof(CreationPolicyAnyExportExplicit),
-                typeof(CreationPolicySharedExport));
+            Assert.Equal(new Type[] {
+                    typeof(CreationPolicyAnyExportImplicit),
+                    typeof(CreationPolicyAnyExportExplicit),
+                    typeof(CreationPolicySharedExport) },
+                importer.Exports.Select(obj => obj.GetType()));
+
         }
 
-        [TestMethod]
+        [Fact]
         public void RequiredNonSharedImporter_ShouldFilterShared()
         {
             var container = CreateDefaultContainer();
 
             var importer = container.GetExportedValue<RequiredNonSharedImporter>();
 
-            EnumerableAssert.AreEqual(
-                importer.Exports.Select(obj => obj.GetType()),
-                typeof(CreationPolicyAnyExportImplicit),
-                typeof(CreationPolicyAnyExportExplicit),
-                typeof(CreationPolicyNonSharedExport));
+            Assert.Equal(new Type[] {
+                    typeof(CreationPolicyAnyExportImplicit),
+                    typeof(CreationPolicyAnyExportExplicit),
+                    typeof(CreationPolicyNonSharedExport) },
+                importer.Exports.Select(obj => obj.GetType()));
         }
     }
 }

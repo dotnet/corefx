@@ -1,19 +1,17 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
-using System.Linq;
-using System.Text;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
-using Microsoft.CLR.UnitTesting;
+using System.Linq;
 using System.UnitTesting;
+using Xunit;
 
 namespace Tests.Integration
 {
-    [TestClass]
     public class RejectionTests
     {
         public interface IExtension
@@ -42,7 +40,7 @@ namespace Tests.Integration
             public int Id { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void Rejection_ExtensionLightUp_AddedViaBatch()
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(
@@ -52,18 +50,18 @@ namespace Tests.Integration
 
             var importer = container.GetExportedValue<MyImporter>();
 
-            Assert.AreEqual(0, importer.Extensions.Length, "Should have 0 extensions");
+            Assert.Equal(0, importer.Extensions.Length);
 
             container.ComposeExportedValue<int>("IExtension.IdValue", 10);
 
-            Assert.AreEqual(1, importer.Extensions.Length, "Should have 1 extension");
-            Assert.AreEqual(10, importer.Extensions[0].Id);
+            Assert.Equal(1, importer.Extensions.Length);
+            Assert.Equal(10, importer.Extensions[0].Id);
 
             container.ComposeExportedValue<int>("IExtension.IdValue2", 20);
 
-            Assert.AreEqual(2, importer.Extensions.Length, "Should have 2 extension");
-            Assert.AreEqual(10, importer.Extensions[0].Id);
-            Assert.AreEqual(20, importer.Extensions[1].Id);
+            Assert.Equal(2, importer.Extensions.Length);
+            Assert.Equal(10, importer.Extensions[0].Id);
+            Assert.Equal(20, importer.Extensions[1].Id);
         }
 
         public class ExtensionValues
@@ -75,7 +73,7 @@ namespace Tests.Integration
             public int Value2 = 20;
         }
 
-        [TestMethod]
+        [Fact]
         public void Rejection_ExtensionLightUp_AddedViaCatalog()
         {
             var ext1Cat = CatalogFactory.CreateAttributed(typeof(Extension1));
@@ -90,21 +88,21 @@ namespace Tests.Integration
 
             var importer = container.GetExportedValue<MyImporter>();
 
-            Assert.AreEqual(0, importer.Extensions.Length, "Should have 0 extensions");
+            Assert.Equal(0, importer.Extensions.Length);
 
             catalog.Catalogs.Add(ext1Cat);
 
-            Assert.AreEqual(0, importer.Extensions.Length, "Should have 0 extensions after ext1 added without dependency");
+            Assert.Equal(0, importer.Extensions.Length);
 
             catalog.Catalogs.Add(ext2Cat);
 
-            Assert.AreEqual(0, importer.Extensions.Length, "Should have 0 extensions after ext2 added without dependency");
+            Assert.Equal(0, importer.Extensions.Length);
 
             catalog.Catalogs.Add(valueCat);
 
-            Assert.AreEqual(2, importer.Extensions.Length, "Should have 2 extension");
-            Assert.AreEqual(10, importer.Extensions[0].Id);
-            Assert.AreEqual(20, importer.Extensions[1].Id);
+            Assert.Equal(2, importer.Extensions.Length);
+            Assert.Equal(10, importer.Extensions[0].Id);
+            Assert.Equal(20, importer.Extensions[1].Id);
         }
 
         public interface IMissing { }
@@ -142,58 +140,58 @@ namespace Tests.Integration
             public ISingle SingleImport { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void Rejection_Resurrection()
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(Needy));
 
             var exports1 = container.GetExportedValues<Needy>();
 
-            Assert.AreEqual(0, exports1.Count(), "Catalog entry should be rejected");
+            Assert.Equal(0, exports1.Count());
 
             container.ComposeParts(new NoImportPart());
 
             var exports2 = container.GetExportedValues<Needy>();
-            Assert.AreEqual(1, exports2.Count(), "Catalog entry should be ressurrected");
+            Assert.Equal(1, exports2.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void Rejection_BatchSatisfiesBatch()
         {
             var container = ContainerFactory.Create();
             var needy = new Needy();
             container.ComposeParts(needy, new NoImportPart());
-            Assert.IsInstanceOfType(needy.SingleImport, typeof(SingleImpl), "Import not satisifed as expected");
+            Assert.IsType<SingleImpl>(needy.SingleImport);
         }
 
-        [TestMethod]
+        [Fact]
         public void Rejection_BatchSatisfiesBatchReversed()
         {
             var container = ContainerFactory.Create();
             var needy = new Needy();
             container.ComposeParts(new NoImportPart(), needy);
-            Assert.IsInstanceOfType(needy.SingleImport, typeof(SingleImpl), "Import not satisifed as expected");
+            Assert.IsType<SingleImpl>(needy.SingleImport);
         }
 
-        [TestMethod]
+        [Fact]
         public void Rejection_CatalogSatisfiesBatch()
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(NoImportPart));
             var needy = new Needy();
             container.ComposeParts(needy);
-            Assert.IsInstanceOfType(needy.SingleImport, typeof(SingleImpl), "Import not satisifed as expected");
+            Assert.IsType<SingleImpl>(needy.SingleImport);
         }
 
-        [TestMethod]
+        [Fact]
         public void Rejection_TransitiveDependenciesSatisfied()
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(Needy), typeof(NoImportPart));
             var needy = container.GetExportedValue<Needy>();
-            Assert.IsNotNull(needy);
-            Assert.IsInstanceOfType(needy.SingleImport, typeof(SingleImpl), "Import not satisifed as expected");
+            Assert.NotNull(needy);
+            Assert.IsType<SingleImpl>(needy.SingleImport);
         }
 
-        [TestMethod]
+        [Fact]
         public void Rejection_TransitiveDependenciesUnsatisfied_ShouldThrowCardinalityMismatch()
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(Needy), typeof(MissingImportPart));
@@ -208,7 +206,7 @@ namespace Tests.Integration
             public IMissing MissingImport { set; get; }
         }
 
-        [TestMethod]
+        [Fact]
         public void Rejection_BatchRevert()
         {
             var container = ContainerFactory.Create();
@@ -217,7 +215,7 @@ namespace Tests.Integration
                 container.ComposeParts(new MissingImportPart()));
         }
 
-        [TestMethod]
+        [Fact]
         public void Rejection_DefendPromisesOnceMade()
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(Needy));
@@ -242,7 +240,7 @@ namespace Tests.Integration
                 container.Compose(removeBatch));
         }
 
-        [TestMethod]
+        [Fact]
         public void Rejection_DefendPromisesLazily()
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(Needy));
@@ -266,8 +264,7 @@ namespace Tests.Integration
                 container.ComposeParts(new NoImportPart()));
         }
 
-
-        [TestMethod]
+        [Fact]
         public void Rejection_SwitchPromiseFromManualToCatalog()
         {
             // This test shows how the priority list in the AggregateCatalog can actually play with 
@@ -334,7 +331,7 @@ namespace Tests.Integration
         // Both have desireable and undesirable characteristics.  The first case is non-discriminatory but
         // rejects more parts than are necessary, the second minimizes rejection but must choose a subset
         // on somewhat arbitary grounds.
-        [TestMethod]
+        [Fact]
         public void Rejection_TheClemensLoop()
         {
             var catalog = new TypeCatalog(new Type[] { typeof(LoopA1), typeof(LoopA2), typeof(LoopB1), typeof(LoopB2) });
@@ -343,12 +340,12 @@ namespace Tests.Integration
             var exportsB = container.GetExportedValues<ILoopB>();
 
             // These assertions would prove solution one
-            Assert.AreEqual(0, exportsA.Count(), "Catalog ILoopA entries should be rejected");
-            Assert.AreEqual(0, exportsB.Count(), "Catalog ILoopB entries should be rejected");
+            Assert.Equal(0, exportsA.Count());
+            Assert.Equal(0, exportsB.Count());
 
             // These assertions would prove solution two
-            //Assert.AreEqual(1, exportsA.Count, "Only noe ILoopA entry should not be rejected");
-            //Assert.AreEqual(1, exportsB.Count, "Only noe ILoopB entry should not be rejected");
+            //Assert.Equal(1, exportsA.Count);
+            //Assert.Equal(1, exportsB.Count);
         }
 
         public interface IWorkItem
@@ -377,7 +374,7 @@ namespace Tests.Integration
 
         }
 
-        [TestMethod]
+        [Fact]
         public void AppliedStateNotCompleteedYet()
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(AllWorkItems));
@@ -386,12 +383,12 @@ namespace Tests.Integration
 
             var workItems = container.GetExportedValue<AllWorkItems>();
 
-            Assert.AreEqual(0, workItems.WorkItems.Length);
+            Assert.Equal(0, workItems.WorkItems.Length);
 
             container.ComposeParts(new WorkItem());
 
-            Assert.AreEqual(1, workItems.WorkItems.Length);
-            Assert.AreEqual("A", workItems.WorkItems[0].Value.Id);
+            Assert.Equal(1, workItems.WorkItems.Length);
+            Assert.Equal("A", workItems.WorkItems[0].Value.Id);
         }
 
         [Export]
@@ -399,16 +396,22 @@ namespace Tests.Integration
         {
             [Import]
             private string _importNotFound = null;
+
+            public ClassWithMissingImport()
+            {
+                if (_importNotFound != null)
+                    throw new ArgumentException();
+            }
         }
 
-        [TestMethod]
+        [Fact]
         public void AppliedStateStored_ShouldRevertStateOnFailure()
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(AllWorkItems), typeof(WorkItem), typeof(Ids));
 
             var workItems = container.GetExportedValue<AllWorkItems>();
 
-            Assert.AreEqual(1, workItems.WorkItems.Length);
+            Assert.Equal(1, workItems.WorkItems.Length);
 
             var batch = new CompositionBatch();
 
@@ -418,7 +421,7 @@ namespace Tests.Integration
             ExceptionAssert.Throws<ChangeRejectedException>(() =>
                 container.Compose(batch));
 
-            Assert.AreEqual("MyId", workItems.WorkItems[0].Value.Id);
+            Assert.Equal("MyId", workItems.WorkItems[0].Value.Id);
         }
 
         [Export]
@@ -428,14 +431,14 @@ namespace Tests.Integration
             public ClassWithMissingImport Import { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void OptionalImportWithMissingDependency_ShouldRejectAndComposeFine()
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(OptionalImporter), typeof(ClassWithMissingImport));
 
             var importer = container.GetExportedValue<OptionalImporter>();
 
-            Assert.IsNull(importer.Import);
+            Assert.Null(importer.Import);
         }
 
         [Export]
@@ -459,20 +462,20 @@ namespace Tests.Integration
             public PartB ImportB { get; set; }
         }
 
-        [TestMethod]
-        [WorkItem(684510)]
+        [Fact]
+        [ActiveIssue(684510)]
         public void PartAOptionalDependsOnPartB_PartBGetAddedLater()
         {
             var container = new CompositionContainer(new TypeCatalog(typeof(PartC), typeof(PartA)));
             var partA = container.GetExportedValue<PartA>();
 
-            Assert.IsNull(partA.ImportB);
+            Assert.Null(partA.ImportB);
 
             var partB = new PartB();
             container.ComposeParts(partB);
 
-            Assert.AreEqual(partA.ImportB, partB);
-            Assert.IsNotNull(partB.ImportC);
+            Assert.Equal(partA.ImportB, partB);
+            Assert.NotNull(partB.ImportC);
         }
 
         [Export]
@@ -485,21 +488,21 @@ namespace Tests.Integration
             public PartC ImportC { get; set; }
         }
 
-        [TestMethod]
-        [WorkItem(684510)]
+        [Fact]
+        [ActiveIssue(684510)]
         public void PartAOptionalDependsOnPartBAndPartC_PartCGetRecurrected()
         {
             var container = new CompositionContainer(new TypeCatalog(typeof(PartA2), typeof(PartB)));
             var partA = container.GetExportedValue<PartA2>();
 
-            Assert.IsNull(partA.ImportB);
-            Assert.IsNull(partA.ImportC);
+            Assert.Null(partA.ImportB);
+            Assert.Null(partA.ImportC);
 
             var partC = new PartC();
             container.ComposeParts(partC);
 
-            Assert.AreEqual(partA.ImportB, partC.ImportB);
-            Assert.AreEqual(partA.ImportC, partC);
+            Assert.Equal(partA.ImportB, partC.ImportB);
+            Assert.Equal(partA.ImportC, partC);
         }
     }
 }
