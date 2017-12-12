@@ -1,24 +1,21 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
-using System.ComponentModel.Composition.Factories;
-using System.ComponentModel.Composition.Hosting;
-using System.ComponentModel.Composition.Primitives;
-using System.Reflection;
-using Microsoft.Internal;
-using Microsoft.CLR.UnitTesting;
 using System.Collections.Generic;
+using System.ComponentModel.Composition.Primitives;
 using System.Linq;
+using System.Reflection;
 using System.UnitTesting;
-using System.Threading;
+using Microsoft.Internal;
+using Xunit;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
-    [TestClass]
     public class ReflectionModelServicesTests
     {
-        [TestMethod]
+        [Fact]
         public void CreatePartDefinition()
         {
             Type expectedType = typeof(TestPart);
@@ -36,22 +33,22 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 new Lazy<IEnumerable<ImportDefinition>>(() => expectedImports),
                 new Lazy<IEnumerable<ExportDefinition>>(() => expectedExports),
                 expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(partDefinition);
+            Assert.NotNull(partDefinition);
 
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
-            Assert.IsNotNull(definition);
+            Assert.NotNull(definition);
 
-            Assert.AreSame(expectedType, definition.GetPartType());
-            Assert.IsTrue(definition.Metadata.Keys.SequenceEqual(expectedMetadata.Keys));
-            Assert.IsTrue(definition.Metadata.Values.SequenceEqual(expectedMetadata.Values));
-            Assert.IsTrue(definition.ExportDefinitions.SequenceEqual(expectedExports.Cast<ExportDefinition>()));
-            Assert.IsTrue(definition.ImportDefinitions.SequenceEqual(expectedImports.Cast<ImportDefinition>()));
-            Assert.AreSame(expectedOrigin, ((ICompositionElement)definition).Origin);
-            Assert.IsNotNull(((ICompositionElement)definition).DisplayName);
-            Assert.IsFalse(definition.IsDisposalRequired);
+            Assert.Same(expectedType, definition.GetPartType());
+            Assert.True(definition.Metadata.Keys.SequenceEqual(expectedMetadata.Keys));
+            Assert.True(definition.Metadata.Values.SequenceEqual(expectedMetadata.Values));
+            Assert.True(definition.ExportDefinitions.SequenceEqual(expectedExports.Cast<ExportDefinition>()));
+            Assert.True(definition.ImportDefinitions.SequenceEqual(expectedImports.Cast<ImportDefinition>()));
+            Assert.Same(expectedOrigin, ((ICompositionElement)definition).Origin);
+            Assert.NotNull(((ICompositionElement)definition).DisplayName);
+            Assert.False(definition.IsDisposalRequired);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreatePartDefinition_Disposable()
         {
             Type expectedType = typeof(TestPart);
@@ -69,22 +66,22 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 new Lazy<IEnumerable<ImportDefinition>>(() => expectedImports),
                 new Lazy<IEnumerable<ExportDefinition>>(() => expectedExports),
                 expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(partDefinition);
+            Assert.NotNull(partDefinition);
 
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
-            Assert.IsNotNull(definition);
+            Assert.NotNull(definition);
 
-            Assert.AreSame(expectedType, definition.GetPartType());
-            Assert.IsTrue(definition.Metadata.Keys.SequenceEqual(expectedMetadata.Keys));
-            Assert.IsTrue(definition.Metadata.Values.SequenceEqual(expectedMetadata.Values));
-            Assert.IsTrue(definition.ExportDefinitions.SequenceEqual(expectedExports.Cast<ExportDefinition>()));
-            Assert.IsTrue(definition.ImportDefinitions.SequenceEqual(expectedImports.Cast<ImportDefinition>()));
-            Assert.AreSame(expectedOrigin, ((ICompositionElement)definition).Origin);
-            Assert.IsNotNull(((ICompositionElement)definition).DisplayName);
-            Assert.IsTrue(definition.IsDisposalRequired);
+            Assert.Same(expectedType, definition.GetPartType());
+            Assert.True(definition.Metadata.Keys.SequenceEqual(expectedMetadata.Keys));
+            Assert.True(definition.Metadata.Values.SequenceEqual(expectedMetadata.Values));
+            Assert.True(definition.ExportDefinitions.SequenceEqual(expectedExports.Cast<ExportDefinition>()));
+            Assert.True(definition.ImportDefinitions.SequenceEqual(expectedImports.Cast<ImportDefinition>()));
+            Assert.Same(expectedOrigin, ((ICompositionElement)definition).Origin);
+            Assert.NotNull(((ICompositionElement)definition).DisplayName);
+            Assert.True(definition.IsDisposalRequired);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreatePartDefinition_NullMetadataAllowed()
         {
             Type expectedType = typeof(TestPart);
@@ -99,15 +96,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 new Lazy<IEnumerable<ImportDefinition>>(() => expectedImports),
                 new Lazy<IEnumerable<ExportDefinition>>(() => expectedExports),
                 null, expectedOrigin);
-            Assert.IsNotNull(partDefinition);
+            Assert.NotNull(partDefinition);
 
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
-            Assert.IsNotNull(definition);
-            Assert.IsNotNull(definition.Metadata);
-            Assert.AreEqual(0, definition.Metadata.Count);
+            Assert.NotNull(definition);
+            Assert.NotNull(definition.Metadata);
+            Assert.Equal(0, definition.Metadata.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreatePartDefinition_EvaluatedNullMetadataAllowed()
         {
             Type expectedType = typeof(TestPart);
@@ -123,16 +120,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 new Lazy<IEnumerable<ImportDefinition>>(() => expectedImports),
                 new Lazy<IEnumerable<ExportDefinition>>(() => expectedExports),
                 expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(partDefinition);
+            Assert.NotNull(partDefinition);
 
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
-            Assert.IsNotNull(definition);
-            Assert.IsNotNull(definition.Metadata);
-            Assert.AreEqual(0, definition.Metadata.Count);
+            Assert.NotNull(definition);
+            Assert.NotNull(definition.Metadata);
+            Assert.Equal(0, definition.Metadata.Count);
         }
 
-
-        [TestMethod]
+        [Fact]
         public void CreatePartDefinition_NullExportsAllowed()
         {
             Type expectedType = typeof(TestPart);
@@ -148,15 +144,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 new Lazy<IEnumerable<ImportDefinition>>(() => expectedImports),
                 null,
                 expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(partDefinition);
+            Assert.NotNull(partDefinition);
 
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
-            Assert.IsNotNull(definition);
-            Assert.IsNotNull(definition.ExportDefinitions);
-            Assert.AreEqual(0, definition.ExportDefinitions.Count());
+            Assert.NotNull(definition);
+            Assert.NotNull(definition.ExportDefinitions);
+            Assert.Equal(0, definition.ExportDefinitions.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void CreatePartDefinition_EvaluatedNullExportsAllowed()
         {
             Type expectedType = typeof(TestPart);
@@ -172,15 +168,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 new Lazy<IEnumerable<ImportDefinition>>(() => expectedImports),
                 new Lazy<IEnumerable<ExportDefinition>>(() => null),
                 expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(partDefinition);
+            Assert.NotNull(partDefinition);
 
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
-            Assert.IsNotNull(definition);
-            Assert.IsNotNull(definition.ExportDefinitions);
-            Assert.AreEqual(0, definition.ExportDefinitions.Count());
+            Assert.NotNull(definition);
+            Assert.NotNull(definition.ExportDefinitions);
+            Assert.Equal(0, definition.ExportDefinitions.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void CreatePartDefinition_ExportsMustBeOfRightType()
         {
             Type expectedType = typeof(TestPart);
@@ -196,10 +192,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 new Lazy<IEnumerable<ImportDefinition>>(() => expectedImports),
                 new Lazy<IEnumerable<ExportDefinition>>(() => CreateInvalidExports()),
                 expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(partDefinition);
+            Assert.NotNull(partDefinition);
 
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
-            Assert.IsNotNull(definition);
+            Assert.NotNull(definition);
 
             ExceptionAssert.Throws<InvalidOperationException>(() =>
             {
@@ -207,7 +203,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void CreatePartDefinition_NullImportsAllowed()
         {
             Type expectedType = typeof(TestPart);
@@ -223,15 +219,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 null,
                 new Lazy<IEnumerable<ExportDefinition>>(() => expectedExports),
                 expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(partDefinition);
+            Assert.NotNull(partDefinition);
 
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
-            Assert.IsNotNull(definition);
-            Assert.IsNotNull(definition.ImportDefinitions);
-            Assert.AreEqual(0, definition.ImportDefinitions.Count());
+            Assert.NotNull(definition);
+            Assert.NotNull(definition.ImportDefinitions);
+            Assert.Equal(0, definition.ImportDefinitions.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void CreatePartDefinition_EvaluatedNullImportsAllowed()
         {
             Type expectedType = typeof(TestPart);
@@ -247,15 +243,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 new Lazy<IEnumerable<ImportDefinition>>(() => null),
                 new Lazy<IEnumerable<ExportDefinition>>(() => expectedExports),
                 expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(partDefinition);
+            Assert.NotNull(partDefinition);
 
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
-            Assert.IsNotNull(definition);
-            Assert.IsNotNull(definition.ImportDefinitions);
-            Assert.AreEqual(0, definition.ImportDefinitions.Count());
+            Assert.NotNull(definition);
+            Assert.NotNull(definition.ImportDefinitions);
+            Assert.Equal(0, definition.ImportDefinitions.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void CreatePartDefinition_ImportsMustBeOfRightType()
         {
             Type expectedType = typeof(TestPart);
@@ -271,10 +267,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 new Lazy<IEnumerable<ImportDefinition>>(() => CreateInvalidImports()),
                 new Lazy<IEnumerable<ExportDefinition>>(() => expectedExports),
                 expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(partDefinition);
+            Assert.NotNull(partDefinition);
 
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
-            Assert.IsNotNull(definition);
+            Assert.NotNull(definition);
             ExceptionAssert.Throws<InvalidOperationException>(() =>
             {
                 definition.ImportDefinitions.Count();
@@ -282,7 +278,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         }
 
-        [TestMethod]
+        [Fact]
         public void CreatePartDefinition_NullTypeNotAllowed()
         {
             Type expectedType = typeof(TestPart);
@@ -296,7 +292,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
             ICompositionElement expectedOrigin = new MockOrigin();
 
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("partType", () =>
+            Assert.Throws<ArgumentNullException>("partType", () =>
             {
                 ComposablePartDefinition partDefinition = ReflectionModelServices.CreatePartDefinition(null, false,
                     new Lazy<IEnumerable<ImportDefinition>>(() => expectedImports),
@@ -305,8 +301,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             });
         }
 
-
-        [TestMethod]
+        [Fact]
         public void CreatePartDefinition_NullEvaluatedTypeNotAllowed()
         {
             Type expectedType = typeof(TestPart);
@@ -327,7 +322,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 expectedMetadata.AsLazy(), expectedOrigin);
 
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
-            Assert.IsNotNull(definition);
+            Assert.NotNull(definition);
 
             ExceptionAssert.Throws<InvalidOperationException>(() =>
             {
@@ -335,7 +330,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPartType()
         {
             Type expectedType = typeof(TestPart);
@@ -353,32 +348,31 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 new Lazy<IEnumerable<ImportDefinition>>(() => expectedImports),
                 new Lazy<IEnumerable<ExportDefinition>>(() => expectedExports),
                 expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(partDefinition);
+            Assert.NotNull(partDefinition);
 
             Lazy<Type> lazyPartType = ReflectionModelServices.GetPartType(partDefinition);
-            Assert.AreEqual(expectedLazyType, lazyPartType);
+            Assert.Equal(expectedLazyType, lazyPartType);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPartType_NullAsPart_ShouldThrowArgumentNull()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("partDefinition", () =>
+            Assert.Throws<ArgumentNullException>("partDefinition", () =>
             {
                 ReflectionModelServices.GetPartType(null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPartType_InvalidPart_ShouldThrowArgument()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentException>("partDefinition", () =>
+            Assert.Throws<ArgumentException>("partDefinition", () =>
             {
                 ReflectionModelServices.GetPartType(new InvalidPartDefinition());
             });
         }
 
-
-        [TestMethod]
+        [Fact]
         public void IsDisposalRequired_ForNonDisposable()
         {
             Type expectedType = typeof(TestPart);
@@ -396,13 +390,13 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 new Lazy<IEnumerable<ImportDefinition>>(() => expectedImports),
                 new Lazy<IEnumerable<ExportDefinition>>(() => expectedExports),
                 expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(partDefinition);
+            Assert.NotNull(partDefinition);
 
             bool isDisposalRequired = ReflectionModelServices.IsDisposalRequired(partDefinition);
-            Assert.IsFalse(isDisposalRequired);
+            Assert.False(isDisposalRequired);
         }
 
-        [TestMethod]
+        [Fact]
         public void IsDisposalRequired_ForDisposable()
         {
             Type expectedType = typeof(TestPart);
@@ -420,32 +414,31 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 new Lazy<IEnumerable<ImportDefinition>>(() => expectedImports),
                 new Lazy<IEnumerable<ExportDefinition>>(() => expectedExports),
                 expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(partDefinition);
+            Assert.NotNull(partDefinition);
 
             bool isDisposalRequired = ReflectionModelServices.IsDisposalRequired(partDefinition);
-            Assert.IsTrue(isDisposalRequired);
+            Assert.True(isDisposalRequired);
         }
 
-
-        [TestMethod]
+        [Fact]
         public void IsDisposalRequired_NullAsPart_ShouldThrowArgumentNull()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("partDefinition", () =>
+            Assert.Throws<ArgumentNullException>("partDefinition", () =>
             {
                 ReflectionModelServices.IsDisposalRequired(null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void IsDisposalRequired_InvalidPart_ShouldThrowArgument()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentException>("partDefinition", () =>
+            Assert.Throws<ArgumentException>("partDefinition", () =>
             {
                 ReflectionModelServices.IsDisposalRequired(new InvalidPartDefinition());
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateExportDefinition()
         {
             PropertyInfo property = typeof(TestPart).GetProperties().First();
@@ -460,18 +453,18 @@ namespace System.ComponentModel.Composition.ReflectionModel
             ICompositionElement expectedOrigin = new MockOrigin();
 
             ExportDefinition exportDefinition = ReflectionModelServices.CreateExportDefinition(expectedLazyMember, expectedContractName, expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(exportDefinition);
+            Assert.NotNull(exportDefinition);
             ReflectionMemberExportDefinition definition = exportDefinition as ReflectionMemberExportDefinition;
-            Assert.IsNotNull(definition);
+            Assert.NotNull(definition);
 
-            Assert.AreEqual(expectedContractName, definition.ContractName);
-            Assert.IsTrue(definition.Metadata.Keys.SequenceEqual(expectedMetadata.Keys));
-            Assert.IsTrue(definition.Metadata.Values.SequenceEqual(expectedMetadata.Values));
-            Assert.AreEqual(expectedOrigin, ((ICompositionElement)definition).Origin);
-            Assert.AreEqual(expectedLazyMember, definition.ExportingLazyMember);
+            Assert.Equal(expectedContractName, definition.ContractName);
+            Assert.True(definition.Metadata.Keys.SequenceEqual(expectedMetadata.Keys));
+            Assert.True(definition.Metadata.Values.SequenceEqual(expectedMetadata.Values));
+            Assert.Equal(expectedOrigin, ((ICompositionElement)definition).Origin);
+            Assert.Equal(expectedLazyMember, definition.ExportingLazyMember);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateExportDefinition_NullAsContractName_ThrowsNullArgument()
         {
             PropertyInfo property = typeof(TestPart).GetProperties().First();
@@ -481,10 +474,9 @@ namespace System.ComponentModel.Composition.ReflectionModel
             expectedMetadata["Key1"] = 1;
             expectedMetadata["Key2"] = "Value2";
 
-
             ICompositionElement expectedOrigin = new MockOrigin();
 
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("contractName", () =>
+            Assert.Throws<ArgumentNullException>("contractName", () =>
             {
                 ReflectionModelServices.CreateExportDefinition(expectedLazyMember, null, expectedMetadata.AsLazy(), expectedOrigin);
             });
@@ -503,11 +495,11 @@ namespace System.ComponentModel.Composition.ReflectionModel
             ICompositionElement expectedOrigin = new MockOrigin();
 
             ExportDefinition definition = ReflectionModelServices.CreateExportDefinition(expectedLazyMember, expectedContractName, expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(definition.Metadata);
-            Assert.AreEqual(0, definition.Metadata.Count);
+            Assert.NotNull(definition.Metadata);
+            Assert.Equal(0, definition.Metadata.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateExportDefinition_InvalidLazymemberInfo_ShouldThrowArtument()
         {
             EventInfo _event = typeof(TestPart).GetEvents().First();
@@ -521,13 +513,13 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
             ICompositionElement expectedOrigin = new MockOrigin();
 
-            ExceptionAssert.ThrowsArgument<ArgumentException>("exportingMember", () =>
+            Assert.Throws<ArgumentException>("exportingMember", () =>
             {
                 ReflectionModelServices.CreateExportDefinition(expectedLazyMember, expectedContractName, expectedMetadata.AsLazy(), expectedOrigin);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportingMember()
         {
             PropertyInfo property = typeof(TestPart).GetProperties().First();
@@ -542,31 +534,31 @@ namespace System.ComponentModel.Composition.ReflectionModel
             ICompositionElement expectedOrigin = new MockOrigin();
 
             ExportDefinition exportDefinition = ReflectionModelServices.CreateExportDefinition(expectedLazyMember, expectedContractName, expectedMetadata.AsLazy(), expectedOrigin);
-            Assert.IsNotNull(exportDefinition);
+            Assert.NotNull(exportDefinition);
 
             LazyMemberInfo lazyMember = ReflectionModelServices.GetExportingMember(exportDefinition);
-            Assert.AreEqual(expectedLazyMember, lazyMember);
+            Assert.Equal(expectedLazyMember, lazyMember);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportingMember_NullAsExportDefinition_ShouldThrowArhumentNull()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("exportDefinition", () =>
+            Assert.Throws<ArgumentNullException>("exportDefinition", () =>
             {
                 ReflectionModelServices.GetExportingMember(null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportingMember_InvalidExportDefinition_ShouldThrowArhumentNull()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentException>("exportDefinition", () =>
+            Assert.Throws<ArgumentException>("exportDefinition", () =>
             {
                 ReflectionModelServices.GetExportingMember(new ExportDefinition("Foo", null));
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateImportDefinition_Member()
         {
             PropertyInfo property = typeof(TestPart).GetProperties().First();
@@ -590,23 +582,23 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 expectedRecomposable,
                 expectedCreationPolicy,
                 expectedOrigin);
-            Assert.IsNotNull(importDefinition);
+            Assert.NotNull(importDefinition);
 
             ReflectionMemberImportDefinition definition = importDefinition as ReflectionMemberImportDefinition;
-            Assert.IsNotNull(definition);
+            Assert.NotNull(definition);
 
-            Assert.AreEqual(expectedLazyMember, definition.ImportingLazyMember);
-            Assert.AreEqual(definition.ContractName, expectedContractName);
-            Assert.AreEqual(definition.RequiredTypeIdentity, expectedRequiredTypeIdentity);
-            Assert.IsTrue(definition.RequiredMetadata.SequenceEqual(expectedRequiredMetadata));
-            Assert.AreEqual(definition.Cardinality, expectedCardinality);
-            Assert.AreEqual(definition.RequiredCreationPolicy, expectedCreationPolicy);
-            Assert.AreEqual(definition.IsRecomposable, expectedRecomposable);
-            Assert.AreSame(expectedOrigin, ((ICompositionElement)definition).Origin);
-            Assert.IsFalse(definition.IsPrerequisite);
+            Assert.Equal(expectedLazyMember, definition.ImportingLazyMember);
+            Assert.Equal(definition.ContractName, expectedContractName);
+            Assert.Equal(definition.RequiredTypeIdentity, expectedRequiredTypeIdentity);
+            Assert.True(definition.RequiredMetadata.SequenceEqual(expectedRequiredMetadata));
+            Assert.Equal(definition.Cardinality, expectedCardinality);
+            Assert.Equal(definition.RequiredCreationPolicy, expectedCreationPolicy);
+            Assert.Equal(definition.IsRecomposable, expectedRecomposable);
+            Assert.Same(expectedOrigin, ((ICompositionElement)definition).Origin);
+            Assert.False(definition.IsPrerequisite);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateImportDefinition_Member_InvalidMember_ShouldThrowArgument()
         {
             MethodInfo method = typeof(TestPart).GetMethods().First();
@@ -621,7 +613,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
             ICompositionElement expectedOrigin = new MockOrigin();
 
-            ExceptionAssert.ThrowsArgument<ArgumentException>("importingMember", () =>
+            Assert.Throws<ArgumentException>("importingMember", () =>
             {
                 ReflectionModelServices.CreateImportDefinition(
                 expectedLazyMember,
@@ -635,7 +627,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetImporingMember()
         {
             PropertyInfo property = typeof(TestPart).GetProperties().First();
@@ -659,33 +651,31 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 expectedRecomposable,
                 expectedCreationPolicy,
                 expectedOrigin);
-            Assert.IsNotNull(importDefinition);
+            Assert.NotNull(importDefinition);
 
             LazyMemberInfo lazyMember = ReflectionModelServices.GetImportingMember(importDefinition);
-            Assert.AreEqual(expectedLazyMember, lazyMember);
+            Assert.Equal(expectedLazyMember, lazyMember);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetImporingMember_NullAsImport_ShouldThrowArgumentNull()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("importDefinition", () =>
+            Assert.Throws<ArgumentNullException>("importDefinition", () =>
             {
                 ReflectionModelServices.GetImportingMember(null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetImporingMember_InvalidImport_ShouldThrowArgument()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentException>("importDefinition", () =>
+            Assert.Throws<ArgumentException>("importDefinition", () =>
             {
                 ReflectionModelServices.GetImportingMember(new ContractBasedImportDefinition("Foo", "Foo", null, ImportCardinality.ZeroOrMore, false, false, CreationPolicy.Any));
             });
         }
 
-
-
-        [TestMethod]
+        [Fact]
         public void CreateImportDefinition_Parameter()
         {
 
@@ -708,23 +698,23 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 expectedCardinality,
                 expectedCreationPolicy,
                 expectedOrigin);
-            Assert.IsNotNull(importDefinition);
+            Assert.NotNull(importDefinition);
 
             ReflectionParameterImportDefinition definition = importDefinition as ReflectionParameterImportDefinition;
-            Assert.IsNotNull(definition);
+            Assert.NotNull(definition);
 
-            Assert.AreEqual(expectedLazyParameter, definition.ImportingLazyParameter);
-            Assert.AreEqual(definition.ContractName, expectedContractName);
-            Assert.AreEqual(definition.RequiredTypeIdentity, expectedRequiredTypeIdentity);
-            Assert.IsTrue(definition.RequiredMetadata.SequenceEqual(expectedRequiredMetadata));
-            Assert.AreEqual(definition.Cardinality, expectedCardinality);
-            Assert.AreEqual(definition.RequiredCreationPolicy, expectedCreationPolicy);
-            Assert.IsFalse(definition.IsRecomposable);
-            Assert.AreSame(expectedOrigin, ((ICompositionElement)definition).Origin);
-            Assert.IsTrue(definition.IsPrerequisite);
+            Assert.Equal(expectedLazyParameter, definition.ImportingLazyParameter);
+            Assert.Equal(definition.ContractName, expectedContractName);
+            Assert.Equal(definition.RequiredTypeIdentity, expectedRequiredTypeIdentity);
+            Assert.True(definition.RequiredMetadata.SequenceEqual(expectedRequiredMetadata));
+            Assert.Equal(definition.Cardinality, expectedCardinality);
+            Assert.Equal(definition.RequiredCreationPolicy, expectedCreationPolicy);
+            Assert.False(definition.IsRecomposable);
+            Assert.Same(expectedOrigin, ((ICompositionElement)definition).Origin);
+            Assert.True(definition.IsPrerequisite);
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateImportDefinition_Parameter_NullAsParamater_ShouldThrowArgumentNull()
         {
             ParameterInfo parameter = typeof(TestPart).GetConstructor(new Type[] { typeof(int) }).GetParameters()[0];
@@ -738,7 +728,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
             ICompositionElement expectedOrigin = new MockOrigin();
 
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("parameter", () =>
+            Assert.Throws<ArgumentNullException>("parameter", () =>
             {
                 ReflectionModelServices.CreateImportDefinition(
                                 null,
@@ -751,7 +741,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetImportingParameter()
         {
             ParameterInfo parameter = typeof(TestPart).GetConstructor(new Type[] { typeof(int) }).GetParameters()[0];
@@ -772,31 +762,31 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 expectedCardinality,
                 expectedCreationPolicy,
                 expectedOrigin);
-            Assert.IsNotNull(importDefinition);
+            Assert.NotNull(importDefinition);
 
             Lazy<ParameterInfo> lazyParameter = ReflectionModelServices.GetImportingParameter(importDefinition);
-            Assert.AreEqual(expectedLazyParameter, lazyParameter);
+            Assert.Equal(expectedLazyParameter, lazyParameter);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetImportingParameter_NullAsImport_ShouldThrowArgumentNull()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("importDefinition", () =>
+            Assert.Throws<ArgumentNullException>("importDefinition", () =>
             {
                 ReflectionModelServices.GetImportingParameter(null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetImportingParameter_InvalidImport_ShouldThrowArgument()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentException>("importDefinition", () =>
+            Assert.Throws<ArgumentException>("importDefinition", () =>
             {
                 ReflectionModelServices.GetImportingParameter(new ContractBasedImportDefinition("Foo", "Foo", null, ImportCardinality.ZeroOrMore, false, false, CreationPolicy.Any));
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void IsImportingParameter_OnParameterImport()
         {
             ParameterInfo parameter = typeof(TestPart).GetConstructor(new Type[] { typeof(int) }).GetParameters()[0];
@@ -817,12 +807,12 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 expectedCardinality,
                 expectedCreationPolicy,
                 expectedOrigin);
-            Assert.IsNotNull(importDefinition);
+            Assert.NotNull(importDefinition);
 
-            Assert.IsTrue(ReflectionModelServices.IsImportingParameter(importDefinition));
+            Assert.True(ReflectionModelServices.IsImportingParameter(importDefinition));
         }
 
-        [TestMethod]
+        [Fact]
         public void IsImportingParameter_OnMemberImport()
         {
             PropertyInfo property = typeof(TestPart).GetProperties().First();
@@ -846,43 +836,43 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 expectedRecomposable,
                 expectedCreationPolicy,
                 expectedOrigin);
-            Assert.IsNotNull(importDefinition);
+            Assert.NotNull(importDefinition);
 
-            Assert.IsFalse(ReflectionModelServices.IsImportingParameter(importDefinition));
+            Assert.False(ReflectionModelServices.IsImportingParameter(importDefinition));
         }
 
-        [TestMethod]
+        [Fact]
         public void IsImportingParameter_NullAsImport_ShouldThrowArgumentNull()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("importDefinition", () =>
+            Assert.Throws<ArgumentNullException>("importDefinition", () =>
             {
                 ReflectionModelServices.IsImportingParameter(null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void IsImportingParameter_InvalidImport_ShouldThrowArgument()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentException>("importDefinition", () =>
+            Assert.Throws<ArgumentException>("importDefinition", () =>
             {
                 ReflectionModelServices.IsImportingParameter(new ContractBasedImportDefinition("Foo", "Foo", null, ImportCardinality.ZeroOrMore, false, false, CreationPolicy.Any));
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void IsExportFactoryImportDefinition_NullImport_ShouldThrowArgumentNull()
         {
-            ExceptionAssert.ThrowsArgumentNull("importDefinition", () =>
+            Assert.Throws<ArgumentNullException>("importDefinition", () =>
                 ReflectionModelServices.IsExportFactoryImportDefinition(null));
         }
-        
-        [TestMethod]
+
+        [Fact]
         public void IsExportFactoryImportDefinition_InvalidImport_ShouldReturnFalse()
         {
-            Assert.IsFalse(ReflectionModelServices.IsExportFactoryImportDefinition(CreateInvalidImport()));
+            Assert.False(ReflectionModelServices.IsExportFactoryImportDefinition(CreateInvalidImport()));
         }
-        
-        [TestMethod]
+
+        [Fact]
         public void IsExportFactoryImportDefinition_NonPartCreatorImport_ShouldReturnFalse()
         {
             var import = ReflectionModelServices.CreateImportDefinition(
@@ -895,10 +885,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 CreationPolicy.Any,
                 null);
 
-            Assert.IsFalse(ReflectionModelServices.IsExportFactoryImportDefinition(import));
+            Assert.False(ReflectionModelServices.IsExportFactoryImportDefinition(import));
         }
 
-        [TestMethod]
+        [Fact]
         public void IsExportFactoryImportDefinition_PartCreatorImport_ShouldReturnTrue()
         {
             var import = ReflectionModelServices.CreateImportDefinition(
@@ -913,30 +903,30 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 true, //isPartCreator
                 null);
 
-            Assert.IsTrue(ReflectionModelServices.IsExportFactoryImportDefinition(import));
+            Assert.True(ReflectionModelServices.IsExportFactoryImportDefinition(import));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportFactoryProductImportDefinition_NullImport_ShouldThrowArgumentNull()
         {
-            ExceptionAssert.ThrowsArgumentNull("importDefinition", () =>
+            Assert.Throws<ArgumentNullException>("importDefinition", () =>
                 ReflectionModelServices.GetExportFactoryProductImportDefinition(null));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportFactoryProductImportDefinition_InvalidImport_ShouldThrowArgument()
         {
-            ExceptionAssert.ThrowsArgument("importDefinition", () =>
+            Assert.Throws<ArgumentException>("importDefinition", () =>
                 ReflectionModelServices.GetExportFactoryProductImportDefinition(CreateInvalidImport()));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportFactoryProductImportDefinition_()
         {
 
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportFactoryProductImportDefinition_PartCreatorImport_()
         {
             LazyMemberInfo bogusMember = new LazyMemberInfo(MemberTypes.Field, () => new MemberInfo[] { typeof(ReflectionModelServicesTests) });
@@ -966,11 +956,11 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 true, //isPartCreator
                 null);
 
-            Assert.AreEqual(import.ContractName, import2.ContractName);
-            Assert.AreEqual(import.Cardinality, import2.Cardinality);
-            Assert.AreEqual(import.IsRecomposable, import2.IsRecomposable);
-            Assert.AreEqual(import.RequiredCreationPolicy, import2.RequiredCreationPolicy);
-            Assert.AreEqual(import.RequiredTypeIdentity, import2.RequiredTypeIdentity);
+            Assert.Equal(import.ContractName, import2.ContractName);
+            Assert.Equal(import.Cardinality, import2.Cardinality);
+            Assert.Equal(import.IsRecomposable, import2.IsRecomposable);
+            Assert.Equal(import.RequiredCreationPolicy, import2.RequiredCreationPolicy);
+            Assert.Equal(import.RequiredTypeIdentity, import2.RequiredTypeIdentity);
             EnumerableAssert.AreEqual(import.RequiredMetadata, import2.RequiredMetadata);
         }
 
@@ -988,7 +978,6 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             yield return new ExportDefinition("Foo", null);
         }
-
 
         class InvalidPartDefinition : ComposablePartDefinition
         {

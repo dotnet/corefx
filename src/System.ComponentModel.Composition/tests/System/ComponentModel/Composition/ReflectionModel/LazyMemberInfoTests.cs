@@ -1,24 +1,19 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
-using System.ComponentModel.Composition.Factories;
-using System.ComponentModel.Composition.Hosting;
-using System.ComponentModel.Composition.Primitives;
-using System.Reflection;
-using Microsoft.Internal;
-using Microsoft.CLR.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.UnitTesting;
-using System.Threading;
+using Xunit;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
-    [TestClass]
     public class LazyMemberInfoTests
     {
-        [TestMethod]
+        [Fact]
         public void Constructor_PassMember()
         {
             foreach (var memberAndAccessorsInfo in GetMembersAndAccessors(typeof(LazyMemberTestClass)))
@@ -28,22 +23,22 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 MemberInfo[] accessors = memberAndAccessorsInfo.Item2.Item2;
 
                 LazyMemberInfo lazy = new LazyMemberInfo(member);
-                Assert.AreEqual(memberType, lazy.MemberType);
-                Assert.AreEqual(accessors.Length, lazy.GetAccessors().Length);
-                Assert.IsTrue(accessors.SequenceEqual(lazy.GetAccessors()));
+                Assert.Equal(memberType, lazy.MemberType);
+                Assert.Equal(accessors.Length, lazy.GetAccessors().Length);
+                Assert.True(accessors.SequenceEqual(lazy.GetAccessors()));
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_PassNullMember()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("member", () =>
+            Assert.Throws<ArgumentNullException>("member", () =>
                 {
                     LazyMemberInfo lazy = new LazyMemberInfo((MemberInfo)null);
                 });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_PassAccessors()
         {
             foreach (var memberAndAccessorsInfo in GetMembersAndAccessors(typeof(LazyMemberTestClass)))
@@ -53,13 +48,13 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 MemberInfo[] accessors = memberAndAccessorsInfo.Item2.Item2;
 
                 LazyMemberInfo lazy = new LazyMemberInfo(memberType, accessors);
-                Assert.AreEqual(memberType, lazy.MemberType);
-                Assert.AreEqual(accessors.Length, lazy.GetAccessors().Length);
-                Assert.IsTrue(accessors.SequenceEqual(lazy.GetAccessors()));
+                Assert.Equal(memberType, lazy.MemberType);
+                Assert.Equal(accessors.Length, lazy.GetAccessors().Length);
+                Assert.True(accessors.SequenceEqual(lazy.GetAccessors()));
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_PassInvalidAccessors()
         {
             foreach (var memberAndAccessorsInfo in GetMembersAndAccessors(typeof(LazyMemberTestClass)))
@@ -74,7 +69,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     {
                         continue;
                     }
-                    ExceptionAssert.ThrowsArgument<ArgumentException>("accessors", () =>
+                    Assert.Throws<ArgumentException>("accessors", () =>
                     {
                         LazyMemberInfo lazy = new LazyMemberInfo(wrongMemberType, accessors);
                     });
@@ -82,7 +77,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_PassAccessorsInvalidMemberType()
         {
             MemberTypes[] validMemberTypes = GetValidMemberTypes().ToArray();
@@ -90,7 +85,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             {
                 if (!validMemberTypes.Contains(memberType))
                 {
-                    ExceptionAssert.ThrowsArgument<ArgumentException>("memberType", () =>
+                    Assert.Throws<ArgumentException>("memberType", () =>
                     {
                         LazyMemberInfo lazy = new LazyMemberInfo(memberType, typeof(LazyMemberTestClass));
                     });
@@ -98,25 +93,25 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_PassNullAccessors()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("accessors", () =>
+            Assert.Throws<ArgumentNullException>("accessors", () =>
             {
                 LazyMemberInfo lazy = new LazyMemberInfo(MemberTypes.Field, (MemberInfo[])null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_PassAccessorsWithNulls()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentException>("accessors", () =>
+            Assert.Throws<ArgumentException>("accessors", () =>
             {
                 LazyMemberInfo lazy = new LazyMemberInfo(MemberTypes.Field, new MemberInfo[] { null, null });
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_PassAccessorCreators()
         {
             foreach (var memberAndAccessorsInfo in GetMembersAndAccessors(typeof(LazyMemberTestClass)))
@@ -126,13 +121,13 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 MemberInfo[] accessors = memberAndAccessorsInfo.Item2.Item2;
 
                 LazyMemberInfo lazy = new LazyMemberInfo(memberType, () => accessors);
-                Assert.AreEqual(memberType, lazy.MemberType);
-                Assert.AreEqual(accessors.Length, lazy.GetAccessors().Length);
-                Assert.IsTrue(accessors.SequenceEqual(lazy.GetAccessors()));
+                Assert.Equal(memberType, lazy.MemberType);
+                Assert.Equal(accessors.Length, lazy.GetAccessors().Length);
+                Assert.True(accessors.SequenceEqual(lazy.GetAccessors()));
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_PassInvalidAccessorCreators()
         {
             foreach (var memberAndAccessorsInfo in GetMembersAndAccessors(typeof(LazyMemberTestClass)))
@@ -156,7 +151,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_PassAccessorCreatorsWithInvalidMemberType()
         {
             MemberTypes[] validMemberTypes = GetValidMemberTypes().ToArray();
@@ -164,7 +159,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             {
                 if (!validMemberTypes.Contains(memberType))
                 {
-                    ExceptionAssert.ThrowsArgument<ArgumentException>("memberType", () =>
+                    Assert.Throws<ArgumentException>("memberType", () =>
                     {
                         LazyMemberInfo lazy = new LazyMemberInfo(memberType, () => new MemberInfo[] { typeof(LazyMemberTestClass) });
                     });
@@ -172,15 +167,14 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_PassNullAccessorCreators()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("accessorsCreator", () =>
+            Assert.Throws<ArgumentNullException>("accessorsCreator", () =>
             {
                 LazyMemberInfo lazy = new LazyMemberInfo(MemberTypes.Field, (Func<MemberInfo[]>)null);
             });
         }
-
 
         private static IEnumerable<Tuple<MemberInfo, Tuple<MemberTypes, MemberInfo[]>>> GetMembersAndAccessors(Type type)
         {
@@ -229,15 +223,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
             yield return MemberTypes.NestedType;
             yield return MemberTypes.Constructor;
             yield return MemberTypes.Field;
-            yield return  MemberTypes.Method;
-            yield return  MemberTypes.Property;
+            yield return MemberTypes.Method;
+            yield return MemberTypes.Property;
             yield return MemberTypes.Event;
         }
 
         public class LazyMemberTestClass
         {
             public LazyMemberTestClass() { }
-            public string Property { get; set;  }
+            public string Property { get; set; }
             public string SetProperty { set { } }
             public string GetProperty { get { return null; } }
             public string Field;
