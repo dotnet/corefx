@@ -72,9 +72,9 @@ namespace System.IO.Pipes
                     }
 
                     // The timeout has expired.
-                    if (errorCode == Interop.Errors.ERROR_SUCCESS)
+                    if (errorCode == Interop.Errors.ERROR_SEM_TIMEOUT)
                     {
-                        if (cancellationToken.CanBeCanceled)
+                        if (cancellationToken.IsCancellationRequested)
                         {
                             // It may not be real timeout.
                             return false;
