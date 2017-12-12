@@ -964,5 +964,39 @@ namespace System.Linq.Expressions.Tests
             SwitchCase e3 = Expression.SwitchCase(Expression.Parameter(typeof(int), "x"), Expression.Constant(1), Expression.Constant(2));
             Assert.Equal("case (1, 2): ...", e3.ToString());
         }
+
+        private delegate void TwoOutAction(int input, ref int x, ref int y);
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public void JumpBetweenCases(bool useIntepreter)
+        {
+            LabelTarget label = Expression.Label();
+            ParameterExpression xParam = Expression.Parameter(typeof(int).MakeByRefType());
+            ParameterExpression yParam = Expression.Parameter(typeof(int).MakeByRefType());
+            ParameterExpression inpParam = Expression.Parameter(typeof(int));
+            Expression<TwoOutAction> lambda = Expression.Lambda<TwoOutAction>(
+                Expression.Switch(
+                    inpParam,
+                    Expression.Empty(),
+                    Expression.SwitchCase(
+                        Expression.Block(Expression.Assign(xParam, Expression.Constant(1)), Expression.Goto(label), Expression.Empty()),
+                        Expression.Constant(0)),
+                    Expression.SwitchCase(
+                        Expression.Block(Expression.Label(label), Expression.Assign(yParam, Expression.Constant(2)), Expression.Empty()),
+                        Expression.Constant(1))), inpParam, xParam, yParam);
+            TwoOutAction act = lambda.Compile(useIntepreter);
+            int x = 0;
+            int y = 0;
+            act(2, ref x, ref y);
+            Assert.Equal(0, x);
+            Assert.Equal(0, y);
+            act(1, ref x, ref y);
+            Assert.Equal(0, x);
+            Assert.Equal(2, y);
+            y = 0;
+            act(0, ref x, ref y);
+            Assert.Equal(1, x);
+            Assert.Equal(2, y);
+        }
     }
 }
