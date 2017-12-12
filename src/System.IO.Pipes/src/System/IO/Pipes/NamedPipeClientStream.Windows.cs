@@ -65,24 +65,14 @@ namespace System.IO.Pipes
                 {
                     errorCode = Marshal.GetLastWin32Error();
 
-                    // Server is not yet created
-                    if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND)
+                    // Server is not yet created or a timeout ocurred before a pipe instance was available.
+                    if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND ||
+                        errorCode == Interop.Errors.ERROR_SEM_TIMEOUT)
                     {
                         return false;
                     }
 
-                    // The timeout has expired.
-                    if (errorCode == Interop.Errors.ERROR_SUCCESS)
-                    {
-                        if (cancellationToken.CanBeCanceled)
-                        {
-                            // It may not be real timeout.
-                            return false;
-                        }
-                        throw new TimeoutException();
-                    }
-
-                    throw Win32Marshal.GetExceptionForWin32Error(errorCode);
+                    throw Win32Marshal.GetExceptionForWin32Error(errorCode, errorCode.ToString("X8"));
                 }
 
                 // Pipe server should be free.  Let's try to connect to it.
