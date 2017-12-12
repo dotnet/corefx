@@ -1,46 +1,43 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.ComponentModel.Composition.Diagnostics;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.Linq;
 using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class ComposablePartCatalogExportProviderTests
     {
-        [TestMethod]
+        [Fact]
         public void Constructor_NullAsCatalogArgument_ShouldThrowArgumentNull()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("catalog", () =>
+            Assert.Throws<ArgumentNullException>("catalog", () =>
             {
                 new CatalogExportProvider((ComposablePartCatalog)null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void CompositionOptionsInvalidValueCatalogExportProvider()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentOutOfRangeException>("compositionOptions",
+            Assert.Throws<ArgumentOutOfRangeException>("compositionOptions",
                 () => new CatalogExportProvider(new TypeCatalog(), (CompositionOptions)0x0400));
         }
 
-        [TestMethod]
+        [Fact]
         public void CompositionOptionsInvalidValueComposablePartExportProvider()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentOutOfRangeException>("compositionOptions",
+            Assert.Throws<ArgumentOutOfRangeException>("compositionOptions",
                 () => new ComposablePartExportProvider((CompositionOptions)0x0400));
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_ValueAsCatalogArgument_ShouldSetCatalogPropertyToEmpty()
         {
             var expectations = Expectations.GetCatalogs();
@@ -49,11 +46,11 @@ namespace System.ComponentModel.Composition
             {
                 var provider = new CatalogExportProvider(e);
 
-                Assert.AreSame(e, provider.Catalog);
+                Assert.Same(e, provider.Catalog);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Catalog_WhenDisposed_ShouldThrowObjectDisposed()
         {
             var provider = CreateCatalogExportProvider();
@@ -65,18 +62,18 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void SourceProvider_NullAsValueArgument_ShouldThrowArgumentNull()
         {
             var provider = CreateCatalogExportProvider();
 
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("value", () =>
+            Assert.Throws<ArgumentNullException>("value", () =>
             {
                 provider.SourceProvider = null;
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports_WhenRejectedDefinitionRequiredImportIsAdded_ShouldBeResurrected()
         {
             var part = PartFactory.CreateImporterExporter("Export", "Import");
@@ -87,17 +84,17 @@ namespace System.ComponentModel.Composition
 
             var exports = provider.GetExports<object>("Export");
 
-            EnumerableAssert.IsEmpty(exports, "definition should have been rejected.");
+            Assert.Empty(exports);
 
             // Resurrect the definition
             sourceProvider.AddExport("Import", new object());
 
             exports = provider.GetExports<object>("Export");
 
-            Assert.AreEqual(1, exports.Count(), "definition should have been resurrected.");
+            Assert.Equal(1, exports.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports_WhenMultipleRejectedDefinitionsRequiredImportsAreAdded_ShouldBeResurrected()
         {
             var part1 = PartFactory.CreateImporterExporter("Export", "Import");
@@ -109,18 +106,18 @@ namespace System.ComponentModel.Composition
 
             var exports = provider.GetExports<object>("Export");
 
-            EnumerableAssert.IsEmpty(exports, "definition1 and definition2 should have been rejected.");
+            Assert.Empty(exports);
 
             // Resurrect both definitions
             sourceProvider.AddExport("Import", new object());
 
             exports = provider.GetExports<object>("Export");
 
-            Assert.AreEqual(2, exports.Count(), "definition1 and definition2 should have been resurrected.");
+            Assert.Equal(2, exports.Count());
         }
 
-        [TestMethod]
-        [WorkItem(743740)]
+        [Fact]
+        [ActiveIssue(743740)]
         public void GetExports_AfterResurrectedDefinitionHasBeenRemovedAndReaddedToCatalog_ShouldNotBeTreatedAsRejected()
         {
             var definition1 = PartDefinitionFactory.Create(PartFactory.CreateImporterExporter("Export", "Import"));
@@ -133,106 +130,29 @@ namespace System.ComponentModel.Composition
 
             var exports = provider.GetExports<object>("Export");
 
-            EnumerableAssert.IsEmpty(exports, "definition1 and definition2 should have been rejected.");
+            Assert.Empty(exports);
 
             // Resurrect both definitions
             sourceProvider.AddExport("Import", new object());
 
             exports = provider.GetExports<object>("Export");
 
-            Assert.AreEqual(2, exports.Count(), "definition1 and definition2 should have been resurrected.");
+            Assert.Equal(2, exports.Count());
 
             catalog.RemoveDefinition(definition1);
 
             exports = provider.GetExports<object>("Export");
-            Assert.AreEqual(1, exports.Count(), "definition1 should have been removed.");
+            Assert.Equal(1, exports.Count());
 
             catalog.AddDefinition(definition1);
 
             exports = provider.GetExports<object>("Export");
 
-            Assert.AreEqual(2, exports.Count(), "definition1 and definition2 should be both present.");
+            Assert.Equal(2, exports.Count());
         }
 
-#if FEATURE_TRACING
-
-        [TestMethod]
-        public void GetExports_WhenDefinitionIsRejected_ShouldTraceWarning()
-        {
-            using (TraceContext context = new TraceContext(SourceLevels.Warning))
-            {
-                var part = PartFactory.CreateImporterExporter("Export", "Import");
-                var provider = CreateCatalogExportProvider(part);
-                provider.SourceProvider = ExportProviderFactory.CreateRecomposable();
-
-                ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
-                {
-                    provider.GetExport<object>("Export");
-
-                });
-
-                Assert.IsNotNull(context.LastTraceEvent);
-                Assert.AreEqual(context.LastTraceEvent.EventType, TraceEventType.Warning);
-                Assert.AreEqual(context.LastTraceEvent.Id, TraceId.Rejection_DefinitionRejected);
-            }
-        }
-
-        [TestMethod]
-        public void GetExports_WhenDefinitionIsResurrected_ShouldTraceInformation()
-        {
-            using (TraceContext context = new TraceContext(SourceLevels.Information))
-            {
-                var part = PartFactory.CreateImporterExporter("Export", "Import");
-                var sourceProvider = ExportProviderFactory.CreateRecomposable();
-                var provider = CreateCatalogExportProvider(part);
-                provider.SourceProvider = sourceProvider;
-
-                ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
-                {
-                    provider.GetExport<object>("Export");
-                });
-
-                // Add the required export to the source provider 'resurrect' the part
-                sourceProvider.AddExport("Import", "Value");
-
-                provider.GetExport<object>("Export");
-
-                Assert.IsNotNull(context.LastTraceEvent);
-                Assert.AreEqual(context.LastTraceEvent.EventType, TraceEventType.Information);
-                Assert.AreEqual(context.LastTraceEvent.Id, TraceId.Rejection_DefinitionResurrected);
-            }
-        }
-
-        [TestMethod]
-        public void GetExports_WhenDefinitionsAreResurrected_ShouldTraceInformation()
-        {
-            using (TraceContext context = new TraceContext(SourceLevels.Information))
-            {
-                var part1 = PartFactory.CreateImporterExporter("Export", "Import");
-                var part2 = PartFactory.CreateImporterExporter("Export", "Import");
-
-                var sourceProvider = ExportProviderFactory.CreateRecomposable();
-                var provider = CreateCatalogExportProvider(part1, part2);
-                provider.SourceProvider = sourceProvider;
-
-                EnumerableAssert.IsEmpty(provider.GetExports<object>("Export"));
-
-                // Add the required export to the source provider 'resurrect' the part
-                sourceProvider.AddExport("Import", "Value");
-
-                provider.GetExports<object>("Export");
-
-                Assert.AreEqual(4, context.TraceEvents.Count);  // 2 for rejection, 2 for resurrection
-                Assert.AreEqual(context.TraceEvents[2].EventType, TraceEventType.Information);
-                Assert.AreEqual(context.TraceEvents[3].EventType, TraceEventType.Information);
-                Assert.AreEqual(context.TraceEvents[2].Id, TraceId.Rejection_DefinitionResurrected);
-                Assert.AreEqual(context.TraceEvents[3].Id, TraceId.Rejection_DefinitionResurrected);
-            }
-        }
-#endif //FEATURE_TRACING
-
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void BasicTest()
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();
@@ -242,72 +162,70 @@ namespace System.ComponentModel.Composition
             var testNameNonComponent = AttributedModelServices.GetContractName(typeof(CatalogComponentTestNonComponentPart));
             var testInterfaceName = AttributedModelServices.GetContractName(typeof(ICatalogComponentTest));
 
-            Assert.AreEqual(1, catalogExportProvider.GetExports(ImportFromContract(testName)).Count());
-            Assert.AreEqual(0, catalogExportProvider.GetExports(ImportFromContract(testNameNonComponent)).Count());
+            Assert.Equal(1, catalogExportProvider.GetExports(ImportFromContract(testName)).Count());
+            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContract(testNameNonComponent)).Count());
 
             var exports = catalogExportProvider.GetExports(ImportFromContract(testInterfaceName));
-            Assert.AreEqual(2, exports.Count(), "There should be 2 of them");
+            Assert.Equal(2, exports.Count());
 
             foreach (var i in exports)
-                Assert.IsNotNull(i.Value, "Should get a value");
+                Assert.NotNull(i.Value);
 
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void BasicTestWithRequiredMetadata_NoTypeConstraint()
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();
             var catalogExportProvider = new CatalogExportProvider(catalog);
             catalogExportProvider.SourceProvider = catalogExportProvider;
 
-            Assert.AreEqual(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] {typeof(object)})).Count());
+            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(object) })).Count());
 
-            Assert.AreEqual(1, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(object) })).Count());
-            Assert.AreEqual(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo", "Bar" }, new Type[] { typeof(object), typeof(object) })).Count());
+            Assert.Equal(1, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(object) })).Count());
+            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo", "Bar" }, new Type[] { typeof(object), typeof(object) })).Count());
 
-            Assert.AreEqual(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(object) })).Count());
-            Assert.AreEqual(1, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(object) })).Count());
+            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(object) })).Count());
+            Assert.Equal(1, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(object) })).Count());
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void BasicTestWithRequiredMetadata_TypeConstraint()
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();
             var catalogExportProvider = new CatalogExportProvider(catalog);
             catalogExportProvider.SourceProvider = catalogExportProvider;
 
-            Assert.AreEqual(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(string) })).Count());
+            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(string) })).Count());
 
-            Assert.AreEqual(1, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(string) })).Count());
-            Assert.AreEqual(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo", "Bar" }, new Type[] { typeof(string), typeof(string) })).Count());
+            Assert.Equal(1, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(string) })).Count());
+            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo", "Bar" }, new Type[] { typeof(string), typeof(string) })).Count());
 
-            Assert.AreEqual(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(string) })).Count());
-            Assert.AreEqual(1, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(string) })).Count());
+            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(string) })).Count());
+            Assert.Equal(1, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(string) })).Count());
         }
 
-
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void BasicTestWithRequiredMetadata_WrongTypeConstraint()
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();
             var catalogExportProvider = new CatalogExportProvider(catalog);
             catalogExportProvider.SourceProvider = catalogExportProvider;
 
-            Assert.AreEqual(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(int) })).Count());
+            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(int) })).Count());
 
-            Assert.AreEqual(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(int) })).Count());
-            Assert.AreEqual(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo", "Bar" }, new Type[] { typeof(int), typeof(int) })).Count());
+            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(int) })).Count());
+            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo", "Bar" }, new Type[] { typeof(int), typeof(int) })).Count());
 
-            Assert.AreEqual(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(int) })).Count());
-            Assert.AreEqual(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(int) })).Count());
+            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(int) })).Count());
+            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(int) })).Count());
         }
 
-
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void ComponentCatalogResolverGetStaticExport()
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();
@@ -315,12 +233,12 @@ namespace System.ComponentModel.Composition
             catalogExportProvider.SourceProvider = catalogExportProvider;
 
             var exports = catalogExportProvider.GetExports(ImportFromContract("StaticString"));
-            Assert.AreEqual(1, exports.Count());
-            Assert.AreEqual("StaticString", exports.First().Value);
+            Assert.Equal(1, exports.Count());
+            Assert.Equal("StaticString", exports.First().Value);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void ComponentCatalogResolverComponentCatalogExportReference()
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();
@@ -329,24 +247,24 @@ namespace System.ComponentModel.Composition
 
             var exports = catalogExportProvider.GetExports(ImportFromContract(AttributedModelServices.GetContractName(typeof(MyExporterWithValidMetadata))));
 
-            Assert.AreEqual(1, exports.Count());
+            Assert.Equal(1, exports.Count());
 
             var export = exports.First();
-            Assert.AreEqual("world", export.Metadata["hello"]);
+            Assert.Equal("world", export.Metadata["hello"]);
 
-            Assert.IsInstanceOfType(export.Value, typeof(MyExporterWithValidMetadata));
+            Assert.IsType<MyExporterWithValidMetadata>(export.Value);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void ValueTypeFromCatalog()
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();
             var container = new CompositionContainer(catalog);
             int singletonResult = container.GetExportedValue<int>("{AssemblyCatalogResolver}SingletonValueType");
-            Assert.AreEqual(17, singletonResult, "expecting value type resolved from catalog");
+            Assert.Equal(17, singletonResult);
             int factoryResult = container.GetExportedValue<int>("{AssemblyCatalogResolver}FactoryValueType");
-            Assert.AreEqual(18, factoryResult, "expecting value type resolved from catalog");
+            Assert.Equal(18, factoryResult);
         }
 
         [Export]
@@ -356,10 +274,10 @@ namespace System.ComponentModel.Composition
 
         }
 
-        [TestMethod]
+        [Fact]
         public void CreationPolicyAny_MultipleCallsReturnSameInstance()
         {
-            var catalog = CatalogFactory.CreateAttributed(typeof (CreationPolicyAny));
+            var catalog = CatalogFactory.CreateAttributed(typeof(CreationPolicyAny));
             var provider = new CatalogExportProvider(catalog);
             provider.SourceProvider = ContainerFactory.Create();
 
@@ -369,7 +287,7 @@ namespace System.ComponentModel.Composition
             {
                 var export1 = provider.GetExportedValue<CreationPolicyAny>();
 
-                Assert.AreEqual(export, export1);
+                Assert.Equal(export, export1);
             }
         }
 
@@ -380,7 +298,7 @@ namespace System.ComponentModel.Composition
 
         }
 
-        [TestMethod]
+        [Fact]
         public void CreationPolicyShared_MultipleCallsReturnSameInstance()
         {
             var catalog = CatalogFactory.CreateAttributed(typeof(CreationPolicyShared));
@@ -393,7 +311,7 @@ namespace System.ComponentModel.Composition
             {
                 var export1 = provider.GetExportedValue<CreationPolicyShared>();
 
-                Assert.AreEqual(export, export1);
+                Assert.Equal(export, export1);
             }
         }
 
@@ -404,7 +322,8 @@ namespace System.ComponentModel.Composition
 
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void CreationPolicyNonShared_MultipleCallsReturnsDifferentInstances()
         {
             var catalog = CatalogFactory.CreateAttributed(typeof(CreationPolicyNonShared));
@@ -419,13 +338,14 @@ namespace System.ComponentModel.Composition
             {
                 export = provider.GetExportedValue<CreationPolicyNonShared>();
 
-                CollectionAssert.DoesNotContain(list, export);
+                Assert.DoesNotContain(export, list);
+                Assert.Contains(export, list);
                 list.Add(export);
             }
         }
 
-        [TestMethod]
-        [WorkItem(684514)]
+        [Fact]
+        [ActiveIssue(684514)]
         public void GetExports_NoSourceProvider_ShouldThrowInvalidOperation()
         {
             var catalog = CatalogFactory.CreateAttributed();
@@ -435,39 +355,37 @@ namespace System.ComponentModel.Composition
                 provider.GetExports(ImportFromContract("Foo")));
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
-        [Ignore]
-        [WorkItem(561310)]
+        [Fact]
+        [Trait("Type", "Integration")]
+        [ActiveIssue(561310)]
         public void Recomposition_PartDefWithRecomposableImportIsRemoved_ExportsMatchingImportChanged_ShouldNotBeRecomposed()
         {
             string dependencyContractName = "dependency";
             var exportValue = new object();
-            
+
             var exporterPart = PartFactory.CreateExporter(dependencyContractName, exportValue);
             var importerPart = PartFactory.CreateImporter(dependencyContractName, true);
-            
+
             var exporterCatalog = CatalogFactory.Create(exporterPart);
             var importerCatalog = CatalogFactory.Create(importerPart);
 
             var aggregateCatalog = CatalogFactory.CreateAggregateCatalog(importerCatalog, exporterCatalog);
-            
+
             var provider = new CatalogExportProvider(aggregateCatalog);
             provider.SourceProvider = provider;
 
             var exports = provider.GetExports(importerPart.ImportDefinitions.Single());
-            Assert.AreEqual(exportValue, importerPart.Value, "Importer was not composed");
+            Assert.Equal(exportValue, importerPart.Value);
 
             aggregateCatalog.Catalogs.Remove(importerCatalog);
             aggregateCatalog.Catalogs.Remove(exporterCatalog);
 
-            Assert.AreEqual(exportValue, importerPart.Value, "Importer was unexpectedly recomposed");
+            Assert.Equal(exportValue, importerPart.Value);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
-        [Ignore]
-        [WorkItem(561310)]
+        [Fact]
+        [Trait("Type", "Integration")]
+        [ActiveIssue(561310)]
         public void Recomposition_PartDefWithNonRecomposableImportIsRemoved_ExportsMatchingImportChanged_ShouldNotBeRejected()
         {
             string dependencyContractName = "dependency";
@@ -485,15 +403,16 @@ namespace System.ComponentModel.Composition
             provider.SourceProvider = provider;
 
             var exports = provider.GetExports(importerPart.ImportDefinitions.Single());
-            Assert.AreEqual(exportValue, importerPart.Value, "Importer was not composed");
+            Assert.Equal(exportValue, importerPart.Value);
 
             aggregateCatalog.Catalogs.Remove(importerCatalog);
             aggregateCatalog.Catalogs.Remove(exporterCatalog);
 
-            Assert.AreEqual(exportValue, importerPart.Value, "Importer was unexpectedly recomposed");
+            Assert.Equal(exportValue, importerPart.Value);
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void CanBeCollectedAfterDispose()
         {
             AggregateExportProvider sourceExportProvider = new AggregateExportProvider();
@@ -508,13 +427,13 @@ namespace System.ComponentModel.Composition
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            Assert.IsFalse(weakCatalogExportProvider.IsAlive);
+            Assert.False(weakCatalogExportProvider.IsAlive);
 
             GC.KeepAlive(sourceExportProvider);
             GC.KeepAlive(catalog);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovingAndReAddingMultipleDefinitionsFromCatalog()
         {
             var fixedParts = new TypeCatalog(typeof(RootMultipleImporter), typeof(ExportedService));
@@ -526,13 +445,13 @@ namespace System.ComponentModel.Composition
             catalogExportProvider.SourceProvider = catalogExportProvider;
 
             var root = catalogExportProvider.GetExport<RootMultipleImporter>().Value;
-            Assert.AreEqual(2, root.Imports.Length);
+            Assert.Equal(2, root.Imports.Length);
 
             catalog.Catalogs.Remove(changingParts);
-            Assert.AreEqual(0, root.Imports.Length);
+            Assert.Equal(0, root.Imports.Length);
 
             catalog.Catalogs.Add(changingParts);
-            Assert.AreEqual(2, root.Imports.Length);
+            Assert.Equal(2, root.Imports.Length);
         }
 
         [Export]
@@ -541,27 +460,29 @@ namespace System.ComponentModel.Composition
             [ImportMany(AllowRecomposition = true)]
             public IExportedInterface[] Imports { get; set; }
         }
+
         public interface IExportedInterface
         {
         }
+
         [Export(typeof(IExportedInterface))]
         public class Exporter1 : IExportedInterface
         {
             [Import]
             public ExportedService Service { get; set; }
         }
+
         [Export(typeof(IExportedInterface))]
         public class Exporter2 : IExportedInterface
         {
             [Import]
             public ExportedService Service { get; set; }
         }
+
         [Export]
         public class ExportedService
         {
         }
-
-
 
         private static ImportDefinition ImportFromContract(string contractName)
         {
@@ -574,7 +495,7 @@ namespace System.ComponentModel.Composition
 
         private static ImportDefinition ImportFromContractAndMetadata(string contractName, string[] metadataKeys, Type[] metadataValues)
         {
-            Assert.AreEqual(metadataKeys.Length, metadataValues.Length);
+            Assert.Equal(metadataKeys.Length, metadataValues.Length);
             Dictionary<string, Type> requiredMetadata = new Dictionary<string, Type>();
             for (int i = 0; i < metadataKeys.Length; i++)
             {
