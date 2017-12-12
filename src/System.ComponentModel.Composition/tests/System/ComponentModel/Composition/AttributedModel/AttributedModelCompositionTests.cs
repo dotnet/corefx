@@ -1,32 +1,30 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
-using System.Linq;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.ComponentModel.Composition.Factories;
-using Microsoft.CLR.UnitTesting;
-using System.UnitTesting;
 using System.ComponentModel.Composition.Hosting;
-using System.ComponentModel.Composition.UnitTesting;
+using System.Linq;
+using System.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition.AttributedModel
 {
-    [TestClass]
     public class AttributedModelCompositionTests
     {
-        [TestMethod]
+        [Fact]
         public void PartContainingOnlyStaticExports_ShouldNotCauseInstanceToBeCreated()
         {  
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(HasOnlyStaticExports));
             
-            Assert.AreEqual("Field", container.GetExportedValue<string>("Field"));
-            Assert.AreEqual("Property", container.GetExportedValue<string>("Property"));
-            Assert.IsNotNull("Method", container.GetExportedValue<Func<string>>("Method")());
+            Assert.Equal("Field", container.GetExportedValue<string>("Field"));
+            Assert.Equal("Property", container.GetExportedValue<string>("Property"));
+            Assert.NotNull(container.GetExportedValue<Func<string>>("Method")());
 
-            Assert.IsFalse(HasOnlyStaticExports.InstanceCreated);
+            Assert.False(HasOnlyStaticExports.InstanceCreated);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportOnAbstractBase_DoesNotReturnNull()
         {   // 499393 - Classes inheriting from an exported 
             // abstract class are exported as 'null'
@@ -38,10 +36,10 @@ namespace System.ComponentModel.Composition.AttributedModel
             batch.AddPart(definition.CreatePart());
             container.Compose(batch);
 
-            Assert.IsNotNull(container.GetExportedValueOrDefault<Base>());
+            Assert.NotNull(container.GetExportedValueOrDefault<Base>());
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadOnlyFieldImport_ShouldThrowComposition()
         {
             var importer = PartFactory.CreateAttributed(new ReadOnlyPropertyImport());
@@ -57,7 +55,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadOnlyPropertyImport_ShouldThrowComposition()
         {
             var importer = PartFactory.CreateAttributed(new ReadOnlyPropertyImport());
@@ -73,7 +71,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void WriteOnlyPropertyExport_ShouldThrowComposition()
         {
             var importer = PartFactory.CreateAttributed(new WriteOnlyPropertyExport());
@@ -88,7 +86,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValueMismatchFromInt32ToDateTime()
         {
             var container = ContainerFactory.Create();
@@ -104,7 +102,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValueMismatchFromInt16ToInt32()
         {
             var container = ContainerFactory.Create();
@@ -122,7 +120,7 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValueMismatchFromInt32ToInt16()
         {
             var container = ContainerFactory.Create();
@@ -139,7 +137,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValueMismatchFromInt32ToUInt32()
         {
             var container = ContainerFactory.Create();
@@ -156,7 +154,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValueMismatchFromUInt32ToInt32()
         {
             var container = ContainerFactory.Create();
@@ -173,7 +171,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValueMismatchFromInt32ToInt64()
         {
             var container = ContainerFactory.Create();
@@ -190,7 +188,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValueMismatchFromSingleToDouble()
         {
             var container = ContainerFactory.Create();
@@ -207,7 +205,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValueMismatchFromDoubleToSingle()
         {
             var container = ContainerFactory.Create(); 
@@ -224,7 +222,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValueMismatchFromSingleToInt32()
         {
             var container = ContainerFactory.Create();
@@ -241,7 +239,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportValueMismatchFromInt32ToSingle()
         {
             var container = ContainerFactory.Create();
@@ -258,7 +256,8 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void MemberExports()
         {
             var exporter = PartFactory.CreateAttributed(new ObjectWithMemberExports());
@@ -280,7 +279,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             EnumerableAssert.AreEqual(methodExports, 4, 8);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestExportedValueCachesValue()
         {
             var container = ContainerFactory.Create();
@@ -289,17 +288,16 @@ namespace System.ComponentModel.Composition.AttributedModel
 
             container.ComposeParts(exporter);
 
-            Assert.AreEqual("Value1", container.GetExportedValue<string>("Property"));
+            Assert.Equal("Value1", container.GetExportedValue<string>("Property"));
 
             exporter.Property = "Value2";
 
             //  Exported value should have been cached and so it shouldn't change
-            Assert.AreEqual("Value1", container.GetExportedValue<string>("Property"));
+            Assert.Equal("Value1", container.GetExportedValue<string>("Property"));
         }
 
-        [TestMethod]
-        [WorkItem(739354)]
-        [Ignore]
+        [Fact]
+        [ActiveIssue(739354)]
         public void TestExportedValueCachesNullValue()
         {
             var container = ContainerFactory.Create();
@@ -308,12 +306,12 @@ namespace System.ComponentModel.Composition.AttributedModel
 
             container.ComposeParts(exporter);
 
-            Assert.IsNull(container.GetExportedValue<string>("Property"));
+            Assert.Null(container.GetExportedValue<string>("Property"));
 
             exporter.Property = "Value1";
 
             //  Exported value should have been cached and so it shouldn't change
-            Assert.IsNull(container.GetExportedValue<string>("Property"));
+            Assert.Null(container.GetExportedValue<string>("Property"));
         }
 
         public class ExportsMutableProperty
@@ -425,7 +423,6 @@ namespace System.ComponentModel.Composition.AttributedModel
             }
 
             [Import("UInt32", AllowDefault = true)]
-            [CLSCompliant(false)]
             public uint UInt32
             {
                 get;

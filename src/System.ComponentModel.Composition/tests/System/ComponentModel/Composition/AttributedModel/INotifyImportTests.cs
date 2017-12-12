@@ -1,17 +1,15 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
-using System.ComponentModel.Composition.UnitTesting;
-using Microsoft.CLR.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition.AttributedModel
 {
-    [TestClass()]
     public class INotifyImportTests
     {
         [Export(typeof(PartWithoutImports))]
@@ -24,22 +22,22 @@ namespace System.ComponentModel.Composition.AttributedModel
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportsSatisfiedOnComponentWithoutImports()
         {
             CompositionContainer container = ContainerFactory.CreateWithAttributedCatalog(typeof(PartWithoutImports));
 
             PartWithoutImports partWithoutImports = container.GetExportedValue<PartWithoutImports>();
-            Assert.IsNotNull(partWithoutImports);
+            Assert.NotNull(partWithoutImports);
 
-            Assert.IsTrue(partWithoutImports.ImportsSatisfiedInvoked);
+            Assert.True(partWithoutImports.ImportsSatisfiedInvoked);
 
         }
 
-        [TestMethod()]
+        [Fact]
         public void ImportCompletedTest()
         {
-            var container = ContainerFactory.Create(); 
+            var container = ContainerFactory.Create();
             CompositionBatch batch = new CompositionBatch();
             var entrypoint = new UpperCaseStringComponent();
 
@@ -50,39 +48,39 @@ namespace System.ComponentModel.Composition.AttributedModel
             batch.AddParts(new object());
             container.Compose(batch);
 
-            Assert.AreEqual(entrypoint.LowerCaseStrings.Count, 1);
-            Assert.AreEqual(entrypoint.ImportCompletedCallCount, 1);
-            Assert.AreEqual(entrypoint.UpperCaseStrings.Count, 1);
-            Assert.AreEqual(entrypoint.LowerCaseStrings[0].Value.String, "abc");
-            Assert.AreEqual(entrypoint.UpperCaseStrings[0], "ABC");
+            Assert.Equal(entrypoint.LowerCaseStrings.Count, 1);
+            Assert.Equal(entrypoint.ImportCompletedCallCount, 1);
+            Assert.Equal(entrypoint.UpperCaseStrings.Count, 1);
+            Assert.Equal(entrypoint.LowerCaseStrings[0].Value.String, "abc");
+            Assert.Equal(entrypoint.UpperCaseStrings[0], "ABC");
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportCompletedWithRecomposing()
         {
-            var container = ContainerFactory.Create(); 
+            var container = ContainerFactory.Create();
             CompositionBatch batch = new CompositionBatch();
             var entrypoint = new UpperCaseStringComponent();
 
             batch.AddParts(new LowerCaseString("abc"), entrypoint);
             container.Compose(batch);
 
-            Assert.AreEqual(entrypoint.LowerCaseStrings.Count, 1);
-            Assert.AreEqual(entrypoint.ImportCompletedCallCount, 1);
-            Assert.AreEqual(entrypoint.UpperCaseStrings.Count, 1);
-            Assert.AreEqual(entrypoint.LowerCaseStrings[0].Value.String, "abc");
-            Assert.AreEqual(entrypoint.UpperCaseStrings[0], "ABC");
+            Assert.Equal(entrypoint.LowerCaseStrings.Count, 1);
+            Assert.Equal(entrypoint.ImportCompletedCallCount, 1);
+            Assert.Equal(entrypoint.UpperCaseStrings.Count, 1);
+            Assert.Equal(entrypoint.LowerCaseStrings[0].Value.String, "abc");
+            Assert.Equal(entrypoint.UpperCaseStrings[0], "ABC");
 
             // Add another component to verify recomposing
             batch = new CompositionBatch();
             batch.AddParts(new LowerCaseString("def"));
             container.Compose(batch);
 
-            Assert.AreEqual(entrypoint.LowerCaseStrings.Count, 2);
-            Assert.AreEqual(entrypoint.ImportCompletedCallCount, 2);
-            Assert.AreEqual(entrypoint.UpperCaseStrings.Count, 2);
-            Assert.AreEqual(entrypoint.LowerCaseStrings[1].Value.String, "def");
-            Assert.AreEqual(entrypoint.UpperCaseStrings[1], "DEF");
+            Assert.Equal(entrypoint.LowerCaseStrings.Count, 2);
+            Assert.Equal(entrypoint.ImportCompletedCallCount, 2);
+            Assert.Equal(entrypoint.UpperCaseStrings.Count, 2);
+            Assert.Equal(entrypoint.LowerCaseStrings[1].Value.String, "def");
+            Assert.Equal(entrypoint.UpperCaseStrings[1], "DEF");
 
             // Verify that adding a random component doesn't cause
             // the OnImportsSatisfied to be called again.
@@ -90,14 +88,13 @@ namespace System.ComponentModel.Composition.AttributedModel
             batch.AddParts(new object());
             container.Compose(batch);
 
-            Assert.AreEqual(entrypoint.LowerCaseStrings.Count, 2);
-            Assert.AreEqual(entrypoint.ImportCompletedCallCount, 2);
-            Assert.AreEqual(entrypoint.UpperCaseStrings.Count, 2);
+            Assert.Equal(entrypoint.LowerCaseStrings.Count, 2);
+            Assert.Equal(entrypoint.ImportCompletedCallCount, 2);
+            Assert.Equal(entrypoint.UpperCaseStrings.Count, 2);
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(700940)]
+        [Fact]
+        [ActiveIssue(700940)]
         public void ImportCompletedUsingSatisfyImportsOnce()
         {
             var container = ContainerFactory.Create();
@@ -108,40 +105,39 @@ namespace System.ComponentModel.Composition.AttributedModel
             batch.AddParts(new LowerCaseString("abc"));
             container.Compose(batch);
             container.SatisfyImportsOnce(entrypointPart);
-            
-            Assert.AreEqual(1, entrypoint.LowerCaseStrings.Count);
-            Assert.AreEqual(1, entrypoint.ImportCompletedCallCount);
-            Assert.AreEqual(1, entrypoint.UpperCaseStrings.Count);
-            Assert.AreEqual("abc", entrypoint.LowerCaseStrings[0].Value.String);
-            Assert.AreEqual("ABC", entrypoint.UpperCaseStrings[0]);
+
+            Assert.Equal(1, entrypoint.LowerCaseStrings.Count);
+            Assert.Equal(1, entrypoint.ImportCompletedCallCount);
+            Assert.Equal(1, entrypoint.UpperCaseStrings.Count);
+            Assert.Equal("abc", entrypoint.LowerCaseStrings[0].Value.String);
+            Assert.Equal("ABC", entrypoint.UpperCaseStrings[0]);
 
             batch = new CompositionBatch();
             batch.AddParts(new object());
             container.Compose(batch);
             container.SatisfyImportsOnce(entrypointPart);
 
-            Assert.AreEqual(1, entrypoint.LowerCaseStrings.Count);
-            Assert.AreEqual(1, entrypoint.ImportCompletedCallCount);
-            Assert.AreEqual(1, entrypoint.UpperCaseStrings.Count);
-            Assert.AreEqual("abc", entrypoint.LowerCaseStrings[0].Value.String);
-            Assert.AreEqual("ABC", entrypoint.UpperCaseStrings[0]);
-            
+            Assert.Equal(1, entrypoint.LowerCaseStrings.Count);
+            Assert.Equal(1, entrypoint.ImportCompletedCallCount);
+            Assert.Equal(1, entrypoint.UpperCaseStrings.Count);
+            Assert.Equal("abc", entrypoint.LowerCaseStrings[0].Value.String);
+            Assert.Equal("ABC", entrypoint.UpperCaseStrings[0]);
+
             batch.AddParts(new LowerCaseString("def"));
             container.Compose(batch);
             container.SatisfyImportsOnce(entrypointPart);
-            
-            Assert.AreEqual(2, entrypoint.LowerCaseStrings.Count);
-            Assert.AreEqual(2, entrypoint.ImportCompletedCallCount);
-            Assert.AreEqual(2, entrypoint.UpperCaseStrings.Count);
-            Assert.AreEqual("abc", entrypoint.LowerCaseStrings[0].Value.String);
-            Assert.AreEqual("ABC", entrypoint.UpperCaseStrings[0]);
-            Assert.AreEqual("def", entrypoint.LowerCaseStrings[1].Value.String);
-            Assert.AreEqual("DEF", entrypoint.UpperCaseStrings[1]);
+
+            Assert.Equal(2, entrypoint.LowerCaseStrings.Count);
+            Assert.Equal(2, entrypoint.ImportCompletedCallCount);
+            Assert.Equal(2, entrypoint.UpperCaseStrings.Count);
+            Assert.Equal("abc", entrypoint.LowerCaseStrings[0].Value.String);
+            Assert.Equal("ABC", entrypoint.UpperCaseStrings[0]);
+            Assert.Equal("def", entrypoint.LowerCaseStrings[1].Value.String);
+            Assert.Equal("DEF", entrypoint.UpperCaseStrings[1]);
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(654513)]
+        [Fact]
+        [ActiveIssue(654513)]
         public void ImportCompletedCalledAfterAllImportsAreFullyComposed()
         {
             int importSatisfationCount = 0;
@@ -150,8 +146,8 @@ namespace System.ComponentModel.Composition.AttributedModel
 
             Action<object, EventArgs> verificationAction = (object sender, EventArgs e) =>
             {
-                Assert.IsTrue(importer1.AreAllImportsFullyComposed);
-                Assert.IsTrue(importer2.AreAllImportsFullyComposed);
+                Assert.True(importer1.AreAllImportsFullyComposed);
+                Assert.True(importer2.AreAllImportsFullyComposed);
                 ++importSatisfationCount;
             };
 
@@ -165,7 +161,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             var container = ContainerFactory.Create();
             container.ComposeExportedValue<ICompositionService>(container);
             container.Compose(batch);
-            Assert.AreEqual(2, importSatisfationCount);
+            Assert.Equal(2, importSatisfationCount);
 
             // importer2 added first
             importSatisfationCount = 0;
@@ -175,10 +171,10 @@ namespace System.ComponentModel.Composition.AttributedModel
             container = ContainerFactory.Create();
             container.ComposeExportedValue<ICompositionService>(container);
             container.Compose(batch);
-            Assert.AreEqual(2, importSatisfationCount);
+            Assert.Equal(2, importSatisfationCount);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportCompletedAddPartAndBindComponent()
         {
             var container = ContainerFactory.Create();
@@ -193,7 +189,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             container.Compose(batch);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportCompletedChildNeedsParentContainer()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
@@ -207,7 +203,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             parent.Compose(parentBatch);
             var child = new CompositionContainer(parent);
             var child2 = new CompositionContainer(parent);
-            
+
             var parentImporter = new MyNotifyImportImporter(parent);
             var childImporter = new MyNotifyImportImporter(child);
             var child2Importer = new MyNotifyImportImporter(child2);
@@ -220,23 +216,22 @@ namespace System.ComponentModel.Composition.AttributedModel
             parent.Compose(parentBatch);
             child.Compose(childBatch);
             child2.Compose(child2Batch);
-            
 
-            Assert.AreEqual(1, parentImporter.ImportCompletedCallCount);
-            Assert.AreEqual(1, childImporter.ImportCompletedCallCount);
-            Assert.AreEqual(1, child2Importer.ImportCompletedCallCount);
+            Assert.Equal(1, parentImporter.ImportCompletedCallCount);
+            Assert.Equal(1, childImporter.ImportCompletedCallCount);
+            Assert.Equal(1, child2Importer.ImportCompletedCallCount);
 
             MyNotifyImportExporter parentExporter = parent.GetExportedValue<MyNotifyImportExporter>("MyNotifyImportExporter");
-            Assert.AreEqual(1, parentExporter.ImportCompletedCallCount);
+            Assert.Equal(1, parentExporter.ImportCompletedCallCount);
 
             MyNotifyImportExporter childExporter = child.GetExportedValue<MyNotifyImportExporter>("MyNotifyImportExporter");
-            Assert.AreEqual(1, childExporter.ImportCompletedCallCount);
+            Assert.Equal(1, childExporter.ImportCompletedCallCount);
 
             MyNotifyImportExporter child2Exporter = child2.GetExportedValue<MyNotifyImportExporter>("MyNotifyImportExporter");
-            Assert.AreEqual(1, child2Exporter.ImportCompletedCallCount);
+            Assert.Equal(1, child2Exporter.ImportCompletedCallCount);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportCompletedChildDoesnotNeedParentContainer()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
@@ -260,20 +255,20 @@ namespace System.ComponentModel.Composition.AttributedModel
 
             child.Compose(childBatch);
 
-            Assert.AreEqual(0, parentImporter.ImportCompletedCallCount);
-            Assert.AreEqual(1, childImporter.ImportCompletedCallCount);
+            Assert.Equal(0, parentImporter.ImportCompletedCallCount);
+            Assert.Equal(1, childImporter.ImportCompletedCallCount);
 
             // Parent will become bound at this point.
             MyNotifyImportExporter parentExporter = parent.GetExportedValue<MyNotifyImportExporter>("MyNotifyImportExporter");
             parent.Compose(parentBatch);
-            Assert.AreEqual(1, parentImporter.ImportCompletedCallCount);
-            Assert.AreEqual(1, parentExporter.ImportCompletedCallCount);
+            Assert.Equal(1, parentImporter.ImportCompletedCallCount);
+            Assert.Equal(1, parentExporter.ImportCompletedCallCount);
 
             MyNotifyImportExporter childExporter = child.GetExportedValue<MyNotifyImportExporter>("MyNotifyImportExporter");
-            Assert.AreEqual(1, childExporter.ImportCompletedCallCount);
+            Assert.Equal(1, childExporter.ImportCompletedCallCount);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportCompletedBindChildIndirectlyThroughParentContainerBind()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
@@ -296,17 +291,17 @@ namespace System.ComponentModel.Composition.AttributedModel
             parent.Compose(parentBatch);
             child.Compose(childBatch);
 
-            Assert.AreEqual(1, parentImporter.ImportCompletedCallCount);
-            Assert.AreEqual(1, childImporter.ImportCompletedCallCount);
+            Assert.Equal(1, parentImporter.ImportCompletedCallCount);
+            Assert.Equal(1, childImporter.ImportCompletedCallCount);
 
             MyNotifyImportExporter parentExporter = parent.GetExportedValue<MyNotifyImportExporter>("MyNotifyImportExporter");
-            Assert.AreEqual(1, parentExporter.ImportCompletedCallCount);
+            Assert.Equal(1, parentExporter.ImportCompletedCallCount);
 
             MyNotifyImportExporter childExporter = child.GetExportedValue<MyNotifyImportExporter>("MyNotifyImportExporter");
-            Assert.AreEqual(1, childExporter.ImportCompletedCallCount);
+            Assert.Equal(1, childExporter.ImportCompletedCallCount);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportCompletedGetExportedValueLazy()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
@@ -314,19 +309,19 @@ namespace System.ComponentModel.Composition.AttributedModel
 
             NotifyImportExportee.InstanceCount = 0;
             NotifyImportExportsLazy notifyee = container.GetExportedValue<NotifyImportExportsLazy>("NotifyImportExportsLazy");
-            Assert.IsNotNull(notifyee, "Expecting bound type");
-            Assert.IsNotNull(notifyee.Imports, "Expecting Imports to be populated");
-            Assert.IsTrue(notifyee.NeedRefresh, "Expecting import to put class in pending state");
-            Assert.AreEqual(3, notifyee.Imports.Count, "Expecting 3 Exports before filtering");
-            Assert.AreEqual(0, NotifyImportExportee.InstanceCount, "Not instance expected before pull");
-            Assert.AreEqual(0, notifyee.realImports.Count, "Expecting collection to be empty before pull");
-            Assert.AreEqual(2, notifyee.RealImports.Count, "Expecting 2 real values after pull");
-            Assert.AreEqual(1, notifyee.RealImports[0].Id, "Expecting distinct activated instance");
-            Assert.AreEqual(3, notifyee.RealImports[1].Id, "Expecting distinct  activated instance");
-            Assert.AreEqual(2, NotifyImportExportee.InstanceCount, "2 instances expected after pull");
+            Assert.NotNull(notifyee);
+            Assert.NotNull(notifyee.Imports);
+            Assert.True(notifyee.NeedRefresh);
+            Assert.Equal(3, notifyee.Imports.Count);
+            Assert.Equal(0, NotifyImportExportee.InstanceCount);
+            Assert.Equal(0, notifyee.realImports.Count);
+            Assert.Equal(2, notifyee.RealImports.Count);
+            Assert.Equal(1, notifyee.RealImports[0].Id);
+            Assert.Equal(3, notifyee.RealImports[1].Id);
+            Assert.Equal(2, NotifyImportExportee.InstanceCount);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportCompletedGetExportedValueEager()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
@@ -334,15 +329,15 @@ namespace System.ComponentModel.Composition.AttributedModel
 
             NotifyImportExportee.InstanceCount = 0;
             var notifyee = container.GetExportedValue<NotifyImportExportsEager>("NotifyImportExportsEager");
-            Assert.IsNotNull(notifyee, "Expecting bound type");
-            Assert.IsNotNull(notifyee.Imports, "Expecting Imports to be populated");
-            Assert.AreEqual(3, notifyee.Imports.Count, "Expecting 3 Exports before filtering");
-            Assert.AreEqual(2, NotifyImportExportee.InstanceCount, "Expecting concrete instances already pulled");
-            Assert.AreEqual(2, notifyee.realImports.Count, "Expecting collection to be populated");
-            Assert.AreEqual(2, notifyee.RealImports.Count, "Expecting 2 real values after import");
-            Assert.AreEqual(1, notifyee.RealImports[0].Id, "Expecting distinct activated instance");
-            Assert.AreEqual(3, notifyee.RealImports[1].Id, "Expecting distinct activated instance");
-            Assert.AreEqual(2, NotifyImportExportee.InstanceCount, "Expecting no more instances after read");
+            Assert.NotNull(notifyee);
+            Assert.NotNull(notifyee.Imports);
+            Assert.Equal(3, notifyee.Imports.Count);
+            Assert.Equal(2, NotifyImportExportee.InstanceCount);
+            Assert.Equal(2, notifyee.realImports.Count);
+            Assert.Equal(2, notifyee.RealImports.Count);
+            Assert.Equal(1, notifyee.RealImports[0].Id);
+            Assert.Equal(3, notifyee.RealImports[1].Id);
+            Assert.Equal(2, NotifyImportExportee.InstanceCount);
         }
     }
 
@@ -420,7 +415,7 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         public Collection<NotifyImportExportee> RealImports
         {
-            get 
+            get
             {
                 if (NeedRefresh)
                 {
@@ -556,6 +551,7 @@ namespace System.ComponentModel.Composition.AttributedModel
         {
             this.container = container;
         }
+
         [Import("MyNotifyImportExporter")]
         public MyNotifyImportExporter MyNotifyImportExporter { get; set; }
 
@@ -583,9 +579,10 @@ namespace System.ComponentModel.Composition.AttributedModel
             UpperCaseStrings = new List<string>();
         }
         Collection<Lazy<LowerCaseString>> lowerCaseString = new Collection<Lazy<LowerCaseString>>();
-        
+
         [ImportMany("LowerCaseString", AllowRecomposition = true)]
-        public Collection<Lazy<LowerCaseString>> LowerCaseStrings { 
+        public Collection<Lazy<LowerCaseString>> LowerCaseStrings
+        {
             get { return lowerCaseString; }
             set { lowerCaseString = value; }
         }

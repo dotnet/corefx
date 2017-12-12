@@ -1,18 +1,16 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
-using Microsoft.CLR.UnitTesting;
-using System.ComponentModel.Composition.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class AllowNonPublicCompositionTests
     {
-        [TestMethod]
+        [Fact]
         public void PublicFromPublic()
         {
             var container = ContainerFactory.Create(); 
@@ -22,10 +20,11 @@ namespace System.ComponentModel.Composition
             batch.AddPart(new AllPublicExportOnly() { ExportA = 5, ExportB = 10 });
             container.Compose(batch);
 
-            Assert.AreEqual(5, importer.ImportA);
-            Assert.AreEqual(10, importer.ImportB);
+            Assert.Equal(5, importer.ImportA);
+            Assert.Equal(10, importer.ImportB);
         }
-        [TestMethod]
+
+        [Fact]
         public void PublicToSelf()
         {
             var container = ContainerFactory.Create();
@@ -34,10 +33,11 @@ namespace System.ComponentModel.Composition
             batch.AddPart(importer);
             container.Compose(batch);
 
-            Assert.AreEqual(5, importer.ImportA);
-            Assert.AreEqual(10, importer.ImportB);
+            Assert.Equal(5, importer.ImportA);
+            Assert.Equal(10, importer.ImportB);
         }
-        [TestMethod]
+
+        [Fact]
         public void PublicFromPrivate()
         {
             var container = ContainerFactory.Create();
@@ -47,10 +47,11 @@ namespace System.ComponentModel.Composition
             batch.AddPart(new AllPrivateExportOnly(5, 10));
             container.Compose(batch);
 
-            Assert.AreEqual(5, importer.ImportA);
-            Assert.AreEqual(10, importer.ImportB);
+            Assert.Equal(5, importer.ImportA);
+            Assert.Equal(10, importer.ImportB);
         }
-        [TestMethod]
+
+        [Fact]
         public void PrivateFromPublic()
         {
             var container = ContainerFactory.Create();
@@ -60,10 +61,11 @@ namespace System.ComponentModel.Composition
             batch.AddPart(new AllPublicExportOnly() { ExportA = 5, ExportB = 10 });
             container.Compose(batch);
 
-            Assert.AreEqual(5, importer.PublicImportA);
-            Assert.AreEqual(10, importer.PublicImportB);
+            Assert.Equal(5, importer.PublicImportA);
+            Assert.Equal(10, importer.PublicImportB);
         }
-        [TestMethod]
+
+        [Fact]
         public void PrivateToSelf()
         {
             var container = ContainerFactory.Create();
@@ -72,10 +74,11 @@ namespace System.ComponentModel.Composition
             batch.AddPart(importer);
             container.Compose(batch);
 
-            Assert.AreEqual(5, importer.PublicImportA);
-            Assert.AreEqual(10, importer.PublicImportB);
+            Assert.Equal(5, importer.PublicImportA);
+            Assert.Equal(10, importer.PublicImportB);
         }
-        [TestMethod]
+
+        [Fact]
         public void PrivateData()
         {
             var container = ContainerFactory.Create();
@@ -84,72 +87,92 @@ namespace System.ComponentModel.Composition
             batch.AddPart(importer);
             container.Compose(batch);
 
-            Assert.AreEqual(5, importer.X);
+            Assert.Equal(5, importer.X);
         }
-        [TestMethod]
+
+        [Fact]
+        [ActiveIssue(25498)]
         public void TestPublicImportsExpectingPublicExportsFromCatalog()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
             var container = new CompositionContainer(cat);
             container.GetExportedValue<PublicImportsExpectingPublicExports>().VerifyIsBound();
         }
-        [TestMethod]
+
+        [Fact]
+        [ActiveIssue(25498)]
         public void TestInternalImportsExpectingPublicExportsFromCatalog()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
             var container = new CompositionContainer(cat);
             container.GetExportedValue<InternalImportsExpectingPublicExports>().VerifyIsBound();
         }
-        [TestMethod]
+
+        [Fact]
+        [ActiveIssue(25498)]
         public void TestPublicImportsExpectingInternalExportsFromCatalog()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
             var container = new CompositionContainer(cat);
             container.GetExportedValue<PublicImportsExpectingInternalExports>().VerifyIsBound();
         }
-        [TestMethod]
+
+        [Fact]
+        [ActiveIssue(25498)]
         public void TestInternalImportsExpectingInternalExportsFromCatalog()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
             var container = new CompositionContainer(cat);
             container.GetExportedValue<InternalImportsExpectingInternalExports>().VerifyIsBound();
         }
-        [TestMethod]
+
+        [Fact]
+        [ActiveIssue(25498)]
         public void TestPublicImportsExpectingProtectedExportsFromCatalog()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
             var container = new CompositionContainer(cat);
             container.GetExportedValue<PublicImportsExpectingProtectedExports>().VerifyIsBound();
         }
-        [TestMethod]
+
+        [Fact]
+        [ActiveIssue(25498)]
         public void TestInternalImportsExpectingProtectedExportsFromCatalog()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
             var container = new CompositionContainer(cat);
             container.GetExportedValue<InternalImportsExpectingProtectedExports>().VerifyIsBound();
         }
-        [TestMethod]
+
+        [Fact]
+        [ActiveIssue(25498)]
         public void TestPublicImportsExpectingProtectedInternalExportsFromCatalog()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
             var container = new CompositionContainer(cat);
             container.GetExportedValue<PublicImportsExpectingProtectedInternalExports>().VerifyIsBound();
         }
-        [TestMethod]
+
+        [Fact]
+        [ActiveIssue(25498)]
         public void TestInternalImportsExpectingProtectedInternalExportsFromCatalog()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
             var container = new CompositionContainer(cat);
             container.GetExportedValue<InternalImportsExpectingProtectedInternalExports>().VerifyIsBound();
         }
-        [TestMethod]
+
+        [Fact]
+        [ActiveIssue(25498)]
         public void TestPublicImportsExpectingPrivateExportsFromCatalog()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
             var container = new CompositionContainer(cat);
             container.GetExportedValue<PublicImportsExpectingPrivateExports>().VerifyIsBound();
         }
-        [TestMethod]
+
+        [Fact]
+        [ActiveIssue(25498)]
         public void TestInternalImportsExpectingPrivateExportsFromCatalog()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
