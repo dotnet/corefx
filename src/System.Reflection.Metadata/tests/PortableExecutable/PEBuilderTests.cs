@@ -130,7 +130,8 @@ namespace System.Reflection.PortableExecutable.Tests
                 WritePEImage(peStream, metadataBuilder, ilBuilder, entryPoint, privateKeyOpt: Misc.KeyPair);
 
                 // The expected checksum can be determined by saving the PE stream to a file, 
-                // running "sn -R test.dll KeyPair.snk" and ispecting the resulting binary.
+                // running "sn -R test.dll KeyPair.snk" and inspecting the resulting binary.
+                // The re-signed binary should be the same as the original one.
                 // See https://github.com/dotnet/corefx/issues/25829.
                 peStream.Position = 0;
                 var actualChecksum = new PEHeaders(peStream).PEHeader.CheckSum;
