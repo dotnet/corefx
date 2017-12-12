@@ -184,6 +184,7 @@
     <Compile Include="System\UnitTesting\ExtendedAssert.cs" />
     <Compile Include="System\UnitTesting\RetryMode.cs" />
     <Compile Include="System\UnitTesting\TestServices.cs" />
+    <Compile Include="TestAssembly.cs" />
     <Compile Include="TransparentTestCase.cs" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
