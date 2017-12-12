@@ -357,7 +357,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]        
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void LoadIndexed_BmpFile()
         {
             // Tests that we can load an indexed file, but...
