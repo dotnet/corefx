@@ -1,116 +1,110 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.ComponentModel.Composition.Factories;
-using System.Linq;
-using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
-using System.ComponentModel.Composition.AttributedModel;
-using System.ComponentModel.Composition.ReflectionModel;
 using System.ComponentModel.Composition.Primitives;
+using System.ComponentModel.Composition.ReflectionModel;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class CompositionServiceExtensionsTests
     {
-        [TestMethod]
+        [Fact]
         public void SatisfyImports_BooleanOverride_PartAndFalseHaveBeenPassed()
         {
             MockCompositionService compositionService = new MockCompositionService();
             ComposablePart part = PartFactory.Create();
 
             bool importsSatisfiedCalled = false;
-            compositionService.ImportsSatisfied += delegate(object sender, SatisfyImportsEventArgs e)
+            compositionService.ImportsSatisfied += delegate (object sender, SatisfyImportsEventArgs e)
             {
-                Assert.IsFalse(importsSatisfiedCalled);
-                Assert.AreEqual(part, e.Part);
+                Assert.False(importsSatisfiedCalled);
+                Assert.Equal(part, e.Part);
                 importsSatisfiedCalled = true;
             };
 
             compositionService.SatisfyImportsOnce(part);
-            Assert.IsTrue(importsSatisfiedCalled);
+            Assert.True(importsSatisfiedCalled);
         }
 
-
-        [TestMethod]
+        [Fact]
         public void SatisfyImports_AttributedOverride_NullAsCompositionService()
         {
             ICompositionService compositionService = null;
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("compositionService", () =>
+            Assert.Throws<ArgumentNullException>("compositionService", () =>
             {
                 compositionService.SatisfyImportsOnce(new MockAttributedPart());
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void SatisfyImports_AttributedOverride_NullAsAttributedPart()
         {
             MockCompositionService compositionService = new MockCompositionService();
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("attributedPart", () =>
+            Assert.Throws<ArgumentNullException>("attributedPart", () =>
             {
                 compositionService.SatisfyImportsOnce((object)null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void SatisfyImports_AttributedOverride_PartAndFalseHaveBeenPassed()
         {
             MockCompositionService compositionService = new MockCompositionService();
             object attributedPart = new MockAttributedPart();
 
             bool importsSatisfiedCalled = false;
-            compositionService.ImportsSatisfied += delegate(object sender, SatisfyImportsEventArgs e)
+            compositionService.ImportsSatisfied += delegate (object sender, SatisfyImportsEventArgs e)
             {
-                Assert.IsFalse(importsSatisfiedCalled);
-                Assert.IsTrue(e.Part is ReflectionComposablePart);
-                Assert.IsTrue(((ReflectionComposablePart)e.Part).Definition.GetPartType() == typeof(MockAttributedPart));
+                Assert.False(importsSatisfiedCalled);
+                Assert.True(e.Part is ReflectionComposablePart);
+                Assert.True(((ReflectionComposablePart)e.Part).Definition.GetPartType() == typeof(MockAttributedPart));
                 importsSatisfiedCalled = true;
             };
 
             compositionService.SatisfyImportsOnce(attributedPart);
-            Assert.IsTrue(importsSatisfiedCalled);
+            Assert.True(importsSatisfiedCalled);
         }
 
-        [TestMethod]
+        [Fact]
         public void SatisfyImports_AttributedAndBooleanOverride_NullAsCompositionService()
         {
             ICompositionService compositionService = null;
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("compositionService", () =>
+            Assert.Throws<ArgumentNullException>("compositionService", () =>
             {
                 compositionService.SatisfyImportsOnce(new MockAttributedPart());
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void SatisfyImports_AttributedAndBooleanOverride_NullAsAttributedPart()
         {
             MockCompositionService compositionService = new MockCompositionService();
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("attributedPart", () =>
+            Assert.Throws<ArgumentNullException>("attributedPart", () =>
             {
                 compositionService.SatisfyImportsOnce((object)null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void SatisfyImports_AttributedAndBooleanOverride_PartAndFalseHaveBeenPassed()
         {
             MockCompositionService compositionService = new MockCompositionService();
             object attributedPart = new MockAttributedPart();
 
             bool importsSatisfiedCalled = false;
-            compositionService.ImportsSatisfied += delegate(object sender, SatisfyImportsEventArgs e)
+            compositionService.ImportsSatisfied += delegate (object sender, SatisfyImportsEventArgs e)
             {
-                Assert.IsFalse(importsSatisfiedCalled);
-                Assert.IsTrue(e.Part is ReflectionComposablePart);
-                Assert.IsTrue(((ReflectionComposablePart)e.Part).Definition.GetPartType() == typeof(MockAttributedPart));
+                Assert.False(importsSatisfiedCalled);
+                Assert.True(e.Part is ReflectionComposablePart);
+                Assert.True(((ReflectionComposablePart)e.Part).Definition.GetPartType() == typeof(MockAttributedPart));
                 importsSatisfiedCalled = true;
             };
 
             compositionService.SatisfyImportsOnce(attributedPart);
-            Assert.IsTrue(importsSatisfiedCalled);
+            Assert.True(importsSatisfiedCalled);
         }
 
         internal class SatisfyImportsEventArgs : EventArgs

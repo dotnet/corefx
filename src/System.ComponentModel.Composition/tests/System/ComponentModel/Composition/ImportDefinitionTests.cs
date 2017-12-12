@@ -1,70 +1,66 @@
-//------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-//------------------------------------------------------------
-using System;
-using System.ComponentModel.Composition;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.CLR.UnitTesting;
+using System.ComponentModel.Composition.Primitives;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.UnitTesting;
-using System.ComponentModel.Composition.Factories;
-using System.ComponentModel.Composition.Primitives;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class ImportDefinitionTests
     {
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetCardinalityPropertyToExactlyOne()
         {
             var definition = new NoOverridesImportDefinition();
 
-            Assert.AreEqual(ImportCardinality.ExactlyOne, definition.Cardinality);
+            Assert.Equal(ImportCardinality.ExactlyOne, definition.Cardinality);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetIsPrerequisitePropertyToTrue()
         {
             var definition = new NoOverridesImportDefinition();
 
-            Assert.IsTrue(definition.IsPrerequisite);
+            Assert.True(definition.IsPrerequisite);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetIsRecomposablePropertyToFalse()
         {
             var definition = new NoOverridesImportDefinition();
 
-            Assert.IsFalse(definition.IsRecomposable);
+            Assert.False(definition.IsRecomposable);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_NullAsConstraintArgument_ShouldThrowArgumentNull()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("constraint", () =>
+            Assert.Throws<ArgumentNullException>("constraint", () =>
             {
                 new ImportDefinition((Expression<Func<ExportDefinition, bool>>)null, "", ImportCardinality.ExactlyOne, false, false);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_OutOfRangeValueAsCardinalityArgument_ShouldThrowArgument()
         {
             var expectations = Expectations.GetInvalidEnumValues<ImportCardinality>();
 
             foreach (var e in expectations)
             {
-                ExceptionAssert.ThrowsArgument<ArgumentException>("cardinality", () =>
+                Assert.Throws<ArgumentException>("cardinality", () =>
                 {
                     new ImportDefinition(d => true, "", e, false, false);
                 });
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ValueAsCardinalityArgument_ShouldSetCardinalityProperty()
         {
             var expectations = Expectations.GetEnumValues<ImportCardinality>();
@@ -73,11 +69,11 @@ namespace System.ComponentModel.Composition
             {
                 var definition = new ImportDefinition(d => true, "", e, false, false);
 
-                Assert.AreEqual(e, definition.Cardinality);
+                Assert.Equal(e, definition.Cardinality);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ValueAsConstraintArgument_ShouldSetConstraintProperty()
         {
             var expectations = new List<Expression<Func<ExportDefinition, bool>>>();
@@ -90,11 +86,11 @@ namespace System.ComponentModel.Composition
             {
                 var definition = new ImportDefinition(e, "", ImportCardinality.ExactlyOne, false, false);
 
-                Assert.AreEqual(e, definition.Constraint);
+                Assert.Equal(e, definition.Constraint);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ValueAsIsRecomposableArgument_ShouldSetIsRecomposableProperty()
         {
             var expectations = Expectations.GetBooleans();
@@ -103,11 +99,11 @@ namespace System.ComponentModel.Composition
             {
                 var definition = new ImportDefinition(d => true, "", ImportCardinality.ExactlyOne, e, false);
 
-                Assert.AreEqual(e, definition.IsRecomposable);
+                Assert.Equal(e, definition.IsRecomposable);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ValueAsIsPrerequisiteArgument_ShouldSetIsPrerequisiteProperty()
         {
             var expectations = Expectations.GetBooleans();
@@ -116,11 +112,11 @@ namespace System.ComponentModel.Composition
             {
                 var definition = new ImportDefinition(d => true, "", ImportCardinality.ExactlyOne, false, e);
 
-                Assert.AreEqual(e, definition.IsPrerequisite);
+                Assert.Equal(e, definition.IsPrerequisite);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ContractName_ShouldSetAppropriately()
         {
             var expectations = new ExpectationCollection<string, string>();
@@ -136,12 +132,11 @@ namespace System.ComponentModel.Composition
             {
                 var definition = new ImportDefinition(d => true, e.Input, ImportCardinality.ExactlyOne, false, false);
 
-                Assert.AreEqual(e.Output, definition.ContractName);
+                Assert.Equal(e.Output, definition.ContractName);
             }
         }
 
-
-        [TestMethod]
+        [Fact]
         public void Constraint_WhenNotOverridden_ShouldThrowNotImplemented()
         {
             var definition = new NoOverridesImportDefinition();
@@ -152,7 +147,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ToString_WhenConstraintPropertyNotOverridden_ShouldThrowNotImplemented()
         {
             var definition = new NoOverridesImportDefinition();
@@ -163,7 +158,8 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void ToString_ValueAsConstraintArgument_ShouldReturnConstraintProperty()
         {
             var expectations = new ExpectationCollection<Expression<Func<ExportDefinition, bool>>, string>();
@@ -176,11 +172,12 @@ namespace System.ComponentModel.Composition
             {
                 var item = new ImportDefinition(e.Input, "", ImportCardinality.ExactlyOne, false, false);
 
-                Assert.IsTrue(Regex.IsMatch(item.ToString(), e.Output));
+                Assert.True(Regex.IsMatch(item.ToString(), e.Output));
             }
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void ToString_DerivedImportDefinition_ShouldReturnOverriddenConstraintProperty()
         {
             var expectations = new ExpectationCollection<Expression<Func<ExportDefinition, bool>>, string>();
@@ -193,13 +190,12 @@ namespace System.ComponentModel.Composition
             {
                 var item = new DerivedImportDefinition(e.Input);
 
-                Assert.IsTrue(Regex.IsMatch(item.ToString(), e.Output));
+                Assert.True(Regex.IsMatch(item.ToString(), e.Output));
             }
         }
 
-        [TestMethod]
-        [WorkItem(738535)]
-        [Ignore]
+        [Fact]
+        [ActiveIssue(738535)]
         public void ContractName_ShouldBeIncludedInConstraintAutomatically()
         {
             string testContractName = "TestContractName";
@@ -208,11 +204,11 @@ namespace System.ComponentModel.Composition
             var shouldMatch = new ExportDefinition(testContractName, null);
             var shouldNotMatch = new ExportDefinition(testContractName + testContractName, null);
 
-            Assert.IsTrue(contractImportDefinition.IsConstraintSatisfiedBy(shouldMatch));
-            Assert.IsFalse(contractImportDefinition.IsConstraintSatisfiedBy(shouldNotMatch));
+            Assert.True(contractImportDefinition.IsConstraintSatisfiedBy(shouldMatch));
+            Assert.False(contractImportDefinition.IsConstraintSatisfiedBy(shouldNotMatch));
         }
 
-        [TestMethod]
+        [Fact]
         public void EmptyContractName_ShouldMatchAllContractNames()
         {
             var importDefinition = new ImportDefinition(ed => true, string.Empty, ImportCardinality.ZeroOrMore, false, false);
@@ -220,8 +216,8 @@ namespace System.ComponentModel.Composition
             var shouldMatch1 = new ExportDefinition("contract1", null);
             var shouldMatch2 = new ExportDefinition("contract2", null);
 
-            Assert.IsTrue(importDefinition.IsConstraintSatisfiedBy(shouldMatch1));
-            Assert.IsTrue(importDefinition.IsConstraintSatisfiedBy(shouldMatch2));
+            Assert.True(importDefinition.IsConstraintSatisfiedBy(shouldMatch1));
+            Assert.True(importDefinition.IsConstraintSatisfiedBy(shouldMatch2));
         }
 
         private class NoOverridesImportDefinition : ImportDefinition

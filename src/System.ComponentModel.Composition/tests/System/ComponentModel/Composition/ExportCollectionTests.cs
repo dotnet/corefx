@@ -1,20 +1,18 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
-using System.Linq;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
-using System.ComponentModel.Composition.UnitTesting;
+using System.Linq;
 using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class ExportCollectionTests
     {
         public class Importer
@@ -85,9 +83,9 @@ namespace System.ComponentModel.Composition
 
                 ExportsAssert.AreEqual(CollectionPlain, untypedExpectedValues);
                 ExportsAssert.AreEqual(CollectionPlainRawMetadata, untypedExpectedValues);
-                EnumerableAssert.IsTrueForAll(CollectionPlainRawMetadata, i => true.Equals(i.Metadata["PropertyName"]));
-                EnumerableAssert.IsEmpty(CollectionPlainEmpty);
-                EnumerableAssert.IsEmpty(CollectionPlainEmptyRawMetadata);
+                EqualityExtensions.IsTrueForAll(CollectionPlainRawMetadata, i => true.Equals(i.Metadata["PropertyName"]));
+                Assert.Empty(CollectionPlainEmpty);
+                Assert.Empty(CollectionPlainEmptyRawMetadata);
 
                 // Add a new Export to this collection to ensure that it doesn't
                 // modifiy the other collections because they should each have there 
@@ -96,30 +94,30 @@ namespace System.ComponentModel.Composition
 
                 ExportsAssert.AreEqual(CollectionTyped, expectedValues);
                 ExportsAssert.AreEqual(CollectionTypedRawMetadata, expectedValues);
-                EnumerableAssert.IsTrueForAll(CollectionTypedRawMetadata, i => true.Equals(i.Metadata["PropertyName"]));
-                EnumerableAssert.IsEmpty(CollectionTypedEmpty);
+                EqualityExtensions.IsTrueForAll(CollectionTypedRawMetadata, i => true.Equals(i.Metadata["PropertyName"]));
+                Assert.Empty(CollectionTypedEmpty);
 
                 ExportsAssert.AreEqual(CollectionTypedMetadata, expectedValues);
-                EnumerableAssert.IsTrueForAll(CollectionTypedMetadata, i => true == i.Metadata.PropertyName);
-                EnumerableAssert.IsEmpty(CollectionTypedMetadataEmpty);
+                EqualityExtensions.IsTrueForAll(CollectionTypedMetadata, i => true == i.Metadata.PropertyName);
+                Assert.Empty(CollectionTypedMetadataEmpty);
 
                 EnumerableAssert.AreEqual(ReadWriteEnumerable, expectedValues);
-                EnumerableAssert.IsEmpty(ReadWriteEnumerableEmpty);
+                Assert.Empty(ReadWriteEnumerableEmpty);
 
                 ExportsAssert.AreEqual(MetadataUntypedEnumerable, untypedExpectedValues);
                 ExportsAssert.AreEqual(MetadataUntypedEnumerableRawMetadata, untypedExpectedValues);
-                EnumerableAssert.IsTrueForAll(MetadataUntypedEnumerableRawMetadata, i => true.Equals(i.Metadata["PropertyName"]));
-                EnumerableAssert.IsEmpty(MetadataUntypedEnumerableEmpty);
-                EnumerableAssert.IsEmpty(MetadataUntypedEnumerableEmptyRawMetadata);
+                EqualityExtensions.IsTrueForAll(MetadataUntypedEnumerableRawMetadata, i => true.Equals(i.Metadata["PropertyName"]));
+                Assert.Empty(MetadataUntypedEnumerableEmpty);
+                Assert.Empty(MetadataUntypedEnumerableEmptyRawMetadata);
 
                 ExportsAssert.AreEqual(MetadataTypedEnumerable, expectedValues);
                 ExportsAssert.AreEqual(MetadataTypedEnumerableRawMetadata, expectedValues);
-                EnumerableAssert.IsTrueForAll(MetadataTypedEnumerableRawMetadata, i => true.Equals(i.Metadata["PropertyName"]));
-                EnumerableAssert.IsEmpty(MetadataTypedEnumerableEmpty);
+                EqualityExtensions.IsTrueForAll(MetadataTypedEnumerableRawMetadata, i => true.Equals(i.Metadata["PropertyName"]));
+                Assert.Empty(MetadataTypedEnumerableEmpty);
 
                 ExportsAssert.AreEqual(MetadataFullyTypedEnumerable, expectedValues);
-                EnumerableAssert.IsTrueForAll(MetadataFullyTypedEnumerable, i => true == i.Metadata.PropertyName);
-                EnumerableAssert.IsEmpty(MetadataFullyTypedEnumerableEmpty);
+                EqualityExtensions.IsTrueForAll(MetadataFullyTypedEnumerable, i => true == i.Metadata.PropertyName);
+                Assert.Empty(MetadataFullyTypedEnumerableEmpty);
             }
         }
 
@@ -143,9 +141,8 @@ namespace System.ComponentModel.Composition
             public int Value { get; set; }
         }
 
-
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void ImportCollectionsFromContainerOnly()
         {
             var container = ContainerFactory.Create();
@@ -163,8 +160,8 @@ namespace System.ComponentModel.Composition
             importer.VerifyImport(21, 22, 42, 43);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void ImportCollectionsFromCatalogOnly()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
@@ -178,8 +175,8 @@ namespace System.ComponentModel.Composition
             importer.VerifyImport(21, 42);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void ImportCollectionsFormContainerAndCatalog()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();

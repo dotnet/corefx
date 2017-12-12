@@ -1,23 +1,19 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Linq;
-using System.Linq.Expressions;
-using Microsoft.CLR.UnitTesting;
-using System.ComponentModel.Composition.UnitTesting;
 using System.ComponentModel.Composition.Factories;
-using System.UnitTesting;
 using System.ComponentModel.Composition.Hosting;
+using System.Linq;
+using System.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class ComponentServicesTests
     {
-        [TestMethod]
+        [Fact]
         public void GetValuesByType()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
@@ -29,11 +25,11 @@ namespace System.ComponentModel.Composition
             var e1 = container.GetExportedValues<ITest>();
             var e2 = container.GetExports<ITest, object>(itestName);
 
-            Assert.IsInstanceOfType(e1.First(), typeof(T1), "First should be T1");
-            Assert.IsInstanceOfType(e1.Skip(1).First(), typeof(T2), "Second should be T2");
+            Assert.IsType<T1>(e1.First());
+            Assert.IsType<T2>(e1.Skip(1).First());
 
-            Assert.IsInstanceOfType(e2.First().Value, typeof(T1), "First should be T1");
-            Assert.IsInstanceOfType(e2.Skip(1).First().Value, typeof(T2), "Second should be T2");
+            Assert.IsType<T1>(e2.First().Value);
+            Assert.IsType<T2>(e2.Skip(1).First().Value);
 
             CompositionContainer childContainer = new CompositionContainer(container);
             CompositionBatch batch = new CompositionBatch();
@@ -42,11 +38,11 @@ namespace System.ComponentModel.Composition
             var t1 = childContainer.GetExportedValue<ITest>();
             var t2 = childContainer.GetExport<ITest, object>(itestName);
 
-            Assert.IsInstanceOfType(t1, typeof(T1), "First (resolved) should be T1");
-            Assert.IsInstanceOfType(t2.Value, typeof(T1), "First (resolved) should be T1");
+            Assert.IsType<T1>(t1);
+            Assert.IsType<T1>(t2.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetValueTest()
         {
             var container = ContainerFactory.Create();
@@ -56,12 +52,12 @@ namespace System.ComponentModel.Composition
             batch.AddExportedValue(name, t);
             container.Compose(batch);
             ITest value = container.GetExportedValue<ITest>();
-            Assert.AreEqual(t, value, "TryGetExportedValue should return t (by type)");
+            Assert.Equal(t, value);
             value = container.GetExportedValue<ITest>(name);
-            Assert.AreEqual(t, value, "TryGetExportedValue should return t (given name)");
+            Assert.Equal(t, value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetValuesTest()
         {
             var container = ContainerFactory.Create();
@@ -71,14 +67,12 @@ namespace System.ComponentModel.Composition
             batch.AddExportedValue(name, t);
             container.Compose(batch);
             IEnumerable<ITest> values = container.GetExportedValues<ITest>();
-            Assert.AreEqual(t, values.First(), "TryGetExportedValues should return t (by type)");
+            Assert.Equal(t, values.First());
             values = container.GetExportedValues<ITest>(name);
-            Assert.AreEqual(t, values.First(), "TryGetExportedValues should return t (by name)");
+            Assert.Equal(t, values.First());
         }
 
-
-
-        [TestMethod]
+        [Fact]
         public void NoResolverExceptionTest()
         {
             var container = ContainerFactory.Create();

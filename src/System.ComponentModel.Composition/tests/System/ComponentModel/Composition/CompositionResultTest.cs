@@ -1,61 +1,58 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
-using System.ComponentModel.Composition.UnitTesting;
+using System.ComponentModel.Composition.Factories;
 using System.Linq;
 using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
-using System.ComponentModel.Composition.Hosting;
-using System.ComponentModel.Composition.Factories;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class CompositionResultTest
     {
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetErrorsPropertyToEmptyEnumerable()
         {
             var result = new CompositionResult();
 
-            EnumerableAssert.IsEmpty(result.Errors);
+            Assert.Empty(result.Errors);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_NullAsErrorsArgument_ShouldSetErrorsPropertyToEmptyEnumerable()
         {
             var result = new CompositionResult((CompositionError[])null);
 
-            EnumerableAssert.IsEmpty(result.Errors);
+            Assert.Empty(result.Errors);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_NullAsErrorsArgument_ShouldSetErrorsPropertyToEmptyEnumerable()
         {
             var result = new CompositionResult((IEnumerable<CompositionError>)null);
 
-            EnumerableAssert.IsEmpty(result.Errors);
+            Assert.Empty(result.Errors);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_EmptyAsErrorsArgument_ShouldSetErrorsPropertyToEmptyEnumerable()
         {
             var result = new CompositionResult(new CompositionError[0]);
 
-            EnumerableAssert.IsEmpty(result.Errors);
+            Assert.Empty(result.Errors);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_EmptyAsErrorsArgument_ShouldSetErrorsPropertyToEmptyEnumerable()
         {
             var result = new CompositionResult(Enumerable.Empty<CompositionError>());
 
-            EnumerableAssert.IsEmpty(result.Errors);
+            Assert.Empty(result.Errors);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ValuesAsErrorsArgument_ShouldSetErrorsProperty()
         {
             var errors = Expectations.GetCompositionErrors();
@@ -64,11 +61,11 @@ namespace System.ComponentModel.Composition
             {
                 var result = new CompositionResult(e.ToArray());
 
-                EnumerableAssert.AreEqual(e, result.Errors);
+                Assert.Equal(e, result.Errors);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_ValuesAsErrorsArgument_ShouldSetErrorsProperty()
         {
             var errors = Expectations.GetCompositionErrors();
@@ -77,51 +74,51 @@ namespace System.ComponentModel.Composition
             {
                 var result = new CompositionResult(e);
 
-                EnumerableAssert.AreEqual(e, result.Errors);
+                Assert.Equal(e, result.Errors);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetSucceededPropertyToTrue()
         {
             var result = new CompositionResult();
 
-            Assert.IsTrue(result.Succeeded);
+            Assert.True(result.Succeeded);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_NullAsErrorsArgument_ShouldSetSucceededPropertyToTrue()
         {
             var result = new CompositionResult((CompositionError[])null);
 
-            Assert.IsTrue(result.Succeeded);
+            Assert.True(result.Succeeded);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_NullAsErrorsArgument_ShouldSetSucceededPropertyToTrue()
         {
             var result = new CompositionResult((IEnumerable<CompositionError>)null);
 
-            Assert.IsTrue(result.Succeeded);
+            Assert.True(result.Succeeded);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_EmptyAsErrorsArgument_ShouldSetSucceededPropertyToTrue()
         {
             var result = new CompositionResult(new CompositionError[0]);
 
-            Assert.IsTrue(result.Succeeded);
+            Assert.True(result.Succeeded);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_EmptyAsErrorsArgument_ShouldSetSucceededPropertyToTrue()
         {
             var result = new CompositionResult(Enumerable.Empty<CompositionError>());
 
-            Assert.IsTrue(result.Succeeded);
+            Assert.True(result.Succeeded);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ValuesAsErrorsArgument_ShouldSetSucceededPropertyToTrueIfThereAreErrors()
         {
             var errors = Expectations.GetCompositionErrors();
@@ -132,16 +129,16 @@ namespace System.ComponentModel.Composition
 
                 if (e.Count() > 0)
                 {
-                    Assert.IsFalse(result.Succeeded);
+                    Assert.False(result.Succeeded);
                 }
                 else
                 {
-                    Assert.IsTrue(result.Succeeded);
+                    Assert.True(result.Succeeded);
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_ValuesAsErrorsArgument_ShouldSetSucceededPropertyToTrueIfThereAreErrors()
         {
             var errors = Expectations.GetCompositionErrors();
@@ -152,16 +149,17 @@ namespace System.ComponentModel.Composition
 
                 if (e.Count() > 0)
                 {
-                    Assert.IsFalse(result.Succeeded);
+                    Assert.False(result.Succeeded);
                 }
                 else
                 {
-                    Assert.IsTrue(result.Succeeded);
+                    Assert.True(result.Succeeded);
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void MergeResult_ResultWithNullErrorsAsResultArgument_ShouldReturnResultWithSameErrors()
         {
             var emptyResult = CreateCompositionResult((IEnumerable<CompositionError>)null);
@@ -174,11 +172,12 @@ namespace System.ComponentModel.Composition
 
                 var mergedResult = result.MergeResult(emptyResult);
 
-                CompositionAssert.AreEqual(result, mergedResult);
+                Assert.Equal(result, mergedResult);
             }
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void MergeResult_ResultWithEmptyErrorsAsResultArgument_ShouldReturnResultWithSameErrors()
         {
             var emptyResult = CreateCompositionResult(Enumerable.Empty<CompositionError>());
@@ -191,11 +190,11 @@ namespace System.ComponentModel.Composition
 
                 var mergedResult = result.MergeResult(emptyResult);
 
-                CompositionAssert.AreEqual(result, mergedResult);
+                Assert.Equal(result, mergedResult);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void MergeResult_ResultWithErrorsAsResultArgument_ShouldReturnResultWithCombinedErrors()
         {
             var expectations = Expectations.GetCompositionErrors();
@@ -208,12 +207,12 @@ namespace System.ComponentModel.Composition
                 var mergedResult = result1.MergeResult(result2);
                 var mergedErrors = result1.Errors.Concat(result2.Errors);
 
-                EnumerableAssert.AreSequenceSame(mergedErrors, mergedResult.Errors);
-                Assert.AreEqual(mergedResult.Succeeded, result1.Succeeded | result2.Succeeded);
+                EqualityExtensions.CheckEquals(mergedErrors, mergedResult.Errors);
+                Assert.Equal(mergedResult.Succeeded, result1.Succeeded | result2.Succeeded);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void MergeError_ValueAsErrorArgumentWhenMergedWithResultWithNullErrors_ShouldReturnResultWithCombinedErrors()
         {
             var result = CreateCompositionResult((IEnumerable<CompositionError>)null);
@@ -226,12 +225,12 @@ namespace System.ComponentModel.Composition
                 var mergedResult = result.MergeError(error);
                 var mergedErrors = result.Errors.Concat(new CompositionError[] { error });
 
-                EnumerableAssert.AreSequenceSame(mergedErrors, mergedResult.Errors);
-                Assert.IsFalse(mergedResult.Succeeded);                
+                EqualityExtensions.CheckEquals(mergedErrors, mergedResult.Errors);
+                Assert.False(mergedResult.Succeeded);                
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void MergeError_ValueAsErrorArgumentWhenMergedWithResultWithEmptyErrors_ShouldReturnResultWithCombinedErrors()
         {
             var result = CreateCompositionResult(Enumerable.Empty<CompositionError>());
@@ -244,12 +243,12 @@ namespace System.ComponentModel.Composition
                 var mergedResult = result.MergeError(error);
                 var mergedErrors = result.Errors.Concat(new CompositionError[] { error });
 
-                EnumerableAssert.AreSequenceSame(mergedErrors, mergedResult.Errors);
-                Assert.IsFalse(mergedResult.Succeeded);
+                EqualityExtensions.CheckEquals(mergedErrors, mergedResult.Errors);
+                Assert.False(mergedResult.Succeeded);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void MergeError_ValueAsErrorArgumentWhenMergedWithResultWithErrors_ShouldReturnResultWithCombinedErrors()
         {
             var result = CreateCompositionResult(2);
@@ -262,12 +261,12 @@ namespace System.ComponentModel.Composition
                 var mergedResult = result.MergeError(error);
                 var mergedErrors = result.Errors.Concat(new CompositionError[] { error });
 
-                EnumerableAssert.AreSequenceSame(mergedErrors, mergedResult.Errors);
-                Assert.IsFalse(mergedResult.Succeeded);
+                EqualityExtensions.CheckEquals(mergedErrors, mergedResult.Errors);
+                Assert.False(mergedResult.Succeeded);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void MergeErrors_ValueAsErrorArgumentWhenMergedWithResultWithNullErrors_ShouldReturnResultWithCombinedErrors()
         {
             var result = CreateCompositionResult((IEnumerable<CompositionError>)null);
@@ -278,12 +277,12 @@ namespace System.ComponentModel.Composition
                 var mergedResult = result.MergeErrors(e);
                 var mergedErrors = result.Errors.Concat(e);
 
-                EnumerableAssert.AreSequenceSame(mergedErrors, mergedResult.Errors);
-                Assert.AreEqual(!e.Any(), mergedResult.Succeeded);
+                EqualityExtensions.CheckEquals(mergedErrors, mergedResult.Errors);
+                Assert.Equal(!e.Any(), mergedResult.Succeeded);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void MergeErrors_ValueAsErrorArgumentWhenMergedWithResultWithEmptyErrors_ShouldReturnResultWithCombinedErrors()
         {
             var result = CreateCompositionResult(Enumerable.Empty<CompositionError>());
@@ -294,12 +293,12 @@ namespace System.ComponentModel.Composition
                 var mergedResult = result.MergeErrors(e);
                 var mergedErrors = result.Errors.Concat(e);
 
-                EnumerableAssert.AreSequenceSame(mergedErrors, mergedResult.Errors);
-                Assert.AreEqual(!e.Any(), mergedResult.Succeeded);
+                EqualityExtensions.CheckEquals(mergedErrors, mergedResult.Errors);
+                Assert.Equal(!e.Any(), mergedResult.Succeeded);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void MergeErrors_ValueAsErrorArgumentWhenMergedWithResultWithErrors_ShouldReturnResultWithCombinedErrors()
         {
             var result = CreateCompositionResult(2);
@@ -310,12 +309,12 @@ namespace System.ComponentModel.Composition
                 var mergedResult = result.MergeErrors(e);
                 var mergedErrors = result.Errors.Concat(e);
 
-                EnumerableAssert.AreSequenceSame(mergedErrors, mergedResult.Errors);
-                Assert.IsFalse(mergedResult.Succeeded);
+                EqualityExtensions.CheckEquals(mergedErrors, mergedResult.Errors);
+                Assert.False(mergedResult.Succeeded);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ThrowOnErrors_NullAsErrorsArgument_ShouldNotThrow()
         {
             var result = CreateCompositionResult((IEnumerable<CompositionError>)null);
@@ -323,7 +322,7 @@ namespace System.ComponentModel.Composition
             result.ThrowOnErrors();
         }
 
-        [TestMethod]
+        [Fact]
         public void ThrowOnErrors_EmptyEnumerableAsErrorsArgument_ShouldNotThrow()
         {
             var result = CreateCompositionResult(Enumerable.Empty<CompositionError>());
@@ -331,7 +330,7 @@ namespace System.ComponentModel.Composition
             result.ThrowOnErrors();
         }
 
-        [TestMethod]
+        [Fact]
         public void ThrowOnErrors_SingleValueAsErrorsArgument_ShouldThrowComposition()
         {
             var errorIds = Expectations.GetEnumValues<CompositionErrorId>();
@@ -347,7 +346,7 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ThrowOnErrors_TwoSameValuesAsErrorsArgument_ShouldThrowComposition()
         {
             var errorIds = Expectations.GetEnumValues<CompositionErrorId>();
@@ -363,7 +362,7 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ThrowOnErrors_TwoDifferentValuesAsErrorsArgument_ShouldThrowComposition()
         {
             var errorIds1 = Expectations.GetEnumValues<CompositionErrorId>();
@@ -383,27 +382,27 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ToResultOfT_NullAsErrorsArgument_ShouldReturnResultWithEmptyErrorsProperty()
         {
             var result = CreateCompositionResult((IEnumerable<CompositionError>)null);
 
             var copy = result.ToResult<string>("Value");
 
-            EnumerableAssert.IsEmpty(copy.Errors);
+            Assert.Empty(copy.Errors);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToResultOfT_EmptyEnumerableAsErrorsArgument_ShouldReturnResultWithEmptyErrorsProperty()
         {
             var result = CreateCompositionResult(Enumerable.Empty<CompositionError>());
 
             var copy = result.ToResult<string>("Value");
 
-            EnumerableAssert.IsEmpty(copy.Errors);
+            Assert.Empty(copy.Errors);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToResultOfT_ValueAsErrorsArgument_ShouldReturnResultWithErrorsPropertySet()
         {
             var expectations = Expectations.GetCompositionErrors();
@@ -414,11 +413,11 @@ namespace System.ComponentModel.Composition
 
                 var copy = result.ToResult<string>("Value");
 
-                EnumerableAssert.AreSequenceSame(result.Errors, copy.Errors);
+                EqualityExtensions.CheckEquals(result.Errors, copy.Errors);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ToResultOfT_ReferenceValueAsValueArgument_ShouldReturnResultWithValuePropertySet()
         {
             var expectations = Expectations.GetObjectsReferenceTypes();
@@ -429,11 +428,11 @@ namespace System.ComponentModel.Composition
 
                 var copy = result.ToResult<object>(e);
 
-                Assert.AreSame(e, copy.Value);
+                Assert.Same(e, copy.Value);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ToResultOfT_ValueTypeValueAsValueArgument_ShouldReturnResultWithValuePropertySet()
         {
             var expectations = Expectations.GetObjectsValueTypes();
@@ -444,24 +443,24 @@ namespace System.ComponentModel.Composition
 
                 var copy = result.ToResult<object>(e);
 
-                Assert.AreEqual(e, copy.Value);
+                Assert.Equal(e, copy.Value);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SucceededResult_ShouldSetSuccessPropertyToTrue()
         {
             var succeeded = CompositionResult.SucceededResult.Succeeded;
 
-            Assert.IsTrue(succeeded);
+            Assert.True(succeeded);
         }
 
-        [TestMethod]
+        [Fact]
         public void SucceededResult_ShouldSetErrorsPropertyToEmptyEnumerable()
         {
             var errors = CompositionResult.SucceededResult.Errors;
 
-            EnumerableAssert.IsEmpty(errors);
+            Assert.Empty(errors);
         }
 
         private CompositionResult CreateCompositionResult(params CompositionErrorId[] errorIds)

@@ -1,15 +1,11 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
-using System.ComponentModel.Composition;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.ComponentModel.Composition.Hosting;
-using System.Reflection;
-
-using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
 using System.ComponentModel.Composition.Primitives;
-
+using System.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
@@ -22,7 +18,14 @@ namespace System.ComponentModel.Composition
     public class Constants
     {
         [Export("Seven")]
-        int seven = 7;
+        int seven;
+
+        public Constants()
+        {
+            seven = 7;
+            if (seven == default)
+                throw new ArgumentException();
+        }
     }
 
     [Export]
@@ -37,47 +40,46 @@ namespace System.ComponentModel.Composition
             set { data[index] = value; }
         }
     }
-
-    [TestClass]
+    
     public class ImportAttributeTests
     {
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetContractNamePropertyToEmptyString()
         {
             var attribute = new ImportAttribute();
 
-            Assert.IsNull(attribute.ContractName);
-            Assert.IsNull(attribute.ContractType);
+            Assert.Null(attribute.ContractName);
+            Assert.Null(attribute.ContractType);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_NullAsContractNameArgument_ShouldSetContractNamePropertyToEmptyString()
         {
             var attribute = new ImportAttribute((string)null);
 
-            Assert.IsNull(attribute.ContractName);
-            Assert.IsNull(attribute.ContractType);
+            Assert.Null(attribute.ContractName);
+            Assert.Null(attribute.ContractType);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_NullAsContractTypeArgument_ShouldSetContractNamePropertyToEmptyString()
         {
             var attribute = new ImportAttribute((Type)null);
 
-            Assert.IsNull(attribute.ContractName);
-            Assert.IsNull(attribute.ContractType);
+            Assert.Null(attribute.ContractName);
+            Assert.Null(attribute.ContractType);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_NullAsContractTypeArgument_ShouldSetContractNamePropertyToEmptyString()
         {
             var attribute = new ImportAttribute((string)null, (Type)null);
 
-            Assert.IsNull(attribute.ContractName);
-            Assert.IsNull(attribute.ContractType);
+            Assert.Null(attribute.ContractName);
+            Assert.Null(attribute.ContractType);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ValueAsContractNameArgument_ShouldSetContractNameProperty()
         {
             var expectations = Expectations.GetContractNamesWithEmpty();
@@ -86,59 +88,59 @@ namespace System.ComponentModel.Composition
             {
                 var attribute = new ImportAttribute(e);
 
-                Assert.AreEqual(e, attribute.ContractName);
+                Assert.Equal(e, attribute.ContractName);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetAllowDefaultPropertyToFalse()
         {
             var attribute = new ImportAttribute();
 
-            Assert.IsFalse(attribute.AllowDefault);
+            Assert.False(attribute.AllowDefault);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ShouldSetAllowDefaultPropertyToFalse()
         {
             var attribute = new ImportAttribute("ContractName");
 
-            Assert.IsFalse(attribute.AllowDefault);
+            Assert.False(attribute.AllowDefault);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_ShouldSetAllowDefaultPropertyToFalse()
         {
             var attribute = new ImportAttribute(typeof(String));
 
-            Assert.IsFalse(attribute.AllowDefault);
+            Assert.False(attribute.AllowDefault);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetAllowRecompositionPropertyToFalse()
         {
             var attribute = new ImportAttribute();
 
-            Assert.IsFalse(attribute.AllowRecomposition);
+            Assert.False(attribute.AllowRecomposition);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ShouldSetAllowRecompositionPropertyToFalse()
         {
             var attribute = new ImportAttribute("ContractName");
 
-            Assert.IsFalse(attribute.AllowRecomposition);
+            Assert.False(attribute.AllowRecomposition);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_ShouldSetAllowRecompositionPropertyToFalse()
         {
             var attribute = new ImportAttribute(typeof(String));
 
-            Assert.IsFalse(attribute.AllowRecomposition);
+            Assert.False(attribute.AllowRecomposition);
         }
 
-        [TestMethod]
+        [Fact]
         public void AllowDefault_ValueAsValueArgument_ShouldSetProperty()
         {
             var expectations = Expectations.GetBooleans();
@@ -148,11 +150,11 @@ namespace System.ComponentModel.Composition
             foreach (var e in expectations)
             {
                 attribute.AllowDefault = e;
-                Assert.AreEqual(e, attribute.AllowDefault);
+                Assert.Equal(e, attribute.AllowDefault);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void AllowRecomposition_ValueAsValueArgument_ShouldSetProperty()
         {
             var expectations = Expectations.GetBooleans();
@@ -162,11 +164,11 @@ namespace System.ComponentModel.Composition
             foreach (var e in expectations)
             {
                 attribute.AllowRecomposition = e;
-                Assert.AreEqual(e, attribute.AllowRecomposition);
+                Assert.Equal(e, attribute.AllowRecomposition);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportIndexers_ShouldThrowSomething()
         {
             var con = new CompositionContainer(

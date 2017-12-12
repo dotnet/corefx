@@ -1,48 +1,43 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
-using System.Text;
-using Microsoft.Internal;
-using Microsoft.CLR.UnitTesting;
-using System.UnitTesting;
-using Tests.Integration;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text;
+using System.UnitTesting;
+using Tests.Integration;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class CompositionServicesTests
     {
         private static readonly Type NonGenericType = typeof(int);
 
-        [TestMethod]
+        [Fact]
         public void GetContractName_NullAsTypeArgument_ThrowsArgumentNull()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("type", () =>
+            Assert.Throws<ArgumentNullException>("type", () =>
                 {
                     AttributedModelServices.GetContractName((Type)null);
                 });
         }        
 
-        [TestMethod]
+        [Fact]
         [Description("Verifies adding custom modifiers to contract name.")]
         public void ContractNameServicesAddCustomModifiersTest()
         {
             Type[] modifiers = new Type[] { typeof(int), typeof(List<int>), typeof(double) };
             StringBuilder typeName = new StringBuilder();
             ContractNameServices.WriteCustomModifiers(typeName, "test", modifiers, false);
-            Assert.AreEqual<string>(
+            Assert.Equal(
                 string.Format(" {0}(System.Int32,System.Collections.Generic.List(System.Int32),System.Double)", "test"),
-                typeName.ToString(),
-                "Expecting correct modifiers text.");
+                typeName.ToString());
         }
 
-        [TestMethod]
+        [Fact]
         [Description("Verifies CompositionServices.GetDefaultContractName method.")]
         public void GetDefaultContractNameTest()
         {
@@ -89,21 +84,21 @@ namespace System.ComponentModel.Composition
             foreach (var e in expectations)
             {
                 string typeIdentity = AttributedModelServices.GetTypeIdentity(e.Input);
-                Assert.AreEqual(e.Output, typeIdentity);
+                Assert.Equal(e.Output, typeIdentity);
             }
 
             // Do it again to excerise the cache.
             foreach (var e in expectations)
             {
                 string typeIdentity = AttributedModelServices.GetTypeIdentity(e.Input);
-                Assert.AreEqual(e.Output, typeIdentity);
+                Assert.Equal(e.Output, typeIdentity);
             }
         }
 
         public Type EmitGenericType(string typeName, Type genericArgumentType)
         {
             var assemblyName = new AssemblyName("EmittedTestAssembly");
-            var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
             var moduleBuilder = assemblyBuilder.DefineDynamicModule("EmittedTestModule");
             var typeBuilder = moduleBuilder.DefineType(typeName, TypeAttributes.Public);
 

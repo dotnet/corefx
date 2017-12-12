@@ -1,42 +1,35 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-//using System.ComponentModel.Composition.Factories;
-using System.ComponentModel.Composition.Hosting;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.ComponentModel.Composition.Primitives;
-using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Threading;
 using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition.Hosting
 {
-    [TestClass]
     public class FilteredCatalogTests
     {
-        [TestMethod]
+        [Fact]
         public void Constructor_ThrowsOnNullCatalog()
         {
-            ExceptionAssert.ThrowsArgumentNull("catalog", () =>
+            Assert.Throws<ArgumentNullException>("catalog", () =>
             {
                 new FilteredCatalog(null, p => true);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_ThrowsOnNullFilter()
         {
-            ExceptionAssert.ThrowsArgumentNull("filter", () =>
+            Assert.Throws<ArgumentNullException>("filter", () =>
             {
                 new FilteredCatalog(CreateCatalog(), null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Parts_Throws_WhenDisposed()
         {
             var originalCatalog = this.CreateCatalog();
@@ -49,18 +42,18 @@ namespace System.ComponentModel.Composition.Hosting
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Parts()
         {
             var originalCatalog = this.CreateCatalog();
             using (FilteredCatalog catalog = new FilteredCatalog(originalCatalog, p => p.Exports<IContract1>()))
             {
                 var parts = catalog.Parts;
-                Assert.AreEqual(2, parts.Count());
+                Assert.Equal(2, parts.Count());
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports_Throws_WhenDisposed()
         {
             var originalCatalog = this.CreateCatalog();
@@ -73,39 +66,38 @@ namespace System.ComponentModel.Composition.Hosting
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports()
         {
             var originalCatalog = this.CreateCatalog();
             using (FilteredCatalog catalog = new FilteredCatalog(originalCatalog, p => p.Exports<IContract1>()))
             {
                 var parts1 = catalog.GetExports<IContract1>();
-                Assert.AreEqual(2, parts1.Count());
+                Assert.Equal(2, parts1.Count());
 
                 var parts2 = catalog.GetExports<IContract2>();
-                Assert.AreEqual(0, parts2.Count());
+                Assert.Equal(0, parts2.Count());
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsWithGenerics()
         {
             var originalCatalog = new TypeCatalog(typeof(GenericExporter<,>), typeof(Exporter11), typeof(Exporter22));
             using (FilteredCatalog catalog = new FilteredCatalog(originalCatalog, p => p.Exports<IContract1>()).IncludeDependents())
             {
                 var parts1 = catalog.GetExports<IContract1>();
-                Assert.AreEqual(1, parts1.Count());
+                Assert.Equal(1, parts1.Count());
 
                 using (var container = new CompositionContainer(catalog))
                 {
                     var results = container.GetExports<IGenericContract<string, string>>();
-                    Assert.AreEqual(1, results.Count());
+                    Assert.Equal(1, results.Count());
                 }
             }
-        } 
+        }
 
-
-        [TestMethod]
+        [Fact]
         public void Complement_Throws_WhenDisposed()
         {
             var originalCatalog = this.CreateCatalog();
@@ -118,24 +110,24 @@ namespace System.ComponentModel.Composition.Hosting
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Complement()
         {
             var originalCatalog = this.CreateCatalog();
             using (FilteredCatalog catalog = new FilteredCatalog(originalCatalog, p => p.Exports<IContract1>()))
             {
                 var c = catalog.Complement;
-                Assert.IsNotNull(c);
+                Assert.NotNull(c);
 
                 var parts1 = c.GetExports<IContract2>();
-                Assert.AreEqual(2, parts1.Count());
+                Assert.Equal(2, parts1.Count());
 
                 var parts2 = c.GetExports<IContract1>();
-                Assert.AreEqual(0, parts2.Count());
+                Assert.Equal(0, parts2.Count());
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Complement_Repeatable_Read()
         {
             var originalCatalog = this.CreateCatalog();
@@ -144,11 +136,11 @@ namespace System.ComponentModel.Composition.Hosting
                 var c1 = catalog.Complement;
                 var c2 = catalog.Complement;
 
-                Assert.AreSame(c1, c2);
+                Assert.Same(c1, c2);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Complement_ComplementOfComplement()
         {
             var originalCatalog = this.CreateCatalog();
@@ -157,11 +149,11 @@ namespace System.ComponentModel.Composition.Hosting
                 var c1 = catalog.Complement;
                 var c2 = c1.Complement;
 
-                Assert.AreSame(catalog, c2);
+                Assert.Same(catalog, c2);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void FilteredNotifications()
         {
             var catalog1 = CreateSubCatalog1();
@@ -181,11 +173,11 @@ namespace System.ComponentModel.Composition.Hosting
 
             filter1.Changing += (object s, ComposablePartCatalogChangeEventArgs a) =>
             {
-                Assert.AreSame(filter1, s);
-                Assert.IsFalse(filter1Ing);
-                Assert.IsFalse(filter1Ed);
-                Assert.IsNull(ingArgs);
-                Assert.IsNull(edArgs);
+                Assert.Same(filter1, s);
+                Assert.False(filter1Ing);
+                Assert.False(filter1Ed);
+                Assert.Null(ingArgs);
+                Assert.Null(edArgs);
 
                 filter1Ing = true;
                 ingArgs = a;
@@ -193,24 +185,24 @@ namespace System.ComponentModel.Composition.Hosting
 
             filter1.Changed += (object s, ComposablePartCatalogChangeEventArgs a) =>
             {
-                Assert.IsTrue(filter1Ing);
-                Assert.IsFalse(filter1Ed);
-                Assert.IsNotNull(ingArgs);
-                Assert.IsNull(edArgs);
+                Assert.True(filter1Ing);
+                Assert.False(filter1Ed);
+                Assert.NotNull(ingArgs);
+                Assert.Null(edArgs);
 
                 filter1Ed = true;
                 edArgs = a;
-                EnumerableAssert.AreSequenceEqual(ingArgs.AddedDefinitions, edArgs.AddedDefinitions);
-                EnumerableAssert.AreSequenceEqual(ingArgs.RemovedDefinitions, edArgs.RemovedDefinitions);
+                EqualityExtensions.CheckEquals(ingArgs.AddedDefinitions, edArgs.AddedDefinitions);
+                EqualityExtensions.CheckEquals(ingArgs.RemovedDefinitions, edArgs.RemovedDefinitions);
             };
 
             filter2.Changing += (object s, ComposablePartCatalogChangeEventArgs a) =>
             {
-                Assert.AreSame(filter2, s);
-                Assert.IsFalse(filter2Ing);
-                Assert.IsFalse(filter2Ed);
-                Assert.IsNull(ingArgs);
-                Assert.IsNull(edArgs);
+                Assert.Same(filter2, s);
+                Assert.False(filter2Ing);
+                Assert.False(filter2Ed);
+                Assert.Null(ingArgs);
+                Assert.Null(edArgs);
 
                 filter2Ing = true;
                 ingArgs = a;
@@ -218,17 +210,16 @@ namespace System.ComponentModel.Composition.Hosting
 
             filter2.Changed += (object s, ComposablePartCatalogChangeEventArgs a) =>
             {
-                Assert.IsTrue(filter2Ing);
-                Assert.IsFalse(filter2Ed);
-                Assert.IsNotNull(ingArgs);
-                Assert.IsNull(edArgs);
+                Assert.True(filter2Ing);
+                Assert.False(filter2Ed);
+                Assert.NotNull(ingArgs);
+                Assert.Null(edArgs);
 
                 filter2Ed = true;
                 edArgs = a;
-                EnumerableAssert.AreSequenceEqual(ingArgs.AddedDefinitions, edArgs.AddedDefinitions);
-                EnumerableAssert.AreSequenceEqual(ingArgs.RemovedDefinitions, edArgs.RemovedDefinitions);
+                EqualityExtensions.CheckEquals(ingArgs.AddedDefinitions, edArgs.AddedDefinitions);
+                EqualityExtensions.CheckEquals(ingArgs.RemovedDefinitions, edArgs.RemovedDefinitions);
             };
-
 
             //at first everything is empty
 
@@ -241,18 +232,18 @@ namespace System.ComponentModel.Composition.Hosting
             edArgs = null;
 
             catalog.Catalogs.Add(catalog1);
-            Assert.IsTrue(filter1Ing);
-            Assert.IsTrue(filter1Ed);
-            Assert.IsFalse(filter2Ing);
-            Assert.IsFalse(filter2Ed);
+            Assert.True(filter1Ing);
+            Assert.True(filter1Ed);
+            Assert.False(filter2Ing);
+            Assert.False(filter2Ed);
 
-            Assert.AreEqual(edArgs.AddedDefinitions.Count(), 2);
-            Assert.AreEqual(edArgs.RemovedDefinitions.Count(), 0);
-            Assert.AreEqual(0, filter2.Parts.Count());
-            Assert.AreEqual(2, filter1.Parts.Count());
+            Assert.Equal(edArgs.AddedDefinitions.Count(), 2);
+            Assert.Equal(edArgs.RemovedDefinitions.Count(), 0);
+            Assert.Equal(0, filter2.Parts.Count());
+            Assert.Equal(2, filter1.Parts.Count());
 
-            EnumerableAssert.AreSequenceEqual(ingArgs.AddedDefinitions, catalog1.Parts);
-            EnumerableAssert.AreSequenceEqual(edArgs.AddedDefinitions, catalog1.Parts);
+            EqualityExtensions.CheckEquals(ingArgs.AddedDefinitions, catalog1.Parts);
+            EqualityExtensions.CheckEquals(edArgs.AddedDefinitions, catalog1.Parts);
 
             // add the second one
             filter1Ing = false;
@@ -263,19 +254,18 @@ namespace System.ComponentModel.Composition.Hosting
             edArgs = null;
 
             catalog.Catalogs.Add(catalog2);
-            Assert.IsTrue(filter2Ing);
-            Assert.IsTrue(filter2Ed);
-            Assert.IsFalse(filter1Ing);
-            Assert.IsFalse(filter1Ed);
+            Assert.True(filter2Ing);
+            Assert.True(filter2Ed);
+            Assert.False(filter1Ing);
+            Assert.False(filter1Ed);
 
-            Assert.AreEqual(edArgs.AddedDefinitions.Count(), 2);
-            Assert.AreEqual(edArgs.RemovedDefinitions.Count(), 0);
-            Assert.AreEqual(2, filter2.Parts.Count());
-            Assert.AreEqual(2, filter1.Parts.Count());
+            Assert.Equal(edArgs.AddedDefinitions.Count(), 2);
+            Assert.Equal(edArgs.RemovedDefinitions.Count(), 0);
+            Assert.Equal(2, filter2.Parts.Count());
+            Assert.Equal(2, filter1.Parts.Count());
 
-            EnumerableAssert.AreSequenceEqual(ingArgs.AddedDefinitions, catalog2.Parts);
-            EnumerableAssert.AreSequenceEqual(edArgs.AddedDefinitions, catalog2.Parts);
-
+            EqualityExtensions.CheckEquals(ingArgs.AddedDefinitions, catalog2.Parts);
+            EqualityExtensions.CheckEquals(edArgs.AddedDefinitions, catalog2.Parts);
 
             // remove the second one
             filter1Ing = false;
@@ -286,19 +276,18 @@ namespace System.ComponentModel.Composition.Hosting
             edArgs = null;
 
             catalog.Catalogs.Remove(catalog2);
-            Assert.IsTrue(filter2Ing);
-            Assert.IsTrue(filter2Ed);
-            Assert.IsFalse(filter1Ing);
-            Assert.IsFalse(filter1Ed);
+            Assert.True(filter2Ing);
+            Assert.True(filter2Ed);
+            Assert.False(filter1Ing);
+            Assert.False(filter1Ed);
 
-            Assert.AreEqual(edArgs.AddedDefinitions.Count(), 0);
-            Assert.AreEqual(edArgs.RemovedDefinitions.Count(), 2);
-            Assert.AreEqual(0, filter2.Parts.Count());
-            Assert.AreEqual(2, filter1.Parts.Count());
+            Assert.Equal(edArgs.AddedDefinitions.Count(), 0);
+            Assert.Equal(edArgs.RemovedDefinitions.Count(), 2);
+            Assert.Equal(0, filter2.Parts.Count());
+            Assert.Equal(2, filter1.Parts.Count());
 
-            EnumerableAssert.AreSequenceEqual(ingArgs.RemovedDefinitions, catalog2.Parts);
-            EnumerableAssert.AreSequenceEqual(edArgs.RemovedDefinitions, catalog2.Parts);
-
+            EqualityExtensions.CheckEquals(ingArgs.RemovedDefinitions, catalog2.Parts);
+            EqualityExtensions.CheckEquals(edArgs.RemovedDefinitions, catalog2.Parts);
 
             // remove the first one
             filter1Ing = false;
@@ -309,22 +298,21 @@ namespace System.ComponentModel.Composition.Hosting
             edArgs = null;
 
             catalog.Catalogs.Remove(catalog1);
-            Assert.IsTrue(filter1Ing);
-            Assert.IsTrue(filter1Ed);
-            Assert.IsFalse(filter2Ing);
-            Assert.IsFalse(filter2Ed);
+            Assert.True(filter1Ing);
+            Assert.True(filter1Ed);
+            Assert.False(filter2Ing);
+            Assert.False(filter2Ed);
 
-            Assert.AreEqual(edArgs.AddedDefinitions.Count(), 0);
-            Assert.AreEqual(edArgs.RemovedDefinitions.Count(), 2);
-            Assert.AreEqual(0, filter2.Parts.Count());
-            Assert.AreEqual(0, filter1.Parts.Count());
+            Assert.Equal(edArgs.AddedDefinitions.Count(), 0);
+            Assert.Equal(edArgs.RemovedDefinitions.Count(), 2);
+            Assert.Equal(0, filter2.Parts.Count());
+            Assert.Equal(0, filter1.Parts.Count());
 
-            EnumerableAssert.AreSequenceEqual(ingArgs.RemovedDefinitions, catalog1.Parts);
-            EnumerableAssert.AreSequenceEqual(edArgs.RemovedDefinitions, catalog1.Parts);
+            EqualityExtensions.CheckEquals(ingArgs.RemovedDefinitions, catalog1.Parts);
+            EqualityExtensions.CheckEquals(edArgs.RemovedDefinitions, catalog1.Parts);
         }
 
-
-        [TestMethod]
+        [Fact]
         public void NoNotificationsAfterDispose()
         {
             var catalog1 = CreateSubCatalog1();
@@ -335,21 +323,21 @@ namespace System.ComponentModel.Composition.Hosting
 
             filter1.Changing += (s, e) =>
             {
-                Assert.Fail("No events should be fired");
+                throw new NotImplementedException();
             };
 
             filter1.Changed += (s, e) =>
             {
-                Assert.Fail("No events should be fired");
+                throw new NotImplementedException();
             };
 
             filter1.Dispose();
 
-            Assert.IsTrue(catalog.Catalogs.Remove(catalog1));
-            Assert.IsTrue(catalog.Catalogs.Remove(catalog2));
+            Assert.True(catalog.Catalogs.Remove(catalog1));
+            Assert.True(catalog.Catalogs.Remove(catalog2));
         }
 
-        [TestMethod]
+        [Fact]
         public void DoubleDispose()
         {
             var catalog1 = CreateSubCatalog1();
@@ -360,27 +348,27 @@ namespace System.ComponentModel.Composition.Hosting
 
             filter1.Changing += (s, e) =>
             {
-                Assert.Fail("No events should be fired");
+                throw new NotImplementedException();
             };
 
             filter1.Changed += (s, e) =>
             {
-                Assert.Fail("No events should be fired");
+                throw new NotImplementedException();
             };
 
             filter1.Dispose();
             filter1.Dispose();
 
-            Assert.IsTrue(catalog.Catalogs.Remove(catalog1));
-            Assert.IsTrue(catalog.Catalogs.Remove(catalog2));
+            Assert.True(catalog.Catalogs.Remove(catalog1));
+            Assert.True(catalog.Catalogs.Remove(catalog2));
         }
 
         private ComposablePartCatalog CreateCatalog()
         {
             return new TypeCatalog(
-                typeof(Exporter11), 
-                typeof(Exporter12), 
-                typeof(Exporter21), 
+                typeof(Exporter11),
+                typeof(Exporter12),
+                typeof(Exporter21),
                 typeof(Exporter22));
 
         }
@@ -407,7 +395,7 @@ namespace System.ComponentModel.Composition.Hosting
         public class GenericExporter<T1, T2> : IGenericContract<T1, T2>
         {
             [Import]
-            IContract1 Import { get; set; } 
+            IContract1 Import { get; set; }
         }
 
         [Export(typeof(IContract1))]
@@ -429,7 +417,6 @@ namespace System.ComponentModel.Composition.Hosting
         public class Exporter22 : IContract2
         {
         }
-
 
     }
 }

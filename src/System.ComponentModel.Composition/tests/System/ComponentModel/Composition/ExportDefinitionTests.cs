@@ -1,28 +1,25 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using Microsoft.CLR.UnitTesting;
-using System.UnitTesting;
-using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Primitives;
+using System.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class ExportDefinitionTests
     {
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetMetadataPropertyToEmptyDictionary()
         {
             var definition = new DerivedExportDefinition();
 
-            EnumerableAssert.IsEmpty(definition.Metadata);
+            Assert.Empty(definition.Metadata);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetMetadataPropertyToReadOnlyDictionary()
         {
             var definition = new DerivedExportDefinition();
@@ -33,25 +30,25 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_NullAsContractNameArgument_ShouldThrowArgumentNull()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("contractName", () =>
+            Assert.Throws<ArgumentNullException>("contractName", () =>
             {
                 new ExportDefinition((string)null, new Dictionary<string, object>());
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_EmptyStringAsContractNameArgument_ShouldThrowArgument()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentException>("contractName", () =>
+            Assert.Throws<ArgumentException>("contractName", () =>
             {
                 new ExportDefinition(string.Empty, new Dictionary<string, object>());
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ValueAsContractNameArgument_ShouldSetContractNameProperty()
         {
             var expectations = Expectations.GetContractNames();
@@ -60,19 +57,19 @@ namespace System.ComponentModel.Composition
             {
                 var definition = new ExportDefinition(e, new Dictionary<string, object>());
 
-                Assert.AreEqual(e, definition.ContractName);
+                Assert.Equal(e, definition.ContractName);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_NullAsMetadataArgument_ShouldSetMetadataPropertyToEmptyDictionary()
         {
             var definition = new ExportDefinition("Contract", (IDictionary<string, object>)null); ;
 
-            EnumerableAssert.IsEmpty(definition.Metadata);
+            Assert.Empty(definition.Metadata);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_NullAsMetadataArgument_ShouldSetMetadataPropertyToReadOnlyDictionary()
         {
             var definition = new ExportDefinition("Contract", (IDictionary<string, object>)null);
@@ -83,7 +80,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_WritableDictionaryAsMetadataArgument_ShouldSetMetadataPropertyToReadOnlyDictionary()
         {
             var definition = new ExportDefinition("Contract", new Dictionary<string, object>());
@@ -94,7 +91,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_DictionaryAsMetadataArgument_ShouldSetMetadataProperty()
         {
             var expectations = Expectations.GetMetadata();
@@ -107,7 +104,7 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ContractName_WhenNotOverridden_ShouldThrowNotImplemented()
         {
             var definition = new DerivedExportDefinition();
@@ -118,7 +115,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ToString_WhenContractNameNotOverridden_ShouldThrowNotImplemented()
         {
             var definition = new DerivedExportDefinition();
@@ -129,7 +126,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ToString_ShouldReturnContractNameProperty()
         {
             var expectations = Expectations.GetContractNames();
@@ -138,11 +135,11 @@ namespace System.ComponentModel.Composition
             {
                 var definition = new ExportDefinition(e, new Dictionary<string, object>());
 
-                Assert.AreEqual(e, definition.ToString());
+                Assert.Equal(e, definition.ToString());
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ToString_ShouldReturnOverriddenContractNameProperty()
         {
             var expectations = Expectations.GetContractNamesWithEmpty();
@@ -151,7 +148,7 @@ namespace System.ComponentModel.Composition
             {
                 var definition = new DerivedExportDefinition(() => e);
 
-                Assert.AreEqual(e, definition.ToString());
+                Assert.Equal(e, definition.ToString());
             }
         }
 

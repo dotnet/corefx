@@ -1,29 +1,26 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
-using System.ComponentModel.Composition.Factories;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Reflection;
+using System.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition.Hosting
 {
-    [TestClass]
     public class AssemblyCatalogDebuggerProxyTests
     {
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void Constructor_NullAsCatalogArgument_ShouldThrowArgumentNull()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("catalog", () =>
+            AssertExtensions.Throws<ArgumentNullException>("catalog", () =>
             {
                 new AssemblyCatalogDebuggerProxy((AssemblyCatalog)null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_ValueAsCatalogArgument_ShouldSetPartsProperty()
         {
             var expectations = Expectations.GetAssemblies();
@@ -33,12 +30,12 @@ namespace System.ComponentModel.Composition.Hosting
                 var catalog = CreateAssemblyCatalog(e);
 
                 var proxy = new AssemblyCatalogDebuggerProxy(catalog);
-
-                EnumerableAssert.AreSequenceEqual(catalog.Parts, proxy.Parts);
+                
+                EqualityExtensions.CheckSequenceEquals(catalog.Parts, proxy.Parts);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_ValueAsCatalogArgument_ShouldSetAssemblyProperty()
         {
             var expectations = Expectations.GetAssemblies();
@@ -49,7 +46,7 @@ namespace System.ComponentModel.Composition.Hosting
 
                 var proxy = new AssemblyCatalogDebuggerProxy(catalog);
 
-                Assert.AreSame(catalog.Assembly, proxy.Assembly);
+                Assert.Same(catalog.Assembly, proxy.Assembly);
             }
         }
 

@@ -1,24 +1,19 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Linq;
-using System.Reflection;
-using Microsoft.CLR.UnitTesting;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
-using System.ComponentModel.Composition.UnitTesting;
-using System.ComponentModel.Composition.AttributedModel;
+using System.Linq;
 using System.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class AdvancedValueComposition
     {
-        [TestMethod]
+        [Fact]
         public void RepeatedContainerUse()
         {
             var container = ContainerFactory.Create();
@@ -32,10 +27,10 @@ namespace System.ComponentModel.Composition
             batch.AddPart(new TrivialImporter());
             container.Compose(batch);
 
-            Assert.IsTrue(e.done, "Initialization of importer should have set the done flag on E");
+            Assert.True(e.done, "Initialization of importer should have set the done flag on E");
         }
 
-        [TestMethod]
+        [Fact]
         public void FunctionsFieldsAndProperties()
         {
             Consumer c;
@@ -46,9 +41,10 @@ namespace System.ComponentModel.Composition
             batch.AddPart(c = new Consumer());
             container.Compose(batch);
 
-            Assert.AreEqual(3, c.op(c.a, c.b), "1 + 2 == 3");
+            Assert.Equal(3, c.op(c.a, c.b));
         }
-        [TestMethod]
+
+        [Fact]
         public void FunctionsFieldsAndProperties2()
         {
             Consumer c;
@@ -59,10 +55,11 @@ namespace System.ComponentModel.Composition
             batch.AddPart(c = new Consumer());
             container.Compose(batch);
 
-            Assert.AreEqual(-1, c.op(c.a, c.b), "1 - 2 == -1");
+            Assert.Equal(-1, c.op(c.a, c.b));
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void FunctionsFieldsAndProperties2_WithCatalog()
         {
             var container = ContainerFactory.CreateWithDefaultAttributedCatalog();
@@ -72,24 +69,24 @@ namespace System.ComponentModel.Composition
             batch.AddPart(c);
             container.Compose(batch);
 
-            foreach (var export in c.opInfo)
+            foreach (Lazy<Func<int,int,int>, IDictionary<string, object>> export in c.opInfo)
             {
                 if ((string)export.Metadata["Var1"] == "add")
                 {
-                    Assert.AreEqual(3, export.Value(1, 2), "1 + 2 == 3");
+                    Assert.Equal(3, export.Value(1, 2));
                 }
                 else if ((string)export.Metadata["Var1"] == "sub")
                 {
-                    Assert.AreEqual(-1, export.Value(1, 2), "1 - 2 == -1");
+                    Assert.Equal(-1, export.Value(1, 2));
                 }
                 else
                 {
-                    Assert.Fail("Unexpected value");
+                    throw new NotImplementedException();
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void FunctionsFieldsAndProperties2_StronglyTypedMetadata()
         {
             var container = ContainerFactory.CreateWithDefaultAttributedCatalog();
@@ -100,28 +97,29 @@ namespace System.ComponentModel.Composition
             {
                 if (export.Metadata.Var1 == "add")
                 {
-                    Assert.AreEqual(3, export.Value(1, 2), "1 + 2 == 3");
+                    Assert.Equal(3, export.Value(1, 2));
                 }
                 else if (export.Metadata.Var1 == "sub")
                 {
-                    Assert.AreEqual(-1, export.Value(1, 2), "1 - 2 == -1");
+                    Assert.Equal(-1, export.Value(1, 2));
                 }
                 else
                 {
-                    Assert.Fail("Unexpected value");
+                    throw new NotImplementedException();
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void InAdditionToCatalogTest()
         {
             var container = ContainerFactory.CreateWithDefaultAttributedCatalog();
 
             IDictionary<string, object> multMetadata = new Dictionary<string, object>();
-            multMetadata["Var1"]= "mult";
+            multMetadata["Var1"] = "mult";
             multMetadata[CompositionConstants.ExportTypeIdentityMetadataName] = AttributedModelServices.GetTypeIdentity(typeof(Func<int, int, int>));
-            var basicValue = ExportFactory.Create("Add", multMetadata, (() => (Func<int, int, int>)delegate(int a, int b) { return a * b; }));
+            var basicValue = ExportFactory.Create("Add", multMetadata, (() => (Func<int, int, int>)delegate (int a, int b)
+            { return a * b; }));
 
             CompositionBatch batch = new CompositionBatch();
             batch.AddExport(basicValue);
@@ -129,54 +127,55 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports<Func<int, int, int>, ITrans_ExportableTest>("Add");
 
-            Assert.AreEqual(3, exports.Count(), "There should be 3 entries for 'Add'");
+            Assert.Equal(3, exports.Count());
 
             foreach (var export in exports)
             {
                 if (export.Metadata.Var1 == "mult")
                 {
-                    Assert.AreEqual(2, export.Value(1, 2), "1 * 2 == 2");
+                    Assert.Equal(2, export.Value(1, 2));
                 }
                 else if (export.Metadata.Var1 == "add")
                 {
-                    Assert.AreEqual(3, export.Value(1, 2), "1 + 2 == 3");
+                    Assert.Equal(3, export.Value(1, 2));
                 }
                 else if (export.Metadata.Var1 == "sub")
                 {
-                    Assert.AreEqual(-1, export.Value(1, 2), "1 - 2 == -1");
+                    Assert.Equal(-1, export.Value(1, 2));
                 }
                 else
                 {
-                    Assert.Fail("Unexpected value");
+                    throw new NotImplementedException();
                 }
             }
         }
-        
-        [TestMethod]
+
+        [Fact]
+        [ActiveIssue(25498)]
         public void CollectionMetadataPropertyTest()
         {
             var container = ContainerFactory.CreateWithDefaultAttributedCatalog();
             var export = container.GetExport<ComponentWithCollectionProperty, ITrans_CollectionOfStrings>();
 
-            Assert.IsNotNull(export.Metadata, "Should have metadata");
-            Assert.IsNotNull(export.Metadata.Values, "MetadataView should have collection of values");
-            Assert.AreEqual(export.Metadata.Values.Count(), 3, "Should have 3 elements");
-            Assert.AreEqual(export.Metadata.Values.First(), "One", "First should be 'One'");
-            Assert.AreEqual(export.Metadata.Values.Skip(1).First(), "two", "First should be 'two'");
-            Assert.AreEqual(export.Metadata.Values.Skip(2).First(), "3", "First should be '3'");
+            Assert.NotNull(export.Metadata);
+            Assert.NotNull(export.Metadata.Values);
+            Assert.Equal(export.Metadata.Values.Count(), 3);
+            Assert.Equal(export.Metadata.Values.First(), "One");
+            Assert.Equal(export.Metadata.Values.Skip(1).First(), "two");
+            Assert.Equal(export.Metadata.Values.Skip(2).First(), "3");
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportExportSansNameTest()
         {
             var container = ContainerFactory.CreateWithDefaultAttributedCatalog();
 
-			UnnamedImportAndExport unnamed = container.GetExportedValue<UnnamedImportAndExport>();
-            Assert.IsNotNull(unnamed, "Should have found UnnamedImportAndExport component");
-            Assert.IsNotNull(unnamed.ImportedValue, "Component's unnamed import should have been fulfilled");
+            UnnamedImportAndExport unnamed = container.GetExportedValue<UnnamedImportAndExport>();
+            Assert.NotNull(unnamed);
+            Assert.NotNull(unnamed.ImportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void MultipleInstantiationOfStaticCatalogItem()
         {
             var container = ContainerFactory.CreateWithDefaultAttributedCatalog();
@@ -185,16 +184,16 @@ namespace System.ComponentModel.Composition
             StaticExport first = unnamedVI.Value;
             StaticExport second = unnamedVI.Value;
 
-            Assert.IsNotNull(first, "Should have created an instance");
-            Assert.IsNotNull(second, "Should have created a second instance");
-            Assert.IsTrue(object.ReferenceEquals(first, second), "Instances should be the same");
+            Assert.NotNull(first);
+            Assert.NotNull(second);
+            Assert.True(object.ReferenceEquals(first, second), "Instances should be the same");
 
             var exports = container.GetExports<StaticExport, object>();
 
-            Assert.AreEqual(1, exports.Count(), "There should still only be one exported value");
+            Assert.Equal(1, exports.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void MultipleInstantiationOfNonStaticCatalogItem()
         {
             var container = ContainerFactory.CreateWithDefaultAttributedCatalog();
@@ -204,12 +203,13 @@ namespace System.ComponentModel.Composition
             NonStaticExport first = export1.Value;
             NonStaticExport second = export2.Value;
 
-            Assert.IsNotNull(first, "Should have created an instance");
-            Assert.IsNotNull(second, "Should have created a second instance");
-            Assert.IsFalse(object.ReferenceEquals(first, second), "Instances should be different");
+            Assert.NotNull(first);
+            Assert.NotNull(second);
+            Assert.False(object.ReferenceEquals(first, second), "Instances should be different");
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void ImportIntoUntypedExportTest()
         {
             var container = ContainerFactory.Create();
@@ -223,7 +223,7 @@ namespace System.ComponentModel.Composition
             batch.AddPart(rb);
             container.Compose(batch);
 
-            Assert.AreEqual(42, u.Export.Value);
+            Assert.Equal(42, u.Export.Value);
 
             var us = new UntypedExportsImporter();
             batch = new CompositionBatch();
@@ -232,11 +232,11 @@ namespace System.ComponentModel.Composition
             batch.AddPart(us);
             container.Compose(batch);
 
-            Assert.IsNotNull(us.Exports, "Should have an enumeration");
-            Assert.AreEqual(2, us.Exports.Count(), "Should have 2 values");
+            Assert.NotNull(us.Exports);
+            Assert.Equal(2, us.Exports.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportIntoDerivationOfExportException()
         {
             var container = ContainerFactory.Create();
@@ -250,10 +250,10 @@ namespace System.ComponentModel.Composition
                                           ErrorId.ReflectionModel_ImportNotAssignableFromExport, RetryMode.DoNotRetry, () =>
             {
                 container.Compose(batch);
-            });            
+            });
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportIntoDerivationOfExportsException()
         {
             var container = ContainerFactory.Create();
@@ -263,11 +263,11 @@ namespace System.ComponentModel.Composition
             var d = new DerivedExportsImporter();
             batch.AddPart(d);
 
-            CompositionAssert.ThrowsError(ErrorId.ImportEngine_PartCannotSetImport, 
+            CompositionAssert.ThrowsError(ErrorId.ImportEngine_PartCannotSetImport,
                                           ErrorId.ReflectionModel_ImportNotAssignableFromExport, RetryMode.DoNotRetry, () =>
             {
                 container.Compose(batch);
-            });            
+            });
         }
-    }    
+    }
 }

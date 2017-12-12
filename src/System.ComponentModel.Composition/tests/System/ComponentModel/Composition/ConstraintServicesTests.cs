@@ -1,24 +1,21 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
-using System.Linq;
-using System.Linq.Expressions;
-using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
 using System.ComponentModel.Composition.ReflectionModel;
+using System.Linq.Expressions;
 using System.Reflection;
+using System.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class ConstraintServicesTests
     {
-        [TestMethod]
+        [Fact]
         public void TypeIdentityConstraint_ValidMatchingExportDef_ShouldMatch()
         {
             var contractName = "MyContract";
@@ -32,10 +29,10 @@ namespace System.ComponentModel.Composition
 
             var predicate = constraint.Compile();
 
-            Assert.IsTrue(predicate(exportDefinition));
+            Assert.True(predicate(exportDefinition));
         }
 
-        [TestMethod]
+        [Fact]
         public void TypeIdentityConstraint_ValidNonMatchingExportDef_ShouldNotMatch()
         {
             var contractName = "MyContract";
@@ -49,10 +46,10 @@ namespace System.ComponentModel.Composition
 
             var predicate = constraint.Compile();
 
-            Assert.IsFalse(predicate(exportDefinition));
+            Assert.False(predicate(exportDefinition));
         }
 
-        [TestMethod]
+        [Fact]
         public void TypeIdentityConstraint_InvalidExportDef_ShouldNotMatch()
         {
             var contractName = "MyContract";
@@ -65,10 +62,10 @@ namespace System.ComponentModel.Composition
 
             var predicate = constraint.Compile();
 
-            Assert.IsFalse(predicate(exportDefinition));
+            Assert.False(predicate(exportDefinition));
         }
 
-        [TestMethod]
+        [Fact]
         public void CreationPolicyConstraint_ValidMatchingCreationPolicy_ShouldMatch()
         {
             var contractName = "MyContract";
@@ -81,10 +78,10 @@ namespace System.ComponentModel.Composition
 
             var predicate = constraint.Compile();
 
-            Assert.IsTrue(predicate(exportDefinition));
+            Assert.True(predicate(exportDefinition));
         }
 
-        [TestMethod]
+        [Fact]
         public void CreationPolicyConstraint_ValidNonMatchingCreationPolicy_ShouldNotMatch()
         {
             var contractName = "MyContract";
@@ -97,10 +94,10 @@ namespace System.ComponentModel.Composition
 
             var predicate = constraint.Compile();
 
-            Assert.IsFalse(predicate(exportDefinition));
+            Assert.False(predicate(exportDefinition));
         }
 
-        [TestMethod]
+        [Fact]
         public void CreationPolicyConstraint_InvalidCreationPolicy_ShouldNotMatch()
         {
             var contractName = "MyContract";
@@ -113,10 +110,10 @@ namespace System.ComponentModel.Composition
 
             var predicate = constraint.Compile();
 
-            Assert.IsFalse(predicate(exportDefinition));
+            Assert.False(predicate(exportDefinition));
         }
 
-        [TestMethod]
+        [Fact]
         public void CreationPolicyConstraint_NoCreationPolicy_ShouldNotMatch()
         {
             var contractName = "MyContract";
@@ -128,10 +125,10 @@ namespace System.ComponentModel.Composition
 
             var predicate = constraint.Compile();
 
-            Assert.IsTrue(predicate(exportDefinition));
+            Assert.True(predicate(exportDefinition));
         }
 
-        [TestMethod]
+        [Fact]
         public void PartCreatorConstraint_ShouldMatchPartCreatorExportDefinition()
         {
             var partCreatorImportDef = ReflectionModelServices.CreateImportDefinition(
@@ -159,11 +156,11 @@ namespace System.ComponentModel.Composition
             var exportDefinition = new ExportDefinition(CompositionConstants.PartCreatorContractName, metadata);
 
             var predicate = partCreatorImportDef.Constraint.Compile();
-            Assert.IsTrue(partCreatorImportDef.IsConstraintSatisfiedBy(exportDefinition));
-            Assert.IsTrue(predicate(exportDefinition));
+            Assert.True(partCreatorImportDef.IsConstraintSatisfiedBy(exportDefinition));
+            Assert.True(predicate(exportDefinition));
         }
 
-        [TestMethod]
+        [Fact]
         public void TryParseConstraint_ConstraintFromCreateConstraintAsConstraintArgument1_CanParse()
         {
             var expectations = Expectations.GetContractNamesWithEmpty();
@@ -176,7 +173,7 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TryParseConstraint_ConstraintFromCreateConstraintAsConstraintArgument3_CanParse()
         {
             var contractNames = Expectations.GetContractNames();
@@ -193,7 +190,7 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TryParseConstraint_ContractNameOperatorEqualsAsConstraintArgument_CanParse()
         {
             var expectations = new ExpectationCollection<Expression<Func<ExportDefinition, bool>>, string>();
@@ -213,25 +210,25 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TryParseConstraint_MetadataContainsKeyAsConstraintArgument_CanParse()
         {
             var expectations = new ExpectationCollection<Expression<Func<ExportDefinition, bool>>, Dictionary<string, Type>>();
             expectations.Add(
-                item => typeof(string).IsInstanceOfType(item.Metadata[""]), 
-                new Dictionary<string, Type>{ {"", typeof(string) }});
+                item => typeof(string).IsInstanceOfType(item.Metadata[""]),
+                new Dictionary<string, Type> { { "", typeof(string) } });
             expectations.Add(
-                item => typeof(string).IsInstanceOfType(item.Metadata["value"]), 
-                new Dictionary<string, Type>{ {"value", typeof(string) } });
+                item => typeof(string).IsInstanceOfType(item.Metadata["value"]),
+                new Dictionary<string, Type> { { "value", typeof(string) } });
             expectations.Add(
-                item => typeof(string).IsInstanceOfType(item.Metadata["Value"]), 
-                new Dictionary<string, Type>{ {"Value", typeof(string) } });
+                item => typeof(string).IsInstanceOfType(item.Metadata["Value"]),
+                new Dictionary<string, Type> { { "Value", typeof(string) } });
             expectations.Add(
                 item => typeof(string).IsInstanceOfType(item.Metadata["Value"]) && typeof(int).IsInstanceOfType(item.Metadata["value"]),
-                new Dictionary<string, Type>{ {"Value", typeof(string)}, {"value", typeof(int) }});
+                new Dictionary<string, Type> { { "Value", typeof(string) }, { "value", typeof(int) } });
             expectations.Add(
                 item => typeof(string).IsInstanceOfType(item.Metadata["Value"]) && typeof(int).IsInstanceOfType(item.Metadata["value"]) && typeof(object).IsInstanceOfType(item.Metadata["Metadata"]),
-                new Dictionary<string, Type>{ {"Value", typeof(string)}, {"value", typeof(int)}, {"Metadata", typeof(object) } });          
+                new Dictionary<string, Type> { { "Value", typeof(string) }, { "value", typeof(int) }, { "Metadata", typeof(object) } });
 
             foreach (var e in expectations)
             {
@@ -239,7 +236,7 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TryParseConstraint_ContractNameOperatorEqualsAndMetadataContainsKeyAsConstraintArgumen_CanParse()
         {
             var expectations = new ExpectationCollection<Expression<Func<ExportDefinition, bool>>, KeyValuePair<string, Type>[]>();
@@ -250,13 +247,13 @@ namespace System.ComponentModel.Composition
                 item => item.ContractName == "ContractName" && typeof(string).IsInstanceOfType(item.Metadata["value"]),
                 new KeyValuePair<string, Type>[] { new KeyValuePair<string, Type>("value", typeof(string)) });
             expectations.Add(
-                item => item.ContractName == "ContractName"  && typeof(string).IsInstanceOfType(item.Metadata["Value"]),
+                item => item.ContractName == "ContractName" && typeof(string).IsInstanceOfType(item.Metadata["Value"]),
                 new KeyValuePair<string, Type>[] { new KeyValuePair<string, Type>("Value", typeof(string)) });
             expectations.Add(
-                item => item.ContractName == "ContractName"  && typeof(string).IsInstanceOfType(item.Metadata["Value"]) && typeof(int).IsInstanceOfType(item.Metadata["value"]),
+                item => item.ContractName == "ContractName" && typeof(string).IsInstanceOfType(item.Metadata["Value"]) && typeof(int).IsInstanceOfType(item.Metadata["value"]),
                 new KeyValuePair<string, Type>[] { new KeyValuePair<string, Type>("Value", typeof(string)), new KeyValuePair<string, Type>("value", typeof(int)) });
             expectations.Add(
-                item => item.ContractName == "ContractName"  && typeof(string).IsInstanceOfType(item.Metadata["Value"]) && typeof(int).IsInstanceOfType(item.Metadata["value"]) && typeof(object).IsInstanceOfType(item.Metadata["Metadata"]),
+                item => item.ContractName == "ContractName" && typeof(string).IsInstanceOfType(item.Metadata["Value"]) && typeof(int).IsInstanceOfType(item.Metadata["value"]) && typeof(object).IsInstanceOfType(item.Metadata["Metadata"]),
                 new KeyValuePair<string, Type>[] { new KeyValuePair<string, Type>("Value", typeof(string)), new KeyValuePair<string, Type>("value", typeof(int)), new KeyValuePair<string, Type>("Metadata", typeof(object)) });
 
             foreach (var e in expectations)
@@ -265,8 +262,7 @@ namespace System.ComponentModel.Composition
             }
         }
 
-
-        [TestMethod]
+        [Fact]
         public void TryParseConstraint_ContractNameReverseOperatorEqualsAsConstraintArgument_CanParse()
         {
             var expectations = new ExpectationCollection<Expression<Func<ExportDefinition, bool>>, string>();
@@ -288,28 +284,28 @@ namespace System.ComponentModel.Composition
 
         private static void AssertCanParse(Expression<Func<ExportDefinition, bool>> constraint, string contractName, IEnumerable<KeyValuePair<string, Type>> requiredMetadata)
         {
-            Assert.IsNotNull(constraint);
+            Assert.NotNull(constraint);
 
             string contractNameResult = null;
             IEnumerable<KeyValuePair<string, Type>> requiredMetadataResult = null;
             bool success = ContraintParser.TryParseConstraint(constraint, out contractNameResult, out requiredMetadataResult);
 
-            Assert.IsTrue(success);
-            Assert.AreEqual(contractName, contractNameResult);
+            Assert.True(success);
+            Assert.Equal(contractName, contractNameResult);
             EnumerableAssert.AreEqual(requiredMetadata, requiredMetadataResult);
         }
 
         private static void AssertCanNotParse(Expression<Func<ExportDefinition, bool>> constraint)
         {
-            Assert.IsNotNull(constraint);
+            Assert.NotNull(constraint);
 
             string contractNameResult;
             IEnumerable<KeyValuePair<string, Type>> requiredMetadataResult;
 
             var success = ContraintParser.TryParseConstraint(constraint, out contractNameResult, out requiredMetadataResult);
-            Assert.IsFalse(success);
-            Assert.IsNull(contractNameResult);
-            Assert.IsNull(requiredMetadataResult);
+            Assert.False(success);
+            Assert.Null(contractNameResult);
+            Assert.Null(requiredMetadataResult);
         }
     }
 }

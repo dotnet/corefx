@@ -1,46 +1,41 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.Serialization;
-using Microsoft.CLR.UnitTesting;
 using System.ComponentModel.Composition.Factories;
-using System.UnitTesting;
-using System.ComponentModel.Composition.AttributedModel;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
-using System.ComponentModel.Composition.UnitTesting;
+using System.Linq;
+using System.Linq.Expressions;
+using System.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class CompositionContainerTests
     {
-        [TestMethod]
+        [Fact]
         public void Constructor2_ArrayWithNullElementAsProvidersArgument_ShouldThrowArgumentException()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentException>("providers", () =>
+            Assert.Throws<ArgumentException>("providers", () =>
             {
                 new CompositionContainer(new ExportProvider[] { null });
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_ArrayWithNullElementAsProvidersArgument_ShouldThrowArgumentException()
         {
             var catalog = CatalogFactory.Create();
 
-            ExceptionAssert.ThrowsArgument<ArgumentException>("providers", () =>
+            Assert.Throws<ArgumentException>("providers", () =>
             {
                 new CompositionContainer(catalog, new ExportProvider[] { null });
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ArrayAsProvidersArgument_ShouldNotAllowModificationAfterConstruction()
         {
             var providers = new ExportProvider[] { ExportProviderFactory.Create() };
@@ -48,10 +43,10 @@ namespace System.ComponentModel.Composition
 
             providers[0] = null;
 
-            Assert.IsNotNull(container.Providers[0]);
+            Assert.NotNull(container.Providers[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_ArrayAsProvidersArgument_ShouldNotAllowModificationAfterConstruction()
         {
             var providers = new ExportProvider[] { ExportProviderFactory.Create() };
@@ -59,58 +54,58 @@ namespace System.ComponentModel.Composition
 
             providers[0] = null;
 
-            Assert.IsNotNull(container.Providers[0]);
+            Assert.NotNull(container.Providers[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetProvidersPropertyToEmptyCollection()
         {
             var container = new CompositionContainer();
 
-            EnumerableAssert.IsEmpty(container.Providers);
+            Assert.Empty(container.Providers);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_EmptyArrayAsProvidersArgument_ShouldSetProvidersPropertyToEmpty()
         {
             var container = new CompositionContainer(new ExportProvider[0]);
 
-            EnumerableAssert.IsEmpty(container.Providers);
+            Assert.Empty(container.Providers);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_EmptyArrayAsProvidersArgument_ShouldSetProvidersPropertyToEmpty()
         {
             var container = new CompositionContainer(CatalogFactory.Create(), new ExportProvider[0]);
 
-            EnumerableAssert.IsEmpty(container.Providers);
+            Assert.Empty(container.Providers);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetCatalogPropertyToNull()
         {
             var container = new CompositionContainer();
 
-            Assert.IsNull(container.Catalog);
+            Assert.Null(container.Catalog);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ShouldSetCatalogPropertyToNull()
         {
             var container = new CompositionContainer(new ExportProvider[0]);
 
-            Assert.IsNull(container.Catalog);
+            Assert.Null(container.Catalog);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_NullAsCatalogArgument_ShouldSetCatalogPropertyToNull()
         {
             var container = new CompositionContainer((ComposablePartCatalog)null, new ExportProvider[0]);
 
-            Assert.IsNull(container.Catalog);
+            Assert.Null(container.Catalog);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_ValueAsCatalogArgument_ShouldSetCatalogProperty()
         {
             var expectations = Expectations.GetCatalogs();
@@ -119,11 +114,11 @@ namespace System.ComponentModel.Composition
             {
                 var container = new CompositionContainer(e, new ExportProvider[0]);
 
-                Assert.AreSame(e, container.Catalog);
+                Assert.Same(e, container.Catalog);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Catalog_WhenDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -135,7 +130,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Providers_WhenDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -147,9 +142,8 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(579990)]  // NullReferenceException
+        [Fact]
+        [ActiveIssue(579990)]  // NullReferenceException
         public void ExportsChanged_Add_WhenDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -161,9 +155,8 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(579990)] // NullReferenceException
+        [Fact]
+        [ActiveIssue(579990)] // NullReferenceException
         public void ExportsChanged_Remove_WhenDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -175,7 +168,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void AddPart1_ImportOnlyPart_ShouldNotGetGarbageCollected()
         {
             var container = CreateCompositionContainer();
@@ -192,12 +185,12 @@ namespace System.ComponentModel.Composition
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            Assert.IsNotNull(weakRef.Target, "Import only part should not have been collected!");
+            Assert.NotNull(weakRef.Target);
 
             GC.KeepAlive(container);
         }
 
-        [TestMethod]
+        [Fact]
         public void Compose_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -210,7 +203,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfT1_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -222,7 +215,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfT2_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -234,7 +227,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView1_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -246,7 +239,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView2_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -258,7 +251,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -271,7 +264,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports2_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -283,7 +276,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfT1_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -295,7 +288,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfT2_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -307,7 +300,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView1_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -319,7 +312,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView2_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -331,7 +324,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOfT1_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -343,8 +336,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOfT2_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -356,7 +348,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT1_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -368,7 +360,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT2_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -380,7 +372,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValuesOfT1_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -392,7 +384,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValuesOfT2_WhenContainerDisposed_ShouldThrowObjectDisposed()
         {
             var container = CreateCompositionContainer();
@@ -404,29 +396,29 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_NullAsImportDefinitionArgument_ShouldThrowArgumentNull()
         {
             var container = CreateCompositionContainer();
 
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("definition", () =>
+            Assert.Throws<ArgumentNullException>("definition", () =>
             {
                 container.GetExports((ImportDefinition)null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports2_NullAsTypeArgument_ShouldThrowArgumentNull()
         {
             var container = CreateCompositionContainer();
 
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("type", () =>
+            Assert.Throws<ArgumentNullException>("type", () =>
             {
                 container.GetExports((Type)null, typeof(string), "ContractName");
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfT1_AskingForContractThatDoesNotExist_ShouldThrowCardinalityMismatch()
         {
             var container = CreateCompositionContainer();
@@ -437,7 +429,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfT2_AskingForContractThatDoesNotExist_ShouldThrowCardinalityMismatch()
         {
             var container = CreateCompositionContainer();
@@ -448,7 +440,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView1_AskingForContractThatDoesNotExist_ShouldThrowCardinalityMismatch()
         {
             var container = CreateCompositionContainer();
@@ -459,7 +451,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView2_AskingForContractThatDoesNotExist_ShouldThrowCardinalityMismatch()
         {
             var container = CreateCompositionContainer();
@@ -470,7 +462,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_DefinitionAskingForExactlyOneContractThatDoesNotExist_ShouldThrowCardinalityMismatch()
         {
             var container = CreateCompositionContainer();
@@ -483,7 +475,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_DefinitionAskingForExactlyZeroOrOneContractThatDoesNotExist_ShouldReturnEmpty()
         {
             var container = CreateCompositionContainer();
@@ -492,10 +484,10 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports(definition);
 
-            EnumerableAssert.IsEmpty(exports);
+            Assert.Empty(exports);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_DefinitionAskingForExactlyZeroOrMoreContractThatDoesNotExist_ShouldReturnEmpty()
         {
             var container = CreateCompositionContainer();
@@ -504,60 +496,60 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports(definition);
 
-            EnumerableAssert.IsEmpty(exports);
+            Assert.Empty(exports);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports2_AskingForContractThatDoesNotExist_ShouldReturnNoExports()
         {
             var container = CreateCompositionContainer();
 
             var exports = container.GetExports(typeof(string), (Type)null, "Contract");
 
-            EnumerableAssert.IsEmpty(exports);
+            Assert.Empty(exports);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfT1_AskingForContractThatDoesNotExist_ShouldReturnEmpty()
         {
             var container = CreateCompositionContainer();
 
             var exports = container.GetExports<string>();
 
-            EnumerableAssert.IsEmpty(exports);
+            Assert.Empty(exports);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfT2_AskingForContractThatDoesNotExist_ShouldReturnEmpty()
         {
             var container = CreateCompositionContainer();
 
             var exports = container.GetExports<string>("Contract");
 
-            EnumerableAssert.IsEmpty(exports);
+            Assert.Empty(exports);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView1_AskingForContractThatDoesNotExist_ShouldReturnEmpty()
         {
             var container = CreateCompositionContainer();
 
             var exports = container.GetExports<string, object>();
 
-            EnumerableAssert.IsEmpty(exports);
+            Assert.Empty(exports);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView2_AskingForContractThatDoesNotExist_ShouldReturnEmpty()
         {
             var container = CreateCompositionContainer();
 
             var exports = container.GetExports<string, object>("Contract");
 
-            EnumerableAssert.IsEmpty(exports);
+            Assert.Empty(exports);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOfT1_AskingForContractThatDoesNotExist_ShouldThrowCardinalityMismatch()
         {
             var container = CreateCompositionContainer();
@@ -568,7 +560,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOfT2_AskingForContractThatDoesNotExist_ShouldThrowCardinalityMismatch()
         {
             var container = CreateCompositionContainer();
@@ -579,107 +571,107 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT1_AskingForStringContractThatDoesNotExist_ShouldReturnNull()
         {
             var container = CreateCompositionContainer();
 
             var exportedValue = container.GetExportedValueOrDefault<string>();
 
-            Assert.IsNull(exportedValue);
+            Assert.Null(exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT2_AskingForStringContractThatDoesNotExist_ShouldReturnNull()
         {
             var container = CreateCompositionContainer();
 
             var exportedValue = container.GetExportedValueOrDefault<string>("Contract");
 
-            Assert.IsNull(exportedValue);
+            Assert.Null(exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT1_AskingForInt32ContractThatDoesNotExist_ShouldReturnZero()
         {
             var container = CreateCompositionContainer();
 
             var exportedValue = container.GetExportedValueOrDefault<int>();
 
-            Assert.AreEqual(0, exportedValue);
+            Assert.Equal(0, exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT2_AskingForInt32ContractThatDoesNotExist_ShouldReturnZero()
         {
             var container = CreateCompositionContainer();
 
             var exportedValue = container.GetExportedValueOrDefault<int>("Contract");
 
-            Assert.AreEqual(0, exportedValue);
+            Assert.Equal(0, exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValuesOfT1_AskingForContractThatDoesNotExist_ShouldReturnEmpty()
         {
             var container = CreateCompositionContainer();
 
             var exports = container.GetExportedValues<string>();
 
-            EnumerableAssert.IsEmpty(exports);
+            Assert.Empty(exports);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValuesOfT2_AskingForContractThatDoesNotExist_ShouldReturnEmpty()
         {
             var container = CreateCompositionContainer();
 
             var exports = container.GetExports<string>("Contract");
 
-            EnumerableAssert.IsEmpty(exports);
+            Assert.Empty(exports);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfT1_AskingForContractWithOneExport_ShouldReturnExport()
         {
             var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(String)), "Value"));
 
             var export = container.GetExport<string>();
 
-            Assert.AreEqual("Value", export.Value);
+            Assert.Equal("Value", export.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfT2_AskingForContractWithOneExport_ShouldReturnExport()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
             var export = container.GetExport<string>("Contract");
 
-            Assert.AreEqual("Value", export.Value);
+            Assert.Equal("Value", export.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView1_AskingForContractWithOneExport_ShouldReturnExport()
         {
             var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(String)), "Value"));
 
             var export = container.GetExport<string, object>();
 
-            Assert.AreEqual("Value", export.Value);
+            Assert.Equal("Value", export.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView2_AskingForContractWithOneExport_ShouldReturnExport()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
             var export = container.GetExport<string, object>("Contract");
 
-            Assert.AreEqual("Value", export.Value);
+            Assert.Equal("Value", export.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForExactlyOneContractWithOneExport_ShouldReturnExport()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
@@ -691,7 +683,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Value");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForZeroOrOneContractWithOneExport_ShouldReturnExport()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
@@ -703,7 +695,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Value");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForZeroOrMoreContractWithOneExport_ShouldReturnExport()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
@@ -715,7 +707,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Value");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports2_AskingForContractWithOneExport_ShouldReturnOneExport()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
@@ -725,7 +717,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Value");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfT1_AskingForContractWithOneExport_ShouldReturnOneExport()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
@@ -735,7 +727,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Value");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfT2_AskingForContractWithOneExport_ShouldReturnOneExport()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
@@ -745,7 +737,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Value");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView1_AskingForContractWithOneExport_ShouldReturnOneExport()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
@@ -755,7 +747,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Value");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView2_AskingForContractWithOneExport_ShouldReturnOneExport()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
@@ -765,57 +757,57 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Value");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOfT1_AskingForContractWithOneExport_ShouldReturnExport()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
 
             var exportedValue = container.GetExportedValue<string>();
 
-            Assert.AreEqual("Value", exportedValue);
+            Assert.Equal("Value", exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOfT2_AskingForContractWithOneExport_ShouldReturnExport()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
             var exportedValue = container.GetExportedValue<string>("Contract");
 
-            Assert.AreEqual("Value", exportedValue);
+            Assert.Equal("Value", exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT1_AskingForContractWithOneExport_ShouldReturnExport()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
 
             var exportedValue = container.GetExportedValueOrDefault<string>();
 
-            Assert.AreEqual("Value", exportedValue);
+            Assert.Equal("Value", exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT2_AskingForContractWithOneExport_ShouldReturnExport()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
             var exportedValue = container.GetExportedValueOrDefault<string>("Contract");
 
-            Assert.AreEqual("Value", exportedValue);
+            Assert.Equal("Value", exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValuesOfT1_AskingForContractWithOneExport_ShouldReturnOneExport()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
 
             var exportedValues = container.GetExportedValues<string>();
-            
-            EnumerableAssert.AreEqual(exportedValues, "Value");            
+
+            EnumerableAssert.AreEqual(exportedValues, "Value");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValuesOfT2_AskingForContractWithOneExport_ShouldReturnOneExport()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
@@ -825,7 +817,7 @@ namespace System.ComponentModel.Composition
             EnumerableAssert.AreEqual(exportedValues, "Value");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfT1_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(String)), "Value1", "Value2"));
@@ -836,7 +828,7 @@ namespace System.ComponentModel.Composition
              });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfT2_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
@@ -847,7 +839,7 @@ namespace System.ComponentModel.Composition
              });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView1_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(String)), "Value1", "Value2"));
@@ -858,7 +850,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView2_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
@@ -869,7 +861,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForExactlyOneContractWithMultipleExports_ShouldThrowCardinalityMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
@@ -882,17 +874,17 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForZeroOrOneContractWithMultipleExports_ShouldReturnZero()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
 
             var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrOne);
 
-            Assert.AreEqual(0, container.GetExports(definition).Count());
+            Assert.Equal(0, container.GetExports(definition).Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForZeroOrMoreContractWithMultipleExports_ShouldReturnMultipleExports()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
@@ -904,7 +896,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Value1", "Value2");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports2_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
@@ -914,7 +906,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Value1", "Value2");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfT1_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(String), "Value1", "Value2"));
@@ -924,7 +916,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Value1", "Value2");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfT2_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
@@ -934,7 +926,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Value1", "Value2");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView1_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
@@ -944,7 +936,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Value1", "Value2");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView2_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
@@ -954,45 +946,45 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Value1", "Value2");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOfT1_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
 
             ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
             {
-                 container.GetExportedValue<string>();
+                container.GetExportedValue<string>();
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOfT2_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
 
             ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
             {
-                 container.GetExportedValue<string>("Contract");
+                container.GetExportedValue<string>("Contract");
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT1_AskingForContractWithMultipleExports_ShouldReturnZero()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
 
-            Assert.IsNull(container.GetExportedValueOrDefault<string>());
+            Assert.Null(container.GetExportedValueOrDefault<string>());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT2_AskingForContractWithMultipleExports_ShouldReturnZero()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
 
-            Assert.IsNull(container.GetExportedValueOrDefault<string>("Contract"));
+            Assert.Null(container.GetExportedValueOrDefault<string>("Contract"));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValuesOfT1_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
@@ -1002,7 +994,7 @@ namespace System.ComponentModel.Composition
             EnumerableAssert.AreEqual(exportedValues, "Value1", "Value2");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValuesOfT2_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), "Value1", "Value2"));
@@ -1012,7 +1004,7 @@ namespace System.ComponentModel.Composition
             EnumerableAssert.AreEqual(exportedValues, "Value1", "Value2");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForExactlyOneAndAll_ShouldThrowCardinalityMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract1", "Value1", "Value2", "Value3"),
@@ -1026,7 +1018,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForZeroOrOneAndAll_ShouldReturnZero()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract1", "Value1", "Value2", "Value3"),
@@ -1034,10 +1026,10 @@ namespace System.ComponentModel.Composition
 
             var definition = ImportDefinitionFactory.Create(import => true, ImportCardinality.ZeroOrOne);
 
-            Assert.AreEqual(0, container.GetExports(definition).Count());
+            Assert.Equal(0, container.GetExports(definition).Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForZeroOrMoreAndAll_ShouldReturnAll()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract1", "Value1", "Value2", "Value3"),
@@ -1051,7 +1043,7 @@ namespace System.ComponentModel.Composition
                                             "Value4", "Value5", "Value6");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfT1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
@@ -1064,7 +1056,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfT2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
@@ -1077,7 +1069,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
@@ -1090,7 +1082,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
@@ -1103,14 +1095,14 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
 
             var exports = container.GetExports(typeof(string), (Type)null, "Contract");
 
-            Assert.AreEqual(1, exports.Count());
+            Assert.Equal(1, exports.Count());
 
             var export = exports.ElementAt(0);
 
@@ -1120,14 +1112,14 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfT1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
 
             var exports = container.GetExports<string>();
 
-            Assert.AreEqual(1, exports.Count());
+            Assert.Equal(1, exports.Count());
 
             var export = exports.ElementAt(0);
 
@@ -1137,14 +1129,14 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfT2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
 
             var exports = container.GetExports<string>("Contract");
 
-            Assert.AreEqual(1, exports.Count());
+            Assert.Equal(1, exports.Count());
 
             var export = exports.ElementAt(0);
 
@@ -1154,14 +1146,14 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
 
             var exports = container.GetExports<string, object>();
 
-            Assert.AreEqual(1, exports.Count());
+            Assert.Equal(1, exports.Count());
 
             var export = exports.ElementAt(0);
 
@@ -1171,14 +1163,14 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
 
             var exports = container.GetExports<string, object>("Contract");
 
-            Assert.AreEqual(1, exports.Count());
+            Assert.Equal(1, exports.Count());
 
             var export = exports.ElementAt(0);
 
@@ -1188,7 +1180,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOfT1_StringAsTTypeArgumentAskingForContractWithObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
@@ -1199,7 +1191,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOfT2_StringAsTTypeArgumentAskingForContractWithObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
@@ -1210,7 +1202,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT1_StringAsTTypeArgumentAskingForContractWithObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
@@ -1221,7 +1213,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT2_StringAsTTypeArgumentAskingForContractWithObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
@@ -1232,7 +1224,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValuesOfT1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
@@ -1243,7 +1235,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValuesOfT2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
         {
             var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
@@ -1254,8 +1246,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-
-        [TestMethod]
+        [Fact]
         public void GetExportOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
@@ -1263,10 +1254,10 @@ namespace System.ComponentModel.Composition
 
             var export = child.GetExport<string>();
 
-            Assert.AreEqual("Parent", export.Value);
+            Assert.Equal("Parent", export.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1274,10 +1265,10 @@ namespace System.ComponentModel.Composition
 
             var export = child.GetExport<string>("Contract");
 
-            Assert.AreEqual("Parent", export.Value);
+            Assert.Equal("Parent", export.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
@@ -1285,10 +1276,10 @@ namespace System.ComponentModel.Composition
 
             var export = child.GetExport<string, object>();
 
-            Assert.AreEqual("Parent", export.Value);
+            Assert.Equal("Parent", export.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1296,10 +1287,10 @@ namespace System.ComponentModel.Composition
 
             var export = child.GetExport<string, object>("Contract");
 
-            Assert.AreEqual("Parent", export.Value);
+            Assert.Equal("Parent", export.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForExactlyOneContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1312,7 +1303,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForZeroOrOneContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1325,7 +1316,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForZeroOrMoreContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1338,7 +1329,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1349,7 +1340,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
@@ -1360,7 +1351,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1371,7 +1362,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
@@ -1382,7 +1373,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1390,10 +1381,10 @@ namespace System.ComponentModel.Composition
 
             var exports = child.GetExports<string, object>("Contract");
 
-            ExportsAssert.AreEqual(exports, "Parent");            
+            ExportsAssert.AreEqual(exports, "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
@@ -1401,10 +1392,10 @@ namespace System.ComponentModel.Composition
 
             var exportedValue = child.GetExportedValue<string>();
 
-            Assert.AreEqual("Parent", exportedValue);
+            Assert.Equal("Parent", exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1412,10 +1403,10 @@ namespace System.ComponentModel.Composition
 
             var exportedValue = child.GetExportedValue<string>("Contract");
 
-            Assert.AreEqual("Parent", exportedValue);
+            Assert.Equal("Parent", exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
@@ -1423,10 +1414,10 @@ namespace System.ComponentModel.Composition
 
             var exportedValue = child.GetExportedValueOrDefault<string>();
 
-            Assert.AreEqual("Parent", exportedValue);
+            Assert.Equal("Parent", exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1434,10 +1425,10 @@ namespace System.ComponentModel.Composition
 
             var exportedValue = child.GetExportedValueOrDefault<string>("Contract");
 
-            Assert.AreEqual("Parent", exportedValue);
+            Assert.Equal("Parent", exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValuesOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
@@ -1448,7 +1439,7 @@ namespace System.ComponentModel.Composition
             EnumerableAssert.AreEqual(exportedValues, "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValuesOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1459,7 +1450,7 @@ namespace System.ComponentModel.Composition
             EnumerableAssert.AreEqual(exportedValues, "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
         {
             var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
@@ -1467,10 +1458,10 @@ namespace System.ComponentModel.Composition
 
             var export = child.GetExport<string>();
 
-            Assert.AreEqual("Child", export.Value);
+            Assert.Equal("Child", export.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1478,10 +1469,10 @@ namespace System.ComponentModel.Composition
 
             var export = child.GetExport<string>("Contract");
 
-            Assert.AreEqual("Child", export.Value);
+            Assert.Equal("Child", export.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
         {
             var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
@@ -1489,10 +1480,10 @@ namespace System.ComponentModel.Composition
 
             var export = child.GetExport<string, object>();
 
-            Assert.AreEqual("Child", export.Value);
+            Assert.Equal("Child", export.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1500,10 +1491,10 @@ namespace System.ComponentModel.Composition
 
             var export = child.GetExport<string, object>("Contract");
 
-            Assert.AreEqual("Child", export.Value);
+            Assert.Equal("Child", export.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForExactlyOneContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1516,7 +1507,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Child");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForZeroOrOneContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1529,7 +1520,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Child");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForZeroOrMoreContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1542,7 +1533,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Child", "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1553,7 +1544,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Child", "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
         {
             var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
@@ -1564,7 +1555,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Child", "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1575,19 +1566,18 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Child", "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
         {
             var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
             var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
-
 
             var exports = child.GetExports<string, object>();
 
             ExportsAssert.AreEqual(exports, "Child", "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1598,7 +1588,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(exports, "Child", "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
         {
             var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
@@ -1606,10 +1596,10 @@ namespace System.ComponentModel.Composition
 
             var exportedValue = child.GetExportedValue<string>();
 
-            Assert.AreEqual("Child", exportedValue);
+            Assert.Equal("Child", exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1617,10 +1607,10 @@ namespace System.ComponentModel.Composition
 
             var exportedValue = child.GetExportedValue<string>("Contract");
 
-            Assert.AreEqual("Child", exportedValue);
+            Assert.Equal("Child", exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
         {
             var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
@@ -1628,10 +1618,10 @@ namespace System.ComponentModel.Composition
 
             var exportedValue = child.GetExportedValueOrDefault<string>();
 
-            Assert.AreEqual("Child", exportedValue);
+            Assert.Equal("Child", exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValueOrDefaultOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1639,10 +1629,10 @@ namespace System.ComponentModel.Composition
 
             var exportedValue = child.GetExportedValueOrDefault<string>("Contract");
 
-            Assert.AreEqual("Child", exportedValue);
+            Assert.Equal("Child", exportedValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValuesOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
         {
             var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
@@ -1653,7 +1643,7 @@ namespace System.ComponentModel.Composition
             EnumerableAssert.AreEqual(exportedValues, "Child", "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportedValuesOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
         {
             var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
@@ -1664,7 +1654,7 @@ namespace System.ComponentModel.Composition
             EnumerableAssert.AreEqual(exportedValues, "Child", "Parent");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView1_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
         {
             var metadata = new Dictionary<string, object>();
@@ -1672,20 +1662,20 @@ namespace System.ComponentModel.Composition
             metadata.Add("Metadata2", "MetadataValue2");
             metadata.Add("Metadata3", "MetadataValue3");
 
-            var container = ContainerFactory.Create(new MicroExport("Another",      metadata, "Value1"),
+            var container = ContainerFactory.Create(new MicroExport("Another", metadata, "Value1"),
                                                     new MicroExport(typeof(string), metadata, "Value1"),
-                                                    new MicroExport(typeof(string),           "Value2"));
+                                                    new MicroExport(typeof(string), "Value2"));
 
             var export = container.GetExport<string, IMetadataView>();
             var metadataExport = (Lazy<string, IMetadataView>)export;
 
-            Assert.AreEqual("Value1", metadataExport.Value);
-            Assert.AreEqual("MetadataValue1", metadataExport.Metadata.Metadata1);
-            Assert.AreEqual("MetadataValue2", metadataExport.Metadata.Metadata2);
-            Assert.AreEqual("MetadataValue3", metadataExport.Metadata.Metadata3);
+            Assert.Equal("Value1", metadataExport.Value);
+            Assert.Equal("MetadataValue1", metadataExport.Metadata.Metadata1);
+            Assert.Equal("MetadataValue2", metadataExport.Metadata.Metadata2);
+            Assert.Equal("MetadataValue3", metadataExport.Metadata.Metadata3);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportOfTTMetadataView2_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
         {
             var metadata = new Dictionary<string, object>();
@@ -1700,13 +1690,13 @@ namespace System.ComponentModel.Composition
             var export = container.GetExport<string, IMetadataView>("Contract");
             var metadataExport = (Lazy<string, IMetadataView>)export;
 
-            Assert.AreEqual("Value1", metadataExport.Value);
-            Assert.AreEqual("MetadataValue1", metadataExport.Metadata.Metadata1);
-            Assert.AreEqual("MetadataValue2", metadataExport.Metadata.Metadata2);
-            Assert.AreEqual("MetadataValue3", metadataExport.Metadata.Metadata3);
+            Assert.Equal("Value1", metadataExport.Value);
+            Assert.Equal("MetadataValue1", metadataExport.Metadata.Metadata1);
+            Assert.Equal("MetadataValue2", metadataExport.Metadata.Metadata2);
+            Assert.Equal("MetadataValue3", metadataExport.Metadata.Metadata3);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
         {
             var metadata = new Dictionary<string, object>();
@@ -1725,15 +1715,15 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports(definition);
 
-            Assert.AreEqual(1, exports.Count());
+            Assert.Equal(1, exports.Count());
 
             var export = exports.First();
 
-            Assert.AreEqual("Value1", export.Value);
+            Assert.Equal("Value1", export.Value);
             EnumerableAssert.AreEqual(metadata, export.Metadata);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports2_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
         {
             var metadata = new Dictionary<string, object>();
@@ -1747,20 +1737,20 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports(typeof(string), typeof(IMetadataView), "Contract");
 
-            Assert.AreEqual(1, exports.Count());
+            Assert.Equal(1, exports.Count());
 
             var export = exports.First();
             IMetadataView exportMetadata = export.Metadata as IMetadataView;
 
-            Assert.AreEqual("Value1", export.Value);
-            Assert.IsNotNull(exportMetadata);
+            Assert.Equal("Value1", export.Value);
+            Assert.NotNull(exportMetadata);
 
-            Assert.AreEqual("MetadataValue1", exportMetadata.Metadata1);
-            Assert.AreEqual("MetadataValue2", exportMetadata.Metadata2);
-            Assert.AreEqual("MetadataValue3", exportMetadata.Metadata3);
+            Assert.Equal("MetadataValue1", exportMetadata.Metadata1);
+            Assert.Equal("MetadataValue2", exportMetadata.Metadata2);
+            Assert.Equal("MetadataValue3", exportMetadata.Metadata3);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView1_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
         {
             var metadata = new Dictionary<string, object>();
@@ -1774,17 +1764,17 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports<string, IMetadataView>();
 
-            Assert.AreEqual(1, exports.Count());
+            Assert.Equal(1, exports.Count());
 
             var export = (Lazy<string, IMetadataView>)exports.First();
 
-            Assert.AreEqual("Value1", export.Value);
-            Assert.AreEqual("MetadataValue1", export.Metadata.Metadata1);
-            Assert.AreEqual("MetadataValue2", export.Metadata.Metadata2);
-            Assert.AreEqual("MetadataValue3", export.Metadata.Metadata3);
+            Assert.Equal("Value1", export.Value);
+            Assert.Equal("MetadataValue1", export.Metadata.Metadata1);
+            Assert.Equal("MetadataValue2", export.Metadata.Metadata2);
+            Assert.Equal("MetadataValue3", export.Metadata.Metadata3);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExportsOfTTMetadataView2_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
         {
             var metadata = new Dictionary<string, object>();
@@ -1798,18 +1788,17 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports<string, IMetadataView>("Contract");
 
-            Assert.AreEqual(1, exports.Count());
+            Assert.Equal(1, exports.Count());
 
             var export = (Lazy<string, IMetadataView>)exports.First();
 
-            Assert.AreEqual("Value1", export.Value);
-            Assert.AreEqual("MetadataValue1", export.Metadata.Metadata1);
-            Assert.AreEqual("MetadataValue2", export.Metadata.Metadata2);
-            Assert.AreEqual("MetadataValue3", export.Metadata.Metadata3);
+            Assert.Equal("Value1", export.Value);
+            Assert.Equal("MetadataValue1", export.Metadata.Metadata1);
+            Assert.Equal("MetadataValue2", export.Metadata.Metadata2);
+            Assert.Equal("MetadataValue3", export.Metadata.Metadata3);
         }
 
-
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForExactlyOneAndAllWhenContainerEmpty_ShouldThrowCardinalityMismatch()
         {
             var container = CreateCompositionContainer();
@@ -1822,7 +1811,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForZeroOrOneAndAllWhenContainerEmpty_ShouldReturnEmpty()
         {
             var container = CreateCompositionContainer();
@@ -1831,10 +1820,10 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports(definition);
 
-            EnumerableAssert.IsEmpty(exports);
+            Assert.Empty(exports);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports1_AskingForExactlyOneAndAllWhenContainerEmpty_ShouldReturnEmpty()
         {
             var container = CreateCompositionContainer();
@@ -1843,10 +1832,10 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports(definition);
 
-            EnumerableAssert.IsEmpty(exports);
+            Assert.Empty(exports);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovePart_PartNotInContainerAsPartArgument_ShouldNotCauseImportsToBeRebound()
         {
             const string contractName = "Contract";
@@ -1855,9 +1844,8 @@ namespace System.ComponentModel.Composition
             var importer = PartFactory.CreateImporter(contractName);
             var container = ContainerFactory.Create(exporter, importer);
 
-
-            Assert.AreEqual(1, importer.Value);
-            Assert.AreEqual(1, importer.ImportSatisfiedCount);
+            Assert.Equal(1, importer.Value);
+            Assert.Equal(1, importer.ImportSatisfiedCount);
 
             var doesNotExistInContainer = PartFactory.CreateExporter(new MicroExport(contractName, 2));
 
@@ -1865,10 +1853,10 @@ namespace System.ComponentModel.Composition
             batch.RemovePart(doesNotExistInContainer);
             container.Compose(batch);
 
-            Assert.AreEqual(1, importer.ImportSatisfiedCount);
+            Assert.Equal(1, importer.ImportSatisfiedCount);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovePart_PartInContainerQueueAsPartArgument_ShouldNotLeavePartInContainer()
         {
             const string contractName = "Contract";
@@ -1881,32 +1869,32 @@ namespace System.ComponentModel.Composition
             batch.RemovePart(exporter);
             container.Compose(batch);
 
-            Assert.IsNull(importer.Value);
-            Assert.AreEqual(2, importer.ImportSatisfiedCount);
+            Assert.Null(importer.Value);
+            Assert.Equal(2, importer.ImportSatisfiedCount);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovePart_PartAlreadyRemovedAsPartArgument_ShouldNotThrow()
         {
             var exporter = PartFactory.CreateExporter(new MicroExport("Contract", 1));
             var container = ContainerFactory.Create(exporter);
 
-            Assert.AreEqual(1, container.GetExportedValue<int>("Contract"));
+            Assert.Equal(1, container.GetExportedValue<int>("Contract"));
 
             CompositionBatch batch = new CompositionBatch();
             batch.RemovePart(exporter);
             container.Compose(batch);
 
-            Assert.IsFalse(container.IsPresent("Contract"));
+            Assert.False(container.IsPresent("Contract"));
 
             batch = new CompositionBatch();
             batch.RemovePart(exporter);
             container.Compose(batch);
 
-            Assert.IsFalse(container.IsPresent("Contract"));
+            Assert.False(container.IsPresent("Contract"));
         }
 
-        [TestMethod]
+        [Fact]
         public void TryComposeSimple()
         {
             var container = CreateCompositionContainer();
@@ -1916,10 +1904,10 @@ namespace System.ComponentModel.Composition
             batch.AddParts(importer, new Int32Exporter(42));
             container.Compose(batch);
 
-            Assert.AreEqual(42, importer.Value, "Expected value imported from export");
+            Assert.Equal(42, importer.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void TryComposeSimpleFail()
         {
             var container = CreateCompositionContainer();
@@ -1933,10 +1921,10 @@ namespace System.ComponentModel.Composition
                 container.Compose(batch);
             });
 
-            Assert.AreEqual(0, importer.Value, "Expected default value to remain");
+            Assert.Equal(0, importer.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeDisposableChildContainer()
         {
             var outerContainer = CreateCompositionContainer();
@@ -1946,7 +1934,7 @@ namespace System.ComponentModel.Composition
             var key = outerBatch.AddExportedValue("Value", 42);
             outerBatch.AddPart(outerImporter);
             outerContainer.Compose(outerBatch);
-            Assert.AreEqual(42, outerImporter.Value, "Expected value imported from export");
+            Assert.Equal(42, outerImporter.Value);
 
             Int32Importer innerImporter = new Int32Importer();
             var innerContainer = new CompositionContainer(outerContainer);
@@ -1954,26 +1942,26 @@ namespace System.ComponentModel.Composition
             innerBatch.AddPart(innerImporter);
 
             innerContainer.Compose(innerBatch);
-            Assert.AreEqual(42, innerImporter.Value, "Expected value imported from export");
-            Assert.AreEqual(42, outerImporter.Value, "Expected value imported from export");
+            Assert.Equal(42, innerImporter.Value);
+            Assert.Equal(42, outerImporter.Value);
 
             outerBatch = new CompositionBatch();
             outerBatch.RemovePart(key);
             key = outerBatch.AddExportedValue("Value", -5);
             outerContainer.Compose(outerBatch);
-            Assert.AreEqual(-5, innerImporter.Value, "Expected update value imported from export");
-            Assert.AreEqual(-5, outerImporter.Value, "Expected updated value imported from export");
+            Assert.Equal(-5, innerImporter.Value);
+            Assert.Equal(-5, outerImporter.Value);
 
             innerContainer.Dispose();
             outerBatch = new CompositionBatch();
             outerBatch.RemovePart(key);
             key = outerBatch.AddExportedValue("Value", 500);
             outerContainer.Compose(outerBatch);
-            Assert.AreEqual(500, outerImporter.Value, "Expected updated value imported from export");
-            Assert.AreEqual(-5, innerImporter.Value, "Expected value not updated");
+            Assert.Equal(500, outerImporter.Value);
+            Assert.Equal(-5, innerImporter.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveValueTest()
         {
             var container = CreateCompositionContainer();
@@ -1982,21 +1970,21 @@ namespace System.ComponentModel.Composition
             var key = batch.AddExportedValue("foo", "hello");
             container.Compose(batch);
             var result = container.GetExportedValue<string>("foo");
-            Assert.AreEqual("hello", result, "Should get the correct value");
+            Assert.Equal("hello", result);
 
             batch = new CompositionBatch();
             batch.RemovePart(key);
             container.Compose(batch);
 
-            Assert.IsFalse(container.IsPresent("foo"));
+            Assert.False(container.IsPresent("foo"));
 
             batch = new CompositionBatch();
             batch.RemovePart(key);        // Remove should be idempotent
             container.Compose(batch);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfValueTypeBoundToDefaultValueShouldNotAffectAvailableValues()
         {
             var container = CreateCompositionContainer();
@@ -2006,7 +1994,7 @@ namespace System.ComponentModel.Composition
             batch.AddPart(importer);
             container.Compose(batch);
 
-            Assert.AreEqual(0, importer.ValueType);
+            Assert.Equal(0, importer.ValueType);
 
             ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
             {
@@ -2014,8 +2002,8 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfNullableValueTypeBoundToDefaultValueShouldNotAffectAvailableValues()
         {
             var container = CreateCompositionContainer();
@@ -2025,7 +2013,7 @@ namespace System.ComponentModel.Composition
             batch.AddPart(importer);
             container.Compose(batch);
 
-            Assert.IsNull(importer.NullableValueType);
+            Assert.Null(importer.NullableValueType);
 
             ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
             {
@@ -2033,8 +2021,8 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void OptionalImportsOfReferenceTypeBoundToDefaultValueShouldNotAffectAvailableValues()
         {
             var container = CreateCompositionContainer();
@@ -2044,29 +2032,29 @@ namespace System.ComponentModel.Composition
             batch.AddPart(importer);
             container.Compose(batch);
 
-            Assert.IsNull(importer.ReferenceType);
+            Assert.Null(importer.ReferenceType);
 
             ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
             {
                 container.GetExportedValue<int>("ReferenceType");
-            });            
+            });
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportsChanged_ExportNothing_ShouldNotFireExportsChanged()
         {
             var container = CreateCompositionContainer();
 
             container.ExportsChanged += (sender, args) =>
             {
-                Assert.Fail("Event should not be fired!");
+                throw new NotImplementedException();
             };
 
             CompositionBatch batch = new CompositionBatch();
             container.Compose(batch);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportsChanged_ExportAdded_ShouldFireExportsChanged()
         {
             var container = CreateCompositionContainer();
@@ -2074,11 +2062,11 @@ namespace System.ComponentModel.Composition
 
             container.ExportsChanged += (sender, args) =>
             {
-                Assert.AreSame(container, sender);
-                Assert.IsNull(changedNames, "Ensure this event only fires once!");
-                Assert.IsNotNull(args.AddedExports);
-                Assert.IsNotNull(args.RemovedExports);
-                Assert.IsNotNull(args.ChangedContractNames);
+                Assert.Same(container, sender);
+                Assert.Null(changedNames);
+                Assert.NotNull(args.AddedExports);
+                Assert.NotNull(args.RemovedExports);
+                Assert.NotNull(args.ChangedContractNames);
                 changedNames = args.ChangedContractNames;
             };
 
@@ -2089,7 +2077,7 @@ namespace System.ComponentModel.Composition
             EnumerableAssert.AreEqual(changedNames, "MyExport");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportsChanged_ExportRemoved_ShouldFireExportsChanged()
         {
             var container = CreateCompositionContainer();
@@ -2101,11 +2089,11 @@ namespace System.ComponentModel.Composition
 
             container.ExportsChanged += (sender, args) =>
             {
-                Assert.AreSame(container, sender);
-                Assert.IsNull(changedNames, "Ensure this event only fires once!");
-                Assert.IsNotNull(args.AddedExports);
-                Assert.IsNotNull(args.RemovedExports);
-                Assert.IsNotNull(args.ChangedContractNames);
+                Assert.Same(container, sender);
+                Assert.Null(changedNames);
+                Assert.NotNull(args.AddedExports);
+                Assert.NotNull(args.RemovedExports);
+                Assert.NotNull(args.ChangedContractNames);
                 changedNames = args.ChangedContractNames;
             };
 
@@ -2116,7 +2104,7 @@ namespace System.ComponentModel.Composition
             EnumerableAssert.AreEqual(changedNames, "MyExport");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportsChanged_ExportAddAnother_ShouldFireExportsChanged()
         {
             var container = CreateCompositionContainer();
@@ -2128,11 +2116,11 @@ namespace System.ComponentModel.Composition
 
             container.ExportsChanged += (sender, args) =>
             {
-                Assert.AreSame(container, sender);
-                Assert.IsNull(changedNames, "Ensure this event only fires once!");
-                Assert.IsNotNull(args.AddedExports);
-                Assert.IsNotNull(args.RemovedExports);
-                Assert.IsNotNull(args.ChangedContractNames);
+                Assert.Same(container, sender);
+                Assert.Null(changedNames);
+                Assert.NotNull(args.AddedExports);
+                Assert.NotNull(args.RemovedExports);
+                Assert.NotNull(args.ChangedContractNames);
                 changedNames = args.ChangedContractNames;
             };
 
@@ -2141,11 +2129,10 @@ namespace System.ComponentModel.Composition
             batch.AddExportedValue("MyExport", new object());
             container.Compose(batch);
 
-
             EnumerableAssert.AreEqual(changedNames, "MyExport");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportsChanged_AddExportOnParent_ShouldFireExportsChangedOnBoth()
         {
             var parent = CreateCompositionContainer();
@@ -2154,14 +2141,14 @@ namespace System.ComponentModel.Composition
             IEnumerable<string> parentNames = null;
             parent.ExportsChanged += (sender, args) =>
             {
-                Assert.AreSame(parent, sender);
+                Assert.Same(parent, sender);
                 parentNames = args.ChangedContractNames;
             };
 
             IEnumerable<string> childNames = null;
             child.ExportsChanged += (sender, args) =>
             {
-                Assert.AreSame(child, sender);
+                Assert.Same(child, sender);
                 childNames = args.ChangedContractNames;
             };
 
@@ -2173,8 +2160,7 @@ namespace System.ComponentModel.Composition
             EnumerableAssert.AreEqual(childNames, "MyExport");
         }
 
-
-        [TestMethod]
+        [Fact]
         public void ExportsChanged_AddExportOnChild_ShouldFireExportsChangedOnChildOnly()
         {
             var parent = CreateCompositionContainer();
@@ -2182,13 +2168,13 @@ namespace System.ComponentModel.Composition
 
             parent.ExportsChanged += (sender, args) =>
             {
-                Assert.Fail("Should not fire on parent container!!");
+                throw new NotImplementedException();
             };
 
             IEnumerable<string> childNames = null;
             child.ExportsChanged += (sender, args) =>
             {
-                Assert.AreSame(child, sender);
+                Assert.Same(child, sender);
                 childNames = args.ChangedContractNames;
             };
 
@@ -2199,7 +2185,7 @@ namespace System.ComponentModel.Composition
             EnumerableAssert.AreEqual(childNames, "MyExport2");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportsChanged_FromAggregateCatalog_ShouldFireExportsChangedOnce()
         {
 
@@ -2209,22 +2195,21 @@ namespace System.ComponentModel.Composition
 
             container.ExportsChanged += (sender, args) =>
             {
-                Assert.AreSame(container, sender);
-                Assert.IsNull(changedNames, "Ensure this event only fires once!");
-                Assert.IsNotNull(args.AddedExports);
-                Assert.IsNotNull(args.RemovedExports);
-                Assert.IsNotNull(args.ChangedContractNames);
+                Assert.Same(container, sender);
+                Assert.Null(changedNames);
+                Assert.NotNull(args.AddedExports);
+                Assert.NotNull(args.RemovedExports);
+                Assert.NotNull(args.ChangedContractNames);
                 changedNames = args.ChangedContractNames;
             };
-
 
             var typeCatalog = new TypeCatalog(typeof(SimpleExporter));
             cat.Catalogs.Add(typeCatalog);
 
-            Assert.IsNotNull(changedNames);
+            Assert.NotNull(changedNames);
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_BeforeCompose_CanBeCallMultipleTimes()
         {
             var container = ContainerFactory.Create(PartFactory.Create(), PartFactory.Create());
@@ -2233,7 +2218,7 @@ namespace System.ComponentModel.Composition
             container.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_AfterCompose_CanBeCallMultipleTimes()
         {
             var container = ContainerFactory.Create(PartFactory.Create(), PartFactory.Create());
@@ -2242,7 +2227,7 @@ namespace System.ComponentModel.Composition
             container.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_CallsGCSuppressFinalize()
         {
             bool finalizerCalled = false;
@@ -2262,21 +2247,21 @@ namespace System.ComponentModel.Composition
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
-            Assert.IsFalse(finalizerCalled);
+            Assert.False(finalizerCalled);
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_CallsDisposeBoolWithTrue()
         {
             var container = ContainerFactory.CreateDisposable(disposing =>
             {
-                Assert.IsTrue(disposing);
+                Assert.True(disposing);
             });
 
             container.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_CallsDisposeBoolOnce()
         {
             int disposeCount = 0;
@@ -2288,10 +2273,10 @@ namespace System.ComponentModel.Composition
 
             container.Dispose();
 
-            Assert.AreEqual(1, disposeCount);
+            Assert.Equal(1, disposeCount);
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_ContainerAsExportedValue_CanBeDisposed()
         {
             using (var container = CreateCompositionContainer())
@@ -2302,7 +2287,7 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_ContainerAsPart_CanBeDisposed()
         {   // Tests that when we re-enter CompositionContainer.Dispose, that we don't
             // stack overflow.
@@ -2314,45 +2299,45 @@ namespace System.ComponentModel.Composition
                 batch.AddPart(part);
                 container.Compose(batch);
 
-                Assert.AreSame(container, container.GetExportedValue<ICompositionService>());
+                Assert.Same(container, container.GetExportedValue<ICompositionService>());
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ICompositionService_ShouldNotBeImplicitlyExported()
         {
             var container = CreateCompositionContainer();
 
-            Assert.IsFalse(container.IsPresent<ICompositionService>());
+            Assert.False(container.IsPresent<ICompositionService>());
         }
 
-        [TestMethod]
+        [Fact]
         public void CompositionContainer_ShouldNotBeImplicitlyExported()
         {
             var container = CreateCompositionContainer();
 
-            Assert.IsFalse(container.IsPresent<CompositionContainer>());
+            Assert.False(container.IsPresent<CompositionContainer>());
         }
 
-        [TestMethod]
+        [Fact]
         public void ICompositionService_ShouldNotBeImplicitlyImported()
         {
             var importer = PartFactory.CreateImporter<ICompositionService>();
             var container = ContainerFactory.Create(importer);
 
-            Assert.IsNull(importer.Value);
+            Assert.Null(importer.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void CompositionContainer_ShouldNotBeImplicitlyImported()
         {
             var importer = PartFactory.CreateImporter<CompositionContainer>();
             var container = ContainerFactory.Create(importer);
 
-            Assert.IsNull(importer.Value);
+            Assert.Null(importer.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ICompositionService_CanBeExported()
         {
             var container = CreateCompositionContainer();
@@ -2360,10 +2345,10 @@ namespace System.ComponentModel.Composition
             batch.AddExportedValue<ICompositionService>(container);
             container.Compose(batch);
 
-            Assert.AreSame(container, container.GetExportedValue<ICompositionService>());
+            Assert.Same(container, container.GetExportedValue<ICompositionService>());
         }
 
-        [TestMethod]
+        [Fact]
         public void CompositionContainer_CanBeExported()
         {
             var container = CreateCompositionContainer();
@@ -2371,33 +2356,33 @@ namespace System.ComponentModel.Composition
             batch.AddExportedValue<CompositionContainer>(container);
             container.Compose(batch);
 
-            Assert.AreSame(container, container.GetExportedValue<CompositionContainer>());
+            Assert.Same(container, container.GetExportedValue<CompositionContainer>());
         }
 
-        [TestMethod]
+        [Fact]
         public void ReleaseExport_Null_ShouldThrowArugmentNull()
         {
             var container = CreateCompositionContainer();
 
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("export", 
+            Assert.Throws<ArgumentNullException>("export",
                 () => container.ReleaseExport(null));
         }
 
-        [TestMethod]
+        [Fact]
         public void ReleaseExports_Null_ShouldThrowArgumentNull()
         {
             var container = CreateCompositionContainer();
 
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("exports",
+            Assert.Throws<ArgumentNullException>("exports",
                 () => container.ReleaseExports(null));
         }
 
-        [TestMethod]
+        [Fact]
         public void ReleaseExports_ElementNull_ShouldThrowArgument()
         {
             var container = CreateCompositionContainer();
 
-            ExceptionAssert.ThrowsArgument<ArgumentException>("exports",
+            Assert.Throws<ArgumentException>("exports",
                 () => container.ReleaseExports(new Export[] { null }));
         }
 
@@ -2431,7 +2416,7 @@ namespace System.ComponentModel.Composition
             public int SimpleInt { get { throw new NotImplementedException(); } }
         }
 
-        [TestMethod]
+        [Fact]
         public void TryGetValueWithCatalogVerifyExecptionDuringGet()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();
@@ -2443,7 +2428,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void TryGetExportedValueWhileLockedForNotify()
         {
             var container = CreateCompositionContainer();
@@ -2456,7 +2441,7 @@ namespace System.ComponentModel.Composition
             container.Compose(batch);
         }
 
-        [TestMethod]
+        [Fact]
         public void RawExportTests()
         {
             var container = CreateCompositionContainer();
@@ -2467,12 +2452,11 @@ namespace System.ComponentModel.Composition
 
             Lazy<int> export = container.GetExport<int>("foo");
 
-            Assert.AreEqual(1, export.Value, "Should be the value I put in...");
+            Assert.Equal(1, export.Value);
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(468388)]
+        [Fact]
+        [ActiveIssue(468388)]
         public void ContainerXGetXTest()
         {
             CompositionContainer container = CreateCompositionContainer();
@@ -2482,9 +2466,8 @@ namespace System.ComponentModel.Composition
             ContainerXGetExportBoundValue(container);
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(468388)]
+        [Fact]
+        [ActiveIssue(468388)]
         public void ContainerXGetXByComponentCatalogTest()
         {
             CompositionContainer container = ContainerFactory.CreateWithDefaultAttributedCatalog();
@@ -2493,29 +2476,7 @@ namespace System.ComponentModel.Composition
 
         private void ContainerXGetExportBoundValue(CompositionContainer container)
         {
-            Assert.Fail("This scenario (required metadata warnings) no longer works, see 468388");
-
-            //string[] required = new string[] { "Foo" };
-            //string[] RequiredMetadataNotFound = new string[] { CompositionIssueId.RequiredMetadataNotFound, CompositionIssueId.CardinalityMismatch };
-            //container.TryGetExport<MyExporterWithNoFoo>().VerifyFailure(CompositionIssueId.CardinalityMismatch);
-            //container.TryGetExport<MyExporterWithNoFoo>(required).VerifyFailure(CompositionIssueId.CardinalityMismatch);
-            //container.TryGetExport<MyExporterWithNoFoo>("MyExporterWithNoFoo").VerifySuccess();
-            //container.TryGetExport<MyExporterWithNoFoo>("MyExporterWithNoFoo", required).VerifyFailure(RequiredMetadataNotFound);
-            //container.TryGetExports<MyExporterWithNoFoo>().VerifyFailure(CompositionIssueId.CardinalityMismatch);
-            //container.TryGetExports<MyExporterWithNoFoo>(required).VerifyFailure(CompositionIssueId.CardinalityMismatch);
-            //container.TryGetExports<MyExporterWithNoFoo>("MyExporterWithNoFoo").VerifySuccess();
-            //container.TryGetExports<MyExporterWithNoFoo>("MyExporterWithNoFoo", required).VerifyFailure(RequiredMetadataNotFound);
-            //container.TryGetExportedValue<MyExporterWithNoFoo>().VerifyFailure(CompositionIssueId.CardinalityMismatch);
-            //container.TryGetExportedValue<MyExporterWithNoFoo>(required).VerifyFailure(CompositionIssueId.CardinalityMismatch);
-            //container.TryGetExportedValue<MyExporterWithNoFoo>("MyExporterWithNoFoo").VerifySuccess();
-            //container.TryGetExportedValue<MyExporterWithNoFoo>("MyExporterWithNoFoo", required).VerifyFailure(RequiredMetadataNotFound);
-            //container.TryGetExportedValues<MyExporterWithNoFoo>().VerifyFailure(CompositionIssueId.CardinalityMismatch);
-            //container.TryGetExportedValues<MyExporterWithNoFoo>(required).VerifyFailure(CompositionIssueId.CardinalityMismatch);
-            //container.TryGetExportedValues<MyExporterWithNoFoo>("MyExporterWithNoFoo").VerifySuccess();
-            //container.TryGetExportedValues<MyExporterWithNoFoo>("MyExporterWithNoFoo", required).VerifyFailure(RequiredMetadataNotFound);
-
-            ExceptionAssert.Throws<ImportCardinalityMismatchException>(() => container.GetExportedValue<MyExporterWithNoFoo>());
-            Assert.IsNotNull(container.GetExportedValue<MyExporterWithNoFoo>("MyExporterWithNoFoo"));
+            throw new NotImplementedException();
         }
 
         [Export("MyExporterWithNoFoo")]
@@ -2537,7 +2498,7 @@ namespace System.ComponentModel.Composition
         }
 
         // Silverlight doesn't support strongly typed metadata
-        [TestMethod]
+        [Fact]
         public void ConverterExportTests()
         {
             var container = CreateCompositionContainer();
@@ -2546,11 +2507,11 @@ namespace System.ComponentModel.Composition
             container.Compose(batch);
 
             var export = container.GetExport<int, IDictionary<string, object>>("foo");
-            Assert.AreEqual(1, export.Value, "Should be the value I put in...");
-            Assert.IsNotNull(export.Metadata, "Should have metadata (as an object)");
+            Assert.Equal(1, export.Value);
+            Assert.NotNull(export.Metadata);
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveFromWrongContainerTest()
         {
             CompositionContainer d1 = CreateCompositionContainer();
@@ -2566,8 +2527,8 @@ namespace System.ComponentModel.Composition
             d2.Compose(batch2);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void AddPartSimple()
         {
             var container = CreateCompositionContainer();
@@ -2577,11 +2538,11 @@ namespace System.ComponentModel.Composition
             batch.AddPart(new Int32Exporter(42));
             container.Compose(batch);
 
-            Assert.AreEqual(42, importer.Value, "Expected value imported from export");
+            Assert.Equal(42, importer.Value);
         }
 
-        [TestMethod]
-        [TestProperty("Type", "Integration")]
+        [Fact]
+        [Trait("Type", "Integration")]
         public void AddPart()
         {
             var container = CreateCompositionContainer();
@@ -2591,10 +2552,10 @@ namespace System.ComponentModel.Composition
             batch.AddPart(new Int32Exporter(42));
             container.Compose(batch);
 
-            Assert.AreEqual(42, importer.Value, "Expected value imported from export");
+            Assert.Equal(42, importer.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeReentrantChildContainerDisposed()
         {
             var container = CreateCompositionContainer();
@@ -2612,18 +2573,18 @@ namespace System.ComponentModel.Composition
                     nestedBatch.AddPart(innerImporter);
                     innerContainer.Compose(nestedBatch);
                 }
-                Assert.AreEqual(42, innerImporter.Value, "Expected value imported from export");
+                Assert.Equal(42, innerImporter.Value);
             });
 
             batch = new CompositionBatch();
             batch.AddParts(outerImporter, callback);
             container.Compose(batch);
 
-            Assert.AreEqual(42, outerImporter.Value, "Expected value imported from export");
-            Assert.AreEqual(42, innerImporter.Value, "Expected value imported from export");
+            Assert.Equal(42, outerImporter.Value);
+            Assert.Equal(42, innerImporter.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeSimple()
         {
             var container = CreateCompositionContainer();
@@ -2633,10 +2594,10 @@ namespace System.ComponentModel.Composition
             batch.AddParts(importer, new Int32Exporter(42));
             container.Compose(batch);
 
-            Assert.AreEqual(42, importer.Value, "Expected value imported from export");
+            Assert.Equal(42, importer.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeSimpleFail()
         {
             var container = CreateCompositionContainer();
@@ -2653,7 +2614,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ExceptionDuringNotify()
         {
             var container = CreateCompositionContainer();
@@ -2670,7 +2631,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void NeutralComposeWhileNotified()
         {
             var container = CreateCompositionContainer();
@@ -2683,6 +2644,7 @@ namespace System.ComponentModel.Composition
 
             container.Compose(batch);
         }
+
         public class PartWithReentrantCompose : ComposablePart
         {
             private CompositionContainer _container;
@@ -2726,7 +2688,7 @@ namespace System.ComponentModel.Composition
 
         }
 
-        [TestMethod]
+        [Fact]
         public void ThreadSafeCompositionContainer()
         {
             TypeCatalog catalog = new TypeCatalog(typeof(SimpleExporter));
@@ -2738,14 +2700,14 @@ namespace System.ComponentModel.Composition
             batch.AddParts(importer, new Int32Exporter(42));
             container.Compose(batch);
 
-            Assert.IsNotNull(container.GetExportedValue<SimpleExporter>());
-            Assert.AreEqual(42, importer.Value, "Expected value imported from export");
+            Assert.NotNull(container.GetExportedValue<SimpleExporter>());
+            Assert.Equal(42, importer.Value);
 
             container.Dispose();
 
         }
 
-        [TestMethod]
+        [Fact]
         public void ThreadSafeCompositionOptionsCompositionContainer()
         {
             TypeCatalog catalog = new TypeCatalog(typeof(SimpleExporter));
@@ -2757,13 +2719,13 @@ namespace System.ComponentModel.Composition
             batch.AddParts(importer, new Int32Exporter(42));
             container.Compose(batch);
 
-            Assert.IsNotNull(container.GetExportedValue<SimpleExporter>());
-            Assert.AreEqual(42, importer.Value, "Expected value imported from export");
+            Assert.NotNull(container.GetExportedValue<SimpleExporter>());
+            Assert.Equal(42, importer.Value);
 
             container.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void DisableSilentRejectionCompositionOptionsCompositionContainer()
         {
             TypeCatalog catalog = new TypeCatalog(typeof(SimpleExporter));
@@ -2775,13 +2737,13 @@ namespace System.ComponentModel.Composition
             batch.AddParts(importer, new Int32Exporter(42));
             container.Compose(batch);
 
-            Assert.IsNotNull(container.GetExportedValue<SimpleExporter>());
-            Assert.AreEqual(42, importer.Value, "Expected value imported from export");
+            Assert.NotNull(container.GetExportedValue<SimpleExporter>());
+            Assert.Equal(42, importer.Value);
 
             container.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void DisableSilentRejectionThreadSafeCompositionOptionsCompositionContainer()
         {
             TypeCatalog catalog = new TypeCatalog(typeof(SimpleExporter));
@@ -2793,20 +2755,20 @@ namespace System.ComponentModel.Composition
             batch.AddParts(importer, new Int32Exporter(42));
             container.Compose(batch);
 
-            Assert.IsNotNull(container.GetExportedValue<SimpleExporter>());
-            Assert.AreEqual(42, importer.Value, "Expected value imported from export");
+            Assert.NotNull(container.GetExportedValue<SimpleExporter>());
+            Assert.Equal(42, importer.Value);
 
             container.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void CompositionOptionsInvalidValue()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentOutOfRangeException>("compositionOptions",
+            Assert.Throws<ArgumentOutOfRangeException>("compositionOptions",
                 () => new CompositionContainer((CompositionOptions)0x0400));
         }
 
-        [TestMethod]
+        [Fact]
         public void ReentrantencyDisabledWhileComposing()
         {
             var container = CreateCompositionContainer();
@@ -2850,7 +2812,7 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeExportedValueOfT_NullStringAsExportedValueArgument_VerifyCanPullOnValue()
         {
             var container = CreateCompositionContainer();
@@ -2859,10 +2821,10 @@ namespace System.ComponentModel.Composition
             container.ComposeExportedValue<string>(expectation);
             var actualValue = container.GetExportedValue<string>();
 
-            Assert.AreEqual(expectation, actualValue);
+            Assert.Equal(expectation, actualValue);
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeExportedValueOfT_StringAsExportedValueArgument_VerifyCanPullOnValue()
         {
             var expectations = new List<string>();
@@ -2876,11 +2838,11 @@ namespace System.ComponentModel.Composition
                 container.ComposeExportedValue<string>(expectation);
                 var actualValue = container.GetExportedValue<string>();
 
-                Assert.AreEqual(expectation, actualValue);
+                Assert.Equal(expectation, actualValue);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeExportedValueOfT_StringAsIEnumerableOfCharAsExportedValueArgument_VerifyCanPullOnValue()
         {
             var expectations = new List<string>();
@@ -2894,11 +2856,11 @@ namespace System.ComponentModel.Composition
                 container.ComposeExportedValue<IEnumerable<char>>(expectation);
                 var actualValue = container.GetExportedValue<IEnumerable<char>>();
 
-                Assert.AreEqual(expectation, actualValue);
+                Assert.Equal(expectation, actualValue);
             }
         }
-            
-        [TestMethod]
+
+        [Fact]
         public void ComposeExportedValueOfT_ObjectAsExportedValueArgument_VerifyCanPullOnValue()
         {
             var expectations = new List<object>();
@@ -2914,11 +2876,11 @@ namespace System.ComponentModel.Composition
                 container.ComposeExportedValue<object>(expectation);
                 var actualValue = container.GetExportedValue<object>();
 
-                Assert.AreEqual(expectation, actualValue);
+                Assert.Equal(expectation, actualValue);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeExportedValueOfT_ExportedValue_ExportedUnderDefaultContractName()
         {
             string expectedContractName = AttributedModelServices.GetContractName(typeof(string));
@@ -2927,11 +2889,11 @@ namespace System.ComponentModel.Composition
 
             var importDefinition = new ImportDefinition(ed => true, null, ImportCardinality.ZeroOrMore, false, false);
             var exports = container.GetExports(importDefinition);
-            Assert.AreEqual(1, exports.Count());
-            Assert.AreEqual(expectedContractName, exports.Single().Definition.ContractName);
+            Assert.Equal(1, exports.Count());
+            Assert.Equal(expectedContractName, exports.Single().Definition.ContractName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeExportedValueOfT_ExportedValue_ExportContainsEmptyMetadata()
         {
             var container = CreateCompositionContainer();
@@ -2939,21 +2901,21 @@ namespace System.ComponentModel.Composition
 
             var importDefinition = new ImportDefinition(ed => true, null, ImportCardinality.ZeroOrMore, false, false);
             var exports = container.GetExports(importDefinition);
-            Assert.AreEqual(1, exports.Count());
-            Assert.AreEqual(1, exports.Single().Metadata.Count);  // contains type identity
+            Assert.Equal(1, exports.Count());
+            Assert.Equal(1, exports.Single().Metadata.Count);  // contains type identity
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeExportedValueOfT_ExportedValue_LazyContainsEmptyMetadata()
         {
             var container = CreateCompositionContainer();
             container.ComposeExportedValue<string>("Value");
 
             var lazy = container.GetExport<string, IDictionary<string, object>>();
-            Assert.AreEqual(1, lazy.Metadata.Count);  // contains type identity
+            Assert.Equal(1, lazy.Metadata.Count);  // contains type identity
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeExportedValueOfT_ExportedValue_ImportsAreNotDiscovered()
         {
             var container = CreateCompositionContainer();
@@ -2963,26 +2925,26 @@ namespace System.ComponentModel.Composition
 
             var importDefinition = new ImportDefinition(ed => true, null, ImportCardinality.ZeroOrMore, false, false);
             var exports = container.GetExports(importDefinition);
-            Assert.AreEqual(1, exports.Count());  // we only get one if the import was not discovered since the import is not satisfied
+            Assert.Equal(1, exports.Count());  // we only get one if the import was not discovered since the import is not satisfied
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeExportedValueOfT_NullAsContractName_ThrowsArgumentNullException()
         {
             var container = CreateCompositionContainer();
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("contractName", () =>
+            Assert.Throws<ArgumentNullException>("contractName", () =>
                 container.ComposeExportedValue<string>((string)null, "Value"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeExportedValueOfT_EmptyStringAsContractName_ThrowsArgumentException()
         {
             var container = CreateCompositionContainer();
-            ExceptionAssert.ThrowsArgument<ArgumentException>("contractName", () =>
+            Assert.Throws<ArgumentException>("contractName", () =>
                 container.ComposeExportedValue<string>(String.Empty, "Value"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeExportedValueOfT_ValidContractName_ValidExportedValue_VerifyCanPullOnValue()
         {
             var expectations = new List<Tuple<string, string>>();
@@ -2999,14 +2961,14 @@ namespace System.ComponentModel.Composition
                 container.ComposeExportedValue<string>(expectation.Item1, expectation.Item2);
                 var actualValue = container.GetExportedValue<string>(expectation.Item1);
 
-                Assert.AreEqual(expectation.Item2, actualValue);
+                Assert.Equal(expectation.Item2, actualValue);
 
                 ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
                     container.GetExportedValue<string>());
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeExportedValueOfT_ValidContractName_ExportedValue_ExportedUnderSpecifiedContractName()
         {
             string expectedContractName = "ContractName";
@@ -3015,13 +2977,12 @@ namespace System.ComponentModel.Composition
 
             var importDefinition = new ImportDefinition(ed => true, null, ImportCardinality.ZeroOrMore, false, false);
             var exports = container.GetExports(importDefinition);
-            Assert.AreEqual(1, exports.Count());
-            Assert.AreEqual(expectedContractName, exports.Single().Definition.ContractName);
+            Assert.Equal(1, exports.Count());
+            Assert.Equal(expectedContractName, exports.Single().Definition.ContractName);
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(812029)]
+        [Fact]
+        [ActiveIssue(812029)]
         public void ComposeExportedValueOfT_ValidContractName_ExportedValue_ExportContainsEmptyMetadata()
         {
             string expectedContractName = "ContractName";
@@ -3030,11 +2991,11 @@ namespace System.ComponentModel.Composition
 
             var importDefinition = new ImportDefinition(ed => ed.ContractName == expectedContractName, null, ImportCardinality.ZeroOrMore, false, false);
             var exports = container.GetExports(importDefinition);
-            Assert.AreEqual(1, exports.Count());
-            Assert.AreEqual(1, exports.Single().Metadata.Count); // contains type identity
+            Assert.Equal(1, exports.Count());
+            Assert.Equal(1, exports.Single().Metadata.Count); // contains type identity
         }
 
-        [TestMethod]
+        [Fact]
         public void ComposeExportedValueOfT_ValidContractName_ExportedValue_ImportsAreNotDiscovered()
         {
             var container = CreateCompositionContainer();
@@ -3044,27 +3005,27 @@ namespace System.ComponentModel.Composition
 
             var importDefinition = new ImportDefinition(ed => true, null, ImportCardinality.ZeroOrMore, false, false);
             var exports = container.GetExports(importDefinition);
-            Assert.AreEqual(1, exports.Count());  // we only get one if the import was not discovered since the import is not satisfied
+            Assert.Equal(1, exports.Count());  // we only get one if the import was not discovered since the import is not satisfied
         }
 
-        [TestMethod]
+        [Fact]
         public void TestExportedValueCachesNullValue()
         {
             var container = ContainerFactory.Create();
             var exporter = new ExportsMutableProperty();
             exporter.Property = null;
             container.ComposeParts(exporter);
-            Assert.IsNull(container.GetExportedValue<string>("Property"));
+            Assert.Null(container.GetExportedValue<string>("Property"));
             exporter.Property = "Value1";
             // Exported value should have been cached and so it shouldn't change
-            Assert.IsNull(container.GetExportedValue<string>("Property"));
+            Assert.Null(container.GetExportedValue<string>("Property"));
         }
+
         public class ExportsMutableProperty
         {
             [Export("Property")]
             public string Property { get; set; }
         }
-
 
         public class PartWithRequiredImport
         {

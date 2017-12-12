@@ -1,11 +1,10 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
-using System.ComponentModel.Composition;
-using Microsoft.CLR.UnitTesting;
-using System.UnitTesting;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.ComponentModel.Composition.Hosting;
+using System.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
@@ -19,47 +18,46 @@ namespace System.ComponentModel.Composition
     }
 
     public class ExportOnIndexer { }
-
-    [TestClass]
+    
     public class ExportAttributeTests
     {
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetContractNamePropertyToEmptyString()
         {
             var attribute = new ExportAttribute();
 
-            Assert.IsNull(attribute.ContractName);
-            Assert.IsNull(attribute.ContractType);
+            Assert.Null(attribute.ContractName);
+            Assert.Null(attribute.ContractType);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_NullAsContractNameArgument_ShouldSetContractNamePropertyToEmptyString()
         {
             var attribute = new ExportAttribute((string)null);
 
-            Assert.IsNull(attribute.ContractName);
-            Assert.IsNull(attribute.ContractType);
+            Assert.Null(attribute.ContractName);
+            Assert.Null(attribute.ContractType);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_NullAsContractTypeArgument_ShouldSetContractNamePropertyToEmptyString()
         {
             var attribute = new ExportAttribute((Type)null);
 
-            Assert.IsNull(attribute.ContractName);
-            Assert.IsNull(attribute.ContractType);
+            Assert.Null(attribute.ContractName);
+            Assert.Null(attribute.ContractType);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_NullAsContractTypeArgument_ShouldSetContractNamePropertyToEmptyString()
         {
             var attribute = new ExportAttribute((string)null, (Type)null);
 
-            Assert.IsNull(attribute.ContractName);
-            Assert.IsNull(attribute.ContractType);
+            Assert.Null(attribute.ContractName);
+            Assert.Null(attribute.ContractType);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ValueAsContractNameArgument_ShouldSetContractNameProperty()
         {
             var expectations = Expectations.GetContractNamesWithEmpty();
@@ -68,11 +66,11 @@ namespace System.ComponentModel.Composition
             {
                 var attribute = new ExportAttribute(e);
 
-                Assert.AreEqual(e, attribute.ContractName);
+                Assert.Equal(e, attribute.ContractName);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ExportIndexers_ShouldThrowSomething()
         {
             var con = new CompositionContainer(

@@ -1,24 +1,21 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Linq;
-using System.Reflection;
-using Microsoft.CLR.UnitTesting;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
-using System.ComponentModel.Composition.UnitTesting;
+using System.Linq;
+using System.Reflection;
 using System.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class ComposablePartExtensibilityTests
     {
-        [TestMethod]
+        [Fact]
         public void PhaseTest()
         {
             CompositionContainer container = ContainerFactory.Create();
@@ -38,12 +35,12 @@ namespace System.ComponentModel.Composition
             var export = container.GetExport<object>("Export1");
 
             part.CallOrder.Enqueue("Export:Export1");
-            Assert.AreEqual(1, export.Value);
+            Assert.Equal(1, export.Value);
 
-            Assert.IsTrue(part.CallOrder.Count == 0);
+            Assert.True(part.CallOrder.Count == 0);
         }
 
-        [TestMethod]
+        [Fact]
         public void ImportTest()
         {
             var exporter = new TestExportBinder();
@@ -60,7 +57,7 @@ namespace System.ComponentModel.Composition
             ExportsAssert.AreEqual(importer.SetImports["multi"], 1, 2, 3);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConstructorInjectionSimpleCase()
         {
             var container = ContainerFactory.Create();
@@ -73,10 +70,10 @@ namespace System.ComponentModel.Composition
             var import = container.GetExport<Foo>();
             var foo = import.Value;
 
-            Assert.AreEqual("Bar Value", foo.Bar.Value);
+            Assert.Equal("Bar Value", foo.Bar.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConstructorInjectionCycle()
         {
             var container = ContainerFactory.Create();
@@ -113,19 +110,19 @@ namespace System.ComponentModel.Composition
 
         private void OnGetExport(string contractName)
         {
-            Assert.AreEqual("Export:" + contractName, CallOrder.Dequeue());
+            Assert.Equal("Export:" + contractName, CallOrder.Dequeue());
         }
 
         public override void SetImport(ImportDefinition definition, IEnumerable<Export> exports)
         {
             ContractBasedImportDefinition contractBasedImportDefinition = (ContractBasedImportDefinition)definition;
-            Assert.AreEqual("Import:" + contractBasedImportDefinition.ContractName, CallOrder.Dequeue());
+            Assert.Equal("Import:" + contractBasedImportDefinition.ContractName, CallOrder.Dequeue());
             base.SetImport(definition, exports);
         }
 
         public override void Activate()
         {
-            Assert.AreEqual("OnComposed", CallOrder.Dequeue());
+            Assert.Equal("OnComposed", CallOrder.Dequeue());
             base.Activate();
         }
     }
@@ -204,7 +201,6 @@ namespace System.ComponentModel.Composition
         private Type _type;
         private ConstructorInfo _constructor;
         private Dictionary<ImportDefinition, object> _imports;
-        private bool currentlyExecuting = false;
 
         public ConstructorInjectionComposablePart(Type type)
         {
@@ -212,7 +208,7 @@ namespace System.ComponentModel.Composition
 
             // Note that this just blindly takes the first constructor...
             this._constructor = this._type.GetConstructors().FirstOrDefault();
-            Assert.IsNotNull(this._constructor);
+            Assert.NotNull(this._constructor);
 
             foreach (var param in this._constructor.GetParameters())
             {
@@ -249,8 +245,6 @@ namespace System.ComponentModel.Composition
 
             try
             {
-                currentlyExecuting = true;
-
                 List<object> constructorArgs = new List<object>();
 
                 foreach (ImportDefinition import in this.ImportDefinitions
@@ -279,7 +273,6 @@ namespace System.ComponentModel.Composition
             }
             finally
             {
-                currentlyExecuting = false;
             }
         }
 

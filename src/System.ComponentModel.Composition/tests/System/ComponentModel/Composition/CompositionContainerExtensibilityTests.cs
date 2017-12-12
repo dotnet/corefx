@@ -1,53 +1,51 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
-using System.Linq;
-using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class CompositionContainerExtensibilityTests
     {
-        [TestMethod]
+        [Fact]
         public void Dispose_DoesNotThrow()
         {
             var container = CreateCustomCompositionContainer();
             container.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void DerivedCompositionContainer_CanExportItself()
         {
             var container = CreateCustomCompositionContainer();
             container.AddAndComposeExportedValue<CustomCompositionContainer>(container);
 
-            Assert.AreSame(container, container.GetExportedValue<CustomCompositionContainer>());
+            Assert.Same(container, container.GetExportedValue<CustomCompositionContainer>());
         }
 
-        [TestMethod]
+        [Fact]
         public void ICompositionService_CanBeExported()
         {
             var container = CreateCustomCompositionContainer();
             container.AddAndComposeExportedValue<ICompositionService>(container);
 
-            Assert.AreSame(container, container.GetExportedValue<ICompositionService>());
+            Assert.Same(container, container.GetExportedValue<ICompositionService>());
         }
 
-        [TestMethod]
+        [Fact]
         public void CompositionContainer_CanBeExported()
         {
             var container = CreateCustomCompositionContainer();
             container.AddAndComposeExportedValue<CompositionContainer>(container);
 
-            Assert.AreSame(container, container.GetExportedValue<CompositionContainer>());
+            Assert.Same(container, container.GetExportedValue<CompositionContainer>());
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void CanBeCollectedAfterDispose()
         {
             AggregateExportProvider exportProvider = new AggregateExportProvider();
@@ -61,7 +59,7 @@ namespace System.ComponentModel.Composition
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            Assert.IsFalse(weakContainer.IsAlive);
+            Assert.False(weakContainer.IsAlive);
 
             GC.KeepAlive(exportProvider);
             GC.KeepAlive(catalog);
