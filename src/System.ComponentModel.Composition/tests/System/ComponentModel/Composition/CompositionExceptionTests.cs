@@ -1,66 +1,23 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
-using System.ComponentModel.Composition.UnitTesting;
 using System.ComponentModel.Composition.Factories;
+using System.ComponentModel.Composition.Primitives;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Security;
-using System.Security.Permissions;
 using System.Text;
-using System.ComponentModel.Composition.Primitives;
 using System.UnitTesting;
-using Microsoft.Internal;
-using Microsoft.CLR.UnitTesting;
-using System.Runtime.Serialization;
-
-#if FEATURE_APPDOMAINCONTROL
-using System.Security.Policy;
-#endif
-
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass][Serializable]
+    [Serializable]
     public class CompositionExceptionTests
     {
-#if FEATURE_APPDOMAINCONTROL
-        public delegate void Work(int index);
-
-        public class Worker : MarshalByRefObject
-        {
-            public static ExpectationCollection<IEnumerable<CompositionError>, string> expectations = new ExpectationCollection<IEnumerable<CompositionError>, string>();
-            static Worker()
-            {
-                expectations.Add(ErrorFactory.CreateFromDsl("Error"), "1<Separator> Error");
-                expectations.Add(ErrorFactory.CreateFromDsl("Error|Error"), "1<Separator> Error|2<Separator> Error");
-                expectations.Add(ErrorFactory.CreateFromDsl("Error|Error|Error"), "1<Separator> Error|2<Separator> Error|3<Separator> Error");
-                expectations.Add(ErrorFactory.CreateFromDsl("Error(Error)"), "1<Separator> Error|<Prefix>Error");
-                expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error)"), "1<Separator> Error|<Prefix>Error|2<Separator> Error|<Prefix>Error");
-                expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error|Error)"), "1<Separator> Error|<Prefix>Error|2<Separator> Error|<Prefix>Error|3<Separator> Error|<Prefix>Error");
-                expectations.Add(ErrorFactory.CreateFromDsl("Error(Error(Exception))"), "1<Separator> Exception|<Prefix>Error|<Prefix>Error");
-                expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Exception)"), "1<Separator> Error|<Prefix>Error|2<Separator> Exception|<Prefix>Error");
-                expectations.Add(ErrorFactory.CreateFromDsl("Error(Exception)"), "1<Separator> Exception|<Prefix>Error");
-                expectations.Add(ErrorFactory.CreateFromDsl("Error(Exception(Exception))"), "1<Separator> Exception|<Prefix>Exception|<Prefix>Error");
-                expectations.Add(ErrorFactory.CreateFromDsl("Error(Error(Exception)|Error)"), "1<Separator> Exception|<Prefix>Error|<Prefix>Error|2<Separator> Error|<Prefix>Error");
-            }
-
-            public Work Action;
-
-            internal void DoWork(int index)
-            {
-                Action(index);
-            }
-
-        }
-
-#endif //FEATURE_APPDOMAINCONTROL
-
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetMessagePropertyToDefault()
         {
             var exception = new CompositionException();
@@ -68,7 +25,7 @@ namespace System.ComponentModel.Composition
             ExceptionAssert.HasDefaultMessage(exception);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_NullAsMessageArgument_ShouldSetMessagePropertyToDefault()
         {
             var exception = new CompositionException((string)null);
@@ -76,7 +33,7 @@ namespace System.ComponentModel.Composition
             ExceptionAssert.HasDefaultMessage(exception);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_EmptyEnumerableAsErrorsArgument_ShouldSetMessagePropertyToDefault()
         {
             var exception = new CompositionException(Enumerable.Empty<CompositionError>());
@@ -84,7 +41,7 @@ namespace System.ComponentModel.Composition
             ExceptionAssert.HasDefaultMessage(exception);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_NullAsMessageArgument_ShouldSetMessagePropertyToDefault()
         {
             var exception = new CompositionException((string)null, new Exception());
@@ -92,7 +49,7 @@ namespace System.ComponentModel.Composition
             ExceptionAssert.HasDefaultMessage(exception);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor5_NullAsMessageArgument_ShouldSetMessagePropertyToDefault()
         {
             var exception = new CompositionException((string)null, new Exception(), Enumerable.Empty<CompositionError>());
@@ -100,7 +57,7 @@ namespace System.ComponentModel.Composition
             ExceptionAssert.HasDefaultMessage(exception);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ValueAsMessageArgument_ShouldSetMessageProperty()
         {
             var expectations = Expectations.GetExceptionMessages();
@@ -109,11 +66,11 @@ namespace System.ComponentModel.Composition
             {
                 var exception = new CompositionException(e);
 
-                Assert.AreEqual(e, exception.Message);
+                Assert.Equal(e, exception.Message);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_ValueAsMessageArgument_ShouldSetMessageProperty()
         {
             var expectations = Expectations.GetExceptionMessages();
@@ -122,11 +79,11 @@ namespace System.ComponentModel.Composition
             {
                 var exception = new CompositionException(e, new Exception());
 
-                Assert.AreEqual(e, exception.Message);
+                Assert.Equal(e, exception.Message);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor5_ValueAsMessageArgument_ShouldSetMessageProperty()
         {
             var expectations = Expectations.GetExceptionMessages();
@@ -135,51 +92,51 @@ namespace System.ComponentModel.Composition
             {
                 var exception = new CompositionException(e, new Exception(), Enumerable.Empty<CompositionError>());
 
-                Assert.AreEqual(e, exception.Message);
+                Assert.Equal(e, exception.Message);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetInnerExceptionPropertyToNull()
         {
             var exception = new CompositionException();
 
-            Assert.IsNull(exception.InnerException);
+            Assert.Null(exception.InnerException);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ShouldSetInnerExceptionPropertyToNull()
         {
             var exception = new CompositionException("Message");
 
-            Assert.IsNull(exception.InnerException);
+            Assert.Null(exception.InnerException);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_ShouldSetInnerExceptionPropertyToNull()
         {
             var exception = new CompositionException(Enumerable.Empty<CompositionError>());
 
-            Assert.IsNull(exception.InnerException);
+            Assert.Null(exception.InnerException);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_NullAsInnerExceptionArgument_ShouldSetInnerExceptionPropertyToNull()
         {
             var exception = new CompositionException("Message", (Exception)null);
 
-            Assert.IsNull(exception.InnerException);
+            Assert.Null(exception.InnerException);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor5_NullAsInnerExceptionArgument_ShouldSetInnerExceptionPropertyToNull()
         {
             var exception = new CompositionException("Message", (Exception)null, Enumerable.Empty<CompositionError>());
 
-            Assert.IsNull(exception.InnerException);
+            Assert.Null(exception.InnerException);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_ValueAsInnerExceptionArgument_ShouldSetInnerExceptionProperty()
         {
             var expectations = Expectations.GetInnerExceptions();
@@ -188,11 +145,11 @@ namespace System.ComponentModel.Composition
             {
                 var exception = new CompositionException("Message", e);
 
-                Assert.AreSame(e, exception.InnerException);
+                Assert.Same(e, exception.InnerException);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor5_ValueAsInnerExceptionArgument_ShouldSetInnerExceptionProperty()
         {
             var expectations = Expectations.GetInnerExceptions();
@@ -201,57 +158,57 @@ namespace System.ComponentModel.Composition
             {
                 var exception = new CompositionException("Message", e, Enumerable.Empty<CompositionError>());
 
-                Assert.AreSame(e, exception.InnerException);
+                Assert.Same(e, exception.InnerException);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ArrayWithNullAsErrorsArgument_ShouldThrowArgument()
         {
             var errors = new CompositionError[] { null };
 
-            ExceptionAssert.ThrowsArgument<ArgumentException>("errors", () =>
+            Assert.Throws<ArgumentException>("errors", () =>
             {
                 new CompositionException(errors);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor5_ArrayWithNullAsErrorsArgument_ShouldThrowArgument()
         {
             var errors = new CompositionError[] { null };
 
-            ExceptionAssert.ThrowsArgument<ArgumentException>("errors", () =>
+            Assert.Throws<ArgumentException>("errors", () =>
             {
                 new CompositionException("Message", new Exception(), errors);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetErrorsPropertyToEmpty()
         {
             var exception = new CompositionException();
 
-            EnumerableAssert.IsEmpty(exception.Errors);
+            Assert.Empty(exception.Errors);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_NullAsErrorsArgument_ShouldSetErrorsPropertyToEmptyEnumerable()
         {
             var exception = new CompositionException((IEnumerable<CompositionError>)null);
 
-            EnumerableAssert.IsEmpty(exception.Errors);
+            Assert.Empty(exception.Errors);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_EmptyEnumerableAsErrorsArgument_ShouldSetErrorsPropertyToEmptyEnumerable()
         {
             var exception = new CompositionException(Enumerable.Empty<CompositionError>());
 
-            EnumerableAssert.IsEmpty(exception.Errors);
+            Assert.Empty(exception.Errors);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ValueAsErrorsArgument_ShouldSetErrorsProperty()
         {
             var expectations = Expectations.GetCompositionErrors();
@@ -260,11 +217,11 @@ namespace System.ComponentModel.Composition
             {
                 var exception = new CompositionException(e);
 
-                EnumerableAssert.AreSequenceSame(e, exception.Errors);
+                EqualityExtensions.CheckEquals(e, exception.Errors);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor2_ArrayAsAsErrorsArgument_ShouldNotAllowModificationAfterConstruction()
         {
             var error = CreateCompositionError();
@@ -277,39 +234,39 @@ namespace System.ComponentModel.Composition
             EnumerableAssert.AreEqual(exception.Errors, error);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_ShouldSetErrorsPropertyToEmpty()
         {
             var exception = new CompositionException();
 
-            EnumerableAssert.IsEmpty(exception.Errors);
+            Assert.Empty(exception.Errors);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor4_ShouldSetErrorsPropertyToEmptyEnumerable()
         {
             var exception = new CompositionException("Message", new Exception());
 
-            EnumerableAssert.IsEmpty(exception.Errors);
+            Assert.Empty(exception.Errors);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor5_NullAsErrorsArgument_ShouldSetErrorsPropertyToEmptyEnumerable()
         {
             var exception = new CompositionException("Message", new Exception(), (IEnumerable<CompositionError>)null);
 
-            EnumerableAssert.IsEmpty(exception.Errors);
+            Assert.Empty(exception.Errors);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor5_EmptyEnumerableAsErrorsArgument_ShouldSetErrorsPropertyToEmptyEnumerable()
         {
             var exception = new CompositionException("Message", new Exception(), Enumerable.Empty<CompositionError>());
 
-            EnumerableAssert.IsEmpty(exception.Errors);
+            Assert.Empty(exception.Errors);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor5_ValueAsErrorsArgument_ShouldSetErrorsProperty()
         {
             var expectations = Expectations.GetCompositionErrors();
@@ -318,11 +275,11 @@ namespace System.ComponentModel.Composition
             {
                 var exception = new CompositionException("Message", new Exception(), e);
 
-                EnumerableAssert.AreSequenceSame(e, exception.Errors);
+                EqualityExtensions.CheckEquals(e, exception.Errors);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor5_ArrayAsAsErrorsArgument_ShouldNotAllowModificationAfterConstruction()
         {
             var error = CreateCompositionError();
@@ -335,7 +292,7 @@ namespace System.ComponentModel.Composition
             EnumerableAssert.AreEqual(exception.Errors, error);
         }
 
-        [TestMethod]
+        [Fact]
         public void Message_ShouldIncludeElementGraph()
         {
             var expectations = new ExpectationCollection<CompositionError, string>();
@@ -353,98 +310,31 @@ namespace System.ComponentModel.Composition
             error = CreateCompositionErrorWithElementChain(10);
             expectations.Add(error, GetElementGraphString(error));
 
-
             foreach (var e in expectations)
             {
                 var exception = CreateCompositionException(new CompositionError[] { e.Input });
 
                 string result = exception.ToString();
                 string expected = FixMessage(e.Output);
-                StringAssert.Contains(result, expected);
+                AssertExtensions.Contains(result, expected);
             }
         }
 
-#if FEATURE_APPDOMAINCONTROL
-        [TestMethod]
-        public void Message_ShouldIncludeElementGraphAccrossAppDomain()
-        {
-            PermissionSet ps = new PermissionSet(PermissionState.None);
-            ps.AddPermission(new SecurityPermission(SecurityPermissionFlag.Execution));
-            ps.AddPermission(new ReflectionPermission(ReflectionPermissionFlag.MemberAccess));
-
-            //Create a new sandboxed domain 
-            AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
-            setup.ApplicationBase = Path.GetDirectoryName(typeof(CompositionExceptionTests).Assembly.Location);
-            AppDomain newDomain = AppDomain.CreateDomain("test domain", null, setup, ps);
-
-            Worker remoteWorker = (Worker)newDomain.CreateInstanceAndUnwrap(
-                Assembly.GetExecutingAssembly().FullName,
-                typeof(Worker).FullName);
-
-            var expectationIndex = new int[] { 1, 2, 3, 10};
-
-            var expectations = new ExpectationCollection<CompositionError, string>();
-            CompositionError error = null;
-
-            error = CreateCompositionErrorWithElementChain(1);
-            expectations.Add(error, GetElementGraphString(error));
-
-            error = CreateCompositionErrorWithElementChain(2);
-            expectations.Add(error, GetElementGraphString(error));
-
-            error = CreateCompositionErrorWithElementChain(3);
-            expectations.Add(error, GetElementGraphString(error));
-
-            error = CreateCompositionErrorWithElementChain(10);
-            expectations.Add(error, GetElementGraphString(error));
-
-            int index = 0;
-            foreach (var e in expectations)
-            {
-                try
-                {
-                    remoteWorker.Action = (int x) => 
-                    {
-                        var lclExpectations = new ExpectationCollection<CompositionError, string>();
-
-                        var lclError = CreateCompositionErrorWithElementChain(x);
-                        lclExpectations.Add(lclError, GetElementGraphString(lclError));
-
-                        var ce =  CreateCompositionException(new CompositionError[] { lclExpectations[0].Input });
-                        throw ce;
-                    };
-                    remoteWorker.DoWork(expectationIndex[index]);
-                }
-                catch (CompositionException compositionException)
-                {
-                    string result = compositionException.ToString();
-                    string expected = FixMessage(e.Output);
-                    StringAssert.Contains(result, expected);
-                }
-                catch (Exception exception)
-                {
-                    Assert.Fail(exception.ToString());
-                }
-                ++index;
-            }
-        }
-#endif //FEATURE_APPDOMAINCONTROL
-
-        [TestMethod]
+        [Fact]
         public void Message_ShouldIncludeErrors()
-        { 
+        {
             var expectations = new ExpectationCollection<IEnumerable<CompositionError>, string>();
-            expectations.Add(ErrorFactory.CreateFromDsl("Error"),                           "1<Separator> Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error|Error"),                     "1<Separator> Error|2<Separator> Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error|Error|Error"),               "1<Separator> Error|2<Separator> Error|3<Separator> Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error)"),                    "1<Separator> Error|<Prefix>Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error)"),              "1<Separator> Error|<Prefix>Error|2<Separator> Error|<Prefix>Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error|Error)"),        "1<Separator> Error|<Prefix>Error|2<Separator> Error|<Prefix>Error|3<Separator> Error|<Prefix>Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error(Exception))"),         "1<Separator> Exception|<Prefix>Error|<Prefix>Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Exception)"),          "1<Separator> Error|<Prefix>Error|2<Separator> Exception|<Prefix>Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Exception)"),                "1<Separator> Exception|<Prefix>Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Exception(Exception))"),     "1<Separator> Exception|<Prefix>Exception|<Prefix>Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error(Exception)|Error)"),   "1<Separator> Exception|<Prefix>Error|<Prefix>Error|2<Separator> Error|<Prefix>Error");
+            expectations.Add(ErrorFactory.CreateFromDsl("Error"), "1<Separator> Error");
+            expectations.Add(ErrorFactory.CreateFromDsl("Error|Error"), "1<Separator> Error|2<Separator> Error");
+            expectations.Add(ErrorFactory.CreateFromDsl("Error|Error|Error"), "1<Separator> Error|2<Separator> Error|3<Separator> Error");
+            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error)"), "1<Separator> Error|<Prefix>Error");
+            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error)"), "1<Separator> Error|<Prefix>Error|2<Separator> Error|<Prefix>Error");
+            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error|Error)"), "1<Separator> Error|<Prefix>Error|2<Separator> Error|<Prefix>Error|3<Separator> Error|<Prefix>Error");
+            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error(Exception))"), "1<Separator> Exception|<Prefix>Error|<Prefix>Error");
+            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Exception)"), "1<Separator> Error|<Prefix>Error|2<Separator> Exception|<Prefix>Error");
+            expectations.Add(ErrorFactory.CreateFromDsl("Error(Exception)"), "1<Separator> Exception|<Prefix>Error");
+            expectations.Add(ErrorFactory.CreateFromDsl("Error(Exception(Exception))"), "1<Separator> Exception|<Prefix>Exception|<Prefix>Error");
+            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error(Exception)|Error)"), "1<Separator> Exception|<Prefix>Error|<Prefix>Error|2<Separator> Error|<Prefix>Error");
 
             foreach (var e in expectations)
             {
@@ -454,60 +344,18 @@ namespace System.ComponentModel.Composition
             }
         }
 
-#if FEATURE_APPDOMAINCONTROL
-        [TestMethod]
-        public void Message_ShouldIncludeErrorsAccrossAppDomain()
-        {
-            PermissionSet ps = new PermissionSet(PermissionState.None);
-            ps.AddPermission(new SecurityPermission(SecurityPermissionFlag.Execution));
-            ps.AddPermission(new ReflectionPermission(ReflectionPermissionFlag.MemberAccess));
-
-            //Create a new sandboxed domain 
-            AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
-            setup.ApplicationBase = Path.GetDirectoryName(typeof(CompositionExceptionTests).Assembly.Location);
-            AppDomain newDomain = AppDomain.CreateDomain("test domain", null, setup, ps);
-
-            Worker remoteWorker = (Worker)newDomain.CreateInstanceAndUnwrap(
-                Assembly.GetExecutingAssembly().FullName,
-                typeof(Worker).FullName);
-
-            int index = 0;
-            foreach (var expectation in Worker.expectations)
-            {
-                try
-                {
-                    remoteWorker.Action = (int x) => 
-                    {
-                        Exception e = CreateCompositionException(Worker.expectations[x].Input);
-                        throw e;
-                    };
-
-                    remoteWorker.DoWork(index);
-                }
-                catch(CompositionException e)
-                {
-                    AssertMessage(e, expectation.Output.Split('|'));
-                }
-                catch(Exception e)
-                {
-                    Assert.Fail(e.ToString());
-                }
-                ++index;
-            }
-        }
-#endif //FEATURE_APPDOMAINCONTROL
-        [TestMethod]
+        [Fact]
         public void Messsage_ShouldIncludeCountOfRootCauses()
         {
             var expectations = new ExpectationCollection<IEnumerable<CompositionError>, int>();
-            expectations.Add(ErrorFactory.CreateFromDsl("Error"),                            1);
-            expectations.Add(ErrorFactory.CreateFromDsl("Error|Error"),                      2);
-            expectations.Add(ErrorFactory.CreateFromDsl("Error|Error|Error"),                3);
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error)"),                     1);
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error)|Error(Error)"),        2);
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error)"),               2);
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error|Exception)"),     3);
-            
+            expectations.Add(ErrorFactory.CreateFromDsl("Error"), 1);
+            expectations.Add(ErrorFactory.CreateFromDsl("Error|Error"), 2);
+            expectations.Add(ErrorFactory.CreateFromDsl("Error|Error|Error"), 3);
+            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error)"), 1);
+            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error)|Error(Error)"), 2);
+            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error)"), 2);
+            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error|Exception)"), 3);
+
             foreach (var e in expectations)
             {
                 var exception = CreateCompositionException(e.Input);
@@ -516,7 +364,7 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Message_ShouldFormatCountOfRootCausesUsingTheCurrentCulture()
         {
             var cultures = Expectations.GetCulturesForFormatting();
@@ -536,51 +384,15 @@ namespace System.ComponentModel.Composition
             }
         }
 
-#if FEATURE_APPDOMAINCONTROL
-
-        [TestMethod]
-        public void Message_CanBeSerialized()
-        {
-            var expectations = Expectations.GetExceptionMessages();
-
-            foreach (var e in expectations)
-            {
-                var exception = CreateCompositionException(e);
-
-                var result = SerializationTestServices.RoundTrip(exception);
-
-                Assert.AreEqual(exception.Message, result.Message);
-            }
-        }
-
-        [TestMethod]
-        public void Errors_CanBeSerialized()
-        {
-            var expectations = Expectations.GetCompositionErrors();
-
-            foreach (var e in expectations)
-            {
-                var exception = CreateCompositionException(e);
-
-                var result = SerializationTestServices.RoundTrip(exception);
-
-                EnumerableAssert.AreSequenceEqual(exception.Errors, result.Errors, (index, expected, actual) =>
-                {
-                    CompositionAssert.AreEqual(expected, actual);
-                });
-            }
-        }
-
-#endif //FEATURE_APPDOMAINCONTROL
         private string GetElementGraphString(CompositionError error)
         {
             StringBuilder writer = new StringBuilder();
             ICompositionElement element = error.Element;
-            writer.AppendFormat(CultureInfo.CurrentCulture, Strings.CompositionException_ElementPrefix, element.DisplayName);
+            writer.AppendFormat(CultureInfo.CurrentCulture, SR.CompositionException_ElementPrefix, element.DisplayName);
 
             while ((element = element.Origin) != null)
             {
-                writer.AppendFormat(CultureInfo.CurrentCulture, Strings.CompositionException_OriginFormat, Strings.CompositionException_OriginSeparator, element.DisplayName);
+                writer.AppendFormat(CultureInfo.CurrentCulture, SR.CompositionException_OriginFormat, SR.CompositionException_OriginSeparator, element.DisplayName);
             }
 
             return writer.ToString();
@@ -594,13 +406,13 @@ namespace System.ComponentModel.Composition
 
                 if (rootCauseCount == 1)
                 {
-                    Assert.IsTrue(line.Contains(Strings.CompositionException_SingleErrorWithSinglePath));
+                    Assert.True(line.Contains(SR.CompositionException_SingleErrorWithSinglePath));
                 }
                 else
                 {
-                    Assert.IsTrue(
-                        line.Contains(string.Format(CultureInfo.CurrentCulture, Strings.CompositionException_SingleErrorWithMultiplePaths, rootCauseCount)) ||
-                        line.Contains(string.Format(CultureInfo.CurrentCulture, Strings.CompositionException_MultipleErrorsWithMultiplePaths, rootCauseCount))
+                    Assert.True(
+                        line.Contains(string.Format(CultureInfo.CurrentCulture, SR.CompositionException_SingleErrorWithMultiplePaths, rootCauseCount)) ||
+                        line.Contains(string.Format(CultureInfo.CurrentCulture, SR.CompositionException_MultipleErrorsWithMultiplePaths, rootCauseCount))
                         );
                 }
             }
@@ -617,16 +429,16 @@ namespace System.ComponentModel.Composition
                 {
                     // Skip blank line
                     reader.ReadLine();
-                    Assert.AreEqual(FixMessage(expect), reader.ReadLine());
+                    Assert.Equal(FixMessage(expect), reader.ReadLine());
                 }
             }
         }
 
         private string FixMessage(string expect)
         {
-            string fixedPrefix = expect.Replace("<Prefix>", Strings.CompositionException_ErrorPrefix + " ");
-            string fixedSeparator = fixedPrefix.Replace("<Separator>", Strings.CompositionException_PathsCountSeparator);
-            return fixedSeparator.Replace("<OriginSeparator>", Strings.CompositionException_OriginSeparator);
+            string fixedPrefix = expect.Replace("<Prefix>", SR.CompositionException_ErrorPrefix + " ");
+            string fixedSeparator = fixedPrefix.Replace("<Separator>", SR.CompositionException_PathsCountSeparator);
+            return fixedSeparator.Replace("<OriginSeparator>", SR.CompositionException_OriginSeparator);
         }
 
         private static CompositionError CreateCompositionError()

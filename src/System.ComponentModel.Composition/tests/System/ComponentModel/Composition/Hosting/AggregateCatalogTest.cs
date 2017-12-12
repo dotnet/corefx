@@ -1,118 +1,90 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Factories;
-using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
-using System.Security;
-using System.Security.Permissions;
-using System.Reflection;
+using Xunit;
 
 namespace System.ComponentModel.Composition.Hosting
 {
-    [TestClass]
     public class AggregateCatalogTest
     {
-#if FEATURE_APPDOMAINCONTROL
-        public delegate bool Work();
-
-        public class Worker : MarshalByRefObject
-        {
-            public static ExpectationCollection<IEnumerable<CompositionError>, string> expectations = new ExpectationCollection<IEnumerable<CompositionError>, string>();
-            static Worker()
-            {
-            }
-
-            public Work Action;
-
-            internal bool DoWork()
-            {
-                return Action();
-            }
-        }
-#endif //FEATURE_APPDOMAINCONTROL
-
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldNotThrow()
         {
             new AggregateCatalog();
         }
 
-
-        [TestMethod]
+        [Fact]
         public void Constructor1_ShouldSetCatalogsPropertyToEmpty()
         {
             var catalog = new AggregateCatalog();
 
-            EnumerableAssert.IsEmpty(catalog.Catalogs);
+            Assert.Empty(catalog.Catalogs);
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(812029)]
+        [Fact]
+        [ActiveIssue(812029)]
         public void Constructor1_ShouldSetPartsPropertyToEmpty()
         {
             var catalog = new AggregateCatalog();
 
-            EnumerableAssert.IsEmpty(catalog.Parts);
+            Assert.Empty(catalog.Parts);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_NullAsCatalogsArgument_ShouldSetCatalogsPropertyToEmpty()
         {
             var catalog = new AggregateCatalog((IEnumerable<ComposablePartCatalog>)null);
 
-            EnumerableAssert.IsEmpty(catalog.Catalogs);
+            Assert.Empty(catalog.Catalogs);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor3_EmptyIEnumerableAsCatalogsArgument_ShouldSetCatalogsPropertyToEmpty()
         {
             var catalog = new AggregateCatalog(Enumerable.Empty<ComposablePartCatalog>());
 
-            EnumerableAssert.IsEmpty(catalog.Catalogs);
+            Assert.Empty(catalog.Catalogs);
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(812029)]
+        [Fact]
+        [ActiveIssue(812029)]
         public void Constructor3_NullAsCatalogsArgument_ShouldSetPartsPropertyToEmpty()
         {
             var catalog = new AggregateCatalog((IEnumerable<ComposablePartCatalog>)null);
 
-            EnumerableAssert.IsEmpty(catalog.Parts);
+            Assert.Empty(catalog.Parts);
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(812029)]
+        [Fact]
+        [ActiveIssue(812029)]
         public void Constructor3_EmptyIEnumerableAsCatalogsArgument_ShouldSetPartsPropertyToEmpty()
         {
             var catalog = new AggregateCatalog(Enumerable.Empty<ComposablePartCatalog>());
 
-            EnumerableAssert.IsEmpty(catalog.Parts);
+            Assert.Empty(catalog.Parts);
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void Constructor3_ArrayWithNullAsCatalogsArgument_ShouldThrowArgument()
         {
             var catalogs = new ComposablePartCatalog[] { null };
 
-            ExceptionAssert.ThrowsArgument<ArgumentException>("catalogs", () =>
+            AssertExtensions.Throws<ArgumentException>("catalogs", () =>
             {
                 new AggregateCatalog(catalogs);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Catalogs_WhenCatalogDisposed_ShouldThrowObjectDisposed()
         {
             var catalog = CreateAggregateCatalog();
@@ -124,7 +96,7 @@ namespace System.ComponentModel.Composition.Hosting
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Parts_WhenCatalogDisposed_ShouldThrowObjectDisposed()
         {
             var catalog = CreateAggregateCatalog();
@@ -136,7 +108,7 @@ namespace System.ComponentModel.Composition.Hosting
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports_WhenCatalogDisposed_ShouldThrowObjectDisposed()
         {
             var catalog = CreateAggregateCatalog();
@@ -149,18 +121,19 @@ namespace System.ComponentModel.Composition.Hosting
             });
         }
 
-        [TestMethod]
+        [Fact]
+        [ActiveIssue(25498)]
         public void GetExports_NullAsConstraintArgument_ShouldThrowArgumentNull()
         {
             var catalog = CreateAggregateCatalog();
 
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("definition", () =>
+            AssertExtensions.Throws<ArgumentNullException>("definition", () =>
             {
                 catalog.GetExports((ImportDefinition)null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_ShouldNotThrow()
         {
             using (var catalog = CreateAggregateCatalog())
@@ -168,7 +141,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_CanBeCalledMultipleTimes()
         {
             var catalog = CreateAggregateCatalog();
@@ -177,7 +150,7 @@ namespace System.ComponentModel.Composition.Hosting
             catalog.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void EnumeratePartsProperty_ShouldSucceed()
         {
             using (var catalog = new AggregateCatalog(
@@ -188,45 +161,12 @@ namespace System.ComponentModel.Composition.Hosting
                 new TypeCatalog(typeof(SharedPartStuff)),
                 new TypeCatalog(typeof(SharedPartStuff))))
             {
-                Assert.IsTrue(catalog.Catalogs.Count() == 6, "Initialise AggregateCatalog gets right number of catalogs");
-                Assert.IsTrue(catalog.Parts.Count() == 6, "Initialise AggregateCatalog gets right number of catalogs");
+                Assert.True(catalog.Catalogs.Count() == 6);
+                Assert.True(catalog.Parts.Count() == 6);
             }
-       }
-
-#if FEATURE_APPDOMAINCONTROL
-        [TestMethod]
-        public void EnumeratePartsPropertyPartialInTrust_ShouldSucceed()
-        {
-            PermissionSet ps = new PermissionSet(PermissionState.None);
-            ps.AddPermission(new SecurityPermission(SecurityPermissionFlag.Execution));
-            ps.AddPermission(new ReflectionPermission(ReflectionPermissionFlag.MemberAccess));
-
-            //Create a new sandboxed domain 
-            AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
-            setup.ApplicationBase = Path.GetDirectoryName(typeof(CompositionExceptionTests).Assembly.Location);
-            AppDomain newDomain = AppDomain.CreateDomain("test domain", null, setup, ps);
-
-            Worker remoteWorker = (Worker)newDomain.CreateInstanceAndUnwrap(
-                Assembly.GetExecutingAssembly().FullName,
-                typeof(Worker).FullName);
-
-            remoteWorker.Action = () => 
-            {
-                using (var catalog = new AggregateCatalog(
-                    new TypeCatalog(typeof(SharedPartStuff)),
-                    new TypeCatalog(typeof(SharedPartStuff)),
-                    new TypeCatalog(typeof(SharedPartStuff)),
-                    new TypeCatalog(typeof(SharedPartStuff)),
-                    new TypeCatalog(typeof(SharedPartStuff)),
-                    new TypeCatalog(typeof(SharedPartStuff))))
-                {
-                    return (catalog.Catalogs.Count() == 6) && (catalog.Parts.Count() == 6);
-                }
-            };
-            Assert.IsTrue(remoteWorker.DoWork());
         }
-#endif //FEATURE_APPDOMAINCONTROL
-        [TestMethod]
+
+        [Fact]
         public void MutableCatalogNotifications()
         {
             int step = 0;
@@ -244,75 +184,75 @@ namespace System.ComponentModel.Composition.Hosting
             catalog.Catalogs.Add(typePartCatalog);
             catalog.Catalogs.Remove(typePartCatalog);
             catalog.Catalogs.Clear();
-            Assert.IsTrue(catalog.Catalogs.Count == 0, "Add/Remove/Clear -- PartsAsCollection.Count is now 0");
+            Assert.True(catalog.Catalogs.Count == 0);
 
             // Add notifications
-            catalog.Changed += delegate(object source, ComposablePartCatalogChangeEventArgs args)
+            catalog.Changed += delegate (object source, ComposablePartCatalogChangeEventArgs args)
             {
                 // Local code
-                ++step; ++step;
+                ++step;
+                ++step;
                 changedStep = step;
             };
 
             //Add something then verify counters
             catalog.Catalogs.Add(typePartCatalog);
-            Assert.IsTrue(catalog.Catalogs.Count == 1, "Add -- Catalogs.Count is now 1");
-            Assert.IsTrue(changedStep == 2, "Add -- Changed must be fired after");
+            Assert.True(catalog.Catalogs.Count == 1);
+            Assert.True(changedStep == 2);
 
             // Reset counters
             step = changedStep = 0;
 
             // Remove something then verify counters
             catalog.Catalogs.Remove(typePartCatalog);
-            Assert.IsTrue(catalog.Catalogs.Count == 0, "Add -- Catalogs.Count is now 0");
-            Assert.IsTrue(changedStep == 2, "Remove -- Changed must be fired after");
-
+            Assert.True(catalog.Catalogs.Count == 0);
+            Assert.True(changedStep == 2);
 
             //Now Add it back
             catalog.Catalogs.Add(typePartCatalog);
-            Assert.IsTrue(catalog.Catalogs.Count == 1, "Add -- Catalogs.Count is now 1");
+            Assert.True(catalog.Catalogs.Count == 1);
 
             step = changedStep = 0;
             // Now clear the collection and verify counters
             catalog.Catalogs.Clear();
-            Assert.IsTrue(catalog.Catalogs.Count == 0, "Add -- Catalogs.Count is now 0");
-            Assert.IsTrue(changedStep == 2, "Remove -- Changed must be fired after");
+            Assert.True(catalog.Catalogs.Count == 0);
+            Assert.True(changedStep == 2);
 
             // Now remove a non existent item and verify counters
             step = changedStep = 0;
             bool removed = catalog.Catalogs.Remove(typePartCatalog);
-            Assert.IsTrue(removed == false, "Remove -- correctly returned false");
-            Assert.IsTrue(changedStep == 0, "Remove -- Changed should not fire if nothing changed");
+            Assert.True(removed == false);
+            Assert.True(changedStep == 0);
 
             // Add a bunch
             step = changedStep = 0;
             catalog.Catalogs.Add(typePartCatalog);
-            Assert.IsTrue(catalog.Catalogs.Count == 1, "Add -- Catalogs.Count is now 1");
-            Assert.IsTrue(changedStep == 2, "Add -- Changed must be fired after");
+            Assert.True(catalog.Catalogs.Count == 1);
+            Assert.True(changedStep == 2);
 
             catalog.Catalogs.Add(typePartCatalog1);
-            Assert.IsTrue(catalog.Catalogs.Count == 2, "Add -- Catalogs.Count is now 1");
-            Assert.IsTrue(changedStep == 4, "Add -- Changing must be fired after");
+            Assert.True(catalog.Catalogs.Count == 2);
+            Assert.True(changedStep == 4);
 
             catalog.Catalogs.Add(typePartCatalog2);
             catalog.Catalogs.Add(typePartCatalog3);
             catalog.Catalogs.Add(typePartCatalog4);
             catalog.Catalogs.Add(typePartCatalog5);
-            Assert.IsTrue(catalog.Catalogs.Count == 6, "Add -- Catalogs.Count is now 1");
-            Assert.IsTrue(changedStep == 12, "Add -- Changing must be fired after");
+            Assert.True(catalog.Catalogs.Count == 6);
+            Assert.True(changedStep == 12);
 
             removed = catalog.Catalogs.Remove(typePartCatalog3);
-            Assert.IsTrue(catalog.Catalogs.Count == 5, "Add -- Catalogs.Count is now 5");
-            Assert.IsTrue(removed == true, "Remove should have succeeded");
-            Assert.IsTrue(changedStep == 14, "Remove -- Changed must be fired after");
+            Assert.True(catalog.Catalogs.Count == 5);
+            Assert.True(removed == true);
+            Assert.True(changedStep == 14);
             removed = catalog.Catalogs.Remove(typePartCatalog2);
             removed = catalog.Catalogs.Remove(typePartCatalog1);
             removed = catalog.Catalogs.Remove(typePartCatalog4);
             removed = catalog.Catalogs.Remove(typePartCatalog);
             removed = catalog.Catalogs.Remove(typePartCatalog5);
-            Assert.IsTrue(catalog.Catalogs.Count == 0, "Add -- Catalogs.Count is now 0");
-            Assert.IsTrue(removed == true, "Remove should have succeeded");
-            Assert.IsTrue(changedStep == 24, "Remove -- Changing must be fired after");
+            Assert.True(catalog.Catalogs.Count == 0);
+            Assert.True(removed == true);
+            Assert.True(changedStep == 24);
 
             // Add and then clear a lot
             step = changedStep = 0;
@@ -322,46 +262,47 @@ namespace System.ComponentModel.Composition.Hosting
             catalog.Catalogs.Add(typePartCatalog3);
             catalog.Catalogs.Add(typePartCatalog4);
             catalog.Catalogs.Add(typePartCatalog5);
-            Assert.IsTrue(catalog.Catalogs.Count == 6, "Add -- Catalogs.Count should be 6");
-            Assert.IsTrue(changedStep == 12, "Add -- Changing must be fired after");
+            Assert.True(catalog.Catalogs.Count == 6);
+            Assert.True(changedStep == 12);
 
             catalog.Catalogs.Clear();
-            Assert.IsTrue(catalog.Catalogs.Count == 0, "Add -- Catalogs.Count should be 0");
+            Assert.True(catalog.Catalogs.Count == 0);
 
             step = changedStep = 0;
             int step2 = 100;
             int changedStep2 = 0;
 
-            catalog.Changed += delegate(object source, ComposablePartCatalogChangeEventArgs args)
+            catalog.Changed += delegate (object source, ComposablePartCatalogChangeEventArgs args)
             {
                 // Local code
-                --step2; --step2;
+                --step2;
+                --step2;
                 changedStep2 = step2;
             };
 
             catalog.Catalogs.Add(typePartCatalog);
-            Assert.IsTrue(catalog.Catalogs.Count == 1, "Add -- Catalogs.Count is now 1");
-            Assert.IsTrue(changedStep == 2, "Add handler 1 -- Changed must be fired after");
-            Assert.IsTrue(changedStep2 == 98, "Add handler 2 -- Changed must be fired after");
+            Assert.True(catalog.Catalogs.Count == 1);
+            Assert.True(changedStep == 2);
+            Assert.True(changedStep2 == 98);
 
             catalog.Catalogs.Add(typePartCatalog1);
-            Assert.IsTrue(catalog.Catalogs.Count == 2, "Add -- Catalogs.Count is now 1");
-            Assert.IsTrue(changedStep == 4, "Add handler 1 -- Changed must be fired after");
-            Assert.IsTrue(changedStep2 == 96, "Add handler 2 -- Changed must be firedafter");
+            Assert.True(catalog.Catalogs.Count == 2);
+            Assert.True(changedStep == 4);
+            Assert.True(changedStep2 == 96);
 
             catalog.Catalogs.Remove(typePartCatalog);
-            Assert.IsTrue(catalog.Catalogs.Count == 1, "Add -- PartsAsCollection.Count is now 1");
-            Assert.IsTrue(changedStep == 6, "Add handler 1 -- Changed must be fired and fired after");
-            Assert.IsTrue(changedStep2 == 94, "Add handler 2 -- Changed must be fired and fired after");
+            Assert.True(catalog.Catalogs.Count == 1);
+            Assert.True(changedStep == 6);
+            Assert.True(changedStep2 == 94);
 
             catalog.Catalogs.Clear();
-            Assert.IsTrue(catalog.Catalogs.Count == 0, "Add -- PartsAsCollection.Count is now 0");
-            Assert.IsTrue(changedStep == 8, "Add handler 1 -- Changed must be fired after");
-            Assert.IsTrue(changedStep2 == 92, "Add handler 2 -- Changed must be fired after");
+            Assert.True(catalog.Catalogs.Count == 0);
+            Assert.True(changedStep == 8);
+            Assert.True(changedStep2 == 92);
 
         }
 
-        [TestMethod]
+        [Fact]
         public void DisposeAggregatingCatalog()
         {
             int changedNotification = 0;
@@ -374,11 +315,10 @@ namespace System.ComponentModel.Composition.Hosting
             var assemblyPartCatalog2 = new AssemblyCatalog(typeof(SharedPartStuff).Assembly);
             var assemblyPartCatalog3 = new AssemblyCatalog(typeof(SharedPartStuff).Assembly);
 
-#if FEATURE_REFLECTIONFILEIO
-            var dirPartCatalog1 = new DirectoryCatalog(FileIO.GetRootTemporaryDirectory());
-            var dirPartCatalog2 = new DirectoryCatalog(FileIO.GetRootTemporaryDirectory());
-            var dirPartCatalog3 = new DirectoryCatalog(FileIO.GetRootTemporaryDirectory());
-#endif //FEATURE_REFLECTIONFILEIO
+            var dirPartCatalog1 = new DirectoryCatalog(Path.GetTempPath());
+            var dirPartCatalog2 = new DirectoryCatalog(Path.GetTempPath());
+            var dirPartCatalog3 = new DirectoryCatalog(Path.GetTempPath());
+
             using (var catalog = new AggregateCatalog())
             {
                 catalog.Catalogs.Add(typePartCatalog1);
@@ -389,14 +329,12 @@ namespace System.ComponentModel.Composition.Hosting
                 catalog.Catalogs.Add(assemblyPartCatalog2);
                 catalog.Catalogs.Add(assemblyPartCatalog3);
 
-#if FEATURE_REFLECTIONFILEIO
                 catalog.Catalogs.Add(dirPartCatalog1);
                 catalog.Catalogs.Add(dirPartCatalog2);
                 catalog.Catalogs.Add(dirPartCatalog3);
-#endif //FEATURE_REFLECTIONFILEIO
 
                 // Add notifications
-                catalog.Changed += delegate(object source, ComposablePartCatalogChangeEventArgs args)
+                catalog.Changed += delegate (object source, ComposablePartCatalogChangeEventArgs args)
                 {
                     // Local code
                     ++changedNotification;
@@ -404,7 +342,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             }
 
-            Assert.IsTrue(changedNotification == 0, "No changed notifications");
+            Assert.True(changedNotification == 0);
 
             //Ensure that the other catalogs are 
             ExceptionAssert.ThrowsDisposed(typePartCatalog1, () =>
@@ -438,7 +376,6 @@ namespace System.ComponentModel.Composition.Hosting
                 var iEnum = assemblyPartCatalog3.Parts.GetEnumerator();
             });
 
-#if FEATURE_REFLECTIONFILEIO
             //Ensure that the other catalogs are 
             ExceptionAssert.ThrowsDisposed(dirPartCatalog1, () =>
             {
@@ -454,17 +391,15 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 var iEnum = dirPartCatalog3.Parts.GetEnumerator();
             });
-#endif //FEATURE_REFLECTIONFILEIO
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(514749)]
+        [Fact]
+        [ActiveIssue(514749)]
         public void MutableMultithreadedEnumerations()
         {
             var catalog = new AggregateCatalog();
 
-            ThreadStart func = delegate()
+            ThreadStart func = delegate ()
             {
                 var typePart = new TypeCatalog(typeof(SharedPartStuff));
                 var typePart1 = new TypeCatalog(typeof(SharedPartStuff));
@@ -482,7 +417,7 @@ namespace System.ComponentModel.Composition.Hosting
                     catalog.Catalogs.Add(typePart4);
                     catalog.Catalogs.Add(typePart5);
 
-                    Assert.IsTrue(catalog.Catalogs.Count >= 6, "Catalogs Collection must be at least 6 big");
+                    Assert.True(catalog.Catalogs.Count >= 6);
 
                     for (int k = 0; k < 5; k++)
                     {
@@ -496,7 +431,7 @@ namespace System.ComponentModel.Composition.Hosting
                             ++j;
                         }
 
-                        Assert.IsTrue(j >= 6, "Catalogs Collection must be at least 6 big");
+                        Assert.True(j >= 6);
 
                         // Ensure that iterating the returned enumerator is okay even though there are many threads mutationg it
                         // We are really just looking to ensure that collection changed exceptions are not thrown
@@ -506,9 +441,8 @@ namespace System.ComponentModel.Composition.Hosting
                         {
                             ++j;
                         }
-                        Assert.IsTrue(j >= 6, "Catalogs Collection must be at least 6 big");
+                        Assert.True(j >= 6);
                     }
-
 
                     catalog.Catalogs.Remove(typePart);
                     catalog.Catalogs.Remove(typePart1);
@@ -534,16 +468,15 @@ namespace System.ComponentModel.Composition.Hosting
                 threads[i].Join();
             }
 
-            Assert.IsTrue(catalog.Catalogs.Count == 0, "Collection must be empty");
+            Assert.True(catalog.Catalogs.Count == 0);
         }
 
-
         public void CreateMainAndOtherChildren(
-            out AggregateCatalog[] mainChildren,
-            out AggregateCatalog[] otherChildren,
-            out TypeCatalog[] componentCatalogs)
+                    out AggregateCatalog[] mainChildren,
+                    out AggregateCatalog[] otherChildren,
+                    out TypeCatalog[] componentCatalogs)
         {
-            componentCatalogs = new TypeCatalog[] 
+            componentCatalogs = new TypeCatalog[]
             {
                 new TypeCatalog(typeof(SharedPartStuff)),
                 new TypeCatalog(typeof(SharedPartStuff)),
@@ -564,14 +497,13 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(812029)]
+        [Fact]
+        [ActiveIssue(812029)]
         public void AggregatingCatalogAddAndRemoveChildren()
         {
             int changedCount = 0;
             int typesChanged = 0;
-            EventHandler<ComposablePartCatalogChangeEventArgs> onChanged = delegate(object sender, ComposablePartCatalogChangeEventArgs e)
+            EventHandler<ComposablePartCatalogChangeEventArgs> onChanged = delegate (object sender, ComposablePartCatalogChangeEventArgs e)
             {
                 ++changedCount;
                 typesChanged += e.AddedDefinitions.Concat(e.RemovedDefinitions).Count();
@@ -592,8 +524,8 @@ namespace System.ComponentModel.Composition.Hosting
                 parent.Catalogs.Add(otherChildren[i]);
             }
 
-            Assert.AreEqual(otherChildren.Length, changedCount);
-            Assert.AreEqual(otherChildren.Length * 3, typesChanged);
+            Assert.Equal(otherChildren.Length, changedCount);
+            Assert.Equal(otherChildren.Length * 3, typesChanged);
 
             changedCount = 0;
             typesChanged = 0;
@@ -601,8 +533,8 @@ namespace System.ComponentModel.Composition.Hosting
             parent.Catalogs.Remove(otherChildren[0]);
             parent.Catalogs.Remove(otherChildren[1]);
 
-            Assert.AreEqual(2, changedCount);
-            Assert.AreEqual(2 * 3, typesChanged);
+            Assert.Equal(2, changedCount);
+            Assert.Equal(2 * 3, typesChanged);
 
             changedCount = 0;
             typesChanged = 0;
@@ -610,15 +542,15 @@ namespace System.ComponentModel.Composition.Hosting
             parent.Catalogs.Add(otherChildren[0]);
             parent.Catalogs.Add(otherChildren[1]);
 
-            Assert.AreEqual(2, changedCount);
-            Assert.AreEqual(2 * 3, typesChanged);
+            Assert.Equal(2, changedCount);
+            Assert.Equal(2 * 3, typesChanged);
 
             changedCount = 0;
             typesChanged = 0;
 
             parent.Catalogs.Clear();
-            Assert.AreEqual(1, changedCount);
-            Assert.AreEqual((mainChildren.Length + otherChildren.Length) * 3, typesChanged);
+            Assert.Equal(1, changedCount);
+            Assert.Equal((mainChildren.Length + otherChildren.Length) * 3, typesChanged);
 
             changedCount = 0;
             typesChanged = 0;
@@ -626,24 +558,23 @@ namespace System.ComponentModel.Composition.Hosting
             // These have already been removed and so I should be able remove components from them without recieving notifications
             otherChildren[0].Catalogs.Remove(componentCatalogs[0]);
             otherChildren[1].Catalogs.Remove(componentCatalogs[1]);
-            Assert.AreEqual(0, changedCount);
-            Assert.AreEqual(0, typesChanged);
+            Assert.Equal(0, changedCount);
+            Assert.Equal(0, typesChanged);
 
             // These have already been Cleared and so I should be able remove components from them without recieving notifications
             otherChildren[3].Catalogs.Remove(componentCatalogs[0]);
             otherChildren[4].Catalogs.Remove(componentCatalogs[1]);
-            Assert.AreEqual(0, changedCount);
+            Assert.Equal(0, changedCount);
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(812029)]
+        [Fact]
+        [ActiveIssue(812029)]
         public void AggregatingCatalogAddAndRemoveNestedChildren()
         {
             int changedCount = 0;
             int typesChanged = 0;
 
-            EventHandler<ComposablePartCatalogChangeEventArgs> onChanged = delegate(object sender, ComposablePartCatalogChangeEventArgs e)
+            EventHandler<ComposablePartCatalogChangeEventArgs> onChanged = delegate (object sender, ComposablePartCatalogChangeEventArgs e)
             {
                 ++changedCount;
                 typesChanged += e.AddedDefinitions.Concat(e.RemovedDefinitions).Count();
@@ -655,7 +586,6 @@ namespace System.ComponentModel.Composition.Hosting
             TypeCatalog[] componentCatalogs;
             CreateMainAndOtherChildren(out mainChildren, out otherChildren, out componentCatalogs);
 
-
             var parent = new AggregateCatalog(mainChildren);
             parent.Changed += onChanged;
 
@@ -664,8 +594,8 @@ namespace System.ComponentModel.Composition.Hosting
                 parent.Catalogs.Add(otherChildren[i]);
             }
 
-            Assert.AreEqual(otherChildren.Length, changedCount);
-            Assert.AreEqual(otherChildren.Length * 3, typesChanged);
+            Assert.Equal(otherChildren.Length, changedCount);
+            Assert.Equal(otherChildren.Length * 3, typesChanged);
 
             changedCount = 0;
             typesChanged = 0;
@@ -673,8 +603,8 @@ namespace System.ComponentModel.Composition.Hosting
             otherChildren[0].Catalogs.Remove(componentCatalogs[0]);
             otherChildren[1].Catalogs.Remove(componentCatalogs[1]);
 
-            Assert.AreEqual(2, changedCount);
-            Assert.AreEqual(2, typesChanged);
+            Assert.Equal(2, changedCount);
+            Assert.Equal(2, typesChanged);
 
             changedCount = 0;
             typesChanged = 0;
@@ -682,25 +612,24 @@ namespace System.ComponentModel.Composition.Hosting
             otherChildren[0].Catalogs.Add(componentCatalogs[0]);
             otherChildren[1].Catalogs.Add(componentCatalogs[1]);
 
-            Assert.AreEqual(2, changedCount);
-            Assert.AreEqual(2, typesChanged);
+            Assert.Equal(2, changedCount);
+            Assert.Equal(2, typesChanged);
 
             changedCount = 0;
             typesChanged = 0;
             otherChildren[1].Catalogs.Clear();
-            Assert.AreEqual(1, changedCount);
-            Assert.AreEqual(componentCatalogs.Length, typesChanged);
+            Assert.Equal(1, changedCount);
+            Assert.Equal(componentCatalogs.Length, typesChanged);
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(812029)]
+        [Fact]
+        [ActiveIssue(812029)]
         public void AggregatingDisposedAndNotifications()
         {
             int changedCount = 0;
             int typesChanged = 0;
 
-            EventHandler<ComposablePartCatalogChangeEventArgs> onChanged = delegate(object sender, ComposablePartCatalogChangeEventArgs e)
+            EventHandler<ComposablePartCatalogChangeEventArgs> onChanged = delegate (object sender, ComposablePartCatalogChangeEventArgs e)
             {
                 ++changedCount;
                 typesChanged += e.AddedDefinitions.Concat(e.RemovedDefinitions).Count();
@@ -712,7 +641,6 @@ namespace System.ComponentModel.Composition.Hosting
             TypeCatalog[] componentCatalogs;
             CreateMainAndOtherChildren(out mainChildren, out otherChildren, out componentCatalogs);
 
-
             var parent = new AggregateCatalog(mainChildren);
             parent.Changed += onChanged;
 
@@ -721,16 +649,16 @@ namespace System.ComponentModel.Composition.Hosting
                 parent.Catalogs.Add(otherChildren[i]);
             }
 
-            Assert.AreEqual(otherChildren.Length, changedCount);
-            Assert.AreEqual(otherChildren.Length * 3, typesChanged);
+            Assert.Equal(otherChildren.Length, changedCount);
+            Assert.Equal(otherChildren.Length * 3, typesChanged);
 
             changedCount = 0;
             typesChanged = 0;
 
             parent.Dispose();
 
-            Assert.AreEqual(0, changedCount);
-            Assert.AreEqual(0, typesChanged);
+            Assert.Equal(0, changedCount);
+            Assert.Equal(0, typesChanged);
 
             //Ensure that the children are also disposed
             ExceptionAssert.ThrowsDisposed(otherChildren[0], () =>
@@ -744,11 +672,11 @@ namespace System.ComponentModel.Composition.Hosting
                 otherChildren[4].Catalogs.Remove(componentCatalogs[0]);
             });
 
-            Assert.AreEqual(0, changedCount);
-            Assert.AreEqual(0, typesChanged);
+            Assert.Equal(0, changedCount);
+            Assert.Equal(0, typesChanged);
         }
 
-        [TestMethod]
+        [Fact]
         public void AggregatingCatalogParmsConstructorAggregateAggregateCatalogs()
         {
             var aggCatalog1 = new AggregateCatalog();
@@ -757,19 +685,18 @@ namespace System.ComponentModel.Composition.Hosting
 
             // Construct with one catalog parameter
             var catalog = new AggregateCatalog(aggCatalog1);
-            Assert.IsTrue(catalog.Catalogs.Count == 1);
+            Assert.True(catalog.Catalogs.Count == 1);
 
             // Construct with two catalog parameters
             catalog = new AggregateCatalog(aggCatalog1, aggCatalog2);
-            Assert.IsTrue(catalog.Catalogs.Count == 2);
+            Assert.True(catalog.Catalogs.Count == 2);
 
             // Construct with three catalog parameters
             catalog = new AggregateCatalog(aggCatalog1, aggCatalog2, aggCatalog3);
-            Assert.IsTrue(catalog.Catalogs.Count == 3);
+            Assert.True(catalog.Catalogs.Count == 3);
         }
 
-
-        [TestMethod]
+        [Fact]
         public void AggregatingCatalogParmsConstructorAggregateAssemblyCatalogs()
         {
             var assemblyCatalog1 = new AssemblyCatalog(typeof(SharedPartStuff).Assembly);
@@ -778,18 +705,18 @@ namespace System.ComponentModel.Composition.Hosting
 
             // Construct with one catalog parameter
             var catalog = new AggregateCatalog(assemblyCatalog1);
-            Assert.IsTrue(catalog.Catalogs.Count == 1);
+            Assert.True(catalog.Catalogs.Count == 1);
 
             // Construct with two catalog parameters
             catalog = new AggregateCatalog(assemblyCatalog1, assemblyCatalog2);
-            Assert.IsTrue(catalog.Catalogs.Count == 2);
+            Assert.True(catalog.Catalogs.Count == 2);
 
             // Construct with three catalog parameters
             catalog = new AggregateCatalog(assemblyCatalog1, assemblyCatalog2, assemblyCatalog3);
-            Assert.IsTrue(catalog.Catalogs.Count == 3);
+            Assert.True(catalog.Catalogs.Count == 3);
         }
 
-        [TestMethod]
+        [Fact]
         public void AggregatingCatalogParmsConstructorMixedCatalogs()
         {
             var typePartCatalog1 = new TypeCatalog(typeof(SharedPartStuff));
@@ -798,10 +725,10 @@ namespace System.ComponentModel.Composition.Hosting
 
             // Construct with three catalog parameters
             var catalog = new AggregateCatalog(typePartCatalog1, assemblyCatalog2, typePartCatalog3);
-            Assert.IsTrue(catalog.Catalogs.Count == 3);
+            Assert.True(catalog.Catalogs.Count == 3);
         }
 
-        [TestMethod]
+        [Fact]
         public void AggregatingCatalogRaisesChangesForCatalogsPassedToConstructor()
         {
             var subCatalog = CreateAggregateCatalog();
@@ -815,7 +742,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             subCatalog.Catalogs.Add(new TypeCatalog(typeof(SharedPartStuff)));
 
-            Assert.IsTrue(changedCalled);
+            Assert.True(changedCalled);
         }
 
         private AggregateCatalog CreateAggregateCatalog()
@@ -823,18 +750,16 @@ namespace System.ComponentModel.Composition.Hosting
             return new AggregateCatalog();
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(812029)]
+        [Fact]
+        [ActiveIssue(812029)]
         public void CatalogEvents_AggregateAddRemove()
         {
             var catalog = new AggregateCatalog();
             AggregateTests(catalog, catalog);
         }
 
-        [TestMethod]
-        [Ignore]
-        [WorkItem(812029)]
+        [Fact]
+        [ActiveIssue(812029)]
         public void CatalogEvents_DeepAggregateAddRemove()
         {
             var deepCatalog = new AggregateCatalog();
@@ -862,7 +787,6 @@ namespace System.ComponentModel.Composition.Hosting
             catalogListener.VerifyAdd(bothCatalog, typeof(FooExporter), typeof(BarExporter));
             catalogListener.VerifyRemove(bothCatalog, typeof(FooExporter), typeof(BarExporter));
         }
-
 
         public interface IFoo { }
         public interface IBar { }
@@ -900,8 +824,8 @@ namespace System.ComponentModel.Composition.Hosting
 
                 this._modifiedCatalog.Catalogs.Add(catalogToAdd);
 
-                Assert.IsTrue(this._changingEventCount == 1, "Changing event should have been called");
-                Assert.IsTrue(this._changedEventCount == 1, "Changed event should have been called");
+                Assert.True(this._changingEventCount == 1);
+                Assert.True(this._changedEventCount == 1);
 
                 ResetState();
             }
@@ -913,8 +837,8 @@ namespace System.ComponentModel.Composition.Hosting
 
                 this._modifiedCatalog.Catalogs.Remove(catalogToRemove);
 
-                Assert.IsTrue(this._changingEventCount == 1, "Changing event should have been called");
-                Assert.IsTrue(this._changedEventCount == 1, "Changed event should have been called");
+                Assert.True(this._changingEventCount == 1);
+                Assert.True(this._changedEventCount == 1);
 
                 ResetState();
             }
@@ -926,63 +850,63 @@ namespace System.ComponentModel.Composition.Hosting
 
                 this._modifiedCatalog.Catalogs.Clear();
 
-                Assert.IsTrue(this._changingEventCount == 1, "Changing event should have been called");
-                Assert.IsTrue(this._changedEventCount == 1, "Changed event should have been called");
+                Assert.True(this._changingEventCount == 1);
+                Assert.True(this._changedEventCount == 1);
 
                 ResetState();
             }
 
             public void OnChanging(object sender, ComposablePartCatalogChangeEventArgs args)
             {
-                Assert.IsTrue(this._expectedAdds != null || this._expectedRemoves != null);
+                Assert.True(this._expectedAdds != null || this._expectedRemoves != null);
 
                 if (this._expectedAdds == null)
                 {
-                    EnumerableAssert.IsEmpty(args.AddedDefinitions);
+                    Assert.Empty(args.AddedDefinitions);
                 }
                 else
                 {
-                    EnumerableAssert.AreSequenceEqual(this._expectedAdds, GetDisplayNames(args.AddedDefinitions));
+                    EqualityExtensions.CheckSequenceEquals(this._expectedAdds, GetDisplayNames(args.AddedDefinitions));
                 }
 
                 if (this._expectedRemoves == null)
                 {
-                    EnumerableAssert.IsEmpty(args.RemovedDefinitions);
+                    Assert.Empty(args.RemovedDefinitions);
                 }
                 else
                 {
-                    EnumerableAssert.AreSequenceEqual(this._expectedRemoves, GetDisplayNames(args.RemovedDefinitions));
+                    EqualityExtensions.CheckSequenceEquals(this._expectedRemoves, GetDisplayNames(args.RemovedDefinitions));
                 }
 
-                Assert.IsFalse(ContainsChanges(), "The catalog should NOT contain the changes yet");
+                Assert.False(ContainsChanges(), "The catalog should NOT contain the changes yet");
 
                 this._changingEventCount++;
             }
 
             public void OnChanged(object sender, ComposablePartCatalogChangeEventArgs args)
             {
-                Assert.IsTrue(this._expectedAdds != null || this._expectedRemoves != null);
+                Assert.True(this._expectedAdds != null || this._expectedRemoves != null);
 
                 if (this._expectedAdds == null)
                 {
-                    EnumerableAssert.IsEmpty(args.AddedDefinitions);
+                    Assert.Empty(args.AddedDefinitions);
                 }
                 else
                 {
-                    EnumerableAssert.AreSequenceEqual(this._expectedAdds, GetDisplayNames(args.AddedDefinitions));
+                    EqualityExtensions.CheckSequenceEquals(this._expectedAdds, GetDisplayNames(args.AddedDefinitions));
                 }
 
                 if (this._expectedRemoves == null)
                 {
-                    EnumerableAssert.IsEmpty(args.RemovedDefinitions);
+                    Assert.Empty(args.RemovedDefinitions);
                 }
                 else
                 {
-                    EnumerableAssert.AreSequenceEqual(this._expectedRemoves, GetDisplayNames(args.RemovedDefinitions));
+                    EqualityExtensions.CheckSequenceEquals(this._expectedRemoves, GetDisplayNames(args.RemovedDefinitions));
                 }
 
-                Assert.IsNull(args.AtomicComposition);
-                Assert.IsTrue(ContainsChanges(), "The catalog should contain the changes");
+                Assert.Null(args.AtomicComposition);
+                Assert.True(ContainsChanges());
 
                 this._changedEventCount++;
             }
