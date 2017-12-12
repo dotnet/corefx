@@ -210,7 +210,7 @@ namespace System.Drawing.Tests
         [InlineData("0xG12")]
         [InlineData("&h")]
         [InlineData("&hG12")]
-        public void FromHtml_Invalid_Throws_ArgumentException(string htmlColor)
+        public void FromHtml_Invalid_Throws(string htmlColor)
         {
             using (new ThreadCultureChange(CultureInfo.InvariantCulture))
             {
