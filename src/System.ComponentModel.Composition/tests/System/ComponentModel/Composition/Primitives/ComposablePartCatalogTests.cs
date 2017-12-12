@@ -1,21 +1,18 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.ComponentModel.Composition.Factories;
+using System.ComponentModel.Composition.Primitives;
 using System.Linq;
 using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
-using System.Linq.Expressions;
-using System.ComponentModel.Composition.Primitives;
+using Xunit;
 
 namespace System.ComponentModel.Composition
 {
-    [TestClass]
     public class ComposablePartCatalogTests
     {
-        [TestMethod]
+        [Fact]
         public void GetExports_WhenDisposed_ShouldThrowObjectDisposed()
         {
             var catalog = CatalogFactory.Create();
@@ -28,25 +25,25 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports_NullAsConstraintArgument_ShouldThrowArgumentNull()
         {
             var catalog = CatalogFactory.Create();
 
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("definition", () =>
+            Assert.Throws<ArgumentNullException>("definition", () =>
             {
                 catalog.GetExports((ImportDefinition)null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_ShouldNotThrow()
         {
             var catalog = CatalogFactory.Create();
             catalog.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_CanBeCalledMultipleTimes()
         {
             var catalog = CatalogFactory.Create();
@@ -55,7 +52,7 @@ namespace System.ComponentModel.Composition
             catalog.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_CallsGCSuppressFinalize()
         {
             bool finalizerCalled = false;
@@ -75,21 +72,21 @@ namespace System.ComponentModel.Composition
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
-            Assert.IsFalse(finalizerCalled);
+            Assert.False(finalizerCalled);
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_CallsDisposeBoolWithTrue()
         {
             var catalog = CatalogFactory.CreateDisposable(disposing =>
             {
-                Assert.IsTrue(disposing);
+                Assert.True(disposing);
             });
 
             catalog.Dispose();
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose_CallsDisposeBoolOnce()
         {
             int disposeCount = 0;
@@ -100,7 +97,7 @@ namespace System.ComponentModel.Composition
 
             catalog.Dispose();
 
-            Assert.AreEqual(1, disposeCount);
+            Assert.Equal(1, disposeCount);
         }
 
         private IQueryable<ComposablePartDefinition> GetPartDefinitions(ExportDefinition definition)

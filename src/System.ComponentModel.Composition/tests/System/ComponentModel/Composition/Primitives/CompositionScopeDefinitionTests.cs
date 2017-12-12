@@ -1,17 +1,15 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Primitives;
-using Microsoft.CLR.UnitTesting;
 using System.Linq;
 using System.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition.Hosting
 {
-    [TestClass]
     public class CompositionScopeDefinitionTests
     {
         public interface IFooContract
@@ -30,7 +28,6 @@ namespace System.ComponentModel.Composition.Hosting
         {
         }
 
-
         [Export(typeof(IFooContract))]
         public class FooImpl3 : IFooContract
         {
@@ -42,8 +39,6 @@ namespace System.ComponentModel.Composition.Hosting
         public class FooImpl4 : IFooContract
         {
         }
-
-
 
         public class TestCatalog : ComposablePartCatalog, INotifyComposablePartCatalogChanged
         {
@@ -86,8 +81,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-
-        [TestMethod]
+        [Fact]
         public void Constructor()
         {
             TypeCatalog catalog = new TypeCatalog(typeof(FooImpl));
@@ -98,25 +92,25 @@ namespace System.ComponentModel.Composition.Hosting
             CompositionScopeDefinition scope2 = new CompositionScopeDefinition(catalog1, Enumerable.Empty<CompositionScopeDefinition>());
             CompositionScopeDefinition scope = new CompositionScopeDefinition(catalog, new CompositionScopeDefinition[] { scope1, scope2 });
 
-            Assert.IsNotNull(scope);
-            Assert.IsNotNull(scope.Parts);
-            Assert.AreEqual(1, scope.Parts.Count());
-            Assert.AreEqual(2, scope.Children.Count());
-            Assert.AreSame(scope1, scope.Children.ToArray()[0]);
-            Assert.AreSame(scope2, scope.Children.ToArray()[1]);
+            Assert.NotNull(scope);
+            Assert.NotNull(scope.Parts);
+            Assert.Equal(1, scope.Parts.Count());
+            Assert.Equal(2, scope.Children.Count());
+            Assert.Same(scope1, scope.Children.ToArray()[0]);
+            Assert.Same(scope2, scope.Children.ToArray()[1]);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_NullChildren()
         {
             TypeCatalog catalog = new TypeCatalog(typeof(FooImpl));
             CompositionScopeDefinition scope = new CompositionScopeDefinition(catalog, null);
 
-            Assert.IsNotNull(scope.Children);
-            Assert.AreEqual(0, scope.Children.Count());
+            Assert.NotNull(scope.Children);
+            Assert.Equal(0, scope.Children.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_NullCatalog_ShowThrowNullArgument()
         {
             var ex = ExceptionAssert.Throws<ArgumentNullException>(RetryMode.DoNotRetry, () =>
@@ -125,7 +119,7 @@ namespace System.ComponentModel.Composition.Hosting
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Parts_DelegateToCatalog()
         {
             var parts = new TypeCatalog(typeof(FooImpl), typeof(FooImpl2), typeof(FooImpl2)).Parts;
@@ -135,29 +129,29 @@ namespace System.ComponentModel.Composition.Hosting
                 () => exports);
 
             CompositionScopeDefinition scope = new CompositionScopeDefinition(catalog, null);
-            EnumerableAssert.AreSequenceEqual(parts, scope.Parts);
+            EqualityExtensions.CheckEquals(parts, scope.Parts);
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_PublicSurface()
         {
             var catalog = new TypeCatalog(typeof(FooImpl), typeof(FooImpl2), typeof(FooImpl2));
             var exports = catalog.Parts.Select(p => p.ExportDefinitions.First());
             CompositionScopeDefinition scope = new CompositionScopeDefinition(catalog, null, exports);
-            Assert.AreEqual(catalog.Parts.Count(), scope.Parts.Count());
-            Assert.AreEqual(exports.Count(), scope.PublicSurface.Count());
+            Assert.Equal(catalog.Parts.Count(), scope.Parts.Count());
+            Assert.Equal(exports.Count(), scope.PublicSurface.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_PublicSurface_MultipleExportsPerPart()
         {
             var catalog = new TypeCatalog(typeof(FooImpl4));
             var exports = catalog.Parts.SelectMany(p => p.ExportDefinitions);
             CompositionScopeDefinition scope = new CompositionScopeDefinition(catalog, null, exports);
-            Assert.AreEqual(3, scope.PublicSurface.Count());
+            Assert.Equal(3, scope.PublicSurface.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetExports_DelegateToCatalog()
         {
             var parts = new TypeCatalog(typeof(FooImpl), typeof(FooImpl2), typeof(FooImpl2)).Parts;
@@ -168,10 +162,10 @@ namespace System.ComponentModel.Composition.Hosting
                 () => exports);
 
             CompositionScopeDefinition scope = new CompositionScopeDefinition(catalog, null);
-            Assert.AreSame(exports, scope.GetExports(import));
+            Assert.Same(exports, scope.GetExports(import));
         }
 
-        [TestMethod]
+        [Fact]
         public void Notifications()
         {
             var parts = new TypeCatalog(typeof(FooImpl), typeof(FooImpl2), typeof(FooImpl2)).Parts;
@@ -187,26 +181,24 @@ namespace System.ComponentModel.Composition.Hosting
             bool changedFired = false;
             scope.Changed += new EventHandler<ComposablePartCatalogChangeEventArgs>((o, e) =>
                 {
-                    Assert.AreSame(args, e);
-                    Assert.AreSame(scope, o);
+                    Assert.Same(args, e);
+                    Assert.Same(scope, o);
                     changedFired = true;
                 });
 
             bool changingFired = false;
             scope.Changing += new EventHandler<ComposablePartCatalogChangeEventArgs>((o, e) =>
             {
-                Assert.AreSame(args, e);
-                Assert.AreSame(scope, o);
+                Assert.Same(args, e);
+                Assert.Same(scope, o);
                 changingFired = true;
             });
 
-
             catalog.OnChanged(args);
-            Assert.IsTrue(changedFired);
+            Assert.True(changedFired);
 
             catalog.OnChanging(args);
-            Assert.IsTrue(changingFired);
-
+            Assert.True(changingFired);
 
             changedFired = false;
             changingFired = false;
@@ -216,12 +208,12 @@ namespace System.ComponentModel.Composition.Hosting
             catalog.OnChanged(args);
             catalog.OnChanging(args);
 
-            Assert.IsFalse(changedFired);
-            Assert.IsFalse(changingFired);
+            Assert.False(changedFired);
+            Assert.False(changingFired);
 
         }
 
-        [TestMethod]
+        [Fact]
         public void Dispose()
         {
             var parts = new TypeCatalog(typeof(FooImpl), typeof(FooImpl2), typeof(FooImpl2)).Parts;
@@ -257,7 +249,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         }
 
-        [TestMethod]
+        [Fact]
         public void SimpleComposition()
         {
             var catalog = new TypeCatalog(typeof(FooImpl), typeof(FooImpl2), typeof(FooImpl2));
@@ -265,7 +257,7 @@ namespace System.ComponentModel.Composition.Hosting
             var container = new CompositionContainer(scope);
 
             var foos = container.GetExportedValues<IFooContract>();
-            Assert.AreEqual(3, foos.Count());
+            Assert.Equal(3, foos.Count());
         }
     }
 }

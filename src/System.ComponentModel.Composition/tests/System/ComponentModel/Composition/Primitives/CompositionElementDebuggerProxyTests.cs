@@ -1,29 +1,24 @@
-// -----------------------------------------------------------------------
-// Copyright (c) Microsoft Corporation.  All rights reserved.
-// -----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Factories;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.ComponentModel.Composition.Primitives;
-using System.UnitTesting;
-using Microsoft.CLR.UnitTesting;
+using Xunit;
 
 namespace System.ComponentModel.Composition.Hosting
 {
-    [TestClass]
     public class CompositionElementDebuggerProxyTests
     {
-        [TestMethod]
+        [Fact]
         public void Constructor_NullAsElementArgument_ShouldThrowArgumentNull()
         {
-            ExceptionAssert.ThrowsArgument<ArgumentNullException>("element", () =>
+            Assert.Throws<ArgumentNullException>("element", () =>
             {
                 new CompositionElementDebuggerProxy((CompositionElement)null);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_ValueAsElementArgument_ShouldSetDisplayNameProperty()
         {
             var expectations = Expectations.GetObjectsReferenceTypes();
@@ -34,11 +29,11 @@ namespace System.ComponentModel.Composition.Hosting
 
                 var proxy = new CompositionElementDebuggerProxy(element);
 
-                Assert.AreSame(element.DisplayName, proxy.DisplayName);
+                Assert.Same(element.DisplayName, proxy.DisplayName);
             }            
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_ValueAsElementArgument_ShouldSetOriginProperty()
         {
             var expectations = Expectations.GetObjectsReferenceTypes();
@@ -49,11 +44,11 @@ namespace System.ComponentModel.Composition.Hosting
 
                 var proxy = new CompositionElementDebuggerProxy(element);
 
-                Assert.AreSame(element.Origin, proxy.Origin);
+                Assert.Same(element.Origin, proxy.Origin);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Constructor_ValueAsElementArgument_ShouldSetUnderlyingObjectProperty()
         {
             var expectations = Expectations.GetObjectsReferenceTypes();
@@ -64,7 +59,7 @@ namespace System.ComponentModel.Composition.Hosting
 
                 var proxy = new CompositionElementDebuggerProxy(element);
 
-                Assert.AreSame(element.UnderlyingObject, proxy.UnderlyingObject);
+                Assert.Same(element.UnderlyingObject, proxy.UnderlyingObject);
             }
         }
 
