@@ -432,6 +432,37 @@ namespace System.Security.Cryptography.Asn1
             return contents;
         }
 
+        public BigInteger GetInteger() => GetInteger(Asn1Tag.Integer);
+
+        public BigInteger GetInteger(Asn1Tag expectedTag)
+        {
+            ReadOnlyMemory<byte> contents =
+                GetIntegerContents(expectedTag, UniversalTagNumber.Integer, out int headerLength);
+
+            // TODO: Split this for netcoreapp/netstandard to use the Big-Endian BigInteger parsing
+            byte[] tmp = ArrayPool<byte>.Shared.Rent(contents.Length);
+            BigInteger value;
+
+            try
+            {
+                byte fill = (contents.Span[0] & 0x80) == 0 ? (byte)0 : (byte)0xFF;
+                // Fill the unused portions of tmp with positive or negative padding.
+                new Span<byte>(tmp, contents.Length, tmp.Length - contents.Length).Fill(fill);
+                contents.CopyTo(tmp);
+                // Convert to Little-Endian.
+                AsnWriter.Reverse(new Span<byte>(tmp, 0, contents.Length));
+                value = new BigInteger(tmp);
+            }
+            finally
+            {
+                Array.Clear(tmp, 0, contents.Length);
+                ArrayPool<byte>.Shared.Return(tmp);
+            }
+
+            _data = _data.Slice(headerLength + contents.Length);
+            return value;
+        }
+
         private bool TryReadSignedInteger(
             int sizeLimit,
             Asn1Tag expectedTag,

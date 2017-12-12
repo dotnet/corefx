@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
+using System.Numerics;
 using System.Security.Cryptography.Asn1;
 using Test.Cryptography;
 using Xunit;
@@ -104,6 +106,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                   // because we don't write back the .0004 second.
                   "181332303136313130363031323334352E3736355A" +
                   "180F32303136313130363031323334355A" +
+                  "020F0102030405060708090A0B0C0D0E0F" +
                   "0000";
 
             const string UnicodeVerifier = "Dr. & Mrs. Smith\u2010Jones \uFE60 children";
@@ -141,6 +144,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 // The fractions will be dropped off by the serializer/writer, to simplify
                 // the cases where the time was computed and isn't an integer number of seconds.
                 GeneralizedTimeNoFractions = new DateTimeOffset(2016, 11, 6, 1, 23, 45, 765, TimeSpan.Zero),
+                BigInteger = BigInteger.Parse("0102030405060708090A0B0C0D0E0F", NumberStyles.HexNumber),
             };
 
             AsnWriter writer = AsnSerializer.Serialize(allTheThings, AsnEncodingRules.CER);

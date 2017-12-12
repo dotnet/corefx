@@ -672,6 +672,11 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException();
             }
 
+            if (typeT == typeof(BigInteger))
+            {
+                return (value, writer) => writer.WriteInteger(tag, (BigInteger)value);
+            }
+
             if (typeT.IsLayoutSequential)
             {
                 if (isChoice)
@@ -964,6 +969,11 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException();
             }
 
+            if (typeT == typeof(BigInteger))
+            {
+                return reader => reader.GetInteger(expectedTag);
+            }
+
             if (typeT.IsLayoutSequential)
             {
                 if (fieldData.TagType == UniversalTagNumber.Sequence)
@@ -1167,7 +1177,8 @@ namespace System.Security.Cryptography.Asn1
                          unpackedType == typeof(int) ||
                          unpackedType == typeof(uint) ||
                          unpackedType == typeof(long) ||
-                         unpackedType == typeof(ulong))
+                         unpackedType == typeof(ulong) ||
+                         unpackedType == typeof(BigInteger))
                 {
                     serializerFieldData.TagType = UniversalTagNumber.Integer;
                 }

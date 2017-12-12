@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
 using System.IO;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.Asn1;
@@ -92,6 +94,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                   "170D3530303130323132333435365A" +
                   "181432303136313130363031323334352E373635345A" +
                   "180F32303136313130363031323334355A" +
+                  "020F0102030405060708090A0B0C0D0E0F" +
                   "0000";
 
             byte[] inputData = InputHex.HexToByteArray();
@@ -132,6 +135,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Equal(new DateTimeOffset(2050, 1, 2, 12, 34, 56, TimeSpan.Zero), atst.UtcTime2099);
             Assert.Equal(new DateTimeOffset(2016, 11, 6, 1, 23, 45, 765, TimeSpan.Zero), atst.GeneralizedTimeWithFractions);
             Assert.Equal(new DateTimeOffset(2016, 11, 6, 1, 23, 45, TimeSpan.Zero), atst.GeneralizedTimeNoFractions);
+            Assert.Equal(BigInteger.Parse("0102030405060708090A0B0C0D0E0F", NumberStyles.HexNumber), atst.BigInteger);
         }
 
         [Fact]
@@ -512,6 +516,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         public DateTimeOffset GeneralizedTimeWithFractions;
         [GeneralizedTime(DisallowFractions = true)]
         public DateTimeOffset GeneralizedTimeNoFractions;
+        public BigInteger BigInteger;
 
         public bool NotBool
         {
