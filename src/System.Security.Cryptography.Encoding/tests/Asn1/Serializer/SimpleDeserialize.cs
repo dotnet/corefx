@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.Asn1;
 using Test.Cryptography;
@@ -386,6 +387,67 @@ namespace System.Security.Cryptography.Tests.Asn1
                 SomeFlagsEnum.BitFour | SomeFlagsEnum.BitNine | SomeFlagsEnum.BitFifteen,
                 variants.DefaultMode);
         }
+
+        [Fact]
+        public static void ReadAnyValueWithExpectedTag()
+        {
+            byte[] inputData = "308006010030030101000000".HexToByteArray();
+
+            var data = AsnSerializer.Deserialize<AnyWithExpectedTag>(
+                inputData,
+                AsnEncodingRules.BER);
+
+            Assert.Equal("0.0", data.Id);
+            Assert.Equal(5, data.Data.Length);
+            Assert.True(Unsafe.AreSame(ref data.Data.Span.DangerousGetPinnableReference(), ref inputData[5]));
+
+            // Change [Constructed] SEQUENCE to [Constructed] Context-Specific 0.
+            inputData[5] = 0xA0;
+
+            Assert.Throws<CryptographicException>(
+                () => AsnSerializer.Deserialize<AnyWithExpectedTag>(inputData, AsnEncodingRules.BER));
+        }
+
+        [Theory]
+        [InlineData("3000", false, false)]
+        [InlineData("30051603494135", false, true)]
+        [InlineData("30060C0455544638", true, false)]
+        [InlineData("300B0C04555446381603494135", true, true)]
+        public static void ReadOptionals(string inputHex, bool hasUtf8, bool hasIa5)
+        {
+            byte[] inputData = inputHex.HexToByteArray();
+            var data = AsnSerializer.Deserialize<OptionalValues>(inputData, AsnEncodingRules.BER);
+
+            if (hasUtf8)
+            {
+                Assert.Equal("UTF8", data.Utf8String);
+            }
+            else
+            {
+                Assert.Null(data.Utf8String);
+            }
+
+            if (hasIa5)
+            {
+                Assert.Equal("IA5", data.IA5String);
+            }
+            else
+            {
+                Assert.Null(data.IA5String);
+            }
+        }
+
+        [Fact]
+        public static void TooMuchData()
+        {
+            // This is { IA5String("IA5"), UTF8String("UTF8") }, which is the opposite
+            // of the field order of OptionalValues.  SO it will see the UTF8String as null,
+            // then the IA5String as present, but then data remains.
+            byte[] inputData = "300B16034941350C0455544638".HexToByteArray();
+
+            Assert.Throws<CryptographicException>(
+                () => AsnSerializer.Deserialize<OptionalValues>(inputData, AsnEncodingRules.BER));
+        }
     }
 
     // RFC 3280 / ITU-T X.509
@@ -725,5 +787,35 @@ namespace System.Security.Cryptography.Tests.Asn1
     public struct NamedBitListModeVariants
     {
         public SomeFlagsEnum DefaultMode;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ExplicitValueStruct
+    {
+        [ExpectedTag(0, ExplicitTag = true)]
+        public int ExplicitInt;
+
+        public int ImplicitInt;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct AnyWithExpectedTag
+    {
+        [ObjectIdentifier]
+        public string Id;
+
+        [AnyValue]
+        [ExpectedTag(TagClass.Universal, (int)UniversalTagNumber.Sequence)]
+        public ReadOnlyMemory<byte> Data;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct OptionalValues
+    {
+        [UTF8String, OptionalValue]
+        public string Utf8String;
+
+        [IA5String, OptionalValue]
+        public string IA5String;
     }
 }

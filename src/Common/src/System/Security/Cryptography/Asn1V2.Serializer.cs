@@ -5,7 +5,6 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -105,7 +104,18 @@ namespace System.Security.Cryptography.Asn1
         {
             FieldInfo[] fieldInfos = typeT.GetFields(FieldFlags);
 
-            foreach (FieldInfo fieldInfo in fieldInfos)
+            // https://github.com/dotnet/corefx/issues/14606 asserts that ordering by the metadata
+            // token on a SequentialLayout will produce the fields in their layout order.
+            //
+            // Some other alternatives:
+            // * Add an attribute for controlling the field read order.
+            //    fieldInfos.Select(fi => (fi, fi.GetCustomAttribute<AsnFieldOrderAttribute>(false)).
+            //      Where(val => val.Item2 != null).OrderBy(val => val.Item2.OrderWeight).Select(val => val.Item1);
+            //
+            // * Use Marshal.OffsetOf as a sort key
+            //
+            // * Invent more alternatives
+            foreach (FieldInfo fieldInfo in fieldInfos.OrderBy(fi => fi.MetadataToken))
             {
                 Type fieldType = fieldInfo.FieldType;
 
@@ -118,7 +128,7 @@ namespace System.Security.Cryptography.Asn1
                             fieldInfo.DeclaringType.FullName));
                 }
 
-                fieldType = UnpackNullable(fieldType);
+                fieldType = UnpackIfNullable(fieldType);
 
                 if (currentSet.Contains(fieldInfo))
                 {
@@ -351,7 +361,7 @@ namespace System.Security.Cryptography.Asn1
             Deserializer valueDeserializer,
             bool isOptional,
             byte[] defaultContents,
-            Asn1Tag expectedTag)
+            Asn1Tag? expectedTag)
         {
             return reader =>
                 DefaultValueDeserializer(
@@ -364,7 +374,7 @@ namespace System.Security.Cryptography.Asn1
 
         private static object DefaultValueDeserializer(
             AsnReader reader,
-            Asn1Tag expectedTag,
+            Asn1Tag? expectedTag,
             Deserializer valueDeserializer,
             byte[] defaultContents,
             bool isOptional)
@@ -373,8 +383,9 @@ namespace System.Security.Cryptography.Asn1
             {
                 Asn1Tag actualTag = reader.PeekTag();
 
-                if ((actualTag.TagClass == expectedTag.TagClass && actualTag.TagValue == expectedTag.TagValue) ||
-                    expectedTag == Asn1Tag.EndOfContents)
+                if (expectedTag == null ||
+                    // Normalize the constructed bit so only class and value are compared
+                    actualTag.AsPrimitive() == expectedTag.Value.AsPrimitive())
                 {
                     return valueDeserializer(reader);
                 }
@@ -484,20 +495,27 @@ namespace System.Security.Cryptography.Asn1
             defaultContents = fieldData.DefaultContents;
             isOptional = fieldData.IsOptional;
 
-            typeT = UnpackNullable(typeT);
+            typeT = UnpackIfNullable(typeT);
+            bool isChoice = GetChoiceAttribute(typeT) != null;
 
             Asn1Tag tag;
 
             if (fieldData.HasExplicitTag)
             {
                 explicitTag = fieldData.ExpectedTag;
-                tag = new Asn1Tag(fieldData.TagType);
+                tag = new Asn1Tag(fieldData.TagType.GetValueOrDefault());
             }
             else
             {
                 explicitTag = null;
                 tag = fieldData.ExpectedTag;
             }
+
+            // EXPLICIT Any can result in a TagType of null, as can CHOICE types.
+            // In either of those cases we'll get a tag of EoC, but otherwise the tag should be valid.
+            Debug.Assert(
+                tag != Asn1Tag.EndOfContents || fieldData.IsAny || isChoice,
+                $"Unknown state for typeT={typeT.FullName} on field {fieldInfo?.Name} of type {fieldInfo?.DeclaringType.FullName}");
 
             if (typeT.IsPrimitive)
             {
@@ -525,13 +543,33 @@ namespace System.Security.Cryptography.Asn1
                     return (value, writer) => writer.WriteObjectIdentifier(tag, (string)value);
                 }
 
-                return (value, writer) => writer.WriteCharacterString(tag, fieldData.TagType, (string)value);
+                // Because all string types require an attribute saying their type, we'll
+                // definitely have a value.
+                return (value, writer) => writer.WriteCharacterString(tag, fieldData.TagType.Value, (string)value);
             }
 
             if (typeT == typeof(ReadOnlyMemory<byte>) && !fieldData.IsCollection)
             {
                 if (fieldData.IsAny)
                 {
+                    // If a tag was specified via [ExpectedTag] (other than because it's wrapped in an EXPLICIT)
+                    // then don't let the serializer write a violation of that expectation.
+                    if (fieldData.SpecifiedTag && !fieldData.HasExplicitTag)
+                    {
+                        return (value, writer) =>
+                        {
+                            ReadOnlyMemory<byte> data = (ReadOnlyMemory<byte>)value;
+
+                            if (!Asn1Tag.TryParse(data.Span, out Asn1Tag actualTag, out _) ||
+                                actualTag.AsPrimitive() != fieldData.ExpectedTag.AsPrimitive())
+                            {
+                                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                            }
+
+                            writer.WriteEncodedValue(data);
+                        };
+                    }
+
                     return (value, writer) => writer.WriteEncodedValue((ReadOnlyMemory<byte>)value);
                 }
 
@@ -636,7 +674,7 @@ namespace System.Security.Cryptography.Asn1
 
             if (typeT.IsLayoutSequential)
             {
-                if (GetChoiceAttribute(typeT) != null)
+                if (isChoice)
                 {
                     return (value, writer) => SerializeChoice(typeT, value, writer);
                 }
@@ -667,11 +705,18 @@ namespace System.Security.Cryptography.Asn1
 
             if (fieldData.IsOptional || fieldData.DefaultContents != null)
             {
+                Asn1Tag? expectedTag = null;
+
+                if (fieldData.SpecifiedTag || fieldData.TagType != null)
+                {
+                    expectedTag = fieldData.ExpectedTag;
+                }
+                    
                 deserializer = DefaultValueDeserializer(
                     deserializer,
                     fieldData.IsOptional,
                     fieldData.DefaultContents,
-                    fieldData.ExpectedTag);
+                    expectedTag);
             }
 
             return deserializer;
@@ -691,9 +736,48 @@ namespace System.Security.Cryptography.Asn1
             GetFieldInfo(typeT, fieldInfo, out fieldData);
 
             SerializerFieldData localFieldData = fieldData;
-            typeT = UnpackNullable(typeT);
+            typeT = UnpackIfNullable(typeT);
 
-            Asn1Tag expectedTag = fieldData.HasExplicitTag ? new Asn1Tag(fieldData.TagType) : fieldData.ExpectedTag;
+            if (fieldData.IsAny)
+            {
+                if (typeT == typeof(ReadOnlyMemory<byte>))
+                {
+                    Asn1Tag matchTag = fieldData.ExpectedTag;
+
+                    // EXPLICIT Any can't be validated, just return the value.
+                    if (fieldData.HasExplicitTag || !fieldData.SpecifiedTag)
+                    {
+                        return reader => reader.GetEncodedValue();
+                    }
+
+                    // If it's not declared EXPLICIT but an [ExpectedTag] was provided,
+                    // use it as a validation/filter.
+                    return reader =>
+                    {
+                        Asn1Tag nextTag = reader.PeekTag();
+
+                        if (matchTag.TagClass != nextTag.TagClass ||
+                            matchTag.TagValue != nextTag.TagValue)
+                        {
+                            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                        }
+
+                        return reader.GetEncodedValue();
+                    };
+                }
+
+                throw new AsnSerializationConstraintException(
+                    SR.Format(SR.Cryptography_AsnSerializer_UnhandledType, typeT.FullName));
+            }
+
+            if (GetChoiceAttribute(typeT) != null)
+            {
+                return reader => DeserializeChoice(reader, typeT);
+            }
+
+            Debug.Assert(fieldData.TagType != null);
+
+            Asn1Tag expectedTag = fieldData.HasExplicitTag ? new Asn1Tag(fieldData.TagType.Value) : fieldData.ExpectedTag;
 
             if (typeT.IsPrimitive)
             {
@@ -722,36 +806,14 @@ namespace System.Security.Cryptography.Asn1
                     return reader => reader.ReadObjectIdentifierAsString(expectedTag);
                 }
 
-                return reader => reader.GetCharacterString(expectedTag, localFieldData.TagType);
+                // Because all string types require an attribute saying their type, we'll
+                // definitely have a value.
+                Debug.Assert(localFieldData.TagType != null);
+                return reader => reader.GetCharacterString(expectedTag, localFieldData.TagType.Value);
             }
 
             if (typeT == typeof(ReadOnlyMemory<byte>) && !fieldData.IsCollection)
             {
-                if (fieldData.IsAny)
-                {
-                    Asn1Tag matchTag = fieldData.ExpectedTag;
-                    
-                    // EXPLICIT Any can't be validated, just return the value.
-                    // And if no field type was known, just read that, too.
-                    if (fieldData.HasExplicitTag || matchTag == Asn1Tag.EndOfContents)
-                    {
-                        return reader => reader.GetEncodedValue();
-                    }
-
-                    return reader =>
-                    {
-                        Asn1Tag nextTag = reader.PeekTag();
-
-                        if (matchTag.TagClass != nextTag.TagClass ||
-                            matchTag.TagValue != nextTag.TagValue)
-                        {
-                            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                        }
-
-                        return reader.GetEncodedValue();
-                    };
-                }
-
                 if (fieldData.TagType == UniversalTagNumber.BitString)
                 {
                     return reader =>
@@ -904,11 +966,6 @@ namespace System.Security.Cryptography.Asn1
 
             if (typeT.IsLayoutSequential)
             {
-                if (GetChoiceAttribute(typeT) != null)
-                {
-                    return reader => DeserializeChoice(reader, typeT);
-                }
-
                 if (fieldData.TagType == UniversalTagNumber.Sequence)
                 {
                     return reader => DeserializeCustomType(reader, typeT);
@@ -967,7 +1024,7 @@ namespace System.Security.Cryptography.Asn1
                         typeof(AsnTypeAttribute).FullName));
             }
 
-            Type unpackedType = UnpackNullable(typeT);
+            Type unpackedType = UnpackIfNullable(typeT);
 
             if (typeAttrs.Length == 1)
             {
@@ -1080,6 +1137,8 @@ namespace System.Security.Cryptography.Asn1
                     throw new CryptographicException();
                 }
 
+                Debug.Assert(serializerFieldData.IsCollection || expectedTypes != null);
+
                 if (!serializerFieldData.IsCollection && Array.IndexOf(expectedTypes, unpackedType) < 0)
                 {
                     throw new AsnSerializationConstraintException(
@@ -1095,7 +1154,7 @@ namespace System.Security.Cryptography.Asn1
             var defaultValueAttr = fieldInfo?.GetCustomAttribute<DefaultValueAttribute>(false);
             serializerFieldData.DefaultContents = defaultValueAttr?.EncodedBytes;
 
-            if (serializerFieldData.TagType == 0 && !serializerFieldData.IsAny)
+            if (serializerFieldData.TagType == null && !serializerFieldData.IsAny)
             {
                 if (unpackedType == typeof(bool))
                 {
@@ -1178,26 +1237,23 @@ namespace System.Security.Cryptography.Asn1
                 // This will throw for unmapped TagClass values
                 serializerFieldData.ExpectedTag = new Asn1Tag(tagOverride.TagClass, tagOverride.TagValue);
                 serializerFieldData.HasExplicitTag = tagOverride.ExplicitTag;
+                serializerFieldData.SpecifiedTag = true;
                 return;
             }
 
             if (isChoice)
             {
-                serializerFieldData.TagType = 0;
+                serializerFieldData.TagType = null;
             }
 
+            serializerFieldData.SpecifiedTag = false;
             serializerFieldData.HasExplicitTag = false;
-            serializerFieldData.ExpectedTag = new Asn1Tag(serializerFieldData.TagType);
+            serializerFieldData.ExpectedTag = new Asn1Tag(serializerFieldData.TagType.GetValueOrDefault());
         }
 
-        private static Type UnpackNullable(Type typeT)
+        private static Type UnpackIfNullable(Type typeT)
         {
-            if (typeT.IsGenericType && typeT.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                typeT = typeT.GetGenericArguments()[0];
-            }
-
-            return typeT;
+            return Nullable.GetUnderlyingType(typeT) ?? typeT;
         }
 
         private static Deserializer GetPrimitiveDeserializer(Type typeT, Asn1Tag tag)
@@ -1282,12 +1338,13 @@ namespace System.Security.Cryptography.Asn1
         private struct SerializerFieldData
         {
             internal bool WasCustomized;
-            internal UniversalTagNumber TagType;
+            internal UniversalTagNumber? TagType;
             internal bool? PopulateOidFriendlyName;
             internal bool IsAny;
             internal bool IsCollection;
             internal byte[] DefaultContents;
             internal bool HasExplicitTag;
+            internal bool SpecifiedTag;
             internal bool IsOptional;
             internal int? TwoDigitYearMax;
             internal Asn1Tag ExpectedTag;

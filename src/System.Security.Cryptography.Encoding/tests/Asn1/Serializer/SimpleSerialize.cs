@@ -309,5 +309,82 @@ namespace System.Security.Cryptography.Tests.Asn1
             AsnWriter writer = AsnSerializer.Serialize(flagsContainer, AsnEncodingRules.DER);
             Assert.Equal("30050303012012", writer.Encode().ByteArrayToHex());
         }
+
+        [Fact]
+        public static void SerializeDefaultValue_AsDefault()
+        {
+            var extension = new X509DeserializeTests.Extension
+            {
+                ExtnId = "2.5.29.19",
+                Critical = false,
+                ExtnValue = new byte[] { 0x30, 0x00 },
+            };
+
+            AsnWriter writer = AsnSerializer.Serialize(extension, AsnEncodingRules.DER);
+            Assert.Equal("30090603551D1304023000", writer.Encode().ByteArrayToHex());
+        }
+
+        [Fact]
+        public static void SerializeDefaultValue_AsNonDefault()
+        {
+            var extension = new X509DeserializeTests.Extension
+            {
+                ExtnId = "2.5.29.15",
+                Critical = true,
+                ExtnValue = new byte[] { 0x03, 0x02, 0x05, 0xA0 },
+            };
+
+            AsnWriter writer = AsnSerializer.Serialize(extension, AsnEncodingRules.DER);
+            Assert.Equal("300E0603551D0F0101FF0404030205A0", writer.Encode().ByteArrayToHex());
+        }
+
+        [Fact]
+        public static void SerializeExplicitValue()
+        {
+            var data = new ExplicitValueStruct
+            {
+                ExplicitInt = 3,
+                ImplicitInt = 0x17,
+            };
+
+            AsnWriter writer = AsnSerializer.Serialize(data, AsnEncodingRules.DER);
+            Assert.Equal("3008A003020103020117", writer.Encode().ByteArrayToHex());
+        }
+
+        [Fact]
+        public static void WriteAnyValueWithExpectedTag()
+        {
+            byte[] anyValue = "3003010100".HexToByteArray();
+
+            var data = new AnyWithExpectedTag
+            {
+                Id = "0.0",
+                Data = anyValue,
+            };
+
+            AsnWriter writer = AsnSerializer.Serialize(data, AsnEncodingRules.DER);
+            Assert.Equal("30080601003003010100", writer.Encode().ByteArrayToHex());
+
+            anyValue[0] = 0xA0;
+
+            Assert.Throws<CryptographicException>(() => AsnSerializer.Serialize(data, AsnEncodingRules.DER));
+        }
+
+        [Theory]
+        [InlineData("3000", false, false)]
+        [InlineData("30051603494135", false, true)]
+        [InlineData("30060C0455544638", true, false)]
+        [InlineData("300B0C04555446381603494135", true, true)]
+        public static void WriteOptionals(string expectedHex, bool hasUtf8, bool hasIa5)
+        {
+            var data = new OptionalValues
+            {
+                Utf8String = hasUtf8 ? "UTF8" : null,
+                IA5String = hasIa5 ? "IA5" : null,
+            };
+
+            AsnWriter writer = AsnSerializer.Serialize(data, AsnEncodingRules.DER);
+            Assert.Equal(expectedHex, writer.Encode().ByteArrayToHex());
+        }
     }
 }
