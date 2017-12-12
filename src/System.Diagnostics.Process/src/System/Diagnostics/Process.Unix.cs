@@ -553,16 +553,7 @@ namespace System.Diagnostics
                 // it contains spaces.
                 if (c == '"')
                 {
-                    if (inQuotes && i < arguments.Length - 1 && arguments[i + 1] == '"')
-                    {
-                        currentArgument.Append('"');
-                        i++;
-                    }
-                    else
-                    {
-                        inQuotes = !inQuotes;
-                    }
-
+                    inQuotes = !inQuotes;
                     i++;
                     continue;
                 }
