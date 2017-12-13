@@ -30,6 +30,7 @@
     <_contract Include="System.Globalization.Extensions"/>
     <_contract Include="System.IO"/>
     <_contract Include="System.IO.Compression"/>
+    <_contract Include="System.IO.Compression.ZipFile"/>
     <_contract Include="System.Linq"/>
     <_contract Include="System.Linq.Expressions"/>
     <_contract Include="System.Linq.Parallel"/>
