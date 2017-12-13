@@ -679,6 +679,21 @@ namespace System
         }
 #endif
 
+        public static int SequenceCompareTo(ref byte first, int firstLength, ref byte second, int secondLength)
+        {
+            Debug.Assert(firstLength >= 0);
+            Debug.Assert(secondLength >= 0);
+
+            var minLength = firstLength;
+            if (minLength > secondLength) minLength = secondLength;
+            for (int i = 0; i < minLength; i++)
+            {
+                int result = Unsafe.Add(ref first, i).CompareTo( Unsafe.Add(ref second, i));
+                if (result != 0) return result;
+            }
+            return firstLength.CompareTo(secondLength);
+        }
+
 #if !netstandard11
         // Vector sub-search adapted from https://github.com/aspnet/KestrelHttpServer/pull/1138
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

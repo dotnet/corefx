@@ -148,6 +148,9 @@ namespace System
         public static bool Overlaps<T>(this Span<T> first, ReadOnlySpan<T> second, out int elementOffset) { throw null; }
         public static bool Overlaps<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second) { throw null; }
         public static bool Overlaps<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second, out int elementOffset) { throw null; }
+
+        public static int SequenceCompareTo<T>(this Span<T> first, ReadOnlySpan<T> second) where T : IComparable<T> { throw null; }
+        public static int SequenceCompareTo<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second) where T : IComparable<T> { throw null; }
     }
 
     public readonly struct ReadOnlyMemory<T>
