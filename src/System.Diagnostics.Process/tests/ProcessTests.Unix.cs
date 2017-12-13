@@ -265,41 +265,6 @@ namespace System.Diagnostics.Tests
             Assert.NotEqual(0, e.NativeErrorCode);
         }
 
-        [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "Non applicable for uap - RemoteInvoke works differently")]
-        [InlineData(@"""abc"" d e", @"abc,d,e")]
-        [InlineData(@"""abc""      d e", @"abc,d,e")]
-        [InlineData("\"abc\"\t\td\te", @"abc,d,e")]
-        [InlineData(@"a\\b d""e f""g h", @"a\\b,de fg,h")]
-        [InlineData(@"\ \\ \\\", @"\,\\,\\\")]
-        [InlineData(@"a\\\""b c d", @"a\""b,c,d")]
-        [InlineData(@"a\\\\""b c"" d e", @"a\\b c,d,e")]
-        [InlineData(@"a""b c""d e""f g""h i""j k""l", @"ab cd,ef gh,ij kl")]
-        [InlineData(@"a b c""def", @"a,b,cdef")]
-        [InlineData(@"""\a\"" \\""\\\ b c", @"\a"" \\\\,b,c")]
-        [InlineData("\"\" b \"\"", ",b,")]
-        [InlineData("\"\"\"\" b c", "\",b,c")]
-        [InlineData("c\"\"\"\" b \"\"\\", "c\",b,\\")]
-        [InlineData("\"\"c \"\"b\"\" d\"\\", "c,b,d\\")]
-        [InlineData("\"\"a\"\" b d", "a,b,d")]
-        [InlineData("b d \"\"a\"\" ", "b,d,a")]
-        [InlineData("\\\"\\\"a\\\"\\\" b d", "\"\"a\"\",b,d")]
-        [InlineData("b d \\\"\\\"a\\\"\\\"", "b,d,\"\"a\"\"")]
-        [InlineData("\"\"\"a\"\"\" c b", "\"a\",c,b")]
-        public void TestArgumentParsing(string inputArguments, string expectedArgv)
-        {
-            var options = new RemoteInvokeOptions
-            {
-                Start = true,
-                StartInfo = new ProcessStartInfo { RedirectStandardOutput = true }
-            };
-
-            using (RemoteInvokeHandle handle = RemoteInvokeRaw((Func<string, string, string, int>)RemotelyInvokable.ConcatThreeArguments, inputArguments, options))
-            {
-                Assert.Equal(expectedArgv, handle.Process.StandardOutput.ReadToEnd());
-            }
-        }
-
         [Fact]
         [PlatformSpecific(~TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
         public void TestStartOnUnixWithBadFormat()
