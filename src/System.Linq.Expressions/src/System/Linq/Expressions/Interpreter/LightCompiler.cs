@@ -2583,7 +2583,7 @@ namespace System.Linq.Expressions.Interpreter
                 Type typeToCompare = node.Left.Type;
                 if (!node.Type.IsNullableType())
                 {
-                    typeToCompare = node.Left.Type.GetNonNullableType();
+                    typeToCompare = typeToCompare.GetNonNullableType();
                 }
 
                 if (!TypeUtils.AreEquivalent(node.Type, typeToCompare))
