@@ -547,7 +547,7 @@ namespace System.Globalization
                 return false;
             }
 
-            private static bool TrailingZeros(ReadOnlySpan<char> s, int index)
+            private static unsafe bool TrailingZeros(ReadOnlySpan<char> s, int index)
             {
                 fixed (char* sPtr = &s.DangerousGetPinnableReference())
                 {
@@ -640,7 +640,7 @@ namespace System.Globalization
             {
                 fixed (char* formatPtr = &format.DangerousGetPinnableReference())
                 {
-                    var formatSpan = new Span<char>(formatPtr, span.Length);
+                    var formatSpan = new Span<char>(formatPtr, format.Length);
                     char c = default;
                     if (format.Length > 0)
                     {
