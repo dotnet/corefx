@@ -628,6 +628,8 @@ namespace System.IO.Pipes.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/pull/25877 yet to be ported to netfx")]
+        [PlatformSpecific(TestPlatforms.Windows)] // Unix ignores MaxNumberOfServerInstances and second client also connects.
         public void ClientConnect_Throws_Timeout_When_Pipe_Busy()
         {
             string pipeName = GetUniquePipeName();
@@ -651,6 +653,8 @@ namespace System.IO.Pipes.Tests
 
         [Theory]
         [MemberData(nameof(GetCancellationTokens))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/pull/25877 yet to be ported to netfx")]
+        [PlatformSpecific(TestPlatforms.Windows)] // Unix ignores MaxNumberOfServerInstances and second client also connects.
         public async void ClientConnectAsync_With_Cancellation_Throws_Timeout_When_Pipe_Busy(CancellationToken cancellationToken)
         {
             string pipeName = GetUniquePipeName();
