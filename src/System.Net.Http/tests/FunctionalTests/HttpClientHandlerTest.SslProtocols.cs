@@ -5,6 +5,7 @@
 using System.IO;
 using System.Net.Security;
 using System.Net.Test.Common;
+using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using Xunit;
@@ -155,7 +156,8 @@ namespace System.Net.Http.Functional.Tests
                 }
                 using (var client = new HttpClient(handler))
                 {
-                    (await client.GetAsync(url)).Dispose();
+                    Type remoteServerExceptionType = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? typeof(TaskCanceledException) : typeof(HttpRequestException);
+                    (await RemoteServerQuery.Run<HttpResponseMessage>(() => client.GetAsync(url), remoteServerExceptionType, url)).Dispose();
                 }
             }
         }
@@ -189,7 +191,8 @@ namespace System.Net.Http.Functional.Tests
 
             using (HttpClient client = CreateHttpClient())
             {
-                await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));
+                Type remoteServerExceptionType = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? typeof(TaskCanceledException) : typeof(HttpRequestException);
+                await RemoteServerQuery.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url), remoteServerExceptionType, url);
             }
         }
 
