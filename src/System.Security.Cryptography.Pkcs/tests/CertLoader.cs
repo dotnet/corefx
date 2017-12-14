@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Test.Cryptography
@@ -106,10 +107,18 @@ namespace Test.Cryptography
             using (X509Certificate2 cer = new X509Certificate2(CerData))
             {
                 X509Certificate2Collection matches = new X509Certificate2Collection();
+
                 using (X509Store store = new X509Store(storeName, storeLocation))
                 {
-                    store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
-                    
+                    try
+                    {
+                        store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+                    }
+                    catch (CryptographicException)
+                    {
+                        return matches;
+                    }
+
                     foreach (X509Certificate2 candidate in store.Certificates)
                     {
                         // X509Certificate2.Equals() compares issuer and serial.

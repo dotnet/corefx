@@ -3,9 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers;
 using System.Text;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
 using X509IssuerSerial = System.Security.Cryptography.Xml.X509IssuerSerial;
@@ -17,6 +20,40 @@ namespace Internal.Cryptography
         public static byte[] CloneByteArray(this byte[] a)
         {
             return (byte[])(a.Clone());
+        }
+
+#if !netcoreapp
+        // Compatibility API.
+        internal static void AppendData(this IncrementalHash hasher, ReadOnlySpan<byte> data)
+        {
+            hasher.AppendData(data.ToArray());
+        }
+#endif
+
+        internal static HashAlgorithmName GetDigestAlgorithm(Oid oid)
+        {
+            Debug.Assert(oid != null);
+            return GetDigestAlgorithm(oid.Value);
+        }
+
+        internal static HashAlgorithmName GetDigestAlgorithm(string oidValue)
+        {
+            switch (oidValue)
+            {
+                case Oids.Md5:
+                    return HashAlgorithmName.MD5;
+                case Oids.Sha1:
+                    return HashAlgorithmName.SHA1;
+                case Oids.Sha256:
+                    return HashAlgorithmName.SHA256;
+                case Oids.Sha384:
+                    return HashAlgorithmName.SHA384;
+                case Oids.Sha512:
+                    return HashAlgorithmName.SHA512;
+                default:
+                    throw new CryptographicException(
+                        $"Unknown cryptographic algorithm '{oidValue}'");
+            }
         }
 
         /// <summary>
@@ -32,6 +69,54 @@ namespace Internal.Cryptography
             a = a.CloneByteArray();
 #endif
             return a;
+        }
+
+        public static void RemoveAt<T>(ref T[] arr, int idx)
+        {
+            Debug.Assert(arr != null);
+            Debug.Assert(idx >= 0);
+            Debug.Assert(idx < arr.Length);
+
+            if (arr.Length == 1)
+            {
+                arr = Array.Empty<T>();
+                return;
+            }
+
+            T[] tmp = new T[arr.Length - 1];
+
+            if (idx != 0)
+            {
+                Array.Copy(arr, 0, tmp, 0, idx);
+            }
+
+            if (idx < tmp.Length)
+            {
+                Array.Copy(arr, idx + 1, tmp, idx, tmp.Length - idx);
+            }
+
+            arr = tmp;
+        }
+
+        public static T[] NormalizeSet<T>(
+            T[] setItems,
+            Action<byte[]> encodedValueProcessor=null)
+        {
+            AsnSet<T> set = new AsnSet<T>
+            {
+                SetData = setItems,
+            };
+
+            AsnWriter writer = AsnSerializer.Serialize(set, AsnEncodingRules.DER);
+            byte[] normalizedValue = writer.Encode();
+            set = AsnSerializer.Deserialize<AsnSet<T>>(normalizedValue, AsnEncodingRules.DER);
+
+            if (encodedValueProcessor != null)
+            {
+                encodedValueProcessor(normalizedValue);
+            }
+
+            return set.SetData;
         }
 
         public static CmsRecipientCollection DeepCopy(this CmsRecipientCollection recipients)
@@ -149,9 +234,14 @@ namespace Internal.Cryptography
             return skiString.UpperHexStringToByteArray();
         }
 
+        public static string ToSkiString(this ReadOnlySpan<byte> skiBytes)
+        {
+            return ToUpperHexString(skiBytes);
+        }
+
         public static string ToSkiString(this byte[] skiBytes)
         {
-            return skiBytes.ToUpperHexString();
+            return ToUpperHexString(skiBytes);
         }
 
         /// <summary>
@@ -170,16 +260,18 @@ namespace Internal.Cryptography
         {
             serialBytes = serialBytes.CloneByteArray();
             Array.Reverse(serialBytes);
-            return serialBytes.ToUpperHexString();
+            return ToUpperHexString(serialBytes);
         }
 
-        private static string ToUpperHexString(this byte[] ba)
+        private static string ToUpperHexString(ReadOnlySpan<byte> ba)
         {
             StringBuilder sb = new StringBuilder(ba.Length * 2);
-            foreach (byte b in ba)
+
+            for (int i = 0; i < ba.Length; i++)
             {
-                sb.Append(b.ToString("X2"));
+                sb.Append(ba[i].ToString("X2"));
             }
+
             return sb.ToString();
         }
 
@@ -255,6 +347,62 @@ namespace Internal.Cryptography
             T enhancedAttribute = new T();
             enhancedAttribute.CopyFrom(basicAttribute);
             return enhancedAttribute;
+        }
+
+        public static byte[] GetSubjectKeyIdentifier(this X509Certificate2 certificate)
+        {
+            Debug.Assert(certificate != null);
+
+            X509Extension extension = certificate.Extensions[Oids.SubjectKeyIdentifier];
+
+            if (extension != null)
+            {
+                AsnReader reader = new AsnReader(extension.RawData, AsnEncodingRules.DER);
+
+                if (reader.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> contents))
+                {
+                    return contents.ToArray();
+                }
+
+                throw new CryptographicException();
+            }
+
+            throw new PlatformNotSupportedException(
+                "SubjectKeyIdentifier values must be encoded as a certificate extension.");
+        }
+
+        internal static void DigestWriter(IncrementalHash hasher, AsnWriter writer)
+        {
+#if netcoreapp
+            byte[] rented = null;
+            Span<byte> span = stackalloc byte[64];
+            ArrayPool<byte> pool = ArrayPool<byte>.Shared;
+            int bytesWritten;
+
+            while (!writer.TryEncode(span, out bytesWritten))
+            {
+                if (rented != null)
+                {
+                    pool.Return(rented);
+                }
+
+                rented = pool.Rent(span.Length * 2);
+                span = rented;
+            }
+
+            hasher.AppendData(span.Slice(0, bytesWritten));
+#else
+            // If there's no AppendData(ReadOnlySpan) just call Encode to get the
+            // properly sized array.
+            hasher.AppendData(writer.Encode());
+#endif
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct AsnSet<T>
+        {
+            [SetOf]
+            public T[] SetData;
         }
     }
 }
