@@ -57,7 +57,7 @@ namespace Internal.Cryptography
 
                 try
                 {
-                    if (!reader.TryGetOctetStringBytes(out var contents))
+                    if (!reader.TryGetPrimitiveOctetStringBytes(out var contents))
                     {
                         if (reader.TryCopyOctetStringBytes(tmp, out int bytesWritten))
                         {
