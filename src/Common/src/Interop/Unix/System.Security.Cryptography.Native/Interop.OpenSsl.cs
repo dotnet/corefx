@@ -18,6 +18,8 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
 
+using Internal.Runtime.CompilerServices;
+
 internal static partial class Interop
 {
     internal static partial class OpenSsl
