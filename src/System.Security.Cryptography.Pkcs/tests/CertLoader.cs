@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
@@ -11,13 +11,35 @@ namespace Test.Cryptography
 {
     internal abstract partial class CertLoader
     {
+        private static readonly X509KeyStorageFlags s_defaultKeyStorageFlags = GetBestKeyStorageFlags();
+
         // Prefer ephemeral when available
-        protected X509KeyStorageFlags KeyStorageFlags =
+        private static X509KeyStorageFlags GetBestKeyStorageFlags()
+        {
 #if netcoreapp
-            X509KeyStorageFlags.EphemeralKeySet;
-#else
-            X509KeyStorageFlags.DefaultKeySet;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // On Windows 7 ephemeral keys with a key usage embedded in the PFX
+                // are treated differently than Windows 8.  So just use the default
+                // storage flags for Win7.
+                Version win8 = new Version(6, 2, 9200);
+
+                if (Environment.OSVersion.Version >= win8)
+                {
+                    return X509KeyStorageFlags.EphemeralKeySet;
+                }
+            }
+            else if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                // OSX doesn't allow ephemeral, but every other Unix does.
+                return X509KeyStorageFlags.EphemeralKeySet;
+            }
 #endif
+
+            return X509KeyStorageFlags.DefaultKeySet;
+        }
+
+        protected X509KeyStorageFlags KeyStorageFlags = s_defaultKeyStorageFlags;
 
         /// <summary>
         /// Returns a freshly allocated X509Certificate2 instance that has a public key only. 
