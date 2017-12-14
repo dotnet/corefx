@@ -23,9 +23,9 @@ namespace Microsoft.CSharp.RuntimeBinder
         // or not members have been added to an AggSym or not.
         public static bool IsEquivalentTo(this MemberInfo mi1, MemberInfo mi2)
         {
-            if (mi1 == null | mi2 == null)
+            if (mi1 == null || mi2 == null)
             {
-                return mi1 == null & mi2 == null;
+                return mi1 == null && mi2 == null;
             }
 
 #if UNSUPPORTEDAPI
@@ -103,9 +103,9 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private static bool IsEquivalentTo(this ParameterInfo pi1, ParameterInfo pi2, MethodBase method1, MethodBase method2)
         {
-            if (pi1 == null | pi2 == null)
+            if (pi1 == null || pi2 == null)
             {
-                return pi1 == null & pi2 == null;
+                return pi1 == null && pi2 == null;
             }
 
             if (pi1.Equals(pi2))
@@ -118,9 +118,9 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private static bool IsGenericallyEqual(this Type t1, Type t2)
         {
-            if (t1 == null | t2 == null)
+            if (t1 == null || t2 == null)
             {
-                return t1 == null & t2 == null;
+                return t1 == null && t2 == null;
             }
 
             if (t1.Equals(t2))
