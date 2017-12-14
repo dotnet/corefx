@@ -312,7 +312,6 @@ namespace System.Security.Cryptography.Pkcs
         SubjectKeyIdentifier = 2,
         Unknown = 0,
     }
-    // existing
     public enum SubjectIdentifierType
     {
         IssuerAndSerialNumber = 1,
