@@ -1829,10 +1829,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 types.Add(GetTypeOfParameter(p, associatedInfo));
             }
 
-
-            if (associatedInfo is MethodInfo mi
-                ? (mi.CallingConvention & CallingConventions.VarArgs) != 0
-                : associatedInfo is ConstructorInfo ci && (ci.CallingConvention & CallingConventions.VarArgs) != 0)
+            if (associatedInfo is MethodBase mb && (mb.CallingConvention & CallingConventions.VarArgs) != 0)
             {
                 types.Add(_typeManager.GetArgListType());
             }
