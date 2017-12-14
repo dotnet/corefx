@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.Pkcs;
+using System.Security.Cryptography.Pkcs.Asn1;
 using System.Security.Cryptography.X509Certificates;
 using X509IssuerSerial = System.Security.Cryptography.Xml.X509IssuerSerial;
 
@@ -367,8 +368,21 @@ namespace Internal.Cryptography
                 throw new CryptographicException();
             }
 
-            throw new PlatformNotSupportedException(
-                "SubjectKeyIdentifier values must be encoded as a certificate extension.");
+            // The Desktop/Windows version of this method use CertGetCertificateContextProperty
+            // with a property ID of CERT_KEY_IDENTIFIER_PROP_ID.
+            //
+            // MSDN says that when there's no extension, this method takes the SHA-1 of the
+            // SubjectPublicKeyInfo block, and returns that.
+            //
+            // https://msdn.microsoft.com/en-us/library/windows/desktop/aa376079%28v=vs.85%29.aspx
+
+#pragma warning disable CA5350 // SHA-1 is required for compat.
+            using (HashAlgorithm hash = SHA1.Create())
+#pragma warning restore CA5350 // Do not use insecure cryptographic algorithm SHA1.
+            {
+                ReadOnlyMemory<byte> publicKeyInfoBytes = GetSubjectPublicKeyInfo(certificate);
+                return hash.ComputeHash(publicKeyInfoBytes.ToArray());
+            }
         }
 
         internal static void DigestWriter(IncrementalHash hasher, AsnWriter writer)
@@ -396,6 +410,67 @@ namespace Internal.Cryptography
             // properly sized array.
             hasher.AppendData(writer.Encode());
 #endif
+        }
+
+        private static ReadOnlyMemory<byte> GetSubjectPublicKeyInfo(X509Certificate2 certificate)
+        {
+            var parsedCertificate = AsnSerializer.Deserialize<Certificate>(certificate.RawData, AsnEncodingRules.DER);
+            return parsedCertificate.TbsCertificate.SubjectPublicKeyInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct Certificate
+        {
+            internal TbsCertificateLite TbsCertificate;
+            internal AlgorithmIdentifierAsn AlgorithmIdentifier;
+            [BitString]
+            internal ReadOnlyMemory<byte> SignatureValue;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct TbsCertificateLite
+        {
+            [ExpectedTag(0, ExplicitTag = true)]
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+            [DefaultValue(0xA0, 0x03, 0x02, 0x01, 0x00)]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+            internal int Version;
+
+            [Integer]
+            internal ReadOnlyMemory<byte> SerialNumber;
+
+            internal AlgorithmIdentifierAsn AlgorithmIdentifier;
+
+            [AnyValue]
+            [ExpectedTag(TagClass.Universal, (int)UniversalTagNumber.SequenceOf)]
+            internal ReadOnlyMemory<byte> Issuer;
+
+            [AnyValue]
+            [ExpectedTag(TagClass.Universal, (int)UniversalTagNumber.Sequence)]
+            internal ReadOnlyMemory<byte> Validity;
+
+            [AnyValue]
+            [ExpectedTag(TagClass.Universal, (int)UniversalTagNumber.SequenceOf)]
+            internal ReadOnlyMemory<byte> Subject;
+
+            [AnyValue]
+            [ExpectedTag(TagClass.Universal, (int)UniversalTagNumber.Sequence)]
+            internal ReadOnlyMemory<byte> SubjectPublicKeyInfo;
+
+            [ExpectedTag(1)]
+            [OptionalValue]
+            [BitString]
+            internal ReadOnlyMemory<byte>? IssuerUniqueId;
+
+            [ExpectedTag(2)]
+            [OptionalValue]
+            [BitString]
+            internal ReadOnlyMemory<byte>? SubjectUniqueId;
+
+            [OptionalValue]
+            [AnyValue]
+            [ExpectedTag(3)]
+            internal ReadOnlyMemory<byte>? Extensions;
         }
 
         [StructLayout(LayoutKind.Sequential)]

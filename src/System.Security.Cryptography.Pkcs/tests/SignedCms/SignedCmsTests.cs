@@ -913,5 +913,29 @@ namespace System.Security.Cryptography.Pkcs.Tests
             encoded.AsSpan().Fill(0x55);
             cms.CheckSignature(true);
         }
+
+        [Fact]
+        public static void SignWithImplicitSubjectKeyIdentifier()
+        {
+            byte[] contentBytes = { 9, 8, 7, 6, 5 };
+            ContentInfo contentInfo = new ContentInfo(contentBytes);
+            SignedCms cms = new SignedCms(contentInfo, false);
+
+            using (X509Certificate2 signerCert = Certificates.RSAKeyTransferCapi1.TryGetCertificateWithPrivateKey())
+            {
+                // This cert has no Subject Key Identifier extension.
+                Assert.Null(signerCert.Extensions[Oids.SubjectKeyIdentifier]);
+
+                CmsSigner signer = new CmsSigner(SubjectIdentifierType.SubjectKeyIdentifier, signerCert);
+                cms.ComputeSignature(signer);
+            }
+
+            Assert.Equal(
+                "6B4A6B92FDED07EE0119F3674A96D1A70D2A588D",
+                (string)cms.SignerInfos[0].SignerIdentifier.Value);
+
+            // Assert.NoThrow
+            cms.CheckSignature(true);
+        }
     }
 }
