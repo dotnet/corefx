@@ -39,7 +39,7 @@ namespace System.IO.Compression
         /// <summary>
         /// Returns true if the end of the stream has been reached.
         /// </summary>
-        public bool Finished() => _finished && _zlibStream.AvailIn == 0 && _zlibStream.AvailOut == 0;
+        public bool Finished() => _finished;
 
         public unsafe bool Inflate(out byte b)
         {
@@ -119,7 +119,6 @@ namespace System.IO.Compression
             }
         }
 
-        [SecuritySafeCritical]
         private void Dispose(bool disposing)
         {
             if (!_isDisposed)
@@ -148,7 +147,6 @@ namespace System.IO.Compression
         /// <summary>
         /// Creates the ZStream that will handle inflation.
         /// </summary>
-        [SecuritySafeCritical]
         private void InflateInit(int windowBits)
         {
             ZLibNative.ErrorCode error;
@@ -200,7 +198,6 @@ namespace System.IO.Compression
         /// <summary>
         /// Wrapper around the ZLib inflate function
         /// </summary>
-        [SecuritySafeCritical]
         private ZLibNative.ErrorCode Inflate(ZLibNative.FlushCode flushCode)
         {
             ZLibNative.ErrorCode errC;

@@ -278,6 +278,9 @@
       "InboxOn": {}
     },
     "Microsoft.XmlSerializer.Generator": {
+       "StableVersions": [
+        "1.0.0"
+      ],
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.0.0": "1.0.0",
@@ -811,13 +814,15 @@
     "System.ComponentModel.Composition": {
       "InboxOn": {
         "net45": "4.0.0.0",
-        "netstandard2.0": "4.0.0.0",
         "monoandroid10": "Any",
         "monotouch10": "Any",
         "xamarinios10": "Any",
         "xamarinmac20": "Any",
         "xamarintvos10": "Any",
         "xamarinwatchos10": "Any"
+      },
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.5.0"
       }
     },
     "System.ComponentModel.Composition.Registration": {
