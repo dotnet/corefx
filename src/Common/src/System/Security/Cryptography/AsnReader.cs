@@ -455,7 +455,8 @@ namespace System.Security.Cryptography.Asn1
             }
             finally
             {
-                Array.Clear(tmp, 0, contents.Length);
+                // Clear the whole tmp so that not even the sign bit is returned to the array pool.
+                Array.Clear(tmp, 0, tmp.Length);
                 ArrayPool<byte>.Shared.Return(tmp);
             }
 
