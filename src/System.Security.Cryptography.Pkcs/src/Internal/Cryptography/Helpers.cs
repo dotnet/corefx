@@ -52,8 +52,7 @@ namespace Internal.Cryptography
                 case Oids.Sha512:
                     return HashAlgorithmName.SHA512;
                 default:
-                    throw new CryptographicException(
-                        $"Unknown cryptographic algorithm '{oidValue}'");
+                    throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, oidValue);
             }
         }
 
