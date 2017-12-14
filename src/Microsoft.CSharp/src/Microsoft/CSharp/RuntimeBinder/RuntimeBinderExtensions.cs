@@ -37,9 +37,9 @@ namespace Microsoft.CSharp.RuntimeBinder
                 return true;
             }
 
-            if (mi1 is MethodInfo method1 && mi2 is MethodInfo method2)
+            if (mi1 is MethodInfo method1)
             {
-                if (method1.IsGenericMethod != method2.IsGenericMethod)
+                if (!(mi2 is MethodInfo method2) || method1.IsGenericMethod != method2.IsGenericMethod)
                 {
                     return false;
                 }
@@ -63,25 +63,22 @@ namespace Microsoft.CSharp.RuntimeBinder
                     && method1.AreParametersEquivalent(method2);
             }
 
-            if (mi1 is ConstructorInfo ctor1 && mi2 is ConstructorInfo ctor2)
+            if (mi1 is ConstructorInfo ctor1)
             {
-                return ctor1 != ctor2
+                return mi2 is ConstructorInfo ctor2
+                    && ctor1 != ctor2
                     && ctor1.CallingConvention == ctor2.CallingConvention
                     && ctor1.DeclaringType.IsGenericallyEqual(ctor2.DeclaringType)
                     && ctor1.AreParametersEquivalent(ctor2);
             }
 
-            if (mi1 is PropertyInfo prop1 && mi2 is PropertyInfo prop2)
-            {
-                return prop1 != prop2
-                    && prop1.Name == prop2.Name
-                    && prop1.DeclaringType.IsGenericallyEqual(prop2.DeclaringType)
-                    && prop1.PropertyType.IsGenericallyEquivalentTo(prop2.PropertyType, prop1, prop2)
-                    && prop1.GetGetMethod(true).IsEquivalentTo(prop2.GetGetMethod(true))
-                    && prop1.GetSetMethod(true).IsEquivalentTo(prop2.GetSetMethod(true));
-            }
-
-            return false;
+            return mi1 is PropertyInfo prop1 && mi2 is PropertyInfo prop2
+                && prop1 != prop2
+                && prop1.Name == prop2.Name
+                && prop1.DeclaringType.IsGenericallyEqual(prop2.DeclaringType)
+                && prop1.PropertyType.IsGenericallyEquivalentTo(prop2.PropertyType, prop1, prop2)
+                && prop1.GetGetMethod(true).IsEquivalentTo(prop2.GetGetMethod(true))
+                && prop1.GetSetMethod(true).IsEquivalentTo(prop2.GetSetMethod(true));
         }
 
         private static bool AreParametersEquivalent(this MethodBase method1, MethodBase method2)
