@@ -103,35 +103,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             lock (_bindLock)
             {
-                // this is a strategy for realizing correct binding when the symboltable
-                // finds a name collision across different types, e.g. one dynamic binding
-                // uses a type "N.T" and now a second binding uses a different type "N.T".
-
-                // In order to make this work, we have to reset the symbol table and begin
-                // the second binding over again when we detect the collision. So this is
-                // something like a longjmp to the beginning of binding. For a single binding,
-                // if we have to do this more than once, we give an RBE--this would be a
-                // scenario that needs to know about both N.T's simultaneously to work.
-
-                // See SymbolTable.LoadSymbolsFromType for more information.
-
-                try
-                {
-                    return BindCore(binder, parameters, args, out deferredBinding);
-                }
-                catch (ResetBindException)
-                {
-                    Reset();
-                    try
-                    {
-                        return BindCore(binder, parameters, args, out deferredBinding);
-                    }
-                    catch (ResetBindException)
-                    {
-                        Reset();
-                        throw Error.BindingNameCollision();
-                    }
-                }
+                return BindCore(binder, parameters, args, out deferredBinding);
             }
         }
 
@@ -173,13 +145,12 @@ namespace Microsoft.CSharp.RuntimeBinder
             //    Linq expression tree for the whole thing and return it.
 
             // (1) - Create the locals
-            Scope pScope = _semanticChecker.GetGlobalSymbolFactory().CreateScope(null);
+            Scope pScope = _semanticChecker.GetGlobalSymbolFactory().CreateScope();
             LocalVariableSymbol[] locals = PopulateLocalScope(payload, pScope, arguments, parameters);
 
             // (1.5) - Check to see if we need to defer.
-            if (DeferBinding(payload, arguments, args, locals, out DynamicMetaObject o))
+            if (DeferBinding(payload, arguments, args, locals, out deferredBinding))
             {
-                deferredBinding = o;
                 return null;
             }
 
@@ -187,9 +158,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             Expr pResult = payload.DispatchPayload(this, arguments, locals);
             Debug.Assert(pResult != null);
 
-            deferredBinding = null;
-            Expression e = CreateExpressionTreeFromResult(parameters, pScope, pResult);
-            return e;
+            return CreateExpressionTreeFromResult(parameters, pScope, pResult);
         }
 
         #region Helpers
@@ -277,11 +246,11 @@ namespace Microsoft.CSharp.RuntimeBinder
             Scope pScope,
             Expr pResult)
         {
-            // (3) - Place the result in a return statement and create the EXPRBOUNDLAMBDA.
+            // (3) - Place the result in a return statement and create the ExprBoundLambda.
             ExprBoundLambda boundLambda = GenerateBoundLambda(pScope, pResult);
 
-            // (4) - Rewrite the EXPRBOUNDLAMBDA into an expression tree.
-            Expr exprTree = ExpressionTreeRewriter.Rewrite(boundLambda, _exprFactory, SymbolLoader);
+            // (4) - Rewrite the ExprBoundLambda into an expression tree.
+            ExprBinOp exprTree = ExpressionTreeRewriter.Rewrite(boundLambda, _exprFactory, SymbolLoader);
 
             // (5) - Create the actual Expression Tree
             Expression e = ExpressionTreeCallRewriter.Rewrite(SymbolLoader.GetTypeManager(), exprTree, parameters);
@@ -447,7 +416,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 LocalVariableSymbol local =
                     _semanticChecker.GetGlobalSymbolFactory()
                         .CreateLocalVar(NameManager.Add("p" + i), pScope, type);
-                local.fUsedInAnonMeth = true;
                 locals[i] = local;
             }
 
@@ -462,14 +430,8 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             // We don't actually need the real delegate type here - we just need SOME delegate type.
             // This is because we never attempt any conversions on the lambda itself.
-            AggregateType delegateType = _symbolTable.GetCTypeFromType(typeof(Func<>)) as AggregateType;
-            LocalVariableSymbol thisLocal = _semanticChecker.GetGlobalSymbolFactory().CreateLocalVar(NameManager.Add("this"), pScope, _symbolTable.GetCTypeFromType(typeof(object)));
-            thisLocal.isThis = true;
-            ExprBoundLambda boundLambda = _exprFactory.CreateAnonymousMethod(delegateType, pScope);
-            ExprReturn returnStatement = _exprFactory.CreateReturn(call);
-            ExprBlock block = _exprFactory.CreateBlock(returnStatement);
-            boundLambda.OptionalBody = block;
-            return boundLambda;
+            AggregateType delegateType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_FUNC);
+            return _exprFactory.CreateAnonymousMethod(delegateType, pScope, call);
         }
 
         #region ExprCreation
@@ -1504,7 +1466,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 throw Error.NullReferenceOnMemberException();
             }
 
-            Debug.Assert(_bindingContext.ContextForMemberLookup != null);
             SymWithType swt = _symbolTable.LookupMember(
                     binder.Name,
                     callingObject,
@@ -1526,7 +1487,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // this is an event. This is due to the Dev10 design change around
                 // the binding of +=, and the fact that the "IsEvent" binding question
                 // is only ever asked about the LHS of a += or -=.
-                if (swt.Sym is FieldSymbol field && field.isEvent)
+                else if (swt.Sym is FieldSymbol field && field.isEvent)
                 {
                     result = true;
                 }

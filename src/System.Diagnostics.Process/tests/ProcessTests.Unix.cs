@@ -238,12 +238,20 @@ namespace System.Diagnostics.Tests
             ProcessPriorityClass originalPriority = _process.PriorityClass;
             Assert.Equal(ProcessPriorityClass.Normal, originalPriority);
 
-            SetAndCheckBasePriority(ProcessPriorityClass.Idle, 19);
+            // https://github.com/dotnet/corefx/issues/25861 -- returns "-19" and not "19"
+            if (!PlatformDetection.IsWindowsSubsystemForLinux)
+            {
+                SetAndCheckBasePriority(ProcessPriorityClass.Idle, 19);
+            }
 
             try
             {
                 SetAndCheckBasePriority(ProcessPriorityClass.Normal, 0);
-                SetAndCheckBasePriority(ProcessPriorityClass.High, -11);
+                // https://github.com/dotnet/corefx/issues/25861 -- returns "11" and not "-11"
+                if (!PlatformDetection.IsWindowsSubsystemForLinux)
+                {
+                    SetAndCheckBasePriority(ProcessPriorityClass.High, -11);
+                }
                 _process.PriorityClass = originalPriority;
             }
             catch (Win32Exception ex)
@@ -266,7 +274,22 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [PlatformSpecific(~TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
         public void TestStartOnUnixWithBadFormat()
+        {
+            string path = GetTestFilePath();
+            File.Create(path).Dispose();
+            int mode = Convert.ToInt32("744", 8);
+
+            Assert.Equal(0, chmod(path, mode)); // execute permissions
+
+            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
+            Assert.NotEqual(0, e.NativeErrorCode);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
+        public void TestStartOnOSXWithBadFormat()
         {
             string path = GetTestFilePath();
             File.Create(path).Dispose();
@@ -285,30 +308,5 @@ namespace System.Diagnostics.Tests
         private static extern int chmod(string path, int mode);
 
         private readonly string[] s_allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
-
-        /// <summary>
-        /// Checks if the program is installed
-        /// </summary>
-        /// <param name="program"></param>
-        /// <returns></returns>
-        private bool IsProgramInstalled(string program)
-        {
-            string path;
-            string pathEnvVar = Environment.GetEnvironmentVariable("PATH");
-            if (pathEnvVar != null)
-            {
-                var pathParser = new StringParser(pathEnvVar, ':', skipEmpty: true);
-                while (pathParser.MoveNext())
-                {
-                    string subPath = pathParser.ExtractCurrent();
-                    path = Path.Combine(subPath, program);
-                    if (File.Exists(path))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
     }
 }
