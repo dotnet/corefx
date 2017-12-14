@@ -23,9 +23,9 @@ namespace Microsoft.CSharp.RuntimeBinder
         // or not members have been added to an AggSym or not.
         public static bool IsEquivalentTo(this MemberInfo mi1, MemberInfo mi2)
         {
-            if (mi1 == null || mi2 == null)
+            if (mi1 == null | mi2 == null)
             {
-                return mi1 == null && mi2 == null;
+                return mi1 == null & mi2 == null;
             }
 
 #if UNSUPPORTEDAPI
@@ -37,10 +37,8 @@ namespace Microsoft.CSharp.RuntimeBinder
                 return true;
             }
 
-            if (mi1 is MethodInfo && mi2 is MethodInfo)
+            if (mi1 is MethodInfo method1 && mi2 is MethodInfo method2)
             {
-                MethodInfo method1 = mi1 as MethodInfo;
-                MethodInfo method2 = mi2 as MethodInfo;
                 ParameterInfo[] pis1;
                 ParameterInfo[] pis2;
 
@@ -69,10 +67,8 @@ namespace Microsoft.CSharp.RuntimeBinder
                     && Enumerable.All(Enumerable.Zip(pis1, pis2, (pi1, pi2) => pi1.IsEquivalentTo(pi2, method1, method2)), x => x);
             }
 
-            if (mi1 is ConstructorInfo && mi2 is ConstructorInfo)
+            if (mi1 is ConstructorInfo ctor1 && mi2 is ConstructorInfo ctor2)
             {
-                ConstructorInfo ctor1 = mi1 as ConstructorInfo;
-                ConstructorInfo ctor2 = mi2 as ConstructorInfo;
                 ParameterInfo[] pis1;
                 ParameterInfo[] pis2;
 
@@ -83,11 +79,8 @@ namespace Microsoft.CSharp.RuntimeBinder
                     && Enumerable.All(Enumerable.Zip(pis1, pis2, (pi1, pi2) => pi1.IsEquivalentTo(pi2, ctor1, ctor2)), x => x);
             }
 
-            if (mi1 is PropertyInfo && mi2 is PropertyInfo)
+            if (mi1 is PropertyInfo prop1 && mi2 is PropertyInfo prop2)
             {
-                PropertyInfo prop1 = mi1 as PropertyInfo;
-                PropertyInfo prop2 = mi2 as PropertyInfo;
-
                 return prop1 != prop2
                     && prop1.Name == prop2.Name
                     && prop1.DeclaringType.IsGenericallyEqual(prop2.DeclaringType)
@@ -101,9 +94,9 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private static bool IsEquivalentTo(this ParameterInfo pi1, ParameterInfo pi2, MethodBase method1, MethodBase method2)
         {
-            if (pi1 == null || pi2 == null)
+            if (pi1 == null | pi2 == null)
             {
-                return pi1 == null && pi2 == null;
+                return pi1 == null & pi2 == null;
             }
 
             if (pi1.Equals(pi2))
@@ -116,9 +109,9 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private static bool IsGenericallyEqual(this Type t1, Type t2)
         {
-            if (t1 == null || t2 == null)
+            if (t1 == null | t2 == null)
             {
-                return t1 == null && t2 == null;
+                return t1 == null & t2 == null;
             }
 
             if (t1.Equals(t2))
