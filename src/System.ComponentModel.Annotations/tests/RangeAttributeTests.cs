@@ -183,7 +183,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(DotDecimalRanges))]
+        [Theory, MemberData(nameof(DotDecimalRanges)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void ParseDotSeparatorExtremaInCommaSeparatorCultures(Type type, string min, string max)
         {
             using (new TempCulture("en-US"))
@@ -198,7 +198,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(DotDecimalRanges))]
+        [Theory, MemberData(nameof(DotDecimalRanges)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void ParseDotSeparatorInvariantExtremaInCommaSeparatorCultures(Type type, string min, string max)
         {
             using (new TempCulture("en-US"))
@@ -220,7 +220,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CommaDecimalRanges))]
+        [Theory, MemberData(nameof(CommaDecimalRanges)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void ParseCommaSeparatorExtremaInCommaSeparatorCultures(Type type, string min, string max)
         {
             using (new TempCulture("en-US"))
@@ -235,7 +235,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CommaDecimalRanges))]
+        [Theory, MemberData(nameof(CommaDecimalRanges)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void ParseCommaSeparatorInvariantExtremaInCommaSeparatorCultures(Type type, string min, string max)
         {
             using (new TempCulture("en-US"))
@@ -250,7 +250,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(DotDecimalValidValues))]
+        [Theory, MemberData(nameof(DotDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void DotDecimalExtremaAndValues(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -265,7 +265,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(DotDecimalValidValues))]
+        [Theory, MemberData(nameof(DotDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void DotDecimalExtremaAndValuesInvariantParse(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -287,7 +287,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(DotDecimalValidValues))]
+        [Theory, MemberData(nameof(DotDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void DotDecimalExtremaAndValuesInvariantConvert(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -309,7 +309,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(DotDecimalValidValues))]
+        [Theory, MemberData(nameof(DotDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void DotDecimalExtremaAndValuesInvariantBoth(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -333,7 +333,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(DotDecimalNonStringValidValues))]
+        [Theory, MemberData(nameof(DotDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void DotDecimalExtremaAndNonStringValues(Type type, string min, string max, object value)
         {
             using (new TempCulture("en-US"))
@@ -348,7 +348,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(DotDecimalNonStringValidValues))]
+        [Theory, MemberData(nameof(DotDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void DotDecimalExtremaAndNonStringValuesInvariantParse(Type type, string min, string max, object value)
         {
             using (new TempCulture("en-US"))
@@ -370,7 +370,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(DotDecimalNonStringValidValues))]
+        [Theory, MemberData(nameof(DotDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void DotDecimalExtremaAndNonStringValuesInvariantConvert(Type type, string min, string max, object value)
         {
             using (new TempCulture("en-US"))
@@ -392,7 +392,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(DotDecimalNonStringValidValues))]
+        [Theory, MemberData(nameof(DotDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void DotDecimalExtremaAndNonStringValuesInvariantBoth(Type type, string min, string max, object value)
         {
             using (new TempCulture("en-US"))
@@ -416,7 +416,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CommaDecimalNonStringValidValues))]
+        [Theory, MemberData(nameof(CommaDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void CommaDecimalExtremaAndNonStringValues(Type type, string min, string max, object value)
         {
             using (new TempCulture("en-US"))
@@ -431,7 +431,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CommaDecimalNonStringValidValues))]
+        [Theory, MemberData(nameof(CommaDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void CommaDecimalExtremaAndNonStringValuesInvariantParse(Type type, string min, string max, object value)
         {
             using (new TempCulture("en-US"))
@@ -453,7 +453,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CommaDecimalNonStringValidValues))]
+        [Theory, MemberData(nameof(CommaDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void CommaDecimalExtremaAndNonStringValuesInvariantConvert(Type type, string min, string max, object value)
         {
             using (new TempCulture("en-US"))
@@ -475,7 +475,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CommaDecimalNonStringValidValues))]
+        [Theory, MemberData(nameof(CommaDecimalNonStringValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void CommaDecimalExtremaAndNonStringValuesInvariantBoth(Type type, string min, string max, object value)
         {
             using (new TempCulture("en-US"))
@@ -499,7 +499,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(DotDecimalInvalidValues))]
+        [Theory, MemberData(nameof(DotDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void DotDecimalExtremaAndInvalidValues(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -514,7 +514,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(DotDecimalInvalidValues))]
+        [Theory, MemberData(nameof(DotDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void DotDecimalExtremaAndInvalidValuesInvariantParse(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -536,7 +536,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(DotDecimalInvalidValues))]
+        [Theory, MemberData(nameof(DotDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void DotDecimalExtremaAndInvalidValuesInvariantConvert(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -558,7 +558,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(DotDecimalInvalidValues))]
+        [Theory, MemberData(nameof(DotDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void DotDecimalExtremaAndInvalidValuesInvariantBoth(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -582,7 +582,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CommaDecimalValidValues))]
+        [Theory, MemberData(nameof(CommaDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void CommaDecimalExtremaAndValues(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -597,7 +597,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CommaDecimalValidValues))]
+        [Theory, MemberData(nameof(CommaDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void CommaDecimalExtremaAndValuesInvariantParse(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -619,7 +619,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CommaDecimalValidValues))]
+        [Theory, MemberData(nameof(CommaDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void CommaDecimalExtremaAndValuesInvariantConvert(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -641,7 +641,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CommaDecimalValidValues))]
+        [Theory, MemberData(nameof(CommaDecimalValidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void CommaDecimalExtremaAndValuesInvariantBoth(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -665,7 +665,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CommaDecimalInvalidValues))]
+        [Theory, MemberData(nameof(CommaDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void CommaDecimalExtremaAndInvalidValues(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -680,7 +680,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CommaDecimalInvalidValues))]
+        [Theory, MemberData(nameof(CommaDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void CommaDecimalExtremaAndInvalidValuesInvariantParse(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -702,7 +702,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CommaDecimalInvalidValues))]
+        [Theory, MemberData(nameof(CommaDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void CommaDecimalExtremaAndInvalidValuesInvariantConvert(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
@@ -724,7 +724,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CommaDecimalInvalidValues))]
+        [Theory, MemberData(nameof(CommaDecimalInvalidValues)), SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "2648 not fixed on NetFX")]
         public static void CommaDecimalExtremaAndInvalidValuesInvariantBoth(Type type, string min, string max, string value)
         {
             using (new TempCulture("en-US"))
