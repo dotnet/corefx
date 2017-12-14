@@ -101,7 +101,9 @@ namespace System.Collections.Immutable
         public bool IsDefaultOrEmpty { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public T this[int index] { get { throw null; } }
+#if ItemRefAPI
         public ref readonly T ItemRef(int index) { throw null; }
+#endif
         public int Length { get { throw null; } }
         int System.Collections.Generic.ICollection<T>.Count { get { throw null; } }
         bool System.Collections.Generic.ICollection<T>.IsReadOnly { get { throw null; } }
@@ -199,7 +201,9 @@ namespace System.Collections.Immutable
             public int Capacity { get { throw null; } set { } }
             public int Count { get { throw null; } set { } }
             public T this[int index] { get { throw null; } set { } }
+#if ItemRefAPI
             public ref readonly T ItemRef(int index) { throw null; }
+#endif
             bool System.Collections.Generic.ICollection<T>.IsReadOnly { get { throw null; } }
             public void Add(T item) { }
             public void AddRange(System.Collections.Generic.IEnumerable<T> items) { }
@@ -526,7 +530,9 @@ namespace System.Collections.Immutable
         public int Count { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public T this[int index] { get { throw null; } }
+#if ItemRefAPI
         public ref readonly T ItemRef(int index) { throw null; }
+#endif
         bool System.Collections.Generic.ICollection<T>.IsReadOnly { get { throw null; } }
         T System.Collections.Generic.IList<T>.this[int index] { get { throw null; } set { } }
         bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
@@ -613,7 +619,9 @@ namespace System.Collections.Immutable
             internal Builder() { }
             public int Count { get { throw null; } }
             public T this[int index] { get { throw null; } set { } }
+#if ItemRefAPI
             public ref readonly T ItemRef(int index) { throw null; }
+#endif
             bool System.Collections.Generic.ICollection<T>.IsReadOnly { get { throw null; } }
             bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
             object System.Collections.ICollection.SyncRoot { get { throw null; } }
@@ -705,7 +713,9 @@ namespace System.Collections.Immutable
         public System.Collections.Immutable.ImmutableQueue<T> Enqueue(T value) { throw null; }
         public System.Collections.Immutable.ImmutableQueue<T>.Enumerator GetEnumerator() { throw null; }
         public T Peek() { throw null; }
+#if ItemRefAPI
         public ref readonly T PeekRef() { throw null; }
+#endif
         System.Collections.Generic.IEnumerator<T> System.Collections.Generic.IEnumerable<T>.GetEnumerator() { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         System.Collections.Immutable.IImmutableQueue<T> System.Collections.Immutable.IImmutableQueue<T>.Clear() { throw null; }
@@ -744,7 +754,9 @@ namespace System.Collections.Immutable
         public int Count { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public TValue this[TKey key] { get { throw null; } }
+#if ItemRefAPI
         public ref readonly TValue ValueRef(TKey key) { throw null; }
+#endif
         public System.Collections.Generic.IComparer<TKey> KeyComparer { get { throw null; } }
         public System.Collections.Generic.IEnumerable<TKey> Keys { get { throw null; } }
         bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey,TValue>>.IsReadOnly { get { throw null; } }
@@ -802,7 +814,9 @@ namespace System.Collections.Immutable
             internal Builder() { }
             public int Count { get { throw null; } }
             public TValue this[TKey key] { get { throw null; } set { } }
+#if ItemRefAPI
             public ref readonly TValue ValueRef(TKey key) { throw null; }
+#endif
             public System.Collections.Generic.IComparer<TKey> KeyComparer { get { throw null; } set { } }
             public System.Collections.Generic.IEnumerable<TKey> Keys { get { throw null; } }
             bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey,TValue>>.IsReadOnly { get { throw null; } }
@@ -875,7 +889,9 @@ namespace System.Collections.Immutable
         public int Count { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public T this[int index] { get { throw null; } }
+#if ItemRefAPI
         public ref readonly T ItemRef(int index) { throw null; }
+#endif
         public System.Collections.Generic.IComparer<T> KeyComparer { get { throw null; } }
         public T Max { get { throw null; } }
         public T Min { get { throw null; } }
@@ -939,7 +955,9 @@ namespace System.Collections.Immutable
             internal Builder() { }
             public int Count { get { throw null; } }
             public T this[int index] { get { throw null; } }
+#if ItemRefAPI
             public ref readonly T ItemRef(int index) { throw null; }
+#endif
             public System.Collections.Generic.IComparer<T> KeyComparer { get { throw null; } set { } }
             public T Max { get { throw null; } }
             public T Min { get { throw null; } }
@@ -996,7 +1014,9 @@ namespace System.Collections.Immutable
         public System.Collections.Immutable.ImmutableStack<T> Clear() { throw null; }
         public System.Collections.Immutable.ImmutableStack<T>.Enumerator GetEnumerator() { throw null; }
         public T Peek() { throw null; }
+#if ItemRefAPI
         public ref readonly T PeekRef() { throw null; }
+#endif
         public System.Collections.Immutable.ImmutableStack<T> Pop() { throw null; }
         public System.Collections.Immutable.ImmutableStack<T> Pop(out T value) { value = default(T); throw null; }
         public System.Collections.Immutable.ImmutableStack<T> Push(T value) { throw null; }

@@ -141,6 +141,7 @@ namespace System.Collections.Immutable
             return _forwards.Peek();
         }
 
+#if ItemRefApi
         /// <summary>
         /// Gets a read-only reference to the element at the front of the queue.
         /// </summary>
@@ -155,6 +156,7 @@ namespace System.Collections.Immutable
 
             return ref _forwards.PeekRef();
         }
+#endif
 
         /// <summary>
         /// Adds an element to the back of the queue.

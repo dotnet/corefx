@@ -330,6 +330,7 @@ namespace System.Collections.Immutable
                 return this.RemoveRecursive(key, keyComparer, out mutated);
             }
 
+#if ItemRefApi
             /// <summary>
             /// Returns a read-only reference to the value associated with the provided key.
             /// </summary>
@@ -348,6 +349,7 @@ namespace System.Collections.Immutable
 
                 return ref match._value;
             }
+#endif
 
             /// <summary>
             /// Tries to get the value.

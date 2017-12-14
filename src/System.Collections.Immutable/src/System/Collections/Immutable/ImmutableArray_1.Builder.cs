@@ -157,6 +157,7 @@ namespace System.Collections.Immutable
                 }
             }
 
+#if ItemRefApi
             /// <summary>
             /// Gets a read-only reference to the element at the specified index.
             /// </summary>
@@ -173,6 +174,7 @@ namespace System.Collections.Immutable
 
                 return ref this._elements[index];
             }
+#endif
 
             /// <summary>
             /// Gets a value indicating whether the <see cref="ICollection{T}"/> is read-only.

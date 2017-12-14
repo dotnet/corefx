@@ -121,6 +121,7 @@ namespace System.Collections.Immutable
             return _head;
         }
 
+#if ItemRefApi
         /// <summary>
         /// Gets a read-only reference to the element on the top of the stack.
         /// </summary>
@@ -138,6 +139,7 @@ namespace System.Collections.Immutable
 
             return ref _head;
         }
+#endif
 
         /// <summary>
         /// Pushes an element onto a stack and returns the new stack.

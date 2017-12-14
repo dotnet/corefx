@@ -182,7 +182,11 @@ namespace System.Collections.Immutable
                     int index = _additionalElements.IndexOf(value, valueComparer);
                     if (index >= 0)
                     {
+#if ItemRefApi
                         existingValue = _additionalElements.ItemRef(index);
+#else
+                        existingValue = _additionalElements[index];
+#endif
                         return true;
                     }
                 }

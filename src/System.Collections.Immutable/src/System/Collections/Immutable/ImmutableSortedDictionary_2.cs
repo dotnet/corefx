@@ -212,6 +212,7 @@ namespace System.Collections.Immutable
             }
         }
 
+#if ItemRefApi
         /// <summary>
         /// Returns a read-only reference to the value associated with the provided key.
         /// </summary>
@@ -222,6 +223,7 @@ namespace System.Collections.Immutable
 
             return ref _root.ValueRef(key, _keyComparer);
         }
+#endif
 
         #endregion
 

@@ -229,6 +229,32 @@ namespace System.Collections.Immutable
             }
 
             /// <summary>
+            /// Gets the element of the set at the given index.
+            /// </summary>
+            /// <param name="index">The 0-based index of the element in the set to return.</param>
+            /// <returns>The element at the given position.</returns>
+            internal T this[int index]
+            {
+                get
+                {
+                    Requires.Range(index >= 0 && index < this.Count, nameof(index));
+
+                    if (index < _left._count)
+                    {
+                        return _left[index];
+                    }
+
+                    if (index > _left._count)
+                    {
+                        return _right[index - _left._count - 1];
+                    }
+
+                    return _key;
+                }
+            }
+
+#if ItemRefApi
+            /// <summary>
             /// Gets a read-only reference to the element of the set at the given index.
             /// </summary>
             /// <param name="index">The 0-based index of the element in the set to return.</param>
@@ -249,6 +275,7 @@ namespace System.Collections.Immutable
 
                 return ref _key;
             }
+#endif
 
             #region IEnumerable<T> Members
 
