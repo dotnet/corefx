@@ -10,12 +10,8 @@
     <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
     <GenerateAppxPackageOnBuild>False</GenerateAppxPackageOnBuild>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetGroup)' == 'netstandard1.0'">
-    <PackageTargetFramework>netstandard1.0;portable-net45+win8+wp8+wpa81</PackageTargetFramework>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetGroup)' == 'netstandard1.3'">
+  <PropertyGroup Condition="'$(TargetGroup)' != 'netstandard1.0'">
     <DefineConstants>$(DefineConstants);ItemRefAPI</DefineConstants>
-    <PackageTargetFramework>netstandard1.3;portable-net45+win8+wp8+wpa81</PackageTargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\InternalsVisibleTo.cs" />
