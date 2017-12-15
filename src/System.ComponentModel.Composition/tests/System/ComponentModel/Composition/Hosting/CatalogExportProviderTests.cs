@@ -153,6 +153,7 @@ namespace System.ComponentModel.Composition
 
         [Fact]
         [Trait("Type", "Integration")]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void BasicTest()
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();
@@ -175,6 +176,7 @@ namespace System.ComponentModel.Composition
 
         [Fact]
         [Trait("Type", "Integration")]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void BasicTestWithRequiredMetadata_NoTypeConstraint()
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();
@@ -192,6 +194,7 @@ namespace System.ComponentModel.Composition
 
         [Fact]
         [Trait("Type", "Integration")]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void BasicTestWithRequiredMetadata_TypeConstraint()
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();
@@ -209,6 +212,7 @@ namespace System.ComponentModel.Composition
 
         [Fact]
         [Trait("Type", "Integration")]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void BasicTestWithRequiredMetadata_WrongTypeConstraint()
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();
@@ -226,6 +230,7 @@ namespace System.ComponentModel.Composition
 
         [Fact]
         [Trait("Type", "Integration")]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void ComponentCatalogResolverGetStaticExport()
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();
@@ -239,6 +244,7 @@ namespace System.ComponentModel.Composition
 
         [Fact]
         [Trait("Type", "Integration")]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void ComponentCatalogResolverComponentCatalogExportReference()
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();
@@ -257,6 +263,7 @@ namespace System.ComponentModel.Composition
 
         [Fact]
         [Trait("Type", "Integration")]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void ValueTypeFromCatalog()
         {
             var catalog = CatalogFactory.CreateDefaultAttributed();

@@ -54,6 +54,7 @@ namespace System.ComponentModel.Composition.AttributedModel
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.ArgumentException: ComposablePartDefinition of type 'System.ComponentModel.Composition.AttributedModel.ConcreteCPD' cannot be used in this context. Only part definitions produced by the ReflectionModelServices.CreatePartDefinition are supported.
         public void CreatePart_From_InvalidPartDefiniton_ShouldThrowArgumentException()
         {
             Assert.Throws<ArgumentException>("partDefinition", () =>

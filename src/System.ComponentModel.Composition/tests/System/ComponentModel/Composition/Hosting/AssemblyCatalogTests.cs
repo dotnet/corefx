@@ -215,6 +215,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)]
         public void Constructor1_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
@@ -224,6 +225,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498)]
         public void Constructor1_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad()
         {
             AssemblyCatalogConstructorTests.Constructor_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad((s) =>
@@ -243,6 +245,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // fault segmentation - AnyUnix
         public void Constructor1_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat()
         {
             AssemblyCatalogConstructorTests.Constructor_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat((s) =>
@@ -311,6 +314,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)]
         public void Constructor2_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
@@ -320,6 +324,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498)]
         public void Constructor2_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad()
         {
             AssemblyCatalogConstructorTests.Constructor_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad((s) =>
@@ -339,6 +344,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // fault segmentation - AnyUnix
         public void Constructor2_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat()
         {
             AssemblyCatalogConstructorTests.Constructor_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat((s) =>
@@ -406,6 +412,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)]
         public void Constructor3_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
@@ -415,6 +422,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498)]
         public void Constructor3_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad()
         {
             AssemblyCatalogConstructorTests.Constructor_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad((s) =>
@@ -434,6 +442,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // fault segmentation - AnyUnix
         public void Constructor3_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat()
         {
             AssemblyCatalogConstructorTests.Constructor_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat((s) =>
@@ -500,6 +509,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)]
         public void Constructor4_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument()
         {
             AssemblyCatalogConstructorTests.Constructor_InvalidFileNameAsCodeBaseArgument_ShouldThrowArgument((s) =>
@@ -509,6 +519,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498)]
         public void Constructor4_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad()
         {
             AssemblyCatalogConstructorTests.Constructor_DirectoryAsCodeBaseArgument_ShouldThrowFileLoad((s) =>
@@ -528,6 +539,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // fault segmentation - AnyUnix
         public void Constructor4_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat()
         {
             AssemblyCatalogConstructorTests.Constructor_NonAssemblyFileNameAsCodeBaseArgument_ShouldThrowBadImageFormat((s) =>
@@ -675,6 +687,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void DiscoverCatalogUsingDerivedReflectionContextCatalogDiscoveryAttribute()
         {
             var catalog = new AssemblyCatalog(typeof(TestAssemblyTwo).Assembly);
@@ -803,6 +816,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void Parts()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
@@ -811,6 +825,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void Parts_ShouldSetDefinitionOriginToCatalogItself()
         {
             var catalog = CreateAssemblyCatalog();
@@ -823,6 +838,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void AddAssemblyUsingFile()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly.Location);
@@ -832,6 +848,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void TwoTypesWithSameSimpleName()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
@@ -849,6 +866,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void GettingFunctionExports()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
@@ -875,6 +893,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void SharedPartCreation()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
@@ -892,6 +911,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void NonSharedPartCreation()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
@@ -909,6 +929,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void RecursiveNonSharedPartCreation()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
@@ -946,6 +967,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // typeof(System.Reflection.ReflectionTypeLoadException)
         public void RecursiveNonSharedPartCreationDisableSilentRejection()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);
@@ -983,6 +1005,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void TryToDiscoverExportWithGenericParameter()
         {
             var catalog = new AssemblyCatalog(typeof(AssemblyCatalogTests).Assembly);

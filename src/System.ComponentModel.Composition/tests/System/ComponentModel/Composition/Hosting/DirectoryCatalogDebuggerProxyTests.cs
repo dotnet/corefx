@@ -68,6 +68,7 @@ namespace System.ComponentModel.Composition.Primitives
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void Constuctor_ValueAsCatalogArgument_ShouldSetSearchPatternProperty()
         {
             string directoryPath = GetTemporaryDirectory();
@@ -87,7 +88,9 @@ namespace System.ComponentModel.Composition.Primitives
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [ActiveIssue(25498)]
         public void FullPath_ValidPath_ShouldBeFine()
         {
             string directoryPath = GetTemporaryDirectory();
@@ -113,6 +116,7 @@ namespace System.ComponentModel.Composition.Primitives
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void LoadedFiles_EmptyDirectory_ShouldBeFine()
         {
             string directoryPath = GetTemporaryDirectory();

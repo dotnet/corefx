@@ -21,6 +21,7 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void Constructor_ValueAsCatalogArgument_ShouldSetPartsProperty()
         {
             var expectations = Expectations.GetAssemblies();

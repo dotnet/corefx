@@ -181,10 +181,10 @@ namespace System.ComponentModel.Composition
                 var value = invalidLazy.Value.Value;
             });
         }
-
-
-        [Fact]
+        
+        [ConditionalFact(Helpers.ComImportAvailable)]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [ActiveIssue(25498)]
         public void ImportValueComComponent()
         {
             CTaskScheduler scheduler = new CTaskScheduler();
@@ -208,8 +208,9 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.ComImportAvailable)]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [ActiveIssue(25498)]
         public void DelayImportValueComComponent()
         {
             CTaskScheduler scheduler = new CTaskScheduler();

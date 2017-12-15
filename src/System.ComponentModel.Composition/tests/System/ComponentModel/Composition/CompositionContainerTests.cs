@@ -2417,6 +2417,7 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // Actual:   typeof(System.Reflection.ReflectionTypeLoadException)
         public void TryGetValueWithCatalogVerifyExecptionDuringGet()
         {
             var cat = CatalogFactory.CreateDefaultAttributed();

@@ -235,6 +235,7 @@ IEnumerable<ImportDefinition> imports;
         }
 
         [Fact]
+        [ActiveIssue(25498, TestPlatforms.AnyUnix)] // System.Reflection.ReflectionTypeLoadException : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
         public void ICompositionElementDisplayName_ShouldReturnTypeDisplayName()
         {
             var expectations = Expectations.GetAttributedTypes();
