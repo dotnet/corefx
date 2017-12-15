@@ -172,9 +172,9 @@
       <Link>Common\Interop\Windows\NCrypt\Interop.NCryptFreeObject.cs</Link>
     </Compile>
   </ItemGroup>
-  <!-- Internal types (platform: Unix) -->
+  <!-- Internal types (platform: AnyOS) -->
   <ItemGroup Condition="'$(TargetsWindows)' != 'true' AND '$(CompileSourceCode)' == 'true'">
-    <Compile Include="Internal\Cryptography\Pal\Unix\PkcsPal.Unix.cs" />
+    <Compile Include="Internal\Cryptography\Pal\AnyOS\PkcsPal.AnyOS.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
     <Reference Include="mscorlib" />
