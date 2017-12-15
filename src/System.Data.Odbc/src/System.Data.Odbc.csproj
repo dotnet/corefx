@@ -157,5 +157,8 @@
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.ReaderWriter" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="DatabaseSetupInstructions.md" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
