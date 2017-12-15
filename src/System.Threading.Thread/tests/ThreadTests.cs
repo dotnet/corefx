@@ -145,39 +145,23 @@ namespace System.Threading.Threads.Tests
         }
 
         [Theory]
-        [InlineData(true)] 
-        [InlineData(false)]
+        [InlineData("STAMain.exe", "GetApartmentState")] 
+        [InlineData("STAMain.exe", "SetApartmentState")]
+        [InlineData("MTAMain.exe", "GetApartmentState")]
+        [InlineData("MTAMain.exe", "SetApartmentState")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public static void ApartmentState_STAAtributePresent(bool mode)
+        public static void ApartmentState_AtributePresent(string AppName, string mode)
         {
-            const string AppName = "STAMain.exe";
             var psi = new ProcessStartInfo();
             psi.FileName = DummyClass.HostRunnerTest;
             psi.Arguments = $"{AppName} {mode}";
             using (Process p = Process.Start(psi))
             {
                 p.WaitForExit();
-                Assert.Equal(1, p.ExitCode);
+                Assert.Equal(0, p.ExitCode);
             }
         }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public static void ApartmentState_MTAAtributePresent(bool mode)
-        {
-            const string AppName = "MTAMain.exe";
-            var psi = new ProcessStartInfo();
-            psi.FileName = DummyClass.HostRunnerTest;
-            psi.Arguments = $"{AppName} {mode}";
-            using (Process p = Process.Start(psi))
-            {
-                p.WaitForExit();
-                Assert.Equal(1, p.ExitCode);
-            }
-        }
-
+        
         [Theory]
         [MemberData(nameof(ApartmentStateTest_MemberData))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior differs on Unix and Windows

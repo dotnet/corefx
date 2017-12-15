@@ -12,14 +12,14 @@ namespace MTAMain
         [MTAThread]
         static int Main(string[] args)
         {
-            int retValue = 0;
+            int retValue = 1;
 
-            bool mode = bool.Parse(args[0]);
-            if (mode)
+            string mode = args[0];
+            if (mode == "GetApartmentState")
             {
                 if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
                 {
-                    retValue = 1;
+                    retValue = 0;
                 }
 
             }
@@ -31,7 +31,7 @@ namespace MTAMain
                 }
                 catch (InvalidOperationException)
                 {
-                    retValue = 1;
+                    retValue = 0;
                 }
             }
 
