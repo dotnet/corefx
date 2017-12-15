@@ -13,7 +13,12 @@ using Xunit;
 
 namespace System.Threading.Threads.Tests
 {
-    public static class ThreadTests
+    public class DummyClass : RemoteExecutorTestBase
+    {
+        public static string HostRunnerTest = HostRunner;
+    }
+
+    public static class ThreadTests 
     {
         private const int UnexpectedTimeoutMilliseconds = ThreadTestHelpers.UnexpectedTimeoutMilliseconds;
         private const int ExpectedTimeoutMilliseconds = ThreadTestHelpers.ExpectedTimeoutMilliseconds;
@@ -137,6 +142,85 @@ namespace System.Threading.Threads.Tests
                         }),
                     2
                 };
+        }
+
+        [Theory]
+        [InlineData("STAMain.exe", "GetApartmentState")] 
+        [InlineData("STAMain.exe", "SetApartmentState")]
+        [InlineData("MTAMain.exe", "GetApartmentState")]
+        [InlineData("MTAMain.exe", "SetApartmentState")]
+        [ActiveIssue(20766, TargetFrameworkMonikers.Uap)]
+        public static void ApartmentState_AtributePresent(string AppName, string mode)
+        {
+            var psi = new ProcessStartInfo();
+            if (PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative)
+            {
+                psi.FileName = AppName;
+                psi.Arguments = $"{mode}";
+            }
+            else
+            {
+                psi.FileName = DummyClass.HostRunnerTest;
+                psi.Arguments = $"{AppName} {mode}";
+            }
+            using (Process p = Process.Start(psi))
+            {
+                p.WaitForExit();
+                if (PlatformDetection.IsWindows)
+                {
+                    Assert.Equal(0, p.ExitCode);
+                }
+                else
+                {
+                    Assert.Equal(1, p.ExitCode);
+                }
+            }
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void ApartmentState_NoAttributePresent_DefaultState_Windows()
+        {
+            DummyClass.RemoteInvoke(() =>
+            {
+                Assert.Equal(ApartmentState.MTA, Thread.CurrentThread.GetApartmentState());
+                Assert.Throws<InvalidOperationException>(() => Thread.CurrentThread.SetApartmentState(ApartmentState.STA));
+                Thread.CurrentThread.SetApartmentState(ApartmentState.MTA);
+            }).Dispose();
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void ApartmentState_NoAttributePresent_STA_Windows()
+        {
+            DummyClass.RemoteInvoke(() =>
+            {
+                Thread.CurrentThread.SetApartmentState(ApartmentState.STA);
+                Assert.Equal(ApartmentState.STA, Thread.CurrentThread.GetApartmentState());
+                Assert.Throws<InvalidOperationException>(() => Thread.CurrentThread.SetApartmentState(ApartmentState.MTA));
+            }).Dispose();
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] 
+        public static void ApartmentState_NoAttributePresent_DefaultState_Unix()
+        {
+            DummyClass.RemoteInvoke(() =>
+            {
+                Assert.Equal(ApartmentState.Unknown, Thread.CurrentThread.GetApartmentState());
+                Assert.Throws<PlatformNotSupportedException>(() => Thread.CurrentThread.SetApartmentState(ApartmentState.MTA));
+            }).Dispose();
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] 
+        public static void ApartmentState_NoAttributePresent_STA_Unix()
+        {
+            DummyClass.RemoteInvoke(() =>
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => Thread.CurrentThread.SetApartmentState(ApartmentState.STA));
+            }).Dispose();
         }
 
         [Theory]
