@@ -23,7 +23,7 @@
     </ProjectReference>
     <ProjectReference Include="STAMain\STAMain.csproj">
       <Name>STAMain</Name>
-    <ProjectReference>
+    </ProjectReference>
     <ProjectReference Include="MTAMain\MTAMain.csproj">
       <Name>MTAMain</Name>
     </ProjectReference>
