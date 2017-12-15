@@ -24,12 +24,12 @@
     <ProjectReference Include="STAMain\STAMain.csproj">
       <Name>STAMain</Name>
     <ProjectReference>
-    </ProjectReference Include="MTAMain\MTAMain.csproj">
+    <ProjectReference Include="MTAMain\MTAMain.csproj">
       <Name>MTAMain</Name>
-    <ProjectReference>
-    </ProjectReference Include="UnknownMain\UnknownMain.csproj">
+    </ProjectReference>
+    <ProjectReference Include="UnknownMain\UnknownMain.csproj">
       <Name>UnknownMain</Name>
-    <ProjectReference>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
