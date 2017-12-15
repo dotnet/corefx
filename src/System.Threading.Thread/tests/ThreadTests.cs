@@ -13,7 +13,12 @@ using Xunit;
 
 namespace System.Threading.Threads.Tests
 {
-    public static class ThreadTests
+    public class DummyClass : RemoteExecutorTestBase
+    {
+        public static string HostRunnerTest = HostRunner;
+    }
+
+    public static class ThreadTests 
     {
         private const int UnexpectedTimeoutMilliseconds = ThreadTestHelpers.UnexpectedTimeoutMilliseconds;
         private const int ExpectedTimeoutMilliseconds = ThreadTestHelpers.ExpectedTimeoutMilliseconds;
@@ -137,6 +142,58 @@ namespace System.Threading.Threads.Tests
                         }),
                     2
                 };
+        }
+
+        [Theory]
+        [InlineData(true)] 
+        [InlineData(false)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void ApartmentState_STAAtributePresent(bool mode)
+        {
+            const string AppName = "STAMain.exe";
+            var psi = new ProcessStartInfo();
+            psi.FileName = DummyClass.HostRunnerTest;
+            psi.Arguments = $"{AppName} {mode}";
+            using (Process p = Process.Start(psi))
+            {
+                p.WaitForExit();
+                Assert.Equal(1, p.ExitCode);
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void ApartmentState_MTAAtributePresent(bool mode)
+        {
+            const string AppName = "MTAMain.exe";
+            var psi = new ProcessStartInfo();
+            psi.FileName = DummyClass.HostRunnerTest;
+            psi.Arguments = $"{AppName} {mode}";
+            using (Process p = Process.Start(psi))
+            {
+                p.WaitForExit();
+                Assert.Equal(1, p.ExitCode);
+            }
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void ApartmentState_NoAtributePresent(int mode)
+        {
+            const string AppName = "UnKnownMain.exe";
+            var psi = new ProcessStartInfo();
+            psi.FileName = DummyClass.HostRunnerTest;
+            psi.Arguments = $"{AppName} {mode}";
+            using (Process p = Process.Start(psi))
+            {
+                p.WaitForExit();
+                Assert.Equal(1, p.ExitCode);
+            }
         }
 
         [Theory]
