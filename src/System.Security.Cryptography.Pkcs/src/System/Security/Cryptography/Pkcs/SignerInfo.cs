@@ -609,21 +609,7 @@ namespace System.Security.Cryptography.Pkcs
 
         private HashAlgorithmName GetDigestAlgorithm()
         {
-            switch (DigestAlgorithm.Value)
-            {
-                case Oids.Md5:
-                    return HashAlgorithmName.MD5;
-                case Oids.Sha1:
-                    return HashAlgorithmName.SHA1;
-                case Oids.Sha256:
-                    return HashAlgorithmName.SHA256;
-                case Oids.Sha384:
-                    return HashAlgorithmName.SHA384;
-                case Oids.Sha512:
-                    return HashAlgorithmName.SHA512;
-                default:
-                    throw new CryptographicException(SR.Cryptography_Cms_UnknownAlgorithm, DigestAlgorithm.Value);
-            }
+            return Helpers.GetDigestAlgorithm(DigestAlgorithm.Value);
         }
 
         private static CryptographicAttributeObjectCollection MakeAttributeCollection(AttributeAsn[] attributes)
