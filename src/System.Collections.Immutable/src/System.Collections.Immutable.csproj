@@ -11,7 +11,7 @@
     <GenerateAppxPackageOnBuild>False</GenerateAppxPackageOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)' != 'netstandard1.0'">
-    <DefineConstants>$(DefineConstants);ItemRefAPI</DefineConstants>
+    <DefineConstants>$(DefineConstants);ItemRefApi</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\InternalsVisibleTo.cs" />

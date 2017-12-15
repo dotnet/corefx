@@ -5,7 +5,7 @@
     <ProjectGuid>{C7EFF4EE-70DC-453B-B817-4AF67921AB03}</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetGroup)' != 'netstandard1.0'">
-    <DefineConstants>$(DefineConstants);ItemRefAPI</DefineConstants>
+    <DefineConstants>$(DefineConstants);ItemRefApi</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Collections.Immutable.cs" />
