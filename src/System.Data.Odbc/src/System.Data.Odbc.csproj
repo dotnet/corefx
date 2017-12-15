@@ -28,7 +28,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <ItemGroup Condition="$(TargetGroup.Contains('netcoreapp'))">
+  <ItemGroup Condition="$(TargetGroup.StartsWith('netcoreapp'))">
     <Compile Include="$(CommonPath)\System\Data\Common\AdapterUtil.cs">
       <Link>Common\System\Data\Common\AdapterUtil.cs</Link>
     </Compile>
@@ -133,7 +133,7 @@
       <Link>Common\Interop\OSX\Interop.Libraries.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' And $(TargetGroup.Contains('netcoreapp'))">
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' And $(TargetGroup.StartsWith('netcoreapp'))">
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
@@ -177,7 +177,7 @@
     <Reference Include="System.Xml.ReaderWriter" />
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation" />
   </ItemGroup>
-  <ItemGroup Condition="$(TargetGroup.Contains('netcoreapp'))">
+  <ItemGroup Condition="$(TargetGroup.StartsWith('netcoreapp'))">
     <Reference Include="System.Transactions.Local" />
   </ItemGroup>
   <ItemGroup>
