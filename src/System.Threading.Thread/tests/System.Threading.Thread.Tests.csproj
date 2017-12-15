@@ -21,6 +21,15 @@
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
+    <ProjectReference Include="STAMain\STAMain.csproj">
+      <Name>STAMain</Name>
+    <ProjectReference>
+    </ProjectReference Include="MTAMain\MTAMain.csproj">
+      <Name>MTAMain</Name>
+    <ProjectReference>
+    </ProjectReference Include="UnknownMain\UnknownMain.csproj">
+      <Name>UnknownMain</Name>
+    <ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
