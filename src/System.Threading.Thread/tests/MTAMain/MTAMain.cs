@@ -21,7 +21,7 @@ namespace VoidMainWithExitCodeApp
             bool mode = bool.Parse(args[0]);
             if (mode)
             {
-                if (Thread.CurrentThread.GetApartmentState().ToString().Equals("STA"))
+                if (Thread.CurrentThread.GetApartmentState().ToString().Equals("MTA"))
                 {
                     retValue = 1;
                 }
