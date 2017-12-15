@@ -3,6 +3,7 @@
   <PropertyGroup>
     <BuildConfigurations>
       netstandard;
+      netstandard-Windows_NT;
       netcoreapp-Windows_NT;
       netcoreapp;
       netfx-Windows_NT;
