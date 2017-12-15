@@ -34,7 +34,7 @@ namespace Unknown
             {
                 try
                 {
-                    Thread.CurrentThread.SetApartmentState(ApartmentState.STA);
+                    Thread.CurrentThread.SetApartmentState(ApartmentState.MTA);
                     retValue = 1;
                 }
                 catch (InvalidOperationException){ }
