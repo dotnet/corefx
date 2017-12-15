@@ -10,6 +10,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
+
+  <!-- Default interfaces are not officially supported in netcoreapp yet -->
+  <DefineConstants Condition="'$(IsPrerelease)' == 'true' and '$(TargetGroup)' == 'netcoreapp'">$(DefineConstants);FEATURE_DEFAULT_INTERFACES</DefineConstants> 
+
   <ItemGroup>
     <Compile Include="System.Runtime.cs" />
     <Compile Include="System.Runtime.Manual.cs" />
