@@ -34,7 +34,7 @@ namespace System.Collections.Immutable
     /// </devremarks>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     [NonVersionable] // Applies to field layout
-    public partial struct ImmutableArray<T> : IEnumerable<T>, IEquatable<ImmutableArray<T>>, IImmutableArray
+    public readonly partial struct ImmutableArray<T> : IEnumerable<T>, IEquatable<ImmutableArray<T>>, IImmutableArray
     {
         /// <summary>
         /// An empty (initialized) instance of <see cref="ImmutableArray{T}"/>.
@@ -48,7 +48,7 @@ namespace System.Collections.Immutable
         /// This would be private, but we make it internal so that our own extension methods can access it.
         /// </remarks>
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        internal T[] array;
+        internal readonly T[] array;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct

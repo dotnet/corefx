@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace System.Collections.Immutable
@@ -109,7 +110,7 @@ namespace System.Collections.Immutable
         /// <returns>The prior value at the specified <paramref name="location"/>.</returns>
         public static ImmutableArray<T> InterlockedExchange<T>(ref ImmutableArray<T> location, ImmutableArray<T> value)
         {
-            return new ImmutableArray<T>(Interlocked.Exchange(ref location.array, value.array));
+            return new ImmutableArray<T>(Interlocked.Exchange(ref Unsafe.AsRef(in location.array), value.array));
         }
 
         /// <summary>
@@ -123,7 +124,7 @@ namespace System.Collections.Immutable
         /// <returns>The prior value at the specified <paramref name="location"/>.</returns>
         public static ImmutableArray<T> InterlockedCompareExchange<T>(ref ImmutableArray<T> location, ImmutableArray<T> value, ImmutableArray<T> comparand)
         {
-            return new ImmutableArray<T>(Interlocked.CompareExchange(ref location.array, value.array, comparand.array));
+            return new ImmutableArray<T>(Interlocked.CompareExchange(ref Unsafe.AsRef(in location.array), value.array, comparand.array));
         }
 
         /// <summary>

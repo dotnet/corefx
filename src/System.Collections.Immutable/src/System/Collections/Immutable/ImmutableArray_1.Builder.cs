@@ -8,7 +8,7 @@ using System.Diagnostics.Contracts;
 
 namespace System.Collections.Immutable
 {
-    public partial struct ImmutableArray<T>
+    public readonly partial struct ImmutableArray<T>
     {
         /// <summary>
         /// A writable array accessor that can be converted into an <see cref="ImmutableArray{T}"/>
