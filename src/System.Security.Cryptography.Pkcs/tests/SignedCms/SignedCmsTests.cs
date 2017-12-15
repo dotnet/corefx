@@ -798,53 +798,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Throws<CryptographicException>(() => cms.CheckSignature(false));
         }
 
-        [Fact]
-        public static void SignSilentDoesNotPrompt()
-        {
-            ContentInfo content = new ContentInfo(new byte[] { 1, 2, 3 });
-
-            using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
-            {
-                store.Open(OpenFlags.ReadOnly);
-
-                X509Certificate2Collection certs = store.Certificates;
-
-                try
-                {
-                    foreach (X509Certificate2 cert in certs)
-                    {
-                        if (cert.HasPrivateKey)
-                        {
-                            SignedCms cms = new SignedCms(content);
-                            CmsSigner signer = new CmsSigner(cert)
-                            {
-                                IncludeOption = X509IncludeOption.EndCertOnly,
-                                DigestAlgorithm = new Oid(Oids.Sha1, Oids.Sha1)
-                            };
-
-                            try
-                            {
-                                cms.ComputeSignature(signer);
-                            }
-                            catch (CryptographicException)
-                            {
-                                continue;
-                            }
-
-                            cms.CheckSignature(true);
-                        }
-                    }
-                }
-                finally
-                {
-                    foreach (X509Certificate2 cert in certs)
-                    {
-                        cert.Dispose();
-                    }
-                }
-            }
-        }
-
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
