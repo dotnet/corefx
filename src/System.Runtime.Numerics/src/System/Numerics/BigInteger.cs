@@ -258,7 +258,7 @@ namespace System.Numerics
 
         public unsafe BigInteger(ReadOnlySpan<byte> value, bool isUnsigned=false, bool isBigEndian=false)
         {
-            fixed (byte* valuePtr = &value.DangerousGetPinnableReference())
+            fixed (byte* valuePtr = &MemoryMarshal.GetReference(value))
             {
                 var valueSpan = new Span<byte>(valuePtr, value.Length);
                 int byteCount = valueSpan.Length;

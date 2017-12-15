@@ -549,7 +549,7 @@ namespace System.Globalization
 
             private static unsafe bool TrailingZeros(ReadOnlySpan<char> s, int index)
             {
-                fixed (char* sPtr = &s.DangerousGetPinnableReference())
+                fixed (char* sPtr = &MemoryMarshal.GetReference(s))
                 {
                     var span = new Span<char>(sPtr, s.Length);
                     // For compatibility, we need to allow trailing zeros at the end of a number string
@@ -568,7 +568,7 @@ namespace System.Globalization
             {
                 Debug.Assert(numfmt != null);
 
-                fixed (char* stringPointer = &str.DangerousGetPinnableReference())
+                fixed (char* stringPointer = &MemoryMarshal.GetReference(str))
                 {
                     char* p = stringPointer;
                     if (!ParseNumber(ref p, options, ref number, sb, numfmt, parseDecimal)
@@ -638,7 +638,7 @@ namespace System.Globalization
 
             internal static unsafe char ParseFormatSpecifier(ReadOnlySpan<char> format, out int digits)
             {
-                fixed (char* formatPtr = &format.DangerousGetPinnableReference())
+                fixed (char* formatPtr = &MemoryMarshal.GetReference(format))
                 {
                     var formatSpan = new Span<char>(formatPtr, format.Length);
                     char c = default;
@@ -1219,7 +1219,7 @@ namespace System.Globalization
                     return 0;
                 }
 
-                fixed (char* pFormat = &format.DangerousGetPinnableReference())
+                fixed (char* pFormat = &MemoryMarshal.GetReference(format))
                 {
                     int src = 0;
                     for (;;)
@@ -1295,7 +1295,7 @@ namespace System.Globalization
                     scaleAdjust = 0;
                     src = section;
 
-                    fixed (char* pFormat = &format.DangerousGetPinnableReference())
+                    fixed (char* pFormat = &MemoryMarshal.GetReference(format))
                     {
                         while (src < format.Length && (ch = pFormat[src++]) != 0 && ch != ';')
                         {
@@ -1485,7 +1485,7 @@ namespace System.Globalization
 
                 bool decimalWritten = false;
 
-                fixed (char* pFormat = &format.DangerousGetPinnableReference())
+                fixed (char* pFormat = &MemoryMarshal.GetReference(format))
                 {
                     char* cur = dig;
 

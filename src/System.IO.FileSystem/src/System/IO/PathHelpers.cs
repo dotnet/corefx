@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace System.IO
 {
@@ -113,7 +114,7 @@ namespace System.IO
         private unsafe static string CombineNoChecksInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second)
         {
             Debug.Assert(first.Length > 0 && second.Length > 0, "should have dealt with empty paths");
-            fixed (char* f = &first.DangerousGetPinnableReference(), s = &second.DangerousGetPinnableReference())
+            fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second))
             {
                 var firstSpan = new Span<char>(f, first.Length);
                 var secondSpan = new Span<char>(s, second.Length);
@@ -137,7 +138,7 @@ namespace System.IO
         private unsafe static string CombineNoChecksInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second, ReadOnlySpan<char> third)
         {
             Debug.Assert(first.Length > 0 && second.Length > 0 && third.Length > 0, "should have dealt with empty paths");
-            fixed (char* f = &first.DangerousGetPinnableReference(), s = &second.DangerousGetPinnableReference(), t = &third.DangerousGetPinnableReference())
+            fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second), t = &MemoryMarshal.GetReference(third))
             {
                 var firstSpan = new Span<char>(f, first.Length);
                 var secondSpan = new Span<char>(s, second.Length);
@@ -171,7 +172,7 @@ namespace System.IO
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsDotOrDotDot(ReadOnlySpan<char> fileName)
         {
-            fixed (char* fileNamePtr = &fileName.DangerousGetPinnableReference())
+            fixed (char* fileNamePtr = &MemoryMarshal.GetReference(fileName))
             {
                 var fileNameSpan = new Span<char>(fileNamePtr, fileName.Length);
                 return !(fileName.Length > 2
@@ -187,7 +188,7 @@ namespace System.IO
 
             int root = PathInternal.GetRootLength(path);
             int i = path.Length;
-            fixed (char* pathPtr = &path.DangerousGetPinnableReference())
+            fixed (char* pathPtr = &MemoryMarshal.GetReference(path))
             {
                 var pathSpan = new Span<char>(pathPtr, path.Length);
                 if (i > root)

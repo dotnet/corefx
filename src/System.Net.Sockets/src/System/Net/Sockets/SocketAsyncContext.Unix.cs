@@ -1302,7 +1302,7 @@ namespace System.Net.Sockets
                 return errorCode;
             }
 
-            fixed (byte* bufferPtr = &buffer.DangerousGetPinnableReference())
+            fixed (byte* bufferPtr = &MemoryMarshal.GetReference(buffer))
             {
                 var operation = new BufferPtrReceiveOperation(this)
                 {
@@ -1564,7 +1564,7 @@ namespace System.Net.Sockets
                 return errorCode;
             }
 
-            fixed (byte* bufferPtr = &buffer.DangerousGetPinnableReference())
+            fixed (byte* bufferPtr = &MemoryMarshal.GetReference(buffer))
             {
                 var operation = new BufferPtrSendOperation(this)
                 {

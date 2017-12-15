@@ -190,7 +190,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Equal(valueTag, actualTag);
 
             AssertRefSame(
-                ref valueSpan.DangerousGetPinnableReference(),
+                ref MemoryMarshal.GetReference(valueSpan),
                 ref bytes[offset],
                 $"{label} is at bytes[{offset}]");
 
@@ -207,7 +207,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
         private static void AssertRefSame(ReadOnlyMemory<byte> a, ref byte b, string msg)
         {
-            AssertRefSame(ref a.Span.DangerousGetPinnableReference(), ref b, msg);
+            AssertRefSame(ref MemoryMarshal.GetReference(a.Span), ref b, msg);
         }
 
         private static void AssertRefSame(ref byte a, ref byte b, string msg)

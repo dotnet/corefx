@@ -223,7 +223,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
                 Assert.True(
                     Unsafe.AreSame(
-                        ref contents.Span.DangerousGetPinnableReference(),
+                        ref MemoryMarshal.GetReference(contents.Span),
                         ref inputData[2]));
             }
             else

@@ -5,6 +5,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -571,7 +572,7 @@ namespace System.IO
             Debug.Assert(_bytePos <= preamble.Length, "_compressPreamble was called with the current bytePos greater than the preamble buffer length.  Are two threads using this StreamReader at the same time?");
             int len = (_byteLen >= (preamble.Length)) ? (preamble.Length - _bytePos) : (_byteLen - _bytePos);
 
-            fixed (byte* preamblePtr = &preamble.DangerousGetPinnableReference())
+            fixed (byte* preamblePtr = &MemoryMarshal.GetReference(preamble))
             {
                 var preambleSpan = new Span<byte>(preamblePtr, preamble.Length);
                 for (int i = 0; i < len; i++, _bytePos++)

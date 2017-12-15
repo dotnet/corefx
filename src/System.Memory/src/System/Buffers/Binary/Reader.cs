@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace System.Buffers.Binary
 {
@@ -116,7 +117,7 @@ namespace System.Buffers.Binary
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
             }
-            return Unsafe.ReadUnaligned<T>(ref buffer.DangerousGetPinnableReference());
+            return Unsafe.ReadUnaligned<T>(ref MemoryMarshal.GetReference(buffer));
         }
 
         /// <summary>
@@ -143,7 +144,7 @@ namespace System.Buffers.Binary
                 value = default;
                 return false;
             }
-            value = Unsafe.ReadUnaligned<T>(ref buffer.DangerousGetPinnableReference());
+            value = Unsafe.ReadUnaligned<T>(ref MemoryMarshal.GetReference(buffer));
             return true;
         }
     }

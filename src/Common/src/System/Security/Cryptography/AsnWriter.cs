@@ -1414,7 +1414,7 @@ namespace System.Security.Cryptography.Asn1
                 // TODO: Split this for netstandard vs netcoreapp for span?.
                 unsafe
                 {
-                    fixed (char* strPtr = &str.DangerousGetPinnableReference())
+                    fixed (char* strPtr = &MemoryMarshal.GetReference(str))
                     {
                         size = encoding.GetByteCount(strPtr, str.Length);
 
@@ -1431,7 +1431,7 @@ namespace System.Security.Cryptography.Asn1
             // TODO: Split this for netstandard vs netcoreapp for span?.
             unsafe
             {
-                fixed (char* strPtr = &str.DangerousGetPinnableReference())
+                fixed (char* strPtr = &MemoryMarshal.GetReference(str))
                 {
                     if (size < 0)
                     {
@@ -1443,7 +1443,7 @@ namespace System.Security.Cryptography.Asn1
                     WriteLength(size);
                     Span<byte> dest = _buffer.AsSpan().Slice(_offset, size);
 
-                    fixed (byte* destPtr = &dest.DangerousGetPinnableReference())
+                    fixed (byte* destPtr = &MemoryMarshal.GetReference(dest))
                     {
                         int written = encoding.GetBytes(strPtr, str.Length, destPtr, dest.Length);
 
@@ -1468,7 +1468,7 @@ namespace System.Security.Cryptography.Asn1
             // TODO: Split this for netstandard vs netcoreapp for span?.
             unsafe
             {
-                fixed (char* strPtr = &str.DangerousGetPinnableReference())
+                fixed (char* strPtr = &MemoryMarshal.GetReference(str))
                 {
                     tmp = ArrayPool<byte>.Shared.Rent(size);
 

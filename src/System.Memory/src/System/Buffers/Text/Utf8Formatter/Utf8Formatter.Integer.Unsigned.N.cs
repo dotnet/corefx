@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace System.Buffers.Text
 {
@@ -42,7 +43,7 @@ namespace System.Buffers.Text
                 return false;
             }
 
-            ref byte utf8Bytes = ref buffer.DangerousGetPinnableReference();
+            ref byte utf8Bytes = ref MemoryMarshal.GetReference(buffer);
 
             // Write the last group
             Unsafe.Add(ref utf8Bytes, idx++) = Utf8Constants.Separator;

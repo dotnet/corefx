@@ -477,7 +477,7 @@ namespace System.Numerics
                 return 'R';
             }
 
-            fixed (char* formatPtr = &format.DangerousGetPinnableReference())
+            fixed (char* formatPtr = &MemoryMarshal.GetReference(format))
             {
                 var formatSpan = new Span<char>(formatPtr, format.Length);
                 int i = 0;

@@ -149,7 +149,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             // Check that it is, in fact, the same memory. No copies with this API.
             Assert.True(
                 Unsafe.AreSame(
-                    ref contents.Span.DangerousGetPinnableReference(),
+                    ref MemoryMarshal.GetReference(contents.Span),
                     ref input[5]));
         }
 

@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace System.Xml
@@ -3217,7 +3218,7 @@ namespace System.Xml
             ReadOnlySpan<byte> preamble = _ps.encoding.Preamble;
             int preambleLen = preamble.Length;
             int i;
-            fixed (byte* preamblePtr = &preamble.DangerousGetPinnableReference())
+            fixed (byte* preamblePtr = &MemoryMarshal.GetReference(preamble))
             {
                 var preambleSpan = new Span<byte>(preamblePtr, preambleLen);
                 for (i = 0; i < preambleLen && i < _ps.bytesUsed; i++)
