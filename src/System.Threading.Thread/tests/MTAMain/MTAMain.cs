@@ -5,7 +5,7 @@
 using System;
 using System.Threading;
 
-namespace VoidMainWithExitCodeApp
+namespace MTAMain
 {
     internal static class Program
     {
@@ -17,7 +17,7 @@ namespace VoidMainWithExitCodeApp
             bool mode = bool.Parse(args[0]);
             if (mode)
             {
-                if (Thread.CurrentThread.GetApartmentState().ToString().Equals("MTA"))
+                if (Thread.CurrentThread.GetApartmentState().Equals(ApartmentState.MTA))
                 {
                     retValue = 1;
                 }

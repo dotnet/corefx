@@ -5,7 +5,7 @@
 using System;
 using System.Threading;
 
-namespace VoidMainWithExitCodeApp
+namespace Unknown
 {
     internal static class Program
     {
@@ -16,7 +16,7 @@ namespace VoidMainWithExitCodeApp
             int mode = int.Parse(args[0]);
             if (mode == 1)
             {
-                if (Thread.CurrentThread.GetApartmentState().ToString().Equals("Unknown"))
+                if (Thread.CurrentThread.GetApartmentState().Equals(ApartmentState.Unknown))
                 {
                     retValue = 1;
                 }

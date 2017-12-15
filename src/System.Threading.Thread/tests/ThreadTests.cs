@@ -185,7 +185,7 @@ namespace System.Threading.Threads.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void ApartmentState_NoAtributePresent(int mode)
         {
-            const string AppName = "UnKnownMain.exe";
+            const string AppName = "UnknownMain.exe";
             var psi = new ProcessStartInfo();
             psi.FileName = DummyClass.HostRunnerTest;
             psi.Arguments = $"{AppName} {mode}";

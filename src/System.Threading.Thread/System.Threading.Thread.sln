@@ -20,7 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E107E9C1-E89
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{2E666815-2EDB-464B-9DF6-380BF4789AD4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnKnownMain", "tests\UnKnownMain\UnKnownMain.csproj", "{55E1FF5D-C006-4128-A02F-BAE460C18746}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnknownMain", "tests\UnknownMain\UnknownMain.csproj", "{55E1FF5D-C006-4128-A02F-BAE460C18746}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTAMain", "tests\MTAMain\MTAMain.csproj", "{525EDAE0-8BFC-4FB0-9915-589236CA042D}"
 EndProject

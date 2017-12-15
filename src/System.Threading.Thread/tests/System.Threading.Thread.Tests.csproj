@@ -27,8 +27,8 @@
     <ProjectReference Include="MTAMain\MTAMain.csproj">
         <Name>MTAMain</Name>
     </ProjectReference>
-    <ProjectReference Include="UnKnownMain\UnKnownMain.csproj">
-        <Name>UnKnownMain</Name>
+    <ProjectReference Include="UnknownMain\UnknownMain.csproj">
+        <Name>UnknownMain</Name>
     </ProjectReference>
   </ItemGroup>
 
