@@ -56,6 +56,9 @@ namespace Internal.Cryptography
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "pkcs7-data", "1.2.840.113549.1.7.1" },
+                { "contentType", "1.2.840.113549.1.9.3" },
+                { "messageDigest", "1.2.840.113549.1.9.4" },
+                { "signingTime", "1.2.840.113549.1.9.5" },
                 { "X509v3 Subject Key Identifier", "2.5.29.14" },
                 { "X509v3 Key Usage", "2.5.29.15" },
                 { "X509v3 Basic Constraints", "2.5.29.19" },
