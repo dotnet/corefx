@@ -392,26 +392,8 @@ namespace Internal.Cryptography
         internal static void DigestWriter(IncrementalHash hasher, AsnWriter writer)
         {
 #if netcoreapp
-            byte[] rented = null;
-            Span<byte> span = stackalloc byte[64];
-            ArrayPool<byte> pool = ArrayPool<byte>.Shared;
-            int bytesWritten;
-
-            while (!writer.TryEncode(span, out bytesWritten))
-            {
-                if (rented != null)
-                {
-                    pool.Return(rented);
-                }
-
-                rented = pool.Rent(span.Length * 2);
-                span = rented;
-            }
-
-            hasher.AppendData(span.Slice(0, bytesWritten));
+            hasher.AppendData(writer.EncodeAsSpan());
 #else
-            // If there's no AppendData(ReadOnlySpan) just call Encode to get the
-            // properly sized array.
             hasher.AppendData(writer.Encode());
 #endif
         }
