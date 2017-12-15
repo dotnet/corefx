@@ -1141,6 +1141,7 @@ namespace System.Diagnostics.Tests
         [InlineData("b d \"\"a\"\" ", "b,d,a")]
         [InlineData("\\\"\\\"a\\\"\\\" b d", "\"\"a\"\",b,d")]
         [InlineData("b d \\\"\\\"a\\\"\\\"", "b,d,\"\"a\"\"")]
+        [InlineData("\"\"\"a\"\"\" c b", "\"a\",c,b")]
         public void TestArgumentParsing(string inputArguments, string expectedArgv)
         {
             var options = new RemoteInvokeOptions
