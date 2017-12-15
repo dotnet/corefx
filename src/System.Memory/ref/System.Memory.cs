@@ -17,7 +17,7 @@ namespace System
         [CLSCompliant(false)]
         public unsafe ReadOnlySpan(void* pointer, int length) { throw null; }
         public bool IsEmpty { get { throw null; } }
-        public T this[int index] { get { throw null; } }
+        public ref readonly T this[int index] { get { throw null; }}
         public int Length { get { throw null; } }
         public void CopyTo(Span<T> destination) { }
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
@@ -452,5 +452,10 @@ namespace System.Runtime.InteropServices
     public static class MemoryMarshal
     {
         public static Memory<T> AsMemory<T>(ReadOnlyMemory<T> readOnlyMemory) { throw null; }
+
+        public static ref T GetReference<T>(Span<T> span) { throw null; }
+        public static ref readonly T GetReference<T>(ReadOnlySpan<T> span) { throw null; }
+
+        public static bool TryGetArray<T>(ReadOnlyMemory<T> readOnlyMemory, out ArraySegment<T> arraySegment) { throw null; }
     }
 }
