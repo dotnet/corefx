@@ -16,7 +16,7 @@ namespace Unknown
             int mode = int.Parse(args[0]);
             if (mode == 1)
             {
-                if (Thread.CurrentThread.GetApartmentState().Equals(ApartmentState.Unknown))
+                if (Thread.CurrentThread.GetApartmentState() == ApartmentState.Unknown)
                 {
                     retValue = 1;
                 }

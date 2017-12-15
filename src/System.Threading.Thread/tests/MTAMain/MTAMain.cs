@@ -17,7 +17,7 @@ namespace MTAMain
             bool mode = bool.Parse(args[0]);
             if (mode)
             {
-                if (Thread.CurrentThread.GetApartmentState().Equals(ApartmentState.MTA))
+                if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
                 {
                     retValue = 1;
                 }

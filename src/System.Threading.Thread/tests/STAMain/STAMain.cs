@@ -17,11 +17,10 @@ namespace STAMain
             bool mode = bool.Parse(args[0]);
             if (mode)
             {
-                if (Thread.CurrentThread.GetApartmentState().Equals(ApartmentState.STA))
+                if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
                 {
                     retValue = 1;
-                }
-                
+                }    
             }
             else
             {
