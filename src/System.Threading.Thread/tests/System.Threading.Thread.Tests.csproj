@@ -27,9 +27,6 @@
     <ProjectReference Include="MTAMain\MTAMain.csproj">
       <Name>MTAMain</Name>
     </ProjectReference>
-    <ProjectReference Include="UnknownMain\UnknownMain.csproj">
-      <Name>UnknownMain</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

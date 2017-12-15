@@ -20,8 +20,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E107E9C1-E89
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{2E666815-2EDB-464B-9DF6-380BF4789AD4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnknownMain", "tests\UnknownMain\UnknownMain.csproj", "{C8E0B248-31E9-4175-B3B0-7729193227FB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STAMain", "tests\STAMain\STAMain.csproj", "{54144785-3121-47FF-892E-3D7A4E68A496}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTAMain", "tests\MTAMain\MTAMain.csproj", "{AA1531EA-98ED-4B26-ADF5-C93EDFA7BC0A}"
@@ -58,14 +56,6 @@ Global
 		{82D06A2D-008D-4A4A-A83D-FB7F04721C87}.netstandard-Release|Any CPU.Build.0 = netcoreapp-Release|Any CPU
 		{82D06A2D-008D-4A4A-A83D-FB7F04721C87}.Release|Any CPU.ActiveCfg = netcoreapp-Release|Any CPU
 		{82D06A2D-008D-4A4A-A83D-FB7F04721C87}.Release|Any CPU.Build.0 = netcoreapp-Release|Any CPU
-		{C8E0B248-31E9-4175-B3B0-7729193227FB}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
-		{C8E0B248-31E9-4175-B3B0-7729193227FB}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
-		{C8E0B248-31E9-4175-B3B0-7729193227FB}.netstandard-Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
-		{C8E0B248-31E9-4175-B3B0-7729193227FB}.netstandard-Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
-		{C8E0B248-31E9-4175-B3B0-7729193227FB}.netstandard-Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
-		{C8E0B248-31E9-4175-B3B0-7729193227FB}.netstandard-Release|Any CPU.Build.0 = netstandard-Release|Any CPU
-		{C8E0B248-31E9-4175-B3B0-7729193227FB}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
-		{C8E0B248-31E9-4175-B3B0-7729193227FB}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
 		{54144785-3121-47FF-892E-3D7A4E68A496}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
 		{54144785-3121-47FF-892E-3D7A4E68A496}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
 		{54144785-3121-47FF-892E-3D7A4E68A496}.netstandard-Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU

@@ -179,24 +179,6 @@ namespace System.Threading.Threads.Tests
         }
 
         [Theory]
-        [InlineData(1)]
-        [InlineData(2)]
-        [InlineData(3)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public static void ApartmentState_NoAtributePresent(int mode)
-        {
-            const string AppName = "UnknownMain.exe";
-            var psi = new ProcessStartInfo();
-            psi.FileName = DummyClass.HostRunnerTest;
-            psi.Arguments = $"{AppName} {mode}";
-            using (Process p = Process.Start(psi))
-            {
-                p.WaitForExit();
-                Assert.Equal(1, p.ExitCode);
-            }
-        }
-
-        [Theory]
         [MemberData(nameof(ApartmentStateTest_MemberData))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior differs on Unix and Windows
         [ActiveIssue(20766,TargetFrameworkMonikers.UapAot)]
