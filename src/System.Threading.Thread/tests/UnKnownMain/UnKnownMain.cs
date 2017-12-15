@@ -4,17 +4,13 @@
 
 using System;
 using System.Threading;
-using System.Reflection;
-using Xunit;
 
 namespace VoidMainWithExitCodeApp
 {
     internal static class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
-            PropertyInfo set_ExitCode = typeof(Environment).GetTypeInfo().GetDeclaredProperty("ExitCode");
-            MethodInfo Exit = typeof(Environment).GetTypeInfo().GetDeclaredMethod("Exit");
             int retValue = 0;
 
             int mode = int.Parse(args[0]);
@@ -43,7 +39,8 @@ namespace VoidMainWithExitCodeApp
                 }
                 catch (InvalidOperationException){ }
             }
-            Exit.Invoke(null, new object[] { retValue });
+
+            return retValue;
         }
     }
 }
