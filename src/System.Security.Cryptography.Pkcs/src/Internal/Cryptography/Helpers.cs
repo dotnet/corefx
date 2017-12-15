@@ -357,6 +357,7 @@ namespace Internal.Cryptography
 
             if (extension != null)
             {
+                // Certificates are DER encoded.
                 AsnReader reader = new AsnReader(extension.RawData, AsnEncodingRules.DER);
 
                 if (reader.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> contents))
@@ -364,7 +365,11 @@ namespace Internal.Cryptography
                     return contents.ToArray();
                 }
 
-                throw new CryptographicException();
+                // TryGetPrimitiveOctetStringBytes will have thrown if the next tag wasn't
+                // Universal (primitive) OCTET STRING, since we're in DER mode.
+                // So there's really no way we can get here.
+                Debug.Fail($"TryGetPrimitiveOctetStringBytes returned false in DER mode");
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
             // The Desktop/Windows version of this method use CertGetCertificateContextProperty

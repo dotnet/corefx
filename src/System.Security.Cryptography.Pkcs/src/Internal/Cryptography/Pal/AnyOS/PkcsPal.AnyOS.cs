@@ -41,6 +41,7 @@ namespace Internal.Cryptography
 
             public override byte[] EncodeOctetString(byte[] octets)
             {
+                // Write using DER to support the most readers.
                 AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
                 writer.WriteOctetString(octets);
                 return writer.Encode();
@@ -48,6 +49,7 @@ namespace Internal.Cryptography
 
             public override byte[] DecodeOctetString(byte[] encodedOctets)
             {
+                // Read using BER because the CMS specification says the encoding is BER.
                 AsnReader reader = new AsnReader(encodedOctets, AsnEncodingRules.BER);
 
                 const int ArbitraryStackLimit = 256;
@@ -100,7 +102,9 @@ namespace Internal.Cryptography
 
             public override byte[] EncodeUtcTime(DateTime utcTime)
             {
+                // Write using DER to support the most readers.
                 AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
+
                 // Sending the DateTime through ToLocalTime here will cause the right normalization
                 // of DateTimeKind.Unknown.
                 //
@@ -113,6 +117,7 @@ namespace Internal.Cryptography
 
             public override DateTime DecodeUtcTime(byte[] encodedUtcTime)
             {
+                // Read using BER because the CMS specification says the encoding is BER.
                 AsnReader reader = new AsnReader(encodedUtcTime, AsnEncodingRules.BER);
                 DateTimeOffset value = reader.GetUtcTime();
 
@@ -136,6 +141,7 @@ namespace Internal.Cryptography
                     return string.Empty;
                 }
 
+                // Read using BER because the CMS specification says the encoding is BER.
                 AsnReader reader = new AsnReader(encodedOid, AsnEncodingRules.BER);
                 string value = reader.ReadObjectIdentifierAsString();
 
