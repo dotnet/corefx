@@ -40,6 +40,9 @@ namespace System.Diagnostics
             if (startInfo.StandardOutputEncoding != null)
                 throw new InvalidOperationException(SR.StandardOutputEncodingNotAllowed);
 
+            if (startInfo.StandardInputEncoding != null)
+                throw new InvalidOperationException(SR.StandardInputEncodingNotAllowed);
+
             if (startInfo._environmentVariables != null)
                 throw new InvalidOperationException(SR.CantUseEnvVars);
 

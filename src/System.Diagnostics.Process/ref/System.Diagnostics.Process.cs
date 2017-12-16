@@ -171,6 +171,7 @@ namespace System.Diagnostics
         public bool RedirectStandardOutput { get { throw null; } set { } }
         public System.Text.Encoding StandardErrorEncoding { get { throw null; } set { } }
         public System.Text.Encoding StandardOutputEncoding { get { throw null; } set { } }
+        public System.Text.Encoding StandardInputEncoding { get { throw null; } set { } }
         public string UserName { get { throw null; } set { } }
         public bool UseShellExecute { get { throw null; } set { } }
         public string WorkingDirectory { get { throw null; } set { } }

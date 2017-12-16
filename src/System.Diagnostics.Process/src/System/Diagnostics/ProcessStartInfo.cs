@@ -99,6 +99,8 @@ namespace System.Diagnostics
 
         public Encoding StandardOutputEncoding { get; set; }
 
+        public Encoding StandardInputEncoding { get; set; }
+
         /// <devdoc>
         ///    <para>
         ///       Returns or sets the application, document, or URL that is to be launched.

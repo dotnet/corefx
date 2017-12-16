@@ -1249,6 +1249,22 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        public void Start_HasStandardInputEncodingNonRedirected_ThrowsInvalidOperationException()
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "FileName",
+                    RedirectStandardInput = false,
+                    StandardInputEncoding = Encoding.UTF8
+                }
+            };
+
+            Assert.Throws<InvalidOperationException>(() => process.Start());
+        }
+
+        [Fact]
         public void Start_Disposed_ThrowsObjectDisposedException()
         {
             var process = new Process();
