@@ -161,7 +161,31 @@ namespace System.Threading.Threads.Tests
                 Assert.Equal(0, p.ExitCode);
             }
         }
-        
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void ApartmentState_NoAtributePresent_DefaultState()
+        {
+            DummyClass.RemoteInvoke(() =>
+            {
+                Assert.Equal(ApartmentState.MTA, Thread.CurrentThread.GetApartmentState());
+                Assert.Throws<InvalidOperationException>(() => Thread.CurrentThread.SetApartmentState(ApartmentState.STA));
+                Thread.CurrentThread.SetApartmentState(ApartmentState.MTA);
+            }).Dispose();
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void ApartmentState_NoAtributePresent_STA()
+        {
+            DummyClass.RemoteInvoke(() =>
+            {
+                Thread.CurrentThread.SetApartmentState(ApartmentState.STA);
+                Assert.Equal(ApartmentState.STA, Thread.CurrentThread.GetApartmentState());
+                Assert.Throws<InvalidOperationException>(() => Thread.CurrentThread.SetApartmentState(ApartmentState.MTA));
+            }).Dispose();
+        }
+
         [Theory]
         [MemberData(nameof(ApartmentStateTest_MemberData))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior differs on Unix and Windows
