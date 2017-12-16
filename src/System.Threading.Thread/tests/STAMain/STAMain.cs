@@ -12,13 +12,15 @@ namespace STAMain
         [STAThread]
         static int Main(string[] args)
         {
-            int retValue = 1;
-
             string mode = args[0];
+            int retValue = 1;
+            Thread curThread = Thread.CurrentThread;
+            
             if (mode == "GetApartmentState")
             {
-                if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
+                if (curThread.GetApartmentState() == ApartmentState.STA)
                 {
+                    curThread.SetApartmentState(ApartmentState.STA);
                     retValue = 0;
                 }    
             }
@@ -26,7 +28,7 @@ namespace STAMain
             {
                 try
                 {
-                    Thread.CurrentThread.SetApartmentState(ApartmentState.MTA);
+                    curThread.SetApartmentState(ApartmentState.MTA);
                 }
                 catch (InvalidOperationException)
                 {
