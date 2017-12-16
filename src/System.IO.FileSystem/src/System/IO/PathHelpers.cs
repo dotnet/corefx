@@ -137,14 +137,6 @@ namespace System.IO
         private unsafe static string CombineNoChecksInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second, ReadOnlySpan<char> third)
         {
             Debug.Assert(first.Length > 0 && second.Length > 0 && third.Length > 0, "should have dealt with empty paths");
-<<<<<<< HEAD
-            fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second), t = &MemoryMarshal.GetReference(third))
-            {
-                var firstSpan = new Span<char>(f, first.Length);
-                var secondSpan = new Span<char>(s, second.Length);
-                var thirdSpan = new Span<char>(t, third.Length);
-=======
->>>>>>> 79d708b2faf8a75089b1873fbb101b0a957c1fbd
 
             bool firstHasSeparator = PathInternal.IsDirectorySeparator(first[first.Length - 1])
                 || PathInternal.IsDirectorySeparator(second[0]);
@@ -176,19 +168,9 @@ namespace System.IO
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsDotOrDotDot(ReadOnlySpan<char> fileName)
         {
-<<<<<<< HEAD
-            fixed (char* fileNamePtr = &MemoryMarshal.GetReference(fileName))
-            {
-                var fileNameSpan = new Span<char>(fileNamePtr, fileName.Length);
-                return !(fileName.Length > 2
-                    || fileNameSpan[0] != '.'
-                    || (fileName.Length == 2 && fileNameSpan[1] != '.'));
-            }
-=======
             return !(fileName.Length > 2
                 || fileName[0] != '.'
                 || (fileName.Length == 2 && fileName[1] != '.'));
->>>>>>> 79d708b2faf8a75089b1873fbb101b0a957c1fbd
         }
 
         public static ReadOnlySpan<char> GetDirectoryNameNoChecks(ReadOnlySpan<char> path)
@@ -198,11 +180,7 @@ namespace System.IO
 
             int root = PathInternal.GetRootLength(path);
             int i = path.Length;
-<<<<<<< HEAD
-            fixed (char* pathPtr = &MemoryMarshal.GetReference(path))
-=======
             if (i > root)
->>>>>>> 79d708b2faf8a75089b1873fbb101b0a957c1fbd
             {
                 while (i > root && !PathInternal.IsDirectorySeparator(path[--i])) ;
                 return path.Slice(0, i);
