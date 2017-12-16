@@ -557,7 +557,8 @@ namespace System.Diagnostics
                     {
                         // Two consecutive double quotes inside an inQuotes region should result in a literal double quote 
                         // (the parser is left in the inQuotes region).
-                        // This behavior is not part of the spec linked above, but is compatible with CRT and .NET Framework.
+                        // This behavior is not part of the spec of code:ParseArgumentsIntoList, but is compatible with CRT 
+                        // and .NET Framework.
                         currentArgument.Append('"');
                         i++;
                     }
