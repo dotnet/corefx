@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace System.Collections.Immutable
 {
-    public readonly partial struct ImmutableArray<T>
+    public partial struct ImmutableArray<T>
     {
         /// <summary>
         /// An array enumerator.

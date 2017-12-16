@@ -212,7 +212,7 @@ namespace System.Collections.Immutable
             }
         }
 
-#if ItemRefApi
+#if FEATURE_ITEMREFAPI
         /// <summary>
         /// Returns a read-only reference to the value associated with the provided key.
         /// </summary>

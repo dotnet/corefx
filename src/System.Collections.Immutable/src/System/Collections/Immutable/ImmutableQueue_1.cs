@@ -141,7 +141,7 @@ namespace System.Collections.Immutable
             return _forwards.Peek();
         }
 
-#if ItemRefApi
+#if FEATURE_ITEMREFAPI
         /// <summary>
         /// Gets a read-only reference to the element at the front of the queue.
         /// </summary>

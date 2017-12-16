@@ -187,7 +187,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-#if ItemRefApi
+#if FEATURE_ITEMREFAPI
             /// <summary>
             /// Gets a read-only reference to the element of the set at the given index.
             /// </summary>
@@ -524,7 +524,7 @@ namespace System.Collections.Immutable
                 int end = index + count - 1;
                 while (start < end)
                 {
-#if ItemRefApi
+#if FEATURE_ITEMREFAPI
                     T a = result.ItemRef(start);
                     T b = result.ItemRef(end);
 #else

@@ -186,7 +186,7 @@ namespace System.Collections.Immutable
                             result = OperationResult.NoChangeRequired;
                             return this;
                         case KeyCollisionBehavior.ThrowIfValueDifferent:
-#if ItemRefApi
+#if FEATURE_ITEMREFAPI
                             ref readonly var existingEntry = ref _additionalElements.ItemRef(keyCollisionIndex);
 #else
                             var existingEntry = _additionalElements[keyCollisionIndex];
@@ -281,7 +281,7 @@ namespace System.Collections.Immutable
                     return false;
                 }
 
-#if ItemRefApi
+#if FEATURE_ITEMREFAPI
                 value = _additionalElements.ItemRef(index).Value;
 #else
                 value = _additionalElements[index].Value;
@@ -324,7 +324,7 @@ namespace System.Collections.Immutable
                     return false;
                 }
 
-#if ItemRefApi
+#if FEATURE_ITEMREFAPI
                 actualKey = _additionalElements.ItemRef(index).Key;
 #else
                 actualKey = _additionalElements[index].Key;

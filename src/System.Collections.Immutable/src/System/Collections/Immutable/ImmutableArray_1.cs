@@ -12,7 +12,7 @@ using System.Runtime.Versioning;
 
 namespace System.Collections.Immutable
 {
-    public readonly partial struct ImmutableArray<T> : IReadOnlyList<T>, IList<T>, IEquatable<ImmutableArray<T>>, IList, IImmutableArray, IStructuralComparable, IStructuralEquatable, IImmutableList<T>
+    public partial struct ImmutableArray<T> : IReadOnlyList<T>, IList<T>, IEquatable<ImmutableArray<T>>, IList, IImmutableArray, IStructuralComparable, IStructuralEquatable, IImmutableList<T>
     {
         /// <summary>
         /// Gets or sets the element at the specified index in the read-only list.

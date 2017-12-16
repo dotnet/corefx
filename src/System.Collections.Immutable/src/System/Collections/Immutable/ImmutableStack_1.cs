@@ -121,7 +121,7 @@ namespace System.Collections.Immutable
             return _head;
         }
 
-#if ItemRefApi
+#if FEATURE_ITEMREFAPI
         /// <summary>
         /// Gets a read-only reference to the element on the top of the stack.
         /// </summary>

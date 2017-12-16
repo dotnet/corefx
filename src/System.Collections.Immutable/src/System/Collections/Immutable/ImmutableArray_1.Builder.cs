@@ -8,7 +8,7 @@ using System.Diagnostics.Contracts;
 
 namespace System.Collections.Immutable
 {
-    public readonly partial struct ImmutableArray<T>
+    public partial struct ImmutableArray<T>
     {
         /// <summary>
         /// A writable array accessor that can be converted into an <see cref="ImmutableArray{T}"/>
@@ -157,7 +157,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-#if ItemRefApi
+#if FEATURE_ITEMREFAPI
             /// <summary>
             /// Gets a read-only reference to the element at the specified index.
             /// </summary>

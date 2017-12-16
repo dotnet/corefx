@@ -135,7 +135,7 @@ namespace System.Collections.Immutable
             {
                 get
                 {
-#if ItemRefApi
+#if FEATURE_ITEMREFAPI
                     return this.Root.ItemRef(index);
 #else
                     return this.Root[index];
@@ -159,7 +159,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-#if ItemRefApi
+#if FEATURE_ITEMREFAPI
             /// <summary>
             /// Gets a read-only reference to the value for a given index into the list.
             /// </summary>

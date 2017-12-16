@@ -253,7 +253,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-#if ItemRefApi
+#if FEATURE_ITEMREFAPI
             /// <summary>
             /// Gets a read-only reference to the element of the set at the given index.
             /// </summary>
