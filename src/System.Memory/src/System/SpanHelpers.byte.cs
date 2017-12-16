@@ -5,6 +5,10 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
+#if !netstandard
+using Internal.Runtime.CompilerServices;
+#endif
+
 #if !netstandard11
 using System.Numerics;
 #endif
@@ -437,7 +441,7 @@ namespace System
 
                 while ((byte*)nLength > (byte*)index)
                 {
-                    var vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index));
+                    Vector<byte> vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index));
                     var vMatches = Vector.BitwiseOr(
                                     Vector.Equals(vData, values0),
                                     Vector.Equals(vData, values1));
@@ -572,7 +576,7 @@ namespace System
                 Vector<byte> values2 = GetVector(value2);
                 while ((byte*)nLength > (byte*)index)
                 {
-                    var vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index));
+                    Vector<byte> vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index));
 
                     var vMatches = Vector.BitwiseOr(
                                     Vector.BitwiseOr(
@@ -707,7 +711,7 @@ namespace System
 
                 while ((byte*)nLength > (byte*)(Vector<byte>.Count - 1))
                 {
-                    var vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index - Vector<byte>.Count));
+                    Vector<byte> vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index - Vector<byte>.Count));
                     var vMatches = Vector.BitwiseOr(
                                     Vector.Equals(vData, values0),
                                     Vector.Equals(vData, values1));
@@ -837,7 +841,7 @@ namespace System
                 Vector<byte> values2 = GetVector(value2);
                 while ((byte*)nLength > (byte*)(Vector<byte>.Count - 1))
                 {
-                    var vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index - Vector<byte>.Count));
+                    Vector<byte> vData = Unsafe.ReadUnaligned<Vector<byte>>(ref Unsafe.AddByteOffset(ref searchSpace, index - Vector<byte>.Count));
 
                     var vMatches = Vector.BitwiseOr(
                                     Vector.BitwiseOr(

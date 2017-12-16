@@ -3,7 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+
+#if !netstandard
+using Internal.Runtime.CompilerServices;
+#else
 using System.Runtime.CompilerServices;
+#endif
+
 using System.Runtime.InteropServices;
 
 namespace System.Buffers.Text
