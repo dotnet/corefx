@@ -29,7 +29,7 @@ namespace System.SpanTests
                 for (int i = 0; i < length; i++)
                 {
                     byte target0 = default;
-                    int idx = span.IndexOf<byte>(target0);
+                    int idx = span.IndexOf(target0);
                     Assert.Equal(0, idx);
                 }
             }
@@ -50,7 +50,7 @@ namespace System.SpanTests
                 for (int targetIndex = 0; targetIndex < length; targetIndex++)
                 {
                     byte target = a[targetIndex];
-                    int idx = span.IndexOf<byte>(target);
+                    int idx = span.IndexOf(target);
                     Assert.Equal(targetIndex, idx);
                 }
             }
@@ -71,7 +71,7 @@ namespace System.SpanTests
                 }
                 ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(a);
 
-                int idx = span.IndexOf<byte>(target);
+                int idx = span.IndexOf(target);
                 Assert.Equal(-1, idx);
             }
         }
@@ -83,11 +83,11 @@ namespace System.SpanTests
             for (var i = 0; i < Vector<byte>.Count; i++)
             {
                 var span = new ReadOnlySpan<byte>(array, i, 3 * Vector<byte>.Count);
-                int idx = span.IndexOf<byte>((byte)'1');
+                int idx = span.IndexOf((byte)'1');
                 Assert.Equal(-1, idx);
 
                 span = new ReadOnlySpan<byte>(array, i, 3 * Vector<byte>.Count - 3);
-                idx = span.IndexOf<byte>((byte)'1');
+                idx = span.IndexOf((byte)'1');
                 Assert.Equal(-1, idx);
             }
         }
@@ -177,7 +177,7 @@ namespace System.SpanTests
             var index = -1;
             if (searchFor.Length == 1)
             {
-                index = span.IndexOf<byte>((byte)searchFor[0]);
+                index = span.IndexOf((byte)searchFor[0]);
             }
             else if (searchFor.Length == 2)
             {
