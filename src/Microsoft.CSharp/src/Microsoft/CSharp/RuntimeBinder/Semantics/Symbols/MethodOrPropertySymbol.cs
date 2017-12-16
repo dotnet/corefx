@@ -60,7 +60,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             set
             {
-                // Should only be set once!
+                Debug.Assert(_Params == null, "Should only be set once");
                 _Params = value;
                 int count = value.Count;
                 if (count == 0)
