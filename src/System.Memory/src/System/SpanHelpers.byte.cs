@@ -60,16 +60,13 @@ namespace System
             if (valueLength == 0)
                 return 0;  // A zero-length sequence is always treated as "found" at the start of the search space.
 
-            int index = -1;
+            int index = int.MaxValue;
             for (int i = 0; i < valueLength; i++)
             {
                 var tempIndex = IndexOf(ref searchSpace, Unsafe.Add(ref value, i), searchSpaceLength);
-                if (tempIndex != -1)
-                {
-                    index = (index == -1 || index > tempIndex) ? tempIndex : index;
-                }
+                index = (tempIndex == -1 || tempIndex > index) ? index : tempIndex;
             }
-            return index;
+            return index == int.MaxValue ? -1 : index;
         }
 
         public static int LastIndexOfAny(ref byte searchSpace, int searchSpaceLength, ref byte value, int valueLength)
@@ -80,16 +77,13 @@ namespace System
             if (valueLength == 0)
                 return 0;  // A zero-length sequence is always treated as "found" at the start of the search space.
 
-            int index = -1;
+            int index = int.MinValue;
             for (int i = 0; i < valueLength; i++)
             {
                 var tempIndex = LastIndexOf(ref searchSpace, Unsafe.Add(ref value, i), searchSpaceLength);
-                if (tempIndex != -1)
-                {
-                    index = (index == -1 || index < tempIndex) ? tempIndex : index;
-                }
+                index = (tempIndex == -1 || index > tempIndex) ? index : tempIndex;
             }
-            return index;
+            return index == int.MinValue ? -1 : index;
         }
 
         public static unsafe int IndexOf(ref byte searchSpace, byte value, int length)
