@@ -64,7 +64,7 @@ namespace System
             for (int i = 0; i < valueLength; i++)
             {
                 var tempIndex = IndexOf(ref searchSpace, Unsafe.Add(ref value, i), searchSpaceLength);
-                index = (tempIndex == -1 || tempIndex > index) ? index : tempIndex;
+                if ((uint)tempIndex < (uint)index) index = tempIndex;
             }
             return index == int.MaxValue ? -1 : index;
         }
@@ -81,7 +81,7 @@ namespace System
             for (int i = 0; i < valueLength; i++)
             {
                 var tempIndex = LastIndexOf(ref searchSpace, Unsafe.Add(ref value, i), searchSpaceLength);
-                index = (index > tempIndex) ? index : tempIndex;
+                if (tempIndex > index) index = tempIndex;
             }
             return index;
         }
