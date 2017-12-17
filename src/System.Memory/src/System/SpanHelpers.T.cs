@@ -59,13 +59,13 @@ namespace System
             if (valueLength == 0)
                 return 0;  // A zero-length sequence is always treated as "found" at the start of the search space.
 
-            int index = int.MinValue;
+            int index = -1;
             for (int i = 0; i < valueLength; i++)
             {
                 var tempIndex = LastIndexOf(ref searchSpace, Unsafe.Add(ref value, i), searchSpaceLength);
-                index = (tempIndex == -1 || index > tempIndex) ? index : tempIndex;
+                index = (index > tempIndex) ? index : tempIndex;
             }
-            return index == int.MinValue ? -1 : index;
+            return index;
         }
 
         public static unsafe int IndexOf<T>(ref T searchSpace, T value, int length)
