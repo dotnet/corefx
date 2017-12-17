@@ -52,6 +52,19 @@ namespace System.Reflection.Metadata
             }
         }
 
+        public bool IsNested
+        {
+            get
+            {
+                if (Treatment == 0)
+                {
+                    return _reader.TypeDefTable.GetFlags(Handle).IsNested();
+                }
+
+                return GetProjectedFlags().IsNested();
+            }
+        }
+
         /// <summary>
         /// Name of the type.
         /// </summary>

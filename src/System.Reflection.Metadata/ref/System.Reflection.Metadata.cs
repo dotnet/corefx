@@ -2271,6 +2271,7 @@ namespace System.Reflection.Metadata
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public readonly partial struct TypeDefinition
     {
+        public bool IsNested { get { throw null; } }
         public System.Reflection.TypeAttributes Attributes { get { throw null; } }
         public System.Reflection.Metadata.EntityHandle BaseType { get { throw null; } }
         public System.Reflection.Metadata.StringHandle Name { get { throw null; } }
