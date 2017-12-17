@@ -17,7 +17,7 @@ namespace System.Reflection.Metadata.Tests
             {
                 var typeDef = reader.GetTypeDefinition(typeDefHandle);
 
-                Assert.Equal(typeDef.IsNested, typeDef.Attributes.IsNested());
+                Assert.Equal(typeDef.Attributes.IsNested(), typeDef.IsNested);
             }
         }
 
@@ -30,7 +30,7 @@ namespace System.Reflection.Metadata.Tests
             {
                 var typeDef = reader.GetTypeDefinition(typeDefHandle);
 
-                Assert.Equal(typeDef.IsNested, typeDef.Attributes.IsNested());
+                Assert.Equal(typeDef.Attributes.IsNested(), typeDef.IsNested);
             }
         }
     }
