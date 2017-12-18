@@ -149,12 +149,19 @@ namespace System.Threading.Threads.Tests
         [InlineData("STAMain.exe", "SetApartmentState")]
         [InlineData("MTAMain.exe", "GetApartmentState")]
         [InlineData("MTAMain.exe", "SetApartmentState")]
-        [ActiveIssue(20766,TargetFrameworkMonikers.UapAot)]
         public static void ApartmentState_AtributePresent(string AppName, string mode)
         {
             var psi = new ProcessStartInfo();
-            psi.FileName = DummyClass.HostRunnerTest;
-            psi.Arguments = $"{AppName} {mode}";
+            if (PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative)
+            {
+                psi.FileName = AppName;
+                psi.Arguments = $"{mode}";
+            }
+            else
+            {
+                psi.FileName = DummyClass.HostRunnerTest;
+                psi.Arguments = $"{AppName} {mode}";
+            }
             using (Process p = Process.Start(psi))
             {
                 p.WaitForExit();
@@ -170,7 +177,7 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] 
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void ApartmentState_NoAttributePresent_DefaultState_Windows()
         {
             DummyClass.RemoteInvoke(() =>
@@ -182,7 +189,8 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] 
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void ApartmentState_NoAttributePresent_STA_Windows()
         {
             DummyClass.RemoteInvoke(() =>
