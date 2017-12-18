@@ -150,6 +150,7 @@ namespace System.Threading.Threads.Tests
         [InlineData("MTAMain.exe", "GetApartmentState")]
         [InlineData("MTAMain.exe", "SetApartmentState")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [ActiveIssue(20766,TargetFrameworkMonikers.UapAot)]
         public static void ApartmentState_AtributePresent(string AppName, string mode)
         {
             var psi = new ProcessStartInfo();
