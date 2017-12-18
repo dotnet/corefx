@@ -196,7 +196,6 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [PlatformSpecific(TestPlatforms.AnyUnix)] 
         public static void ApartmentState_NoAttributePresent_DefaultState_Unix()
         {
@@ -208,7 +207,6 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [PlatformSpecific(TestPlatforms.AnyUnix)] 
         public static void ApartmentState_NoAttributePresent_STA_Unix()
         {
