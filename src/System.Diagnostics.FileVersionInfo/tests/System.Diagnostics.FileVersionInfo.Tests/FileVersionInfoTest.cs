@@ -106,7 +106,7 @@ namespace System.Diagnostics.Tests
         public void FileVersionInfo_RelativePath_ArgumentException()
         {
             Assert.Throws<ArgumentException>(() =>
-                FileVersionInfo.GetVersionInfo(FileVersionInfo.GetVersionInfo("kernelbase.dll")));
+                FileVersionInfo.GetVersionInfo("kernelbase.dll"));
         }
 
         // Additional Tests Wanted:
