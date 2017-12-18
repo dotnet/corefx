@@ -271,7 +271,7 @@ namespace System.Diagnostics
                 throw new FileNotFoundException(fileName);
             }
             // Check if fileName is a full path.
-            if(!Path.IsPathRooted(fileName))
+            if (!Path.IsPathRooted(fileName))
             {
                 throw new ArgumentException("Absolute path information is required.");
             }
