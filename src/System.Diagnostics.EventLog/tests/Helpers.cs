@@ -6,6 +6,9 @@ using System.ComponentModel;
 using System.Threading;
 using Xunit;
 
+// Implementation is not robust with respect to concurrently writing and reading log
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace System.Diagnostics.Tests
 {
     internal class Helpers
@@ -20,15 +23,20 @@ namespace System.Diagnostics.Tests
 
         public static T RetryOnWin7<T>(Func<T> func)
         {
-            T entry = default(T);
             if (!PlatformDetection.IsWindows7)
             {
                 return func();
             }
 
-            // We are retrying on windows 7 because it throws win32exception while some operations like Writing,Retrieveing and Deleting log.
+            return RetryOnAllPlatforms(func);
+            // We are retrying on windows 7 because it throws win32exception while some operations like Writing,retrieving and Deleting log.
             // So We just try to do the operation again in case of this exception 
-            int retries = 10;
+        }
+
+        public static T RetryOnAllPlatforms<T>(Func<T> func)
+        {
+            T entry = default(T);
+            int retries = 20;
             while (retries > 0)
             {
                 try
@@ -41,10 +49,38 @@ namespace System.Diagnostics.Tests
                     Thread.Sleep(100);
                     retries--;
                 }
+                catch (ArgumentException)
+                {
+                    Thread.Sleep(100);
+                    retries--;
+                }
             }
 
             Assert.NotEqual(0, retries);
             return entry;
+        }
+
+        public static void WaitForEventLog(EventLog eventLog, int entriesExpected)
+        {
+            int tries = 1;
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            while (RetryOnAllPlatforms((() => eventLog.Entries.Count)) < entriesExpected && tries <= 50)
+            {
+                if (tries == 50)
+                {
+                    Thread.Sleep(30000);
+                }
+                else
+                {
+                    Thread.Sleep(100 * (tries));
+                }
+                tries++;
+            }
+
+            if (stopwatch.ElapsedMilliseconds / 1000 >= 5)
+                Console.WriteLine($"{stopwatch.ElapsedMilliseconds / 1000 } seconds");
+
+            Assert.Equal(entriesExpected, RetryOnWin7((() => eventLog.Entries.Count)));
         }
     }
 }

@@ -79,7 +79,14 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "type"))
                     {
-                        types.Add(value);
+                        if (value != string.Empty)
+                        {
+                            string[] typelist = value.Split(';');
+                            foreach (var type in typelist)
+                            {
+                                types.Add(type);
+                            }
+                        }
                     }
                     else if (ArgumentMatch(arg, "assembly"))
                     {
@@ -155,7 +162,7 @@ namespace Microsoft.XmlSerializer.Generator
                 if(disableRun)
                 {
                     Console.WriteLine("This tool is not intended to be used directly.");
-                    Console.WriteLine("Please refer to https://github.com/dotnet/core/blob/master/samples/xmlserializergenerator-instructions.md on how to use it.");
+                    Console.WriteLine("Please refer to https://go.microsoft.com/fwlink/?linkid=858594 on how to use it.");
                     return 0;
                 }
 
@@ -384,7 +391,7 @@ namespace Microsoft.XmlSerializer.Generator
         private static Assembly LoadAssembly(string assemblyName, bool throwOnFail)
         {
             Assembly assembly = null;
-            string path = Path.GetFullPath(assemblyName);
+            string path = Path.IsPathRooted(assemblyName) ? assemblyName : Path.GetFullPath(assemblyName);
             assembly = Assembly.LoadFile(path);
             if (assembly == null)
             {

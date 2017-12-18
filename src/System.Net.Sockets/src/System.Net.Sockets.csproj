@@ -143,6 +143,7 @@
     <Compile Include="System\Net\Sockets\SocketAsyncEventArgs.Windows.cs" />
     <Compile Include="System\Net\Sockets\SocketPal.Windows.cs" />
     <Compile Include="System\Net\Sockets\TransmitFileAsyncResult.Windows.cs" />
+    <Compile Include="System\Net\Sockets\UnixDomainSocketEndPoint.Windows.cs" />
     <Compile Include="$(CommonPath)\System\Net\SafeCloseSocket.Windows.cs">
       <Link>Common\System\Net\SafeCloseSocket.Windows.cs</Link>
     </Compile>
@@ -266,6 +267,7 @@
     <Compile Include="System\Net\Sockets\SocketAsyncEngine.Unix.cs" />
     <Compile Include="System\Net\Sockets\SocketAsyncEventArgs.Unix.cs" />
     <Compile Include="System\Net\Sockets\SocketPal.Unix.cs" />
+    <Compile Include="System\Net\Sockets\UnixDomainSocketEndPoint.Unix.cs" />
     <Compile Include="$(CommonPath)\System\Net\ContextAwareResult.Unix.cs">
       <Link>Common\System\Net\ContextAwareResult.Unix.cs</Link>
     </Compile>
@@ -310,6 +312,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetBytesAvailable.cs">
       <Link>Interop\Unix\System.Native\Interop.GetBytesAvailable.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetDomainSocketSizes.cs">
+      <Link>Common\Interop\Unix\Interop.GetDomainSocketSizes.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetPeerName.cs">
       <Link>Interop\Unix\System.Native\Interop.GetPeerName.cs</Link>
@@ -394,11 +399,11 @@
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tracing" />
     <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Net.NameResolution" />
     <Reference Include="System.Net.Primitives" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Security.Claims" />

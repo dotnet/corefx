@@ -21,7 +21,6 @@ namespace System.IO.Pipes
         // on the server end, but WaitForConnection will not return until we have returned.  Any data written to the
         // pipe by us after we have connected but before the server has called WaitForConnection will be available
         // to the server after it calls WaitForConnection. 
-        [SecurityCritical]
         private bool TryConnect(int timeout, CancellationToken cancellationToken)
         {
             Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = PipeStream.GetSecAttrs(_inheritability);
@@ -66,21 +65,11 @@ namespace System.IO.Pipes
                 {
                     errorCode = Marshal.GetLastWin32Error();
 
-                    // Server is not yet created
-                    if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND)
+                    // Server is not yet created or a timeout occurred before a pipe instance was available.
+                    if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND ||
+                        errorCode == Interop.Errors.ERROR_SEM_TIMEOUT)
                     {
                         return false;
-                    }
-
-                    // The timeout has expired.
-                    if (errorCode == Interop.Errors.ERROR_SUCCESS)
-                    {
-                        if (cancellationToken.CanBeCanceled)
-                        {
-                            // It may not be real timeout.
-                            return false;
-                        }
-                        throw new TimeoutException();
                     }
 
                     throw Win32Marshal.GetExceptionForWin32Error(errorCode);
@@ -119,7 +108,6 @@ namespace System.IO.Pipes
 
         public int NumberOfServerInstances
         {
-            [SecurityCritical]
             [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             get
             {

@@ -298,6 +298,7 @@ namespace System.Reflection.PortableExecutable.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void TryOpenAssociatedPortablePdb_Args()
         {
             var peStream = new MemoryStream(PortablePdbs.DocumentsDll);
@@ -310,6 +311,23 @@ namespace System.Reflection.PortableExecutable.Tests
                 Assert.Throws<ArgumentNullException>(() => reader.TryOpenAssociatedPortablePdb(@"b.dll", null, out pdbProvider, out pdbPath));
                 Assert.Throws<ArgumentNullException>(() => reader.TryOpenAssociatedPortablePdb(null, _ => null, out pdbProvider, out pdbPath));
                 AssertExtensions.Throws<ArgumentException>("peImagePath", () => reader.TryOpenAssociatedPortablePdb("C:\\a\\\0\\b", _ => null, out pdbProvider, out pdbPath));
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void TryOpenAssociatedPortablePdb_Args_Core()
+        {
+            var peStream = new MemoryStream(PortablePdbs.DocumentsDll);
+            using (var reader = new PEReader(peStream))
+            {
+                MetadataReaderProvider pdbProvider;
+                string pdbPath;
+
+                Assert.False(reader.TryOpenAssociatedPortablePdb(@"b.dll", _ => null, out pdbProvider, out pdbPath));
+                Assert.Throws<ArgumentNullException>(() => reader.TryOpenAssociatedPortablePdb(@"b.dll", null, out pdbProvider, out pdbPath));
+                Assert.Throws<ArgumentNullException>(() => reader.TryOpenAssociatedPortablePdb(null, _ => null, out pdbProvider, out pdbPath));
+                Assert.False(reader.TryOpenAssociatedPortablePdb("C:\\a\\\0\\b", _ => null, out pdbProvider, out pdbPath));
             }
         }
 

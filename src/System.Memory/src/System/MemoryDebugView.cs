@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace System
 {
@@ -27,12 +28,19 @@ namespace System
             // https://devdiv.visualstudio.com/DevDiv/_workitems?id=286592
             get
             {
-                if (_memory.DangerousTryGetArray(out ArraySegment<T> segment))
+                if (MemoryMarshal.TryGetArray(_memory, out ArraySegment<T> segment))
                 {
                     T[] array = new T[_memory.Length];
                     Array.Copy(segment.Array, segment.Offset, array, 0, array.Length);
                     return array;
                 }
+
+                if (typeof(T) == typeof(char) &&
+                    ((ReadOnlyMemory<char>)(object)_memory).TryGetString(out string text, out int start, out int length))
+                {
+                    return (T[])(object)text.Substring(start, length).ToCharArray();
+                }
+
                 return SpanHelpers.PerTypeValues<T>.EmptyArray;
             }
         }

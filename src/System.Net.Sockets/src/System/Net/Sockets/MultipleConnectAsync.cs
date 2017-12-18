@@ -127,7 +127,7 @@ namespace System.Net.Sockets
 
                     _internalArgs = new SocketAsyncEventArgs();
                     _internalArgs.Completed += InternalConnectCallback;
-                    _internalArgs.SetBuffer(_userArgs.Buffer, _userArgs.Offset, _userArgs.Count);
+                    _internalArgs.CopyBufferFrom(_userArgs);
 
                     exception = AttemptConnection();
 
@@ -252,7 +252,7 @@ namespace System.Net.Sockets
             }
         }
 
-        private static Exception AttemptConnection(Socket attemptSocket, SocketAsyncEventArgs args)
+        private Exception AttemptConnection(Socket attemptSocket, SocketAsyncEventArgs args)
         {
             try
             {
@@ -261,9 +261,10 @@ namespace System.Net.Sockets
                     NetEventSource.Fail(null, "attemptSocket is null!");
                 }
 
-                if (!attemptSocket.ConnectAsync(args))
+                bool pending = attemptSocket.ConnectAsync(args);
+                if (!pending)
                 {
-                    return new SocketException((int)args.SocketError);
+                    InternalConnectCallback(null, args);
                 }
             }
             catch (ObjectDisposedException)

@@ -2,8 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime;
 using System.Runtime.CompilerServices;
+
+#if !netstandard
+using Internal.Runtime.CompilerServices;
+#endif
 
 namespace System.Buffers.Binary
 {
@@ -11,7 +14,7 @@ namespace System.Buffers.Binary
     /// Reads bytes as primitives with specific endianness
     /// </summary>
     /// <remarks>
-    /// For native formats, SpanExtensions.Read&lt;T&gt; should be used.
+    /// For native formats, MemoryExtensions.Read{T}; should be used.
     /// Use these helpers when you need to read specific endinanness.
     /// </remarks>
     public static partial class BinaryPrimitives
@@ -21,6 +24,7 @@ namespace System.Buffers.Binary
         /// This allows the caller to read a struct of numeric primitives and reverse each field
         /// rather than having to skip sbyte fields.
         /// </summary> 
+        [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static sbyte ReverseEndianness(sbyte value)
         {
@@ -62,6 +66,7 @@ namespace System.Buffers.Binary
         /// <summary>
         /// Reverses a primitive value - performs an endianness swap
         /// </summary> 
+        [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort ReverseEndianness(ushort value)
         {
@@ -71,6 +76,7 @@ namespace System.Buffers.Binary
         /// <summary>
         /// Reverses a primitive value - performs an endianness swap
         /// </summary> 
+        [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint ReverseEndianness(uint value)
         {
@@ -82,6 +88,7 @@ namespace System.Buffers.Binary
         /// <summary>
         /// Reverses a primitive value - performs an endianness swap
         /// </summary> 
+        [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong ReverseEndianness(ulong value)
         {

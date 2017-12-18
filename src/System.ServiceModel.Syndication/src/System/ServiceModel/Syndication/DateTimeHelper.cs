@@ -11,46 +11,40 @@ namespace System.ServiceModel.Syndication
     {
         private const string Rfc3339DateTimeFormat = "yyyy-MM-ddTHH:mm:ssK";
 
-        public static Func<string, string, string, DateTimeOffset> CreateRss20DateTimeParser()
+        public static DateTimeOffset DefaultRss20DateTimeParser(string dateTimeString, string localName, string ns)
         {
-            return (dateTimeString, localName, ns) =>
+            DateTimeOffset dto;
+
+            // First check if DateTimeOffset default parsing can parse the date
+            if (DateTimeOffset.TryParse(dateTimeString, out dto))
             {
-                DateTimeOffset dto;
+                return dto;
+            }
 
-                // First check if DateTimeOffset default parsing can parse the date
-                if (DateTimeOffset.TryParse(dateTimeString, out dto))
-                {
-                    return dto;
-                }
+            // RSS specifies RFC822
+            if (Rfc822DateTimeParser(dateTimeString, out dto))
+            {
+                return dto;
+            }
 
-                // RSS specifies RFC822
-                if (Rfc822DateTimeParser(dateTimeString, out dto))
-                {
-                    return dto;
-                }
+            // Event though RCS3339 is for Atom, someone might be using this for RSS
+            if (Rfc3339DateTimeParser(dateTimeString, out dto))
+            {
+                return dto;
+            }
 
-                // Event though RCS3339 is for Atom, someone might be using this for RSS
-                if (Rfc3339DateTimeParser(dateTimeString, out dto))
-                {
-                    return dto;
-                }
-
-                // Unable to parse - using a default date;
-                return new DateTimeOffset();
-            };
+            // Unable to parse - using a default date;
+            throw new FormatException(SR.ErrorParsingDateTime);
         }
 
-        public static Func<string, string, string, DateTimeOffset> CreateAtom10DateTimeParser()
+        public static DateTimeOffset DefaultAtom10DateTimeParser(string dateTimeString, string localName, string ns)
         {
-            return (dateTimeString, localName, ns) =>
+            if (Rfc3339DateTimeParser(dateTimeString, out DateTimeOffset dto))
             {
-                if (Rfc3339DateTimeParser(dateTimeString, out DateTimeOffset dto))
-                {
-                    return dto;
-                }
+                return dto;
+            }
 
-                throw new FormatException(SR.ErrorParsingDateTime);
-            };
+            throw new FormatException(SR.ErrorParsingDateTime);
         }
 
         private static bool Rfc3339DateTimeParser(string dateTimeString, out DateTimeOffset dto)
@@ -73,7 +67,7 @@ namespace System.ServiceModel.Syndication
                 dateTimeString = dateTimeString.Substring(0, 19) + dateTimeString.Substring(i);
             }
 
-            return DateTimeOffset.TryParseExact(dateTimeString, Rfc3339DateTimeFormat,CultureInfo.InvariantCulture.DateTimeFormat,DateTimeStyles.None, out dto);
+            return DateTimeOffset.TryParseExact(dateTimeString, Rfc3339DateTimeFormat, CultureInfo.InvariantCulture.DateTimeFormat, DateTimeStyles.None, out dto);
         }
 
         private static bool Rfc822DateTimeParser(string dateTimeString, out DateTimeOffset dto)

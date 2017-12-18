@@ -24,7 +24,6 @@ namespace System.SpanTests
             spanLong.Validate(1, -3, 7, -15, 31);
         }
 
-        [ActiveIssue(23952, TargetFrameworkMonikers.UapAot)]
         [Fact]
         public static void ObjectArrayAsReadOnlySpan()
         {
@@ -39,8 +38,7 @@ namespace System.SpanTests
         public static void NullArrayAsReadOnlySpan()
         {
             int[] a = null;
-            ReadOnlySpan<int> span;
-            TestHelpers.AssertThrows<ArgumentNullException, int>(span, _span => _span = a.AsReadOnlySpan());
+            Assert.Throws<ArgumentNullException>(() => a.AsReadOnlySpan().DontBox());
         }
 
         [Fact]
@@ -119,6 +117,23 @@ namespace System.SpanTests
         {
             string s = null;
             Assert.Throws<ArgumentNullException>(() => s.AsReadOnlySpan().DontBox());
+        }
+
+        [Fact]
+        public static void EmptySpanAsReadOnlySpan()
+        {
+            Span<int> span = default;
+            Assert.True(span.AsReadOnlySpan().IsEmpty);
+        }
+
+        [Fact]
+        public static void SpanAsReadOnlySpan()
+        {
+            int[] a = { 19, -17 };
+            Span<int> span = new Span<int>(a);
+            ReadOnlySpan<int> readOnlySpan = span.AsReadOnlySpan();
+
+            readOnlySpan.Validate(a);
         }
     }
 }

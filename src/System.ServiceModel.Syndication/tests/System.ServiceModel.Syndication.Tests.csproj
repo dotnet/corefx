@@ -4,23 +4,32 @@
   <PropertyGroup>
     <ProjectGuid>{A622B2C0-DD74-4218-9CF0-F9B2E52F4E91}</ProjectGuid>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netstandard-Release|AnyCPU'" />
   <ItemGroup>
-    <Compile Include="$(MsBuildThisFileDirectory)**\*.cs" 
-             Exclude="$(MsBuildThisFileDirectory)async\**\*.cs" />
+    <Compile Include="$(MsBuildThisFileDirectory)**\*.cs" Exclude="$(MsBuildThisFileDirectory)netcoreapp\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="$(MsBuildThisFileDirectory)netcoreapp\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <ReferenceFromRuntime Include="System.ServiceModel.Syndication">
+      <Private>true</Private>
+    </ReferenceFromRuntime>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\*.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\AtomFeeds\*.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="$(MsBuildThisFileDirectory)\TestFeeds\**\*.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MsBuildThisFileDirectory)\TestFeeds\atom_feeds.dat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MsBuildThisFileDirectory)\TestFeeds\rss_feeds.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />

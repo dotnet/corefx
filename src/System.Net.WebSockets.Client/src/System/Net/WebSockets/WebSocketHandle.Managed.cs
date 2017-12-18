@@ -108,6 +108,7 @@ namespace System.Net.WebSockets
 
         public async Task ConnectAsyncCore(Uri uri, CancellationToken cancellationToken, ClientWebSocketOptions options)
         {
+            HttpResponseMessage response = null;
             try
             {
                 // Create the request message, including a uri with ws{s} switched to http{s}.
@@ -138,11 +139,25 @@ namespace System.Net.WebSockets
                 }
 
                 // Issue the request.  The response must be status code 101.
-                HttpResponseMessage response;
-                using (var externalAndAbortCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _abortSource.Token))
+                CancellationTokenSource linkedCancellation, externalAndAbortCancellation;
+                if (cancellationToken.CanBeCanceled) // avoid allocating linked source if external token is not cancelable
+                {
+                    linkedCancellation =
+                        externalAndAbortCancellation = 
+                        CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _abortSource.Token);
+                }
+                else
+                {
+                    linkedCancellation = null;
+                    externalAndAbortCancellation = _abortSource;
+                }
+
+                using (linkedCancellation)
                 {
                     response = await handler.SendAsync(request, externalAndAbortCancellation.Token).ConfigureAwait(false);
+                    externalAndAbortCancellation.Token.ThrowIfCancellationRequested(); // poll in case sends/receives in request/response didn't observe cancellation
                 }
+
                 if (response.StatusCode != HttpStatusCode.SwitchingProtocols)
                 {
                     throw new WebSocketException(SR.net_webstatus_ConnectFailure);
@@ -162,12 +177,15 @@ namespace System.Net.WebSockets
                 {
                     Debug.Assert(subprotocolEnumerableValues is string[]);
                     string[] subprotocolArray = (string[])subprotocolEnumerableValues;
-                    if (subprotocolArray.Length != 1 ||
-                        (subprotocol = options.RequestedSubProtocols.Find(requested => string.Equals(requested, subprotocolArray[0], StringComparison.OrdinalIgnoreCase))) == null)
+                    if (subprotocolArray.Length > 0 && !string.IsNullOrEmpty(subprotocolArray[0]))
                     {
-                        throw new WebSocketException(
-                            WebSocketError.UnsupportedProtocol,
-                            SR.Format(SR.net_WebSockets_AcceptUnsupportedProtocol, string.Join(", ", options.RequestedSubProtocols), subprotocol));
+                        subprotocol = options.RequestedSubProtocols.Find(requested => string.Equals(requested, subprotocolArray[0], StringComparison.OrdinalIgnoreCase));
+                        if (subprotocol == null)
+                        {
+                            throw new WebSocketException(
+                                WebSocketError.UnsupportedProtocol,
+                                SR.Format(SR.net_WebSockets_AcceptUnsupportedProtocol, string.Join(", ", options.RequestedSubProtocols), string.Join(", ", subprotocolArray)));
+                        }
                     }
                 }
 
@@ -198,6 +216,7 @@ namespace System.Net.WebSockets
                 }
 
                 Abort();
+                response?.Dispose();
 
                 if (exc is WebSocketException)
                 {

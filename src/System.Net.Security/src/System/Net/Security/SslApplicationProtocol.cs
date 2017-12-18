@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -6,7 +6,7 @@ using System.Text;
 
 namespace System.Net.Security
 {
-    public struct SslApplicationProtocol : IEquatable<SslApplicationProtocol>
+    public readonly struct SslApplicationProtocol : IEquatable<SslApplicationProtocol>
     {
         private readonly ReadOnlyMemory<byte> _readOnlyProtocol;
         private static readonly Encoding s_utf8 = Encoding.GetEncoding(Encoding.UTF8.CodePage, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
@@ -33,8 +33,8 @@ namespace System.Net.Security
             if (copy)
             {
                 byte[] temp = new byte[protocol.Length];
-                Array.Copy(protocol, temp, protocol.Length);
-                _readOnlyProtocol = new ReadOnlyMemory<byte>(protocol);
+                Array.Copy(protocol, 0, temp, 0, protocol.Length);
+                _readOnlyProtocol = new ReadOnlyMemory<byte>(temp);
             }
             else
             {

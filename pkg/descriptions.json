@@ -64,8 +64,13 @@
     "CommonTypes": []
   },
   {
-    "Name": "Microsoft.NETFramework.Compatibility",
-    "Description": "References a number of .NET Core libraries that are intended to provide support for more APIs that exist on .NET Framework.",
+    "Name": "Microsoft.Windows.Compatibility",
+    "Description": "This Windows Compatibility Pack provides access to APIs that were previously available only for .NET Framework. It can be used from both .NET Core as well as .NET Standard.",
+    "CommonTypes": []
+  },
+  {
+    "Name": "Microsoft.Windows.Compatibility.Shims",
+    "Description": "This package provides infrastructure services and shouldn't be referenced directly from your code. It provides facade assemblies in order to make the Microsoft.Windows.Compatibility package work across all .NET implementations.",
     "CommonTypes": []
   },
   {
@@ -163,7 +168,7 @@
   },
   {
     "Name": "Microsoft.XmlSerializer.Generator",
-    "Description": "Provides SGen tool to generate Xml serialization code for types in a specified assembly in order to improve the startup performance of a XmlSerializer when it serializes or deserializes objects of the specified types",
+    "Description": "Like the Xml Serializer Generator (sgen.exe) on desktop, Microsoft.XmlSerializer.Generator NuGet package is the solution for .NET Core and .NET Standard Libraries. It creates an Xml serialization assembly for types contained in an assembly in order to improve the startup performance of Xml serialization when serializing or de-serializing objects of those types using XmlSerializer.",
     "CommonTypes": []
   },
   {
@@ -332,6 +337,27 @@
       "System.ComponentModel.DataAnnotations.DataTypeAttribute",
       "System.ComponentModel.DataAnnotations.RangeAttribute",
       "System.ComponentModel.DataAnnotations.KeyAttribute"
+    ]
+  },
+  {
+    "Name": "System.ComponentModel.Composition",
+    "Description": "This namespace provides classes that constitute the core of the Managed Extensibility Framework, or MEF.",
+    "CommonTypes": [
+      "System.ComponentModel.Composition.ChangeRejectedException",
+      "System.ComponentModel.Composition.CompositionContractMismatchException",
+      "System.ComponentModel.Composition.CompositionError",
+      "System.ComponentModel.Composition.CompositionException",
+      "System.ComponentModel.Composition.ExportAttribute",
+      "System.ComponentModel.Composition.ImportAttribute",
+      "System.ComponentModel.Composition.ImportCardinalityMismatchException",
+      "System.ComponentModel.Composition.Hosting.AggregateCatalog",
+      "System.ComponentModel.Composition.Hosting.ApplicationCatalog",
+      "System.ComponentModel.Composition.Hosting.AssemblyCatalog",
+      "System.ComponentModel.Composition.Hosting.CompositionContainer",
+      "System.ComponentModel.Composition.Primitives.ComposablePartException",
+      "System.ComponentModel.Composition.Primitives.ExportDefinition",
+      "System.ComponentModel.Composition.Primitives.ImportDefinition",
+      "System.ComponentModel.Composition.ReflectionModel.ReflectionModelServices"
     ]
   },
   {
@@ -1370,6 +1396,22 @@
       "System.UInt64",
       "System.IDisposable",
       "System.Uri"
+    ]
+  },
+  {
+    "Name": "System.Runtime.Caching",
+    "Description": "Provides classes to use caching facilities.",
+    "CommonTypes": [
+      "System.Runtime.Caching.CacheEntryChangeMonitor",
+      "System.Runtime.Caching.CacheEntryRemovedArguments",
+      "System.Runtime.Caching.CacheEntryUpdateArguments",
+      "System.Runtime.Caching.CacheItem",
+      "System.Runtime.Caching.CacheItemPolicy",
+      "System.Runtime.Caching.ChangeMonitor",
+      "System.Runtime.Caching.FileChangeMonitor",
+      "System.Runtime.Caching.HostFileChangeMonitor",
+      "System.Runtime.Caching.MemoryCache",
+      "System.Runtime.Caching.ObjectCache",
     ]
   },
   {

@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -26,7 +28,7 @@ namespace System.Threading.Channels.Tests
                 c.Writer.WriteAsync(i);
             }
             DebuggerAttributes.ValidateDebuggerDisplayReferences(c);
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(c);
+            DebuggerAttributes.InvokeDebuggerTypeProxyProperties(c);
         }
 
         [Fact]
@@ -304,6 +306,30 @@ namespace System.Threading.Channels.Tests
         }
 
         [Fact]
+        public async Task WaitToWriteAsync_ManyConcurrent_SatisifedByReaders()
+        {
+            if (RequiresSingleReader || RequiresSingleWriter)
+            {
+                return;
+            }
+
+            Channel<int> c = CreateChannel();
+
+            Task[] writers = Enumerable.Range(0, 100).Select(_ => c.Writer.WaitToWriteAsync()).ToArray();
+            Task[] readers = Enumerable.Range(0, 100).Select(_ => c.Reader.ReadAsync().AsTask()).ToArray();
+
+            await Task.WhenAll(writers);
+        }
+
+        [Fact]
+        public void WaitToWriteAsync_BlockedReader_ReturnsTrue()
+        {
+            Channel<int> c = CreateChannel();
+            ValueTask<int> reader = c.Reader.ReadAsync();
+            AssertSynchronousSuccess(c.Writer.WaitToWriteAsync());
+        }
+
+        [Fact]
         public void TryRead_DataAvailable_Success()
         {
             Channel<int> c = CreateChannel();
@@ -499,6 +525,170 @@ namespace System.Threading.Channels.Tests
             Assert.False(read.IsCompleted);
             cts.Cancel();
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => read);
+        }
+
+        [Fact]
+        public async Task ReadAsync_ThenWriteAsync_Succeeds()
+        {
+            Channel<int> c = CreateChannel();
+
+            ValueTask<int> r = c.Reader.ReadAsync();
+            Assert.False(r.IsCompleted);
+
+            Task w = c.Writer.WriteAsync(42);
+            AssertSynchronousSuccess(w);
+
+            Assert.Equal(42, await r);
+        }
+
+        [Fact]
+        public async Task WriteAsync_ReadAsync_Succeeds()
+        {
+            Channel<int> c = CreateChannel();
+
+            Task w = c.Writer.WriteAsync(42);
+            ValueTask<int> r = c.Reader.ReadAsync();
+
+            await Task.WhenAll(w, r.AsTask());
+
+            Assert.Equal(42, await r);
+        }
+
+        [Fact]
+        public void ReadAsync_Precanceled_CanceledSynchronously()
+        {
+            Channel<int> c = CreateChannel();
+            var cts = new CancellationTokenSource();
+            cts.Cancel();
+            AssertSynchronouslyCanceled(c.Reader.ReadAsync(cts.Token).AsTask(), cts.Token);
+        }
+
+        [Fact]
+        public async Task ReadAsync_Canceled_CanceledAsynchronously()
+        {
+            Channel<int> c = CreateChannel();
+            var cts = new CancellationTokenSource();
+
+            ValueTask<int> r = c.Reader.ReadAsync(cts.Token);
+            Assert.False(r.IsCompleted);
+
+            cts.Cancel();
+
+            await AssertCanceled(r.AsTask(), cts.Token);
+
+            if (c.Writer.TryWrite(42))
+            {
+                Assert.Equal(42, await c.Reader.ReadAsync());
+            }
+        }
+
+        [Fact]
+        public async Task ReadAsync_WriteAsync_ManyConcurrentReaders_SerializedWriters_Success()
+        {
+            if (RequiresSingleReader)
+            {
+                return;
+            }
+
+            Channel<int> c = CreateChannel();
+            const int Items = 100;
+
+            ValueTask<int>[] readers = (from i in Enumerable.Range(0, Items) select c.Reader.ReadAsync()).ToArray();
+            for (int i = 0; i < Items; i++)
+            {
+                await c.Writer.WriteAsync(i);
+            }
+
+            Assert.Equal((Items * (Items - 1)) / 2, Enumerable.Sum(await Task.WhenAll(readers.Select(r => r.AsTask()))));
+        }
+
+        [Fact]
+        public async Task ReadAsync_TryWrite_ManyConcurrentReaders_SerializedWriters_Success()
+        {
+            if (RequiresSingleReader)
+            {
+                return;
+            }
+
+            Channel<int> c = CreateChannel();
+            const int Items = 100;
+
+            ValueTask<int>[] readers = (from i in Enumerable.Range(0, Items) select c.Reader.ReadAsync()).ToArray();
+            var remainingReaders = new List<Task<int>>(readers.Select(r => r.AsTask()));
+
+            for (int i = 0; i < Items; i++)
+            {
+                Assert.True(c.Writer.TryWrite(i), $"Failed to write at {i}");
+                Task<int> r = await Task.WhenAny(remainingReaders);
+                await r;
+                remainingReaders.Remove(r);
+            }
+
+            Assert.Equal((Items * (Items - 1)) / 2, Enumerable.Sum(await Task.WhenAll(readers.Select(r => r.AsTask()))));
+        }
+
+        [Fact]
+        public async Task ReadAsync_AlreadyCompleted_Throws()
+        {
+            Channel<int> c = CreateChannel();
+            c.Writer.Complete();
+            await Assert.ThrowsAsync<ChannelClosedException>(() => c.Reader.ReadAsync().AsTask());
+        }
+
+        [Fact]
+        public async Task ReadAsync_SubsequentlyCompleted_Throws()
+        {
+            Channel<int> c = CreateChannel();
+            Task<int> r = c.Reader.ReadAsync().AsTask();
+            Assert.False(r.IsCompleted);
+            c.Writer.Complete();
+            await Assert.ThrowsAsync<ChannelClosedException>(() => r);
+        }
+
+        [Fact]
+        public async Task ReadAsync_AfterFaultedChannel_Throws()
+        {
+            Channel<int> c = CreateChannel();
+
+            var e = new FormatException();
+            c.Writer.Complete(e);
+            Assert.True(c.Reader.Completion.IsFaulted);
+
+            ChannelClosedException cce = await Assert.ThrowsAsync<ChannelClosedException>(() => c.Reader.ReadAsync().AsTask());
+            Assert.Same(e, cce.InnerException);
+        }
+
+        [Fact]
+        public async Task ReadAsync_AfterCanceledChannel_Throws()
+        {
+            Channel<int> c = CreateChannel();
+
+            var e = new OperationCanceledException();
+            c.Writer.Complete(e);
+            Assert.True(c.Reader.Completion.IsCanceled);
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => c.Reader.ReadAsync().AsTask());
+        }
+
+        [Fact]
+        public async Task ReadAsync_Canceled_WriteAsyncCompletesNextReader()
+        {
+            Channel<int> c = CreateChannel();
+
+            for (int i = 0; i < 5; i++)
+            {
+                var cts = new CancellationTokenSource();
+                ValueTask<int> r = c.Reader.ReadAsync(cts.Token);
+                cts.Cancel();
+                await AssertCanceled(r.AsTask(), cts.Token);
+            }
+
+            for (int i = 0; i < 7; i++)
+            {
+                ValueTask<int> r = c.Reader.ReadAsync();
+                await c.Writer.WriteAsync(i);
+                Assert.Equal(i, await r);
+            }
         }
     }
 }

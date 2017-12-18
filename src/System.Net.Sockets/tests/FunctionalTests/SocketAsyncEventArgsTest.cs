@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Net.Sockets.Tests
 {
-    public class SocketAsyncEventArgsTest
+    public partial class SocketAsyncEventArgsTest
     {
         [Fact]
         public void Usertoken_Roundtrips()
@@ -154,6 +154,12 @@ namespace System.Net.Sockets.Tests
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => saea.SetBuffer(new byte[1], 0, -1));
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => saea.SetBuffer(new byte[1], 0, 2));
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => saea.SetBuffer(new byte[1], 1, 2));
+
+                saea.SetBuffer(new byte[2], 0, 2);
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => saea.SetBuffer(-1, 2));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => saea.SetBuffer(3, 2));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => saea.SetBuffer(0, -1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => saea.SetBuffer(0, 3));
             }
         }
 
@@ -327,7 +333,8 @@ namespace System.Net.Sockets.Tests
                     connectSaea.Completed += (s, e) => tcs.SetResult(e.SocketError);
                     connectSaea.RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, ((IPEndPoint)listen.LocalEndPoint).Port);
 
-                    Assert.True(client.ConnectAsync(connectSaea), $"ConnectAsync completed synchronously with SocketError == {connectSaea.SocketError}");
+                    bool pending = client.ConnectAsync(connectSaea);
+                    if (!pending) tcs.SetResult(connectSaea.SocketError);
                     if (tcs.Task.IsCompleted)
                     {
                         Assert.NotEqual(SocketError.Success, tcs.Task.Result);

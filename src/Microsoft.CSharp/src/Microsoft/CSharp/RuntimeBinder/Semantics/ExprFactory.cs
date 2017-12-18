@@ -51,19 +51,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprUserDefinedConversion CreateUserDefinedConversion(Expr arg, Expr call, MethWithInst method) => 
             new ExprUserDefinedConversion(arg, call, method);
 
-        public ExprCast CreateCast(CType type, Expr argument) => CreateCast(0, CreateClass(type), argument);
+        public ExprCast CreateCast(CType type, Expr argument) => CreateCast(0, type, argument);
 
-        public ExprCast CreateCast(EXPRFLAG flags, ExprClass type, Expr argument) => new ExprCast(flags, type, argument);
-
-        public ExprReturn CreateReturn(Expr optionalObject) => new ExprReturn(optionalObject);
+        public ExprCast CreateCast(EXPRFLAG flags, CType type, Expr argument) => new ExprCast(flags, type, argument);
 
         public ExprLocal CreateLocal(LocalVariableSymbol local) => new ExprLocal(local);
 
-        public ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType, Scope argumentScope) => 
-            new ExprBoundLambda(delegateType, argumentScope);
-
-        public ExprHoistedLocalExpr CreateHoistedLocalInExpression() => 
-            new ExprHoistedLocalExpr(Types.GetPredefAgg(PredefinedType.PT_EXPRESSION).getThisType());
+        public ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType, Scope argumentScope, Expr expression) => 
+            new ExprBoundLambda(delegateType, argumentScope, expression);
 
         public ExprMethodInfo CreateMethodInfo(MethPropWithInst mwi) => 
             CreateMethodInfo(mwi.Meth(), mwi.GetType(), mwi.TypeArgs);
@@ -81,10 +76,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprFieldInfo CreateFieldInfo(FieldSymbol field, AggregateType fieldType) => 
             new ExprFieldInfo(field, fieldType, Types.GetPredefAgg(PredefinedType.PT_FIELDINFO).getThisType());
 
-        private ExprTypeOf CreateTypeOf(ExprClass sourceType) => 
+        public ExprTypeOf CreateTypeOf(CType sourceType) => 
             new ExprTypeOf(Types.GetPredefAgg(PredefinedType.PT_TYPE).getThisType(), sourceType);
 
-        public ExprTypeOf CreateTypeOf(CType sourceType) => CreateTypeOf(CreateClass(sourceType));
 
         public ExprUserLogicalOp CreateUserLogOp(CType type, Expr trueFalseCall, ExprCall operatorCall) => 
             new ExprUserLogicalOp(type, trueFalseCall, operatorCall);
@@ -126,7 +120,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case FUNDTYPE.FT_PTR:
                     {
                         // Just allocate a new node and fill it in.
-                        return CreateCast(0, CreateClass(type), CreateNull());
+                        return CreateCast(0, type, CreateNull());
                     }
 
                 case FUNDTYPE.FT_STRUCT:
@@ -152,8 +146,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ExprConstant CreateBoolConstant(bool b) => 
             CreateConstant(Types.GetPredefAgg(PredefinedType.PT_BOOL).getThisType(), ConstVal.Get(b));
-
-        public ExprBlock CreateBlock(ExprStatement pOptionalStatements) => new ExprBlock(pOptionalStatements);
 
         public ExprArrayIndex CreateArrayIndex(CType type, Expr array, Expr index) =>
             new ExprArrayIndex(type, array, index);
@@ -197,9 +189,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create a node that evaluates the first, evaluates the second, results in the first.
-
-        public ExprBinOp CreateReverseSequence(Expr first, Expr second) =>
-            CreateBinop(ExpressionKind.SequenceReverse, first.Type, first, second);
 
         public ExprAssignment CreateAssignment(Expr left, Expr right) => new ExprAssignment(left, right);
 
