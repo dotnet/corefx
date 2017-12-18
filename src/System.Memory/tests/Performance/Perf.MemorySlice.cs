@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
 using Microsoft.Xunit.Performance;
 using Xunit;
 
@@ -29,7 +30,7 @@ namespace System.Memory.Tests
                     {
                         for (int j = 0; j < numberOfSlices; j++)
                         {
-                            var span = memory.Slice(10, 1).Span;
+                            Span<byte> span = memory.Slice(10, 1).Span;
                             localInt ^= span[0];
                         }
                     }
@@ -55,7 +56,7 @@ namespace System.Memory.Tests
                     {
                         for (int j = 0; j < numberOfSlices; j++)
                         {
-                            var span = memory.Span.Slice(10, 1);
+                            Span<byte> span = memory.Span.Slice(10, 1);
                             localInt ^= span[0];
                         }
                     }
@@ -82,7 +83,7 @@ namespace System.Memory.Tests
                     {
                         for (int j = 0; j < numberOfSlices; j++)
                         {
-                            var span = memory.Span.Slice(10, 1);
+                            ReadOnlySpan<byte> span = memory.Span.Slice(10, 1);
                             localInt ^= span[0];
                         }
                     }
@@ -109,7 +110,7 @@ namespace System.Memory.Tests
                     {
                         for (int j = 0; j < numberOfSlices; j++)
                         {
-                            var span = memory.Span.Slice(10, 1);
+                            ReadOnlySpan<char> span = memory.Span.Slice(10, 1);
                             localInt ^= span[0];
                         }
                     }
@@ -131,7 +132,7 @@ namespace System.Memory.Tests
                 {
                     for (int i = 0; i < iters; i++)
                     {
-                        memory.DangerousTryGetArray(out result);
+                        MemoryMarshal.TryGetArray(memory, out result);
                     }
                 }
             }
@@ -152,7 +153,7 @@ namespace System.Memory.Tests
                 {
                     for (int i = 0; i < iters; i++)
                     {
-                        memory.DangerousTryGetArray(out result);
+                        MemoryMarshal.TryGetArray(memory, out result);
                     }
                 }
             }

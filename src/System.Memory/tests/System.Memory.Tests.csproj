@@ -38,6 +38,8 @@
     <Compile Include="Span\IndexOfSequence.T.cs" />
     <Compile Include="Span\IndexOfSequence.byte.cs" />
     <Compile Include="Span\IndexOfSequence.char.cs" />
+    <Compile Include="Span\LastIndexOfAny.T.cs" />
+    <Compile Include="Span\LastIndexOfAny.byte.cs" />
     <Compile Include="Span\LastIndexOf.T.cs" />
     <Compile Include="Span\LastIndexOf.byte.cs" />
     <Compile Include="Span\LastIndexOf.char.cs" />
@@ -57,6 +59,7 @@
   <ItemGroup>
     <Compile Include="ReadOnlySpan\AsBytes.cs" />
     <Compile Include="ReadOnlySpan\AsReadOnlySpan.cs" />
+    <Compile Include="ReadOnlySpan\BinarySearch.cs" />
     <Compile Include="ReadOnlySpan\CopyTo.cs" />
     <Compile Include="ReadOnlySpan\CtorArray.cs" />
     <Compile Include="ReadOnlySpan\CtorArrayIntInt.cs" />
@@ -76,6 +79,8 @@
     <Compile Include="ReadOnlySpan\IndexOfSequence.T.cs" />
     <Compile Include="ReadOnlySpan\IndexOfSequence.byte.cs" />
     <Compile Include="ReadOnlySpan\IndexOfSequence.char.cs" />
+    <Compile Include="ReadOnlySpan\LastIndexOfAny.T.cs" />
+    <Compile Include="ReadOnlySpan\LastIndexOfAny.byte.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOf.T.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOf.byte.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOf.char.cs" />
@@ -113,6 +118,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MemoryMarshal\AsMemory.cs" />
+    <Compile Include="MemoryMarshal\GetReference.cs" />
+    <Compile Include="MemoryMarshal\TryGetArray.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ReadOnlyMemory\CopyTo.cs" />
@@ -167,6 +174,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
