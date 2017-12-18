@@ -34,6 +34,7 @@ namespace STAMain
                 {
                     retValue = 0;
                 }
+                catch (PlatformNotSupportedException) {}
             }
 
             return retValue;

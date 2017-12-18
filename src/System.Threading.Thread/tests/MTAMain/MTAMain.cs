@@ -35,6 +35,7 @@ namespace MTAMain
                 {
                     retValue = 0;
                 }
+                catch (PlatformNotSupportedException) {}
             }
 
             return retValue;
