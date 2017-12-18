@@ -2,24 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
-/*
- * Some diagnostic lines have been commented
- * 
- * */
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Text;
+using System.Xml;
+using System.Xml.Serialization;
+using System.Diagnostics.CodeAnalysis;
+using System.Xml.Schema;
+using System.Runtime.CompilerServices;
 
 namespace System.ServiceModel.Syndication
 {
-    using System;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Runtime.CompilerServices;
-    using System.Threading.Tasks;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
-
     [XmlRoot(ElementName = Atom10Constants.EntryTag, Namespace = Atom10Constants.Atom10Namespace)]
-    public class Atom10ItemFormatter : SyndicationItemFormatter
+    public class Atom10ItemFormatter : SyndicationItemFormatter, IXmlSerializable
     {
         private Atom10FeedFormatter _feedSerializer;
         private Type _itemType;
@@ -36,11 +33,12 @@ namespace System.ServiceModel.Syndication
         {
             if (itemTypeToCreate == null)
             {
-                throw new ArgumentNullException(nameof(itemTypeToCreate));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("itemTypeToCreate");
             }
             if (!typeof(SyndicationItem).IsAssignableFrom(itemTypeToCreate))
             {
-                throw new ArgumentException(string.Format(SR.InvalidObjectTypePassed, nameof(itemTypeToCreate), nameof(SyndicationItem)));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgument("itemTypeToCreate",
+                    SR.Format(SR.InvalidObjectTypePassed, "itemTypeToCreate", "SyndicationItem"));
             }
             _feedSerializer = new Atom10FeedFormatter();
             _feedSerializer.PreserveAttributeExtensions = _preserveAttributeExtensions = true;
@@ -95,33 +93,63 @@ namespace System.ServiceModel.Syndication
         {
             if (reader == null)
             {
-                throw new ArgumentNullException(nameof(reader));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("reader");
             }
             return reader.IsStartElement(Atom10Constants.EntryTag, Atom10Constants.Atom10Namespace);
         }
 
-        public override Task ReadFromAsync(XmlReader reader)
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        XmlSchema IXmlSerializable.GetSchema()
         {
-            if (!CanRead(reader))
-            {
-                throw new XmlException(string.Format(SR.UnknownItemXml, reader.LocalName, reader.NamespaceURI));
-            }
-
-            return ReadItemAsync(reader);
+            return null;
         }
 
-        public override async Task WriteToAsync(XmlWriter writer)
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        void IXmlSerializable.ReadXml(XmlReader reader)
+        {
+            if (reader == null)
+            {
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("reader");
+            }
+            SyndicationFeedFormatter.TraceItemReadBegin();
+            ReadItem(reader);
+            SyndicationFeedFormatter.TraceItemReadEnd();
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        void IXmlSerializable.WriteXml(XmlWriter writer)
         {
             if (writer == null)
             {
-                throw new ArgumentNullException(nameof(writer));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("writer");
             }
+            SyndicationFeedFormatter.TraceItemWriteBegin();
+            WriteItem(writer);
+            SyndicationFeedFormatter.TraceItemWriteEnd();
+        }
 
-            writer = XmlWriterWrapper.CreateFromWriter(writer);
+        public override void ReadFrom(XmlReader reader)
+        {
+            SyndicationFeedFormatter.TraceItemReadBegin();
+            if (!CanRead(reader))
+            {
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new XmlException(SR.Format(SR.UnknownItemXml, reader.LocalName, reader.NamespaceURI)));
+            }
+            ReadItem(reader);
+            SyndicationFeedFormatter.TraceItemReadEnd();
+        }
 
-            await writer.WriteStartElementAsync(Atom10Constants.EntryTag, Atom10Constants.Atom10Namespace);
-            await WriteItemAsync(writer);
-            await writer.WriteEndElementAsync();
+        public override void WriteTo(XmlWriter writer)
+        {
+            if (writer == null)
+            {
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("writer");
+            }
+            SyndicationFeedFormatter.TraceItemWriteBegin();
+            writer.WriteStartElement(Atom10Constants.EntryTag, Atom10Constants.Atom10Namespace);
+            WriteItem(writer);
+            writer.WriteEndElement();
+            SyndicationFeedFormatter.TraceItemWriteEnd();
         }
 
         protected override SyndicationItem CreateItemInstance()
@@ -129,20 +157,20 @@ namespace System.ServiceModel.Syndication
             return SyndicationItemFormatter.CreateItemInstance(_itemType);
         }
 
-        private Task ReadItemAsync(XmlReader reader)
+        private void ReadItem(XmlReader reader)
         {
             SetItem(CreateItemInstance());
-            return _feedSerializer.ReadItemFromAsync(XmlReaderWrapper.CreateFromReader(XmlDictionaryReader.CreateDictionaryReader(reader)), this.Item);
+            _feedSerializer.ReadItemFrom(XmlDictionaryReader.CreateDictionaryReader(reader), this.Item);
         }
 
-        private Task WriteItemAsync(XmlWriter writer)
+        private void WriteItem(XmlWriter writer)
         {
             if (this.Item == null)
             {
-                throw new InvalidOperationException(SR.ItemFormatterDoesNotHaveItem);
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.ItemFormatterDoesNotHaveItem)));
             }
             XmlDictionaryWriter w = XmlDictionaryWriter.CreateDictionaryWriter(writer);
-            return _feedSerializer.WriteItemContentsAsync(w, this.Item);
+            _feedSerializer.WriteItemContents(w, this.Item);
         }
     }
 

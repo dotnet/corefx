@@ -11,7 +11,7 @@ namespace System.Collections.Generic
     /// Represents a position within a <see cref="LargeArrayBuilder{T}"/>.
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    internal struct CopyPosition
+    internal readonly struct CopyPosition
     {
         /// <summary>
         /// Constructs a new <see cref="CopyPosition"/>.
@@ -200,7 +200,7 @@ namespace System.Collections.Generic
                 arrayIndex += toCopy;
             }
         }
-        
+
         /// <summary>
         /// Copies the contents of this builder to the specified array.
         /// </summary>

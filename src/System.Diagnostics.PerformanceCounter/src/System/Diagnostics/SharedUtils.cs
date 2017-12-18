@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Security.Permissions;
 using System.Threading;
 using System.Text;
 using Microsoft.Win32;
@@ -113,7 +112,6 @@ namespace System.Diagnostics
         {
             bool ret;
 
-            RuntimeHelpers.PrepareConstrainedRegions();
             try
             { }
             finally
@@ -163,27 +161,9 @@ namespace System.Diagnostics
             RegistryKey baseKey = null;
             RegistryKey complusReg = null;
 
-            //This property is retrieved only when creationg a new category,
-            //                          the calling code already demanded PerformanceCounterPermission.
-            //                          Therefore the assert below is safe.
-
-            //This property is retrieved only when creationg a new log,
-            //                          the calling code already demanded EventLogPermission.
-            //                          Therefore the assert below is safe.
-
-            RegistryPermission registryPermission = new RegistryPermission(PermissionState.Unrestricted);
-            registryPermission.Assert();
-
             try
             {
-                if (machineName.Equals("."))
-                {
-                    return GetLocalBuildDirectory();
-                }
-                else
-                {
-                    baseKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, machineName);
-                }
+                baseKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, machineName);
                 if (baseKey == null)
                     throw new InvalidOperationException(SR.Format(SR.RegKeyMissingShort, "HKEY_LOCAL_MACHINE", machineName));
 
@@ -305,8 +285,6 @@ namespace System.Diagnostics
 
                 if (baseKey != null)
                     baseKey.Close();
-
-                RegistryPermission.RevertAssert();
             }
 
             return dllDir;

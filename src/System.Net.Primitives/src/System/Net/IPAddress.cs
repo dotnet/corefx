@@ -634,29 +634,22 @@ namespace System.Net
                 Debug.Assert(scopeWritten);
 
                 hashCode = Marvin.ComputeHash32(
-                    ref addressAndScopeIdSpan[0],
-                    addressAndScopeIdLength,
+                    addressAndScopeIdSpan,
                     Marvin.DefaultSeed);
             }
             else
             {
+                Span<uint> addressOrScopeIdSpan = stackalloc uint[1];
+                addressOrScopeIdSpan[0] = _addressOrScopeId;
+ 
                 // For IPv4 addresses, we use Marvin on the integer representation of the Address.
                 hashCode = Marvin.ComputeHash32(
-                    ref Unsafe.As<uint, byte>(ref _addressOrScopeId),
-                    sizeof(uint),
+                    addressOrScopeIdSpan.AsBytes(),
                     Marvin.DefaultSeed);
             }
 
             _hashCode = hashCode;
             return _hashCode;
-        }
-
-        // For security, we need to be able to take an IPAddress and make a copy that's immutable and not derived.
-        internal IPAddress Snapshot()
-        {
-            return IsIPv4 ?
-                new IPAddress(PrivateAddress) :
-                new IPAddress(_numbers, PrivateScopeId);
         }
 
         // IPv4 192.168.1.1 maps as ::FFFF:192.168.1.1

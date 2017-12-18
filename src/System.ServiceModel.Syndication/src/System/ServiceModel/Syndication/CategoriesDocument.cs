@@ -2,15 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Xml;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Serialization;
+using System.Xml.Serialization;
+using System.Runtime.CompilerServices;
+
 namespace System.ServiceModel.Syndication
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Runtime.CompilerServices;
-    using System.Threading.Tasks;
-    using System.Xml;
-
     public abstract class CategoriesDocument : IExtensibleSyndicationObject
     {
         private Uri _baseUri;
@@ -69,10 +70,10 @@ namespace System.ServiceModel.Syndication
             return new ReferencedCategoriesDocument(linkToCategoriesDocument);
         }
 
-        public static async Task<CategoriesDocument> LoadAsync(XmlReader reader)
+        public static CategoriesDocument Load(XmlReader reader)
         {
             AtomPub10CategoriesDocumentFormatter formatter = new AtomPub10CategoriesDocumentFormatter();
-            await formatter.ReadFromAsync(reader);
+            formatter.ReadFrom(reader);
             return formatter.Document;
         }
 
@@ -96,17 +97,17 @@ namespace System.ServiceModel.Syndication
             return false;
         }
 
-        protected internal virtual Task WriteAttributeExtensionsAsync(XmlWriter writer, string version)
+        protected internal virtual void WriteAttributeExtensions(XmlWriter writer, string version)
         {
-            return _extensions.WriteAttributeExtensionsAsync(writer);
+            _extensions.WriteAttributeExtensions(writer);
         }
 
-        protected internal virtual Task WriteElementExtensionsAsync(XmlWriter writer, string version)
+        protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
         {
-            return _extensions.WriteElementExtensionsAsync(writer);
+            _extensions.WriteElementExtensions(writer);
         }
 
-        internal void LoadElementExtensions(XmlReaderWrapper readerOverUnparsedExtensions, int maxExtensionSize)
+        internal void LoadElementExtensions(XmlReader readerOverUnparsedExtensions, int maxExtensionSize)
         {
             _extensions.LoadElementExtensions(readerOverUnparsedExtensions, maxExtensionSize);
         }

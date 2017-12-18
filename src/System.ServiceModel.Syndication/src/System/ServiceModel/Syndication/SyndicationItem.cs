@@ -2,14 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Text;
+using System.Xml;
+using System.Runtime.Serialization;
+using System.Xml.Serialization;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+
 namespace System.ServiceModel.Syndication
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Threading.Tasks;
-    using System.Xml;
-
     // NOTE: This class implements Clone so if you add any members, please update the copy ctor
     public class SyndicationItem : IExtensibleSyndicationObject
     {
@@ -49,7 +53,6 @@ namespace System.ServiceModel.Syndication
             {
                 this.Title = new TextSyndicationContent(title);
             }
-
             _content = content;
             if (itemAlternateLink != null)
             {
@@ -63,7 +66,7 @@ namespace System.ServiceModel.Syndication
         {
             if (source == null)
             {
-                throw new ArgumentNullException(nameof(source));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("source");
             }
             _extensions = source._extensions.Clone();
             _authors = FeedUtils.ClonePersons(source._authors);
@@ -155,10 +158,24 @@ namespace System.ServiceModel.Syndication
             set { _id = value; }
         }
 
+        internal Exception LastUpdatedTimeException { get; set; }
+
         public DateTimeOffset LastUpdatedTime
         {
-            get { return _lastUpdatedTime; }
-            set { _lastUpdatedTime = value; }
+            get
+            {
+                if (LastUpdatedTimeException != null)
+                {
+                    throw LastUpdatedTimeException;
+                }
+
+                return _lastUpdatedTime;
+            }
+            set
+            {
+                LastUpdatedTimeException = null;
+                _lastUpdatedTime = value;
+            }
         }
 
         public Collection<SyndicationLink> Links
@@ -173,10 +190,24 @@ namespace System.ServiceModel.Syndication
             }
         }
 
+        internal Exception PublishDateException { get; set; }
+
         public DateTimeOffset PublishDate
         {
-            get { return _publishDate; }
-            set { _publishDate = value; }
+            get
+            {
+                if (PublishDateException != null)
+                {
+                    throw PublishDateException;
+                }
+
+                return _publishDate;
+            }
+            set
+            {
+                PublishDateException = null;
+                _publishDate = value;
+            }
         }
 
         public SyndicationFeed SourceFeed
@@ -197,36 +228,41 @@ namespace System.ServiceModel.Syndication
             set { _title = value; }
         }
 
-        public static Task<SyndicationItem> LoadAsync(XmlReader reader)
+        public static SyndicationItem Load(XmlReader reader)
         {
-            return LoadAsync<SyndicationItem>(reader);
+            return Load<SyndicationItem>(reader);
         }
 
-        public static async Task<TSyndicationItem> LoadAsync<TSyndicationItem>(XmlReader reader)
+        public static TSyndicationItem Load<TSyndicationItem>(XmlReader reader)
             where TSyndicationItem : SyndicationItem, new()
         {
             if (reader == null)
             {
-                throw new ArgumentNullException(nameof(reader));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("reader");
             }
-
+            Atom10ItemFormatter<TSyndicationItem> atomSerializer = new Atom10ItemFormatter<TSyndicationItem>();
+            if (atomSerializer.CanRead(reader))
+            {
+                atomSerializer.ReadFrom(reader);
+                return atomSerializer.Item as TSyndicationItem;
+            }
             Rss20ItemFormatter<TSyndicationItem> rssSerializer = new Rss20ItemFormatter<TSyndicationItem>();
-
             if (rssSerializer.CanRead(reader))
             {
-                await rssSerializer.ReadFromAsync(reader);
+                rssSerializer.ReadFrom(reader);
                 return rssSerializer.Item as TSyndicationItem;
             }
-
-            throw new XmlException(string.Format(SR.UnknownItemXml, reader.LocalName, reader.NamespaceURI));
+            throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new XmlException(SR.Format(SR.UnknownItemXml, reader.LocalName, reader.NamespaceURI)));
         }
 
 
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "0#permalink", Justification = "permalink is a term defined in the RSS format")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Permalink", Justification = "permalink is a term defined in the RSS format")]
         public void AddPermalink(Uri permalink)
         {
             if (permalink == null)
             {
-                throw new ArgumentNullException(nameof(permalink));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("permalink");
             }
             this.Id = permalink.AbsoluteUri;
             this.Links.Add(SyndicationLink.CreateAlternateLink(permalink));
@@ -252,14 +288,14 @@ namespace System.ServiceModel.Syndication
             return new Rss20ItemFormatter(this, serializeExtensionsAsAtom);
         }
 
-        public Task SaveAsAtom10(XmlWriter writer)
+        public void SaveAsAtom10(XmlWriter writer)
         {
-            return GetAtom10Formatter().WriteToAsync(writer);
+            this.GetAtom10Formatter().WriteTo(writer);
         }
 
-        public Task SaveAsRss20(XmlWriter writer)
+        public void SaveAsRss20(XmlWriter writer)
         {
-            return GetRss20Formatter().WriteToAsync(writer);
+            this.GetRss20Formatter().WriteTo(writer);
         }
 
         protected internal virtual SyndicationCategory CreateCategory()
@@ -293,14 +329,14 @@ namespace System.ServiceModel.Syndication
             return false;
         }
 
-        protected internal virtual Task WriteAttributeExtensionsAsync(XmlWriter writer, string version)
+        protected internal virtual void WriteAttributeExtensions(XmlWriter writer, string version)
         {
-            return _extensions.WriteAttributeExtensionsAsync(writer);
+            _extensions.WriteAttributeExtensions(writer);
         }
 
-        protected internal virtual Task WriteElementExtensionsAsync(XmlWriter writer, string version)
+        protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
         {
-            return _extensions.WriteElementExtensionsAsync(writer);
+            _extensions.WriteElementExtensions(writer);
         }
 
         internal void LoadElementExtensions(XmlReader readerOverUnparsedExtensions, int maxExtensionSize)

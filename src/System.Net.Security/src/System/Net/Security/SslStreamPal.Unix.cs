@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Security;
 using System.Runtime.InteropServices;
@@ -29,22 +30,49 @@ namespace System.Net.Security
         }
 
         public static SecurityStatusPal AcceptSecurityContext(ref SafeFreeCredentials credential, ref SafeDeleteContext context,
-            SecurityBuffer inputBuffer, SecurityBuffer outputBuffer, bool remoteCertRequired)
+            SecurityBuffer[] inputBuffers, SecurityBuffer outputBuffer, SslAuthenticationOptions sslAuthenticationOptions)
         {
-            return HandshakeInternal(credential, ref context, inputBuffer, outputBuffer, true, remoteCertRequired);
+            if (inputBuffers != null)
+            {
+                Debug.Assert(inputBuffers.Length == 2);
+                Debug.Assert(inputBuffers[1].token == null);
+
+                return HandshakeInternal(credential, ref context, inputBuffers[0], outputBuffer, sslAuthenticationOptions);
+            }
+            else
+            {
+                return HandshakeInternal(credential, ref context, inputBuffer: null, outputBuffer, sslAuthenticationOptions);
+            }
         }
 
         public static SecurityStatusPal InitializeSecurityContext(ref SafeFreeCredentials credential, ref SafeDeleteContext context,
-            string targetName, SecurityBuffer inputBuffer, SecurityBuffer outputBuffer)
+            string targetName, SecurityBuffer inputBuffer, SecurityBuffer outputBuffer, SslAuthenticationOptions sslAuthenticationOptions)
         {
-            return HandshakeInternal(credential, ref context, inputBuffer, outputBuffer, false, false);
+            return HandshakeInternal(credential, ref context, inputBuffer, outputBuffer, sslAuthenticationOptions);
         }
 
-        public static SecurityStatusPal InitializeSecurityContext(SafeFreeCredentials credential, ref SafeDeleteContext context, string targetName, SecurityBuffer[] inputBuffers, SecurityBuffer outputBuffer)
+        public static SecurityStatusPal InitializeSecurityContext(SafeFreeCredentials credential, ref SafeDeleteContext context, string targetName, SecurityBuffer[] inputBuffers, SecurityBuffer outputBuffer, SslAuthenticationOptions sslAuthenticationOptions)
         {
             Debug.Assert(inputBuffers.Length == 2);
             Debug.Assert(inputBuffers[1].token == null);
-            return HandshakeInternal(credential, ref context, inputBuffers[0], outputBuffer, false, false);
+
+            return HandshakeInternal(credential, ref context, inputBuffers[0], outputBuffer, sslAuthenticationOptions);
+        }
+
+        public static SecurityBuffer[] GetIncomingSecurityBuffers(SslAuthenticationOptions options, ref SecurityBuffer incomingSecurity)
+        {
+            SecurityBuffer[] incomingSecurityBuffers = null;
+
+            if (incomingSecurity != null)
+            {
+                incomingSecurityBuffers = new SecurityBuffer[]
+                {
+                    incomingSecurity,
+                    new SecurityBuffer(null, 0, 0, SecurityBufferType.SECBUFFER_EMPTY)
+                };
+            }
+
+            return incomingSecurityBuffers;
         }
 
         public static SafeFreeCredentials AcquireCredentialsHandle(X509Certificate certificate,
@@ -55,7 +83,7 @@ namespace System.Net.Security
 
         public static SecurityStatusPal EncryptMessage(SafeDeleteContext securityContext, ReadOnlyMemory<byte> input, int headerSize, int trailerSize, ref byte[] output, out int resultSize)
         {
-            return EncryptDecryptHelper(securityContext, input, offset:0, size: 0, encrypt: true, output: ref output, resultSize: out resultSize);
+            return EncryptDecryptHelper(securityContext, input, offset: 0, size: 0, encrypt: true, output: ref output, resultSize: out resultSize);
         }
 
         public static SecurityStatusPal DecryptMessage(SafeDeleteContext securityContext, byte[] buffer, ref int offset, ref int count)
@@ -102,8 +130,13 @@ namespace System.Net.Security
             connectionInfo = new SslConnectionInfo(((SafeDeleteSslContext)securityContext).SslContext);
         }
 
-        private static SecurityStatusPal HandshakeInternal(SafeFreeCredentials credential, ref SafeDeleteContext context,
-            SecurityBuffer inputBuffer, SecurityBuffer outputBuffer, bool isServer, bool remoteCertRequired)
+        public static byte[] ConvertAlpnProtocolListToByteArray(List<SslApplicationProtocol> applicationProtocols)
+        {
+            return Interop.Ssl.ConvertAlpnProtocolListToByteArray(applicationProtocols);
+        }
+
+        private static SecurityStatusPal HandshakeInternal(SafeFreeCredentials credential, ref SafeDeleteContext context, SecurityBuffer inputBuffer,
+            SecurityBuffer outputBuffer, SslAuthenticationOptions sslAuthenticationOptions)
         {
             Debug.Assert(!credential.IsInvalid);
 
@@ -111,7 +144,7 @@ namespace System.Net.Security
             {
                 if ((null == context) || context.IsInvalid)
                 {
-                    context = new SafeDeleteSslContext(credential as SafeFreeSslCredentials, isServer, remoteCertRequired);
+                    context = new SafeDeleteSslContext(credential as SafeFreeSslCredentials, sslAuthenticationOptions);
                 }
 
                 byte[] output = null;
@@ -127,6 +160,16 @@ namespace System.Net.Security
                     done = Interop.OpenSsl.DoSslHandshake(((SafeDeleteSslContext)context).SslContext, inputBuffer.token, inputBuffer.offset, inputBuffer.size, out output, out outputSize);
                 }
 
+                // When the handshake is done, and the context is server, check if the alpnHandle target was set to null during ALPN.
+                // If it was, then that indiciates ALPN failed, send failure.
+                // We have this workaround, as openssl supports terminating handshake only from version 1.1.0,
+                // whereas ALPN is supported from version 1.0.2.
+                SafeSslHandle sslContext = ((SafeDeleteSslContext)context).SslContext;
+                if (done && sslAuthenticationOptions.IsServer && sslAuthenticationOptions.ApplicationProtocols != null && sslContext.AlpnHandle.IsAllocated && sslContext.AlpnHandle.Target == null)
+                {
+                    return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, Interop.OpenSsl.CreateSslException(SR.net_alpn_failed));
+                }
+
                 outputBuffer.size = outputSize;
                 outputBuffer.offset = 0;
                 outputBuffer.token = outputSize > 0 ? output : null;
@@ -137,6 +180,14 @@ namespace System.Net.Security
             {
                 return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, exc);
             }
+        }
+
+        internal static byte[] GetNegotiatedApplicationProtocol(SafeDeleteContext context)
+        {
+            if (context == null)
+                return null;
+
+            return Interop.Ssl.SslGetAlpnSelected(((SafeDeleteSslContext)context).SslContext);
         }
 
         private static SecurityStatusPal EncryptDecryptHelper(SafeDeleteContext securityContext, ReadOnlyMemory<byte> input, int offset, int size, bool encrypt, ref byte[] output, out int resultSize)

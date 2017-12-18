@@ -2,14 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Xml;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Serialization;
+using System.Xml.Serialization;
+using System.Runtime.CompilerServices;
+
 namespace System.ServiceModel.Syndication
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.CompilerServices;
-    using System.Threading.Tasks;
-    using System.Xml;
-
     // NOTE: This class implements Clone so if you add any members, please update the copy ctor
     public class SyndicationCategory : IExtensibleSyndicationObject
     {
@@ -39,7 +41,7 @@ namespace System.ServiceModel.Syndication
         {
             if (source == null)
             {
-                throw new ArgumentNullException(nameof(source));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("source");
             }
             _label = source._label;
             _name = source._name;
@@ -90,14 +92,14 @@ namespace System.ServiceModel.Syndication
             return false;
         }
 
-        protected internal virtual Task WriteAttributeExtensionsAsync(XmlWriter writer, string version)
+        protected internal virtual void WriteAttributeExtensions(XmlWriter writer, string version)
         {
-            return _extensions.WriteAttributeExtensionsAsync(writer);
+            _extensions.WriteAttributeExtensions(writer);
         }
 
-        protected internal virtual Task WriteElementExtensionsAsync(XmlWriter writer, string version)
+        protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
         {
-            return _extensions.WriteElementExtensionsAsync(writer);
+            _extensions.WriteElementExtensions(writer);
         }
 
         internal void LoadElementExtensions(XmlReader readerOverUnparsedExtensions, int maxExtensionSize)

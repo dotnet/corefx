@@ -86,31 +86,27 @@ namespace System.Runtime.CompilerServices
             if (!delegateType.IsSubclassOf(typeof(MulticastDelegate))) throw System.Linq.Expressions.Error.TypeMustBeDerivedFromSystemDelegate();
 
             CacheDict<Type, Func<CallSiteBinder, CallSite>> ctors = s_siteCtors;
-            if (ctors == null) {
+            if (ctors == null)
+            {
                 // It's okay to just set this, worst case we're just throwing away some data
                 s_siteCtors = ctors = new CacheDict<Type, Func<CallSiteBinder, CallSite>>(100);
             }
 
-            Func<CallSiteBinder, CallSite> ctor;
-            MethodInfo method = null;
-            if (!ctors.TryGetValue(delegateType, out ctor))
+            if (!ctors.TryGetValue(delegateType, out Func<CallSiteBinder, CallSite> ctor))
             {
-                method = typeof(CallSite<>).MakeGenericType(delegateType).GetMethod(nameof(Create));
+                MethodInfo method = typeof(CallSite<>).MakeGenericType(delegateType).GetMethod(nameof(Create));
 
-                if (delegateType.CanCache())
+                if (delegateType.IsCollectible)
                 {
-                    ctor = (Func<CallSiteBinder, CallSite>)method.CreateDelegate(typeof(Func<CallSiteBinder, CallSite>));
-                    ctors.Add(delegateType, ctor);
+                    // slow path
+                    return (CallSite)method.Invoke(null, new object[] { binder });
                 }
+
+                ctor = (Func<CallSiteBinder, CallSite>)method.CreateDelegate(typeof(Func<CallSiteBinder, CallSite>));
+                ctors.Add(delegateType, ctor);
             }
 
-            if (ctor != null)
-            {
-                return ctor(binder);
-            }
-
-            // slow path
-            return (CallSite)method.Invoke(null, new object[] { binder });
+            return ctor(binder);
         }
     }
 
@@ -305,8 +301,8 @@ namespace System.Runtime.CompilerServices
                 }
                 if (method != null)
                 {
-                    s_cachedNoMatch = (T)(object)CreateDelegateHelper(target, noMatchMethod.MakeGenericMethod(args));
-                    return (T)(object)CreateDelegateHelper(target, method.MakeGenericMethod(args));
+                    s_cachedNoMatch = (T)(object)noMatchMethod.MakeGenericMethod(args).CreateDelegate(target);
+                    return (T)(object)method.MakeGenericMethod(args).CreateDelegate(target);
                 }
             }
 
@@ -316,26 +312,6 @@ namespace System.Runtime.CompilerServices
         }
 
 #if FEATURE_COMPILE
-        // This needs to be SafeCritical to allow access to
-        // internal types from user code as generic parameters.
-        //
-        // It's safe for a few reasons:
-        //   1. The internal types are coming from a lower trust level (app code)
-        //   2. We got the internal types from our own generic parameter: T
-        //   3. The UpdateAndExecute methods don't do anything with the types,
-        //      we just want the CallSite args to be strongly typed to avoid
-        //      casting.
-        //   4. Works on desktop CLR with AppDomain that has only Execute
-        //      permission. In theory it might require RestrictedMemberAccess,
-        //      but it's unclear because we have tests passing without RMA.
-        //
-        // When Silverlight gets RMA we may be able to remove this.
-        [System.Security.SecuritySafeCritical]
-        private static Delegate CreateDelegateHelper(Type delegateType, MethodInfo method)
-        {
-            return method.CreateDelegate(delegateType);
-        }
-
         private static bool IsSimpleSignature(MethodInfo invoke, out Type[] sig)
         {
             ParameterInfo[] pis = invoke.GetParametersCached();

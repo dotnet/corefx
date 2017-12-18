@@ -2,11 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
-
 namespace System.ServiceModel.Syndication
 {
-    public static class Atom10Constants
+    internal static class Atom10Constants
     {
         public const string AlternateTag = "alternate";
         public const string Atom10Namespace = "http://www.w3.org/2005/Atom";
@@ -48,6 +46,5 @@ namespace System.ServiceModel.Syndication
         public const string XHtmlMediaType = "application/xhtml+xml";
         public const string XHtmlType = "xhtml";
         public const string XmlMediaType = "text/xml";
-        public const string IconTag = "icon";
     }
 }

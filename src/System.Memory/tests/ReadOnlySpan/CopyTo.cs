@@ -128,6 +128,7 @@ namespace System.SpanTests
         // the residual chunk of size (bufferSize % 4GB). The inputs sizes to this method, 4GB and 4GB+256B,
         // test the two size selection paths in CoptyTo method - memory size that is multiple of 4GB or,
         // a multiple of 4GB + some more size.
+        [ActiveIssue(25254)]
         [Theory]
         [OuterLoop]
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
@@ -180,8 +181,10 @@ namespace System.SpanTests
                 }
                 finally
                 {
-                    if (allocatedFirst) AllocationHelper.ReleaseNative(ref memBlockFirst);
-                    if (allocatedSecond) AllocationHelper.ReleaseNative(ref memBlockSecond);
+                    if (allocatedFirst)
+                        AllocationHelper.ReleaseNative(ref memBlockFirst);
+                    if (allocatedSecond)
+                        AllocationHelper.ReleaseNative(ref memBlockSecond);
                 }
             }
         }

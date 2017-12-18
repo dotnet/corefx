@@ -6,9 +6,11 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Net.Security;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
@@ -20,10 +22,11 @@ internal static partial class Interop
 {
     internal static partial class OpenSsl
     {
-        private static Ssl.SslCtxSetVerifyCallback s_verifyClientCertificate = VerifyClientCertificate;
+        private static readonly Ssl.SslCtxSetVerifyCallback s_verifyClientCertificate = VerifyClientCertificate;
+        private unsafe static readonly Ssl.SslCtxSetAlpnCallback s_alpnServerCallback = AlpnServerSelectCallback;
+        private static readonly IdnMapping s_idnMapping = new IdnMapping();
 
         #region internal methods
-
         internal static SafeChannelBindingHandle QueryChannelBinding(SafeSslHandle context, ChannelBindingKind bindingType)
         {
             Debug.Assert(
@@ -47,7 +50,7 @@ internal static partial class Interop
             return bindingHandle;
         }
 
-        internal static SafeSslHandle AllocateSslContext(SslProtocols protocols, SafeX509Handle certHandle, SafeEvpPKeyHandle certKeyHandle, EncryptionPolicy policy, bool isServer, bool remoteCertRequired)
+        internal static SafeSslHandle AllocateSslContext(SslProtocols protocols, SafeX509Handle certHandle, SafeEvpPKeyHandle certKeyHandle, EncryptionPolicy policy, SslAuthenticationOptions sslAuthenticationOptions)
         {
             SafeSslHandle context = null;
 
@@ -88,44 +91,82 @@ internal static partial class Interop
                     SetSslCertificate(innerContext, certHandle, certKeyHandle);
                 }
 
-                if (remoteCertRequired)
+                if (sslAuthenticationOptions.IsServer && sslAuthenticationOptions.RemoteCertRequired)
                 {
-                    Debug.Assert(isServer, "isServer flag should be true");
-                    Ssl.SslCtxSetVerify(innerContext,
-                        s_verifyClientCertificate);
+                    Ssl.SslCtxSetVerify(innerContext, s_verifyClientCertificate);
 
                     //update the client CA list 
                     UpdateCAListFromRootStore(innerContext);
                 }
 
-                context = SafeSslHandle.Create(innerContext, isServer);
-                Debug.Assert(context != null, "Expected non-null return value from SafeSslHandle.Create");
-                if (context.IsInvalid)
+                GCHandle alpnHandle = default;
+                try
                 {
-                    context.Dispose();
-                    throw CreateSslException(SR.net_allocate_ssl_context_failed);
-                }
-
-                if (hasCertificateAndKey)
-                {
-                    bool hasCertReference = false;
-                    try
+                    if (sslAuthenticationOptions.ApplicationProtocols != null)
                     {
-                        certHandle.DangerousAddRef(ref hasCertReference);
-                        using (X509Certificate2 cert = new X509Certificate2(certHandle.DangerousGetHandle()))
+                        if (sslAuthenticationOptions.IsServer)
                         {
-                            using (X509Chain chain = TLSCertificateExtensions.BuildNewChain(cert, includeClientApplicationPolicy: false))
+                            alpnHandle = GCHandle.Alloc(sslAuthenticationOptions.ApplicationProtocols);
+                            Interop.Ssl.SslCtxSetAlpnSelectCb(innerContext, s_alpnServerCallback, GCHandle.ToIntPtr(alpnHandle));
+                        }
+                        else
+                        {
+                            if (Interop.Ssl.SslCtxSetAlpnProtos(innerContext, sslAuthenticationOptions.ApplicationProtocols) != 0)
                             {
-                                if (chain != null && !Ssl.AddExtraChainCertificates(context, chain))
-                                    throw CreateSslException(SR.net_ssl_use_cert_failed);
+                                throw CreateSslException(SR.net_alpn_config_failed);
                             }
                         }
                     }
-                    finally
+
+                    context = SafeSslHandle.Create(innerContext, sslAuthenticationOptions.IsServer);
+                    Debug.Assert(context != null, "Expected non-null return value from SafeSslHandle.Create");
+                    if (context.IsInvalid)
                     {
-                        if (hasCertReference)
-                            certHandle.DangerousRelease();
+                        context.Dispose();
+                        throw CreateSslException(SR.net_allocate_ssl_context_failed);
                     }
+
+                    if (!sslAuthenticationOptions.IsServer)
+                    {
+                        // The IdnMapping converts unicode input into the IDNA punycode sequence.
+                        string punyCode = s_idnMapping.GetAscii(sslAuthenticationOptions.TargetHost);
+
+                        // Similar to windows behavior, set SNI on openssl by default for client context, ignore errors.
+                        Ssl.SslSetTlsExtHostName(context, punyCode);
+                    }
+
+                    if (hasCertificateAndKey)
+                    {
+                        bool hasCertReference = false;
+                        try
+                        {
+                            certHandle.DangerousAddRef(ref hasCertReference);
+                            using (X509Certificate2 cert = new X509Certificate2(certHandle.DangerousGetHandle()))
+                            {
+                                using (X509Chain chain = TLSCertificateExtensions.BuildNewChain(cert, includeClientApplicationPolicy: false))
+                                {
+                                    if (chain != null && !Ssl.AddExtraChainCertificates(context, chain))
+                                        throw CreateSslException(SR.net_ssl_use_cert_failed);
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            if (hasCertReference)
+                                certHandle.DangerousRelease();
+                        }
+                    }
+
+                    context.AlpnHandle = alpnHandle;
+                }
+                catch
+                {
+                    if (alpnHandle.IsAllocated)
+                    {
+                        alpnHandle.Free();
+                    }
+
+                    throw;
                 }
             }
 
@@ -191,7 +232,7 @@ internal static partial class Interop
             {
                 using (MemoryHandle handle = input.Retain(pin: true))
                 {
-                    retVal = Ssl.SslWrite(context, (byte*)handle.PinnedPointer, input.Length);
+                    retVal = Ssl.SslWrite(context, (byte*)handle.Pointer, input.Length);
                 }
             }
 
@@ -312,6 +353,53 @@ internal static partial class Interop
             // we'll process it after the handshake finishes.
             const int OpenSslSuccess = 1;
             return OpenSslSuccess;
+        }
+
+        private static unsafe int AlpnServerSelectCallback(IntPtr ssl, out byte* outp, out byte outlen, byte* inp, uint inlen, IntPtr arg)
+        {
+            outp = null;
+            outlen = 0;
+
+            GCHandle protocolHandle = GCHandle.FromIntPtr(arg);
+            if (!(protocolHandle.Target is List<SslApplicationProtocol> protocolList))
+            {
+                return Ssl.SSL_TLSEXT_ERR_NOACK;
+            }
+
+            try
+            {
+                for (int i = 0; i < protocolList.Count; i++)
+                {
+                    Span<byte> clientList = new Span<byte>(inp, (int)inlen);
+                    while (clientList.Length > 0)
+                    {
+                        byte length = clientList[0];
+                        Span<byte> clientProto = clientList.Slice(1, length);
+                        if (clientProto.SequenceEqual(protocolList[i].Protocol.Span))
+                        {
+                            outp = (byte*)Unsafe.AsPointer(ref clientProto.DangerousGetPinnableReference());
+                            outlen = length;
+                            return Ssl.SSL_TLSEXT_ERR_OK;
+                        }
+
+                        clientList = clientList.Slice(1 + length);
+                    }
+                }
+            }
+            catch
+            {
+                // No common application protocol was negotiated, set the target on the alpnHandle to null.
+                // It is ok to clear the handle value here, this results in handshake failure, so the SslStream object is disposed.
+                protocolHandle.Target = null;
+
+                return Ssl.SSL_TLSEXT_ERR_NOACK;
+            }
+
+            // No common application protocol was negotiated, set the target on the alpnHandle to null.
+            // It is ok to clear the handle value here, this results in handshake failure, so the SslStream object is disposed.
+            protocolHandle.Target = null;
+
+            return Ssl.SSL_TLSEXT_ERR_NOACK;
         }
 
         private static void UpdateCAListFromRootStore(SafeSslContextHandle context)

@@ -2,18 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Text;
+using System.Xml;
+using System.Runtime.Serialization;
+using System.Globalization;
+using System.Xml.Serialization;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+
 namespace System.ServiceModel.Syndication
 {
-    using System.ServiceModel;
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Runtime.CompilerServices;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using System.Xml;
-
-
     // NOTE: This class implements Clone so if you add any members, please update the copy ctor
     public class SyndicationFeed : IExtensibleSyndicationObject
     {
@@ -26,98 +27,12 @@ namespace System.ServiceModel.Syndication
         private ExtensibleSyndicationObject _extensions = new ExtensibleSyndicationObject();
         private string _generator;
         private string _id;
-
         private Uri _imageUrl;
-        private TextSyndicationContent _imageTitle;
-        private Uri _imageLink;
-
         private IEnumerable<SyndicationItem> _items;
         private string _language;
         private DateTimeOffset _lastUpdatedTime;
         private Collection<SyndicationLink> _links;
         private TextSyndicationContent _title;
-
-        // optional RSS tags
-        private SyndicationLink _documentation;
-        private int _timeToLive;
-        private Collection<int> _skipHours;
-        private Collection<string> _skipDays;
-        private SyndicationTextInput _textInput;
-        private Uri _iconImage;
-
-        public Uri IconImage
-        {
-            get
-            {
-                return _iconImage;
-            }
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(value));
-                _iconImage = value;
-            }
-        }
-
-        public SyndicationTextInput TextInput
-        {
-            get
-            {
-                return _textInput;
-            }
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(value));
-                _textInput = value;
-            }
-        }
-
-        public SyndicationLink Documentation
-        {
-            get
-            {
-                return _documentation;
-            }
-            set
-            {
-                _documentation = value;
-            }
-        }
-
-        public int TimeToLive
-        {
-            get
-            {
-                return _timeToLive;
-            }
-            set
-            {
-                _timeToLive = value;
-            }
-        }
-
-        public Collection<int> SkipHours
-        {
-            get
-            {
-                if (_skipHours == null)
-                    _skipHours = new Collection<int>();
-                return _skipHours;
-            }
-        }
-
-        public Collection<string> SkipDays
-        {
-            get
-            {
-                if (_skipDays == null)
-                    _skipDays = new Collection<string>();
-                return _skipDays;
-            }
-        }
-
-        //======================================
 
         public SyndicationFeed()
             : this((IEnumerable<SyndicationItem>)null)
@@ -167,7 +82,7 @@ namespace System.ServiceModel.Syndication
         {
             if (source == null)
             {
-                throw new ArgumentNullException(nameof(source));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("source");
             }
             _authors = FeedUtils.ClonePersons(source._authors);
             _categories = FeedUtils.CloneCategories(source._categories);
@@ -197,7 +112,7 @@ namespace System.ServiceModel.Syndication
             {
                 if (cloneItems)
                 {
-                    throw new InvalidOperationException(SR.UnbufferedItemsCannotBeCloned);
+                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.UnbufferedItemsCannotBeCloned)));
                 }
                 _items = source._items;
             }
@@ -286,18 +201,6 @@ namespace System.ServiceModel.Syndication
             set { _imageUrl = value; }
         }
 
-        public TextSyndicationContent ImageTitle
-        {
-            get { return _imageTitle; }
-            set { _imageTitle = value; }
-        }
-
-        public Uri ImageLink
-        {
-            get { return _imageLink; }
-            set { _imageLink = value; }
-        }
-
         public IEnumerable<SyndicationItem> Items
         {
             get
@@ -312,7 +215,7 @@ namespace System.ServiceModel.Syndication
             {
                 if (value == null)
                 {
-                    throw new ArgumentNullException(nameof(value));
+                    throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("value");
                 }
                 _items = value;
             }
@@ -324,10 +227,24 @@ namespace System.ServiceModel.Syndication
             set { _language = value; }
         }
 
+        internal Exception LastUpdatedTimeException { get; set; }
+
         public DateTimeOffset LastUpdatedTime
         {
-            get { return _lastUpdatedTime; }
-            set { _lastUpdatedTime = value; }
+            get
+            {
+                if (LastUpdatedTimeException != null)
+                {
+                    throw LastUpdatedTimeException;
+                }
+
+                return _lastUpdatedTime;
+            }
+            set
+            {
+                LastUpdatedTimeException = null;
+                _lastUpdatedTime = value;
+            }
         }
 
         public Collection<SyndicationLink> Links
@@ -348,43 +265,6 @@ namespace System.ServiceModel.Syndication
             set { _title = value; }
         }
 
-        //// Custom Parsing
-        public static async Task<SyndicationFeed> LoadAsync(XmlReader reader, Rss20FeedFormatter formatter, CancellationToken ct)
-        {
-            return await LoadAsync(reader, formatter, new Atom10FeedFormatter(), ct);
-        }
-
-        public static async Task<SyndicationFeed> LoadAsync(XmlReader reader, Atom10FeedFormatter formatter, CancellationToken ct)
-        {
-            return await LoadAsync(reader, new Rss20FeedFormatter(), formatter, ct);
-        }
-
-        public static async Task<SyndicationFeed> LoadAsync(XmlReader reader, Rss20FeedFormatter Rssformatter, Atom10FeedFormatter Atomformatter, CancellationToken ct)
-        {
-            if (reader == null)
-            {
-                throw new ArgumentNullException(nameof(reader));
-            }
-
-            XmlReaderWrapper wrappedReader = XmlReaderWrapper.CreateFromReader(reader);
-
-            Atom10FeedFormatter atomSerializer = Atomformatter;
-            if (atomSerializer.CanRead(wrappedReader))
-            {
-                await atomSerializer.ReadFromAsync(wrappedReader, new CancellationToken());
-                return atomSerializer.Feed;
-            }
-            Rss20FeedFormatter rssSerializer = Rssformatter;
-            if (rssSerializer.CanRead(wrappedReader))
-            {
-                await rssSerializer.ReadFromAsync(wrappedReader, new CancellationToken());
-                return rssSerializer.Feed;
-            }
-            throw new XmlException(string.Format(SR.UnknownFeedXml, wrappedReader.LocalName, wrappedReader.NamespaceURI));
-        }
-
-        //=================================
-
         public static SyndicationFeed Load(XmlReader reader)
         {
             return Load<SyndicationFeed>(reader);
@@ -393,33 +273,23 @@ namespace System.ServiceModel.Syndication
         public static TSyndicationFeed Load<TSyndicationFeed>(XmlReader reader)
             where TSyndicationFeed : SyndicationFeed, new()
         {
-            CancellationToken ct = new CancellationToken();
-            return LoadAsync<TSyndicationFeed>(reader, ct).GetAwaiter().GetResult();
-        }
-
-        public static async Task<SyndicationFeed> LoadAsync(XmlReader reader, CancellationToken ct)
-        {
-            return await LoadAsync<SyndicationFeed>(reader, ct);
-        }
-
-        public static async Task<TSyndicationFeed> LoadAsync<TSyndicationFeed>(XmlReader reader, CancellationToken ct)
-            where TSyndicationFeed : SyndicationFeed, new()
-        {
+            if (reader == null)
+            {
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("reader");
+            }
             Atom10FeedFormatter<TSyndicationFeed> atomSerializer = new Atom10FeedFormatter<TSyndicationFeed>();
             if (atomSerializer.CanRead(reader))
             {
-                await atomSerializer.ReadFromAsync(reader, ct);
+                atomSerializer.ReadFrom(reader);
                 return atomSerializer.Feed as TSyndicationFeed;
             }
-
             Rss20FeedFormatter<TSyndicationFeed> rssSerializer = new Rss20FeedFormatter<TSyndicationFeed>();
             if (rssSerializer.CanRead(reader))
             {
-                await rssSerializer.ReadFromAsync(reader, ct);
+                rssSerializer.ReadFrom(reader);
                 return rssSerializer.Feed as TSyndicationFeed;
             }
-
-            throw new XmlException(string.Format(SR.UnknownFeedXml, reader.LocalName, reader.NamespaceURI));
+            throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new XmlException(SR.Format(SR.UnknownFeedXml, reader.LocalName, reader.NamespaceURI)));
         }
 
         public virtual SyndicationFeed Clone(bool cloneItems)
@@ -442,14 +312,14 @@ namespace System.ServiceModel.Syndication
             return new Rss20FeedFormatter(this, serializeExtensionsAsAtom);
         }
 
-        public Task SaveAsAtom10Async(XmlWriter writer, CancellationToken ct)
+        public void SaveAsAtom10(XmlWriter writer)
         {
-            return GetAtom10Formatter().WriteToAsync(writer, ct);
+            this.GetAtom10Formatter().WriteTo(writer);
         }
 
-        public Task SaveAsRss20Async(XmlWriter writer, CancellationToken ct)
+        public void SaveAsRss20(XmlWriter writer)
         {
-            return GetRss20Formatter().WriteToAsync(writer, ct);
+            this.GetRss20Formatter().WriteTo(writer);
         }
 
         protected internal virtual SyndicationCategory CreateCategory()
@@ -482,14 +352,14 @@ namespace System.ServiceModel.Syndication
             return false;
         }
 
-        protected internal virtual Task WriteAttributeExtensionsAsync(XmlWriter writer, string version)
+        protected internal virtual void WriteAttributeExtensions(XmlWriter writer, string version)
         {
-            return _extensions.WriteAttributeExtensionsAsync(writer);
+            _extensions.WriteAttributeExtensions(writer);
         }
 
-        protected internal virtual Task WriteElementExtensionsAsync(XmlWriter writer, string version)
+        protected internal virtual void WriteElementExtensions(XmlWriter writer, string version)
         {
-            return _extensions.WriteElementExtensionsAsync(writer);
+            _extensions.WriteElementExtensions(writer);
         }
 
         internal void LoadElementExtensions(XmlReader readerOverUnparsedExtensions, int maxExtensionSize)

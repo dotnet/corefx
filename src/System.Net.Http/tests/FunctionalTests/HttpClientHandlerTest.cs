@@ -97,6 +97,7 @@ namespace System.Net.Http.Functional.Tests
             GetMethods("HEAD", "TRACE");
 
         private static bool IsWindows10Version1607OrGreater => PlatformDetection.IsWindows10Version1607OrGreater;
+        private static bool NotWindowsUAPOrBeforeVersion1709 => !PlatformDetection.IsUap || PlatformDetection.IsWindows10Version1709OrGreater;
 
         private static IEnumerable<object[]> GetMethods(params string[] methods)
         {
@@ -155,7 +156,7 @@ namespace System.Net.Http.Functional.Tests
                 Assert.False(handler.PreAuthenticate);
                 Assert.True(handler.SupportsProxy);
                 Assert.True(handler.SupportsRedirectConfiguration);
-                
+
                 // Changes from .NET Framework (Desktop).
                 if (!PlatformDetection.IsFullFramework)
                 {
@@ -285,7 +286,50 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(22158, TargetFrameworkMonikers.Uap)] 
+        [OuterLoop] // TODO: Issue #11345
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task SendAsync_GetWithValidHostHeader_Success(bool withPort)
+        {
+            var m = new HttpRequestMessage(HttpMethod.Get, Configuration.Http.SecureRemoteEchoServer);
+            m.Headers.Host = withPort ? Configuration.Http.SecureHost + ":123" : Configuration.Http.SecureHost;
+
+            using (HttpClient client = CreateHttpClient())
+            using (HttpResponseMessage response = await client.SendAsync(m))
+            {
+                string responseContent = await response.Content.ReadAsStringAsync();
+                _output.WriteLine(responseContent);
+                TestHelper.VerifyResponseBody(
+                    responseContent,
+                    response.Content.Headers.ContentMD5,
+                    false,
+                    null);
+            }
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public async Task SendAsync_GetWithInvalidHostHeader_ThrowsException()
+        {
+            if (PlatformDetection.IsNetCore && !UseManagedHandler)
+            {
+                // [ActiveIssue(24862)]
+                // WinHttpHandler and CurlHandler do not use the Host header to influence the SSL auth.
+                // .NET Framework and ManagedHandler do.
+                return;
+            }
+
+            var m = new HttpRequestMessage(HttpMethod.Get, Configuration.Http.SecureRemoteEchoServer);
+            m.Headers.Host = "hostheaderthatdoesnotmatch";
+
+            using (HttpClient client = CreateHttpClient())
+            {
+                await Assert.ThrowsAsync<HttpRequestException>(() => client.SendAsync(m));
+            }
+        }
+
+        [ActiveIssue(22158, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task GetAsync_IPv6LinkLocalAddressUri_Success()
@@ -555,7 +599,7 @@ namespace System.Net.Http.Functional.Tests
                             "\r\n");
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
-                    List <string> receivedRequest = await serverTask;
+                    List<string> receivedRequest = await serverTask;
                     string[] statusLineParts = receivedRequest[0].Split(' ');
 
                     using (HttpResponseMessage response = await getResponseTask)
@@ -632,6 +676,36 @@ namespace System.Net.Http.Functional.Tests
                     Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
                     Assert.Equal(uri, response.RequestMessage.RequestUri);
                 }
+            }
+        }
+
+        [Fact]
+        public async Task GetAsync_AllowAutoRedirectTrue_RedirectWithoutLocation_ReturnsOriginalResponse()
+        {
+            // [ActiveIssue(24819, TestPlatforms.Windows)]
+            if (PlatformDetection.IsWindows && PlatformDetection.IsNetCore && !UseManagedHandler)
+            {
+                return;
+            }
+
+            HttpClientHandler handler = CreateHttpClientHandler();
+            handler.AllowAutoRedirect = true;
+            using (var client = new HttpClient(handler))
+            {
+                await LoopbackServer.CreateServerAsync(async (server, url) =>
+                {
+                    Task<HttpResponseMessage> getTask = client.GetAsync(url);
+                    Task<List<string>> serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                            $"HTTP/1.1 302 OK\r\n" +
+                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            "\r\n");
+                    await TestHelper.WhenAllCompletedOrAnyFailed(getTask, serverTask);
+
+                    using (HttpResponseMessage response = await getTask)
+                    {
+                        Assert.Equal(302, (int)response.StatusCode);
+                    }
+                });
             }
         }
 
@@ -814,6 +888,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        [OuterLoop] // Test uses azure endpoint.
         public async Task GetAsync_CredentialIsNetworkCredentialUriRedirect_StatusCodeUnauthorized()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
@@ -828,6 +903,33 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpResponseMessage unAuthResponse = await client.GetAsync(redirectUri))
                 {
                     Assert.Equal(HttpStatusCode.Unauthorized, unAuthResponse.StatusCode);
+                }
+            }
+        }
+
+        [Fact]
+        [OuterLoop] // Test uses azure endpoint.
+        public async Task HttpClientHandler_CredentialIsNotCredentialCacheAfterRedirect_StatusCodeOK()
+        {
+            HttpClientHandler handler = CreateHttpClientHandler();
+            handler.Credentials = _credential;
+            using (var client = new HttpClient(handler))
+            {
+                Uri redirectUri = Configuration.Http.RedirectUriForCreds(
+                    secure: false,
+                    statusCode: 302,
+                    userName: Username,
+                    password: Password);
+                using (HttpResponseMessage unAuthResponse = await client.GetAsync(redirectUri))
+                {
+                    Assert.Equal(HttpStatusCode.Unauthorized, unAuthResponse.StatusCode);
+                }
+
+                // Use the same handler to perform get request, authentication should succeed after redirect.
+                Uri uri = Configuration.Http.BasicAuthUriForCreds(secure: true, userName: Username, password: Password);
+                using (HttpResponseMessage authResponse = await client.GetAsync(uri))
+                {
+                    Assert.Equal(HttpStatusCode.OK, authResponse.StatusCode);
                 }
             }
         }
@@ -927,9 +1029,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(22187, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
-        [Theory, MemberData(nameof(HeaderWithEmptyValueAndUris))]
+        [ConditionalTheory(nameof(NotWindowsUAPOrBeforeVersion1709)), MemberData(nameof(HeaderWithEmptyValueAndUris))]
         public async Task GetAsync_RequestHeadersAddCustomHeaders_HeaderAndEmptyValueSent(string name, string value, Uri uri)
         {
             using (HttpClient client = CreateHttpClient())
@@ -1112,7 +1213,7 @@ namespace System.Net.Http.Functional.Tests
                     Task serverTask =
                         LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
                         {
-                            var list = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, partialResponse, shutdown: false);
+                            var list = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, partialResponse);
                             await tcs.Task;
                             return list;
                         }, null);
@@ -1282,34 +1383,6 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Theory]
-        [InlineData(200)]
-        [InlineData(500)]
-        [InlineData(600)]
-        [InlineData(900)]
-        [InlineData(999)]
-        public async Task GetAsync_ExpectedStatusCode(int statusCode)
-        {
-            await LoopbackServer.CreateServerAsync(async (server, url) =>
-            {
-                using (HttpClient client = CreateHttpClient())
-                {
-                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
-                    await TestHelper.WhenAllCompletedOrAnyFailed(
-                        getResponseTask,
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                            $"HTTP/1.1 {statusCode}\r\n" +
-                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
-                            "\r\n"));
-                    using (HttpResponseMessage response = await getResponseTask)
-                    {
-                        Assert.Equal(statusCode, (int)response.StatusCode);
-                    }
-                }
-            });
-        }
-
-        [OuterLoop] // TODO: Issue #11345
-        [Theory]
         [InlineData(99)]
         [InlineData(1000)]
         public async Task GetAsync_StatusCodeOutOfRange_ExpectedException(int statusCode)
@@ -1319,7 +1392,7 @@ namespace System.Net.Http.Functional.Tests
                 // UAP platform allows this status code due to historical reasons.
                 return;
             }
-            
+
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClient client = CreateHttpClient())
@@ -2085,7 +2158,7 @@ namespace System.Net.Http.Functional.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
-        public void Proxy_HaveNoCredsAndUseAuthenticatedCustomProxy_ProxyAuthenticationRequiredStatusCode()
+        public async Task Proxy_HaveNoCredsAndUseAuthenticatedCustomProxy_ProxyAuthenticationRequiredStatusCode()
         {
             int port;
             Task<LoopbackGetRequestHttpProxy.ProxyResult> proxyTask = LoopbackGetRequestHttpProxy.StartAsync(
@@ -2099,7 +2172,7 @@ namespace System.Net.Http.Functional.Tests
             using (var client = new HttpClient(handler))
             {
                 Task<HttpResponseMessage> responseTask = client.GetAsync(Configuration.Http.RemoteEchoServer);
-                Task.WaitAll(proxyTask, responseTask);
+                await (new Task[] { proxyTask, responseTask }).WhenAllOrAnyFailed();
                 using (responseTask.Result)
                 {
                     Assert.Equal(HttpStatusCode.ProxyAuthenticationRequired, responseTask.Result.StatusCode);

@@ -69,7 +69,6 @@ namespace System.Net.Sockets
         private int _intCleanedUp; // 0 if not completed, > 0 otherwise.
 
         internal static volatile bool s_initialized;
-        internal static readonly bool s_perfCountersEnabled = false; // TODO (#7833): Implement socket perf counters. 
 
         #region Constructors
         public Socket(SocketType socketType, ProtocolType protocolType)
@@ -334,7 +333,7 @@ namespace System.Net.Sockets
             set
             {
                 //
-                // This implementation does not support non-IOCP-based async I/O on Windows, and this concept is 
+                // This implementation does not support non-IOCP-based async I/O on Windows, and this concept is
                 // not even meaningful on other platforms.  This option is really only functionally meaningful
                 // if the user calls DuplicateAndClose.  Since we also don't support DuplicateAndClose,
                 // we can safely ignore the caller's choice here, rather than breaking compat further with something
@@ -738,6 +737,7 @@ namespace System.Net.Sockets
             // This may throw ObjectDisposedException.
             SocketError errorCode = SocketPal.Bind(
                 _handle,
+                _protocolType,
                 socketAddress.Buffer,
                 socketAddress.Size);
 
@@ -1148,18 +1148,6 @@ namespace System.Net.Sockets
                 return 0;
             }
 
-            if (s_perfCountersEnabled)
-            {
-                if (bytesTransferred > 0)
-                {
-                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesSent, bytesTransferred);
-                    if (Transport == TransportType.Udp)
-                    {
-                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsSent);
-                    }
-                }
-            }
-
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, bytesTransferred);
             return bytesTransferred;
         }
@@ -1217,18 +1205,6 @@ namespace System.Net.Sockets
                     NetEventSource.Exit(this, 0);
                 }
                 return 0;
-            }
-
-            if (s_perfCountersEnabled)
-            {
-                if (bytesTransferred > 0)
-                {
-                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesSent, bytesTransferred);
-                    if (Transport == TransportType.Udp)
-                    {
-                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsSent);
-                    }
-                }
             }
 
             if (NetEventSource.IsEnabled)
@@ -1314,7 +1290,7 @@ namespace System.Net.Sockets
         public int SendTo(byte[] buffer, int offset, int size, SocketFlags socketFlags, EndPoint remoteEP)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
-            
+
             if (CleanedUp)
             {
                 throw new ObjectDisposedException(this.GetType().FullName);
@@ -1356,18 +1332,6 @@ namespace System.Net.Sockets
             {
                 // Save a copy of the EndPoint so we can use it for Create().
                 _rightEndPoint = endPointSnapshot;
-            }
-
-            if (s_perfCountersEnabled)
-            {
-                if (bytesTransferred > 0)
-                {
-                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesSent, bytesTransferred);
-                    if (Transport == TransportType.Udp)
-                    {
-                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsSent);
-                    }
-                }
             }
 
             if (NetEventSource.IsEnabled)
@@ -1460,20 +1424,6 @@ namespace System.Net.Sockets
                     NetEventSource.Exit(this, 0);
                 }
                 return 0;
-            }
-
-            if (s_perfCountersEnabled)
-            {
-                bool peek = ((int)socketFlags & (int)SocketFlags.Peek) != 0;
-
-                if (bytesTransferred > 0 && !peek)
-                {
-                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, bytesTransferred);
-                    if (Transport == TransportType.Udp)
-                    {
-                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsReceived);
-                    }
-                }
             }
 
             if (NetEventSource.IsEnabled)
@@ -1585,20 +1535,6 @@ namespace System.Net.Sockets
                     NetEventSource.Exit(this, 0);
                 }
                 return 0;
-            }
-
-            if (s_perfCountersEnabled)
-            {
-                bool peek = ((int)socketFlags & (int)SocketFlags.Peek) != 0;
-
-                if (bytesTransferred > 0 && !peek)
-                {
-                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, bytesTransferred);
-                    if (Transport == TransportType.Udp)
-                    {
-                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsReceived);
-                    }
-                }
             }
 
 #if TRACE_VERBOSE
@@ -1782,18 +1718,6 @@ namespace System.Net.Sockets
                 throw socketException;
             }
 
-            if (s_perfCountersEnabled)
-            {
-                if (bytesTransferred > 0)
-                {
-                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, bytesTransferred);
-                    if (Transport == TransportType.Udp)
-                    {
-                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsReceived);
-                    }
-                }
-            }
-
             if (NetEventSource.IsEnabled)
             {
                 NetEventSource.DumpBuffer(this, buffer, offset, size);
@@ -1828,7 +1752,7 @@ namespace System.Net.Sockets
             int realOptionLength = 0;
 
             // IOControl is used for Windows-specific IOCTL operations.  If we need to add support for IOCTLs specific
-            // to other platforms, we will likely need to add a new API, as the control codes may overlap with those 
+            // to other platforms, we will likely need to add a new API, as the control codes may overlap with those
             // from Windows.  Generally it would be preferable to add new methods/properties to abstract these across
             // platforms, however.
             SocketError errorCode = SocketPal.WindowsIoctl(_handle, ioControlCode, optionInValue, optionOutValue, out realOptionLength);
@@ -1973,7 +1897,7 @@ namespace System.Net.Sockets
                 out optionValue);
 
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Interop.Winsock.getsockopt returns errorCode:{errorCode}");
-        
+
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
@@ -2119,17 +2043,17 @@ namespace System.Net.Sockets
         }
 
         // Routine Description:
-        // 
+        //
         //    BeginConnect - Does an async connect.
-        // 
+        //
         // Arguments:
-        // 
+        //
         //    remoteEP - status line that we wish to parse
         //    Callback - Async Callback Delegate that is called upon Async Completion
         //    State - State used to track callback, set by caller, not required
-        // 
+        //
         // Return Value:
-        // 
+        //
         //    IAsyncResult - Async result used to retrieve result
         public IAsyncResult BeginConnect(EndPoint remoteEP, AsyncCallback callback, object state)
         {
@@ -2178,7 +2102,7 @@ namespace System.Net.Sockets
         {
             //
             // On Windows, we cannot duplicate a socket that is bound to an IOCP.  In this implementation, we *only*
-            // support IOCPs, so this will not work.  
+            // support IOCPs, so this will not work.
             //
             // On Unix, duplication of a socket into an arbitrary process is not supported at all.
             //
@@ -2409,16 +2333,16 @@ namespace System.Net.Sockets
         }
 
         // Routine Description:
-        // 
+        //
         //    EndConnect - Called after receiving callback from BeginConnect,
         //     in order to retrieve the result of async call
-        // 
+        //
         // Arguments:
-        // 
+        //
         //    AsyncResult - the AsyncResult Returned from BeginConnect call
-        // 
+        //
         // Return Value:
-        // 
+        //
         //    int - Return code from async Connect, 0 for success, SocketError.NotConnected otherwise
         public void EndConnect(IAsyncResult asyncResult)
         {
@@ -2434,36 +2358,10 @@ namespace System.Net.Sockets
                 throw new ArgumentNullException(nameof(asyncResult));
             }
 
-            LazyAsyncResult castedAsyncResult = null;
-            EndPoint remoteEndPoint = null;
-            ConnectOverlappedAsyncResult coar;
-            MultipleAddressConnectAsyncResult macar;
-            ConnectAsyncResult car;
-
-            coar = asyncResult as ConnectOverlappedAsyncResult;
-            if (coar == null)
-            {
-                macar = asyncResult as MultipleAddressConnectAsyncResult;
-                if (macar == null)
-                {
-                    car = asyncResult as ConnectAsyncResult;
-                    if (car != null)
-                    {
-                        remoteEndPoint = car.RemoteEndPoint;
-                        castedAsyncResult = car;
-                    }
-                }
-                else
-                {
-                    remoteEndPoint = macar.RemoteEndPoint;
-                    castedAsyncResult = macar;
-                }
-            }
-            else
-            {
-                remoteEndPoint = coar.RemoteEndPoint;
-                castedAsyncResult = coar;
-            }
+            ContextAwareResult castedAsyncResult =
+                asyncResult as ConnectOverlappedAsyncResult ??
+                asyncResult as MultipleAddressConnectAsyncResult ??
+                (ContextAwareResult)(asyncResult as ConnectAsyncResult);
 
             if (castedAsyncResult == null || castedAsyncResult.AsyncObject != this)
             {
@@ -2485,7 +2383,7 @@ namespace System.Net.Sockets
                 if (ex == null)
                 {
                     // Update the internal state of this socket according to the error before throwing.
-                    SocketException se = SocketExceptionFactory.CreateSocketException(castedAsyncResult.ErrorCode, remoteEndPoint);
+                    SocketException se = SocketExceptionFactory.CreateSocketException(castedAsyncResult.ErrorCode, castedAsyncResult.RemoteEndPoint);
                     UpdateStatusAfterSocketError(se);
                     ex = se;
                 }
@@ -2544,21 +2442,21 @@ namespace System.Net.Sockets
         }
 
         // Routine Description:
-        // 
+        //
         //    BeginSend - Async implementation of Send call, mirrored after BeginReceive
         //    This routine may go pending at which time,
         //    but any case the callback Delegate will be called upon completion
-        // 
+        //
         // Arguments:
-        // 
+        //
         //    WriteBuffer - status line that we wish to parse
         //    Index - Offset into WriteBuffer to begin sending from
         //    Size - Size of Buffer to transmit
         //    Callback - Delegate function that holds callback, called on completion of I/O
         //    State - State used to track callback, set by caller, not required
-        // 
+        //
         // Return Value:
-        // 
+        //
         //    IAsyncResult - Async result used to retrieve result
         public IAsyncResult BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback, object state)
         {
@@ -2626,7 +2524,7 @@ namespace System.Net.Sockets
 
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Interop.Winsock.WSASend returns:{errorCode} size:{size} returning AsyncResult:{asyncResult}");
 
-            // If the call failed, update our status 
+            // If the call failed, update our status
             CheckErrorAndUpdateStatus(errorCode);
 
             return errorCode;
@@ -2691,23 +2589,23 @@ namespace System.Net.Sockets
 
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Interop.Winsock.WSASend returns:{errorCode} returning AsyncResult:{asyncResult}");
 
-            // If the call failed, update our status 
+            // If the call failed, update our status
             CheckErrorAndUpdateStatus(errorCode);
 
             return errorCode;
         }
 
         // Routine Description:
-        // 
+        //
         //    EndSend -  Called by user code after I/O is done or the user wants to wait.
         //                 until Async completion, needed to retrieve error result from call
-        // 
+        //
         // Arguments:
-        // 
+        //
         //    AsyncResult - the AsyncResult Returned from BeginSend call
-        // 
+        //
         // Return Value:
-        // 
+        //
         //    int - Number of bytes transferred
         public int EndSend(IAsyncResult asyncResult)
         {
@@ -2746,18 +2644,6 @@ namespace System.Net.Sockets
 
             int bytesTransferred = castedAsyncResult.InternalWaitForCompletionInt32Result();
             castedAsyncResult.EndCalled = true;
-
-            if (s_perfCountersEnabled)
-            {
-                if (bytesTransferred > 0)
-                {
-                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesSent, bytesTransferred);
-                    if (Transport == TransportType.Udp)
-                    {
-                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsSent);
-                    }
-                }
-            }
 
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"bytesTransffered:{bytesTransferred}");
 
@@ -2826,14 +2712,14 @@ namespace System.Net.Sockets
         }
 
         // Routine Description:
-        // 
+        //
         //    BeginSendTo - Async implementation of SendTo,
-        // 
+        //
         //    This routine may go pending at which time,
         //    but any case the callback Delegate will be called upon completion
-        // 
+        //
         // Arguments:
-        // 
+        //
         //    WriteBuffer - Buffer to transmit
         //    Index - Offset into WriteBuffer to begin sending from
         //    Size - Size of Buffer to transmit
@@ -2841,9 +2727,9 @@ namespace System.Net.Sockets
         //    remoteEP - EndPoint to transmit To
         //    Callback - Delegate function that holds callback, called on completion of I/O
         //    State - State used to track callback, set by caller, not required
-        // 
+        //
         // Return Value:
-        // 
+        //
         //    IAsyncResult - Async result used to retrieve result
         public IAsyncResult BeginSendTo(byte[] buffer, int offset, int size, SocketFlags socketFlags, EndPoint remoteEP, AsyncCallback callback, object state)
         {
@@ -2927,16 +2813,16 @@ namespace System.Net.Sockets
         }
 
         // Routine Description:
-        // 
+        //
         //    EndSendTo -  Called by user code after I/O is done or the user wants to wait.
         //                 until Async completion, needed to retrieve error result from call
-        // 
+        //
         // Arguments:
-        // 
+        //
         //    AsyncResult - the AsyncResult Returned from BeginSend call
-        // 
+        //
         // Return Value:
-        // 
+        //
         //    int - Number of bytes transferred
         public int EndSendTo(IAsyncResult asyncResult)
         {
@@ -2966,18 +2852,6 @@ namespace System.Net.Sockets
             int bytesTransferred = castedAsyncResult.InternalWaitForCompletionInt32Result();
             castedAsyncResult.EndCalled = true;
 
-            if (s_perfCountersEnabled)
-            {
-                if (bytesTransferred > 0)
-                {
-                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesSent, bytesTransferred);
-                    if (Transport == TransportType.Udp)
-                    {
-                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsSent);
-                    }
-                }
-            }
-
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"bytesTransferred:{bytesTransferred}");
 
             // Throw an appropriate SocketException if the native call failed asynchronously.
@@ -2991,26 +2865,26 @@ namespace System.Net.Sockets
         }
 
         // Routine Description:
-        // 
+        //
         //    BeginReceive - Async implementation of Recv call,
-        // 
+        //
         //    Called when we want to start an async receive.
         //    We kick off the receive, and if it completes synchronously we'll
         //    call the callback. Otherwise we'll return an IASyncResult, which
         //    the caller can use to wait on or retrieve the final status, as needed.
-        // 
+        //
         //    Uses Winsock 2 overlapped I/O.
-        // 
+        //
         // Arguments:
-        // 
+        //
         //    ReadBuffer - status line that we wish to parse
         //    Index - Offset into ReadBuffer to begin reading from
         //    Size - Size of Buffer to recv
         //    Callback - Delegate function that holds callback, called on completion of I/O
         //    State - State used to track callback, set by caller, not required
-        // 
+        //
         // Return Value:
-        // 
+        //
         //    IAsyncResult - Async result used to retrieve result
         public IAsyncResult BeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback, object state)
         {
@@ -3152,7 +3026,7 @@ namespace System.Net.Sockets
             SocketError errorCode = SocketPal.ReceiveAsync(_handle, buffers, socketFlags, asyncResult);
 
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Interop.Winsock.WSARecv returns:{errorCode} returning AsyncResult:{asyncResult}");
- 
+
             if (!CheckErrorAndUpdateStatus(errorCode))
             {
             }
@@ -3175,17 +3049,17 @@ namespace System.Net.Sockets
 #endif
 
         // Routine Description:
-        // 
+        //
         //    EndReceive -  Called when I/O is done or the user wants to wait. If
         //              the I/O isn't done, we'll wait for it to complete, and then we'll return
         //              the bytes of I/O done.
-        // 
+        //
         // Arguments:
-        // 
+        //
         //    AsyncResult - the AsyncResult Returned from BeginSend call
-        // 
+        //
         // Return Value:
-        // 
+        //
         //    int - Number of bytes transferred
         public int EndReceive(IAsyncResult asyncResult)
         {
@@ -3225,18 +3099,6 @@ namespace System.Net.Sockets
 
             int bytesTransferred = castedAsyncResult.InternalWaitForCompletionInt32Result();
             castedAsyncResult.EndCalled = true;
-
-            if (s_perfCountersEnabled)
-            {
-                if (bytesTransferred > 0)
-                {
-                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, bytesTransferred);
-                    if (Transport == TransportType.Udp)
-                    {
-                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsReceived);
-                    }
-                }
-            }
 
 #if TRACE_VERBOSE
             if (NetEventSource.IsEnabled)
@@ -3436,18 +3298,6 @@ namespace System.Net.Sockets
                 }
             }
 
-            if (s_perfCountersEnabled)
-            {
-                if (bytesTransferred > 0)
-                {
-                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, bytesTransferred);
-                    if (Transport == TransportType.Udp)
-                    {
-                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsReceived);
-                    }
-                }
-            }
-
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"bytesTransferred:{bytesTransferred}");
 
             // Throw an appropriate SocketException if the native call failed asynchronously.
@@ -3464,18 +3314,18 @@ namespace System.Net.Sockets
         }
 
         // Routine Description:
-        // 
+        //
         //    BeginReceiveFrom - Async implementation of RecvFrom call,
-        // 
+        //
         //    Called when we want to start an async receive.
         //    We kick off the receive, and if it completes synchronously we'll
         //    call the callback. Otherwise we'll return an IASyncResult, which
         //    the caller can use to wait on or retrieve the final status, as needed.
-        // 
+        //
         //    Uses Winsock 2 overlapped I/O.
-        // 
+        //
         // Arguments:
-        // 
+        //
         //    ReadBuffer - status line that we wish to parse
         //    Index - Offset into ReadBuffer to begin reading from
         //    Request - Size of Buffer to recv
@@ -3483,9 +3333,9 @@ namespace System.Net.Sockets
         //    remoteEP - EndPoint that are to receive from
         //    Callback - Delegate function that holds callback, called on completion of I/O
         //    State - State used to track callback, set by caller, not required
-        // 
+        //
         // Return Value:
-        // 
+        //
         //    IAsyncResult - Async result used to retrieve result
         public IAsyncResult BeginReceiveFrom(byte[] buffer, int offset, int size, SocketFlags socketFlags, ref EndPoint remoteEP, AsyncCallback callback, object state)
         {
@@ -3596,17 +3446,17 @@ namespace System.Net.Sockets
         }
 
         // Routine Description:
-        // 
+        //
         //    EndReceiveFrom -  Called when I/O is done or the user wants to wait. If
         //              the I/O isn't done, we'll wait for it to complete, and then we'll return
         //              the bytes of I/O done.
-        // 
+        //
         // Arguments:
-        // 
+        //
         //    AsyncResult - the AsyncResult Returned from BeginReceiveFrom call
-        // 
+        //
         // Return Value:
-        // 
+        //
         //    int - Number of bytes transferred
         public int EndReceiveFrom(IAsyncResult asyncResult, ref EndPoint endPoint)
         {
@@ -3660,18 +3510,6 @@ namespace System.Net.Sockets
                 }
             }
 
-            if (s_perfCountersEnabled)
-            {
-                if (bytesTransferred > 0)
-                {
-                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, bytesTransferred);
-                    if (Transport == TransportType.Udp)
-                    {
-                        SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketDatagramsReceived);
-                    }
-                }
-            }
-
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"bytesTransferred:{bytesTransferred}");
 
             // Throw an appropriate SocketException if the native call failed asynchronously.
@@ -3684,22 +3522,22 @@ namespace System.Net.Sockets
         }
 
         // Routine Description:
-        // 
+        //
         //    BeginAccept - Does an async winsock accept, creating a new socket on success
-        // 
+        //
         //     Works by creating a pending accept request the first time,
         //     and subsequent calls are queued so that when the first accept completes,
         //     the next accept can be resubmitted in the callback.
         //     this routine may go pending at which time,
         //     but any case the callback Delegate will be called upon completion
-        // 
+        //
         // Arguments:
-        // 
+        //
         //    Callback - Async Callback Delegate that is called upon Async Completion
         //    State - State used to track callback, set by caller, not required
-        // 
+        //
         // Return Value:
-        // 
+        //
         //    IAsyncResult - Async result used to retrieve resultant new socket
         public IAsyncResult BeginAccept(AsyncCallback callback, object state)
         {
@@ -3778,17 +3616,17 @@ namespace System.Net.Sockets
         }
 
         // Routine Description:
-        // 
+        //
         //    EndAccept -  Called by user code after I/O is done or the user wants to wait.
         //                 until Async completion, so it provides End handling for async Accept calls,
         //                 and retrieves new Socket object
-        // 
+        //
         // Arguments:
-        // 
+        //
         //    AsyncResult - the AsyncResult Returned from BeginAccept call
-        // 
+        //
         // Return Value:
-        // 
+        //
         //    Socket - a valid socket if successful
         public Socket EndAccept(IAsyncResult asyncResult)
         {
@@ -3836,14 +3674,6 @@ namespace System.Net.Sockets
             buffer = castedAsyncResult.Buffer;
 
             castedAsyncResult.EndCalled = true;
-
-            if (s_perfCountersEnabled)
-            {
-                if (bytesTransferred > 0)
-                {
-                    SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketBytesReceived, bytesTransferred);
-                }
-            }
 
             // Throw an appropriate SocketException if the native call failed asynchronously.
             if ((SocketError)castedAsyncResult.ErrorCode != SocketError.Success)
@@ -3927,14 +3757,10 @@ namespace System.Net.Sockets
             SafeCloseSocket acceptHandle;
             e.AcceptSocket = GetOrCreateAcceptSocket(e.AcceptSocket, true, "AcceptSocket", out acceptHandle);
 
-            // Prepare for the native call.
-            e.StartOperationCommon(this);
+            // Prepare for and make the native call.
+            e.StartOperationCommon(this, SocketAsyncOperation.Accept);
             e.StartOperationAccept();
-
-            // Local variables for sync completion.
             SocketError socketError = SocketError.Success;
-
-            // Make the native call.
             try
             {
                 socketError = e.DoOperationAccept(this, _handle, acceptHandle);
@@ -3995,8 +3821,8 @@ namespace System.Net.Sockets
 
                 MultipleConnectAsync multipleConnectAsync = new SingleSocketMultipleConnectAsync(this, true);
 
-                e.StartOperationCommon(this);
-                e.StartOperationWrapperConnect(multipleConnectAsync);
+                e.StartOperationCommon(this, SocketAsyncOperation.Connect);
+                e.StartOperationConnect(multipleConnectAsync);
 
                 pending = multipleConnectAsync.StartConnectAsync(e, dnsEP);
             }
@@ -4025,7 +3851,7 @@ namespace System.Net.Sockets
                     }
                 }
 
-                // Save the old RightEndPoint and prep new RightEndPoint.           
+                // Save the old RightEndPoint and prep new RightEndPoint.
                 EndPoint oldEndPoint = _rightEndPoint;
                 if (_rightEndPoint == null)
                 {
@@ -4033,7 +3859,7 @@ namespace System.Net.Sockets
                 }
 
                 // Prepare for the native call.
-                e.StartOperationCommon(this);
+                e.StartOperationCommon(this, SocketAsyncOperation.Connect);
                 e.StartOperationConnect();
 
                 // Make the native call.
@@ -4046,7 +3872,7 @@ namespace System.Net.Sockets
                 {
                     _rightEndPoint = oldEndPoint;
 
-                    // Clear in-use flag on event args object. 
+                    // Clear in-use flag on event args object.
                     e.Complete();
                     throw;
                 }
@@ -4085,7 +3911,7 @@ namespace System.Net.Sockets
                 MultipleConnectAsync multipleConnectAsync = null;
                 if (dnsEP.AddressFamily == AddressFamily.Unspecified)
                 {
-                    // This is the only *Connect* API that fully supports multiple endpoint attempts, as it's responsible 
+                    // This is the only *Connect* API that fully supports multiple endpoint attempts, as it's responsible
                     // for creating each Socket instance and can create one per attempt.
                     multipleConnectAsync = new DualSocketMultipleConnectAsync(socketType, protocolType);
 #pragma warning restore
@@ -4096,8 +3922,8 @@ namespace System.Net.Sockets
                     multipleConnectAsync = new SingleSocketMultipleConnectAsync(attemptSocket, false);
                 }
 
-                e.StartOperationCommon(attemptSocket);
-                e.StartOperationWrapperConnect(multipleConnectAsync);
+                e.StartOperationCommon(attemptSocket, SocketAsyncOperation.Connect);
+                e.StartOperationConnect(multipleConnectAsync);
 
                 pending = multipleConnectAsync.StartConnectAsync(e, dnsEP);
             }
@@ -4130,10 +3956,8 @@ namespace System.Net.Sockets
                 throw new ObjectDisposedException(GetType().FullName);
             }
 
-            // Prepare for the native call.
-            e.StartOperationCommon(this);
-            e.StartOperationDisconnect();
-
+            // Prepare for and make the native call.
+            e.StartOperationCommon(this, SocketAsyncOperation.Disconnect);
             SocketError socketError = SocketError.Success;
             try
             {
@@ -4141,7 +3965,7 @@ namespace System.Net.Sockets
             }
             catch
             {
-                // clear in-use on event arg object 
+                // clear in-use on event arg object
                 e.Complete();
                 throw;
             }
@@ -4165,22 +3989,16 @@ namespace System.Net.Sockets
                 throw new ArgumentNullException(nameof(e));
             }
 
-            // Prepare for the native call.
-            e.StartOperationCommon(this);
-            e.StartOperationReceive();
-
-            // Local vars for sync completion of native call.
-            SocketFlags flags;
+            // Prepare for and make the native call.
+            e.StartOperationCommon(this, SocketAsyncOperation.Receive);
             SocketError socketError;
-
-            // Wrap native methods with try/catch so event args object can be cleaned up.
             try
             {
-                socketError = e.DoOperationReceive(_handle, out flags);
+                socketError = e.DoOperationReceive(_handle);
             }
             catch
             {
-                // Clear in-use flag on event args object. 
+                // Clear in-use flag on event args object.
                 e.Complete();
                 throw;
             }
@@ -4220,25 +4038,20 @@ namespace System.Net.Sockets
             EndPoint endPointSnapshot = e.RemoteEndPoint;
             e._socketAddress = SnapshotAndSerialize(ref endPointSnapshot);
 
-            // DualMode sockets may have updated the endPointSnapshot, and it has to have the same AddressFamily as 
+            // DualMode sockets may have updated the endPointSnapshot, and it has to have the same AddressFamily as
             // e.m_SocketAddres for Create to work later.
             e.RemoteEndPoint = endPointSnapshot;
 
-            // Prepare for the native call.
-            e.StartOperationCommon(this);
-            e.StartOperationReceiveFrom();
-
-            // Make the native call.
-            SocketFlags flags;
+            // Prepare for and make the native call.
+            e.StartOperationCommon(this, SocketAsyncOperation.ReceiveFrom);
             SocketError socketError;
-
             try
             {
-                socketError = e.DoOperationReceiveFrom(_handle, out flags);
+                socketError = e.DoOperationReceiveFrom(_handle);
             }
             catch
             {
-                // Clear in-use flag on event args object. 
+                // Clear in-use flag on event args object.
                 e.Complete();
                 throw;
             }
@@ -4278,26 +4091,22 @@ namespace System.Net.Sockets
             EndPoint endPointSnapshot = e.RemoteEndPoint;
             e._socketAddress = SnapshotAndSerialize(ref endPointSnapshot);
 
-            // DualMode may have updated the endPointSnapshot, and it has to have the same AddressFamily as 
+            // DualMode may have updated the endPointSnapshot, and it has to have the same AddressFamily as
             // e.m_SocketAddres for Create to work later.
             e.RemoteEndPoint = endPointSnapshot;
 
             SetReceivingPacketInformation();
 
-            // Prepare for the native call.
-            e.StartOperationCommon(this);
-            e.StartOperationReceiveMessageFrom();
-
-            // Make the native call.
+            // Prepare for and make the native call.
+            e.StartOperationCommon(this, SocketAsyncOperation.ReceiveMessageFrom);
             SocketError socketError;
-
             try
             {
                 socketError = e.DoOperationReceiveMessageFrom(this, _handle);
             }
             catch
             {
-                // Clear in-use flag on event args object. 
+                // Clear in-use flag on event args object.
                 e.Complete();
                 throw;
             }
@@ -4321,21 +4130,16 @@ namespace System.Net.Sockets
                 throw new ArgumentNullException(nameof(e));
             }
 
-            // Prepare for the native call.
-            e.StartOperationCommon(this);
-            e.StartOperationSend();
-
-            // Local vars for sync completion of native call.
+            // Prepare for and make the native call.
+            e.StartOperationCommon(this, SocketAsyncOperation.Send);
             SocketError socketError;
-
-            // Wrap native methods with try/catch so event args object can be cleaned up.
             try
             {
                 socketError = e.DoOperationSend(_handle);
             }
             catch
             {
-                // Clear in-use flag on event args object. 
+                // Clear in-use flag on event args object.
                 e.Complete();
                 throw;
             }
@@ -4368,33 +4172,18 @@ namespace System.Net.Sockets
                 throw new NotSupportedException(SR.net_notconnected);
             }
 
-            // Prepare for the native call.
-            e.StartOperationCommon(this);
-            e.StartOperationSendPackets();
-
-            // Make the native call.
+            // Prepare for and make the native call.
+            e.StartOperationCommon(this, SocketAsyncOperation.SendPackets);
             SocketError socketError;
-
-            Debug.Assert(e.SendPacketsDescriptorCount != null);
-
-            if (e.SendPacketsDescriptorCount > 0)
+            try
             {
-                try
-                {
-                    socketError = e.DoOperationSendPackets(this, _handle);
-                }
-                catch (Exception)
-                {
-                    // Clear in-use flag on event args object. 
-                    e.Complete();
-                    throw;
-                }
+                socketError = e.DoOperationSendPackets(this, _handle);
             }
-            else
+            catch (Exception)
             {
-                // No buffers or files to send.
-                e.FinishOperationSyncSuccess(0, SocketFlags.None);
-                socketError = SocketError.Success;
+                // Clear in-use flag on event args object.
+                e.Complete();
+                throw;
             }
 
             bool pending = (socketError == SocketError.IOPending);
@@ -4424,21 +4213,16 @@ namespace System.Net.Sockets
             EndPoint endPointSnapshot = e.RemoteEndPoint;
             e._socketAddress = SnapshotAndSerialize(ref endPointSnapshot);
 
-            // Prepare for the native call.
-            e.StartOperationCommon(this);
-            e.StartOperationSendTo();
-
-            // Make the native call.
+            // Prepare for and make the native call.
+            e.StartOperationCommon(this, SocketAsyncOperation.SendTo);
             SocketError socketError;
-
-            // Wrap native methods with try/catch so event args object can be cleaned up.
             try
             {
                 socketError = e.DoOperationSendTo(_handle);
             }
             catch
             {
-                // Clear in-use flag on event args object. 
+                // Clear in-use flag on event args object.
                 e.Complete();
                 throw;
             }
@@ -5090,13 +4874,13 @@ namespace System.Net.Sockets
         {
             private EndPoint _endPoint;
 
-            internal ConnectAsyncResult(object myObject, EndPoint endPoint, object myState, AsyncCallback myCallBack) : 
+            internal ConnectAsyncResult(object myObject, EndPoint endPoint, object myState, AsyncCallback myCallBack) :
                 base(myObject, myState, myCallBack)
             {
                 _endPoint = endPoint;
             }
 
-            internal EndPoint RemoteEndPoint
+            internal override EndPoint RemoteEndPoint
             {
                 get { return _endPoint; }
             }
@@ -5118,7 +4902,7 @@ namespace System.Net.Sockets
             internal int _port;
             internal Exception _lastException;
 
-            internal EndPoint RemoteEndPoint
+            internal override EndPoint RemoteEndPoint
             {
                 get
                 {
@@ -5296,10 +5080,6 @@ namespace System.Net.Sockets
             _isConnected = true;
             _isDisconnected = false;
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, "now connected");
-            if (s_perfCountersEnabled)
-            {
-                SocketPerfCounter.Instance.Increment(SocketPerfCounterName.SocketConnectionsEstablished);
-            }
         }
 
         internal void SetToDisconnected()

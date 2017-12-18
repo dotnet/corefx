@@ -87,11 +87,6 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public async Task MulticastInterface_Set_AnyInterface_Succeeds()
         {
-            if (PlatformDetection.IsFedora)
-            {
-                return; // [ActiveIssue(24008)]
-            }
-
             // On all platforms, index 0 means "any interface"
             await MulticastInterface_Set_Helper(0);
         }
@@ -122,11 +117,7 @@ namespace System.Net.Sockets.Tests
                 receiveSocket.ReceiveTimeout = 1000;
                 receiveSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(multicastAddress, interfaceIndex));
 
-                // https://github.com/Microsoft/BashOnWindows/issues/990
-                if (!PlatformDetection.IsWindowsSubsystemForLinux)
-                {
-                    sendSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, IPAddress.HostToNetworkOrder(interfaceIndex));
-                }
+                sendSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, IPAddress.HostToNetworkOrder(interfaceIndex));
 
                 var receiveBuffer = new byte[1024];
                 var receiveTask = receiveSocket.ReceiveAsync(new ArraySegment<byte>(receiveBuffer), SocketFlags.None);
@@ -282,6 +273,88 @@ namespace System.Net.Sockets.Tests
         public void ReuseAddress_Windows(bool? exclusiveAddressUse, bool? firstSocketReuseAddress, bool? secondSocketReuseAddress, bool expectFailure)
         {
             ReuseAddress(exclusiveAddressUse, firstSocketReuseAddress, secondSocketReuseAddress, expectFailure);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // Windows defaults are different
+        public void ExclusiveAddress_Default_Unix()
+        {
+            using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                Assert.Equal(1, (int)a.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse));
+                Assert.Equal(true, a.ExclusiveAddressUse);
+                Assert.Equal(0, (int)a.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress));
+            }
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(0)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // Unix does not have separate options for ExclusiveAddressUse and ReuseAddress.
+        public void SettingExclusiveAddress_SetsReuseAddress(int value)
+        {
+            using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                a.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, value);
+
+                Assert.Equal(value, (int)a.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse));
+                Assert.Equal(value == 1 ? 0 : 1, (int)a.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress));
+            }
+
+            // SettingReuseAddress_SetsExclusiveAddress
+            using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                a.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, value);
+
+                Assert.Equal(value, (int)a.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress));
+                Assert.Equal(value == 1 ? 0 : 1, (int)a.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse));
+            }
+        }
+
+        [Fact]
+        public void BindDuringTcpWait_Succeeds()
+        {
+            int port = 0;
+            using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                a.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                port = (a.LocalEndPoint as IPEndPoint).Port;
+                a.Listen(10);
+
+                // Connect a client
+                using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+                {
+                    client.Connect(new IPEndPoint(IPAddress.Loopback, port));
+                    // accept socket and close it with zero linger time.
+                    a.Accept().Close(0);
+                }
+            }
+
+            // Bind a socket to the same address we just used.
+            using (Socket b = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                b.Bind(new IPEndPoint(IPAddress.Loopback, port));
+            }
+        }
+
+        [Fact]
+        public void ExclusiveAddressUseTcp()
+        {
+            using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                // ExclusiveAddressUse defaults to true on Unix, on Windows it defaults to false.
+                a.ExclusiveAddressUse = true;
+
+                a.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                a.Listen(10);
+                int port = (a.LocalEndPoint as IPEndPoint).Port;
+
+                using (Socket b = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+                {
+                    SocketException ex = Assert.ThrowsAny<SocketException>(() => b.Bind(new IPEndPoint(IPAddress.Loopback, port)));
+                    Assert.Equal(SocketError.AddressAlreadyInUse, ex.SocketErrorCode);
+                }
+            }
         }
 
         [OuterLoop] // TODO: Issue #11345

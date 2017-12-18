@@ -49,10 +49,14 @@ namespace System.IO.Pipes
                 throw new PlatformNotSupportedException(SR.PlatformNotSupproted_InvalidNameChars);
             }
 
-            // Return the pipe path.  The pipe is created directly under %TMPDIR%.  We don't bother
-            // putting it into subdirectories, as the pipe will only exist on disk for the
-            // duration between when the server starts listening and the client connects, after
-            // which the pipe will be deleted.
+            // Return the pipe path.  The pipe is created directly under %TMPDIR%.  We previously
+            // didn't put it into a subdirectory because it only existed on disk for the duration
+            // between when the server started listening in WaitForConnection and when the client
+            // connected, after which the pipe was deleted.  We now create the pipe when the
+            // server stream is created, which leaves it on disk longer, but we can't change the
+            // naming scheme used as that breaks the ability for code running on an older
+            // runtime to connect to code running on the newer runtime.  That means we're stuck
+            // with a tmp file for the lifetime of the server stream.
             return s_pipePrefix + pipeName;
         }
 
@@ -77,13 +81,12 @@ namespace System.IO.Pipes
 
         /// <summary>Initializes the handle to be used asynchronously.</summary>
         /// <param name="handle">The handle.</param>
-        [SecurityCritical]
         private void InitializeAsyncHandle(SafePipeHandle handle)
         {
             // nop
         }
 
-        private void UninitializeAsyncHandle()
+        internal virtual void DisposeCore(bool disposing)
         {
             // nop
         }
@@ -264,7 +267,6 @@ namespace System.IO.Pipes
         }
 
         // Blocks until the other end of the pipe has read in all written buffer.
-        [SecurityCritical]
         public void WaitForPipeDrain()
         {
             CheckWriteOperations();
@@ -284,7 +286,6 @@ namespace System.IO.Pipes
         // override this in cases where only one mode is legal (such as anonymous pipes)
         public virtual PipeTransmissionMode TransmissionMode
         {
-            [SecurityCritical]
             [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             get
             {
@@ -297,7 +298,6 @@ namespace System.IO.Pipes
         // access. If that passes, call to GetNamedPipeInfo will succeed.
         public virtual int InBufferSize
         {
-            [SecurityCritical]
             [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands")]
             get
             {
@@ -316,7 +316,6 @@ namespace System.IO.Pipes
         // the ctor.
         public virtual int OutBufferSize
         {
-            [SecurityCritical]
             [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             get
             {
@@ -331,13 +330,11 @@ namespace System.IO.Pipes
 
         public virtual PipeTransmissionMode ReadMode
         {
-            [SecurityCritical]
             get
             {
                 CheckPipePropertyOperations();
                 return PipeTransmissionMode.Byte; // Unix pipes are only byte-based, not message-based
             }
-            [SecurityCritical]
             [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             set
             {

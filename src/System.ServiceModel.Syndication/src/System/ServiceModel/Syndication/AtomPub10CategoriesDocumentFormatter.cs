@@ -2,17 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.ObjectModel;
+using System.Runtime.Serialization;
+using System.Xml.Serialization;
+using System.Collections.Generic;
+using System.Xml;
+using System.Xml.Schema;
+using System.ServiceModel.Channels;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace System.ServiceModel.Syndication
 {
-    using System;
-    using System.Runtime.CompilerServices;
-    using System.Threading.Tasks;
-    using System.Xml;
-    using System.Xml.Serialization;
-
     [XmlRoot(ElementName = App10Constants.Categories, Namespace = App10Constants.Namespace)]
-    public class AtomPub10CategoriesDocumentFormatter : CategoriesDocumentFormatter
+    public class AtomPub10CategoriesDocumentFormatter : CategoriesDocumentFormatter, IXmlSerializable
     {
         private Type _inlineDocumentType;
         private int _maxExtensionSize;
@@ -30,24 +34,22 @@ namespace System.ServiceModel.Syndication
         {
             if (inlineDocumentType == null)
             {
-                throw new ArgumentNullException(nameof(inlineDocumentType));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("inlineDocumentType");
             }
-
             if (!typeof(InlineCategoriesDocument).IsAssignableFrom(inlineDocumentType))
             {
-                throw new ArgumentException(string.Format(SR.InvalidObjectTypePassed, nameof(inlineDocumentType), nameof(InlineCategoriesDocument)));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgument("inlineDocumentType",
+                    SR.Format(SR.InvalidObjectTypePassed, "inlineDocumentType", "InlineCategoriesDocument"));
             }
-
             if (referencedDocumentType == null)
             {
-                throw new ArgumentNullException(nameof(referencedDocumentType));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("referencedDocumentType");
             }
-
             if (!typeof(ReferencedCategoriesDocument).IsAssignableFrom(referencedDocumentType))
             {
-                throw new ArgumentException(string.Format(SR.InvalidObjectTypePassed, nameof(referencedDocumentType), nameof(ReferencedCategoriesDocument)));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgument("referencedDocumentType",
+                    SR.Format(SR.InvalidObjectTypePassed, "referencedDocumentType", "ReferencedCategoriesDocument"));
             }
-
             _maxExtensionSize = int.MaxValue;
             _preserveAttributeExtensions = true;
             _preserveElementExtensions = true;
@@ -79,74 +81,95 @@ namespace System.ServiceModel.Syndication
             get { return App10Constants.Namespace; }
         }
 
-        public override Task<bool> CanReadAsync(XmlReader reader)
+        public override bool CanRead(XmlReader reader)
         {
             if (reader == null)
             {
-                throw new ArgumentNullException(nameof(reader));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("reader");
             }
-
-            XmlReaderWrapper wrappedReader = XmlReaderWrapper.CreateFromReader(reader);
-            return wrappedReader.IsStartElementAsync(App10Constants.Categories, App10Constants.Namespace);
+            return reader.IsStartElement(App10Constants.Categories, App10Constants.Namespace);
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        XmlSchema IXmlSerializable.GetSchema()
+        {
+            return null;
+        }
 
-
-        private Task ReadXmlAsync(XmlReaderWrapper reader)
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        void IXmlSerializable.ReadXml(XmlReader reader)
         {
             if (reader == null)
             {
-                throw new ArgumentNullException(nameof(reader));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("reader");
             }
-
-            return ReadDocumentAsync(reader);
+            TraceCategoriesDocumentReadBegin();
+            ReadDocument(reader);
+            TraceCategoriesDocumentReadEnd();
         }
 
-        private Task WriteXmlAsync(XmlWriter writer)
+        [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Justification = "The IXmlSerializable implementation is only for exposing under WCF DataContractSerializer. The funcionality is exposed to derived class through the ReadFrom\\WriteTo methods")]
+        void IXmlSerializable.WriteXml(XmlWriter writer)
         {
             if (writer == null)
             {
-                throw new ArgumentNullException(nameof(writer));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("writer");
             }
-
             if (this.Document == null)
             {
-                throw new InvalidOperationException(SR.DocumentFormatterDoesNotHaveDocument);
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.DocumentFormatterDoesNotHaveDocument)));
             }
-
-            return WriteDocumentAsync(writer);
+            TraceCategoriesDocumentWriteBegin();
+            WriteDocument(writer);
+            TraceCategoriesDocumentWriteEnd();
         }
 
-        public override async Task ReadFromAsync(XmlReader reader)
+        public override void ReadFrom(XmlReader reader)
         {
             if (reader == null)
             {
-                throw new ArgumentNullException(nameof(reader));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("reader");
             }
-
-            if (!await CanReadAsync(reader))
+            if (!CanRead(reader))
             {
-                throw new XmlException(string.Format(SR.UnknownDocumentXml, reader.LocalName, reader.NamespaceURI));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new XmlException(SR.Format(SR.UnknownDocumentXml, reader.LocalName, reader.NamespaceURI)));
             }
-
-            await ReadDocumentAsync(XmlReaderWrapper.CreateFromReader(reader));
+            TraceCategoriesDocumentReadBegin();
+            ReadDocument(reader);
+            TraceCategoriesDocumentReadEnd();
         }
 
-        public override async Task WriteTo(XmlWriter writer)
+        public override void WriteTo(XmlWriter writer)
         {
             if (writer == null)
             {
-                throw new ArgumentNullException(nameof(writer));
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("writer");
             }
-
             if (this.Document == null)
             {
-                throw new InvalidOperationException(SR.DocumentFormatterDoesNotHaveDocument);
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.DocumentFormatterDoesNotHaveDocument)));
             }
-
+            TraceCategoriesDocumentWriteBegin();
             writer.WriteStartElement(App10Constants.Prefix, App10Constants.Categories, App10Constants.Namespace);
-            await WriteDocumentAsync(writer);
+            WriteDocument(writer);
             writer.WriteEndElement();
+            TraceCategoriesDocumentWriteEnd();
+        }
+
+        internal static void TraceCategoriesDocumentReadBegin()
+        {
+        }
+
+        internal static void TraceCategoriesDocumentReadEnd()
+        {
+        }
+
+        internal static void TraceCategoriesDocumentWriteBegin()
+        {
+        }
+
+        internal static void TraceCategoriesDocumentWriteEnd()
+        {
         }
 
         protected override InlineCategoriesDocument CreateInlineCategoriesDocument()
@@ -173,12 +196,12 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        private async Task ReadDocumentAsync(XmlReaderWrapper reader)
+        private void ReadDocument(XmlReader reader)
         {
             try
             {
-                await SyndicationFeedFormatter.MoveToStartElementAsync(reader);
-                SetDocument(await AtomPub10ServiceDocumentFormatter.ReadCategories(reader, null,
+                SyndicationFeedFormatter.MoveToStartElement(reader);
+                SetDocument(AtomPub10ServiceDocumentFormatter.ReadCategories(reader, null,
                     delegate ()
                     {
                         return this.CreateInlineCategoriesDocument();
@@ -195,19 +218,19 @@ namespace System.ServiceModel.Syndication
             }
             catch (FormatException e)
             {
-                throw new XmlException(FeedUtils.AddLineInfo(reader, SR.ErrorParsingDocument), e);
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new XmlException(FeedUtils.AddLineInfo(reader, SR.ErrorParsingDocument), e));
             }
             catch (ArgumentException e)
             {
-                throw new XmlException(FeedUtils.AddLineInfo(reader, SR.ErrorParsingDocument), e);
+                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new XmlException(FeedUtils.AddLineInfo(reader, SR.ErrorParsingDocument), e));
             }
         }
 
-        private Task WriteDocumentAsync(XmlWriter writer)
+        private void WriteDocument(XmlWriter writer)
         {
             // declare the atom10 namespace upfront for compactness
             writer.WriteAttributeString(Atom10Constants.Atom10Prefix, Atom10FeedFormatter.XmlNsNs, Atom10Constants.Atom10Namespace);
-            return AtomPub10ServiceDocumentFormatter.WriteCategoriesInnerXml(writer, this.Document, null, this.Version);
+            AtomPub10ServiceDocumentFormatter.WriteCategoriesInnerXml(writer, this.Document, null, this.Version);
         }
     }
 }

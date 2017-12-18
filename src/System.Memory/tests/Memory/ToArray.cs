@@ -24,7 +24,7 @@ namespace System.MemoryTests
             int[] a = { 91, 92, 93, 94, 95 };
             var memory = new Memory<int>(a);
             int[] copy = memory.Slice(2).ToArray();
-            
+
             Assert.Equal<int>(new int[] { 93, 94, 95 }, copy);
         }
 
@@ -41,6 +41,14 @@ namespace System.MemoryTests
         public static void ToArrayEmpty()
         {
             Memory<int> memory = Memory<int>.Empty;
+            int[] copy = memory.ToArray();
+            Assert.Equal(0, copy.Length);
+        }
+
+        [Fact]
+        public static void ToArrayDefault()
+        {
+            Memory<int> memory = default;
             int[] copy = memory.ToArray();
             Assert.Equal(0, copy.Length);
         }

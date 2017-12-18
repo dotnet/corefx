@@ -18,7 +18,7 @@ namespace System.Net.Sockets
         public int Send(ReadOnlySpan<byte> buffer, System.Net.Sockets.SocketFlags socketFlags, out System.Net.Sockets.SocketError errorCode) { throw null; }
     }
 
-    public partial static class SocketTaskExtensions
+    public static partial class SocketTaskExtensions
     {
         public static System.Threading.Tasks.ValueTask<int> ReceiveAsync(this System.Net.Sockets.Socket socket, System.Memory<byte> buffer, System.Net.Sockets.SocketFlags socketFlags, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public static System.Threading.Tasks.ValueTask<int> SendAsync(this System.Net.Sockets.Socket socket, System.ReadOnlyMemory<byte> buffer, System.Net.Sockets.SocketFlags socketFlags, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
@@ -26,7 +26,12 @@ namespace System.Net.Sockets
 
     public partial class SocketAsyncEventArgs : System.EventArgs, System.IDisposable
     {
-        public System.Memory<byte> GetBuffer() { throw null; }
+        public System.Memory<byte> MemoryBuffer { get { throw null; } }
         public void SetBuffer(System.Memory<byte> buffer) { throw null; }
+    }
+
+    public sealed partial class UnixDomainSocketEndPoint : System.Net.EndPoint
+    {
+        public UnixDomainSocketEndPoint(string path) { }
     }
 }
