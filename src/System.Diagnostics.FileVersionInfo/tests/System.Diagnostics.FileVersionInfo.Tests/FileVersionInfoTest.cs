@@ -105,6 +105,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void FileVersionInfo_RelativePath_ArgumentException()
         {
+            File.WriteAllText("kernelbase.dll", "bogus kernelbase.dll");
             Assert.Throws<ArgumentException>(() =>
                 FileVersionInfo.GetVersionInfo("kernelbase.dll"));
         }
