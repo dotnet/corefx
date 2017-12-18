@@ -102,6 +102,13 @@ namespace System.Diagnostics.Tests
                 FileVersionInfo.GetVersionInfo(Path.Combine(Directory.GetCurrentDirectory(), TestNotFoundFileName)));
         }
 
+        [Fact]
+        public void FileVersionInfo_RelativePath_ArgumentException()
+        {
+            Assert.Throws<ArgumentException>(() =>
+                FileVersionInfo.GetVersionInfo(FileVersionInfo.GetVersionInfo("kernelbase.dll")));
+        }
+
         // Additional Tests Wanted:
         // [] File exists but we don't have permission to read it
         // [] DLL has unknown codepage info
