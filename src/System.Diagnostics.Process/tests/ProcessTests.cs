@@ -94,7 +94,7 @@ namespace System.Diagnostics.Tests
         public void TestEnableRaiseEvents(bool? enable)
         {
             bool exitedInvoked = false;
-
+            
             Process p = CreateProcessLong();
             if (enable.HasValue)
             {
@@ -1242,22 +1242,6 @@ namespace System.Diagnostics.Tests
                     FileName = "FileName",
                     RedirectStandardError = false,
                     StandardErrorEncoding = Encoding.UTF8
-                }
-            };
-
-            Assert.Throws<InvalidOperationException>(() => process.Start());
-        }
-
-        [Fact]
-        public void Start_HasStandardInputEncodingNonRedirected_ThrowsInvalidOperationException()
-        {
-            var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "FileName",
-                    RedirectStandardInput = false,
-                    StandardInputEncoding = Encoding.UTF8
                 }
             };
 

@@ -95,11 +95,11 @@ namespace System.Diagnostics
         public bool RedirectStandardOutput { get; set; }
         public bool RedirectStandardError { get; set; }
 
-        public Encoding StandardErrorEncoding { get; set; }
-
-        public Encoding StandardOutputEncoding { get; set; }
-
         public Encoding StandardInputEncoding { get; set; }
+
+        public Encoding StandardErrorEncoding { get; set; }
+        
+        public Encoding StandardOutputEncoding { get; set; }
 
         /// <devdoc>
         ///    <para>
