@@ -1,8 +1,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.30319.200
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Private.Uri.ExtendedFunctional.Tests", "tests\ExtendedFunctionalTests\System.Private.Uri.ExtendedFunctional.Tests.csproj", "{0FEBE054-68AC-446F-B999-9068736D3CEC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Private.Uri.ExtendedFunctional.Tests", "tests\ExtendedFunctionalTests\System.Private.Uri.ExtendedFunctional.Tests.csproj", "{0febe054-68ac-446f-b999-9068736d3cec}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4AC5343E-6E31-4BA5-A795-0493AE7E9008} = {4AC5343E-6E31-4BA5-A795-0493AE7E9008}
 	EndProjectSection
@@ -29,10 +29,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0FEBE054-68AC-446F-B999-9068736D3CEC}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
-		{0FEBE054-68AC-446F-B999-9068736D3CEC}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
-		{0FEBE054-68AC-446F-B999-9068736D3CEC}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
-		{0FEBE054-68AC-446F-B999-9068736D3CEC}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{0febe054-68ac-446f-b999-9068736d3cec}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{0febe054-68ac-446f-b999-9068736d3cec}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{0febe054-68ac-446f-b999-9068736d3cec}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{0febe054-68ac-446f-b999-9068736d3cec}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
 		{B0FFC4A8-BAC3-4A7F-8FD5-5B680209371C}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
 		{B0FFC4A8-BAC3-4A7F-8FD5-5B680209371C}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
 		{B0FFC4A8-BAC3-4A7F-8FD5-5B680209371C}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
@@ -50,12 +50,9 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{0FEBE054-68AC-446F-B999-9068736D3CEC} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
+		{0febe054-68ac-446f-b999-9068736d3cec} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
 		{B0FFC4A8-BAC3-4A7F-8FD5-5B680209371C} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
 		{96AF3242-A368-4F13-B006-A722CC3B8517} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
 		{4AC5343E-6E31-4BA5-A795-0493AE7E9008} = {E107E9C1-E893-4E87-987E-04EF0DCEAEFD}
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {E3D9B56D-9E4F-4BC3-9284-63443FE79FBC}
 	EndGlobalSection
 EndGlobal
