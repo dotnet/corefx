@@ -54,6 +54,7 @@ namespace Internal.Cryptography
 
                 const int ArbitraryStackLimit = 256;
                 Span<byte> tmp = stackalloc byte[ArbitraryStackLimit];
+                // Use stackalloc 0 so data can later hold a slice of tmp.
                 ReadOnlySpan<byte> data = stackalloc byte[0];
                 byte[] poolBytes = null;
 
@@ -75,7 +76,7 @@ namespace Internal.Cryptography
                                 throw new CryptographicException();
                             }
 
-                            data = tmp.Slice(0, bytesWritten);
+                            data = new ReadOnlySpan<byte>(poolBytes, 0, bytesWritten);
                         }
                     }
                     else

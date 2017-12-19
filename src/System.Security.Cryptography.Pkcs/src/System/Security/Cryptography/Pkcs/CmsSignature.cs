@@ -108,6 +108,11 @@ namespace System.Security.Cryptography.Pkcs
                     return false;
                 }
 
+                // Fill it with zeros so that small data is correctly zero-prefixed.
+                // this buffer isn't very large, so there's not really a reason to the
+                // partial-fill gymnastics.
+                ieeeSignature.Clear();
+
                 ReadOnlySpan<byte> val = sequence.GetIntegerBytes().Span;
 
                 if (val.Length > fieldSize && val[0] == 0)
