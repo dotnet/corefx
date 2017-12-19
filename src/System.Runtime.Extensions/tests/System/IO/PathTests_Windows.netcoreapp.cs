@@ -33,5 +33,40 @@ namespace System.IO.Tests
             string path = "C:\\Test" + component;
             Assert.Equal("C:\\Test", Path.GetFullPath(path));
         }
+
+        [Theory,
+            MemberData(nameof(GetFullPath_Windows_NonFullyQualified)),           
+            MemberData(nameof(GetFullPath_Windows_FullyQualified_Diff))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void GetFullPath_BasicExpansions_Windows(string path, string basePath, string expected)
+        {
+            Assert.Equal(expected, Path.GetFullPath(path, basePath));
+        }
+
+        [Theory,
+           MemberData(nameof(GetFullPath_Windows_UNC))]
+        public void GetFullPath_CommonUnc_Windows(string path, string basePath, string expected)
+        {
+            Assert.Equal(@"\\" + expected, Path.GetFullPath(path, @"\\" + basePath));
+            Assert.Equal(@"\\.\UNC\" + expected, Path.GetFullPath(path, @"\\.\UNC\" + basePath));
+            Assert.Equal(@"\\?\UNC\" + expected, Path.GetFullPath(path, @"\\?\UNC\" + basePath));
+        }
+
+        [Theory,
+           MemberData(nameof(GetFullPath_Windows_CommonDevicePaths))]
+        public void GetFullPath_CommonDevice_Windows(string path, string basePath, string expected)
+        {
+            Assert.Equal(@"\\.\" + expected, Path.GetFullPath(path, @"\\.\" + basePath));
+            Assert.Equal(@"\\?\" + expected, Path.GetFullPath(path, @"\\?\" + basePath));            
+        }
+
+        [Theory,
+            MemberData(nameof(GetFullPath_CommonUnRootedWindowsData))]
+        public void GetFullPath_CommonUnRooted_Windows(string path, string basePath, string expected)
+        {
+            Assert.Equal(expected, Path.GetFullPath(path, basePath));
+            Assert.Equal(@"\\.\" + expected, Path.GetFullPath(path, @"\\.\" + basePath));
+            Assert.Equal(@"\\?\" + expected, Path.GetFullPath(path, @"\\?\" + basePath));
+        }
     }
 }

@@ -65,5 +65,13 @@ namespace System.IO.Tests
             Assert.Equal(Path.Combine(curDir, "    "), Path.GetFullPath("    "));
             Assert.Equal(Path.Combine(curDir, "\r\n"), Path.GetFullPath("\r\n"));
         }
+
+        [Theory,
+           MemberData(nameof(GetFullPath_BasePath_BasicExpansions_TestData_Unix))]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public static void GetFullPath_BasicExpansions_Unix(string path, string basePath, string expected)
+        {
+            Assert.Equal(expected, Path.GetFullPath(path, basePath));
+        }
     }
 }

@@ -212,5 +212,19 @@ namespace System.IO.Tests
             string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + wildcard + "ing");
             Assert.Equal(path, Path.GetFullPath(path));
         }
+
+        [Theory,
+            MemberData(nameof(GetFullPathBasePath_ArgumentNullException))]
+        public static void GetFullPath_BasePath_NullInput(string path, string basePath, string paramName)
+        {
+            Assert.Throws<ArgumentNullException>(paramName, () => Path.GetFullPath(path, basePath));
+        }
+
+        [Theory,
+    MemberData(nameof(GetFullPathBasePath_ArgumentException))]
+        public static void GetFullPath_BasePath_Input(string path, string basePath, string paramName)
+        {
+            Assert.Throws<ArgumentException>(paramName, () => Path.GetFullPath(path, basePath));
+        }
     }
 }
