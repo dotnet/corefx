@@ -129,11 +129,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             }
         }
 
-        private void ErrAppendMethodParentSym(MethodSymbol sym, SubstContext pcxt)
-        {
-            ErrAppendParentSym(sym, pcxt);
-        }
-
         private void ErrAppendParentSym(Symbol sym, SubstContext pctx)
         {
             ErrAppendParentCore(sym.parent, pctx);
@@ -231,7 +226,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 return;
             }
 
-            ErrAppendMethodParentSym(meth, pctx);
+            ErrAppendParentSym(meth, pctx);
             if (meth.IsConstructor())
             {
                 // Use the name of the parent class instead of the name "<ctor>".
