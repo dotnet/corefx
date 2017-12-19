@@ -23,12 +23,15 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' Or '$(TargetGroup)' == 'uap'">
     <ProjectReference Include="..\..\System.Collections\ref\System.Collections.csproj" />
     <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Runtime.InteropServices\ref\System.Runtime.InteropServices.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.0'">
     <Reference Include="System.Runtime" />
     <Reference Include="System.Collections" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard1.0'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.3'">
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Collections" />
     <Reference Include="System.Runtime.InteropServices" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
