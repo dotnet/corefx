@@ -2,7 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if !netstandard
+using Internal.Runtime.CompilerServices;
+#else
 using System.Runtime.CompilerServices;
+#endif
 
 namespace System.Buffers.Text
 {
@@ -74,7 +78,6 @@ namespace System.Buffers.Text
                 default:
                     return ThrowHelper.TryFormatThrowFormatException(out bytesWritten);
             }
-
 
             bytesWritten = GuidChars + (dash ? 4 : 0) + (bookEnds ? 2 : 0);
             if (buffer.Length < bytesWritten)

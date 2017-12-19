@@ -4,6 +4,10 @@
 
 using System.Runtime.CompilerServices;
 
+#if !netstandard
+using Internal.Runtime.CompilerServices;
+#endif
+
 namespace System.Buffers.Text
 {
     /// <summary>
@@ -58,9 +62,11 @@ namespace System.Buffers.Text
                 sourceIndex += 3;
             }
 
-            if (maxSrcLength != srcLength - 2) goto DestinationSmallExit;
-            
-            if (isFinalBlock != true) goto NeedMoreDataExit;
+            if (maxSrcLength != srcLength - 2)
+                goto DestinationSmallExit;
+
+            if (isFinalBlock != true)
+                goto NeedMoreDataExit;
 
             if (sourceIndex == srcLength - 1)
             {
@@ -81,12 +87,12 @@ namespace System.Buffers.Text
             written = destIndex;
             return OperationStatus.Done;
 
-            NeedMoreDataExit:
+        NeedMoreDataExit:
             consumed = sourceIndex;
             written = destIndex;
             return OperationStatus.NeedMoreData;
 
-            DestinationSmallExit:
+        DestinationSmallExit:
             consumed = sourceIndex;
             written = destIndex;
             return OperationStatus.DestinationTooSmall;
@@ -125,7 +131,8 @@ namespace System.Buffers.Text
         public static OperationStatus EncodeToUtf8InPlace(Span<byte> buffer, int dataLength, out int written)
         {
             int encodedLength = GetMaxEncodedToUtf8Length(dataLength);
-            if (buffer.Length < encodedLength) goto FalseExit;
+            if (buffer.Length < encodedLength)
+                goto FalseExit;
 
             int leftover = dataLength - dataLength / 3 * 3; // how many bytes after packs of 3
 
@@ -135,7 +142,7 @@ namespace System.Buffers.Text
 
             ref byte encodingMap = ref s_encodingMap[0];
             ref byte bufferBytes = ref buffer.DangerousGetPinnableReference();
-            
+
             // encode last pack to avoid conditional in the main loop
             if (leftover != 0)
             {
@@ -165,7 +172,7 @@ namespace System.Buffers.Text
             written = encodedLength;
             return OperationStatus.Done;
 
-            FalseExit:
+        FalseExit:
             written = 0;
             return OperationStatus.DestinationTooSmall;
         }

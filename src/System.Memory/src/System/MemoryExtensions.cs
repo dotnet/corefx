@@ -2,7 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+
+#if !netstandard
+using Internal.Runtime.CompilerServices;
+#endif
 
 namespace System
 {
@@ -20,10 +25,10 @@ namespace System
         public static int IndexOf<T>(this Span<T> span, T value)
             where T : IEquatable<T>
         {
-            if (typeof(T) == typeof(byte)) 
+            if (typeof(T) == typeof(byte))
                 return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()), 
-                    Unsafe.As<T, byte>(ref value), 
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    Unsafe.As<T, byte>(ref value),
                     span.Length);
             return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
         }
@@ -37,13 +42,48 @@ namespace System
         public static int IndexOf<T>(this Span<T> span, ReadOnlySpan<T> value)
             where T : IEquatable<T>
         {
-            if (typeof(T) == typeof(byte)) 
+            if (typeof(T) == typeof(byte))
                 return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()), 
-                    span.Length, 
-                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()), 
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    span.Length,
+                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
                     value.Length);
             return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
+        }
+
+        /// <summary>
+        /// Searches for the specified value and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value">The value to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOf<T>(this Span<T> span, T value)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.LastIndexOf(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    Unsafe.As<T, byte>(ref value),
+                    span.Length);
+            return SpanHelpers.LastIndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the specified sequence and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value">The sequence to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOf<T>(this Span<T> span, ReadOnlySpan<T> value)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.LastIndexOf(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    span.Length,
+                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    value.Length);
+            return SpanHelpers.LastIndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
         }
 
         /// <summary>
@@ -72,10 +112,10 @@ namespace System
         public static int IndexOf<T>(this ReadOnlySpan<T> span, T value)
             where T : IEquatable<T>
         {
-            if (typeof(T) == typeof(byte)) 
+            if (typeof(T) == typeof(byte))
                 return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()), 
-                    Unsafe.As<T, byte>(ref value), 
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    Unsafe.As<T, byte>(ref value),
                     span.Length);
             return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
         }
@@ -89,13 +129,48 @@ namespace System
         public static int IndexOf<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
             where T : IEquatable<T>
         {
-            if (typeof(T) == typeof(byte)) 
+            if (typeof(T) == typeof(byte))
                 return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()), 
-                    span.Length, 
-                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()), 
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    span.Length,
+                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
                     value.Length);
             return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
+        }
+
+        /// <summary>
+        /// Searches for the specified value and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value">The value to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOf<T>(this ReadOnlySpan<T> span, T value)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.LastIndexOf(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    Unsafe.As<T, byte>(ref value),
+                    span.Length);
+            return SpanHelpers.LastIndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the specified sequence and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value">The sequence to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOf<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.LastIndexOf(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    span.Length,
+                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    value.Length);
+            return SpanHelpers.LastIndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
         }
 
         /// <summary>
@@ -171,6 +246,122 @@ namespace System
         }
 
         /// <summary>
+        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1.
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value0">One of the values to search for.</param>
+        /// <param name="value1">One of the values to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOfAny<T>(this Span<T> span, T value0, T value1)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.LastIndexOfAny(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    Unsafe.As<T, byte>(ref value0),
+                    Unsafe.As<T, byte>(ref value1),
+                    span.Length);
+            return SpanHelpers.LastIndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1.
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value0">One of the values to search for.</param>
+        /// <param name="value1">One of the values to search for.</param>
+        /// <param name="value2">One of the values to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOfAny<T>(this Span<T> span, T value0, T value1, T value2)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.LastIndexOfAny(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    Unsafe.As<T, byte>(ref value0),
+                    Unsafe.As<T, byte>(ref value1),
+                    Unsafe.As<T, byte>(ref value2),
+                    span.Length);
+            return SpanHelpers.LastIndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1. 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="values">The set of values to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOfAny<T>(this Span<T> span, ReadOnlySpan<T> values)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.LastIndexOfAny(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    span.Length,
+                    ref Unsafe.As<T, byte>(ref values.DangerousGetPinnableReference()),
+                    values.Length);
+            return SpanHelpers.LastIndexOfAny(ref span.DangerousGetPinnableReference(), span.Length, ref values.DangerousGetPinnableReference(), values.Length);
+        }
+
+        /// <summary>
+        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1.
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value0">One of the values to search for.</param>
+        /// <param name="value1">One of the values to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOfAny<T>(this ReadOnlySpan<T> span, T value0, T value1)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.LastIndexOfAny(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    Unsafe.As<T, byte>(ref value0),
+                    Unsafe.As<T, byte>(ref value1),
+                    span.Length);
+            return SpanHelpers.LastIndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1. 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="value0">One of the values to search for.</param>
+        /// <param name="value1">One of the values to search for.</param>
+        /// <param name="value2">One of the values to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOfAny<T>(this ReadOnlySpan<T> span, T value0, T value1, T value2)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.LastIndexOfAny(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    Unsafe.As<T, byte>(ref value0),
+                    Unsafe.As<T, byte>(ref value1),
+                    Unsafe.As<T, byte>(ref value2),
+                    span.Length);
+            return SpanHelpers.LastIndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
+        }
+
+        /// <summary>
+        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1. 
+        /// </summary>
+        /// <param name="span">The span to search.</param>
+        /// <param name="values">The set of values to search for.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LastIndexOfAny<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> values)
+            where T : IEquatable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.LastIndexOfAny(
+                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    span.Length,
+                    ref Unsafe.As<T, byte>(ref values.DangerousGetPinnableReference()),
+                    values.Length);
+            return SpanHelpers.LastIndexOfAny<T>(ref span.DangerousGetPinnableReference(), span.Length, ref values.DangerousGetPinnableReference(), values.Length);
+        }
+
+        /// <summary>
         /// Determines whether two sequences are equal by comparing the elements using IEquatable{T}.Equals(T). 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -196,7 +387,7 @@ namespace System
         {
             int valueLength = value.Length;
             if (typeof(T) == typeof(byte))
-                return valueLength <= span.Length && 
+                return valueLength <= span.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
                     ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
@@ -213,7 +404,7 @@ namespace System
         {
             int valueLength = value.Length;
             if (typeof(T) == typeof(byte))
-                return valueLength <= span.Length && 
+                return valueLength <= span.Length &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
                     ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
@@ -236,10 +427,10 @@ namespace System
                     ref Unsafe.As<T, byte>(ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength)),
                     ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
                     valueLength);
-            return valueLength <= spanLength && 
+            return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
-                    ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength), 
-                    ref value.DangerousGetPinnableReference(), 
+                    ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength),
+                    ref value.DangerousGetPinnableReference(),
                     valueLength);
         }
 
@@ -261,7 +452,7 @@ namespace System
             return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
                     ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength),
-                    ref value.DangerousGetPinnableReference(), 
+                    ref value.DangerousGetPinnableReference(),
                     valueLength);
         }
 
@@ -566,6 +757,170 @@ namespace System
                     return false;
                 }
             }
+        }
+
+        /// <summary>
+        /// Searches an entire sorted <see cref="Span{T}"/> for a value
+        /// using the specified <see cref="IComparable{T}"/> generic interface.
+        /// </summary>
+        /// <typeparam name="T">The element type of the span.</typeparam>
+        /// <param name="span">The sorted <see cref="Span{T}"/> to search.</param>
+        /// <param name="comparable">The <see cref="IComparable{T}"/> to use when comparing.</param>
+        /// <returns>
+        /// The zero-based index of <paramref name="comparable"/> in the sorted <paramref name="span"/>,
+        /// if <paramref name="comparable"/> is found; otherwise, a negative number that is the bitwise complement
+        /// of the index of the next element that is larger than <paramref name="comparable"/> or, if there is
+        /// no larger element, the bitwise complement of <see cref="Span{T}.Length"/>.
+        /// </returns>
+        /// <exception cref="T:System.ArgumentNullException">
+		///     <paramref name = "comparable" /> is <see langword="null"/> .
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int BinarySearch<T>(
+            this Span<T> span, IComparable<T> comparable)
+        {
+            return BinarySearch<T, IComparable<T>>(span, comparable);
+        }
+
+        /// <summary>
+        /// Searches an entire sorted <see cref="Span{T}"/> for a value
+        /// using the specified <typeparamref name="TComparable"/> generic type.
+        /// </summary>
+        /// <typeparam name="T">The element type of the span.</typeparam>
+        /// <typeparam name="TComparable">The specific type of <see cref="IComparable{T}"/>.</typeparam>
+        /// <param name="span">The sorted <see cref="Span{T}"/> to search.</param>
+        /// <param name="comparable">The <typeparamref name="TComparable"/> to use when comparing.</param>
+        /// <returns>
+        /// The zero-based index of <paramref name="comparable"/> in the sorted <paramref name="span"/>,
+        /// if <paramref name="comparable"/> is found; otherwise, a negative number that is the bitwise complement
+        /// of the index of the next element that is larger than <paramref name="comparable"/> or, if there is
+        /// no larger element, the bitwise complement of <see cref="Span{T}.Length"/>.
+        /// </returns>
+        /// <exception cref="T:System.ArgumentNullException">
+		///     <paramref name = "comparable" /> is <see langword="null"/> .
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int BinarySearch<T, TComparable>(
+            this Span<T> span, TComparable comparable)
+            where TComparable : IComparable<T>
+        {
+            return BinarySearch((ReadOnlySpan<T>)span, comparable);
+        }
+
+        /// <summary>
+        /// Searches an entire sorted <see cref="Span{T}"/> for the specified <paramref name="value"/>
+        /// using the specified <typeparamref name="TComparer"/> generic type.
+        /// </summary>
+        /// <typeparam name="T">The element type of the span.</typeparam>
+        /// <typeparam name="TComparer">The specific type of <see cref="IComparer{T}"/>.</typeparam>
+        /// <param name="span">The sorted <see cref="Span{T}"/> to search.</param>
+        /// <param name="value">The object to locate. The value can be null for reference types.</param>
+        /// <param name="comparer">The <typeparamref name="TComparer"/> to use when comparing.</param>
+        /// /// <returns>
+        /// The zero-based index of <paramref name="value"/> in the sorted <paramref name="span"/>,
+        /// if <paramref name="value"/> is found; otherwise, a negative number that is the bitwise complement
+        /// of the index of the next element that is larger than <paramref name="value"/> or, if there is
+        /// no larger element, the bitwise complement of <see cref="Span{T}.Length"/>.
+        /// </returns>
+        /// <exception cref="T:System.ArgumentNullException">
+        ///     <paramref name = "value" /> is <see langword="null"/> .
+        /// </exception>
+        // TODO: Do we accept a null comparer and then revert to T as IComparable if possible??
+        //   T:System.ArgumentException:
+        //     comparer is null, and value is of a type that is not compatible with the elements
+        //     of array.
+        //   T:System.InvalidOperationException:
+        //     comparer is null, and T does not implement the System.IComparable`1 generic interface
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int BinarySearch<T, TComparer>(
+            this Span<T> span, T value, TComparer comparer)
+            where TComparer : IComparer<T>
+        {
+            return BinarySearch((ReadOnlySpan<T>)span, value, comparer);
+        }
+
+        /// <summary>
+        /// Searches an entire sorted <see cref="ReadOnlySpan{T}"/> for a value
+        /// using the specified <see cref="IComparable{T}"/> generic interface.
+        /// </summary>
+        /// <typeparam name="T">The element type of the span.</typeparam>
+        /// <param name="span">The sorted <see cref="ReadOnlySpan{T}"/> to search.</param>
+        /// <param name="comparable">The <see cref="IComparable{T}"/> to use when comparing.</param>
+        /// <returns>
+        /// The zero-based index of <paramref name="comparable"/> in the sorted <paramref name="span"/>,
+        /// if <paramref name="comparable"/> is found; otherwise, a negative number that is the bitwise complement
+        /// of the index of the next element that is larger than <paramref name="comparable"/> or, if there is
+        /// no larger element, the bitwise complement of <see cref="ReadOnlySpan{T}.Length"/>.
+        /// </returns>
+        /// <exception cref="T:System.ArgumentNullException">
+		///     <paramref name = "comparable" /> is <see langword="null"/> .
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int BinarySearch<T>(
+            this ReadOnlySpan<T> span, IComparable<T> comparable)
+        {
+            return BinarySearch<T, IComparable<T>>(span, comparable);
+        }
+
+        /// <summary>
+        /// Searches an entire sorted <see cref="ReadOnlySpan{T}"/> for a value
+        /// using the specified <typeparamref name="TComparable"/> generic type.
+        /// </summary>
+        /// <typeparam name="T">The element type of the span.</typeparam>
+        /// <typeparam name="TComparable">The specific type of <see cref="IComparable{T}"/>.</typeparam>
+        /// <param name="span">The sorted <see cref="ReadOnlySpan{T}"/> to search.</param>
+        /// <param name="comparable">The <typeparamref name="TComparable"/> to use when comparing.</param>
+        /// <returns>
+        /// The zero-based index of <paramref name="comparable"/> in the sorted <paramref name="span"/>,
+        /// if <paramref name="comparable"/> is found; otherwise, a negative number that is the bitwise complement
+        /// of the index of the next element that is larger than <paramref name="comparable"/> or, if there is
+        /// no larger element, the bitwise complement of <see cref="ReadOnlySpan{T}.Length"/>.
+        /// </returns>
+        /// <exception cref="T:System.ArgumentNullException">
+		///     <paramref name = "comparable" /> is <see langword="null"/> .
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int BinarySearch<T, TComparable>(
+            this ReadOnlySpan<T> span, TComparable comparable)
+            where TComparable : IComparable<T>
+        {
+            return SpanHelpers.BinarySearch(span, comparable);
+        }
+
+        /// <summary>
+        /// Searches an entire sorted <see cref="ReadOnlySpan{T}"/> for the specified <paramref name="value"/>
+        /// using the specified <typeparamref name="TComparer"/> generic type.
+        /// </summary>
+        /// <typeparam name="T">The element type of the span.</typeparam>
+        /// <typeparam name="TComparer">The specific type of <see cref="IComparer{T}"/>.</typeparam>
+        /// <param name="span">The sorted <see cref="ReadOnlySpan{T}"/> to search.</param>
+        /// <param name="value">The object to locate. The value can be null for reference types.</param>
+        /// <param name="comparer">The <typeparamref name="TComparer"/> to use when comparing.</param>
+        /// /// <returns>
+        /// The zero-based index of <paramref name="value"/> in the sorted <paramref name="span"/>,
+        /// if <paramref name="value"/> is found; otherwise, a negative number that is the bitwise complement
+        /// of the index of the next element that is larger than <paramref name="value"/> or, if there is
+        /// no larger element, the bitwise complement of <see cref="ReadOnlySpan{T}.Length"/>.
+        /// </returns>
+        /// <exception cref="T:System.ArgumentNullException">
+        ///     <paramref name = "value" /> is <see langword="null"/> .
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int BinarySearch<T, TComparer>(
+            this ReadOnlySpan<T> span, T value, TComparer comparer)
+            where TComparer : IComparer<T>
+        {
+            if (comparer == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.comparer);
+            // TODO: Do we accept a null comparer and then revert to T as IComparable if possible??
+            //   T:System.ArgumentException:
+            //     comparer is null, and value is of a type that is not compatible with the elements
+            //     of array.
+            //   T:System.InvalidOperationException:
+            //     comparer is null, and T does not implement the System.IComparable`1 generic interface
+            var comparable = new SpanHelpers.ComparerComparable<T, TComparer>(
+                value, comparer);
+            return BinarySearch(span, comparable);
         }
     }
 }

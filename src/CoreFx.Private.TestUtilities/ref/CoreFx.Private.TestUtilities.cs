@@ -17,11 +17,12 @@ namespace System
     }
     public static partial class AssertExtensions
     {
+        public static void Contains(string value, string substring) { }
         public static void Equal(byte[] expected, byte[] actual) { }
-        public static void GreaterThanOrEqualTo<T>(T actual, T greaterThanOrEqualTo, string userMessage=null) where T : System.IComparable { }
-        public static void GreaterThan<T>(T actual, T greaterThan, string userMessage=null) where T : System.IComparable { }
-        public static void LessThanOrEqualTo<T>(T actual, T lessThanOrEqualTo, string userMessage=null) where T : System.IComparable { }
-        public static void LessThan<T>(T actual, T lessThan, string userMessage=null) where T : System.IComparable { }
+        public static void GreaterThanOrEqualTo<T>(T actual, T greaterThanOrEqualTo, string userMessage = null) where T : System.IComparable { }
+        public static void GreaterThan<T>(T actual, T greaterThan, string userMessage = null) where T : System.IComparable { }
+        public static void LessThanOrEqualTo<T>(T actual, T lessThanOrEqualTo, string userMessage = null) where T : System.IComparable { }
+        public static void LessThan<T>(T actual, T lessThan, string userMessage = null) where T : System.IComparable { }
         public static void ThrowsAny(System.Type firstExceptionType, System.Type secondExceptionType, System.Action action) { }
         public static void ThrowsAny<TFirstExceptionType, TSecondExceptionType>(System.Action action) where TFirstExceptionType : System.Exception where TSecondExceptionType : System.Exception { }
         public static void ThrowsAny<TFirstExceptionType, TSecondExceptionType, TThirdExceptionType>(System.Action action) where TFirstExceptionType : System.Exception where TSecondExceptionType : System.Exception where TThirdExceptionType : System.Exception { }
@@ -32,6 +33,7 @@ namespace System
         public static T Throws<T>(string paramName, System.Func<object> testCode) where T : System.ArgumentException { throw null; }
         public static void Throws<T>(string netCoreParamName, string netFxParamName, System.Action action) where T : System.ArgumentException { }
         public static void Throws<TNetCoreExceptionType, TNetFxExceptionType>(string paramName, System.Action action) where TNetCoreExceptionType : System.ArgumentException where TNetFxExceptionType : System.ArgumentException { }
+        public static Exception Throws<TNetCoreExceptionType, TNetFxExceptionType>(Action action) where TNetCoreExceptionType : Exception where TNetFxExceptionType : Exception { throw null; }
         public static void Throws<TNetCoreExceptionType, TNetFxExceptionType>(string netCoreParamName, string netFxParamName, System.Action action) where TNetCoreExceptionType : System.ArgumentException where TNetFxExceptionType : System.ArgumentException { }
     }
     public static partial class PlatformDetection
@@ -77,6 +79,7 @@ namespace System
         public static bool IsNotRedHatFamily6 { get { throw null; } }
         public static bool IsUap { get { throw null; } }
         public static Version ICUVersion { get { return null; } }
+        public static Version OpenSslVersion { get { return null; } }
         public static bool IsUbuntu { get { throw null; } }
         public static bool IsUbuntu1404 { get { throw null; } }
         public static bool IsUbuntu1604 { get { throw null; } }
@@ -129,16 +132,16 @@ namespace System.Diagnostics
         public const int SuccessExitCode = 42;
         protected static readonly string TestConsoleApp;
         protected RemoteExecutorTestBase() { }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action method, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<int> method, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, int> method, string arg, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, int> method, string arg1, string arg2, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, string, int> method, string arg1, string arg2, string arg3, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, string, string, int> method, string arg1, string arg2, string arg3, string arg4, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, string, string, string, int> method, string arg1, string arg2, string arg3, string arg4, string arg5, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<System.Threading.Tasks.Task<int>> method, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, System.Threading.Tasks.Task<int>> method, string arg, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvokeRaw(System.Delegate method, string unparsedArg, System.Diagnostics.RemoteInvokeOptions options=null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action method, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<int> method, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, int> method, string arg, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, int> method, string arg1, string arg2, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, string, int> method, string arg1, string arg2, string arg3, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, string, string, int> method, string arg1, string arg2, string arg3, string arg4, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, string, string, string, int> method, string arg1, string arg2, string arg3, string arg4, string arg5, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<System.Threading.Tasks.Task<int>> method, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, System.Threading.Tasks.Task<int>> method, string arg, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvokeRaw(System.Delegate method, string unparsedArg, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public sealed partial class RemoteInvokeHandle : System.IDisposable
         {
             public RemoteInvokeHandle(System.Diagnostics.Process process, System.Diagnostics.RemoteInvokeOptions options) { }
@@ -168,7 +171,7 @@ namespace System.IO
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         ~FileCleanupTestBase() { }
-        protected string GetTestFileName(System.Nullable<int> index=default(System.Nullable<int>), [System.Runtime.CompilerServices.CallerMemberNameAttribute]string memberName=null, [System.Runtime.CompilerServices.CallerLineNumberAttribute]int lineNumber=0) { throw null; }
-        protected string GetTestFilePath(System.Nullable<int> index=default(System.Nullable<int>), [System.Runtime.CompilerServices.CallerMemberNameAttribute]string memberName=null, [System.Runtime.CompilerServices.CallerLineNumberAttribute]int lineNumber=0) { throw null; }
+        protected string GetTestFileName(System.Nullable<int> index = default(System.Nullable<int>), [System.Runtime.CompilerServices.CallerMemberNameAttribute]string memberName = null, [System.Runtime.CompilerServices.CallerLineNumberAttribute]int lineNumber = 0) { throw null; }
+        protected string GetTestFilePath(System.Nullable<int> index = default(System.Nullable<int>), [System.Runtime.CompilerServices.CallerMemberNameAttribute]string memberName = null, [System.Runtime.CompilerServices.CallerLineNumberAttribute]int lineNumber = 0) { throw null; }
     }
 }
