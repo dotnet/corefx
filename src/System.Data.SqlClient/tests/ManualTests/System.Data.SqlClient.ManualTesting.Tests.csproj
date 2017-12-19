@@ -12,7 +12,7 @@
     </Compile>
     <Compile Include="DataCommon\CheckConnStrSetupFactAttribute.cs" />
     <Compile Include="SQL\AdapterTest\AdapterTest.cs" />
-    <Compile Include="SQL\AsyncTest\LegacyAsyncTest.cs" />
+    <Compile Include="SQL\AsyncTest\BeginExecAsyncTest.cs" />
     <Compile Include="SQL\Common\AsyncDebugScope.cs" />
     <Compile Include="SQL\Common\ConnectionPoolWrapper.cs" />
     <Compile Include="SQL\Common\InternalConnectionWrapper.cs" />

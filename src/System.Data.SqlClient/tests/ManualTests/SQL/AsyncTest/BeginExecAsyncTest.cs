@@ -7,12 +7,9 @@ using Xunit;
 
 namespace System.Data.SqlClient.ManualTesting.Tests
 {
-    public static class LegacyAsyncTest
+    public static class BeginExecAsyncTest
     {
-        [CheckConnStrSetupFact]
-        public static void ExecuteTest()
-        {
-            string commandText =
+        private static string commandText =
                 "INSERT INTO[dbo].[Shippers] " +
                 "([CompanyName] " +
                 ",[Phone]) " +
@@ -21,10 +18,11 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 ",'555-1212'); " +
                 "WAITFOR DELAY '0:0:3';" +
                 "DELETE FROM dbo.Shippers WHERE ShipperID > 3;";
-
-            SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr);
-
-            using (connection)
+        
+        [CheckConnStrSetupFact]
+        public static void ExecuteTest()
+        {
+            using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
             {
                 try
                 {                    
@@ -62,25 +60,13 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         [CheckConnStrSetupFact]
         public static void FailureTest()
         {
-
-            string commandText =
-                "INSERT INTO[dbo].[Shippers] " +
-                "([CompanyName] " +
-                ",[Phone]) " +
-                "VALUES " +
-                "('Acme Inc.' " +
-                ",'555-1212'); " +
-                "WAITFOR DELAY '0:0:3';" +
-                "DELETE FROM dbo.Shippers WHERE ShipperID > 3;";
-
-            SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr);
-
-            using (connection)
+            using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
             {
-                bool expectedException = false;
+                bool caughtException = false;
                 SqlCommand command = new SqlCommand(commandText, connection);
                 connection.Open();
 
+                //Try to execute a synchronous query on same command
                 IAsyncResult result = command.BeginExecuteNonQuery();
                 try
                 {
@@ -89,11 +75,11 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 catch (Exception ex)
                 {
                     Assert.True(ex is InvalidOperationException, "FAILED: Thrown exception for BeginExecuteNonQuery was not an InvalidOperationException");
-                    expectedException = true;
+                    caughtException = true;
                 }
 
-                Assert.True(expectedException, "FAILED: No exception thrown after trying second BeginExecuteNonQuery.");
-                expectedException = false;
+                Assert.True(caughtException, "FAILED: No exception thrown after trying second BeginExecuteNonQuery.");
+                caughtException = false;
 
                 while (!result.IsCompleted)
                 {
