@@ -11,7 +11,7 @@ namespace System.Reflection.Metadata.Tests
         [Fact]
         public void ValidateTypeDefinitionIsNestedNoProjection()
         {
-            var reader = MetadataReaderTests.GetMetadataReader(NetModule.AppCS, options: MetadataReaderOptions.None);
+            var reader = MetadataReaderTests.GetMetadataReader(Namespace.NamespaceTests, options: MetadataReaderOptions.None);
 
             foreach (var typeDefHandle in reader.TypeDefinitions)
             {
@@ -24,7 +24,7 @@ namespace System.Reflection.Metadata.Tests
         [Fact]
         public void ValidateTypeDefinitionIsNestedWindowsProjection()
         {
-            var reader = MetadataReaderTests.GetMetadataReader(NetModule.AppCS, options: MetadataReaderOptions.ApplyWindowsRuntimeProjections);
+            var reader = MetadataReaderTests.GetMetadataReader(Namespace.NamespaceTests, options: MetadataReaderOptions.ApplyWindowsRuntimeProjections);
 
             foreach (var typeDefHandle in reader.TypeDefinitions)
             {
