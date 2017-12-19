@@ -321,15 +321,8 @@ namespace System.Xml.Xsl.Xslt
         }
 
         public QilNode String(string value) { return _f.String(value); }     // As argument of id() or key() function
-        public QilNode Number(double value) { return UnexpectedToken("Literal number"); }
-        public QilNode Variable(string prefix, string name) { return UnexpectedToken("Variable"); }
-
-        private QilNode UnexpectedToken(string tokenName)
-        {
-            string prompt = string.Format(CultureInfo.InvariantCulture, "Internal Error: {0} is not allowed in XSLT pattern outside of predicate.", tokenName);
-            Debug.Assert(false, prompt);
-            throw new Exception(prompt);
-        }
+        public QilNode Number(double value) { throw new NotSupportedException(SR.Format(SR.XPath_UnexpectedToken2, "Literal number")); }
+        public QilNode Variable(string prefix, string name) { throw new NotSupportedException(SR.Format(SR.XPath_UnexpectedToken2, "Variable")); }
 
         // -------------------------------------- Priority / Parent ---------------------------------------
 
