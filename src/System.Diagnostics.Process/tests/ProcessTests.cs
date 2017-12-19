@@ -94,7 +94,7 @@ namespace System.Diagnostics.Tests
         public void TestEnableRaiseEvents(bool? enable)
         {
             bool exitedInvoked = false;
-            
+
             Process p = CreateProcessLong();
             if (enable.HasValue)
             {

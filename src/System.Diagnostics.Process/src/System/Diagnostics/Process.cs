@@ -1156,6 +1156,10 @@ namespace System.Diagnostics
             {
                 throw new InvalidOperationException(SR.FileNameMissing);
             }
+            if (startInfo.StandardInputEncoding != null && !startInfo.RedirectStandardInput)
+            {
+                throw new InvalidOperationException(SR.StandardInputEncodingNotAllowed);
+            }
             if (startInfo.StandardOutputEncoding != null && !startInfo.RedirectStandardOutput)
             {
                 throw new InvalidOperationException(SR.StandardOutputEncodingNotAllowed);
@@ -1163,10 +1167,6 @@ namespace System.Diagnostics
             if (startInfo.StandardErrorEncoding != null && !startInfo.RedirectStandardError)
             {
                 throw new InvalidOperationException(SR.StandardErrorEncodingNotAllowed);
-            }
-            if (startInfo.StandardInputEncoding != null && !startInfo.RedirectStandardInput)
-            {
-                throw new InvalidOperationException(SR.StandardInputEncodingNotAllowed);
             }
 
             //Cannot start a new process and store its handle if the object has been disposed, since finalization has been suppressed.            

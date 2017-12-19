@@ -34,14 +34,14 @@ namespace System.Diagnostics
             if (startInfo.RedirectStandardInput || startInfo.RedirectStandardOutput || startInfo.RedirectStandardError)
                 throw new InvalidOperationException(SR.CantRedirectStreams);
 
+            if (startInfo.StandardInputEncoding != null)
+                throw new InvalidOperationException(SR.StandardInputEncodingNotAllowed);
+
             if (startInfo.StandardErrorEncoding != null)
                 throw new InvalidOperationException(SR.StandardErrorEncodingNotAllowed);
 
             if (startInfo.StandardOutputEncoding != null)
                 throw new InvalidOperationException(SR.StandardOutputEncodingNotAllowed);
-
-            if (startInfo.StandardInputEncoding != null)
-                throw new InvalidOperationException(SR.StandardInputEncodingNotAllowed);
 
             if (startInfo._environmentVariables != null)
                 throw new InvalidOperationException(SR.CantUseEnvVars);
