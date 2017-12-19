@@ -11,7 +11,6 @@
 using Internal.Runtime.CompilerServices;
 #endif
 using System.Globalization;
-using System.Numerics.Hashing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -507,24 +506,26 @@ namespace System.Numerics
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
-            int hash = 0;
-
             if (Vector.IsHardwareAccelerated)
             {
-<#    foreach (Type type in supportedTypes)
-    {
-#>
-                <#=GenerateIfStatementHeader(type)#>
+                if (typeof(T) == typeof(Byte) ||
+                    typeof(T) == typeof(SByte) ||
+                    typeof(T) == typeof(UInt16) ||
+                    typeof(T) == typeof(Int16) ||
+                    typeof(T) == typeof(UInt32) ||
+                    typeof(T) == typeof(Int32) ||
+                    typeof(T) == typeof(UInt64) ||
+                    typeof(T) == typeof(Int64) ||
+                    typeof(T) == typeof(Single) ||
+                    typeof(T) == typeof(Double))
                 {
+                    var hashCode = new HashCode();
                     for (int g = 0; g < Count; g++)
                     {
-                        hash = HashHelpers.Combine(hash, ((<#=type.Name#>)(object)this[g]).GetHashCode());
+                        hashCode.Add(((T)(object)this[g]).GetHashCode());
                     }
-                    return hash;
+                    return hashCode.ToHashCode();
                 }
-<#
-        }
-#>
                 else
                 {
                     throw new NotSupportedException(SR.Arg_TypeNotSupported);
@@ -532,24 +533,124 @@ namespace System.Numerics
             }
             else
             {
-<#    foreach (Type type in supportedTypes)
-    {
-#>
-                <#=GenerateIfStatementHeader(type)#>
+                if (typeof(T) == typeof(Byte))
                 {
-<#
-            for (int g = 0; g < GetNumFields(type, totalSize); g++)
-            {
-#>
-                    hash = HashHelpers.Combine(hash, this.<#=GetRegisterFieldName(type, g)#>.GetHashCode());
-<#
-            }
-#>
-                    return hash;
+                    var hashCode = new HashCode();
+                    hashCode.Add(this.register.byte_0);
+                    hashCode.Add(this.register.byte_1);
+                    hashCode.Add(this.register.byte_2);
+                    hashCode.Add(this.register.byte_3);
+                    hashCode.Add(this.register.byte_4);
+                    hashCode.Add(this.register.byte_5);
+                    hashCode.Add(this.register.byte_6);
+                    hashCode.Add(this.register.byte_7);
+                    hashCode.Add(this.register.byte_8);
+                    hashCode.Add(this.register.byte_9);
+                    hashCode.Add(this.register.byte_10);
+                    hashCode.Add(this.register.byte_11);
+                    hashCode.Add(this.register.byte_12);
+                    hashCode.Add(this.register.byte_13);
+                    hashCode.Add(this.register.byte_14);
+                    hashCode.Add(this.register.byte_15);
+                    return hashCode.ToHashCode();
                 }
-<#
-        }
-#>
+                else if (typeof(T) == typeof(SByte))
+                {
+                    var hashCode = new HashCode();
+                    hashCode.Add(this.register.sbyte_0);
+                    hashCode.Add(this.register.sbyte_1);
+                    hashCode.Add(this.register.sbyte_2);
+                    hashCode.Add(this.register.sbyte_3);
+                    hashCode.Add(this.register.sbyte_4);
+                    hashCode.Add(this.register.sbyte_5);
+                    hashCode.Add(this.register.sbyte_6);
+                    hashCode.Add(this.register.sbyte_7);
+                    hashCode.Add(this.register.sbyte_8);
+                    hashCode.Add(this.register.sbyte_9);
+                    hashCode.Add(this.register.sbyte_10);
+                    hashCode.Add(this.register.sbyte_11);
+                    hashCode.Add(this.register.sbyte_12);
+                    hashCode.Add(this.register.sbyte_13);
+                    hashCode.Add(this.register.sbyte_14);
+                    hashCode.Add(this.register.sbyte_15);
+                    return hashCode.ToHashCode();
+                }
+                else if (typeof(T) == typeof(UInt16))
+                {
+                    return HashCode.Combine(
+                        this.register.uint16_0,
+                        this.register.uint16_1,
+                        this.register.uint16_2,
+                        this.register.uint16_3,
+                        this.register.uint16_4,
+                        this.register.uint16_5,
+                        this.register.uint16_6,
+                        this.register.uint16_7,
+                        this.register.uint16_8
+                    );
+                }
+                else if (typeof(T) == typeof(Int16))
+                {
+                    return HashCode.Combine(
+                        this.register.int16_0,
+                        this.register.int16_1,
+                        this.register.int16_2,
+                        this.register.int16_3,
+                        this.register.int16_4,
+                        this.register.int16_5,
+                        this.register.int16_6,
+                        this.register.int16_7,
+                        this.register.int16_8
+                    );
+                }
+                else if (typeof(T) == typeof(UInt32))
+                {
+                    return HashCode.Combine(
+                        this.register.uint32_0,
+                        this.register.uint32_1,
+                        this.register.uint32_2,
+                        this.register.uint32_3
+                    );
+                }
+                else if (typeof(T) == typeof(Int32))
+                {
+                    return HashCode.Combine(
+                        this.register.int32_0,
+                        this.register.int32_1,
+                        this.register.int32_2,
+                        this.register.int32_3
+                    );
+                }
+                else if (typeof(T) == typeof(UInt64))
+                {
+                    return HashCode.Combine(
+                        this.register.uint64_0,
+                        this.register.uint64_1
+                    );
+                }
+                else if (typeof(T) == typeof(Int64))
+                {
+                    return HashCode.Combine(
+                        this.register.int64_0,
+                        this.register.int64_1
+                    );
+                }
+                else if (typeof(T) == typeof(Single))
+                {
+                    return HashCode.Combine(
+                        this.register.single_0,
+                        this.register.single_1,
+                        this.register.single_2,
+                        this.register.single_3
+                    );
+                }
+                else if (typeof(T) == typeof(Double))
+                {
+                    return HashCode.Combine(
+                        this.register.double_0,
+                        this.register.double_1
+                    );
+                }
                 else
                 {
                     throw new NotSupportedException(SR.Arg_TypeNotSupported);

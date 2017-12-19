@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
-using System.Numerics.Hashing;
 
 namespace System.Drawing
 {
@@ -246,10 +245,12 @@ namespace System.Drawing
         /// <summary>
         ///    Gets the hash code for this <see cref='System.Drawing.RectangleF'/>.
         /// </summary>
-        public override int GetHashCode() =>
-            HashHelpers.Combine(
-                HashHelpers.Combine(HashHelpers.Combine(X.GetHashCode(), Y.GetHashCode()), Width.GetHashCode()),
-                Height.GetHashCode());
+        public override int GetHashCode() => HashCode.Combine(
+            X,
+            Y,
+            Width,
+            Height
+        );
 
         /// <summary>
         ///    <para>

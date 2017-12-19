@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
-using System.Numerics.Hashing;
 
 namespace System.Drawing
 {
@@ -146,7 +145,10 @@ namespace System.Drawing
 
         public bool Equals(PointF other) => this == other;
 
-        public override int GetHashCode() => HashHelpers.Combine(X.GetHashCode(), Y.GetHashCode());
+        public override int GetHashCode() => HashCode.Combine(
+            X,
+            Y
+        );
 
         public override string ToString() => "{X=" + x.ToString() + ", Y=" + y.ToString() + "}";
     }

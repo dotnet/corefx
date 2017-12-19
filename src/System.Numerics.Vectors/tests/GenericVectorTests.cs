@@ -470,17 +470,13 @@ namespace System.Numerics.Tests
             Vector<T> v1 = new Vector<T>(values1);
             int hash = v1.GetHashCode();
 
-            int expected = 0;
+            var expected = new HashCode();
             for (int g = 0; g < Vector<T>.Count; g++)
             {
-                unchecked
-                {
-                    uint shift5 = ((uint)expected << 5) | ((uint)expected >> 27);
-                    expected = ((int)shift5 + expected) ^ v1[g].GetHashCode();
-                }
+                expected.Add(v1[g]);
             }
 
-            Assert.Equal(expected, hash);
+            Assert.Equal(expected.ToHashCode(), hash);
         }
 
         [Fact]

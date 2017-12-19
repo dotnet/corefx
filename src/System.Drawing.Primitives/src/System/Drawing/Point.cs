@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
-using System.Numerics.Hashing;
 
 namespace System.Drawing
 {
@@ -179,7 +178,10 @@ namespace System.Drawing
         ///       Returns a hash code.
         ///    </para>
         /// </summary>
-        public override int GetHashCode() => HashHelpers.Combine(X, Y);
+        public override int GetHashCode() => HashCode.Combine(
+            X,
+            Y
+        );
 
         /// <summary>
         ///    Translates this <see cref='System.Drawing.Point'/> by the specified amount.
