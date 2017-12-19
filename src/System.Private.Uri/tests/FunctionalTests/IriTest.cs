@@ -526,6 +526,7 @@ namespace System.PrivateUri.Tests
         [InlineData("\u00E8")]
         [InlineData("_\u00E8")]
         [InlineData("_")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void Iri_FileUriUncFallback_DoesSupportUnicodeHost(string authority)
         {
             Uri fileTwoSlashes = new Uri("file://" + authority);
