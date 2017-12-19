@@ -129,9 +129,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             }
         }
 
-        private void ErrAppendMethodParentSym(MethodSymbol sym, SubstContext pcxt, out TypeArray substMethTyParams)
+        private void ErrAppendMethodParentSym(MethodSymbol sym, SubstContext pcxt)
         {
-            substMethTyParams = null;
             ErrAppendParentSym(sym, pcxt);
         }
 
@@ -232,7 +231,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 return;
             }
 
-            ErrAppendMethodParentSym(meth, pctx, out TypeArray replacementTypeArray);
+            ErrAppendMethodParentSym(meth, pctx);
             if (meth.IsConstructor())
             {
                 // Use the name of the parent class instead of the name "<ctor>".
@@ -271,10 +270,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 ErrAppendName(meth.name);
             }
 
-            if (null == replacementTypeArray)
-            {
-                ErrAppendTypeParameters(meth.typeVars, pctx, false);
-            }
+            ErrAppendTypeParameters(meth.typeVars, pctx, false);
 
             if (fArgs)
             {
