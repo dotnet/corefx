@@ -321,8 +321,8 @@ namespace System.Xml.Xsl.Xslt
         }
 
         public QilNode String(string value) { return _f.String(value); }     // As argument of id() or key() function
-        public QilNode Number(double value) { throw new NotSupportedException(SR.Format(SR.XPath_UnexpectedToken2, "Literal number")); }
-        public QilNode Variable(string prefix, string name) { throw new NotSupportedException(SR.Format(SR.XPath_UnexpectedToken2, "Variable")); }
+        public QilNode Number(double value) { throw new XmlException(SR.Format(SR.XPath_UnexpectedToken2, "Literal number")); }
+        public QilNode Variable(string prefix, string name) { throw new XmlException(SR.Format(SR.XPath_UnexpectedToken2, "Variable")); }
 
         // -------------------------------------- Priority / Parent ---------------------------------------
 
