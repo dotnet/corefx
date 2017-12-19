@@ -534,10 +534,5 @@ namespace System.PrivateUri.Tests
             Assert.Equal(authority, fileTwoSlashes.Authority); // Two slashes must be followed by an authority
             Assert.Equal(authority, fileFourSlashes.Authority); // More than three slashes looks like a UNC share
         }
-        [Fact]
-        public void Iri_FileUriUncFallback_DoesNotSupportPercentEncodedHost()
-        {
-            Assert.Throws<UriFormatException>(() => new Uri("file://_%C3%A8"));
-        }
     }
 }
