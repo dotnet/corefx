@@ -5,7 +5,12 @@
 using System.Diagnostics;
 using System.Text;
 using System.Runtime.InteropServices;
+
+#if !netstandard
+using Internal.Runtime.CompilerServices;
+#else
 using System.Runtime.CompilerServices;
+#endif
 
 namespace System
 {
@@ -31,9 +36,9 @@ namespace System
         public int Scale;
         public bool IsNegative;
 
-        public unsafe Span<byte> Digits => new Span<byte>(Unsafe.AsPointer<byte>(ref _b0), BufferSize);
+        public unsafe Span<byte> Digits => new Span<byte>(Unsafe.AsPointer(ref _b0), BufferSize);
 
-        public unsafe byte* UnsafeDigits => (byte*)Unsafe.AsPointer<byte>(ref _b0);
+        public unsafe byte* UnsafeDigits => (byte*)Unsafe.AsPointer(ref _b0);
 
         public int NumDigits => Digits.IndexOf<byte>(0);
 

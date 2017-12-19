@@ -1911,7 +1911,7 @@ namespace System
         [CLSCompliant(false)]
         public unsafe ReadOnlySpan(void* pointer, int length) { throw null; }
         public bool IsEmpty { get { throw null; } }
-        public T this[int index] { get { throw null; } }
+        public ref readonly T this[int index] { get { throw null; } }
         public int Length { get { throw null; } }
         public void CopyTo(Span<T> destination) { }
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
@@ -3701,6 +3701,43 @@ namespace System
         public void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public void SetTarget(T target) { }
         public bool TryGetTarget(out T target) { throw null; }
+    }
+
+    public partial struct HashCode
+    {
+        public static int Combine<T1>(T1 value1) { throw null; }
+
+        public static int Combine<T1, T2>(T1 value1, T2 value2) { throw null; }
+
+        public static int Combine<T1, T2, T3>(T1 value1, T2 value2, T3 value3) { throw null; }
+
+        public static int Combine<T1, T2, T3, T4>(T1 value1, T2 value2, T3 value3, T4 value4) { throw null; }
+
+        public static int Combine<T1, T2, T3, T4, T5>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5) { throw null; }
+
+        public static int Combine<T1, T2, T3, T4, T5, T6>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6) { throw null; }
+
+        public static int Combine<T1, T2, T3, T4, T5, T6, T7>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7) { throw null; }
+
+        public static int Combine<T1, T2, T3, T4, T5, T6, T7, T8>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8) { throw null; }
+
+        public void Add<T>(T value) { }
+
+        public void Add<T>(T value, System.Collections.Generic.IEqualityComparer<T> comparer) { }
+
+        public int ToHashCode() { throw null; }
+
+#pragma warning disable 0809
+
+        [System.ObsoleteAttribute("HashCode is a mutable struct and should not be compared with other HashCodes. Use ToHashCode to retrieve the computed hash code.", error: true)]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+        public override int GetHashCode() { throw null; }
+
+        [System.ObsoleteAttribute("HashCode is a mutable struct and should not be compared with other HashCodes.", error: true)]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+        public override bool Equals(object obj) { throw null; }
+
+#pragma warning restore 0809
     }
 }
 
@@ -6791,6 +6828,9 @@ namespace System.Runtime.CompilerServices
     }
     public static class RuntimeFeature
     {
+#if FEATURE_DEFAULT_INTERFACES
+        public const string DefaultImplementationsOfInterfaces = nameof(DefaultImplementationsOfInterfaces); 
+#endif
         public static bool IsSupported(string feature) { throw null; }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
