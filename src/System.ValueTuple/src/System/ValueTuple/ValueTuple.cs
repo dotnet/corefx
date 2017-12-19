@@ -2068,7 +2068,6 @@ namespace System
             }
 
             Debug.Assert(false, "Missed all cases for computing ValueTuple hash code");
-            return -1;
         }
 
         private void GetHashCodeCore(ref HashCode hashCode, IEqualityComparer comparer)
@@ -2151,7 +2150,6 @@ namespace System
             }
 
             Debug.Assert(false, "Missed all cases for computing ValueTuple hash code");
-            return -1;
         }
 
         /// <summary>
