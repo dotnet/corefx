@@ -366,7 +366,7 @@ namespace System
 
         private void GetHashCodeCore(ref HashCode hashCode)
         {
-            hashCode.Add(GetHashCode(Item1), s_t1Comparer);
+            hashCode.Add(Item1, s_t1Comparer);
         }
 
         private void GetHashCodeCore(ref HashCode hashCode, IEqualityComparer comparer)
@@ -560,8 +560,8 @@ namespace System
 
         private void GetHashCodeCore(ref HashCode hashCode)
         {
-            hashCode.Add(GetHashCode(Item1), s_t1Comparer);
-            hashCode.Add(GetHashCode(Item2), s_t2Comparer);
+            hashCode.Add(Item1, s_t1Comparer);
+            hashCode.Add(Item2, s_t2Comparer);
         }
 
         private void GetHashCodeCore(ref HashCode hashCode, IEqualityComparer comparer)
@@ -754,9 +754,9 @@ namespace System
 
         private void GetHashCodeCore(ref HashCode hashCode)
         {
-            hashCode.Add(GetHashCode(Item1), s_t1Comparer);
-            hashCode.Add(GetHashCode(Item2), s_t2Comparer);
-            hashCode.Add(GetHashCode(Item3), s_t3Comparer);
+            hashCode.Add(Item1, s_t1Comparer);
+            hashCode.Add(Item2, s_t2Comparer);
+            hashCode.Add(Item3, s_t3Comparer);
         }
 
         private void GetHashCodeCore(ref HashCode hashCode, IEqualityComparer comparer)
@@ -964,10 +964,10 @@ namespace System
 
         private void GetHashCodeCore(ref HashCode hashCode)
         {
-            hashCode.Add(GetHashCode(Item1), s_t1Comparer);
-            hashCode.Add(GetHashCode(Item2), s_t2Comparer);
-            hashCode.Add(GetHashCode(Item3), s_t3Comparer);
-            hashCode.Add(GetHashCode(Item4), s_t4Comparer);
+            hashCode.Add(Item1, s_t1Comparer);
+            hashCode.Add(Item2, s_t2Comparer);
+            hashCode.Add(Item3, s_t3Comparer);
+            hashCode.Add(Item4, s_t4Comparer);
         }
 
         private void GetHashCodeCore(ref HashCode hashCode, IEqualityComparer comparer)
@@ -1192,11 +1192,11 @@ namespace System
 
         private void GetHashCodeCore(ref HashCode hashCode)
         {
-            hashCode.Add(GetHashCode(Item1), s_t1Comparer);
-            hashCode.Add(GetHashCode(Item2), s_t2Comparer);
-            hashCode.Add(GetHashCode(Item3), s_t3Comparer);
-            hashCode.Add(GetHashCode(Item4), s_t4Comparer);
-            hashCode.Add(GetHashCode(Item5), s_t5Comparer);
+            hashCode.Add(Item1, s_t1Comparer);
+            hashCode.Add(Item2, s_t2Comparer);
+            hashCode.Add(Item3, s_t3Comparer);
+            hashCode.Add(Item4, s_t4Comparer);
+            hashCode.Add(Item5, s_t5Comparer);
         }
 
         private void GetHashCodeCore(ref HashCode hashCode, IEqualityComparer comparer)
@@ -1438,12 +1438,12 @@ namespace System
 
         private void GetHashCodeCore(ref HashCode hashCode)
         {
-            hashCode.Add(GetHashCode(Item1), s_t1Comparer);
-            hashCode.Add(GetHashCode(Item2), s_t2Comparer);
-            hashCode.Add(GetHashCode(Item3), s_t3Comparer);
-            hashCode.Add(GetHashCode(Item4), s_t4Comparer);
-            hashCode.Add(GetHashCode(Item5), s_t5Comparer);
-            hashCode.Add(GetHashCode(Item6), s_t6Comparer);
+            hashCode.Add(Item1, s_t1Comparer);
+            hashCode.Add(Item2, s_t2Comparer);
+            hashCode.Add(Item3, s_t3Comparer);
+            hashCode.Add(Item4, s_t4Comparer);
+            hashCode.Add(Item5, s_t5Comparer);
+            hashCode.Add(Item6, s_t6Comparer);
         }
 
         private void GetHashCodeCore(ref HashCode hashCode, IEqualityComparer comparer)
@@ -1702,13 +1702,13 @@ namespace System
 
         private void GetHashCodeCore(ref HashCode hashCode)
         {
-            hashCode.Add(GetHashCode(Item1), s_t1Comparer);
-            hashCode.Add(GetHashCode(Item2), s_t2Comparer);
-            hashCode.Add(GetHashCode(Item3), s_t3Comparer);
-            hashCode.Add(GetHashCode(Item4), s_t4Comparer);
-            hashCode.Add(GetHashCode(Item5), s_t5Comparer);
-            hashCode.Add(GetHashCode(Item6), s_t6Comparer);
-            hashCode.Add(GetHashCode(Item7), s_t7Comparer);
+            hashCode.Add(Item1, s_t1Comparer);
+            hashCode.Add(Item2, s_t2Comparer);
+            hashCode.Add(Item3, s_t3Comparer);
+            hashCode.Add(Item4, s_t4Comparer);
+            hashCode.Add(Item5, s_t5Comparer);
+            hashCode.Add(Item6, s_t6Comparer);
+            hashCode.Add(Item7, s_t7Comparer);
         }
 
         private void GetHashCodeCore(ref HashCode hashCode, IEqualityComparer comparer)
@@ -1994,13 +1994,13 @@ namespace System
             ITupleInternal rest = Rest as ITupleInternal;
             if (rest == null)
             {
-                hashCode.Add(GetHashCode(Item1), s_t1Comparer);
-                hashCode.Add(GetHashCode(Item2), s_t2Comparer);
-                hashCode.Add(GetHashCode(Item3), s_t3Comparer);
-                hashCode.Add(GetHashCode(Item4), s_t4Comparer);
-                hashCode.Add(GetHashCode(Item5), s_t5Comparer);
-                hashCode.Add(GetHashCode(Item6), s_t6Comparer);
-                hashCode.Add(GetHashCode(Item7), s_t7Comparer);
+                hashCode.Add(Item1, s_t1Comparer);
+                hashCode.Add(Item2, s_t2Comparer);
+                hashCode.Add(Item3, s_t3Comparer);
+                hashCode.Add(Item4, s_t4Comparer);
+                hashCode.Add(Item5, s_t5Comparer);
+                hashCode.Add(Item6, s_t6Comparer);
+                hashCode.Add(Item7, s_t7Comparer);
                 return;
             }
 
@@ -2016,53 +2016,53 @@ namespace System
             switch (k)
             {
                 case 1:
-                    hashCode.Add(GetHashCode(Item7), s_t7Comparer);
+                    hashCode.Add(Item7, s_t7Comparer);
                     rest.GetHashCode(ref hashCode);
                     return;
                 case 2:
-                    hashCode.Add(GetHashCode(Item6), s_t6Comparer);
-                    hashCode.Add(GetHashCode(Item7), s_t7Comparer);
+                    hashCode.Add(Item6, s_t6Comparer);
+                    hashCode.Add(Item7, s_t7Comparer);
                     rest.GetHashCode(ref hashCode);
                     return;
                 case 3:
-                    hashCode.Add(GetHashCode(Item5), s_t5Comparer);
-                    hashCode.Add(GetHashCode(Item6), s_t6Comparer);
-                    hashCode.Add(GetHashCode(Item7), s_t7Comparer);
+                    hashCode.Add(Item5, s_t5Comparer);
+                    hashCode.Add(Item6, s_t6Comparer);
+                    hashCode.Add(Item7, s_t7Comparer);
                     rest.GetHashCode(ref hashCode);
                     return;
                 case 4:
-                    hashCode.Add(GetHashCode(Item4), s_t4Comparer);
-                    hashCode.Add(GetHashCode(Item5), s_t5Comparer);
-                    hashCode.Add(GetHashCode(Item6), s_t6Comparer);
-                    hashCode.Add(GetHashCode(Item7), s_t7Comparer);
+                    hashCode.Add(Item4, s_t4Comparer);
+                    hashCode.Add(Item5, s_t5Comparer);
+                    hashCode.Add(Item6, s_t6Comparer);
+                    hashCode.Add(Item7, s_t7Comparer);
                     rest.GetHashCode(ref hashCode);
                     return;
                 case 5:
-                    hashCode.Add(GetHashCode(Item3), s_t3Comparer);
-                    hashCode.Add(GetHashCode(Item4), s_t4Comparer);
-                    hashCode.Add(GetHashCode(Item5), s_t5Comparer);
-                    hashCode.Add(GetHashCode(Item6), s_t6Comparer);
-                    hashCode.Add(GetHashCode(Item7), s_t7Comparer);
+                    hashCode.Add(Item3, s_t3Comparer);
+                    hashCode.Add(Item4, s_t4Comparer);
+                    hashCode.Add(Item5, s_t5Comparer);
+                    hashCode.Add(Item6, s_t6Comparer);
+                    hashCode.Add(Item7, s_t7Comparer);
                     rest.GetHashCode(ref hashCode);
                     return;
                 case 6:
-                    hashCode.Add(GetHashCode(Item2), s_t2Comparer);
-                    hashCode.Add(GetHashCode(Item3), s_t3Comparer);
-                    hashCode.Add(GetHashCode(Item4), s_t4Comparer);
-                    hashCode.Add(GetHashCode(Item5), s_t5Comparer);
-                    hashCode.Add(GetHashCode(Item6), s_t6Comparer);
-                    hashCode.Add(GetHashCode(Item7), s_t7Comparer);
+                    hashCode.Add(Item2, s_t2Comparer);
+                    hashCode.Add(Item3, s_t3Comparer);
+                    hashCode.Add(Item4, s_t4Comparer);
+                    hashCode.Add(Item5, s_t5Comparer);
+                    hashCode.Add(Item6, s_t6Comparer);
+                    hashCode.Add(Item7, s_t7Comparer);
                     rest.GetHashCode(ref hashCode);
                     return;
                 case 7:
                 case 8:
-                    hashCode.Add(GetHashCode(Item1), s_t1Comparer);
-                    hashCode.Add(GetHashCode(Item2), s_t2Comparer);
-                    hashCode.Add(GetHashCode(Item3), s_t3Comparer);
-                    hashCode.Add(GetHashCode(Item4), s_t4Comparer);
-                    hashCode.Add(GetHashCode(Item5), s_t5Comparer);
-                    hashCode.Add(GetHashCode(Item6), s_t6Comparer);
-                    hashCode.Add(GetHashCode(Item7), s_t7Comparer);
+                    hashCode.Add(Item1, s_t1Comparer);
+                    hashCode.Add(Item2, s_t2Comparer);
+                    hashCode.Add(Item3, s_t3Comparer);
+                    hashCode.Add(Item4, s_t4Comparer);
+                    hashCode.Add(Item5, s_t5Comparer);
+                    hashCode.Add(Item6, s_t6Comparer);
+                    hashCode.Add(Item7, s_t7Comparer);
                     rest.GetHashCode(ref hashCode);
                     return;
             }
