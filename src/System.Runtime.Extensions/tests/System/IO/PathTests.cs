@@ -943,17 +943,17 @@ namespace System.IO.Tests
         public static IEnumerable<object[]> GetFullPath_BasePath_BasicExpansions_TestData()
         {
             string curDir = Directory.GetCurrentDirectory();
-            yield return new object[] { curDir, curDir, curDir }; // Current directory => current directory
-            yield return new object[] { curDir, null, curDir }; // should enable these
+            yield return new object[] { curDir, curDir, curDir };
+            yield return new object[] { curDir, null, curDir };
             yield return new object[] { curDir, "foo\bar", curDir };
             yield return new object[] { "..", curDir, Path.GetDirectoryName(curDir) };
-            yield return new object[] { Path.Combine(curDir, ".", ".", ".", ".", "."), curDir, curDir }; // "dir/./././." => "dir"
-            yield return new object[] { curDir + new string(Path.DirectorySeparatorChar, 3) + ".", curDir, curDir }; // "dir///." => "dir"
-            yield return new object[] { Path.Combine(curDir, "..", Path.GetFileName(curDir), ".", "..", Path.GetFileName(curDir)), curDir, curDir }; // "dir/../dir/./../dir" => "dir"
-            yield return new object[] { Path.Combine(Path.GetPathRoot(curDir), "somedir", ".."), curDir, Path.GetPathRoot(curDir) }; // "C:\somedir\.." => "C:\"
-            yield return new object[] { Path.Combine(Path.GetPathRoot(curDir), "."), curDir, Path.GetPathRoot(curDir) }; // "C:\." => "C:\"
-            yield return new object[] { Path.Combine(Path.GetPathRoot(curDir), "..", "..", "..", ".."), curDir, Path.GetPathRoot(curDir) }; // "C:\..\..\..\.." => "C:\"
-            yield return new object[] { Path.GetPathRoot(curDir) + new string(Path.DirectorySeparatorChar, 3), curDir, Path.GetPathRoot(curDir) }; // "C:\\\" => "C:\"
+            yield return new object[] { Path.Combine(curDir, ".", ".", ".", ".", "."), curDir, curDir };
+            yield return new object[] { curDir + new string(Path.DirectorySeparatorChar, 3) + ".", curDir, curDir };
+            yield return new object[] { Path.Combine(curDir, "..", Path.GetFileName(curDir), ".", "..", Path.GetFileName(curDir)), curDir, curDir };
+            yield return new object[] { Path.Combine(Path.GetPathRoot(curDir), "somedir", ".."), curDir, Path.GetPathRoot(curDir) };
+            yield return new object[] { Path.Combine(Path.GetPathRoot(curDir), "."), curDir, Path.GetPathRoot(curDir) };
+            yield return new object[] { Path.Combine(Path.GetPathRoot(curDir), "..", "..", "..", ".."), curDir, Path.GetPathRoot(curDir) }; 
+            yield return new object[] { Path.GetPathRoot(curDir) + new string(Path.DirectorySeparatorChar, 3), curDir, Path.GetPathRoot(curDir) };
 
             // Device paths
             yield return new object[] { "foo", @"\\?\C:\ ", @"\\?\C:\ \foo" };
@@ -1027,10 +1027,12 @@ namespace System.IO.Tests
 
         [Theory]
         [MemberData(nameof(GetFullPath_BasePath_BasicExpansions_TestData))]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void GetFullPath_BasicExpansions(string path, string basePath, string expected)
         {
             Assert.Equal(expected, Path.GetFullPath(path, basePath));
         }
+
         // Windows-only P/Invoke to create 8.3 short names from long names
         [DllImport("kernel32.dll", EntryPoint = "GetShortPathNameW" ,CharSet = CharSet.Unicode)]
         private static extern uint GetShortPathName(string lpszLongPath, StringBuilder lpszShortPath, int cchBuffer);
