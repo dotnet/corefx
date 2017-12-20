@@ -143,7 +143,9 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // RFC 2965
 
-            yield return new object[] { u,
+            yield return new object[]
+            {
+                u,
                 "name98=value98; port=\"80, 90\", name99=value99",
                 new Cookie[]
                 {
@@ -206,6 +208,109 @@ namespace System.Net.Primitives.Unit.Tests
                     new Cookie("name98", "\"\"")
                 }
             }; // Use escaped values (2)
+            
+            yield return new object[] {
+                u,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Normal case
+            
+            yield return new object[] {
+                uSecure,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Normal case with secure URI
+            
+            yield return new object[] {
+                u,
+                ",locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header at the beginning
+            yield return new object[] {
+                uSecure,
+                "          ,locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header composed by spaces at the beginning
+            yield return new object[] {
+                u,
+                "locale=en,, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header in the middle
+            yield return new object[] {
+                uSecure,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46,       , country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header composed by spaces in the middle
+            yield return new object[] {
+                u,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1,",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header at the end
+            
+            yield return new object[] {
+                u,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1,   ",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header composed by spaces at the end
+            yield return new object[] {
+                uSecure,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1,   ,",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header followed by another empty header at the end
         }
 
         [Theory]
@@ -218,6 +323,7 @@ namespace System.Net.Primitives.Unit.Tests
 
         [Theory]
         [MemberData(nameof(SetCookiesData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void SetCookies_Success(Uri uri, string cookieHeader, Cookie[] expected)
         {
             CookieContainer cc = CreateCount11Container();
