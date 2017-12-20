@@ -102,9 +102,10 @@ namespace System
 
         internal static bool DontEnableStrictRFC3986ReservedCharacterSets
         {
-            // In .NET Framework this would test agains an AppContextSwitch. Since this is a potentially
+            // In .NET Framework this would test against an AppContextSwitch. Since this is a potentially
             // breaking change, we'll leave in the system used to disable it.
-            get {
+            get
+            {
                 return false;
             }
         }
