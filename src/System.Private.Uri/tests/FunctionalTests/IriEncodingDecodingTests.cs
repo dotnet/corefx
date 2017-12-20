@@ -149,6 +149,6 @@ namespace System.PrivateUri.Tests
                 uri = new Uri(sourceStr);
                 Assert.Equal(RFC3986CompliantDecoding[i, 1], uri.UserInfo);
             }
-    }
+        }
     }
 }
