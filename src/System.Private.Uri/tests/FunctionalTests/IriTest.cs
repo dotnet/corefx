@@ -451,6 +451,7 @@ namespace System.PrivateUri.Tests
         /// CheckIsReserved().
         /// </summary>
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void Iri_CheckIsReserved_EscapingBehavior()
         {
             for (int i = 0; i < s_checkIsReservedEscapingStrings.GetLength(0); i++)

@@ -321,6 +321,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void UriAbsoluteUnEscaping_RFC3986UnreservedEscaped_AllUnescaped()
         {
             string escaped = Escape(RFC3986Unreserved);
