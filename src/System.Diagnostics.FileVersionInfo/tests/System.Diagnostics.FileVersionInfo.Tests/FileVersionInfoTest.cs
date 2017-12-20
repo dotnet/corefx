@@ -109,7 +109,7 @@ namespace System.Diagnostics.Tests
             using (new FileStream("kernelbase.dll", FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
             {
                 Assert.Throws<ArgumentException>(() =>
-                    Console.WriteLine(FileVersionInfo.GetVersionInfo("kernelbase.dll"));
+                    Console.WriteLine(FileVersionInfo.GetVersionInfo("kernelbase.dll")));
             }
         }
 
