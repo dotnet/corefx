@@ -9,9 +9,10 @@ namespace System.IO.Tests
     public static class GetFullyQualifiedPathTests
     {
         [Fact]
-        public static void IsPathFullyQualified_NullThrows()
+        public static void IsPathFullyQualified_NullArgument()
         {
             Assert.Throws<ArgumentNullException>(() => Path.IsPathFullyQualified(null));
+            Assert.False(Path.IsPathFullyQualified(new ReadOnlySpan<char>()));
         }
 
         [Fact]
@@ -30,6 +31,7 @@ namespace System.IO.Tests
         public static void IsPathFullyQualified_Windows_Invalid(string path)
         {
             Assert.False(Path.IsPathFullyQualified(path));
+            Assert.False(Path.IsPathFullyQualified(path.AsReadOnlySpan()));
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]
@@ -51,6 +53,7 @@ namespace System.IO.Tests
         public static void IsPathFullyQualified_Windows_Valid(string path)
         {
             Assert.True(Path.IsPathFullyQualified(path));
+            Assert.True(Path.IsPathFullyQualified(path.AsReadOnlySpan()));
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]
@@ -67,6 +70,7 @@ namespace System.IO.Tests
         public static void IsPathFullyQualified_Unix_Invalid(string path)
         {
             Assert.False(Path.IsPathFullyQualified(path));
+            Assert.False(Path.IsPathFullyQualified(path.AsReadOnlySpan()));
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]
@@ -80,6 +84,7 @@ namespace System.IO.Tests
         public static void IsPathFullyQualified_Unix_Valid(string path)
         {
             Assert.True(Path.IsPathFullyQualified(path));
+            Assert.True(Path.IsPathFullyQualified(path.AsReadOnlySpan()));
         }
     }
 }

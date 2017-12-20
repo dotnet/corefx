@@ -51,6 +51,7 @@ namespace System.IO.Tests
             if (PlatformDetection.IsWindows)
             {
                 AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(path));
+                Assert.Throws<ArgumentException>(() => Path.GetDirectoryName(path.AsReadOnlySpan()));
             }
             else
             {
@@ -68,6 +69,7 @@ namespace System.IO.Tests
             if (PlatformDetection.IsWindows)
             {
                 AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(path));
+                Assert.Equal(string.Empty, new string(Path.GetDirectoryName(new ReadOnlySpan<char>())));
             }
             else
             {
@@ -92,6 +94,7 @@ namespace System.IO.Tests
         public static void GetDirectoryName_NonControlWithSeparator(string path)
         {
             Assert.Equal(path, Path.GetDirectoryName(Path.Combine(path, path)));
+            Assert.Equal(path, new string(Path.GetDirectoryName(Path.Combine(path, path).AsReadOnlySpan())));
         }
 
         [Theory]
@@ -102,6 +105,7 @@ namespace System.IO.Tests
         public static void GetDirectoryName(string path, string expected)
         {
             Assert.Equal(expected, Path.GetDirectoryName(path));
+            Assert.Equal(expected ?? string.Empty, new string(Path.GetDirectoryName(path != null ? path.AsReadOnlySpan() : new ReadOnlySpan<char>())));
         }
 
         [Theory]
@@ -118,6 +122,7 @@ namespace System.IO.Tests
         public static void GetDirectoryName_Windows(string path, string expected)
         {
             Assert.Equal(expected, Path.GetDirectoryName(path));
+            Assert.Equal(expected ?? string.Empty, new string(Path.GetDirectoryName(path.AsReadOnlySpan())));
         }
 
         [Theory]
@@ -131,6 +136,7 @@ namespace System.IO.Tests
         public static void GetDirectoryName_Unix(string path, string expected)
         {
             Assert.Equal(expected, Path.GetDirectoryName(path));
+            Assert.Equal(expected ?? string.Empty, new string(Path.GetDirectoryName(path.AsReadOnlySpan())));
         }
 
         [Fact]
@@ -138,17 +144,22 @@ namespace System.IO.Tests
         {
             string curDir = Directory.GetCurrentDirectory();
             Assert.Equal(curDir, Path.GetDirectoryName(Path.Combine(curDir, "baz")));
+            Assert.Equal(curDir, new string(Path.GetDirectoryName(Path.Combine(curDir, "baz").AsReadOnlySpan())));
+
             Assert.Equal(null, Path.GetDirectoryName(Path.GetPathRoot(curDir)));
+            Assert.Equal(string.Empty, new string(Path.GetDirectoryName(Path.GetPathRoot(curDir).AsReadOnlySpan())));
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Checks Unix-specific special characters in directory path
-        [Fact]
-        public static void GetDirectoryName_ControlCharacters_Unix()
+        [Theory]
+        [InlineData('\t', 1, "file")]
+        [InlineData('\b', 2, "fi le")]
+        [InlineData('\v', 3, "fi\nle")]
+        [InlineData('\n', 4, "fi\rle")]
+        public static void GetDirectoryName_ControlCharacters_Unix(char ch, int count, string file)
         {
-            Assert.Equal(new string('\t', 1), Path.GetDirectoryName(Path.Combine(new string('\t', 1), "file")));
-            Assert.Equal(new string('\b', 2), Path.GetDirectoryName(Path.Combine(new string('\b', 2), "fi le")));
-            Assert.Equal(new string('\v', 3), Path.GetDirectoryName(Path.Combine(new string('\v', 3), "fi\nle")));
-            Assert.Equal(new string('\n', 4), Path.GetDirectoryName(Path.Combine(new string('\n', 4), "fi\rle")));
+            Assert.Equal(new string(ch, count), Path.GetDirectoryName(Path.Combine(new string(ch, count), file)));
+            Assert.Equal(new string(ch, count), new string(Path.GetDirectoryName(Path.Combine(new string(ch, count), file).AsReadOnlySpan())));
         }
 
         [Theory]
@@ -165,8 +176,12 @@ namespace System.IO.Tests
             {
                 path = path.Replace('/', Path.DirectorySeparatorChar);
             }
+
             Assert.Equal(expected, Path.GetExtension(path));
             Assert.Equal(!string.IsNullOrEmpty(expected), Path.HasExtension(path));
+
+            Assert.Equal(expected ?? string.Empty, new string(Path.GetExtension(path != null ? path.AsReadOnlySpan() : new ReadOnlySpan<char>())));
+            Assert.Equal(!string.IsNullOrEmpty(expected), Path.HasExtension(path != null ? path.AsReadOnlySpan() : new ReadOnlySpan<char>()));
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Checks file extension behavior on Unix
@@ -180,6 +195,9 @@ namespace System.IO.Tests
         {
             Assert.Equal(expected, Path.GetExtension(path));
             Assert.Equal(!string.IsNullOrEmpty(expected), Path.HasExtension(path));
+
+            Assert.Equal(expected, new string(Path.GetExtension(path.AsReadOnlySpan())));
+            Assert.Equal(!string.IsNullOrEmpty(expected), Path.HasExtension(path.AsReadOnlySpan()));
         }
 
         public static IEnumerable<object[]> GetFileName_TestData()
@@ -200,17 +218,25 @@ namespace System.IO.Tests
         public static void GetFileName(string path, string expected)
         {
             Assert.Equal(expected, Path.GetFileName(path));
+            Assert.Equal(expected ?? string.Empty, new string(Path.GetFileName(path != null ? path.AsReadOnlySpan() : new ReadOnlySpan<char>())));
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests Unix-specific valid file names
-        [Fact]
-        public static void GetFileName_Unix()
+        [Theory]
+        [InlineData(" . ")]
+        [InlineData(" .. ")]
+        [InlineData("fi le")]
+        [InlineData("fi  le")]
+        public static void GetFileName_Unix(string file)
         {
-            Assert.Equal(" . ", Path.GetFileName(" . "));
-            Assert.Equal(" .. ", Path.GetFileName(" .. "));
-            Assert.Equal("fi le", Path.GetFileName("fi le"));
-            Assert.Equal("fi  le", Path.GetFileName("fi  le"));
-            Assert.Equal("fi  le", Path.GetFileName(Path.Combine("b \r\n ar", "fi  le")));
+            Assert.Equal(file, Path.GetFileName(file));
+            Assert.Equal(file, new string(Path.GetFileName(file).AsReadOnlySpan()));
+
+            if (file.Equals("fi  le"))
+            {
+                Assert.Equal(file, Path.GetFileName(Path.Combine("b \r\n ar", file)));
+                Assert.Equal(file, new string(Path.GetFileName(Path.Combine("b \r\n ar", file).AsReadOnlySpan())));
+            }      
         }
 
         public static IEnumerable<object[]> GetFileNameWithoutExtension_TestData()
@@ -228,12 +254,14 @@ namespace System.IO.Tests
         public static void GetFileNameWithoutExtension(string path, string expected)
         {
             Assert.Equal(expected, Path.GetFileNameWithoutExtension(path));
+            Assert.Equal(expected ?? string.Empty, new string(Path.GetFileNameWithoutExtension(path != null ? path.AsReadOnlySpan() : new ReadOnlySpan<char>())));
         }
 
         [Fact]
         public static void GetPathRoot_NullReturnsNull()
         {
             Assert.Null(Path.GetPathRoot(null));
+            Assert.Equal(string.Empty, new string(Path.GetPathRoot(new ReadOnlySpan<char>())));
         }
 
         [Fact]
@@ -264,6 +292,9 @@ namespace System.IO.Tests
         {
             Assert.True(Path.IsPathRooted(value));
             Assert.Equal(expected, Path.GetPathRoot(value));
+
+            Assert.True(Path.IsPathRooted(value.AsReadOnlySpan()));
+            Assert.Equal(expected, new string(Path.GetPathRoot(value.AsReadOnlySpan())));
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests UNC
@@ -276,9 +307,11 @@ namespace System.IO.Tests
         public static void GetPathRoot_Windows_UncAndExtended_WithLegacySupport(string normalExpected, string legacyExpected, string value)
         {
             Assert.True(Path.IsPathRooted(value));
+            Assert.True(Path.IsPathRooted(value.AsReadOnlySpan()));
 
             string expected = PathFeatures.IsUsingLegacyPathNormalization() ? legacyExpected : normalExpected;
             Assert.Equal(expected, Path.GetPathRoot(value));
+            Assert.Equal(expected, new string(Path.GetPathRoot(value.AsReadOnlySpan())));
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific path convention
@@ -294,6 +327,9 @@ namespace System.IO.Tests
         {
             Assert.True(Path.IsPathRooted(value));
             Assert.Equal(expected, Path.GetPathRoot(value));
+
+            Assert.True(Path.IsPathRooted(value.AsReadOnlySpan()));
+            Assert.Equal(expected, new string(Path.GetPathRoot(value.AsReadOnlySpan())));
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests Unix-specific path convention
@@ -313,6 +349,7 @@ namespace System.IO.Tests
         public static void IsPathRooted(string path)
         {
             Assert.False(Path.IsPathRooted(path));
+            Assert.False(Path.IsPathRooted(path != null? path.AsReadOnlySpan() : new ReadOnlySpan<char>()));
         }
 
         // Testing invalid drive letters !(a-zA-Z)
@@ -326,6 +363,7 @@ namespace System.IO.Tests
         public static void IsPathRooted_Windows_Invalid(string value)
         {
             Assert.False(Path.IsPathRooted(value));
+            Assert.False(Path.IsPathRooted(value.AsReadOnlySpan()));
         }
 
         [Fact]
