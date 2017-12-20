@@ -130,13 +130,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // No existing array symbol. Create a new one.
                 pArray = _typeFactory.CreateArray(name, elementType, args, isSZArray);
-                pArray.InitFromParent();
-
                 _typeTable.InsertArray(name, elementType, pArray);
-            }
-            else
-            {
-                Debug.Assert(pArray.HasErrors() == elementType.HasErrors());
             }
 
             Debug.Assert(pArray.rank == args);
@@ -167,12 +161,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 Debug.Assert(!pAggregate.fConstraintsChecked && !pAggregate.fConstraintError);
 
-                pAggregate.SetErrors(false);
                 _typeTable.InsertAggregate(agg, atsOuter, typeArgs, pAggregate);
-            }
-            else
-            {
-                Debug.Assert(!pAggregate.HasErrors());
             }
 
             Debug.Assert(pAggregate.getAggregate() == agg);
@@ -213,13 +202,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Name namePtr = NameManager.GetPredefinedName(PredefinedName.PN_PTR);
 
                 pPointer = _typeFactory.CreatePointer(namePtr, baseType);
-                pPointer.InitFromParent();
-
                 _typeTable.InsertPointer(baseType, pPointer);
-            }
-            else
-            {
-                Debug.Assert(pPointer.HasErrors() == baseType.HasErrors());
             }
 
             Debug.Assert(pPointer.GetReferentType() == baseType);
@@ -241,8 +224,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Name pName = NameManager.GetPredefinedName(PredefinedName.PN_NUB);
 
                 pNullableType = _typeFactory.CreateNullable(pName, pUnderlyingType, _BSymmgr, this);
-                pNullableType.InitFromParent();
-
                 _typeTable.InsertNullable(pUnderlyingType, pNullableType);
             }
 
@@ -265,13 +246,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // No existing parammod symbol. Create a new one.
                 pParamModifier = _typeFactory.CreateParameterModifier(name, paramType);
                 pParamModifier.isOut = isOut;
-                pParamModifier.InitFromParent();
-
                 _typeTable.InsertParameterModifier(name, paramType, pParamModifier);
-            }
-            else
-            {
-                Debug.Assert(pParamModifier.HasErrors() == paramType.HasErrors());
             }
 
             Debug.Assert(pParamModifier.GetParameterType() == paramType);

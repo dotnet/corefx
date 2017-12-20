@@ -15,8 +15,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private TypeKind _typeKind;
         private Name _pName;
 
-        private bool _fHasErrors;  // Whether anyituents have errors. This is immutable.
-
         public bool IsWindowsRuntimeType()
         {
             return (AssociatedSystemType.Attributes & TypeAttributes.WindowsRuntime) == TypeAttributes.WindowsRuntime;
@@ -174,21 +172,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 default:
                     return null;
             }
-        }
-
-        public void InitFromParent()
-        {
-            Debug.Assert(!(this is AggregateType));
-            _fHasErrors = GetBaseOrParameterOrElementType().HasErrors();
-        }
-
-        public bool HasErrors()
-        {
-            return _fHasErrors;
-        }
-        public void SetErrors(bool fHasErrors)
-        {
-            _fHasErrors = fHasErrors;
         }
 
         ////////////////////////////////////////////////////////////////////////////////
