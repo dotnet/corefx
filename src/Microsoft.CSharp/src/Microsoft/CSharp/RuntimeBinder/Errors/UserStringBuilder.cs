@@ -254,12 +254,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 ErrAppendString("operator ");
                 ErrAppendString(Operators.OperatorOfMethodName(meth.name));
             }
-            else if (meth.IsExpImpl())
-            {
-                if (meth.errExpImpl != null)
-                    ErrAppendType(meth.errExpImpl, pctx, fArgs);
-            }
-            else
+            else if (!meth.IsExpImpl())
             {
                 // regular method
                 ErrAppendName(meth.name);
@@ -287,16 +282,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         private void ErrAppendProperty(PropertySymbol prop, SubstContext pctx)
         {
             ErrAppendParentSym(prop, pctx);
-            if (prop.IsExpImpl() && prop.swtSlot.Sym != null)
+            if (prop.IsExpImpl())
             {
-                SubstContext ctx = new SubstContext(GetTypeManager().SubstType(prop.swtSlot.GetType(), pctx));
-                ErrAppendSym(prop.swtSlot.Sym, ctx);
-            }
-            else if (prop.IsExpImpl())
-            {
-                if (prop.errExpImpl != null)
-                    ErrAppendType(prop.errExpImpl, pctx, false);
-                if (prop is IndexerSymbol indexer)
+                if (prop.swtSlot.Sym != null)
+                {
+                    SubstContext ctx = new SubstContext(GetTypeManager().SubstType(prop.swtSlot.GetType(), pctx));
+                    ErrAppendSym(prop.swtSlot.Sym, ctx);
+                }
+                else if (prop is IndexerSymbol indexer)
                 {
                     ErrAppendChar('.');
                     ErrAppendIndexer(indexer, pctx);
