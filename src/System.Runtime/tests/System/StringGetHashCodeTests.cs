@@ -48,14 +48,15 @@ namespace System.Tests
         {
             var dict = new Dictionary<string, int>();
             Assert.NotSame(EqualityComparer<string>.Default, dict.Comparer);
+            var stringData = new StringsMatchingNonRandomizedHashCode().Data;
 
-            foreach (var s in StringsMatchingNonRandomizedHashCode.Data.Take(101))
+            foreach (var s in stringData.Take(101))
             {
                 dict.Add(s, 0);
             } 
 
             Assert.NotSame(EqualityComparer<string>.Default, dict.Comparer);
-            dict.Add(StringsMatchingNonRandomizedHashCode.Data.ElementAt(101), 0);
+            dict.Add(stringData.ElementAt(101), 0);
             Assert.Same(EqualityComparer<string>.Default, dict.Comparer);
         }
     }
