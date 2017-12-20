@@ -180,9 +180,6 @@
   <data name="Xml_InternalError" xml:space="preserve">
     <value>An internal error has occurred.</value>
   </data>
-    <data name="Xml_UnreachableLocation" xml:space="preserve">
-    <value>This program location is thought to be unreachable.</value>
-  </data>
   <data name="Xml_InvalidCharInThisEncoding" xml:space="preserve">
     <value>Invalid character in the given encoding.</value>
   </data>
@@ -2855,9 +2852,6 @@
   </data>
   <data name="XPath_UnexpectedToken" xml:space="preserve">
     <value>Unexpected token '{0}' in the expression.</value>
-  </data>
-    <data name="XPath_UnexpectedToken2" xml:space="preserve">
-    <value>"Internal Error: {0} is not allowed in XSLT pattern outside of predicate."</value>
   </data>
   <data name="XPath_NodeTestExpected" xml:space="preserve">
     <value>Expected a node test, found '{0}'.</value>
