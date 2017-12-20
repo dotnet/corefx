@@ -59,15 +59,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return (expr == null) ? false : 0 != (expr.Flags & EXPRFLAG.EXF_CHECKOVERFLOW);
         }
-        public static bool isNull(this Expr expr)
-        {
-            return expr is ExprConstant constant && constant.IsOK && (expr.Type.fundType() == FUNDTYPE.FT_REF) && constant.Val.IsNullRef;
-        }
 
-        public static bool IsZero(this Expr expr)
-        {
-            return expr is ExprConstant constant && constant.IsOK && constant.IsZero;
-        }
+        public static bool isNull(this Expr expr)
+            => expr is ExprConstant constant && expr.Type.fundType() == FUNDTYPE.FT_REF && constant.Val.IsNullRef;
+
+        public static bool IsZero(this Expr expr) => expr is ExprConstant constant && constant.IsZero;
 
         private static Expr GetSeqVal(this Expr expr)
         {
@@ -99,6 +95,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return exprVal;
         }
 
-        public static bool isCONSTANT_OK(this Expr expr) { return (expr == null) ? false : (expr.Kind == ExpressionKind.Constant && expr.IsOK); }
+        public static bool isCONSTANT_OK(this Expr expr) { return expr != null && expr.Kind == ExpressionKind.Constant; }
     }
 }

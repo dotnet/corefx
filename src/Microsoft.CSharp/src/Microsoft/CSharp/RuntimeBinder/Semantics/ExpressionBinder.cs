@@ -482,11 +482,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             ExprCall pResult = GetExprFactory().CreateCall(0, pReturnType, pArguments, pMemGroup, mwi);
 
-            if (!pResult.IsOK)
-            {
-                return pResult;
-            }
-
             // Set the return type and flags for constructors.
             if ((flags & MemLookFlags.Ctor) != 0)
             {

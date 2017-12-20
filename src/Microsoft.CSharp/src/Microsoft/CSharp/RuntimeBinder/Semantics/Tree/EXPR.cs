@@ -37,9 +37,5 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             protected set { _type = value; }
         }
-
-        public bool IsOK => !HasError;
-
-        public bool HasError { get; private set; }
     }
 }

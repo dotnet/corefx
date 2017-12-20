@@ -99,30 +99,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return null;
             }
 
-            Expr expr = null;
-
-            switch (info.binopKind)
+            Expr expr;
+            if (info.binopKind == BinOpKind.Logical)
             {
-                case BinOpKind.Logical:
-                    {
-                        // Logical operators cannot be overloaded, but use the bitwise overloads.
-                        ExprCall call = BindUDBinop((ExpressionKind)(ek - ExpressionKind.LogicalAnd + ExpressionKind.BitwiseAnd), info.arg1, info.arg2, true, out pmpwi);
-                        if (call != null)
-                        {
-                            if (call.IsOK)
-                            {
-                                expr = BindUserBoolOp(ek, call);
-                            }
-                            else
-                            {
-                                expr = call;
-                            }
-                        }
-                        break;
-                    }
-                default:
-                    expr = BindUDBinop(ek, info.arg1, info.arg2, false, out pmpwi);
-                    break;
+                // Logical operators cannot be overloaded, but use the bitwise overloads.
+                ExprCall call = BindUDBinop(
+                    ek - ExpressionKind.LogicalAnd + ExpressionKind.BitwiseAnd, info.arg1, info.arg2, true, out pmpwi);
+                if (call == null)
+                {
+                    return null;
+                }
+
+                expr = BindUserBoolOp(ek, call);
+            }
+            else
+            {
+                expr = BindUDBinop(ek, info.arg1, info.arg2, false, out pmpwi);
             }
 
             if (expr == null)
@@ -1995,11 +1987,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Expr exprRes = BindIntOp(ek, flags, arg1, arg2, ptOp);
 
-            if (!exprRes.IsOK)
-            {
-                return exprRes;
-            }
-
             if (exprRes.Type != typeDst)
             {
                 Debug.Assert(!typeDst.isPredefType(PredefinedType.PT_BOOL));
@@ -2054,11 +2041,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             exprRes.Flags |= flags;
             Debug.Assert((exprRes.Flags & EXPRFLAG.EXF_LVALUE) == 0);
 
-            if (!exprRes.IsOK)
-            {
-                return exprRes;
-            }
-
             if (exprRes.Type != typeDst)
             {
                 return mustCast(exprRes, typeDst, CONVERTTYPE.NOUDC);
@@ -2101,12 +2083,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             arg = mustCast(arg, typeOp, CONVERTTYPE.NOUDC);
 
             Expr exprRes = BindIntOp(ek, flags, arg, null, ptOp);
-
-            if (!exprRes.IsOK)
-            {
-                return exprRes;
-            }
-
             return mustCastInUncheckedContext(exprRes, typeEnum, CONVERTTYPE.NOUDC);
         }
 

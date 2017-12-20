@@ -363,7 +363,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             FUNDTYPE ftSrc = expr.Type.fundType();
             FUNDTYPE ftDest = dest.fundType();
 
-            if (expr is ExprConstant constant && constant.IsOK &&
+            if (expr is ExprConstant constant &&
                 expr.Type.isSimpleType() && dest.isSimpleType())
             {
                 if ((ftSrc == FUNDTYPE.FT_I4 && (ftDest <= FUNDTYPE.FT_LASTNONLONG || ftDest == FUNDTYPE.FT_U8)) ||

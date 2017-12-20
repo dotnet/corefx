@@ -894,7 +894,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 BindingFlag.BIND_RVALUEREQUIRED | BindingFlag.BIND_STMTEXPRONLY, memGroup, CreateArgumentListEXPR(arguments, locals, 1, arguments.Length));
 
             // If overload resolution failed, throw an error.
-            if (pResult == null || !pResult.IsOK)
+            if (pResult == null)
             {
                 throw Error.BindCallFailedOverloadResolution();
             }
