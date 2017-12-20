@@ -480,20 +480,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
                     break;
 
-                case TypeKind.TK_ErrorType:
-                    ErrorType err = (ErrorType)pType;
-                    if (err.HasParent)
-                    {
-                        Debug.Assert(err.nameText != null);
-                        ErrAppendName(err.nameText);
-                    }
-                    else
-                    {
-                        // Load the string "<error>".
-                        ErrAppendId(MessageID.ERRORSYM);
-                    }
-                    break;
-
                 case TypeKind.TK_NullType:
                     // Load the string "<null>".
                     ErrAppendId(MessageID.NULL);
