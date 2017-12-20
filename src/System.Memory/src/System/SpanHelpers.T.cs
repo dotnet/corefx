@@ -3,12 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-
-#if !netstandard
-using Internal.Runtime.CompilerServices;
-#else
 using System.Runtime.CompilerServices;
-#endif
 
 namespace System
 {
@@ -63,7 +58,10 @@ namespace System
             for (int i = 0; i < valueLength; i++)
             {
                 var tempIndex = LastIndexOf(ref searchSpace, Unsafe.Add(ref value, i), searchSpaceLength);
-                if (tempIndex > index) index = tempIndex;
+                if (tempIndex != -1)
+                {
+                    index = (index == -1 || index < tempIndex) ? tempIndex : index;
+                }
             }
             return index;
         }
@@ -177,7 +175,7 @@ namespace System
             return -1;
         }
 
-        public static int LastIndexOf<T>(ref T searchSpace, T value, int length)
+        public static unsafe int LastIndexOf<T>(ref T searchSpace, T value, int length)
             where T : IEquatable<T>
         {
             Debug.Assert(length >= 0);
@@ -245,7 +243,7 @@ namespace System
             return length + 7;
         }
 
-        public static int LastIndexOfAny<T>(ref T searchSpace, T value0, T value1, int length)
+        public static unsafe int LastIndexOfAny<T>(ref T searchSpace, T value0, T value1, int length)
             where T : IEquatable<T>
         {
             Debug.Assert(length >= 0);
@@ -327,7 +325,7 @@ namespace System
             return length + 7;
         }
 
-        public static int LastIndexOfAny<T>(ref T searchSpace, T value0, T value1, T value2, int length)
+        public static unsafe int LastIndexOfAny<T>(ref T searchSpace, T value0, T value1, T value2, int length)
             where T : IEquatable<T>
         {
             Debug.Assert(length >= 0);

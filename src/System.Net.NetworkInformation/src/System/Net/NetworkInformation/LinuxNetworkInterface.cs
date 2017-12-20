@@ -225,7 +225,7 @@ namespace System.Net.NetworkInformation
             return OperationalStatus.Unknown;
         }
 
-        // Maps values from /sys/class/net/<interface>/operstate to OperationalStatus values.
+        // Maps values from /sys/class/net/<interface>/operstate to OperationStatus values.
         private static OperationalStatus MapState(string state)
         {
             //

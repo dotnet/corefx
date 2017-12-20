@@ -27,7 +27,8 @@ namespace System.ComponentModel.Composition.Factories
 
             public override ComposablePart CreatePart()
             {
-                throw new NotImplementedException();
+                Assert.False(true);
+                return null;
             }
         }
     }

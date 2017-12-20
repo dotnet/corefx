@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
@@ -859,7 +858,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         ////////////////////////////////////////////////////////////////////////////////
         // Given a method group or indexer group, bind it to the arguments for an 
         // invocation.
-        private GroupToArgsBinderResult BindMethodGroupToArgumentsCore(BindingFlag bindFlags, ExprMemberGroup grp, Expr args, int carg, bool bHasNamedArgumentSpecifiers)
+        private GroupToArgsBinderResult BindMethodGroupToArgumentsCore(BindingFlag bindFlags, ExprMemberGroup grp, ref Expr args, int carg, bool bHasNamedArgumentSpecifiers)
         {
             ArgInfos pargInfo = new ArgInfos {carg = carg};
             FillInArgInfoFromArgList(pargInfo, args);
@@ -881,15 +880,23 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(grp.SymKind == SYMKIND.SK_MethodSymbol || grp.SymKind == SYMKIND.SK_PropertySymbol && ((grp.Flags & EXPRFLAG.EXF_INDEXER) != 0));
 
             // Count the args.
-            int carg = CountArguments(args);
+            int carg = CountArguments(args, out bool _);
 
-            Debug.Assert(grp.Name != null);
+            // If we weren't given a pName, then we couldn't bind the method pName, so we should
+            // just bail out of here.
 
-            // If we have named arguments specified, make sure we have them all appearing after
+            if (grp.Name == null)
+            {
+                ExprCall rval = GetExprFactory().CreateCall(0, GetTypes().GetErrorSym(), args, grp, null);
+                rval.SetError();
+                return rval;
+            }
+
+            // If we have named arguments specified, make sure we have them all appearing after 
             // fixed arguments.
             bool seenNamed = VerifyNamedArgumentsAfterFixed(args);
 
-            MethPropWithInst mpwiBest = BindMethodGroupToArgumentsCore(bindFlags, grp, args, carg, seenNamed)
+            MethPropWithInst mpwiBest = BindMethodGroupToArgumentsCore(bindFlags, grp, ref args, carg, seenNamed)
                 .GetBestResult();
             if (grp.SymKind == SYMKIND.SK_PropertySymbol)
             {
@@ -1275,7 +1282,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             MethodSymbol m = mp as MethodSymbol;
             int argCount = ExpressionIterator.Count(argsPtr);
 
-            Debug.Assert(!@params.Items.Any(p => p is ArgumentListType)); // We should never have picked a varargs method to bind to.
+            if (m != null && m.isVarargs)
+            {
+                paramCount--; // we don't care about the vararg sentinel
+            }
 
             bool bDontFixParamArray = false;
 
@@ -1538,9 +1548,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 Debug.Assert(arg != null);
-                Debug.Assert(arg.Type != null);
 
-                prgtype[iarg] = arg.Type;
+                if (arg.Type != null)
+                {
+                    prgtype[iarg] = arg.Type;
+                }
+                else
+                {
+                    prgtype[iarg] = GetTypes().GetErrorSym();
+                }
                 argInfo.prgexpr.Add(arg);
             }
 
@@ -1838,9 +1854,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GetExprFactory().CreateAssignment(op1, op2);
         }
 
-        internal static int CountArguments(Expr args)
+        internal static int CountArguments(Expr args, out bool typeErrors)
         {
             int carg = 0;
+            typeErrors = false;
             for (Expr list = args; list != null; carg++)
             {
                 Expr arg;
@@ -1857,8 +1874,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 Debug.Assert(arg != null);
-            }
 
+                if (arg.Type == null || arg.Type is ErrorType)
+                {
+                    typeErrors = true;
+                }
+            }
             return carg;
         }
     }

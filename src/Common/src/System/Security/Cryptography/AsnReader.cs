@@ -2744,7 +2744,7 @@ namespace System.Security.Cryptography.Asn1
                 if (fraction != 0)
                 {
                     // No minutes means this is fractions of an hour
-                    fractionSpan = new TimeSpan((long)(frac * TimeSpan.TicksPerHour));
+                    fractionSpan = TimeSpan.FromHours(frac);
                 }
             }
             else if (!second.HasValue)
@@ -2754,13 +2754,13 @@ namespace System.Security.Cryptography.Asn1
                 if (fraction != 0)
                 {
                     // No seconds means this is fractions of a minute
-                    fractionSpan = new TimeSpan((long)(frac * TimeSpan.TicksPerMinute));
+                    fractionSpan = TimeSpan.FromMinutes(frac);
                 }
             }
             else if (fraction != 0)
             {
                 // Both minutes and seconds means fractions of a second.
-                fractionSpan = new TimeSpan((long)(frac * TimeSpan.TicksPerSecond));
+                fractionSpan = TimeSpan.FromSeconds(frac);
             }
             
             DateTimeOffset value;

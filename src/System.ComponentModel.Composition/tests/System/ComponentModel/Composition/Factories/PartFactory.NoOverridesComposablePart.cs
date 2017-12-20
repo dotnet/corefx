@@ -31,12 +31,13 @@ namespace System.ComponentModel.Composition.Factories
 
             public override object GetExportedValue(ExportDefinition definition)
             {
-                throw new NotImplementedException();
+                Assert.False(true);
+                return null;
             }
 
             public override void SetImport(ImportDefinition definition, IEnumerable<Export> exports)
             {
-                throw new NotImplementedException();
+                Assert.False(true);
             }
         }
     }

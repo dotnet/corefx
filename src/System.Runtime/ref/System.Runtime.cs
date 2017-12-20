@@ -1911,7 +1911,7 @@ namespace System
         [CLSCompliant(false)]
         public unsafe ReadOnlySpan(void* pointer, int length) { throw null; }
         public bool IsEmpty { get { throw null; } }
-        public ref readonly T this[int index] { get { throw null; } }
+        public T this[int index] { get { throw null; } }
         public int Length { get { throw null; } }
         public void CopyTo(Span<T> destination) { }
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
@@ -6828,9 +6828,6 @@ namespace System.Runtime.CompilerServices
     }
     public static class RuntimeFeature
     {
-#if FEATURE_DEFAULT_INTERFACES
-        public const string DefaultImplementationsOfInterfaces = nameof(DefaultImplementationsOfInterfaces); 
-#endif
         public static bool IsSupported(string feature) { throw null; }
     }
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]

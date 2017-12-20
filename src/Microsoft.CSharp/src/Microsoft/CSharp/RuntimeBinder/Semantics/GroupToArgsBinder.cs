@@ -586,7 +586,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             FieldSymbol field = symbolLoader.LookupAggMember(name, agg, symbmask_t.MASK_FieldSymbol) as FieldSymbol;
                             FieldWithType fwt = new FieldWithType(field, agg.getThisType());
                             ExprField exprField = exprFactory.CreateField(agg.getThisType(), null, fwt, false);
-                            optionalArgument = exprFactory.CreateCast(type, exprField);
+
+                            if (agg.getThisType() != type)
+                            {
+                                optionalArgument = exprFactory.CreateCast(type, exprField);
+                            }
+                            else
+                            {
+                                optionalArgument = exprField;
+                            }
                         }
                     }
                     else

@@ -87,7 +87,7 @@ namespace System.Buffers.Text.Tests
         [Fact]
         public static void GenerateEncodingMapAndVerify()
         {
-            byte[] data = new byte[64]; // Base64
+            var data = new byte[64]; // Base64
             for (int i = 0; i < s_characters.Length; i++)
             {
                 data[i] = (byte)s_characters[i];
@@ -98,7 +98,7 @@ namespace System.Buffers.Text.Tests
         [Fact]
         public static void GenerateDecodingMapAndVerify()
         {
-            sbyte[] data = new sbyte[256]; // 0 to byte.MaxValue (255)
+            var data = new sbyte[256]; // 0 to byte.MaxValue (255)
             for (int i = 0; i < data.Length; i++)
             {
                 data[i] = s_invalidByte;

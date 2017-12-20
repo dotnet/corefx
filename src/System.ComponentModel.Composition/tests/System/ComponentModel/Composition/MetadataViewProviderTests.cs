@@ -231,7 +231,6 @@ namespace System.ComponentModel.Composition
                 get;
             }
         }
-
         public class RawMetadata : Dictionary<string, object>
         {
             public RawMetadata(IDictionary<string, object> dictionary) : base(dictionary) { }
@@ -324,7 +323,6 @@ namespace System.ComponentModel.Composition
             var view = MetadataViewProvider.GetMetadataView<ITrans_MetadataViewWithDefaultedString>(new Dictionary<string, object>());
             Assert.Equal("MyString", view.MyString);
         }
-
         [Fact]
         public void GetMetadataView_IMetadataViewWithTypeMismatchDefaultValue()
         {
@@ -361,5 +359,6 @@ namespace System.ComponentModel.Composition
                 MetadataViewProvider.GetMetadataView<ITrans_HasInt64>(metadata);
             });
         }
+
     }
 }

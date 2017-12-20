@@ -272,9 +272,7 @@ namespace System.ComponentModel.Composition
     public class ScopeExportFactoryWithPublicSurface
     {
         [Export] public class ClassA { }
-
         [Export] public class ClassB { }
-
         [Export] public class ClassC { }
 
         [Export]
@@ -314,7 +312,6 @@ namespace System.ComponentModel.Composition
     public class ScopeFactoryAutoResolveFromAncestorScope
     {
         [Export] public class Root { }
-
         [Export] public class Child { }
 
         [Export]

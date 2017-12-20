@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -60,27 +59,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             set
             {
-                Debug.Assert(_Params == null, "Should only be set once");
+                // Should only be set once!
                 _Params = value;
-                int count = value.Count;
-                if (count == 0)
-                {
-                    _optionalParameterIndex = _defaultParameterIndex = _marshalAsIndex = Array.Empty<bool>();
-                    _defaultParameters = Array.Empty<ConstVal>();
-                    _defaultParameterConstValTypes = Array.Empty<CType>();
-                    _marshalAsBuffer = Array.Empty<UnmanagedType>();
-                }
-                else
-                {
-                    _optionalParameterIndex = new bool[count];
-                    _defaultParameterIndex = new bool[count];
-                    _defaultParameters = new ConstVal[count];
-                    _defaultParameterConstValTypes = new CType[count];
-                    _marshalAsIndex = new bool[count];
-                    _marshalAsBuffer = new UnmanagedType[count];
-                }
+                _optionalParameterIndex = new bool[_Params.Count];
+                _defaultParameterIndex = new bool[_Params.Count];
+                _defaultParameters = new ConstVal[_Params.Count];
+                _defaultParameterConstValTypes = new CType[_Params.Count];
+                _marshalAsIndex = new bool[_Params.Count];
+                _marshalAsBuffer = new UnmanagedType[_Params.Count];
             }
-        }
+        }             // array of cParams parameter types.
 
         public MethodOrPropertySymbol()
         {
@@ -169,13 +157,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool MarshalAsObject(int index)
         {
+            UnmanagedType marshalAsType = default(UnmanagedType);
+
             if (IsMarshalAsParameter(index))
             {
-                UnmanagedType marshalAsType = GetMarshalAsParameterValue(index);
-                return marshalAsType == UnmanagedType.Interface || marshalAsType == UnmanagedType.IUnknown || marshalAsType == UnmanagedType.IDispatch;
+                marshalAsType = GetMarshalAsParameterValue(index);
             }
 
-            return false;
+            return marshalAsType == UnmanagedType.Interface || marshalAsType == UnmanagedType.IUnknown;
         }
 
         public AggregateSymbol getClass() => parent as AggregateSymbol;

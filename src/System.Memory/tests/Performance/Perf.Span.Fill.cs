@@ -37,7 +37,7 @@ namespace System.Memory.Tests
         {
             var a = new int[size];
             var span = new Span<int>(a);
-            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            foreach (var iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {

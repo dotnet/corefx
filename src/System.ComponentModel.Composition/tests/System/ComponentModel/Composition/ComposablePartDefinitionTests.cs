@@ -33,10 +33,6 @@ namespace System.ComponentModel.Composition
         {
             return types;
         }
-
-        public const string ComImportAvailable = nameof(Helpers) + "." + nameof(CheckComImportAvailable);
-
-        private static bool CheckComImportAvailable() => PlatformDetection.IsWindows && PlatformDetection.IsNotWindowsNanoServer && !PlatformDetection.IsUap;
     }
     
     public class ComposablePartDefinitionTests

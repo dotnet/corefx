@@ -6,5 +6,6 @@
     <AssemblyKey>Open</AssemblyKey>
     <IsNETCoreApp>true</IsNETCoreApp>
     <IsUAP>true</IsUAP>
+    <IsUAPRef>false</IsUAPRef>
   </PropertyGroup>
 </Project>
