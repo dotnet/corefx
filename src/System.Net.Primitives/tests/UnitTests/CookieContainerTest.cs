@@ -244,6 +244,7 @@ namespace System.Net.Primitives.Unit.Tests
                     new Cookie("_m_ask_fm_session", "session1")
                 }
             }; // Empty header at the beginning
+            
             yield return new object[] {
                 uSecure,
                 "          ,locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
@@ -255,6 +256,7 @@ namespace System.Net.Primitives.Unit.Tests
                     new Cookie("_m_ask_fm_session", "session1")
                 }
             }; // Empty header composed by spaces at the beginning
+            
             yield return new object[] {
                 u,
                 "locale=en,, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
@@ -266,6 +268,7 @@ namespace System.Net.Primitives.Unit.Tests
                     new Cookie("_m_ask_fm_session", "session1")
                 }
             }; // Empty header in the middle
+            
             yield return new object[] {
                 uSecure,
                 "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46,       , country=US, _m_ask_fm_session=session1",
@@ -277,6 +280,7 @@ namespace System.Net.Primitives.Unit.Tests
                     new Cookie("_m_ask_fm_session", "session1")
                 }
             }; // Empty header composed by spaces in the middle
+            
             yield return new object[] {
                 u,
                 "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1,",
@@ -300,6 +304,7 @@ namespace System.Net.Primitives.Unit.Tests
                     new Cookie("_m_ask_fm_session", "session1")
                 }
             }; // Empty header composed by spaces at the end
+            
             yield return new object[] {
                 uSecure,
                 "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1,   ,",
