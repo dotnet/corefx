@@ -569,11 +569,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             ExprField pResult = GetExprFactory()
                 .CreateField(pFieldType, pOptionalObject, fwt, isLValue);
 
-            if (pFieldType is ErrorType)
-            {
-                pResult.SetError();
-            }
-
             Debug.Assert(BindingFlag.BIND_MEMBERSET == (BindingFlag)EXPRFLAG.EXF_MEMBERSET);
             pResult.Flags |= (EXPRFLAG)(bindFlags & BindingFlag.BIND_MEMBERSET);
 
@@ -949,13 +944,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(pOperand1 != null);
             Debug.Assert(pOperand1.Type != null);
-            Debug.Assert(!(pOperand1.Type is ErrorType));
 
             if (pOperand2 != null)
             {
                 Debug.Assert(pOperand2.Type != null);
-                Debug.Assert(!(pOperand2.Type is ErrorType));
-
                 return ErrorContext.Error(ErrorCode.ERR_BadBinaryOps, strOp, pOperand1.Type, pOperand2.Type);
             }
 

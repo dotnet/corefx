@@ -106,7 +106,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             Debug.Assert(false, "Bad kind in CompareTypes");
                             break;
                         case TypeKind.TK_TypeParameterType:
-                        case TypeKind.TK_ErrorType:
                             break;
 
                         case TypeKind.TK_PointerType:

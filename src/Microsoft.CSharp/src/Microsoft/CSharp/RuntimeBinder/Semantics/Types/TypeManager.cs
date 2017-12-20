@@ -26,7 +26,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private readonly NullType _nullType;
         private readonly MethodGroupType _typeMethGrp;
         private readonly ArgumentListType _argListType;
-        private readonly ErrorType _errorType;
 
         private readonly StdTypeVarColl _stvcMethod;
         private readonly StdTypeVarColl _stvcClass;
@@ -37,13 +36,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _typeTable = new TypeTable();
 
             // special types with their own symbol kind.
-            _errorType = _typeFactory.CreateError(null);
             _voidType = _typeFactory.CreateVoid();
             _nullType = _typeFactory.CreateNull();
             _typeMethGrp = _typeFactory.CreateMethodGroup();
             _argListType = _typeFactory.CreateArgList();
-
-            _errorType.SetErrors(true);
 
             _stvcMethod = new StdTypeVarColl();
             _stvcClass = new StdTypeVarColl();
@@ -283,26 +279,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return pParamModifier;
         }
 
-        public ErrorType GetErrorType(Name nameText)
-        {
-            Debug.Assert(nameText != null);
-            ErrorType pError = _typeTable.LookupError(nameText);
-            if (pError == null)
-            {
-                // No existing error symbol. Create a new one.
-                pError = _typeFactory.CreateError(nameText);
-                pError.SetErrors(true);
-                _typeTable.InsertError(nameText, pError);
-            }
-            else
-            {
-                Debug.Assert(pError.HasErrors());
-                Debug.Assert(pError.nameText == nameText);
-            }
-
-            return pError;
-        }
-
         public VoidType GetVoid()
         {
             return _voidType;
@@ -321,11 +297,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ArgumentListType GetArgListType()
         {
             return _argListType;
-        }
-
-        public ErrorType GetErrorSym()
-        {
-            return _errorType;
         }
 
         public AggregateSymbol GetNullable() => GetPredefAgg(PredefinedType.PT_G_OPTIONAL);
@@ -422,7 +393,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_VoidType:
                 case TypeKind.TK_MethodGroupType:
                 case TypeKind.TK_ArgumentListType:
-                case TypeKind.TK_ErrorType:
                     return type;
 
                 case TypeKind.TK_ParameterModifierType:
@@ -581,16 +551,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return true;
 
-                case TypeKind.TK_ErrorType:
-                    ErrorType errSrc = (ErrorType)typeSrc;
-                    if (!(typeDst is ErrorType errDst))
-                    {
-                        return false;
-                    }
-
-                    Name srcName = errSrc.nameText;
-                    return srcName != null && errSrc.nameText == errDst.nameText;
-
                 case TypeKind.TK_TypeParameterType:
                     { // BLOCK
                         TypeParameterSymbol tvs = ((TypeParameterType)typeSrc).GetTypeParameterSymbol();
@@ -672,7 +632,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return false;
 
-                case TypeKind.TK_ErrorType:
                 case TypeKind.TK_TypeParameterType:
                     return false;
             }
@@ -690,7 +649,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_NullType:
                 case TypeKind.TK_VoidType:
                 case TypeKind.TK_MethodGroupType:
-                case TypeKind.TK_ErrorType:
                     return false;
 
                 case TypeKind.TK_ArrayType:
@@ -850,7 +808,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // These guys have no accessibility concerns.
-            Debug.Assert(!(typeSrc is VoidType) && !(typeSrc is ErrorType) && !(typeSrc is TypeParameterType));
+            Debug.Assert(!(typeSrc is VoidType) && !(typeSrc is TypeParameterType));
 
             if (typeSrc is ParameterModifierType || typeSrc is PointerType)
             {

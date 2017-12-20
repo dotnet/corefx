@@ -78,7 +78,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // (14.4.3), cast expressions (14.6.6), and assignments (14.14).
 
                 // Can't convert to or from the error type.
-                if (_typeSrc == null || _typeDest == null || _typeDest.IsNeverSameType())
+                if (_typeSrc == null || _typeDest == null || _typeDest is MethodGroupType)
                 {
                     return false;
                 }
@@ -89,17 +89,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 switch (_typeDest.GetTypeKind())
                 {
-                    case TypeKind.TK_ErrorType:
-                        Debug.Assert(((ErrorType)_typeDest).HasParent);
-                        if (_typeSrc != _typeDest)
-                        {
-                            return false;
-                        }
-                        if (_needsExprDest)
-                        {
-                            _exprDest = _exprSrc;
-                        }
-                        return true;
                     case TypeKind.TK_NullType:
                         // Can only convert to the null type if src is null.
                         if (!(_typeSrc is NullType))
@@ -111,21 +100,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             _exprDest = _exprSrc;
                         }
                         return true;
-                    case TypeKind.TK_MethodGroupType:
-                        Debug.Fail("Something is wrong with Type.IsNeverSameType()");
-                        return false;
                     case TypeKind.TK_ArgumentListType:
                         return _typeSrc == _typeDest;
                     case TypeKind.TK_VoidType:
                         return false;
                     default:
                         break;
-                }
-
-                if (_typeSrc is ErrorType)
-                {
-                    Debug.Assert(!(_typeDest is ErrorType));
-                    return false;
                 }
 
                 // 13.1.1 Identity conversion
@@ -168,7 +148,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         Debug.Fail($"Bad type symbol kind: {_typeSrc.GetTypeKind()}");
                         break;
                     case TypeKind.TK_VoidType:
-                    case TypeKind.TK_ErrorType:
                     case TypeKind.TK_ParameterModifierType:
                     case TypeKind.TK_ArgumentListType:
                         return false;

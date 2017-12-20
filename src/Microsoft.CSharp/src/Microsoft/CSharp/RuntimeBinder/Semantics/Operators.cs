@@ -1326,7 +1326,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     Expr exprVal = bindUDUnop((ExpressionKind)(exprKind - ExpressionKind.Add + ExpressionKind.Inc), exprGet);
                     if (exprVal != null)
                     {
-                        if (exprVal.Type != null && !(exprVal.Type is ErrorType) && exprVal.Type != pArgumentType)
+                        if (exprVal.Type != null && exprVal.Type != pArgumentType)
                         {
                             exprVal = mustConvert(exprVal, pArgumentType);
                         }

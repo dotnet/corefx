@@ -356,7 +356,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return exprResult;
             }
 
-            if (expr.IsOK && !(dest is ErrorType))
+            if (expr.IsOK)
             {
                 // don't report cascading error.
 
@@ -441,7 +441,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     checkUnsafe(dest); // added to the binder so we don't bind to pointer ops
                     return exprResult;
                 }
-                if (dest != null && !(dest is ErrorType))
+                if (dest != null)
                 { // don't report cascading error.
                     // For certain situations, try to give a better error.
                     string value = "";
@@ -509,7 +509,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             // Generic "can't convert" error.
             // Only report if we don't have an error type.
-            if (expr.Type != null && !(expr.Type is ErrorType))
+            if (expr.Type != null)
             {
                 throw ErrorContext.Error(ErrorCode.ERR_NoExplicitConv, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
             }
