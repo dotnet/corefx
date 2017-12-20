@@ -1936,7 +1936,7 @@ public static partial class XmlSerializerTests
         Assert.False(xmp.CheckSpecified);
     }
 
-    [Fact]    
+    [Fact]       
     public static void XmlSchemaExporter_ExportMembersMapping_NotSupportedDefaultValue()
     {
         XmlReflectionImporter importer = new XmlReflectionImporter("http://www.contoso.com/");
@@ -1947,7 +1947,7 @@ public static partial class XmlSerializerTests
         XmlMemberMapping xmp = mappings[0];
         XmlSchemas schema = new XmlSchemas();
         XmlSchemaExporter exporter = new XmlSchemaExporter(schema);
-        AssertExtensions.Throws<NotSupportedException,Exception>(() => exporter.ExportMembersMapping(mappings));
+        AssertExtensions.Throws<XmlException,Exception>(() => exporter.ExportMembersMapping(mappings));
     }
 
     [Fact]
