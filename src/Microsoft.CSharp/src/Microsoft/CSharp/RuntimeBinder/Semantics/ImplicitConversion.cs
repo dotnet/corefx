@@ -304,19 +304,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // The null type can be implicitly converted to T? as the default value.
                     if (_typeSrc is NullType)
                     {
-                        // If we have the constant null, generate it as a default value of T?.  If we have 
+                        // If we have the constant null, generate it as a default value of T?.  If we have
                         // some crazy expression which has been determined to be always null, like (null??null)
                         // keep it in its expression form and transform it in the nullable rewrite pass.
                         if (_needsExprDest)
                         {
-                            if (_exprSrc.isCONSTANT_OK())
-                            {
-                                _exprDest = GetExprFactory().CreateZeroInit(nubDst);
-                            }
-                            else
-                            {
-                                _exprDest = GetExprFactory().CreateCast(_typeDest, _exprSrc);
-                            }
+                            _exprDest = _exprSrc is ExprConstant
+                                ? GetExprFactory().CreateZeroInit(nubDst)
+                                : GetExprFactory().CreateCast(_typeDest, _exprSrc);
                         }
                         return true;
                     }
@@ -409,17 +404,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 if (_needsExprDest)
                 {
-                    // If the conversion argument is a constant null then return a ZEROINIT.   
-                    // Otherwise, bind this as a cast to the destination type. In a later 
+                    // If the conversion argument is a constant null then return a ZEROINIT.
+                    // Otherwise, bind this as a cast to the destination type. In a later
                     // rewrite pass we will rewrite the cast as SEQ(side effects, ZEROINIT).
-                    if (_exprSrc.isCONSTANT_OK())
-                    {
-                        _exprDest = GetExprFactory().CreateZeroInit(_typeDest);
-                    }
-                    else
-                    {
-                        _exprDest = GetExprFactory().CreateCast(_typeDest, _exprSrc);
-                    }
+                    _exprDest = _exprSrc is ExprConstant
+                        ? GetExprFactory().CreateZeroInit(_typeDest)
+                        : GetExprFactory().CreateCast(_typeDest, _exprSrc);
                 }
                 return true;
             }

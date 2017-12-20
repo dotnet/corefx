@@ -90,11 +90,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public static Expr GetConst(this Expr expr)
         {
             Expr exprVal = expr.GetSeqVal();
-            if (null == exprVal || !exprVal.isCONSTANT_OK() && exprVal.Kind != ExpressionKind.ZeroInit)
-                return null;
-            return exprVal;
-        }
+            switch (exprVal?.Kind)
+            {
+                case ExpressionKind.Constant:
+                case ExpressionKind.ZeroInit:
+                    return exprVal;
+            }
 
-        public static bool isCONSTANT_OK(this Expr expr) { return expr != null && expr.Kind == ExpressionKind.Constant; }
+            return null;
+        }
     }
 }

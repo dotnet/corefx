@@ -173,23 +173,26 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     case ConvKind.None:
                         continue;
                     case ConvKind.Explicit:
-                        if (!info.arg1.isCONSTANT_OK())
+                        if (!(info.arg1 is ExprConstant constant))
                         {
                             continue;
                         }
                         // Need to try to convert.
-                        if (canConvert(info.arg1, typeSig1))
+
+                        if (canConvert(constant, typeSig1))
                         {
                             break;
                         }
+
                         if (ibos < ibosMinLift || !bos.CanLift())
                         {
                             continue;
                         }
+
                         Debug.Assert(typeSig1.IsValType());
 
                         typeSig1 = GetSymbolLoader().GetTypeManager().GetNullable(typeSig1);
-                        if (!canConvert(info.arg1, typeSig1))
+                        if (!canConvert(constant, typeSig1))
                         {
                             continue;
                         }
@@ -255,15 +258,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     case ConvKind.None:
                         continue;
                     case ConvKind.Explicit:
-                        if (!info.arg2.isCONSTANT_OK())
+                        if (!(info.arg2 is ExprConstant constant))
                         {
                             continue;
                         }
+
                         // Need to try to convert.
-                        if (canConvert(info.arg2, typeSig2))
+                        if (canConvert(constant, typeSig2))
                         {
                             break;
                         }
+
                         if (ibos < ibosMinLift || !bos.CanLift())
                         {
                             continue;
@@ -271,10 +276,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         Debug.Assert(typeSig2.IsValType());
 
                         typeSig2 = GetSymbolLoader().GetTypeManager().GetNullable(typeSig2);
-                        if (!canConvert(info.arg2, typeSig2))
+                        if (!canConvert(constant, typeSig2))
                         {
                             continue;
                         }
+
                         switch (GetConvKind(info.ptRaw2, bos.pt2))
                         {
                             default:
@@ -1243,7 +1249,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return BindLiftedStandardUnop(ek, flags, pArgument, uofs);
             }
 
-            if (pArgument.isCONSTANT_OK())
+            if (pArgument is ExprConstant)
             {
                 // Wrap the constant in an identity cast, to force the later casts to not be optimised out.
                 // The ExpressionTreeRewriter will remove this again.
@@ -1388,10 +1394,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         continue;
 
                     case ConvKind.Explicit:
-                        if (!pArgument.isCONSTANT_OK())
+                        if (!(pArgument is ExprConstant))
                         {
                             continue;
                         }
+
                         if (canConvert(pArgument, typeSig = GetPredefindType(uos.pt)))
                         {
                             break;
