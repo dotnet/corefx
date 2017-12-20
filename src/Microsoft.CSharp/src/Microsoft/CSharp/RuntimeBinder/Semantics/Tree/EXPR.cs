@@ -41,10 +41,5 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool IsOK => !HasError;
 
         public bool HasError { get; private set; }
-
-        public void SetError()
-        {
-            HasError = true;
-        }
     }
 }

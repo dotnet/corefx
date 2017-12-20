@@ -1335,16 +1335,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         ExprMulti exprMulti = GetExprFactory().CreateMulti(EXPRFLAG.EXF_ASSGOP | flags, pArgumentType, pArgument, exprVal);
                         exprGet.OptionalMulti = exprMulti;
 
-                        // Check whether Lvalue can be assigned. checkLvalue may return true 
-                        // despite reporting an error. 
-                        if (!checkLvalue(pArgument, CheckLvalueKind.Increment))
-                        {
-                            // This seems like it can never be reached - exprVal is only valid if 
-                            // we have a UDUnop, and in order for checkLValue to return false, either the 
-                            // arg has to not be OK, in which case we shouldn't get here, or we have an 
-                            // AnonMeth, Lambda, or Constant, all of which cannot have UDUnops defined for them. 
-                            exprMulti.SetError();
-                        }
+                        // Check whether Lvalue can be assigned.
+                        CheckLvalue(pArgument, CheckLvalueKind.Increment);
                         ppResult = exprMulti;
                         return UnaryOperatorSignatureFindResult.Return;
                     }
@@ -1588,13 +1580,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private Expr BindIncOp(ExpressionKind ek, EXPRFLAG flags, Expr arg, UnaOpFullSig uofs)
         {
             Debug.Assert(ek == ExpressionKind.Add || ek == ExpressionKind.Subtract);
-            if (!checkLvalue(arg, CheckLvalueKind.Increment))
-            {
-                Expr rval = GetExprFactory().CreateBinop(ek, arg.Type, arg, null);
-                rval.SetError();
-                return rval;
-            }
 
+            CheckLvalue(arg, CheckLvalueKind.Increment);
             CType typeRaw = uofs.GetType().StripNubs();
 
             FUNDTYPE ft = typeRaw.fundType();
