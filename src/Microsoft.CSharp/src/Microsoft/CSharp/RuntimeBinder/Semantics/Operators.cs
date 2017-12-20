@@ -2738,21 +2738,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private ExprBinOp CreateBinopForPredefMethodCall(ExpressionKind ek, PREDEFMETH predefMeth, CType RetType, Expr arg1, Expr arg2)
         {
             MethodSymbol methSym = GetSymbolLoader().getPredefinedMembers().GetMethod(predefMeth);
+            Debug.Assert(methSym != null);
             ExprBinOp binop = GetExprFactory().CreateBinop(ek, RetType, arg1, arg2);
 
             // Set the predefined method to call.
-            if (methSym != null)
-            {
-                AggregateSymbol agg = methSym.getClass();
-                AggregateType callingType = GetTypes().GetAggregate(agg, BSYMMGR.EmptyTypeArray());
-                binop.PredefinedMethodToCall = new MethWithInst(methSym, callingType, null);
-                binop.UserDefinedCallMethod = binop.PredefinedMethodToCall;
-            }
-            else
-            {
-                // Couldn't find it.
-                binop.SetError();
-            }
+            AggregateSymbol agg = methSym.getClass();
+            AggregateType callingType = GetTypes().GetAggregate(agg, BSYMMGR.EmptyTypeArray());
+            binop.PredefinedMethodToCall = new MethWithInst(methSym, callingType, null);
+            binop.UserDefinedCallMethod = binop.PredefinedMethodToCall;
             return binop;
         }
 
