@@ -103,6 +103,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "Don't want to create temp file in app container current directory")]
         public void FileVersionInfo_RelativePath_ArgumentException()
         {
             using (new FileStream("kernelbase.dll", FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
