@@ -321,8 +321,16 @@ namespace System.Xml.Xsl.Xslt
         }
 
         public QilNode String(string value) { return _f.String(value); }     // As argument of id() or key() function
-        public QilNode Number(double value) { throw new XmlException(SR.Format(SR.XPath_UnexpectedToken2, "Literal number")); }
-        public QilNode Variable(string prefix, string name) { throw new XmlException(SR.Format(SR.XPath_UnexpectedToken2, "Variable")); }
+        public QilNode Number(double value)
+        {
+            //Internal Error: Literal number is not allowed in XSLT pattern outside of predicate.
+            throw new XmlException(SR.Xml_InternalError);
+        }
+        public QilNode Variable(string prefix, string name)
+        {
+            //Internal Error: Variable is not allowed in XSLT pattern outside of predicate.
+            throw new XmlException(SR.Xml_InternalError);
+        }
 
         // -------------------------------------- Priority / Parent ---------------------------------------
 
