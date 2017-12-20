@@ -191,11 +191,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             public TypeArrayKey(CType[] types)
             {
                 _types = types;
-                _hashCode = 0;
-                for (int i = 0, n = types.Length; i < n; i++)
+                int hashCode = 0x162A16FE;
+                foreach (CType type in types)
                 {
-                    _hashCode ^= types[i].GetHashCode();
+                    hashCode = (hashCode << 5) - hashCode;
+                    if (type != null)
+                    {
+                        hashCode ^= type.GetHashCode();
+                    }
                 }
+
+                _hashCode = hashCode;
             }
 
             public bool Equals(TypeArrayKey other)
@@ -214,7 +220,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 for (int i = 0; i < types.Length; i++)
                 {
-                    if (!types[i].Equals(otherTypes[i]))
+                    if (types[i] != otherTypes[i])
                     {
                         return false;
                     }
