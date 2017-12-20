@@ -937,13 +937,16 @@ namespace System.IO.Tests
         {
 
             Assert.Throws<ArgumentNullException>(() => Path.GetFullPath("", null));
+            Assert.Throws<ArgumentNullException>(() => Path.GetFullPath("tmp", null));
             Assert.Throws<ArgumentException>(() => Path.GetFullPath("", "foo\bar"));
+            Assert.Throws<ArgumentException>(() => Path.GetFullPath("tmp", "foo\bar"));
         }
 
         public static IEnumerable<object[]> GetFullPath_BasePath_BasicExpansions_TestData()
         {
             string curDir = Directory.GetCurrentDirectory();
             yield return new object[] { curDir, curDir, curDir };
+            yield return new object[] { "", curDir, curDir };
             yield return new object[] { curDir, null, curDir };
             yield return new object[] { curDir, "foo\bar", curDir };
             yield return new object[] { "..", curDir, Path.GetDirectoryName(curDir) };
@@ -991,7 +994,7 @@ namespace System.IO.Tests
             yield return new object[] { "foo", @"\\.\C:\Foo1\.", @"\\.\C:\Foo1\foo" };
             yield return new object[] { "foo", @"\\.\C:\Foo2\..", @"\\.\C:\foo" };
 
-            // local host paths
+            // Local host paths
             yield return new object[] { "foo", @"\\LOCALHOST\share1", @"\\LOCALHOST\share1\foo" };
             yield return new object[] { "foo", @"\\LOCALHOST\share2", @"\\LOCALHOST\share2\foo" };
             yield return new object[] { "foo", @"\\LOCALHOST\share3\dir", @"\\LOCALHOST\share3\dir\foo" };
@@ -1012,17 +1015,28 @@ namespace System.IO.Tests
             yield return new object[] { "foo", @"\\.\UNC\LOCALHOST\shareK\", @"\\.\UNC\LOCALHOST\shareK\foo" };
             yield return new object[] { "foo", @"\\.\UNC\LOCALHOST\  shareL\", @"\\.\UNC\LOCALHOST\  shareL\foo" };
 
-            // current Drive rooted
+            // Current drive rooted
             yield return new object[] { @"\tmp\bar", curDir, Path.GetPathRoot(curDir)+ @"tmp\bar" };
             yield return new object[] { @"\.\bar", curDir, Path.GetPathRoot(curDir) + @"bar" };
             yield return new object[] { @"\tmp\..", curDir, Path.GetPathRoot(curDir).Substring(0,2)};
             yield return new object[] { @"\tmp\bar\..", curDir, Path.GetPathRoot(curDir) + @"tmp" };
+            yield return new object[] { @"\tmp\bar\..", curDir, Path.GetPathRoot(curDir) + @"tmp" };
+            yield return new object[] { @"\", curDir, Path.GetPathRoot(curDir) };
 
-            //specific Drive Rooted
+            // Specific drive Rooted
             yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\..", curDir, Path.GetPathRoot(curDir) + @"tmp" };
             yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\.", curDir, Path.GetPathRoot(curDir) + @"tmp\foo" };
             yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\..", curDir, Path.GetPathRoot(curDir) +@"tmp"  };
             yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp", curDir, Path.GetPathRoot(curDir) + @"tmp" };
+            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":", curDir, Path.GetPathRoot(curDir) };
+            yield return new object[] { Path.GetPathRoot(curDir)[0], curDir, curDir + Path.DirectorySeparatorChar + Path.GetPathRoot(curDir)[0] };
+
+            yield return new object[] { @"Z:tmp\foo\..", curDir, @"Z:\tmp" };
+            yield return new object[] { @"Z:tmp\foo\.", curDir, @"Z:\tmp\foo" };
+            yield return new object[] { @"Z:tmp\foo\..", curDir, @"Z:\tmp" };
+            yield return new object[] { @"Z:tmp", curDir, @"Z:\tmp" };
+            yield return new object[] { @"Z:", curDir, @"Z:\" };
+            yield return new object[] { @"Z", curDir, curDir + Path.DirectorySeparatorChar + @"Z" };
         }
 
         [Theory]
