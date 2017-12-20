@@ -465,8 +465,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                         if (!okNow)
                         {
-                            CantConvert(expr, dest);
-                            goto CANTCONVERT;
+                            throw CantConvert(expr, dest);
                         }
 
                         // Failed because value was out of range. Report nifty error message.
@@ -496,23 +495,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         throw ErrorContext.Error(ErrorCode.ERR_ValueCantBeNull, dest);
                     }
 
-                    CantConvert(expr, dest);
+                    throw CantConvert(expr, dest);
                 }
             }
-        CANTCONVERT:
+
             exprResult = ExprFactory.CreateCast(0, dest, expr);
             exprResult.SetError();
             return exprResult;
         }
 
-        private void CantConvert(Expr expr, CType dest)
+        private RuntimeBinderException CantConvert(Expr expr, CType dest)
         {
             // Generic "can't convert" error.
-            // Only report if we don't have an error type.
-            if (expr.Type != null)
-            {
-                throw ErrorContext.Error(ErrorCode.ERR_NoExplicitConv, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
-            }
+            Debug.Assert(expr.Type != null);
+            return ErrorContext.Error(ErrorCode.ERR_NoExplicitConv, new ErrArg(expr.Type, ErrArgFlags.Unique), new ErrArg(dest, ErrArgFlags.Unique));
         }
 
         public Expr mustCast(Expr expr, CType dest) => mustCast(expr, dest, 0);
