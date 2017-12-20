@@ -103,11 +103,15 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void FileVersionInfo_RelativePath_ArgumentException()
         {
-            File.WriteAllText("kernelbase.dll", "bogus kernelbase.dll");
+            string fileNameFullPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".dll");
+            Uri currentDirectory = new Uri(Directory.GetCurrentDirectory(), UriKind.Absolute);
+            string fileNameRelativePath = currentDirectory.MakeRelativeUri(new Uri(fileNameFullPath, UriKind.Absolute)).ToString();
+            File.WriteAllText(fileNameFullPath, "bogus kernelbase.dll");
             Assert.Throws<ArgumentException>(() =>
-                FileVersionInfo.GetVersionInfo("kernelbase.dll"));
+                FileVersionInfo.GetVersionInfo(fileNameRelativePath));
         }
 
         // Additional Tests Wanted:

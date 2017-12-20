@@ -265,15 +265,15 @@ namespace System.Diagnostics
         /// </summary>
         public static FileVersionInfo GetVersionInfo(string fileName)
         {
+            // Check if fileName is a full path.
+            if (!Path.IsPathFullyQualified(fileName))
+            {
+                throw new ArgumentException("Absolute path information is required.");
+            }
             // Check for the existence of the file. File.Exists returns false if Read permission is denied.
             if (!File.Exists(fileName))
             {
                 throw new FileNotFoundException(fileName);
-            }
-            // Check if fileName is a full path.
-            if (!Path.IsPathRooted(fileName))
-            {
-                throw new ArgumentException("Absolute path information is required.");
             }
 
             return new FileVersionInfo(fileName);
