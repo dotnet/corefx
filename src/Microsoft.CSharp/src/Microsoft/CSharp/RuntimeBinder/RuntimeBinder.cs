@@ -953,16 +953,8 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private static void CheckForConditionalMethodError(ExprCall call)
         {
-            // This mimics the behavior of the native CompilerSymbolLoader in GetConditionalSymbols. Override
-            // methods cannot have the conditional attribute, but implicitly acquire it from their slot.
-
             MethodSymbol method = call.MethWithInst.Meth();
-            if (method.isOverride)
-            {
-                method = method.swtSlot.Meth();
-            }
-
-            object[] conditions = method.AssociatedMemberInfo.GetCustomAttributes(typeof(ConditionalAttribute), false).ToArray();
+            object[] conditions = method.AssociatedMemberInfo.GetCustomAttributes(typeof(ConditionalAttribute), true);
             if (conditions.Length > 0)
             {
                 throw Error.BindCallToConditionalMethod(method.name);
