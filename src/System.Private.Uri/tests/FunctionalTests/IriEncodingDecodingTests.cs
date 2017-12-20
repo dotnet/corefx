@@ -23,6 +23,7 @@ namespace System.PrivateUri.Tests
         };
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void AbsoluteUri_DangerousPathSymbols_RFC3986CompliantAbsoluteUri()
         {
             Uri uri;
@@ -36,6 +37,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void AbsolutePath_DangerousPathSymbols_RFC3986CompliantAbsolutePath()
         {
             Uri uri;
@@ -50,6 +52,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void Segments_DangerousPathSymbols_RFC3986CompliantPathSegments()
         {
             Uri uri;
@@ -64,6 +67,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void Equality_DangerousPathSymbols_RFC3986CompliantEquality()
         {
             string baseUri = "http://a/%C3%88/";
@@ -76,6 +80,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void PathAndQuery_DangerousQuerySymbols_RFC3986CompliantPathAndQuery()
         {
             Uri uri;
@@ -90,6 +95,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void Query_DangerousQuerySymbols_RFC3986CompliantQuery()
         {
             Uri uri;
@@ -103,6 +109,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void Equality_DangerousQuerySymbols_RFC3986CompliantEquality()
         {
             string baseUri = "http://a/%C3%88/";
@@ -115,6 +122,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void Fragment_DangerousFragmentSymbols_RFC3986CompliantFragment()
         {
             Uri uri;
@@ -128,6 +136,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void UserInfo_DangerousUserInfoSymbols_RFC3986CompliantUserInfo()
         {
             Uri uri;
