@@ -2752,20 +2752,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private ExprUnaryOp CreateUnaryOpForPredefMethodCall(ExpressionKind ek, PREDEFMETH predefMeth, CType pRetType, Expr pArg)
         {
             MethodSymbol methSym = GetSymbolLoader().getPredefinedMembers().GetMethod(predefMeth);
+            Debug.Assert(methSym != null);
             ExprUnaryOp pUnaryOp = GetExprFactory().CreateUnaryOp(ek, pRetType, pArg);
 
             // Set the predefined method to call.
-            if (methSym != null)
-            {
-                AggregateSymbol pAgg = methSym.getClass();
-                AggregateType pCallingType = GetTypes().GetAggregate(pAgg, BSYMMGR.EmptyTypeArray());
-                pUnaryOp.PredefinedMethodToCall = new MethWithInst(methSym, pCallingType, null);
-                pUnaryOp.UserDefinedCallMethod = pUnaryOp.PredefinedMethodToCall;
-            }
-            else
-            {
-                pUnaryOp.SetError();
-            }
+            AggregateSymbol pAgg = methSym.getClass();
+            AggregateType pCallingType = GetTypes().GetAggregate(pAgg, BSYMMGR.EmptyTypeArray());
+            pUnaryOp.PredefinedMethodToCall = new MethWithInst(methSym, pCallingType, null);
+            pUnaryOp.UserDefinedCallMethod = pUnaryOp.PredefinedMethodToCall;
             return pUnaryOp;
         }
     }
