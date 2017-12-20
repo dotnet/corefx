@@ -154,7 +154,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // RFC 2965 (no path)
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 uSecure,
                 "name98=value98; name98=value98; comment=comment; comment=comment2; commentURL=http://url.com; commentURL=commentURL2; discard; discard; domain=.uri.com; domain=domain2; max-age=400; max-age=400; path=/; path=path; port=\"80, 90, 443\"; port=port2; path=path; expires=Wed, 09 Jun 2021 10:18:14 GMT; expires=expires2; secure; secure; httponly; httponly; Version=100; Version=100, name99=value99",
                 new Cookie[]
@@ -164,7 +165,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Double entries
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u,
                 "name98=value98; commentURL=invalidurl",
                 new Cookie[]
@@ -173,7 +175,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Ignore invalid comment url
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u6,
                 "name98=value98; unknown1; unknown2=unknown",
                 new Cookie[]
@@ -182,7 +185,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Ignore unknown tokens
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u6,
                 "name98=value98; =; token=",
                 new Cookie[]
@@ -191,7 +195,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Ignore invalid tokens
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u6,
                 "name98=\"value; domain=\".domain\"; max-age=\"400\"",
                 new Cookie[]
@@ -200,7 +205,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Use escaped values (1)
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u6,
                 "name98=\"\"",
                 new Cookie[]
@@ -209,7 +215,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Use escaped values (2)
             
-            yield return new object[] {
+            yield return new object[]
+            {
                 u,
                 "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
                 new Cookie[]
@@ -221,7 +228,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Normal case
             
-            yield return new object[] {
+            yield return new object[]
+            {
                 uSecure,
                 "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
                 new Cookie[]
@@ -233,7 +241,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Normal case with secure URI
             
-            yield return new object[] {
+            yield return new object[]
+            {
                 u,
                 ",locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
                 new Cookie[]
@@ -245,7 +254,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Empty header at the beginning
             
-            yield return new object[] {
+            yield return new object[]
+            {
                 uSecure,
                 "          ,locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
                 new Cookie[]
@@ -257,7 +267,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Empty header composed by spaces at the beginning
             
-            yield return new object[] {
+            yield return new object[]
+            {
                 u,
                 "locale=en,, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
                 new Cookie[]
@@ -269,7 +280,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Empty header in the middle
             
-            yield return new object[] {
+            yield return new object[]
+            {
                 uSecure,
                 "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46,       , country=US, _m_ask_fm_session=session1",
                 new Cookie[]
@@ -281,7 +293,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Empty header composed by spaces in the middle
             
-            yield return new object[] {
+            yield return new object[]
+            {
                 u,
                 "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1,",
                 new Cookie[]
@@ -293,7 +306,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Empty header at the end
             
-            yield return new object[] {
+            yield return new object[]
+            {
                 u,
                 "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1,   ",
                 new Cookie[]
@@ -305,7 +319,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Empty header composed by spaces at the end
             
-            yield return new object[] {
+            yield return new object[]
+            {
                 uSecure,
                 "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1,   ,",
                 new Cookie[]
