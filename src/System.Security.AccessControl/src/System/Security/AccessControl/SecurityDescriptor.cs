@@ -669,8 +669,9 @@ nameof(sddlForm));
 nameof(sddlForm));
                     }
                     else if (error != Interop.Errors.ERROR_SUCCESS)
-                    {                        
-                        throw new Win32Exception(error,SR.Format(SR.AccessControl_UnexpectedError,error));
+                    {
+                        Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Unexpected error out of Win32.ConvertStringSdToSd: {0}", error));
+                        throw new Win32Exception(error, SR.Format(SR.AccessControl_UnexpectedError, error));
                     }
                 }
 
