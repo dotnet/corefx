@@ -265,7 +265,7 @@ namespace System.Net.Primitives.Unit.Tests
                     new Cookie("country", "US"),
                     new Cookie("_m_ask_fm_session", "session1")
                 }
-            }; // Empty header composed by spaces at the beginning
+            }; // Empty header composed of spaces at the beginning
             
             yield return new object[]
             {
@@ -291,7 +291,7 @@ namespace System.Net.Primitives.Unit.Tests
                     new Cookie("country", "US"),
                     new Cookie("_m_ask_fm_session", "session1")
                 }
-            }; // Empty header composed by spaces in the middle
+            }; // Empty header composed of spaces in the middle
             
             yield return new object[]
             {
@@ -317,7 +317,7 @@ namespace System.Net.Primitives.Unit.Tests
                     new Cookie("country", "US"),
                     new Cookie("_m_ask_fm_session", "session1")
                 }
-            }; // Empty header composed by spaces at the end
+            }; // Empty header composed of spaces at the end
             
             yield return new object[]
             {
