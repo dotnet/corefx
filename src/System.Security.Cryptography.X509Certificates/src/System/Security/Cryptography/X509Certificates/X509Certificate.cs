@@ -316,10 +316,28 @@ namespace System.Security.Cryptography.X509Certificates
             return GetRawCertHash().CloneByteArray();
         }
 
+        public virtual byte[] GetCertHash(HashAlgorithmName hashAlgorithm)
+        {
+            ThrowIfInvalid();
+
+            using (IncrementalHash hasher = IncrementalHash.CreateHash(hashAlgorithm))
+            {
+                hasher.AppendData(Pal.RawData);
+                return hasher.GetHashAndReset();
+            }
+        }
+
         public virtual string GetCertHashString()
         {
             ThrowIfInvalid();
             return GetRawCertHash().ToHexStringUpper();
+        }
+
+        public virtual string GetCertHashString(HashAlgorithmName hashAlgorithm)
+        {
+            ThrowIfInvalid();
+
+            return GetCertHash(hashAlgorithm).ToHexStringUpper();
         }
 
         // Only use for internal purposes when the returned byte[] will not be mutated

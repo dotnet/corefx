@@ -289,6 +289,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 // State held on X509Certificate
                 Assert.ThrowsAny<CryptographicException>(() => c.GetCertHash());
+                Assert.ThrowsAny<CryptographicException>(() => c.GetCertHash(HashAlgorithmName.SHA256));
+                Assert.ThrowsAny<CryptographicException>(() => c.GetCertHashString());
+                Assert.ThrowsAny<CryptographicException>(() => c.GetCertHashString(HashAlgorithmName.SHA256));
                 Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithm());
                 Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithmParameters());
                 Assert.ThrowsAny<CryptographicException>(() => c.GetKeyAlgorithmParametersString());

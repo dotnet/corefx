@@ -66,6 +66,49 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+        [Theory]
+        [InlineData("SHA1")]
+        [InlineData("SHA256")]
+        [InlineData("SHA384")]
+        [InlineData("SHA512")]
+        public static void TestThumbprint(string hashAlgName)
+        {
+            string expectedThumbprintHex;
+
+            switch (hashAlgName)
+            {
+                case "SHA1":
+                    expectedThumbprintHex =
+                        "108E2BA23632620C427C570B6D9DB51AC31387FE";
+                    break;
+                case "SHA256":
+                    expectedThumbprintHex =
+                        "73FCF982974387FB164C91D0168FE8C3B957DE6526AE239AAD32825C5A63D2A4";
+                    break;
+                case "SHA384":
+                    expectedThumbprintHex =
+                        "E6DCEF0840DAB43E1DBE9BE23142182BD05106AB25F7043BDE6A551928DFB4C7082791B86A5FB5E77B0F43DD92B7A3E5";
+                    break;
+                case "SHA512":
+                    expectedThumbprintHex =
+                        "8435635A12915A1A9C28BC2BCE7C3CAD08EB723FE276F13CD37D1C3B21416994" +
+                        "0661A27B419882DBA643B23A557CA9EBC03ACC3D7EE3D4D591AB4BA0E553B945";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(hashAlgName));
+            }
+
+            HashAlgorithmName alg = new HashAlgorithmName(hashAlgName);
+
+            using (X509Certificate2 c = LoadCertificateFromFile())
+            {
+                byte[] thumbPrint = c.GetCertHash(alg);
+                Assert.Equal(expectedThumbprintHex, thumbPrint.ByteArrayToHex());
+                string thumbPrintHex = c.GetCertHashString(alg);
+                Assert.Equal(expectedThumbprintHex, thumbPrintHex);
+            }
+        }
+
         [Fact]
         public static void TestGetFormat()
         {
