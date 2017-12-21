@@ -268,7 +268,7 @@ namespace System.Diagnostics
             // Check if fileName is a full path.
             if (!Path.IsPathFullyQualified(fileName))
             {
-                throw new ArgumentException("Absolute path information is required.");
+                fileName = Path.GetFullPath(fileName);
             }
             // Check for the existence of the file. File.Exists returns false if Read permission is denied.
             if (!File.Exists(fileName))

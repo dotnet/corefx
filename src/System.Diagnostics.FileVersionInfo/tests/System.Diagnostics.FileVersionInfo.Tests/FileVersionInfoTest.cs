@@ -104,12 +104,12 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "Don't want to create temp file in app container current directory")]
-        public void FileVersionInfo_RelativePath_ArgumentException()
+        public void FileVersionInfo_RelativePath_CorrectFilePath()
         {
             using (new FileStream("kernelbase.dll", FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
             {
-                Assert.Throws<ArgumentException>(() =>
-                    Console.WriteLine(FileVersionInfo.GetVersionInfo("kernelbase.dll")));
+                FileVersionInfo fvi = FileVersionInfo.GetVersionInfo("kernelbase.dll");
+                Assert.Equal(Path.GetFullPath("kernelbase.dll"), fvi.FileName);
             }
         }
 
