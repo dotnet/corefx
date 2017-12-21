@@ -5046,7 +5046,7 @@ namespace System.Net.Sockets
                 {
                     try
                     {
-                        context._socket.EndConnect((IAsyncResult)result);
+                        context._socket.InternalEndConnect((IAsyncResult)result);
                     }
                     catch (Exception exception)
                     {
