@@ -7,6 +7,8 @@
     <NoWarn>1718</NoWarn>
     <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)'=='uapaot'">$(DefineConstants);uapaot</DefineConstants>
+    <!-- Please don't delete. We need App.config for netfx -->
+    <NETFxTestRunnerAppConfig>$(MSBuildProjectDirectory)\App.config</NETFxTestRunnerAppConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
@@ -48,7 +50,6 @@
       <Link>Common\System\Reflection\MockParameterInfo.cs</Link>
     </Compile>
     <Compile Include="System\Runtime\ConstrainedExecution\PrePrepareMethodAttributeTests.cs" />
-    <Compile Include="System\StringsMatchingNonRandomizedHashCode.cs" />
     <Compile Include="TimeZoneInfoTests.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\CriticalHandleZeroOrMinusOneIsInvalid.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs" />
