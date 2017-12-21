@@ -11,6 +11,7 @@ using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace System.Security.Cryptography.Asn1
 {
