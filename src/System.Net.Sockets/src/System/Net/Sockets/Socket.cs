@@ -18,6 +18,9 @@ namespace System.Net.Sockets
     public partial class Socket : IDisposable
     {
         internal const int DefaultCloseTimeout = -1; // NOTE: changing this default is a breaking change.
+        
+        // Async connect operation integrity check.
+        private int asyncConnectOperationLock = 0;
 
         private SafeCloseSocket _handle;
 
@@ -2073,7 +2076,11 @@ namespace System.Net.Sockets
             {
                 throw new InvalidOperationException(SR.net_sockets_mustnotlisten);
             }
-
+            
+            if (Interlocked.Exchange(ref asyncConnectOperationLock, 1) != 0)
+            {
+                throw new InvalidOperationException(SR.net_sockets_no_duplicate_async);
+            }
 
             DnsEndPoint dnsEP = remoteEP as DnsEndPoint;
             if (dnsEP != null)
@@ -2085,7 +2092,7 @@ namespace System.Net.Sockets
                     throw new NotSupportedException(SR.net_invalidversion);
                 }
 
-                return BeginConnect(dnsEP.Host, dnsEP.Port, callback, state);
+                return InternalBeginConnectHostName(dnsEP.Host, dnsEP.Port, callback, state);
             }
 
             ValidateForMultiConnect(isMultiEndpoint: false);
@@ -2164,21 +2171,11 @@ namespace System.Net.Sockets
 
             ValidateForMultiConnect(isMultiEndpoint: true);
 
-            // Here, want to flow the context.  No need to lock.
-            MultipleAddressConnectAsyncResult result = new MultipleAddressConnectAsyncResult(null, port, this, state, requestCallback);
-            result.StartPostingAsyncOp(false);
-
-            IAsyncResult dnsResult = Dns.BeginGetHostAddresses(host, new AsyncCallback(DnsCallback), result);
-            if (dnsResult.CompletedSynchronously)
+            if (Interlocked.Exchange(ref asyncConnectOperationLock, 1) != 0)
             {
-                if (DoDnsCallback(dnsResult, result))
-                {
-                    result.InvokeCallback();
-                }
+                throw new InvalidOperationException(SR.net_sockets_no_duplicate_async);
             }
-
-            // Done posting.
-            result.FinishPostingAsyncOp(ref Caches.ConnectClosureCache);
+            MultipleAddressConnectAsyncResult result = InternalBeginConnectHostName(host, port, requestCallback, state);
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, result);
             return result;
@@ -2208,6 +2205,7 @@ namespace System.Net.Sockets
                 throw new NotSupportedException(SR.net_invalidversion);
             }
 
+            // The BeginConnect() overload below will perform async connect check.
             IAsyncResult result = BeginConnect(new IPEndPoint(address, port), requestCallback, state);
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, result);
             return result;
@@ -2241,6 +2239,11 @@ namespace System.Net.Sockets
             if (_isListening)
             {
                 throw new InvalidOperationException(SR.net_sockets_mustnotlisten);
+            }
+            
+            if (Interlocked.Exchange(ref asyncConnectOperationLock, 1) != 0)
+            {
+                throw new InvalidOperationException(SR.net_sockets_no_duplicate_async);
             }
 
             ValidateForMultiConnect(isMultiEndpoint: true);
@@ -2347,54 +2350,19 @@ namespace System.Net.Sockets
         public void EndConnect(IAsyncResult asyncResult)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, asyncResult);
-            if (CleanedUp)
+            
+            try
             {
-                throw new ObjectDisposedException(this.GetType().FullName);
+                InternalEndConnect(asyncResult);
             }
-
-            // Validate input parameters.
-            if (asyncResult == null)
+            finally
             {
-                throw new ArgumentNullException(nameof(asyncResult));
-            }
-
-            ContextAwareResult castedAsyncResult =
-                asyncResult as ConnectOverlappedAsyncResult ??
-                asyncResult as MultipleAddressConnectAsyncResult ??
-                (ContextAwareResult)(asyncResult as ConnectAsyncResult);
-
-            if (castedAsyncResult == null || castedAsyncResult.AsyncObject != this)
-            {
-                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
-            }
-            if (castedAsyncResult.EndCalled)
-            {
-                throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, "EndConnect"));
-            }
-
-            castedAsyncResult.InternalWaitForCompletion();
-            castedAsyncResult.EndCalled = true;
-
-            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"asyncResult:{asyncResult}");
-
-            Exception ex = castedAsyncResult.Result as Exception;
-            if (ex != null || (SocketError)castedAsyncResult.ErrorCode != SocketError.Success)
-            {
-                if (ex == null)
-                {
-                    // Update the internal state of this socket according to the error before throwing.
-                    SocketException se = SocketExceptionFactory.CreateSocketException(castedAsyncResult.ErrorCode, castedAsyncResult.RemoteEndPoint);
-                    UpdateStatusAfterSocketError(se);
-                    ex = se;
-                }
-
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, ex);
-                ExceptionDispatchInfo.Throw(ex);
+                // User delegate has completed. Clear the async connect lock status.
+                Interlocked.Exchange(ref asyncConnectOperationLock, 0);
             }
 
             if (NetEventSource.IsEnabled)
             {
-                NetEventSource.Connected(this, LocalEndPoint, RemoteEndPoint);
                 NetEventSource.Exit(this, "");
             }
         }
@@ -4344,6 +4312,85 @@ namespace System.Net.Sockets
                         s_initialized = true;
                     }
                 }
+            }
+        }
+        
+        private MultipleAddressConnectAsyncResult InternalBeginConnectHostName(string host, int port, AsyncCallback requestCallback, object state)
+        {
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
+            
+            // Want to flow the context here. No need to lock.
+            MultipleAddressConnectAsyncResult result = new MultipleAddressConnectAsyncResult(null, port, this, state, requestCallback);
+            result.StartPostingAsyncOp(false);
+            
+            IAsyncResult dnsResult = Dns.BeginGetHostAddresses(host, new AsyncCallback(DnsCallback), result);
+            if (dnsResult.CompletedSynchronously)
+            {
+                if (DoDnsCallback(dnsResult, result))
+                {
+                    result.InvokeCallback();
+                }
+            }
+            
+            // Done posting.
+            result.FinishPostingAsyncOp(ref Caches.ConnectClosureCache);
+            
+            if (NetEventSource.IsEnabled) NetEventSource.Exit(this, result);
+            return result;
+        }
+
+        private void InternalEndConnect(IAsyncResult asyncResult)
+        {
+            if (NetEventSource.IsEnabled) NetEventSource.Enter(this, asyncResult);
+            if (CleanedUp)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
+
+            // Validate input parameters.
+            if (asyncResult == null)
+            {
+                throw new ArgumentNullException(nameof(asyncResult));
+            }
+
+            ContextAwareResult castedAsyncResult =
+                asyncResult as ConnectOverlappedAsyncResult ??
+                asyncResult as MultipleAddressConnectAsyncResult ??
+                (ContextAwareResult)(asyncResult as ConnectAsyncResult);
+
+            if (castedAsyncResult == null || castedAsyncResult.AsyncObject != this)
+            {
+                throw new ArgumentException(SR.net_io_invalidasyncresult, nameof(asyncResult));
+            }
+            if (castedAsyncResult.EndCalled)
+            {
+                throw new InvalidOperationException(SR.Format(SR.net_io_invalidendcall, "EndConnect"));
+            }
+
+            castedAsyncResult.InternalWaitForCompletion();
+            castedAsyncResult.EndCalled = true;
+
+            if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"asyncResult:{asyncResult}");
+
+            Exception ex = castedAsyncResult.Result as Exception;
+            if (ex != null || (SocketError)castedAsyncResult.ErrorCode != SocketError.Success)
+            {
+                if (ex == null)
+                {
+                    // Update the internal state of this socket according to the error before throwing.
+                    SocketException se = SocketExceptionFactory.CreateSocketException(castedAsyncResult.ErrorCode, castedAsyncResult.RemoteEndPoint);
+                    UpdateStatusAfterSocketError(se);
+                    ex = se;
+                }
+
+                if (NetEventSource.IsEnabled) NetEventSource.Error(this, ex);
+                ExceptionDispatchInfo.Throw(ex);
+            }
+
+            if (NetEventSource.IsEnabled)
+            {
+                NetEventSource.Connected(this, LocalEndPoint, RemoteEndPoint);
+                NetEventSource.Exit(this, "");
             }
         }
 

@@ -991,6 +991,11 @@ namespace System.Net.Sockets.Tests
         {
             Assert.Throws<NotSupportedException>(() => GetSocket(AddressFamily.InterNetwork).BeginConnect(
                 new DnsEndPoint("localhost", 1, AddressFamily.InterNetworkV6), TheAsyncCallback, null));
+        }
+        
+        [Fact]
+        public void ConnectAsync_EndPoint_AddressFamily_Throws_NotSupported()
+        {
             Assert.Throws<NotSupportedException>(() => { GetSocket(AddressFamily.InterNetwork).ConnectAsync(
                 new DnsEndPoint("localhost", 1, AddressFamily.InterNetworkV6)); });
         }

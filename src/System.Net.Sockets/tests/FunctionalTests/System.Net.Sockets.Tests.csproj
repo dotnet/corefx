@@ -13,6 +13,7 @@
     <Compile Include="Accept.cs" />
     <Compile Include="AgnosticListenerTest.cs" />
     <Compile Include="ArgumentValidationTests.cs" />
+    <Compile Include="BeginConnectTest.cs" />
     <Compile Include="DisconnectTest.cs" />
     <Compile Include="HandleTest.cs" />
     <Compile Include="Connect.cs" />
@@ -56,6 +57,9 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.Sockets.cs">
       <Link>SocketCommon\Configuration.Sockets.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Sockets\DummySocketServer.cs">
+      <Link>SocketCommon\DummySocketServer.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Sockets\TestSettings.cs">
       <Link>SocketCommon\TestSettings.cs</Link>
