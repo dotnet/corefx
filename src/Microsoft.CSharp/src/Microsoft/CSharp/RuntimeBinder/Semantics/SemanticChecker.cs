@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using Microsoft.CSharp.RuntimeBinder.Errors;
-using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
@@ -237,7 +236,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // Handle the protected case - which is the only real complicated one.
-            Debug.Assert(symCheck.GetAccess() == ACCESS.ACC_PROTECTED || symCheck.GetAccess() == ACCESS.ACC_INTERNALPROTECTED || symCheck.GetAccess() == ACCESS.ACC_INTERNAL_AND_PROTECTED);
+            Debug.Assert(symCheck.GetAccess() == ACCESS.ACC_PROTECTED
+                || symCheck.GetAccess() == ACCESS.ACC_INTERNALPROTECTED
+                || symCheck.GetAccess() == ACCESS.ACC_INTERNAL_AND_PROTECTED);
 
             // Check if symCheck is in aggWhere or a base of aggWhere,
             // or in an outer agg of aggWhere or a base of an outer agg of aggWhere.
