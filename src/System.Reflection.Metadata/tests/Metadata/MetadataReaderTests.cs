@@ -92,7 +92,44 @@ namespace System.Reflection.Metadata.Tests
             return pinned;
         }
 
+        internal static unsafe int FindIndex(byte[] peImage, byte[] toFind, int start)
+        {
+            byte[] toTest = new byte[toFind.Length];
+            for (int i = 0; i < peImage.Length - toFind.Length; i++)
+            {
+                Array.Copy(peImage, i + start, toTest, 0, toTest.Length);
+                if (toTest.SequenceEqual(toFind))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        internal static unsafe void InsertBytes(byte[] peImage, byte[] toInsert, int start)
+        {
+            for (int i = 0; i < toInsert.Length; i++)
+            {
+                peImage[start + i] = toInsert[i];
+            }
+        }
+
         #endregion
+
+
+        [Fact]
+        public unsafe void InvalidExternalTableMask()
+        {
+            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
+            GCHandle pinned = GetPinnedPEImage(peImage);
+
+            //38654710855 is the external table mask from PortablePdbs.DocumentsPdb
+            int externalTableMaskIndex = FindIndex(peImage, BitConverter.GetBytes(38654710855), 0);
+            Assert.NotEqual(externalTableMaskIndex, -1);
+
+            InsertBytes(peImage, BitConverter.GetBytes(38654710855 + 1), externalTableMaskIndex);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length));
+        }
 
         [Fact]
         public unsafe void EmptyMetadata()
