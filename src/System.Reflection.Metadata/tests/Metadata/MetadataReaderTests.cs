@@ -95,7 +95,7 @@ namespace System.Reflection.Metadata.Tests
         internal static unsafe int FindIndex(byte[] peImage, byte[] toFind, int start)
         {
             byte[] toTest = new byte[toFind.Length];
-            for (int i = 0; i < start - toFind.Length; i++)
+            for (int i = 0; i < peImage.Length - toFind.Length; i++)
             {
                 Array.Copy(peImage, i + start, toTest, 0, toTest.Length);
                 if (toTest.SequenceEqual(toFind))
@@ -191,6 +191,20 @@ namespace System.Reflection.Metadata.Tests
             InsertBytes(peImage, new byte[] { 0 }, fiveIndex + 10 + headers.MetadataStartOffset + COR20Constants.MinimalDeltaMetadataTableStreamName.Length);
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
 
+        }
+
+        [Fact]
+        public unsafe void InvalidExternalTableMask()
+        {
+            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+
+            int externalTableMaskIndex = FindIndex(peImage, BitConverter.GetBytes((ulong)38654710855), 0);
+            Assert.NotEqual(externalTableMaskIndex, -1);
+            InsertBytes(peImage, BitConverter.GetBytes((ulong)(TableMask.ValidPortablePdbExternalTables + 1)), externalTableMaskIndex);
+            
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length));
         }
 
 
