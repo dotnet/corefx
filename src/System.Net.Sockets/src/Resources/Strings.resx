@@ -142,6 +142,9 @@
   <data name="net_sockets_namedmustnotbebound" xml:space="preserve">
     <value>{0}: The socket must not be bound or connected.</value>
   </data>
+  <data name="net_sockets_no_duplicate_async" xml:space="preserve">
+    <value>BeginConnect cannot be called while another asynchronous operation is in progress on the same Socket.</value>
+  </data>
   <data name="net_sockets_invalid_ipaddress_length" xml:space="preserve">
     <value>The number of specified IP addresses has to be greater than 0.</value>
   </data>
