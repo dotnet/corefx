@@ -819,7 +819,7 @@ namespace System
         /// no larger element, the bitwise complement of <see cref="Span{T}.Length"/>.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">
-        ///     <paramref name = "value" /> is <see langword="null"/> .
+        ///     <paramref name = "comparer" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BinarySearch<T, TComparer>(
@@ -893,7 +893,7 @@ namespace System
         /// no larger element, the bitwise complement of <see cref="ReadOnlySpan{T}.Length"/>.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">
-        ///     <paramref name = "value" /> is <see langword="null"/> .
+        ///     <paramref name = "comparer" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BinarySearch<T, TComparer>(
