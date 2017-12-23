@@ -165,6 +165,13 @@ namespace System
         public static int BinarySearch<T>(this Span<T> span, IComparable<T> comparable) { throw null; }
         public static int BinarySearch<T, TComparable>(this Span<T> span, TComparable comparable) where TComparable : IComparable<T> { throw null; }
         public static int BinarySearch<T, TComparer>(this Span<T> span, T value, TComparer comparer) where TComparer : IComparer<T> { throw null; }
+
+        public static void Sort<T>(this Span<T> span) { throw null; }
+        public static void Sort<T, TComparer>(this Span<T> span, TComparer comparer) where TComparer : IComparer<T> { throw null; }
+        public static void Sort<T>(this Span<T> span, Comparison<T> comparison) { throw null; }
+        public static void Sort<TKey, TValue>(this Span<TKey> keys, Span<TValue> items) { throw null; }
+        public static void Sort<TKey, TValue, TComparer>(this Span<TKey> keys, Span<TValue> items, TComparer comparer) where TComparer : IComparer<TKey> { throw null; }
+        public static void Sort<TKey, TValue>(this Span<TKey> keys, Span<TValue> items, Comparison<TKey> comparison) { throw null; }
     }
 
     public readonly struct ReadOnlyMemory<T>

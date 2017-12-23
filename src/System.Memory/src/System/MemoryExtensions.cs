@@ -922,5 +922,78 @@ namespace System
                 value, comparer);
             return BinarySearch(span, comparable);
         }
+
+        /// <summary>
+        /// Sorts the elements in the entire <see cref="Span{T}" /> 
+        /// using the <see cref="IComparable" /> implementation of each 
+        /// element of the <see cref= "Span{T}" />
+        /// </summary>
+        /// <param name="span">The <see cref="Span{T}"/> to sort.</param>
+        /// <exception cref = "InvalidOperationException"> 
+        /// One or more elements do not implement the <see cref="IComparable" /> interface.
+        /// </exception>
+        public static void Sort<T>(this Span<T> span)
+        {
+
+        }
+
+        /// <summary>
+        /// Sorts the elements in the entire <see cref="Span{T}" /> 
+        /// using the <typeparamref name="TComparer" />.
+        /// </summary>
+        public static void Sort<T, TComparer>(this Span<T> span, TComparer comparer)
+           where TComparer : IComparer<T>
+        {
+
+        }
+
+        /// <summary>
+        /// Sorts the elements in the entire <see cref="Span{T}" /> 
+        /// using the <see cref="Comparison{T}" />.
+        /// </summary>
+        public static void Sort<T>(this Span<T> span, Comparison<T> comparison)
+        {
+
+        }
+
+        /// <summary>
+        /// Sorts a pair of spans 
+        /// (one contains the keys <see cref="Span{TKey}"/> 
+        /// and the other contains the corresponding items <see cref="Span{TValue}"/>) 
+        /// based on the keys in the first <see cref= "Span{TKey}" /> 
+        /// using the <see cref="IComparable" /> implementation of each 
+        /// element of the <see cref= "Span{TKey}"/>.
+        /// </summary>
+        public static void Sort<TKey, TValue>(this Span<TKey> keys, Span<TValue> items)
+        {
+
+        }
+
+        /// <summary>
+        /// Sorts a pair of spans 
+        /// (one contains the keys <see cref="Span{TKey}"/> 
+        /// and the other contains the corresponding items <see cref="Span{TValue}"/>) 
+        /// based on the keys in the first <see cref= "Span{TKey}" /> 
+        /// using the <typeparamref name="TComparer" />.
+        /// </summary>
+        public static void Sort<TKey, TValue, TComparer>(this Span<TKey> keys,
+           Span<TValue> items, TComparer comparer)
+           where TComparer : IComparer<TKey>
+        {
+
+        }
+
+        /// <summary>
+        /// Sorts a pair of spans 
+        /// (one contains the keys <see cref="Span{TKey}"/> 
+        /// and the other contains the corresponding items <see cref="Span{TValue}"/>) 
+        /// based on the keys in the first <see cref= "Span{TKey}" /> 
+        /// using the <see cref="Comparison{TKey}" />.
+        /// </summary>
+        public static void Sort<TKey, TValue>(this Span<TKey> keys,
+           Span<TValue> items, Comparison<TKey> comparison)
+        {
+
+        }
     }
 }
