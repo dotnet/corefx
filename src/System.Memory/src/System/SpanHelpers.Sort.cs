@@ -91,115 +91,133 @@ namespace System
                         }
                         if (partitionSize == 2)
                         {
-                            SwapIfGreater(keys, comparer, lo, hi);
+                            // No indeces equal here!
+                            SwapIfGreater(ref keys, comparer, lo, hi);
                             return;
                         }
                         if (partitionSize == 3)
                         {
-                            SwapIfGreater(keys, comparer, lo, hi - 1);
-                            SwapIfGreater(keys, comparer, lo, hi);
-                            SwapIfGreater(keys, comparer, hi - 1, hi);
+                            // No indeces equal here! Many indeces can be reused here...
+                            SwapIfGreater(ref keys, comparer, lo, hi - 1);
+                            SwapIfGreater(ref keys, comparer, lo, hi);
+                            SwapIfGreater(ref keys, comparer, hi - 1, hi);
                             return;
                         }
 
-                        InsertionSort(keys, lo, hi, comparer);
+                        InsertionSort(ref keys, lo, hi, comparer);
                         return;
                     }
 
                     if (depthLimit == 0)
                     {
-                        Heapsort(keys, lo, hi, comparer);
+                        Heapsort(ref keys, lo, hi, comparer);
                         return;
                     }
                     depthLimit--;
 
-                    int p = PickPivotAndPartition(keys, lo, hi, comparer);
+                    // We should never reach here, unless > 3 elements due to partition size
+                    int p = PickPivotAndPartition(ref keys, lo, hi, comparer);
                     // Note we've already partitioned around the pivot and do not have to move the pivot again.
-                    IntroSort(keys, p + 1, hi, depthLimit, comparer);
+                    IntroSort(ref keys, p + 1, hi, depthLimit, comparer);
                     hi = p - 1;
                 }
             }
 
-            private static int PickPivotAndPartition(T[] keys, int lo, int hi, Comparison<T> comparer)
+            private static int PickPivotAndPartition(ref T keys, int lo, int hi, TComparer comparer)
             {
-                Debug.Assert(keys != null);
                 Debug.Assert(comparer != null);
                 Debug.Assert(lo >= 0);
                 Debug.Assert(hi > lo);
-                Debug.Assert(hi < keys.Length);
 
                 // Compute median-of-three.  But also partition them, since we've done the comparison.
-                int middle = lo + ((hi - lo) / 2);
+                // PERF: `lo` or `hi` will never be negative inside the loop,
+                //       so computing median using uints is safe since we know 
+                //       `length <= int.MaxValue`, and indices are >= 0
+                //       and thus cannot overflow an uint. 
+                //       Saves one subtraction per loop compared to 
+                //       `int i = lo + ((hi - lo) >> 1);`
+                int middle = (int)(((uint)hi + (uint)lo) >> 1);
 
                 // Sort lo, mid and hi appropriately, then pick mid as the pivot.
-                SwapIfGreater(keys, comparer, lo, middle);  // swap the low with the mid point
-                SwapIfGreater(keys, comparer, lo, hi);   // swap the low with the high
-                SwapIfGreater(keys, comparer, middle, hi); // swap the middle with the high
+                SwapIfGreater(ref keys, comparer, lo, middle);  // swap the low with the mid point
+                SwapIfGreater(ref keys, comparer, lo, hi);   // swap the low with the high
+                SwapIfGreater(ref keys, comparer, middle, hi); // swap the middle with the high
 
-                T pivot = keys[middle];
-                Swap(keys, middle, hi - 1);
+                ref var pivot = ref Unsafe.Add(ref keys, middle);
+                // Swap in different way
+                Swap(ref keys, middle, hi - 1);
                 int left = lo, right = hi - 1;  // We already partitioned lo and hi and put the pivot in hi - 1.  And we pre-increment & decrement below.
 
                 while (left < right)
                 {
-                    while (comparer(keys[++left], pivot) < 0)
+                    // TODO: Would be good to update local ref here
+                    while (comparer.Compare(Unsafe.Add(ref keys, ++left), pivot) < 0)
                         ;
-                    while (comparer(pivot, keys[--right]) < 0)
+                    // TODO: Would be good to update local ref here
+                    while (comparer.Compare(pivot, Unsafe.Add(ref keys, --right)) < 0)
                         ;
 
                     if (left >= right)
                         break;
 
-                    Swap(keys, left, right);
+                    // Indeces cannot be equal here
+                    Swap(ref keys, left, right);
                 }
 
                 // Put pivot in the right location.
-                Swap(keys, left, (hi - 1));
+                Swap(ref keys, left, (hi - 1));
                 return left;
             }
 
-            private static void Heapsort(T[] keys, int lo, int hi, Comparison<T> comparer)
+            private static void Heapsort(ref T keys, int lo, int hi, TComparer comparer)
             {
                 Debug.Assert(keys != null);
                 Debug.Assert(comparer != null);
                 Debug.Assert(lo >= 0);
                 Debug.Assert(hi > lo);
-                Debug.Assert(hi < keys.Length);
 
                 int n = hi - lo + 1;
-                for (int i = n / 2; i >= 1; i = i - 1)
+                for (int i = n / 2; i >= 1; --i)
                 {
-                    DownHeap(keys, i, n, lo, comparer);
+                    DownHeap(ref keys, i, n, lo, comparer);
                 }
-                for (int i = n; i > 1; i = i - 1)
+                for (int i = n; i > 1; --i)
                 {
-                    Swap(keys, lo, lo + i - 1);
-                    DownHeap(keys, 1, i - 1, lo, comparer);
+                    Swap(ref keys, lo, lo + i - 1);
+                    DownHeap(ref keys, 1, i - 1, lo, comparer);
                 }
             }
 
-            private static void DownHeap(T[] keys, int i, int n, int lo, Comparison<T> comparer)
+            private static void DownHeap(ref T keys, int i, int n, int lo, TComparer comparer)
             {
                 Debug.Assert(keys != null);
                 Debug.Assert(comparer != null);
                 Debug.Assert(lo >= 0);
-                Debug.Assert(lo < keys.Length);
 
-                T d = keys[lo + i - 1];
+                ref T d = ref Unsafe.Add(ref keys, lo + i - 1);
+                T v = d;
                 int child;
                 while (i <= n / 2)
                 {
                     child = 2 * i;
-                    if (child < n && comparer(keys[lo + child - 1], keys[lo + child]) < 0)
+                    // TODO: Local ref updates needed
+                    //ref var l = ref Unsafe.Add(ref keys, lo + child - 1);
+                    //ref var r = ref Unsafe.Add(ref keys, lo + child);
+                    if (child < n && 
+                        comparer.Compare(Unsafe.Add(ref keys, lo + child - 1), 
+                            Unsafe.Add(ref keys, lo + child)) < 0)
                     {
                         child++;
                     }
-                    if (!(comparer(d, keys[lo + child - 1]) < 0))
+                    ref T c = ref Unsafe.Add(ref keys, lo + child - 1);
+                    if (!(comparer.Compare(d, c) < 0))
                         break;
-                    keys[lo + i - 1] = keys[lo + child - 1];
+                    //keys[lo + i - 1] = keys[lo + child - 1];
+                    d = c;
                     i = child;
                 }
-                keys[lo + i - 1] = d;
+                //keys[lo + i - 1] = d;
+                d = v;
             }
 
             private static void InsertionSort(T[] keys, int lo, int hi, Comparison<T> comparer)
@@ -224,26 +242,33 @@ namespace System
                 }
             }
 
-            private static void SwapIfGreater<T, TComparer>(T[] keys, Comparison<T> comparer, int a, int b)
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static void SwapIfGreater(ref T start, TComparer comparer, int i, int j)
             {
-                if (a != b)
+                // TODO: Is the a!=b check necessary? Most cases not needed?
+                if (i != j)
                 {
-                    if (comparer(keys[a], keys[b]) > 0)
+                    ref var iElement = ref Unsafe.Add(ref start, i);
+                    ref var jElement = ref Unsafe.Add(ref start, j);
+                    if (comparer.Compare(iElement, jElement) > 0)
                     {
-                        T key = keys[a];
-                        keys[a] = keys[b];
-                        keys[b] = key;
+                        T temp = iElement;
+                        iElement = jElement;
+                        jElement = temp;
                     }
                 }
             }
 
-            private static void Swap(T[] a, int i, int j)
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static void Swap(ref T start, int i, int j)
             {
                 if (i != j)
                 {
-                    T t = a[i];
-                    a[i] = a[j];
-                    a[j] = t;
+                    ref var iElement = ref Unsafe.Add(ref start, i);
+                    ref var jElement = ref Unsafe.Add(ref start, j);
+                    T temp = iElement;
+                    iElement = jElement;
+                    jElement = temp;
                 }
             }
         }
@@ -331,8 +356,6 @@ namespace System
                 }
                 return defaultArraySortHelper;
             }
-
-            #region IArraySortHelper<T> Members
 
             public void Sort(Span<T> keys, TComparer comparer)
             {
