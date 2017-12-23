@@ -21,50 +21,133 @@ namespace System
         {
             //if (comparer == null)
             //    ThrowHelper.ThrowArgumentNullException(ExceptionArgument.comparer);
-
-            ArraySortHelper<T, TComparer>.Default.Sort(span, comparer);
+            // What checks to do before reverting to array sort helper...
+            SpanSortHelper<T, TComparer>.Default.Sort(span, comparer);
+            // And not just call
+            
         }
 
-        internal static class SpanSortHelper<T, TComparer>
-            where TComparer : IComparer<T>
+        // Helper to allow sharing all code via IComparer<T> inlineable
+        internal struct ComparableComparer<T> : IComparer<T>
+            where T : IComparable<T>
         {
-            internal static void Sort(ref T spanStart, int length, TComparer comparer)
-            {
-                int lo = 0;
-                int hi = length - 1;
-                // If length == 0, hi == -1, and loop will not be entered
-                while (lo <= hi)
-                {
-                    // PERF: `lo` or `hi` will never be negative inside the loop,
-                    //       so computing median using uints is safe since we know 
-                    //       `length <= int.MaxValue`, and indices are >= 0
-                    //       and thus cannot overflow an uint. 
-                    //       Saves one subtraction per loop compared to 
-                    //       `int i = lo + ((hi - lo) >> 1);`
-                    int i = (int)(((uint)hi + (uint)lo) >> 1);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public int Compare(T x, T y) => x.CompareTo(y);
+        }
+        // Helper to allow sharing all code via IComparer<T> inlineable
+        internal struct ComparisonComparer<T> : IComparer<T>
+        {
+            readonly Comparison<T> m_comparison;
 
-                    // TODO: We probably need to add `ref readonly`/`in` methods e.g. `AddReadOnly` to unsafe
-                    //int c = comparable.CompareTo(Unsafe.Add(ref spanStart, i));
-                    //if (c == 0)
-                    //{
-                    //    return i;
-                    //}
-                    //else if (c > 0)
-                    //{
-                    //    lo = i + 1;
-                    //}
-                    //else
-                    //{
-                    //    hi = i - 1;
-                    //}
-                }
-                // If none found, then a negative number that is the bitwise complement
-                // of the index of the next element that is larger than or, if there is
-                // no larger element, the bitwise complement of `length`, which
-                // is `lo` at this point.
-                //return ~lo;
+            public ComparisonComparer(Comparison<T> comparison)
+            {
+                m_comparison = comparison;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public int Compare(T x, T y) => m_comparison(x, y);
+        }
+
+        // https://github.com/dotnet/coreclr/blob/master/src/mscorlib/src/System/Collections/Generic/ArraySortHelper.cs
+        internal interface ISpanSortHelper<TKey, TComparer>
+            where TComparer : IComparer<TKey>
+        {
+            void Sort(Span<TKey> keys, in TComparer comparer);
+            //int BinarySearch(Span<TKey> keys, TKey value, IComparer<TKey> comparer);
+        }
+
+        internal static class IntrospectiveSortUtilities
+        {
+            // https://github.com/dotnet/coreclr/blob/master/src/mscorlib/src/System/Collections/Generic/ArraySortHelper.cs
+            // https://github.com/dotnet/coreclr/blob/master/src/classlibnative/bcltype/arrayhelpers.cpp
+
+            // This is the threshold where Introspective sort switches to Insertion sort.
+            // Empirically, 16 seems to speed up most cases without slowing down others, at least for integers.
+            // Large value types may benefit from a smaller number.
+            internal const int IntrosortSizeThreshold = 16;
+
+            internal static int FloorLog2PlusOne(int n)
+            {
+                int result = 0;
+                while (n >= 1)
+                {
+                    result++;
+                    n = n / 2;
+                }
+                return result;
+            }
+        }
+
+
+        internal class SpanSortHelper<T, TComparer> : ISpanSortHelper<T, TComparer>
+            where TComparer : IComparer<T>
+        {
+            private static volatile ISpanSortHelper<T, TComparer> defaultArraySortHelper;
+
+            public static ISpanSortHelper<T, TComparer> Default
+            {
+                get
+                {
+                    ISpanSortHelper<T, TComparer> sorter = defaultArraySortHelper;
+                    if (sorter == null)
+                        sorter = CreateArraySortHelper();
+
+                    return sorter;
+                }
+            }
+
+            private static ISpanSortHelper<T, TComparer> CreateArraySortHelper()
+            {
+                if (typeof(IComparable<T>).IsAssignableFrom(typeof(T)))
+                {
+                    // TODO: How to allocate here, need reflection??
+                    //defaultArraySortHelper = (IArraySortHelper<T, TComparer>)
+                    //    RuntimeTypeHandle.Allocate(
+                    //        typeof(GenericArraySortHelper<string, TComparer>).TypeHandle.Instantiate(new Type[] { typeof(T), typeof(TComparer) }));
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    defaultArraySortHelper = new SpanSortHelper<T, TComparer>();
+                }
+                return defaultArraySortHelper;
+            }
+
+            public void Sort(Span<T> keys, in TComparer comparer)
+            {
+                // Add a try block here to detect IComparers (or their
+                // underlying IComparables, etc) that are bogus.
+                try
+                {
+                    if (typeof(TComparer) == typeof(IComparer<T>) && comparer == null)
+                    {
+                        SpanSortHelper<T, IComparer<T>>.Sort(ref keys.DangerousGetPinnableReference(), keys.Length, Comparer<T>.Default);
+                    }
+                    else
+                    {
+                        Sort(ref keys.DangerousGetPinnableReference(), keys.Length, comparer);
+                    }
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    //IntrospectiveSortUtilities.ThrowOrIgnoreBadComparer(comparer);
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                    //throw new InvalidOperationException(SR.InvalidOperation_IComparerFailed, e);
+                }
+            }
+
+
+            internal static void Sort(ref T spanStart, int length, TComparer comparer)
+            {
+                // TODO: Check if default comparer etc.
+                // TODO: Unfold specific types handled if default comparer, if we need to, we shouldn't...
+                //       we should make cached reflection for IComparables... i.e. basic types etc.
+
+                IntrospectiveSort(ref spanStart, length, comparer);
+            }
 
             internal static void IntrospectiveSort(ref T spanStart, int length, TComparer comparer)
             {
@@ -203,8 +286,8 @@ namespace System
                     // TODO: Local ref updates needed
                     //ref var l = ref Unsafe.Add(ref keys, lo + child - 1);
                     //ref var r = ref Unsafe.Add(ref keys, lo + child);
-                    if (child < n && 
-                        comparer.Compare(Unsafe.Add(ref keys, lo + child - 1), 
+                    if (child < n &&
+                        comparer.Compare(Unsafe.Add(ref keys, lo + child - 1),
                             Unsafe.Add(ref keys, lo + child)) < 0)
                     {
                         child++;
@@ -220,25 +303,26 @@ namespace System
                 d = v;
             }
 
-            private static void InsertionSort(T[] keys, int lo, int hi, Comparison<T> comparer)
+            private static void InsertionSort(ref T keys, int lo, int hi, TComparer comparer)
             {
                 Debug.Assert(keys != null);
                 Debug.Assert(lo >= 0);
                 Debug.Assert(hi >= lo);
-                Debug.Assert(hi <= keys.Length);
 
                 int i, j;
                 T t;
                 for (i = lo; i < hi; i++)
                 {
                     j = i;
-                    t = keys[i + 1];
-                    while (j >= lo && comparer(t, keys[j]) < 0)
+                    //t = keys[i + 1];
+                    t = Unsafe.Add(ref keys, i + 1);
+                    // Need local ref that can be updated
+                    while (j >= lo && comparer.Compare(t, Unsafe.Add(ref keys, j)) < 0)
                     {
-                        keys[j + 1] = keys[j];
+                        Unsafe.Add(ref keys, j + 1) = Unsafe.Add(ref keys, j);
                         j--;
                     }
-                    keys[j + 1] = t;
+                    Unsafe.Add(ref keys, j + 1) = t;
                 }
             }
 
@@ -273,115 +357,10 @@ namespace System
             }
         }
 
-        // Helper to allow sharing all code via IComparer<T> inlineable
-        internal struct ComparableComparer<T> : IComparer<T>
-            where T : IComparable<T>
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public int Compare(T x, T y) => x.CompareTo(y);
-        }
-        // Helper to allow sharing all code via IComparer<T> inlineable
-        internal struct ComparisonComparer<T> : IComparer<T>
-        {
-            readonly Comparison<T> m_comparison;
-
-            public ComparisonComparer(Comparison<T> comparison)
-            {
-                m_comparison = comparison;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public int Compare(T x, T y) => m_comparison(x, y);
-        }
-
-        // https://github.com/dotnet/coreclr/blob/master/src/mscorlib/src/System/Collections/Generic/ArraySortHelper.cs
-        internal interface IArraySortHelper<TKey, TComparer>
-            where TComparer : IComparer<TKey>
-        {
-            void Sort(Span<TKey> keys, in TComparer comparer);
-            //int BinarySearch(Span<TKey> keys, TKey value, IComparer<TKey> comparer);
-        }
-
-        internal static class IntrospectiveSortUtilities
-        {
-            // https://github.com/dotnet/coreclr/blob/master/src/mscorlib/src/System/Collections/Generic/ArraySortHelper.cs
-            // https://github.com/dotnet/coreclr/blob/master/src/classlibnative/bcltype/arrayhelpers.cpp
-
-            // This is the threshold where Introspective sort switches to Insertion sort.
-            // Empirically, 16 seems to speed up most cases without slowing down others, at least for integers.
-            // Large value types may benefit from a smaller number.
-            internal const int IntrosortSizeThreshold = 16;
-
-            internal static int FloorLog2PlusOne(int n)
-            {
-                int result = 0;
-                while (n >= 1)
-                {
-                    result++;
-                    n = n / 2;
-                }
-                return result;
-            }
-        }
-
-        internal class ArraySortHelper<T, TComparer>
-            : IArraySortHelper<T, TComparer>
-            where TComparer : IComparer<T>
-        {
-            private static volatile IArraySortHelper<T, TComparer> defaultArraySortHelper;
-
-            public static IArraySortHelper<T, TComparer> Default
-            {
-                get
-                {
-                    IArraySortHelper<T, TComparer> sorter = defaultArraySortHelper;
-                    if (sorter == null)
-                        sorter = CreateArraySortHelper();
-
-                    return sorter;
-                }
-            }
-
-            private static IArraySortHelper<T, TComparer> CreateArraySortHelper()
-            {
-                if (typeof(IComparable<T>).IsAssignableFrom(typeof(T)))
-                {
-                    defaultArraySortHelper = (IArraySortHelper<T, TComparer>)
-                        RuntimeTypeHandle.Allocate(
-                            typeof(GenericArraySortHelper<string, TComparer>).TypeHandle.Instantiate(new Type[] { typeof(T), typeof(TComparer) }));
-                }
-                else
-                {
-                    defaultArraySortHelper = new ArraySortHelper<T, TComparer>();
-                }
-                return defaultArraySortHelper;
-            }
-
-            public void Sort(Span<T> keys, TComparer comparer)
-            {
-                // Add a try block here to detect IComparers (or their
-                // underlying IComparables, etc) that are bogus.
-                try
-                {
-                    if (typeof(TComparer) == typeof(IComparer<T>) && comparer == null)
-                    {
-                        Sort<T, IComparer<T>>(ref keys.DangerousGetPinnableReference(), keys.Length, Comparer<T>.Default);
-                    }
-                    else
-                    {
-                        Sort<T, TComparer>(ref keys.DangerousGetPinnableReference(), keys.Length, comparer);
-                    }
-                }
-                catch (IndexOutOfRangeException)
-                {
-                    //IntrospectiveSortUtilities.ThrowOrIgnoreBadComparer(comparer);
-                }
-                catch (Exception e)
-                {
-                    throw e;
-                    //throw new InvalidOperationException(SR.InvalidOperation_IComparerFailed, e);
-                }
-            }
+        //internal class ArraySortHelper<T, TComparer>
+        //    : ISpanSortHelper<T, TComparer>
+        //    where TComparer : IComparer<T>
+        //{
 
             //public int BinarySearch(Span<T> array, T value, TComparer comparer)
             //{
@@ -448,7 +427,7 @@ namespace System
             //    return ~lo;
             //}
 
-        }
+        //}
 
     }
 }
