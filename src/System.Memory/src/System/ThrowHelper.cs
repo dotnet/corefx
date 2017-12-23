@@ -104,6 +104,7 @@ namespace System
         ownedMemory,
         pointer,
         comparable,
-        comparer
+        comparer,
+        comparison
     }
 }

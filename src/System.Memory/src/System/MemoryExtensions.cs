@@ -923,6 +923,7 @@ namespace System
             return BinarySearch(span, comparable);
         }
 
+
         /// <summary>
         /// Sorts the elements in the entire <see cref="Span{T}" /> 
         /// using the <see cref="IComparable" /> implementation of each 
@@ -934,7 +935,10 @@ namespace System
         /// </exception>
         public static void Sort<T>(this Span<T> span)
         {
-
+            // TODO: Can we "statically" check if T is IComparable<T>
+            //       and force C# to then call implementation that
+            //       uses this instead of default comparer
+            SpanHelpers.Sort(span, Comparer<T>.Default);
         }
 
         /// <summary>
@@ -944,7 +948,7 @@ namespace System
         public static void Sort<T, TComparer>(this Span<T> span, TComparer comparer)
            where TComparer : IComparer<T>
         {
-
+            SpanHelpers.Sort(span, comparer);
         }
 
         /// <summary>
@@ -953,7 +957,10 @@ namespace System
         /// </summary>
         public static void Sort<T>(this Span<T> span, Comparison<T> comparison)
         {
+            if (comparison == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.comparison);
 
+            SpanHelpers.Sort(span, new SpanHelpers.ComparisonComparer<T>(comparison));
         }
 
         /// <summary>
