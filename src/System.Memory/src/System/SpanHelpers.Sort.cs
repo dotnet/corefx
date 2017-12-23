@@ -24,7 +24,7 @@ namespace System
             // What checks to do before reverting to array sort helper...
             SpanSortHelper<T, TComparer>.Default.Sort(span, comparer);
             // And not just call
-            
+
         }
 
         // Helper to allow sharing all code via IComparer<T> inlineable
@@ -139,17 +139,12 @@ namespace System
                 }
             }
 
-
-            internal static void Sort(ref T spanStart, int length, TComparer comparer)
+            internal static void Sort(ref T spanStart, int length, in TComparer comparer)
             {
-                // TODO: Check if default comparer etc.
-                // TODO: Unfold specific types handled if default comparer, if we need to, we shouldn't...
-                //       we should make cached reflection for IComparables... i.e. basic types etc.
-
                 IntrospectiveSort(ref spanStart, length, comparer);
             }
 
-            internal static void IntrospectiveSort(ref T spanStart, int length, TComparer comparer)
+            private static void IntrospectiveSort(ref T spanStart, int length, in TComparer comparer)
             {
                 if (length < 2)
                     return;
@@ -158,7 +153,7 @@ namespace System
                 IntroSort(ref spanStart, 0, length - 1, depthLimit, comparer);
             }
 
-            private static void IntroSort(ref T keys, int lo, int hi, int depthLimit, TComparer comparer)
+            private static void IntroSort(ref T keys, int lo, int hi, int depthLimit, in TComparer comparer)
             {
                 Debug.Assert(comparer != null);
                 Debug.Assert(lo >= 0);
@@ -193,7 +188,7 @@ namespace System
 
                     if (depthLimit == 0)
                     {
-                        Heapsort(ref keys, lo, hi, comparer);
+                        HeapSort(ref keys, lo, hi, comparer);
                         return;
                     }
                     depthLimit--;
@@ -206,7 +201,7 @@ namespace System
                 }
             }
 
-            private static int PickPivotAndPartition(ref T keys, int lo, int hi, TComparer comparer)
+            private static int PickPivotAndPartition(ref T keys, int lo, int hi, in TComparer comparer)
             {
                 Debug.Assert(comparer != null);
                 Debug.Assert(lo >= 0);
@@ -252,7 +247,7 @@ namespace System
                 return left;
             }
 
-            private static void Heapsort(ref T keys, int lo, int hi, TComparer comparer)
+            private static void HeapSort(ref T keys, int lo, int hi, in TComparer comparer)
             {
                 Debug.Assert(keys != null);
                 Debug.Assert(comparer != null);
@@ -271,7 +266,7 @@ namespace System
                 }
             }
 
-            private static void DownHeap(ref T keys, int i, int n, int lo, TComparer comparer)
+            private static void DownHeap(ref T keys, int i, int n, int lo, in TComparer comparer)
             {
                 Debug.Assert(keys != null);
                 Debug.Assert(comparer != null);
@@ -303,7 +298,7 @@ namespace System
                 d = v;
             }
 
-            private static void InsertionSort(ref T keys, int lo, int hi, TComparer comparer)
+            private static void InsertionSort(ref T keys, int lo, int hi, in TComparer comparer)
             {
                 Debug.Assert(keys != null);
                 Debug.Assert(lo >= 0);
@@ -329,7 +324,8 @@ namespace System
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private static void SwapIfGreater(ref T start, TComparer comparer, int i, int j)
             {
-                // TODO: Is the a!=b check necessary? Most cases not needed?
+                // TODO: Is the i!=j check necessary? Most cases not needed?
+                // Only in one case it seems, REFACTOR
                 if (i != j)
                 {
                     ref var iElement = ref Unsafe.Add(ref start, i);
@@ -346,6 +342,8 @@ namespace System
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private static void Swap(ref T start, int i, int j)
             {
+                // TODO: Is the i!=j check necessary? Most cases not needed?
+                // Only in one case it seems, REFACTOR
                 if (i != j)
                 {
                     ref var iElement = ref Unsafe.Add(ref start, i);
@@ -357,10 +355,48 @@ namespace System
             }
         }
 
-        //internal class ArraySortHelper<T, TComparer>
-        //    : ISpanSortHelper<T, TComparer>
-        //    where TComparer : IComparer<T>
-        //{
+        internal class ComparableSpanSortHelper<T, TComparer>
+        : ISpanSortHelper<T, TComparer>
+        where T : IComparable<T>
+        where TComparer : IComparer<T>
+        {
+            // Do not add a constructor to this class because SpanSortHelper<T>.CreateSortHelper will not execute it
+
+            public void Sort(Span<T> keys, in TComparer comparer)
+            {
+                try
+                {
+                    if (comparer == null ||
+                        // Cache this in generic traits helper class perhaps
+                        (!typeof(TComparer).IsValueType &&
+                         object.ReferenceEquals(comparer, Comparer<T>.Default)))
+                    {
+                        SpanSortHelper<T, ComparableComparer<T>>.Sort(
+                            ref keys.DangerousGetPinnableReference(), keys.Length,
+                            new ComparableComparer<T>());
+                    }
+                    else
+                    {
+                        SpanSortHelper<T, TComparer>.Sort(
+                            ref keys.DangerousGetPinnableReference(), keys.Length,
+                            comparer);
+                    }
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    //IntrospectiveSortUtilities.ThrowOrIgnoreBadComparer(comparer);
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                    //throw new InvalidOperationException(SR.InvalidOperation_IComparerFailed, e);
+                }
+            }
+
+            //internal class ArraySortHelper<T, TComparer>
+            //    : ISpanSortHelper<T, TComparer>
+            //    where TComparer : IComparer<T>
+            //{
 
             //public int BinarySearch(Span<T> array, T value, TComparer comparer)
             //{
@@ -427,7 +463,8 @@ namespace System
             //    return ~lo;
             //}
 
-        //}
+            //}
 
+        }
     }
 }
