@@ -26,6 +26,9 @@
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\DataContractSerializerHelper.cs">
+      <Link>Common\System\Runtime\Serialization\DataContractSerializerHelper.cs</Link>
+    </Compile>
     <Compile Include="$(TestSourceFolder)SerializationTestTypes\ObjRefSample.cs" />
     <Compile Include="SerializationTestTypes\Collections.cs" />
     <Compile Include="SerializationTestTypes\DataContract.cs" />
@@ -39,6 +42,9 @@
   <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
     <Compile Include="$(TestSourceFolder)SerializationTypes.CoreCLR.cs" />
     <Compile Include="$(TestSourceFolder)DataContractSerializer.CoreCLR.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'=='uapaot'">
+    <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

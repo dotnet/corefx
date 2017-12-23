@@ -1,8 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace System.Net.Http.Headers
 {
@@ -101,7 +102,7 @@ namespace System.Net.Http.Headers
             char this[int index] { get; }
         }
 
-        private struct StringAccessor : IHeaderNameAccessor
+        private readonly struct StringAccessor : IHeaderNameAccessor
         {
             private readonly string _string;
 
@@ -115,7 +116,7 @@ namespace System.Net.Http.Headers
         }
 
         // Can't use Span here as it's unsupported.
-        private unsafe struct BytePtrAccessor : IHeaderNameAccessor
+        private unsafe readonly struct BytePtrAccessor : IHeaderNameAccessor
         {
             private readonly byte* _p;
             private readonly int _length;
@@ -370,7 +371,7 @@ namespace System.Net.Http.Headers
 
         internal unsafe static KnownHeader TryGetKnownHeader(ReadOnlySpan<byte> name)
         {
-            fixed (byte* p = &name.DangerousGetPinnableReference())
+            fixed (byte* p = &MemoryMarshal.GetReference(name))
             {
                 KnownHeader candidate = GetCandidate(new BytePtrAccessor(p, name.Length));
                 if (candidate != null && ByteArrayHelpers.EqualsOrdinalAsciiIgnoreCase(candidate.Name, name))

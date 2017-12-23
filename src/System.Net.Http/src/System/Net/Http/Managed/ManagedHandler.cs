@@ -269,19 +269,14 @@ namespace System.Net.Http
                 handler = new HttpProxyConnectionHandler(_settings, handler);
             }
 
-            if (_settings._credentials != null)
-            {
-                handler = new AuthenticationHandler(_settings._preAuthenticate, _settings._credentials, handler);
-            }
-
             if (_settings._useCookies)
             {
                 handler = new CookieHandler(CookieContainer, handler);
             }
 
-            if (_settings._allowAutoRedirect)
+            if (_settings._credentials != null || _settings._allowAutoRedirect)
             {
-                handler = new AutoRedirectHandler(_settings._maxAutomaticRedirections, handler);
+                handler = new AuthenticateAndRedirectHandler(_settings._preAuthenticate, _settings._credentials, _settings._allowAutoRedirect, _settings._maxAutomaticRedirections, handler);
             }
 
             if (_settings._automaticDecompression != DecompressionMethods.None)

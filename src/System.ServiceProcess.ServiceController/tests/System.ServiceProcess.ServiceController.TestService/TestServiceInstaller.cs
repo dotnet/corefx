@@ -14,6 +14,8 @@ namespace System.ServiceProcess.Tests
     {
         public const string LocalServiceName = "NT AUTHORITY\\LocalService";
 
+        private string _removalStack;
+
         public TestServiceInstaller()
         {
         }
@@ -128,12 +130,36 @@ namespace System.ServiceProcess.Tests
 
         public void RemoveService()
         {
+            if (ServiceName == null)
+                throw new InvalidOperationException($"Already removed service at stack ${_removalStack}");
+
+            // Store the stack for logging in case we're called twice
+            try
+            {
+                throw new Exception();
+            }
+            catch (Exception e)
+            {
+                _removalStack = e.StackTrace;
+            }
+
             // Stop the service
             using (ServiceController svc = new ServiceController(ServiceName))
             {
+                // The Service exists at this point, but OpenService is failing, possibly because its being invoked concurrently for another service.
+                // https://github.com/dotnet/corefx/issues/23388 
                 if (svc.Status != ServiceControllerStatus.Stopped)
                 {
-                    svc.Stop();
+                    try
+                    {
+                        svc.Stop();
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        ServiceName = null;
+                        return;
+                    }
+
                     svc.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(30));
                 }
             }
@@ -161,6 +187,8 @@ namespace System.ServiceProcess.Tests
 
                 Interop.Advapi32.CloseServiceHandle(serviceManagerHandle);
             }
+
+            ServiceName = null;
         }
     }
 }

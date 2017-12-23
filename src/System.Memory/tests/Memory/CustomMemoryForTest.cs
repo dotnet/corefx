@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
 using System.Buffers;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -29,11 +28,14 @@ namespace System.MemoryTests
 
         protected override bool IsRetained => _referenceCount > 0;
 
-        public override Span<T> AsSpan()
+        public override Span<T> Span
         {
-            if (IsDisposed)
-                throw new ObjectDisposedException(nameof(CustomMemoryForTest<T>));
-            return new Span<T>(_array, 0, _array.Length);
+            get
+            {
+                if (IsDisposed)
+                    throw new ObjectDisposedException(nameof(CustomMemoryForTest<T>));
+                return new Span<T>(_array, 0, _array.Length);
+            }
         }
 
         public override MemoryHandle Pin()
@@ -65,7 +67,7 @@ namespace System.MemoryTests
             }
 
             _disposed = true;
-            
+
         }
 
         public override void Retain()

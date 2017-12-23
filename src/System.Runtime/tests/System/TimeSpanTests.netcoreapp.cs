@@ -119,7 +119,7 @@ namespace System.Tests
             TimeSpan result;
 
             Assert.Equal(expected, TimeSpan.Parse(input, provider));
-            Assert.True(TimeSpan.TryParse(input, out result, provider));
+            Assert.True(TimeSpan.TryParse(input, provider, out result));
             Assert.Equal(expected, result);
 
             // Also negate
@@ -129,7 +129,7 @@ namespace System.Tests
                 expected = -expected;
 
                 Assert.Equal(expected, TimeSpan.Parse(input, provider));
-                Assert.True(TimeSpan.TryParse(input, out result, provider));
+                Assert.True(TimeSpan.TryParse(input, provider, out result));
                 Assert.Equal(expected, result);
             }
         }
@@ -141,7 +141,7 @@ namespace System.Tests
             if (inputString != null)
             {
                 Assert.Throws(exceptionType, () => TimeSpan.Parse(inputString.AsReadOnlySpan(), provider));
-                Assert.False(TimeSpan.TryParse(inputString.AsReadOnlySpan(), out TimeSpan result, provider));
+                Assert.False(TimeSpan.TryParse(inputString.AsReadOnlySpan(), provider, out TimeSpan result));
                 Assert.Equal(TimeSpan.Zero, result);
             }
         }
@@ -169,24 +169,24 @@ namespace System.Tests
                 // TimeSpanStyles is interpreted only for custom formats
                 Assert.Equal(expected.Negate(), TimeSpan.ParseExact(input, format, new CultureInfo("en-US"), TimeSpanStyles.AssumeNegative));
 
-                Assert.True(TimeSpan.TryParseExact(input, format, new CultureInfo("en-US"), out result, TimeSpanStyles.AssumeNegative));
+                Assert.True(TimeSpan.TryParseExact(input, format, new CultureInfo("en-US"), TimeSpanStyles.AssumeNegative, out result));
                 Assert.Equal(expected.Negate(), result);
             }
             else
             {
                 // Inputs that can be parsed in standard formats with ParseExact should also be parsable with Parse
-                Assert.Equal(expected, TimeSpan.Parse(input));
+                Assert.Equal(expected, TimeSpan.Parse(input, CultureInfo.InvariantCulture));
 
-                Assert.True(TimeSpan.TryParse(input, out result));
+                Assert.True(TimeSpan.TryParse(input, CultureInfo.InvariantCulture, out result));
                 Assert.Equal(expected, result);
             }
         }
 
         [Theory]
         [MemberData(nameof(ParseExact_Invalid_TestData))]
-        public static void ParseExactTest__Span_Invalid(string inputString, string format, Type exceptionType)
+        public static void ParseExactTest_Span_Invalid(string inputString, string format, Type exceptionType)
         {
-            if (inputString != null)
+            if (inputString != null && format != null)
             {
                 Assert.Throws(exceptionType, () => TimeSpan.ParseExact(inputString.AsReadOnlySpan(), format, new CultureInfo("en-US")));
 
@@ -219,16 +219,16 @@ namespace System.Tests
             Span<char> dst;
 
             dst = new char[expected.Length - 1];
-            Assert.False(input.TryFormat(dst, out charsWritten, format));
+            Assert.False(input.TryFormat(dst, out charsWritten, format, CultureInfo.InvariantCulture));
             Assert.Equal(0, charsWritten);
 
             dst = new char[expected.Length];
-            Assert.True(input.TryFormat(dst, out charsWritten, format));
+            Assert.True(input.TryFormat(dst, out charsWritten, format, CultureInfo.InvariantCulture));
             Assert.Equal(expected.Length, charsWritten);
             Assert.Equal(expected, new string(dst));
 
             dst = new char[expected.Length + 1];
-            Assert.True(input.TryFormat(dst, out charsWritten, format));
+            Assert.True(input.TryFormat(dst, out charsWritten, format, CultureInfo.InvariantCulture));
             Assert.Equal(expected.Length, charsWritten);
             Assert.Equal(expected, new string(dst.Slice(0, dst.Length - 1)));
             Assert.Equal(0, dst[dst.Length - 1]);

@@ -15,7 +15,7 @@ namespace System.Numerics
 
         // see https://en.wikipedia.org/wiki/Barrett_reduction
 
-        internal struct FastReducer
+        internal readonly struct FastReducer
         {
             private readonly uint[] _modulus;
             private readonly uint[] _mu;
@@ -66,7 +66,6 @@ namespace System.Numerics
                               _modulus, _modulus.Length + 1);
             }
 
-            [SecuritySafeCritical]
             private static unsafe int DivMul(uint[] left, int leftLength,
                                              uint[] right, int rightLength,
                                              uint[] bits, int k)
@@ -111,7 +110,6 @@ namespace System.Numerics
                 return 0;
             }
 
-            [SecuritySafeCritical]
             private static unsafe int SubMod(uint[] left, int leftLength,
                                              uint[] right, int rightLength,
                                              uint[] modulus, int k)

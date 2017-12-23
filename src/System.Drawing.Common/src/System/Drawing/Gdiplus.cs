@@ -63,11 +63,9 @@ using System.Runtime.CompilerServices;
 
 namespace System.Drawing
 {
-    [SuppressUnmanagedCodeSecurity]
     internal partial class SafeNativeMethods
     {
         // We make this a nested class so that we don't have to initialize GDI+ to access SafeNativeMethods (mostly gdi/user32).
-        [SuppressUnmanagedCodeSecurityAttribute]
         internal partial class Gdip
         {
             private static readonly TraceSwitch s_gdiPlusInitialization = new TraceSwitch("GdiPlusInitialization", "Tracks GDI+ initialization and teardown");
@@ -83,7 +81,7 @@ namespace System.Drawing
 
                 s_gdipModule = LoadNativeLibrary();
                 LoadSharedFunctionPointers();
-                LoadPlatformFunctionPointers(); // This should be combined with the above call when Windows/Unix implementations are unified.
+                PlatformInitialize();
 
                 StartupInput input = StartupInput.GetDefault();
                 StartupOutput output;
@@ -852,9 +850,12 @@ namespace System.Drawing
         {
             return IntGlobalAlloc(uFlags, new UIntPtr(dwBytes));
         }
-
-        [DllImport(ExternDll.Kernel32)]
-        static internal extern void ZeroMemory(IntPtr destination, UIntPtr length);
+        
+        static internal unsafe void ZeroMemory(byte* ptr, ulong length)
+        {
+            byte* end = ptr + length;
+            while (ptr != end) *ptr++ = 0;
+        }
 
         public const int ERROR_ACCESS_DENIED = 5;
         public const int ERROR_INVALID_PARAMETER = 87;
@@ -1315,56 +1316,41 @@ namespace System.Drawing
         [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
         public interface IPicture
         {
-            [SuppressUnmanagedCodeSecurity]
             IntPtr GetHandle();
 
-            [SuppressUnmanagedCodeSecurity]
             IntPtr GetHPal();
 
             [return: MarshalAs(UnmanagedType.I2)]
-            [SuppressUnmanagedCodeSecurity]
             short GetPictureType();
 
-            [SuppressUnmanagedCodeSecurity]
             int GetWidth();
 
-            [SuppressUnmanagedCodeSecurity]
             int GetHeight();
 
-            [SuppressUnmanagedCodeSecurity]
             void Render();
 
-            [SuppressUnmanagedCodeSecurity]
             void SetHPal([In] IntPtr phpal);
 
-            [SuppressUnmanagedCodeSecurity]
             IntPtr GetCurDC();
 
-            [SuppressUnmanagedCodeSecurity]
             void SelectPicture([In] IntPtr hdcIn,
                                [Out, MarshalAs(UnmanagedType.LPArray)] int[] phdcOut,
                                [Out, MarshalAs(UnmanagedType.LPArray)] int[] phbmpOut);
 
             [return: MarshalAs(UnmanagedType.Bool)]
-            [SuppressUnmanagedCodeSecurity]
             bool GetKeepOriginalFormat();
 
-            [SuppressUnmanagedCodeSecurity]
             void SetKeepOriginalFormat([In, MarshalAs(UnmanagedType.Bool)] bool pfkeep);
 
-            [SuppressUnmanagedCodeSecurity]
             void PictureChanged();
 
-            [SuppressUnmanagedCodeSecurity]
             [PreserveSig]
             int SaveAsFile([In, MarshalAs(UnmanagedType.Interface)] UnsafeNativeMethods.IStream pstm,
                            [In] int fSaveMemCopy,
                            [Out] out int pcbSize);
 
-            [SuppressUnmanagedCodeSecurity]
             int GetAttributes();
 
-            [SuppressUnmanagedCodeSecurity]
             void SetHdc([In] IntPtr hdc);
         }
     }

@@ -208,7 +208,7 @@ namespace System.IO.Tests
         [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
         public void Unix_NotFoundDirectory_ReadOnlyVolume()
         {
-            if (PlatformDetection.IsRedHat69)
+            if (PlatformDetection.IsRedHatFamily6)
                 return; // [ActiveIssue(https://github.com/dotnet/corefx/issues/21920)]
 
             ReadOnly_FileSystemHelper(readOnlyDirectory =>
@@ -254,6 +254,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [ActiveIssue(24242)]
         [PlatformSpecific(TestPlatforms.Windows)]
         [OuterLoop("This test is very slow.")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop does not have the fix for #22596")]

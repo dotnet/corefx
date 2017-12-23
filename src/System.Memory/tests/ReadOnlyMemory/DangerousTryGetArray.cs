@@ -24,11 +24,19 @@ namespace System.MemoryTests
         }
 
         [Fact]
+        public static void TryGetArrayFromDefaultMemory()
+        {
+            ReadOnlyMemory<int> memory = default;
+            Assert.False(memory.DangerousTryGetArray(out ArraySegment<int> segment));
+            Assert.True(segment.Equals(default));
+        }
+
+        [Fact]
         public static void OwnedMemoryTryGetArray()
         {
             int[] array = new int[10];
             OwnedMemory<int> owner = new CustomMemoryForTest<int>(array);
-            ReadOnlyMemory<int> memory = owner.AsMemory;
+            ReadOnlyMemory<int> memory = owner.Memory;
             Assert.True(memory.DangerousTryGetArray(out ArraySegment<int> segment));
             Assert.Equal(array.Length, segment.Count);
 

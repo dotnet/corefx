@@ -432,6 +432,18 @@ namespace System.Runtime.CompilerServices
         }
 
         [Fact]
+        public static void InAsRef()
+        {
+            int[] a = new int[] { 0x123, 0x234, 0x345, 0x456 };
+
+            ref int r = ref Unsafe.AsRef<int>(a[0]);
+            Assert.Equal(0x123, r);
+
+            r = 0x42;
+            Assert.Equal(0x42, a[0]);
+        }
+
+        [Fact]
         public static void RefAs()
         {
             byte[] b = new byte[4] { 0x42, 0x42, 0x42, 0x42 };
@@ -780,9 +792,12 @@ namespace System.Runtime.CompilerServices
         public fixed byte Bytes[512];
     }
 
+    [StructLayout(LayoutKind.Explicit, Size=16)]
     public unsafe struct Int32Double
     {
+        [FieldOffset(0)]
         public int Int32;
+        [FieldOffset(8)]
         public double Double;
 
         public static unsafe byte[] Unaligned(int i, double d)

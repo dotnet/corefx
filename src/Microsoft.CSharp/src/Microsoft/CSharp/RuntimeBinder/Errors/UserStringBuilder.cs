@@ -81,7 +81,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
          * Does NOT include ()
          */
 
-        private void ErrAppendParamList(TypeArray @params, bool isVarargs, bool isParamArray)
+        private void ErrAppendParamList(TypeArray @params, bool isParamArray)
         {
             if (null == @params)
                 return;
@@ -100,16 +100,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                 // parameter type name
                 ErrAppendType(@params[i], null);
-            }
-
-            if (isVarargs)
-            {
-                if (@params.Count != 0)
-                {
-                    ErrAppendString(", ");
-                }
-
-                ErrAppendString("...");
             }
         }
 
@@ -152,11 +142,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
         private void ErrAppendParentCore(Symbol parent, SubstContext pctx)
         {
-            if (null == parent)
+            if (parent == null || parent == NamespaceSymbol.Root)
+            {
                 return;
-
-            if (parent == getBSymmgr().GetRootNS())
-                return;
+            }
 
             if (pctx != null && !pctx.FNop() && parent is AggregateSymbol agg && 0 != agg.GetTypeVarsAll().Count)
             {
@@ -192,7 +181,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 ErrAppendParentSym(meth, pctx);
 
                 // Get the type args from the explicit impl type and substitute using pctx (if there is one).
-                SubstContext ctx = new SubstContext(GetTypeManager().SubstType(meth.swtSlot.GetType(), pctx) as AggregateType);
+                SubstContext ctx = new SubstContext(GetTypeManager().SubstType(meth.swtSlot.GetType(), pctx));
                 ErrAppendSym(meth.swtSlot.Sym, ctx, fArgs);
 
                 // args already added
@@ -243,8 +232,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 return;
             }
 
-            TypeArray replacementTypeArray = null;
-            ErrAppendMethodParentSym(meth, pctx, out replacementTypeArray);
+            ErrAppendMethodParentSym(meth, pctx, out TypeArray replacementTypeArray);
             if (meth.IsConstructor())
             {
                 // Use the name of the parent class instead of the name "<ctor>".
@@ -293,7 +281,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 // append argument types
                 ErrAppendChar('(');
 
-                ErrAppendParamList(GetTypeManager().SubstTypeArray(meth.Params, pctx), meth.isVarargs, meth.isParamArray);
+                ErrAppendParamList(GetTypeManager().SubstTypeArray(meth.Params, pctx), meth.isParamArray);
 
                 ErrAppendChar(')');
             }
@@ -302,7 +290,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         private void ErrAppendIndexer(IndexerSymbol indexer, SubstContext pctx)
         {
             ErrAppendString("this[");
-            ErrAppendParamList(GetTypeManager().SubstTypeArray(indexer.Params, pctx), false, indexer.isParamArray);
+            ErrAppendParamList(GetTypeManager().SubstTypeArray(indexer.Params, pctx), indexer.isParamArray);
             ErrAppendChar(']');
         }
         private void ErrAppendProperty(PropertySymbol prop, SubstContext pctx)
@@ -310,7 +298,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             ErrAppendParentSym(prop, pctx);
             if (prop.IsExpImpl() && prop.swtSlot.Sym != null)
             {
-                SubstContext ctx = new SubstContext(GetTypeManager().SubstType(prop.swtSlot.GetType(), pctx) as AggregateType);
+                SubstContext ctx = new SubstContext(GetTypeManager().SubstType(prop.swtSlot.GetType(), pctx));
                 ErrAppendSym(prop.swtSlot.Sym, ctx);
             }
             else if (prop.IsExpImpl())
@@ -391,9 +379,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     ErrAppendEvent((EventSymbol)sym, pctx);
                     break;
 
-                case SYMKIND.SK_AssemblyQualifiedNamespaceSymbol:
                 case SYMKIND.SK_NamespaceSymbol:
-                    if (sym == getBSymmgr().GetRootNS())
+                    if (sym == NamespaceSymbol.Root)
                     {
                         ErrAppendId(MessageID.GlobalNamespace);
                     }
@@ -506,14 +493,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     ErrorType err = (ErrorType)pType;
                     if (err.HasParent)
                     {
-                        Debug.Assert(err.nameText != null && err.typeArgs != null);
+                        Debug.Assert(err.nameText != null);
                         ErrAppendName(err.nameText);
-                        ErrAppendTypeParameters(err.typeArgs, pctx, true);
                     }
                     else
                     {
                         // Load the string "<error>".
-                        Debug.Assert(null == err.typeArgs);
                         ErrAppendId(MessageID.ERRORSYM);
                     }
                     break;
@@ -574,7 +559,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
 
                 case TypeKind.TK_VoidType:
-                    ErrAppendName(GetNameManager().Lookup(TokenFacts.GetText(TokenKind.Void)));
+                    ErrAppendName(NameManager.GetPredefinedName(PredefinedName.PN_VOID));
                     break;
 
                 case TypeKind.TK_ParameterModifierType:
@@ -616,9 +601,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
             switch (parg.eak)
             {
-                case ErrArgKind.Ids:
-                    ErrId(out psz, parg.ids);
-                    break;
                 case ErrArgKind.SymKind:
                     ErrSK(out psz, parg.sk);
                     break;
@@ -675,24 +657,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             return result;
         }
 
-        private NameManager GetNameManager()
-        {
-            return m_globalSymbols.GetNameManager();
-        }
-
         private TypeManager GetTypeManager()
         {
             return m_globalSymbols.GetTypes();
-        }
-
-        private BSYMMGR getBSymmgr()
-        {
-            return m_globalSymbols.GetGlobalSymbols();
-        }
-
-        private int GetTypeID(CType type)
-        {
-            return 0;
         }
 
         private void ErrId(out string s, MessageID id)

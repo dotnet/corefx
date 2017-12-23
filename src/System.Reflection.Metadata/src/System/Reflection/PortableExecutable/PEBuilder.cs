@@ -19,7 +19,7 @@ namespace System.Reflection.PortableExecutable
         private readonly Lazy<ImmutableArray<Section>> _lazySections;
         private Blob _lazyChecksum;
 
-        protected struct Section
+        protected readonly struct Section
         {
             public readonly string Name;
             public readonly SectionCharacteristics Characteristics;
@@ -36,7 +36,7 @@ namespace System.Reflection.PortableExecutable
             }
         }
 
-        private struct SerializedSection
+        private readonly struct SerializedSection
         {
             public readonly BlobBuilder Builder;
 
@@ -502,11 +502,12 @@ namespace System.Reflection.PortableExecutable
                 throw new InvalidOperationException(SR.SignatureProviderReturnedInvalidSignature);
             }
 
-            uint checksum = CalculateChecksum(peImage, _lazyChecksum);
-            new BlobWriter(_lazyChecksum).WriteUInt32(checksum);
-
             var writer = new BlobWriter(strongNameSignatureFixup);
             writer.WriteBytes(signature);
+
+            // Calculate the checksum after the strong name signature has been written.
+            uint checksum = CalculateChecksum(peImage, _lazyChecksum);
+            new BlobWriter(_lazyChecksum).WriteUInt32(checksum);
         }
 
         // internal for testing

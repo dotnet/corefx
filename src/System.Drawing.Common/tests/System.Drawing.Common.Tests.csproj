@@ -3,6 +3,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{4B93E684-0630-45F4-8F63-6C7788C9892F}</ProjectGuid>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
@@ -31,6 +32,15 @@
     <Compile Include="Imaging\ImageAttributesTests.cs" />
     <Compile Include="Imaging\MetafileTests.cs" />
     <Compile Include="Imaging\PropertyItemTests.cs" />
+    <Compile Include="mono\System.Drawing.Imaging\BmpCodecTests.cs" />
+    <Compile Include="mono\System.Drawing.Imaging\GifCodecTests.cs" />
+    <Compile Include="mono\System.Drawing.Imaging\IconCodecTests.cs" />
+    <Compile Include="mono\System.Drawing.Imaging\JpegCodecTests.cs" />
+    <Compile Include="mono\System.Drawing.Imaging\PngCodecTesst.cs" />
+    <Compile Include="mono\System.Drawing.Imaging\TiffCodecTests.cs" />
+    <Compile Include="mono\System.Drawing\GraphicsTests.cs" />
+    <Compile Include="mono\System.Imaging\MetafileTest.cs" />
+    <Compile Include="mono\System.Drawing\BitmapTests.cs" />
     <Compile Include="PenTests.cs" />
     <Compile Include="PensTests.cs" />
     <Compile Include="Imaging\BitmapDataTests.cs" />
@@ -74,19 +84,19 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)system.drawing.common.testdata\1.0.3\content\**\*.*">
+    <SupplementalTestData Include="$(PackagesDir)system.drawing.common.testdata\1.0.6\content\**\*.*">
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
     </SupplementalTestData>
-    <EmbeddedResource Include="$(PackagesDir)system.drawing.common.testdata\1.0.3\content\bitmaps\48x48_multiple_entries_4bit.ico">
+    <EmbeddedResource Include="$(PackagesDir)system.drawing.common.testdata\1.0.6\content\bitmaps\48x48_multiple_entries_4bit.ico">
       <LogicalName>System.Drawing.Tests.48x48_multiple_entries_4bit.ico</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="$(PackagesDir)system.drawing.common.testdata\1.0.3\content\bitmaps\bitmap_173x183_indexed_8bit.bmp">
+    <EmbeddedResource Include="$(PackagesDir)system.drawing.common.testdata\1.0.6\content\bitmaps\bitmap_173x183_indexed_8bit.bmp">
       <LogicalName>System.Drawing.Tests.bitmap_173x183_indexed_8bit.bmp</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="$(PackagesDir)system.drawing.common.testdata\1.0.3\content\bitmaps\empty.file">
+    <EmbeddedResource Include="$(PackagesDir)system.drawing.common.testdata\1.0.6\content\bitmaps\empty.file">
       <LogicalName>System.Drawing.Tests.empty.file</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="$(PackagesDir)system.drawing.common.testdata\1.0.3\content\bitmaps\invalid.ico">
+    <EmbeddedResource Include="$(PackagesDir)system.drawing.common.testdata\1.0.6\content\bitmaps\invalid.ico">
       <LogicalName>System.Drawing.Tests.invalid.ico</LogicalName>
     </EmbeddedResource>
     <Compile Include="Printing\MarginsTests.cs" />

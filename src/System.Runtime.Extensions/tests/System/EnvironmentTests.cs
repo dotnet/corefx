@@ -275,7 +275,7 @@ namespace System.Tests
         }
 
         // Requires recent RS3 builds and needs to run inside AppContainer
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows10Version16251OrGreater), nameof(PlatformDetection.IsWinRT))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows10Version1709OrGreater), nameof(PlatformDetection.IsInAppContainer))]
         [InlineData(Environment.SpecialFolder.LocalApplicationData)]
         [InlineData(Environment.SpecialFolder.Cookies)]
         [InlineData(Environment.SpecialFolder.History)]
@@ -291,7 +291,7 @@ namespace System.Tests
         }
 
         // Requires recent RS3 builds and needs to run inside AppContainer
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows10Version16251OrGreater), nameof(PlatformDetection.IsWinRT))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows10Version1709OrGreater), nameof(PlatformDetection.IsInAppContainer))]
         [InlineData(Environment.SpecialFolder.ApplicationData)]
         [InlineData(Environment.SpecialFolder.MyMusic)]
         [InlineData(Environment.SpecialFolder.MyPictures)]
@@ -358,7 +358,7 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.ProgramFiles)]
         [InlineData(Environment.SpecialFolder.CommonProgramFiles)]
         [InlineData(Environment.SpecialFolder.AdminTools)]
-        [InlineData(Environment.SpecialFolder.CDBurning)]
+        //[InlineData(Environment.SpecialFolder.CDBurning)]  // Not available on Server Core
         [InlineData(Environment.SpecialFolder.CommonAdminTools)]
         [InlineData(Environment.SpecialFolder.CommonDocuments)]
         [InlineData(Environment.SpecialFolder.CommonMusic)]

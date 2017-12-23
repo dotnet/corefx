@@ -13,12 +13,12 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public class HttpClientHandler_DefaultProxyCredentials_Test : RemoteExecutorTestBase
+    public class HttpClientHandler_DefaultProxyCredentials_Test : HttpClientTestBase
     {
         [Fact]
         public void Default_Get_Null()
         {
-            using (var handler = new HttpClientHandler())
+            using (HttpClientHandler handler = CreateHttpClientHandler())
             {
                 Assert.Null(handler.DefaultProxyCredentials);
             }
@@ -27,7 +27,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void SetGet_Roundtrips()
         {
-            using (var handler = new HttpClientHandler())
+            using (HttpClientHandler handler = CreateHttpClientHandler())
             {
                 var creds = new NetworkCredential("username", "password", "domain");
 
@@ -46,7 +46,7 @@ namespace System.Net.Http.Functional.Tests
         [ActiveIssue(20010, TargetFrameworkMonikers.Uap)]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
-        public void ProxyExplicitlyProvided_DefaultCredentials_Ignored()
+        public async Task ProxyExplicitlyProvided_DefaultCredentials_Ignored()
         {
             int port;
             Task<LoopbackGetRequestHttpProxy.ProxyResult> proxyTask = LoopbackGetRequestHttpProxy.StartAsync(out port, requireAuth: true, expectCreds: true);
@@ -55,7 +55,7 @@ namespace System.Net.Http.Functional.Tests
             var rightCreds = new NetworkCredential("rightusername", "rightpassword");
             var wrongCreds = new NetworkCredential("wrongusername", "wrongpassword");
 
-            using (var handler = new HttpClientHandler())
+            using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {
                 handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, rightCreds);
@@ -66,7 +66,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     using (t.Result) return t.Result.Content.ReadAsStringAsync();
                 }, TaskScheduler.Default).Unwrap();
-                Task.WaitAll(proxyTask, responseTask, responseStringTask);
+                await (new Task[] { proxyTask, responseTask, responseStringTask }).WhenAllOrAnyFailed();
 
                 TestHelper.VerifyResponseBody(responseStringTask.Result, responseTask.Result.Content.Headers.ContentMD5, false, null);
                 Assert.Equal(Encoding.ASCII.GetString(proxyTask.Result.ResponseContent), responseStringTask.Result);
@@ -80,14 +80,9 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
+        [ActiveIssue(25640, TestPlatforms.Windows)] // TODO It should be enabled for managed Handler on all platforms
         public void ProxySetViaEnvironmentVariable_DefaultProxyCredentialsUsed(bool useProxy)
         {
-            bool envVarsSupported = ManagedHandlerTestHelpers.IsEnabled || !RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-            if (!envVarsSupported)
-            {
-                return;
-            }
-
             int port = 0;
             Task<LoopbackGetRequestHttpProxy.ProxyResult> proxyTask = null;
             if (useProxy)
@@ -103,9 +98,9 @@ namespace System.Net.Http.Functional.Tests
             // test in another process.
             var psi = new ProcessStartInfo();
             psi.Environment.Add("http_proxy", $"http://localhost:{port}");
-            RemoteInvoke(useProxyString =>
+            RemoteInvoke((useProxyString, useManagedHandlerString) =>
             {
-                using (var handler = new HttpClientHandler())
+                using (HttpClientHandler handler = CreateHttpClientHandler(useManagedHandlerString))
                 using (var client = new HttpClient(handler))
                 {
                     var creds = new NetworkCredential(ExpectedUsername, ExpectedPassword);
@@ -122,7 +117,7 @@ namespace System.Net.Http.Functional.Tests
                     TestHelper.VerifyResponseBody(responseStringTask.Result, responseTask.Result.Content.Headers.ContentMD5, false, null);
                 }
                 return SuccessExitCode;
-            }, useProxy.ToString(), new RemoteInvokeOptions { StartInfo = psi }).Dispose();
+            }, useProxy.ToString(), UseManagedHandler.ToString(), new RemoteInvokeOptions { StartInfo = psi }).Dispose();
 
             if (useProxy)
             {
@@ -139,7 +134,7 @@ namespace System.Net.Http.Functional.Tests
         {
             WebRequest.DefaultWebProxy = null;
 
-            using (var handler = new HttpClientHandler())
+            using (HttpClientHandler handler = CreateHttpClientHandler())
             using (var client = new HttpClient(handler))
             {
                 handler.DefaultProxyCredentials = new NetworkCredential("UsernameNotUsed", "PasswordNotUsed");
