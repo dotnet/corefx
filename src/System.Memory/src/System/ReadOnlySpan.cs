@@ -313,7 +313,7 @@ namespace System
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        internal ref readonly T DangerousGetPinnableReference()
+        internal ref T DangerousGetPinnableReference()
         {
             if (_pinnable == null)
                 unsafe { return ref Unsafe.AsRef<T>(_byteOffset.ToPointer()); }
