@@ -859,7 +859,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         ////////////////////////////////////////////////////////////////////////////////
         // Given a method group or indexer group, bind it to the arguments for an 
         // invocation.
-        private GroupToArgsBinderResult BindMethodGroupToArgumentsCore(BindingFlag bindFlags, ExprMemberGroup grp, Expr args, int carg, NamedArgumentsType namedArgumentsType)
+        private GroupToArgsBinderResult BindMethodGroupToArgumentsCore(BindingFlag bindFlags, ExprMemberGroup grp, Expr args, int carg, NamedArgumentsKind namedArgumentsKind)
         {
             ArgInfos pargInfo = new ArgInfos {carg = carg};
             FillInArgInfoFromArgList(pargInfo, args);
@@ -867,7 +867,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             ArgInfos pOriginalArgInfo = new ArgInfos {carg = carg};
             FillInArgInfoFromArgList(pOriginalArgInfo, args);
 
-            GroupToArgsBinder binder = new GroupToArgsBinder(this, bindFlags, grp, pargInfo, pOriginalArgInfo, namedArgumentsType);
+            GroupToArgsBinder binder = new GroupToArgsBinder(this, bindFlags, grp, pargInfo, pOriginalArgInfo, namedArgumentsKind);
             binder.Bind();
 
             return binder.GetResultsOfBind();
@@ -887,14 +887,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Do we have named arguments specified, are they after fixed arguments (can position) or
             // non-trailing (can rule out methods only).
-            NamedArgumentsType namedType = FindNamedArgumentsType(args);
+            NamedArgumentsKind namedKind = FindNamedArgumentsType(args);
 
-            MethPropWithInst mpwiBest = BindMethodGroupToArgumentsCore(bindFlags, grp, args, carg, namedType).BestResult;
+            MethPropWithInst mpwiBest = BindMethodGroupToArgumentsCore(bindFlags, grp, args, carg, namedKind).BestResult;
             if (grp.SymKind == SYMKIND.SK_PropertySymbol)
             {
                 Debug.Assert((grp.Flags & EXPRFLAG.EXF_INDEXER) != 0);
-                //PropWithType pwt = new PropWithType(mpwiBest.Prop(), mpwiBest.GetType());
-
                 return BindToProperty(grp.OptionalObject, new PropWithType(mpwiBest), bindFlags, args, grp);
             }
 
@@ -903,14 +901,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        public enum NamedArgumentsType
+        public enum NamedArgumentsKind
         {
             None,
             Positioning,
             NonTrailing
         }
 
-        private static NamedArgumentsType FindNamedArgumentsType(Expr args)
+        private static NamedArgumentsKind FindNamedArgumentsType(Expr args)
         {
             Expr list = args;
             while (list != null)
@@ -945,15 +943,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                         if (!(arg is ExprNamedArgumentSpecification))
                         {
-                            return NamedArgumentsType.NonTrailing;
+                            return NamedArgumentsKind.NonTrailing;
                         }
                     }
 
-                    return NamedArgumentsType.Positioning;
+                    return NamedArgumentsKind.Positioning;
                 }
             }
 
-            return NamedArgumentsType.None;
+            return NamedArgumentsKind.None;
         }
 
         ////////////////////////////////////////////////////////////////////////////////

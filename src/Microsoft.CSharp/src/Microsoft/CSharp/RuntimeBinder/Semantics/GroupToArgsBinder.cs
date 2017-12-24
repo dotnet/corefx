@@ -33,7 +33,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private readonly ExprMemberGroup _pGroup;
             private readonly ArgInfos _pArguments;
             private readonly ArgInfos _pOriginalArguments;
-            private readonly NamedArgumentsType _namedArgumentsType;
+            private readonly NamedArgumentsKind _namedArgumentsKind;
             private AggregateType _pCurrentType;
             private MethodOrPropertySymbol _pCurrentSym;
             private TypeArray _pCurrentTypeArgs;
@@ -57,7 +57,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private readonly List<CType> _HiddenTypes;
             private bool _bArgumentsChangedForNamedOrOptionalArguments;
 
-            public GroupToArgsBinder(ExpressionBinder exprBinder, BindingFlag bindFlags, ExprMemberGroup grp, ArgInfos args, ArgInfos originalArgs, NamedArgumentsType namedArgumentsType)
+            public GroupToArgsBinder(ExpressionBinder exprBinder, BindingFlag bindFlags, ExprMemberGroup grp, ArgInfos args, ArgInfos originalArgs, NamedArgumentsKind namedArgumentsKind)
             {
                 Debug.Assert(grp != null);
                 Debug.Assert(exprBinder != null);
@@ -69,7 +69,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _pGroup = grp;
                 _pArguments = args;
                 _pOriginalArguments = originalArgs;
-                _namedArgumentsType = namedArgumentsType;
+                _namedArgumentsKind = namedArgumentsKind;
                 _pCurrentType = null;
                 _pCurrentSym = null;
                 _pCurrentTypeArgs = null;
@@ -137,7 +137,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // iterator will only return propsyms (or methsyms, or whatever)
                 symbmask_t mask = (symbmask_t)(1 << (int)_pGroup.SymKind);
 
-                CMemberLookupResults.CMethodIterator iterator = _pGroup.MemberLookupResults.GetMethodIterator(GetSemanticChecker(), GetSymbolLoader(), GetTypeQualifier(_pGroup), _pExprBinder.ContextForMemberLookup(), _pGroup.TypeArgs.Count, _pGroup.Flags, mask, _namedArgumentsType == NamedArgumentsType.NonTrailing ? _pOriginalArguments : null);
+                CMemberLookupResults.CMethodIterator iterator = _pGroup.MemberLookupResults.GetMethodIterator(GetSemanticChecker(), GetSymbolLoader(), GetTypeQualifier(_pGroup), _pExprBinder.ContextForMemberLookup(), _pGroup.TypeArgs.Count, _pGroup.Flags, mask, _namedArgumentsKind == NamedArgumentsKind.NonTrailing ? _pOriginalArguments : null);
                 while (true)
                 {
                     bool bFoundExpanded;
@@ -173,7 +173,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // If we have named arguments, reorder them for this method.
                     // If we don't have Exprs, its because we're doing a method group conversion.
                     // In those scenarios, we never want to add named arguments or optional arguments.
-                    if (_namedArgumentsType == NamedArgumentsType.Positioning)
+                    if (_namedArgumentsKind == NamedArgumentsKind.Positioning)
                     {
                         if (!ReOrderArgsForNamedArguments())
                         {
