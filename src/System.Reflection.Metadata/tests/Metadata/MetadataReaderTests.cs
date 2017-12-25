@@ -197,16 +197,42 @@ namespace System.Reflection.Metadata.Tests
         public unsafe void InvalidExternalTableMask()
         {
             byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
-
             GCHandle pinned = GetPinnedPEImage(peImage);
 
-            int externalTableMaskIndex = FindIndex(peImage, BitConverter.GetBytes((ulong)38654710855), 0);
+            //38654710855 is the external table mask from PortablePdbs.DocumentsPdb
+            int externalTableMaskIndex = FindIndex(peImage, BitConverter.GetBytes(38654710855), 0);
             Assert.NotEqual(externalTableMaskIndex, -1);
-            InsertBytes(peImage, BitConverter.GetBytes((ulong)(TableMask.ValidPortablePdbExternalTables + 1)), externalTableMaskIndex);
-            
+
+            InsertBytes(peImage, BitConverter.GetBytes(38654710855 + 1), externalTableMaskIndex);
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length));
         }
 
+        [Fact]
+        public unsafe void InvalidMetaDataTableHeaders()
+        {
+            // start with a valid PE (cloned because we'll mutate it).
+            byte[] peImage = (byte[])NetModule.AppCS.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+
+            //1392 is the remaining bytes from NetModule.AppCS
+            int remainingBytesIndex = FindIndex(peImage, BitConverter.GetBytes(1392), headers.MetadataStartOffset);
+            Assert.NotEqual(remainingBytesIndex, -1);
+
+            //14057656686423 is the presentTables from NetModule.AppCS, must be after remainingBytesIndex
+            int presentTablesIndex = FindIndex(peImage, BitConverter.GetBytes(14057656686423), headers.MetadataStartOffset + remainingBytesIndex);
+            Assert.NotEqual(presentTablesIndex, -1);
+            //14057656686424 is a value to make (presentTables & ~validTables) != 0 but not (presentTables & (ulong)(TableMask.PtrTables | TableMask.EnCMap)) != 0
+            InsertBytes(peImage, BitConverter.GetBytes((ulong)14057656686424), presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
+            //14066246621015 makes (presentTables & ~validTables) != 0 fail
+            InsertBytes(peImage, BitConverter.GetBytes((ulong)14066246621015), presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
+            //set remaining bytes smaller than MetadataStreamConstants.SizeOfMetadataTableHeader
+            InsertBytes(peImage, BitConverter.GetBytes(1), remainingBytesIndex + headers.MetadataStartOffset);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
+        }
 
         [Fact]
         public unsafe void EmptyMetadata()
