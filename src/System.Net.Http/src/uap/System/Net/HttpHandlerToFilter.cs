@@ -383,7 +383,7 @@ namespace System.Net.Http
             {
                 content.Headers.ContentLength = null;
             }
-            else
+            else if (content.Headers.ContentLength != content.Headers.ContentLength)
             {
                 // Trigger delayed header generation via TryComputeLength. This code is needed due to an outstanding
                 // bug in HttpContentHeaders.ContentLength. See GitHub Issue #5523.
