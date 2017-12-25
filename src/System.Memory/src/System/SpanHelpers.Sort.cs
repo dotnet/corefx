@@ -100,11 +100,16 @@ namespace System
             {
                 if (typeof(IComparable<T>).IsAssignableFrom(typeof(T)))
                 {
+                    var ctor = typeof(ComparableSpanSortHelper<,>)
+                        .MakeGenericType(new Type[] { typeof(T), typeof(TComparer) })
+                        .GetConstructor(Array.Empty<Type>());
+
+                    return (ISpanSortHelper<T, TComparer>)ctor.Invoke(Array.Empty<object>());
                     // TODO: How to allocate here, need reflection??
                     //defaultArraySortHelper = (IArraySortHelper<T, TComparer>)
                     //    RuntimeTypeHandle.Allocate(
-                    //        typeof(GenericArraySortHelper<string, TComparer>).TypeHandle.Instantiate(new Type[] { typeof(T), typeof(TComparer) }));
-                    throw new NotImplementedException();
+                    //        .TypeHandle.Instantiate());
+                    //throw new NotImplementedException();
                 }
                 else
                 {
