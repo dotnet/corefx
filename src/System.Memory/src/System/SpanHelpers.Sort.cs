@@ -154,6 +154,8 @@ namespace System
                 if (length < 2)
                     return;
 
+                // Note how old used the full length of keys to limit
+                //IntroSort(keys, left, length + left - 1, 2 * IntrospectiveSortUtilities.FloorLog2PlusOne(keys.Length), comparer);
                 var depthLimit = 2 * IntrospectiveSortUtilities.FloorLog2PlusOne(length);
                 IntroSort(ref spanStart, 0, length - 1, depthLimit, comparer);
             }
@@ -219,14 +221,15 @@ namespace System
                 //       and thus cannot overflow an uint. 
                 //       Saves one subtraction per loop compared to 
                 //       `int i = lo + ((hi - lo) >> 1);`
-                int middle = (int)(((uint)hi + (uint)lo) >> 1);
+                int middle = lo + ((hi - lo) / 2);
+                //int middle = (int)(((uint)hi + (uint)lo) >> 1);
 
                 // Sort lo, mid and hi appropriately, then pick mid as the pivot.
                 SwapIfGreater(ref keys, comparer, lo, middle);  // swap the low with the mid point
                 SwapIfGreater(ref keys, comparer, lo, hi);   // swap the low with the high
                 SwapIfGreater(ref keys, comparer, middle, hi); // swap the middle with the high
 
-                ref var pivot = ref Unsafe.Add(ref keys, middle);
+                var pivot = Unsafe.Add(ref keys, middle);
                 // Swap in different way
                 Swap(ref keys, middle, hi - 1);
                 int left = lo, right = hi - 1;  // We already partitioned lo and hi and put the pivot in hi - 1.  And we pre-increment & decrement below.
@@ -234,11 +237,9 @@ namespace System
                 while (left < right)
                 {
                     // TODO: Would be good to update local ref here
-                    while (comparer.Compare(Unsafe.Add(ref keys, ++left), pivot) < 0)
-                        ;
+                    while (comparer.Compare(Unsafe.Add(ref keys, ++left), pivot) < 0) ;
                     // TODO: Would be good to update local ref here
-                    while (comparer.Compare(pivot, Unsafe.Add(ref keys, --right)) < 0)
-                        ;
+                    while (comparer.Compare(pivot, Unsafe.Add(ref keys, --right)) < 0) ;
 
                     if (left >= right)
                         break;
@@ -277,30 +278,53 @@ namespace System
                 Debug.Assert(comparer != null);
                 Debug.Assert(lo >= 0);
 
-                ref T d = ref Unsafe.Add(ref keys, lo + i - 1);
-                T v = d;
+                //T d = keys[lo + i - 1];
+                T d = Unsafe.Add(ref keys, lo + i - 1);
                 int child;
                 while (i <= n / 2)
                 {
                     child = 2 * i;
-                    // TODO: Local ref updates needed
-                    //ref var l = ref Unsafe.Add(ref keys, lo + child - 1);
-                    //ref var r = ref Unsafe.Add(ref keys, lo + child);
-                    if (child < n &&
-                        comparer.Compare(Unsafe.Add(ref keys, lo + child - 1),
-                            Unsafe.Add(ref keys, lo + child)) < 0)
+                    //if (child < n && comparer(keys[lo + child - 1], keys[lo + child]) < 0)
+                    if (child < n && comparer.Compare(Unsafe.Add(ref keys, lo + child - 1), 
+                        Unsafe.Add(ref keys, lo + child)) < 0)
                     {
-                        child++;
+                            child++;
                     }
-                    ref T c = ref Unsafe.Add(ref keys, lo + child - 1);
-                    if (!(comparer.Compare(d, c) < 0))
+                    //if (!(comparer(d, keys[lo + child - 1]) < 0))
+                    if (!(comparer.Compare(d, Unsafe.Add(ref keys, lo + child - 1)) < 0))
                         break;
-                    //keys[lo + i - 1] = keys[lo + child - 1];
-                    d = c;
+                    // keys[lo + i - 1] = keys[lo + child - 1]
+                    Unsafe.Add(ref keys, lo + i - 1) = Unsafe.Add(ref keys, lo + child - 1);
                     i = child;
                 }
                 //keys[lo + i - 1] = d;
-                d = v;
+                Unsafe.Add(ref keys, lo + i - 1) = d;
+
+
+                //ref T d = ref Unsafe.Add(ref keys, lo + i - 1);
+                //T v = d;
+                //int child;
+                //while (i <= n / 2)
+                //{
+                //    child = 2 * i;
+                //    // TODO: Local ref updates needed
+                //    //ref var l = ref Unsafe.Add(ref keys, lo + child - 1);
+                //    //ref var r = ref Unsafe.Add(ref keys, lo + child);
+                //    if (child < n &&
+                //        comparer.Compare(Unsafe.Add(ref keys, lo + child - 1),
+                //            Unsafe.Add(ref keys, lo + child)) < 0)
+                //    {
+                //        child++;
+                //    }
+                //    ref T c = ref Unsafe.Add(ref keys, lo + child - 1);
+                //    if (!(comparer.Compare(v, c) < 0))
+                //        break;
+                //    //keys[lo + i - 1] = keys[lo + child - 1];
+                //    d = c;
+                //    i = child;
+                //}
+                ////keys[lo + i - 1] = d;
+                //d = v;
             }
 
             private static void InsertionSort(ref T keys, int lo, int hi, in TComparer comparer)

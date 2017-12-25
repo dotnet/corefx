@@ -17,29 +17,31 @@ namespace System.SpanTests
 
         [Theory]
         [Trait("MyTrait", "MyTraitValue")]
-        //[InlineData(new uint[] { })]
-        //[InlineData(new uint[] { 1 })]
-        //[InlineData(new uint[] { 2, 1})]
-        //[InlineData(new uint[] { 3, 1, 2})]
-        //[InlineData(new uint[] { 3, 2, 1})]
+        [InlineData(new uint[] { })]
+        [InlineData(new uint[] { 1 })]
+        [InlineData(new uint[] { 2, 1})]
+        [InlineData(new uint[] { 3, 1, 2})]
+        [InlineData(new uint[] { 3, 2, 1})]
         [InlineData(new uint[] { 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 1, 2, 3, 4, 7, 6, 5 })]
         public static void Sort_UInt(uint[] unsorted)
         {
             TestSortOverloads(unsorted);
         }
 
-        //[Theory]
-        //[InlineData(17, 512)]
-        //[InlineData(42, 1024)]
-        //public static void Sort_Random_Int(int seed, int maxCount)
-        //{
-        //    var random = new Random(seed);
-        //    for (int count = 0; count < maxCount; count++)
-        //    {
-        //        var unsorted = Enumerable.Range(0, count).Select(i => random.Next()).ToArray();
-        //        TestSortOverloads(unsorted);
-        //    }
-        //}
+        // TODO: OuterLoop
+        [Theory]
+        [Trait("MyTrait", "MyTraitValue")]
+        [InlineData(17, 1024)]
+        [InlineData(42, 1024)]
+        public static void Sort_Random_Int(int seed, int maxCount)
+        {
+            var random = new Random(seed);
+            for (int count = 0; count < maxCount; count++)
+            {
+                var unsorted = Enumerable.Range(0, count).Select(i => random.Next()).ToArray();
+                TestSortOverloads(unsorted);
+            }
+        }
 
         //[Fact]
         //public static void Sort_Slice()
