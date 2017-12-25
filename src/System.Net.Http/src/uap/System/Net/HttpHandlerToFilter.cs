@@ -383,6 +383,8 @@ namespace System.Net.Http
             {
                 content.Headers.ContentLength = null;
             }
+            //Only re-assign content.Headers.ContentLength if necessary, as setting an existing header's value under UWP
+            //causes (ultimately harmless) com exceptions to be raised. See GitHub Issue #26051.
             else if (content.Headers.ContentLength != content.Headers.ContentLength)
             {
                 // Trigger delayed header generation via TryComputeLength. This code is needed due to an outstanding
