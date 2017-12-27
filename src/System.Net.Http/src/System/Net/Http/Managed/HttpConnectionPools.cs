@@ -41,10 +41,23 @@ namespace System.Net.Http
             // Start out with the timer not running, since we have no pools.
 
             // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live forever
-            ExecutionContext.SuppressFlow();
-            _cleaningTimer = new Timer(s => ((HttpConnectionPools)s).RemoveStalePools(), this, Timeout.Infinite, Timeout.Infinite);
-            // Restore the current ExecutionContext
-            ExecutionContext.RestoreFlow();
+            bool restoreFlow = false;
+            try
+            {
+                if (!ExecutionContext.IsFlowSuppressed())
+                {
+                    ExecutionContext.SuppressFlow();
+                    restoreFlow = true;
+                }
+
+                _cleaningTimer = new Timer(s => ((HttpConnectionPools)s).RemoveStalePools(), this, Timeout.Infinite, Timeout.Infinite);
+            }
+            finally
+            {
+                // Restore the current ExecutionContext
+                if (restoreFlow)
+                    ExecutionContext.RestoreFlow();
+            }
         }
 
         /// <summary>Gets a pool for the specified endpoint, adding one if none existed.</summary>
