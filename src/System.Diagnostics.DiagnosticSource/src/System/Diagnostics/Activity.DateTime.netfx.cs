@@ -44,6 +44,7 @@ namespace System.Diagnostics
         // sync DateTime and Stopwatch ticks every 2 hours
         private static Timer syncTimeUpdater = InitalizeSyncTimer();
 
+        [System.Security.SecuritySafeCritical]
         private static Timer InitalizeSyncTimer()
         {
             // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live forever
