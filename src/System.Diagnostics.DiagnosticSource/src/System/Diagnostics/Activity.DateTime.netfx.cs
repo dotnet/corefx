@@ -47,11 +47,26 @@ namespace System.Diagnostics
         [System.Security.SecuritySafeCritical]
         private static Timer InitalizeSyncTimer()
         {
+            Timer timer;
             // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live forever
-            ExecutionContext.SuppressFlow();
-            var timer = new Timer(s => { Sync(); }, null, 0, 7200000);
-            // Restore the current ExecutionContext
-            ExecutionContext.RestoreFlow();
+            bool restoreFlow = false;
+            try
+            {
+                if (!ExecutionContext.IsFlowSuppressed())
+                {
+                    ExecutionContext.SuppressFlow();
+                    restoreFlow = true;
+                }
+
+                timer = new Timer(s => { Sync(); }, null, 0, 7200000);
+            }
+            finally
+            {
+                // Restore the current ExecutionContext
+                if (restoreFlow)
+                    ExecutionContext.RestoreFlow();
+            }
+
             return timer;
         }
     }
