@@ -408,11 +408,23 @@ namespace System.Diagnostics.Tracing
                 DisposeTimer();
                 _timeStampSinceCollectionStarted = DateTime.UtcNow;
                 // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live forever
-                ExecutionContext.SuppressFlow();
-                _pollingTimer = new Timer(OnTimer, null, _pollingIntervalInMilliseconds, _pollingIntervalInMilliseconds);
-                // Restore the current ExecutionContext
-                ExecutionContext.RestoreFlow();
+                bool restoreFlow = false;
+                try
+                {
+                    if (!ExecutionContext.IsFlowSuppressed())
+                    {
+                        ExecutionContext.SuppressFlow();
+                        restoreFlow = true;
+                    }
 
+                    _pollingTimer = new Timer(OnTimer, null, _pollingIntervalInMilliseconds, _pollingIntervalInMilliseconds);
+                }
+                finally
+                {
+                    // Restore the current ExecutionContext
+                    if (restoreFlow)
+                        ExecutionContext.RestoreFlow();
+                }
             }
             // Always fire the timer event (so you see everything up to this time).  
             OnTimer(null);
