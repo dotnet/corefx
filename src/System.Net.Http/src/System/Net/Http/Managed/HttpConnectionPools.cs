@@ -39,7 +39,12 @@ namespace System.Net.Http
             _maxConnectionsPerServer = maxConnectionsPerServer;
             _pools = new ConcurrentDictionary<HttpConnectionKey, HttpConnectionPool>();
             // Start out with the timer not running, since we have no pools.
+
+            // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live forever
+            ExecutionContext.SuppressFlow();
             _cleaningTimer = new Timer(s => ((HttpConnectionPools)s).RemoveStalePools(), this, Timeout.Infinite, Timeout.Infinite);
+            // Restore the current ExecutionContext
+            ExecutionContext.RestoreFlow();
         }
 
         /// <summary>Gets a pool for the specified endpoint, adding one if none existed.</summary>
