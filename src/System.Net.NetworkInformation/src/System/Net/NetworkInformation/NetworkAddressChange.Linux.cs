@@ -76,9 +76,27 @@ namespace System.Net.NetworkInformation
                     {
                         CreateSocket();
                     }
+
                     if (s_availabilityTimer == null)
                     {
-                        s_availabilityTimer = new Timer(s_availabilityTimerFiredCallback, null, -1, -1);
+                        // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live forever
+                        bool restoreFlow = false;
+                        try
+                        {
+                            if (!ExecutionContext.IsFlowSuppressed())
+                            {
+                                ExecutionContext.SuppressFlow();
+                                restoreFlow = true;
+                            }
+
+                            s_availabilityTimer = new Timer(s_availabilityTimerFiredCallback, null, -1, -1);
+                        }
+                        finally
+                        {
+                            // Restore the current ExecutionContext
+                            if (restoreFlow)
+                                ExecutionContext.RestoreFlow();
+                        }
                     }
 
                     s_availabilityChangedSubscribers += value;
