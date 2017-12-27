@@ -407,7 +407,12 @@ namespace System.Diagnostics.Tracing
                 _pollingIntervalInMilliseconds = (int)(pollingIntervalInSeconds * 1000);
                 DisposeTimer();
                 _timeStampSinceCollectionStarted = DateTime.UtcNow;
+                // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live forever
+                ExecutionContext.SuppressFlow();
                 _pollingTimer = new Timer(OnTimer, null, _pollingIntervalInMilliseconds, _pollingIntervalInMilliseconds);
+                // Restore the current ExecutionContext
+                ExecutionContext.RestoreFlow();
+
             }
             // Always fire the timer event (so you see everything up to this time).  
             OnTimer(null);
