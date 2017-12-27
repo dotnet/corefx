@@ -896,8 +896,12 @@ namespace System.Runtime.Caching
                 {
                     DateTime utcNow = DateTime.UtcNow;
                     TimeSpan due = _tsPerBucket - (new TimeSpan(utcNow.Ticks % _tsPerBucket.Ticks));
+                    // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live to lifetime of cache
+                    ExecutionContext.SuppressFlow();
                     Timer timer = new Timer(new TimerCallback(this.TimerCallback), null,
                             due.Ticks / TimeSpan.TicksPerMillisecond, _tsPerBucket.Ticks / TimeSpan.TicksPerMillisecond);
+                    // Restore the current ExecutionContext
+                    ExecutionContext.RestoreFlow();
                     _timerHandleRef = new GCHandleRef<Timer>(timer);
 
                     Dbg.Trace("Cache", "Cache expiration timer created.");

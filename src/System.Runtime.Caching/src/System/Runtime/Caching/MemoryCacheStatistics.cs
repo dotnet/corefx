@@ -155,7 +155,13 @@ namespace System.Runtime.Caching
             try
             {
                 _cacheMemoryMonitor = new CacheMemoryMonitor(_memoryCache, _configCacheMemoryLimitMegabytes);
+
+                // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live to lifetime of cache
+                ExecutionContext.SuppressFlow();
                 Timer timer = new Timer(new TimerCallback(CacheManagerTimerCallback), null, _configPollingInterval, _configPollingInterval);
+                // Restore the current ExecutionContext
+                ExecutionContext.RestoreFlow();
+
                 _timerHandleRef = new GCHandleRef<Timer>(timer);
                 dispose = false;
             }
