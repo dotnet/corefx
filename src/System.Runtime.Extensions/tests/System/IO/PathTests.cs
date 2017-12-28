@@ -1023,7 +1023,7 @@ namespace System.IO.Tests
             yield return new object[] { @"\tmp\bar\..", curDir, Path.GetPathRoot(curDir) + @"tmp" };
             yield return new object[] { @"\", curDir, Path.GetPathRoot(curDir) };
 
-            // Specific drive Rooted
+            // Specific drive rooted
             yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\..", curDir, Path.GetPathRoot(curDir) + @"tmp" };
             yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\.", curDir, Path.GetPathRoot(curDir) + @"tmp\foo" };
             yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\..", curDir, Path.GetPathRoot(curDir) +@"tmp"  };
