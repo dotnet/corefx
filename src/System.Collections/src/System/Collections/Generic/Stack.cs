@@ -275,12 +275,29 @@ namespace System.Collections.Generic
         // Pushes an item to the top of the stack.
         public void Push(T item)
         {
-            if (_size == _array.Length)
+            int size = _size;
+            T[] array = _array;
+
+            if ((uint)size < (uint)array.Length)
             {
-                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+                array[size] = item;
+                _version++;
+                _size++;
             }
-            _array[_size++] = item;
+            else
+            {
+                PushWithResize(item);
+            }
+        }
+        
+        // Non-inline from Stack.Push to improve its code quality as uncommon path
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void PushWithResize(T item)
+        {
+            Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+            _array[_size] = item;
             _version++;
+            _size++;
         }
 
         // Copies the Stack to an array, in the same order Pop would return the items.
