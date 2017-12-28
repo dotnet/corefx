@@ -202,22 +202,28 @@ namespace System.Collections.Generic
         // is empty, Peek throws an InvalidOperationException.
         public T Peek()
         {
-            if (_size == 0)
+            int size = _size - 1;
+            T[] array = _array;
+
+            if ((uint)size >= (uint)array.Length)
             {
                 ThrowForEmptyStack();
             }
             
-            return _array[_size - 1];
+            return array[size];
         }
 
         public bool TryPeek(out T result)
         {
-            if (_size == 0)
+            int size = _size - 1;
+            T[] array = _array;
+
+            if ((uint)size >= (uint)array.Length)
             {
-                result = default(T);
+                result = default;
                 return false;
             }
-            result = _array[_size - 1];
+            result = array[size];
             return true;
         }
 
@@ -247,17 +253,21 @@ namespace System.Collections.Generic
 
         public bool TryPop(out T result)
         {
-            if (_size == 0)
+            int size = _size - 1;
+            T[] array = _array;
+
+            if ((uint)size >= (uint)array.Length)
             {
-                result = default(T);
+                result = default;
                 return false;
             }
 
             _version++;
-            result = _array[--_size];
+            _size = size;
+            result = array[size];
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
-                _array[_size] = default(T);     // Free memory quicker.
+                array[size] = default;     // Free memory quicker.
             }
             return true;
         }
@@ -265,12 +275,17 @@ namespace System.Collections.Generic
         // Pushes an item to the top of the stack.
         public void Push(T item)
         {
-            if (_size == _array.Length)
+            int size = _size;
+            T[] array = _array;
+
+            if ((uint)size >= (uint)array.Length)
             {
-                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+                Array.Resize(ref array, (array.Length == 0) ? DefaultCapacity : 2 * array.Length);
+                _array = array;
             }
-            _array[_size++] = item;
+            array[size++] = item;
             _version++;
+            _size = size;
         }
 
         // Copies the Stack to an array, in the same order Pop would return the items.
