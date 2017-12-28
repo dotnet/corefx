@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace STAMain
 {
-    internal static class Program
+    internal static class STAMain
     {
         [STAThread]
         static int Main(string[] args)

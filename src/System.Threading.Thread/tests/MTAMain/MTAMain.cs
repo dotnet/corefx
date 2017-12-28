@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace MTAMain
 {
-    internal static class Program
+    internal static class MTAMain
     {
         [MTAThread]
         static int Main(string[] args)

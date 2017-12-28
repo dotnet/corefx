@@ -150,7 +150,7 @@ namespace System.Threading.Threads.Tests
         [InlineData("MTAMain.exe", "GetApartmentState")]
         [InlineData("MTAMain.exe", "SetApartmentState")]
         [ActiveIssue(20766, TargetFrameworkMonikers.Uap)]
-        public static void ApartmentState_AtributePresent(string AppName, string mode)
+        public static void ApartmentState_AttributePresent(string AppName, string mode)
         {
             var psi = new ProcessStartInfo();
             if (PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative)
@@ -166,14 +166,7 @@ namespace System.Threading.Threads.Tests
             using (Process p = Process.Start(psi))
             {
                 p.WaitForExit();
-                if (PlatformDetection.IsWindows)
-                {
-                    Assert.Equal(0, p.ExitCode);
-                }
-                else
-                {
-                    Assert.Equal(1, p.ExitCode);
-                }
+                Assert.Equal(PlatformDetection.IsWindows ? 0 : 1, p.ExitCode);
             }
         }
 
@@ -192,13 +185,27 @@ namespace System.Threading.Threads.Tests
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public static void ApartmentState_NoAttributePresent_STA_Windows()
+        public static void ApartmentState_NoAttributePresent_STA_Windows_Core()
         {
             DummyClass.RemoteInvoke(() =>
             {
                 Thread.CurrentThread.SetApartmentState(ApartmentState.STA);
                 Assert.Equal(ApartmentState.STA, Thread.CurrentThread.GetApartmentState());
                 Assert.Throws<InvalidOperationException>(() => Thread.CurrentThread.SetApartmentState(ApartmentState.MTA));
+            }).Dispose();
+        }
+
+        // The Thread Apartment State is set to MTA if attribute is not specified on main function
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public static void ApartmentState_NoAttributePresent_STA_Windows_Desktop()
+        {
+            DummyClass.RemoteInvoke(() =>
+            {
+                Assert.Throws<InvalidOperationException>(() => Thread.CurrentThread.SetApartmentState(ApartmentState.STA));
+                Thread.CurrentThread.SetApartmentState(ApartmentState.MTA);
+                Assert.Equal(ApartmentState.MTA, Thread.CurrentThread.GetApartmentState());
             }).Dispose();
         }
 
