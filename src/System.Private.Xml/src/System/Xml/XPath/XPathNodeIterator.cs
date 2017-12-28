@@ -3,13 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Xml.Xsl;
 
 namespace System.Xml.XPath
 {
     [DebuggerDisplay("Position={CurrentPosition}, Current={debuggerDisplayProxy}")]
-    public abstract class XPathNodeIterator : ICloneable, IEnumerable
+    public abstract class XPathNodeIterator : ICloneable, IEnumerable<XPathNavigator>
     {
         internal int count = -1;
 
@@ -32,7 +34,13 @@ namespace System.Xml.XPath
                 return count;
             }
         }
+
         public virtual IEnumerator GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        IEnumerator<XPathNavigator> IEnumerable<XPathNavigator>.GetEnumerator()
         {
             return new Enumerator(this);
         }
@@ -42,7 +50,7 @@ namespace System.Xml.XPath
         /// <summary>
         /// Implementation of a resetable enumerator that is linked to the XPathNodeIterator used to create it.
         /// </summary>
-        private class Enumerator : IEnumerator
+        private class Enumerator : IEnumerator<XPathNavigator>
         {
             private XPathNodeIterator _original;     // Keep original XPathNodeIterator in case Reset() is called
             private XPathNodeIterator _current;
@@ -53,7 +61,7 @@ namespace System.Xml.XPath
                 _original = original.Clone();
             }
 
-            public virtual object Current
+            public virtual XPathNavigator Current
             {
                 get
                 {
@@ -72,6 +80,8 @@ namespace System.Xml.XPath
                     throw new InvalidOperationException(SR.Format(SR.Sch_EnumNotStarted, string.Empty));
                 }
             }
+
+            object IEnumerator.Current => Current;
 
             public virtual bool MoveNext()
             {
@@ -96,6 +106,8 @@ namespace System.Xml.XPath
             {
                 _iterationStarted = false;
             }
+
+            public void Dispose() {}
         }
 
         private struct DebuggerDisplayProxy
