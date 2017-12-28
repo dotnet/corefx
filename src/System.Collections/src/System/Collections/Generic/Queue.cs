@@ -376,11 +376,12 @@ namespace System.Collections.Generic
             // It is tempting to use the remainder operator here but it is actually much slower
             // than a simple comparison and a rarely taken branch.
             // JIT produces better code than with ternary operator ?:
-            index++;
-            if (index == _array.Length)
+            int tmp = index + 1;
+            if (tmp == _array.Length)
             {
-                index = 0;
+                tmp = 0;
             }
+            index = tmp;
         }
 
         private void ThrowForEmptyQueue()
