@@ -1,11 +1,16 @@
-﻿using Xunit;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
-namespace System.Security.Authentication
+using System.Security.Authentication;
+using Xunit;
+
+namespace System.Net.Security.Tests
 {
     public class InvalidCredentialExceptionTest
     {
         [Fact]
-        public void Constructor()
+        public void Constructor_NoParameter_DefaultMessageCorrect()
         {
             InvalidCredentialException invalidCredentialException = new InvalidCredentialException();
 
@@ -13,20 +18,25 @@ namespace System.Security.Authentication
         }
 
         [Fact]
-        public void Constructor_String()
+        public void Constructor_String_PassedInMessageCorrect()
         {
-            InvalidCredentialException invalidCredentialException = new InvalidCredentialException("base was called");
+            const string passedInMessage = "base was called";
 
-            Assert.Equal("base was called", invalidCredentialException.Message);
+            InvalidCredentialException invalidCredentialException = new InvalidCredentialException(passedInMessage);
+
+            Assert.Equal(passedInMessage, invalidCredentialException.Message);
         }
 
         [Fact]
-        public void Constructor_String_Exception()
+        public void Constructor_String_Exception_MessagesCorrect()
         {
-            InvalidCredentialException invalidCredentialException = new InvalidCredentialException("base was called", new Exception("this is the inner exception message"));
+            const string passedInMessage = "base was called";
+            const string innerExceptionMessage = "this is the inner exception message";
 
-            Assert.Equal("base was called", invalidCredentialException.Message);
-            Assert.Equal("this is the inner exception message", invalidCredentialException.InnerException.Message);
+            InvalidCredentialException invalidCredentialException = new InvalidCredentialException(passedInMessage, new Exception(innerExceptionMessage));
+
+            Assert.Equal(passedInMessage, invalidCredentialException.Message);
+            Assert.Equal(innerExceptionMessage, invalidCredentialException.InnerException.Message);
         }
     }
 }
