@@ -225,16 +225,22 @@ namespace System.Collections.Generic
         // throws an InvalidOperationException.
         public T Pop()
         {
-            if (_size == 0)
+            int size = _size - 1;
+            T[] array = _array;
+            
+            // if (_size == 0) is equivalent to if (size == -1), and this case
+            // is covered with (uint)size, thus allowing RCE https://github.com/dotnet/coreclr/pull/9773
+            if ((uint)size >= (uint)array.Length)
             {
                 ThrowForEmptyStack();
             }
             
             _version++;
-            T item = _array[--_size];
+            _size = size;
+            T item = array[size];
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
-                _array[_size] = default(T);     // Free memory quicker.
+                array[size] = default;     // Free memory quicker.
             }
             return item;
         }
