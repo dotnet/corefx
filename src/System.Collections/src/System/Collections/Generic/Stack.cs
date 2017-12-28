@@ -235,7 +235,8 @@ namespace System.Collections.Generic
             T[] array = _array;
             
             // if (_size == 0) is equivalent to if (size == -1), and this case
-            // is covered with (uint)size, thus allowing RCE https://github.com/dotnet/coreclr/pull/9773
+            // is covered with (uint)size, thus allowing bounds check elimination 
+            // https://github.com/dotnet/coreclr/pull/9773
             if ((uint)size >= (uint)array.Length)
             {
                 ThrowForEmptyStack();
