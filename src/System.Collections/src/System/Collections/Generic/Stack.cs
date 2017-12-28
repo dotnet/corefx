@@ -275,17 +275,12 @@ namespace System.Collections.Generic
         // Pushes an item to the top of the stack.
         public void Push(T item)
         {
-            int size = _size;
-            T[] array = _array;
-
-            if ((uint)size >= (uint)array.Length)
+            if (_size == _array.Length)
             {
-                Array.Resize(ref array, (array.Length == 0) ? DefaultCapacity : 2 * array.Length);
-                _array = array;
+                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
             }
-            array[size++] = item;
+            _array[_size++] = item;
             _version++;
-            _size = size;
         }
 
         // Copies the Stack to an array, in the same order Pop would return the items.
