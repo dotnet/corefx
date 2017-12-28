@@ -234,15 +234,18 @@ namespace System.Collections.Generic
         // InvalidOperationException.
         public T Dequeue()
         {
-            if (_size == 0)
+            int head = _head;
+            T[] array = _array;
+            
+            if (_size == 0 || (uint)head >= (uint)array.Length)
             {
                 ThrowForEmptyQueue();
             }
 
-            T removed = _array[_head];
+            T removed = array[head];
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
-                _array[_head] = default(T);
+                array[head] = default;
             }
             MoveNext(ref _head);
             _size--;
@@ -252,16 +255,19 @@ namespace System.Collections.Generic
 
         public bool TryDequeue(out T result)
         {
-            if (_size == 0)
+            int head = _head;
+            T[] array = _array;
+
+            if (_size == 0 || (uint)head >= (uint)array.Length)
             {
-            	result = default(T);
+            	result = default;
             	return false;
             }
 
-            result = _array[_head];
+            result = array[head];
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
-                _array[_head] = default(T);
+                array[head] = default;
             }
             MoveNext(ref _head);
             _size--;
@@ -367,10 +373,14 @@ namespace System.Collections.Generic
         // Increments the index wrapping it if necessary.
         private void MoveNext(ref int index)
         {
-            // It is tempting to use the remainder operator here but it is actually much slower 
-            // than a simple comparison and a rarely taken branch.   
-            int tmp = index + 1;
-            index = (tmp == _array.Length) ? 0 : tmp;
+            // It is tempting to use the remainder operator here but it is actually much slower
+            // than a simple comparison and a rarely taken branch.
+            // JIT produces better code than with ternary operator ?:
+            index++;
+            if (index == _array.Length)
+            {
+                index = 0;
+            }
         }
 
         private void ThrowForEmptyQueue()
