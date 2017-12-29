@@ -10,6 +10,7 @@ namespace System.Memory.Tests
     public class Perf_Span_Sort
     {
         [Benchmark()]
+        [Trait("MyTrait", "MyTraitValue")]
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
@@ -20,6 +21,7 @@ namespace System.Memory.Tests
         }
         
         [Benchmark()]
+        [Trait("MyTrait", "MyTraitValue")]
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
@@ -83,10 +85,7 @@ namespace System.Memory.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-                    {
-                        span.Sort();
-                    }
+                    span.Sort();
                 }
             }
         }
