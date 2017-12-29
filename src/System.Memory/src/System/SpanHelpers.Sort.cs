@@ -220,9 +220,8 @@ namespace System
                 //       `length <= int.MaxValue`, and indices are >= 0
                 //       and thus cannot overflow an uint. 
                 //       Saves one subtraction per loop compared to 
-                //       `int i = lo + ((hi - lo) >> 1);`
-                int middle = lo + ((hi - lo) / 2);
-                //int middle = (int)(((uint)hi + (uint)lo) >> 1);
+                //       `int middle = lo + ((hi - lo) >> 1);`
+                int middle = (int)(((uint)hi + (uint)lo) >> 1);
 
                 // Sort lo, mid and hi appropriately, then pick mid as the pivot.
                 SwapIfGreater(ref keys, comparer, lo, middle);  // swap the low with the mid point
