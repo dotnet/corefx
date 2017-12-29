@@ -19,12 +19,7 @@ namespace System
             this Span<T> span, TComparer comparer)
             where TComparer : IComparer<T>
         {
-            //if (comparer == null)
-            //    ThrowHelper.ThrowArgumentNullException(ExceptionArgument.comparer);
-            // What checks to do before reverting to array sort helper...
             SpanSortHelper<T, TComparer>.Default.Sort(span, comparer);
-            // And not just call
-
         }
 
         // Helper to allow sharing all code via IComparer<T> inlineable
@@ -100,12 +95,13 @@ namespace System
             {
                 if (typeof(IComparable<T>).IsAssignableFrom(typeof(T)))
                 {
+                    // TODO: Is there a faster way?
                     var ctor = typeof(ComparableSpanSortHelper<,>)
                         .MakeGenericType(new Type[] { typeof(T), typeof(TComparer) })
                         .GetConstructor(Array.Empty<Type>());
 
                     return (ISpanSortHelper<T, TComparer>)ctor.Invoke(Array.Empty<object>());
-                    // TODO: How to allocate here, need reflection??
+                    // coreclr does the following:
                     //defaultArraySortHelper = (IArraySortHelper<T, TComparer>)
                     //    RuntimeTypeHandle.Allocate(
                     //        .TypeHandle.Instantiate());
@@ -122,11 +118,14 @@ namespace System
             {
                 // Add a try block here to detect IComparers (or their
                 // underlying IComparables, etc) that are bogus.
+                // TODO: Do we need the try/catch?? Only when using default comparer?
                 try
                 {
                     if (typeof(TComparer) == typeof(IComparer<T>) && comparer == null)
                     {
-                        SpanSortHelper<T, IComparer<T>>.Sort(ref keys.DangerousGetPinnableReference(), keys.Length, Comparer<T>.Default);
+                        SpanSortHelper<T, IComparer<T>>.Sort(
+                            ref keys.DangerousGetPinnableReference(), keys.Length, 
+                            Comparer<T>.Default);
                     }
                     else
                     {
@@ -154,7 +153,7 @@ namespace System
                 if (length < 2)
                     return;
 
-                // Note how old used the full length of keys to limit
+                // Note how old used the full length of keys array to limit,
                 //IntroSort(keys, left, length + left - 1, 2 * IntrospectiveSortUtilities.FloorLog2PlusOne(keys.Length), comparer);
                 var depthLimit = 2 * IntrospectiveSortUtilities.FloorLog2PlusOne(length);
                 IntroSort(ref spanStart, 0, length - 1, depthLimit, comparer);
@@ -186,6 +185,35 @@ namespace System
                             SwapIfGreater(ref keys, comparer, lo, hi - 1);
                             SwapIfGreater(ref keys, comparer, lo, hi);
                             SwapIfGreater(ref keys, comparer, hi - 1, hi);
+                            // Replace with optimal 3 element sort
+                            // if a[0] < a[1]:
+                            //    if a[1] > a[2]:
+                            //        if a[0] < a[2]:
+                            //            temp = a[1]
+                            //            a[1] = a[2]
+                            //            a[2] = temp
+                            //        else:
+                            //            temp = a[0]
+                            //            a[0] = a[2]
+                            //            a[2] = a[1]
+                            //            a[1] = temp
+                            //    else:
+                            //        # do nothing
+                            //else:
+                            //    if a[1] < a[2]:
+                            //        if a[0] < a[2]:
+                            //            temp = a[0]
+                            //            a[0] = a[1]
+                            //            a[1] = temp
+                            //        else:
+                            //            temp = a[0]
+                            //            a[0] = a[1]
+                            //            a[1] = a[2]
+                            //            a[2] = temp
+                            //    else:
+                            //        temp = a[0]
+                            //        a[0] = a[2]
+                            //        a[2] = temp
                             return;
                         }
 
@@ -228,7 +256,7 @@ namespace System
                 SwapIfGreater(ref keys, comparer, lo, hi);   // swap the low with the high
                 SwapIfGreater(ref keys, comparer, middle, hi); // swap the middle with the high
 
-                var pivot = Unsafe.Add(ref keys, middle);
+                T pivot = Unsafe.Add(ref keys, middle);
                 // Swap in different way
                 Swap(ref keys, middle, hi - 1);
                 int left = lo, right = hi - 1;  // We already partitioned lo and hi and put the pivot in hi - 1.  And we pre-increment & decrement below.
