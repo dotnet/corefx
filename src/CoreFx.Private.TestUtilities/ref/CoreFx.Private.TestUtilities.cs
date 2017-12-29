@@ -40,7 +40,6 @@ namespace System
     {
         public static bool IsReflectionEmitSupported;
         public static bool ClientWebSocketPartialMessagesSupported { get { throw null; } }
-        public static System.PlatformDetection.Range[] FrameworkRanges { get { throw null; } }
         public static bool HasWindowsShell { get { throw null; } }
         public static bool IsArmProcess { get { throw null; } }
         public static bool IsCentos6 { get { throw null; } }
@@ -106,15 +105,6 @@ namespace System
         public static bool IsNetfx470OrNewer() { throw null; }
         public static bool IsNetfx471OrNewer() { throw null; }
         public static bool TargetsNetFx452OrLower { get { throw null; } }
-
-        public partial class Range
-        {
-            public Range(System.Version start, System.Version finish, System.Version frameworkVersion) { }
-            public System.Version Finish { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-            public System.Version FrameworkVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-            public System.Version Start { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-            public bool IsInRange(System.Version version) { throw null; }
-        }
     }
     public static partial class TheoryExtensions
     {
