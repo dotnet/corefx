@@ -33,12 +33,25 @@ namespace System.SpanTests
         [Trait("MyTrait", "MyTraitValue")]
         [InlineData(17, 1024)]
         [InlineData(42, 1024)]
+        [InlineData(1873318, 1024)]
         public static void Sort_Random_Int(int seed, int maxCount)
         {
             var random = new Random(seed);
             for (int count = 0; count < maxCount; count++)
             {
                 var unsorted = Enumerable.Range(0, count).Select(i => random.Next()).ToArray();
+                TestSortOverloads(unsorted);
+            }
+        }
+
+        // TODO: OuterLoop
+        [Fact]
+        [Trait("MyTrait", "MyTraitValue")]
+        public static void Sort_Reverse_Int()
+        {
+            for (int count = 1; count <= 1024 * 1024; count <<= 1)
+            {
+                var unsorted = Enumerable.Range(0, count).Reverse().ToArray();
                 TestSortOverloads(unsorted);
             }
         }

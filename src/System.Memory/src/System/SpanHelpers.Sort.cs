@@ -249,7 +249,11 @@ namespace System
                 }
 
                 // Put pivot in the right location.
-                Swap(ref keys, left, (hi - 1));
+                right = (hi - 1);
+                if (left != right)
+                {
+                    Swap(ref keys, left, right);
+                }
                 return left;
             }
 
@@ -353,9 +357,9 @@ namespace System
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private static void SwapIfGreater(ref T start, TComparer comparer, int i, int j)
             {
-                // TODO: Is the i!=j check necessary? Most cases not needed?
-                // Only in one case it seems, REFACTOR
-                if (i != j)
+                Debug.Assert(i != j);
+                // Check moved to the one case actually needing it, not all!
+                //if (i != j)
                 {
                     ref var iElement = ref Unsafe.Add(ref start, i);
                     ref var jElement = ref Unsafe.Add(ref start, j);
@@ -373,7 +377,9 @@ namespace System
             {
                 // TODO: Is the i!=j check necessary? Most cases not needed?
                 // Only in one case it seems, REFACTOR
-                if (i != j)
+                Debug.Assert(i != j);
+                // No place needs this it seems
+                //if (i != j)
                 {
                     ref var iElement = ref Unsafe.Add(ref start, i);
                     ref var jElement = ref Unsafe.Add(ref start, j);
