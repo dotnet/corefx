@@ -10,11 +10,11 @@ namespace System.Net.Security.Tests
     public class InvalidCredentialExceptionTest
     {
         [Fact]
-        public void Constructor_NoParameter_DefaultMessageCorrect()
+        public void Constructor_NoParameter_DefaultMessageIsNotNull()
         {
             InvalidCredentialException invalidCredentialException = new InvalidCredentialException();
 
-            Assert.Equal("System error.", invalidCredentialException.Message);
+            Assert.NotNull(invalidCredentialException.Message);
         }
 
         [Fact]

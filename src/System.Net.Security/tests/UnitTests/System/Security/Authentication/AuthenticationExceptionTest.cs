@@ -10,11 +10,11 @@ namespace System.Net.Security.Tests
     public class AuthenticationExceptionTest
     {
         [Fact]
-        public void Constructor_NoParameter_DefaultMessageCorrect()
+        public void Constructor_NoParameter_DefaultMessageIsNotNull()
         {
             AuthenticationException authenticationException = new AuthenticationException();
 
-            Assert.Equal("System error.", authenticationException.Message);
+            Assert.NotNull(authenticationException.Message);
         }
 
         [Fact]
