@@ -257,6 +257,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Stackwalking is not supported on UaoAot")]
         public static void GetTypeByName_ViaReflection()
         {
             MethodInfo method = typeof(Type).GetMethod("GetType", new[] { typeof(string) });
