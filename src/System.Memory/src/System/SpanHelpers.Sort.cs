@@ -214,6 +214,46 @@ namespace System
                             //        temp = a[0]
                             //        a[0] = a[2]
                             //        a[2] = temp
+                            //template < typename T >
+                            //void sort3(T(&a)[3])
+                            //{
+                            //    if (a[0] < a[1])
+                            //    {
+                            //        if (a[1] < a[2])
+                            //        {
+                            //            return;
+                            //        }
+                            //        else if (a[0] < a[2])
+                            //        {
+                            //            std::swap(a[1], a[2]);
+                            //        }
+                            //        else
+                            //        {
+                            //            T tmp = std::move(a[0]);
+                            //            a[0] = std::move(a[2]);
+                            //            a[2] = std::move(a[1]);
+                            //            a[1] = std::move(tmp);
+                            //        }
+                            //    }
+                            //    else
+                            //    {
+                            //        if (a[0] < a[2])
+                            //        {
+                            //            std::swap(a[0], a[1]);
+                            //        }
+                            //        else if (a[2] < a[1])
+                            //        {
+                            //            std::swap(a[0], a[2]);
+                            //        }
+                            //        else
+                            //        {
+                            //            T tmp = std::move(a[0]);
+                            //            a[0] = std::move(a[1]);
+                            //            a[1] = std::move(a[2]);
+                            //            a[2] = std::move(tmp);
+                            //        }
+                            //    }
+                            //}
                             return;
                         }
 
@@ -309,53 +349,53 @@ namespace System
                 Debug.Assert(comparer != null);
                 Debug.Assert(lo >= 0);
 
-                //T d = keys[lo + i - 1];
-                T d = Unsafe.Add(ref keys, lo + i - 1);
-                int child;
-                while (i <= n / 2)
-                {
-                    child = 2 * i;
-                    //if (child < n && comparer(keys[lo + child - 1], keys[lo + child]) < 0)
-                    if (child < n && comparer.Compare(Unsafe.Add(ref keys, lo + child - 1), 
-                        Unsafe.Add(ref keys, lo + child)) < 0)
-                    {
-                            child++;
-                    }
-                    //if (!(comparer(d, keys[lo + child - 1]) < 0))
-                    if (!(comparer.Compare(d, Unsafe.Add(ref keys, lo + child - 1)) < 0))
-                        break;
-                    // keys[lo + i - 1] = keys[lo + child - 1]
-                    Unsafe.Add(ref keys, lo + i - 1) = Unsafe.Add(ref keys, lo + child - 1);
-                    i = child;
-                }
-                //keys[lo + i - 1] = d;
-                Unsafe.Add(ref keys, lo + i - 1) = d;
-
-
-                //ref T d = ref Unsafe.Add(ref keys, lo + i - 1);
-                //T v = d;
+                ////T d = keys[lo + i - 1];
+                //T d = Unsafe.Add(ref keys, lo + i - 1);
                 //int child;
                 //while (i <= n / 2)
                 //{
                 //    child = 2 * i;
-                //    // TODO: Local ref updates needed
-                //    //ref var l = ref Unsafe.Add(ref keys, lo + child - 1);
-                //    //ref var r = ref Unsafe.Add(ref keys, lo + child);
-                //    if (child < n &&
-                //        comparer.Compare(Unsafe.Add(ref keys, lo + child - 1),
-                //            Unsafe.Add(ref keys, lo + child)) < 0)
+                //    //if (child < n && comparer(keys[lo + child - 1], keys[lo + child]) < 0)
+                //    if (child < n && comparer.Compare(Unsafe.Add(ref keys, lo + child - 1), 
+                //        Unsafe.Add(ref keys, lo + child)) < 0)
                 //    {
-                //        child++;
+                //            child++;
                 //    }
-                //    ref T c = ref Unsafe.Add(ref keys, lo + child - 1);
-                //    if (!(comparer.Compare(v, c) < 0))
+                //    //if (!(comparer(d, keys[lo + child - 1]) < 0))
+                //    if (!(comparer.Compare(d, Unsafe.Add(ref keys, lo + child - 1)) < 0))
                 //        break;
-                //    //keys[lo + i - 1] = keys[lo + child - 1];
-                //    d = c;
+                //    // keys[lo + i - 1] = keys[lo + child - 1]
+                //    Unsafe.Add(ref keys, lo + i - 1) = Unsafe.Add(ref keys, lo + child - 1);
                 //    i = child;
                 //}
                 ////keys[lo + i - 1] = d;
-                //d = v;
+                //Unsafe.Add(ref keys, lo + i - 1) = d;
+
+
+                ref T d = ref Unsafe.Add(ref keys, lo + i - 1);
+                T v = d;
+                int child;
+                while (i <= n / 2)
+                {
+                    child = 2 * i;
+                    // TODO: Local ref updates needed
+                    //ref var l = ref Unsafe.Add(ref keys, lo + child - 1);
+                    //ref var r = ref Unsafe.Add(ref keys, lo + child);
+                    if (child < n &&
+                        comparer.Compare(Unsafe.Add(ref keys, lo + child - 1),
+                            Unsafe.Add(ref keys, lo + child)) < 0)
+                    {
+                        child++;
+                    }
+                    ref T c = ref Unsafe.Add(ref keys, lo + child - 1);
+                    if (!(comparer.Compare(v, c) < 0))
+                        break;
+                    //keys[lo + i - 1] = keys[lo + child - 1];
+                    d = c;
+                    i = child;
+                }
+                //keys[lo + i - 1] = d;
+                d = v;
             }
 
             private static void InsertionSort(ref T keys, int lo, int hi, in TComparer comparer)
