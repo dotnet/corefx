@@ -257,6 +257,14 @@ namespace System.Tests
         }
 
         [Fact]
+        public static void GetTypeByName_ViaReflection()
+        {
+            MethodInfo method = typeof(Type).GetMethod("GetType", new[] { typeof(string) });
+            object result = method.Invoke(null, new object[] { "System.Tests.TypeTests" });
+            Assert.Equal(typeof(TypeTests), result);
+        }
+
+        [Fact]
         public static void Delimiter()
         {
             Assert.NotNull(Type.Delimiter);
