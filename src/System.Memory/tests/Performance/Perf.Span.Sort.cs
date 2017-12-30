@@ -9,48 +9,69 @@ namespace System.Memory.Tests
 {
     public class Perf_Span_Sort
     {
+        private const int InnerCountForNoSorting = 1000000;
+        //private const string NumberFormat = "D9";
+
+        [Benchmark(InnerIterationCount = InnerCountForNoSorting)]
+        public void ArraySort_Int_Length_0()
+        {
+            int[] array = new int[0];
+            BenchmarkRepeatableArray(array);
+        }
+        [Benchmark(InnerIterationCount = InnerCountForNoSorting)]
+        public void ArraySort_Int_Length_1()
+        {
+            int[] array = new int[1];
+            BenchmarkRepeatableArray(array);
+        }
         [Benchmark()]
-        [InlineData(0)]
-        [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
-        [InlineData(1000)]
         [InlineData(10000)]
-        [InlineData(100000)]
-        public void ArraySort_Int_Random(int size)
+        [InlineData(1000000)]
+        public void ArraySort_Int_Random(int length)
         {
-            BenchmarkAndAssertArrayInt(size);
+            BenchmarkAndAssertArrayInt(length);
         }
-        
+
+        [Benchmark(InnerIterationCount = InnerCountForNoSorting)]
+        public void SpanSort_Int_Length_0()
+        {
+            Span<int> span = new int[0];
+            BenchmarkRepeatableSpan(span);
+        }
+        [Benchmark(InnerIterationCount = InnerCountForNoSorting)]
+        public void SpanSort_Int_Length_1()
+        {
+            Span<int> span = new int[1];
+            BenchmarkRepeatableSpan(span);
+        }
         [Benchmark()]
-        [InlineData(0)]
-        [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
-        [InlineData(1000)]
         [InlineData(10000)]
-        [InlineData(100000)]
-        public void SpanSort_Int_Random(int size)
+        [InlineData(1000000)]
+        public void SpanSort_Int_Random(int length)
         {
-            BenchmarkAndAssertSpan(size, i => i);
+            BenchmarkAndAssertSpanInt(length);
         }
 
-        private static void BenchmarkAndAssertArrayInt(int size)
+        private static void BenchmarkAndAssertArrayInt(int length)
         {
-            BenchmarkAndAssertArray(size, i => i);
+            BenchmarkAndAssertArray(length, i => i);
         }
 
-        //private static void BenchmarkAndAssertArrayString(int size)
+        //private static void BenchmarkAndAssertArrayString(int length)
         //{
-        //    BenchmarkAndAssertArray(size, i => i.ToString(NumberFormat));
+        //    BenchmarkAndAssertArray(length, i => i.ToString(NumberFormat));
         //}
 
         const int Seed = 213718398;
-        private static void BenchmarkAndAssertArray<T>(int size, Func<int, T> toValue)
+        private static void BenchmarkAndAssertArray<T>(int length, Func<int, T> toValue)
             where T : IComparable<T>
         {
             var random = new Random(Seed);
-            var array = new T[size];
+            var array = new T[length];
             for (int i = 0; i < array.Length; i++)
             {
                 array[i] = toValue(random.Next());
@@ -65,21 +86,21 @@ namespace System.Memory.Tests
             }
         }
 
-        private static void BenchmarkAndAssertSpanInt(int size)
+        private static void BenchmarkAndAssertSpanInt(int length)
         {
-            BenchmarkAndAssertSpan(size, i => i);
+            BenchmarkAndAssertSpan(length, i => i);
         }
 
-        //private static void BenchmarkAndAssertSpanString(int size)
+        //private static void BenchmarkAndAssertSpanString(int length)
         //{
-        //    BenchmarkAndAssertSpan(size, i => i.ToString(NumberFormat));
+        //    BenchmarkAndAssertSpan(length, i => i.ToString(NumberFormat));
         //}
 
-        private static void BenchmarkAndAssertSpan<T>(int size, Func<int, T> toValue)
+        private static void BenchmarkAndAssertSpan<T>(int length, Func<int, T> toValue)
             where T : IComparable<T>
         {
             var random = new Random(Seed);
-            Span<T> span = new T[size];
+            Span<T> span = new T[length];
             for (int i = 0; i < span.Length; i++)
             {
                 span[i] = toValue(random.Next());
@@ -90,6 +111,34 @@ namespace System.Memory.Tests
                 using (iteration.StartMeasurement())
                 {
                     span.Sort();
+                }
+            }
+        }
+
+        private static void BenchmarkRepeatableSpan(Span<int> span)
+        {
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        span.Sort();
+                    }
+                }
+            }
+        }
+
+        private static void BenchmarkRepeatableArray(int[] array)
+        {
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        Array.Sort(array);
+                    }
                 }
             }
         }
