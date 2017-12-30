@@ -18,26 +18,11 @@ namespace System
         // false but we don't expect any code change though.
         public static bool TargetsNetFx452OrLower => TargetVersion.CompareTo(new Version(4, 5, 3, 0)) < 0;
 
-        public static bool IsNetfx462OrNewer()
-        {
-            Version net462 = new Version(4, 6, 2);
-            Version runningVersion = GetFrameworkVersion();
-            return runningVersion != null && runningVersion >= net462;
-        }
+        public static bool IsNetfx462OrNewer => GetFrameworkVersion() >= new Version(4, 6, 2);
 
-        public static bool IsNetfx470OrNewer()
-        {
-            Version net470 = new Version(4, 7, 0);
-            Version runningVersion = GetFrameworkVersion();
-            return runningVersion != null && runningVersion >= net470;
-        }
+        public static bool IsNetfx470OrNewer => GetFrameworkVersion() >= new Version(4, 7, 0);
 
-        public static bool IsNetfx471OrNewer()
-        {
-            Version net471 = new Version(4, 7, 1);
-            Version runningVersion = GetFrameworkVersion();
-            return runningVersion != null && runningVersion >= net471;
-        }
+        public static bool IsNetfx471OrNewer => GetFrameworkVersion() >= new Version(4, 7, 1);
 
         // To get the framework version we can do it throught the registry key and getting the Release value under the .NET Framework key.
         // the mapping to each version can be found in: https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
@@ -69,7 +54,7 @@ namespace System
                     throw new NotSupportedException($"No 4.5 or later framework version detected, framework key value: {value}");
                 }
 
-            return null;
+                throw new NotSupportedException(@"No registry key found under 'SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full' to determine running framework version");
             }
         }
     }

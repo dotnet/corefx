@@ -53,6 +53,9 @@ namespace System
         public static bool IsNetBSD { get { throw null; } }
         public static bool IsFreeBSD { get { throw null; } }
         public static bool IsNetCore { get { throw null; } }
+        public static bool IsNetfx462OrNewer { get { throw null; } }
+        public static bool IsNetfx470OrNewer { get { throw null; } }
+        public static bool IsNetfx471OrNewer { get { throw null; } }
         public static bool IsNetNative { get { throw null; } }
         public static bool IsNonZeroLowerBoundArraySupported { get { throw null; } }
         public static bool IsNotArmProcess { get { throw null; } }
@@ -101,9 +104,6 @@ namespace System
         public static System.Version OSXVersion { get { throw null; } }
         public static int WindowsVersion { get { throw null; } }
         public static string GetDistroVersionString() { throw null; }
-        public static bool IsNetfx462OrNewer() { throw null; }
-        public static bool IsNetfx470OrNewer() { throw null; }
-        public static bool IsNetfx471OrNewer() { throw null; }
         public static bool TargetsNetFx452OrLower { get { throw null; } }
     }
     public static partial class TheoryExtensions
