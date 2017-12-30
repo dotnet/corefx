@@ -34,7 +34,7 @@ namespace System
             this Span<T> span, TComparer comparer)
             where TComparer : IComparer<T>
         {
-            SpanSortHelper<T, TComparer>.DefaultArraySortHelper.Sort(span, comparer);
+            SpanSortHelper<T, TComparer>.s_default.Sort(span, comparer);
         }
 
         // Helper to allow sharing all code via IComparer<T> inlineable
@@ -105,9 +105,9 @@ namespace System
             //        return sorter;
             //    }
             //}
-            internal static readonly ISpanSortHelper<T, TComparer> DefaultArraySortHelper = CreateArraySortHelper();
+            internal static readonly ISpanSortHelper<T, TComparer> s_default = CreateSortHelper();
 
-            private static ISpanSortHelper<T, TComparer> CreateArraySortHelper()
+            private static ISpanSortHelper<T, TComparer> CreateSortHelper()
             {
                 if (typeof(IComparable<T>).IsAssignableFrom(typeof(T)))
                 {

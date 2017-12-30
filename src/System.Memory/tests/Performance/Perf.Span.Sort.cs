@@ -10,35 +10,39 @@ namespace System.Memory.Tests
     public class Perf_Span_Sort
     {
         [Benchmark()]
-        [Trait("MyTrait", "MyTraitValue")]
+        [InlineData(0)]
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
         [InlineData(1000)]
+        [InlineData(10000)]
+        [InlineData(100000)]
         public void ArraySort_Int_Random(int size)
         {
-            BenchmarkAndAssertArray(size);
+            BenchmarkAndAssertArrayInt(size);
         }
         
         [Benchmark()]
-        [Trait("MyTrait", "MyTraitValue")]
+        [InlineData(0)]
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
         [InlineData(1000)]
+        [InlineData(10000)]
+        [InlineData(100000)]
         public void SpanSort_Int_Random(int size)
         {
             BenchmarkAndAssertSpan(size, i => i);
         }
 
-        private static void BenchmarkAndAssertArray(int size)
+        private static void BenchmarkAndAssertArrayInt(int size)
         {
             BenchmarkAndAssertArray(size, i => i);
         }
 
-        //private static void BenchmarkAndAssertArray(int size, string value, int expectedIndex)
+        //private static void BenchmarkAndAssertArrayString(int size)
         //{
-        //    BenchmarkAndAssertArray(size, i => i.ToString(NumberFormat), value, expectedIndex);
+        //    BenchmarkAndAssertArray(size, i => i.ToString(NumberFormat));
         //}
 
         const int Seed = 213718398;
@@ -61,14 +65,14 @@ namespace System.Memory.Tests
             }
         }
 
-        private static void BenchmarkAndAssertSpan(int size)
+        private static void BenchmarkAndAssertSpanInt(int size)
         {
             BenchmarkAndAssertSpan(size, i => i);
         }
 
-        //private static void BenchmarkAndAssertSpan(int size, string value, int expectedIndex)
+        //private static void BenchmarkAndAssertSpanString(int size)
         //{
-        //    BenchmarkAndAssertSpan(size, i => i.ToString(NumberFormat), value, expectedIndex);
+        //    BenchmarkAndAssertSpan(size, i => i.ToString(NumberFormat));
         //}
 
         private static void BenchmarkAndAssertSpan<T>(int size, Func<int, T> toValue)
