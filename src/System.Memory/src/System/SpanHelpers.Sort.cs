@@ -25,7 +25,7 @@ namespace System
             }
             else
             {
-                SpanSortHelper<T, Comparer<T>>.Default.Sort(span, Comparer<T>.Default);
+                Sort(span, Comparer<T>.Default);
             }
         }
 
@@ -34,7 +34,7 @@ namespace System
             this Span<T> span, TComparer comparer)
             where TComparer : IComparer<T>
         {
-            SpanSortHelper<T, TComparer>.Default.Sort(span, comparer);
+            SpanSortHelper<T, TComparer>.DefaultArraySortHelper.Sort(span, comparer);
         }
 
         // Helper to allow sharing all code via IComparer<T> inlineable
@@ -92,19 +92,20 @@ namespace System
         internal class SpanSortHelper<T, TComparer> : ISpanSortHelper<T, TComparer>
             where TComparer : IComparer<T>
         {
-            private static volatile ISpanSortHelper<T, TComparer> defaultArraySortHelper;
+            //private static volatile ISpanSortHelper<T, TComparer> defaultArraySortHelper;
 
-            public static ISpanSortHelper<T, TComparer> Default
-            {
-                get
-                {
-                    ISpanSortHelper<T, TComparer> sorter = defaultArraySortHelper;
-                    if (sorter == null)
-                        sorter = CreateArraySortHelper();
+            //public static ISpanSortHelper<T, TComparer> Default
+            //{
+            //    get
+            //    {
+            //        ISpanSortHelper<T, TComparer> sorter = defaultArraySortHelper;
+            //        if (sorter == null)
+            //            sorter = CreateArraySortHelper();
 
-                    return sorter;
-                }
-            }
+            //        return sorter;
+            //    }
+            //}
+            internal static readonly ISpanSortHelper<T, TComparer> DefaultArraySortHelper = CreateArraySortHelper();
 
             private static ISpanSortHelper<T, TComparer> CreateArraySortHelper()
             {
@@ -117,16 +118,14 @@ namespace System
 
                     return (ISpanSortHelper<T, TComparer>)ctor.Invoke(Array.Empty<object>());
                     // coreclr does the following:
-                    //defaultArraySortHelper = (IArraySortHelper<T, TComparer>)
+                    //return (IArraySortHelper<T, TComparer>)
                     //    RuntimeTypeHandle.Allocate(
                     //        .TypeHandle.Instantiate());
-                    //throw new NotImplementedException();
                 }
                 else
                 {
-                    defaultArraySortHelper = new SpanSortHelper<T, TComparer>();
+                    return new SpanSortHelper<T, TComparer>();
                 }
-                return defaultArraySortHelper;
             }
 
             public void Sort(Span<T> keys, in TComparer comparer)
