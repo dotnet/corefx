@@ -933,18 +933,20 @@ namespace System
         /// <exception cref = "InvalidOperationException"> 
         /// One or more elements do not implement the <see cref="IComparable" /> interface.
         /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort<T>(this Span<T> span)
         {
             // TODO: Can we "statically" check if T is IComparable<T>
             //       and force C# to then call implementation that
             //       uses this instead of default comparer
-            SpanHelpers.Sort(span, Comparer<T>.Default);
+            SpanHelpers.Sort(span);
         }
 
         /// <summary>
         /// Sorts the elements in the entire <see cref="Span{T}" /> 
         /// using the <typeparamref name="TComparer" />.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort<T, TComparer>(this Span<T> span, TComparer comparer)
            where TComparer : IComparer<T>
         {
@@ -955,6 +957,7 @@ namespace System
         /// Sorts the elements in the entire <see cref="Span{T}" /> 
         /// using the <see cref="Comparison{T}" />.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort<T>(this Span<T> span, Comparison<T> comparison)
         {
             if (comparison == null)
@@ -971,6 +974,7 @@ namespace System
         /// using the <see cref="IComparable" /> implementation of each 
         /// element of the <see cref= "Span{TKey}"/>.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort<TKey, TValue>(this Span<TKey> keys, Span<TValue> items)
         {
 
@@ -983,6 +987,7 @@ namespace System
         /// based on the keys in the first <see cref= "Span{TKey}" /> 
         /// using the <typeparamref name="TComparer" />.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort<TKey, TValue, TComparer>(this Span<TKey> keys,
            Span<TValue> items, TComparer comparer)
            where TComparer : IComparer<TKey>
@@ -997,6 +1002,7 @@ namespace System
         /// based on the keys in the first <see cref= "Span{TKey}" /> 
         /// using the <see cref="Comparison{TKey}" />.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort<TKey, TValue>(this Span<TKey> keys,
            Span<TValue> items, Comparison<TKey> comparison)
         {

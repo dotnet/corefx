@@ -15,6 +15,21 @@ namespace System
     internal static partial class SpanHelpers
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void Sort<T>(this Span<T> span)
+        {
+            if (typeof(T) == typeof(int))
+            {
+                //ref var intRef = ref Unsafe.As<T, int>(ref MemoryManager.GetReference(span));
+                ref var intRef = ref Unsafe.As<T, int>(ref span.DangerousGetPinnableReference());
+                SpanSortHelper<int, ComparableComparer<int>>.Sort(ref intRef, span.Length, new ComparableComparer<int>());
+            }
+            else
+            {
+                SpanSortHelper<T, Comparer<T>>.Default.Sort(span, Comparer<T>.Default);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void Sort<T, TComparer>(
             this Span<T> span, TComparer comparer)
             where TComparer : IComparer<T>
