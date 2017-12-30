@@ -23,7 +23,6 @@
     <Compile Include="Span\CtorArrayIntInt.cs" />
     <Compile Include="Span\CtorPointerInt.cs" />
     <Compile Include="Span\DangerousCreate.cs" />
-    <Compile Include="Span\DangerousGetPinnableReference.cs" />
     <Compile Include="Span\Empty.cs" />
     <Compile Include="Span\EndsWith.byte.cs" />
     <Compile Include="Span\EndsWith.T.cs" />
@@ -65,7 +64,6 @@
     <Compile Include="ReadOnlySpan\CtorArrayIntInt.cs" />
     <Compile Include="ReadOnlySpan\CtorPointerInt.cs" />
     <Compile Include="ReadOnlySpan\DangerousCreate.cs" />
-    <Compile Include="ReadOnlySpan\DangerousGetPinnableReference.cs" />
     <Compile Include="ReadOnlySpan\Empty.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.byte.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.T.cs" />
@@ -118,12 +116,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MemoryMarshal\AsMemory.cs" />
+    <Compile Include="MemoryMarshal\GetReference.cs" />
+    <Compile Include="MemoryMarshal\TryGetArray.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ReadOnlyMemory\CopyTo.cs" />
     <Compile Include="ReadOnlyMemory\CtorArray.cs" />
     <Compile Include="ReadOnlyMemory\CtorArrayIntInt.cs" />
-    <Compile Include="ReadOnlyMemory\DangerousTryGetArray.cs" />
     <Compile Include="ReadOnlyMemory\Empty.cs" />
     <Compile Include="ReadOnlyMemory\Equality.cs" />
     <Compile Include="ReadOnlyMemory\GetHashCode.cs" />
@@ -172,6 +171,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

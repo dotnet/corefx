@@ -4,6 +4,11 @@
 
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+#if !netstandard
+using Internal.Runtime.CompilerServices;
+#endif
 
 namespace System
 {
@@ -17,7 +22,7 @@ namespace System
             if (comparable == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.comparable);
 
-            return BinarySearch(ref span.DangerousGetPinnableReference(), span.Length, comparable);
+            return BinarySearch(ref MemoryMarshal.GetReference(span), span.Length, comparable);
         }
 
         internal static int BinarySearch<T, TComparable>(

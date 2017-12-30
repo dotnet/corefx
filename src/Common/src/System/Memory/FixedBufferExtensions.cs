@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
+
 namespace System
 {
     internal static class FixedBufferExtensions
@@ -11,7 +13,7 @@ namespace System
         /// </summary>
         internal unsafe static string GetStringFromFixedBuffer(this ReadOnlySpan<char> span)
         {
-            fixed (char* c = &span.DangerousGetPinnableReference())
+            fixed (char* c = &MemoryMarshal.GetReference(span))
             {
                 return new string(c, 0, span.GetFixedBufferStringLength());
             }
@@ -35,21 +37,17 @@ namespace System
             if (value == null || value.Length > span.Length)
                 return false;
 
-            fixed (char* spanPtr = &span.DangerousGetPinnableReference())
+            int i = 0;
+            for (; i < value.Length; i++)
             {
-                var readWriteSpan = new Span<char>(spanPtr, span.Length);
-                int i = 0;
-                for (; i < value.Length; i++)
-                {
-                    // Strings with embedded nulls can never match as the fixed buffer always null terminates.
-                    if (value[i] == '\0' || value[i] != readWriteSpan[i])
-                        return false;
-                }
-
-                // If we've maxed out the buffer or reached the
-                // null terminator, we're equal.
-                return i == span.Length || readWriteSpan[i] == '\0';
+                // Strings with embedded nulls can never match as the fixed buffer always null terminates.
+                if (value[i] == '\0' || value[i] != span[i])
+                    return false;
             }
+
+            // If we've maxed out the buffer or reached the
+            // null terminator, we're equal.
+            return i == span.Length || span[i] == '\0';
         }
     }
 }
