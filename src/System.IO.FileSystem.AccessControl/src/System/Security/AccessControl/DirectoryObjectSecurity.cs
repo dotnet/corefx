@@ -348,7 +348,7 @@ namespace System.Security.AccessControl
                         result = _securityDescriptor.DiscretionaryAcl.RemoveAccess(AccessControlType.Allow, sid, -1, InheritanceFlags.ContainerInherit, 0, ObjectAceFlags.None, Guid.Empty, Guid.Empty);
                         if (result == false)
                         {                            
-                            throw new InvalidOperationException(SR.InvalidOperation_AccessControl);
+                            throw new InvalidOperationException(SR.InvalidOperation_RemoveFail);
                         }
 
                         break;
@@ -393,7 +393,7 @@ nameof(modification),
                         result = _securityDescriptor.DiscretionaryAcl.RemoveAccess(AccessControlType.Deny, sid, -1, InheritanceFlags.ContainerInherit, 0, ObjectAceFlags.None, Guid.Empty, Guid.Empty);
                         if (result == false)
                         {                            
-                            throw new InvalidOperationException(SR.InvalidOperation_AccessControl);
+                            throw new InvalidOperationException(SR.InvalidOperation_RemoveFail);
                         }
 
                         break;
@@ -486,7 +486,7 @@ nameof(modification),
                     result = _securityDescriptor.SystemAcl.RemoveAudit(AuditFlags.Failure | AuditFlags.Success, sid, -1, InheritanceFlags.ContainerInherit, 0, ObjectAceFlags.None, Guid.Empty, Guid.Empty);
                     if (result == false)
                     {                        
-                        throw new InvalidOperationException(SR.InvalidOperation_AccessControl);
+                        throw new InvalidOperationException(SR.InvalidOperation_RemoveFail);
                     }
 
                     break;
