@@ -1010,7 +1010,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             ArgInfos argInfo = new ArgInfos
             {
-                carg = ExpressionBinder.CountArguments(arguments, out _)
+                carg = ExpressionBinder.CountArguments(arguments)
             };
             _binder.FillInArgInfoFromArgList(argInfo, arguments);
 
@@ -1411,6 +1411,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             LocalVariableSymbol[] locals)
         {
             Debug.Assert(arguments.Length >= 2);
+            Debug.Assert(arguments.All(a => a.Type != null));
 
             string name = payload.Name;
 
@@ -1435,12 +1436,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             int indexOfLast = arguments.Length - 1;
             Expr rhs = CreateArgumentEXPR(arguments[indexOfLast], locals[indexOfLast]);
-
-            if (arguments[0].Type == null)
-            {
-                throw Error.BindBinaryAssignmentFailedNullReference();
-            }
-
             return _binder.BindAssignment(lhs, rhs, bIsCompound);
         }
         #endregion

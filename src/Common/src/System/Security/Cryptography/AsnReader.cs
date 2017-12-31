@@ -1930,8 +1930,8 @@ namespace System.Security.Cryptography.Asn1
                 return true;
             }
 
-            fixed (byte* bytePtr = &source.DangerousGetPinnableReference())
-            fixed (char* charPtr = &destination.DangerousGetPinnableReference())
+            fixed (byte* bytePtr = &MemoryMarshal.GetReference(source))
+            fixed (char* charPtr = &MemoryMarshal.GetReference(destination))
             {
                 try
                 {
@@ -1981,7 +1981,7 @@ namespace System.Security.Cryptography.Asn1
                 {
                     unsafe
                     {
-                        fixed (byte* bytePtr = &contents.DangerousGetPinnableReference())
+                        fixed (byte* bytePtr = &MemoryMarshal.GetReference(contents))
                         {
                             try
                             {
@@ -2744,7 +2744,7 @@ namespace System.Security.Cryptography.Asn1
                 if (fraction != 0)
                 {
                     // No minutes means this is fractions of an hour
-                    fractionSpan = TimeSpan.FromHours(frac);
+                    fractionSpan = new TimeSpan((long)(frac * TimeSpan.TicksPerHour));
                 }
             }
             else if (!second.HasValue)
@@ -2754,13 +2754,13 @@ namespace System.Security.Cryptography.Asn1
                 if (fraction != 0)
                 {
                     // No seconds means this is fractions of a minute
-                    fractionSpan = TimeSpan.FromMinutes(frac);
+                    fractionSpan = new TimeSpan((long)(frac * TimeSpan.TicksPerMinute));
                 }
             }
             else if (fraction != 0)
             {
                 // Both minutes and seconds means fractions of a second.
-                fractionSpan = TimeSpan.FromSeconds(frac);
+                fractionSpan = new TimeSpan((long)(frac * TimeSpan.TicksPerSecond));
             }
             
             DateTimeOffset value;
