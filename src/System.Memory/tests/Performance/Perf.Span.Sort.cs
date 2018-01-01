@@ -70,18 +70,16 @@ namespace System.Memory.Tests
         private static void BenchmarkAndAssertArray<T>(int length, Func<int, T> toValue)
             where T : IComparable<T>
         {
-            var random = new Random(Seed);
-            var array = new T[length];
-            for (int i = 0; i < array.Length; i++)
-            {
-                array[i] = toValue(random.Next());
-            }
+            var random = CreateRandomArray(length, toValue);
+            var work = new T[length];
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
+                Array.Copy(random, work, random.Length);
+
                 using (iteration.StartMeasurement())
                 {
-                    Array.Sort(array);
+                    Array.Sort(work);
                 }
             }
         }
@@ -99,18 +97,17 @@ namespace System.Memory.Tests
         private static void BenchmarkAndAssertSpan<T>(int length, Func<int, T> toValue)
             where T : IComparable<T>
         {
-            var random = new Random(Seed);
-            Span<T> span = new T[length];
-            for (int i = 0; i < span.Length; i++)
-            {
-                span[i] = toValue(random.Next());
-            }
+            var random = CreateRandomArray(length, toValue);
+            var work = new T[length];
+            Span<T> spanWork = work;
 
             foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
+                Array.Copy(random, work, random.Length);
+
                 using (iteration.StartMeasurement())
                 {
-                    span.Sort();
+                    spanWork.Sort();
                 }
             }
         }
@@ -141,6 +138,18 @@ namespace System.Memory.Tests
                     }
                 }
             }
+        }
+
+        private static T[] CreateRandomArray<T>(int length, Func<int, T> toValue)
+            where T : IComparable<T>
+        {
+            var random = new Random(Seed);
+            var array = new T[length];
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = toValue(random.Next());
+            }
+            return array;
         }
     }
 }
