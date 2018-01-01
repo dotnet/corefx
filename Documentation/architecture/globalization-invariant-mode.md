@@ -98,7 +98,15 @@ When running on Linux, ICU is used to get the time zone display name. In invaria
  
 ## Enabling the invariant mode
  
-Applications can enable the invariant mode by setting the config switch System.Globalization.Invariant to true, in the `runtimeconfig.json` file, as you can see in the following example:
+Applications can enable the invariant mode by setting the config switch `System.Globalization.Invariant` to true either in project file:
+
+```xml
+<ItemGroup>
+  <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
+</ItemGroup>
+```
+
+or in `runtimeconfig.json` file:
 
 ```json
 {
