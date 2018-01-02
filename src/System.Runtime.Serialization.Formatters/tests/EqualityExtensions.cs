@@ -1151,6 +1151,12 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 CheckEquals(@this.InnerException, other.InnerException);
         }
 
+        public static void IsEqual(this EventArgs @this, EventArgs other)
+        {
+            Assert.NotNull(@this);
+            Assert.NotNull(other);
+        }
+
         public class ReferenceComparer<T> : IEqualityComparer<T> where T: class
         {
             public bool Equals(T x, T y)
