@@ -142,6 +142,6 @@
     <value>AccessControlType '{0}' unrecognized</value>
   </data>
   <data name="InvalidOperation_RemoveFail" xml:space="preserve">
-    <value>Remove fail</value>
+    <value>Remove access rule failed</value>
   </data>
 </root>
