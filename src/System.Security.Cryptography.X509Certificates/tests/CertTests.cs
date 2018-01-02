@@ -302,6 +302,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.ThrowsAny<CryptographicException>(() => c.NotBefore);
                 Assert.ThrowsAny<CryptographicException>(() => c.NotAfter);
 
+                Assert.ThrowsAny<CryptographicException>(
+                    () => c.TryGetCertHash(HashAlgorithmName.SHA256, Array.Empty<byte>(), out _));
+
                 // State held on X509Certificate2
                 Assert.ThrowsAny<CryptographicException>(() => c.RawData);
                 Assert.ThrowsAny<CryptographicException>(() => c.SignatureAlgorithm);

@@ -327,6 +327,20 @@ namespace System.Security.Cryptography.X509Certificates
             }
         }
 
+        public virtual bool TryGetCertHash(
+            HashAlgorithmName hashAlgorithm,
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            ThrowIfInvalid();
+
+            using (IncrementalHash hasher = IncrementalHash.CreateHash(hashAlgorithm))
+            {
+                hasher.AppendData(Pal.RawData);
+                return hasher.TryGetHashAndReset(destination, out bytesWritten);
+            }
+        }
+
         public virtual string GetCertHashString()
         {
             ThrowIfInvalid();

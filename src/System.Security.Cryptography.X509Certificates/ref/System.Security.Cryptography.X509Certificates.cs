@@ -167,6 +167,7 @@ namespace System.Security.Cryptography.X509Certificates
         protected static string FormatDate(System.DateTime date) { throw null; }
         public virtual byte[] GetCertHash() { throw null; }
         public virtual byte[] GetCertHash(HashAlgorithmName hashAlgorithm) { throw null; }
+        public virtual bool TryGetCertHash(HashAlgorithmName hashAlgorithm, Span<byte> destination, out int bytesWritten) { throw null; }
         public virtual string GetCertHashString() { throw null; }
         public virtual string GetCertHashString(HashAlgorithmName hashAlgorithm) { throw null; }
         public virtual string GetEffectiveDateString() { throw null; }

@@ -55,6 +55,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.ThrowsAny<CryptographicException>(() => c.GetIssuerName());
             Assert.ThrowsAny<CryptographicException>(() => c.GetName());
 #pragma warning restore 0618
+
+            Assert.ThrowsAny<CryptographicException>(
+                () => c.TryGetCertHash(HashAlgorithmName.SHA256, Array.Empty<byte>(), out _));
         }
 
         [Fact]

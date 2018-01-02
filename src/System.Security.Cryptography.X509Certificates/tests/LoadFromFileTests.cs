@@ -67,11 +67,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Theory]
-        [InlineData("SHA1")]
-        [InlineData("SHA256")]
-        [InlineData("SHA384")]
-        [InlineData("SHA512")]
-        public static void TestThumbprint(string hashAlgName)
+        [InlineData("SHA1", false)]
+        [InlineData("SHA1", true)]
+        [InlineData("SHA256", false)]
+        [InlineData("SHA256", true)]
+        [InlineData("SHA384", false)]
+        [InlineData("SHA384", true)]
+        [InlineData("SHA512", false)]
+        [InlineData("SHA512", true)]
+        public static void TestThumbprint(string hashAlgName, bool viaSpan)
         {
             string expectedThumbprintHex;
 
@@ -102,10 +106,46 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
             using (X509Certificate2 c = LoadCertificateFromFile())
             {
-                byte[] thumbPrint = c.GetCertHash(alg);
-                Assert.Equal(expectedThumbprintHex, thumbPrint.ByteArrayToHex());
-                string thumbPrintHex = c.GetCertHashString(alg);
-                Assert.Equal(expectedThumbprintHex, thumbPrintHex);
+                if (viaSpan)
+                {
+                    const int WriteOffset = 3;
+                    const byte FillByte = 0x55;
+
+                    int expectedSize = expectedThumbprintHex.Length / 2;
+                    byte[] thumbPrint = new byte[expectedSize + 10];
+                    thumbPrint.AsSpan().Fill(FillByte);
+
+                    Span<byte> writeDest = thumbPrint.AsSpan().Slice(WriteOffset);
+                    int bytesWritten;
+
+                    // Too small.
+                    Assert.False(c.TryGetCertHash(alg, writeDest.Slice(0, expectedSize - 1), out bytesWritten));
+                    Assert.Equal(0, bytesWritten);
+                    // Still all 0x55s.
+                    Assert.Equal(new string('5', thumbPrint.Length * 2), thumbPrint.ByteArrayToHex());
+
+                    // Large enough (+7)
+                    Assert.True(c.TryGetCertHash(alg, writeDest, out bytesWritten));
+                    Assert.Equal(expectedSize, bytesWritten);
+
+                    Assert.Equal(expectedThumbprintHex, writeDest.Slice(0, bytesWritten).ByteArrayToHex());
+                    Assert.Equal(FillByte, thumbPrint[expectedSize + WriteOffset]);
+
+                    // Try again with a perfectly sized value
+                    thumbPrint.AsSpan().Fill(FillByte);
+                    Assert.True(c.TryGetCertHash(alg, writeDest.Slice(0, expectedSize), out bytesWritten));
+                    Assert.Equal(expectedSize, bytesWritten);
+
+                    Assert.Equal(expectedThumbprintHex, writeDest.Slice(0, bytesWritten).ByteArrayToHex());
+                    Assert.Equal(FillByte, thumbPrint[expectedSize + WriteOffset]);
+                }
+                else
+                {
+                    byte[] thumbPrint = c.GetCertHash(alg);
+                    Assert.Equal(expectedThumbprintHex, thumbPrint.ByteArrayToHex());
+                    string thumbPrintHex = c.GetCertHashString(alg);
+                    Assert.Equal(expectedThumbprintHex, thumbPrintHex);
+                }
             }
         }
 
