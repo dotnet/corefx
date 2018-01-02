@@ -13,6 +13,7 @@ namespace STAMain
         static int Main(string[] args)
         {
             const int Success = 0;
+            const int SuccessOnUnix = 2;
             const int Failure = 1;
 
             string mode = args[0];
@@ -25,7 +26,11 @@ namespace STAMain
                 {
                     curThread.SetApartmentState(ApartmentState.STA);
                     retValue = Success;
-                }    
+                }
+                else
+                {
+                    retValue = SuccessOnUnix;
+                }
             }
             else
             {
@@ -37,7 +42,10 @@ namespace STAMain
                 {
                     retValue = Success;
                 }
-                catch (PlatformNotSupportedException) {}
+                catch (PlatformNotSupportedException)
+                {
+                    retValue = SuccessOnUnix;
+                }
             }
 
             return retValue;

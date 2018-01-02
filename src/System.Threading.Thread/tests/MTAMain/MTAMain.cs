@@ -13,6 +13,7 @@ namespace MTAMain
         static int Main(string[] args)
         {
             const int Success = 0;
+            const int SuccessOnUnix = 2;
             const int Failure = 1;
 
             string mode = args[0];
@@ -26,6 +27,10 @@ namespace MTAMain
                     curThread.SetApartmentState(ApartmentState.MTA);
                     retValue = Success;
                 }
+                else
+                {
+                    retValue = SuccessOnUnix;
+                }
             }
             else
             {
@@ -37,7 +42,10 @@ namespace MTAMain
                 {
                     retValue = Success;
                 }
-                catch (PlatformNotSupportedException) {}
+                catch (PlatformNotSupportedException)
+                {
+                    retValue = SuccessOnUnix;
+                }
             }
 
             return retValue;

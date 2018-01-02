@@ -166,7 +166,7 @@ namespace System.Threading.Threads.Tests
             using (Process p = Process.Start(psi))
             {
                 p.WaitForExit();
-                Assert.Equal(PlatformDetection.IsWindows ? 0 : 1, p.ExitCode);
+                Assert.Equal(PlatformDetection.IsWindows ? 0 : 2, p.ExitCode);
             }
         }
 
