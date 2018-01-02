@@ -144,7 +144,7 @@ namespace System.Threading.Threads.Tests
                 };
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData("STAMain.exe", "GetApartmentState")] 
         [InlineData("STAMain.exe", "SetApartmentState")]
         [InlineData("MTAMain.exe", "GetApartmentState")]
@@ -182,7 +182,7 @@ namespace System.Threading.Threads.Tests
             }).Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void ApartmentState_NoAttributePresent_STA_Windows_Core()
@@ -217,6 +217,17 @@ namespace System.Threading.Threads.Tests
             {
                 Assert.Equal(ApartmentState.Unknown, Thread.CurrentThread.GetApartmentState());
                 Assert.Throws<PlatformNotSupportedException>(() => Thread.CurrentThread.SetApartmentState(ApartmentState.MTA));
+            }).Dispose();
+        }
+
+        // Thread is always initialized as MTA irrespective of the attribute present.
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsWindowsNanoServer))]
+        public static void ApartmentState_NoAttributePresent_DefaultState_Nano()
+        {
+            DummyClass.RemoteInvoke(() =>
+            {
+                Assert.Throws<InvalidOperationException>(() => Thread.CurrentThread.SetApartmentState(ApartmentState.STA));
+                Assert.Equal(ApartmentState.MTA, Thread.CurrentThread.GetApartmentState());                
             }).Dispose();
         }
 

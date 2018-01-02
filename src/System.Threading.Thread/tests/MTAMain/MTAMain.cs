@@ -12,8 +12,11 @@ namespace MTAMain
         [MTAThread]
         static int Main(string[] args)
         {
+            const int Success = 0;
+            const int Failure = 1;
+
             string mode = args[0];
-            int retValue = 1;
+            int retValue = Failure;
             Thread curThread = Thread.CurrentThread;
 
             if (mode == "GetApartmentState")
@@ -21,9 +24,8 @@ namespace MTAMain
                 if (curThread.GetApartmentState() == ApartmentState.MTA)
                 {
                     curThread.SetApartmentState(ApartmentState.MTA);
-                    retValue = 0;
+                    retValue = Success;
                 }
-
             }
             else
             {
@@ -33,7 +35,7 @@ namespace MTAMain
                 }
                 catch (InvalidOperationException)
                 {
-                    retValue = 0;
+                    retValue = Success;
                 }
                 catch (PlatformNotSupportedException) {}
             }

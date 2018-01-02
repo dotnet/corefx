@@ -12,8 +12,11 @@ namespace STAMain
         [STAThread]
         static int Main(string[] args)
         {
+            const int Success = 0;
+            const int Failure = 1;
+
             string mode = args[0];
-            int retValue = 1;
+            int retValue = Failure;
             Thread curThread = Thread.CurrentThread;
             
             if (mode == "GetApartmentState")
@@ -21,7 +24,7 @@ namespace STAMain
                 if (curThread.GetApartmentState() == ApartmentState.STA)
                 {
                     curThread.SetApartmentState(ApartmentState.STA);
-                    retValue = 0;
+                    retValue = Success;
                 }    
             }
             else
@@ -32,7 +35,7 @@ namespace STAMain
                 }
                 catch (InvalidOperationException)
                 {
-                    retValue = 0;
+                    retValue = Success;
                 }
                 catch (PlatformNotSupportedException) {}
             }
