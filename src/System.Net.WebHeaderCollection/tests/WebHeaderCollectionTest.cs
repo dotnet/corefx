@@ -529,6 +529,43 @@ namespace System.Net.Tests
             AssertExtensions.Throws<ArgumentException>(paramName, () => headers.Add(header));
         }
 
+        private string headerType = "Set-Cookie";
+        private string cookie1 = "locale=en; path=/; expires=Fri, 05 Oct 2018 06:28:57 -0000";
+        private string cookie2 = "uuid=123abc; path=/; expires=Fri, 05 Oct 2018 06:28:57 -0000; secure; HttpOnly";
+        private string cookie3 = "country=US; path=/; expires=Fri, 05 Oct 2018 06:28:57 -0000";
+        private string cookie4 = "m_session=session1; path=/; expires=Sun, 08 Oct 2017 00:28:57 -0000; secure; HttpOnly";
+
+        [Fact]
+        public void GetValues_MultipleSetCookieHeadersWithExpiresAttribute_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add(headerType, cookie1);
+            w.Add(headerType, cookie2);
+            w.Add(headerType, cookie3);
+            w.Add(headerType, cookie4);
+
+            string[] values = w.GetValues(headerType);
+            Assert.Equal(4, values.Length);
+            Assert.Equal(cookie1, values[0]);
+            Assert.Equal(cookie2, values[1]);
+            Assert.Equal(cookie3, values[2]);
+            Assert.Equal(cookie4, values[3]);
+        }
+
+        [Fact]
+        public void GetValues_SingleSetCookieHeaderWithMultipleCookiesWithExpiresAttribute_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add(headerType, cookie1 + "," + cookie2 + "," + cookie3 + "," + cookie4);
+
+            string[] values = w.GetValues(headerType);
+            Assert.Equal(4, values.Length);
+            Assert.Equal(cookie1, values[0]);
+            Assert.Equal(cookie2, values[1]);
+            Assert.Equal(cookie3, values[2]);
+            Assert.Equal(cookie4, values[3]);
+        }
+
         [Fact]
         public void HttpRequestHeader_Add_Rmemove_Success()
         {
