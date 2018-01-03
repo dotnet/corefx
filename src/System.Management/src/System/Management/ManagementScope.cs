@@ -307,70 +307,69 @@ namespace System.Management
                 return;
             }
 
-            IntPtr loadLibrary = IntPtr.Zero;
             string wminet_utilsPath = Path.Combine(
                 netFrameworkInstallRoot,
                 CompatSwitches.DotNetVersion, // The same value is hard coded on Environment.Version and quirks for WMI
                 "wminet_utils.dll");
 
-            loadLibrary =  Interop.Kernel32.LoadLibrary(wminet_utilsPath);
-            if (loadLibrary == IntPtr.Zero)
+            IntPtr hModule =  Interop.Kernel32.LoadLibrary(wminet_utilsPath);
+            if (hModule == IntPtr.Zero)
             {
                 // This is unlikely, so having the TypeInitializationException wrapping it is fine.
                 throw new Win32Exception(Marshal.GetLastWin32Error(), string.Format(SR.LoadLibraryFailed, wminet_utilsPath));
             }
 
-            if (LoadDelegate(ref ResetSecurity_f, Interop.Kernel32.GetProcAddress(loadLibrary, "ResetSecurity")) &&
-                LoadDelegate(ref SetSecurity_f, Interop.Kernel32.GetProcAddress(loadLibrary, "SetSecurity")) &&
-                LoadDelegate(ref BlessIWbemServices_f, Interop.Kernel32.GetProcAddress(loadLibrary, "BlessIWbemServices")) &&
-                LoadDelegate(ref BlessIWbemServicesObject_f, Interop.Kernel32.GetProcAddress(loadLibrary, "BlessIWbemServicesObject")) &&
-                LoadDelegate(ref GetPropertyHandle_f27, Interop.Kernel32.GetProcAddress(loadLibrary, "GetPropertyHandle")) &&
-                LoadDelegate(ref WritePropertyValue_f28, Interop.Kernel32.GetProcAddress(loadLibrary, "WritePropertyValue")) &&
-                LoadDelegate(ref Clone_f12, Interop.Kernel32.GetProcAddress(loadLibrary, "Clone")) &&
-                LoadDelegate(ref VerifyClientKey_f, Interop.Kernel32.GetProcAddress(loadLibrary, "VerifyClientKey")) &&
-                LoadDelegate(ref GetQualifierSet_f, Interop.Kernel32.GetProcAddress(loadLibrary, "GetQualifierSet")) &&
-                LoadDelegate(ref Get_f, Interop.Kernel32.GetProcAddress(loadLibrary, "Get")) &&
-                LoadDelegate(ref Put_f, Interop.Kernel32.GetProcAddress(loadLibrary, "Put")) &&
-                LoadDelegate(ref Delete_f, Interop.Kernel32.GetProcAddress(loadLibrary, "Delete")) &&
-                LoadDelegate(ref GetNames_f, Interop.Kernel32.GetProcAddress(loadLibrary, "GetNames")) &&
-                LoadDelegate(ref BeginEnumeration_f, Interop.Kernel32.GetProcAddress(loadLibrary, "BeginEnumeration")) &&
-                LoadDelegate(ref Next_f, Interop.Kernel32.GetProcAddress(loadLibrary, "Next")) &&
-                LoadDelegate(ref EndEnumeration_f, Interop.Kernel32.GetProcAddress(loadLibrary, "EndEnumeration")) &&
-                LoadDelegate(ref GetPropertyQualifierSet_f, Interop.Kernel32.GetProcAddress(loadLibrary, "GetPropertyQualifierSet")) &&
-                LoadDelegate(ref Clone_f, Interop.Kernel32.GetProcAddress(loadLibrary, "Clone")) &&
-                LoadDelegate(ref GetObjectText_f, Interop.Kernel32.GetProcAddress(loadLibrary, "GetObjectText")) &&
-                LoadDelegate(ref SpawnDerivedClass_f, Interop.Kernel32.GetProcAddress(loadLibrary, "SpawnDerivedClass")) &&
-                LoadDelegate(ref SpawnInstance_f, Interop.Kernel32.GetProcAddress(loadLibrary, "SpawnInstance")) &&
-                LoadDelegate(ref CompareTo_f, Interop.Kernel32.GetProcAddress(loadLibrary, "CompareTo")) &&
-                LoadDelegate(ref GetPropertyOrigin_f, Interop.Kernel32.GetProcAddress(loadLibrary, "GetPropertyOrigin")) &&
-                LoadDelegate(ref InheritsFrom_f, Interop.Kernel32.GetProcAddress(loadLibrary, "InheritsFrom")) &&
-                LoadDelegate(ref GetMethod_f, Interop.Kernel32.GetProcAddress(loadLibrary, "GetMethod")) &&
-                LoadDelegate(ref PutMethod_f, Interop.Kernel32.GetProcAddress(loadLibrary, "PutMethod")) &&
-                LoadDelegate(ref DeleteMethod_f, Interop.Kernel32.GetProcAddress(loadLibrary, "DeleteMethod")) &&
-                LoadDelegate(ref BeginMethodEnumeration_f, Interop.Kernel32.GetProcAddress(loadLibrary, "BeginMethodEnumeration")) &&
-                LoadDelegate(ref NextMethod_f, Interop.Kernel32.GetProcAddress(loadLibrary, "NextMethod")) &&
-                LoadDelegate(ref EndMethodEnumeration_f, Interop.Kernel32.GetProcAddress(loadLibrary, "EndMethodEnumeration")) &&
-                LoadDelegate(ref GetMethodQualifierSet_f, Interop.Kernel32.GetProcAddress(loadLibrary, "GetMethodQualifierSet")) &&
-                LoadDelegate(ref GetMethodOrigin_f, Interop.Kernel32.GetProcAddress(loadLibrary, "GetMethodOrigin")) &&
-                LoadDelegate(ref QualifierGet_f, Interop.Kernel32.GetProcAddress(loadLibrary, "QualifierSet_Get")) &&
-                LoadDelegate(ref QualifierPut_f, Interop.Kernel32.GetProcAddress(loadLibrary, "QualifierSet_Put")) &&
-                LoadDelegate(ref QualifierDelete_f, Interop.Kernel32.GetProcAddress(loadLibrary, "QualifierSet_Delete")) &&
-                LoadDelegate(ref QualifierGetNames_f, Interop.Kernel32.GetProcAddress(loadLibrary, "QualifierSet_GetNames")) &&
-                LoadDelegate(ref QualifierBeginEnumeration_f, Interop.Kernel32.GetProcAddress(loadLibrary, "QualifierSet_BeginEnumeration")) &&
-                LoadDelegate(ref QualifierNext_f, Interop.Kernel32.GetProcAddress(loadLibrary, "QualifierSet_Next")) &&
-                LoadDelegate(ref QualifierEndEnumeration_f, Interop.Kernel32.GetProcAddress(loadLibrary, "QualifierSet_EndEnumeration")) &&
-                LoadDelegate(ref GetCurrentApartmentType_f, Interop.Kernel32.GetProcAddress(loadLibrary, "GetCurrentApartmentType")) &&
-                LoadDelegate(ref GetDemultiplexedStub_f, Interop.Kernel32.GetProcAddress(loadLibrary, "GetDemultiplexedStub")) &&
-                LoadDelegate(ref CreateInstanceEnumWmi_f, Interop.Kernel32.GetProcAddress(loadLibrary, "CreateInstanceEnumWmi")) &&
-                LoadDelegate(ref CreateClassEnumWmi_f, Interop.Kernel32.GetProcAddress(loadLibrary, "CreateClassEnumWmi")) &&
-                LoadDelegate(ref ExecQueryWmi_f, Interop.Kernel32.GetProcAddress(loadLibrary, "ExecQueryWmi")) &&
-                LoadDelegate(ref ExecNotificationQueryWmi_f, Interop.Kernel32.GetProcAddress(loadLibrary, "ExecNotificationQueryWmi")) &&
-                LoadDelegate(ref PutInstanceWmi_f, Interop.Kernel32.GetProcAddress(loadLibrary, "PutInstanceWmi")) &&
-                LoadDelegate(ref PutClassWmi_f, Interop.Kernel32.GetProcAddress(loadLibrary, "PutClassWmi")) &&
-                LoadDelegate(ref CloneEnumWbemClassObject_f, Interop.Kernel32.GetProcAddress(loadLibrary, "CloneEnumWbemClassObject")) &&
-                LoadDelegate(ref ConnectServerWmi_f, Interop.Kernel32.GetProcAddress(loadLibrary, "ConnectServerWmi")) &&
-                LoadDelegate(ref GetErrorInfo_f, Interop.Kernel32.GetProcAddress(loadLibrary, "GetErrorInfo")) &&
-                LoadDelegate(ref Initialize_f, Interop.Kernel32.GetProcAddress(loadLibrary, "Initialize")))
+            if (LoadDelegate(ref ResetSecurity_f, hModule, "ResetSecurity") &&
+                LoadDelegate(ref SetSecurity_f, hModule, "SetSecurity") &&
+                LoadDelegate(ref BlessIWbemServices_f, hModule, "BlessIWbemServices") &&
+                LoadDelegate(ref BlessIWbemServicesObject_f, hModule, "BlessIWbemServicesObject") &&
+                LoadDelegate(ref GetPropertyHandle_f27, hModule, "GetPropertyHandle") &&
+                LoadDelegate(ref WritePropertyValue_f28, hModule, "WritePropertyValue") &&
+                LoadDelegate(ref Clone_f12, hModule, "Clone") &&
+                LoadDelegate(ref VerifyClientKey_f, hModule, "VerifyClientKey") &&
+                LoadDelegate(ref GetQualifierSet_f, hModule, "GetQualifierSet") &&
+                LoadDelegate(ref Get_f, hModule, "Get") &&
+                LoadDelegate(ref Put_f, hModule, "Put") &&
+                LoadDelegate(ref Delete_f, hModule, "Delete") &&
+                LoadDelegate(ref GetNames_f, hModule, "GetNames") &&
+                LoadDelegate(ref BeginEnumeration_f, hModule, "BeginEnumeration") &&
+                LoadDelegate(ref Next_f, hModule, "Next") &&
+                LoadDelegate(ref EndEnumeration_f, hModule, "EndEnumeration") &&
+                LoadDelegate(ref GetPropertyQualifierSet_f, hModule, "GetPropertyQualifierSet") &&
+                LoadDelegate(ref Clone_f, hModule, "Clone") &&
+                LoadDelegate(ref GetObjectText_f, hModule, "GetObjectText") &&
+                LoadDelegate(ref SpawnDerivedClass_f, hModule, "SpawnDerivedClass") &&
+                LoadDelegate(ref SpawnInstance_f, hModule, "SpawnInstance") &&
+                LoadDelegate(ref CompareTo_f, hModule, "CompareTo") &&
+                LoadDelegate(ref GetPropertyOrigin_f, hModule, "GetPropertyOrigin") &&
+                LoadDelegate(ref InheritsFrom_f, hModule, "InheritsFrom") &&
+                LoadDelegate(ref GetMethod_f, hModule, "GetMethod") &&
+                LoadDelegate(ref PutMethod_f, hModule, "PutMethod") &&
+                LoadDelegate(ref DeleteMethod_f, hModule, "DeleteMethod") &&
+                LoadDelegate(ref BeginMethodEnumeration_f, hModule, "BeginMethodEnumeration") &&
+                LoadDelegate(ref NextMethod_f, hModule, "NextMethod") &&
+                LoadDelegate(ref EndMethodEnumeration_f, hModule, "EndMethodEnumeration") &&
+                LoadDelegate(ref GetMethodQualifierSet_f, hModule, "GetMethodQualifierSet") &&
+                LoadDelegate(ref GetMethodOrigin_f, hModule, "GetMethodOrigin") &&
+                LoadDelegate(ref QualifierGet_f, hModule, "QualifierSet_Get") &&
+                LoadDelegate(ref QualifierPut_f, hModule, "QualifierSet_Put") &&
+                LoadDelegate(ref QualifierDelete_f, hModule, "QualifierSet_Delete") &&
+                LoadDelegate(ref QualifierGetNames_f, hModule, "QualifierSet_GetNames") &&
+                LoadDelegate(ref QualifierBeginEnumeration_f, hModule, "QualifierSet_BeginEnumeration") &&
+                LoadDelegate(ref QualifierNext_f, hModule, "QualifierSet_Next") &&
+                LoadDelegate(ref QualifierEndEnumeration_f, hModule, "QualifierSet_EndEnumeration") &&
+                LoadDelegate(ref GetCurrentApartmentType_f, hModule, "GetCurrentApartmentType") &&
+                LoadDelegate(ref GetDemultiplexedStub_f, hModule, "GetDemultiplexedStub") &&
+                LoadDelegate(ref CreateInstanceEnumWmi_f, hModule, "CreateInstanceEnumWmi") &&
+                LoadDelegate(ref CreateClassEnumWmi_f, hModule, "CreateClassEnumWmi") &&
+                LoadDelegate(ref ExecQueryWmi_f, hModule, "ExecQueryWmi") &&
+                LoadDelegate(ref ExecNotificationQueryWmi_f, hModule, "ExecNotificationQueryWmi") &&
+                LoadDelegate(ref PutInstanceWmi_f, hModule, "PutInstanceWmi") &&
+                LoadDelegate(ref PutClassWmi_f, hModule, "PutClassWmi") &&
+                LoadDelegate(ref CloneEnumWbemClassObject_f, hModule, "CloneEnumWbemClassObject") &&
+                LoadDelegate(ref ConnectServerWmi_f, hModule, "ConnectServerWmi") &&
+                LoadDelegate(ref GetErrorInfo_f, hModule, "GetErrorInfo") &&
+                LoadDelegate(ref Initialize_f, hModule, "Initialize"))
             {
                 // All required delegates were loaded.
                 Initialize_f(CompatSwitches.AllowIManagementObjectQI);
@@ -380,10 +379,11 @@ namespace System.Management
                 LoadPlatformNotSupportedDelegates(string.Format(SR.PlatformNotSupported_FrameworkUpdatedRequired, wminet_utilsPath));
             }
         }
-        static bool LoadDelegate<TDelegate>(ref TDelegate delegate_f, IntPtr procAddr) where TDelegate : class
+        static bool LoadDelegate<TDelegate>(ref TDelegate delegate_f, IntPtr hModule, string procName) where TDelegate : class
         {
+            IntPtr procAddr = Interop.Kernel32.GetProcAddress(hModule, procName);
             return procAddr != null &&
-                (delegate_f = Marshal.GetDelegateForFunctionPointer(procAddr, typeof(TDelegate)) as TDelegate) != null;
+                (delegate_f = Marshal.GetDelegateForFunctionPointer<TDelegate>(procAddr)) != null;
         }
 
         static void LoadPlatformNotSupportedDelegates(string exceptionMessage)
