@@ -100,7 +100,7 @@ namespace System.ServiceProcess.Tests
                     {
                         File.Delete(LogPath);
                     }
-                    catch(IOException)
+                    catch (IOException)
                     {
                         // Don't fail simply because the service was not fully cleaned up
                         // and is still holding a handle to the log file
