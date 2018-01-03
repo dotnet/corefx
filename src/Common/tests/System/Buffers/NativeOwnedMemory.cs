@@ -6,7 +6,7 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace System.IO.Tests
+namespace System.Buffers
 {
     internal sealed class NativeOwnedMemory : OwnedMemory<byte>
     {
@@ -51,7 +51,7 @@ namespace System.IO.Tests
             }
         }
 
-        public override unsafe Span<byte> AsSpan() => new Span<byte>((void*)_ptr, _length);
+        public override unsafe Span<byte> Span => new Span<byte>((void*)_ptr, _length);
 
         public override unsafe MemoryHandle Pin() => new MemoryHandle(this, (void*)_ptr);
 

@@ -72,6 +72,35 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [Fact]
+        [OuterLoop("Opens program")]
+        public void ProcessStart_DirectoryNameInCurDirectorySameAsFileNameInExecDirectory_Success()
+        {
+            string fileToOpen = "dotnet";
+            string curDir = Environment.CurrentDirectory;
+            string dotnetFolder = Path.Combine(Path.GetTempPath(),"dotnet");
+            bool shouldDelete = !Directory.Exists(dotnetFolder);
+            try
+            {
+                Directory.SetCurrentDirectory(Path.GetTempPath());
+                Directory.CreateDirectory(dotnetFolder);
+
+                using (var px = Process.Start(fileToOpen))
+                {
+                    Assert.NotNull(px);
+                }
+            }
+            finally
+            {
+                if (shouldDelete)
+                {
+                    Directory.Delete(dotnetFolder);
+                }
+
+                Directory.SetCurrentDirectory(curDir);
+            }
+        }
+
         [Theory, InlineData(true), InlineData(false)]
         [OuterLoop("Opens program")]
         public void ProcessStart_UseShellExecute_OnUnix_SuccessWhenProgramInstalled(bool isFolder)
@@ -93,12 +122,7 @@ namespace System.Diagnostics.Tests
                 using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }))
                 {
                     Assert.NotNull(px);
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                    {
-                        // Assert.Equal(programToOpenWith, px.ProcessName); // on OSX, process name is dotnet for some reason. Refer to #23972
-                        Console.WriteLine($"{nameof(ProcessStart_UseShellExecute_OnUnix_SuccessWhenProgramInstalled)}(isFolder: {isFolder}), ProcessName: {px.ProcessName}");
-                    }
-                    else
+                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) // on OSX, process name is dotnet for some reason. Refer to #23972
                     {
                         Assert.Equal(programToOpen, px.ProcessName);
                     }
@@ -214,12 +238,20 @@ namespace System.Diagnostics.Tests
             ProcessPriorityClass originalPriority = _process.PriorityClass;
             Assert.Equal(ProcessPriorityClass.Normal, originalPriority);
 
-            SetAndCheckBasePriority(ProcessPriorityClass.Idle, 19);
+            // https://github.com/dotnet/corefx/issues/25861 -- returns "-19" and not "19"
+            if (!PlatformDetection.IsWindowsSubsystemForLinux)
+            {
+                SetAndCheckBasePriority(ProcessPriorityClass.Idle, 19);
+            }
 
             try
             {
                 SetAndCheckBasePriority(ProcessPriorityClass.Normal, 0);
-                SetAndCheckBasePriority(ProcessPriorityClass.High, -11);
+                // https://github.com/dotnet/corefx/issues/25861 -- returns "11" and not "-11"
+                if (!PlatformDetection.IsWindowsSubsystemForLinux)
+                {
+                    SetAndCheckBasePriority(ProcessPriorityClass.High, -11);
+                }
                 _process.PriorityClass = originalPriority;
             }
             catch (Win32Exception ex)
@@ -233,18 +265,37 @@ namespace System.Diagnostics.Tests
         {
             string path = GetTestFilePath();
             File.Create(path).Dispose();
-            Assert.Equal(0, chmod(path, 644)); // no execute permissions
+            int mode = Convert.ToInt32("644", 8);
+
+            Assert.Equal(0, chmod(path, mode));
 
             Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
             Assert.NotEqual(0, e.NativeErrorCode);
         }
 
         [Fact]
+        [PlatformSpecific(~TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
         public void TestStartOnUnixWithBadFormat()
         {
             string path = GetTestFilePath();
             File.Create(path).Dispose();
-            Assert.Equal(0, chmod(path, 744)); // execute permissions
+            int mode = Convert.ToInt32("744", 8);
+
+            Assert.Equal(0, chmod(path, mode)); // execute permissions
+
+            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(path));
+            Assert.NotEqual(0, e.NativeErrorCode);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
+        public void TestStartOnOSXWithBadFormat()
+        {
+            string path = GetTestFilePath();
+            File.Create(path).Dispose();
+            int mode = Convert.ToInt32("744", 8);
+
+            Assert.Equal(0, chmod(path, mode)); // execute permissions
 
             using (Process p = Process.Start(path))
             {
@@ -257,30 +308,5 @@ namespace System.Diagnostics.Tests
         private static extern int chmod(string path, int mode);
 
         private readonly string[] s_allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
-
-        /// <summary>
-        /// Checks if the program is installed
-        /// </summary>
-        /// <param name="program"></param>
-        /// <returns></returns>
-        private bool IsProgramInstalled(string program)
-        {
-            string path;
-            string pathEnvVar = Environment.GetEnvironmentVariable("PATH");
-            if (pathEnvVar != null)
-            {
-                var pathParser = new StringParser(pathEnvVar, ':', skipEmpty: true);
-                while (pathParser.MoveNext())
-                {
-                    string subPath = pathParser.ExtractCurrent();
-                    path = Path.Combine(subPath, program);
-                    if (File.Exists(path))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
     }
 }

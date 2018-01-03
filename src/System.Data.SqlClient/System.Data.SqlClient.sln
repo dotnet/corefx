@@ -7,6 +7,26 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SqlClient.Tests
 		{D4550556-4745-457F-BA8F-3EBF3836D6B4} = {D4550556-4745-457F-BA8F-3EBF3836D6B4}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Address", "tests\ManualTests\SQL\UdtTest\UDTs\Address\Address.csproj", "{D1392B54-998A-4F27-BC17-4CE149117BCC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D4550556-4745-457F-BA8F-3EBF3836D6B4} = {D4550556-4745-457F-BA8F-3EBF3836D6B4}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Circle", "tests\ManualTests\SQL\UdtTest\UDTs\Circle\Circle.csproj", "{6C88F00F-9597-43AD-9E5F-9B344DA3B16F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D4550556-4745-457F-BA8F-3EBF3836D6B4} = {D4550556-4745-457F-BA8F-3EBF3836D6B4}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shapes", "tests\ManualTests\SQL\UdtTest\UDTs\Shapes\Shapes.csproj", "{B73A7063-37C3-415D-AD53-BB3DA20ABD6E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D4550556-4745-457F-BA8F-3EBF3836D6B4} = {D4550556-4745-457F-BA8F-3EBF3836D6B4}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utf8String", "tests\ManualTests\SQL\UdtTest\UDTs\Utf8String\Utf8String.csproj", "{E0A6BB21-574B-43D9-890D-6E1144F2EE9E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D4550556-4745-457F-BA8F-3EBF3836D6B4} = {D4550556-4745-457F-BA8F-3EBF3836D6B4}
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.SqlClient.ManualTesting.Tests", "tests\ManualTests\System.Data.SqlClient.ManualTesting.Tests.csproj", "{45DB5F86-7AE3-45C6-870D-F9357B66BDB5}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D4550556-4745-457F-BA8F-3EBF3836D6B4} = {D4550556-4745-457F-BA8F-3EBF3836D6B4}
@@ -70,6 +90,22 @@ Global
 		{F3E72F35-0351-4D67-9388-725BCAD807BA}.Debug|Any CPU.Build.0 = netstandard-Windows_NT-Debug|Any CPU
 		{F3E72F35-0351-4D67-9388-725BCAD807BA}.Release|Any CPU.ActiveCfg = netstandard-Windows_NT-Release|Any CPU
 		{F3E72F35-0351-4D67-9388-725BCAD807BA}.Release|Any CPU.Build.0 = netstandard-Windows_NT-Release|Any CPU
+		{D1392B54-998A-4F27-BC17-4CE149117BCC}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{D1392B54-998A-4F27-BC17-4CE149117BCC}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{D1392B54-998A-4F27-BC17-4CE149117BCC}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{D1392B54-998A-4F27-BC17-4CE149117BCC}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{6C88F00F-9597-43AD-9E5F-9B344DA3B16F}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{6C88F00F-9597-43AD-9E5F-9B344DA3B16F}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{6C88F00F-9597-43AD-9E5F-9B344DA3B16F}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{6C88F00F-9597-43AD-9E5F-9B344DA3B16F}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{B73A7063-37C3-415D-AD53-BB3DA20ABD6E}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{B73A7063-37C3-415D-AD53-BB3DA20ABD6E}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{B73A7063-37C3-415D-AD53-BB3DA20ABD6E}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{B73A7063-37C3-415D-AD53-BB3DA20ABD6E}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{E0A6BB21-574B-43D9-890D-6E1144F2EE9E}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{E0A6BB21-574B-43D9-890D-6E1144F2EE9E}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{E0A6BB21-574B-43D9-890D-6E1144F2EE9E}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{E0A6BB21-574B-43D9-890D-6E1144F2EE9E}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
 		{45DB5F86-7AE3-45C6-870D-F9357B66BDB5}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
 		{45DB5F86-7AE3-45C6-870D-F9357B66BDB5}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
 		{45DB5F86-7AE3-45C6-870D-F9357B66BDB5}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
@@ -116,6 +152,10 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F3E72F35-0351-4D67-9388-725BCAD807BA} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
+		{D1392B54-998A-4F27-BC17-4CE149117BCC} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
+		{6C88F00F-9597-43AD-9E5F-9B344DA3B16F} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
+		{B73A7063-37C3-415D-AD53-BB3DA20ABD6E} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
+		{E0A6BB21-574B-43D9-890D-6E1144F2EE9E} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
 		{45DB5F86-7AE3-45C6-870D-F9357B66BDB5} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
 		{AF78BA88-6428-47EA-8682-442DAF8E9656} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
 		{B94B8E6D-3E41-4046-B758-4A2E281F74EE} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}

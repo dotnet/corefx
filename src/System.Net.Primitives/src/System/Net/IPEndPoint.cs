@@ -148,22 +148,12 @@ namespace System.Net
 
         public override bool Equals(object comparand)
         {
-            if (!(comparand is IPEndPoint))
-            {
-                return false;
-            }
-            return ((IPEndPoint)comparand)._address.Equals(_address) && ((IPEndPoint)comparand)._port == _port;
+            return comparand is IPEndPoint other && other._address.Equals(_address) && other._port == _port;
         }
 
         public override int GetHashCode()
         {
             return _address.GetHashCode() ^ _port;
-        }
-
-        // For security, we need to be able to take an IPEndPoint and make a copy that's immutable and not derived.
-        internal IPEndPoint Snapshot()
-        {
-            return new IPEndPoint(Address.Snapshot(), Port);
         }
     }
 }

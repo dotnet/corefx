@@ -65,7 +65,7 @@ namespace System.ComponentModel.DataAnnotations
             // Check the lengths for legality
             EnsureLegalLengths();
 
-            var length = 0;
+            int length;
             // Automatically pass if value is null. RequiredAttribute should be used to assert a value is not null.
             if (value == null)
             {
@@ -128,6 +128,7 @@ namespace System.ComponentModel.DataAnnotations
                 count = (int)property.GetValue(value);
                 return true;
             }
+
             count = -1;
             return false;
         }

@@ -1279,6 +1279,31 @@ namespace System.IO.Packaging.Tests
             packagePath1.Delete();
         }
 
+        [Fact]
+        public void OpenInternalTargetRelationships()
+        {
+            // This is to test different behavior on Mono vs .NET Core
+            using (var ms = new MemoryStream())
+            {
+                using (var package = Package.Open(ms, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                {
+                    package.CreateRelationship(new Uri("/target", UriKind.Relative), TargetMode.Internal, "type");
+                }
+
+                ms.Position = 0;
+
+                using (var package = Package.Open(ms, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                {
+                    var relationships = package.GetRelationships();
+
+                    var relationship = Assert.Single(relationships);
+
+                    Assert.Equal(new Uri("/", UriKind.Relative), relationship.SourceUri);
+                    Assert.Equal(new Uri("/target", UriKind.Relative), relationship.TargetUri);
+                    Assert.Equal(TargetMode.Internal, relationship.TargetMode);
+                }
+            }
+        }
 
         [Fact]
         public void T035_ModifyAllPackageProperties()
@@ -3487,6 +3512,62 @@ namespace System.IO.Packaging.Tests
                 Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.Read);
             });
             tempGuidName.Delete();
+        }
+
+        [Fact]
+        public void SetEmptyPropertyToNull()
+        {
+            using (var ms = new MemoryStream())
+            using (var package = Package.Open(ms, FileMode.Create))
+            {
+                package.PackageProperties.Category = null;
+                Assert.Null(package.PackageProperties.Category);
+
+                package.PackageProperties.ContentStatus = null;
+                Assert.Null(package.PackageProperties.ContentStatus);
+
+                package.PackageProperties.ContentType = null;
+                Assert.Null(package.PackageProperties.ContentType);
+
+                package.PackageProperties.Created = null;
+                Assert.Null(package.PackageProperties.Created);
+
+                package.PackageProperties.Creator = null;
+                Assert.Null(package.PackageProperties.Creator);
+
+                package.PackageProperties.Description = null;
+                Assert.Null(package.PackageProperties.Description);
+
+                package.PackageProperties.Identifier = null;
+                Assert.Null(package.PackageProperties.Identifier);
+
+                package.PackageProperties.Keywords = null;
+                Assert.Null(package.PackageProperties.Keywords);
+
+                package.PackageProperties.Language = null;
+                Assert.Null(package.PackageProperties.Language);
+
+                package.PackageProperties.LastModifiedBy = null;
+                Assert.Null(package.PackageProperties.LastModifiedBy);
+
+                package.PackageProperties.LastPrinted = null;
+                Assert.Null(package.PackageProperties.LastPrinted);
+
+                package.PackageProperties.Modified = null;
+                Assert.Null(package.PackageProperties.Modified);
+
+                package.PackageProperties.Revision = null;
+                Assert.Null(package.PackageProperties.Revision);
+
+                package.PackageProperties.Subject = null;
+                Assert.Null(package.PackageProperties.Subject);
+
+                package.PackageProperties.Title = null;
+                Assert.Null(package.PackageProperties.Title);
+
+                package.PackageProperties.Version = null;
+                Assert.Null(package.PackageProperties.Version);
+            }
         }
 
         private const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";

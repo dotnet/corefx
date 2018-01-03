@@ -9,6 +9,8 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace System.Xml
 {
@@ -624,9 +626,8 @@ namespace System.Xml
             {
                 //this will be hit when user create a XmlReader by setting Async, but the first call is Read() instead of ReadAsync(), 
                 //then we still should create an async stream here. And wait for the method finish.
-                System.Threading.Tasks.Task<object> t = _laterInitParam.inputUriResolver.GetEntityAsync(_laterInitParam.inputbaseUri, string.Empty, typeof(Stream));
-                t.Wait();
-                stream = (Stream)t.Result;
+                Task<object> t = _laterInitParam.inputUriResolver.GetEntityAsync(_laterInitParam.inputbaseUri, string.Empty, typeof(Stream));
+                stream = (Stream)t.GetAwaiter().GetResult();
             }
             else
             {
@@ -9633,7 +9634,6 @@ namespace System.Xml
             }
         }
 
-        [System.Security.SecuritySafeCritical]
         internal static unsafe void AdjustLineInfo(char[] chars, int startPos, int endPos, bool isNormalized, ref LineInfo lineInfo)
         {
             Debug.Assert(startPos >= 0);
@@ -9646,7 +9646,6 @@ namespace System.Xml
             }
         }
 
-        [System.Security.SecuritySafeCritical]
         internal static unsafe void AdjustLineInfo(string str, int startPos, int endPos, bool isNormalized, ref LineInfo lineInfo)
         {
             Debug.Assert(startPos >= 0);
@@ -9659,7 +9658,6 @@ namespace System.Xml
             }
         }
 
-        [System.Security.SecurityCritical]
         internal static unsafe void AdjustLineInfo(char* pChars, int length, bool isNormalized, ref LineInfo lineInfo)
         {
             int lastNewLinePos = -1;

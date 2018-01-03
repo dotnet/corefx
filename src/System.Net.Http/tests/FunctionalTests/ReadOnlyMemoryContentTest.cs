@@ -5,7 +5,6 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Tests;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -393,7 +392,7 @@ namespace System.Net.Http.Functional.Tests
             else
             {
                 ownedMemory = new NativeOwnedMemory(contentLength);
-                memory = ownedMemory.AsMemory;
+                memory = ownedMemory.Memory;
             }
 
             new Random(contentLength).NextBytes(memory.Span);

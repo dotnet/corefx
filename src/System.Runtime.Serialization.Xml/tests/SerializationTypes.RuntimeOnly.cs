@@ -1980,6 +1980,13 @@ namespace SerializationTypes
     }
 
     [XmlType(TypeName = "MyXmlType")]
+    public class TypeWithQNameArrayAsXmlAttributeInvalidDefaultValue
+    {
+        [DefaultValue("DefaultValue")]
+        public XmlQualifiedName XmlAttributeForms;
+    }
+
+    [XmlType(TypeName = "MyXmlType")]
     public class TypeWithQNameArrayAsXmlAttribute
     {
         [XmlAttribute(Form = XmlSchemaForm.Qualified)]
@@ -2231,26 +2238,6 @@ public class TypeWithPrivateFieldAndPrivateGetPublicSetProperty
     public string GetName()
     {
         return _name;
-    }
-}
-
-public class TypeWithoutPublicSetter
-{
-    public string Name { get; private set; }
-
-    [XmlIgnore]
-    public int Age { get; private set; }
-
-    public Type MyType { get; private set; }
-
-    public string ValidProperty { get; set; }
-
-    public string PropertyWrapper
-    {
-        get
-        {
-            return ValidProperty;
-        }
     }
 }
 
@@ -4359,4 +4346,31 @@ public class TypeWithCollectionAndDateTimeOffset
     }
 
     public DateTimeOffset DateTimeOffset { get; set; }
+}
+
+[KnownType(typeof(bool))]
+[KnownType(typeof(byte[]))]
+[KnownType(typeof(char))]
+[KnownType(typeof(DateTime))]
+[KnownType(typeof(decimal))]
+[KnownType(typeof(double))]
+[KnownType(typeof(float))]
+[KnownType(typeof(Guid))]
+[KnownType(typeof(int))]
+[KnownType(typeof(long))]
+[KnownType(typeof(object))]
+[KnownType(typeof(XmlQualifiedName))]
+[KnownType(typeof(short))]
+[KnownType(typeof(sbyte))]
+[KnownType(typeof(string))]
+[KnownType(typeof(TimeSpan))]
+[KnownType(typeof(byte))]
+[KnownType(typeof(uint))]
+[KnownType(typeof(ulong))]
+[KnownType(typeof(ushort))]
+[KnownType(typeof(Uri))]
+[CollectionDataContract]
+public class TypeWithPrimitiveKnownTypes : List<object>
+{
+
 }

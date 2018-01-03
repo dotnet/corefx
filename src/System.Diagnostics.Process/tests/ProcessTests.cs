@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.DirectoryServices.ActiveDirectory;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -135,7 +136,43 @@ namespace System.Diagnostics.Tests
         {
             Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = Path.GetTempPath() }));
         }
-        
+
+        [Fact]
+        [PlatformSpecific(~TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // UWP overrides WorkingDirectory (https://github.com/dotnet/corefx/pull/25266#issuecomment-347719832).
+        public void TestStartWithBadWorkingDirectory()
+        {
+            string program;
+            string workingDirectory;
+            if (PlatformDetection.IsWindows)
+            {
+                program = "powershell.exe";
+                workingDirectory = @"C:\does-not-exist";
+            }
+            else
+            {
+                program = "uname";
+                workingDirectory = "/does-not-exist";
+            }
+
+            if (IsProgramInstalled(program))
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = program,
+                    UseShellExecute = false,
+                    WorkingDirectory = workingDirectory
+                };
+
+                Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(psi));
+                Assert.NotEqual(0, e.NativeErrorCode);
+            }
+            else
+            {
+                Console.WriteLine($"Program {program} is not installed on this machine.");
+            }
+        }
+
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.HasWindowsShell))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
         [OuterLoop("Launches File Explorer")]
@@ -168,11 +205,11 @@ namespace System.Diagnostics.Tests
             {
                 if (isFolder)
                 {
-                    Assert.Null(px); // Not sure why px returned is null. but the call does not throw and opens folder successfully.
+                    Assert.Null(px);
                 }
                 else
                 {
-                    if (px != null) // sometimes process is null: tracked by #24048
+                    if (px != null) // sometimes process is null
                     {
                         Assert.Equal("notepad", px.ProcessName);
 
@@ -885,6 +922,30 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        public void GetProcesses_InvalidMachineName_ThrowsInvalidOperationException()
+        {
+            Assert.Throws<InvalidOperationException>(() => Process.GetProcesses(Guid.NewGuid().ToString()));
+        }
+
+        [Fact]
+        public void GetProcesses_RemoteMachinePath_ReturnsExpected()
+        {
+            try
+            {
+                Process[] processes = Process.GetProcesses(Environment.MachineName + "." + Domain.GetComputerDomain());
+                Assert.NotEmpty(processes);
+            }
+            catch (ActiveDirectoryObjectNotFoundException)
+            {
+                //This will be thrown when the executing machine is not domain-joined, i.e. in CI
+            }
+            catch (PlatformNotSupportedException)
+            {
+                //System.DirectoryServices is not supported on all platforms
+            }
+        }
+
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void GetProcessesByName_ProcessName_ReturnsExpected()
         {
@@ -1112,6 +1173,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "GC has different behavior on Mono")]
         public void CanBeFinalized()
         {
             FinalizingProcess.CreateAndRelease();

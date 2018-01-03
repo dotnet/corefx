@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -13,11 +13,15 @@ namespace System.Runtime.InteropServices
     /// <typeparam name="T">The type of the function to wrap.</typeparam>
     internal class FunctionWrapper<T> where T : class
     {
+        private string _libraryName;
+        private string _functionName;
         private Lazy<FunctionLoadResult<T>> _lazyDelegate;
 
-        public FunctionWrapper(Lazy<FunctionLoadResult<T>> lazyDelegate)
+        public FunctionWrapper(Lazy<FunctionLoadResult<T>> lazyDelegate, string libName, string funcName)
         {
             _lazyDelegate = lazyDelegate;
+            _libraryName = libName;
+            _functionName = funcName;
         }
 
         public T Delegate
@@ -30,9 +34,9 @@ namespace System.Runtime.InteropServices
                     case FunctionLoadResultKind.Success:
                         return loadResult.Delegate;
                     case FunctionLoadResultKind.LibraryNotFound:
-                        throw new DllNotFoundException();
+                        throw new DllNotFoundException(SR.Format(SR.DllNotFoundExceptionMessage, _libraryName));
                     case FunctionLoadResultKind.FunctionNotFound:
-                        throw new EntryPointNotFoundException();
+                        throw new EntryPointNotFoundException(SR.Format(SR.EntryPointNotFoundExceptionMessage, _functionName, _libraryName));
                     default:
                         Debug.Fail("Illegal FunctionLoadResultKind: " + loadResult.ResultKind);
                         return null;
@@ -43,7 +47,7 @@ namespace System.Runtime.InteropServices
 
     public enum FunctionLoadResultKind { Success, LibraryNotFound, FunctionNotFound }
 
-    public struct FunctionLoadResult<T>
+    public readonly struct FunctionLoadResult<T>
     {
         public FunctionLoadResultKind ResultKind { get; }
         public T Delegate { get; }
@@ -52,7 +56,7 @@ namespace System.Runtime.InteropServices
 
     internal static partial class FunctionWrapper
     {
-        public static FunctionWrapper<T> Load<T>(IntPtr nativeLibraryHandle, string name) where T : class
+        public static FunctionWrapper<T> Load<T>(IntPtr nativeLibraryHandle, string funcName, string libName) where T : class
         {
             Lazy<FunctionLoadResult<T>> lazyDelegate = new Lazy<FunctionLoadResult<T>>(() =>
             {
@@ -61,7 +65,7 @@ namespace System.Runtime.InteropServices
                     return new FunctionLoadResult<T>(FunctionLoadResultKind.LibraryNotFound, null);
                 }
 
-                IntPtr funcPtr = LoadFunctionPointer(nativeLibraryHandle, name);
+                IntPtr funcPtr = LoadFunctionPointer(nativeLibraryHandle, funcName);
                 if (funcPtr == IntPtr.Zero)
                 {
                     return new FunctionLoadResult<T>(FunctionLoadResultKind.FunctionNotFound, null);
@@ -72,7 +76,7 @@ namespace System.Runtime.InteropServices
                 }
             });
 
-            return new FunctionWrapper<T>(lazyDelegate);
+            return new FunctionWrapper<T>(lazyDelegate, libName, funcName);
         }
     }
 }

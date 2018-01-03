@@ -49,13 +49,6 @@ namespace System.IO.Compression
         private CompressionLevel? _compressionLevel;
 
         // Initializes, attaches it to archive
-        internal ZipArchiveEntry(ZipArchive archive, ZipCentralDirectoryFileHeader cd, CompressionLevel compressionLevel)
-            : this(archive, cd)
-        {
-            _compressionLevel = compressionLevel;
-        }
-
-        // Initializes, attaches it to archive
         internal ZipArchiveEntry(ZipArchive archive, ZipCentralDirectoryFileHeader cd)
         {
             _archive = archive;
@@ -151,6 +144,9 @@ namespace System.IO.Compression
         /// The ZipArchive that this entry belongs to. If this entry has been deleted, this will return null.
         /// </summary>
         public ZipArchive Archive => _archive;
+
+        [CLSCompliant(false)]
+        public uint Crc32 => _crc32;
 
         /// <summary>
         /// The compressed size of the entry. If the archive that the entry belongs to is in Create mode, attempts to get this property will always throw an exception. If the archive that the entry belongs to is in update mode, this property will only be valid if the entry has not been opened.
@@ -1239,7 +1235,5 @@ namespace System.IO.Compression
         private enum BitFlagValues : ushort { DataDescriptor = 0x8, UnicodeFileName = 0x800 }
 
         internal enum CompressionMethodValues : ushort { Stored = 0x0, Deflate = 0x8, Deflate64 = 0x9, BZip2 = 0xC, LZMA = 0xE }
-
-        private enum OpenableValues { Openable, FileNonExistent, FileTooLarge }
     }
 }

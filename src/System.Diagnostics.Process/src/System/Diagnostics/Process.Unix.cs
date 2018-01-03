@@ -83,6 +83,37 @@ namespace System.Diagnostics
             GetWaitState(); // lazily initializes the wait state
         }
 
+        /// <devdoc>
+        ///     Make sure we are watching for a process exit.
+        /// </devdoc>
+        /// <internalonly/>
+        private void EnsureWatchingForExit()
+        {
+            if (!_watchingForExit)
+            {
+                lock (this)
+                {
+                    if (!_watchingForExit)
+                    {
+                        Debug.Assert(_haveProcessHandle, "Process.EnsureWatchingForExit called with no process handle");
+                        Debug.Assert(Associated, "Process.EnsureWatchingForExit called with no associated process");
+                        _watchingForExit = true;
+                        try
+                        {
+                            _waitHandle = new ProcessWaitHandle(_processHandle);
+                            _registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(_waitHandle,
+                                new WaitOrTimerCallback(CompletionCallback), null, -1, true);
+                        }
+                        catch
+                        {
+                            _watchingForExit = false;
+                            throw;
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Instructs the Process component to wait the specified number of milliseconds for the associated process to exit.
         /// </summary>
@@ -251,7 +282,7 @@ namespace System.Diagnostics
             {
                 filename = ResolvePath(startInfo.FileName);
                 argv = ParseArgv(startInfo);
-                if (Directory.Exists(startInfo.FileName))
+                if (Directory.Exists(filename))
                 {
                     throw new Win32Exception(SR.DirectoryNotValidAsInput);
                 }
@@ -442,23 +473,6 @@ namespace System.Diagnostics
             return TimeSpan.FromSeconds(ticks / (double)ticksPerSecond);
         }
 
-        /// <summary>Computes a time based on a number of ticks since boot.</summary>
-        /// <param name="timespanAfterBoot">The timespan since boot.</param>
-        /// <returns>The converted time.</returns>
-        internal static DateTime BootTimeToDateTime(TimeSpan timespanAfterBoot)
-        {
-            // Use the uptime and the current time to determine the absolute boot time. This implementation is relying on the 
-            // implementation detail that Stopwatch.GetTimestamp() uses a value based on time since boot.
-            DateTime bootTime = DateTime.UtcNow - TimeSpan.FromSeconds(Stopwatch.GetTimestamp() / (double)Stopwatch.Frequency);
-
-            // And use that to determine the absolute time for timespan.
-            DateTime dt = bootTime + timespanAfterBoot;
-
-            // The return value is expected to be in the local time zone.
-            // It is converted here (rather than starting with DateTime.Now) to avoid DST issues.
-            return dt.ToLocalTime();
-        }
-
         /// <summary>Opens a stream around the specified file descriptor and with the specified access.</summary>
         /// <param name="fd">The file descriptor.</param>
         /// <param name="access">The access mode.</param>
@@ -541,6 +555,10 @@ namespace System.Diagnostics
                 {
                     if (inQuotes && i < arguments.Length - 1 && arguments[i + 1] == '"')
                     {
+                        // Two consecutive double quotes inside an inQuotes region should result in a literal double quote 
+                        // (the parser is left in the inQuotes region).
+                        // This behavior is not part of the spec of code:ParseArgumentsIntoList, but is compatible with CRT 
+                        // and .NET Framework.
                         currentArgument.Append('"');
                         i++;
                     }

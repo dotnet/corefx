@@ -6,4 +6,6 @@ namespace System.Net.Sockets.Tests
 {
     public sealed class SendReceiveSpanSync : SendReceive<SocketHelperSpanSync> { }
     public sealed class SendReceiveSpanSyncForceNonBlocking : SendReceive<SocketHelperSpanSyncForceNonBlocking> { }
+    public sealed class SendReceiveMemoryArrayTask : SendReceive<SocketHelperMemoryArrayTask> { }
+    public sealed class SendReceiveMemoryNativeTask : SendReceive<SocketHelperMemoryNativeTask> { }
 }

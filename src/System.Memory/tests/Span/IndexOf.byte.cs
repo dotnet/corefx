@@ -14,7 +14,7 @@ namespace System.SpanTests
         public static void ZeroLengthIndexOf_Byte()
         {
             Span<byte> sp = new Span<byte>(Array.Empty<byte>());
-            int idx = sp.IndexOf(0);
+            int idx = sp.IndexOf<byte>(0);
             Assert.Equal(-1, idx);
         }
 
@@ -28,7 +28,7 @@ namespace System.SpanTests
 
                 for (int i = 0; i < length; i++)
                 {
-                    byte target0 = default(byte);
+                    byte target0 = default;
                     int idx = span.IndexOf(target0);
                     Assert.Equal(0, idx);
                 }
@@ -103,11 +103,11 @@ namespace System.SpanTests
             for (var i = 0; i < Vector<byte>.Count; i++)
             {
                 var span = new Span<byte>(array, i, 3 * Vector<byte>.Count);
-                int idx = span.IndexOf(5);
+                int idx = span.IndexOf<byte>(5);
                 Assert.Equal(0, idx);
 
                 span = new Span<byte>(array, i, 3 * Vector<byte>.Count - 3);
-                idx = span.IndexOf(5);
+                idx = span.IndexOf<byte>(5);
                 Assert.Equal(0, idx);
             }
         }
@@ -128,7 +128,7 @@ namespace System.SpanTests
                 a[length - 2] = 200;
 
                 Span<byte> span = new Span<byte>(a);
-                int idx = span.IndexOf(200);
+                int idx = span.IndexOf<byte>(200);
                 Assert.Equal(length - 2, idx);
             }
         }
@@ -142,7 +142,7 @@ namespace System.SpanTests
                 a[0] = 99;
                 a[length + 1] = 99;
                 Span<byte> span = new Span<byte>(a, 1, length);
-                int index = span.IndexOf(99);
+                int index = span.IndexOf<byte>(99);
                 Assert.Equal(-1, index);
             }
         }
@@ -169,10 +169,10 @@ namespace System.SpanTests
         [InlineData("/localhost:5000/PATH/PATH2/ HTTP/1.1", " %?", ' ', 27)]
         public static void IndexOfAnyStrings_Byte(string raw, string search, char expectResult, int expectIndex)
         {
-            var buffers = Encoding.UTF8.GetBytes(raw);
+            byte[] buffers = Encoding.UTF8.GetBytes(raw);
             var span = new Span<byte>(buffers);
-            var searchFor = search.ToCharArray();
-            var searchForBytes = Encoding.UTF8.GetBytes(searchFor);
+            char[] searchFor = search.ToCharArray();
+            byte[] searchForBytes = Encoding.UTF8.GetBytes(searchFor);
 
             var index = -1;
             if (searchFor.Length == 1)
@@ -215,7 +215,7 @@ namespace System.SpanTests
                 byte[] a = new byte[length];
                 Span<byte> span = new Span<byte>(a);
 
-                byte[] targets = { default(byte), 99 };
+                byte[] targets = { default, 99 };
 
                 for (int i = 0; i < length; i++)
                 {
@@ -346,7 +346,7 @@ namespace System.SpanTests
                 byte[] a = new byte[length];
                 Span<byte> span = new Span<byte>(a);
 
-                byte[] targets = { default(byte), 99, 98 };
+                byte[] targets = { default, 99, 98 };
 
                 for (int i = 0; i < length; i++)
                 {
@@ -486,7 +486,7 @@ namespace System.SpanTests
                 byte[] a = new byte[length];
                 Span<byte> span = new Span<byte>(a);
 
-                var values = new ReadOnlySpan<byte>(new byte[] { default(byte), 99, 98, 0 });
+                var values = new ReadOnlySpan<byte>(new byte[] { default, 99, 98, 0 });
 
                 for (int i = 0; i < length; i++)
                 {

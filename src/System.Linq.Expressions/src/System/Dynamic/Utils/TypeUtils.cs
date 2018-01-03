@@ -231,7 +231,7 @@ namespace System.Dynamic.Utils
             // nonbool==>bool and nonbool==>bool? which are only legal from
             // bool-backed enums.
             return IsConvertible(source) && IsConvertible(dest)
-                   && (GetNonNullableType(dest) != typeof(bool) 
+                   && (GetNonNullableType(dest) != typeof(bool)
                    || source.IsEnum && source.GetEnumUnderlyingType() == typeof(bool));
         }
 
@@ -689,7 +689,7 @@ namespace System.Dynamic.Utils
         {
             do
             {
-                MethodInfo result = type.GetAnyStaticMethodValidated(name, new[] {type});
+                MethodInfo result = type.GetAnyStaticMethodValidated(name, new[] { type });
                 if (result != null && result.IsSpecialName && !result.ContainsGenericParameters)
                 {
                     return result;
@@ -754,46 +754,6 @@ namespace System.Dynamic.Utils
             return true;
         }
 
-        private static Assembly s_mscorlib;
-
-        private static Assembly MsCorLib => s_mscorlib ?? (s_mscorlib = typeof(object).Assembly);
-
-        /// <summary>
-        /// We can cache references to types, as long as they aren't in
-        /// collectible assemblies. Unfortunately, we can't really distinguish
-        /// between different flavors of assemblies. But, we can at least
-        /// create a cache for types in mscorlib (so we get the primitives, etc).
-        /// </summary>
-        public static bool CanCache(this Type t)
-        {
-            // Note: we don't have to scan base or declaring types here.
-            // There's no way for a type in mscorlib to derive from or be
-            // contained in a type from another assembly. The only thing we
-            // need to look at is the generic arguments, which are the thing
-            // that allows mscorlib types to be specialized by types in other
-            // assemblies.
-
-            Assembly asm = t.Assembly;
-            if (asm != MsCorLib)
-            {
-                // Not in mscorlib or our assembly
-                return false;
-            }
-
-            if (t.IsGenericType)
-            {
-                foreach (Type g in t.GetGenericArguments())
-                {
-                    if (!g.CanCache())
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
         public static MethodInfo GetInvokeMethod(this Type delegateType)
         {
             Debug.Assert(typeof(Delegate).IsAssignableFrom(delegateType));
@@ -836,6 +796,5 @@ namespace System.Dynamic.Utils
         }
 
 #endif
-
     }
 }

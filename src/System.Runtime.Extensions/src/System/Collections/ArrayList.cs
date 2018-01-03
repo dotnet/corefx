@@ -633,7 +633,6 @@ namespace System.Collections
             Contract.Ensures(Count >= 0);
 
             int index = IndexOf(obj);
-            Debug.Assert(index >= 0 || !(obj is Int32), "You passed an Int32 to Remove that wasn't in the ArrayList." + Environment.NewLine + "Did you mean RemoveAt?  int: " + obj + "  Count: " + Count);
             if (index >= 0)
                 RemoveAt(index);
         }
@@ -831,7 +830,6 @@ namespace System.Collections
         // downcasting all elements.  This copy may fail and is an O(n) operation.
         // Internally, this implementation calls Array.Copy.
         //
-        [SecuritySafeCritical]
         public virtual Array ToArray(Type type)
         {
             if (type == null)
@@ -1246,7 +1244,6 @@ namespace System.Collections
                 return array;
             }
 
-            [SecuritySafeCritical]
             public override Array ToArray(Type type)
             {
                 if (type == null)
@@ -2915,7 +2912,6 @@ namespace System.Collections
                 return array;
             }
 
-            [SecuritySafeCritical]
             public override Array ToArray(Type type)
             {
                 if (type == null)
