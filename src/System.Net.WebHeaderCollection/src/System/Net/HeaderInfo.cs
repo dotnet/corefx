@@ -2,27 +2,28 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-internal delegate string[] HeaderParser(string value);
-
-internal class HeaderInfo
+namespace System.Net
 {
-    internal readonly bool IsRequestRestricted;
-    internal readonly bool IsResponseRestricted;
-    internal readonly HeaderParser Parser;
-    //
-    // Note that the HeaderName field is not always valid, and should not
-    // be used after initialization. In particular, the HeaderInfo returned
-    // for an unknown header will not have the correct header name.
-    //
-    internal readonly string HeaderName;
-    internal readonly bool AllowMultiValues;
-
-    internal HeaderInfo(string name, bool requestRestricted, bool responseRestricted, bool multi, HeaderParser p)
+    internal class HeaderInfo
     {
-        HeaderName = name;
-        IsRequestRestricted = requestRestricted;
-        IsResponseRestricted = responseRestricted;
-        Parser = p;
-        AllowMultiValues = multi;
+        internal readonly bool IsRequestRestricted;
+        internal readonly bool IsResponseRestricted;
+        internal readonly Func<string, string[]> Parser;
+        //
+        // Note that the HeaderName field is not always valid, and should not
+        // be used after initialization. In particular, the HeaderInfo returned
+        // for an unknown header will not have the correct header name.
+        //
+        internal readonly string HeaderName;
+        internal readonly bool AllowMultiValues;
+    
+        internal HeaderInfo(string name, bool requestRestricted, bool responseRestricted, bool multi, Func<string, string[]> parser)
+        {
+            HeaderName = name;
+            IsRequestRestricted = requestRestricted;
+            IsResponseRestricted = responseRestricted;
+            Parser = parser;
+            AllowMultiValues = multi;
+        }
     }
 }

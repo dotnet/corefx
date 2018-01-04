@@ -242,62 +242,54 @@ namespace System.Net
         {
             // First get the information about the header and the values for
             // the header.
-            HeaderInfo Info = HeaderInfo[header];
-            string[] Values = InnerCollection.GetValues(header);
-            
+            HeaderInfo info = HeaderInfo[header];
+            string[] values = InnerCollection.GetValues(header);
             // If we have no information about the header or it doesn't allow
             // multiple values, just return the values.
-            if (Info == null || Values == null || !Info.AllowMultiValues)
+            if (info == null || values == null || !info.AllowMultiValues)
             {
-                return Values;
+                return values;
             }
-            
             // Here we have a multi value header. We need to go through
             // each entry in the multi values array, and if an entry itself
             // has multiple values we'll need to combine those in.
             //
             // We do some optimazation here, where we try not to copy the
             // values unless there really is one that have multiple values.
-            string[] TempValues;
-            ArrayList ValueList = null;
-            int i;
-            for (i = 0; i < Values.Length; i++)
+            string[] tempValues;
+            List<string> valueList = null;
+            for (int i = 0; i < values.Length; i++)
             {
                 // Parse this value header.
-                TempValues = Info.Parser(Values[i]);
-                
+                tempValues = info.Parser(values[i]);
                 // If we don't have an array list yet, see if this
                 // value has multiple values.
-                if (ValueList == null)
+                if (valueList == null)
                 {
                     // See if it has multiple values.
-                    if (TempValues.Length > 1)
+                    if (tempValues.Length > 1)
                     {
                         // It does, so we need to create an array list that
                         // represents the Values, then trim out this one and
                         // the ones after it that haven't been parsed yet.
-                        ValueList = new ArrayList(Values);
-                        ValueList.RemoveRange(i, Values.Length - i);
-                        ValueList.AddRange(TempValues);
+                        valueList = new List<string>(values);
+                        valueList.RemoveRange(i, values.Length - i);
+                        valueList.AddRange(tempValues);
                     }
                 }
                 else
                 {
-                    // We already have an ArrayList, so just add the values.
-                    ValueList.AddRange(TempValues);
+                    // We already have an List, so just add the values.
+                    valueList.AddRange(tempValues);
                 }
             }
-            
-            // See if we have an ArrayList. If we don't, just return the values.
-            // Otherwise convert the ArrayList to a string array and return that.
-            if (ValueList != null)
+            // See if we have an List. If we don't, just return the values.
+            // Otherwise convert the List to a string array and return that.
+            if (valueList != null)
             {
-                string[] ReturnArray = new string[ValueList.Count];
-                ValueList.CopyTo(ReturnArray);
-                return ReturnArray;
+                return valueList.ToArray();
             }
-            
-            return Values;
+            return values;
         }
 
         public override string GetKey(int index)
