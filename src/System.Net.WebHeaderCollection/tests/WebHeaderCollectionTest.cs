@@ -536,6 +536,7 @@ namespace System.Net.Tests
         private string cookie4 = "m_session=session1; path=/; expires=Sun, 08 Oct 2017 00:28:57 -0000; secure; HttpOnly";
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void GetValues_MultipleSetCookieHeadersWithExpiresAttribute_Success()
         {
             WebHeaderCollection w = new WebHeaderCollection();
@@ -553,6 +554,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void GetValues_SingleSetCookieHeaderWithMultipleCookiesWithExpiresAttribute_Success()
         {
             WebHeaderCollection w = new WebHeaderCollection();
@@ -564,6 +566,18 @@ namespace System.Net.Tests
             Assert.Equal(cookie2, values[1]);
             Assert.Equal(cookie3, values[2]);
             Assert.Equal(cookie4, values[3]);
+        }
+        
+        [Fact]
+        public void GetValues_MultipleValuesHeader_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            string headerType = "Accept";
+            w.Add(headerType, "text/plain, text/html");
+            string[] values = w.GetValues(headerType);
+            Assert.Equal(2, values.Length);
+            Assert.Equal("text/plain", values[0]);
+            Assert.Equal("text/html", values[1]);
         }
 
         [Fact]
