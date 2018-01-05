@@ -26,9 +26,6 @@
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
-    <Project Include="..\src\System.Xml.ReaderWriter\pkg\System.Xml.ReaderWriter.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
   </ItemGroup>
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipNativePackageBuild)' != 'true'" >   
