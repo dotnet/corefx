@@ -3,11 +3,13 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{80958E8B-2FEB-4F95-83F9-825CA1ED26F8}</ProjectGuid>
-    <AssemblyName>Microsoft.XmlSerializer.Generator</AssemblyName>
+    <AssemblyName>dotnet-Microsoft.XmlSerializer.Generator</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <StringResourcesPath>..\..\System.Private.Xml\src\Resources\Strings.resx</StringResourcesPath>
     <DefineConstants>$(DefineConstants);XMLSERIALIZERGENERATOR</DefineConstants>
     <SourceDir>..\..\System.Private.Xml\src</SourceDir>
+    <OutputType>Exe</OutputType>
+    <TargetExt>.dll</TargetExt>
     <NoWarn>$(NoWarn);0169;0414;0649</NoWarn>
   </PropertyGroup>
   <!-- Default configurations to help VS understand the options -->
@@ -109,9 +111,6 @@
     <Compile Include="$(SourceDir)\System\Xml\Serialization\XmlReflectionMember.cs">
       <Link>System\Xml\Serialization\XmlReflectionMember.cs</Link>
     </Compile>
-    <Compile Include="$(SourceDir)\System\Xml\Serialization\XmlSchemaProviderAttribute.cs">
-      <Link>System\Xml\Serialization\XmlSchemaProviderAttribute.cs</Link>
-    </Compile>
     <Compile Include="$(SourceDir)\System\Xml\Serialization\XmlSerializationGeneratedCode.cs">
       <Link>System\Xml\Serialization\XmlSerializationGeneratedCode.cs</Link>
     </Compile>
@@ -129,12 +128,6 @@
     </Compile>
     <Compile Include="$(SourceDir)\System\Xml\Serialization\XmlSerializerNamespaces.cs">
       <Link>System\Xml\Serialization\XmlSerializerNamespaces.cs</Link>
-    </Compile>
-    <Compile Include="$(SourceDir)\System\Xml\Serialization\XmlTextAttribute.cs">
-      <Link>System\Xml\Serialization\XmlTextAttribute.cs</Link>
-    </Compile>
-    <Compile Include="$(SourceDir)\System\Xml\Serialization\XmlTypeAttribute.cs">
-      <Link>System\Xml\Serialization\XmlTypeAttribute.cs</Link>
     </Compile>
     <Compile Include="$(SourceDir)\System\Xml\Serialization\XmlTypeMapping.cs">
       <Link>System\Xml\Serialization\XmlTypeMapping.cs</Link>
@@ -161,11 +154,6 @@
     <Compile Include="System\Xml\Serialization\XmlElementAttributeExtension.cs" />
     <Compile Include="System\Xml\Serialization\XmlRootAttributeExtensions.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Resources.ResourceManager" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
-  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Import Project=".\GenerateThisAssemblyCs.targets" />
 </Project>

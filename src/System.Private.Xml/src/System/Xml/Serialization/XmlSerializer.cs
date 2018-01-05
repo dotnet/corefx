@@ -28,7 +28,11 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
+#if XMLSERIALIZERGENERATOR
+    internal struct XmlDeserializationEvents
+#else
     public struct XmlDeserializationEvents
+#endif
     {
         private XmlNodeEventHandler _onUnknownNode;
         private XmlAttributeEventHandler _onUnknownAttribute;
@@ -97,7 +101,11 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
+#if XMLSERIALIZERGENERATOR
+    internal abstract class XmlSerializerImplementation
+#else
     public abstract class XmlSerializerImplementation
+#endif
     {
         /// <include file='doc\XmlSerializer.uex' path='docs/doc[@for="XmlSerializerImplementation.Reader"]/*' />
         public virtual XmlSerializationReader Reader { get { throw new NotSupportedException(); } }
@@ -119,13 +127,18 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
+#if XMLSERIALIZERGENERATOR
+    internal class XmlSerializer
+#else
     public class XmlSerializer
+#endif
     {
         internal enum SerializationMode
         {
             CodeGenOnly,
             ReflectionOnly,
-            ReflectionAsBackup
+            ReflectionAsBackup,
+            PreGenOnly
         }
 
         internal static SerializationMode Mode { get; set; } = SerializationMode.ReflectionAsBackup;
@@ -273,6 +286,13 @@ namespace System.Xml.Serialization
                             Assembly assembly = TempAssembly.LoadGeneratedAssembly(type, defaultNamespace, out contract);
                             if (assembly == null)
                             {
+                                if (Mode == SerializationMode.PreGenOnly)
+                                {
+                                    AssemblyName name = type.Assembly.GetName();
+                                    var serializerName = Compiler.GetTempAssemblyName(name, defaultNamespace);
+                                    throw new FileLoadException(SR.Format(SR.FailLoadAssemblyUnderPregenMode, serializerName));
+                                }
+
                                 // need to reflect and generate new serialization assembly
                                 XmlReflectionImporter importer = new XmlReflectionImporter(defaultNamespace);
                                 _mapping = importer.ImportTypeMapping(type, null, defaultNamespace);
@@ -819,7 +839,7 @@ namespace System.Xml.Serialization
 #if XMLSERIALIZERGENERATOR
         [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
         [ResourceExposure(ResourceScope.None)]
-        public static bool GenerateSerializer(Type[] types, XmlMapping[] mappings, string codePath)
+        public static bool GenerateSerializer(Type[] types, XmlMapping[] mappings, Stream stream)
         {
             if (types == null || types.Length == 0)
                 return false;
@@ -827,10 +847,8 @@ namespace System.Xml.Serialization
             if (mappings == null)
                 throw new ArgumentNullException(nameof(mappings));
 
-            if(!Directory.Exists(codePath))
-            {
-                throw new ArgumentException(SR.Format(SR.XmlMelformMapping));
-            }
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
 
             if (XmlMapping.IsShallow(mappings))
             {
@@ -856,7 +874,7 @@ namespace System.Xml.Serialization
                 }
             }
 
-            return TempAssembly.GenerateSerializerFile(mappings, types, null, assembly, new Hashtable(), codePath);
+            return TempAssembly.GenerateSerializerToStream(mappings, types, null, assembly, new Hashtable(), stream);
         }
 #endif
 
