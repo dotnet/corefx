@@ -12,7 +12,7 @@ namespace System.IO.Tests
         public static void IsPathFullyQualified_NullArgument()
         {
             Assert.Throws<ArgumentNullException>(() => Path.IsPathFullyQualified(null));
-            Assert.False(Path.IsPathFullyQualified(new ReadOnlySpan<char>()));
+            Assert.False(Path.IsPathFullyQualified(ReadOnlySpan<char>.Empty));
         }
 
         [Fact]

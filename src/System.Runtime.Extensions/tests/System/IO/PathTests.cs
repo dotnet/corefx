@@ -69,7 +69,7 @@ namespace System.IO.Tests
             if (PlatformDetection.IsWindows)
             {
                 AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(path));
-                Assert.Equal(string.Empty, new string(Path.GetDirectoryName(new ReadOnlySpan<char>())));
+                Assert.Equal(string.Empty, new string(Path.GetDirectoryName(path.AsReadOnlySpan())));
             }
             else
             {
@@ -105,7 +105,8 @@ namespace System.IO.Tests
         public static void GetDirectoryName(string path, string expected)
         {
             Assert.Equal(expected, Path.GetDirectoryName(path));
-            Assert.Equal(expected ?? string.Empty, new string(Path.GetDirectoryName(path != null ? path.AsReadOnlySpan() : new ReadOnlySpan<char>())));
+            if (path != null)
+                Assert.Equal(expected, new string(Path.GetDirectoryName(path.AsReadOnlySpan())));
         }
 
         [Theory]
@@ -114,7 +115,7 @@ namespace System.IO.Tests
         [InlineData(@"dir\baz\bar", @"dir\baz")]
         [InlineData(@"dir\\baz", "dir")]
         [InlineData(@" dir\baz", " dir")]
-        [InlineData(@" C:\dir\baz", @"C:\dir")]
+        [InlineData(@" C:\dir\baz", @"C:\dir")] 
         [InlineData(@"..\..\files.txt", @"..\..")]
         [InlineData(@"C:\", null)]
         [InlineData(@"C:", null)]
@@ -175,13 +176,13 @@ namespace System.IO.Tests
             if (path != null)
             {
                 path = path.Replace('/', Path.DirectorySeparatorChar);
+
+                Assert.Equal(expected, new string(Path.GetExtension(path.AsReadOnlySpan())));
+                Assert.Equal(!string.IsNullOrEmpty(expected), Path.HasExtension(path.AsReadOnlySpan()));
             }
 
             Assert.Equal(expected, Path.GetExtension(path));
             Assert.Equal(!string.IsNullOrEmpty(expected), Path.HasExtension(path));
-
-            Assert.Equal(expected ?? string.Empty, new string(Path.GetExtension(path != null ? path.AsReadOnlySpan() : new ReadOnlySpan<char>())));
-            Assert.Equal(!string.IsNullOrEmpty(expected), Path.HasExtension(path != null ? path.AsReadOnlySpan() : new ReadOnlySpan<char>()));
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Checks file extension behavior on Unix
@@ -203,6 +204,7 @@ namespace System.IO.Tests
         public static IEnumerable<object[]> GetFileName_TestData()
         {
             yield return new object[] { null, null };
+            yield return new object[] { "", "" };
             yield return new object[] { ".", "." };
             yield return new object[] { "..", ".." };
             yield return new object[] { "file", "file" };
@@ -218,7 +220,8 @@ namespace System.IO.Tests
         public static void GetFileName(string path, string expected)
         {
             Assert.Equal(expected, Path.GetFileName(path));
-            Assert.Equal(expected ?? string.Empty, new string(Path.GetFileName(path != null ? path.AsReadOnlySpan() : new ReadOnlySpan<char>())));
+            if (path != null)
+                Assert.Equal(expected, new string(Path.GetFileName(path.AsReadOnlySpan())));
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests Unix-specific valid file names
@@ -254,20 +257,22 @@ namespace System.IO.Tests
         public static void GetFileNameWithoutExtension(string path, string expected)
         {
             Assert.Equal(expected, Path.GetFileNameWithoutExtension(path));
-            Assert.Equal(expected ?? string.Empty, new string(Path.GetFileNameWithoutExtension(path != null ? path.AsReadOnlySpan() : new ReadOnlySpan<char>())));
+
+            if (path != null)
+                Assert.Equal(expected ?? string.Empty, new string(Path.GetFileNameWithoutExtension(path.AsReadOnlySpan())));
         }
 
         [Fact]
         public static void GetPathRoot_NullReturnsNull()
         {
             Assert.Null(Path.GetPathRoot(null));
-            Assert.Equal(string.Empty, new string(Path.GetPathRoot(new ReadOnlySpan<char>())));
         }
 
         [Fact]
         public static void GetPathRoot_EmptyThrows()
         {
             AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetPathRoot(string.Empty));
+            Assert.Equal(string.Empty, new string(Path.GetPathRoot(ReadOnlySpan<char>.Empty)));
         }
 
         [Fact]
@@ -349,7 +354,8 @@ namespace System.IO.Tests
         public static void IsPathRooted(string path)
         {
             Assert.False(Path.IsPathRooted(path));
-            Assert.False(Path.IsPathRooted(path != null? path.AsReadOnlySpan() : new ReadOnlySpan<char>()));
+            if (path != null)
+                Assert.False(Path.IsPathRooted(path.AsReadOnlySpan()));
         }
 
         // Testing invalid drive letters !(a-zA-Z)
@@ -401,9 +407,15 @@ namespace System.IO.Tests
                 AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetExtension(bad));
                 AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetFileName(bad));
                 AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetFileNameWithoutExtension(bad));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetDirectoryName(bad.AsReadOnlySpan()));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetExtension(bad.AsReadOnlySpan()));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetFileName(bad.AsReadOnlySpan()));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetFileNameWithoutExtension(bad.AsReadOnlySpan()));
                 AssertExtensions.Throws<ArgumentException>(c == 124 ? null : "path", null, () => Path.GetFullPath(bad));
                 AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetPathRoot(bad));
                 AssertExtensions.Throws<ArgumentException>("path", null, () => Path.IsPathRooted(bad));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.GetPathRoot(bad.AsReadOnlySpan()));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => Path.IsPathRooted(bad.AsReadOnlySpan()));
             });
         }
 
