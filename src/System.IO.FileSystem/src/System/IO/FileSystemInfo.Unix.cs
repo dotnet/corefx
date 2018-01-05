@@ -6,6 +6,8 @@ namespace System.IO
 {
     partial class FileSystemInfo : IFileSystemObject
     {
+        private const int NanosecondsPerTick = 100;
+
         /// <summary>The last cached stat information about the file.</summary>
         private Interop.Sys.FileStatus _fileStatus;
         /// <summary>true if <see cref="_fileStatus"/> represents a symlink and the target of that symlink is a directory.</summary>
@@ -202,15 +204,17 @@ namespace System.IO
                 if (!_exists)
                     return DateTimeOffset.FromFileTime(0);
 
-                long rawTime = (_fileStatus.Flags & Interop.Sys.FileStatusFlags.HasBirthTime) != 0 ?
+                Interop.Sys.TimeSpec rawTime = (_fileStatus.Flags & Interop.Sys.FileStatusFlags.HasBirthTime) != 0 ?
                     _fileStatus.BirthTime :
-                    Math.Min(_fileStatus.CTime, _fileStatus.MTime); // fall back to the oldest time we have in between change and modify time
-                return DateTimeOffset.FromUnixTimeSeconds(rawTime).ToLocalTime();
+                     // fall back to the oldest time we have in between change and modify time
+                    _fileStatus.CTime < _fileStatus.MTime ? _fileStatus.CTime : _fileStatus.MTime;
+
+                return DateTimeOffset.FromUnixTimeSeconds(rawTime.Seconds).ToLocalTime().AddTicks(rawTime.Nanoseconds / NanosecondsPerTick);
             }
             set
             {
                 // There isn't a reliable way to set this; however, we can't just do nothing since the
-                // FileSystemWatcher specifically looks for this call to make a Metatdata Change, so we
+                // FileSystemWatcher specifically looks for this call to make a Metadata Change, so we
                 // should set the LastAccessTime of the file to cause the metadata change we need.
                 LastAccessTime = LastAccessTime;
             }
@@ -223,7 +227,7 @@ namespace System.IO
                 EnsureStatInitialized();
                 if (!_exists)
                     return DateTimeOffset.FromFileTime(0);
-                return DateTimeOffset.FromUnixTimeSeconds(_fileStatus.ATime).ToLocalTime();
+                return DateTimeOffset.FromUnixTimeSeconds(_fileStatus.ATime.Seconds).ToLocalTime().AddTicks(_fileStatus.ATime.Nanoseconds / NanosecondsPerTick);
             }
             set { SetAccessWriteTimes(value.ToUnixTimeSeconds(), null); }
         }
@@ -235,7 +239,7 @@ namespace System.IO
                 EnsureStatInitialized();
                 if (!_exists)
                     return DateTimeOffset.FromFileTime(0);
-                return DateTimeOffset.FromUnixTimeSeconds(_fileStatus.MTime).ToLocalTime();
+                return DateTimeOffset.FromUnixTimeSeconds(_fileStatus.MTime.Seconds).ToLocalTime().AddTicks(_fileStatus.MTime.Nanoseconds / NanosecondsPerTick);
             }
             set { SetAccessWriteTimes(null, value.ToUnixTimeSeconds()); }
         }
@@ -245,8 +249,8 @@ namespace System.IO
             _fileStatusInitialized = -1; // force a refresh so that we have an up-to-date times for values not being overwritten
             EnsureStatInitialized();
             Interop.Sys.UTimBuf buf;
-            buf.AcTime = accessTime ?? _fileStatus.ATime;
-            buf.ModTime = writeTime ?? _fileStatus.MTime;
+            buf.AcTime = accessTime ?? _fileStatus.ATime.Seconds;
+            buf.ModTime = writeTime ?? _fileStatus.MTime.Seconds;
             bool isDirectory = this is DirectoryInfo;
             Interop.CheckIo(Interop.Sys.UTime(FullPath, ref buf), FullPath, isDirectory);
             _fileStatusInitialized = -1;

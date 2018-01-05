@@ -16,6 +16,28 @@ internal static partial class Interop
         // Explicitly saying Sequential disables that warning/error for consumers which only
         // use Stat in debug builds.
         [StructLayout(LayoutKind.Sequential)]
+        internal struct TimeSpec
+        {
+            internal long Seconds;
+            internal long Nanoseconds;
+
+            public static bool operator <(TimeSpec left, TimeSpec right)
+            {
+                if (left.Seconds < right.Seconds)
+                    return true;
+                if (right.Seconds < left.Seconds)
+                    return false;
+
+                return (left.Nanoseconds < right.Nanoseconds);
+            }
+
+            public static bool operator >(TimeSpec left, TimeSpec right)
+            {
+                return !(left < right) && !(left.Seconds == right.Seconds && left.Nanoseconds == right.Nanoseconds);
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
         internal struct FileStatus
         {
             internal FileStatusFlags Flags;
@@ -23,10 +45,10 @@ internal static partial class Interop
             internal uint Uid;
             internal uint Gid;
             internal long Size;
-            internal long ATime;
-            internal long MTime;
-            internal long CTime;
-            internal long BirthTime;
+            internal TimeSpec ATime;
+            internal TimeSpec MTime;
+            internal TimeSpec CTime;
+            internal TimeSpec BirthTime;
             internal long Dev;
             internal long Ino;
         }
