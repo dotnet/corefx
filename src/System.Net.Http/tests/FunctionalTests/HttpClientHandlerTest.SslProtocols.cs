@@ -99,6 +99,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 return;
             }
+
             if (UseManagedHandler)
             {
                 // TODO #26186: The managed handler is failing on some OSes.
