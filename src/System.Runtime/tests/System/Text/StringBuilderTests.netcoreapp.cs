@@ -199,5 +199,38 @@ namespace System.Text.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => builder.Insert(builder.Length + 1, new ReadOnlySpan<char>(new char[0]))); // Index > builder.Length
             AssertExtensions.Throws<ArgumentOutOfRangeException>("requiredLength", () => builder.Insert(builder.Length, new ReadOnlySpan<char>(new char[1]))); // New length > builder.MaxCapacity
         }
+
+        public static IEnumerable<object[]> Equals_String_TestData()
+        {
+            var mediumString = new string('a', 30);
+            var largeString = new string('a', 1000);
+            var extraLargeString = new string('a', 50000); // 40000 is the maximum chunk size
+
+            var sb1 = new StringBuilder("Hello");
+            var sb2 = new StringBuilder(mediumString);
+            var sb3 = new StringBuilder(largeString);
+            var sb4 = new StringBuilder(extraLargeString);
+
+            yield return new object[] { sb1, "Hello", true };
+            yield return new object[] { sb1, "Hel", false };
+            yield return new object[] { sb1, "Hellz", false };
+            yield return new object[] { sb1, "Hellz0", false };
+            yield return new object[] { sb1, "", false };
+            yield return new object[] { new StringBuilder(), "", true };
+            yield return new object[] { sb2, mediumString, true };
+            yield return new object[] { sb2, "H", false };
+            yield return new object[] { sb3, largeString, true };
+            yield return new object[] { sb3, "H", false };
+            yield return new object[] { sb4, extraLargeString, true };
+            yield return new object[] { sb4, "H", false };
+        }
+
+        [Theory]
+        [MemberData(nameof(Equals_String_TestData))]
+        public static void Equals(StringBuilder sb1, string value, bool expected)
+        {
+            Assert.Equal(expected, sb1.Equals(value));
+            Assert.Equal(expected, sb1.Equals(value.AsReadOnlySpan()));
+        }
     }
 }
