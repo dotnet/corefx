@@ -13,11 +13,7 @@ namespace System.Xml.Serialization
     ///    Specifies various flavours of XmlCodeExporter generated code.
     /// </devdoc>
     [Flags]
-#if XMLSERIALIZERGENERATOR
-    internal enum CodeGenerationOptions
-#else
     public enum CodeGenerationOptions
-#endif
     {
         /// <include file='doc\CodeGenerationOptions.uex' path='docs/doc[@for="CodeGenerationOptions.None"]/*' />
         /// <devdoc>

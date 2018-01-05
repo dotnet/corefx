@@ -9,11 +9,7 @@ namespace System.Xml.Serialization
 
     /// <include file='doc\SoapSchemaMember.uex' path='docs/doc[@for="SoapSchemaMember"]/*' />
     /// <internalonly/>
-#if XMLSERIALIZERGENERATOR
-    internal class SoapSchemaMember
-#else
     public class SoapSchemaMember
-#endif
     {
         private string _memberName;
         private XmlQualifiedName _type = XmlQualifiedName.Empty;

@@ -12,11 +12,7 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
-#if XMLSERIALIZERGENERATOR
-    internal class XmlReflectionMember
-#else
     public class XmlReflectionMember
-#endif
     {
         private string _memberName;
         private Type _type;

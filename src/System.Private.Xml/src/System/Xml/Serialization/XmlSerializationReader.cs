@@ -20,11 +20,7 @@ namespace System.Xml.Serialization
     using System.Xml.Serialization.Configuration;
 
     ///<internalonly/>
-#if XMLSERIALIZERGENERATOR
-    internal abstract class XmlSerializationReader : XmlSerializationGeneratedCode
-#else
     public abstract class XmlSerializationReader : XmlSerializationGeneratedCode
-#endif
     {
         private XmlReader _r;
         private XmlCountingReader _countingReader;

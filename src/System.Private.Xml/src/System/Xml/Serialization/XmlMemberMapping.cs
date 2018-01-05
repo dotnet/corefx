@@ -9,11 +9,7 @@ using System;
 namespace System.Xml.Serialization
 {
     /// <internalonly/>
-#if XMLSERIALIZERGENERATOR
-    internal class XmlMemberMapping
-#else
     public class XmlMemberMapping
-#endif
     {
         private MemberMapping _mapping;
 

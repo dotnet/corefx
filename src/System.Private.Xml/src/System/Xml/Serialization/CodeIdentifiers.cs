@@ -34,11 +34,7 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
-#if XMLSERIALIZERGENERATOR
-    internal class CodeIdentifiers
-#else
     public class CodeIdentifiers
-#endif
     {
         private Hashtable _identifiers;
         private Hashtable _reservedIdentifiers;

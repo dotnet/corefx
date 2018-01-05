@@ -31,11 +31,7 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
-#if XMLSERIALIZERGENERATOR
-    internal class XmlAttributes
-#else
     public class XmlAttributes
-#endif
     {
         private XmlElementAttributes _xmlElements = new XmlElementAttributes();
         private XmlArrayItemAttributes _xmlArrayItems = new XmlArrayItemAttributes();

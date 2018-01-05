@@ -13,11 +13,7 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
-#if XMLSERIALIZERGENERATOR
-    internal class XmlMembersMapping : XmlMapping
-#else
     public class XmlMembersMapping : XmlMapping
-#endif
     {
         private XmlMemberMapping[] _mappings;
 

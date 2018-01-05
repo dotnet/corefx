@@ -14,11 +14,7 @@ namespace System.Xml.Serialization
     using System.Globalization;
 
     ///<internalonly/>
-#if XMLSERIALIZERGENERATOR
-    internal abstract class XmlSerializationGeneratedCode
-#else
     public abstract class XmlSerializationGeneratedCode
-#endif
     {
         internal void Init(TempAssembly tempAssembly)
         {

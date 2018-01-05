@@ -12,11 +12,7 @@ using System.Xml.Serialization;
 namespace System.Xml.Serialization
 {
     [Flags]
-#if XMLSERIALIZERGENERATOR
-    internal enum XmlMappingAccess
-#else
     public enum XmlMappingAccess
-#endif
     {
         None = 0x00,
         Read = 0x01,
@@ -27,11 +23,7 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
-#if XMLSERIALIZERGENERATOR
-    internal abstract class XmlMapping
-#else
     public abstract class XmlMapping
-#endif
     {
         private TypeScope _scope;
         private bool _generateSerializer = false;
