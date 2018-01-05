@@ -115,7 +115,7 @@ namespace System.IO.Tests
         [InlineData(@"dir\baz\bar", @"dir\baz")]
         [InlineData(@"dir\\baz", "dir")]
         [InlineData(@" dir\baz", " dir")]
-        [InlineData(@" C:\dir\baz", @"C:\dir")] 
+        [InlineData(@" C:\dir\baz", @"C:\dir")]
         [InlineData(@"..\..\files.txt", @"..\..")]
         [InlineData(@"C:\", null)]
         [InlineData(@"C:", null)]
