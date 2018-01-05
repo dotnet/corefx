@@ -935,19 +935,19 @@ namespace System.IO.Tests
         [Fact]
         public static void GetFullPath_BasePath_InvalidInput()
         {
-
+            string curDir = Directory.GetCurrentDirectory();
             Assert.Throws<ArgumentNullException>(() => Path.GetFullPath("", null));
             Assert.Throws<ArgumentNullException>(() => Path.GetFullPath("tmp", null));
+            Assert.Throws<ArgumentNullException>(() => Path.GetFullPath(curDir, null));
             Assert.Throws<ArgumentException>(() => Path.GetFullPath("", "foo\bar"));
             Assert.Throws<ArgumentException>(() => Path.GetFullPath("tmp", "foo\bar"));
         }
 
         public static IEnumerable<object[]> GetFullPath_BasePath_BasicExpansions_TestData()
         {
-            string curDir = Directory.GetCurrentDirectory();
+            string curDir = @"c:\git\corefx";
             yield return new object[] { curDir, curDir, curDir };
             yield return new object[] { "", curDir, curDir };
-            yield return new object[] { curDir, null, curDir };
             yield return new object[] { curDir, "foo\bar", curDir };
             yield return new object[] { "..", curDir, Path.GetDirectoryName(curDir) };
             yield return new object[] { Path.Combine(curDir, ".", ".", ".", ".", "."), curDir, curDir };
