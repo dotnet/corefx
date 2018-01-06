@@ -935,10 +935,9 @@ namespace System.IO.Tests
         [Fact]
         public static void GetFullPath_BasePath_InvalidInput()
         {
-            string curDir = Directory.GetCurrentDirectory();
             Assert.Throws<ArgumentNullException>(() => Path.GetFullPath("", null));
             Assert.Throws<ArgumentNullException>(() => Path.GetFullPath("tmp", null));
-            Assert.Throws<ArgumentNullException>(() => Path.GetFullPath(curDir, null));
+            Assert.Throws<ArgumentNullException>(() => Path.GetFullPath(@"c:\git\corefx", null));
             Assert.Throws<ArgumentException>(() => Path.GetFullPath("", "foo\bar"));
             Assert.Throws<ArgumentException>(() => Path.GetFullPath("tmp", "foo\bar"));
         }
@@ -1043,6 +1042,110 @@ namespace System.IO.Tests
         [MemberData(nameof(GetFullPath_BasePath_BasicExpansions_TestData))]
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void GetFullPath_BasicExpansions(string path, string basePath, string expected)
+        {
+            Assert.Equal(expected, Path.GetFullPath(path, basePath));
+        }
+
+        public static IEnumerable<object[]> GetFullPath_BasePath_BasicExpansions_TestData_Unix()
+        {
+            string curDir = @"c:\git\corefx";
+            yield return new object[] { curDir, curDir, curDir };
+            yield return new object[] { "", curDir, curDir };
+            yield return new object[] { curDir, "foo\bar", curDir };
+            yield return new object[] { "..", curDir, Path.GetDirectoryName(curDir) };
+            yield return new object[] { Path.Combine(curDir, ".", ".", ".", ".", "."), curDir, curDir };
+            yield return new object[] { curDir + new string(Path.DirectorySeparatorChar, 3) + ".", curDir, curDir };
+            yield return new object[] { Path.Combine(curDir, "..", Path.GetFileName(curDir), ".", "..", Path.GetFileName(curDir)), curDir, curDir };
+            yield return new object[] { Path.Combine(Path.GetPathRoot(curDir), "somedir", ".."), curDir, Path.GetPathRoot(curDir) };
+            yield return new object[] { Path.Combine(Path.GetPathRoot(curDir), "."), curDir, Path.GetPathRoot(curDir) };
+            yield return new object[] { Path.Combine(Path.GetPathRoot(curDir), "..", "..", "..", ".."), curDir, Path.GetPathRoot(curDir) };
+            yield return new object[] { Path.GetPathRoot(curDir) + new string(Path.DirectorySeparatorChar, 3), curDir, Path.GetPathRoot(curDir) };
+
+            // Device paths
+            yield return new object[] { "foo", @"\\?\C:\ ", @"\\?\C:\ \foo" };
+            yield return new object[] { "foo", @"\\?\C:\ \ ", @"\\?\C:\ \ \foo" };
+            yield return new object[] { "foo", @"\\?\C:\ .", @"\\?\C:\ .\foo" };
+            yield return new object[] { "foo", @"\\?\C:\ ..", @"\\?\C:\ ..\foo" };
+            yield return new object[] { "foo", @"\\?\C:\...", @"\\?\C:\...\foo" };
+            yield return new object[] { "foo", @"\\?\GLOBALROOT\", @"\?\GLOBALROOT\foo" };
+            yield return new object[] { "foo", @"\\?\", @"\?\foo" };
+            yield return new object[] { "foo", @"\\?\.", @"\?\foo" };
+            yield return new object[] { "foo", @"\\?\..", @"\foo" };
+            yield return new object[] { "foo", @"\\?\\", @"\?\foo" };
+            yield return new object[] { "foo", @"\\?\C:\\", @"\\?\C:\\foo" };
+            yield return new object[] { "foo", @"\\?\C:\|", @"\\?\C:\|\foo" };
+            yield return new object[] { "foo", @"\\?\C:\.", @"\\?\C:\.\foo" };
+            yield return new object[] { "foo", @"\\?\C:\..", @"\\?\C:\..\foo" };
+            yield return new object[] { "foo", @"\\?\C:\Foo1\.", @"\\?\C:\Foo1\foo" };
+            yield return new object[] { "foo", @"\\?\C:\Foo2\..", @"\\?\C:\foo" };
+            yield return new object[] { "foo", @"\\?\UNC\", @"\\?\UNC\foo" };
+            yield return new object[] { "foo", @"\\?\UNC\server1", @"\\?\UNC\server1\foo" };
+            yield return new object[] { "foo", @"\\?\UNC\server2\", @"\\?\UNC\server2\foo" };
+            yield return new object[] { "foo", @"\\?\UNC\server3\\", @"\\?\UNC\server3\\foo" };
+            yield return new object[] { "foo", @"\\?\UNC\server4\..", @"\\?\UNC\server4\..\foo" };
+            yield return new object[] { "foo", @"\\?\UNC\server5\share\.", @"\\?\UNC\server5\share\foo" };
+            yield return new object[] { "foo", @"\\?\UNC\server6\share\..", @"\\?\UNC\server6\foo" };
+            yield return new object[] { "foo", @"\\?\UNC\a\b\\", @"\\?\UNC\a\b\foo" };
+            yield return new object[] { "foo", @"\\.\", @"\\.\foo" };
+            yield return new object[] { "foo", @"\\.\.", @"\\.\.\foo" };
+            yield return new object[] { "foo", @"\\.\..", @"\\.\..\foo" };
+            yield return new object[] { "foo", @"\\.\\", @"\\.\\foo" };
+            yield return new object[] { "foo", @"\\.\C:\\", @"\\.\C:\foo" };
+            yield return new object[] { "foo", @"\\.\C:\|", @"\\.\C:\|\foo" };
+            yield return new object[] { "foo", @"\\.\C:\.", @"\\.\C:\foo" };
+            yield return new object[] { "foo", @"\\.\C:\..", @"\\.\foo" };
+            yield return new object[] { "foo", @"\\.\C:\Foo1\.", @"\\.\C:\Foo1\foo" };
+            yield return new object[] { "foo", @"\\.\C:\Foo2\..", @"\\.\C:\foo" };
+
+            // Local host paths
+            yield return new object[] { "foo", @"\\LOCALHOST\share1", @"\\LOCALHOST\share1\foo" };
+            yield return new object[] { "foo", @"\\LOCALHOST\share2", @"\\LOCALHOST\share2\foo" };
+            yield return new object[] { "foo", @"\\LOCALHOST\share3\dir", @"\\LOCALHOST\share3\dir\foo" };
+            yield return new object[] { "foo", @"\\LOCALHOST\share4", @"\\LOCALHOST\share4\foo" };
+            yield return new object[] { "foo", @"\\LOCALHOST\share5", @"\\LOCALHOST\share5\foo" };
+            yield return new object[] { "foo", @"\\LOCALHOST\share6\", @"\\LOCALHOST\share6\foo" };
+            yield return new object[] { "foo", @"\\LOCALHOST\  share7\", @"\\LOCALHOST\  share7\foo" };
+            yield return new object[] { "foo", @"\\?\UNC\LOCALHOST\share8\test.txt.~SS", @"\\?\UNC\LOCALHOST\share8\test.txt.~SS\foo" };
+            yield return new object[] { "foo", @"\\?\UNC\LOCALHOST\share9", @"\\?\UNC\LOCALHOST\share9\foo" };
+            yield return new object[] { "foo", @"\\?\UNC\LOCALHOST\shareA\dir", @"\\?\UNC\LOCALHOST\shareA\dir\foo" };
+            yield return new object[] { "foo", @"\\?\UNC\LOCALHOST\shareB\. ", @"\\?\UNC\LOCALHOST\shareB\. \foo" };
+            yield return new object[] { "foo", @"\\?\UNC\LOCALHOST\shareC\.. ", @"\\?\UNC\LOCALHOST\shareC\.. \foo" };
+            yield return new object[] { "foo", @"\\?\UNC\LOCALHOST\shareD\    ", @"\\?\UNC\LOCALHOST\shareD\    \foo" };
+            yield return new object[] { "foo", @"\\.\UNC\LOCALHOST\  shareE\", @"\\.\UNC\LOCALHOST\  shareE\foo" };
+            yield return new object[] { "foo", @"\\.\UNC\LOCALHOST\shareF\test.txt.~SS", @"\\.\UNC\LOCALHOST\shareF\test.txt.~SS\foo" };
+            yield return new object[] { "foo", @"\\.\UNC\LOCALHOST\shareG", @"\\.\UNC\LOCALHOST\shareG\foo" };
+            yield return new object[] { "foo", @"\\.\UNC\LOCALHOST\shareH\dir", @"\\.\UNC\LOCALHOST\shareH\dir\foo" };
+            yield return new object[] { "foo", @"\\.\UNC\LOCALHOST\shareK\", @"\\.\UNC\LOCALHOST\shareK\foo" };
+            yield return new object[] { "foo", @"\\.\UNC\LOCALHOST\  shareL\", @"\\.\UNC\LOCALHOST\  shareL\foo" };
+
+            // Current drive rooted
+            yield return new object[] { @"\tmp\bar", curDir, Path.GetPathRoot(curDir) + @"tmp\bar" };
+            yield return new object[] { @"\.\bar", curDir, Path.GetPathRoot(curDir) + @"bar" };
+            yield return new object[] { @"\tmp\..", curDir, Path.GetPathRoot(curDir).Substring(0, 2) };
+            yield return new object[] { @"\tmp\bar\..", curDir, Path.GetPathRoot(curDir) + @"tmp" };
+            yield return new object[] { @"\tmp\bar\..", curDir, Path.GetPathRoot(curDir) + @"tmp" };
+            yield return new object[] { @"\", curDir, Path.GetPathRoot(curDir) };
+
+            // Specific drive rooted
+            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\..", curDir, Path.GetPathRoot(curDir) + @"tmp" };
+            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\.", curDir, Path.GetPathRoot(curDir) + @"tmp\foo" };
+            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\..", curDir, Path.GetPathRoot(curDir) + @"tmp" };
+            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp", curDir, Path.GetPathRoot(curDir) + @"tmp" };
+            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":", curDir, Path.GetPathRoot(curDir) };
+            yield return new object[] { Path.GetPathRoot(curDir)[0], curDir, curDir + Path.DirectorySeparatorChar + Path.GetPathRoot(curDir)[0] };
+
+            yield return new object[] { @"Z:tmp\foo\..", curDir, @"Z:\tmp" };
+            yield return new object[] { @"Z:tmp\foo\.", curDir, @"Z:\tmp\foo" };
+            yield return new object[] { @"Z:tmp\foo\..", curDir, @"Z:\tmp" };
+            yield return new object[] { @"Z:tmp", curDir, @"Z:\tmp" };
+            yield return new object[] { @"Z:", curDir, @"Z:\" };
+            yield return new object[] { @"Z", curDir, curDir + Path.DirectorySeparatorChar + @"Z" };
+        }
+
+        [Theory]
+        [MemberData(nameof(GetFullPath_BasePath_BasicExpansions_TestData))]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public static void GetFullPath_BasicExpansions_Unix(string path, string basePath, string expected)
         {
             Assert.Equal(expected, Path.GetFullPath(path, basePath));
         }
