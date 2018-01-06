@@ -204,12 +204,12 @@ namespace System.Text.Tests
         {
             var mediumString = new string('a', 30);
             var largeString = new string('a', 1000);
-            var extraLargeString = new string('a', 50000); // 40000 is the maximum chunk size
+            var extraLargeString = new string('a', 41000); // 8000 is the maximum chunk size
 
             var sb1 = new StringBuilder("Hello");
-            var sb2 = new StringBuilder(mediumString);
-            var sb3 = new StringBuilder(largeString);
-            var sb4 = new StringBuilder(extraLargeString);
+            var sb2 = new StringBuilder(20).Append(mediumString);
+            var sb3 = new StringBuilder(20).Append(largeString);
+            var sb4 = new StringBuilder(20).Append(extraLargeString);
 
             yield return new object[] { sb1, "Hello", true };
             yield return new object[] { sb1, "Hel", false };
