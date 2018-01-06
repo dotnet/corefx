@@ -67,7 +67,7 @@ namespace System.Diagnostics
 
         private static object s_createProcessLock = new object();
 
-        private boolean _inputStreamAccessed;
+        private bool _inputStreamAccessed;
 
         private StreamReadMode _outputStreamReadMode;
         private StreamReadMode _errorStreamReadMode;
