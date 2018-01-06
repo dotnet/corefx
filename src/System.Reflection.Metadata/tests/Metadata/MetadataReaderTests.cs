@@ -219,10 +219,16 @@ namespace System.Reflection.Metadata.Tests
             //1392 is the remaining bytes from NetModule.AppCS
             int remainingBytesIndex = FindIndex(peImage, BitConverter.GetBytes(1392), headers.MetadataStartOffset);
             Assert.NotEqual(remainingBytesIndex, -1);
-
             //14057656686423 is the presentTables from NetModule.AppCS, must be after remainingBytesIndex
             int presentTablesIndex = FindIndex(peImage, BitConverter.GetBytes(14057656686423), headers.MetadataStartOffset + remainingBytesIndex);
             Assert.NotEqual(presentTablesIndex, -1);
+
+            //set row counts greater than TokenTypeIds.RIDMask
+            InsertBytes(peImage, BitConverter.GetBytes((ulong)16777216), presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset + 16);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
+            //set remaining bytes smaller than required for row counts.
+            InsertBytes(peImage, BitConverter.GetBytes(25), remainingBytesIndex + headers.MetadataStartOffset);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
             //14057656686424 is a value to make (presentTables & ~validTables) != 0 but not (presentTables & (ulong)(TableMask.PtrTables | TableMask.EnCMap)) != 0
             InsertBytes(peImage, BitConverter.GetBytes((ulong)14057656686424), presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset);
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
