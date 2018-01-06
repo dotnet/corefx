@@ -67,6 +67,8 @@ namespace System.Diagnostics
 
         private static object s_createProcessLock = new object();
 
+        private boolean _inputStreamAccessed;
+
         private StreamReadMode _outputStreamReadMode;
         private StreamReadMode _errorStreamReadMode;
 
@@ -691,6 +693,7 @@ namespace System.Diagnostics
                     throw new InvalidOperationException(SR.CantGetStandardIn);
                 }
 
+                _inputStreamAccessed = true;
                 return _standardInput;
             }
         }
@@ -846,18 +849,37 @@ namespace System.Diagnostics
                 _machineName = ".";
                 _raisedOnExited = false;
 
-                //Don't call close on the Readers and writers
-                //since they might be referenced by somebody else while the 
-                //process is still alive but this method called.
-                _standardOutput = null;
-                _standardInput = null;
-                _standardError = null;
+                // Only call close on the streams if the user cannot have a reference on them.
+                // If they are referenced it is the user's responsibility to dispose of them.
+                try 
+                {
+                    if (_standardOutput != null && (_outputStreamReadMode == StreamReadMode.AsyncMode || _outputStreamReadMode == StreamReadMode.Undefined))
+                    {
+                    _standardOutput.Close();
+                    }
 
-                _output = null;
-                _error = null;
+                    if (_standardError != null && (_errorStreamReadMode == StreamReadMode.AsyncMode || _errorStreamReadMode == StreamReadMode.Undefined))
+                    {
+                        _standardError.Close();
+                    }
 
-                CloseCore();
-                Refresh();
+                    if (_standardInput != null && !_inputStreamAccessed) 
+                    {
+                        _standardInput.Close();
+                    }
+                }
+                finally 
+                {
+                    _standardOutput = null;
+                    _standardInput = null;
+                    _standardError = null;
+
+                    _output = null;
+                    _error = null;
+
+                    CloseCore();
+                    Refresh();
+                }
             }
         }
 
