@@ -148,7 +148,6 @@ namespace System.Data.SqlClient.SNI
                 }
                 else
                 {
-                    //connectTask = ConnectAsync(serverName, port);
                     _socket = Connect(serverName, port, ts);
                 }
 
