@@ -15,8 +15,8 @@ namespace System.SpanTests
 
             Span<int> first = new Span<int>(a, 1, 0);
             Span<int> second = new Span<int>(a, 2, 0);
-            bool b = first.SequenceEqual(second);
-            Assert.True(b);
+            int result = first.SequenceCompareTo(second);
+            Assert.Equal(0, result);
         }
 
         [Fact]
@@ -24,18 +24,34 @@ namespace System.SpanTests
         {
             int[] a = { 4, 5, 6 };
             Span<int> span = new Span<int>(a);
-            bool b = span.SequenceEqual(span);
-            Assert.True(b);
+            int result = span.SequenceCompareTo(span);
+            Assert.Equal(0, result);
         }
 
         [Fact]
         public static void LengthMismatchSequenceCompareTo()
         {
             int[] a = { 4, 5, 6 };
-            Span<int> first = new Span<int>(a, 0, 3);
-            Span<int> second = new Span<int>(a, 0, 2);
-            bool b = first.SequenceEqual(second);
-            Assert.False(b);
+            Span<int> first = new Span<int>(a, 0, 2);
+            Span<int> second = new Span<int>(a, 0, 3);
+            int result = first.SequenceCompareTo(second);
+            Assert.True(result < 0);
+            Assert.Equal(first.Length.CompareTo(second.Length), result);
+
+            result = second.SequenceCompareTo(first);
+            Assert.True(result > 0);
+            Assert.Equal(second.Length.CompareTo(first.Length), result);
+
+            // one sequence is empty
+            first = new Span<int>(a, 1, 0);
+
+            result = first.SequenceCompareTo(second);
+            Assert.True(result < 0);
+            Assert.Equal(first.Length.CompareTo(second.Length), result);
+
+            result = second.SequenceCompareTo(first);
+            Assert.True(result > 0);
+            Assert.Equal(second.Length.CompareTo(first.Length), result);
         }
 
         [Fact]
@@ -54,11 +70,11 @@ namespace System.SpanTests
 
                 Span<TInt> firstSpan = new Span<TInt>(first);
                 ReadOnlySpan<TInt> secondSpan = new ReadOnlySpan<TInt>(second);
-                bool b = firstSpan.SequenceEqual(secondSpan);
-                Assert.True(b);
+                int result = firstSpan.SequenceCompareTo(secondSpan);
+                Assert.Equal(0, result);
 
                 // Make sure each element of the array was compared once. (Strictly speaking, it would not be illegal for 
-                // SequenceEqual to compare an element more than once but that would be a non-optimal implementation and 
+                // SequenceCompareTo to compare an element more than once but that would be a non-optimal implementation and 
                 // a red flag. So we'll stick with the stricter test.)
                 Assert.Equal(first.Length, log.Count);
                 foreach (TInt elem in first)
@@ -70,7 +86,7 @@ namespace System.SpanTests
         }
 
         [Fact]
-        public static void SequenceCompareToNoMatch()
+        public static void SequenceCompareToSingleMismatch()
         {
             for (int length = 1; length < 32; length++)
             {
@@ -89,11 +105,46 @@ namespace System.SpanTests
 
                     Span<TInt> firstSpan = new Span<TInt>(first);
                     ReadOnlySpan<TInt> secondSpan = new ReadOnlySpan<TInt>(second);
-                    bool b = firstSpan.SequenceEqual(secondSpan);
-                    Assert.False(b);
-
+                    int result = firstSpan.SequenceCompareTo(secondSpan);
+                    Assert.True(result < 0);
                     Assert.Equal(1, log.CountCompares(first[mismatchIndex].Value, second[mismatchIndex].Value));
+                    Assert.Equal(firstSpan[mismatchIndex].CompareTo(secondSpan[mismatchIndex]), result);        //adds to log.CountCompares
+
+                    result = secondSpan.SequenceCompareTo(firstSpan);       // adds to log.CountCompares
+                    Assert.True(result > 0);
+                    Assert.Equal(3, log.CountCompares(first[mismatchIndex].Value, second[mismatchIndex].Value));
+                    Assert.Equal(secondSpan[mismatchIndex].CompareTo(firstSpan[mismatchIndex]), result);
                 }
+            }
+        }
+
+        [Fact]
+        public static void SequenceCompareToNoMatch()
+        {
+            for (int length = 1; length < 32; length++)
+            {
+                TIntLog log = new TIntLog();
+
+                TInt[] first = new TInt[length];
+                TInt[] second = new TInt[length];
+                
+                for (int i = 0; i < length; i++)
+                {
+                    first[i] = new TInt(i + 1, log);
+                    second[i] = new TInt(length + i + 1, log);
+                }
+
+                Span<TInt> firstSpan = new Span<TInt>(first);
+                ReadOnlySpan<TInt> secondSpan = new ReadOnlySpan<TInt>(second);
+                int result = firstSpan.SequenceCompareTo(secondSpan);
+                Assert.True(result < 0);
+                Assert.Equal(1, log.CountCompares(firstSpan[0].Value, secondSpan[0].Value));
+                Assert.Equal(firstSpan[0].CompareTo(secondSpan[0]), result);        //adds to log.CountCompares
+
+                result = secondSpan.SequenceCompareTo(firstSpan);       // adds to log.CountCompares
+                Assert.True(result > 0);
+                Assert.Equal(3, log.CountCompares(firstSpan[0].Value, secondSpan[0].Value));
+                Assert.Equal(secondSpan[0].CompareTo(firstSpan[0]), result);
             }
         }
 
@@ -126,8 +177,8 @@ namespace System.SpanTests
 
                 Span<TInt> firstSpan = new Span<TInt>(first, GuardLength, length);
                 Span<TInt> secondSpan = new Span<TInt>(second, GuardLength, length);
-                bool b = firstSpan.SequenceEqual(secondSpan);
-                Assert.True(b);
+                int result = firstSpan.SequenceCompareTo(secondSpan);
+                Assert.Equal(0, result);
             }
         }
     }

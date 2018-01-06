@@ -16,7 +16,7 @@ namespace System.SpanTests
             Span<byte> first = new Span<byte>(a, 1, 0);
             Span<byte> second = new Span<byte>(a, 2, 0);
             int result = first.SequenceCompareTo<byte>(second);
-            Assert.Equal(-1, result);
+            Assert.Equal(0, result);
         }
 
         [Fact]
@@ -25,7 +25,7 @@ namespace System.SpanTests
             byte[] a = { 4, 5, 6 };
             Span<byte> span = new Span<byte>(a);
             int result = span.SequenceCompareTo<byte>(span);
-            Assert.Equal(-1, result);
+            Assert.Equal(0, result);
         }
 
         [Fact]
@@ -34,7 +34,7 @@ namespace System.SpanTests
             byte[] a = { 4, 5, 6 };
             Span<byte> first = new Span<byte>(a, 0, 3);
             int result = first.SequenceCompareTo<byte>(a);
-            Assert.Equal(-1, result);
+            Assert.Equal(0, result);
         }
 
         [Fact]
@@ -46,21 +46,37 @@ namespace System.SpanTests
 
             Span<byte> first = new Span<byte>(src, 0, 3);
             int result = first.SequenceCompareTo<byte>(segment);
-            Assert.Equal(-1, result);
+            Assert.Equal(0, result);
         }
 
         [Fact]
         public static void LengthMismatchSequenceCompareTo_Byte()
         {
             byte[] a = { 4, 5, 6 };
-            Span<byte> first = new Span<byte>(a, 0, 3);
-            Span<byte> second = new Span<byte>(a, 0, 2);
+            Span<byte> first = new Span<byte>(a, 0, 2);
+            Span<byte> second = new Span<byte>(a, 0, 3);
             int result = first.SequenceCompareTo<byte>(second);
-            Assert.Equal(-1, result);
+            Assert.True(result < 0);
+            Assert.Equal(first.Length.CompareTo(second.Length), result);
+
+            result = second.SequenceCompareTo<byte>(first);
+            Assert.True(result > 0);
+            Assert.Equal(second.Length.CompareTo(first.Length), result);
+
+            // one sequence is empty
+            first = new Span<byte>(a, 1, 0);
+
+            result = first.SequenceCompareTo<byte>(second);
+            Assert.True(result < 0);
+            Assert.Equal(first.Length.CompareTo(second.Length), result);
+
+            result = second.SequenceCompareTo<byte>(first);
+            Assert.True(result > 0);
+            Assert.Equal(second.Length.CompareTo(first.Length), result);
         }
 
         [Fact]
-        public static void SequenceCompareToNoMatch_Byte()
+        public static void SequenceCompareToWithSingleMismatch_Byte()
         {
             for (int length = 1; length < 32; length++)
             {
@@ -78,8 +94,39 @@ namespace System.SpanTests
                     Span<byte> firstSpan = new Span<byte>(first);
                     ReadOnlySpan<byte> secondSpan = new ReadOnlySpan<byte>(second);
                     int result = firstSpan.SequenceCompareTo<byte>(secondSpan);
-                    Assert.Equal(-1, result);
+                    Assert.True(result < 0);
+                    Assert.Equal(firstSpan[mismatchIndex].CompareTo(secondSpan[mismatchIndex]), result);
+
+                    result = secondSpan.SequenceCompareTo<byte>(firstSpan);
+                    Assert.True(result > 0);
+                    Assert.Equal(secondSpan[mismatchIndex].CompareTo(firstSpan[mismatchIndex]), result);
                 }
+            }
+        }
+
+        [Fact]
+        public static void SequenceCompareToNoMatch_Byte()
+        {
+            for (int length = 1; length < 32; length++)
+            {
+                byte[] first = new byte[length];
+                byte[] second = new byte[length];
+                
+                for (int i = 0; i < length; i++)
+                {
+                    first[i] = (byte)(i + 1);
+                    second[i] = (byte)(byte.MaxValue - i);
+                }
+
+                Span<byte> firstSpan = new Span<byte>(first);
+                ReadOnlySpan<byte> secondSpan = new ReadOnlySpan<byte>(second);
+                int result = firstSpan.SequenceCompareTo<byte>(secondSpan);
+                Assert.True(result < 0);
+                Assert.Equal(firstSpan[0].CompareTo(secondSpan[0]), result);
+
+                result = secondSpan.SequenceCompareTo<byte>(firstSpan);
+                Assert.True(result > 0);
+                Assert.Equal(secondSpan[0].CompareTo(firstSpan[0]), result);
             }
         }
 
@@ -97,7 +144,7 @@ namespace System.SpanTests
                 Span<byte> span1 = new Span<byte>(first, 1, length);
                 ReadOnlySpan<byte> span2 = new ReadOnlySpan<byte>(second, 1, length);
                 int result = span1.SequenceCompareTo<byte>(span2);
-                Assert.Equal(-1, result);
+                Assert.Equal(0, result);
             }
         }
     }

@@ -112,11 +112,11 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.SequenceCompareTo(
-                    ref Unsafe.As<T, byte>(ref first.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
                     first.Length,
-                    ref Unsafe.As<T, byte>(ref second.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
                     second.Length);
-            return SpanHelpers.SequenceCompareTo(ref first.DangerousGetPinnableReference(), first.Length, ref second.DangerousGetPinnableReference(), second.Length);
+            return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(first), first.Length, ref MemoryMarshal.GetReference(second), second.Length);
         }
 
         /// <summary>
@@ -452,11 +452,11 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.SequenceCompareTo(
-                    ref Unsafe.As<T, byte>(ref first.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
                     first.Length,
-                    ref Unsafe.As<T, byte>(ref second.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
                     second.Length);
-            return SpanHelpers.SequenceCompareTo(ref first.DangerousGetPinnableReference(), first.Length, ref second.DangerousGetPinnableReference(), second.Length);
+            return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(first), first.Length, ref MemoryMarshal.GetReference(second), second.Length);
         }
 
         /// <summary>
