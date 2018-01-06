@@ -221,12 +221,15 @@ namespace System.Data.SqlClient.SNI
             {
                 try
                 {
-                    sockets[i] = new Socket(ipAddresses[i].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                    sockets[i].Connect(ipAddresses[i], port);
-                    if (sockets[i].Connected)
+                    if (ipAddresses[i] != null)
                     {
-                        availableSocket = sockets[i];
-                        break;
+                        sockets[i] = new Socket(ipAddresses[i].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                        sockets[i].Connect(ipAddresses[i], port);
+                        if (sockets[i].Connected)
+                        {
+                            availableSocket = sockets[i];
+                            break;
+                        }
                     }
                 }
                 catch { }
