@@ -29,7 +29,7 @@ namespace System
         private readonly int _index;
         private readonly int _length;
 
-        private const int RemoveOwnedFlagBitMask = 0x7FFFFFFF;
+        internal const int RemoveOwnedFlagBitMask = 0x7FFFFFFF;
 
         /// <summary>
         /// Creates a new memory over the entirety of the target array.
@@ -234,31 +234,6 @@ namespace System
                 }
             }
             return memoryHandle;
-        }
-
-        /// <summary>
-        /// Get an array segment from the underlying memory. 
-        /// If unable to get the array segment, return false with a default array segment.
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public bool DangerousTryGetArray(out ArraySegment<T> arraySegment)
-        {
-            if (_index < 0)
-            {
-                if (((OwnedMemory<T>)_object).TryGetArray(out var segment))
-                {
-                    arraySegment = new ArraySegment<T>(segment.Array, segment.Offset + (_index & RemoveOwnedFlagBitMask), _length);
-                    return true;
-                }
-            }
-            else if (_object is T[] arr)
-            {
-                arraySegment = new ArraySegment<T>(arr, _index, _length);
-                return true;
-            }
-
-            arraySegment = default;
-            return false;
         }
 
         /// <summary>

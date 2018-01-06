@@ -432,6 +432,38 @@ namespace System.Security.Cryptography.Asn1
             return contents;
         }
 
+        public BigInteger GetInteger() => GetInteger(Asn1Tag.Integer);
+
+        public BigInteger GetInteger(Asn1Tag expectedTag)
+        {
+            ReadOnlyMemory<byte> contents =
+                GetIntegerContents(expectedTag, UniversalTagNumber.Integer, out int headerLength);
+
+            // TODO: Split this for netcoreapp/netstandard to use the Big-Endian BigInteger parsing
+            byte[] tmp = ArrayPool<byte>.Shared.Rent(contents.Length);
+            BigInteger value;
+
+            try
+            {
+                byte fill = (contents.Span[0] & 0x80) == 0 ? (byte)0 : (byte)0xFF;
+                // Fill the unused portions of tmp with positive or negative padding.
+                new Span<byte>(tmp, contents.Length, tmp.Length - contents.Length).Fill(fill);
+                contents.CopyTo(tmp);
+                // Convert to Little-Endian.
+                AsnWriter.Reverse(new Span<byte>(tmp, 0, contents.Length));
+                value = new BigInteger(tmp);
+            }
+            finally
+            {
+                // Clear the whole tmp so that not even the sign bit is returned to the array pool.
+                Array.Clear(tmp, 0, tmp.Length);
+                ArrayPool<byte>.Shared.Return(tmp);
+            }
+
+            _data = _data.Slice(headerLength + contents.Length);
+            return value;
+        }
+
         private bool TryReadSignedInteger(
             int sizeLimit,
             Asn1Tag expectedTag,
@@ -1898,8 +1930,8 @@ namespace System.Security.Cryptography.Asn1
                 return true;
             }
 
-            fixed (byte* bytePtr = &source.DangerousGetPinnableReference())
-            fixed (char* charPtr = &destination.DangerousGetPinnableReference())
+            fixed (byte* bytePtr = &MemoryMarshal.GetReference(source))
+            fixed (char* charPtr = &MemoryMarshal.GetReference(destination))
             {
                 try
                 {
@@ -1949,7 +1981,7 @@ namespace System.Security.Cryptography.Asn1
                 {
                     unsafe
                     {
-                        fixed (byte* bytePtr = &contents.DangerousGetPinnableReference())
+                        fixed (byte* bytePtr = &MemoryMarshal.GetReference(contents))
                         {
                             try
                             {
@@ -2712,7 +2744,7 @@ namespace System.Security.Cryptography.Asn1
                 if (fraction != 0)
                 {
                     // No minutes means this is fractions of an hour
-                    fractionSpan = TimeSpan.FromHours(frac);
+                    fractionSpan = new TimeSpan((long)(frac * TimeSpan.TicksPerHour));
                 }
             }
             else if (!second.HasValue)
@@ -2722,13 +2754,13 @@ namespace System.Security.Cryptography.Asn1
                 if (fraction != 0)
                 {
                     // No seconds means this is fractions of a minute
-                    fractionSpan = TimeSpan.FromMinutes(frac);
+                    fractionSpan = new TimeSpan((long)(frac * TimeSpan.TicksPerMinute));
                 }
             }
             else if (fraction != 0)
             {
                 // Both minutes and seconds means fractions of a second.
-                fractionSpan = TimeSpan.FromSeconds(frac);
+                fractionSpan = new TimeSpan((long)(frac * TimeSpan.TicksPerSecond));
             }
             
             DateTimeOffset value;
