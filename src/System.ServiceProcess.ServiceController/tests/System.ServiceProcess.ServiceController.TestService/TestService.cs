@@ -33,8 +33,8 @@ namespace System.ServiceProcess.Tests
 
         public static string GetLogPath(string serviceName)
         {
-            return Assembly.GetEntryAssembly().Location + "." + serviceName + ".log";
-        }        
+            return typeof(TestService).Assembly.Location + "." + serviceName + ".log";
+        }
 
         protected override void OnContinue()
         {
@@ -74,6 +74,9 @@ namespace System.ServiceProcess.Tests
 
         protected override void OnStart(string[] args)
         {
+            if (File.Exists(GetLogPath(ServiceName)))
+                File.Delete(GetLogPath(ServiceName));
+
             WriteLog(nameof(OnStart) + " args=" + string.Join(",", args));
             base.OnStart(args);
         }
