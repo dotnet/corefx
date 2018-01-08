@@ -22,6 +22,8 @@ namespace System.Diagnostics.Tests
         public static readonly int SuccessExitCode = 42;
         public const int WaitInMS = 30 * 1000;
         public const string TestConsoleApp = "System.Diagnostics.Process.Tests";
+        public static event EventHandler ClosedEvent;
+
 
         public static string DummyUapCmd()
         {
@@ -161,14 +163,13 @@ namespace System.Diagnostics.Tests
             return SuccessExitCode;
         }
 
-        public static int WriteLinesSlowlyToOutputAndError()
+        public static int WriteLinesAfterClose()
         {
-            for (int i = 0; i < 50; i++)
+            ClosedEvent += (s, e) =>
             {
-                Console.WriteLine("This is line #" + i + ".");
-                Console.Error.WriteLine("This is error line #" + i + ".");
-                Thread.Sleep(100);
-            }
+                Console.WriteLine("This is a line to output.");
+                Console.Error.WriteLine("This is a line to error.");
+            };
             return SuccessExitCode;
         }
 
@@ -192,6 +193,11 @@ namespace System.Diagnostics.Tests
         {
             Process.GetCurrentProcess().Kill();
             throw new ShouldNotBeInvokedException();
+        }
+
+        public static void FireClosedEvent()
+        {
+            ClosedEvent?.Invoke(null, EventArgs.Empty);
         }
     }
 }

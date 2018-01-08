@@ -229,9 +229,9 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void TestClosingStreamsDoesNotThrow()
+        public void TestClosingStreamsAsyncDoesNotThrow()
         {
-            Process p = CreateProcessPortable(RemotelyInvokable.WriteLinesSlowlyToOutputAndError);
+            Process p = CreateProcessPortable(RemotelyInvokable.WriteLinesAfterClose);
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardError = true;
 
@@ -243,6 +243,37 @@ namespace System.Diagnostics.Tests
             p.BeginErrorReadLine();
 
             p.Close();
+        }
+
+        [Fact]
+        public void TestClosingStreamsUndefinedDoesNotThrow()
+        {
+            Process p = CreateProcessPortable(RemotelyInvokable.WriteLinesAfterClose);
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+
+            p.Start();
+            p.Close();
+            RemotelyInvokable.FireClosedEvent();
+        }
+
+        [Fact]
+        public void TestClosingSyncModeDoesNotCloseStreams()
+        {
+            Process p = CreateProcessPortable(RemotelyInvokable.WriteLinesAfterClose);
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+
+            p.Start();
+
+            var output = p.StandardOutput;
+            var error = p.StandardError;
+
+            p.Close();
+            RemotelyInvokable.FireClosedEvent();
+
+            output.ReadToEnd();
+            error.ReadToEnd();
         }
 
         [Fact]
