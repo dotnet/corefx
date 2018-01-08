@@ -100,6 +100,8 @@
     <Compile Include="System\Reflection\Internal\MemoryBlocks\StreamConstraints.cs" />
     <Compile Include="System\Reflection\Internal\MemoryBlocks\StreamMemoryBlockProvider.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\BitArithmetic.cs" />
+    <Compile Include="System\Reflection\Internal\Utilities\BitArithmetic.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
+    <Compile Include="System\Reflection\Internal\Utilities\BitArithmetic.nonnetcoreapp.cs" Condition="'$(TargetGroup)' != 'netcoreapp'" />
     <Compile Include="System\Reflection\Internal\Utilities\StringUtils.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\EmptyArray.cs" />
     <Compile Include="System\Reflection\Internal\Utilities\EncodingHelper.cs" Condition="'$(TargetGroup)' != 'netcoreapp'" />
@@ -269,6 +271,7 @@
     <Reference Include="System.Threading" />
     <Reference Include="System.IO.MemoryMappedFiles" Condition="'$(TargetGroup)' != 'netstandard1.1'" />
     <Reference Include="System.Buffers" Condition="'$(TargetGroup)' == 'netcoreapp'" />
+    <Reference Include="System.Runtime.Intrinsics.X86" Condition="'$(TargetGroup)' == 'netcoreapp'" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

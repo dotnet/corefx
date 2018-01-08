@@ -6,14 +6,14 @@ using System.Diagnostics;
 
 namespace System.Reflection.Internal
 {
-    internal static class BitArithmetic
+    internal static partial class BitArithmetic
     {
         internal static int CountBits(int v)
         {
             return CountBits(unchecked((uint)v));
         }
 
-        internal static int CountBits(uint v)
+        private static int CountBitsPrivate(uint v)
         {
             unchecked
             {
@@ -23,7 +23,7 @@ namespace System.Reflection.Internal
             }
         }
 
-        internal static int CountBits(ulong v)
+        private static int CountBitsPrivate(ulong v)
         {
             const ulong Mask01010101 = 0x5555555555555555UL;
             const ulong Mask00110011 = 0x3333333333333333UL;

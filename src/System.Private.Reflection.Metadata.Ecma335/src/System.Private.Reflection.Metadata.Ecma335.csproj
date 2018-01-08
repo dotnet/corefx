@@ -94,6 +94,7 @@
     <Compile Include="$(SystemReflectionMetadataPath)System\Reflection\Internal\Utilities\CriticalDisposableObject.cs" />
     <Compile Include="$(SystemReflectionMetadataPath)System\Reflection\Internal\Utilities\PinnedObject.cs" />
     <Compile Include="$(SystemReflectionMetadataPath)System\Reflection\Internal\Utilities\BitArithmetic.cs" />
+    <Compile Include="$(SystemReflectionMetadataPath)System\Reflection\Internal\Utilities\BitArithmetic.nonnetcoreapp.cs" />
     <Compile Include="$(SystemReflectionMetadataPath)System\Reflection\Internal\Utilities\StringUtils.cs" />
     <Compile Include="$(SystemReflectionMetadataPath)System\Reflection\Internal\Utilities\EmptyArray.cs" />
     <Compile Include="$(SystemReflectionMetadataPath)System\Reflection\Internal\Utilities\EncodingHelper.cs" />
