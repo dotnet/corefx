@@ -40,7 +40,7 @@ namespace System.Net
                 }
                 else if ((value[i] == ',') && !inquote)
                 {
-                    while (s_valueParser.Count > 0) {singleValue.Insert(insertPos, s_valueParser.Pop());}
+                    while (s_valueParser.Count > 0) singleValue.Insert(insertPos, s_valueParser.Pop());
                     insertPos = singleValue.Length;
                     if (!isSetCookie || !IsDuringExpiresAttributeParsing(singleValue.ToString()))
                     {
@@ -57,7 +57,7 @@ namespace System.Net
 
             // Now add the last of the header values to the stringtable.
             if (chIndex != 0) {
-                while (s_valueParser.Count > 0) {singleValue.Insert(insertPos, s_valueParser.Pop());}
+                while (s_valueParser.Count > 0) singleValue.Insert(insertPos, s_valueParser.Pop());
                 tempStringCollection.Add(singleValue.ToString().Trim());
             }
 

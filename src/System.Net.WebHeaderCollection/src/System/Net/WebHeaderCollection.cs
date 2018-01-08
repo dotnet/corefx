@@ -266,8 +266,10 @@ namespace System.Net
                 // value has multiple values.
                 if (valueList == null)
                 {
-                    // See if it has multiple values.
-                    if (tempValues.Length > 1)
+                    // If it's not empty, replace valueList.
+                    // Because for invalid WebRequest headers, we will return empty
+                    // valueList instead of the default NameValueCollection.GetValues().
+                    if (tempValues != null)
                     {
                         // It does, so we need to create an array list that
                         // represents the Values, then trim out this one and

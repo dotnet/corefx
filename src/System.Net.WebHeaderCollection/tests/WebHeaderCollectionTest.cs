@@ -534,7 +534,13 @@ namespace System.Net.Tests
         private string cookie2 = "uuid=123abc; path=/; expires=Fri, 05 Oct 2018 06:28:57 -0000; secure; HttpOnly";
         private string cookie3 = "country=US; path=/; expires=Fri, 05 Oct 2018 06:28:57 -0000";
         private string cookie4 = "m_session=session1; path=/; expires=Sun, 08 Oct 2017 00:28:57 -0000; secure; HttpOnly";
-        private string cookieNoAttribute = "m_session=session1";
+        
+        private string cookie1NoAttribute = "locale=en";
+        private string cookie2NoAttribute = "uuid=123abc";
+        private string cookie3NoAttribute = "country=US";
+        private string cookie4NoAttribute = "m_session=session1";
+        
+        private string cookieInvalie = "helloWorld";
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
@@ -570,14 +576,47 @@ namespace System.Net.Tests
         }
         
         [Fact]
-        public void GetValues_SingleSetCookieHeaderNoAttribute_Success()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
+        public void GetValues_MultipleSetCookieHeadersWithNoAttribute_Success()
         {
             WebHeaderCollection w = new WebHeaderCollection();
-            w.Add(headerType, cookieNoAttribute);
+            w.Add(headerType, cookie1NoAttribute);
+            w.Add(headerType, cookie2NoAttribute);
+            w.Add(headerType, cookie3NoAttribute);
+            w.Add(headerType, cookie4NoAttribute);
 
             string[] values = w.GetValues(headerType);
-            Assert.Equal(1, values.Length);
-            Assert.Equal(cookieNoAttribute, values[0]);
+            Assert.Equal(4, values.Length);
+            Assert.Equal(cookie1NoAttribute, values[0]);
+            Assert.Equal(cookie2NoAttribute, values[1]);
+            Assert.Equal(cookie3NoAttribute, values[2]);
+            Assert.Equal(cookie4NoAttribute, values[3]);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
+        public void GetValues_SingleSetCookieHeaderWithMultipleCookiesWithNoAttribute_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add(headerType, cookie1NoAttribute + "," + cookie2NoAttribute + "," + cookie3NoAttribute + "," + cookie4NoAttribute);
+
+            string[] values = w.GetValues(headerType);
+            Assert.Equal(4, values.Length);
+            Assert.Equal(cookie1NoAttribute, values[0]);
+            Assert.Equal(cookie2NoAttribute, values[1]);
+            Assert.Equal(cookie3NoAttribute, values[2]);
+            Assert.Equal(cookie4NoAttribute, values[3]);
+        }
+        
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
+        public void GetValues_InvalidSetCookieHeader_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add(headerType, cookieInvalie);
+
+            string[] values = w.GetValues(headerType);
+            Assert.Equal(0, values.Length);
         }
         
         [Fact]
