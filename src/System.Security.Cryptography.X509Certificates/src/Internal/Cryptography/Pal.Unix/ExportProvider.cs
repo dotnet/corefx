@@ -140,12 +140,12 @@ namespace Internal.Cryptography.Pal
                         throw Interop.Crypto.CreateOpenSslCryptographicException();
                     }
 
-                    var result = Interop.Crypto.OpenSslEncode(
+                    byte[] result = Interop.Crypto.OpenSslEncode(
                         Interop.Crypto.GetPkcs12DerSize,
                         Interop.Crypto.EncodePkcs12,
                         pkcs12);
 
-                    // ensure certs handle isn't finalized while raw handle(s) is in use
+                    // ensure cert handles aren't finalized while the raw handles are in use
                     GC.KeepAlive(_certs);
                     return result;
                 }
