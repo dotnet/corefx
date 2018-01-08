@@ -206,12 +206,17 @@ namespace System.Data.SqlClient.SNI
             cts.CancelAfter(timeout);
             void Cancel()
             {
-                foreach (Socket socket in sockets)
+                for (int i = 0; i < sockets.Length; ++i)
                 {
-                    if (socket != null && !socket.Connected)
+                    try
                     {
-                        socket.Dispose();
+                        if (sockets[i] != null && !sockets[i].Connected)
+                        {
+                            sockets[i].Dispose();
+                            sockets[i] = null;
+                        }
                     }
+                    catch { }
                 }
             }
             cts.Token.Register(Cancel);
@@ -233,6 +238,7 @@ namespace System.Data.SqlClient.SNI
                         else
                         {
                             sockets[i].Dispose();
+                            sockets[i] = null;
                         }
                     }
                 }
