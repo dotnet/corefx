@@ -5,6 +5,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
+using System.Text;
 
 namespace System.Net
 {
@@ -15,15 +17,20 @@ namespace System.Net
         private static readonly Func<string, string[]> s_setCookieParser = value => ParseValueHelper(value, isSetCookie: true);
         private static readonly HeaderInfo s_unknownHeaderInfo = new HeaderInfo(string.Empty, false, false, false, s_singleParser);
         private static readonly Hashtable s_headerHashTable;
+        private static readonly Stack<char> s_valueParser = new Stack<char>();
 
         private static string[] ParseValueHelper(string value, bool isSetCookie)
         {
+            // RFC 6265: (for Set-Cookie header)
+            // If the name-value-pair string lacks a %x3D ("=") character, ignore the set-cookie-string entirely.
+            if (isSetCookie && (value.IndexOf('=') < 0)) return new string[0];
+
             List<string> tempStringCollection = new List<string>();
 
             bool inquote = false;
             int chIndex = 0;
-            char[] vp = new char[value.Length];
-            string singleValue;
+            StringBuilder singleValue = new StringBuilder();
+            int insertPos = 0;
 
             for (int i = 0; i < value.Length; i++)
             {
@@ -33,23 +40,28 @@ namespace System.Net
                 }
                 else if ((value[i] == ',') && !inquote)
                 {
-                    singleValue = new string(vp, 0, chIndex);
-                    if (!isSetCookie || !IsDuringExpiresAttributeParsing(singleValue))
+                    while (s_valueParser.Count > 0) {singleValue.Insert(insertPos, s_valueParser.Pop());}
+                    insertPos = singleValue.Length;
+                    if (!isSetCookie || !IsDuringExpiresAttributeParsing(singleValue.ToString()))
                     {
-                        tempStringCollection.Add(singleValue.Trim());
+                        tempStringCollection.Add(singleValue.ToString().Trim());
                         chIndex = 0;
+                        insertPos = 0;
+                        singleValue.Clear();
                         continue;
                     }
                 }
-                vp[chIndex++] = value[i];
+                s_valueParser.Push(value[i]);
+                chIndex++;
             }
 
             // Now add the last of the header values to the stringtable.
             if (chIndex != 0) {
-                singleValue = new string(vp, 0, chIndex);
-                tempStringCollection.Add(singleValue.Trim());
+                while (s_valueParser.Count > 0) {singleValue.Insert(insertPos, s_valueParser.Pop());}
+                tempStringCollection.Add(singleValue.ToString().Trim());
             }
 
+            s_valueParser.Clear();
             string[] stringArray = tempStringCollection.ToArray();
             return stringArray;
         }
@@ -60,8 +72,10 @@ namespace System.Net
         // will contain exactly one comma, no comma means we are still parsing it.
         private static bool IsDuringExpiresAttributeParsing(string singleValue)
         {
-            string[] attributeArray = singleValue.Split(';');
-            string lastElement = attributeArray[attributeArray.Length - 1].Trim();
+            // Current cookie doesn't contain any attributes.
+            if (singleValue.IndexOf(';') < 0) return false;
+            
+            string lastElement = singleValue.Split(';').Last();
             bool noComma = lastElement.IndexOf(',') < 0;
 
             string lastAttribute = lastElement.Split('=')[0].Trim();
