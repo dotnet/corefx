@@ -230,6 +230,10 @@ namespace System.Data.SqlClient.SNI
                             availableSocket = sockets[i];
                             break;
                         }
+                        else
+                        {
+                            sockets[i].Dispose();
+                        }
                     }
                 }
                 catch { }
