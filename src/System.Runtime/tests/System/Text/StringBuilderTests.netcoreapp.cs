@@ -214,9 +214,10 @@ namespace System.Text.Tests
             yield return new object[] { sb1, "Hello", true };
             yield return new object[] { sb1, "Hel", false };
             yield return new object[] { sb1, "Hellz", false };
-            yield return new object[] { sb1, "Hellz0", false };
+            yield return new object[] { sb1, "Hell0z", false };
             yield return new object[] { sb1, "", false };
             yield return new object[] { new StringBuilder(), "", true };
+            yield return new object[] { new StringBuilder(), "Hello", false };
             yield return new object[] { sb2, mediumString, true };
             yield return new object[] { sb2, "H", false };
             yield return new object[] { sb3, largeString, true };
