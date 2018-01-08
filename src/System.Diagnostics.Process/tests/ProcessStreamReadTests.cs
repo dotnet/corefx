@@ -235,14 +235,15 @@ namespace System.Diagnostics.Tests
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardError = true;
 
-            p.OutputDataReceived += (s, e) => {};
-            p.ErrorDataReceived += (s, e) => {};
+            p.OutputDataReceived += (s, e) => { Assert.True(false, "OutputDataReceived called after closing the process"); };
+            p.ErrorDataReceived += (s, e) => { Assert.True(false, "ErrorDataReceived called after closing the process"); };
 
             p.Start();
             p.BeginOutputReadLine();
             p.BeginErrorReadLine();
 
             p.Close();
+            RemotelyInvokable.FireClosedEvent();
         }
 
         [Fact]
