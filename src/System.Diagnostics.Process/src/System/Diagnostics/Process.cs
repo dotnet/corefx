@@ -67,7 +67,7 @@ namespace System.Diagnostics
 
         private static object s_createProcessLock = new object();
 
-        private bool _inputStreamAccessed;
+        private bool _standardInputAccessed;
 
         private StreamReadMode _outputStreamReadMode;
         private StreamReadMode _errorStreamReadMode;
@@ -693,7 +693,7 @@ namespace System.Diagnostics
                     throw new InvalidOperationException(SR.CantGetStandardIn);
                 }
 
-                _inputStreamAccessed = true;
+                _standardInputAccessed = true;
                 return _standardInput;
             }
         }
@@ -855,15 +855,23 @@ namespace System.Diagnostics
                 {
                     if (_standardOutput != null && (_outputStreamReadMode == StreamReadMode.AsyncMode || _outputStreamReadMode == StreamReadMode.Undefined))
                     {
-                    _standardOutput.Close();
+                        if (_outputStreamReadMode == StreamReadMode.AsyncMode)
+                        {
+                            _output.CancelOperation();
+                        }
+                        _standardOutput.Close();
                     }
 
                     if (_standardError != null && (_errorStreamReadMode == StreamReadMode.AsyncMode || _errorStreamReadMode == StreamReadMode.Undefined))
                     {
+                        if (_errorStreamReadMode == StreamReadMode.AsyncMode)
+                        {
+                            _error.CancelOperation();
+                        }
                         _standardError.Close();
                     }
 
-                    if (_standardInput != null && !_inputStreamAccessed) 
+                    if (_standardInput != null && !_standardInputAccessed)
                     {
                         _standardInput.Close();
                     }

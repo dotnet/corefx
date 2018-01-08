@@ -161,6 +161,17 @@ namespace System.Diagnostics.Tests
             return SuccessExitCode;
         }
 
+        public static int WriteLinesSlowlyToOutputAndError()
+        {
+            for (int i = 0; i < 50; i++)
+            {
+                Console.WriteLine("This is line #" + i + ".");
+                Console.Error.WriteLine("This is error line #" + i + ".");
+                Thread.Sleep(100);
+            }
+            return SuccessExitCode;
+        }
+
         public static string ConcatThreeArgumentsUapCmd(string one, string two, string three)
         {
             return $"echo {string.Join(",", one, two, three)} & exit {SuccessExitCode}";

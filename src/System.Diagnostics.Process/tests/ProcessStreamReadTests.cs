@@ -229,6 +229,23 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        public void TestClosingStreamsDoesNotThrow()
+        {
+            Process p = CreateProcessPortable(RemotelyInvokable.WriteLinesSlowlyToOutputAndError);
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+
+            p.OutputDataReceived += (s, e) => {};
+            p.ErrorDataReceived += (s, e) => {};
+
+            p.Start();
+            p.BeginOutputReadLine();
+            p.BeginErrorReadLine();
+
+            p.Close();
+        }
+
+        [Fact]
         public void TestStreamNegativeTests()
         {
             {
