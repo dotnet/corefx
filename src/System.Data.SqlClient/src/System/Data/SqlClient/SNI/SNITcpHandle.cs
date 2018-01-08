@@ -230,15 +230,18 @@ namespace System.Data.SqlClient.SNI
                     {
                         sockets[i] = new Socket(ipAddresses[i].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                         sockets[i].Connect(ipAddresses[i], port);
-                        if (sockets[i].Connected)
+                        if (sockets[i] != null) // sockets[i] can be null if cancel callback is executed during connect()
                         {
-                            availableSocket = sockets[i];
-                            break;
-                        }
-                        else
-                        {
-                            sockets[i].Dispose();
-                            sockets[i] = null;
+                            if (sockets[i].Connected)
+                            {
+                                availableSocket = sockets[i];
+                                break;
+                            }
+                            else
+                            {
+                                sockets[i].Dispose();
+                                sockets[i] = null;
+                            }
                         }
                     }
                 }
