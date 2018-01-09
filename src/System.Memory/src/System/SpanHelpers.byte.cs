@@ -976,7 +976,7 @@ namespace System
             if (minLength > secondLength) minLength = secondLength;
             for (int i = 0; i < minLength; i++)
             {
-                int result = Unsafe.Add(ref first, i).CompareTo( Unsafe.Add(ref second, i));
+                int result = Unsafe.Add(ref first, i).CompareTo(Unsafe.Add(ref second, i));
                 if (result != 0) return result;
             }
             return firstLength.CompareTo(secondLength);
