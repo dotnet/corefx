@@ -769,9 +769,9 @@ namespace System.Runtime.Intrinsics.X86
         public static Vector128<float> ConvertToVector128SingleScalar(Vector128<float> upper, int value) { throw null; }
         public static Vector128<float> ConvertToVector128SingleScalar(Vector128<float> upper, long value) { throw null; }
         public static Vector128<float> Divide(Vector128<float> left,  Vector128<float> right) { throw null; }
-        //public static Vector128<float> DivideScalar(Vector128<float> left, Vector128<float> right) { throw null; }
-        //public static unsafe Vector128<float> Load(float* address) { throw null; }
-       // public static unsafe Vector128<float> LoadAligned(float* address) { throw null; }
+        public static Vector128<float> DivideScalar(Vector128<float> left, Vector128<float> right) { throw null; }
+        public static unsafe Vector128<float> Load(float* address) { throw null; }
+        public static unsafe Vector128<float> LoadAligned(float* address) { throw null; }
         public static unsafe Vector128<float> LoadScalar(float* address) { throw null; }
         public static Vector128<float> Max(Vector128<float> left,  Vector128<float> right) { throw null; }
         public static Vector128<float> MaxScalar(Vector128<float> left, Vector128<float> right) { throw null; }
@@ -787,10 +787,10 @@ namespace System.Runtime.Intrinsics.X86
         public static Vector128<float> ReciprocalScalar(Vector128<float> value) { throw null; }
         public static Vector128<float> ReciprocalSqrt(Vector128<float> value) { throw null; }
         public static Vector128<float> ReciprocalSqrtScalar(Vector128<float> value) { throw null; }
-        //public static Vector128<float> Set(float e3, float e2, float e1, float e0) { throw null; }
-        //public static Vector128<float> Set1(float value) { throw null; }
+        public static Vector128<float> Set(float e3, float e2, float e1, float e0) { throw null; }
+        public static Vector128<float> Set1(float value) { throw null; }
         public static Vector128<float> SetScalar(float value) { throw null; }
-        //public static Vector128<float> SetZero() { throw null; }
+        public static Vector128<float> SetZero() { throw null; }
         public static Vector128<U> StaticCast<T, U>(Vector128<T> value) where T : struct where U : struct { throw null; }
         public static Vector128<float> Shuffle(Vector128<float> left, Vector128<float> right, byte control) { throw null; }
         public static Vector128<float> Sqrt(Vector128<float> value) { throw null; }
