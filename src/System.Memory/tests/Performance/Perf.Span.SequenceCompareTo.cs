@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Memory.Tests
 {
-    public class Perf_Span_StartsWith
+    public class Perf_Span_SequenceCompareTo
     {
         private const int InnerCount = 100000;
 
