@@ -34,6 +34,62 @@ namespace System.SpanTests
                 return;
             }
 
+            int GuidCount = (int)(bufferSize / Unsafe.SizeOf<Guid>());
+            bool allocatedFirst = false;
+            bool allocatedSecond = false;
+            IntPtr memBlockFirst = IntPtr.Zero;
+            IntPtr memBlockSecond = IntPtr.Zero;
+
+            unsafe
+            {
+                try
+                {
+                    allocatedFirst = AllocationHelper.TryAllocNative((IntPtr)bufferSize, out memBlockFirst);
+                    allocatedSecond = AllocationHelper.TryAllocNative((IntPtr)bufferSize, out memBlockSecond);
+
+                    if (allocatedFirst && allocatedSecond)
+                    {
+                        ref Guid memoryFirst = ref Unsafe.AsRef<Guid>(memBlockFirst.ToPointer());
+                        var spanFirst = new ReadOnlySpan<Guid>(memBlockFirst.ToPointer(), GuidCount);
+
+                        ref Guid memorySecond = ref Unsafe.AsRef<Guid>(memBlockSecond.ToPointer());
+                        var spanSecond = new Span<Guid>(memBlockSecond.ToPointer(), GuidCount);
+
+                        Guid theGuid = Guid.Parse("900DBAD9-00DB-AD90-00DB-AD900DBADBAD");
+                        for (int count = 0; count < GuidCount; ++count)
+                        {
+                            Unsafe.Add(ref memoryFirst, count) = theGuid;
+                        }
+
+                        spanFirst.CopyTo(spanSecond);
+
+                        for (int count = 0; count < GuidCount; ++count)
+                        {
+                            Guid guidfirst = Unsafe.Add(ref memoryFirst, count);
+                            Guid guidSecond = Unsafe.Add(ref memorySecond, count);
+                            Assert.Equal(guidfirst, guidSecond);
+                        }
+                    }
+                }
+                finally
+                {
+                    if (allocatedFirst)
+                        AllocationHelper.ReleaseNative(ref memBlockFirst);
+                    if (allocatedSecond)
+                        AllocationHelper.ReleaseNative(ref memBlockSecond);
+                }
+            }
+        }
+
+
+        public static void _CopyToLargeSizeTest(long bufferSize)
+        {
+            // If this test is run in a 32-bit process, the large allocation will fail.
+            if (Unsafe.SizeOf<IntPtr>() != sizeof(long))
+            {
+                return;
+            }
+
             if (AllocationHelper.TryAllocNative((IntPtr)1, out IntPtr pMemory))  // Synchronize with other big-memory tests to reduce stress on machine. The memory itself isn't used.
             {
                 try
