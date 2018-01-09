@@ -231,7 +231,6 @@ namespace System.Text.Tests
         [MemberData(nameof(Equals_String_TestData))]
         public static void Equals(StringBuilder sb1, string value, bool expected)
         {
-            Assert.Equal(expected, sb1.Equals(value));
             Assert.Equal(expected, sb1.Equals(value.AsReadOnlySpan()));
         }
     }
