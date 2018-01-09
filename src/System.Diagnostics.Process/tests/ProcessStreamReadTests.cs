@@ -237,8 +237,8 @@ namespace System.Diagnostics.Tests
 
             // On netfx, the handler is called once with the EventArgs as null, even if the process writes nothing to the pipe.
             // That's fine, so we'll ignore it here.
-            p.OutputDataReceived += (s, e) => { if (e != null) Assert.True(false, "OutputDataReceived called after closing the process"); };
-            p.ErrorDataReceived += (s, e) => { if (e != null) Assert.True(false, "ErrorDataReceived called after closing the process"); };
+            p.OutputDataReceived += (s, e) => { Assert.True(PlatformDetection.IsFullFramework && e == null, "OutputDataReceived called after closing the process"); };
+            p.ErrorDataReceived += (s, e) => { Assert.True(PlatformDetection.IsFullFramework && e == null, "ErrorDataReceived called after closing the process"); };
 
             p.Start();
             p.BeginOutputReadLine();
