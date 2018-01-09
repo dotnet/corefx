@@ -672,71 +672,12 @@ namespace System
 
             var minLength = firstLength;
             if (minLength > secondLength) minLength = secondLength;
-            
-            int result = 0;
-
-            IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
-            while (minLength >= 8)
-            {
-                minLength -= 8;
-
-                result = Unsafe.Add(ref first, index).CompareTo(Unsafe.Add(ref second, index));
-                if (result != 0) goto ResultNotZero;
-                result = Unsafe.Add(ref first, index + 1).CompareTo(Unsafe.Add(ref second, index + 1));
-                if (result != 0) goto ResultNotZero;
-                result = Unsafe.Add(ref first, index + 2).CompareTo(Unsafe.Add(ref second, index + 2));
-                if (result != 0) goto ResultNotZero;
-                result = Unsafe.Add(ref first, index + 3).CompareTo(Unsafe.Add(ref second, index + 3));
-                if (result != 0) goto ResultNotZero;
-                result = Unsafe.Add(ref first, index + 4).CompareTo(Unsafe.Add(ref second, index + 4));
-                if (result != 0) goto ResultNotZero;
-                result = Unsafe.Add(ref first, index + 5).CompareTo(Unsafe.Add(ref second, index + 5));
-                if (result != 0) goto ResultNotZero;
-                result = Unsafe.Add(ref first, index + 6).CompareTo(Unsafe.Add(ref second, index + 6));
-                if (result != 0) goto ResultNotZero;
-                result = Unsafe.Add(ref first, index + 7).CompareTo(Unsafe.Add(ref second, index + 7));
-                if (result != 0) goto ResultNotZero;
-
-                index += 8;
-            }
-
-            if (minLength >= 4)
-            {
-                minLength -= 4;
-
-                result = Unsafe.Add(ref first, index).CompareTo(Unsafe.Add(ref second, index));
-                if (result != 0) goto ResultNotZero;
-                result = Unsafe.Add(ref first, index + 1).CompareTo(Unsafe.Add(ref second, index + 1));
-                if (result != 0) goto ResultNotZero;
-                result = Unsafe.Add(ref first, index + 2).CompareTo(Unsafe.Add(ref second, index + 2));
-                if (result != 0) goto ResultNotZero;
-                result = Unsafe.Add(ref first, index + 3).CompareTo(Unsafe.Add(ref second, index + 3));
-                if (result != 0) goto ResultNotZero;
-                
-                index += 4;
-            }
-
-            while (minLength > 0)
-            {
-                minLength--;
-
-                result = Unsafe.Add(ref first, index).CompareTo(Unsafe.Add(ref second, index));
-                if (result != 0) goto ResultNotZero;
-
-                index += 1;
-            }
-
-            return firstLength.CompareTo(secondLength);
-
-        ResultNotZero:  // Workaround for https://github.com/dotnet/coreclr/issues/13549
-            return result;
-
-            /*for (int i = 0; i < minLength; i++)
+            for (int i = 0; i < minLength; i++)
             {
                 int result = Unsafe.Add(ref first, i).CompareTo(Unsafe.Add(ref second, i));
                 if (result != 0) return result;
             }
-            return firstLength.CompareTo(secondLength);*/
+            return firstLength.CompareTo(secondLength);
         }
     }
 }
