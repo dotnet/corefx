@@ -239,6 +239,7 @@ namespace System.Text.Tests
             var sb3 = new StringBuilder(20).Append(mediumString);
 
             yield return new object[] { new StringBuilder("Hello"), sb1, 0, 5, "HelloHello" };
+            yield return new object[] { new StringBuilder("Hello"), sb1, 0, 0, "Hello" };
             yield return new object[] { new StringBuilder("Hello"), sb1, 2, 3, "Hellollo" };
             yield return new object[] { new StringBuilder("Hello"), sb1, 2, 2, "Helloll" };
             yield return new object[] { new StringBuilder("Hello"), sb1, 2, 0, "Hello" };
