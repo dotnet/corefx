@@ -62,8 +62,7 @@ namespace System.Net
             }
 
             s_valueParser.Clear();
-            string[] stringArray = tempStringCollection.ToArray();
-            return stringArray;
+            return tempStringCollection.ToArray();
         }
 
         // This method is to check if we are in the middle of parsing the Expires attribute
@@ -74,7 +73,7 @@ namespace System.Net
         {
             // Current cookie doesn't contain any attributes.
             if (singleValue.IndexOf(';') < 0) return false;
-            
+
             string lastElement = singleValue.Split(';').Last();
             bool noComma = lastElement.IndexOf(',') < 0;
 
