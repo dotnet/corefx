@@ -173,6 +173,16 @@ namespace System.Diagnostics.Tests
             return SuccessExitCode;
         }
 
+        public static string WriteLinesAfterCloseUapCmd()
+        {
+            ClosedEvent += (s, e) =>
+            {
+                // Finish the pause
+                Console.WriteLine();
+            };
+            return "(pause > nul) & (echo This is a line to output) & (echo This is a line to error 1>&2)";
+        }
+
         public static string ConcatThreeArgumentsUapCmd(string one, string two, string three)
         {
             return $"echo {string.Join(",", one, two, three)} & exit {SuccessExitCode}";
