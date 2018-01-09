@@ -36,22 +36,18 @@ namespace System.SpanTests
             Span<int> second = new Span<int>(a, 0, 3);
             int result = first.SequenceCompareTo(second);
             Assert.True(result < 0);
-            Assert.Equal(first.Length.CompareTo(second.Length), result);
 
             result = second.SequenceCompareTo(first);
             Assert.True(result > 0);
-            Assert.Equal(second.Length.CompareTo(first.Length), result);
 
             // one sequence is empty
             first = new Span<int>(a, 1, 0);
 
             result = first.SequenceCompareTo(second);
             Assert.True(result < 0);
-            Assert.Equal(first.Length.CompareTo(second.Length), result);
 
             result = second.SequenceCompareTo(first);
             Assert.True(result > 0);
-            Assert.Equal(second.Length.CompareTo(first.Length), result);
         }
 
         [Fact]
@@ -108,12 +104,10 @@ namespace System.SpanTests
                     int result = firstSpan.SequenceCompareTo(secondSpan);
                     Assert.True(result < 0);
                     Assert.Equal(1, log.CountCompares(first[mismatchIndex].Value, second[mismatchIndex].Value));
-                    Assert.Equal(firstSpan[mismatchIndex].CompareTo(secondSpan[mismatchIndex]), result);        //adds to log.CountCompares
 
                     result = secondSpan.SequenceCompareTo(firstSpan);       // adds to log.CountCompares
                     Assert.True(result > 0);
-                    Assert.Equal(3, log.CountCompares(first[mismatchIndex].Value, second[mismatchIndex].Value));
-                    Assert.Equal(secondSpan[mismatchIndex].CompareTo(firstSpan[mismatchIndex]), result);
+                    Assert.Equal(2, log.CountCompares(first[mismatchIndex].Value, second[mismatchIndex].Value));
                 }
             }
         }
@@ -139,12 +133,10 @@ namespace System.SpanTests
                 int result = firstSpan.SequenceCompareTo(secondSpan);
                 Assert.True(result < 0);
                 Assert.Equal(1, log.CountCompares(firstSpan[0].Value, secondSpan[0].Value));
-                Assert.Equal(firstSpan[0].CompareTo(secondSpan[0]), result);        //adds to log.CountCompares
 
                 result = secondSpan.SequenceCompareTo(firstSpan);       // adds to log.CountCompares
                 Assert.True(result > 0);
-                Assert.Equal(3, log.CountCompares(firstSpan[0].Value, secondSpan[0].Value));
-                Assert.Equal(secondSpan[0].CompareTo(firstSpan[0]), result);
+                Assert.Equal(2, log.CountCompares(firstSpan[0].Value, secondSpan[0].Value));
             }
         }
 

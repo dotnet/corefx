@@ -1021,7 +1021,7 @@ namespace System
             }
 
         Equal:
-            return firstLength.CompareTo(secondLength);
+            return firstLength - secondLength;
         }
 
 #if !netstandard11

@@ -57,22 +57,18 @@ namespace System.SpanTests
             Span<byte> second = new Span<byte>(a, 0, 3);
             int result = first.SequenceCompareTo<byte>(second);
             Assert.True(result < 0);
-            Assert.Equal(first.Length.CompareTo(second.Length), result);
 
             result = second.SequenceCompareTo<byte>(first);
             Assert.True(result > 0);
-            Assert.Equal(second.Length.CompareTo(first.Length), result);
 
             // one sequence is empty
             first = new Span<byte>(a, 1, 0);
 
             result = first.SequenceCompareTo<byte>(second);
             Assert.True(result < 0);
-            Assert.Equal(first.Length.CompareTo(second.Length), result);
 
             result = second.SequenceCompareTo<byte>(first);
             Assert.True(result > 0);
-            Assert.Equal(second.Length.CompareTo(first.Length), result);
         }
 
         [Fact]
@@ -95,11 +91,9 @@ namespace System.SpanTests
                     ReadOnlySpan<byte> secondSpan = new ReadOnlySpan<byte>(second);
                     int result = firstSpan.SequenceCompareTo<byte>(secondSpan);
                     Assert.True(result < 0);
-                    Assert.Equal(firstSpan[mismatchIndex].CompareTo(secondSpan[mismatchIndex]), result);
 
                     result = secondSpan.SequenceCompareTo<byte>(firstSpan);
                     Assert.True(result > 0);
-                    Assert.Equal(secondSpan[mismatchIndex].CompareTo(firstSpan[mismatchIndex]), result);
                 }
             }
         }
@@ -122,11 +116,9 @@ namespace System.SpanTests
                 ReadOnlySpan<byte> secondSpan = new ReadOnlySpan<byte>(second);
                 int result = firstSpan.SequenceCompareTo<byte>(secondSpan);
                 Assert.True(result < 0);
-                Assert.Equal(firstSpan[0].CompareTo(secondSpan[0]), result);
 
                 result = secondSpan.SequenceCompareTo<byte>(firstSpan);
                 Assert.True(result > 0);
-                Assert.Equal(secondSpan[0].CompareTo(firstSpan[0]), result);
             }
         }
 
