@@ -202,9 +202,9 @@ namespace System.Text.Tests
 
         public static IEnumerable<object[]> Equals_String_TestData()
         {
-            var mediumString = new string('a', 30);
-            var largeString = new string('a', 1000);
-            var extraLargeString = new string('a', 41000); // 8000 is the maximum chunk size
+            string mediumString = new string('a', 30);
+            string largeString = new string('a', 1000);
+            string extraLargeString = new string('a', 41000); // 8000 is the maximum chunk size
 
             var sb1 = new StringBuilder("Hello");
             var sb2 = new StringBuilder(20).Append(mediumString);
@@ -214,7 +214,7 @@ namespace System.Text.Tests
             yield return new object[] { sb1, "Hello", true };
             yield return new object[] { sb1, "Hel", false };
             yield return new object[] { sb1, "Hellz", false };
-            yield return new object[] { sb1, "Hell0z", false };
+            yield return new object[] { sb1, "Helloz", false };
             yield return new object[] { sb1, "", false };
             yield return new object[] { new StringBuilder(), "", true };
             yield return new object[] { new StringBuilder(), "Hello", false };
@@ -222,6 +222,7 @@ namespace System.Text.Tests
             yield return new object[] { sb2, "H", false };
             yield return new object[] { sb3, largeString, true };
             yield return new object[] { sb3, "H", false };
+            yield return new object[] { sb3, new string('a', 999) + 'b', false };
             yield return new object[] { sb4, extraLargeString, true };
             yield return new object[] { sb4, "H", false };
         }
