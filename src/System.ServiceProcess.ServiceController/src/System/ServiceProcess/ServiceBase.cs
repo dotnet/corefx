@@ -917,11 +917,14 @@ namespace System.ServiceProcess
         private void WriteLogEntry(string message, bool error = false)
         {
             //EventLog failures shouldn't affect the service operation
+            Console.WriteLine("i am being called");
             try 
             {
+                Console.WriteLine("i am being called");
                 if (AutoLog)
                 {
-                    this.EventLog.WriteEntry (message);
+                    Console.WriteLine("i am being called");
+                    EventLog.WriteEntry (message); 
                 }
             }
             #region Stuff not to catch
