@@ -163,6 +163,50 @@ static void ConvertFileStatus(const struct stat_* src, struct FileStatus* dst)
 #endif
 }
 
+static void ConvertFileStatus2(const struct stat_* src, struct FileStatus2* dst)
+{
+    dst->Dev = (int64_t)src->st_dev;
+    dst->Ino = (int64_t)src->st_ino;
+    dst->Flags = FILESTATUS_FLAGS_NONE;
+    dst->Mode = (int32_t)src->st_mode;
+    dst->Uid = src->st_uid;
+    dst->Gid = src->st_gid;
+    dst->Size = src->st_size;
+
+/* On macOS (https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man2/stat.2.html)
+   and BSD (https://www.freebsd.org/cgi/man.cgi?query=stat&sektion=2):
+
+    timespec st_atimespec, st_mtimespec, st_ctimespec, st_birthtimespec
+
+  On Linux (http://man7.org/linux/man-pages/man2/stat.2.html, http://man7.org/linux/man-pages/man2/statx.2.html):
+
+    timespec st_atim, st_mtim, st_ctim
+
+        NOTE: Linux offers birthtime via statx(): we don't currently use it.
+
+  On all Unixes above the time_t st_atime,... st_birthtime are defined to always map to tv_sec part of the timespecs,
+  so we can still look for st_birthtime to determine HAVE_STAT_BIRTHTIME.
+*/
+#ifdef __linux__
+    dst->ATime = src->st_atim;
+    dst->MTime = src->st_mtim;
+    dst->CTime = src->st_ctim;
+#else
+    dst->ATime = src->st_atimespec;
+    dst->MTime = src->st_mtimespec;
+    dst->CTime = src->st_ctimespec;
+#endif
+
+
+#if HAVE_STAT_BIRTHTIME
+    dst->BirthTime = src->st_birthtimespec;
+    dst->Flags |= FILESTATUS_FLAGS_HAS_BIRTHTIME;
+#else
+    dst->BirthTime.tv_sec = 0;
+    dst->BirthTime.tv_nsec = 0;
+#endif
+}
+
 int32_t SystemNative_Stat(const char* path, struct FileStatus* output)
 {
     struct stat_ result;
@@ -199,6 +243,47 @@ int32_t SystemNative_LStat(const char* path, struct FileStatus* output)
     if (ret == 0)
     {
         ConvertFileStatus(&result, output);
+    }
+
+    return ret;
+}
+
+int32_t SystemNative_Stat2(const char* path, struct FileStatus2* output)
+{
+    struct stat_ result;
+    int ret;
+    while ((ret = stat_(path, &result)) < 0 && errno == EINTR);
+
+    if (ret == 0)
+    {
+        ConvertFileStatus2(&result, output);
+    }
+
+    return ret;
+}
+
+int32_t SystemNative_FStat2(intptr_t fd, struct FileStatus2* output)
+{
+    struct stat_ result;
+    int ret;
+    while ((ret = fstat_(ToFileDescriptor(fd), &result)) < 0 && errno == EINTR);
+
+    if (ret == 0)
+    {
+        ConvertFileStatus2(&result, output);
+    }
+
+    return ret;
+}
+
+int32_t SystemNative_LStat2(const char* path, struct FileStatus2* output)
+{
+    struct stat_ result;
+    int ret = lstat_(path, &result);
+
+    if (ret == 0)
+    {
+        ConvertFileStatus2(&result, output);
     }
 
     return ret;
