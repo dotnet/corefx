@@ -67,8 +67,8 @@ namespace System.Reflection.PortableExecutable.Tests
             bool publicSigned = false,
             Machine machine = 0)
         {
-            var peHeaderBuilder = new PEHeaderBuilder(imageCharacteristics : entryPointHandle.IsNil ? Characteristics.Dll : Characteristics.ExecutableImage,
-                                                      machine : machine);
+            var peHeaderBuilder = new PEHeaderBuilder(imageCharacteristics: entryPointHandle.IsNil ? Characteristics.Dll : Characteristics.ExecutableImage,
+                                                      machine: machine);
 
             var peBuilder = new ManagedPEBuilder(
                 peHeaderBuilder,
@@ -95,21 +95,14 @@ namespace System.Reflection.PortableExecutable.Tests
             peBlob.WriteContentTo(peStream);
         }
 
-        public static IEnumerable<object[]> AllMachineTypes()
+        public static IEnumerable<object> AllMachineTypes()
         {
-            foreach (object enumValue in Enum.GetValues(typeof(Machine)))
+            return ((Machine[])Enum.GetValues(typeof(Machine))).Select(m => new object[]{(object)m});
+/*            foreach (object enumValue in Enum.GetValues(typeof(Machine)))
             {
-                yield return new object[]{enumValue};
+                yield return new object[]{enumValue}; 
             }
-        }
-
-        public static IEnumerable<object[]> CommonMachineTypes()
-        {
-            yield return new object[] { Machine.Unknown };
-            yield return new object[] { Machine.I386 };
-            yield return new object[] { Machine.Amd64 };
-            yield return new object[] { Machine.Arm64 };
-            yield return new object[] { Machine.ArmThumb2 };
+*/
         }
 
         #endregion
@@ -348,7 +341,7 @@ namespace System.Reflection.PortableExecutable.Tests
         }
 
         [Theory] // Do BasicValidation on common machine types
-        [MemberData(nameof(CommonMachineTypes))]
+        [MemberData(nameof(AllMachineTypes))]
         public void Complex(Machine machine)
         {
             using (var peStream = new MemoryStream())
