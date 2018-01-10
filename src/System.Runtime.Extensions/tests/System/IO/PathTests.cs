@@ -933,6 +933,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void GetFullPath_BasePath_InvalidInput()
         {
             Assert.Throws<ArgumentNullException>(() => Path.GetFullPath("", null));
@@ -1048,7 +1049,7 @@ namespace System.IO.Tests
 
         public static IEnumerable<object[]> GetFullPath_BasePath_BasicExpansions_TestData_Unix()
         {
-            string curDir = @"c:\git\corefx";
+            string curDir = @"\home";
             yield return new object[] { curDir, curDir, curDir };
             yield return new object[] { "", curDir, curDir };
             yield return new object[] { curDir, "foo\bar", curDir };
@@ -1125,21 +1126,6 @@ namespace System.IO.Tests
             yield return new object[] { @"\tmp\bar\..", curDir, Path.GetPathRoot(curDir) + @"tmp" };
             yield return new object[] { @"\tmp\bar\..", curDir, Path.GetPathRoot(curDir) + @"tmp" };
             yield return new object[] { @"\", curDir, Path.GetPathRoot(curDir) };
-
-            // Specific drive rooted
-            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\..", curDir, Path.GetPathRoot(curDir) + @"tmp" };
-            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\.", curDir, Path.GetPathRoot(curDir) + @"tmp\foo" };
-            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp\foo\..", curDir, Path.GetPathRoot(curDir) + @"tmp" };
-            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":tmp", curDir, Path.GetPathRoot(curDir) + @"tmp" };
-            yield return new object[] { Path.GetPathRoot(curDir)[0] + @":", curDir, Path.GetPathRoot(curDir) };
-            yield return new object[] { Path.GetPathRoot(curDir)[0], curDir, curDir + Path.DirectorySeparatorChar + Path.GetPathRoot(curDir)[0] };
-
-            yield return new object[] { @"Z:tmp\foo\..", curDir, @"Z:\tmp" };
-            yield return new object[] { @"Z:tmp\foo\.", curDir, @"Z:\tmp\foo" };
-            yield return new object[] { @"Z:tmp\foo\..", curDir, @"Z:\tmp" };
-            yield return new object[] { @"Z:tmp", curDir, @"Z:\tmp" };
-            yield return new object[] { @"Z:", curDir, @"Z:\" };
-            yield return new object[] { @"Z", curDir, curDir + Path.DirectorySeparatorChar + @"Z" };
         }
 
         [Theory]
