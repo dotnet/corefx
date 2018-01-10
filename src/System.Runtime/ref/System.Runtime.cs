@@ -7117,55 +7117,6 @@ namespace System.Security
         public VerificationException(string message, System.Exception innerException) { }
     }
 }
-namespace System.Text
-{
-    [System.AttributeUsageAttribute((System.AttributeTargets)(1), AllowMultiple=false)]
-    public sealed partial class SecurityRulesAttribute : System.Attribute
-    {
-        public SecurityRulesAttribute(System.Security.SecurityRuleSet ruleSet) { }
-        public System.Security.SecurityRuleSet RuleSet { get { throw null; } }
-        public bool SkipVerificationInFullTrust { get { throw null; } set { } }
-    }
-    public enum SecurityRuleSet : byte
-    {
-        Level1 = (byte)1,
-        Level2 = (byte)2,
-        None = (byte)0,
-    }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(5500), AllowMultiple=false, Inherited=false)]
-    public sealed partial class SecuritySafeCriticalAttribute : System.Attribute
-    {
-        public SecuritySafeCriticalAttribute() { }
-    }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(1), AllowMultiple=false, Inherited=false)]
-    public sealed partial class SecurityTransparentAttribute : System.Attribute
-    {
-        public SecurityTransparentAttribute() { }
-    }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(5501), AllowMultiple=false, Inherited=false)]
-    [System.ObsoleteAttribute("SecurityTreatAsSafe is only used for .NET 2.0 transparency compatibility.  Please use the SecuritySafeCriticalAttribute instead.")]
-    public sealed partial class SecurityTreatAsSafeAttribute : System.Attribute
-    {
-        public SecurityTreatAsSafeAttribute() { }
-    }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(5188), AllowMultiple=true, Inherited=false)]
-    public sealed partial class SuppressUnmanagedCodeSecurityAttribute : System.Attribute
-    {
-        public SuppressUnmanagedCodeSecurityAttribute() { }
-    }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(2), AllowMultiple=true, Inherited=false)]
-    public sealed partial class UnverifiableCodeAttribute : System.Attribute
-    {
-        public UnverifiableCodeAttribute() { }
-    }
-    public partial class VerificationException : System.SystemException
-    {
-        public VerificationException() { }
-        protected VerificationException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public VerificationException(string message) { }
-        public VerificationException(string message, System.Exception innerException) { }
-    }
-}
 namespace System.Security.Cryptography
 {
     public partial class CryptographicException : System.SystemException
