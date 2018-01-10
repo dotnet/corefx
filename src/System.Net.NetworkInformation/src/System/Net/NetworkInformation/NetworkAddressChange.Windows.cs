@@ -15,6 +15,8 @@ namespace System.Net.NetworkInformation
         //introduced for supporting design-time loading of System.Windows.dll
         [Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
         public static void RegisterNetworkChange(NetworkChange nc) { }
+        
+        static private object globalLock = new object();
 
         public static event NetworkAvailabilityChangedEventHandler NetworkAvailabilityChanged
         {
@@ -42,7 +44,6 @@ namespace System.Net.NetworkInformation
 
         internal static class AvailabilityChangeListener
         {
-            private static readonly object s_syncObject = new object();
             private static readonly Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> s_availabilityCallerArray =
                 new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>();
             private static readonly NetworkAddressChangedEventHandler s_addressChange = ChangedAddress;
@@ -56,7 +57,7 @@ namespace System.Net.NetworkInformation
 
             private static void ChangedAddress(object sender, EventArgs eventArgs)
             {
-                lock (s_syncObject)
+                lock (globalLock)
                 {
                     bool isAvailableNow = SystemNetworkInterface.InternalGetIsNetworkAvailable();
 
@@ -85,7 +86,7 @@ namespace System.Net.NetworkInformation
 
             internal static void Start(NetworkAvailabilityChangedEventHandler caller)
             {
-                lock (s_syncObject)
+                lock (globalLock)
                 {
                     if (s_availabilityCallerArray.Count == 0)
                     {
@@ -102,7 +103,7 @@ namespace System.Net.NetworkInformation
 
             internal static void Stop(NetworkAvailabilityChangedEventHandler caller)
             {
-                lock (s_syncObject)
+                lock (globalLock)
                 {
                     s_availabilityCallerArray.Remove(caller);
                     if (s_availabilityCallerArray.Count == 0)
@@ -132,7 +133,7 @@ namespace System.Net.NetworkInformation
             // Callback fired when an address change occurs.
             private static void AddressChangedCallback(object stateObject, bool signaled)
             {
-                lock (s_callerArray)
+                lock (globalLock)
                 {
                     // The listener was canceled, which would only happen if we aren't listening for more events.
                     s_isPending = false;
@@ -189,7 +190,7 @@ namespace System.Net.NetworkInformation
 
             private static void StartHelper(NetworkAddressChangedEventHandler caller, bool captureContext, StartIPOptions startIPOptions)
             {
-                lock (s_callerArray)
+                lock (globalLock)
                 {
                     // Setup changedEvent and native overlapped struct.
                     if (s_ipv4Socket == null)
@@ -315,7 +316,7 @@ namespace System.Net.NetworkInformation
 
             internal static void Stop(NetworkAddressChangedEventHandler caller)
             {
-                lock (s_callerArray)
+                lock (globalLock)
                 {
                     s_callerArray.Remove(caller);
                     if (s_callerArray.Count == 0 && s_isListening)
