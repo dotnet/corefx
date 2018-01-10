@@ -119,7 +119,7 @@ namespace System.Collections.ObjectModel
         /// </summary>
         /// <param name="index">The zero-based index at which the new elements should be inserted.</param>
         /// <param name="collection">The collection whose elements should be inserted into the List<T>.
-        /// The collection itself cannot be null, but it can contain elements that are null, if type T is a reference type.</param>
+        /// The collection itself cannot be null, but it can contain elements that are null, if type T is a reference type.</param>        
         public void InsertRange(int index, IEnumerable<T> collection)
         {
             if (collection == null)
@@ -150,7 +150,7 @@ namespace System.Collections.ObjectModel
 
             if (list.Count == 1)
             {
-                InsertItem(Count, ((IList<T>)list)[0]);
+                InsertItem(index, ((IList<T>)list)[0]);
                 return;
             }
 
@@ -160,6 +160,7 @@ namespace System.Collections.ObjectModel
             var target = (List<T>)Items;
             target.InsertRange(index, collection);
 
+            OnEssentialPropertiesChanged();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, (IList)list, index));
         }
 
@@ -219,8 +220,7 @@ namespace System.Collections.ObjectModel
                 }
             }
 
-            OnCountPropertyChanged();
-            OnIndexerPropertyChanged();
+            OnEssentialPropertiesChanged();
 
             if (Count == 0)
                 OnCollectionReset();
@@ -254,8 +254,7 @@ namespace System.Collections.ObjectModel
             CheckReentrancy();
             items.RemoveRange(index, count);
 
-            OnCountPropertyChanged();
-            OnIndexerPropertyChanged();
+            OnEssentialPropertiesChanged();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removedItems, index));
         }
 
@@ -345,8 +344,7 @@ namespace System.Collections.ObjectModel
                     }
                 }
 
-                OnCountPropertyChanged();
-                OnIndexerPropertyChanged();
+                OnEssentialPropertiesChanged();
             }
         }
 
@@ -413,8 +411,7 @@ namespace System.Collections.ObjectModel
 
             CheckReentrancy();
             base.ClearItems();
-            OnCountPropertyChanged();
-            OnIndexerPropertyChanged();
+            OnEssentialPropertiesChanged();
             OnCollectionReset();
         }
 
@@ -432,8 +429,7 @@ namespace System.Collections.ObjectModel
 
             base.RemoveItem(index);
 
-            OnCountPropertyChanged();
-            OnIndexerPropertyChanged();
+            OnEssentialPropertiesChanged();
             OnCollectionChanged(NotifyCollectionChangedAction.Remove, removedItem, index);
         }
 
@@ -446,8 +442,7 @@ namespace System.Collections.ObjectModel
             CheckReentrancy();
             base.InsertItem(index, item);
 
-            OnCountPropertyChanged();
-            OnIndexerPropertyChanged();
+            OnEssentialPropertiesChanged();
             OnCollectionChanged(NotifyCollectionChangedAction.Add, item, index);
         }
 
@@ -584,17 +579,12 @@ namespace System.Collections.ObjectModel
                 return enumerator.MoveNext();
         }
 
-        /// <summary>
-        /// Helper to raise a PropertyChanged event for the Count property
-        /// </summary>
-        private void OnCountPropertyChanged()
+        private void OnEssentialPropertiesChanged()
         {
             OnPropertyChanged(EventArgsCache.CountPropertyChanged);
+            OnIndexerPropertyChanged();
         }
 
-        /// <summary>
-        /// Helper to raise a PropertyChanged event for the Indexer property
-        /// </summary>
         private void OnIndexerPropertyChanged()
         {
             OnPropertyChanged(EventArgsCache.IndexerPropertyChanged);

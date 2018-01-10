@@ -6,6 +6,8 @@
 // ------------------------------------------------------------------------------
 
 
+using System.Collections.Generic;
+
 namespace System.Collections.ObjectModel
 {
     public abstract partial class KeyedCollection<TKey, TItem> : System.Collections.ObjectModel.Collection<TItem>
@@ -44,7 +46,13 @@ namespace System.Collections.ObjectModel
         protected virtual void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e) { }
         protected override void RemoveItem(int index) { }
         protected override void SetItem(int index, T item) { }
+        #region Range functionality
         public void AddRange(System.Collections.Generic.IEnumerable<T> collection) { }
+        public void InsertRange(int index, IEnumerable<T> collection) { }
+        public void RemoveRange(IEnumerable<T> collection) { }
+        public void RemoveRange(int index, int count) { }    
+        public void ReplaceRange(IEnumerable<T> collection) { }
+        #endregion Range functionality
     }
     public partial class ReadOnlyDictionary<TKey, TValue> : System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IDictionary<TKey, TValue>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IReadOnlyCollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>, System.Collections.ICollection, System.Collections.IDictionary, System.Collections.IEnumerable
     {
