@@ -141,7 +141,7 @@ OnStop
             Assert.Equal(expected, _testService.GetServiceOutput());
         }
 
-        // [ConditionalFact(nameof(IsProcessElevated))]
+        [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnExecuteCustomCommand()
         {
             var controller = new ServiceController(_testService.TestServiceName);
