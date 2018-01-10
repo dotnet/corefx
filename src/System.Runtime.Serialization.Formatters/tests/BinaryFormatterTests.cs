@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
+using NetStandardLib;
 using Xunit;
 
 namespace System.Runtime.Serialization.Formatters.Tests
@@ -100,6 +101,27 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     EqualityExtensions.CheckEquals(obj, BinaryFormatterHelpers.FromBase64String(blobs[i], FormatterAssemblyStyle.Full), isSamePlatform);
                 }
             }
+        }
+
+        [Fact]
+        public void NetStandardLibTest()
+        {
+            // When we start to run our tests against net472 we can remove the ThrowsIf clause, the NetStandardLib project
+            // and the build configuration for netfx in the Configuration.props file in the test folder. Meanwhile this asserts
+            // (1) the behavior isn't broken on .NET Core and (2) the behavior is broken on .NET Framework.
+
+            AssertExtensions.ThrowsIf<TypeLoadException>(PlatformDetection.IsFullFramework, () =>
+            {
+                var serializableType = new SerializableType();
+                byte[] blob = BinaryFormatterHelpers.ToByteArray(serializableType);
+                SerializableType serializableTypeClone = (SerializableType)BinaryFormatterHelpers.FromByteArray(blob);
+
+                Assert.True(serializableType.OnSerializingFired);
+                Assert.False(serializableType.OnDeserializedFired);
+
+                Assert.True(serializableTypeClone.OnDeserializedFired);
+                Assert.False(serializableTypeClone.OnSerializingFired);
+            });
         }
 
         [Fact]

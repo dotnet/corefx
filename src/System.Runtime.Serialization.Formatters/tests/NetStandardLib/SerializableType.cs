@@ -10,20 +10,32 @@ namespace NetStandardLib
     [Serializable]
     public class SerializableType
     {
-        public bool OnSerializingFired { get; private set; }
+        [NonSerialized]
+        private bool _onSerializingFired;
+
+        [NonSerialized]
+        private bool _onDeserializedFired;
+
+        public bool OnSerializingFired
+        {
+            get => _onSerializingFired;
+        }
         
-        public bool OnDeserializedFired { get; private set; }
+        public bool OnDeserializedFired
+        {
+            get => _onDeserializedFired;
+        }
 
         [OnSerializing]
         private void OnSerializing(StreamingContext context)
         {
-           OnSerializingFired = true;
+           _onSerializingFired = true;
         }
 
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
-            OnDeserializedFired = true;
+            _onDeserializedFired = true;
         }
     }
 }
