@@ -17,20 +17,18 @@ namespace System.Net
         private static readonly Func<string, string[]> s_setCookieParser = value => ParseValueHelper(value, isSetCookie: true);
         private static readonly HeaderInfo s_unknownHeaderInfo = new HeaderInfo(string.Empty, false, false, false, s_singleParser);
         private static readonly Hashtable s_headerHashTable;
-        private static readonly Stack<char> s_valueParser = new Stack<char>();
 
         private static string[] ParseValueHelper(string value, bool isSetCookie)
         {
             // RFC 6265: (for Set-Cookie header)
             // If the name-value-pair string lacks a %x3D ("=") character, ignore the set-cookie-string entirely.
-            if (isSetCookie && (value.IndexOf('=') < 0)) return new string[0];
+            if (isSetCookie && (value.IndexOf('=') < 0)) return Array.Empty<string>();
 
-            List<string> tempStringCollection = new List<string>();
+            var tempStringCollection = new List<string>();
 
             bool inquote = false;
-            int chIndex = 0;
-            StringBuilder singleValue = new StringBuilder();
-            int insertPos = 0;
+            int startIndex = 0;
+            int length = 0;
 
             for (int i = 0; i < value.Length; i++)
             {
@@ -40,29 +38,23 @@ namespace System.Net
                 }
                 else if ((value[i] == ',') && !inquote)
                 {
-                    while (s_valueParser.Count > 0) singleValue.Insert(insertPos, s_valueParser.Pop());
-                    insertPos = singleValue.Length;
-                    if (!isSetCookie || !IsDuringExpiresAttributeParsing(singleValue.ToString()))
+                    if (!isSetCookie || !IsDuringExpiresAttributeParsing(value.SubstringTrim(startIndex, length)))
                     {
-                        tempStringCollection.Add(singleValue.ToString().Trim());
-                        chIndex = 0;
-                        insertPos = 0;
-                        singleValue.Clear();
+                        tempStringCollection.Add(value.SubstringTrim(startIndex, length));
+                        startIndex = i + 1;
+                        length = 0;
                         continue;
                     }
                 }
-                s_valueParser.Push(value[i]);
-                chIndex++;
+                length++;
             }
 
-            // Now add the last of the header values to the stringtable.
-            if (chIndex != 0)
+            // Now add the last of the header values to the string table.
+            if (startIndex < value.Length && length > 0)
             {
-                while (s_valueParser.Count > 0) singleValue.Insert(insertPos, s_valueParser.Pop());
-                tempStringCollection.Add(singleValue.ToString().Trim());
+                tempStringCollection.Add(value.SubstringTrim(startIndex, length));
             }
 
-            s_valueParser.Clear();
             return tempStringCollection.ToArray();
         }
 
