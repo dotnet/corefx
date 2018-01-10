@@ -56,7 +56,8 @@ namespace System.Net
             }
 
             // Now add the last of the header values to the stringtable.
-            if (chIndex != 0) {
+            if (chIndex != 0)
+            {
                 while (s_valueParser.Count > 0) singleValue.Insert(insertPos, s_valueParser.Pop());
                 tempStringCollection.Add(singleValue.ToString().Trim());
             }
