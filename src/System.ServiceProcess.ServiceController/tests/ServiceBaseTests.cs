@@ -177,27 +177,18 @@ OnStop
         [ConditionalFact(nameof(IsProcessElevated))]
         public void LogWritten()
         {
-            var controller = new ServiceController(_testService.TestServiceName);
-            AssertExpectedProperties(controller);
-            string expected =
-@"OnStart args=
-OnCustomCommand command=128
-OnStop
-";
-            controller.ExecuteCommand(128);
-            controller.WaitForStatus(ServiceControllerStatus.Running);
-
             using (EventLog eventLog = new EventLog("Application"))
             {
-                //eventLog.Source = controller.ServiceName;
-                // Assert.True(EventLog.SourceExists(controller.ServiceName));
-                // Assert.Equal(0, eventLog.Entries.Count);
-                //Assert.Equal("", eventLog.LogDisplayName);
-                //Assert.Contains("Service command was processed successfully.", eventLog.Entries[eventLog.Entries.Count - 2].Message);
-            }
-            controller.Stop();
-            controller.WaitForStatus(ServiceControllerStatus.Stopped);
-            Assert.Equal(expected, _testService.GetServiceOutput());
+                ServiceBase sb = new ServiceBase() { ServiceName = "hello" };
+                Assert.False(EventLog.SourceExists(sb.ServiceName));
+                int count = eventLog.Entries.Count;
+                ServiceBase.Run(sb);
+                eventLog.Source = sb.ServiceName;
+                Assert.True(EventLog.SourceExists(sb.ServiceName));
+                Assert.True(eventLog.Entries.Count > count);
+                sb.Stop();
+                EventLog.DeleteEventSource(sb.ServiceName);
+            } 
         }
 
         public void Dispose()
