@@ -7119,98 +7119,6 @@ namespace System.Security
 }
 namespace System.Text
 {
-    public sealed partial class StringBuilder : System.Runtime.Serialization.ISerializable
-    {
-        public StringBuilder() { }
-        public StringBuilder(int capacity) { }
-        public StringBuilder(int capacity, int maxCapacity) { }
-        public StringBuilder(string value) { }
-        public StringBuilder(string value, int capacity) { }
-        public StringBuilder(string value, int startIndex, int length, int capacity) { }
-        public int Capacity { get { throw null; } set { } }
-        [System.Runtime.CompilerServices.IndexerName("Chars")]
-        public char this[int index] { get { throw null; } set { } }
-        public int Length { get { throw null; } set { } }
-        public int MaxCapacity { get { throw null; } }
-        public System.Text.StringBuilder Append(bool value) { throw null; }
-        public System.Text.StringBuilder Append(byte value) { throw null; }
-        public System.Text.StringBuilder Append(char value) { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public unsafe System.Text.StringBuilder Append(char* value, int valueCount) { throw null; }
-        public System.Text.StringBuilder Append(char value, int repeatCount) { throw null; }
-        public System.Text.StringBuilder Append(char[] value) { throw null; }
-        public System.Text.StringBuilder Append(char[] value, int startIndex, int charCount) { throw null; }
-        public System.Text.StringBuilder Append(decimal value) { throw null; }
-        public System.Text.StringBuilder Append(double value) { throw null; }
-        public System.Text.StringBuilder Append(short value) { throw null; }
-        public System.Text.StringBuilder Append(int value) { throw null; }
-        public System.Text.StringBuilder Append(long value) { throw null; }
-        public System.Text.StringBuilder Append(object value) { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public System.Text.StringBuilder Append(sbyte value) { throw null; }
-        public System.Text.StringBuilder Append(float value) { throw null; }
-        public System.Text.StringBuilder Append(string value) { throw null; }
-        public System.Text.StringBuilder Append(string value, int startIndex, int count) { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public System.Text.StringBuilder Append(ushort value) { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public System.Text.StringBuilder Append(uint value) { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public System.Text.StringBuilder Append(ulong value) { throw null; }
-        public System.Text.StringBuilder Append(System.ReadOnlySpan<char> value) { throw null; }
-        public System.Text.StringBuilder AppendFormat(System.IFormatProvider provider, string format, object arg0) { throw null; }
-        public System.Text.StringBuilder AppendFormat(System.IFormatProvider provider, string format, object arg0, object arg1) { throw null; }
-        public System.Text.StringBuilder AppendFormat(System.IFormatProvider provider, string format, object arg0, object arg1, object arg2) { throw null; }
-        public System.Text.StringBuilder AppendFormat(System.IFormatProvider provider, string format, params object[] args) { throw null; }
-        public System.Text.StringBuilder AppendFormat(string format, object arg0) { throw null; }
-        public System.Text.StringBuilder AppendFormat(string format, object arg0, object arg1) { throw null; }
-        public System.Text.StringBuilder AppendFormat(string format, object arg0, object arg1, object arg2) { throw null; }
-        public System.Text.StringBuilder AppendFormat(string format, params object[] args) { throw null; }
-        public System.Text.StringBuilder AppendLine() { throw null; }
-        public System.Text.StringBuilder AppendLine(string value) { throw null; }
-        public StringBuilder AppendJoin(string separator, params object[] values) { throw null; }
-        public StringBuilder AppendJoin<T>(string separator, System.Collections.Generic.IEnumerable<T> values) { throw null; }
-        public StringBuilder AppendJoin(string separator, params string[] values) { throw null; }
-        public StringBuilder AppendJoin(char separator, params object[] values) { throw null; }
-        public StringBuilder AppendJoin<T>(char separator, System.Collections.Generic.IEnumerable<T> values) { throw null; }
-        public StringBuilder AppendJoin(char separator, params string[] values) { throw null; }
-        public System.Text.StringBuilder Clear() { throw null; }
-        public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) { }
-        public void CopyTo(int sourceIndex, System.Span<char> destination, int count) { }
-        public int EnsureCapacity(int capacity) { throw null; }
-        public bool Equals(System.Text.StringBuilder sb) { throw null; }
-        public bool Equals(System.ReadOnlySpan<char> value) { throw null; }
-        void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public System.Text.StringBuilder Insert(int index, bool value) { throw null; }
-        public System.Text.StringBuilder Insert(int index, byte value) { throw null; }
-        public System.Text.StringBuilder Insert(int index, char value) { throw null; }
-        public System.Text.StringBuilder Insert(int index, char[] value) { throw null; }
-        public System.Text.StringBuilder Insert(int index, char[] value, int startIndex, int charCount) { throw null; }
-        public System.Text.StringBuilder Insert(int index, System.ReadOnlySpan<char> value) { throw null; }
-        public System.Text.StringBuilder Insert(int index, decimal value) { throw null; }
-        public System.Text.StringBuilder Insert(int index, double value) { throw null; }
-        public System.Text.StringBuilder Insert(int index, short value) { throw null; }
-        public System.Text.StringBuilder Insert(int index, int value) { throw null; }
-        public System.Text.StringBuilder Insert(int index, long value) { throw null; }
-        public System.Text.StringBuilder Insert(int index, object value) { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public System.Text.StringBuilder Insert(int index, sbyte value) { throw null; }
-        public System.Text.StringBuilder Insert(int index, float value) { throw null; }
-        public System.Text.StringBuilder Insert(int index, string value) { throw null; }
-        public System.Text.StringBuilder Insert(int index, string value, int count) { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public System.Text.StringBuilder Insert(int index, ushort value) { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public System.Text.StringBuilder Insert(int index, uint value) { throw null; }
-        [System.CLSCompliantAttribute(false)]
-        public System.Text.StringBuilder Insert(int index, ulong value) { throw null; }
-        public System.Text.StringBuilder Remove(int startIndex, int length) { throw null; }
-        public System.Text.StringBuilder Replace(char oldChar, char newChar) { throw null; }
-        public System.Text.StringBuilder Replace(char oldChar, char newChar, int startIndex, int count) { throw null; }
-        public System.Text.StringBuilder Replace(string oldValue, string newValue) { throw null; }
-        public System.Text.StringBuilder Replace(string oldValue, string newValue, int startIndex, int count) { throw null; }
-        public override string ToString() { throw null; }
-    }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1), AllowMultiple=false)]
     public sealed partial class SecurityRulesAttribute : System.Attribute
     {
@@ -7602,6 +7510,7 @@ namespace System.Text
         public void CopyTo(int sourceIndex, System.Span<char> destination, int count) { }
         public int EnsureCapacity(int capacity) { throw null; }
         public bool Equals(System.Text.StringBuilder sb) { throw null; }
+        public bool Equals(System.ReadOnlySpan<char> value) { throw null; }
         public System.Text.StringBuilder Insert(int index, bool value) { throw null; }
         public System.Text.StringBuilder Insert(int index, byte value) { throw null; }
         public System.Text.StringBuilder Insert(int index, char value) { throw null; }
