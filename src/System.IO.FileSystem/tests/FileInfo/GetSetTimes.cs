@@ -81,7 +81,7 @@ namespace System.IO.Tests
         }
 
 
-        [Fact][Trait("Type", "foo")]
+        [Fact]
         [PlatformSpecific(TestPlatforms.Linux)]
         public void BirthTimeIsNotNewerThanLowestOfAccessModifiedTimes()
         {
