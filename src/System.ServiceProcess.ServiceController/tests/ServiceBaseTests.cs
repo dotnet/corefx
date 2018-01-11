@@ -191,6 +191,21 @@ OnStop
             } 
         }
 
+        [ConditionalFact(nameof(IsProcessElevated))]
+        public void LogWritten_AutoLog_False()
+        {
+            using (EventLog eventLog = new EventLog("Application"))
+            {
+                ServiceBase sb = new ServiceBase() { ServiceName = "hello", AutoLog = false };
+                Assert.False(EventLog.SourceExists(sb.ServiceName));
+                int count = eventLog.Entries.Count;
+                ServiceBase.Run(sb);
+                Assert.False(EventLog.SourceExists(sb.ServiceName));
+                Assert.Equal(eventLog.Entries.Count, count);
+                sb.Stop();
+            }
+        }
+
         public void Dispose()
         {
             if (!_disposed)

@@ -234,7 +234,7 @@ namespace System.ServiceProcess
         }
 
         /// <devdoc>
-        /// you can use to write noficiation of service command calls, such as Start and Stop, to the Application event log. This property is read-only.
+        /// can be used to write notification of service command calls, such as Start and Stop, to the Application event log. This property is read-only.
         /// </devdoc>
         [Browsable (false), DesignerSerializationVisibility (DesignerSerializationVisibility.Hidden)]
         public virtual EventLog EventLog 
@@ -243,9 +243,8 @@ namespace System.ServiceProcess
             {
                 if (eventLog == null) 
                 {
-                    eventLog = new EventLog ();
+                    eventLog = new EventLog("Application");
                     eventLog.Source = ServiceName;
-                    eventLog.Log = "Application";
                 }
 
                 return eventLog;
@@ -916,7 +915,7 @@ namespace System.ServiceProcess
 
         private void WriteLogEntry(string message, bool error = false)
         {
-            //EventLog failures shouldn't affect the service operation
+            // EventLog failures shouldn't affect the service operation
             try 
             {
                 if (AutoLog)

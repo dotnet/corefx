@@ -30,5 +30,8 @@
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.ThreadPool" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\System.Diagnostics.EventLog\ref\System.Diagnostics.EventLog.csproj" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
