@@ -187,7 +187,7 @@ static void ConvertFileStatus2(const struct stat_* src, struct FileStatus2* dst)
   On all Unixes above the time_t st_atime,... st_birthtime are defined to always map to tv_sec part of the timespecs,
   so we can still look for st_birthtime to determine HAVE_STAT_BIRTHTIME.
 */
-#ifdef __linux__
+#ifdef HAVE_STAT_LINUX_FORMAT
     dst->ATime = src->st_atim;
     dst->MTime = src->st_mtim;
     dst->CTime = src->st_ctim;

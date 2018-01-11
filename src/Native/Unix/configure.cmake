@@ -165,6 +165,12 @@ check_struct_has_member(
     HAVE_STAT_BIRTHTIME)
 
 check_struct_has_member(
+    "struct stat"
+    st_atim
+    "sys/types.h;sys/stat.h"
+    HAVE_STAT_LINUX_FORMAT)
+
+check_struct_has_member(
     "struct dirent"
     d_namlen
     "dirent.h"

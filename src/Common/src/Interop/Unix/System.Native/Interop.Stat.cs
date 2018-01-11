@@ -16,12 +16,12 @@ internal static partial class Interop
         // Explicitly saying Sequential disables that warning/error for consumers which only
         // use Stat in debug builds.
         [StructLayout(LayoutKind.Sequential)]
-        internal struct TimeSpec : IComparable<TimeSpec>
+        internal struct TimeSpec
         {
             internal long Seconds;
             internal long Nanoseconds;
 
-            public int CompareTo(TimeSpec other)
+            internal int CompareTo(TimeSpec other)
             {
                 if (this.Seconds < other.Seconds)
                     return -1;
