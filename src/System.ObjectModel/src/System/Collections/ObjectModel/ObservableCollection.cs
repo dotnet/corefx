@@ -117,9 +117,11 @@ namespace System.Collections.ObjectModel
         /// <summary>
         /// Inserts the elements of a collection into the <see cref="ObservableCollection{T}"/> at the specified index.
         /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="collection"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is not in the collection range.</exception>
         /// <param name="index">The zero-based index at which the new elements should be inserted.</param>
         /// <param name="collection">The collection whose elements should be inserted into the List<T>.
-        /// The collection itself cannot be null, but it can contain elements that are null, if type T is a reference type.</param>        
+        /// The collection itself cannot be null, but it can contain elements that are null, if type T is a reference type.</param>                
         public void InsertRange(int index, IEnumerable<T> collection)
         {
             if (collection == null)
@@ -165,11 +167,11 @@ namespace System.Collections.ObjectModel
         }
 
 
-        /// <summary>
         /// <summary> 
         /// Removes the first occurence of each item in the specified collection from ObservableCollection(Of T).
         /// </summary>
-        /// <param name="collection">The items to remove.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="collection"/> is null.</exception>
+        /// <param name="collection">The items to remove.</param>        
         public void RemoveRange(IEnumerable<T> collection)
         {
             if (collection == null)
@@ -199,6 +201,8 @@ namespace System.Collections.ObjectModel
             CheckReentrancy();
 
             var clusters = new Dictionary<int, List<T>>();
+            var lastIndex = -1;
+            List<T> lastCluster = null;
             foreach (T item in collection)
             {
                 var index = IndexOf(item);
@@ -209,13 +213,13 @@ namespace System.Collections.ObjectModel
 
                 Items.RemoveAt(index);
 
-                if (clusters.TryGetValue(index, out List<T> cluster))
+                if (lastIndex == index && lastCluster != null)
                 {
-                    cluster.Add(item);
-                }                
+                    lastCluster.Add(item);
+                }
                 else
                 {
-                    clusters[index] = new List<T> { item };
+                    clusters[lastIndex = index] = lastCluster = new List<T> { item };
                 }
             }
 
@@ -223,7 +227,7 @@ namespace System.Collections.ObjectModel
 
             if (Count == 0)
                 OnCollectionReset();
-            else                
+            else
                 foreach (KeyValuePair<int, List<T>> cluster in clusters)
                     OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster.Value, cluster.Key));
 
@@ -234,14 +238,15 @@ namespace System.Collections.ObjectModel
         /// </summary>
         /// <param name="index">The zero-based starting index of the range of elements to remove.</param>
         /// <param name="count">The number of elements to remove.</param>
+        /// <exception cref="ArgumentOutOfRangeException">The specified range is exceeding the collection.</exception>
         public void RemoveRange(int index, int count)
         {
-            if (index < 0 || (index + count) < Count)
+            if (index < 0 || (index + count) > Count)
                 throw new ArgumentOutOfRangeException();
 
             if (count == 0)
                 return;
-
+                        
             if (count == 1)
             {
                 RemoveItem(index);
@@ -255,7 +260,10 @@ namespace System.Collections.ObjectModel
             items.RemoveRange(index, count);
 
             OnEssentialPropertiesChanged();
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removedItems, index));
+            if (Count == 0)
+                OnCollectionReset();
+            else
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removedItems, index));
         }
 
         /// <summary> 
@@ -676,12 +684,12 @@ namespace System.Collections.ObjectModel
         }
 
         #endregion Private Types
-    }
 
-    internal static class EventArgsCache
-    {
-        internal static readonly PropertyChangedEventArgs CountPropertyChanged = new PropertyChangedEventArgs("Count");
-        internal static readonly PropertyChangedEventArgs IndexerPropertyChanged = new PropertyChangedEventArgs("Item[]");
-        internal static readonly NotifyCollectionChangedEventArgs ResetCollectionChanged = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
+        private static class EventArgsCache
+        {
+            internal static readonly PropertyChangedEventArgs CountPropertyChanged = new PropertyChangedEventArgs("Count");
+            internal static readonly PropertyChangedEventArgs IndexerPropertyChanged = new PropertyChangedEventArgs("Item[]");
+            internal static readonly NotifyCollectionChangedEventArgs ResetCollectionChanged = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
+        }
     }
 }

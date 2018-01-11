@@ -161,20 +161,47 @@ namespace System.Collections.ObjectModel.Tests
             helper = new CollectionAndPropertyChangedTester();
             helper.RemoveRangeTest(col, toRemove);
 
+            //remove items in reversed order
+            //TODO: implement clustering items regardless to their removal order.
+            resetCollection();
+            toRemove = items.Skip(1).Reverse().ToArray();
+            helper = new CollectionAndPropertyChangedTester();
+            helper.RemoveRangeTest(col, toRemove, (2, toRemove.Take(1)), (1, toRemove.Skip(1)));
+
             //remove non existing items
             resetCollection();
             toRemove = new[] { "zero" }.Concat(items.Skip(1)).Concat(new[] { "four", "five" }).ToArray();
             helper = new CollectionAndPropertyChangedTester();
             helper.RemoveRangeTest(col, toRemove, (1, items.Skip(1)));
 
-            void resetCollection() =>
-                col = new ObservableCollection<string>(items);            
+            void resetCollection() => col = new ObservableCollection<string>(items);
         }
 
         [Fact]
         public static void RemoveRangeTest_IndexCount()
         {
+            string[] items = { "one", "two", "three", "four", "five", "six" };
+            var col = new ObservableCollection<string>(items);
+            var helper = new CollectionAndPropertyChangedTester();
+            
+            //remove first items
+            helper.RemoveRangeTest(col, 0, 2);
 
+            //remove subsequent items
+            helper = new CollectionAndPropertyChangedTester();
+            helper.RemoveRangeTest(col, 0, 2);
+
+            //remove single item
+            helper = new CollectionAndPropertyChangedTester();
+            helper.RemoveRangeTest(col, 0, 1);
+
+            //clear collection
+            col = new ObservableCollection<string>(items);
+            helper = new CollectionAndPropertyChangedTester();
+            helper.RemoveRangeTest(col, 0, col.Count);
+
+            col.Clear();
+            Assert.Throws<ArgumentOutOfRangeException>(() => { col.RemoveRange(0, 1); });
         }
 
         /// <summary>

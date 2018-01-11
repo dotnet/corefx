@@ -316,14 +316,13 @@ namespace System.Collections.ObjectModel.Tests
         {
             // prepare
             INotifyPropertyChanged collectionPropertyChanged = collection;
-            collection.CollectionChanged += Collection_CollectionChanged;
-
             var eventArgsCollection = new List<NotifyCollectionChangedEventArgs>();
             void logEventArgs(object sender, NotifyCollectionChangedEventArgs nccea) => eventArgsCollection.Add(nccea);
 
-            collection.CollectionChanged += logEventArgs;
             collection.CollectionChanged += Collection_CollectionChanged;
             collectionPropertyChanged.PropertyChanged += Collection_PropertyChanged;
+            collection.CollectionChanged += logEventArgs;
+
             _expectedPropertyChanged = new[]
             {
                 new PropertyNameExpected(COUNT),
@@ -396,6 +395,52 @@ namespace System.Collections.ObjectModel.Tests
 
             foreach (var item in _expectedPropertyChanged)
                 Assert.True(item.IsFound, "The propertychanged event should have fired for" + item.Name + ", since we just removed an item");
+
+            collection.CollectionChanged -= Collection_CollectionChanged;
+            collectionPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
+        }
+
+        /// <summary>
+        /// Verifies that the items in the specified range are removed.
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <param name="index"></param>
+        /// <param name="count"></param>
+        public void RemoveRangeTest(ObservableCollection<string> collection, int index, int count)
+        {
+            // prepare
+            INotifyPropertyChanged collectionPropertyChanged = collection;
+            collection.CollectionChanged += Collection_CollectionChanged;
+            collectionPropertyChanged.PropertyChanged += Collection_PropertyChanged;
+            _expectedPropertyChanged = new[]
+            {
+                new PropertyNameExpected(COUNT),
+                new PropertyNameExpected(ITEMARRAY)
+            };
+
+            var expectedCollection = new List<string>(collection);
+            expectedCollection.RemoveRange(index, count);
+
+            ExpectedNewItems = null;
+            ExpectedNewStartingIndex = -1;
+
+            ExpectedCollectionChangedFired = 1;
+            var isReset      =count > 1 && expectedCollection.Count == 0;
+            ExpectedAction =  isReset? NotifyCollectionChangedAction.Reset : NotifyCollectionChangedAction.Remove;
+
+            if (!isReset)
+            {
+                ExpectedOldStartingIndex = index;
+                ExpectedOldItems = collection.Skip(index).Take(count).ToArray();
+            }
+            else
+                ExpectedOldStartingIndex = -1;
+
+            // act
+            collection.RemoveRange(index, count);
+
+            // assert
+            Assert.Equal(expectedCollection, collection);
 
             collection.CollectionChanged -= Collection_CollectionChanged;
             collectionPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
