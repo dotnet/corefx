@@ -209,7 +209,7 @@ namespace System.IO
                      // fall back to the oldest time we have in between change and modify time
                     _fileStatus.CTime.CompareTo(_fileStatus.MTime) < 0 ? _fileStatus.CTime : _fileStatus.MTime;
 
-                return DateTimeOffset.FromUnixTimeSeconds(rawTime.Seconds).ToLocalTime().AddTicks(rawTime.Nanoseconds / NanosecondsPerTick);
+                return TimeSpecToDateTimeOffset(rawTime);
             }
             set
             {
@@ -227,7 +227,7 @@ namespace System.IO
                 EnsureStatInitialized();
                 if (!_exists)
                     return DateTimeOffset.FromFileTime(0);
-                return DateTimeOffset.FromUnixTimeSeconds(_fileStatus.ATime.Seconds).ToLocalTime().AddTicks(_fileStatus.ATime.Nanoseconds / NanosecondsPerTick);
+                return TimeSpecToDateTimeOffset(_fileStatus.ATime);
             }
             set { SetAccessWriteTimes(value.ToUnixTimeSeconds(), null); }
         }
@@ -239,9 +239,14 @@ namespace System.IO
                 EnsureStatInitialized();
                 if (!_exists)
                     return DateTimeOffset.FromFileTime(0);
-                return DateTimeOffset.FromUnixTimeSeconds(_fileStatus.MTime.Seconds).ToLocalTime().AddTicks(_fileStatus.MTime.Nanoseconds / NanosecondsPerTick);
+                return TimeSpecToDateTimeOffset(_fileStatus.MTime);
             }
             set { SetAccessWriteTimes(null, value.ToUnixTimeSeconds()); }
+        }
+
+        private DateTimeOffset TimeSpecToDateTimeOffset(Interop.Sys.TimeSpec timeSpec)
+        {
+            return DateTimeOffset.FromUnixTimeSeconds(timeSpec.Seconds).AddTicks(timeSpec.Nanoseconds / NanosecondsPerTick).ToLocalTime();
         }
 
         private void SetAccessWriteTimes(long? accessTime, long? writeTime)
