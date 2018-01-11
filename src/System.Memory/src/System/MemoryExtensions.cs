@@ -992,5 +992,18 @@ namespace System
                 value, comparer);
             return BinarySearch(span, comparable);
         }
+
+        /// <summary>
+        /// Creates an <see cref="IEnumerable{T}"/> view of the given <paramref name="memory" /> to allow
+        /// the <paramref name="memory" /> to be used in existing APIs that take an <see cref="IEnumerable{T}"/>.
+        /// </summary>
+        /// <typeparam name="T">The element type of the <paramref name="memory" />.</typeparam>
+        /// <param name="memory">The Memory to view as an <see cref="IEnumerable{T}"/></param>
+        /// <returns>An <see cref="IEnumerable{T}"/> view of the given <paramref name="memory" /></returns>
+        public static IEnumerable<T> ToEnumerable<T>(this Memory<T> memory)
+        {
+            for (int i = 0; i < memory.Length; i++)
+                yield return memory.Span[i];
+        }
     }
 }

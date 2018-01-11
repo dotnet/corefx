@@ -118,6 +118,7 @@
     <Compile Include="Memory\Span.cs" />
     <Compile Include="Memory\Strings.cs" />
     <Compile Include="Memory\ToArray.cs" />
+    <Compile Include="Memory\ToEnumerable.cs" />
     <Compile Include="Memory\TryGetArray.cs" />
   </ItemGroup>
   <ItemGroup>
