@@ -38,7 +38,7 @@ namespace System.ServiceProcess
         public int ExitCode { get { throw null; } set { } }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
         protected System.IntPtr ServiceHandle { get { throw null; } }
-        public string ServiceName { get { throw null; } }
+        public string ServiceName { get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }
         protected virtual void OnContinue() { }
         protected virtual void OnCustomCommand(int command) { }
