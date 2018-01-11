@@ -21,7 +21,7 @@ internal static partial class Interop
             internal long Seconds;
             internal long Nanoseconds;
 
-            internal int CompareTo(TimeSpec other)
+            public int CompareTo(TimeSpec other)
             {
                 if (this.Seconds < other.Seconds)
                     return -1;
@@ -34,6 +34,7 @@ internal static partial class Interop
                     return 1;
 
                 return 0;
+            }
         }
 
         [StructLayout(LayoutKind.Sequential)]

@@ -207,7 +207,7 @@ namespace System.IO
                 Interop.Sys.TimeSpec rawTime = (_fileStatus.Flags & Interop.Sys.FileStatusFlags.HasBirthTime) != 0 ?
                     _fileStatus.BirthTime :
                      // fall back to the oldest time we have in between change and modify time
-                    _fileStatus.CTime < _fileStatus.MTime ? _fileStatus.CTime : _fileStatus.MTime;
+                    _fileStatus.CTime.CompareTo(_fileStatus.MTime) < 0 ? _fileStatus.CTime : _fileStatus.MTime;
 
                 return DateTimeOffset.FromUnixTimeSeconds(rawTime.Seconds).ToLocalTime().AddTicks(rawTime.Nanoseconds / NanosecondsPerTick);
             }
