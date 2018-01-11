@@ -184,8 +184,7 @@ static void ConvertFileStatus2(const struct stat_* src, struct FileStatus2* dst)
 
         NOTE: Linux offers birthtime via statx(): we don't currently use it.
 
-  On all Unixes above the time_t st_atime,... st_birthtime are defined to always map to tv_sec part of the timespecs,
-  so we can still look for st_birthtime to determine HAVE_STAT_BIRTHTIME.
+  On all Unixes above the time_t st_atime,... st_birthtime are defined to always map to tv_sec part of the timespecs.
 */
 #ifdef HAVE_STAT_LINUX_FORMAT
     dst->ATime = src->st_atim;

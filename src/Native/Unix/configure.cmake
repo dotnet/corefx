@@ -160,7 +160,7 @@ check_symbol_exists(
 
 check_struct_has_member(
     "struct stat"
-    st_birthtime
+    st_birthtimespec
     "sys/types.h;sys/stat.h"
     HAVE_STAT_BIRTHTIME)
 
