@@ -12,7 +12,6 @@ using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
-using NetStandardLib;
 using Xunit;
 
 namespace System.Runtime.Serialization.Formatters.Tests
@@ -104,24 +103,22 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/standard/issues/300", TargetFrameworkMonikers.NetFramework)]
         public void NetStandardLibTest()
         {
-            // When we start to run our tests against net472 we can remove the ThrowsIf clause, the NetStandardLib project
-            // and the build configuration for netfx in the Configuration.props file in the test folder. Meanwhile this asserts
-            // (1) the behavior isn't broken on .NET Core and (2) the behavior is broken on .NET Framework.
+            // When net472 with the corresponding fix is released we should add a platform detection check and conditionally 
+            // run the test on .NET Core and .NET Framework >=netf472. The build configuration for netfx in the Configuration.props
+            // also needs to be removed. Meanwhile this asserts that the behavior isn't broken on .NET Cores skips on .NET Framework.
 
-            AssertExtensions.ThrowsIf<TypeLoadException>(PlatformDetection.IsFullFramework, () =>
-            {
-                var serializableType = new SerializableType();
-                byte[] blob = BinaryFormatterHelpers.ToByteArray(serializableType);
-                SerializableType serializableTypeClone = (SerializableType)BinaryFormatterHelpers.FromByteArray(blob);
+            var serializableType = new StreamingContextType();
+            byte[] blob = BinaryFormatterHelpers.ToByteArray(serializableType);
+            var serializableTypeClone = (StreamingContextType)BinaryFormatterHelpers.FromByteArray(blob);
 
-                Assert.True(serializableType.OnSerializingFired);
-                Assert.False(serializableType.OnDeserializedFired);
+            Assert.True(serializableType.OnSerializingFired);
+            Assert.False(serializableType.OnDeserializedFired);
 
-                Assert.True(serializableTypeClone.OnDeserializedFired);
-                Assert.False(serializableTypeClone.OnSerializingFired);
-            });
+            Assert.True(serializableTypeClone.OnDeserializedFired);
+            Assert.False(serializableTypeClone.OnSerializingFired);
         }
 
         [Fact]

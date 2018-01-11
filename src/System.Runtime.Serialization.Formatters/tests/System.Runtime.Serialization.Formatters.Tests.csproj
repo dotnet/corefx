@@ -41,10 +41,6 @@
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
-    <ProjectReference Include="NetStandardLib\NetStandardLib.csproj">
-      <Project>{23996E5F-FE3E-4CE8-A78A-3BB235B079FB}</Project>
-      <Name>NetStandardLib</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
