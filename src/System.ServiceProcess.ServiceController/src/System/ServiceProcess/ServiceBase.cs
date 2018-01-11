@@ -35,7 +35,7 @@ namespace System.ServiceProcess
         private bool _commandPropsFrozen;  // set to true once we've use the Can... properties.
         private bool _disposed;
         private bool _initialized;
-        private EventLog eventLog;
+        private EventLog _eventLog;
 
         /// <devdoc>
         ///    <para>
@@ -241,13 +241,13 @@ namespace System.ServiceProcess
         {
             get 
             {
-                if (eventLog == null) 
+                if (_eventLog == null)
                 {
-                    eventLog = new EventLog("Application");
-                    eventLog.Source = ServiceName;
+                    _eventLog = new EventLog("Application");
+                    _eventLog.Source = ServiceName;
                 }
 
-                return eventLog;
+                return _eventLog;
             }
         }
 
@@ -923,20 +923,6 @@ namespace System.ServiceProcess
                     EventLog.WriteEntry(message); 
                 }
             }
-            #region Stuff not to catch
-            catch (StackOverflowException) 
-            {
-                throw;
-            }
-            catch (OutOfMemoryException) 
-            {
-                throw;
-            }
-            catch (ThreadAbortException)
-            {
-                throw;
-            }
-            #endregion
             catch  
             {
                 // Do nothing.  Not having the event log is bad, but not starting the service as a result is worse.

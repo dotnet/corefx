@@ -179,15 +179,21 @@ OnStop
         {
             using (EventLog eventLog = new EventLog("Application"))
             {
-                ServiceBase sb = new ServiceBase() { ServiceName = "hello" };
+                ServiceBase sb = new ServiceBase() { ServiceName = nameof(LogWritten) + Guid.NewGuid().ToString() };
                 Assert.False(EventLog.SourceExists(sb.ServiceName));
                 int count = eventLog.Entries.Count;
-                ServiceBase.Run(sb);
-                eventLog.Source = sb.ServiceName;
-                Assert.True(EventLog.SourceExists(sb.ServiceName));
-                Assert.True(eventLog.Entries.Count > count);
-                sb.Stop();
-                EventLog.DeleteEventSource(sb.ServiceName);
+                try
+                {
+                    ServiceBase.Run(sb);
+                    eventLog.Source = sb.ServiceName;
+                    Assert.True(EventLog.SourceExists(sb.ServiceName));
+                    Assert.True(eventLog.Entries.Count > count);
+                }
+                finally
+                {
+                    sb.Stop();
+                    EventLog.DeleteEventSource(sb.ServiceName);
+                }
             } 
         }
 
@@ -196,13 +202,18 @@ OnStop
         {
             using (EventLog eventLog = new EventLog("Application"))
             {
-                ServiceBase sb = new ServiceBase() { ServiceName = "hello", AutoLog = false };
+                ServiceBase sb = new ServiceBase() { ServiceName = nameof(LogWritten) + Guid.NewGuid().ToString(), AutoLog = false };
                 Assert.False(EventLog.SourceExists(sb.ServiceName));
                 int count = eventLog.Entries.Count;
-                ServiceBase.Run(sb);
-                Assert.False(EventLog.SourceExists(sb.ServiceName));
-                Assert.Equal(eventLog.Entries.Count, count);
-                sb.Stop();
+                try
+                {
+                    ServiceBase.Run(sb);
+                    Assert.False(EventLog.SourceExists(sb.ServiceName));
+                }
+                finally
+                {
+                    sb.Stop();
+                }
             }
         }
 
