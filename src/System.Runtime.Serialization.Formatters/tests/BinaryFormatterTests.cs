@@ -103,6 +103,25 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/standard/issues/300", TargetFrameworkMonikers.NetFramework)]
+        public void NetStandardLibTest()
+        {
+            // When net472 with the corresponding fix is released we should add a platform detection check and conditionally 
+            // run the test on .NET Core and .NET Framework >=netf472. The build configuration for netfx in the Configuration.props
+            // also needs to be removed. Meanwhile this asserts that the behavior isn't broken on .NET Cores skips on .NET Framework.
+
+            var serializableType = new StreamingContextType();
+            byte[] blob = BinaryFormatterHelpers.ToByteArray(serializableType);
+            var serializableTypeClone = (StreamingContextType)BinaryFormatterHelpers.FromByteArray(blob);
+
+            Assert.True(serializableType.OnSerializingFired);
+            Assert.False(serializableType.OnDeserializedFired);
+
+            Assert.True(serializableTypeClone.OnDeserializedFired);
+            Assert.False(serializableTypeClone.OnSerializingFired);
+        }
+
+        [Fact]
         public void ArraySegmentDefaultCtor()
         {
             // This is workaround for Xunit bug which tries to pretty print test case name and enumerate this object.

@@ -14,6 +14,38 @@ public struct TypeWithoutNamespace { }
 namespace System.Runtime.Serialization.Formatters.Tests
 {
     [Serializable]
+    public class StreamingContextType
+    {
+        [NonSerialized]
+        private bool _onSerializingFired;
+
+        [NonSerialized]
+        private bool _onDeserializedFired;
+
+        public bool OnSerializingFired
+        {
+            get => _onSerializingFired;
+        }
+        
+        public bool OnDeserializedFired
+        {
+            get => _onDeserializedFired;
+        }
+
+        [OnSerializing]
+        private void OnSerializing(StreamingContext context)
+        {
+           _onSerializingFired = true;
+        }
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            _onDeserializedFired = true;
+        }
+    }
+
+    [Serializable]
     public sealed class SealedObjectWithIntStringFields
     {
         public int Member1;
