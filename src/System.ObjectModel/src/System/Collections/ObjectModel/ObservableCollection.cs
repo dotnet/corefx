@@ -184,13 +184,12 @@ namespace System.Collections.ObjectModel
                 if (list.Count == 0)
                     return;
                 else if (list.Count == 1)
-                {
                     using (IEnumerator<T> enumerator = list.GetEnumerator())
                     {
                         enumerator.MoveNext();
-                        InsertItem(Count, enumerator.Current);
+                        Remove(enumerator.Current);
+                        return;
                     }
-                }
             }
             else if (!(ContainsAny(collection)))
             {
@@ -199,24 +198,24 @@ namespace System.Collections.ObjectModel
 
             CheckReentrancy();
 
-            var removed = new Dictionary<int, List<T>>();
-            var curSegmentIndex = -1;
+            var clusters = new Dictionary<int, List<T>>();
             foreach (T item in collection)
             {
                 var index = IndexOf(item);
                 if (index < 0)
+                {
                     continue;
+                }
 
                 Items.RemoveAt(index);
 
-                if (!removed.TryGetValue(index - 1, out var segment) && !removed.TryGetValue(index, out segment))
+                if (clusters.TryGetValue(index, out List<T> cluster))
                 {
-                    curSegmentIndex = index;
-                    removed[index] = new List<T> { item };
-                }
+                    cluster.Add(item);
+                }                
                 else
                 {
-                    segment.Add(item);
+                    clusters[index] = new List<T> { item };
                 }
             }
 
@@ -224,9 +223,10 @@ namespace System.Collections.ObjectModel
 
             if (Count == 0)
                 OnCollectionReset();
-            else
-                foreach (KeyValuePair<int, List<T>> segment in removed)
-                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, segment.Value, segment.Key));
+            else                
+                foreach (KeyValuePair<int, List<T>> cluster in clusters)
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster.Value, cluster.Key));
+
         }
 
         /// <summary>

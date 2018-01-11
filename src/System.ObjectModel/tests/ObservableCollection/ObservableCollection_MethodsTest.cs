@@ -1,3 +1,5 @@
+using Tests.Collections;
+using System.Linq;
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
@@ -27,7 +29,7 @@ namespace System.Collections.ObjectModel.Tests
             CollectionAndPropertyChangedTester helper = new CollectionAndPropertyChangedTester();
             helper.AddOrInsertItemTest(col, "four");
         }
-        
+
         /// <summary>
         /// Tests that it's possible to add a range to the end of a collection. Consists of:
         /// - Empty collection
@@ -43,27 +45,27 @@ namespace System.Collections.ObjectModel.Tests
             //inserting to new collection
             var helper = new CollectionAndPropertyChangedTester();
             helper.AddOrInsertRangeTest(col, anArray, 0);
-            
+
             //adding to inistialized collection
             helper = new CollectionAndPropertyChangedTester();
             helper.AddOrInsertRangeTest(col, anArray, null);
-            
+
             //inserting collection
             helper = new CollectionAndPropertyChangedTester();
             helper.AddOrInsertRangeTest(col, anArray, 0);
-            
+
             //adding single-item collection
             helper = new CollectionAndPropertyChangedTester();
             helper.AddOrInsertRangeTest(col, new[] { "single item" }, null);
-            
+
             //inserting single-item collection
             helper = new CollectionAndPropertyChangedTester();
             helper.AddOrInsertRangeTest(col, new[] { "single item" }, 0);
-            
+
             //adding empty collection
             helper = new CollectionAndPropertyChangedTester();
             helper.AddOrInsertRangeTest(col, new string[] { }, null);
-            
+
             //inserting empty collection
             helper = new CollectionAndPropertyChangedTester();
             helper.AddOrInsertRangeTest(col, new string[] { }, 0);
@@ -109,6 +111,70 @@ namespace System.Collections.ObjectModel.Tests
                     occurrencesThree++;
             }
             Assert.Equal(1, occurrencesThree);
+        }
+
+        [Fact]
+        public static void RemoveRangeTest_Items()
+        {
+            string[] items = { "one", "two", "three" };
+            ObservableCollection<string> col;
+
+            //remove first two
+            resetCollection();
+            var toRemove = items.Take(2).ToArray();
+            var helper = new CollectionAndPropertyChangedTester();
+            helper.RemoveRangeTest(col, toRemove, (0, toRemove));
+
+            //remove last two
+            resetCollection();
+            toRemove = items.Skip(1).ToArray();
+            helper = new CollectionAndPropertyChangedTester();
+            helper.RemoveRangeTest(col, toRemove, (1, toRemove));
+
+            //remove first and last
+            resetCollection();
+            toRemove = items.Where((i) => i != items[1]).ToArray();
+            helper = new CollectionAndPropertyChangedTester();
+            helper.RemoveRangeTest(col, toRemove, (0, items.Take(1)), (1, items.Skip(2)));
+
+            //remove last and first
+            resetCollection();
+            toRemove = items.Where((i) => i != items[1]).Reverse().ToArray();
+            helper = new CollectionAndPropertyChangedTester();
+            helper.RemoveRangeTest(col, toRemove, (2, items.Skip(2)), (0, items.Take(1)));
+
+            //remove single item
+            resetCollection();
+            toRemove = items.Skip(1).Take(1).ToArray();
+            helper = new CollectionAndPropertyChangedTester();
+            helper.RemoveRangeTest(col, toRemove, (1, toRemove));
+
+            //remove empty collection
+            resetCollection();
+            toRemove = new string[0];
+            helper = new CollectionAndPropertyChangedTester();
+            helper.RemoveRangeTest(col, toRemove);
+
+            //remove all items
+            resetCollection();
+            toRemove = items;
+            helper = new CollectionAndPropertyChangedTester();
+            helper.RemoveRangeTest(col, toRemove);
+
+            //remove non existing items
+            resetCollection();
+            toRemove = new[] { "zero" }.Concat(items.Skip(1)).Concat(new[] { "four", "five" }).ToArray();
+            helper = new CollectionAndPropertyChangedTester();
+            helper.RemoveRangeTest(col, toRemove, (1, items.Skip(1)));
+
+            void resetCollection() =>
+                col = new ObservableCollection<string>(items);            
+        }
+
+        [Fact]
+        public static void RemoveRangeTest_IndexCount()
+        {
+
         }
 
         /// <summary>

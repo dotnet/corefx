@@ -1,4 +1,5 @@
-﻿using Tests.Collections;
+﻿using System.ComponentModel.DataAnnotations;
+using Tests.Collections;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,6 +33,7 @@ namespace System.Collections.ObjectModel.Tests
         public IList ExpectedNewItems { get; private set; }
         public IList ExpectedOldItems { get; private set; }
         public int ExpectedOldStartingIndex { get; private set; }
+        public bool SkipVerifyEventArgs { get; private set; }
 
         private PropertyNameExpected[] _expectedPropertyChanged;
 
@@ -46,14 +48,13 @@ namespace System.Collections.ObjectModel.Tests
         public void AddOrInsertItemTest(ObservableCollection<string> collection, string itemToAdd, int? insertIndex = null)
         {
             INotifyPropertyChanged collectionPropertyChanged = collection;
+            collection.CollectionChanged += Collection_CollectionChanged;
             collectionPropertyChanged.PropertyChanged += Collection_PropertyChanged;
             _expectedPropertyChanged = new[]
             {
                 new PropertyNameExpected(COUNT),
                 new PropertyNameExpected(ITEMARRAY)
             };
-
-            collection.CollectionChanged += Collection_CollectionChanged;
 
             ExpectedCollectionChangedFired++;
             ExpectedAction = NotifyCollectionChangedAction.Add;
@@ -307,6 +308,63 @@ namespace System.Collections.ObjectModel.Tests
         }
 
         /// <summary>
+        /// Verifies that first appearance of each of the items is remvoved from the collection.
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <param name="itemsToRemove"></param>
+        public void RemoveRangeTest(ObservableCollection<string> collection, IEnumerable<string> itemsToRemove, params (int StartingIndex, IEnumerable<string> Items)[] clusters)
+        {
+            // prepare
+            INotifyPropertyChanged collectionPropertyChanged = collection;
+            collection.CollectionChanged += Collection_CollectionChanged;
+
+            var eventArgsCollection = new List<NotifyCollectionChangedEventArgs>();
+            void logEventArgs(object sender, NotifyCollectionChangedEventArgs nccea) => eventArgsCollection.Add(nccea);
+
+            collection.CollectionChanged += logEventArgs;
+            collection.CollectionChanged += Collection_CollectionChanged;
+            collectionPropertyChanged.PropertyChanged += Collection_PropertyChanged;
+            _expectedPropertyChanged = new[]
+            {
+                new PropertyNameExpected(COUNT),
+                new PropertyNameExpected(ITEMARRAY)
+            };
+
+            var expectedCollection = new List<string>(collection);
+            foreach (var item in itemsToRemove)
+                expectedCollection.Remove(item);
+
+            ExpectedNewItems = null;
+            ExpectedNewStartingIndex = -1;
+
+            ExpectedAction = expectedCollection.Count == 0 ? NotifyCollectionChangedAction.Reset : NotifyCollectionChangedAction.Remove;
+            ExpectedCollectionChangedFired = clusters == null ? 1 : clusters.Length;
+
+            SkipVerifyEventArgs = true;       
+
+            // action
+            collection.RemoveRange(itemsToRemove);    
+
+            // assert
+            Assert.Equal(expectedCollection, collection);
+            if (clusters != null)
+            {                              
+                for (int i = 0; i < clusters.Length; i++)
+                {
+                    var cluster = clusters[i];
+                    var eventArgs = eventArgsCollection[i];
+
+                    Assert.Equal(cluster.StartingIndex, eventArgs.OldStartingIndex);
+                    Assert.Equal(cluster.Items, eventArgs.OldItems.Cast<string>());
+                }
+            }
+
+            collectionPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
+            collection.CollectionChanged -= Collection_CollectionChanged;
+            collection.CollectionChanged -= logEventArgs;
+        }
+
+        /// <summary>
         /// Verifies that the item is removed from a given index in the collection.
         /// </summary>
         public void RemoveItemAtTest(ObservableCollection<string> collection, int itemIndex)
@@ -387,7 +445,8 @@ namespace System.Collections.ObjectModel.Tests
                 case NotifyCollectionChangedAction.Move:
                 case NotifyCollectionChangedAction.Reset:
                 case NotifyCollectionChangedAction.Replace:
-                    VerifyEventArgs(e);
+                    if (!SkipVerifyEventArgs)
+                        VerifyEventArgs(e);
                     break;
                 default:
                     throw new NotSupportedException("Does not support this action yet.");
