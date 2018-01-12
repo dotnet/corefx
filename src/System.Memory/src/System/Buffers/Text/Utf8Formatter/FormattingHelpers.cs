@@ -72,6 +72,19 @@ namespace System.Buffers.Text
 
         #region UTF-8 Helper methods
 
+        /// <summary>
+        /// Fills a buffer with the ASCII character '0' (0x30).
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void FillWithAsciiZeros(Span<byte> buffer)
+        {
+            // This is a faster implementation of Span<T>.Fill().
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                buffer[i] = (byte)'0';
+            }
+        }
+
         public enum HexCasing : uint
         {
             // Output [ '0' .. '9' ] and [ 'A' .. 'F' ].
@@ -133,68 +146,66 @@ namespace System.Buffers.Text
             buffer[startingIndex + 1] = (byte)(packedResult);
             buffer[startingIndex] = (byte)(packedResult >> 8);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteDigits(ulong value, Span<byte> buffer)
         {
-            ulong left = value;
+            // We can mutate the 'value' parameter since it's a copy-by-value local.
+            // It'll be used to represent the value left over after each division by 10.
 
             for (int i = buffer.Length - 1; i >= 1; i--)
             {
-                left = DivMod(left, 10, out ulong num);
-                buffer[i] = (byte)('0' + num);
+                ulong temp = '0' + value;
+                value /= 10;
+                buffer[i] = (byte)(temp - (value * 10));
             }
 
-            Debug.Assert(left < 10);
-            buffer[0] = (byte)('0' + left);
+            Debug.Assert(value < 10);
+            buffer[0] = (byte)('0' + value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteDigitsWithGroupSeparator(ulong value, Span<byte> buffer)
+        {
+            // We can mutate the 'value' parameter since it's a copy-by-value local.
+            // It'll be used to represent the value left over after each division by 10.
+
+            int digitsWritten = 0;
+            for (int i = buffer.Length - 1; i >= 1; i--)
+            {
+                ulong temp = '0' + value;
+                value /= 10;
+                buffer[i] = (byte)(temp - (value * 10));
+                if (digitsWritten == Utf8Constants.GroupSize - 1)
+                {
+                    buffer[--i] = Utf8Constants.Comma;
+                    digitsWritten = 0;
+                }
+                else
+                {
+                    digitsWritten++;
+                }
+            }
+
+            Debug.Assert(value < 10);
+            buffer[0] = (byte)('0' + value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteDigits(uint value, Span<byte> buffer)
         {
-            uint left = value;
+            // We can mutate the 'value' parameter since it's a copy-by-value local.
+            // It'll be used to represent the value left over after each division by 10.
 
             for (int i = buffer.Length - 1; i >= 1; i--)
             {
-                left = DivMod(left, 10, out uint num);
-                buffer[i] = (byte)('0' + num);
+                uint temp = '0' + value;
+                value /= 10;
+                buffer[i] = (byte)(temp - (value * 10));
             }
 
-            Debug.Assert(left < 10);
-            buffer[0] = (byte)('0' + left);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteDigits(long value, int digitCount, ref byte buffer, int index)
-        {
-            long left = value;
-
-            for (int i = digitCount - 1; i >= 0; i--)
-            {
-                left = DivMod(left, 10, out long num);
-                Unsafe.Add(ref buffer, index + i) = (byte)('0' + num);
-            }
-
-            Debug.Assert(left == 0);
-        }
-
-        /// <summary>
-        /// The unsigned long implementation of this method is much slower than the signed version above
-        /// due to optimization tricks that happen at the IL to ASM stage. Use the signed version unless
-        /// you definitely need to deal with numbers larger than long.MaxValue.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteDigits(ulong value, int digitCount, ref byte buffer, int index)
-        {
-            ulong left = value;
-
-            for (int i = digitCount - 1; i >= 0; i--)
-            {
-                left = DivMod(left, 10, out ulong num);
-                Unsafe.Add(ref buffer, index + i) = (byte)('0' + num);
-            }
-
-            Debug.Assert(left == 0);
+            Debug.Assert(value < 10);
+            buffer[0] = (byte)('0' + value);
         }
 
         /// <summary>
@@ -240,17 +251,6 @@ namespace System.Buffers.Text
         #endregion UTF-8 Helper methods
 
         #region Math Helper methods
-
-        /// <summary>
-        /// We don't have access to Math.DivRem, so this is a copy of the implementation.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long DivMod(long numerator, long denominator, out long modulo)
-        {
-            long div = numerator / denominator;
-            modulo = numerator - (div * denominator);
-            return div;
-        }
 
         /// <summary>
         /// We don't have access to Math.DivRem, so this is a copy of the implementation.
@@ -303,22 +303,6 @@ namespace System.Buffers.Text
 
             valueWithoutTrailingZeros = value;
             return zeroCount;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int CountDigits(long n)
-        {
-            if (n == 0)
-                return 1;
-
-            int digits = 0;
-            while (n != 0)
-            {
-                n /= 10;
-                digits++;
-            }
-
-            return digits;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -411,7 +395,7 @@ namespace System.Buffers.Text
 
             return digits;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CountHexDigits(ulong value)
         {
