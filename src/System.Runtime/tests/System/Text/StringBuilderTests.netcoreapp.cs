@@ -224,6 +224,8 @@ namespace System.Text.Tests
             yield return new object[] { new StringBuilder(10), sb3, mediumString };
             yield return new object[] { new StringBuilder(30), sb3, mediumString };
             yield return new object[] { new StringBuilder(10), new StringBuilder(20), string.Empty};
+
+            yield return new object[] { sb1, null, "Hello" };
             yield return new object[] { sb1, sb1, "HelloHello" };
         }
 
