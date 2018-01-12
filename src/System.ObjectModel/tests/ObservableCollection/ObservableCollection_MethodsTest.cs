@@ -183,7 +183,7 @@ namespace System.Collections.ObjectModel.Tests
             string[] items = { "one", "two", "three", "four", "five", "six" };
             var col = new ObservableCollection<string>(items);
             var helper = new CollectionAndPropertyChangedTester();
-            
+
             //remove first items
             helper.RemoveRangeTest(col, 0, 2);
 
@@ -202,6 +202,48 @@ namespace System.Collections.ObjectModel.Tests
 
             col.Clear();
             Assert.Throws<ArgumentOutOfRangeException>(() => { col.RemoveRange(0, 1); });
+        }
+
+                
+        /// <summary>
+        /// Verifies that all matches are removed from the collection.
+        /// </summary>
+        [Fact]
+        public static void RemoveAllTest()
+        {
+            var items = new[] { "alpha", "bravo", "charlie", "delta", "echo" };
+            ObservableCollection<string> col;
+            CollectionAndPropertyChangedTester tester;
+
+            //remove single item
+            reset();
+            tester.RemoveAllTest(col, i => i.StartsWith("c"), (2, items.Skip(2).Take(1)));
+
+            //remove multiple items
+            reset();
+            tester.RemoveAllTest(col, i => i.First() > 'b', (2, items.Skip(2)));
+
+            //remove non-existing items
+            reset();
+            tester.RemoveAllTest(col, i => i == "foxtrot");
+
+            //remove 1st and 4th elements
+            reset();
+            tester.RemoveAllTest(col, i => i.EndsWith('a'), (0, items.Take(1)), (2, items.Skip(3).Take(1)));
+
+            //remove 1st, 3rd and 5th
+            reset();
+            tester.RemoveAllTest(col, (i) => Array.IndexOf(items, i) % 2 == 0, (0, items.Take(1)), (1, items.Skip(2).Take(1)), (2, items.TakeLast(1)));
+
+            //remove all
+            reset();
+            tester.RemoveAllTest(col, i => true, (0, items));
+
+            void reset()
+            {
+                col = new ObservableCollection<string>(items);
+                tester = new CollectionAndPropertyChangedTester();
+            }
         }
 
         /// <summary>

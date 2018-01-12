@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Diagnostics;
+using System.ComponentModel.DataAnnotations;
 using Tests.Collections;
 using System;
 using System.Collections;
@@ -339,22 +340,25 @@ namespace System.Collections.ObjectModel.Tests
             ExpectedAction = expectedCollection.Count == 0 ? NotifyCollectionChangedAction.Reset : NotifyCollectionChangedAction.Remove;
             ExpectedCollectionChangedFired = clusters == null ? 1 : clusters.Length;
 
-            SkipVerifyEventArgs = true;       
+            SkipVerifyEventArgs = true;
 
             // action
-            collection.RemoveRange(itemsToRemove);    
+            collection.RemoveRange(itemsToRemove);
 
             // assert
             Assert.Equal(expectedCollection, collection);
             if (clusters != null)
-            {                              
+            {
                 for (int i = 0; i < clusters.Length; i++)
                 {
                     var cluster = clusters[i];
-                    var eventArgs = eventArgsCollection[i];
+                    var args = eventArgsCollection[i];
 
-                    Assert.Equal(cluster.StartingIndex, eventArgs.OldStartingIndex);
-                    Assert.Equal(cluster.Items, eventArgs.OldItems.Cast<string>());
+                    Assert.Equal(null, args.NewItems);
+                    Assert.Equal(-1, args.NewStartingIndex);
+
+                    Assert.Equal(cluster.StartingIndex, args.OldStartingIndex);
+                    Assert.Equal(cluster.Items, args.OldItems.Cast<string>());
                 }
             }
 
@@ -409,9 +413,9 @@ namespace System.Collections.ObjectModel.Tests
         public void RemoveRangeTest(ObservableCollection<string> collection, int index, int count)
         {
             // prepare
-            INotifyPropertyChanged collectionPropertyChanged = collection;
+            INotifyPropertyChanged inpc = collection;
+            inpc.PropertyChanged += Collection_PropertyChanged;
             collection.CollectionChanged += Collection_CollectionChanged;
-            collectionPropertyChanged.PropertyChanged += Collection_PropertyChanged;
             _expectedPropertyChanged = new[]
             {
                 new PropertyNameExpected(COUNT),
@@ -425,8 +429,8 @@ namespace System.Collections.ObjectModel.Tests
             ExpectedNewStartingIndex = -1;
 
             ExpectedCollectionChangedFired = 1;
-            var isReset      =count > 1 && expectedCollection.Count == 0;
-            ExpectedAction =  isReset? NotifyCollectionChangedAction.Reset : NotifyCollectionChangedAction.Remove;
+            var isReset = count > 1 && expectedCollection.Count == 0;
+            ExpectedAction = isReset ? NotifyCollectionChangedAction.Reset : NotifyCollectionChangedAction.Remove;
 
             if (!isReset)
             {
@@ -443,8 +447,55 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Equal(expectedCollection, collection);
 
             collection.CollectionChanged -= Collection_CollectionChanged;
-            collectionPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
+            inpc.PropertyChanged -= Collection_PropertyChanged;
         }
+
+        public void RemoveAllTest(ObservableCollection<string> collection, Predicate<string> match, params (int StartingIndex, IEnumerable<string> Items)[] clusters)
+        {               
+            // prepare
+            List<NotifyCollectionChangedEventArgs> eventArgsCollection = new List<NotifyCollectionChangedEventArgs>();
+            void logEventArgs(object sender, NotifyCollectionChangedEventArgs e) => eventArgsCollection.Add(e);
+            INotifyPropertyChanged inpc = collection;
+            inpc.PropertyChanged += Collection_PropertyChanged;
+            collection.CollectionChanged += Collection_CollectionChanged;
+            collection.CollectionChanged += logEventArgs;
+            _expectedPropertyChanged = new[]
+            {
+                new PropertyNameExpected(COUNT),
+                new PropertyNameExpected(ITEMARRAY)
+            };
+            ExpectedAction = NotifyCollectionChangedAction.Remove;
+
+            var expected = collection.ToList();
+            var expectedRemoveCount = expected.RemoveAll(match);
+
+            if (clusters.Any())
+                ExpectedCollectionChangedFired = clusters.Length;
+            SkipVerifyEventArgs = true;
+
+            // act                  
+            var removeCount = collection.RemoveAll(match);
+
+            // assert
+            Assert.Equal(expected, collection);
+            Assert.Equal(expectedRemoveCount, removeCount);
+
+            for (int i = 0; i < clusters.Length; i++)
+            {
+                var cluster = clusters[i];
+                var args = eventArgsCollection[i];
+
+                Assert.Equal(null, args.NewItems);
+                Assert.Equal(-1, args.NewStartingIndex);
+                Assert.Equal(cluster.StartingIndex, args.OldStartingIndex);
+                Assert.Equal(cluster.Items, args.OldItems.Cast<string>());
+            }            
+            
+            collection.CollectionChanged -= logEventArgs;
+            collection.CollectionChanged -= Collection_CollectionChanged;
+            inpc.PropertyChanged -= Collection_PropertyChanged;  
+        }
+
 
         /// <summary>
         /// Verifies that the eventargs fired matches the expected results.

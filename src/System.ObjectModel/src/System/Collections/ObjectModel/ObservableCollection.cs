@@ -246,7 +246,7 @@ namespace System.Collections.ObjectModel
 
             if (count == 0)
                 return;
-                        
+
             if (count == 1)
             {
                 RemoveItem(index);
@@ -268,7 +268,7 @@ namespace System.Collections.ObjectModel
 
         /// <summary> 
         /// Clears the current collection and replaces it with the specified collection. 
-        /// </summary>         
+        /// </summary>                 
         public void ReplaceRange(IEnumerable<T> collection)
         {
             if (collection == null)
@@ -316,6 +316,7 @@ namespace System.Collections.ObjectModel
             {
                 for (int i = 0; i < max; i++)
                 {
+                    //parallel position
                     if (i < Count && i < lCount)
                     {
                         T old = this[i], @new = list[i];
@@ -324,9 +325,11 @@ namespace System.Collections.ObjectModel
                         else
                         {
                             Items[i] = @new;
+                            //prefer multiple single-item events over resets
                             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, @new, @old, i));
                         }
                     }
+                    //exceeding position
                     else if (Count > lCount)
                     {
                         var removed = new Stack<T>();
@@ -338,6 +341,7 @@ namespace System.Collections.ObjectModel
                         OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T>(removed), i));
                         break;
                     }
+                    //new position                    
                     else
                     {
                         var added = new List<T>();
@@ -354,6 +358,57 @@ namespace System.Collections.ObjectModel
 
                 OnEssentialPropertiesChanged();
             }
+        }
+
+        /// <summary>
+        /// Iterates over the collection and removes all items that satisfy the specified match.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="match"/> is null.</exception>
+        /// <param name="match"></param>
+        /// <returns>Returns the number of elements that where </returns>
+        public int RemoveAll(Predicate<T> match)
+        {
+            if (match == null)
+                throw new ArgumentNullException(nameof(match));
+
+            List<T> cluster = null;
+            var index = -1;
+            var removedCount = 0;
+
+            CheckReentrancy();
+
+            for (int i = 0; i < Count; i++)
+            {
+                T item = Items[i];
+                if (match(item))
+                {
+                    Items.RemoveAt(i);
+                    removedCount++;
+
+                    if (index == i)
+                    {
+                        Debug.Assert(cluster != null);
+                        cluster.Add(item);
+                    }
+                    else
+                    {
+                        cluster = new List<T> { item };
+                        index = i;
+                    }
+
+                    i--;
+                }
+                else if (index > -1)
+                {
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, index));
+                    index = -1;
+                    cluster = null;    
+                }
+            }
+
+            if (index > -1)
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, index));
+            return removedCount;
         }
 
         #endregion Public Methods

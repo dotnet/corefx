@@ -52,6 +52,7 @@ namespace System.Collections.ObjectModel
         public void RemoveRange(System.Collections.Generic.IEnumerable<T> collection) { }
         public void RemoveRange(int index, int count) { }    
         public void ReplaceRange(System.Collections.Generic.IEnumerable<T> collection) { }
+        public int RemoveAll(System.Predicate<T> match) { throw null; }
         #endregion Range functionality
     }
     public partial class ReadOnlyDictionary<TKey, TValue> : System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IDictionary<TKey, TValue>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IReadOnlyCollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>, System.Collections.ICollection, System.Collections.IDictionary, System.Collections.IEnumerable
