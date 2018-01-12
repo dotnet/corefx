@@ -167,29 +167,49 @@ namespace System.Xml.Serialization
                 name.Name = serializerName;
                 name.CodeBase = null;
                 name.CultureInfo = CultureInfo.InvariantCulture;
-                string serializerPath = Path.Combine(Path.GetDirectoryName(type.Assembly.Location), serializerName + ".dll");
-                if (!File.Exists(serializerPath))
+
+                string serializerPath = null;
+
+                try
                 {
-                    serializerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), serializerName + ".dll");
+                    serializerPath = Path.Combine(Path.GetDirectoryName(type.Assembly.Location), serializerName + ".dll");
+                }
+                catch
+                {
                 }
 
                 try
                 {
-                    serializer = Assembly.LoadFile(serializerPath);
+                    if (string.IsNullOrEmpty(serializerPath) || !File.Exists(serializerPath))
+                    {
+                        serializerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), serializerName + ".dll");
+                    }
                 }
-                catch (Exception e)
+                catch
                 {
-                    if (e is OutOfMemoryException)
+                }
+ 
+                if (!string.IsNullOrEmpty(serializerPath))
+                {
+                    try
                     {
-                        throw;
+                        serializer = Assembly.LoadFile(serializerPath);
                     }
-                    byte[] token = name.GetPublicKeyToken();
-                    if (token != null && token.Length > 0)
+                    catch (Exception e)
                     {
-                        // the parent assembly was signed, so do not try to LoadWithPartialName
-                        return null;
+                        if (e is OutOfMemoryException)
+                        {
+                            throw;
+                        }
+                        byte[] token = name.GetPublicKeyToken();
+                        if (token != null && token.Length > 0)
+                        {
+                            // the parent assembly was signed, so do not try to LoadWithPartialName
+                            return null;
+                        }
                     }
                 }
+
                 if (serializer == null)
                 {
                     if (XmlSerializer.Mode == SerializationMode.PreGenOnly)
