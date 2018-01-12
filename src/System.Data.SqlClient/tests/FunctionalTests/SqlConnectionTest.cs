@@ -13,7 +13,6 @@ namespace System.Data.SqlClient.Tests
 {
     public class SqlConnectionBasicTests
     {
-        /*
         [Fact]
         public void ConnectionTest()
         {
@@ -52,7 +51,6 @@ namespace System.Data.SqlClient.Tests
             Assert.Same(typeof(SqlClientFactory), factory.GetType());
             Assert.Same(SqlClientFactory.Instance, factory);
         }
-        */
 
         [Fact]
         public void ConnectionTimeoutTestWithThread()
