@@ -3,7 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Net.Sockets;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Net.WebSockets.Tests
@@ -64,6 +67,31 @@ namespace System.Net.WebSockets.Tests
             Assert.Equal(count, r.Count);
             Assert.Equal(messageType, r.MessageType);
             Assert.Equal(endOfMessage, r.EndOfMessage);
+        }
+
+        [OuterLoop] // Connects to external server.
+        [Fact]
+        public async Task WebSocketProtocol_CreateFromConnectedStream_Succeeds()
+        {
+            Socket s = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            await s.ConnectAsync("corefx-net.cloudapp.net", 80);
+            using (NetworkStream ns = new NetworkStream(s))
+            {
+                using (WebSocket socket = WebSocket.CreateFromStream(ns, false, null, TimeSpan.FromSeconds(10)))
+                {
+                    Assert.NotNull(socket);
+                    Assert.Equal(WebSocketState.Open, socket.State);
+
+                    string expected = "Hello World!";
+                    Memory<byte> buffer = new Memory<byte>(Encoding.UTF8.GetBytes(expected));
+                    await socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+
+                    buffer = new Memory<byte>(new byte[buffer.Length]);
+                    await socket.ReceiveAsync(buffer, CancellationToken.None);
+
+                    Assert.Equal(expected, Encoding.UTF8.GetString(buffer.ToArray()));
+                }
+            }
         }
 
         private sealed class UnreadableStream : Stream
