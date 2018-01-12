@@ -220,6 +220,11 @@ namespace System.Text.Tests
 
             yield return new object[] { new StringBuilder(20).Append(largeString), sb3, largeString + mediumString };
             yield return new object[] { new StringBuilder(10).Append(largeString), sb3, largeString + mediumString };
+
+            yield return new object[] { new StringBuilder(10), sb3, mediumString };
+            yield return new object[] { new StringBuilder(30), sb3, mediumString };
+            yield return new object[] { new StringBuilder(10), new StringBuilder(20), string.Empty};
+            yield return new object[] { sb1, sb1, "HelloHello" };
         }
 
         [Theory]
@@ -244,6 +249,7 @@ namespace System.Text.Tests
             yield return new object[] { new StringBuilder("Hello"), sb1, 2, 2, "Helloll" };
             yield return new object[] { new StringBuilder("Hello"), sb1, 2, 0, "Hello" };
             yield return new object[] { new StringBuilder("Hello"), new StringBuilder(), 0, 0, "Hello" };
+            yield return new object[] { new StringBuilder(), new StringBuilder("Hello"), 2, 3, "llo" };
             yield return new object[] { new StringBuilder("Hello"), sb2, 0, 3, "Helloone" };
 
             yield return new object[] { new StringBuilder("one"), sb3, 5, 25, "one" + new string('a', 25) };
@@ -256,6 +262,8 @@ namespace System.Text.Tests
             yield return new object[] { new StringBuilder(20).Append(largeString), new StringBuilder(20).Append(largeString), 100, 50, largeString + new string('b', 50) };
             yield return new object[] { new StringBuilder(10).Append(mediumString), new StringBuilder(20).Append(largeString), 20, 10, mediumString + new string('b', 10) };
             yield return new object[] { new StringBuilder(10).Append(mediumString), new StringBuilder(20).Append(largeString), 100, 50, mediumString + new string('b', 50) };
+
+            yield return new object[] { sb1, sb1, 2, 3, "Hellollo" };
         }
 
         [Theory]
