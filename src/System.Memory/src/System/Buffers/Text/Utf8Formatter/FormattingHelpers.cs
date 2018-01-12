@@ -16,12 +16,6 @@ namespace System.Buffers.Text
     // code must have already done all the necessary validation.
     internal static class FormattingHelpers
     {
-        // For the purpose of formatting time, the format specifier contains room for
-        // exactly 7 digits in the fraction portion. See "Round-trip format specifier"
-        // at the following URL for more information.
-        // https://msdn.microsoft.com/en-us/library/az4se3k1(v=vs.110).aspx#Roundtrip
-        private const int FractionDigits = 7;
-
         // A simple lookup table for converting numbers to hex.
         internal const string HexTableLower = "0123456789abcdef";
 
@@ -140,15 +134,6 @@ namespace System.Buffers.Text
             buffer[startingIndex] = (byte)(packedResult >> 8);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteFractionDigits(long value, int digitCount, ref byte buffer, int index)
-        {
-            for (int i = FractionDigits; i > digitCount; i--)
-                value /= 10;
-
-            WriteDigits(value, digitCount, ref buffer, index);
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteDigits(ulong value, Span<byte> buffer)
         {
@@ -293,6 +278,33 @@ namespace System.Buffers.Text
 
         #region Character counting helper methods
 
+        // Counts the number of trailing '0' digits in a decimal numnber.
+        // e.g., value =      0 => retVal = 0, valueWithoutTrailingZeros = 0
+        //       value =   1234 => retVal = 0, valueWithoutTrailingZeros = 1234
+        //       value = 320900 => retVal = 2, valueWithoutTrailingZeros = 3209
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int CountDecimalTrailingZeros(uint value, out uint valueWithoutTrailingZeros)
+        {
+            int zeroCount = 0;
+
+            if (value != 0)
+            {
+                while (true)
+                {
+                    uint temp = DivMod(value, 10, out uint modulus);
+                    if (modulus != 0)
+                    {
+                        break;
+                    }
+                    value = temp;
+                    zeroCount++;
+                }
+            }
+
+            valueWithoutTrailingZeros = value;
+            return zeroCount;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CountDigits(long n)
         {
@@ -399,26 +411,7 @@ namespace System.Buffers.Text
 
             return digits;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int CountFractionDigits(long n)
-        {
-            Debug.Assert(n >= 0);
-
-            long left = n;
-            long m = 0;
-            int count = FractionDigits;
-
-            // Remove all the 0 (zero) values from the right.
-            while (left > 0 && m == 0 && count > 0)
-            {
-                left = DivMod(left, 10, out m);
-                count--;
-            }
-
-            return count + 1;
-        }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CountHexDigits(ulong value)
         {
