@@ -13,6 +13,8 @@
 #include <pthread.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 static struct sigaction g_origSigIntHandler, g_origSigQuitHandler; // saved signal handlers for ctrl handling
@@ -20,41 +22,81 @@ static struct sigaction g_origSigContHandler, g_origSigChldHandler; // saved sig
 static volatile CtrlCallback g_ctrlCallback = nullptr; // Callback invoked for SIGINT/SIGQUIT
 static int g_signalPipe[2] = {-1, -1}; // Pipe used between signal handler and worker
 
-static void HandleSignalForReinitialize(int sig, siginfo_t* siginfo, void* context)
+static struct sigaction* OrigActionFor(int sig)
 {
-    // SIGCONT will be sent when we're resumed after suspension, at which point
-    // we need to set the terminal back up.  Similarly, SIGCHLD will be sent after
-    // a child process completes, and that child could have left things in a bad state,
-    // so we similarly need to reinitialize.
-    assert(sig == SIGCONT || sig == SIGCHLD);
+    switch (sig)
+    {
+        case SIGINT:  return &g_origSigIntHandler;
+        case SIGQUIT: return &g_origSigQuitHandler;
+        case SIGCONT: return &g_origSigContHandler;
+        case SIGCHLD: return &g_origSigChldHandler;
+    }
 
-    ReinitializeConsole();
+    assert(false);
+    return nullptr;
+}
+
+static void SignalHandler(int sig, siginfo_t* siginfo, void* context)
+{
+    if (sig == SIGCONT || sig == SIGCHLD)
+    {
+        // SIGCONT will be sent when we're resumed after suspension, at which point
+        // we need to set the terminal back up.  Similarly, SIGCHLD will be sent after
+        // a child process completes, and that child could have left things in a bad state,
+        // so we similarly need to reinitialize.
+        ReinitializeConsole();
+    }
+
+    // Signal handler for signals where we want our background thread to do the real processing.
+    // It simply writes the signal code to a pipe that's read by the thread.
+    if (sig == SIGQUIT || sig == SIGINT || sig == SIGCHLD)
+    {
+        // Write the signal code to the pipe
+        uint8_t signalCodeByte = static_cast<uint8_t>(sig);
+        ssize_t writtenBytes;
+        while (CheckInterrupted(writtenBytes = write(g_signalPipe[1], &signalCodeByte, 1)));
+
+        if (writtenBytes != 1)
+        {
+            abort(); // fatal error
+        }
+    }
 
     // Delegate to any saved handler we may have
-    struct sigaction origHandler = sig == SIGCONT ? g_origSigContHandler : g_origSigChldHandler;
-    if (origHandler.sa_sigaction != nullptr &&
-        reinterpret_cast<void*>(origHandler.sa_sigaction) != reinterpret_cast<void*>(SIG_DFL) &&
-        reinterpret_cast<void*>(origHandler.sa_sigaction) != reinterpret_cast<void*>(SIG_IGN))
+    if (sig == SIGCONT)
     {
-        origHandler.sa_sigaction(sig, siginfo, context);
+        struct sigaction* origHandler = OrigActionFor(sig);
+        if (origHandler->sa_sigaction != nullptr &&
+            reinterpret_cast<void*>(origHandler->sa_sigaction) != reinterpret_cast<void*>(SIG_DFL) &&
+            reinterpret_cast<void*>(origHandler->sa_sigaction) != reinterpret_cast<void*>(SIG_IGN))
+        {
+            origHandler->sa_sigaction(sig, siginfo, context);
+        }
     }
 }
 
-// Signal handler for signals where we want our background thread to do the real processing.
-// It simply writes the signal code to a pipe that's read by the thread.
-static void TransferSignalToHandlerLoop(int sig, siginfo_t* siginfo, void* context)
+__attribute__((unused)) static void ResumeSIGCHLD()
 {
-    (void)siginfo; // unused
-    (void)context; // unused
+    struct sigaction* origHandler = OrigActionFor(SIGCHLD);
 
-    // Write the signal code to the pipe
-    uint8_t signalCodeByte = static_cast<uint8_t>(sig);
-    ssize_t writtenBytes;
-    while (CheckInterrupted(writtenBytes = write(g_signalPipe[1], &signalCodeByte, 1)));
-
-    if (writtenBytes != 1)
+    if (reinterpret_cast<void*>(origHandler->sa_sigaction) == reinterpret_cast<void*>(SIG_IGN))
     {
-        abort(); // fatal error
+        // When the disposition is SIG_IGN, children that terminated do not become zombies.
+        pid_t pid;
+        do
+        {
+            int status;
+            while (CheckInterrupted(pid = waitpid(WAIT_ANY, &status, WNOHANG)));
+        } while (pid > 0);
+    }
+    else if (reinterpret_cast<void*>(origHandler->sa_sigaction) == reinterpret_cast<void*>(SIG_DFL))
+    {
+        // do nothing
+    }
+    else if (origHandler->sa_sigaction != nullptr)
+    {
+        // TODO?: We are passing a nullptr siginfo and context, do we need to try and do better?
+        origHandler->sa_sigaction(SIGCHLD, nullptr, nullptr);
     }
 }
 
@@ -88,30 +130,35 @@ void* SignalHandlerLoop(void* arg)
             return nullptr;
         }
 
-        assert_msg(signalCode == SIGQUIT || signalCode == SIGINT, "invalid signalCode", static_cast<int>(signalCode));
-
-        // We're now handling SIGQUIT and SIGINT. Invoke the callback, if we have one.
-        CtrlCallback callback = g_ctrlCallback;
-        int rv = callback != nullptr ? callback(signalCode == SIGQUIT ? Break : Interrupt) : 0;
-        if (rv == 0) // callback removed or was invoked and didn't handle the signal
+        if (signalCode == SIGQUIT || signalCode == SIGINT)
         {
-            // In general, we now want to remove our handler and reissue the signal to
-            // be picked up by the previously registered handler.  In the most common case,
-            // this will be the default handler, causing the process to be torn down.
-            // It could also be a custom handle registered by other code before us.
+            // We're now handling SIGQUIT and SIGINT. Invoke the callback, if we have one.
+            CtrlCallback callback = g_ctrlCallback;
+            int rv = callback != nullptr ? callback(signalCode == SIGQUIT ? Break : Interrupt) : 0;
+            if (rv == 0) // callback removed or was invoked and didn't handle the signal
+            {
+                // In general, we now want to remove our handler and reissue the signal to
+                // be picked up by the previously registered handler.  In the most common case,
+                // this will be the default handler, causing the process to be torn down.
+                // It could also be a custom handle registered by other code before us.
 
-            if (signalCode == SIGINT)
-            {
                 UninitializeConsole();
-                sigaction(SIGINT, &g_origSigIntHandler, NULL);
-                kill(getpid(), SIGINT);
-            } 
-            else if (signalCode == SIGQUIT)
-            {
-                UninitializeConsole();
-                sigaction(SIGQUIT, &g_origSigQuitHandler, NULL);
-                kill(getpid(), SIGQUIT);
+                sigaction(signalCode, OrigActionFor(signalCode), NULL);
+                kill(getpid(), signalCode);
             }
+        }
+        else if (signalCode == SIGCHLD)
+        {
+            // TODO: Pass SIGCHLD to managed code which should
+            // - waitpid on each managed Process
+            // - call ResumeSIGCHLD
+            // This should happen under a lock that is shared with process creation
+            // to avoid missing/reaping newly started children.
+            // If there is no managed callback yet, we call ResumeSIGCHLD.
+        }
+        else
+        {
+            assert_msg(false, "invalid signalCode", static_cast<int>(signalCode));
         }
     }
 }
@@ -137,6 +184,33 @@ extern "C" void SystemNative_UnregisterForCtrl()
 {
     assert(g_ctrlCallback != nullptr);
     g_ctrlCallback = nullptr;
+}
+
+static bool InstallSignalHandler(int sig, bool overwriteIgnored = true)
+{
+    int rv;
+    struct sigaction* orig = OrigActionFor(sig);
+
+    if (!overwriteIgnored)
+    {
+        rv = sigaction(sig, NULL, orig);
+        assert(rv == 0);
+        if (reinterpret_cast<void*>(orig->sa_sigaction) == reinterpret_cast<void*>(SIG_IGN))
+        {
+            return true;
+        }
+    }
+
+    struct sigaction newAction;
+    memset(&newAction, 0, sizeof(struct sigaction));
+    newAction.sa_flags = SA_RESTART | SA_SIGINFO;
+    sigemptyset(&newAction.sa_mask);
+    newAction.sa_sigaction = &SignalHandler;
+
+    rv = sigaction(sig, &newAction, orig);
+    assert(rv == 0);
+
+    return true;
 }
 
 static bool InitializeSignalHandling()
@@ -174,38 +248,10 @@ static bool InitializeSignalHandling()
     }
 
     // Finally, register our signal handlers
-    struct sigaction newAction;
-    memset(&newAction, 0, sizeof(struct sigaction));
-    newAction.sa_flags = SA_RESTART | SA_SIGINFO;
-    
-    sigemptyset(&newAction.sa_mask);
-    int rv;
-
-    // Hook up signal handlers for use with ctrl-C / ctrl-Break handling
-    // We don't handle ignored signals. If we'd setup a handler, our child processes
-    // would reset to the default on exec causing them to terminate on these signals.
-    newAction.sa_sigaction = &TransferSignalToHandlerLoop;
-    rv = sigaction(SIGINT, NULL, &g_origSigIntHandler);
-    assert(rv == 0);
-    if (reinterpret_cast<void*>(g_origSigIntHandler.sa_sigaction) != reinterpret_cast<void*>(SIG_IGN))
-    {
-        rv = sigaction(SIGINT, &newAction, NULL);
-        assert(rv == 0);
-    }
-    rv = sigaction(SIGQUIT, NULL, &g_origSigQuitHandler);
-    assert(rv == 0);
-    if (reinterpret_cast<void*>(g_origSigQuitHandler.sa_sigaction) != reinterpret_cast<void*>(SIG_IGN))
-    {
-        rv = sigaction(SIGQUIT, &newAction, NULL);
-        assert(rv == 0);
-    }
-
-    // Hook up signal handlers for use with signals that require us to reinitialize the terminal
-    newAction.sa_sigaction = &HandleSignalForReinitialize;
-    rv = sigaction(SIGCONT, &newAction, &g_origSigContHandler);
-    assert(rv == 0);
-    rv = sigaction(SIGCHLD, &newAction, &g_origSigChldHandler);
-    assert(rv == 0);
+    InstallSignalHandler(SIGINT , /* overwriteIgnored */ false);
+    InstallSignalHandler(SIGQUIT, /* overwriteIgnored */ false);
+    InstallSignalHandler(SIGCONT);
+    InstallSignalHandler(SIGCHLD);
 
     return true;
 }
