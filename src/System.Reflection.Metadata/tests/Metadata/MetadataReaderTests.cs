@@ -133,6 +133,24 @@ namespace System.Reflection.Metadata.Tests
         }
 
         [Fact]
+        public unsafe void InvalidFindMscorlibAssemblyRefNoProjection()
+        {
+            // start with a valid PE (cloned because we'll mutate it).
+            byte[] peImage = (byte[])WinRT.Lib.Clone();
+
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
+
+            //find index for mscorlib
+            int mscorlibIndex = FindIndex(peImage, Encoding.ASCII.GetBytes("mscorlib"), headers.MetadataStartOffset);
+            Assert.NotEqual(mscorlibIndex, -1);
+            //mutate mscorlib
+            peImage[mscorlibIndex + headers.MetadataStartOffset] = 0xFF;
+
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
+        }
+
+        [Fact]
         public unsafe void InvalidStreamHeaderLengths()
         {
             // start with a valid PE (cloned because we'll mutate it).
@@ -208,6 +226,33 @@ namespace System.Reflection.Metadata.Tests
         }
 
         [Fact]
+        public unsafe void IsMinimalDelta()
+        {
+            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
+            GCHandle pinned = GetPinnedPEImage(peImage);
+            //Find COR20Constants.StringStreamName to be changed to COR20Constants.MinimalDeltaMetadataTableStreamName
+            int stringIndex = FindIndex(peImage, Encoding.ASCII.GetBytes(COR20Constants.StringStreamName), 0);
+            Assert.NotEqual(stringIndex, -1);
+            //find remainingBytes to be increased because we are changing to uncompressed
+            int remainingBytesIndex = FindIndex(peImage, BitConverter.GetBytes(180), 0);
+            Assert.NotEqual(remainingBytesIndex, -1);
+            //find compressed to change to uncompressed
+            int compressedIndex = FindIndex(peImage, Encoding.ASCII.GetBytes(COR20Constants.CompressedMetadataTableStreamName), 0);
+            Assert.NotEqual(compressedIndex, -1);
+
+            InsertBytes(peImage, Encoding.ASCII.GetBytes(COR20Constants.MinimalDeltaMetadataTableStreamName), stringIndex);
+            InsertBytes(peImage, new byte[] { 0 }, stringIndex + COR20Constants.MinimalDeltaMetadataTableStreamName.Length);
+
+            InsertBytes(peImage, BitConverter.GetBytes(250), remainingBytesIndex);
+
+            InsertBytes(peImage, Encoding.ASCII.GetBytes(COR20Constants.UncompressedMetadataTableStreamName), compressedIndex);
+
+            MetadataReader minimalDeltaReader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
+            Assert.True(minimalDeltaReader.IsMinimalDelta);
+        }
+
+
+        [Fact]
         public unsafe void InvalidMetaDataTableHeaders()
         {
             // start with a valid PE (cloned because we'll mutate it).
@@ -223,6 +268,9 @@ namespace System.Reflection.Metadata.Tests
             int presentTablesIndex = FindIndex(peImage, BitConverter.GetBytes(14057656686423), headers.MetadataStartOffset + remainingBytesIndex);
             Assert.NotEqual(presentTablesIndex, -1);
 
+            //Set this.ModuleTable.NumberOfRows to 0
+            InsertBytes(peImage, BitConverter.GetBytes((ulong)0), presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset + 16);
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
             //set row counts greater than TokenTypeIds.RIDMask
             InsertBytes(peImage, BitConverter.GetBytes((ulong)16777216), presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset + 16);
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
