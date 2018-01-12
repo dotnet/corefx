@@ -78,8 +78,6 @@ namespace System.Data.SqlClient.Tests
 
             int threshold = (timeoutSec + 1) * 1000;
             Assert.True(theMax < threshold);
-
-            Console.WriteLine("theMax: "+ theMax);
         }
 
         public class ConnectionWorker
