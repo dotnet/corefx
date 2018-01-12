@@ -264,6 +264,7 @@ namespace System.Text.Tests
             yield return new object[] { new StringBuilder(10).Append(mediumString), new StringBuilder(20).Append(largeString), 100, 50, mediumString + new string('b', 50) };
 
             yield return new object[] { sb1, sb1, 2, 3, "Hellollo" };
+            yield return new object[] { sb2, sb2, 2, 0, "one" };
         }
 
         [Theory]
