@@ -212,6 +212,46 @@ namespace System.Buffers.Text
             Debug.Assert(left == 0);
         }
 
+        /// <summary>
+        /// Writes a value [ 0000 .. 9999 ] to the buffer starting at the specified offset.
+        /// This method performs best when the starting index is a constant literal.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteFourDecimalDigits(uint value, Span<byte> buffer, int startingIndex = 0)
+        {
+            Debug.Assert(0 <= value && value <= 9999);
+
+            uint temp = '0' + value;
+            value /= 10;
+            buffer[startingIndex + 3] = (byte)(temp - (value * 10));
+
+            temp = '0' + value;
+            value /= 10;
+            buffer[startingIndex + 2] = (byte)(temp - (value * 10));
+
+            temp = '0' + value;
+            value /= 10;
+            buffer[startingIndex + 1] = (byte)(temp - (value * 10));
+
+            buffer[startingIndex] = (byte)('0' + value);
+        }
+
+        /// <summary>
+        /// Writes a value [ 00 .. 99 ] to the buffer starting at the specified offset.
+        /// This method performs best when the starting index is a constant literal.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteTwoDecimalDigits(uint value, Span<byte> buffer, int startingIndex = 0)
+        {
+            Debug.Assert(0 <= value && value <= 99);
+
+            uint temp = '0' + value;
+            value /= 10;
+            buffer[startingIndex + 1] = (byte)(temp - (value * 10));
+
+            buffer[startingIndex] = (byte)('0' + value);
+        }
+
         #endregion UTF-8 Helper methods
 
         #region Math Helper methods
