@@ -23,7 +23,9 @@ namespace System.Buffers.Text
         private const int FractionDigits = 7;
 
         // A simple lookup table for converting numbers to hex.
-        private const string HexTable = "0123456789abcdef";
+        internal const string HexTableLower = "0123456789abcdef";
+
+        internal const string HexTableUpper = "0123456789ABCDEF";
 
         // TODO: Where should the below method live? Ideally it should be publicly exposed
         // since having blittable access to structs would be convenient.
@@ -375,6 +377,35 @@ namespace System.Buffers.Text
             }
 
             return count + 1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int CountHexDigits(ulong value)
+        {
+            // TODO: When x86 intrinsic support comes online, experiment with implementing this using lzcnt.
+            // return 16 - (int)((uint)Lzcnt.LeadingZeroCount(value | 1) >> 3);
+
+            int digits = 1;
+
+            if (value > 0xFFFFFFFF)
+            {
+                digits += 8;
+                value >>= 0x20;
+            }
+            if (value > 0xFFFF)
+            {
+                digits += 4;
+                value >>= 0x10;
+            }
+            if (value > 0xFF)
+            {
+                digits += 2;
+                value >>= 0x8;
+            }
+            if (value > 0xF)
+                digits++;
+
+            return digits;
         }
 
         #endregion Character counting helper methods
