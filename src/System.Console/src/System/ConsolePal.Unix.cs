@@ -662,8 +662,13 @@ namespace System
             {
                 if (!s_initialized)
                 {
-                    // Ensure the console is configured appropriately.  This will start
-                    // signal handlers, etc.
+                    // Ensure signal handling is setup.
+                    if (!Interop.Sys.InitializeSignalHandling())
+                    {
+                        throw Interop.GetExceptionForIoErrno(Interop.Sys.GetLastErrorInfo());
+                    }
+
+                    // Ensure the console is configured appropriately.
                     if (!Interop.Sys.InitializeConsole())
                     {
                         throw Interop.GetExceptionForIoErrno(Interop.Sys.GetLastErrorInfo());
@@ -1115,6 +1120,5 @@ namespace System
                 Interop.Sys.UnregisterForCtrl();
             }
         }
-
     }
 }

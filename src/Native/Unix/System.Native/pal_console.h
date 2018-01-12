@@ -127,23 +127,11 @@ enum CtrlCode : int32_t
 typedef int32_t (*CtrlCallback)(CtrlCode signalCode);
 
 /**
- * Hooks up the specified callback for notifications when SIGINT or SIGQUIT is received.
- *
- * Not thread safe.  Caller must provide its owns synchronization to ensure RegisterForCtrl
- * is not called concurrently with itself or with UnregisterForCtrl.
- *
- * Should only be called when a callback is not currently registered.
+ * Called by pal_signal.cpp to reinitialize the console on SIGCONT/SIGCHLD.
  */
-extern "C" void SystemNative_RegisterForCtrl(CtrlCallback callback);
+void ReinitializeConsole();
 
 /**
- * Unregisters the previously registered ctrlCCallback.
- *
- * Not thread safe.  Caller must provide its owns synchronization to ensure UnregisterForCtrl
- * is not called concurrently with itself or with RegisterForCtrl.
- *
- * Should only be called when a callback is currently registered. The pointer
- * previously registered must remain valid until all ctrl handling activity
- * has quiesced.
+ * Called by pal_signal.cpp to uninitialize the console on SIGINT/SIGQUIT.
  */
-extern "C" void SystemNative_UnregisterForCtrl();
+void UninitializeConsole();
