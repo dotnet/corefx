@@ -568,7 +568,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [ActiveIssue(22707, TestPlatforms.AnyUnix)]
         [Theory, MemberData(nameof(RedirectStatusCodesOldMethodsNewMethods))]
         public async Task AllowAutoRedirect_True_ValidateNewMethodUsedOnRedirection(
             int statusCode, string oldMethod, string newMethod)
