@@ -203,13 +203,14 @@ namespace System.Collections.Generic
         public T Peek()
         {
             int size = _size - 1;
+            T[] array = _array;
 
-            if ((uint)size >= (uint)_array.Length)
+            if ((uint)size >= (uint)array.Length)
             {
                 ThrowForEmptyStack();
             }
             
-            return _array[size];
+            return array[size];
         }
 
         public bool TryPeek(out T result)
