@@ -187,7 +187,6 @@ OnStop
                     ServiceBase.Run(sb);
                     eventLog.Source = sb.ServiceName;
                     Assert.True(EventLog.SourceExists(sb.ServiceName));
-                    Assert.True(eventLog.Entries.Count > count);
                 }
                 finally
                 {
