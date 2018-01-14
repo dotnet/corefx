@@ -99,9 +99,10 @@ namespace System.Net.Http.Functional.Tests
             {
                 return;
             }
+
             if (UseManagedHandler)
             {
-                // TODO #23138: The managed handler is failing.
+                // TODO #26186: The managed handler is failing on some OSes.
                 return;
             }
 
@@ -142,7 +143,7 @@ namespace System.Net.Http.Functional.Tests
         {
             if (UseManagedHandler)
             {
-                // TODO #23138: The managed handler is failing.
+                // TODO #26186: The managed handler is failing on some OSes.
                 return;
             }
 

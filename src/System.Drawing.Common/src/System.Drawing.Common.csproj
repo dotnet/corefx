@@ -28,6 +28,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup Condition="$(TargetGroup.StartsWith('netcoreapp'))">
     <!-- Shared source code, all configurations -->
+    <Compile Include="System\Drawing\Bitmap.cs" />
     <Compile Include="System\Drawing\BitmapSuffixInSameAssemblyAttribute.cs" />
     <Compile Include="System\Drawing\BitmapSuffixInSatelliteAssemblyAttribute.cs" />
     <Compile Include="System\Drawing\Brushes.cs" />
@@ -35,6 +36,7 @@
     <Compile Include="System\Drawing\ColorTranslator.cs" />
     <Compile Include="System\Drawing\ContentAlignment.cs" />
     <Compile Include="System\Drawing\IDeviceContext.cs" />
+    <Compile Include="System\Drawing\Image.cs" />
     <Compile Include="System\Drawing\GdiplusNative.cs" />
     <Compile Include="System\Drawing\Graphics.cs" />
     <Compile Include="System\Drawing\GraphicsUnit.cs" />
@@ -352,7 +354,6 @@
     <Reference Include="System.Collections" />
     <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.Collections.Specialized" />
-    <Reference Include="System.Diagnostics.Contracts" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.StackTrace" />
     <Reference Include="System.Diagnostics.Tools" />

@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 #if !netstandard
 using Internal.Runtime.CompilerServices;
@@ -27,10 +28,10 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
-            return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
+            return SpanHelpers.IndexOf<T>(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
 
         /// <summary>
@@ -44,11 +45,11 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     span.Length,
-                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
                     value.Length);
-            return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
+            return SpanHelpers.IndexOf<T>(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(value), value.Length);
         }
 
         /// <summary>
@@ -62,10 +63,10 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.LastIndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
-            return SpanHelpers.LastIndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
+            return SpanHelpers.LastIndexOf<T>(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
 
         /// <summary>
@@ -79,11 +80,11 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.LastIndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     span.Length,
-                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
                     value.Length);
-            return SpanHelpers.LastIndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
+            return SpanHelpers.LastIndexOf<T>(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(value), value.Length);
         }
 
         /// <summary>
@@ -97,10 +98,25 @@ namespace System
             if (typeof(T) == typeof(byte))
                 return length == second.Length &&
                 SpanHelpers.SequenceEqual(
-                    ref Unsafe.As<T, byte>(ref first.DangerousGetPinnableReference()),
-                    ref Unsafe.As<T, byte>(ref second.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
                     length);
-            return length == second.Length && SpanHelpers.SequenceEqual(ref first.DangerousGetPinnableReference(), ref second.DangerousGetPinnableReference(), length);
+            return length == second.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(first), ref MemoryMarshal.GetReference(second), length);
+        }
+
+        /// <summary>
+        /// Determines the relative order of the sequences being compared by comparing the elements using IComparable{T}.CompareTo(T). 
+        /// </summary>
+        public static int SequenceCompareTo<T>(this Span<T> first, ReadOnlySpan<T> second)
+            where T : IComparable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.SequenceCompareTo(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
+                    first.Length,
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
+                    second.Length);
+            return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(first), first.Length, ref MemoryMarshal.GetReference(second), second.Length);
         }
 
         /// <summary>
@@ -114,10 +130,10 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
-            return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
+            return SpanHelpers.IndexOf<T>(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
 
         /// <summary>
@@ -131,11 +147,11 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.IndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     span.Length,
-                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
                     value.Length);
-            return SpanHelpers.IndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
+            return SpanHelpers.IndexOf<T>(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(value), value.Length);
         }
 
         /// <summary>
@@ -149,10 +165,10 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.LastIndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value),
                     span.Length);
-            return SpanHelpers.LastIndexOf<T>(ref span.DangerousGetPinnableReference(), value, span.Length);
+            return SpanHelpers.LastIndexOf<T>(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
 
         /// <summary>
@@ -166,11 +182,11 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.LastIndexOf(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     span.Length,
-                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
                     value.Length);
-            return SpanHelpers.LastIndexOf<T>(ref span.DangerousGetPinnableReference(), span.Length, ref value.DangerousGetPinnableReference(), value.Length);
+            return SpanHelpers.LastIndexOf<T>(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(value), value.Length);
         }
 
         /// <summary>
@@ -180,9 +196,17 @@ namespace System
         /// <param name="value0">One of the values to search for.</param>
         /// <param name="value1">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOfAny(this Span<byte> span, byte value0, byte value1)
+        public static int IndexOfAny<T>(this Span<T> span, T value0, T value1)
+            where T : IEquatable<T>
         {
-            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, span.Length);
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.IndexOfAny(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, byte>(ref value0),
+                    Unsafe.As<T, byte>(ref value1),
+                    span.Length);
+
+            return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, span.Length);
         }
 
         /// <summary>
@@ -193,9 +217,18 @@ namespace System
         /// <param name="value1">One of the values to search for.</param>
         /// <param name="value2">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOfAny(this Span<byte> span, byte value0, byte value1, byte value2)
+        public static int IndexOfAny<T>(this Span<T> span, T value0, T value1, T value2)
+            where T : IEquatable<T>
         {
-            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.IndexOfAny(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, byte>(ref value0),
+                    Unsafe.As<T, byte>(ref value1),
+                    Unsafe.As<T, byte>(ref value2),
+                    span.Length);
+
+            return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, value2, span.Length);
         }
 
         /// <summary>
@@ -204,9 +237,17 @@ namespace System
         /// <param name="span">The span to search.</param>
         /// <param name="values">The set of values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOfAny(this Span<byte> span, ReadOnlySpan<byte> values)
+        public static int IndexOfAny<T>(this Span<T> span, ReadOnlySpan<T> values)
+            where T : IEquatable<T>
         {
-            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), span.Length, ref values.DangerousGetPinnableReference(), values.Length);
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.IndexOfAny(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    span.Length,
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values)),
+                    values.Length);
+
+            return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(values), values.Length);
         }
 
         /// <summary>
@@ -216,9 +257,17 @@ namespace System
         /// <param name="value0">One of the values to search for.</param>
         /// <param name="value1">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOfAny(this ReadOnlySpan<byte> span, byte value0, byte value1)
+        public static int IndexOfAny<T>(this ReadOnlySpan<T> span, T value0, T value1)
+            where T : IEquatable<T>
         {
-            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, span.Length);
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.IndexOfAny(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, byte>(ref value0),
+                    Unsafe.As<T, byte>(ref value1),
+                    span.Length);
+
+            return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, span.Length);
         }
 
         /// <summary>
@@ -229,9 +278,18 @@ namespace System
         /// <param name="value1">One of the values to search for.</param>
         /// <param name="value2">One of the values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOfAny(this ReadOnlySpan<byte> span, byte value0, byte value1, byte value2)
+        public static int IndexOfAny<T>(this ReadOnlySpan<T> span, T value0, T value1, T value2)
+            where T : IEquatable<T>
         {
-            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.IndexOfAny(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    Unsafe.As<T, byte>(ref value0),
+                    Unsafe.As<T, byte>(ref value1),
+                    Unsafe.As<T, byte>(ref value2),
+                    span.Length);
+
+            return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, value2, span.Length);
         }
 
         /// <summary>
@@ -240,9 +298,17 @@ namespace System
         /// <param name="span">The span to search.</param>
         /// <param name="values">The set of values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int IndexOfAny(this ReadOnlySpan<byte> span, ReadOnlySpan<byte> values)
+        public static int IndexOfAny<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> values)
+            where T : IEquatable<T>
         {
-            return SpanHelpers.IndexOfAny(ref span.DangerousGetPinnableReference(), span.Length, ref values.DangerousGetPinnableReference(), values.Length);
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.IndexOfAny(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    span.Length,
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values)),
+                    values.Length);
+
+            return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(values), values.Length);
         }
 
         /// <summary>
@@ -257,11 +323,11 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.LastIndexOfAny(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value0),
                     Unsafe.As<T, byte>(ref value1),
                     span.Length);
-            return SpanHelpers.LastIndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, span.Length);
+            return SpanHelpers.LastIndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, span.Length);
         }
 
         /// <summary>
@@ -277,12 +343,12 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.LastIndexOfAny(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value0),
                     Unsafe.As<T, byte>(ref value1),
                     Unsafe.As<T, byte>(ref value2),
                     span.Length);
-            return SpanHelpers.LastIndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
+            return SpanHelpers.LastIndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, value2, span.Length);
         }
 
         /// <summary>
@@ -296,11 +362,11 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.LastIndexOfAny(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     span.Length,
-                    ref Unsafe.As<T, byte>(ref values.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values)),
                     values.Length);
-            return SpanHelpers.LastIndexOfAny(ref span.DangerousGetPinnableReference(), span.Length, ref values.DangerousGetPinnableReference(), values.Length);
+            return SpanHelpers.LastIndexOfAny(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(values), values.Length);
         }
 
         /// <summary>
@@ -315,11 +381,11 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.LastIndexOfAny(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value0),
                     Unsafe.As<T, byte>(ref value1),
                     span.Length);
-            return SpanHelpers.LastIndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, span.Length);
+            return SpanHelpers.LastIndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, span.Length);
         }
 
         /// <summary>
@@ -335,12 +401,12 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.LastIndexOfAny(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     Unsafe.As<T, byte>(ref value0),
                     Unsafe.As<T, byte>(ref value1),
                     Unsafe.As<T, byte>(ref value2),
                     span.Length);
-            return SpanHelpers.LastIndexOfAny(ref span.DangerousGetPinnableReference(), value0, value1, value2, span.Length);
+            return SpanHelpers.LastIndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, value2, span.Length);
         }
 
         /// <summary>
@@ -354,11 +420,11 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
                 return SpanHelpers.LastIndexOfAny(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
                     span.Length,
-                    ref Unsafe.As<T, byte>(ref values.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values)),
                     values.Length);
-            return SpanHelpers.LastIndexOfAny<T>(ref span.DangerousGetPinnableReference(), span.Length, ref values.DangerousGetPinnableReference(), values.Length);
+            return SpanHelpers.LastIndexOfAny<T>(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(values), values.Length);
         }
 
         /// <summary>
@@ -372,10 +438,25 @@ namespace System
             if (typeof(T) == typeof(byte))
                 return length == second.Length &&
                 SpanHelpers.SequenceEqual(
-                    ref Unsafe.As<T, byte>(ref first.DangerousGetPinnableReference()),
-                    ref Unsafe.As<T, byte>(ref second.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
                     length);
-            return length == second.Length && SpanHelpers.SequenceEqual(ref first.DangerousGetPinnableReference(), ref second.DangerousGetPinnableReference(), length);
+            return length == second.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(first), ref MemoryMarshal.GetReference(second), length);
+        }
+
+        /// <summary>
+        /// Determines the relative order of the sequences being compared by comparing the elements using IComparable{T}.CompareTo(T). 
+        /// </summary>
+        public static int SequenceCompareTo<T>(this ReadOnlySpan<T> first, ReadOnlySpan<T> second)
+            where T : IComparable<T>
+        {
+            if (typeof(T) == typeof(byte))
+                return SpanHelpers.SequenceCompareTo(
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(first)),
+                    first.Length,
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(second)),
+                    second.Length);
+            return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(first), first.Length, ref MemoryMarshal.GetReference(second), second.Length);
         }
 
         /// <summary>
@@ -389,10 +470,10 @@ namespace System
             if (typeof(T) == typeof(byte))
                 return valueLength <= span.Length &&
                 SpanHelpers.SequenceEqual(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
-                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
                     valueLength);
-            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref span.DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), valueLength);
+            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(value), valueLength);
         }
 
         /// <summary>
@@ -406,10 +487,10 @@ namespace System
             if (typeof(T) == typeof(byte))
                 return valueLength <= span.Length &&
                 SpanHelpers.SequenceEqual(
-                    ref Unsafe.As<T, byte>(ref span.DangerousGetPinnableReference()),
-                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
                     valueLength);
-            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref span.DangerousGetPinnableReference(), ref value.DangerousGetPinnableReference(), valueLength);
+            return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(value), valueLength);
         }
 
         /// <summary>
@@ -424,13 +505,13 @@ namespace System
             if (typeof(T) == typeof(byte))
                 return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
-                    ref Unsafe.As<T, byte>(ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength)),
-                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
                     valueLength);
             return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
-                    ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength),
-                    ref value.DangerousGetPinnableReference(),
+                    ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength),
+                    ref MemoryMarshal.GetReference(value),
                     valueLength);
         }
 
@@ -446,13 +527,13 @@ namespace System
             if (typeof(T) == typeof(byte))
                 return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
-                    ref Unsafe.As<T, byte>(ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength)),
-                    ref Unsafe.As<T, byte>(ref value.DangerousGetPinnableReference()),
+                    ref Unsafe.As<T, byte>(ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength)),
+                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
                     valueLength);
             return valueLength <= spanLength &&
                 SpanHelpers.SequenceEqual(
-                    ref Unsafe.Add(ref span.DangerousGetPinnableReference(), spanLength - valueLength),
-                    ref value.DangerousGetPinnableReference(),
+                    ref Unsafe.Add(ref MemoryMarshal.GetReference(span), spanLength - valueLength),
+                    ref MemoryMarshal.GetReference(value),
                     valueLength);
         }
 
@@ -587,9 +668,9 @@ namespace System
         //
         //  Let's say there are two sequences, x and y. Let
         //
-        //      ref T xRef    = x.DangerousGetPinnableReference()
+        //      ref T xRef    = MemoryMarshal.GetReference(x)
         //      uint  xLength = x.Length * Unsafe.SizeOf<T>()
-        //      ref T yRef    = y.DangerousGetPinnableReference()
+        //      ref T yRef    = MemoryMarshal.GetReference(y)
         //      uint  yLength = y.Length * Unsafe.SizeOf<T>()
         //
         //  Visually, the two sequences are located somewhere in the 32-bit
@@ -693,8 +774,8 @@ namespace System
             }
 
             IntPtr byteOffset = Unsafe.ByteOffset(
-                ref first.DangerousGetPinnableReference(),
-                ref second.DangerousGetPinnableReference());
+                ref MemoryMarshal.GetReference(first),
+                ref MemoryMarshal.GetReference(second));
 
             if (Unsafe.SizeOf<IntPtr>() == sizeof(int))
             {
@@ -720,8 +801,8 @@ namespace System
             }
 
             IntPtr byteOffset = Unsafe.ByteOffset(
-                ref first.DangerousGetPinnableReference(),
-                ref second.DangerousGetPinnableReference());
+                ref MemoryMarshal.GetReference(first),
+                ref MemoryMarshal.GetReference(second));
 
             if (Unsafe.SizeOf<IntPtr>() == sizeof(int))
             {
@@ -823,14 +904,8 @@ namespace System
         /// no larger element, the bitwise complement of <see cref="Span{T}.Length"/>.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">
-        ///     <paramref name = "value" /> is <see langword="null"/> .
+        ///     <paramref name = "comparer" /> is <see langword="null"/> .
         /// </exception>
-        // TODO: Do we accept a null comparer and then revert to T as IComparable if possible??
-        //   T:System.ArgumentException:
-        //     comparer is null, and value is of a type that is not compatible with the elements
-        //     of array.
-        //   T:System.InvalidOperationException:
-        //     comparer is null, and T does not implement the System.IComparable`1 generic interface
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BinarySearch<T, TComparer>(
             this Span<T> span, T value, TComparer comparer)
@@ -903,7 +978,7 @@ namespace System
         /// no larger element, the bitwise complement of <see cref="ReadOnlySpan{T}.Length"/>.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">
-        ///     <paramref name = "value" /> is <see langword="null"/> .
+        ///     <paramref name = "comparer" /> is <see langword="null"/> .
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int BinarySearch<T, TComparer>(
@@ -912,12 +987,7 @@ namespace System
         {
             if (comparer == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.comparer);
-            // TODO: Do we accept a null comparer and then revert to T as IComparable if possible??
-            //   T:System.ArgumentException:
-            //     comparer is null, and value is of a type that is not compatible with the elements
-            //     of array.
-            //   T:System.InvalidOperationException:
-            //     comparer is null, and T does not implement the System.IComparable`1 generic interface
+
             var comparable = new SpanHelpers.ComparerComparable<T, TComparer>(
                 value, comparer);
             return BinarySearch(span, comparable);

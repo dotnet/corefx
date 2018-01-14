@@ -23,7 +23,6 @@
     <Compile Include="Span\CtorArrayIntInt.cs" />
     <Compile Include="Span\CtorPointerInt.cs" />
     <Compile Include="Span\DangerousCreate.cs" />
-    <Compile Include="Span\DangerousGetPinnableReference.cs" />
     <Compile Include="Span\Empty.cs" />
     <Compile Include="Span\EndsWith.byte.cs" />
     <Compile Include="Span\EndsWith.T.cs" />
@@ -35,6 +34,8 @@
     <Compile Include="Span\IndexOf.T.cs" />
     <Compile Include="Span\IndexOf.byte.cs" />
     <Compile Include="Span\IndexOf.char.cs" />
+    <Compile Include="Span\IndexOfAny.T.cs" />
+    <Compile Include="Span\IndexOfAny.byte.cs" />
     <Compile Include="Span\IndexOfSequence.T.cs" />
     <Compile Include="Span\IndexOfSequence.byte.cs" />
     <Compile Include="Span\IndexOfSequence.char.cs" />
@@ -48,6 +49,8 @@
     <Compile Include="Span\LastIndexOfSequence.char.cs" />
     <Compile Include="Span\NonPortableCast.cs" />
     <Compile Include="Span\Overflow.cs" />
+    <Compile Include="Span\SequenceCompareTo.T.cs" />
+    <Compile Include="Span\SequenceCompareTo.byte.cs" />
     <Compile Include="Span\SequenceEqual.T.cs" />
     <Compile Include="Span\SequenceEqual.byte.cs" />
     <Compile Include="Span\SequenceEqual.char.cs" />
@@ -65,7 +68,6 @@
     <Compile Include="ReadOnlySpan\CtorArrayIntInt.cs" />
     <Compile Include="ReadOnlySpan\CtorPointerInt.cs" />
     <Compile Include="ReadOnlySpan\DangerousCreate.cs" />
-    <Compile Include="ReadOnlySpan\DangerousGetPinnableReference.cs" />
     <Compile Include="ReadOnlySpan\Empty.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.byte.cs" />
     <Compile Include="ReadOnlySpan\EndsWith.T.cs" />
@@ -76,6 +78,8 @@
     <Compile Include="ReadOnlySpan\IndexOf.T.cs" />
     <Compile Include="ReadOnlySpan\IndexOf.byte.cs" />
     <Compile Include="ReadOnlySpan\IndexOf.char.cs" />
+    <Compile Include="ReadOnlySpan\IndexOfAny.T.cs" />
+    <Compile Include="ReadOnlySpan\IndexOfAny.byte.cs" />
     <Compile Include="ReadOnlySpan\IndexOfSequence.T.cs" />
     <Compile Include="ReadOnlySpan\IndexOfSequence.byte.cs" />
     <Compile Include="ReadOnlySpan\IndexOfSequence.char.cs" />
@@ -125,7 +129,6 @@
     <Compile Include="ReadOnlyMemory\CopyTo.cs" />
     <Compile Include="ReadOnlyMemory\CtorArray.cs" />
     <Compile Include="ReadOnlyMemory\CtorArrayIntInt.cs" />
-    <Compile Include="ReadOnlyMemory\DangerousTryGetArray.cs" />
     <Compile Include="ReadOnlyMemory\Empty.cs" />
     <Compile Include="ReadOnlyMemory\Equality.cs" />
     <Compile Include="ReadOnlyMemory\GetHashCode.cs" />

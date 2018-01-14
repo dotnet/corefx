@@ -634,8 +634,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             // as well so that overload resolution can find them.
             if (callingType.IsWindowsRuntimeType())
             {
-                TypeArray collectioniFaces = callingType.GetWinRTCollectionIfacesAll(SymbolLoader);
-
                 foreach (AggregateType t in callingType.GetWinRTCollectionIfacesAll(SymbolLoader).Items)
                 {
                     if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask) && distinctCallingTypes.Add(t))
@@ -731,7 +729,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             // For a field, simply create the EXPRFIELD and our caller takes care of the rest.
 
             FieldSymbol fieldSymbol = swt.Field();
-            CType returnType = fieldSymbol.GetType();
             AggregateType fieldType = swt.GetType();
             FieldWithType fwt = new FieldWithType(fieldSymbol, fieldType);
 
@@ -1411,6 +1408,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             LocalVariableSymbol[] locals)
         {
             Debug.Assert(arguments.Length >= 2);
+            Debug.Assert(arguments.All(a => a.Type != null));
 
             string name = payload.Name;
 
@@ -1435,12 +1433,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             int indexOfLast = arguments.Length - 1;
             Expr rhs = CreateArgumentEXPR(arguments[indexOfLast], locals[indexOfLast]);
-
-            if (arguments[0].Type == null)
-            {
-                throw Error.BindBinaryAssignmentFailedNullReference();
-            }
-
             return _binder.BindAssignment(lhs, rhs, bIsCompound);
         }
         #endregion

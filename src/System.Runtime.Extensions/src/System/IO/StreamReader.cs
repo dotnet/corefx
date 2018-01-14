@@ -4,7 +4,7 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -305,7 +305,6 @@ namespace System.IO
             }
         }
 
-        [Pure]
         public override int Peek()
         {
             if (_stream == null)
