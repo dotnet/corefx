@@ -63,9 +63,9 @@ namespace System.Diagnostics
         {
             internal ProcessWaitState _state;
 
-            internal Holder(int processId)
+            internal Holder(int processId, bool isChild = false)
             {
-                _state = ProcessWaitState.AddRef(processId);
+                _state = ProcessWaitState.AddRef(processId, isChild);
             }
 
             ~Holder()
@@ -90,9 +90,15 @@ namespace System.Diagnostics
         }
 
         /// <summary>
-        /// Global table that maps process IDs to the associated shared wait state information.
+        /// Global table that maps process IDs of non-child Processes to the associated shared wait state information.
         /// </summary>
         private static readonly Dictionary<int, ProcessWaitState> s_processWaitStates =
+            new Dictionary<int, ProcessWaitState>();
+
+        /// <summary>
+        /// Global table that maps process IDs of child Processes to the associated shared wait state information.
+        /// </summary>
+        private static readonly Dictionary<int, ProcessWaitState> s_childProcessWaitStates =
             new Dictionary<int, ProcessWaitState>();
 
         /// <summary>
@@ -101,17 +107,31 @@ namespace System.Diagnostics
         /// </summary>
         /// <param name="processId">The process ID for which we need wait state.</param>
         /// <returns>The wait state object.</returns>
-        internal static ProcessWaitState AddRef(int processId)
+        internal static ProcessWaitState AddRef(int processId, bool isChild)
         {
-            lock (s_processWaitStates)
+            lock (s_childProcessWaitStates)
             {
                 ProcessWaitState pws;
-                if (!s_processWaitStates.TryGetValue(processId, out pws))
+                if (isChild)
                 {
-                    pws = new ProcessWaitState(processId);
-                    s_processWaitStates.Add(processId, pws);
+                    pws = new ProcessWaitState(processId, isChild);
+                    s_childProcessWaitStates.Add(processId, pws);
+                    pws._outstandingRefCount++; // For Holder
+                    pws._outstandingRefCount++; // Decremented in CheckChildren
                 }
-                pws._outstandingRefCount++;
+                else
+                {
+                    lock (s_processWaitStates)
+                    {
+                        if (!s_childProcessWaitStates.TryGetValue(processId, out pws)
+                        && !s_processWaitStates.TryGetValue(processId, out pws))
+                        {
+                            pws = new ProcessWaitState(processId, isChild);
+                            s_processWaitStates.Add(processId, pws);
+                        }
+                        pws._outstandingRefCount++;
+                    }
+                }
                 return pws;
             }
         }
@@ -123,16 +143,17 @@ namespace System.Diagnostics
         internal void ReleaseRef()
         {
             ProcessWaitState pws;
-            lock (ProcessWaitState.s_processWaitStates)
+            Dictionary<int, ProcessWaitState> waitStates = _isChild ? s_childProcessWaitStates : s_processWaitStates;
+            lock (waitStates)
             {
-                bool foundState = ProcessWaitState.s_processWaitStates.TryGetValue(_processId, out pws);
+                bool foundState = waitStates.TryGetValue(_processId, out pws);
                 Debug.Assert(foundState);
                 if (foundState)
                 {
                     --pws._outstandingRefCount;
                     if (pws._outstandingRefCount == 0)
                     {
-                        s_processWaitStates.Remove(_processId);
+                        waitStates.Remove(_processId);
                     }
                     else
                     {
@@ -151,6 +172,8 @@ namespace System.Diagnostics
         private readonly object _gate = new object();
         /// <summary>ID of the associated process.</summary>
         private readonly int _processId;
+        /// <summary>Associated process is a child process.</summary>
+        private readonly bool _isChild;
 
         /// <summary>If a wait operation is in progress, the Task that represents it; otherwise, null.</summary>
         private Task _waitInProgress;
@@ -171,10 +194,11 @@ namespace System.Diagnostics
 
         /// <summary>Initialize the wait state object.</summary>
         /// <param name="processId">The associated process' ID.</param>
-        private ProcessWaitState(int processId)
+        private ProcessWaitState(int processId, bool isChild)
         {
             Debug.Assert(processId >= 0);
             _processId = processId;
+            _isChild = isChild;
         }
 
         /// <summary>Releases managed resources used by the ProcessWaitState.</summary>
@@ -264,7 +288,7 @@ namespace System.Diagnostics
                 }
 
                 // Is another wait operation in progress?  If so, then we haven't exited,
-                // and that task owns the right to call CheckForExit.
+                // and that task owns the right to call CheckForNonChildExit.
                 if (_waitInProgress != null)
                 {
                     exitCode = null;
@@ -273,7 +297,7 @@ namespace System.Diagnostics
 
                 // We don't know if we've exited, but no one else is currently
                 // checking, so check.
-                CheckForExit();
+                CheckForNonChildExit();
 
                 // We now have an up-to-date snapshot for whether we've exited,
                 // and if we have, what the exit code is (if we were able to find out).
@@ -282,76 +306,38 @@ namespace System.Diagnostics
             }
         }
 
-        private void CheckForExit(bool blockingAllowed = false)
+        private void CheckForNonChildExit()
         {
             Debug.Assert(Monitor.IsEntered(_gate));
-            Debug.Assert(!blockingAllowed); // see "PERF NOTE" comment in WaitForExit
-
-            // Try to get the state of the (child) process
-            int status;
-            int waitResult = Interop.Sys.WaitPid(_processId, out status,
-                blockingAllowed ? Interop.Sys.WaitPidOptions.None : Interop.Sys.WaitPidOptions.WNOHANG);
-
-            if (waitResult == _processId)
+            if (!_isChild)
             {
-                // Process has exited
-                if (Interop.Sys.WIfExited(status))
+                // We won't be able to get an exit code, but we'll at least be able to determine if the process is
+                // still running.
+                int killResult = Interop.Sys.Kill(_processId, Interop.Sys.Signals.None); // None means don't send a signal
+                if (killResult == 0)
                 {
-                    _exitCode = Interop.Sys.WExitStatus(status);
+                    // Process is still running.  This could also be a defunct process that has completed
+                    // its work but still has an entry in the processes table due to its parent not yet
+                    // having waited on it to clean it up.
+                    return;
                 }
-                else if (Interop.Sys.WIfSignaled(status))
+                else // error from kill
                 {
-                    const int ExitCodeSignalOffset = 128;
-                    _exitCode = ExitCodeSignalOffset + Interop.Sys.WTermSig(status);
-                }
-                SetExited();
-                return;
-            }
-            else if (waitResult == 0)
-            {
-                // Process is still running
-                return;
-            }
-            else if (waitResult == -1)
-            {
-                // Something went wrong, e.g. it's not a child process,
-                // or waitpid was already called for this child, or
-                // that the call was interrupted by a signal.
-                Interop.Error errno = Interop.Sys.GetLastError();
-                if (errno == Interop.Error.ECHILD)
-                {
-                    // waitpid was used with a non-child process.  We won't be
-                    // able to get an exit code, but we'll at least be able 
-                    // to determine if the process is still running (assuming
-                    // there's not a race on its id).
-                    int killResult = Interop.Sys.Kill(_processId, Interop.Sys.Signals.None); // None means don't send a signal
-                    if (killResult == 0)
+                    Interop.Error errno = Interop.Sys.GetLastError();
+                    if (errno == Interop.Error.ESRCH)
                     {
-                        // Process is still running.  This could also be a defunct process that has completed
-                        // its work but still has an entry in the processes table due to its parent not yet
-                        // having waited on it to clean it up.
+                        // Couldn't find the process; assume it's exited
+                        SetExited();
                         return;
                     }
-                    else // error from kill
+                    else if (errno == Interop.Error.EPERM)
                     {
-                        errno = Interop.Sys.GetLastError();
-                        if (errno == Interop.Error.ESRCH)
-                        {
-                            // Couldn't find the process; assume it's exited
-                            SetExited();
-                            return;
-                        }
-                        else if (errno == Interop.Error.EPERM)
-                        {
-                            // Don't have permissions to the process; assume it's alive
-                            return;
-                        }
-                        else Debug.Fail("Unexpected errno value from kill");
+                        // Don't have permissions to the process; assume it's alive
+                        return;
                     }
+                    else Debug.Fail("Unexpected errno value from kill");
                 }
-                else Debug.Fail("Unexpected errno value from waitpid");
             }
-            else Debug.Fail("Unexpected process ID from waitpid.");
 
             SetExited();
         }
@@ -399,8 +385,8 @@ namespace System.Diagnostics
 
                         // No one else is checking for the process' exit... so check.
                         // We're currently holding the _gate lock, so we don't want to
-                        // allow CheckForExit to block indefinitely.
-                        CheckForExit();
+                        // allow CheckForNonChildExit to block indefinitely.
+                        CheckForNonChildExit();
                         return _exited;
                     }
 
@@ -420,16 +406,6 @@ namespace System.Diagnostics
                             CancellationToken.None :
                             (cts = new CancellationTokenSource(remainingTimeout)).Token;
                         waitTask = WaitForExitAsync(token);
-
-                        // PERF NOTE:
-                        // At the moment, we never call CheckForExit(true) (which in turn allows
-                        // waitpid to block until the child has completed) because we currently call it while
-                        // holding the _gate lock.  This is probably unnecessary in some situations, and in particular
-                        // here if remainingTimeout == Timeout.Infinite. In that case, we should be able to set
-                        // _waitInProgress to be a TaskCompletionSource task, and then below outside of the lock
-                        // we could do a CheckForExit(blockingAllowed:true) and complete the TaskCompletionSource
-                        // after that.  We would just need to make sure that there's no risk of the other state
-                        // on this instance experiencing torn reads.
                     }
                 } // lock(_gate)
 
@@ -453,7 +429,6 @@ namespace System.Diagnostics
                     // remaining time.
                     waitTask.Wait(remainingTimeout);
                 }
-
             }
         }
 
@@ -465,7 +440,7 @@ namespace System.Diagnostics
             Debug.Assert(Monitor.IsEntered(_gate));
             Debug.Assert(_waitInProgress == null);
 
-            return _waitInProgress = Task.Run(async delegate // Task.Run used because of potential blocking in CheckForExit
+            return _waitInProgress = Task.Run(async delegate // Task.Run used because of potential blocking in CheckForNonChildExit
             {
                 // Arbitrary values chosen to balance delays with polling overhead.  Start with fast polling
                 // to handle quickly completing processes, but fall back to longer polling to minimize
@@ -483,9 +458,9 @@ namespace System.Diagnostics
                         {
                             if (!_exited)
                             {
-                                CheckForExit();
+                                CheckForNonChildExit();
                             }
-                            if (_exited) // may have been updated by CheckForExit
+                            if (_exited) // may have been updated by CheckForNonChildExit
                             {
                                 return;
                             }
@@ -511,5 +486,66 @@ namespace System.Diagnostics
             });
         }
 
+        private bool TryReapChild()
+        {
+            lock (_gate)
+            {
+                if (_exited)
+                {
+                    return false;
+                }
+
+                // Try to get the state of the child process
+                int status;
+                int waitResult = Interop.Sys.WaitPid(_processId, out status, Interop.Sys.WaitPidOptions.WNOHANG);
+
+                if (waitResult == _processId)
+                {
+                    // Process has exited
+                    if (Interop.Sys.WIfExited(status))
+                    {
+                        _exitCode = Interop.Sys.WExitStatus(status);
+                    }
+                    else if (Interop.Sys.WIfSignaled(status))
+                    {
+                        const int ExitCodeSignalOffset = 128;
+                        _exitCode = ExitCodeSignalOffset + Interop.Sys.WTermSig(status);
+                    }
+
+                    SetExited();
+                    return true;
+                }
+                else if (waitResult == 0)
+                {
+                    // Process is still running
+                    return false;
+                }
+                else if (waitResult == -1)
+                {
+                    Debug.Fail("Unexpected errno value from waitpid");
+                }
+                else Debug.Fail("Unexpected process ID from waitpid.");
+
+                SetExited();
+                return true;
+            }
+        }
+
+        internal static void CheckChildren()
+        {
+            // This is called on SIGCHLD from a native thread.
+            // A lock in Process ensures no new processes are spawned while we are checking.
+            lock (s_childProcessWaitStates)
+            {
+                foreach (var kv in s_childProcessWaitStates)
+                {
+                    ProcessWaitState pws = kv.Value;
+                    if (pws.TryReapChild())
+                    {
+                        pws.ReleaseRef();
+                    }
+                }
+            }
+        }
     }
 }

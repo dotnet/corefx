@@ -76,7 +76,7 @@ static void SignalHandler(int sig, siginfo_t* siginfo, void* context)
     }
 }
 
-__attribute__((unused)) static void ResumeSIGCHLD()
+extern "C" void SystemNative_ResumeSigChld()
 {
     struct sigaction* origHandler = OrigActionFor(SIGCHLD);
 
@@ -150,21 +150,15 @@ void* SignalHandlerLoop(void* arg)
         }
         else if (signalCode == SIGCHLD)
         {
-            // SigChldCallback callback = g_sigChldCallback;
-            // if (callback != nullptr)
-            // {
-            //     callback();
-            // }
-            // else
-            // {
-            //     ResumeSIGCHLD();
-            // }
-            // TODO: Pass SIGCHLD to managed code which should
-            // - waitpid on each managed Process
-            // - call ResumeSIGCHLD
-            // This should happen under a lock that is shared with process creation
-            // to avoid missing/reaping newly started children.
-            // If there is no managed callback yet, we call ResumeSIGCHLD.
+            SigChldCallback callback = g_sigChldCallback;
+            if (callback != nullptr)
+            {
+                callback();
+            }
+            else
+            {
+                SystemNative_ResumeSigChld();
+            }
         }
         else
         {

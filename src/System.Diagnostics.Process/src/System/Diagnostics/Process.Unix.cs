@@ -295,21 +295,28 @@ namespace System.Diagnostics
                 throw new Win32Exception(Interop.Error.ENOENT.Info().RawErrno);
             }
 
-            // Invoke the shim fork/execve routine.  It will create pipes for all requested
-            // redirects, fork a child process, map the pipe ends onto the appropriate stdin/stdout/stderr
-            // descriptors, and execve to execute the requested process.  The shim implementation
-            // is used to fork/execve as executing managed code in a forked process is not safe (only
-            // the calling thread will transfer, thread IDs aren't stable across the fork, etc.)
-            Interop.Sys.ForkAndExecProcess(
-                    filename, argv, envp, cwd,
-                    startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
-                    out childPid,
-                    out stdinFd, out stdoutFd, out stderrFd);
+            // Lock to avoid races with OnSigChild
+            lock (s_sigchildGate)
+            {
+                // Invoke the shim fork/execve routine.  It will create pipes for all requested
+                // redirects, fork a child process, map the pipe ends onto the appropriate stdin/stdout/stderr
+                // descriptors, and execve to execute the requested process.  The shim implementation
+                // is used to fork/execve as executing managed code in a forked process is not safe (only
+                // the calling thread will transfer, thread IDs aren't stable across the fork, etc.)
+                Interop.Sys.ForkAndExecProcess(
+                        filename, argv, envp, cwd,
+                        startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
+                        out childPid,
+                        out stdinFd, out stdoutFd, out stderrFd);
 
-            // Store the child's information into this Process object.
-            Debug.Assert(childPid >= 0);
-            SetProcessId(childPid);
-            SetProcessHandle(new SafeProcessHandle(childPid));
+                // Store the child's information into this Process object.
+                Debug.Assert(childPid >= 0);
+                SetProcessId(childPid);
+                SetProcessHandle(new SafeProcessHandle(childPid));
+
+                // Ensure we'll reap this process.
+                _waitStateHolder = new ProcessWaitState.Holder(_processId, isChild: true);
+            }
 
             // Configure the parent's ends of the redirection streams.
             // We use UTF8 encoding without BOM by-default(instead of Console encoding as on Windows)
@@ -610,12 +617,12 @@ namespace System.Diagnostics
         private bool WaitForInputIdleCore(int milliseconds) => throw new InvalidOperationException(SR.InputIdleUnkownError);
 
         private static bool s_sigchildHandlerRegistered = false;
-        private static readonly object s_sigchildHandlerGate = new object();
+        private static readonly object s_sigchildGate = new object();
         private static readonly Interop.Sys.SigChldCallback s_sigChildHandler = OnSigChild;
 
         private static bool EnsureSigChildHandler()
         {
-            lock (s_sigchildHandlerGate)
+            lock (s_sigchildGate)
             {
                 if (!s_sigchildHandlerRegistered)
                 {
@@ -634,6 +641,12 @@ namespace System.Diagnostics
 
         private static void OnSigChild()
         {
+            // Lock to avoid races with Process.Start
+            lock (s_sigchildGate)
+            {
+                ProcessWaitState.CheckChildren();
+                Interop.Sys.ResumeSigChld();
+            }
         }
     }
 }

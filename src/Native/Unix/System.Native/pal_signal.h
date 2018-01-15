@@ -48,3 +48,8 @@ typedef void (*SigChldCallback)();
  * Should only be called when a callback is not currently registered.
  */
 extern "C" void SystemNative_RegisterForSigChld(SigChldCallback callback);
+
+/**
+ * Calls the original SIGCHLD handler.
+ */
+extern "C" void SystemNative_ResumeSigChld();
