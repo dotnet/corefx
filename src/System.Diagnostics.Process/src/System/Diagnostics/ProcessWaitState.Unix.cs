@@ -140,10 +140,11 @@ namespace System.Diagnostics
         /// Decrements the ref count on the wait state object, and if it's the last one,
         /// removes it from the table.
         /// </summary>
-        internal void ReleaseRef()
+        internal bool ReleaseRef()
         {
             ProcessWaitState pws;
             Dictionary<int, ProcessWaitState> waitStates = _isChild ? s_childProcessWaitStates : s_processWaitStates;
+            bool removed = false;
             lock (waitStates)
             {
                 bool foundState = waitStates.TryGetValue(_processId, out pws);
@@ -154,6 +155,7 @@ namespace System.Diagnostics
                     if (pws._outstandingRefCount == 0)
                     {
                         waitStates.Remove(_processId);
+                        removed = true;
                     }
                     else
                     {
@@ -162,6 +164,7 @@ namespace System.Diagnostics
                 }
             }
             pws?.Dispose();
+            return removed;
         }
 
         /// <summary>
@@ -337,9 +340,9 @@ namespace System.Diagnostics
                     }
                     else Debug.Fail("Unexpected errno value from kill");
                 }
-            }
 
-            SetExited();
+                SetExited();
+            }
         }
 
         /// <summary>Waits for the associated process to exit.</summary>
@@ -537,14 +540,26 @@ namespace System.Diagnostics
             // A lock in Process ensures no new processes are spawned while we are checking.
             lock (s_childProcessWaitStates)
             {
-                foreach (var kv in s_childProcessWaitStates)
+                bool restart;
+                do
                 {
-                    ProcessWaitState pws = kv.Value;
-                    if (pws.TryReapChild())
+                    restart = false;
+                    foreach (var kv in s_childProcessWaitStates)
                     {
-                        pws.ReleaseRef();
+                        ProcessWaitState pws = kv.Value;
+                        if (pws.TryReapChild())
+                        {
+                            bool removed = pws.ReleaseRef();
+                            // We have removed an item from s_childProcessWaitStates
+                            // so our iterator has become invalid.
+                            if (removed)
+                            {
+                                restart = true;
+                                break;
+                            }
+                        }
                     }
-                }
+                } while (restart);
             }
         }
     }
