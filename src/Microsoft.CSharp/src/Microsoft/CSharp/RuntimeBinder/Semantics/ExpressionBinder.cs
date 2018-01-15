@@ -735,8 +735,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                     0,
                                     false));
                 }
-                else if (typeParam.IsNonNubValType() &&
-                         GetTypes().SubstType(methCur.RetType, atsCur).IsNonNubValType() &&
+                else if (typeParam.IsNonNullableValueType &&
+                         GetTypes().SubstType(methCur.RetType, atsCur).IsNonNullableValueType &&
                          canConvert(arg, nubParam = GetTypes().GetNullable(typeParam)))
                 {
                     methFirstList.Add(new CandidateFunctionMember(

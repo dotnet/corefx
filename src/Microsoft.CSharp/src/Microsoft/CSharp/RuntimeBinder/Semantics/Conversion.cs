@@ -718,9 +718,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             continue;
 
                         // Lift the conversion if needed.
-                        if (fLiftSrc && (fDstHasNull || !fNeedImplicit) && typeFrom.IsNonNubValType())
+                        if (fLiftSrc && (fDstHasNull || !fNeedImplicit) && typeFrom.IsNonNullableValueType)
                             typeFrom = GetTypes().GetNullable(typeFrom);
-                        if (fLiftDst && typeTo.IsNonNubValType())
+                        if (fLiftDst && typeTo.IsNonNullableValueType)
                             typeTo = GetTypes().GetNullable(typeTo);
 
                         // Check for applicability.
@@ -853,12 +853,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 int ctypeLift = 0;
 
                 // Lift the conversion if needed.
-                if (fLiftSrc && typeFrom.IsNonNubValType())
+                if (fLiftSrc && typeFrom.IsNonNullableValueType)
                 {
                     typeFrom = GetTypes().GetNullable(typeFrom);
                     ctypeLift++;
                 }
-                if (fLiftDst && typeTo.IsNonNubValType())
+
+                if (fLiftDst && typeTo.IsNonNullableValueType)
                 {
                     typeTo = GetTypes().GetNullable(typeTo);
                     ctypeLift++;

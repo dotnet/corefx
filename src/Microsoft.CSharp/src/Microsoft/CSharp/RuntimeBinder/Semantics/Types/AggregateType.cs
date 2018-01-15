@@ -164,6 +164,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public override bool IsReferenceType => OwningAggregate.IsRefType();
+
+        public override bool IsNonNullableValueType => IsValueType;
+
+        public override bool IsValueType => OwningAggregate.IsValueType();
     }
 }
 

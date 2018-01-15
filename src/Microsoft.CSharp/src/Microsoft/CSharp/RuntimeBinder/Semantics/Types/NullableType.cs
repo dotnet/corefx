@@ -38,5 +38,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public CType UnderlyingType { get; }
+
+        public override bool IsValueType => true;
     }
 }

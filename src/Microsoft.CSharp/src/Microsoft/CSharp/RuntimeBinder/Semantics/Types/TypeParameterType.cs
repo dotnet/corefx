@@ -33,11 +33,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool Contravariant => Symbol.Contravariant;
 
-        public bool IsValueType => Symbol.IsValueType();
+        public override bool IsValueType => Symbol.IsValueType();
 
         public override bool IsReferenceType => Symbol.IsReferenceType();
 
-        public bool IsNonNullableValueType => Symbol.IsNonNullableValueType();
+        public override bool IsNonNullableValueType => Symbol.IsNonNullableValueType();
 
         public bool HasNewConstraint => Symbol.HasNewConstraint();
 

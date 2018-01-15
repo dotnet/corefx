@@ -189,7 +189,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // If S and T are value types and there is a builtin conversion from S => T then there is an
                 // explicit conversion from S? => T that throws on null.
-                if (_typeDest.IsValType() && _binder.BindExplicitConversion(null, _typeSrc.StripNubs(), _typeDest, _flags | CONVERTTYPE.NOUDC))
+                if (_typeDest.IsValueType && _binder.BindExplicitConversion(null, _typeSrc.StripNubs(), _typeDest, _flags | CONVERTTYPE.NOUDC))
                 {
                     if (_needsExprDest)
                     {

@@ -170,7 +170,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // To check whether or not its a nullable type, we need to get the resolved
                 // bound from the type argument and check against that.
 
-                if (!arg.IsValType() || arg is NullableType)
+                if (!arg.IsNonNullableValueType)
                 {
                     if (fReportErrors)
                     {
@@ -250,7 +250,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // Check the newable constraint.
-            if (!var.HasNewConstraint || arg.IsValType())
+            if (!var.HasNewConstraint || arg.IsValueType)
             {
                 return !fError;
             }

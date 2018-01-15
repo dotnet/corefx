@@ -511,7 +511,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 pSource = nubSource.UnderlyingType; // pSource.IsValType() known to be true.
             }
-            else if (!pSource.IsValType())
+            else if (!pSource.IsValueType)
             {
                 return false;
             }

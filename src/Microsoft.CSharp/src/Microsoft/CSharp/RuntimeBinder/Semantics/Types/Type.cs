@@ -419,34 +419,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool isStaticClass() => (GetNakedType(false) as AggregateType)?.OwningAggregate?.IsStatic() ?? false;
 
         // These check for AGGTYPESYMs, TYVARSYMs and others as appropriate.
-        public bool IsValType()
-        {
-            switch (TypeKind)
-            {
-                case Semantics.TypeKind.TK_TypeParameterType:
-                    return ((TypeParameterType)this).IsValueType;
-                case Semantics.TypeKind.TK_AggregateType:
-                    return ((AggregateType)this).OwningAggregate.IsValueType();
-                case Semantics.TypeKind.TK_NullableType:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-        public bool IsNonNubValType()
-        {
-            switch (TypeKind)
-            {
-                case Semantics.TypeKind.TK_TypeParameterType:
-                    return ((TypeParameterType)this).IsNonNullableValueType;
-                case Semantics.TypeKind.TK_AggregateType:
-                    return ((AggregateType)this).OwningAggregate.IsValueType();
-                case Semantics.TypeKind.TK_NullableType:
-                    return false;
-                default:
-                    return false;
-            }
-        }
+        public virtual bool IsValueType => false;
+
+        public virtual bool IsNonNullableValueType => false;
+
         public virtual bool IsReferenceType => false;
     }
 }

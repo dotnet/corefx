@@ -189,7 +189,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             continue;
                         }
 
-                        Debug.Assert(typeSig1.IsValType());
+                        Debug.Assert(typeSig1.IsValueType);
 
                         typeSig1 = GetSymbolLoader().GetTypeManager().GetNullable(typeSig1);
                         if (!canConvert(constant, typeSig1))
@@ -216,7 +216,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             continue;
                         }
-                        Debug.Assert(typeSig1.IsValType());
+                        Debug.Assert(typeSig1.IsValueType);
 
                         typeSig1 = GetSymbolLoader().GetTypeManager().GetNullable(typeSig1);
                         if (!canConvert(info.arg1, typeSig1))
@@ -273,7 +273,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             continue;
                         }
-                        Debug.Assert(typeSig2.IsValType());
+                        Debug.Assert(typeSig2.IsValueType);
 
                         typeSig2 = GetSymbolLoader().GetTypeManager().GetNullable(typeSig2);
                         if (!canConvert(constant, typeSig2))
@@ -301,7 +301,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             continue;
                         }
-                        Debug.Assert(typeSig2.IsValType());
+                        Debug.Assert(typeSig2.IsValueType);
 
                         typeSig2 = GetSymbolLoader().GetTypeManager().GetNullable(typeSig2);
                         if (!canConvert(info.arg2, typeSig2))
@@ -2392,19 +2392,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private bool UserDefinedBinaryOperatorCanBeLifted(ExpressionKind ek, MethodSymbol method, AggregateType ats,
             TypeArray Params)
         {
-            if (!Params[0].IsNonNubValType())
+            if (!Params[0].IsNonNullableValueType || !Params[1].IsNonNullableValueType)
             {
                 return false;
             }
-            if (!Params[1].IsNonNubValType())
-            {
-                return false;
-            }
+
             CType typeRet = GetTypes().SubstType(method.RetType, ats);
-            if (!typeRet.IsNonNubValType())
+            if (!typeRet.IsNonNullableValueType)
             {
                 return false;
             }
+
             switch (ek)
             {
                 case ExpressionKind.Eq:
