@@ -365,5 +365,53 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return sym.IsPredefined() ? PredefinedTypeFacts.GetFundType(sym.GetPredefType()) : FUNDTYPE.FT_STRUCT;
             }
         }
+
+        public override ConstValKind ConstValKind
+        {
+            get
+            {
+                if (IsPredefType(PredefinedType.PT_INTPTR) || IsPredefType(PredefinedType.PT_UINTPTR))
+                {
+                    return ConstValKind.IntPtr;
+                }
+
+                switch (FundamentalType)
+                {
+                    case FUNDTYPE.FT_I8:
+                    case FUNDTYPE.FT_U8:
+                        return ConstValKind.Long;
+
+                    case FUNDTYPE.FT_STRUCT:
+
+                        // Here we can either have a decimal type, or an enum
+                        // whose fundamental type is decimal.
+                        Debug.Assert(
+                            OwningAggregate.IsEnum() && OwningAggregate.GetUnderlyingType().PredefinedType == PredefinedType.PT_DECIMAL
+                            || IsPredefined && PredefinedType == PredefinedType.PT_DATETIME
+                            || IsPredefined && PredefinedType == PredefinedType.PT_DECIMAL);
+
+                        return IsPredefined && PredefinedType == PredefinedType.PT_DATETIME
+                            ? ConstValKind.Long
+                            : ConstValKind.Decimal;
+
+                    case FUNDTYPE.FT_REF:
+                        return IsPredefined && PredefinedType == PredefinedType.PT_STRING
+                            ? ConstValKind.String
+                            : ConstValKind.IntPtr;
+
+                    case FUNDTYPE.FT_R4:
+                        return ConstValKind.Float;
+
+                    case FUNDTYPE.FT_R8:
+                        return ConstValKind.Double;
+
+                    case FUNDTYPE.FT_I1:
+                        return ConstValKind.Boolean;
+
+                    default:
+                        return ConstValKind.Int;
+                }
+            }
+        }
     }
 }

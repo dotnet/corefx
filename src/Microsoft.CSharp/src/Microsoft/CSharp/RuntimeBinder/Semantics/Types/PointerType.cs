@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
@@ -25,5 +27,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public override bool IsUnsigned => true;
 
         public override FUNDTYPE FundamentalType => FUNDTYPE.FT_PTR;
+
+        [ExcludeFromCodeCoverage] // Technically correct, but we can't have constant pointers in dynamically dispatched code.
+        public override ConstValKind ConstValKind
+        {
+            get
+            {
+                Debug.Fail("Constant of pointer in dynamic code?");
+                return ConstValKind.IntPtr;
+            }
+        }
     }
 }

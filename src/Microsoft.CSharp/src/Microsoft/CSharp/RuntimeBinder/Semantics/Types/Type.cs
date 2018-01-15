@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
@@ -35,50 +34,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // struct/value type
         public virtual FUNDTYPE FundamentalType => FUNDTYPE.FT_NONE;
 
-        public ConstValKind constValKind()
-        {
-            if (isPointerLike())
-            {
-                return ConstValKind.IntPtr;
-            }
-
-            switch (FundamentalType)
-            {
-                case FUNDTYPE.FT_I8:
-                case FUNDTYPE.FT_U8:
-                    return ConstValKind.Long;
-                case FUNDTYPE.FT_STRUCT:
-                    // Here we can either have a decimal type, or an enum 
-                    // whose fundamental type is decimal.
-                    Debug.Assert((getAggregate().IsEnum() && getAggregate().GetUnderlyingType().PredefinedType == Syntax.PredefinedType.PT_DECIMAL)
-                        || (IsPredefined && PredefinedType == Syntax.PredefinedType.PT_DATETIME)
-                        || (IsPredefined && PredefinedType == Syntax.PredefinedType.PT_DECIMAL));
-
-                    if (IsPredefined && PredefinedType == Syntax.PredefinedType.PT_DATETIME)
-                    {
-                        return ConstValKind.Long;
-                    }
-                    return ConstValKind.Decimal;
-
-                case FUNDTYPE.FT_REF:
-                    if (IsPredefined && PredefinedType == Syntax.PredefinedType.PT_STRING)
-                    {
-                        return ConstValKind.String;
-                    }
-                    else
-                    {
-                        return ConstValKind.IntPtr;
-                    }
-                case FUNDTYPE.FT_R4:
-                    return ConstValKind.Float;
-                case FUNDTYPE.FT_R8:
-                    return ConstValKind.Double;
-                case FUNDTYPE.FT_I1:
-                    return ConstValKind.Boolean;
-                default:
-                    return ConstValKind.Int;
-            }
-        }
+        public virtual ConstValKind ConstValKind => ConstValKind.Int;
 
         ////////////////////////////////////////////////////////////////////////////////
         // Strips off ArrayType, ParameterModifierType, PointerType, PinnedType and optionally NullableType
@@ -109,12 +65,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        public AggregateSymbol getAggregate()
-        {
-            Debug.Assert(this is AggregateType);
-            return ((AggregateType)this).OwningAggregate;
-        }
-
         public virtual CType StripNubs() => this;
 
         public virtual CType StripNubs(out bool wasNullable)
@@ -134,11 +84,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public virtual bool IsSimpleOrEnum => false;
 
         public virtual bool IsSimpleOrEnumOrString => false;
-
-        private bool isPointerLike()
-        {
-            return this is PointerType || IsPredefType(Syntax.PredefinedType.PT_INTPTR) || IsPredefType(Syntax.PredefinedType.PT_UINTPTR);
-        }
 
         ////////////////////////////////////////////////////////////////////////////////
         // A few types are considered "numeric" types. They are the fundamental number

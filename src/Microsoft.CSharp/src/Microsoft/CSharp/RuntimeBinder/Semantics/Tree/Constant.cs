@@ -16,7 +16,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public Expr OptionalConstructorCall { get; set; }
 
-        public bool IsZero => Val.IsZero(Type.constValKind());
+        public bool IsZero => Val.IsZero(Type.ConstValKind);
 
         public ConstVal Val { get; }
 

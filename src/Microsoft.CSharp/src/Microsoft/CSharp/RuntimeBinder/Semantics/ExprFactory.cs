@@ -135,7 +135,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return new ExprZeroInit(type);
 
                 default:
-                    return CreateConstant(type, ConstVal.GetDefaultValue(type.constValKind()));
+                    return CreateConstant(type, ConstVal.GetDefaultValue(type.ConstValKind));
             }
         }
 
