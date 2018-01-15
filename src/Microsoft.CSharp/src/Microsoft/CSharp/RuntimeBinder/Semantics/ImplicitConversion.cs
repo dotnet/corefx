@@ -513,12 +513,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //
                 // * From any pointer-type to the type void*.
 
-                if (_typeDest is PointerType ptDest && ptDest.GetReferentType() == VoidType.Instance)
+                if (_typeDest is PointerType ptDest && ptDest.ReferentType == VoidType.Instance)
                 {
                     if (_needsExprDest)
+                    {
                         _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest);
+                    }
+
                     return true;
                 }
+
                 return false;
             }
 

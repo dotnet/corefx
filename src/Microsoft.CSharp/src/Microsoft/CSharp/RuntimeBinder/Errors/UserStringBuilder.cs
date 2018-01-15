@@ -545,7 +545,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                 case TypeKind.TK_PointerType:
                     // Generate the base type.
-                    ErrAppendType(((PointerType)pType).GetReferentType(), pctx);
+                    ErrAppendType(((PointerType)pType).ReferentType, pctx);
                     {
                         // add the trailing *
                         ErrAppendChar('*');

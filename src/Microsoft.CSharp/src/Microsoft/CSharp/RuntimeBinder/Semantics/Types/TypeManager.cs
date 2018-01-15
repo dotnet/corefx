@@ -191,7 +191,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _typeTable.InsertPointer(baseType, pPointer);
             }
 
-            Debug.Assert(pPointer.GetReferentType() == baseType);
+            Debug.Assert(pPointer.ReferentType == baseType);
 
             return pPointer;
         }
@@ -335,7 +335,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return (typeDst == typeSrc) ? type : GetArray(typeDst, arr.Rank, arr.IsSZArray);
 
                 case TypeKind.TK_PointerType:
-                    typeDst = SubstTypeCore(typeSrc = ((PointerType)type).GetReferentType(), pctx);
+                    typeDst = SubstTypeCore(typeSrc = ((PointerType)type).ReferentType, pctx);
                     return (typeDst == typeSrc) ? type : GetPointer(typeDst);
 
                 case TypeKind.TK_NullableType:
