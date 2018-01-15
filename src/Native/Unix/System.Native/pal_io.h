@@ -43,13 +43,51 @@ struct FileStatus2
     uint32_t Uid;      // user ID of owner
     uint32_t Gid;      // group ID of owner
     int64_t Size;      // total size, in bytes
-    struct timespec ATime;     // time of last access
-    struct timespec MTime;     // time of last modification
-    struct timespec CTime;     // time of last status change
-    struct timespec BirthTime; // time the file was created
+    int64_t ATime;     // time of last access
+    int64_t ATimeNsec; //     nanosecond part
+    int64_t MTime;     // time of last modification
+    int64_t MTimeNsec; //     nanosecond part
+    int64_t CTime;     // time of last status change
+    int64_t CTimeNsec; //     nanosecond part
+    int64_t BirthTime; // time the file was created
+    int64_t BirthTimeNsec; // nanosecond part
     int64_t Dev;       // ID of the device containing the file
     int64_t Ino;       // inode number of the file
 };
+
+/* Provide consistent access to nanosecond fields, if they exist. */
+/* Seconds are always available through st_atime, st_mtime, st_ctime. */
+
+#if HAVE_STAT_TIMESPEC
+
+#define ST_ATIME_NSEC(statstruct) ((statstruct)->st_atimespec.tv_nsec)
+#define ST_MTIME_NSEC(statstruct) ((statstruct)->st_mtimespec.tv_nsec)
+#define ST_CTIME_NSEC(statstruct) ((statstruct)->st_ctimespec.tv_nsec)
+
+#else /* HAVE_STAT_TIMESPEC */
+
+#if HAVE_STAT_TIM
+
+#define ST_ATIME_NSEC(statstruct) ((statstruct)->st_atim.tv_nsec)
+#define ST_MTIME_NSEC(statstruct) ((statstruct)->st_mtim.tv_nsec)
+#define ST_CTIME_NSEC(statstruct) ((statstruct)->st_ctim.tv_nsec)
+
+#else /* HAVE_STAT_TIM */
+
+#if HAVE_STAT_NSEC
+
+#define ST_ATIME_NSEC(statstruct) ((statstruct)->st_atimensec)
+#define ST_MTIME_NSEC(statstruct) ((statstruct)->st_mtimensec)
+#define ST_CTIME_NSEC(statstruct) ((statstruct)->st_ctimensec)
+
+#else /* HAVE_STAT_NSEC */
+
+#define ST_ATIME_NSEC(statstruct) 0
+#define ST_MTIME_NSEC(statstruct) 0
+#define ST_CTIME_NSEC(statstruct) 0
+
+#endif /* HAVE_STAT_NSEC */
+#endif /* HAVE_STAT_TIMESPEC */
 
 /************
  * The values below in the header are fixed and correct for managed callers to use forever.

@@ -204,12 +204,15 @@ namespace System.IO
                 if (!_exists)
                     return DateTimeOffset.FromFileTime(0);
 
-                Interop.Sys.TimeSpec rawTime = (_fileStatus.Flags & Interop.Sys.FileStatusFlags.HasBirthTime) != 0 ?
-                    _fileStatus.BirthTime :
-                     // fall back to the oldest time we have in between change and modify time
-                    _fileStatus.CTime.CompareTo(_fileStatus.MTime) < 0 ? _fileStatus.CTime : _fileStatus.MTime;
+                if ((_fileStatus.Flags & Interop.Sys.FileStatusFlags.HasBirthTime) != 0)
+                    return UnixTimeToDateTimeOffset(_fileStatus.birthTime, _fileStatus.birthTimeNsec);
 
-                return TimeSpecToDateTimeOffset(rawTime);
+                // fall back to the oldest time we have in between change and modify time
+                if (_fileStatus.MTime < _fileStatus.CTime ||
+                   (_fileStatus.MTime == _fileStatus.CTime && _fileStatus.MTimeNsec < _fileStatus.CTimeNsec))
+                    return UnixTimeToDateTimeOffset(_fileStatus.MTime, _fileStatus.MTimeNsec);
+                
+                return UnixTimeToDateTimeOffset(_fileStatus.Ctime, _fileStatus.CTimeNsec);
             }
             set
             {
@@ -227,7 +230,7 @@ namespace System.IO
                 EnsureStatInitialized();
                 if (!_exists)
                     return DateTimeOffset.FromFileTime(0);
-                return TimeSpecToDateTimeOffset(_fileStatus.ATime);
+                return UnixTimeToDateTimeOffset(_fileStatus.ATime, _fileStatus.ATimeNsec);
             }
             set { SetAccessWriteTimes(value.ToUnixTimeSeconds(), null); }
         }
@@ -239,14 +242,14 @@ namespace System.IO
                 EnsureStatInitialized();
                 if (!_exists)
                     return DateTimeOffset.FromFileTime(0);
-                return TimeSpecToDateTimeOffset(_fileStatus.MTime);
+                return UnixTimeToDateTimeOffset(_fileStatus.MTime, _fileStatus.MTimeNsec);
             }
             set { SetAccessWriteTimes(null, value.ToUnixTimeSeconds()); }
         }
 
-        private DateTimeOffset TimeSpecToDateTimeOffset(Interop.Sys.TimeSpec timeSpec)
+        private DateTimeOffset UnixTimeToDateTimeOffset(long seconds, long nanoseconds)
         {
-            return DateTimeOffset.FromUnixTimeSeconds(timeSpec.Seconds).AddTicks(timeSpec.Nanoseconds / NanosecondsPerTick).ToLocalTime();
+            return DateTimeOffset.FromUnixTimeSeconds(seconds).AddTicks(nanoseconds / NanosecondsPerTick).ToLocalTime();
         }
 
         private void SetAccessWriteTimes(long? accessTime, long? writeTime)
@@ -254,8 +257,8 @@ namespace System.IO
             _fileStatusInitialized = -1; // force a refresh so that we have an up-to-date times for values not being overwritten
             EnsureStatInitialized();
             Interop.Sys.UTimBuf buf;
-            buf.AcTime = accessTime ?? _fileStatus.ATime.Seconds;
-            buf.ModTime = writeTime ?? _fileStatus.MTime.Seconds;
+            buf.AcTime = accessTime ?? _fileStatus.ATime;
+            buf.ModTime = writeTime ?? _fileStatus.MTime;
             bool isDirectory = this is DirectoryInfo;
             Interop.CheckIo(Interop.Sys.UTime(FullPath, ref buf), FullPath, isDirectory);
             _fileStatusInitialized = -1;

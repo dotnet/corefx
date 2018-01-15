@@ -173,36 +173,21 @@ static void ConvertFileStatus2(const struct stat_* src, struct FileStatus2* dst)
     dst->Gid = src->st_gid;
     dst->Size = src->st_size;
 
-/* On macOS (https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man2/stat.2.html)
-   and BSD (https://www.freebsd.org/cgi/man.cgi?query=stat&sektion=2):
+    dst->ATime = src->st_atime;
+    dst->MTime = src->st_mtime;
+    dst->CTime = src->st_ctime;
 
-    timespec st_atimespec, st_mtimespec, st_ctimespec, st_birthtimespec
-
-  On Linux (http://man7.org/linux/man-pages/man2/stat.2.html, http://man7.org/linux/man-pages/man2/statx.2.html):
-
-    timespec st_atim, st_mtim, st_ctim
-
-        NOTE: Linux offers birthtime via statx(): we don't currently use it.
-
-  On all Unixes above the time_t st_atime,... st_birthtime are defined to always map to tv_sec part of the timespecs.
-*/
-#ifdef HAVE_STAT_LINUX_FORMAT
-    dst->ATime = src->st_atim;
-    dst->MTime = src->st_mtim;
-    dst->CTime = src->st_ctim;
-#else
-    dst->ATime = src->st_atimespec;
-    dst->MTime = src->st_mtimespec;
-    dst->CTime = src->st_ctimespec;
-#endif
-
+    dst->ATimeNsec = ST_ATIME_NSEC(&src);
+    dst->MTimeNsec = ST_MTIME_NSEC(&src);
+    dst->CTimeNsec = ST_CTIME_NSEC(&src);
 
 #if HAVE_STAT_BIRTHTIME
-    dst->BirthTime = src->st_birthtimespec;
+    dst->BirthTime = src->st_birthtimespec->tv_sec;
+    dst->BirthTimeNsec = src->st_birthtimespec->tv_nsec;
     dst->Flags |= FILESTATUS_FLAGS_HAS_BIRTHTIME;
 #else
-    dst->BirthTime.tv_sec = 0;
-    dst->BirthTime.tv_nsec = 0;
+    dst->BirthTime = 0;
+    dst->BirthTimeNsec = 0;
 #endif
 }
 
