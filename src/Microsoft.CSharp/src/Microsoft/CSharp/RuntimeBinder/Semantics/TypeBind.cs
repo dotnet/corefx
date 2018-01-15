@@ -18,7 +18,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         None = 0x00,
         Outer = 0x01,
-        NoDupErrors = 0x02,
         NoErrors = 0x04,
     }
 
@@ -56,7 +55,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (ats.fConstraintsChecked)
             {
                 // Already checked.
-                if (!ats.fConstraintError || (flags & CheckConstraintsFlags.NoDupErrors) != 0)
+                if (!ats.fConstraintError)
                 {
                     // No errors or no need to report errors again.
                     return !ats.fConstraintError;
