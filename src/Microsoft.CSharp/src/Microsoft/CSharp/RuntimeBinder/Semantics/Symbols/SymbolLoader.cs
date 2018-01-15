@@ -120,10 +120,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 while (atsDer != null)
                 {
-                    TypeArray ifacesAll = atsDer.GetIfacesAll();
-                    for (int i = 0; i < ifacesAll.Count; i++)
+                    foreach (CType iface in atsDer.IfacesAll.Items)
                     {
-                        if (AreTypesEqualForConversion(ifacesAll[i], pBase))
+                        if (AreTypesEqualForConversion(iface, pBase))
                         {
                             return true;
                         }
@@ -381,7 +380,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType atsBase = (AggregateType)pBase;
             while (atsDer != null)
             {
-                foreach (AggregateType iface in atsDer.GetIfacesAll().Items)
+                foreach (AggregateType iface in atsDer.IfacesAll.Items)
                 {
                     if (HasInterfaceConversion(iface, atsBase))
                     {

@@ -285,11 +285,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                         if (_pCurrentType.IsInterfaceType)
                         {
-                            TypeArray ifaces = _pCurrentType.GetIfacesAll();
-                            for (int i = 0; i < ifaces.Count; i++)
+                            foreach (AggregateType type in _pCurrentType.IfacesAll.Items)
                             {
-                                AggregateType type = ifaces[i] as AggregateType;
-
                                 Debug.Assert(type.IsInterfaceType);
                                 _HiddenTypes.Add(type);
                             }

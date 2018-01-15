@@ -461,23 +461,28 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     fHideByName |= !_fMulti;
 
                     // Mark base interfaces appropriately.
-                    TypeArray ifaces = typeCur.GetIfacesAll();
-                    for (int i = 0; i < ifaces.Count; i++)
+                    foreach (AggregateType type in typeCur.IfacesAll.Items)
                     {
-                        AggregateType type = (AggregateType)ifaces[i];
                         Debug.Assert(type.IsInterfaceType);
                         if (fHideByName)
+                        {
                             type.fAllHidden = true;
+                        }
+
                         type.fDiffHidden = true;
                     }
 
                     // If we hide all base types, that includes object!
                     if (fHideByName)
+                    {
                         fHideObject = true;
+                    }
                 }
 
                 if (itypeNext >= types.Count)
+                {
                     return !fHideObject;
+                }
 
                 // Substitution has already been done.
                 typeCur = types[itypeNext++] as AggregateType;
@@ -578,7 +583,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert((_flags & (MemLookFlags.Ctor | MemLookFlags.NewObj | MemLookFlags.Operator | MemLookFlags.BaseCall)) == 0);
                 typeIface = (AggregateType)typeSrc;
-                ifaces = typeIface.GetIfacesAll();
+                ifaces = typeIface.IfacesAll;
             }
 
             if (typeIface != null || ifaces.Count > 0)

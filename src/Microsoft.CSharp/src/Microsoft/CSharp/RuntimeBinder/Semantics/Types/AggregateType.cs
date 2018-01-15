@@ -116,7 +116,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (IsInterfaceType)
                 {
                     yield return this;
-                    foreach (AggregateType iface in GetIfacesAll().Items)
+                    foreach (AggregateType iface in IfacesAll.Items)
                     {
                         yield return iface;
                     }
@@ -137,10 +137,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeArray TypeArgsAll { get; }
 
-        public TypeArray GetIfacesAll()
-        {
-            return _ifacesAll ?? (_ifacesAll = OwningAggregate.GetTypeManager().SubstTypeArray(OwningAggregate.GetIfacesAll(), TypeArgsAll));
-        }
+        public TypeArray IfacesAll => _ifacesAll ?? (_ifacesAll = OwningAggregate.GetTypeManager().SubstTypeArray(OwningAggregate.GetIfacesAll(), TypeArgsAll));
 
         private bool IsCollectionType
         {
@@ -172,7 +169,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (_winrtifacesAll == null)
             {
                 List<CType> typeList = new List<CType>();
-                foreach (AggregateType type in GetIfacesAll().Items)
+                foreach (AggregateType type in IfacesAll.Items)
                 {
                     Debug.Assert(type.IsInterfaceType);
                     if (type.IsCollectionType)

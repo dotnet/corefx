@@ -26,7 +26,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(type != null);
             foreach (AggregateType b in type.TypeAndBaseClasses())
-                foreach (AggregateType t in b.GetIfacesAll().Items)
+                foreach (AggregateType t in b.IfacesAll.Items)
                     yield return t;
         }
 
