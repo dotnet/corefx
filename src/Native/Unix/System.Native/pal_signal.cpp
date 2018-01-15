@@ -258,5 +258,17 @@ static bool InitializeSignalHandling()
 
 extern "C" int32_t SystemNative_InitializeSignalHandling()
 {
-    return InitializeSignalHandling() ? 1 : 0;
+    static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+    static bool initialized = false;
+
+    pthread_mutex_lock(&lock);
+    {
+        if (!initialized)
+        {
+            initialized = InitializeSignalHandling();
+        }
+    }
+    pthread_mutex_unlock(&lock);
+
+    return initialized ? 1 : 0;
 }
