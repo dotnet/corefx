@@ -263,11 +263,9 @@ namespace System.Net.Http
         {
             HttpMessageHandler handler = new HttpConnectionHandler(_settings);
 
-            Console.WriteLine("SetupHandlerChain _settings._useProxy = {0} _proxy={1}", _settings._useProxy, _settings._proxy);
             if (_settings._useProxy &&
                 (_settings._proxy != null || HttpProxyConnectionHandler.DefaultProxyConfigured))
             {
-                Console.WriteLine("SetupHandlerChain  creating new HttpProxyConnectionHandler!!!\n");
                 handler = new HttpProxyConnectionHandler(_settings, handler);
             }
 
