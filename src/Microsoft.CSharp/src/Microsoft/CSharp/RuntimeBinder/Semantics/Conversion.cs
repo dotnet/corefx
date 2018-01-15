@@ -463,7 +463,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     string value;
                     if (exprType <= FUNDTYPE.FT_LASTINTEGRAL)
                     {
-                        value = expr.Type.isUnsigned()
+                        value = expr.Type.IsUnsigned
                             ? ((ulong)((ExprConstant)exprConst).Int64Value).ToString(CultureInfo.InvariantCulture)
                             : ((ExprConstant)exprConst).Int64Value.ToString(CultureInfo.InvariantCulture);
                     }

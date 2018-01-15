@@ -197,30 +197,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         [ExcludeFromCodeCoverage] // Should only be called through override.
         public virtual AggregateType UnderlyingEnumType => throw Error.InternalCompilerError();
 
-        public bool isUnsigned()
-        {
-            if (this is AggregateType sym)
-            {
-                if (sym.IsEnumType)
-                {
-                    sym = sym.UnderlyingEnumType;
-                }
-
-                if (sym.IsPredefined)
-                {
-                    PredefinedType pt = sym.PredefinedType;
-                    return pt == Syntax.PredefinedType.PT_UINTPTR || pt == Syntax.PredefinedType.PT_BYTE || (pt >= Syntax.PredefinedType.PT_USHORT && pt <= Syntax.PredefinedType.PT_ULONG);
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return this is PointerType;
-            }
-        }
+        public virtual bool IsUnsigned => false;
 
         // Pointer types (or arrays of them) are the only unsafe types.
         // Note that generics may not be instantiated with pointer types

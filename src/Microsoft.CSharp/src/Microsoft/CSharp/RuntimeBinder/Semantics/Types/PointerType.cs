@@ -21,5 +21,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public override Type AssociatedSystemType => ReferentType.AssociatedSystemType.MakePointerType();
 
         public override CType BaseOrParameterOrElementType => ReferentType;
+
+        public override bool IsUnsigned => true;
     }
 }
