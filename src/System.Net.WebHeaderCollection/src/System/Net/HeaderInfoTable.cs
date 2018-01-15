@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
 
 namespace System.Net
 {
@@ -38,9 +37,10 @@ namespace System.Net
                 }
                 else if ((value[i] == ',') && !inquote)
                 {
-                    if (!isSetCookie || !IsDuringExpiresAttributeParsing(value.SubstringTrim(startIndex, length)))
+                    string singleValue = value.SubstringTrim(startIndex, length);
+                    if (!isSetCookie || !IsDuringExpiresAttributeParsing(singleValue))
                     {
-                        tempStringCollection.Add(value.SubstringTrim(startIndex, length));
+                        tempStringCollection.Add(singleValue);
                         startIndex = i + 1;
                         length = 0;
                         continue;
