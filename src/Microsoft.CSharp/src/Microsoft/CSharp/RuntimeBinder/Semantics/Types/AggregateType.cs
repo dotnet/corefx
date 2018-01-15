@@ -168,6 +168,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public override bool IsNonNullableValueType => IsValueType;
 
         public override bool IsValueType => OwningAggregate.IsValueType();
+
+        public override bool IsStaticClass => OwningAggregate.IsStatic();
     }
 }
 

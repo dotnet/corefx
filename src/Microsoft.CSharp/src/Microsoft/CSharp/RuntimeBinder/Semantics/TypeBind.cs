@@ -142,7 +142,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private static bool CheckSingleConstraint(CSemanticChecker checker, ErrorHandling errHandling, Symbol symErr, TypeParameterType var, CType arg, TypeArray typeArgsCls, TypeArray typeArgsMeth, CheckConstraintsFlags flags)
         {
             Debug.Assert(!(arg is PointerType));
-            Debug.Assert(!arg.isStaticClass());
+            Debug.Assert(!arg.IsStaticClass);
 
             bool fReportErrors = 0 == (flags & CheckConstraintsFlags.NoErrors);
 

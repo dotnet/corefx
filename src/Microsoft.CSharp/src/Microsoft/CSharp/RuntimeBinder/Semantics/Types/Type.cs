@@ -416,7 +416,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return getAggregate().GetPredefType();
         }
 
-        public bool isStaticClass() => (GetNakedType(false) as AggregateType)?.OwningAggregate?.IsStatic() ?? false;
+        public virtual bool IsStaticClass => false;
 
         // These check for AGGTYPESYMs, TYVARSYMs and others as appropriate.
         public virtual bool IsValueType => false;

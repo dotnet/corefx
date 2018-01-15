@@ -23,7 +23,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // Generate an error if CType is static.
         public void CheckForStaticClass(Symbol symCtx, CType CType, ErrorCode err)
         {
-            if (CType.isStaticClass())
+            if (CType.IsStaticClass)
             {
                 throw ReportStaticClassError(symCtx, CType, err);
             }
