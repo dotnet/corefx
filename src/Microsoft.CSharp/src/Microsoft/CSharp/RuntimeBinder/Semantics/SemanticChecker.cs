@@ -21,11 +21,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class CSemanticChecker
     {
         // Generate an error if CType is static.
-        public void CheckForStaticClass(Symbol symCtx, CType CType, ErrorCode err)
+        public void CheckForStaticClass(CType type)
         {
-            if (CType.IsStaticClass)
+            if (type.IsStaticClass)
             {
-                throw ReportStaticClassError(symCtx, CType, err);
+                throw ErrorContext.Error(ErrorCode.ERR_ConvertToStaticClass, type);
             }
         }
 
@@ -111,9 +111,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         // Generates an error for static classes
-        public RuntimeBinderException ReportStaticClassError(Symbol symCtx, CType CType, ErrorCode err) =>
-            ErrorContext.Error(err, symCtx != null ? new []{CType, new ErrArg(symCtx)} : new ErrArg[]{CType});
-
         public SymbolLoader SymbolLoader { get; } = new SymbolLoader();
 
         /////////////////////////////////////////////////////////////////////////////////
