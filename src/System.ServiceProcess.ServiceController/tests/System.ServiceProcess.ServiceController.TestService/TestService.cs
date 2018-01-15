@@ -12,11 +12,13 @@ using System.Threading;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Globalization;
+using System.IO.Pipes;
 
 namespace System.ServiceProcess.Tests
 {
     public class TestService : ServiceBase
     {
+        private object streamlock = new object();
         public TestService(string serviceName)
         {
             this.ServiceName = serviceName;
@@ -29,7 +31,12 @@ namespace System.ServiceProcess.Tests
             // We cannot easily test these so disable the events
             this.CanHandleSessionChangeEvent = false;
             this.CanHandlePowerEvent = false;
+
+            this.Server = new NamedPipeServerStream(serviceName);
+            this.Server.WaitForConnectionAsync();
         }
+
+        public NamedPipeServerStream Server { get; set;}
 
         public static string GetLogPath(string serviceName)
         {
@@ -40,18 +47,36 @@ namespace System.ServiceProcess.Tests
         {
             WriteLog(nameof(OnContinue));
             base.OnContinue();
+            lock (streamlock)
+            {
+                StreamWriter writer = new StreamWriter(Server);
+                writer.WriteLine("Continue");
+                writer.Flush();
+            }
         }
 
         protected override void OnCustomCommand(int command)
         {
             WriteLog(nameof(OnCustomCommand) + " command=" + command);
             base.OnCustomCommand(command);
+            lock(streamlock)
+            {
+                StreamWriter writer = new StreamWriter(Server);
+                writer.WriteLine("executeCommand");
+                writer.Flush();
+            }
         }
 
         protected override void OnPause()
         {
             WriteLog(nameof(OnPause));
             base.OnPause();
+            lock (streamlock)
+            {
+                StreamWriter writer = new StreamWriter(Server);
+                writer.WriteLine("Pause");
+                writer.Flush();
+            }
         }
 
         protected override void OnSessionChange(SessionChangeDescription changeDescription)
@@ -84,6 +109,12 @@ namespace System.ServiceProcess.Tests
         {
             WriteLog(nameof(OnStop));
             base.OnStop();
+            lock (streamlock)
+            {
+                StreamWriter writer = new StreamWriter(Server);
+                writer.WriteLine("Stop");
+                writer.Flush();
+            }
         }
 
         private void WriteLog(string msg)

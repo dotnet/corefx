@@ -32,7 +32,7 @@ namespace System.ServiceProcess.Tests
         public TestServiceProvider()
         {
             TestMachineName = ".";
-            ControlTimeout = TimeSpan.FromSeconds(120);
+            ControlTimeout = TimeSpan.FromSeconds(40);
             TestServiceName = Guid.NewGuid().ToString();
             TestServiceDisplayName = "Test Service " + TestServiceName;
 

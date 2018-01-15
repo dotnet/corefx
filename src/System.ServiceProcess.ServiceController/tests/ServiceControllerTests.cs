@@ -133,11 +133,11 @@ namespace System.ServiceProcess.Tests
             for (int i = 0; i < 2; i++)
             {
                 controller.Pause();
-                controller.WaitForStatus(ServiceControllerStatus.Paused, _testService.ControlTimeout);
-                Assert.Equal(ServiceControllerStatus.Paused, controller.Status);
+                //controller.WaitForStatus(ServiceControllerStatus.Paused, _testService.ControlTimeout);
+                //Assert.Equal(ServiceControllerStatus.Paused, controller.Status);
 
                 controller.Continue();
-                controller.WaitForStatus(ServiceControllerStatus.Running, _testService.ControlTimeout);
+                //controller.WaitForStatus(ServiceControllerStatus.Running, _testService.ControlTimeout);
                 Assert.Equal(ServiceControllerStatus.Running, controller.Status);
             }
         }
