@@ -283,14 +283,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // When we find a method, we check if the type has interfaces. If so, mark the other interfaces
                         // as hidden, and object as well.
 
-                        if (_pCurrentType.isInterfaceType())
+                        if (_pCurrentType.IsInterfaceType)
                         {
                             TypeArray ifaces = _pCurrentType.GetIfacesAll();
                             for (int i = 0; i < ifaces.Count; i++)
                             {
                                 AggregateType type = ifaces[i] as AggregateType;
 
-                                Debug.Assert(type.isInterfaceType());
+                                Debug.Assert(type.IsInterfaceType);
                                 _HiddenTypes.Add(type);
                             }
 
@@ -542,7 +542,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         AggregateType dateTimeType = symbolLoader.GetPredefindType(PredefinedType.PT_DATETIME);
                         optionalArgument = exprFactory.CreateConstant(dateTimeType, ConstVal.Get(DateTime.FromBinary(cv.Int64Val)));
                     }
-                    else if (pConstValType.isSimpleOrEnumOrString())
+                    else if (pConstValType.IsSimpleOrEnumOrString)
                     {
                         // In this case, the constval is a simple type (all the numerics, including
                         // decimal), or an enum or a string. This covers all the substantial values,
@@ -551,7 +551,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // For enum parameters, we create a constant of the enum type. For everything
                         // else, we create the appropriate constant.
 
-                        if (pRawParamType.isEnumType() && pConstValType == pRawParamType.underlyingType())
+                        if (pRawParamType.IsEnumType && pConstValType == pRawParamType.underlyingType())
                         {
                             optionalArgument = exprFactory.CreateConstant(pRawParamType, cv);
                         }
@@ -852,7 +852,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_pCurrentType != type &&
                         _pCurrentType != null &&
                         !_methList.IsEmpty() &&
-                        !_methList.Head().mpwi.GetType().isInterfaceType())
+                        !_methList.Head().mpwi.GetType().IsInterfaceType)
                 {
                     return false;
                 }
@@ -1206,7 +1206,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Check for an invoke.
                 if (_pGroup.OptionalObject != null &&
                         _pGroup.OptionalObject.Type != null &&
-                        _pGroup.OptionalObject.Type.isDelegateType() &&
+                        _pGroup.OptionalObject.Type.IsDelegateType &&
                         _pGroup.Name == NameManager.GetPredefinedName(PredefinedName.PN_INVOKE))
                 {
                     Debug.Assert(!_results.BestResult || _results.BestResult.MethProp().getClass().IsDelegate());

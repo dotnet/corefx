@@ -40,5 +40,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public CType UnderlyingType { get; }
 
         public override bool IsValueType => true;
+
+        public override bool IsStructOrEnum => true;
+
+        public override bool IsStructType => true;
     }
 }

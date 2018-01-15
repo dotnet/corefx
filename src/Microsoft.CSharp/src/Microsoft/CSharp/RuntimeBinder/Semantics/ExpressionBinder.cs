@@ -683,7 +683,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     typeSrc = typeSrc.StripNubs();
                     goto LAgain;
                 case TypeKind.TK_AggregateType:
-                    if (!typeSrc.isClassType() && !typeSrc.isStructType() || ((AggregateType)typeSrc).OwningAggregate.IsSkipUDOps())
+                    if (!typeSrc.IsClassType && !typeSrc.IsStructType || ((AggregateType)typeSrc).OwningAggregate.IsSkipUDOps())
                         return null;
                     break;
                 default:
@@ -1132,14 +1132,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // If we're invoking code on a struct-valued field, mark the struct as assigned (to
                 // avoid warning CS0649).
                 if (pObject is ExprField field && !field.FieldWithType.Field().isAssigned && !(swt.Sym is FieldSymbol) &&
-                    typeObj.isStructType() && !typeObj.IsPredefined)
+                    typeObj.IsStructType && !typeObj.IsPredefined)
                 {
                     field.FieldWithType.Field().isAssigned = true;
                 }
 
                 if (pfConstrained &&
                     (typeObj is TypeParameterType ||
-                     typeObj.isStructType() && swt.GetType().IsReferenceType && swt.Sym.IsVirtual()))
+                     typeObj.IsStructType && swt.GetType().IsReferenceType && swt.Sym.IsVirtual()))
                 {
                     // For calls on type parameters or virtual calls on struct types (not enums),
                     // use the constrained prefix.
@@ -1210,7 +1210,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                        // things marked as lvalues have props/fields which are lvalues, with one exception:  props of structs
                        // do not have fields/structs as lvalues
 
-                       !pObject.Type.isStructOrEnum()
+                       !pObject.Type.IsStructOrEnum
                    // non-struct types are lvalues (such as non-struct method returns)
                    );
         }

@@ -320,7 +320,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 for (int i = 0; i < collectioniFaces.Count; i++)
                 {
                     CType collectionType = collectioniFaces[i];
-                    Debug.Assert(collectionType.isInterfaceType());
+                    Debug.Assert(collectionType.IsInterfaceType);
 
                     // Insert into our list of Types.
                     list.Add(collectionType.AssociatedSystemType);

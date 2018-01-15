@@ -116,7 +116,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(atsDer != null);
             Debug.Assert(pBase != null);
-            if (pBase.isInterfaceType())
+            if (pBase.IsInterfaceType)
             {
                 while (atsDer != null)
                 {
@@ -141,13 +141,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(pDerived != null);
             Debug.Assert(pBase != null);
 
-            // This checks to see whether derived is a class, and if so, 
+            // This checks to see whether derived is a class, and if so,
             // if base is a base class of derived.
-            if (!pDerived.isClassType())
-            {
-                return false;
-            }
-            return IsBaseClass(pDerived, pBase);
+            return pDerived.IsClassType && IsBaseClass(pDerived, pBase);
         }
 
         private static bool IsBaseClass(CType pDerived, CType pBase)
@@ -156,10 +152,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(pBase != null);
             // A base class has got to be a class. The derived type might be a struct.
 
-            if (!(pBase is AggregateType atsBase && atsBase.isClassType()))
+            if (!(pBase is AggregateType atsBase && atsBase.IsClassType))
             {
                 return false;
             }
+
             if (pDerived is NullableType derivedNub)
             {
                 pDerived = derivedNub.GetAts();
@@ -211,11 +208,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
-            if (!pSource.IsSZArray)
-            {
-                return false;
-            }
-            if (!pDest.isInterfaceType())
+            if (!pSource.IsSZArray || !pDest.IsInterfaceType)
             {
                 return false;
             }
@@ -305,10 +298,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             break;
 
                         case AggKindEnum.Interface:
-                            if (aggDest.isInterfaceType())
+                            if (aggDest.IsInterfaceType)
                             {
-                                return HasAnyBaseInterfaceConversion(aggSource, aggDest)
-                                       || HasInterfaceConversion(aggSource, aggDest);
+                                return HasAnyBaseInterfaceConversion(aggSource, aggDest) || HasInterfaceConversion(aggSource, aggDest);
                             }
 
                             break;
@@ -333,7 +325,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // VARIANCE EXTENSION:
                             // * From any delegate type S to a delegate type T provided S is not T and
                             //   S is a delegate convertible to T
-                            return pDest.isDelegateType() && HasDelegateConversion(aggSource, aggDest);
+                            return pDest.IsDelegateType && HasDelegateConversion(aggSource, aggDest);
                     }
                 }
             }
@@ -381,11 +373,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool HasAnyBaseInterfaceConversion(CType pDerived, CType pBase)
         {
-            if (!pBase.isInterfaceType())
-            {
-                return false;
-            }
-            if (!(pDerived is AggregateType atsDer))
+            if (!pBase.IsInterfaceType || !(pDerived is AggregateType atsDer))
             {
                 return false;
             }
@@ -422,8 +410,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool HasInterfaceConversion(AggregateType pSource, AggregateType pDest)
         {
-            Debug.Assert(pSource != null && pSource.isInterfaceType());
-            Debug.Assert(pDest != null && pDest.isInterfaceType());
+            Debug.Assert(pSource != null && pSource.IsInterfaceType);
+            Debug.Assert(pDest != null && pDest.IsInterfaceType);
             return HasVariantConversion(pSource, pDest);
         }
 
@@ -431,8 +419,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool HasDelegateConversion(AggregateType pSource, AggregateType pDest)
         {
-            Debug.Assert(pSource != null && pSource.isDelegateType());
-            Debug.Assert(pDest != null && pDest.isDelegateType());
+            Debug.Assert(pSource != null && pSource.IsDelegateType);
+            Debug.Assert(pDest != null && pDest.IsDelegateType);
             return HasVariantConversion(pSource, pDest);
         }
 

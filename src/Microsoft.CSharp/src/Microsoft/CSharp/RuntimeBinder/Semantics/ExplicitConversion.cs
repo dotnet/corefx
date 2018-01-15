@@ -233,7 +233,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_typeDest != null);
 
                 if (!(_typeSrc is ArrayType arrSrc) || !arrSrc.IsSZArray || !(_typeDest is AggregateType aggDest)
-                    || !aggDest.isInterfaceType() || aggDest.TypeArgsAll.Count != 1)
+                    || !aggDest.IsInterfaceType || aggDest.TypeArgsAll.Count != 1)
                 {
                     return false;
                 }
@@ -273,7 +273,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //   S[] to System.Collections.Generic.IList<T> or System.Collections.Generic.IReadOnlyList<T>. This is precisely when either S and T
                 //   are the same type or there is an implicit or explicit reference conversion from S to T.
 
-                if (!arrayDest.IsSZArray || !(_typeSrc is AggregateType aggSrc) || !aggSrc.isInterfaceType() || aggSrc.TypeArgsAll.Count != 1)
+                if (!arrayDest.IsSZArray || !(_typeSrc is AggregateType aggSrc) || !aggSrc.IsInterfaceType || aggSrc.TypeArgsAll.Count != 1)
                 {
                     return false;
                 }
@@ -371,7 +371,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // * From any pointer-type to any other pointer-type.
                 // * From sbyte, byte, short, ushort, int, uint, long, or ulong to any pointer-type.
 
-                if (_typeSrc is PointerType || _typeSrc.fundType() <= FUNDTYPE.FT_LASTINTEGRAL && _typeSrc.isNumericType())
+                if (_typeSrc is PointerType || _typeSrc.fundType() <= FUNDTYPE.FT_LASTINTEGRAL && _typeSrc.IsNumericType)
                 {
                     if (_needsExprDest)
                         _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest);
@@ -401,7 +401,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_typeSrc != null);
                 Debug.Assert(aggTypeDest != null);
 
-                if (!_typeSrc.isEnumType())
+                if (!_typeSrc.IsEnumType)
                 {
                     return AggCastResult.Failure;
                 }
@@ -413,7 +413,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
 
-                if (!aggDest.getThisType().isNumericType() &&
+                if (!aggDest.getThisType().IsNumericType &&
                     !aggDest.IsEnum() &&
                     !(aggDest.IsPredefined() && aggDest.GetPredefType() == PredefinedType.PT_CHAR))
                 {
@@ -546,7 +546,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return bindExplicitConversionFromDecimalToEnum(aggTypeDest);
                 }
 
-                if (_typeSrc.isNumericType() || _typeSrc.IsPredefined && _typeSrc.PredefinedType == PredefinedType.PT_CHAR)
+                if (_typeSrc.IsNumericType || _typeSrc.IsPredefined && _typeSrc.PredefinedType == PredefinedType.PT_CHAR)
                 {
                     // Transform constant to constant.
                     if (_exprSrc.GetConst() != null)
@@ -586,7 +586,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_typeSrc != null);
                 Debug.Assert(aggTypeDest != null);
 
-                if (!_typeSrc.isSimpleType() || !aggTypeDest.isSimpleType())
+                if (!_typeSrc.IsSimpleType || !aggTypeDest.IsSimpleType)
                 {
                     return AggCastResult.Failure;
                 }
@@ -704,7 +704,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //
                 // * From any pointer-type to sbyte, byte, short, ushort, int, uint, long, or ulong.
 
-                if (!(_typeSrc is PointerType) || aggTypeDest.fundType() > FUNDTYPE.FT_LASTINTEGRAL || !aggTypeDest.isNumericType())
+                if (!(_typeSrc is PointerType) || aggTypeDest.fundType() > FUNDTYPE.FT_LASTINTEGRAL || !aggTypeDest.IsNumericType)
                 {
                     return AggCastResult.Failure;
                 }

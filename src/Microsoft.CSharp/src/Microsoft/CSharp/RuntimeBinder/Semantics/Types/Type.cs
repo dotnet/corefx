@@ -311,28 +311,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return this;
         }
 
-        public bool isDelegateType()
-        {
-            return this is AggregateType at && at.OwningAggregate.IsDelegate();
-        }
+        public virtual bool IsDelegateType => false;
 
         ////////////////////////////////////////////////////////////////////////////////
         // A few types are considered "simple" types for purposes of conversions and so
         // on. They are the fundamental types the compiler knows about for operators and
         // conversions.
-        public bool isSimpleType()
-        {
-            return (IsPredefined &&
-                    PredefinedTypeFacts.IsSimpleType(PredefinedType));
-        }
-        public bool isSimpleOrEnum()
-        {
-            return isSimpleType() || isEnumType();
-        }
-        public bool isSimpleOrEnumOrString()
-        {
-            return isSimpleType() || IsPredefType(Syntax.PredefinedType.PT_STRING) || isEnumType();
-        }
+        public virtual bool IsSimpleType => false;
+
+        public virtual bool IsSimpleOrEnum => false;
+
+        public virtual bool IsSimpleOrEnumOrString => false;
 
         private bool isPointerLike()
         {
@@ -342,43 +331,30 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         ////////////////////////////////////////////////////////////////////////////////
         // A few types are considered "numeric" types. They are the fundamental number
         // types the compiler knows about for operators and conversions.
-        public bool isNumericType()
-        {
-            return IsPredefined && PredefinedTypeFacts.IsNumericType(PredefinedType);
-        }
-        public bool isStructOrEnum()
-        {
-            return this is AggregateType at && (at.OwningAggregate.IsStruct() || at.OwningAggregate.IsEnum()) || this is NullableType;
-        }
-        public bool isStructType()
-        {
-            return this is AggregateType at && at.OwningAggregate.IsStruct() || this is NullableType;
-        }
-        public bool isEnumType()
-        {
-            return this is AggregateType at && at.OwningAggregate.IsEnum();
-        }
-        public bool isInterfaceType()
-        {
-            return this is AggregateType at && at.OwningAggregate.IsInterface();
-        }
-        public bool isClassType()
-        {
-            return this is AggregateType at && at.OwningAggregate.IsClass();
-        }
-        public AggregateType underlyingEnumType()
-        {
-            Debug.Assert(isEnumType());
-            return getAggregate().GetUnderlyingType();
-        }
+        public virtual bool IsNumericType => false;
+
+        public virtual bool IsStructOrEnum => false;
+
+        public virtual bool IsStructType => false;
+
+        public virtual bool IsEnumType => false;
+
+        public virtual bool IsInterfaceType => false;
+
+        public virtual bool IsClassType => false;
+
+        [ExcludeFromCodeCoverage] // Should only be called through override.
+        public virtual AggregateType UnderlyingEnumType => throw Error.InternalCompilerError();
+
         public bool isUnsigned()
         {
             if (this is AggregateType sym)
             {
-                if (sym.isEnumType())
+                if (sym.IsEnumType)
                 {
-                    sym = sym.underlyingEnumType();
+                    sym = sym.UnderlyingEnumType;
                 }
+
                 if (sym.IsPredefined)
                 {
                     PredefinedType pt = sym.PredefinedType;
@@ -404,7 +380,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public virtual bool IsPredefined => false;
 
         [ExcludeFromCodeCoverage] // Should only be called through override.
-        public virtual PredefinedType PredefinedType => throw new RuntimeBinderInternalCompilerException();
+        public virtual PredefinedType PredefinedType => throw Error.InternalCompilerError();
 
         public virtual bool IsStaticClass => false;
 

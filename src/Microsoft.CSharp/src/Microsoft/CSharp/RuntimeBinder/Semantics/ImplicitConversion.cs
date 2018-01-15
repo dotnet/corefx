@@ -486,7 +486,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // and the non-generic versions.
 
                 if ((_typeDest is ArrayType ||
-                     (_typeDest is AggregateType aggDest && aggDest.isInterfaceType() &&
+                     (_typeDest is AggregateType aggDest && aggDest.IsInterfaceType &&
                       aggDest.TypeArgsAll.Count == 1 &&
                       (aggDest.TypeArgsAll[0] != ((ArrayType)_typeSrc).ElementType ||
                        0 != (_flags & CONVERTTYPE.FORCECAST))))
@@ -539,7 +539,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return bindImplicitConversionFromEnum(aggTypeSrc);
                 }
 
-                if (_typeDest.isEnumType())
+                if (_typeDest.IsEnumType)
                 {
                     if (bindImplicitConversionToEnum(aggTypeSrc))
                     {
@@ -548,7 +548,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // Even though enum is sealed, a class can derive from enum in LAF scenarios -- 
                     // continue testing for derived to base conversions below.
                 }
-                else if (aggSrc.getThisType().isSimpleType() && _typeDest.isSimpleType())
+                else if (aggSrc.getThisType().IsSimpleType && _typeDest.IsSimpleType)
                 {
                     if (bindImplicitConversionBetweenSimpleTypes(aggTypeSrc))
                     {
@@ -637,7 +637,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     aggTypeSrc.OwningAggregate.GetPredefType() != PredefinedType.PT_BOOL &&
                     _exprSrc != null &&
                     _exprSrc.IsZero() &&
-                    _exprSrc.Type.isNumericType() &&
+                    _exprSrc.Type.IsNumericType &&
                     /*(exprSrc.flags & EXF_LITERALCONST) &&*/
                     0 == (_flags & CONVERTTYPE.STANDARD))
                 {
@@ -658,8 +658,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private bool bindImplicitConversionBetweenSimpleTypes(AggregateType aggTypeSrc)
             {
                 AggregateSymbol aggSrc = aggTypeSrc.OwningAggregate;
-                Debug.Assert(aggSrc.getThisType().isSimpleType());
-                Debug.Assert(_typeDest.isSimpleType());
+                Debug.Assert(aggSrc.getThisType().IsSimpleType);
+                Debug.Assert(_typeDest.IsSimpleType);
 
                 Debug.Assert(aggSrc.IsPredefined() && _typeDest.IsPredefined);
                 PredefinedType ptSrc = aggSrc.GetPredefType();

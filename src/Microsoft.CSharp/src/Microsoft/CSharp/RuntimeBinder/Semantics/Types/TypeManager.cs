@@ -718,7 +718,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             CType intermediateType;
-            if (typeSrc is AggregateType aggSrc && (aggSrc.isInterfaceType() || aggSrc.isDelegateType()) && TryVarianceAdjustmentToGetAccessibleType(semanticChecker, bindingContext, aggSrc, out intermediateType))
+            if (typeSrc is AggregateType aggSrc && (aggSrc.IsInterfaceType || aggSrc.IsDelegateType) && TryVarianceAdjustmentToGetAccessibleType(semanticChecker, bindingContext, aggSrc, out intermediateType))
             {
                 // If we have an interface or delegate type, then it can potentially be varied by its type arguments
                 // to produce an accessible type, and if that's the case, then return that.
@@ -783,7 +783,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private bool TryVarianceAdjustmentToGetAccessibleType(CSemanticChecker semanticChecker, BindingContext bindingContext, AggregateType typeSrc, out CType typeDst)
         {
             Debug.Assert(typeSrc != null);
-            Debug.Assert(typeSrc.isInterfaceType() || typeSrc.isDelegateType());
+            Debug.Assert(typeSrc.IsInterfaceType || typeSrc.IsDelegateType);
 
             typeDst = null;
 

@@ -1084,10 +1084,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   lower bound inference or upper bound inference
             // SPEC:   is made from each Ui to the corresponding Vi.
 
-            if (pSource is AggregateType aggSource &&
-                aggSource.OwningAggregate == pConstructedDest.OwningAggregate)
+            if (pSource is AggregateType aggSource && aggSource.OwningAggregate == pConstructedDest.OwningAggregate)
             {
-                if (aggSource.isInterfaceType() || aggSource.isDelegateType())
+                if (aggSource.IsInterfaceType || aggSource.IsDelegateType)
                 {
                     LowerBoundTypeArgumentInference(aggSource, pConstructedDest);
                 }
@@ -1095,6 +1094,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     ExactTypeArgumentInference(aggSource, pConstructedDest);
                 }
+
                 return true;
             }
 
@@ -1126,7 +1126,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool LowerBoundClassInference(CType pSource, AggregateType pDest)
         {
-            if (!pDest.isClassType())
+            if (!pDest.IsClassType)
             {
                 return false;
             }
@@ -1144,7 +1144,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             AggregateType pSourceBase = null;
 
-            if (pSource.isClassType())
+            if (pSource.IsClassType)
             {
                 pSourceBase = (pSource as AggregateType).GetBaseClass();
             }
@@ -1165,7 +1165,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool LowerBoundInterfaceInference(CType pSource, AggregateType pDest)
         {
-            if (!pDest.isInterfaceType())
+            if (!pDest.IsInterfaceType)
             {
                 return false;
             }
@@ -1179,8 +1179,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             //TypeArray pInterfaces = null;
 
-            if (!pSource.isStructType() && !pSource.isClassType() &&
-                !pSource.isInterfaceType() && !(pSource is TypeParameterType))
+            if (!pSource.IsStructType && !pSource.IsClassType && !pSource.IsInterfaceType && !(pSource is TypeParameterType))
             {
                 return false;
             }
@@ -1406,10 +1405,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   lower bound inference or upper bound inference
             // SPEC:   is made from each Ui to the corresponding Vi.
 
-            if (pDest is AggregateType aggDest &&
-                pConstructedSource.OwningAggregate == aggDest.OwningAggregate)
+            if (pDest is AggregateType aggDest && pConstructedSource.OwningAggregate == aggDest.OwningAggregate)
             {
-                if (aggDest.isInterfaceType() || aggDest.isDelegateType())
+                if (aggDest.IsInterfaceType || aggDest.IsDelegateType)
                 {
                     UpperBoundTypeArgumentInference(pConstructedSource, aggDest);
                 }
@@ -1417,6 +1415,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     ExactTypeArgumentInference(pConstructedSource, aggDest);
                 }
+
                 return true;
             }
 
@@ -1445,7 +1444,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool UpperBoundClassInference(AggregateType pSource, CType pDest)
         {
-            if (!pSource.isClassType() || !pDest.isClassType())
+            if (!pSource.IsClassType || !pDest.IsClassType)
             {
                 return false;
             }
@@ -1472,7 +1471,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool UpperBoundInterfaceInference(AggregateType pSource, CType pDest)
         {
-            if (!pSource.isInterfaceType())
+            if (!pSource.IsInterfaceType)
             {
                 return false;
             }
@@ -1482,8 +1481,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   or indirectly implements C<V1...Vk> then an exact ...
             // SPEC:  ... and U is an interface CType ...
 
-            if (!pDest.isStructType() && !pDest.isClassType() &&
-                !pDest.isInterfaceType())
+            if (!pDest.IsStructType && !pDest.IsClassType && !pDest.IsInterfaceType)
             {
                 return false;
             }

@@ -399,32 +399,32 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType convertL = null;
             CType convertR = null;
 
-            if (typeL.isEnumType())
+            if (typeL.IsEnumType)
             {
                 // We have already inserted casts if not lifted, so we should never see an enum.
                 Debug.Assert(expr.IsLifted);
-                convertL = GetSymbolLoader().GetTypeManager().GetNullable(typeL.underlyingEnumType());
+                convertL = GetSymbolLoader().GetTypeManager().GetNullable(typeL.UnderlyingEnumType);
                 typeL = convertL;
                 didEnumConversion = true;
             }
-            else if (typeL is NullableType nubL && nubL.UnderlyingType.isEnumType())
+            else if (typeL is NullableType nubL && nubL.UnderlyingType.IsEnumType)
             {
                 Debug.Assert(expr.IsLifted);
-                convertL = GetSymbolLoader().GetTypeManager().GetNullable(nubL.UnderlyingType.underlyingEnumType());
+                convertL = GetSymbolLoader().GetTypeManager().GetNullable(nubL.UnderlyingType.UnderlyingEnumType);
                 typeL = convertL;
                 didEnumConversion = true;
             }
-            if (typeR.isEnumType())
+            if (typeR.IsEnumType)
             {
                 Debug.Assert(expr.IsLifted);
-                convertR = GetSymbolLoader().GetTypeManager().GetNullable(typeR.underlyingEnumType());
+                convertR = GetSymbolLoader().GetTypeManager().GetNullable(typeR.UnderlyingEnumType);
                 typeR = convertR;
                 didEnumConversion = true;
             }
-            else if (typeR is NullableType nubR && nubR.UnderlyingType.isEnumType())
+            else if (typeR is NullableType nubR && nubR.UnderlyingType.IsEnumType)
             {
                 Debug.Assert(expr.IsLifted);
-                convertR = GetSymbolLoader().GetTypeManager().GetNullable(nubR.UnderlyingType.underlyingEnumType());
+                convertR = GetSymbolLoader().GetTypeManager().GetNullable(nubR.UnderlyingType.UnderlyingEnumType);
                 typeR = convertR;
                 didEnumConversion = true;
             }
@@ -448,7 +448,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Expr call = GenerateCall(pdm, newL, newR);
 
-            if (didEnumConversion && expr.Type.StripNubs().isEnumType())
+            if (didEnumConversion && expr.Type.StripNubs().IsEnumType)
             {
                 call = GenerateCall(PREDEFMETH.PM_EXPRESSION_CONVERT, call, CreateTypeOf(expr.Type));
             }
@@ -475,7 +475,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Expr origOp = expr.Child;
 
             // Such operations are always already casts on operations on casts.
-            Debug.Assert(!(origOp.Type is NullableType nub) || !nub.UnderlyingType.isEnumType());
+            Debug.Assert(!(origOp.Type is NullableType nub) || !nub.UnderlyingType.IsEnumType);
             return GenerateCall(pdm, Visit(origOp));
         }
 
@@ -685,7 +685,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // represented in the Expr tree so that this is more transparent.
 
                 // converting an enum to its underlying CType never fails, so no need to check it.
-                CType underlyingType = arg.Type.StripNubs().underlyingEnumType();
+                CType underlyingType = arg.Type.StripNubs().UnderlyingEnumType;
                 CType nullableType = GetSymbolLoader().GetTypeManager().GetNullable(underlyingType);
                 Expr typeofNubEnum = CreateTypeOf(nullableType);
                 target = GenerateCall(PREDEFMETH.PM_EXPRESSION_CONVERT, target, typeofNubEnum);
@@ -995,6 +995,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         private static bool isEnumToDecimalConversion(CType argtype, CType desttype) =>
-            argtype.StripNubs().isEnumType() && desttype.StripNubs().IsPredefType(PredefinedType.PT_DECIMAL);
+            argtype.StripNubs().IsEnumType && desttype.StripNubs().IsPredefType(PredefinedType.PT_DECIMAL);
     }
 }

@@ -231,7 +231,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 // even when there is a boxing conversion from the Nullable type to 
                                 // the interface type. This will be a relatively common scenario
                                 // so we cal it out separately from the previous case.
-                                Debug.Assert(typeBnd.isInterfaceType());
+                                Debug.Assert(typeBnd.IsInterfaceType);
                                 error = ErrorCode.ERR_GenericConstraintNotSatisfiedNullableInterface;
                             }
                         }
@@ -255,7 +255,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return !fError;
             }
 
-            if (arg.isClassType())
+            if (arg.IsClassType)
             {
                 AggregateSymbol agg = ((AggregateType)arg).OwningAggregate;
 

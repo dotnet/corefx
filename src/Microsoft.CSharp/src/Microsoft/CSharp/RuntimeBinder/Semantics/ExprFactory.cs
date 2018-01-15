@@ -106,7 +106,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(type != null);
 
-            if (type.isEnumType())
+            if (type.IsEnumType)
             {
                 // For enum types, we create a constant that has the default value
                 // as an object pointer.

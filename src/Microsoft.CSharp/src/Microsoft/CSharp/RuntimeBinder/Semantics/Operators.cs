@@ -635,11 +635,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         */
         private bool GetDelBinOpSigs(List<BinOpFullSig> prgbofs, BinOpArgInfo info)
         {
-            if (!info.ValidForDelegate())
-            {
-                return false;
-            }
-            if (!info.type1.isDelegateType() && !info.type2.isDelegateType())
+            if (!info.ValidForDelegate() || !info.type1.IsDelegateType && !info.type2.IsDelegateType)
             {
                 return false;
             }
@@ -655,8 +651,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // for this binary operator. It's possible that we add two candidates, in which case they will compete
             // in overload resolution. Or we could add no candidates.
 
-            bool t1tot2 = info.type2.isDelegateType() && canConvert(info.arg1, info.type2);
-            bool t2tot1 = info.type1.isDelegateType() && canConvert(info.arg2, info.type1);
+            bool t1tot2 = info.type2.IsDelegateType && canConvert(info.arg1, info.type2);
+            bool t2tot1 = info.type1.IsDelegateType && canConvert(info.arg2, info.type1);
 
             if (t1tot2)
             {
@@ -778,7 +774,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         */
         private bool GetEnumBinOpSigs(List<BinOpFullSig> prgbofs, BinOpArgInfo info)
         {
-            if (!info.typeRaw1.isEnumType() && !info.typeRaw2.isEnumType())
+            if (!info.typeRaw1.IsEnumType && !info.typeRaw2.IsEnumType)
             {
                 return false;
             }
@@ -801,16 +797,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            bool isValidForEnum;
-
-            if (info.typeRaw1.isEnumType())
-            {
-                isValidForEnum = (info.typeRaw2 == info.typeRaw1.underlyingEnumType() && info.ValidForEnumAndUnderlyingType());
-            }
-            else
-            {
-                isValidForEnum = (info.typeRaw1 == info.typeRaw2.underlyingEnumType() && info.ValidForUnderlyingTypeAndEnum());
-            }
+            bool isValidForEnum = info.typeRaw1.IsEnumType
+                ? info.typeRaw2 == info.typeRaw1.UnderlyingEnumType && info.ValidForEnumAndUnderlyingType()
+                : info.typeRaw1 == info.typeRaw2.UnderlyingEnumType && info.ValidForUnderlyingTypeAndEnum();
 
             if (isValidForEnum)
             {
@@ -821,15 +810,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Now deal with the conversion cases. Since there are no conversions from enum types to other
             // enum types we never need to do both cases.
 
-            if (info.typeRaw1.isEnumType())
+            if (info.typeRaw1.IsEnumType)
             {
                 isValidForEnum = info.ValidForEnum() && CanConvertArg2(info, info.typeRaw1, out grflt, out typeSig1, out typeSig2) ||
-                    info.ValidForEnumAndUnderlyingType() && CanConvertArg2(info, info.typeRaw1.underlyingEnumType(), out grflt, out typeSig1, out typeSig2);
+                    info.ValidForEnumAndUnderlyingType() && CanConvertArg2(info, info.typeRaw1.UnderlyingEnumType, out grflt, out typeSig1, out typeSig2);
             }
             else
             {
                 isValidForEnum = info.ValidForEnum() && CanConvertArg1(info, info.typeRaw2, out grflt, out typeSig1, out typeSig2) ||
-                    info.ValidForEnumAndUnderlyingType() && CanConvertArg1(info, info.typeRaw2.underlyingEnumType(), out grflt, out typeSig1, out typeSig2);
+                    info.ValidForEnumAndUnderlyingType() && CanConvertArg1(info, info.typeRaw2.UnderlyingEnumType, out grflt, out typeSig1, out typeSig2);
             }
 
             if (isValidForEnum)
@@ -844,9 +833,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (ek)
             {
                 case ExpressionKind.Add:
-                    return info.typeRaw1.isEnumType() ^ info.typeRaw2.isEnumType();
+                    return info.typeRaw1.IsEnumType ^ info.typeRaw2.IsEnumType;
                 case ExpressionKind.Subtract:
-                    return info.typeRaw1.isEnumType() | info.typeRaw2.isEnumType();
+                    return info.typeRaw1.IsEnumType | info.typeRaw2.IsEnumType;
             }
 
             return false;
@@ -886,8 +875,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // Check for: operator ==(System.Delegate, System.Delegate).
                 CType typeDel = GetPredefindType(PredefinedType.PT_DELEGATE);
-                if (canConvert(info.arg1, typeDel) && canConvert(info.arg2, typeDel) && !type1.isDelegateType()
-                    && !type2.isDelegateType())
+                if (canConvert(info.arg1, typeDel) && canConvert(info.arg2, typeDel) && !type1.IsDelegateType && !type2.IsDelegateType)
                 {
                     prgbofs.Add(
                         new BinOpFullSig(
@@ -931,27 +919,27 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         if (!canCast(type1, type2, CONVERTTYPE.NOUDC) && !canCast(type2, type1, CONVERTTYPE.NOUDC))
                             return false;
 
-                        if (type1.isInterfaceType() || type1.IsPredefType(PredefinedType.PT_STRING)
+                        if (type1.IsInterfaceType || type1.IsPredefType(PredefinedType.PT_STRING)
                             || GetSymbolLoader().HasBaseConversion(type1, typeDel))
                             type1 = typeObj;
                         else if (type1 is ArrayType)
                             type1 = GetPredefindType(PredefinedType.PT_ARRAY);
-                        else if (!type1.isClassType())
+                        else if (!type1.IsClassType)
                             return false;
 
-                        if (type2.isInterfaceType() || type2.IsPredefType(PredefinedType.PT_STRING)
+                        if (type2.IsInterfaceType || type2.IsPredefType(PredefinedType.PT_STRING)
                             || GetSymbolLoader().HasBaseConversion(type2, typeDel))
                             type2 = typeObj;
                         else if (type2 is ArrayType)
                             type2 = GetPredefindType(PredefinedType.PT_ARRAY);
-                        else if (!type2.isClassType())
+                        else if (!type2.IsClassType)
                             return false;
 
                         Debug.Assert(
-                            type1.isClassType() && !type1.IsPredefType(PredefinedType.PT_STRING)
+                            type1.IsClassType && !type1.IsPredefType(PredefinedType.PT_STRING)
                             && !type1.IsPredefType(PredefinedType.PT_DELEGATE));
                         Debug.Assert(
-                            type2.isClassType() && !type2.IsPredefType(PredefinedType.PT_STRING)
+                            type2.IsClassType && !type2.IsPredefType(PredefinedType.PT_STRING)
                             && !type2.IsPredefType(PredefinedType.PT_DELEGATE));
 
                         if (GetSymbolLoader().HasBaseConversion(type2, type1))
@@ -1120,7 +1108,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (type is NullableType nub)
             {
                 CType nonNub = nub.UnderlyingType;
-                if (nonNub.isEnumType())
+                if (nonNub.IsEnumType)
                 {
                     PredefinedType ptOp;
                     switch (nonNub.fundType())
@@ -1284,7 +1272,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (ptRaw > PredefinedType.PT_ULONG)
             {
                 // Enum types are special in that they carry a set of "predefined" operators (~ and inc/dec).
-                if (pRawType.isEnumType())
+                if (pRawType.IsEnumType)
                 {
                     // Nullable enums are dealt with already.
                     Debug.Assert(pRawType == pArgumentType);
@@ -1604,7 +1592,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(ek == ExpressionKind.Add || ek == ExpressionKind.Subtract);
             ConstVal cv;
 
-            if (type.isEnumType() && type.fundType() > FUNDTYPE.FT_LASTINTEGRAL)
+            if (type.IsEnumType && type.fundType() > FUNDTYPE.FT_LASTINTEGRAL)
             {
                 // This is an error case when enum derives from an illegal type. Just treat it as an int.
                 type = GetPredefindType(PredefinedType.PT_INT);
@@ -1659,9 +1647,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private Expr LScalar(ExpressionKind ek, EXPRFLAG flags, Expr exprVal, CType type, ConstVal cv, CType typeTmp)
         {
             CType typeOne = type;
-            if (typeOne.isEnumType())
+            if (typeOne.IsEnumType)
             {
-                typeOne = typeOne.underlyingEnumType();
+                typeOne = typeOne.UnderlyingEnumType;
             }
 
             ExprBinOp pExprResult = GetExprFactory().CreateBinop(ek, typeTmp, exprVal, GetExprFactory().CreateConstant(typeOne, cv));
@@ -1927,7 +1915,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private Expr BindDelBinOp(ExpressionKind ek, EXPRFLAG flags, Expr arg1, Expr arg2)
         {
             Debug.Assert(ek == ExpressionKind.Add || ek == ExpressionKind.Subtract || ek == ExpressionKind.Eq || ek == ExpressionKind.NotEq);
-            Debug.Assert(arg1.Type == arg2.Type && (arg1.Type.isDelegateType() || arg1.Type.IsPredefType(PredefinedType.PT_DELEGATE)));
+            Debug.Assert(arg1.Type == arg2.Type && (arg1.Type.IsDelegateType || arg1.Type.IsPredefType(PredefinedType.PT_DELEGATE)));
 
             PREDEFMETH predefMeth = (PREDEFMETH)0;
             CType RetType = null;
@@ -2010,11 +1998,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType nonNullableType2 = arg2.Type is NullableType arg2NubType ? arg2NubType.UnderlyingType : arg2.Type;
             if (nonNullableType1 is NullType)
             {
-                nonNullableType1 = nonNullableType2.underlyingEnumType();
+                nonNullableType1 = nonNullableType2.UnderlyingEnumType;
             }
             else if (nonNullableType2 is NullType)
             {
-                nonNullableType2 = nonNullableType1.underlyingEnumType();
+                nonNullableType2 = nonNullableType1.UnderlyingEnumType;
             }
 
             NullableType typeDst = GetTypes().GetNullable(GetEnumBinOpType(ek, nonNullableType1, nonNullableType2, out AggregateType typeEnum));
@@ -2064,7 +2052,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(ek == ExpressionKind.BitwiseNot);
             Debug.Assert((ExprCast)arg != null);
-            Debug.Assert(((ExprCast)arg).Argument.Type.isEnumType());
+            Debug.Assert(((ExprCast)arg).Argument.Type.IsEnumType);
 
             PredefinedType ptOp;
             CType typeEnum = ((ExprCast)arg).Argument.Type;
@@ -2348,24 +2336,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private AggregateType GetUserDefinedBinopArgumentType(CType type)
         {
-            for (; ;)
+            if (type is NullableType nt)
             {
-                switch (type.TypeKind)
-                {
-                    case TypeKind.TK_NullableType:
-                        type = type.StripNubs();
-                        break;
-                    case TypeKind.TK_AggregateType:
-                        AggregateType ats = (AggregateType)type;
-                        if ((ats.isClassType() || ats.isStructType()) && !ats.OwningAggregate.IsSkipUDOps())
-                        {
-                            return ats;
-                        }
-                        return null;
-                    default:
-                        return null;
-                }
+                type = nt.UnderlyingType;
             }
+
+            if (type is AggregateType ats && (ats.IsClassType || ats.IsStructType) && !ats.OwningAggregate.IsSkipUDOps())
+            {
+                return ats;
+            }
+
+            return null;
         }
 
         private int GetUserDefinedBinopArgumentTypes(CType type1, CType type2, AggregateType[] rgats)
@@ -2664,15 +2645,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private AggregateType GetEnumBinOpType(ExpressionKind ek, CType argType1, CType argType2, out AggregateType ppEnumType)
         {
-            Debug.Assert(argType1.isEnumType() || argType2.isEnumType());
+            Debug.Assert(argType1.IsEnumType || argType2.IsEnumType);
 
             AggregateType type1 = argType1 as AggregateType;
             AggregateType type2 = argType2 as AggregateType;
 
-            AggregateType typeEnum = type1.isEnumType() ? type1 : type2;
+            AggregateType typeEnum = type1.IsEnumType ? type1 : type2;
 
-            Debug.Assert(type1 == typeEnum || type1 == typeEnum.underlyingEnumType());
-            Debug.Assert(type2 == typeEnum || type2 == typeEnum.underlyingEnumType());
+            Debug.Assert(type1 == typeEnum || type1 == typeEnum.UnderlyingEnumType);
+            Debug.Assert(type2 == typeEnum || type2 == typeEnum.UnderlyingEnumType);
 
             AggregateType typeDst = typeEnum;
 
@@ -2690,7 +2671,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case ExpressionKind.Subtract:
                     if (type1 == type2)
-                        typeDst = typeEnum.underlyingEnumType();
+                        typeDst = typeEnum.UnderlyingEnumType;
                     break;
 
                 default:

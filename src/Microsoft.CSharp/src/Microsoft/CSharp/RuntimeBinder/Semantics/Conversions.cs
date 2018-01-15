@@ -88,11 +88,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // For a type-parameter T that is known to be a reference type (§25.7), the following explicit reference conversions exist:
                 // •    From any interface-type to T.
                 // •    From T to any interface-type I provided there isn’t already an implicit reference conversion from T to I.
-                if (typeSrc.isInterfaceType() && typeDst is TypeParameterType)
-                {
-                    return true;
-                }
-                if (typeSrc is TypeParameterType && typeDst.isInterfaceType())
+                if (typeSrc.IsInterfaceType && typeDst is TypeParameterType || typeSrc is TypeParameterType && typeDst.IsInterfaceType)
                 {
                     return true;
                 }
@@ -127,8 +123,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                     // *    From a one-dimensional array-type S[] to System.Collections.Generic.IList<T>, System.Collections.Generic.IReadOnlyList<T> 
                     //      and their base interfaces, provided there is an explicit reference conversion from S to T.
-                    if (!arrSrc.IsSZArray ||
-                        !typeDst.isInterfaceType())
+                    if (!arrSrc.IsSZArray || !typeDst.IsInterfaceType)
                     {
                         return false;
                     }
@@ -167,7 +162,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     //      one-dimensional array-type S[], provided there is an implicit or explicit reference conversion from S[] to 
                     //      System.Collections.Generic.IList<T> or System.Collections.Generic.IReadOnlyList<T>. This is precisely when either S and T
                     //      are the same type or there is an implicit or explicit reference conversion from S to T.
-                    if (!arrayDest.IsSZArray || !typeSrc.isInterfaceType() || aggtypeSrc.TypeArgsAll.Count != 1)
+                    if (!arrayDest.IsSZArray || !typeSrc.IsInterfaceType || aggtypeSrc.TypeArgsAll.Count != 1)
                     {
                         return false;
                     }
@@ -227,8 +222,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public static bool HasGenericDelegateExplicitReferenceConversion(SymbolLoader loader, CType pSource, AggregateType pTarget)
         {
             if (!(pSource is AggregateType aggSrc) ||
-                !aggSrc.isDelegateType() ||
-                !pTarget.isDelegateType() ||
+                !aggSrc.IsDelegateType ||
+                !pTarget.IsDelegateType ||
                 aggSrc.OwningAggregate != pTarget.OwningAggregate ||
                 loader.HasIdentityOrImplicitReferenceConversion(aggSrc, pTarget))
             {

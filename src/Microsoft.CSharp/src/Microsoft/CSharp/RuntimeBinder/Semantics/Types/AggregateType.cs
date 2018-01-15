@@ -112,7 +112,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             get
             {
-                if (isInterfaceType())
+                if (IsInterfaceType)
                 {
                     yield return this;
                     foreach (AggregateType iface in GetIfacesAll().Items)
@@ -152,7 +152,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 for (int i = 0; i < ifaces.Count; i++)
                 {
                     AggregateType type = ifaces[i] as AggregateType;
-                    Debug.Assert(type.isInterfaceType());
+                    Debug.Assert(type.IsInterfaceType);
 
                     if (type.IsCollectionType())
                     {
@@ -187,6 +187,76 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             AggregateSymbol agg = OwningAggregate;
             return agg.IsPredefined() && agg.GetPredefType() == pt;
+        }
+
+        public override bool IsDelegateType => OwningAggregate.IsDelegate();
+
+        public override bool IsSimpleType
+        {
+            get
+            {
+                AggregateSymbol agg = OwningAggregate;
+                return agg.IsPredefined() && PredefinedTypeFacts.IsSimpleType(agg.GetPredefType());
+            }
+        }
+
+        public override bool IsSimpleOrEnum
+        {
+            get
+            {
+                AggregateSymbol agg = OwningAggregate;
+                return agg.IsPredefined() ? PredefinedTypeFacts.IsSimpleType(agg.GetPredefType()) : agg.IsEnum();
+            }
+        }
+
+        public override bool IsSimpleOrEnumOrString
+        {
+            get
+            {
+                AggregateSymbol agg = OwningAggregate;
+                if (agg.IsPredefined())
+                {
+                    PredefinedType pt = agg.GetPredefType();
+                    return PredefinedTypeFacts.IsSimpleType(pt) || pt == PredefinedType.PT_STRING;
+                }
+
+                return agg.IsEnum();
+            }
+        }
+
+        public override bool IsNumericType
+        {
+            get
+            {
+                AggregateSymbol agg = OwningAggregate;
+                return agg.IsPredefined() && PredefinedTypeFacts.IsNumericType(agg.GetPredefType());
+            }
+        }
+
+        public override bool IsStructOrEnum
+        {
+            get
+            {
+                AggregateSymbol agg = OwningAggregate;
+                return agg.IsStruct() || agg.IsEnum();
+            }
+        }
+
+        public override bool IsStructType => OwningAggregate.IsStruct();
+
+        public override bool IsEnumType => OwningAggregate.IsEnum();
+
+        public override bool IsInterfaceType => OwningAggregate.IsInterface();
+
+        public override bool IsClassType => OwningAggregate.IsClass();
+
+        public override AggregateType UnderlyingEnumType
+        {
+            get
+            {
+                Debug.Assert(IsEnumType);
+                return OwningAggregate.GetUnderlyingType();
+            }
         }
     }
 }

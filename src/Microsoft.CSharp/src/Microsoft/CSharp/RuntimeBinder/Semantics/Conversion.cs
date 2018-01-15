@@ -364,7 +364,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             FUNDTYPE ftDest = dest.fundType();
 
             if (expr is ExprConstant constant &&
-                expr.Type.isSimpleType() && dest.isSimpleType())
+                expr.Type.IsSimpleType && dest.IsSimpleType)
             {
                 if ((ftSrc == FUNDTYPE.FT_I4 && (ftDest <= FUNDTYPE.FT_LASTNONLONG || ftDest == FUNDTYPE.FT_U8)) ||
                     (ftSrc == FUNDTYPE.FT_I8 && ftDest == FUNDTYPE.FT_U8))
@@ -436,8 +436,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // For certain situations, try to give a better error.
             Expr exprConst = expr.GetConst();
-            bool simpleConstToSimpleDestination = exprConst != null && expr.Type.isSimpleOrEnum() &&
-                dest.isSimpleOrEnum();
+            bool simpleConstToSimpleDestination = exprConst != null && expr.Type.IsSimpleOrEnum && dest.IsSimpleOrEnum;
 
             if (simpleConstToSimpleDestination)
             {
@@ -595,8 +594,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(exprSrc == null || exprSrc.Type == typeSrc);
 
             // If either type is an interface we should never employ a UD conversion.
-            if (typeSrc == null || typeDst == null || typeSrc.isInterfaceType() || typeDst.isInterfaceType())
+            if (typeSrc == null || typeDst == null || typeSrc.IsInterfaceType || typeDst.IsInterfaceType)
+            {
                 return false;
+            }
+
             CType typeSrcBase = typeSrc.StripNubs();
             CType typeDstBase = typeDst.StripNubs();
 
