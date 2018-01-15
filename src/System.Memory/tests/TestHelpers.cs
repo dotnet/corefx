@@ -30,6 +30,12 @@ namespace System
             AssertThrows<IndexOutOfRangeException, T>(span, (_span) => ignore = _span[expected.Length]);
         }
 
+        public static unsafe void ValidateNonNullEmpty<T>(this Span<T> span)
+        {
+            Assert.True(span.IsEmpty);
+            Assert.True(Unsafe.AsPointer(ref MemoryMarshal.GetReference(span)) != null);
+        }
+
         public delegate void AssertThrowsAction<T>(Span<T> span);
 
         // Cannot use standard Assert.Throws() when testing Span - Span and closures don't get along.
@@ -84,6 +90,12 @@ namespace System
 
             T ignore;
             AssertThrows<IndexOutOfRangeException, T>(span, (_span) => ignore = _span[expected.Length]);
+        }
+
+        public static unsafe void ValidateNonNullEmpty<T>(this ReadOnlySpan<T> span)
+        {
+            Assert.True(span.IsEmpty);
+            Assert.True(Unsafe.AsPointer(ref MemoryMarshal.GetReference(span)) != null);
         }
 
         public delegate void AssertThrowsActionReadOnly<T>(ReadOnlySpan<T> span);
