@@ -186,6 +186,7 @@ static void ConvertFileStatus2(const struct stat_* src, struct FileStatus2* dst)
     dst->BirthTimeNsec = src->st_birthtimespec->tv_nsec;
     dst->Flags |= FILESTATUS_FLAGS_HAS_BIRTHTIME;
 #else
+    // Linux path: until we use statx() instead
     dst->BirthTime = 0;
     dst->BirthTimeNsec = 0;
 #endif
