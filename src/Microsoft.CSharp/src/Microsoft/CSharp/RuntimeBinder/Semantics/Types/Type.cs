@@ -82,7 +82,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case Semantics.TypeKind.TK_ParameterModifierType:
                     ParameterModifierType r = (ParameterModifierType)src;
-                    Type parameterType = r.GetParameterType().AssociatedSystemType;
+                    Type parameterType = r.ParameterType.AssociatedSystemType;
                     result = parameterType.MakeByRefType();
                     break;
 
@@ -161,7 +161,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return ((PointerType)this).ReferentType;
 
                 case Semantics.TypeKind.TK_ParameterModifierType:
-                    return ((ParameterModifierType)this).GetParameterType();
+                    return ((ParameterModifierType)this).ParameterType;
 
                 case Semantics.TypeKind.TK_NullableType:
                     return ((NullableType)this).GetUnderlyingType();

@@ -438,23 +438,27 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        private Expr CreateLocal(Type type, bool bIsOut, LocalVariableSymbol local)
+        private Expr CreateLocal(Type type, bool isOut, LocalVariableSymbol local)
         {
-            CType ctype = _symbolTable.GetCTypeFromType(type);
-            if (bIsOut)
+            CType ctype;
+            if (isOut)
             {
-                Debug.Assert(ctype is ParameterModifierType);
+                // We need to record the out state, but GetCTypeFromType will only determine that
+                // it should be some sort of ParameterType but not be able to deduce that it needs
+                // IsOut to be true. So do that logic here rather than create a ref type to then
+                // throw away.
+                Debug.Assert(type.IsByRef);
                 ctype = _semanticChecker.GetTypeManager()
-                    .GetParameterModifier(((ParameterModifierType)ctype).GetParameterType(), true);
+                    .GetParameterModifier(_symbolTable.GetCTypeFromType(type.GetElementType()), true);
+            }
+            else
+            {
+                ctype = _symbolTable.GetCTypeFromType(type);
             }
 
             // If we can convert, do that. If not, cast it.
             ExprLocal exprLocal = _exprFactory.CreateLocal(local);
-            Expr result = _binder.tryConvert(exprLocal, ctype);
-            if (result == null)
-            {
-                result = _binder.mustCast(exprLocal, ctype);
-            }
+            Expr result = _binder.tryConvert(exprLocal, ctype) ?? _binder.mustCast(exprLocal, ctype);
             result.Flags |= EXPRFLAG.EXF_LVALUE;
             return result;
         }

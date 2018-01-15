@@ -296,13 +296,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 bool wasOutOrRef = false;
                 if (pDest is ParameterModifierType modDest)
                 {
-                    pDest = modDest.GetParameterType();
+                    pDest = modDest.ParameterType;
                     wasOutOrRef = true;
                 }
+
                 if (pSource is ParameterModifierType modSource)
                 {
-                    pSource = modSource.GetParameterType();
+                    pSource = modSource.ParameterType;
                 }
+
                 // If the argument is a TYPEORNAMESPACEERROR and the pSource is an
                 // error CType, then we want to set it to the generic error CType 
                 // that has no name text. This is because of the following scenario:

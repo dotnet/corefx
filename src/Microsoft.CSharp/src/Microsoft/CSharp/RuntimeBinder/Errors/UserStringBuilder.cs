@@ -537,10 +537,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case TypeKind.TK_ParameterModifierType:
                     ParameterModifierType mod = (ParameterModifierType)pType;
                     // add ref or out
-                    ErrAppendString(mod.isOut ? "out " : "ref ");
+                    ErrAppendString(mod.IsOut ? "out " : "ref ");
 
                     // add base type name
-                    ErrAppendType(mod.GetParameterType(), pctx);
+                    ErrAppendType(mod.ParameterType, pctx);
                     break;
 
                 case TypeKind.TK_PointerType:

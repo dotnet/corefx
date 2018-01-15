@@ -1017,8 +1017,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 // (think ErrorType != ErrorType)
                                 // See if they just differ in out / ref.
                                 CType argStripped = _pArguments.types[ivar] is ParameterModifierType modArg ?
-                                    modArg.GetParameterType() : _pArguments.types[ivar];
-                                CType varStripped = var is ParameterModifierType modVar ? modVar.GetParameterType() : var;
+                                    modArg.ParameterType : _pArguments.types[ivar];
+                                CType varStripped = var is ParameterModifierType modVar ? modVar.ParameterType : var;
 
                                 if (argStripped == varStripped)
                                 {

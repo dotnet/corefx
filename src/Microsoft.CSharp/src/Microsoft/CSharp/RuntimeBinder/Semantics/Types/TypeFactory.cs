@@ -22,12 +22,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public PointerType CreatePointer(CType pReferentType) => new PointerType(pReferentType);
 
-        public ParameterModifierType CreateParameterModifier(CType pParameterType)
-        {
-            ParameterModifierType type = new ParameterModifierType();
-            type.SetParameterType(pParameterType);
-            return type;
-        }
+        public ParameterModifierType CreateParameterModifier(CType pParameterType, bool isOut) =>
+            new ParameterModifierType(pParameterType, isOut);
 
         public NullableType CreateNullable(CType pUnderlyingType, BSYMMGR symmgr, TypeManager typeManager)
         {
