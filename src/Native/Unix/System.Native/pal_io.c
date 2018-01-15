@@ -177,9 +177,9 @@ static void ConvertFileStatus2(const struct stat_* src, struct FileStatus2* dst)
     dst->MTime = src->st_mtime;
     dst->CTime = src->st_ctime;
 
-    dst->ATimeNsec = ST_ATIME_NSEC(&src);
-    dst->MTimeNsec = ST_MTIME_NSEC(&src);
-    dst->CTimeNsec = ST_CTIME_NSEC(&src);
+    dst->ATimeNsec = ST_ATIME_NSEC(src);
+    dst->MTimeNsec = ST_MTIME_NSEC(src);
+    dst->CTimeNsec = ST_CTIME_NSEC(src);
 
 #if HAVE_STAT_BIRTHTIME
     dst->BirthTime = src->st_birthtimespec->tv_sec;

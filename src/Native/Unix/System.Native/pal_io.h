@@ -87,6 +87,7 @@ struct FileStatus2
 #define ST_CTIME_NSEC(statstruct) 0
 
 #endif /* HAVE_STAT_NSEC */
+#endif /* HAVE_STAT_TIM */
 #endif /* HAVE_STAT_TIMESPEC */
 
 /************

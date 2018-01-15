@@ -205,14 +205,14 @@ namespace System.IO
                     return DateTimeOffset.FromFileTime(0);
 
                 if ((_fileStatus.Flags & Interop.Sys.FileStatusFlags.HasBirthTime) != 0)
-                    return UnixTimeToDateTimeOffset(_fileStatus.birthTime, _fileStatus.birthTimeNsec);
+                    return UnixTimeToDateTimeOffset(_fileStatus.BirthTime, _fileStatus.BirthTimeNsec);
 
                 // fall back to the oldest time we have in between change and modify time
                 if (_fileStatus.MTime < _fileStatus.CTime ||
                    (_fileStatus.MTime == _fileStatus.CTime && _fileStatus.MTimeNsec < _fileStatus.CTimeNsec))
                     return UnixTimeToDateTimeOffset(_fileStatus.MTime, _fileStatus.MTimeNsec);
                 
-                return UnixTimeToDateTimeOffset(_fileStatus.Ctime, _fileStatus.CTimeNsec);
+                return UnixTimeToDateTimeOffset(_fileStatus.CTime, _fileStatus.CTimeNsec);
             }
             set
             {
