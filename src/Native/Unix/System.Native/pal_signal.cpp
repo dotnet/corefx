@@ -82,12 +82,13 @@ extern "C" void SystemNative_ResumeSigChld()
 
     if (reinterpret_cast<void*>(origHandler->sa_sigaction) == reinterpret_cast<void*>(SIG_IGN))
     {
-        // When the disposition is SIG_IGN, children that terminated do not become zombies.
+        // When the original disposition is SIG_IGN, children that terminated did not become zombies.
+        // Since we overwrote the disposition, we are now responsible for reaping those processes.
         pid_t pid;
         do
         {
             int status;
-            while (CheckInterrupted(pid = waitpid(WAIT_ANY, &status, WNOHANG)));
+            while (CheckInterrupted(pid = waitpid(-1, &status, WNOHANG)));
         } while (pid > 0);
     }
     else if (reinterpret_cast<void*>(origHandler->sa_sigaction) == reinterpret_cast<void*>(SIG_DFL))
