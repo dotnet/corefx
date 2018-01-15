@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Diagnostics;
+using System.Reflection;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
@@ -52,5 +54,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public int IndexInTotalParameters => Symbol.GetIndexInTotalParameters();
 
         public TypeArray Bounds => Symbol.GetBounds();
+
+        public override Type AssociatedSystemType =>
+            (IsMethodTypeParameter
+                ? ((MethodInfo)((MethodSymbol)OwningSymbol).AssociatedMemberInfo).GetGenericArguments()
+                : ((AggregateSymbol)OwningSymbol).AssociatedSystemType.GetGenericArguments()
+            )[IndexInOwnParameters];
     }
 }

@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class PointerType : CType
@@ -15,5 +17,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public CType ReferentType { get; }
 
         public override bool IsUnsafe() => true;
+
+        public override Type AssociatedSystemType => ReferentType.AssociatedSystemType.MakePointerType();
     }
 }

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -23,107 +22,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return (AssociatedSystemType.Attributes & TypeAttributes.WindowsRuntime) == TypeAttributes.WindowsRuntime;
         }
 
-        private Type _associatedSystemType;
-        public Type AssociatedSystemType
-        {
-            get
-            {
-                if (_associatedSystemType == null)
-                {
-                    _associatedSystemType = CalculateAssociatedSystemType(this);
-                }
-
-                return _associatedSystemType;
-            }
-        }
-
-        private static Type CalculateAssociatedSystemType(CType src)
-        {
-            Type result = null;
-
-            switch (src.TypeKind)
-            {
-                case Semantics.TypeKind.TK_ArrayType:
-                    ArrayType a = (ArrayType)src;
-                    Type elementType = a.ElementType.AssociatedSystemType;
-                    result = a.IsSZArray ? elementType.MakeArrayType() : elementType.MakeArrayType(a.Rank);
-                    break;
-
-                case Semantics.TypeKind.TK_NullableType:
-                    NullableType n = (NullableType)src;
-                    Type underlyingType = n.UnderlyingType.AssociatedSystemType;
-                    result = typeof(Nullable<>).MakeGenericType(underlyingType);
-                    break;
-
-                case Semantics.TypeKind.TK_PointerType:
-                    PointerType p = (PointerType)src;
-                    result = p.ReferentType.AssociatedSystemType.MakePointerType();
-                    break;
-
-                case Semantics.TypeKind.TK_ParameterModifierType:
-                    ParameterModifierType r = (ParameterModifierType)src;
-                    Type parameterType = r.ParameterType.AssociatedSystemType;
-                    result = parameterType.MakeByRefType();
-                    break;
-
-                case Semantics.TypeKind.TK_AggregateType:
-                    result = CalculateAssociatedSystemTypeForAggregate((AggregateType)src);
-                    break;
-
-                case Semantics.TypeKind.TK_TypeParameterType:
-                    TypeParameterType t = (TypeParameterType)src;
-                    if (t.IsMethodTypeParameter)
-                    {
-                        MethodInfo meth = ((MethodSymbol)t.OwningSymbol).AssociatedMemberInfo as MethodInfo;
-                        result = meth.GetGenericArguments()[t.IndexInOwnParameters];
-                    }
-                    else
-                    {
-                        Type parentType = ((AggregateSymbol)t.OwningSymbol).AssociatedSystemType;
-                        result = parentType.GetGenericArguments()[t.IndexInOwnParameters];
-                    }
-                    break;
-            }
-
-            Debug.Assert(result != null || src is AggregateType);
-            return result;
-        }
-
-        private static Type CalculateAssociatedSystemTypeForAggregate(AggregateType aggtype)
-        {
-            AggregateSymbol agg = aggtype.OwningAggregate;
-            TypeArray typeArgs = aggtype.TypeArgsAll;
-
-            List<Type> list = new List<Type>();
-
-            // Get each type arg.
-            for (int i = 0; i < typeArgs.Count; i++)
-            {
-                // Unnamed type parameter types are just placeholders.
-                if (typeArgs[i] is TypeParameterType typeParamArg && typeParamArg.Symbol.name == null)
-                {
-                    return null;
-                }
-                list.Add(typeArgs[i].AssociatedSystemType);
-            }
-
-            Type[] systemTypeArgs = list.ToArray();
-            Type uninstantiatedType = agg.AssociatedSystemType;
-
-            if (uninstantiatedType.IsGenericType)
-            {
-                try
-                {
-                    return uninstantiatedType.MakeGenericType(systemTypeArgs);
-                }
-                catch (ArgumentException)
-                {
-                    // If the constraints don't work, just return the type without substituting it.
-                    return uninstantiatedType;
-                }
-            }
-            return uninstantiatedType;
-        }
+        [ExcludeFromCodeCoverage] // Should only be called through override.
+        public virtual Type AssociatedSystemType => throw Error.InternalCompilerError();
 
         public TypeKind TypeKind { get; }
 

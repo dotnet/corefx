@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     // ----------------------------------------------------------------------------
@@ -25,5 +27,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool IsOut { get; }  // True for out parameter, false for ref parameter.
 
         public CType ParameterType { get; }
+
+        public override Type AssociatedSystemType => ParameterType.AssociatedSystemType.MakeByRefType();
     }
 }

@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     // ----------------------------------------------------------------------------
@@ -42,6 +44,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public override bool IsReferenceType => true;
 
         public override bool IsUnsafe() => BaseElementType is PointerType;
+
+        public override Type AssociatedSystemType
+        {
+            get
+            {
+                Type elementType = ElementType.AssociatedSystemType;
+                return IsSZArray ? elementType.MakeArrayType() : elementType.MakeArrayType(Rank);
+            }
+        }
     }
 }
 

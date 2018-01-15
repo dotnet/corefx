@@ -21,6 +21,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private AggregateType _baseType;  // This is the result of calling SubstTypeArray on the aggregate's baseClass.
         private TypeArray _ifacesAll;  // This is the result of calling SubstTypeArray on the aggregate's ifacesAll.
         private TypeArray _winrtifacesAll; //This is the list of collection interfaces implemented by a WinRT object.
+        private Type _associatedSystemType;
 
         public AggregateType(AggregateSymbol parent, TypeArray typeArgsThis, AggregateType outerType)
             : base(TypeKind.TK_AggregateType)
@@ -279,6 +280,41 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(IsEnumType);
                 return OwningAggregate.GetUnderlyingType();
             }
+        }
+
+        public override Type AssociatedSystemType => _associatedSystemType ?? (_associatedSystemType = CalculateAssociatedSystemType());
+
+        private Type CalculateAssociatedSystemType()
+        {
+            Type uninstantiatedType = OwningAggregate.AssociatedSystemType;
+            if (uninstantiatedType.IsGenericType)
+            {
+                // Get each type arg.
+                TypeArray typeArgs = TypeArgsAll;
+                Type[] systemTypeArgs = new Type[typeArgs.Count];
+                for (int i = 0; i < systemTypeArgs.Length; i++)
+                {
+                    // Unnamed type parameter types are just placeholders.
+                    CType typeArg = typeArgs[i];
+                    if (typeArg is TypeParameterType typeParamArg && typeParamArg.Symbol.name == null)
+                    {
+                        return null;
+                    }
+
+                    systemTypeArgs[i] = typeArg.AssociatedSystemType;
+                }
+
+                try
+                {
+                    return uninstantiatedType.MakeGenericType(systemTypeArgs);
+                }
+                catch (ArgumentException)
+                {
+                    // If the constraints don't work, just return the type without substituting it.
+                }
+            }
+
+            return uninstantiatedType;
         }
     }
 }
