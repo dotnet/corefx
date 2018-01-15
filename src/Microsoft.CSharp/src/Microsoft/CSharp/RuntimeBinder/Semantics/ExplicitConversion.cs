@@ -442,6 +442,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert(_typeSrc != null);
                 Debug.Assert(_typeSrc.IsPredefType(PredefinedType.PT_DECIMAL));
+                Debug.Assert(aggTypeDest.IsEnumType);
 
                 // There is an explicit conversion from decimal to all integral types.
                 if (_exprSrc.GetConst() != null)
@@ -466,7 +467,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // According the language, this is a standard conversion, but it is implemented
                     // through a user-defined conversion. Because it's a standard conversion, we don't
                     // test the CONVERTTYPE.NOUDC flag here.
-                    CType underlyingType = aggTypeDest.underlyingType();
+                    CType underlyingType = aggTypeDest.UnderlyingEnumType;
                     bIsConversionOK = _binder.bindUserDefinedConversion(_exprSrc, _typeSrc, underlyingType, _needsExprDest, out _exprDest, false);
 
                     if (bIsConversionOK)
@@ -483,8 +484,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_typeSrc != null);
                 Debug.Assert(aggTypeDest != null);
                 Debug.Assert(aggTypeDest.IsPredefType(PredefinedType.PT_DECIMAL));
+                Debug.Assert(_typeSrc.IsEnumType);
 
-                AggregateType underlyingType = _typeSrc.underlyingType() as AggregateType;
+                AggregateType underlyingType = _typeSrc.UnderlyingEnumType;
 
                 // Need to first cast the source expr to its underlying type.
 

@@ -118,12 +118,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return ConstValKind.Int;
             }
         }
-        public CType underlyingType()
-        {
-            if (this is AggregateType at && at.OwningAggregate.IsEnum())
-                return at.OwningAggregate.GetUnderlyingType();
-            return this;
-        }
 
         ////////////////////////////////////////////////////////////////////////////////
         // Strips off ArrayType, ParameterModifierType, PointerType, PinnedType and optionally NullableType
