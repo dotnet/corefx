@@ -19,5 +19,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public override bool IsUnsafe() => true;
 
         public override Type AssociatedSystemType => ReferentType.AssociatedSystemType.MakePointerType();
+
+        public override CType BaseOrParameterOrElementType => ReferentType;
     }
 }

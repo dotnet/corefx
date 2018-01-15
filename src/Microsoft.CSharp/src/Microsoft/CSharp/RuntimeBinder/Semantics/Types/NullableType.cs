@@ -48,5 +48,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public override bool IsStructType => true;
 
         public override Type AssociatedSystemType => typeof(Nullable<>).MakeGenericType(UnderlyingType.AssociatedSystemType);
+
+        public override CType BaseOrParameterOrElementType => UnderlyingType;
     }
 }

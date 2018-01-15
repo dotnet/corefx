@@ -27,29 +27,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeKind TypeKind { get; }
 
-        // This call switches on the kind and dispatches accordingly. This should really only be 
-        // used when dereferencing TypeArrays. We should consider refactoring our code to not 
-        // need this type of thing - strongly typed handling of TypeArrays would be much better.
-        public CType GetBaseOrParameterOrElementType()
-        {
-            switch (TypeKind)
-            {
-                case Semantics.TypeKind.TK_ArrayType:
-                    return ((ArrayType)this).ElementType;
-
-                case Semantics.TypeKind.TK_PointerType:
-                    return ((PointerType)this).ReferentType;
-
-                case Semantics.TypeKind.TK_ParameterModifierType:
-                    return ((ParameterModifierType)this).ParameterType;
-
-                case Semantics.TypeKind.TK_NullableType:
-                    return ((NullableType)this).UnderlyingType;
-
-                default:
-                    return null;
-            }
-        }
+        public virtual CType BaseOrParameterOrElementType => null;
 
         ////////////////////////////////////////////////////////////////////////////////
         // Given a symbol, determine its fundamental type. This is the type that 
@@ -162,15 +140,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     default:
                         return type;
 
-                    case Semantics.TypeKind.TK_NullableType:
+                    case TypeKind.TK_NullableType:
                         if (!fStripNub)
-                            return type;
-                        type = type.GetBaseOrParameterOrElementType();
-                        break;
-                    case Semantics.TypeKind.TK_ArrayType:
-                    case Semantics.TypeKind.TK_ParameterModifierType:
-                    case Semantics.TypeKind.TK_PointerType:
-                        type = type.GetBaseOrParameterOrElementType();
+                        {
+                            goto default;
+                        }
+
+                        goto case TypeKind.TK_ArrayType;
+
+                    case TypeKind.TK_ArrayType:
+                    case TypeKind.TK_ParameterModifierType:
+                    case TypeKind.TK_PointerType:
+                        type = type.BaseOrParameterOrElementType;
                         break;
                 }
             }

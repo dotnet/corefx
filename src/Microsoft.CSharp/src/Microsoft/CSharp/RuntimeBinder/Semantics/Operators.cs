@@ -2578,8 +2578,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             TypeArray paramsRaw = GetTypes().SubstTypeArray(mpwi.Meth().Params, mpwi.GetType());
             Debug.Assert(Params != paramsRaw);
-            Debug.Assert(paramsRaw[0] == Params[0].GetBaseOrParameterOrElementType());
-            Debug.Assert(paramsRaw[1] == Params[1].GetBaseOrParameterOrElementType());
+            Debug.Assert(paramsRaw[0] == Params[0].BaseOrParameterOrElementType);
+            Debug.Assert(paramsRaw[1] == Params[1].BaseOrParameterOrElementType);
 
             if (!canConvert(arg1.Type.StripNubs(), paramsRaw[0], CONVERTTYPE.NOUDC))
             {

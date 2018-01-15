@@ -1897,7 +1897,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (!(t is AggregateType))
             {
                 CType endT;
-                while ((endT = t.GetBaseOrParameterOrElementType()) != null)
+                while ((endT = t.BaseOrParameterOrElementType) != null)
                 {
                     t = endT;
                 }

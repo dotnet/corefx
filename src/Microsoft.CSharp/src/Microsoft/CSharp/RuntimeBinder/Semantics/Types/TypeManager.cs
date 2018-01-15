@@ -428,8 +428,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (typeDst.TypeKind != typeSrc.TypeKind)
                         return false;
                     LCheckBases:
-                    typeSrc = typeSrc.GetBaseOrParameterOrElementType();
-                    typeDst = typeDst.GetBaseOrParameterOrElementType();
+                    typeSrc = typeSrc.BaseOrParameterOrElementType;
+                    typeDst = typeDst.BaseOrParameterOrElementType;
                     goto LRecurse;
 
                 case TypeKind.TK_AggregateType:
@@ -518,7 +518,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_NullableType:
                 case TypeKind.TK_ParameterModifierType:
                 case TypeKind.TK_PointerType:
-                    type = type.GetBaseOrParameterOrElementType();
+                    type = type.BaseOrParameterOrElementType;
                     goto LRecurse;
 
                 case TypeKind.TK_AggregateType:
@@ -556,7 +556,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_NullableType:
                 case TypeKind.TK_ParameterModifierType:
                 case TypeKind.TK_PointerType:
-                    type = type.GetBaseOrParameterOrElementType();
+                    type = type.BaseOrParameterOrElementType;
                     goto LRecurse;
 
                 case TypeKind.TK_AggregateType:

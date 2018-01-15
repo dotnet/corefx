@@ -53,6 +53,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return IsSZArray ? elementType.MakeArrayType() : elementType.MakeArrayType(Rank);
             }
         }
+
+        public override CType BaseOrParameterOrElementType => ElementType;
     }
 }
 

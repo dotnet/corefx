@@ -112,8 +112,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         case TypeKind.TK_ParameterModifierType:
                         case TypeKind.TK_ArrayType:
                         case TypeKind.TK_NullableType:
-                            type1 = type1.GetBaseOrParameterOrElementType();
-                            type2 = type2.GetBaseOrParameterOrElementType();
+                            type1 = type1.BaseOrParameterOrElementType;
+                            type2 = type2.BaseOrParameterOrElementType;
                             goto LAgain;
 
                         case TypeKind.TK_AggregateType:

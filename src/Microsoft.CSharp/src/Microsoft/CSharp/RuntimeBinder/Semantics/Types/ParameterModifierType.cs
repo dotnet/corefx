@@ -29,5 +29,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public CType ParameterType { get; }
 
         public override Type AssociatedSystemType => ParameterType.AssociatedSystemType.MakeByRefType();
+
+        public override CType BaseOrParameterOrElementType => ParameterType;
     }
 }
