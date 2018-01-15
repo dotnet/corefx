@@ -231,7 +231,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // * The base interface of IReadOnlyList<T> is IReadOnlyCollection<T>.
             // * The base interface of IReadOnlyCollection<T> is IEnumerable<T>.
 
-            if (pDest.isPredefType(PredefinedType.PT_IENUMERABLE))
+            if (pDest.IsPredefType(PredefinedType.PT_IENUMERABLE))
             {
                 return true;
             }
@@ -260,7 +260,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // The implicit reference conversions are:
             // * From any reference type to Object.
-            if (pSource.IsReferenceType && pDest.isPredefType(PredefinedType.PT_OBJECT))
+            if (pSource.IsReferenceType && pDest.IsPredefType(PredefinedType.PT_OBJECT))
             {
                 return true;
             }
@@ -323,8 +323,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // * From any delegate type to System.Delegate 
                             // * From any delegate type to System.MulticastDelegate
                             // * From any delegate type to any interface implemented by System.MulticastDelegate
-                            if (aggDest.isPredefType(PredefinedType.PT_MULTIDEL)
-                                || aggDest.isPredefType(PredefinedType.PT_DELEGATE) || IsBaseInterface(
+                            if (aggDest.IsPredefType(PredefinedType.PT_MULTIDEL)
+                                || aggDest.IsPredefType(PredefinedType.PT_DELEGATE) || IsBaseInterface(
                                     GetPredefindType(PredefinedType.PT_MULTIDEL), aggDest))
                             {
                                 return true;
@@ -352,7 +352,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (pDest is AggregateType aggDest)
                 {
                     // * From any array type to System.Array or any interface implemented by System.Array.
-                    if (aggDest.isPredefType(PredefinedType.PT_ARRAY)
+                    if (aggDest.IsPredefType(PredefinedType.PT_ARRAY)
                         || IsBaseInterface(GetPredefindType(PredefinedType.PT_ARRAY), aggDest))
                     {
                         return true;
@@ -549,7 +549,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //
             // This notion is not found in the spec but it is useful in the implementation.
 
-            if (pSource is AggregateType && pDest.isPredefType(PredefinedType.PT_OBJECT))
+            if (pSource is AggregateType && pDest.IsPredefType(PredefinedType.PT_OBJECT))
             {
                 // If we are going from any aggregate type (class, struct, interface, enum or delegate)
                 // to object, we immediately return true. This may seem like a mere optimization --

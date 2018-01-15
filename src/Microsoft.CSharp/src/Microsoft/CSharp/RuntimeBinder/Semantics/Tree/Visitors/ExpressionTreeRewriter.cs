@@ -161,7 +161,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // If we have a cast to PredefinedType.PT_G_EXPRESSION and the thing that we're casting is 
             // a EXPRBOUNDLAMBDA that is an expression tree, then just visit the expression tree.
             if (pExpr.Type != null &&
-                    pExpr.Type.isPredefType(PredefinedType.PT_G_EXPRESSION) &&
+                    pExpr.Type.IsPredefType(PredefinedType.PT_G_EXPRESSION) &&
                     pArgument is ExprBoundLambda)
             {
                 return Visit(pArgument);
@@ -179,7 +179,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(expr != null);
             PREDEFMETH pdm;
-            if (expr.FirstArgument.Type.isPredefType(PredefinedType.PT_STRING) && expr.SecondArgument.Type.isPredefType(PredefinedType.PT_STRING))
+            if (expr.FirstArgument.Type.IsPredefType(PredefinedType.PT_STRING) && expr.SecondArgument.Type.IsPredefType(PredefinedType.PT_STRING))
             {
                 pdm = PREDEFMETH.PM_STRING_CONCAT_STRING_2;
             }
@@ -995,6 +995,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         private static bool isEnumToDecimalConversion(CType argtype, CType desttype) =>
-            argtype.StripNubs().isEnumType() && desttype.StripNubs().isPredefType(PredefinedType.PT_DECIMAL);
+            argtype.StripNubs().isEnumType() && desttype.StripNubs().IsPredefType(PredefinedType.PT_DECIMAL);
     }
 }

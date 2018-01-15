@@ -181,7 +181,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 // Since FValCon() is set it is redundant to check System.ValueType as well.
-                if (bnds.Count != 0 && bnds[0].isPredefType(PredefinedType.PT_VALUE))
+                if (bnds.Count != 0 && bnds[0].IsPredefType(PredefinedType.PT_VALUE))
                 {
                     itypeMin = 1;
                 }
@@ -215,7 +215,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         {
                             // nullable types do not satisfy bounds to every type that they are boxable to
                             // They only satisfy bounds of object and ValueType
-                            if (typeBnd.isPredefType(PredefinedType.PT_ENUM) || nubArg.UnderlyingType == typeBnd)
+                            if (typeBnd.IsPredefType(PredefinedType.PT_ENUM) || nubArg.UnderlyingType == typeBnd)
                             {
                                 // Nullable types don't satisfy bounds of EnumType, or the underlying type of the enum
                                 // even though the conversion from Nullable to these types is a boxing conversion

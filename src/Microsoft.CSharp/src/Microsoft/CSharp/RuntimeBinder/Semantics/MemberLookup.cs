@@ -334,7 +334,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             System.Runtime.CompilerServices.DynamicAttribute da = null;
             if (sym is FieldSymbol field)
             {
-                if (!field.getType().isPredefType(PredefinedType.PT_OBJECT))
+                if (!field.getType().IsPredefType(PredefinedType.PT_OBJECT))
                 {
                     return false;
                 }
@@ -348,7 +348,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert(sym is PropertySymbol);
                 PropertySymbol prop = (PropertySymbol)sym;
-                if (!prop.getType().isPredefType(PredefinedType.PT_OBJECT))
+                if (!prop.getType().IsPredefType(PredefinedType.PT_OBJECT))
                 {
                     return false;
                 }
@@ -595,7 +595,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if ((typeIface != null || ifaces.Count > 0) && LookupInInterfaces(typeIface, ifaces) && typeCls2 != null)
                 {
                     // Search object last.
-                    Debug.Assert(typeCls2 != null && typeCls2.isPredefType(PredefinedType.PT_OBJECT));
+                    Debug.Assert(typeCls2 != null && typeCls2.IsPredefType(PredefinedType.PT_OBJECT));
 
                     AggregateType result = null;
                     LookupInClass(typeCls2, ref result);

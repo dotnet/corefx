@@ -441,7 +441,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             private AggCastResult bindExplicitConversionFromDecimalToEnum(AggregateType aggTypeDest)
             {
                 Debug.Assert(_typeSrc != null);
-                Debug.Assert(_typeSrc.isPredefType(PredefinedType.PT_DECIMAL));
+                Debug.Assert(_typeSrc.IsPredefType(PredefinedType.PT_DECIMAL));
 
                 // There is an explicit conversion from decimal to all integral types.
                 if (_exprSrc.GetConst() != null)
@@ -482,7 +482,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert(_typeSrc != null);
                 Debug.Assert(aggTypeDest != null);
-                Debug.Assert(aggTypeDest.isPredefType(PredefinedType.PT_DECIMAL));
+                Debug.Assert(aggTypeDest.IsPredefType(PredefinedType.PT_DECIMAL));
 
                 AggregateType underlyingType = _typeSrc.underlyingType() as AggregateType;
 
@@ -541,7 +541,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return AggCastResult.Failure;
                 }
 
-                if (_typeSrc.isPredefType(PredefinedType.PT_DECIMAL))
+                if (_typeSrc.IsPredefType(PredefinedType.PT_DECIMAL))
                 {
                     return bindExplicitConversionFromDecimalToEnum(aggTypeDest);
                 }
@@ -566,7 +566,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return AggCastResult.Success;
                 }
                 else if (_typeSrc.IsPredefined &&
-                         (_typeSrc.isPredefType(PredefinedType.PT_OBJECT) || _typeSrc.isPredefType(PredefinedType.PT_VALUE) || _typeSrc.isPredefType(PredefinedType.PT_ENUM)))
+                         (_typeSrc.IsPredefType(PredefinedType.PT_OBJECT) || _typeSrc.IsPredefType(PredefinedType.PT_VALUE) || _typeSrc.IsPredefType(PredefinedType.PT_ENUM)))
                 {
                     if (_needsExprDest)
                         _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest, EXPRFLAG.EXF_UNBOX);

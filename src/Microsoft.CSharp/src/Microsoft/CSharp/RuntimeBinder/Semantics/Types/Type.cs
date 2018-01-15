@@ -331,12 +331,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public bool isSimpleOrEnumOrString()
         {
-            return isSimpleType() || isPredefType(Syntax.PredefinedType.PT_STRING) || isEnumType();
+            return isSimpleType() || IsPredefType(Syntax.PredefinedType.PT_STRING) || isEnumType();
         }
 
         private bool isPointerLike()
         {
-            return this is PointerType || isPredefType(Syntax.PredefinedType.PT_INTPTR) || isPredefType(Syntax.PredefinedType.PT_UINTPTR);
+            return this is PointerType || IsPredefType(Syntax.PredefinedType.PT_INTPTR) || IsPredefType(Syntax.PredefinedType.PT_UINTPTR);
         }
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -400,12 +400,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Note that generics may not be instantiated with pointer types
             return this is PointerType || this is ArrayType arr && arr.BaseElementType.isUnsafe();
         }
-        public bool isPredefType(PredefinedType pt)
-        {
-            if (this is AggregateType ats)
-                return ats.OwningAggregate.IsPredefined() && ats.OwningAggregate.GetPredefType() == pt;
-            return (this is VoidType && pt == Syntax.PredefinedType.PT_VOID);
-        }
+
+        public virtual bool IsPredefType(PredefinedType pt) => false;
 
         public virtual bool IsPredefined => false;
 

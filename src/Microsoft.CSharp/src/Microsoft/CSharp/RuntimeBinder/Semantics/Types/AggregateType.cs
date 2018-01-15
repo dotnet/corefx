@@ -182,5 +182,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return OwningAggregate.GetPredefType();
             }
         }
+
+        public override bool IsPredefType(PredefinedType pt)
+        {
+            AggregateSymbol agg = OwningAggregate;
+            return agg.IsPredefined() && agg.GetPredefType() == pt;
+        }
     }
 }

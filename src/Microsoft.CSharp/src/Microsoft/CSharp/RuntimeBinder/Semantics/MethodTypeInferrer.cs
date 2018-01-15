@@ -1009,11 +1009,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 pElementDest = pArrayDest.ElementType;
             }
-            else if (pDest.isPredefType(PredefinedType.PT_G_IENUMERABLE) ||
-                pDest.isPredefType(PredefinedType.PT_G_ICOLLECTION) ||
-                pDest.isPredefType(PredefinedType.PT_G_ILIST) ||
-                pDest.isPredefType(PredefinedType.PT_G_IREADONLYCOLLECTION) ||
-                pDest.isPredefType(PredefinedType.PT_G_IREADONLYLIST))
+            else if (pDest.IsPredefType(PredefinedType.PT_G_IENUMERABLE) ||
+                pDest.IsPredefType(PredefinedType.PT_G_ICOLLECTION) ||
+                pDest.IsPredefType(PredefinedType.PT_G_ILIST) ||
+                pDest.IsPredefType(PredefinedType.PT_G_IREADONLYCOLLECTION) ||
+                pDest.IsPredefType(PredefinedType.PT_G_IREADONLYLIST))
             {
                 if (!pArraySource.IsSZArray)
                 {
@@ -1356,11 +1356,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 pElementSource = pArraySource.ElementType;
             }
-            else if (pSource.isPredefType(PredefinedType.PT_G_IENUMERABLE) ||
-                pSource.isPredefType(PredefinedType.PT_G_ICOLLECTION) ||
-                pSource.isPredefType(PredefinedType.PT_G_ILIST) ||
-                pSource.isPredefType(PredefinedType.PT_G_IREADONLYLIST) ||
-                pSource.isPredefType(PredefinedType.PT_G_IREADONLYCOLLECTION))
+            else if (pSource.IsPredefType(PredefinedType.PT_G_IENUMERABLE) ||
+                pSource.IsPredefType(PredefinedType.PT_G_ICOLLECTION) ||
+                pSource.IsPredefType(PredefinedType.PT_G_ILIST) ||
+                pSource.IsPredefType(PredefinedType.PT_G_IREADONLYLIST) ||
+                pSource.IsPredefType(PredefinedType.PT_G_IREADONLYCOLLECTION))
             {
                 if (!pArrayDest.IsSZArray)
                 {

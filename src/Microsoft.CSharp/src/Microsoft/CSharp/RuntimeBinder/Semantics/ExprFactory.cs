@@ -124,7 +124,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
 
                 case FUNDTYPE.FT_STRUCT:
-                    if (type.isPredefType(PredefinedType.PT_DECIMAL))
+                    if (type.IsPredefType(PredefinedType.PT_DECIMAL))
                     {
                         goto default;
                     }

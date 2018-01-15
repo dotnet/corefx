@@ -259,11 +259,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return BetterType.Same;
             }
-            if (typeGiven.isPredefType(pt1))
+            if (typeGiven.IsPredefType(pt1))
             {
                 return BetterType.Left;
             }
-            if (typeGiven.isPredefType(pt2))
+            if (typeGiven.IsPredefType(pt2))
             {
                 return BetterType.Right;
             }
@@ -621,7 +621,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (typeSrcBase is AggregateType atSrcBase && atSrcBase.OwningAggregate.HasConversion(GetSymbolLoader()))
             {
                 rgats[cats++] = atSrcBase;
-                fIntPtrOverride2 = atSrcBase.isPredefType(PredefinedType.PT_INTPTR) || atSrcBase.isPredefType(PredefinedType.PT_UINTPTR);
+                fIntPtrOverride2 = atSrcBase.IsPredefType(PredefinedType.PT_INTPTR) || atSrcBase.IsPredefType(PredefinedType.PT_UINTPTR);
             }
 
             // Get the list of operators from the destination.
@@ -632,7 +632,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     rgats[cats++] = atDstBase;
                 }
 
-                if (fIntPtrOverride2 && !typeDstBase.isPredefType(PredefinedType.PT_LONG) && !typeDstBase.isPredefType(PredefinedType.PT_ULONG))
+                if (fIntPtrOverride2 && !typeDstBase.IsPredefType(PredefinedType.PT_LONG) && !typeDstBase.IsPredefType(PredefinedType.PT_ULONG))
                 {
                     fIntPtrOverride2 = false;
                 }
@@ -714,7 +714,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                         // Ignore the IntPtr/UIntPtr -> int/uint conversion in favor of
                         // the IntPtr/UIntPtr -> long/ulong conversion.
-                        if (fIntPtrOverride2 && (typeTo.isPredefType(PredefinedType.PT_INT) || typeTo.isPredefType(PredefinedType.PT_UINT)))
+                        if (fIntPtrOverride2 && (typeTo.IsPredefType(PredefinedType.PT_INT) || typeTo.IsPredefType(PredefinedType.PT_UINT)))
                             continue;
 
                         // Lift the conversion if needed.

@@ -114,7 +114,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // such that an entity that already has a required type can be said to be convertible to that type.
 
                 if (_typeSrc == _typeDest &&
-                    ((_flags & CONVERTTYPE.ISEXPLICIT) == 0 || (!_typeSrc.isPredefType(PredefinedType.PT_FLOAT) && !_typeSrc.isPredefType(PredefinedType.PT_DOUBLE))))
+                    ((_flags & CONVERTTYPE.ISEXPLICIT) == 0 || (!_typeSrc.IsPredefType(PredefinedType.PT_FLOAT) && !_typeSrc.IsPredefType(PredefinedType.PT_DOUBLE))))
                 {
                     if (_needsExprDest)
                     {
@@ -398,7 +398,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 FUNDTYPE ftDest = _typeDest.fundType();
                 if (ftDest != FUNDTYPE.FT_REF && ftDest != FUNDTYPE.FT_PTR &&
                     // null is convertible to System.Nullable<T>.
-                    !_typeDest.isPredefType(PredefinedType.PT_G_OPTIONAL))
+                    !_typeDest.IsPredefType(PredefinedType.PT_G_OPTIONAL))
                 {
                     return false;
                 }
@@ -445,7 +445,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (_needsExprDest)
                     {
                         _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest, EXPRFLAG.EXF_BOX);
-                        if (!_typeDest.isPredefType(PredefinedType.PT_OBJECT))
+                        if (!_typeDest.IsPredefType(PredefinedType.PT_OBJECT))
                         {
                             // The base type of a nullable is always a non-nullable value type, 
                             // therefore so is typeDest unless typeDest is PT_OBJECT. In this case the conversion 

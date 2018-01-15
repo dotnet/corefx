@@ -533,8 +533,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     CType pConstValType = methprop.GetDefaultParameterValueConstValType(index);
                     ConstVal cv = methprop.GetDefaultParameterValue(index);
 
-                    if (pConstValType.isPredefType(PredefinedType.PT_DATETIME) &&
-                        (pRawParamType.isPredefType(PredefinedType.PT_DATETIME) || pRawParamType.isPredefType(PredefinedType.PT_OBJECT) || pRawParamType.isPredefType(PredefinedType.PT_VALUE)))
+                    if (pConstValType.IsPredefType(PredefinedType.PT_DATETIME) &&
+                        (pRawParamType.IsPredefType(PredefinedType.PT_DATETIME) || pRawParamType.IsPredefType(PredefinedType.PT_OBJECT) || pRawParamType.IsPredefType(PredefinedType.PT_VALUE)))
                     {
                         // This is the specific case where we want to create a DateTime
                         // but the constval that stores it is a long.
@@ -580,7 +580,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // There was no default parameter specified, so generally use default(T),
                     // except for some cases when the parameter type in metatdata is object.
 
-                    if (pParamType.isPredefType(PredefinedType.PT_OBJECT))
+                    if (pParamType.IsPredefType(PredefinedType.PT_OBJECT))
                     {
                         if (methprop.MarshalAsObject(index))
                         {
