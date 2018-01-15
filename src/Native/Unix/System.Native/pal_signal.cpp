@@ -20,6 +20,7 @@
 static struct sigaction g_origSigIntHandler, g_origSigQuitHandler; // saved signal handlers for ctrl handling
 static struct sigaction g_origSigContHandler, g_origSigChldHandler; // saved signal handlers for reinitialization
 static volatile CtrlCallback g_ctrlCallback = nullptr; // Callback invoked for SIGINT/SIGQUIT
+static volatile SigChldCallback g_sigChldCallback = nullptr; // Callback invoked for SIGINT/SIGQUIT
 static int g_signalPipe[2] = {-1, -1}; // Pipe used between signal handler and worker
 
 static struct sigaction* OrigActionFor(int sig)
@@ -149,6 +150,15 @@ void* SignalHandlerLoop(void* arg)
         }
         else if (signalCode == SIGCHLD)
         {
+            // SigChldCallback callback = g_sigChldCallback;
+            // if (callback != nullptr)
+            // {
+            //     callback();
+            // }
+            // else
+            // {
+            //     ResumeSIGCHLD();
+            // }
             // TODO: Pass SIGCHLD to managed code which should
             // - waitpid on each managed Process
             // - call ResumeSIGCHLD
@@ -184,6 +194,13 @@ extern "C" void SystemNative_UnregisterForCtrl()
 {
     assert(g_ctrlCallback != nullptr);
     g_ctrlCallback = nullptr;
+}
+
+extern "C" void SystemNative_RegisterForSigChld(SigChldCallback callback)
+{
+    assert(callback != nullptr);
+    assert(g_sigChldCallback == nullptr);
+    g_sigChldCallback = callback;
 }
 
 static bool InstallSignalHandler(int sig, bool overwriteIgnored = true)

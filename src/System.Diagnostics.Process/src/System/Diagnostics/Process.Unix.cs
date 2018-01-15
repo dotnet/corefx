@@ -257,6 +257,8 @@ namespace System.Diagnostics
         /// <param name="startInfo">The start info with which to start the process.</param>
         private bool StartCore(ProcessStartInfo startInfo)
         {
+            EnsureSigChildHandler();
+
             string filename;
             string[] argv;
 
@@ -606,5 +608,32 @@ namespace System.Diagnostics
         public bool Responding => true;
 
         private bool WaitForInputIdleCore(int milliseconds) => throw new InvalidOperationException(SR.InputIdleUnkownError);
+
+        private static bool s_sigchildHandlerRegistered = false;
+        private static readonly object s_sigchildHandlerGate = new object();
+        private static readonly Interop.Sys.SigChldCallback s_sigChildHandler = OnSigChild;
+
+        private static bool EnsureSigChildHandler()
+        {
+            lock (s_sigchildHandlerGate)
+            {
+                if (!s_sigchildHandlerRegistered)
+                {
+                    if (!Interop.Sys.InitializeSignalHandling())
+                    {
+                        throw Interop.GetExceptionForIoErrno(Interop.Sys.GetLastErrorInfo());
+                    }
+
+                    Interop.Sys.RegisterForSigChld(s_sigChildHandler);
+
+                    s_sigchildHandlerRegistered = true;
+                }
+            }
+            return s_sigchildHandlerRegistered;
+        }
+
+        private static void OnSigChild()
+        {
+        }
     }
 }

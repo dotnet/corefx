@@ -36,3 +36,15 @@ extern "C" void SystemNative_RegisterForCtrl(CtrlCallback callback);
  * has quiesced.
  */
 extern "C" void SystemNative_UnregisterForCtrl();
+
+typedef void (*SigChldCallback)();
+
+/**
+ * Hooks up the specified callback for notifications when SIGCHLD is received.
+ *
+ * Not thread safe.  Caller must provide its owns synchronization to ensure RegisterForSigChld
+ * is not called concurrently with itself.
+ *
+ * Should only be called when a callback is not currently registered.
+ */
+extern "C" void SystemNative_RegisterForSigChld(SigChldCallback callback);
