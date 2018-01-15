@@ -27,6 +27,8 @@
 using System.IO;
 using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using Xunit;
 
 namespace System.Data.Tests
@@ -429,40 +431,30 @@ namespace System.Data.Tests
         {
             RemoteInvoke(() =>
             {
-                var serializer = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-
+                var serializer = new BinaryFormatter();
                 var table = new DataTable();
-
-                table.Columns.Add(
-                    new DataColumn("RowID", typeof(int))
+                table.Columns.Add(new DataColumn("RowID", typeof(int))
                     {
                         AutoIncrement = true,
                         AutoIncrementSeed = -1, // These lines produce attributes within the schema portion of the underlying XML representation of the DataTable with the values "-1" and "-2".
                         AutoIncrementStep = -2,
                     });
-
                 table.Columns.Add("Value", typeof(string));
-
                 table.Rows.Add(1, "Test");
                 table.Rows.Add(2, "Data");
 
                 var buffer = new MemoryStream();
-
                 var savedCulture = CultureInfo.CurrentCulture;
-
                 try
                 {
                     // Before serializing, update the culture to use a weird negative number format. This test is ensuring that this is ignored.
-                    CultureInfo.CurrentCulture =
-                        new CultureInfo("en-US")
+                    CultureInfo.CurrentCulture = new CultureInfo("en-US")
                         {
-                            NumberFormat =
-                                new NumberFormatInfo()
+                            NumberFormat = new NumberFormatInfo()
                                 {
                                     NegativeSign = "()"
                                 }
                         };
-
                     serializer.Serialize(buffer, table);
                 }
                 finally
@@ -480,7 +472,6 @@ namespace System.Data.Tests
 
                 int schemaStart = rawSerializedData.IndexOf(SchemaStartTag);
                 int schemaEnd = rawSerializedData.IndexOf(SchemaEndTag);
-
                 Assert.True(schemaStart >= 0);
                 Assert.True(schemaEnd > schemaStart);
                 Assert.True(rawSerializedData.IndexOf("<xs:schema", schemaStart + 1) < 0);
@@ -490,7 +481,6 @@ namespace System.Data.Tests
                 string rawSchemaXML = rawSerializedData.Substring(
                     startIndex: schemaStart,
                     length: schemaEnd - schemaStart);
-
                 Assert.Contains(@"AutoIncrementSeed=""-1""", rawSchemaXML);
                 Assert.Contains(@"AutoIncrementStep=""-2""", rawSchemaXML);
                 Assert.DoesNotContain("()1", rawSchemaXML);
@@ -498,34 +488,30 @@ namespace System.Data.Tests
             });
         }
 
-        [Fact, SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not yet have the fix for this bug")]
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not yet have the fix for this bug")]
         public void XsdSchemaDeserializationIgnoresLocale()
         {
             RemoteInvoke(() =>
             {
-                var serializer = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                var serializer = new BinaryFormatter();
 
                 /*
 
                 Test data generator:
 
                     var table = new DataTable();
-
-                    table.Columns.Add(
-                        new DataColumn("RowID", typeof(int))
+                    table.Columns.Add(new DataColumn("RowID", typeof(int))
                         {
                             AutoIncrement = true,
                             AutoIncrementSeed = -1, // These lines produce attributes within the schema portion of the underlying XML representation of the DataTable with the value "-1".
                             AutoIncrementStep = -2,
                         });
-
                     table.Columns.Add("Value", typeof(string));
-
                     table.Rows.Add(1, "Test");
                     table.Rows.Add(2, "Data");
 
                     var buffer = new MemoryStream();
-
                     serializer.Serialize(buffer, table);
 
                 This test data (binary serializer output) embeds the following XML schema:
@@ -552,8 +538,7 @@ namespace System.Data.Tests
 
                 */
 
-                var buffer = new MemoryStream(
-                    new byte[]
+                var buffer = new MemoryStream(new byte[]
                     {
                         0,1,0,0,0,255,255,255,255,1,0,0,0,0,0,0,0,12,2,0,0,0,78,83,121,115,116,101,109,46,68,97,116,97,44,32,86,101,114,115,105,111,110,61,52,46,48,46,48,46,48,44,32,67,117,
                         108,116,117,114,101,61,110,101,117,116,114,97,108,44,32,80,117,98,108,105,99,75,101,121,84,111,107,101,110,61,98,55,55,97,53,99,53,54,49,57,51,52,101,48,56,57,5,1,0,
@@ -592,24 +577,19 @@ namespace System.Data.Tests
                     });
 
                 DataTable table;
-
                 var savedCulture = CultureInfo.CurrentCulture;
-
                 try
                 {
                     // Before deserializing, update the culture to use a weird negative number format. This test is ensuring that this is ignored.
                     // The bug this test is testing would cause "-1" to no longer be treated as a valid representation of the value -1, instead
                     // only accepting the string "()1".
-                    CultureInfo.CurrentCulture =
-                        new CultureInfo("en-US")
+                    CultureInfo.CurrentCulture = new CultureInfo("en-US")
                         {
-                            NumberFormat =
-                                new NumberFormatInfo()
+                            NumberFormat = new NumberFormatInfo()
                                 {
                                     NegativeSign = "()"
                                 }
                         };
-
                     table = (DataTable)serializer.Deserialize(buffer); // BUG: System.Exception: "-1 is not a valid value for Int64."        }
                 }
                 finally
@@ -617,20 +597,18 @@ namespace System.Data.Tests
                     CultureInfo.CurrentCulture = savedCulture;
                 }
 
-                var rowIDColumn = table.Columns["RowID"];
-
+                DataColumn rowIDColumn = table.Columns["RowID"];
                 Assert.Equal(-1, rowIDColumn.AutoIncrementSeed);
                 Assert.Equal(-2, rowIDColumn.AutoIncrementStep);
             });
         }
 
-        [Fact, SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Exists to provide notification of when the full framework gets the bug fix, at which point the preceding test can be re-enabled")]
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Exists to provide notification of when the full framework gets the bug fix, at which point the preceding test can be re-enabled")]
         public void XsdSchemaDeserializationOnFullFrameworkStillHasBug()
         {
-            var serializer = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-
-            var buffer = new MemoryStream(
-                new byte[]
+            var serializer = new BinaryFormatter();
+            var buffer = new MemoryStream(new byte[]
                 {
                     0,1,0,0,0,255,255,255,255,1,0,0,0,0,0,0,0,12,2,0,0,0,78,83,121,115,116,101,109,46,68,97,116,97,44,32,86,101,114,115,105,111,110,61,52,46,48,46,48,46,48,44,32,67,117,
                     108,116,117,114,101,61,110,101,117,116,114,97,108,44,32,80,117,98,108,105,99,75,101,121,84,111,107,101,110,61,98,55,55,97,53,99,53,54,49,57,51,52,101,48,56,57,5,1,0,
@@ -668,27 +646,28 @@ namespace System.Data.Tests
                     0,0,0,255,255,255,255,255,255,255,255,11
                 });
 
-            DataTable table;
-
-            var savedCulture = CultureInfo.CurrentCulture;
-
-            var exception = Assert.Throws<System.Reflection.TargetInvocationException>(
-                () =>
-                {
-                    // Before deserializing, update the culture to use a weird negative number format. The bug this test is testing causes "-1" to no
-                    // longer be treated as a valid representation of the value -1, instead only accepting the string "()1".
-                    CultureInfo.CurrentCulture =
-                        new CultureInfo("en-US")
-                        {
-                            NumberFormat =
-                                new NumberFormatInfo()
-                                {
-                                    NegativeSign = "()"
-                                }
-                        };
-
-                    serializer.Deserialize(buffer); // BUG: System.Exception: "-1 is not a valid value for Int64."
-                });
+            Exception exception;
+            CultureInfo savedCulture = CultureInfo.CurrentCulture;
+            try
+            {
+                exception = Assert.Throws<TargetInvocationException>(() =>
+                    {
+                        // Before deserializing, update the culture to use a weird negative number format. The bug this test is testing causes "-1" to no
+                        // longer be treated as a valid representation of the value -1, instead only accepting the string "()1".
+                        CultureInfo.CurrentCulture = new CultureInfo("en-US")
+                            {
+                                NumberFormat = new NumberFormatInfo()
+                                    {
+                                        NegativeSign = "()"
+                                    }
+                            };
+                        serializer.Deserialize(buffer); // BUG: System.Exception: "-1 is not a valid value for Int64."
+                    });
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = savedCulture;
+            }
 
             Assert.IsAssignableFrom<FormatException>(exception.InnerException.InnerException);
         }
