@@ -764,7 +764,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (typeSrc is AggregateType aggType)
             {
                 // We have an AggregateType, so recurse on its base class.
-                AggregateType baseType = aggType.GetBaseClass();
+                AggregateType baseType = aggType.BaseClass;
 
                 if (baseType == null)
                 {

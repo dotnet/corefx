@@ -662,7 +662,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // In the first pass if we find types that are non-comparable, keep one of the types and keep going.
             for (int iats = 0; iats < cats; iats++)
             {
-                for (AggregateType atsCur = rgats[iats]; atsCur != null && atsCur.OwningAggregate.HasConversion(GetSymbolLoader()); atsCur = atsCur.GetBaseClass())
+                for (AggregateType atsCur = rgats[iats]; atsCur != null && atsCur.OwningAggregate.HasConversion(GetSymbolLoader()); atsCur = atsCur.BaseClass)
                 {
                     AggregateSymbol aggCur = atsCur.OwningAggregate;
 

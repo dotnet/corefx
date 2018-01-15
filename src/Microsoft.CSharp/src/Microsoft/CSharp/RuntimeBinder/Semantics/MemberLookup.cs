@@ -384,7 +384,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType typeCur;
 
             // Loop through types. Loop until we hit typeEnd (object or null).
-            for (typeCur = typeStart; typeCur != typeEnd && typeCur != null; typeCur = typeCur.GetBaseClass())
+            for (typeCur = typeStart; typeCur != typeEnd && typeCur != null; typeCur = typeCur.BaseClass)
             {
                 Debug.Assert(!typeCur.IsInterfaceType);
 

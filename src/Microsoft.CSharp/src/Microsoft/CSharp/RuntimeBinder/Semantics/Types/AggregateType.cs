@@ -76,37 +76,40 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public AggregateSymbol OwningAggregate { get; }
 
-        public AggregateType GetBaseClass()
+        public AggregateType BaseClass
         {
-            if (_baseType == null)
+            get
             {
-                Type baseSysType = AssociatedSystemType.BaseType;
-                if (baseSysType == null)
+                if (_baseType == null)
                 {
-                    return null;
+                    Type baseSysType = AssociatedSystemType.BaseType;
+                    if (baseSysType == null)
+                    {
+                        return null;
+                    }
+
+                    // If we have a generic type definition, then we need to set the
+                    // base class to be our current base type, and use that to calculate 
+                    // our agg type and its base, then set it to be the generic version of the
+                    // base type. This is because:
+                    //
+                    // Suppose we have Foo<T> : IFoo<T>
+                    //
+                    // Initially, the BaseType will be IFoo<Foo.T>, which gives us the substitution
+                    // that we want to use for our agg type's base type. However, in the Symbol chain,
+                    // we want the base type to be IFoo<IFoo.T>. So we need to substitute.
+                    //
+                    // If we don't have a generic type definition, then we just need to set our base
+                    // class. This is so that if we have a base type that's generic, we'll be
+                    // getting the correctly instantiated base type.
+                    TypeManager manager = OwningAggregate.GetTypeManager();
+                    AggregateType baseClass = manager.SymbolTable.GetCTypeFromType(baseSysType) as AggregateType;
+                    Debug.Assert(baseClass != null);
+                    _baseType = manager.SubstType(baseClass, TypeArgsAll);
                 }
 
-                // If we have a generic type definition, then we need to set the
-                // base class to be our current base type, and use that to calculate 
-                // our agg type and its base, then set it to be the generic version of the
-                // base type. This is because:
-                //
-                // Suppose we have Foo<T> : IFoo<T>
-                //
-                // Initially, the BaseType will be IFoo<Foo.T>, which gives us the substitution
-                // that we want to use for our agg type's base type. However, in the Symbol chain,
-                // we want the base type to be IFoo<IFoo.T>. So we need to substitute.
-                //
-                // If we don't have a generic type definition, then we just need to set our base
-                // class. This is so that if we have a base type that's generic, we'll be
-                // getting the correctly instantiated base type.
-                TypeManager manager = OwningAggregate.GetTypeManager();
-                AggregateType baseClass = manager.SymbolTable.GetCTypeFromType(baseSysType) as AggregateType;
-                Debug.Assert(baseClass != null);
-                _baseType = manager.SubstType(baseClass, TypeArgsAll);
+                return _baseType;
             }
-
-            return _baseType;
         }
 
         public IEnumerable<AggregateType> TypeHierarchy
@@ -125,7 +128,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else
                 {
-                    for (AggregateType agg = this; agg != null; agg = agg.GetBaseClass())
+                    for (AggregateType agg = this; agg != null; agg = agg.BaseClass)
                     {
                         yield return agg;
                     }

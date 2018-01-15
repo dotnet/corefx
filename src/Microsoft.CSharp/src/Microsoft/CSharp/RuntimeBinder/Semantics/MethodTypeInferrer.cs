@@ -1146,7 +1146,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (pSource.IsClassType)
             {
-                pSourceBase = (pSource as AggregateType).GetBaseClass();
+                pSourceBase = (pSource as AggregateType).BaseClass;
             }
 
             while (pSourceBase != null)
@@ -1156,8 +1156,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     ExactTypeArgumentInference(pSourceBase, pDest);
                     return true;
                 }
-                pSourceBase = pSourceBase.GetBaseClass();
+
+                pSourceBase = pSourceBase.BaseClass;
             }
+
             return false;
         }
 
@@ -1453,7 +1455,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   inherits directly or indirectly from C<V1...Vk> then an exact 
             // SPEC:   inference is made from each Ui to the corresponding Vi.
 
-            AggregateType pDestBase = ((AggregateType)pDest).GetBaseClass();
+            AggregateType pDestBase = ((AggregateType)pDest).BaseClass;
 
             while (pDestBase != null)
             {
@@ -1462,8 +1464,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     ExactTypeArgumentInference(pSource, pDestBase);
                     return true;
                 }
-                pDestBase = pDestBase.GetBaseClass();
+
+                pDestBase = pDestBase.BaseClass;
             }
+
             return false;
         }
 

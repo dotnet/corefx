@@ -18,7 +18,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             while (t != null)
             {
                 yield return t;
-                t = t.GetBaseClass();
+                t = t.BaseClass;
             }
         }
 

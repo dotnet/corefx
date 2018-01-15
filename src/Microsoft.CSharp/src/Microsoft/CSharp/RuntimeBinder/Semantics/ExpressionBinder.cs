@@ -711,16 +711,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // Find the next type.
                     // If we've found some applicable methods in a class then we don't need to look any further.
                     if (!methFirstList.IsEmpty())
+                    {
                         break;
-                    atsCur = atsCur.GetBaseClass();
+                    }
+
+                    atsCur = atsCur.BaseClass;
                     if (atsCur == null)
+                    {
                         break;
+                    }
+
                     continue;
                 }
 
                 // Only look at operators with 1 args.
                 if (!methCur.isOperator || methCur.Params.Count != 1)
+                {
                     continue;
+                }
+
                 Debug.Assert(methCur.typeVars.Count == 0);
 
                 TypeArray paramsCur = GetTypes().SubstTypeArray(methCur.Params, atsCur);

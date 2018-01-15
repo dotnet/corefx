@@ -2473,13 +2473,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             List<CandidateFunctionMember> candidateList, ExpressionKind ek, AggregateType type,
             Expr arg1, Expr arg2, bool fDontLift, AggregateType atsStop)
         {
-            for (AggregateType atsCur = type; atsCur != null && atsCur != atsStop; atsCur = atsCur.GetBaseClass())
+            for (AggregateType atsCur = type; atsCur != null && atsCur != atsStop; atsCur = atsCur.BaseClass)
             {
                 if (GetApplicableUserDefinedBinaryOperatorCandidates(candidateList, ek, atsCur, arg1, arg2, fDontLift))
                 {
                     return atsCur;
                 }
             }
+
             return null;
         }
 

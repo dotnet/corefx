@@ -128,7 +128,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                     }
 
-                    atsDer = atsDer.GetBaseClass();
+                    atsDer = atsDer.BaseClass;
                 }
             }
 
@@ -156,25 +156,29 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            if (pDerived is NullableType derivedNub)
-            {
-                pDerived = derivedNub.GetAts();
-            }
-
             if (!(pDerived is AggregateType atsDer))
             {
-                return false;
+                if (pDerived is NullableType derivedNub)
+                {
+                    atsDer = derivedNub.GetAts();
+                }
+                else
+                {
+                    return false;
+                }
             }
 
-            AggregateType atsCur = atsDer.GetBaseClass();
+            AggregateType atsCur = atsDer.BaseClass;
             while (atsCur != null)
             {
                 if (atsCur == atsBase)
                 {
                     return true;
                 }
-                atsCur = atsCur.GetBaseClass();
+
+                atsCur = atsCur.BaseClass;
             }
+
             return false;
         }
 
@@ -388,7 +392,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                 }
 
-                atsDer = atsDer.GetBaseClass();
+                atsDer = atsDer.BaseClass;
             }
 
             return false;
