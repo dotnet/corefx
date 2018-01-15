@@ -257,6 +257,7 @@ namespace System.IO
             _fileStatusInitialized = -1; // force a refresh so that we have an up-to-date times for values not being overwritten
             EnsureStatInitialized();
             Interop.Sys.UTimBuf buf;
+            // we use utime() not utimensat() so we drop the subsecond part
             buf.AcTime = accessTime ?? _fileStatus.ATime;
             buf.ModTime = writeTime ?? _fileStatus.MTime;
             bool isDirectory = this is DirectoryInfo;
