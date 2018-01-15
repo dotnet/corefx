@@ -460,13 +460,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     if (null == tpType.Name)
                     {
                         // It's a standard type variable.
-                        if (tpType.IsMethodTypeParameter())
+                        if (tpType.IsMethodTypeParameter)
                         {
                             ErrAppendChar('!');
                         }
 
                         ErrAppendChar('!');
-                        ErrAppendPrintf("{0}", tpType.GetIndexInTotalParameters());
+                        ErrAppendPrintf("{0}", tpType.IndexInTotalParameters);
                     }
                     else
                     {

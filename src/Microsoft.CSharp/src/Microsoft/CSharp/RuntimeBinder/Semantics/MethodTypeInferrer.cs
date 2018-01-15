@@ -158,8 +158,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private bool IsUnfixed(TypeParameterType pParam)
         {
             Debug.Assert(pParam != null);
-            Debug.Assert(pParam.IsMethodTypeParameter());
-            int iParam = pParam.GetIndexInTotalParameters();
+            Debug.Assert(pParam.IsMethodTypeParameter);
+            int iParam = pParam.IndexInTotalParameters;
             Debug.Assert(_pMethodTypeParameters[iParam] == pParam);
             return IsUnfixed(iParam);
         }
@@ -183,7 +183,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private void AddLowerBound(TypeParameterType pParam, CType pBound)
         {
             Debug.Assert(IsUnfixed(pParam));
-            int iParam = pParam.GetIndexInTotalParameters();
+            int iParam = pParam.IndexInTotalParameters;
             if (!_pLowerBounds[iParam].Contains(pBound))
             {
                 _pLowerBounds[iParam].Add(pBound);
@@ -195,7 +195,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private void AddUpperBound(TypeParameterType pParam, CType pBound)
         {
             Debug.Assert(IsUnfixed(pParam));
-            int iParam = pParam.GetIndexInTotalParameters();
+            int iParam = pParam.IndexInTotalParameters;
             if (!_pUpperBounds[iParam].Contains(pBound))
             {
                 _pUpperBounds[iParam].Add(pBound);
@@ -207,7 +207,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private void AddExactBound(TypeParameterType pParam, CType pBound)
         {
             Debug.Assert(IsUnfixed(pParam));
-            int iParam = pParam.GetIndexInTotalParameters();
+            int iParam = pParam.IndexInTotalParameters;
             if (!_pExactBounds[iParam].Contains(pBound))
             {
                 _pExactBounds[iParam].Add(pBound);
@@ -796,7 +796,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   for Xi.
             if (pDest is TypeParameterType pTPType)
             {
-                if (pTPType.IsMethodTypeParameter() && IsUnfixed(pTPType))
+                if (pTPType.IsMethodTypeParameter && IsUnfixed(pTPType))
                 {
                     AddExactBound(pTPType, pSource);
                     return true;
@@ -961,7 +961,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   for Xi.
             if (pDest is TypeParameterType pTPType)
             {
-                if (pTPType.IsMethodTypeParameter() && IsUnfixed(pTPType))
+                if (pTPType.IsMethodTypeParameter && IsUnfixed(pTPType))
                 {
                     AddLowerBound(pTPType, pSource);
                     return true;
@@ -1310,7 +1310,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   for Xi.
             if (pDest is TypeParameterType pTPType)
             {
-                if (pTPType.IsMethodTypeParameter() && IsUnfixed(pTPType))
+                if (pTPType.IsMethodTypeParameter && IsUnfixed(pTPType))
                 {
                     AddUpperBound(pTPType, pSource);
                     return true;

@@ -15,14 +15,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             new AggregateType(parent, typeArgsThis, outerType);
 
         // TypeParameter
-        public TypeParameterType CreateTypeParameter(TypeParameterSymbol pSymbol)
-        {
-            TypeParameterType type = new TypeParameterType();
-            type.SetTypeParameterSymbol(pSymbol);
-            Debug.Assert(pSymbol.GetTypeParameterType() == null);
-            pSymbol.SetTypeParameterType(type);
-            return type;
-        }
+        public TypeParameterType CreateTypeParameter(TypeParameterSymbol pSymbol) => new TypeParameterType(pSymbol);
 
         // Derived types - parent is base type
         public ArrayType CreateArray(CType pElementType, int rank, bool isSZArray)

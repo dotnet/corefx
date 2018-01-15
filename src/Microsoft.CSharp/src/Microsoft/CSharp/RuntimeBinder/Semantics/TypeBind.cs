@@ -147,7 +147,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             bool fReportErrors = 0 == (flags & CheckConstraintsFlags.NoErrors);
 
             bool fError = false;
-            if (var.HasRefConstraint() && !arg.IsRefType())
+            if (var.HasRefConstraint && !arg.IsRefType())
             {
                 if (fReportErrors)
                 {
@@ -157,10 +157,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 fError = true;
             }
 
-            TypeArray bnds = checker.SymbolLoader.GetTypeManager().SubstTypeArray(var.GetBounds(), typeArgsCls, typeArgsMeth);
+            TypeArray bnds = checker.SymbolLoader.GetTypeManager().SubstTypeArray(var.Bounds, typeArgsCls, typeArgsMeth);
             int itypeMin = 0;
 
-            if (var.HasValConstraint())
+            if (var.HasValConstraint)
             {
                 // If we have a type variable that is constrained to a value type, then we
                 // want to check if its a nullable type, so that we can report the 
@@ -250,7 +250,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // Check the newable constraint.
-            if (!var.HasNewConstraint() || arg.IsValType())
+            if (!var.HasNewConstraint || arg.IsValType())
             {
                 return !fError;
             }

@@ -347,7 +347,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_TypeParameterType:
                     {
-                        TypeParameterSymbol tvs = ((TypeParameterType)type).GetTypeParameterSymbol();
+                        TypeParameterSymbol tvs = ((TypeParameterType)type).Symbol;
                         int index = tvs.GetIndexInTotalParameters();
                         if (tvs.IsMethodTypeParameter())
                         {
@@ -482,7 +482,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_TypeParameterType:
                     { // BLOCK
-                        TypeParameterSymbol tvs = ((TypeParameterType)typeSrc).GetTypeParameterSymbol();
+                        TypeParameterSymbol tvs = ((TypeParameterType)typeSrc).Symbol;
                         int index = tvs.GetIndexInTotalParameters();
 
                         if (tvs.IsMethodTypeParameter())
@@ -604,7 +604,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_TypeParameterType:
                     if (typeVars != null && typeVars.Count > 0)
                     {
-                        int ivar = ((TypeParameterType)type).GetIndexInTotalParameters();
+                        int ivar = ((TypeParameterType)type).IndexInTotalParameters;
                         return ivar < typeVars.Count && type == typeVars[ivar];
                     }
                     return true;

@@ -93,15 +93,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case Semantics.TypeKind.TK_TypeParameterType:
                     TypeParameterType t = (TypeParameterType)src;
-                    if (t.IsMethodTypeParameter())
+                    if (t.IsMethodTypeParameter)
                     {
-                        MethodInfo meth = ((MethodSymbol)t.GetOwningSymbol()).AssociatedMemberInfo as MethodInfo;
-                        result = meth.GetGenericArguments()[t.GetIndexInOwnParameters()];
+                        MethodInfo meth = ((MethodSymbol)t.OwningSymbol).AssociatedMemberInfo as MethodInfo;
+                        result = meth.GetGenericArguments()[t.IndexInOwnParameters];
                     }
                     else
                     {
-                        Type parentType = ((AggregateSymbol)t.GetOwningSymbol()).AssociatedSystemType;
-                        result = parentType.GetGenericArguments()[t.GetIndexInOwnParameters()];
+                        Type parentType = ((AggregateSymbol)t.OwningSymbol).AssociatedSystemType;
+                        result = parentType.GetGenericArguments()[t.IndexInOwnParameters];
                     }
                     break;
             }
@@ -121,7 +121,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             for (int i = 0; i < typeArgs.Count; i++)
             {
                 // Unnamed type parameter types are just placeholders.
-                if (typeArgs[i] is TypeParameterType typeParamArg && typeParamArg.GetTypeParameterSymbol().name == null)
+                if (typeArgs[i] is TypeParameterType typeParamArg && typeParamArg.Symbol.name == null)
                 {
                     return null;
                 }
@@ -442,7 +442,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (TypeKind)
             {
                 case Semantics.TypeKind.TK_TypeParameterType:
-                    return ((TypeParameterType)this).IsValueType();
+                    return ((TypeParameterType)this).IsValueType;
                 case Semantics.TypeKind.TK_AggregateType:
                     return ((AggregateType)this).getAggregate().IsValueType();
                 case Semantics.TypeKind.TK_NullableType:
@@ -456,7 +456,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (TypeKind)
             {
                 case Semantics.TypeKind.TK_TypeParameterType:
-                    return ((TypeParameterType)this).IsNonNullableValueType();
+                    return ((TypeParameterType)this).IsNonNullableValueType;
                 case Semantics.TypeKind.TK_AggregateType:
                     return ((AggregateType)this).getAggregate().IsValueType();
                 case Semantics.TypeKind.TK_NullableType:
@@ -473,7 +473,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case Semantics.TypeKind.TK_NullType:
                     return true;
                 case Semantics.TypeKind.TK_TypeParameterType:
-                    return ((TypeParameterType)this).IsReferenceType();
+                    return ((TypeParameterType)this).IsReferenceType;
                 case Semantics.TypeKind.TK_AggregateType:
                     return ((AggregateType)this).getAggregate().IsRefType();
                 default:
