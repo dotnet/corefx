@@ -313,7 +313,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // If we have a WinRT type then we should load the members of it's collection interfaces
             // as well as those members are on this type as far as the user is concerned.
             CType ctype = GetCTypeFromType(type);
-            if (ctype.IsWindowsRuntimeType())
+            if (ctype.IsWindowsRuntimeType)
             {
                 TypeArray collectioniFaces = ((AggregateType)ctype).GetWinRTCollectionIfacesAll(_semanticChecker.SymbolLoader);
 

@@ -569,7 +569,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 typeCls1 = (AggregateType)typeSrc;
 
-                if (typeCls1.IsWindowsRuntimeType())
+                if (typeCls1.IsWindowsRuntimeType)
                 {
                     ifaces = typeCls1.GetWinRTCollectionIfacesAll(GetSymbolLoader());
                 }

@@ -17,10 +17,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             TypeKind = kind;
         }
 
-        public bool IsWindowsRuntimeType()
-        {
-            return (AssociatedSystemType.Attributes & TypeAttributes.WindowsRuntime) == TypeAttributes.WindowsRuntime;
-        }
+        public bool IsWindowsRuntimeType => (AssociatedSystemType.Attributes & TypeAttributes.WindowsRuntime) != 0;
 
         [ExcludeFromCodeCoverage] // Should only be called through override.
         public virtual Type AssociatedSystemType => throw Error.InternalCompilerError();

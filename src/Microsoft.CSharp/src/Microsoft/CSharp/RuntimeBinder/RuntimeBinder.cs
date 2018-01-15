@@ -636,7 +636,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             // If this is a WinRT type we have to add all collection interfaces that have this method 
             // as well so that overload resolution can find them.
-            if (callingType.IsWindowsRuntimeType())
+            if (callingType.IsWindowsRuntimeType)
             {
                 foreach (AggregateType t in callingType.GetWinRTCollectionIfacesAll(SymbolLoader).Items)
                 {
