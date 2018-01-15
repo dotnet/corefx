@@ -18,15 +18,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public TypeParameterType CreateTypeParameter(TypeParameterSymbol pSymbol) => new TypeParameterType(pSymbol);
 
         // Derived types - parent is base type
-        public ArrayType CreateArray(CType pElementType, int rank, bool isSZArray)
-        {
-            ArrayType type = new ArrayType();
-
-            type.rank = rank;
-            type.IsSZArray = isSZArray;
-            type.SetElementType(pElementType);
-            return type;
-        }
+        public ArrayType CreateArray(CType pElementType, int rank, bool isSZArray) => new ArrayType(pElementType, rank, isSZArray);
 
         public PointerType CreatePointer(CType pReferentType)
         {

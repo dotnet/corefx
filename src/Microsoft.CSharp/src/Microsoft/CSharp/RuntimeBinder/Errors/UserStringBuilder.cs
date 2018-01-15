@@ -490,7 +490,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                 case TypeKind.TK_ArrayType:
                     {
-                        CType elementType = ((ArrayType)pType).GetBaseElementType();
+                        CType elementType = ((ArrayType)pType).BaseElementType;
 
                         if (null == elementType)
                         {
@@ -502,9 +502,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                         for (elementType = pType;
                                 elementType is ArrayType arrType;
-                                elementType = arrType.GetElementType())
+                                elementType = arrType.ElementType)
                         {
-                            int rank = arrType.rank;
+                            int rank = arrType.Rank;
 
                             // Add [] with (rank-1) commas inside
                             ErrAppendChar('[');

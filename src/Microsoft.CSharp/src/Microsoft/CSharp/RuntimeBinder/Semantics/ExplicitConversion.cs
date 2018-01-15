@@ -249,7 +249,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
 
-                CType typeArr = arrSrc.GetElementType();
+                CType typeArr = arrSrc.ElementType;
                 CType typeLst = aggDest.TypeArgsAll[0];
 
                 if (!CConversions.FExpRefConv(GetSymbolLoader(), typeArr, typeLst))
@@ -289,7 +289,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
 
-                CType typeArr = arrayDest.GetElementType();
+                CType typeArr = arrayDest.ElementType;
                 CType typeLst = aggSrc.TypeArgsAll[0];
 
                 Debug.Assert(!(typeArr is MethodGroupType));
@@ -316,12 +316,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //
                 //   * An explicit reference conversion exists from SE to TE.
 
-                if (arraySrc.rank != arrayDest.rank || arraySrc.IsSZArray != arrayDest.IsSZArray)
+                if (arraySrc.Rank != arrayDest.Rank || arraySrc.IsSZArray != arrayDest.IsSZArray)
                 {
                     return false;  // Ranks do not match.
                 }
 
-                if (CConversions.FExpRefConv(GetSymbolLoader(), arraySrc.GetElementType(), arrayDest.GetElementType()))
+                if (CConversions.FExpRefConv(GetSymbolLoader(), arraySrc.ElementType, arrayDest.ElementType))
                 {
                     if (_needsExprDest)
                         _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest, EXPRFLAG.EXF_REFCHECK);

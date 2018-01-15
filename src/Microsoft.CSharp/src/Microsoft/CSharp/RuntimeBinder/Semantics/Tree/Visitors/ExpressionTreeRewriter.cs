@@ -319,7 +319,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(expr != null);
             // POSSIBLE ERROR: Multi-d should be an error?
-            Expr pTypeOf = CreateTypeOf(((ArrayType)expr.Type).GetElementType());
+            Expr pTypeOf = CreateTypeOf(((ArrayType)expr.Type).ElementType);
             Expr args = GenerateArgsList(expr.OptionalArguments);
             Expr Params = GenerateParamsArray(args, PredefinedType.PT_EXPRESSION);
             return GenerateCall(PREDEFMETH.PM_EXPRESSION_NEWARRAYINIT, pTypeOf, Params);

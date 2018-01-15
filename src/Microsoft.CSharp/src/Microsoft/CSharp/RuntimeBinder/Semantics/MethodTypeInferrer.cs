@@ -816,12 +816,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            if (pArraySource.rank != pArrayDest.rank || pArraySource.IsSZArray != pArrayDest.IsSZArray)
+            if (pArraySource.Rank != pArrayDest.Rank || pArraySource.IsSZArray != pArrayDest.IsSZArray)
             {
                 return false;
             }
 
-            ExactInference(pArraySource.GetElementType(), pArrayDest.GetElementType());
+            ExactInference(pArraySource.ElementType, pArrayDest.ElementType);
             return true;
         }
 
@@ -995,16 +995,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            CType pElementSource = pArraySource.GetElementType();
+            CType pElementSource = pArraySource.ElementType;
             CType pElementDest;
 
             if (pDest is ArrayType pArrayDest)
             {
-                if (pArrayDest.rank != pArraySource.rank || pArrayDest.IsSZArray != pArraySource.IsSZArray)
+                if (pArrayDest.Rank != pArraySource.Rank || pArrayDest.IsSZArray != pArraySource.IsSZArray)
                 {
                     return false;
                 }
-                pElementDest = pArrayDest.GetElementType();
+
+                pElementDest = pArrayDest.ElementType;
             }
             else if (pDest.isPredefType(PredefinedType.PT_G_IENUMERABLE) ||
                 pDest.isPredefType(PredefinedType.PT_G_ICOLLECTION) ||
@@ -1336,16 +1337,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            CType pElementDest = pArrayDest.GetElementType();
+            CType pElementDest = pArrayDest.ElementType;
             CType pElementSource;
 
             if (pSource is ArrayType pArraySource)
             {
-                if (pArrayDest.rank != pArraySource.rank || pArrayDest.IsSZArray != pArraySource.IsSZArray)
+                if (pArrayDest.Rank != pArraySource.Rank || pArrayDest.IsSZArray != pArraySource.IsSZArray)
                 {
                     return false;
                 }
-                pElementSource = pArraySource.GetElementType();
+
+                pElementSource = pArraySource.ElementType;
             }
             else if (pSource.isPredefType(PredefinedType.PT_G_IENUMERABLE) ||
                 pSource.isPredefType(PredefinedType.PT_G_ICOLLECTION) ||

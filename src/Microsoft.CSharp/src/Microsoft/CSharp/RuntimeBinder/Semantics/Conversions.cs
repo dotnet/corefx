@@ -122,9 +122,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     //     o    An explicit reference conversion exists from SE to TE.
                     if (typeDst is ArrayType arrDst)
                     {
-                        return arrSrc.rank == arrDst.rank
+                        return arrSrc.Rank == arrDst.Rank
                                && arrSrc.IsSZArray == arrDst.IsSZArray
-                               && FExpRefConv(loader, arrSrc.GetElementType(), arrDst.GetElementType());
+                               && FExpRefConv(loader, arrSrc.ElementType, arrDst.ElementType);
                     }
 
                     // *    From a one-dimensional array-type S[] to System.Collections.Generic.IList<T>, System.Collections.Generic.IReadOnlyList<T> 
@@ -154,7 +154,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return false;
                     }
 
-                    return FExpRefConv(loader, arrSrc.GetElementType(), typeArgsAll[0]);
+                    return FExpRefConv(loader, arrSrc.ElementType, typeArgsAll[0]);
                 }
 
                 if (typeDst is ArrayType arrayDest && typeSrc is AggregateType aggtypeSrc)
@@ -185,7 +185,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         return false;
                     }
 
-                    CType typeArr = arrayDest.GetElementType();
+                    CType typeArr = arrayDest.ElementType;
                     CType typeLst = aggtypeSrc.TypeArgsAll[0];
 
                     Debug.Assert(!(typeArr is MethodGroupType));
