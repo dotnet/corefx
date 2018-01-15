@@ -849,7 +849,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   is made from each Ui to the corresponding Vi.
 
             if (!(pSource is AggregateType pConstructedSource) || !(pDest is AggregateType pConstructedDest)
-                || pConstructedSource.GetOwningAggregate() != pConstructedDest.GetOwningAggregate())
+                || pConstructedSource.OwningAggregate != pConstructedDest.OwningAggregate)
             {
                 return false;
             }
@@ -866,10 +866,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
-            Debug.Assert(pSource.GetOwningAggregate() == pDest.GetOwningAggregate());
+            Debug.Assert(pSource.OwningAggregate == pDest.OwningAggregate);
 
-            TypeArray pSourceArgs = pSource.GetTypeArgsAll();
-            TypeArray pDestArgs = pDest.GetTypeArgsAll();
+            TypeArray pSourceArgs = pSource.TypeArgsAll;
+            TypeArray pDestArgs = pDest.TypeArgsAll;
 
             Debug.Assert(pSourceArgs != null);
             Debug.Assert(pDestArgs != null);
@@ -1017,7 +1017,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
                 AggregateType pAggregateDest = (AggregateType)pDest;
-                pElementDest = pAggregateDest.GetTypeArgsThis()[0];
+                pElementDest = pAggregateDest.TypeArgsThis[0];
             }
             else
             {
@@ -1065,7 +1065,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            TypeArray pDestArgs = pConstructedDest.GetTypeArgsAll();
+            TypeArray pDestArgs = pConstructedDest.TypeArgsAll;
             if (pDestArgs.Count == 0)
             {
                 return false;
@@ -1081,7 +1081,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   is made from each Ui to the corresponding Vi.
 
             if (pSource is AggregateType aggSource &&
-                aggSource.GetOwningAggregate() == pConstructedDest.GetOwningAggregate())
+                aggSource.OwningAggregate == pConstructedDest.OwningAggregate)
             {
                 if (aggSource.isInterfaceType() || aggSource.isDelegateType())
                 {
@@ -1147,7 +1147,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             while (pSourceBase != null)
             {
-                if (pSourceBase.GetOwningAggregate() == pDest.GetOwningAggregate())
+                if (pSourceBase.OwningAggregate == pDest.OwningAggregate)
                 {
                     ExactTypeArgumentInference(pSourceBase, pDest);
                     return true;
@@ -1185,7 +1185,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType pInterface = null;
             foreach (AggregateType pCurrent in interfaces)
             {
-                if (pCurrent.GetOwningAggregate() == pDest.GetOwningAggregate())
+                if (pCurrent.OwningAggregate == pDest.OwningAggregate)
                 {
                     if (pInterface == null)
                     {
@@ -1222,11 +1222,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
-            Debug.Assert(pSource.GetOwningAggregate() == pDest.GetOwningAggregate());
+            Debug.Assert(pSource.OwningAggregate == pDest.OwningAggregate);
 
-            TypeArray pTypeParams = pSource.GetOwningAggregate().GetTypeVarsAll();
-            TypeArray pSourceArgs = pSource.GetTypeArgsAll();
-            TypeArray pDestArgs = pDest.GetTypeArgsAll();
+            TypeArray pTypeParams = pSource.OwningAggregate.GetTypeVarsAll();
+            TypeArray pSourceArgs = pSource.TypeArgsAll;
+            TypeArray pDestArgs = pDest.TypeArgsAll;
 
             Debug.Assert(pTypeParams != null);
             Debug.Assert(pSourceArgs != null);
@@ -1358,7 +1358,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
                 AggregateType pAggregateSource = (AggregateType)pSource;
-                pElementSource = pAggregateSource.GetTypeArgsThis()[0];
+                pElementSource = pAggregateSource.TypeArgsThis[0];
             }
             else
             {
@@ -1385,7 +1385,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            TypeArray pSourceArgs = pConstructedSource.GetTypeArgsAll();
+            TypeArray pSourceArgs = pConstructedSource.TypeArgsAll;
             if (pSourceArgs.Count == 0)
             {
                 return false;
@@ -1397,7 +1397,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   is made from each Ui to the corresponding Vi.
 
             if (pDest is AggregateType aggDest &&
-                pConstructedSource.GetOwningAggregate() == aggDest.GetOwningAggregate())
+                pConstructedSource.OwningAggregate == aggDest.OwningAggregate)
             {
                 if (aggDest.isInterfaceType() || aggDest.isDelegateType())
                 {
@@ -1448,7 +1448,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             while (pDestBase != null)
             {
-                if (pDestBase.GetOwningAggregate() == pSource.GetOwningAggregate())
+                if (pDestBase.OwningAggregate == pSource.OwningAggregate)
                 {
                     ExactTypeArgumentInference(pSource, pDestBase);
                     return true;
@@ -1482,7 +1482,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType pInterface = null;
             foreach (AggregateType pCurrent in interfaces)
             {
-                if (pCurrent.GetOwningAggregate() == pSource.GetOwningAggregate())
+                if (pCurrent.OwningAggregate == pSource.OwningAggregate)
                 {
                     if (pInterface == null)
                     {
@@ -1519,11 +1519,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
-            Debug.Assert(pSource.GetOwningAggregate() == pDest.GetOwningAggregate());
+            Debug.Assert(pSource.OwningAggregate == pDest.OwningAggregate);
 
-            TypeArray pTypeParams = pSource.GetOwningAggregate().GetTypeVarsAll();
-            TypeArray pSourceArgs = pSource.GetTypeArgsAll();
-            TypeArray pDestArgs = pDest.GetTypeArgsAll();
+            TypeArray pTypeParams = pSource.OwningAggregate.GetTypeVarsAll();
+            TypeArray pSourceArgs = pSource.TypeArgsAll;
+            TypeArray pDestArgs = pDest.TypeArgsAll;
 
             Debug.Assert(pTypeParams != null);
             Debug.Assert(pSourceArgs != null);

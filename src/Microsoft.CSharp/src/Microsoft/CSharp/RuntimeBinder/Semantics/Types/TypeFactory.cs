@@ -11,17 +11,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         // Aggregate
         public AggregateType CreateAggregateType(
-            AggregateSymbol parent,
-            TypeArray typeArgsThis,
-            AggregateType outerType)
-        {
-            AggregateType type = new AggregateType();
-
-            type.outerType = outerType;
-            type.SetOwningAggregate(parent);
-            type.SetTypeArgsThis(typeArgsThis);
-            return type;
-        }
+            AggregateSymbol parent, TypeArray typeArgsThis, AggregateType outerType) =>
+            new AggregateType(parent, typeArgsThis, outerType);
 
         // TypeParameter
         public TypeParameterType CreateTypeParameter(TypeParameterSymbol pSymbol)

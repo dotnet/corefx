@@ -247,10 +247,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            Debug.Assert(atsDest.GetTypeArgsAll().Count == 1);
+            Debug.Assert(atsDest.TypeArgsAll.Count == 1);
 
             CType pSourceElement = pSource.GetElementType();
-            CType pDestTypeArgument = atsDest.GetTypeArgsAll()[0];
+            CType pDestTypeArgument = atsDest.TypeArgsAll[0];
             return HasIdentityOrImplicitReferenceConversion(pSourceElement, pDestTypeArgument);
         }
 
@@ -271,10 +271,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 if (pDest is AggregateType aggDest)
                 {
-                    switch (aggSource.GetOwningAggregate().AggKind())
+                    switch (aggSource.OwningAggregate.AggKind())
                     {
                         case AggKindEnum.Class:
-                            switch (aggDest.GetOwningAggregate().AggKind())
+                            switch (aggDest.OwningAggregate.AggKind())
                             {
                                 case AggKindEnum.Class:
                                     // * From any class type S to any class type T provided S is derived from T.
@@ -455,8 +455,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             TypeArray pTypeParams = pAggSym.GetTypeVarsAll();
-            TypeArray pSourceArgs = pSource.GetTypeArgsAll();
-            TypeArray pDestArgs = pDest.GetTypeArgsAll();
+            TypeArray pSourceArgs = pSource.TypeArgsAll;
+            TypeArray pDestArgs = pDest.TypeArgsAll;
 
             Debug.Assert(pTypeParams.Count == pSourceArgs.Count);
             Debug.Assert(pTypeParams.Count == pDestArgs.Count);

@@ -558,7 +558,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Expr getOrCreateCall = BindToMethod(
                     new MethWithInst(getOrCreatempwi), pResult, getOrCreateGrp, (MemLookFlags)MemLookFlags.None);
 
-                AggregateSymbol fieldTypeSymbol = fieldType.GetOwningAggregate();
+                AggregateSymbol fieldTypeSymbol = fieldType.OwningAggregate;
                 Name invocationListName = NameManager.GetPredefinedName(PredefinedName.PN_INVOCATIONLIST);
 
                 // InvocationList might not be populated in the symbol table as no one would have called it.

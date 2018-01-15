@@ -439,9 +439,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         }
                         else
                         {
-                            if (pAggType.outerType != null)
+                            if (pAggType.OuterType != null)
                             {
-                                ErrAppendType(pAggType.outerType, pctx);
+                                ErrAppendType(pAggType.OuterType, pctx);
                                 ErrAppendChar('.');
                             }
                             else
@@ -451,7 +451,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                             }
                             ErrAppendName(pAggType.getAggregate().name);
                         }
-                        ErrAppendTypeParameters(pAggType.GetTypeArgsThis(), pctx, true);
+                        ErrAppendTypeParameters(pAggType.TypeArgsThis, pctx, true);
                         break;
                     }
 

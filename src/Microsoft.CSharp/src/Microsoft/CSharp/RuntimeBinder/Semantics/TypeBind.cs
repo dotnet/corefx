@@ -45,7 +45,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (!(type is AggregateType ats))
                 return true;
 
-            if (ats.GetTypeArgsAll().Count == 0)
+            if (ats.TypeArgsAll.Count == 0)
             {
                 // Common case: there are no type vars, so there are no constraints.
                 ats.fConstraintsChecked = true;
@@ -64,8 +64,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             TypeArray typeVars = ats.getAggregate().GetTypeVars();
-            TypeArray typeArgsThis = ats.GetTypeArgsThis();
-            TypeArray typeArgsAll = ats.GetTypeArgsAll();
+            TypeArray typeArgsThis = ats.TypeArgsThis;
+            TypeArray typeArgsAll = ats.TypeArgsAll;
 
             Debug.Assert(typeVars.Count == typeArgsThis.Count);
 
@@ -77,10 +77,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Check the outer type first. If CheckConstraintsFlags.Outer is not specified and the
             // outer type has already been checked then don't bother checking it.
-            if (ats.outerType != null && ((flags & CheckConstraintsFlags.Outer) != 0 || !ats.outerType.fConstraintsChecked))
+            if (ats.OuterType != null && ((flags & CheckConstraintsFlags.Outer) != 0 || !ats.OuterType.fConstraintsChecked))
             {
-                CheckConstraints(checker, errHandling, ats.outerType, flags);
-                ats.fConstraintError |= ats.outerType.fConstraintError;
+                CheckConstraints(checker, errHandling, ats.OuterType, flags);
+                ats.fConstraintError |= ats.OuterType.fConstraintError;
             }
 
             if (typeVars.Count > 0)
@@ -110,7 +110,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (mwi.TypeArgs.Count > 0)
             {
-                CheckConstraintsCore(checker, errCtx, mwi.Meth(), mwi.Meth().typeVars, mwi.TypeArgs, mwi.GetType().GetTypeArgsAll(), mwi.TypeArgs, CheckConstraintsFlags.None);
+                CheckConstraintsCore(checker, errCtx, mwi.Meth(), mwi.Meth().typeVars, mwi.TypeArgs, mwi.GetType().TypeArgsAll, mwi.TypeArgs, CheckConstraintsFlags.None);
             }
         }
         ////////////////////////////////////////////////////////////////////////////////

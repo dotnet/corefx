@@ -664,7 +664,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return method;
                 }
 
-                for (AggregateSymbol pAggregate = agg.GetOwningAggregate();
+                for (AggregateSymbol pAggregate = agg.OwningAggregate;
                         pAggregate?.GetBaseAgg() != null;
                         pAggregate = pAggregate.GetBaseAgg())
                 {
@@ -1104,7 +1104,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
 
-                TypeArray typeVars = varAgg.GetTypeArgsAll();
+                TypeArray typeVars = varAgg.TypeArgsAll;
                 for (int i = 0; i < typeVars.Count; i++)
                 {
                     CType type = typeVars[i];
@@ -1252,10 +1252,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (_pInvalidSpecifiedName != null)
                 {
                     // Give a better message for delegate invoke.
-                    return _pGroup.OptionalObject != null && _pGroup.OptionalObject.Type is AggregateType agg
-                           && agg.GetOwningAggregate().IsDelegate()
+                    return _pGroup.OptionalObject?.Type is AggregateType agg && agg.OwningAggregate.IsDelegate()
                         ? GetErrorContext().Error(
-                            ErrorCode.ERR_BadNamedArgumentForDelegateInvoke, agg.GetOwningAggregate().name,
+                            ErrorCode.ERR_BadNamedArgumentForDelegateInvoke, agg.OwningAggregate.name,
                             _pInvalidSpecifiedName)
                         : GetErrorContext().Error(ErrorCode.ERR_BadNamedArgument, _pGroup.Name, _pInvalidSpecifiedName);
                 }

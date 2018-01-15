@@ -17,17 +17,49 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class AggregateType : CType
     {
-        private TypeArray _pTypeArgsThis;
-        private TypeArray _pTypeArgsAll;         // includes args from outer types
-        private AggregateSymbol _pOwningAggregate;
-
         private AggregateType _baseType;  // This is the result of calling SubstTypeArray on the aggregate's baseClass.
         private TypeArray _ifacesAll;  // This is the result of calling SubstTypeArray on the aggregate's ifacesAll.
         private TypeArray _winrtifacesAll; //This is the list of collection interfaces implemented by a WinRT object.
 
-        public AggregateType()
+        public AggregateType(AggregateSymbol parent, TypeArray typeArgsThis, AggregateType outerType)
             : base(TypeKind.TK_AggregateType)
         {
+
+            Debug.Assert(typeArgsThis != null);
+            OuterType = outerType;
+            OwningAggregate = parent;
+            TypeArgsThis = typeArgsThis;
+
+            // Here we need to check our current type args. If we have an open placeholder,
+            // then we need to have all open placeholders, and we want to flush
+            // our outer type args so that they're open placeholders. 
+            //
+            // This is because of the following scenario:
+            //
+            // class B<T>
+            // {
+            //     class C<U>
+            //     {
+            //     }
+            //     class D
+            //     {
+            //         void Foo()
+            //         {
+            //             Type T = typeof(C<>);
+            //         }
+            //     }
+            // }
+            //
+            // The outer type will be B<T>, but the inner type will be C<>. However,
+            // this will eventually be represented in IL as B<>.C<>. As such, we should
+            // keep our data structures clear - if we have one open type argument, then
+            // all of them must be open type arguments.
+            //
+            // Ensure that invariant here.
+
+            Debug.Assert(outerType == null || outerType.TypeArgsAll != null);
+            TypeArgsAll = parent.GetTypeManager()
+                .ConcatenateTypeArrays(outerType != null ? outerType.TypeArgsAll : BSYMMGR.EmptyTypeArray(), typeArgsThis);
         }
 
         public bool fConstraintsChecked;    // Have the constraints been checked yet?
@@ -38,17 +70,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool fAllHidden;             // All members are hidden by a derived interface member.
         public bool fDiffHidden;            // Members other than a specific kind are hidden by a derived interface member or class member.
 
-        public AggregateType outerType;          // the outer type if this is a nested type
+        public AggregateType OuterType { get; }         // the outer type if this is a nested type
 
-        public void SetOwningAggregate(AggregateSymbol agg)
-        {
-            _pOwningAggregate = agg;
-        }
-
-        public AggregateSymbol GetOwningAggregate()
-        {
-            return _pOwningAggregate;
-        }
+        public AggregateSymbol OwningAggregate { get; }
 
         public AggregateType GetBaseClass()
         {
@@ -74,10 +98,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // If we don't have a generic type definition, then we just need to set our base
                 // class. This is so that if we have a base type that's generic, we'll be
                 // getting the correctly instantiated base type.
-                TypeManager manager = GetOwningAggregate().GetTypeManager();
+                TypeManager manager = OwningAggregate.GetTypeManager();
                 AggregateType baseClass = manager.SymbolTable.GetCTypeFromType(baseSysType) as AggregateType;
                 Debug.Assert(baseClass != null);
-                _baseType = manager.SubstType(baseClass, GetTypeArgsAll());
+                _baseType = manager.SubstType(baseClass, TypeArgsAll);
             }
 
             return _baseType;
@@ -107,77 +131,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        public void SetTypeArgsThis(TypeArray pTypeArgsThis)
-        {
-            TypeArray pOuterTypeArgs;
-            if (outerType != null)
-            {
-                Debug.Assert(outerType.GetTypeArgsThis() != null);
-                Debug.Assert(outerType.GetTypeArgsAll() != null);
+        public TypeArray TypeArgsThis { get; }
 
-                pOuterTypeArgs = outerType.GetTypeArgsAll();
-            }
-            else
-            {
-                pOuterTypeArgs = BSYMMGR.EmptyTypeArray();
-            }
-
-            Debug.Assert(pTypeArgsThis != null);
-            _pTypeArgsThis = pTypeArgsThis;
-            SetTypeArgsAll(pOuterTypeArgs);
-        }
-
-        private void SetTypeArgsAll(TypeArray outerTypeArgs)
-        {
-            Debug.Assert(_pTypeArgsThis != null);
-
-            // Here we need to check our current type args. If we have an open placeholder,
-            // then we need to have all open placeholders, and we want to flush
-            // our outer type args so that they're open placeholders. 
-            //
-            // This is because of the following scenario:
-            //
-            // class B<T>
-            // {
-            //     class C<U>
-            //     {
-            //     }
-            //     class D
-            //     {
-            //         void Foo()
-            //         {
-            //             Type T = typeof(C<>);
-            //         }
-            //     }
-            // }
-            //
-            // The outer type will be B<T>, but the inner type will be C<>. However,
-            // this will eventually be represented in IL as B<>.C<>. As such, we should
-            // keep our data structures clear - if we have one open type argument, then
-            // all of them must be open type arguments.
-            //
-            // Ensure that invariant here.
-
-            TypeArray pCheckedOuterTypeArgs = outerTypeArgs;
-            TypeManager pTypeManager = getAggregate().GetTypeManager();
-            _pTypeArgsAll = pTypeManager.ConcatenateTypeArrays(pCheckedOuterTypeArgs, _pTypeArgsThis);
-        }
-
-        public TypeArray GetTypeArgsThis()
-        {
-            return _pTypeArgsThis;
-        }
-
-        public TypeArray GetTypeArgsAll()
-        {
-            return _pTypeArgsAll;
-        }
+        public TypeArray TypeArgsAll { get; }
 
         public TypeArray GetIfacesAll()
         {
             if (_ifacesAll == null)
             {
-                _ifacesAll = getAggregate().GetTypeManager().SubstTypeArray(getAggregate().GetIfacesAll(), GetTypeArgsAll());
+                _ifacesAll = getAggregate().GetTypeManager().SubstTypeArray(getAggregate().GetIfacesAll(), TypeArgsAll);
             }
             return _ifacesAll;
         }

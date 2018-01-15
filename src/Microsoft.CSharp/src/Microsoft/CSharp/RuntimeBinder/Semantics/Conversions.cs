@@ -136,7 +136,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
 
                     AggregateType aggDst = (AggregateType)typeDst;
-                    TypeArray typeArgsAll = aggDst.GetTypeArgsAll();
+                    TypeArray typeArgsAll = aggDst.TypeArgsAll;
 
                     if (typeArgsAll.Count != 1)
                     {
@@ -169,8 +169,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     //      one-dimensional array-type S[], provided there is an implicit or explicit reference conversion from S[] to 
                     //      System.Collections.Generic.IList<T> or System.Collections.Generic.IReadOnlyList<T>. This is precisely when either S and T
                     //      are the same type or there is an implicit or explicit reference conversion from S to T.
-                    if (!arrayDest.IsSZArray || !typeSrc.isInterfaceType() ||
-                        aggtypeSrc.GetTypeArgsAll().Count != 1)
+                    if (!arrayDest.IsSZArray || !typeSrc.isInterfaceType() || aggtypeSrc.TypeArgsAll.Count != 1)
                     {
                         return false;
                     }
@@ -187,7 +186,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
 
                     CType typeArr = arrayDest.GetElementType();
-                    CType typeLst = aggtypeSrc.GetTypeArgsAll()[0];
+                    CType typeLst = aggtypeSrc.TypeArgsAll[0];
 
                     Debug.Assert(!(typeArr is MethodGroupType));
                     return typeArr == typeLst || FExpRefConv(loader, typeArr, typeLst);
@@ -235,8 +234,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             TypeArray pTypeParams = pSource.getAggregate().GetTypeVarsAll();
-            TypeArray pSourceArgs = ((AggregateType)pSource).GetTypeArgsAll();
-            TypeArray pTargetArgs = ((AggregateType)pTarget).GetTypeArgsAll();
+            TypeArray pSourceArgs = ((AggregateType)pSource).TypeArgsAll;
+            TypeArray pTargetArgs = ((AggregateType)pTarget).TypeArgsAll;
 
             Debug.Assert(pTypeParams.Count == pSourceArgs.Count);
             Debug.Assert(pTypeParams.Count == pTargetArgs.Count);

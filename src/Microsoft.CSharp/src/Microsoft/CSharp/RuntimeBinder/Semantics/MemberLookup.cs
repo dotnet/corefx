@@ -505,7 +505,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool IsDelegateType(CType pSrcType, AggregateType pAggType)
         {
-            CType pInstantiatedType = GetSymbolLoader().GetTypeManager().SubstType(pSrcType, pAggType, pAggType.GetTypeArgsAll());
+            CType pInstantiatedType = GetSymbolLoader().GetTypeManager().SubstType(pSrcType, pAggType, pAggType.TypeArgsAll);
             return pInstantiatedType.isDelegateType();
         }
 

@@ -70,7 +70,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(atsCheck != null);
 
             // Substitute on the CType.
-            if (atsCheck.GetTypeArgsAll().Count > 0)
+            if (atsCheck.TypeArgsAll.Count > 0)
             {
                 CType = SymbolLoader.GetTypeManager().SubstType(CType, atsCheck);
             }
@@ -92,15 +92,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             do
             {
-                if (ACCESSERROR.ACCESSERROR_NOERROR != CheckAccessCore(ats.GetOwningAggregate(), ats.outerType, symWhere, null))
+                if (ACCESSERROR.ACCESSERROR_NOERROR != CheckAccessCore(ats.OwningAggregate, ats.OuterType, symWhere, null))
                 {
                     return false;
                 }
 
-                ats = ats.outerType;
+                ats = ats.OuterType;
             } while(ats != null);
 
-            TypeArray typeArgs = ((AggregateType)type).GetTypeArgsAll();
+            TypeArray typeArgs = ((AggregateType)type).TypeArgsAll;
             for (int i = 0; i < typeArgs.Count; i++)
             {
                 if (!CheckTypeAccess(typeArgs[i], symWhere))

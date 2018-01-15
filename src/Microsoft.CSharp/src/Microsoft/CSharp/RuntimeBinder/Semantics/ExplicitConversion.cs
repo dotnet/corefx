@@ -233,7 +233,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_typeDest != null);
 
                 if (!(_typeSrc is ArrayType arrSrc) || !arrSrc.IsSZArray || !(_typeDest is AggregateType aggDest)
-                    || !aggDest.isInterfaceType() || aggDest.GetTypeArgsAll().Count != 1)
+                    || !aggDest.isInterfaceType() || aggDest.TypeArgsAll.Count != 1)
                 {
                     return false;
                 }
@@ -250,7 +250,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 CType typeArr = arrSrc.GetElementType();
-                CType typeLst = aggDest.GetTypeArgsAll()[0];
+                CType typeLst = aggDest.TypeArgsAll[0];
 
                 if (!CConversions.FExpRefConv(GetSymbolLoader(), typeArr, typeLst))
                 {
@@ -273,8 +273,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //   S[] to System.Collections.Generic.IList<T> or System.Collections.Generic.IReadOnlyList<T>. This is precisely when either S and T
                 //   are the same type or there is an implicit or explicit reference conversion from S to T.
 
-                if (!arrayDest.IsSZArray || !(_typeSrc is AggregateType aggSrc) || !aggSrc.isInterfaceType() ||
-                    aggSrc.GetTypeArgsAll().Count != 1)
+                if (!arrayDest.IsSZArray || !(_typeSrc is AggregateType aggSrc) || !aggSrc.isInterfaceType() || aggSrc.TypeArgsAll.Count != 1)
                 {
                     return false;
                 }
@@ -291,7 +290,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 CType typeArr = arrayDest.GetElementType();
-                CType typeLst = aggSrc.GetTypeArgsAll()[0];
+                CType typeLst = aggSrc.TypeArgsAll[0];
 
                 Debug.Assert(!(typeArr is MethodGroupType));
                 if (typeArr != typeLst && !CConversions.FExpRefConv(GetSymbolLoader(), typeArr, typeLst))
