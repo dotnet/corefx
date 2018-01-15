@@ -895,14 +895,9 @@ namespace Microsoft.CSharp.RuntimeBinder
                     CType underlyingType = pExpr.Type;
                     object objval;
 
-                    if (pExpr.Type is NullType)
+                    if (underlyingType is NullType)
                     {
                         return null;
-                    }
-
-                    if (pExpr.Type.IsEnumType)
-                    {
-                        underlyingType = underlyingType.getAggregate().GetUnderlyingType();
                     }
 
                     switch (Type.GetTypeCode(underlyingType.AssociatedSystemType))

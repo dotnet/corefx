@@ -1200,15 +1200,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Name nameErr = _pGroup.Name;
 
                 // Check for an invoke.
-                if (_pGroup.OptionalObject != null &&
-                        _pGroup.OptionalObject.Type != null &&
-                        _pGroup.OptionalObject.Type.IsDelegateType &&
-                        _pGroup.Name == NameManager.GetPredefinedName(PredefinedName.PN_INVOKE))
+                if (_pGroup.OptionalObject?.Type != null &&
+                    _pGroup.OptionalObject.Type.IsDelegateType &&
+                    _pGroup.Name == NameManager.GetPredefinedName(PredefinedName.PN_INVOKE))
                 {
                     Debug.Assert(!_results.BestResult || _results.BestResult.MethProp().getClass().IsDelegate());
                     Debug.Assert(!_results.BestResult || _results.BestResult.GetType().OwningAggregate.IsDelegate());
                     bUseDelegateErrors = true;
-                    nameErr = _pGroup.OptionalObject.Type.getAggregate().name;
+                    nameErr = ((AggregateType)_pGroup.OptionalObject.Type).OwningAggregate.name;
                 }
 
                 if (_results.BestResult)
