@@ -138,29 +138,51 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeArray GetIfacesAll()
         {
-            return _ifacesAll ?? (_ifacesAll = OwningAggregate.GetTypeManager()
-                       .SubstTypeArray(OwningAggregate.GetIfacesAll(), TypeArgsAll));
+            return _ifacesAll ?? (_ifacesAll = OwningAggregate.GetTypeManager().SubstTypeArray(OwningAggregate.GetIfacesAll(), TypeArgsAll));
+        }
+
+        private bool IsCollectionType
+        {
+            get
+            {
+                Type sysType = AssociatedSystemType;
+                if (sysType.IsGenericType)
+                {
+                    Type genType = sysType.GetGenericTypeDefinition();
+                    return genType == typeof(IList<>)
+                        || genType == typeof(ICollection<>)
+                        || genType == typeof(IEnumerable<>)
+                        || genType == typeof(IReadOnlyList<>)
+                        || genType == typeof(IReadOnlyCollection<>)
+                        || genType == typeof(IDictionary<,>)
+                        || genType == typeof(IReadOnlyDictionary<,>);
+                }
+
+                return sysType == typeof(System.Collections.IList)
+                    || sysType == typeof(System.Collections.ICollection)
+                    || sysType == typeof(System.Collections.IEnumerable)
+                    || sysType == typeof(System.Collections.Specialized.INotifyCollectionChanged)
+                    || sysType == typeof(System.ComponentModel.INotifyPropertyChanged);
+            }
         }
 
         public TypeArray GetWinRTCollectionIfacesAll(SymbolLoader pSymbolLoader)
         {
             if (_winrtifacesAll == null)
             {
-                TypeArray ifaces = GetIfacesAll();
-                System.Collections.Generic.List<CType> typeList = new System.Collections.Generic.List<CType>();
-
-                for (int i = 0; i < ifaces.Count; i++)
+                List<CType> typeList = new List<CType>();
+                foreach (AggregateType type in GetIfacesAll().Items)
                 {
-                    AggregateType type = ifaces[i] as AggregateType;
                     Debug.Assert(type.IsInterfaceType);
-
-                    if (type.IsCollectionType())
+                    if (type.IsCollectionType)
                     {
                         typeList.Add(type);
                     }
                 }
+
                 _winrtifacesAll = pSymbolLoader.getBSymmgr().AllocParams(typeList.Count, typeList.ToArray());
             }
+
             return _winrtifacesAll;
         }
 

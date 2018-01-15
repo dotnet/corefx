@@ -23,27 +23,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return (AssociatedSystemType.Attributes & TypeAttributes.WindowsRuntime) == TypeAttributes.WindowsRuntime;
         }
 
-        public bool IsCollectionType()
-        {
-            if ((AssociatedSystemType.IsGenericType &&
-                 (AssociatedSystemType.GetGenericTypeDefinition() == typeof(IList<>) ||
-                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(ICollection<>) ||
-                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
-                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IReadOnlyList<>) ||
-                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IReadOnlyCollection<>) ||
-                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
-                  AssociatedSystemType.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))) ||
-                AssociatedSystemType == typeof(System.Collections.IList) ||
-                AssociatedSystemType == typeof(System.Collections.ICollection) ||
-                AssociatedSystemType == typeof(System.Collections.IEnumerable) ||
-                AssociatedSystemType == typeof(System.Collections.Specialized.INotifyCollectionChanged) ||
-                AssociatedSystemType == typeof(System.ComponentModel.INotifyPropertyChanged))
-            {
-                return true;
-            }
-            return false;
-        }
-
         private Type _associatedSystemType;
         public Type AssociatedSystemType
         {
