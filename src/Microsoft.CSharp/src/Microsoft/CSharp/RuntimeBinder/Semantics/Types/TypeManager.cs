@@ -86,37 +86,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ArrayType GetArray(CType elementType, int args, bool isSZArray)
         {
-            Name name;
-
             Debug.Assert(args > 0 && args < 32767);
             Debug.Assert(args == 1 || !isSZArray);
 
-            switch (args)
-            {
-                case 1:
-                    if (isSZArray)
-                    {
-                        goto case 2;
-                    }
-                    else
-                    {
-                        goto default;
-                    }
-                case 2:
-                    name = NameManager.GetPredefinedName(PredefinedName.PN_ARRAY0 + args);
-                    break;
-                default:
-                    name = NameManager.Add("[X" + args + 1);
-                    break;
-            }
+            int rankNum = isSZArray ? 0 : args;
 
             // See if we already have an array type of this element type and rank.
-            ArrayType pArray = _typeTable.LookupArray(name, elementType);
+            ArrayType pArray = _typeTable.LookupArray(elementType, rankNum);
             if (pArray == null)
             {
                 // No existing array symbol. Create a new one.
                 pArray = new ArrayType(elementType, args, isSZArray);
-                _typeTable.InsertArray(name, elementType, pArray);
+                _typeTable.InsertArray(elementType, rankNum, pArray);
             }
 
             Debug.Assert(pArray.Rank == args);
@@ -206,14 +187,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ParameterModifierType GetParameterModifier(CType paramType, bool isOut)
         {
-            Name name = NameManager.GetPredefinedName(isOut ? PredefinedName.PN_OUTPARAM : PredefinedName.PN_REFPARAM);
-            ParameterModifierType pParamModifier = _typeTable.LookupParameterModifier(name, paramType);
-
+            ParameterModifierType pParamModifier = _typeTable.LookupParameterModifier(paramType, isOut);
             if (pParamModifier == null)
             {
                 // No existing parammod symbol. Create a new one.
                 pParamModifier = new ParameterModifierType(paramType, isOut);
-                _typeTable.InsertParameterModifier(name, paramType, pParamModifier);
+                _typeTable.InsertParameterModifier(paramType, isOut, pParamModifier);
             }
 
             Debug.Assert(pParamModifier.ParameterType == paramType);
