@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
@@ -234,18 +235,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case FUNDTYPE.FT_STRUCT:
                     // Here we can either have a decimal type, or an enum 
                     // whose fundamental type is decimal.
-                    Debug.Assert((getAggregate().IsEnum() && getAggregate().GetUnderlyingType().getPredefType() == PredefinedType.PT_DECIMAL)
-                        || (isPredefined() && getPredefType() == PredefinedType.PT_DATETIME)
-                        || (isPredefined() && getPredefType() == PredefinedType.PT_DECIMAL));
+                    Debug.Assert((getAggregate().IsEnum() && getAggregate().GetUnderlyingType().PredefinedType == Syntax.PredefinedType.PT_DECIMAL)
+                        || (IsPredefined && PredefinedType == Syntax.PredefinedType.PT_DATETIME)
+                        || (IsPredefined && PredefinedType == Syntax.PredefinedType.PT_DECIMAL));
 
-                    if (isPredefined() && getPredefType() == PredefinedType.PT_DATETIME)
+                    if (IsPredefined && PredefinedType == Syntax.PredefinedType.PT_DATETIME)
                     {
                         return ConstValKind.Long;
                     }
                     return ConstValKind.Decimal;
 
                 case FUNDTYPE.FT_REF:
-                    if (isPredefined() && getPredefType() == PredefinedType.PT_STRING)
+                    if (IsPredefined && PredefinedType == Syntax.PredefinedType.PT_STRING)
                     {
                         return ConstValKind.String;
                     }
@@ -321,8 +322,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // conversions.
         public bool isSimpleType()
         {
-            return (isPredefined() &&
-                    PredefinedTypeFacts.IsSimpleType(getPredefType()));
+            return (IsPredefined &&
+                    PredefinedTypeFacts.IsSimpleType(PredefinedType));
         }
         public bool isSimpleOrEnum()
         {
@@ -330,12 +331,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
         public bool isSimpleOrEnumOrString()
         {
-            return isSimpleType() || isPredefType(PredefinedType.PT_STRING) || isEnumType();
+            return isSimpleType() || isPredefType(Syntax.PredefinedType.PT_STRING) || isEnumType();
         }
 
         private bool isPointerLike()
         {
-            return this is PointerType || isPredefType(PredefinedType.PT_INTPTR) || isPredefType(PredefinedType.PT_UINTPTR);
+            return this is PointerType || isPredefType(Syntax.PredefinedType.PT_INTPTR) || isPredefType(Syntax.PredefinedType.PT_UINTPTR);
         }
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -343,8 +344,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // types the compiler knows about for operators and conversions.
         public bool isNumericType()
         {
-            return (isPredefined() &&
-                    PredefinedTypeFacts.IsNumericType(getPredefType()));
+            return IsPredefined && PredefinedTypeFacts.IsNumericType(PredefinedType);
         }
         public bool isStructOrEnum()
         {
@@ -379,10 +379,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     sym = sym.underlyingEnumType();
                 }
-                if (sym.isPredefined())
+                if (sym.IsPredefined)
                 {
-                    PredefinedType pt = sym.getPredefType();
-                    return pt == PredefinedType.PT_UINTPTR || pt == PredefinedType.PT_BYTE || (pt >= PredefinedType.PT_USHORT && pt <= PredefinedType.PT_ULONG);
+                    PredefinedType pt = sym.PredefinedType;
+                    return pt == Syntax.PredefinedType.PT_UINTPTR || pt == Syntax.PredefinedType.PT_BYTE || (pt >= Syntax.PredefinedType.PT_USHORT && pt <= Syntax.PredefinedType.PT_ULONG);
                 }
                 else
                 {
@@ -404,17 +404,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (this is AggregateType ats)
                 return ats.OwningAggregate.IsPredefined() && ats.OwningAggregate.GetPredefType() == pt;
-            return (this is VoidType && pt == PredefinedType.PT_VOID);
+            return (this is VoidType && pt == Syntax.PredefinedType.PT_VOID);
         }
-        public bool isPredefined()
-        {
-            return this is AggregateType at && at.OwningAggregate.IsPredefined();
-        }
-        public PredefinedType getPredefType()
-        {
-            //ASSERT(isPredefined());
-            return getAggregate().GetPredefType();
-        }
+
+        public virtual bool IsPredefined => false;
+
+        [ExcludeFromCodeCoverage] // Should only be called through override.
+        public virtual PredefinedType PredefinedType => throw new RuntimeBinderInternalCompilerException();
 
         public virtual bool IsStaticClass => false;
 

@@ -661,9 +661,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(aggSrc.getThisType().isSimpleType());
                 Debug.Assert(_typeDest.isSimpleType());
 
-                Debug.Assert(aggSrc.IsPredefined() && _typeDest.isPredefined());
+                Debug.Assert(aggSrc.IsPredefined() && _typeDest.IsPredefined);
                 PredefinedType ptSrc = aggSrc.GetPredefType();
-                PredefinedType ptDest = _typeDest.getPredefType();
+                PredefinedType ptDest = _typeDest.PredefinedType;
                 ConvKind convertKind;
 
                 Debug.Assert((int)ptSrc < NUM_SIMPLE_TYPES && (int)ptDest < NUM_SIMPLE_TYPES);

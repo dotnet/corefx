@@ -546,7 +546,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return bindExplicitConversionFromDecimalToEnum(aggTypeDest);
                 }
 
-                if (_typeSrc.isNumericType() || (_typeSrc.isPredefined() && _typeSrc.getPredefType() == PredefinedType.PT_CHAR))
+                if (_typeSrc.isNumericType() || _typeSrc.IsPredefined && _typeSrc.PredefinedType == PredefinedType.PT_CHAR)
                 {
                     // Transform constant to constant.
                     if (_exprSrc.GetConst() != null)
@@ -565,7 +565,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest);
                     return AggCastResult.Success;
                 }
-                else if (_typeSrc.isPredefined() &&
+                else if (_typeSrc.IsPredefined &&
                          (_typeSrc.isPredefType(PredefinedType.PT_OBJECT) || _typeSrc.isPredefType(PredefinedType.PT_VALUE) || _typeSrc.isPredefType(PredefinedType.PT_ENUM)))
                 {
                     if (_needsExprDest)
@@ -593,9 +593,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 AggregateSymbol aggDest = aggTypeDest.OwningAggregate;
 
-                Debug.Assert(_typeSrc.isPredefined() && aggDest.IsPredefined());
+                Debug.Assert(_typeSrc.IsPredefined && aggDest.IsPredefined());
 
-                PredefinedType ptSrc = _typeSrc.getPredefType();
+                PredefinedType ptSrc = _typeSrc.PredefinedType;
                 PredefinedType ptDest = aggDest.GetPredefType();
 
                 Debug.Assert((int)ptSrc < NUM_SIMPLE_TYPES && (int)ptDest < NUM_SIMPLE_TYPES);

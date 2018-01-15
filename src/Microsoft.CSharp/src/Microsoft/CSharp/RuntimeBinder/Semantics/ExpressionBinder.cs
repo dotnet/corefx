@@ -1132,7 +1132,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // If we're invoking code on a struct-valued field, mark the struct as assigned (to
                 // avoid warning CS0649).
                 if (pObject is ExprField field && !field.FieldWithType.Field().isAssigned && !(swt.Sym is FieldSymbol) &&
-                    typeObj.isStructType() && !typeObj.isPredefined())
+                    typeObj.isStructType() && !typeObj.IsPredefined)
                 {
                     field.FieldWithType.Field().isAssigned = true;
                 }

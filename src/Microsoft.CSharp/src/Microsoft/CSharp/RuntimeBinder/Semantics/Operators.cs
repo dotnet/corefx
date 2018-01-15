@@ -1276,7 +1276,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             ppResult = null;
             CType pArgumentType = pArgument.Type;
             CType pRawType = pArgumentType.StripNubs();
-            PredefinedType ptRaw = pRawType.isPredefined() ? pRawType.getPredefType() : PredefinedType.PT_COUNT;
+            PredefinedType ptRaw = pRawType.IsPredefined ? pRawType.PredefinedType : PredefinedType.PT_COUNT;
 
             // Find all applicable operator signatures.
             // First check for special ones (enum, ptr) and check for user defined ops.
@@ -1370,8 +1370,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             CType pArgumentType = pArgument.Type;
             CType pRawType = pArgumentType.StripNubs();
-            PredefinedType pt = pArgumentType.isPredefined() ? pArgumentType.getPredefType() : PredefinedType.PT_COUNT;
-            PredefinedType ptRaw = pRawType.isPredefined() ? pRawType.getPredefType() : PredefinedType.PT_COUNT;
+            PredefinedType pt = pArgumentType.IsPredefined ? pArgumentType.PredefinedType : PredefinedType.PT_COUNT;
+            PredefinedType ptRaw = pRawType.IsPredefined ? pRawType.PredefinedType : PredefinedType.PT_COUNT;
 
             for (int index = 0; index < g_rguos.Length; index++)
             {
@@ -1538,8 +1538,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         */
         private ExprOperator BindIntBinOp(ExpressionKind ek, EXPRFLAG flags, Expr arg1, Expr arg2)
         {
-            Debug.Assert(arg1.Type.isPredefined() && arg2.Type.isPredefined() && arg1.Type.getPredefType() == arg2.Type.getPredefType());
-            return BindIntOp(ek, flags, arg1, arg2, arg1.Type.getPredefType());
+            Debug.Assert(arg1.Type.IsPredefined && arg2.Type.IsPredefined && arg1.Type.PredefinedType == arg2.Type.PredefinedType);
+            return BindIntOp(ek, flags, arg1, arg2, arg1.Type.PredefinedType);
         }
 
 
@@ -1548,8 +1548,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         */
         private ExprOperator BindIntUnaOp(ExpressionKind ek, EXPRFLAG flags, Expr arg)
         {
-            Debug.Assert(arg.Type.isPredefined());
-            return BindIntOp(ek, flags, arg, null, arg.Type.getPredefType());
+            Debug.Assert(arg.Type.IsPredefined);
+            return BindIntOp(ek, flags, arg, null, arg.Type.PredefinedType);
         }
 
 
@@ -1558,7 +1558,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         */
         private ExprOperator BindRealBinOp(ExpressionKind ek, EXPRFLAG _, Expr arg1, Expr arg2)
         {
-            Debug.Assert(arg1.Type.isPredefined() && arg2.Type.isPredefined() && arg1.Type.getPredefType() == arg2.Type.getPredefType());
+            Debug.Assert(arg1.Type.IsPredefined && arg2.Type.IsPredefined && arg1.Type.PredefinedType == arg2.Type.PredefinedType);
             return bindFloatOp(ek, arg1, arg2);
         }
 
@@ -1568,7 +1568,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         */
         private ExprOperator BindRealUnaOp(ExpressionKind ek, EXPRFLAG _, Expr arg)
         {
-            Debug.Assert(arg.Type.isPredefined());
+            Debug.Assert(arg.Type.IsPredefined);
             return bindFloatOp(ek, arg, null);
         }
 
@@ -1801,10 +1801,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private ExprBinOp BindShiftOp(ExpressionKind ek, EXPRFLAG flags, Expr arg1, Expr arg2)
         {
             Debug.Assert(ek == ExpressionKind.LeftShirt || ek == ExpressionKind.RightShift);
-            Debug.Assert(arg1.Type.isPredefined());
+            Debug.Assert(arg1.Type.IsPredefined);
             Debug.Assert(arg2.Type.isPredefType(PredefinedType.PT_INT));
 
-            PredefinedType ptOp = arg1.Type.getPredefType();
+            PredefinedType ptOp = arg1.Type.PredefinedType;
             Debug.Assert(ptOp == PredefinedType.PT_INT || ptOp == PredefinedType.PT_UINT || ptOp == PredefinedType.PT_LONG || ptOp == PredefinedType.PT_ULONG);
 
             return GetExprFactory().CreateBinop(ek, arg1.Type, arg1, arg2);

@@ -312,14 +312,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             if (!(type1 is NullableType nub1) || !(type2 is NullableType nub2) ||
-                !nub1.UnderlyingType.isPredefined() ||
-                !nub2.UnderlyingType.isPredefined())
+                !nub1.UnderlyingType.IsPredefined ||
+                !nub2.UnderlyingType.IsPredefined)
             {
                 return BetterType.Neither;
             }
 
-            PredefinedType pt1 = (type1 as NullableType).UnderlyingType.getPredefType();
-            PredefinedType pt2 = (type2 as NullableType).UnderlyingType.getPredefType();
+            PredefinedType pt1 = (type1 as NullableType).UnderlyingType.PredefinedType;
+            PredefinedType pt2 = (type2 as NullableType).UnderlyingType.PredefinedType;
 
             if ((int)pt1 < NUM_EXT_TYPES && (int)pt2 < NUM_EXT_TYPES)
             {

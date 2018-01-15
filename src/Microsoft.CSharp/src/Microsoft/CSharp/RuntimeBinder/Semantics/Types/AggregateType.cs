@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
@@ -170,6 +171,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public override bool IsValueType => OwningAggregate.IsValueType();
 
         public override bool IsStaticClass => OwningAggregate.IsStatic();
+
+        public override bool IsPredefined => OwningAggregate.IsPredefined();
+
+        public override PredefinedType PredefinedType
+        {
+            get
+            {
+                Debug.Assert(IsPredefined);
+                return OwningAggregate.GetPredefType();
+            }
+        }
     }
 }
-
