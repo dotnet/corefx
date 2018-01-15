@@ -618,7 +618,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             bool fIntPtrOverride2 = false;
 
             // Get the list of operators from the source.
-            if (typeSrcBase is AggregateType atSrcBase && atSrcBase.getAggregate().HasConversion(GetSymbolLoader()))
+            if (typeSrcBase is AggregateType atSrcBase && atSrcBase.OwningAggregate.HasConversion(GetSymbolLoader()))
             {
                 rgats[cats++] = atSrcBase;
                 fIntPtrOverride2 = atSrcBase.isPredefType(PredefinedType.PT_INTPTR) || atSrcBase.isPredefType(PredefinedType.PT_UINTPTR);
@@ -627,7 +627,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Get the list of operators from the destination.
             if (typeDstBase is AggregateType atDstBase)
             {
-                if (typeDstBase.getAggregate().HasConversion(GetSymbolLoader()))
+                if (atDstBase.OwningAggregate.HasConversion(GetSymbolLoader()))
                 {
                     rgats[cats++] = atDstBase;
                 }
@@ -660,9 +660,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // In the first pass if we find types that are non-comparable, keep one of the types and keep going.
             for (int iats = 0; iats < cats; iats++)
             {
-                for (AggregateType atsCur = rgats[iats]; atsCur != null && atsCur.getAggregate().HasConversion(GetSymbolLoader()); atsCur = atsCur.GetBaseClass())
+                for (AggregateType atsCur = rgats[iats]; atsCur != null && atsCur.OwningAggregate.HasConversion(GetSymbolLoader()); atsCur = atsCur.GetBaseClass())
                 {
-                    AggregateSymbol aggCur = atsCur.getAggregate();
+                    AggregateSymbol aggCur = atsCur.OwningAggregate;
 
                     // We need to replicate behavior that allows non-standard conversions with these guys.
                     PredefinedType aggPredefType = aggCur.GetPredefType();

@@ -1295,7 +1295,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         if (unaryOpKind == UnaOpKind.Tilde)
                         {
                             pSignatures.Add(new UnaOpFullSig(
-                                    pArgumentType.getAggregate().GetUnderlyingType(),
+                                    ((AggregateType)pArgumentType).OwningAggregate.GetUnderlyingType(),
                                     BindEnumUnaOp,
                                     LiftFlags.None,
                                     UnaOpFuncKind.EnumUnaOp));
@@ -1305,7 +1305,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // For enums, we want to add the signature as the underlying type so that we'll
                             // perform the conversions to and from the enum type.
                             pSignatures.Add(new UnaOpFullSig(
-                                    pArgumentType.getAggregate().GetUnderlyingType(),
+                                    ((AggregateType)pArgumentType).OwningAggregate.GetUnderlyingType(),
                                     null,
                                     LiftFlags.None,
                                     UnaOpFuncKind.None));
@@ -2357,7 +2357,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         break;
                     case TypeKind.TK_AggregateType:
                         AggregateType ats = (AggregateType)type;
-                        if ((ats.isClassType() || ats.isStructType()) && !ats.getAggregate().IsSkipUDOps())
+                        if ((ats.isClassType() || ats.isStructType()) && !ats.OwningAggregate.IsSkipUDOps())
                         {
                             return ats;
                         }
@@ -2478,9 +2478,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Name name = ekName(ek);
             Debug.Assert(name != null);
             bool foundSome = false;
-            for (MethodSymbol methCur = GetSymbolLoader().LookupAggMember(name, type.getAggregate(), symbmask_t.MASK_MethodSymbol) as MethodSymbol;
+            for (MethodSymbol methCur = GetSymbolLoader().LookupAggMember(name, type.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol;
                 methCur != null;
-                methCur = SymbolLoader.LookupNextSym(methCur, type.getAggregate(), symbmask_t.MASK_MethodSymbol) as MethodSymbol)
+                methCur = SymbolLoader.LookupNextSym(methCur, type.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol)
             {
                 if (UserDefinedBinaryOperatorIsApplicable(candidateList, ek, methCur, type, arg1, arg2, fDontLift))
                 {

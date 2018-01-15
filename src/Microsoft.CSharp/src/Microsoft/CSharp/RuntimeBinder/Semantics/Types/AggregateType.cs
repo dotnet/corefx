@@ -119,7 +119,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         yield return iface;
                     }
 
-                    yield return getAggregate().GetTypeManager().ObjectAggregateType;
+                    yield return OwningAggregate.GetTypeManager().ObjectAggregateType;
                 }
                 else
                 {
@@ -137,11 +137,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeArray GetIfacesAll()
         {
-            if (_ifacesAll == null)
-            {
-                _ifacesAll = getAggregate().GetTypeManager().SubstTypeArray(getAggregate().GetIfacesAll(), TypeArgsAll);
-            }
-            return _ifacesAll;
+            return _ifacesAll ?? (_ifacesAll = OwningAggregate.GetTypeManager()
+                       .SubstTypeArray(OwningAggregate.GetIfacesAll(), TypeArgsAll));
         }
 
         public TypeArray GetWinRTCollectionIfacesAll(SymbolLoader pSymbolLoader)

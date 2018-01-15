@@ -206,7 +206,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     CType cType = GetCTypeFromType(type);
                     if (!(cType is AggregateType aggType))
                         continue;
-                    AggregateSymbol aggregate = aggType.getAggregate();
+                    AggregateSymbol aggregate = aggType.OwningAggregate;
                     FieldSymbol addedField = null;
 
                     // We need to add fields before the actual events, so do the first iteration
@@ -1823,7 +1823,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // the methods in order. As such, our parent methods should be in the
                 // symbol table at this point.
 
-                AggregateSymbol aggregate = GetCTypeFromType(baseMethodInfo.DeclaringType).getAggregate();
+                AggregateSymbol aggregate = ((AggregateType)GetCTypeFromType(baseMethodInfo.DeclaringType)).OwningAggregate;
                 MethodSymbol baseMethod = FindMethodFromMemberInfo(baseMethodInfo);
                 Debug.Assert(baseMethod != null);
                 return new SymWithType(baseMethod, aggregate.getThisType());
@@ -1838,7 +1838,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             CType t = GetCTypeFromType(baseMemberInfo.DeclaringType);
             Debug.Assert(t is AggregateType);
-            AggregateSymbol aggregate = t.getAggregate();
+            AggregateSymbol aggregate = ((AggregateType)t).OwningAggregate;
             Debug.Assert(aggregate != null);
 
             MethodSymbol meth = _semanticChecker.SymbolLoader.LookupAggMember(
@@ -1914,7 +1914,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             Debug.Assert(t is AggregateType);
-            AggregateSymbol aggregate = ((AggregateType)t).getAggregate();
+            AggregateSymbol aggregate = ((AggregateType)t).OwningAggregate;
 
             // Now find all the conversions and make them.
             foreach (MethodInfo conversion in type.GetRuntimeMethods())

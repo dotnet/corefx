@@ -533,7 +533,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // below. They could be relevant if we had user-defined conversions on
                 // generic types.
 
-                AggregateSymbol aggSrc = aggTypeSrc.getAggregate();
+                AggregateSymbol aggSrc = aggTypeSrc.OwningAggregate;
                 if (aggSrc.IsEnum())
                 {
                     return bindImplicitConversionFromEnum(aggTypeSrc);
@@ -576,7 +576,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
                 EXPRFLAG flags = 0x00;
-                if (pSource.getAggregate().IsStruct() && _typeDest.fundType() == FUNDTYPE.FT_REF)
+                if (pSource.OwningAggregate.IsStruct() && _typeDest.fundType() == FUNDTYPE.FT_REF)
                 {
                     flags = EXPRFLAG.EXF_BOX | EXPRFLAG.EXF_CANTBENULL;
                 }
@@ -634,7 +634,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // Note: Don't use GetConst here since the conversion only applies to bona-fide compile time constants.
                 if (
-                    aggTypeSrc.getAggregate().GetPredefType() != PredefinedType.PT_BOOL &&
+                    aggTypeSrc.OwningAggregate.GetPredefType() != PredefinedType.PT_BOOL &&
                     _exprSrc != null &&
                     _exprSrc.IsZero() &&
                     _exprSrc.Type.isNumericType() &&
@@ -657,7 +657,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             private bool bindImplicitConversionBetweenSimpleTypes(AggregateType aggTypeSrc)
             {
-                AggregateSymbol aggSrc = aggTypeSrc.getAggregate();
+                AggregateSymbol aggSrc = aggTypeSrc.OwningAggregate;
                 Debug.Assert(aggSrc.getThisType().isSimpleType());
                 Debug.Assert(_typeDest.isSimpleType());
 

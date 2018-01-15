@@ -113,9 +113,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // Loop through symbols.
             Symbol symCur;
-            for (symCur = GetSymbolLoader().LookupAggMember(_name, typeCur.getAggregate(), symbmask_t.MASK_ALL);
+            for (symCur = GetSymbolLoader().LookupAggMember(_name, typeCur.OwningAggregate, symbmask_t.MASK_ALL);
                  symCur != null;
-                 symCur = SymbolLoader.LookupNextSym(symCur, typeCur.getAggregate(), symbmask_t.MASK_ALL))
+                 symCur = SymbolLoader.LookupNextSym(symCur, typeCur.OwningAggregate, symbmask_t.MASK_ALL))
             {
                 // Check for arity.
                 switch (symCur.getKind())
@@ -668,9 +668,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if ((_flags & MemLookFlags.Ctor) != 0)
             {
+                Debug.Assert(_typeSrc is AggregateType);
                 return _arity > 0
-                    ? GetErrorContext().Error(ErrorCode.ERR_BadCtorArgCount, _typeSrc.getAggregate(), _arity)
-                    : GetErrorContext().Error(ErrorCode.ERR_NoConstructors, _typeSrc.getAggregate());
+                    ? GetErrorContext().Error(ErrorCode.ERR_BadCtorArgCount, ((AggregateType)_typeSrc).OwningAggregate, _arity)
+                    : GetErrorContext().Error(ErrorCode.ERR_NoConstructors, ((AggregateType)_typeSrc).OwningAggregate);
             }
 
             if ((_flags & MemLookFlags.Operator) != 0)

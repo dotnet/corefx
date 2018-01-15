@@ -104,8 +104,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // * From any interface-type S to any interface-type T, provided S is not derived from T.
                 if (typeSrc is AggregateType atSrc && typeDst is AggregateType atDst)
                 {
-                    AggregateSymbol aggSrc = atSrc.getAggregate();
-                    AggregateSymbol aggDest = atDst.getAggregate();
+                    AggregateSymbol aggSrc = atSrc.OwningAggregate;
+                    AggregateSymbol aggDest = atDst.OwningAggregate;
 
                     if ((aggSrc.IsClass() && !aggSrc.IsSealed() && aggDest.IsInterface()) ||
                         (aggSrc.IsInterface() && aggDest.IsClass() && !aggDest.IsSealed()) ||
@@ -147,9 +147,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     AggregateSymbol aggIReadOnlyList = loader.GetPredefAgg(PredefinedType.PT_G_IREADONLYLIST);
 
                     if ((aggIList == null ||
-                        !SymbolLoader.IsBaseAggregate(aggIList, aggDst.getAggregate())) &&
+                        !SymbolLoader.IsBaseAggregate(aggIList, aggDst.OwningAggregate)) &&
                         (aggIReadOnlyList == null ||
-                        !SymbolLoader.IsBaseAggregate(aggIReadOnlyList, aggDst.getAggregate())))
+                        !SymbolLoader.IsBaseAggregate(aggIReadOnlyList, aggDst.OwningAggregate)))
                     {
                         return false;
                     }
@@ -178,9 +178,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     AggregateSymbol aggIReadOnlyList = loader.GetPredefAgg(PredefinedType.PT_G_IREADONLYLIST);
 
                     if ((aggIList == null ||
-                        !SymbolLoader.IsBaseAggregate(aggIList, aggtypeSrc.getAggregate())) &&
+                        !SymbolLoader.IsBaseAggregate(aggIList, aggtypeSrc.OwningAggregate)) &&
                         (aggIReadOnlyList == null ||
-                        !SymbolLoader.IsBaseAggregate(aggIReadOnlyList, aggtypeSrc.getAggregate())))
+                        !SymbolLoader.IsBaseAggregate(aggIReadOnlyList, aggtypeSrc.OwningAggregate)))
                     {
                         return false;
                     }
@@ -223,19 +223,23 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             o If type parameter Xi is declared to be contravariant ("in") then either Si must be identical to Ti, 
               or Si and Ti must both be reference types.
         ***************************************************************************************************/
-        public static bool HasGenericDelegateExplicitReferenceConversion(SymbolLoader loader, CType pSource, CType pTarget)
+        public static bool HasGenericDelegateExplicitReferenceConversion(SymbolLoader loader, CType source, CType target) =>
+            target is AggregateType aggTarget && HasGenericDelegateExplicitReferenceConversion(loader, source, aggTarget);
+
+        public static bool HasGenericDelegateExplicitReferenceConversion(SymbolLoader loader, CType pSource, AggregateType pTarget)
         {
-            if (!pSource.isDelegateType() ||
+            if (!(pSource is AggregateType aggSrc) ||
+                !aggSrc.isDelegateType() ||
                 !pTarget.isDelegateType() ||
-                pSource.getAggregate() != pTarget.getAggregate() ||
-                loader.HasIdentityOrImplicitReferenceConversion(pSource, pTarget))
+                aggSrc.OwningAggregate != pTarget.OwningAggregate ||
+                loader.HasIdentityOrImplicitReferenceConversion(aggSrc, pTarget))
             {
                 return false;
             }
 
-            TypeArray pTypeParams = pSource.getAggregate().GetTypeVarsAll();
-            TypeArray pSourceArgs = ((AggregateType)pSource).TypeArgsAll;
-            TypeArray pTargetArgs = ((AggregateType)pTarget).TypeArgsAll;
+            TypeArray pTypeParams = aggSrc.OwningAggregate.GetTypeVarsAll();
+            TypeArray pSourceArgs = aggSrc.TypeArgsAll;
+            TypeArray pTargetArgs = pTarget.TypeArgsAll;
 
             Debug.Assert(pTypeParams.Count == pSourceArgs.Count);
             Debug.Assert(pTypeParams.Count == pTargetArgs.Count);

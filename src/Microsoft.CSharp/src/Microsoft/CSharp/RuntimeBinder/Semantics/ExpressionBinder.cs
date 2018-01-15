@@ -508,7 +508,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         internal Expr BindToField(Expr pOptionalObject, FieldWithType fwt, BindingFlag bindFlags)
         {
-            Debug.Assert(fwt.GetType() != null && fwt.Field().getClass() == fwt.GetType().getAggregate());
+            Debug.Assert(fwt.GetType() != null && fwt.Field().getClass() == fwt.GetType().OwningAggregate);
 
             CType pFieldType = GetTypes().SubstType(fwt.Field().GetType(), fwt.GetType());
             pOptionalObject = AdjustMemberObject(fwt, pOptionalObject, out _);
@@ -549,7 +549,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         getOrCreateMethodName.Text, null, fieldType.AssociatedSystemType);
                 MethodSymbol getOrCreateMethod =
                     GetSymbolLoader()
-                        .LookupAggMember(getOrCreateMethodName, fieldType.getAggregate(), symbmask_t.MASK_MethodSymbol)
+                        .LookupAggMember(getOrCreateMethodName, fieldType.OwningAggregate, symbmask_t.MASK_MethodSymbol)
                          as MethodSymbol;
 
                 MethPropWithInst getOrCreatempwi = new MethPropWithInst(getOrCreateMethod, fieldType);
@@ -587,7 +587,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(pwt.Sym is PropertySymbol &&
                     pwt.GetType() != null &&
-                    pwt.Prop().getClass() == pwt.GetType().getAggregate());
+                    pwt.Prop().getClass() == pwt.GetType().OwningAggregate);
             Debug.Assert(pwt.Prop().Params.Count == 0 || pwt.Prop() is IndexerSymbol);
 
             bool fConstrained;
@@ -683,7 +683,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     typeSrc = typeSrc.StripNubs();
                     goto LAgain;
                 case TypeKind.TK_AggregateType:
-                    if (!typeSrc.isClassType() && !typeSrc.isStructType() || ((AggregateType)typeSrc).getAggregate().IsSkipUDOps())
+                    if (!typeSrc.isClassType() && !typeSrc.isStructType() || ((AggregateType)typeSrc).OwningAggregate.IsSkipUDOps())
                         return null;
                     break;
                 default:
@@ -703,8 +703,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // Find the next operator.
                 methCur = methCur == null
-                    ? GetSymbolLoader().LookupAggMember(pName, atsCur.getAggregate(), symbmask_t.MASK_MethodSymbol) as MethodSymbol
-                    : SymbolLoader.LookupNextSym(methCur, atsCur.getAggregate(), symbmask_t.MASK_MethodSymbol) as MethodSymbol;
+                    ? GetSymbolLoader().LookupAggMember(pName, atsCur.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol
+                    : SymbolLoader.LookupNextSym(methCur, atsCur.OwningAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol;
 
                 if (methCur == null)
                 {
@@ -1073,7 +1073,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private Expr AdjustMemberObject(SymWithType swt, Expr pObject, out bool pfConstrained)
         {
             // Assert that the type is present and is an instantiation of the member's parent.
-            Debug.Assert(swt.GetType() != null && swt.GetType().getAggregate() == swt.Sym.parent as AggregateSymbol);
+            Debug.Assert(swt.GetType() != null && swt.GetType().OwningAggregate == swt.Sym.parent as AggregateSymbol);
             bool bIsMatchingStatic = IsMatchingStatic(swt, pObject);
             pfConstrained = false;
 
@@ -1127,7 +1127,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (typeObj is TypeParameterType || typeObj is AggregateType)
             {
                 AggregateSymbol aggCalled = swt.Sym.parent as AggregateSymbol;
-                Debug.Assert(swt.GetType().getAggregate() == aggCalled);
+                Debug.Assert(swt.GetType().OwningAggregate == aggCalled);
 
                 // If we're invoking code on a struct-valued field, mark the struct as assigned (to
                 // avoid warning CS0649).

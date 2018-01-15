@@ -32,7 +32,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ACCESSERROR CheckAccess2(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
         {
             Debug.Assert(symCheck != null);
-            Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.getAggregate());
+            Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.OwningAggregate);
             Debug.Assert(typeThru == null ||
                    typeThru is AggregateType ||
                    typeThru is TypeParameterType ||
@@ -139,7 +139,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private ACCESSERROR CheckAccessCore(Symbol symCheck, AggregateType atsCheck, Symbol symWhere, CType typeThru)
         {
             Debug.Assert(symCheck != null);
-            Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.getAggregate());
+            Debug.Assert(atsCheck == null || symCheck.parent == atsCheck.OwningAggregate);
             Debug.Assert(typeThru == null ||
                    typeThru is AggregateType ||
                    typeThru is TypeParameterType ||
@@ -263,7 +263,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     // agg or a CType derived from an instantiation of agg. In this case
                     // all that matters is that agg is in the base AggregateSymbol chain of atsThru. The
                     // actual AGGTYPESYMs involved don't matter.
-                    if (atsThru == null || atsThru.getAggregate().FindBaseAgg(agg))
+                    if (atsThru == null || atsThru.OwningAggregate.FindBaseAgg(agg))
                     {
                         return ACCESSERROR.ACCESSERROR_NOERROR;
                     }

@@ -109,7 +109,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public AggregateType GetAggregate(AggregateSymbol agg, AggregateType atsOuter, TypeArray typeArgs)
         {
             Debug.Assert(agg.GetTypeManager() == this);
-            Debug.Assert(atsOuter == null || atsOuter.getAggregate() == agg.Parent, "");
+            Debug.Assert(atsOuter == null || atsOuter.OwningAggregate == agg.Parent, "");
 
             if (typeArgs == null)
             {
@@ -127,7 +127,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _typeTable.InsertAggregate(agg, atsOuter, typeArgs, pAggregate);
             }
 
-            Debug.Assert(pAggregate.getAggregate() == agg);
+            Debug.Assert(pAggregate.OwningAggregate == agg);
             Debug.Assert(pAggregate.TypeArgsThis != null && pAggregate.TypeArgsAll != null);
             Debug.Assert(pAggregate.TypeArgsThis == typeArgs);
 
@@ -272,7 +272,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 TypeArray typeArgs = SubstTypeArray(args, ctx);
                 if (args != typeArgs)
                 {
-                    return GetAggregate(type.getAggregate(), typeArgs);
+                    return GetAggregate(type.OwningAggregate, typeArgs);
                 }
             }
 
@@ -438,7 +438,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     { // BLOCK
                         AggregateType atsSrc = (AggregateType)typeSrc;
 
-                        if (atsSrc.getAggregate() != atsDst.getAggregate())
+                        if (atsSrc.OwningAggregate != atsDst.OwningAggregate)
                             return false;
 
                         Debug.Assert(atsSrc.TypeArgsAll.Count == atsDst.TypeArgsAll.Count);

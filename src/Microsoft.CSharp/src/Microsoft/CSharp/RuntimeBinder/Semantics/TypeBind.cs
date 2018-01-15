@@ -63,7 +63,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            TypeArray typeVars = ats.getAggregate().GetTypeVars();
+            TypeArray typeVars = ats.OwningAggregate.GetTypeVars();
             TypeArray typeArgsThis = ats.TypeArgsThis;
             TypeArray typeArgsAll = ats.TypeArgsAll;
 
@@ -84,7 +84,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             if (typeVars.Count > 0)
-                ats.fConstraintError |= !CheckConstraintsCore(checker, errHandling, ats.getAggregate(), typeVars, typeArgsThis, typeArgsAll, null, (flags & CheckConstraintsFlags.NoErrors));
+                ats.fConstraintError |= !CheckConstraintsCore(checker, errHandling, ats.OwningAggregate, typeVars, typeArgsThis, typeArgsAll, null, (flags & CheckConstraintsFlags.NoErrors));
 
             // Now check type args themselves.
             for (int i = 0; i < typeArgsThis.Count; i++)
@@ -106,7 +106,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(mwi.Meth() != null && mwi.GetType() != null && mwi.TypeArgs != null);
             Debug.Assert(mwi.Meth().typeVars.Count == mwi.TypeArgs.Count);
-            Debug.Assert(mwi.GetType().getAggregate() == mwi.Meth().getClass());
+            Debug.Assert(mwi.GetType().OwningAggregate == mwi.Meth().getClass());
 
             if (mwi.TypeArgs.Count > 0)
             {
@@ -257,7 +257,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (arg.isClassType())
             {
-                AggregateSymbol agg = ((AggregateType)arg).getAggregate();
+                AggregateSymbol agg = ((AggregateType)arg).OwningAggregate;
 
                 // Due to late binding nature of IDE created symbols, the AggregateSymbol might not
                 // have all the information necessary yet, if it is not fully bound.
