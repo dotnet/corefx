@@ -40,6 +40,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public override bool IsReferenceType => true;
+
+        public override bool IsUnsafe() => BaseElementType is PointerType;
     }
 }
 

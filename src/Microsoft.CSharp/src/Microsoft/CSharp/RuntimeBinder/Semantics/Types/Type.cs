@@ -394,12 +394,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return this is PointerType;
             }
         }
-        public bool isUnsafe()
-        {
-            // Pointer types are the only unsafe types.
-            // Note that generics may not be instantiated with pointer types
-            return this is PointerType || this is ArrayType arr && arr.BaseElementType.isUnsafe();
-        }
+
+        // Pointer types (or arrays of them) are the only unsafe types.
+        // Note that generics may not be instantiated with pointer types
+        public virtual bool IsUnsafe() => false;
 
         public virtual bool IsPredefType(PredefinedType pt) => false;
 

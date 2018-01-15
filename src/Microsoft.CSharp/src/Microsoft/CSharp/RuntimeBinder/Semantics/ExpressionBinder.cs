@@ -1784,7 +1784,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private void checkUnsafe(CType type)
         {
-            if (type == null || type.isUnsafe())
+            if (type == null || type.IsUnsafe())
             {
                 throw ErrorContext.Error(ErrorCode.ERR_UnsafeNeeded);
             }

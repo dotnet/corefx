@@ -13,5 +13,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public CType ReferentType { get; }
+
+        public override bool IsUnsafe() => true;
     }
 }
