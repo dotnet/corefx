@@ -33,47 +33,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // one of the integral/float types (includes enums with that underlying type)
         // reference type
         // struct/value type
-        public FUNDTYPE fundType()
-        {
-            switch (TypeKind)
-            {
-                case Semantics.TypeKind.TK_AggregateType:
-                    {
-                        AggregateSymbol sym = ((AggregateType)this).OwningAggregate;
+        public virtual FUNDTYPE FundamentalType => FUNDTYPE.FT_NONE;
 
-                        // Treat enums like their underlying types.
-                        if (sym.IsEnum())
-                        {
-                            sym = sym.GetUnderlyingType().OwningAggregate;
-                        }
-
-                        if (sym.IsStruct())
-                        {
-                            // Struct type could be predefined (int, long, etc.) or some other struct.
-                            if (sym.IsPredefined())
-                                return PredefinedTypeFacts.GetFundType(sym.GetPredefType());
-                            return FUNDTYPE.FT_STRUCT;
-                        }
-                        return FUNDTYPE.FT_REF;  // Interfaces, classes, delegates are reference types.
-                    }
-
-                case Semantics.TypeKind.TK_TypeParameterType:
-                    return FUNDTYPE.FT_VAR;
-
-                case Semantics.TypeKind.TK_ArrayType:
-                case Semantics.TypeKind.TK_NullType:
-                    return FUNDTYPE.FT_REF;
-
-                case Semantics.TypeKind.TK_PointerType:
-                    return FUNDTYPE.FT_PTR;
-
-                case Semantics.TypeKind.TK_NullableType:
-                    return FUNDTYPE.FT_STRUCT;
-
-                default:
-                    return FUNDTYPE.FT_NONE;
-            }
-        }
         public ConstValKind constValKind()
         {
             if (isPointerLike())
@@ -81,7 +42,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return ConstValKind.IntPtr;
             }
 
-            switch (fundType())
+            switch (FundamentalType)
             {
                 case FUNDTYPE.FT_I8:
                 case FUNDTYPE.FT_U8:

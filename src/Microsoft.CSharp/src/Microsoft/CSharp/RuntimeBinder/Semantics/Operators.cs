@@ -884,8 +884,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 // The reference type equality operators only handle reference types.
-                Debug.Assert(type1.fundType() != FUNDTYPE.FT_VAR);
-                if (type1.fundType() != FUNDTYPE.FT_REF)
+                Debug.Assert(type1.FundamentalType != FUNDTYPE.FT_VAR);
+                if (type1.FundamentalType != FUNDTYPE.FT_REF)
                 {
                     return false;
                 }
@@ -900,8 +900,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else
                 {
-                    Debug.Assert(type2.fundType() != FUNDTYPE.FT_VAR);
-                    if (type2.fundType() != FUNDTYPE.FT_REF)
+                    Debug.Assert(type2.FundamentalType != FUNDTYPE.FT_VAR);
+                    if (type2.FundamentalType != FUNDTYPE.FT_REF)
                     {
                         return false;
                     }
@@ -1111,7 +1111,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 if (nonNub.IsEnumType)
                 {
                     PredefinedType ptOp;
-                    switch (nonNub.fundType())
+                    switch (nonNub.FundamentalType)
                     {
                         case FUNDTYPE.FT_U4:
                             ptOp = PredefinedType.PT_UINT;
@@ -1571,7 +1571,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CheckLvalue(arg, CheckLvalueKind.Increment);
             CType typeRaw = uofs.GetType().StripNubs();
 
-            FUNDTYPE ft = typeRaw.fundType();
+            FUNDTYPE ft = typeRaw.FundamentalType;
             if (ft == FUNDTYPE.FT_R8 || ft == FUNDTYPE.FT_R4)
             {
                 flags &= ~EXPRFLAG.EXF_CHECKOVERFLOW;
@@ -1592,14 +1592,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(ek == ExpressionKind.Add || ek == ExpressionKind.Subtract);
             ConstVal cv;
 
-            if (type.IsEnumType && type.fundType() > FUNDTYPE.FT_LASTINTEGRAL)
+            if (type.IsEnumType && type.FundamentalType > FUNDTYPE.FT_LASTINTEGRAL)
             {
                 // This is an error case when enum derives from an illegal type. Just treat it as an int.
                 type = GetPredefindType(PredefinedType.PT_INT);
             }
 
-            Debug.Assert(type.fundType() != FUNDTYPE.FT_PTR); // Can't have a pointer.
-            switch (type.fundType())
+            Debug.Assert(type.FundamentalType != FUNDTYPE.FT_PTR); // Can't have a pointer.
+            switch (type.FundamentalType)
             {
                 default:
                     Debug.Assert(type.IsPredefType(PredefinedType.PT_DECIMAL));
@@ -1959,7 +1959,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(typeEnum != null);
             PredefinedType ptOp;
 
-            switch (typeEnum.fundType())
+            switch (typeEnum.FundamentalType)
             {
                 default:
                     // Promote all smaller types to int.
@@ -2010,7 +2010,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(typeEnum != null);
             PredefinedType ptOp;
 
-            switch (typeEnum.fundType())
+            switch (typeEnum.FundamentalType)
             {
                 default:
                     // Promote all smaller types to int.
@@ -2057,7 +2057,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             PredefinedType ptOp;
             CType typeEnum = ((ExprCast)arg).Argument.Type;
 
-            switch (typeEnum.fundType())
+            switch (typeEnum.FundamentalType)
             {
                 default:
                     // Promote all smaller types to int.
@@ -2224,7 +2224,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 throw BadOperatorTypesError(op, null);
             }
 
-            if (ptOp == PredefinedType.PT_UINT && op.Type.fundType() == FUNDTYPE.FT_U4)
+            if (ptOp == PredefinedType.PT_UINT && op.Type.FundamentalType == FUNDTYPE.FT_U4)
             {
                 op = mustConvertCore(op, GetPredefindType(PredefinedType.PT_LONG), CONVERTTYPE.NOUDC);
             }

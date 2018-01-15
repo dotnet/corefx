@@ -139,7 +139,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
 
                 // Get the fundamental types of destination.
-                FUNDTYPE ftDest = _typeDest.fundType();
+                FUNDTYPE ftDest = _typeDest.FundamentalType;
                 Debug.Assert(ftDest != FUNDTYPE.FT_NONE || _typeDest is ParameterModifierType);
 
                 switch (_typeSrc.TypeKind)
@@ -395,7 +395,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // null type can be implicitly converted to any reference type or pointer type or type
                 // variable with reference-type constraint.
 
-                FUNDTYPE ftDest = _typeDest.fundType();
+                FUNDTYPE ftDest = _typeDest.FundamentalType;
                 if (ftDest != FUNDTYPE.FT_REF && ftDest != FUNDTYPE.FT_PTR &&
                     // null is convertible to System.Nullable<T>.
                     !_typeDest.IsPredefType(PredefinedType.PT_G_OPTIONAL))
@@ -576,7 +576,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
                 EXPRFLAG flags = 0x00;
-                if (pSource.OwningAggregate.IsStruct() && _typeDest.fundType() == FUNDTYPE.FT_REF)
+                if (pSource.OwningAggregate.IsStruct() && _typeDest.FundamentalType == FUNDTYPE.FT_REF)
                 {
                     flags = EXPRFLAG.EXF_BOX | EXPRFLAG.EXF_CANTBENULL;
                 }

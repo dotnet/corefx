@@ -18,5 +18,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public override bool IsReferenceType => true;
+
+        public override FUNDTYPE FundamentalType => FUNDTYPE.FT_REF;
     }
 }

@@ -371,7 +371,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // * From any pointer-type to any other pointer-type.
                 // * From sbyte, byte, short, ushort, int, uint, long, or ulong to any pointer-type.
 
-                if (_typeSrc is PointerType || _typeSrc.fundType() <= FUNDTYPE.FT_LASTINTEGRAL && _typeSrc.IsNumericType)
+                if (_typeSrc is PointerType || _typeSrc.FundamentalType <= FUNDTYPE.FT_LASTINTEGRAL && _typeSrc.IsNumericType)
                 {
                     if (_needsExprDest)
                         _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest);
@@ -674,15 +674,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     if (_needsExprDest)
                     {
-                        if (aggDest.IsValueType() && aggSrc.getThisType().fundType() == FUNDTYPE.FT_REF)
-                        {
-                            _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest, EXPRFLAG.EXF_UNBOX);
-                        }
-                        else
-                        {
-                            _binder.bindSimpleCast(_exprSrc, _typeDest, out _exprDest, EXPRFLAG.EXF_REFCHECK | (_exprSrc?.Flags & EXPRFLAG.EXF_CANTBENULL ?? 0));
-                        }
+                        _binder.bindSimpleCast(
+                            _exprSrc, _typeDest, out _exprDest,
+                            aggDest.IsValueType() && aggSrc.getThisType().FundamentalType == FUNDTYPE.FT_REF
+                                ? EXPRFLAG.EXF_UNBOX
+                                : EXPRFLAG.EXF_REFCHECK | (_exprSrc?.Flags & EXPRFLAG.EXF_CANTBENULL ?? 0));
                     }
+
                     return AggCastResult.Success;
                 }
 
@@ -706,7 +704,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 //
                 // * From any pointer-type to sbyte, byte, short, ushort, int, uint, long, or ulong.
 
-                if (!(_typeSrc is PointerType) || aggTypeDest.fundType() > FUNDTYPE.FT_LASTINTEGRAL || !aggTypeDest.IsNumericType)
+                if (!(_typeSrc is PointerType) || aggTypeDest.FundamentalType > FUNDTYPE.FT_LASTINTEGRAL || !aggTypeDest.IsNumericType)
                 {
                     return AggCastResult.Failure;
                 }

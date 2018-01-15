@@ -433,7 +433,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // original tree to the cast.
 
             if (exprConst is ExprConstant constant && exprFlags == 0 &&
-                exprSrc.Type.fundType() == typeDest.fundType() &&
+                exprSrc.Type.FundamentalType == typeDest.FundamentalType &&
                 (!exprSrc.Type.IsPredefType(PredefinedType.PT_STRING) || constant.Val.IsNullRef))
             {
                 ExprConstant expr = GetExprFactory().CreateConstant(typeDest, constant.Val);
@@ -1588,8 +1588,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private static bool isConstantInRange(ExprConstant exprSrc, CType typeDest, bool realsOk)
         {
-            FUNDTYPE ftSrc = exprSrc.Type.fundType();
-            FUNDTYPE ftDest = typeDest.fundType();
+            FUNDTYPE ftSrc = exprSrc.Type.FundamentalType;
+            FUNDTYPE ftDest = typeDest.FundamentalType;
 
             if (ftSrc > FUNDTYPE.FT_LASTINTEGRAL || ftDest > FUNDTYPE.FT_LASTINTEGRAL)
             {

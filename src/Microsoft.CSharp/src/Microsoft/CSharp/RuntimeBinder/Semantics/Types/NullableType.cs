@@ -50,5 +50,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public override Type AssociatedSystemType => typeof(Nullable<>).MakeGenericType(UnderlyingType.AssociatedSystemType);
 
         public override CType BaseOrParameterOrElementType => UnderlyingType;
+
+        public override FUNDTYPE FundamentalType => FUNDTYPE.FT_STRUCT;
     }
 }

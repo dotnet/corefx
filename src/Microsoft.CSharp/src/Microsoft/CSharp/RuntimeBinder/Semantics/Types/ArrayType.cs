@@ -55,6 +55,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public override CType BaseOrParameterOrElementType => ElementType;
+
+        public override FUNDTYPE FundamentalType => FUNDTYPE.FT_REF;
     }
 }
-

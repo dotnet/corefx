@@ -60,5 +60,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 ? ((MethodInfo)((MethodSymbol)OwningSymbol).AssociatedMemberInfo).GetGenericArguments()
                 : ((AggregateSymbol)OwningSymbol).AssociatedSystemType.GetGenericArguments()
             )[IndexInOwnParameters];
+
+        public override FUNDTYPE FundamentalType => FUNDTYPE.FT_VAR;
     }
 }

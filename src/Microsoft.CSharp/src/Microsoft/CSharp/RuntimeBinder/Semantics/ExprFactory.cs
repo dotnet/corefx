@@ -113,9 +113,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return CreateConstant(type, ConstVal.Get(Activator.CreateInstance(type.AssociatedSystemType)));
             }
 
-            Debug.Assert(type.fundType() > FUNDTYPE.FT_NONE);
-            Debug.Assert(type.fundType() < FUNDTYPE.FT_COUNT);
-            switch (type.fundType())
+            Debug.Assert(type.FundamentalType > FUNDTYPE.FT_NONE);
+            Debug.Assert(type.FundamentalType < FUNDTYPE.FT_COUNT);
+            switch (type.FundamentalType)
             {
                 case FUNDTYPE.FT_PTR:
                     {

@@ -23,5 +23,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public override CType BaseOrParameterOrElementType => ReferentType;
 
         public override bool IsUnsigned => true;
+
+        public override FUNDTYPE FundamentalType => FUNDTYPE.FT_PTR;
     }
 }

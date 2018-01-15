@@ -360,8 +360,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // For certain situations, try to give a better error.
 
-            FUNDTYPE ftSrc = expr.Type.fundType();
-            FUNDTYPE ftDest = dest.fundType();
+            FUNDTYPE ftSrc = expr.Type.FundamentalType;
+            FUNDTYPE ftDest = dest.FundamentalType;
 
             if (expr is ExprConstant constant &&
                 expr.Type.IsSimpleType && dest.IsSimpleType)
@@ -375,7 +375,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            if (expr.Type is NullType && dest.fundType() != FUNDTYPE.FT_REF)
+            if (expr.Type is NullType && dest.FundamentalType != FUNDTYPE.FT_REF)
             {
                 throw ErrorContext.Error(ErrorCode.ERR_ValueCantBeNull, dest);
             }
@@ -440,7 +440,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (simpleConstToSimpleDestination)
             {
-                FUNDTYPE exprType = expr.Type.fundType();
+                FUNDTYPE exprType = expr.Type.FundamentalType;
                 if (exprType == FUNDTYPE.FT_STRUCT)
                 {
                     // We have a constant decimal that is out of range of the destination type.
@@ -477,7 +477,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            if (expr.Type is NullType && dest.fundType() != FUNDTYPE.FT_REF)
+            if (expr.Type is NullType && dest.FundamentalType != FUNDTYPE.FT_REF)
             {
                 throw ErrorContext.Error(ErrorCode.ERR_ValueCantBeNull, dest);
             }
@@ -707,8 +707,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             FUNDTYPE ftFrom;
                             FUNDTYPE ftTo;
 
-                            if ((ftTo = typeTo.fundType()) <= FUNDTYPE.FT_LASTNUMERIC && ftTo > FUNDTYPE.FT_NONE &&
-                                (ftFrom = typeFrom.fundType()) <= FUNDTYPE.FT_LASTNUMERIC && ftFrom > FUNDTYPE.FT_NONE)
+                            if ((ftTo = typeTo.FundamentalType) <= FUNDTYPE.FT_LASTNUMERIC && ftTo > FUNDTYPE.FT_NONE &&
+                                (ftFrom = typeFrom.FundamentalType) <= FUNDTYPE.FT_LASTNUMERIC && ftFrom > FUNDTYPE.FT_NONE)
                             {
                                 continue;
                             }
@@ -1084,8 +1084,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             pexprDest = null;
             long valueInt = 0;
             double valueFlt = 0;
-            FUNDTYPE ftSrc = exprSrc.Type.fundType();
-            FUNDTYPE ftDest = typeDest.fundType();
+            FUNDTYPE ftSrc = exprSrc.Type.FundamentalType;
+            FUNDTYPE ftDest = typeDest.FundamentalType;
             bool srcIntegral = (ftSrc <= FUNDTYPE.FT_LASTINTEGRAL);
             bool srcNumeric = (ftSrc <= FUNDTYPE.FT_LASTNUMERIC);
 
@@ -1123,7 +1123,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Get the source constant value into valueInt or valueFlt.
             if (srcIntegral)
             {
-                if (constSrc.Type.fundType() == FUNDTYPE.FT_U8)
+                if (constSrc.Type.FundamentalType == FUNDTYPE.FT_U8)
                 {
                     // If we're going from ulong to something, make sure we can fit.
                     if (ftDest == FUNDTYPE.FT_U8)
@@ -1348,7 +1348,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 // Casting to decimal.
 
-                FUNDTYPE ftSrc = srcType.fundType();
+                FUNDTYPE ftSrc = srcType.FundamentalType;
                 decimal result;
 
                 switch (ftSrc)
@@ -1390,7 +1390,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Casting from decimal
                 decimal decTrunc = 0;
 
-                FUNDTYPE ftDest = destType.fundType();
+                FUNDTYPE ftDest = destType.FundamentalType;
                 try
                 {
                     if (ftDest != FUNDTYPE.FT_R4 && ftDest != FUNDTYPE.FT_R8)

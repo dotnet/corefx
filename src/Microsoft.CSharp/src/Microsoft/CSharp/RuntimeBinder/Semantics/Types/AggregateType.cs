@@ -344,5 +344,26 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
         }
+
+        public override FUNDTYPE FundamentalType
+        {
+            get
+            {
+                AggregateSymbol sym = OwningAggregate;
+
+                // Treat enums like their underlying types.
+                if (sym.IsEnum())
+                {
+                    sym = sym.GetUnderlyingType().OwningAggregate;
+                }
+                else if (!sym.IsStruct())
+                {
+                    return FUNDTYPE.FT_REF; // Interfaces, classes, delegates are reference types.
+                }
+
+                // Struct type could be predefined (int, long, etc.) or some other struct.
+                return sym.IsPredefined() ? PredefinedTypeFacts.GetFundType(sym.GetPredefType()) : FUNDTYPE.FT_STRUCT;
+            }
+        }
     }
 }
