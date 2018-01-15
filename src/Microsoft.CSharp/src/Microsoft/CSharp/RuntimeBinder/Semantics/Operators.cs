@@ -615,7 +615,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     pNonLiftedArgument = mustCast(pNonLiftedArgument, pParameterType);
                 }
-                pNonLiftedArgument = mustCast(pNonLiftedArgument, paramNub.GetUnderlyingType());
+                pNonLiftedArgument = mustCast(pNonLiftedArgument, paramNub.UnderlyingType);
                 if (bConvertBeforeLift)
                 {
                     MarkAsIntermediateConversion(pNonLiftedArgument);
@@ -1710,8 +1710,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // We want to give the lifted argument as the binop, but use the non-lifted argument as the 
             // argument of the call.
             //Debug.Assert(uofs.LiftArg() || type.IsValType());
-            nonLiftedArg = mustCast(nonLiftedArg, type.GetUnderlyingType());
-            Expr nonLiftedResult = BindIncOpCore(ek, flags, nonLiftedArg, type.GetUnderlyingType());
+            nonLiftedArg = mustCast(nonLiftedArg, type.UnderlyingType);
+            Expr nonLiftedResult = BindIncOpCore(ek, flags, nonLiftedArg, type.UnderlyingType);
             exprVal = mustCast(exprVal, type);
             ExprUnaryOp exprRes = GetExprFactory().CreateUnaryOp((ek == ExpressionKind.Add) ? ExpressionKind.Inc : ExpressionKind.Dec, arg.Type/* type */, exprVal);
             mustCast(mustCast(nonLiftedResult, type), arg.Type);
@@ -1818,8 +1818,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(arg1 != null);
             Debug.Assert(arg2 != null);
-            Debug.Assert(arg1.Type.isPredefType(PredefinedType.PT_BOOL) || (arg1.Type is NullableType argNubType1 && argNubType1.GetUnderlyingType().isPredefType(PredefinedType.PT_BOOL)));
-            Debug.Assert(arg2.Type.isPredefType(PredefinedType.PT_BOOL) || (arg2.Type is NullableType argNubType2 && argNubType2.GetUnderlyingType().isPredefType(PredefinedType.PT_BOOL)));
+            Debug.Assert(arg1.Type.isPredefType(PredefinedType.PT_BOOL) || arg1.Type is NullableType argNubType1 && argNubType1.UnderlyingType.isPredefType(PredefinedType.PT_BOOL));
+            Debug.Assert(arg2.Type.isPredefType(PredefinedType.PT_BOOL) || arg2.Type is NullableType argNubType2 && argNubType2.UnderlyingType.isPredefType(PredefinedType.PT_BOOL));
 
             return GetExprFactory().CreateBinop(ek, GetPredefindType(PredefinedType.PT_BOOL), arg1, arg2);
         }
@@ -1827,8 +1827,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private ExprOperator BindBoolBitwiseOp(ExpressionKind ek, EXPRFLAG flags, Expr expr1, Expr expr2, BinOpFullSig bofs)
         {
             Debug.Assert(ek == ExpressionKind.BitwiseAnd || ek == ExpressionKind.BitwiseOr);
-            Debug.Assert(expr1.Type.isPredefType(PredefinedType.PT_BOOL) || expr1.Type is NullableType expNubType1 && expNubType1.GetUnderlyingType().isPredefType(PredefinedType.PT_BOOL));
-            Debug.Assert(expr2.Type.isPredefType(PredefinedType.PT_BOOL) || expr2.Type is NullableType expNubType2 && expNubType2.GetUnderlyingType().isPredefType(PredefinedType.PT_BOOL));
+            Debug.Assert(expr1.Type.isPredefType(PredefinedType.PT_BOOL) || expr1.Type is NullableType expNubType1 && expNubType1.UnderlyingType.isPredefType(PredefinedType.PT_BOOL));
+            Debug.Assert(expr2.Type.isPredefType(PredefinedType.PT_BOOL) || expr2.Type is NullableType expNubType2 && expNubType2.UnderlyingType.isPredefType(PredefinedType.PT_BOOL));
 
             if (expr1.Type is NullableType || expr2.Type is NullableType)
             {

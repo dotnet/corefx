@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.CSharp.RuntimeBinder.Errors;
-
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     // ----------------------------------------------------------------------------
@@ -16,29 +14,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class NullableType : CType
     {
-        private AggregateType ats;
-        public BSYMMGR symmgr;
-        public TypeManager typeManager;
+        private AggregateType _ats;
+        private readonly BSYMMGR _symmgr;
+        private readonly TypeManager _typeManager;
 
-        public NullableType()
+        public NullableType(CType underlyingType, BSYMMGR symmgr, TypeManager typeManager)
             : base(TypeKind.TK_NullableType)
         {
+            UnderlyingType = underlyingType;
+            _symmgr = symmgr;
+            _typeManager = typeManager;
         }
 
-        public AggregateType GetAts()
-        {
-            if (ats == null)
-            {
-                AggregateSymbol aggNullable = typeManager.GetNullable();
-                CType typePar = GetUnderlyingType();
-                CType[] typeParArray = { typePar };
-                TypeArray ta = symmgr.AllocParams(1, typeParArray);
-                ats = typeManager.GetAggregate(aggNullable, ta);
-            }
-
-            return ats;
-        }
-        public CType GetUnderlyingType() { return UnderlyingType; }
+        public AggregateType GetAts() => _ats ?? (_ats = _typeManager.GetAggregate(
+                                             _typeManager.GetNullable(), _symmgr.AllocParams(UnderlyingType)));
 
         public override CType StripNubs() => UnderlyingType;
 
@@ -48,8 +37,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return UnderlyingType;
         }
 
-        public void SetUnderlyingType(CType pType) { UnderlyingType = pType; }
-
-        public CType UnderlyingType;
+        public CType UnderlyingType { get; }
     }
 }

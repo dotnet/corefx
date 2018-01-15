@@ -270,7 +270,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 AggregateType atsDst = nubDst.GetAts();
 
                 // Check for the unboxing conversion. This takes precedence over the wrapping conversions.
-                if (GetSymbolLoader().HasBaseConversion(nubDst.GetUnderlyingType(), _typeSrc) && !CConversions.FWrappingConv(_typeSrc, nubDst))
+                if (GetSymbolLoader().HasBaseConversion(nubDst.UnderlyingType, _typeSrc) && !CConversions.FWrappingConv(_typeSrc, nubDst))
                 {
                     // These should be different! Fix the caller if typeSrc is an AggregateType of Nullable.
                     Debug.Assert(atsDst != _typeSrc);
@@ -440,7 +440,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     return true;
                 }
-                if (GetSymbolLoader().HasBaseConversion(nubSrc.GetUnderlyingType(), _typeDest) && !CConversions.FUnwrappingConv(nubSrc, _typeDest))
+                if (GetSymbolLoader().HasBaseConversion(nubSrc.UnderlyingType, _typeDest) && !CConversions.FUnwrappingConv(nubSrc, _typeDest))
                 {
                     if (_needsExprDest)
                     {

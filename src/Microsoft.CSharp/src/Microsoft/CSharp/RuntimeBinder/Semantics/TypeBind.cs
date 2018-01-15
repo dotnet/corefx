@@ -211,11 +211,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // to which they have an implicit reference conversion
                             error = ErrorCode.ERR_GenericConstraintNotSatisfiedRefType;
                         }
-                        else if (arg is NullableType nubArg && checker.SymbolLoader.HasBaseConversion(nubArg.GetUnderlyingType(), typeBnd))    // This is inlining FBoxingConv
+                        else if (arg is NullableType nubArg && checker.SymbolLoader.HasBaseConversion(nubArg.UnderlyingType, typeBnd))    // This is inlining FBoxingConv
                         {
                             // nullable types do not satisfy bounds to every type that they are boxable to
                             // They only satisfy bounds of object and ValueType
-                            if (typeBnd.isPredefType(PredefinedType.PT_ENUM) || nubArg.GetUnderlyingType() == typeBnd)
+                            if (typeBnd.isPredefType(PredefinedType.PT_ENUM) || nubArg.UnderlyingType == typeBnd)
                             {
                                 // Nullable types don't satisfy bounds of EnumType, or the underlying type of the enum
                                 // even though the conversion from Nullable to these types is a boxing conversion

@@ -321,10 +321,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         *   The term wrapping denotes the process of packaging a value, of type T, in an instance of type T?. 
             A value x of type T is wrapped to type T? by evaluating the expression new T?(x).
         ***************************************************************************************************/
-        public static bool FWrappingConv(CType typeSrc, CType typeDst)
-        {
-            return typeDst is NullableType nubDst && typeSrc == nubDst.GetUnderlyingType();
-        }
+        public static bool FWrappingConv(CType typeSrc, CType typeDst) => typeDst is NullableType nubDst && typeSrc == nubDst.UnderlyingType;
 
         /***************************************************************************************************
             Determines whether there is a unwrapping conversion from typeSrc to typeDst

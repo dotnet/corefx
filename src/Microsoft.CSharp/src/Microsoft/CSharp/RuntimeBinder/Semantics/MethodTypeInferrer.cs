@@ -838,7 +838,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            ExactInference(nubSource.GetUnderlyingType(), nubDest.GetUnderlyingType());
+            ExactInference(nubSource.UnderlyingType, nubDest.UnderlyingType);
             return true;
         }
 
@@ -1054,7 +1054,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return false;
             }
-            ExactInference(pSource, pDest.AsNullableType().GetUnderlyingType());
+            ExactInference(pSource, pDest.AsNullableType().UnderlyingType);
             return true;
         }
          * */
