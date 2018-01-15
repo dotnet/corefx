@@ -21,7 +21,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public TypeManager typeManager;
 
         public NullableType()
-            : base(Semantics.TypeKind.TK_NullableType)
+            : base(TypeKind.TK_NullableType)
         {
         }
 

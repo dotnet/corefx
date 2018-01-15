@@ -1533,7 +1533,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 methodSymbol.isOverride = false;
                 methodSymbol.isOperator = false;
                 methodSymbol.swtSlot = null;
-                methodSymbol.RetType = _typeManager.GetVoid();
+                methodSymbol.RetType = VoidType.Instance;
             }
 
             methodSymbol.modOptCount = GetCountOfModOpts(parameters);
@@ -1745,19 +1745,20 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private TypeArray CreateParameterArray(MemberInfo associatedInfo, ParameterInfo[] parameters)
         {
-            List<CType> types = new List<CType>();
+            bool isVarArg = associatedInfo is MethodBase mb && (mb.CallingConvention & CallingConventions.VarArgs) != 0;
+            CType[] types = new CType[isVarArg ? parameters.Length + 1 : parameters.Length];
 
-            foreach (ParameterInfo p in parameters)
+            for (int i = 0; i < parameters.Length; i++)
             {
-                types.Add(GetTypeOfParameter(p, associatedInfo));
+                types[i] = GetTypeOfParameter(parameters[i], associatedInfo);
             }
 
-            if (associatedInfo is MethodBase mb && (mb.CallingConvention & CallingConventions.VarArgs) != 0)
+            if (isVarArg)
             {
-                types.Add(_typeManager.GetArgListType());
+                types[types.Length - 1] = ArgumentListType.Instance;
             }
 
-            return _bsymmgr.AllocParams(types.Count, types.ToArray());
+            return _bsymmgr.AllocParams(types);
         }
 
         /////////////////////////////////////////////////////////////////////////////////

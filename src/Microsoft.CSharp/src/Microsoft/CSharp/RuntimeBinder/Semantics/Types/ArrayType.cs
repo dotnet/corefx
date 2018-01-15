@@ -11,7 +11,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class ArrayType : CType
     {
         public ArrayType()
-            : base(Semantics.TypeKind.TK_ArrayType)
+            : base(TypeKind.TK_ArrayType)
         {
         }
 

@@ -7,7 +7,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class PointerType : CType
     {
         public PointerType()
-            : base(Semantics.TypeKind.TK_PointerType)
+            : base(TypeKind.TK_PointerType)
         {
         }
 

@@ -33,31 +33,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return type;
         }
 
-        // Primitives
-        public VoidType CreateVoid()
-        {
-            VoidType type = new VoidType();
-            return type;
-        }
-
-        public NullType CreateNull()
-        {
-            NullType type = new NullType();
-            return type;
-        }
-
-        public MethodGroupType CreateMethodGroup()
-        {
-            MethodGroupType type = new MethodGroupType();
-            return type;
-        }
-
-        public ArgumentListType CreateArgList()
-        {
-            ArgumentListType type = new ArgumentListType();
-            return type;
-        }
-
         // Derived types - parent is base type
         public ArrayType CreateArray(CType pElementType, int rank, bool isSZArray)
         {

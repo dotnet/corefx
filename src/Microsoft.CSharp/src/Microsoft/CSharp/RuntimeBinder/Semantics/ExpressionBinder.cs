@@ -361,10 +361,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GetSymbolLoader().GetPredefindType(pt);
         }
 
-        private CType VoidType { get { return GetSymbolLoader().GetTypeManager().GetVoid(); } }
-
-        private CType getVoidType() { return VoidType; }
-
         private Expr GenerateAssignmentConversion(Expr op1, Expr op2, bool allowExplicit) =>
             allowExplicit ? mustCastCore(op2, op1.Type, 0) : mustConvertCore(op2, op1.Type);
 
@@ -491,7 +487,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else
                 {
-                    Debug.Assert(pResult.Type == getVoidType());
+                    Debug.Assert(pResult.Type == VoidType.Instance);
                 }
             }
 

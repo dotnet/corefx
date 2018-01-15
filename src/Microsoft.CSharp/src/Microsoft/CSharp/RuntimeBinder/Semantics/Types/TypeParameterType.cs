@@ -11,7 +11,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class TypeParameterType : CType
     {
         public TypeParameterType()
-            : base(Semantics.TypeKind.TK_TypeParameterType)
+            : base(TypeKind.TK_TypeParameterType)
         {
         }
 

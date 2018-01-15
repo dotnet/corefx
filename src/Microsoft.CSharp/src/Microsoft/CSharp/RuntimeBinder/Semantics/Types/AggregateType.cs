@@ -26,7 +26,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private TypeArray _winrtifacesAll; //This is the list of collection interfaces implemented by a WinRT object.
 
         public AggregateType()
-            : base(Semantics.TypeKind.TK_AggregateType)
+            : base(TypeKind.TK_AggregateType)
         {
         }
 

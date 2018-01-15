@@ -21,12 +21,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private readonly TypeTable _typeTable;
         private SymbolTable _symbolTable;
 
-        // Special types
-        private readonly VoidType _voidType;
-        private readonly NullType _nullType;
-        private readonly MethodGroupType _typeMethGrp;
-        private readonly ArgumentListType _argListType;
-
         private readonly StdTypeVarColl _stvcMethod;
         private readonly StdTypeVarColl _stvcClass;
 
@@ -34,12 +28,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             _typeFactory = new TypeFactory();
             _typeTable = new TypeTable();
-
-            // special types with their own symbol kind.
-            _voidType = _typeFactory.CreateVoid();
-            _nullType = _typeFactory.CreateNull();
-            _typeMethGrp = _typeFactory.CreateMethodGroup();
-            _argListType = _typeFactory.CreateArgList();
 
             _stvcMethod = new StdTypeVarColl();
             _stvcClass = new StdTypeVarColl();
@@ -244,26 +232,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(pParamModifier.GetParameterType() == paramType);
 
             return pParamModifier;
-        }
-
-        public VoidType GetVoid()
-        {
-            return _voidType;
-        }
-
-        public NullType GetNullType()
-        {
-            return _nullType;
-        }
-
-        public MethodGroupType GetMethGrpType()
-        {
-            return _typeMethGrp;
-        }
-
-        public ArgumentListType GetArgListType()
-        {
-            return _argListType;
         }
 
         public AggregateSymbol GetNullable() => GetPredefAgg(PredefinedType.PT_G_OPTIONAL);

@@ -16,7 +16,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class ParameterModifierType : CType
     {
         public ParameterModifierType()
-            : base(Semantics.TypeKind.TK_ParameterModifierType)
+            : base(TypeKind.TK_ParameterModifierType)
         {
         }
 
