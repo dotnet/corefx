@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
+using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
@@ -16,6 +16,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ParentSymbol GetOwningSymbol() { return _pTypeParameterSymbol.parent; }
 
         // Forward calls into the symbol.
+
+        public Name Name => _pTypeParameterSymbol.name;
+
         public bool Covariant { get { return _pTypeParameterSymbol.Covariant; } }
         public bool Invariant { get { return _pTypeParameterSymbol.Invariant; } }
         public bool Contravariant { get { return _pTypeParameterSymbol.Contravariant; } }

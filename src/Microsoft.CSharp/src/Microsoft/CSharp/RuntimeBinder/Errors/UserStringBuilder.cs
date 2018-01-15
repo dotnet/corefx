@@ -456,21 +456,23 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     }
 
                 case TypeKind.TK_TypeParameterType:
-                    if (null == pType.GetName())
+                    TypeParameterType tpType = (TypeParameterType)pType;
+                    if (null == tpType.Name)
                     {
-                        var tpType = (TypeParameterType)pType;
                         // It's a standard type variable.
                         if (tpType.IsMethodTypeParameter())
                         {
                             ErrAppendChar('!');
                         }
+
                         ErrAppendChar('!');
                         ErrAppendPrintf("{0}", tpType.GetIndexInTotalParameters());
                     }
                     else
                     {
-                        ErrAppendName(pType.GetName());
+                        ErrAppendName(tpType.Name);
                     }
+
                     break;
 
                 case TypeKind.TK_NullType:

@@ -29,7 +29,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             TypeParameterType type = new TypeParameterType();
             type.SetTypeParameterSymbol(pSymbol);
-            type.SetName(pSymbol.name);
             Debug.Assert(pSymbol.GetTypeParameterType() == null);
             pSymbol.SetTypeParameterType(type);
 
@@ -67,11 +66,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         // Derived types - parent is base type
-        public ArrayType CreateArray(Name name, CType pElementType, int rank, bool isSZArray)
+        public ArrayType CreateArray(CType pElementType, int rank, bool isSZArray)
         {
             ArrayType type = new ArrayType();
 
-            type.SetName(name);
             type.rank = rank;
             type.IsSZArray = isSZArray;
             type.SetElementType(pElementType);
@@ -80,30 +78,27 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return type;
         }
 
-        public PointerType CreatePointer(Name name, CType pReferentType)
+        public PointerType CreatePointer(CType pReferentType)
         {
             PointerType type = new PointerType();
-            type.SetName(name);
             type.SetReferentType(pReferentType);
 
             type.SetTypeKind(TypeKind.TK_PointerType);
             return type;
         }
 
-        public ParameterModifierType CreateParameterModifier(Name name, CType pParameterType)
+        public ParameterModifierType CreateParameterModifier(CType pParameterType)
         {
             ParameterModifierType type = new ParameterModifierType();
-            type.SetName(name);
             type.SetParameterType(pParameterType);
 
             type.SetTypeKind(TypeKind.TK_ParameterModifierType);
             return type;
         }
 
-        public NullableType CreateNullable(Name name, CType pUnderlyingType, BSYMMGR symmgr, TypeManager typeManager)
+        public NullableType CreateNullable(CType pUnderlyingType, BSYMMGR symmgr, TypeManager typeManager)
         {
             NullableType type = new NullableType();
-            type.SetName(name);
             type.SetUnderlyingType(pUnderlyingType);
             type.symmgr = symmgr;
             type.typeManager = typeManager;

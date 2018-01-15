@@ -129,7 +129,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pArray == null)
             {
                 // No existing array symbol. Create a new one.
-                pArray = _typeFactory.CreateArray(name, elementType, args, isSZArray);
+                pArray = _typeFactory.CreateArray(elementType, args, isSZArray);
                 _typeTable.InsertArray(name, elementType, pArray);
             }
 
@@ -199,9 +199,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pPointer == null)
             {
                 // No existing type. Create a new one.
-                Name namePtr = NameManager.GetPredefinedName(PredefinedName.PN_PTR);
-
-                pPointer = _typeFactory.CreatePointer(namePtr, baseType);
+                pPointer = _typeFactory.CreatePointer(baseType);
                 _typeTable.InsertPointer(baseType, pPointer);
             }
 
@@ -212,18 +210,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public NullableType GetNullable(CType pUnderlyingType)
         {
-            if (pUnderlyingType is NullableType nt)
-            {
-                Debug.Fail("Attempt to make nullable of nullable");
-                return nt;
-            }
+            Debug.Assert(!(pUnderlyingType is NullableType), "Attempt to make nullable of nullable");
 
             NullableType pNullableType = _typeTable.LookupNullable(pUnderlyingType);
             if (pNullableType == null)
             {
-                Name pName = NameManager.GetPredefinedName(PredefinedName.PN_NUB);
-
-                pNullableType = _typeFactory.CreateNullable(pName, pUnderlyingType, _BSymmgr, this);
+                pNullableType = _typeFactory.CreateNullable(pUnderlyingType, _BSymmgr, this);
                 _typeTable.InsertNullable(pUnderlyingType, pNullableType);
             }
 
@@ -244,7 +236,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (pParamModifier == null)
             {
                 // No existing parammod symbol. Create a new one.
-                pParamModifier = _typeFactory.CreateParameterModifier(name, paramType);
+                pParamModifier = _typeFactory.CreateParameterModifier(paramType);
                 pParamModifier.isOut = isOut;
                 _typeTable.InsertParameterModifier(name, paramType, pParamModifier);
             }
