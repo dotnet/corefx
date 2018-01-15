@@ -289,6 +289,12 @@ done:
         CloseIfOpen(stdinFds[WRITE_END_OF_PIPE]);
         CloseIfOpen(stdoutFds[READ_END_OF_PIPE]);
         CloseIfOpen(stderrFds[READ_END_OF_PIPE]);
+        // Reap child
+        if (processId > 0)
+        {
+            int status;
+            waitpid(processId, &status, 0);
+        }
 
         *stdinFd = -1;
         *stdoutFd = -1;
