@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
@@ -107,31 +106,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public PointerType LookupPointer(CType pElementType)
         {
-            PointerType result;
-            if (_pPointerTable.TryGetValue(pElementType, out result))
-            {
-                return result;
-            }
-            return null;
+            _pPointerTable.TryGetValue(pElementType, out PointerType result);
+            return result;
         }
 
         public void InsertPointer(CType pElementType, PointerType pPointer)
         {
+            Debug.Assert(LookupPointer(pElementType) == null);
             _pPointerTable.Add(pElementType, pPointer);
         }
 
         public NullableType LookupNullable(CType pUnderlyingType)
         {
-            NullableType result;
-            if (_pNullableTable.TryGetValue(pUnderlyingType, out result))
-            {
-                return result;
-            }
-            return null;
+            _pNullableTable.TryGetValue(pUnderlyingType, out NullableType result);
+            return result;
         }
 
         public void InsertNullable(CType pUnderlyingType, NullableType pNullable)
         {
+            Debug.Assert(LookupNullable(pUnderlyingType) == null);
             _pNullableTable.Add(pUnderlyingType, pNullable);
         }
     }
