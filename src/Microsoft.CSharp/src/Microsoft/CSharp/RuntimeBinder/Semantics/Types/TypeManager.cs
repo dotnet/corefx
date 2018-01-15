@@ -810,7 +810,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     continue;
                 }
 
-                if (!typeArgs[i].IsRefType() || !((TypeParameterType)typeParams[i]).Covariant)
+                if (!typeArgs[i].IsReferenceType || !((TypeParameterType)typeParams[i]).Covariant)
                 {
                     // This guy is inaccessible, and we are not going to be able to vary him, so we need to fail.
                     return false;
@@ -859,16 +859,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // conversion exists.
 
             CType elementType = typeSrc.ElementType;
-            if (!elementType.IsRefType())
+            if (!elementType.IsReferenceType)
             {
                 // Covariant array conversions exist for reference types only.
                 return false;
             }
 
-            CType intermediateType;
-            if (GetBestAccessibleType(semanticChecker, bindingContext, elementType, out intermediateType))
+            if (GetBestAccessibleType(semanticChecker, bindingContext, elementType, out CType intermediateType))
             {
-                typeDst = this.GetArray(intermediateType, typeSrc.Rank, typeSrc.IsSZArray);
+                typeDst = GetArray(intermediateType, typeSrc.Rank, typeSrc.IsSZArray);
 
                 Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
                 return true;

@@ -1027,7 +1027,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            if (pElementSource.IsRefType())
+            if (pElementSource.IsReferenceType)
             {
                 LowerBoundInference(pElementSource, pElementDest);
             }
@@ -1035,6 +1035,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 ExactInference(pElementSource, pElementDest);
             }
+
             return true;
         }
 
@@ -1244,18 +1245,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CType pSourceArg = pSourceArgs[arg];
                 CType pDestArg = pDestArgs[arg];
 
-                if (pSourceArg.IsRefType() && pTypeParam.Covariant)
+                if (pSourceArg.IsReferenceType)
                 {
-                    LowerBoundInference(pSourceArg, pDestArg);
+                    if (pTypeParam.Covariant)
+                    {
+                        LowerBoundInference(pSourceArg, pDestArg);
+                        continue;
+                    }
+
+                    if (pTypeParam.Contravariant)
+                    {
+                        UpperBoundInference(pSourceArgs[arg], pDestArgs[arg]);
+                        continue;
+                    }
                 }
-                else if (pSourceArg.IsRefType() && pTypeParam.Contravariant)
-                {
-                    UpperBoundInference(pSourceArgs[arg], pDestArgs[arg]);
-                }
-                else
-                {
-                    ExactInference(pSourceArgs[arg], pDestArgs[arg]);
-                }
+
+                ExactInference(pSourceArgs[arg], pDestArgs[arg]);
             }
         }
 
@@ -1369,7 +1374,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            if (pElementSource.IsRefType())
+            if (pElementSource.IsReferenceType)
             {
                 UpperBoundInference(pElementSource, pElementDest);
             }
@@ -1377,6 +1382,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 ExactInference(pElementSource, pElementDest);
             }
+
             return true;
         }
 
@@ -1542,18 +1548,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CType pSourceArg = pSourceArgs[arg];
                 CType pDestArg = pDestArgs[arg];
 
-                if (pSourceArg.IsRefType() && pTypeParam.Covariant)
+                if (pSourceArg.IsReferenceType)
                 {
-                    UpperBoundInference(pSourceArg, pDestArg);
+                    if (pTypeParam.Covariant)
+                    {
+                        UpperBoundInference(pSourceArg, pDestArg);
+                        continue;
+                    }
+
+                    if (pTypeParam.Contravariant)
+                    {
+                        LowerBoundInference(pSourceArgs[arg], pDestArgs[arg]);
+                        continue;
+                    }
                 }
-                else if (pSourceArg.IsRefType() && pTypeParam.Contravariant)
-                {
-                    LowerBoundInference(pSourceArgs[arg], pDestArgs[arg]);
-                }
-                else
-                {
-                    ExactInference(pSourceArgs[arg], pDestArgs[arg]);
-                }
+
+                ExactInference(pSourceArgs[arg], pDestArgs[arg]);
             }
         }
 

@@ -162,6 +162,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             return _winrtifacesAll;
         }
+
+        public override bool IsReferenceType => OwningAggregate.IsRefType();
     }
 }
 

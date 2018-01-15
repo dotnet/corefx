@@ -447,20 +447,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
             }
         }
-        public bool IsRefType()
-        {
-            switch (TypeKind)
-            {
-                case Semantics.TypeKind.TK_ArrayType:
-                case Semantics.TypeKind.TK_NullType:
-                    return true;
-                case Semantics.TypeKind.TK_TypeParameterType:
-                    return ((TypeParameterType)this).IsReferenceType;
-                case Semantics.TypeKind.TK_AggregateType:
-                    return ((AggregateType)this).OwningAggregate.IsRefType();
-                default:
-                    return false;
-            }
-        }
+        public virtual bool IsReferenceType => false;
     }
 }

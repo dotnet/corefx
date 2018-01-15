@@ -35,7 +35,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool IsValueType => Symbol.IsValueType();
 
-        public bool IsReferenceType => Symbol.IsReferenceType();
+        public override bool IsReferenceType => Symbol.IsReferenceType();
 
         public bool IsNonNullableValueType => Symbol.IsNonNullableValueType();
 

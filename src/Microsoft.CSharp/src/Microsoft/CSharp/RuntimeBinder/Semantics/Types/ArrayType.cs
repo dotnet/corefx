@@ -38,6 +38,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return type;
             }
         }
+
+        public override bool IsReferenceType => true;
     }
 }
 

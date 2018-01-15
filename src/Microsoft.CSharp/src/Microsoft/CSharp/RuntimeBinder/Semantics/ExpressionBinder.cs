@@ -1139,7 +1139,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 if (pfConstrained &&
                     (typeObj is TypeParameterType ||
-                     typeObj.isStructType() && swt.GetType().IsRefType() && swt.Sym.IsVirtual()))
+                     typeObj.isStructType() && swt.GetType().IsReferenceType && swt.Sym.IsVirtual()))
                 {
                     // For calls on type parameters or virtual calls on struct types (not enums),
                     // use the constrained prefix.

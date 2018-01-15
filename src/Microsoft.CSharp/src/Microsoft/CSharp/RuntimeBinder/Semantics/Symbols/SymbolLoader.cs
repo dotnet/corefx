@@ -260,7 +260,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             // The implicit reference conversions are:
             // * From any reference type to Object.
-            if (pSource.IsRefType() && pDest.isPredefType(PredefinedType.PT_OBJECT))
+            if (pSource.IsReferenceType && pDest.isPredefType(PredefinedType.PT_OBJECT))
             {
                 return true;
             }
@@ -373,7 +373,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // implementations have a "null type" which some expressions other than the
                 // null literal may have. (For example, (null??null), which is also an
                 // extension to the specification.)
-                return pDest.IsRefType() || pDest is NullableType;
+                return pDest.IsReferenceType || pDest is NullableType;
             }
 
             return false;
@@ -500,7 +500,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // The rest of the boxing conversions only operate when going from a value type
             // to a reference type.
 
-            if (!pDest.IsRefType())
+            if (!pDest.IsReferenceType)
             {
                 return false;
             }

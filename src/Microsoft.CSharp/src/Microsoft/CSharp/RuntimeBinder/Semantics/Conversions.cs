@@ -24,10 +24,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             when the source is a reference type and the destination is a base type of the source. Note
             that typeDst.IsRefType() may still return false (when both are type parameters).
         ***************************************************************************************************/
-        public static bool FImpRefConv(SymbolLoader loader, CType typeSrc, CType typeDst)
-        {
-            return typeSrc.IsRefType() && loader.HasIdentityOrImplicitReferenceConversion(typeSrc, typeDst);
-        }
+        public static bool FImpRefConv(SymbolLoader loader, CType typeSrc, CType typeDst) =>
+            typeSrc.IsReferenceType && loader.HasIdentityOrImplicitReferenceConversion(typeSrc, typeDst);
 
         /***************************************************************************************************
             Determine whether there is an explicit or implicit reference conversion (or identity conversion)
@@ -77,7 +75,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(typeSrc != null);
             Debug.Assert(typeDst != null);
-            if (typeSrc.IsRefType() && typeDst.IsRefType())
+            if (typeSrc.IsReferenceType && typeDst.IsReferenceType)
             {
                 // is there an implicit reference conversion in either direction?
                 // this handles the bulk of the cases ...
@@ -196,13 +194,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return true;
                 }
             }
-            else if (typeSrc.IsRefType())
+            else if (typeSrc.IsReferenceType)
             {
                 // conversion of T . U, where T : class, U
                 // .. these constraints implies where U : class
                 return loader.HasIdentityOrImplicitReferenceConversion(typeSrc, typeDst);
             }
-            else if (typeDst.IsRefType())
+            else if (typeDst.IsReferenceType)
             {
                 // conversion of T . U, where U : class, T 
                 // .. these constraints implies where T : class
@@ -271,12 +269,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else if (pParam.Contravariant)
                 {
-                    if (!pSourceArg.IsRefType() || !pTargetArg.IsRefType())
+                    if (!pSourceArg.IsReferenceType || !pTargetArg.IsReferenceType)
                     {
                         return false;
                     }
                 }
             }
+
             return true;
         }
 

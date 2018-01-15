@@ -147,7 +147,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             bool fReportErrors = 0 == (flags & CheckConstraintsFlags.NoErrors);
 
             bool fError = false;
-            if (var.HasRefConstraint && !arg.IsRefType())
+            if (var.HasRefConstraint && !arg.IsReferenceType)
             {
                 if (fReportErrors)
                 {
@@ -205,7 +205,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // and b) Nullable is one funky type, and user's can use all the help they can get
                         // when using it.
                         ErrorCode error;
-                        if (arg.IsRefType())
+                        if (arg.IsReferenceType)
                         {
                             // A reference type can only satisfy bounds to types 
                             // to which they have an implicit reference conversion

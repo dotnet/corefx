@@ -16,5 +16,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             : base(TypeKind.TK_NullType)
         {
         }
+
+        public override bool IsReferenceType => true;
     }
 }
