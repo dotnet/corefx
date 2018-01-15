@@ -25,6 +25,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private TypeArray _ifacesAll;  // This is the result of calling SubstTypeArray on the aggregate's ifacesAll.
         private TypeArray _winrtifacesAll; //This is the list of collection interfaces implemented by a WinRT object.
 
+        public AggregateType()
+            : base(Semantics.TypeKind.TK_AggregateType)
+        {
+        }
+
         public bool fConstraintsChecked;    // Have the constraints been checked yet?
         public bool fConstraintError;       // Did the constraints check produce an error?
 

@@ -289,7 +289,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (typeBnd == arg)
                 return true;
 
-            switch (typeBnd.GetTypeKind())
+            switch (typeBnd.TypeKind)
             {
                 default:
                     Debug.Assert(false, "Unexpected type.");
@@ -313,7 +313,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(typeBnd is AggregateType || typeBnd is TypeParameterType || typeBnd is ArrayType);
 
-            switch (arg.GetTypeKind())
+            switch (arg.TypeKind)
             {
                 default:
                     return false;

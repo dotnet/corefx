@@ -350,7 +350,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType typeSrc;
             CType typeDst;
 
-            switch (type.GetTypeKind())
+            switch (type.TypeKind)
             {
                 default:
                     Debug.Assert(false);
@@ -464,7 +464,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            switch (typeSrc.GetTypeKind())
+            switch (typeSrc.TypeKind)
             {
                 default:
                     Debug.Assert(false, "Bad Symbol kind in SubstEqualTypesCore");
@@ -473,7 +473,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_NullType:
                 case TypeKind.TK_VoidType:
                     // There should only be a single instance of these.
-                    Debug.Assert(typeDst.GetTypeKind() != typeSrc.GetTypeKind());
+                    Debug.Assert(typeDst.TypeKind != typeSrc.TypeKind);
                     return false;
 
                 case TypeKind.TK_ArrayType:
@@ -491,7 +491,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 case TypeKind.TK_PointerType:
                 case TypeKind.TK_NullableType:
-                    if (typeDst.GetTypeKind() != typeSrc.GetTypeKind())
+                    if (typeDst.TypeKind != typeSrc.TypeKind)
                         return false;
                     LCheckBases:
                     typeSrc = typeSrc.GetBaseOrParameterOrElementType();
@@ -568,7 +568,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (type == typeFind || type.Equals(typeFind))
                 return true;
 
-            switch (type.GetTypeKind())
+            switch (type.TypeKind)
             {
                 default:
                     Debug.Assert(false, "Bad Symbol kind in TypeContainsType");
@@ -577,7 +577,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 case TypeKind.TK_NullType:
                 case TypeKind.TK_VoidType:
                     // There should only be a single instance of these.
-                    Debug.Assert(typeFind.GetTypeKind() != type.GetTypeKind());
+                    Debug.Assert(typeFind.TypeKind != type.TypeKind);
                     return false;
 
                 case TypeKind.TK_ArrayType:
@@ -607,7 +607,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public static bool TypeContainsTyVars(CType type, TypeArray typeVars)
         {
         LRecurse:  // Label used for "tail" recursion.
-            switch (type.GetTypeKind())
+            switch (type.TypeKind)
             {
                 default:
                     Debug.Assert(false, "Bad Symbol kind in TypeContainsTyVars");

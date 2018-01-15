@@ -10,6 +10,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class ArrayType : CType
     {
+        public ArrayType()
+            : base(Semantics.TypeKind.TK_ArrayType)
+        {
+        }
+
         // rank of the array. zero means unknown rank int [?].
         public int rank;
 

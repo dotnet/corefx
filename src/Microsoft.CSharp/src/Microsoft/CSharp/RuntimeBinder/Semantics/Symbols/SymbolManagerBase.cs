@@ -87,7 +87,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 BetterType nParam = BetterType.Neither;
 
             LAgain:
-                if (type1.GetTypeKind() != type2.GetTypeKind())
+                if (type1.TypeKind != type2.TypeKind)
                 {
                     if (type1 is TypeParameterType)
                     {
@@ -100,7 +100,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 else
                 {
-                    switch (type1.GetTypeKind())
+                    switch (type1.TypeKind)
                     {
                         default:
                             Debug.Assert(false, "Bad kind in CompareTypes");

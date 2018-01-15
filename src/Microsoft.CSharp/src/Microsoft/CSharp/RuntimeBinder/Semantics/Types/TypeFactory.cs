@@ -20,7 +20,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.outerType = outerType;
             type.SetOwningAggregate(parent);
             type.SetTypeArgsThis(typeArgsThis);
-            type.SetTypeKind(TypeKind.TK_AggregateType);
             return type;
         }
 
@@ -31,8 +30,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.SetTypeParameterSymbol(pSymbol);
             Debug.Assert(pSymbol.GetTypeParameterType() == null);
             pSymbol.SetTypeParameterType(type);
-
-            type.SetTypeKind(TypeKind.TK_TypeParameterType);
             return type;
         }
 
@@ -40,28 +37,24 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public VoidType CreateVoid()
         {
             VoidType type = new VoidType();
-            type.SetTypeKind(TypeKind.TK_VoidType);
             return type;
         }
 
         public NullType CreateNull()
         {
             NullType type = new NullType();
-            type.SetTypeKind(TypeKind.TK_NullType);
             return type;
         }
 
         public MethodGroupType CreateMethodGroup()
         {
             MethodGroupType type = new MethodGroupType();
-            type.SetTypeKind(TypeKind.TK_MethodGroupType);
             return type;
         }
 
         public ArgumentListType CreateArgList()
         {
             ArgumentListType type = new ArgumentListType();
-            type.SetTypeKind(TypeKind.TK_ArgumentListType);
             return type;
         }
 
@@ -73,8 +66,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.rank = rank;
             type.IsSZArray = isSZArray;
             type.SetElementType(pElementType);
-
-            type.SetTypeKind(TypeKind.TK_ArrayType);
             return type;
         }
 
@@ -82,8 +73,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             PointerType type = new PointerType();
             type.SetReferentType(pReferentType);
-
-            type.SetTypeKind(TypeKind.TK_PointerType);
             return type;
         }
 
@@ -91,8 +80,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             ParameterModifierType type = new ParameterModifierType();
             type.SetParameterType(pParameterType);
-
-            type.SetTypeKind(TypeKind.TK_ParameterModifierType);
             return type;
         }
 
@@ -102,8 +89,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.SetUnderlyingType(pUnderlyingType);
             type.symmgr = symmgr;
             type.typeManager = typeManager;
-
-            type.SetTypeKind(TypeKind.TK_NullableType);
             return type;
         }
     }

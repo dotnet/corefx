@@ -10,5 +10,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class VoidType : CType
     {
+        public VoidType()
+            : base(Semantics.TypeKind.TK_VoidType)
+        {
+        }
     }
 }

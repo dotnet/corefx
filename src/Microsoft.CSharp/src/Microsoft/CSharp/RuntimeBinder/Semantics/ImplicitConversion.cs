@@ -87,7 +87,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(_exprSrc == null || _typeSrc == _exprSrc.Type);    // type of source should be correct if source supplied
                 Debug.Assert(!_needsExprDest || _exprSrc != null);           // need source expr to create dest expr
 
-                switch (_typeDest.GetTypeKind())
+                switch (_typeDest.TypeKind)
                 {
                     case TypeKind.TK_NullType:
                         // Can only convert to the null type if src is null.
@@ -142,10 +142,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 FUNDTYPE ftDest = _typeDest.fundType();
                 Debug.Assert(ftDest != FUNDTYPE.FT_NONE || _typeDest is ParameterModifierType);
 
-                switch (_typeSrc.GetTypeKind())
+                switch (_typeSrc.TypeKind)
                 {
                     default:
-                        Debug.Fail($"Bad type symbol kind: {_typeSrc.GetTypeKind()}");
+                        Debug.Fail($"Bad type symbol kind: {_typeSrc.TypeKind}");
                         break;
                     case TypeKind.TK_VoidType:
                     case TypeKind.TK_ParameterModifierType:

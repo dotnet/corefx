@@ -20,6 +20,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public BSYMMGR symmgr;
         public TypeManager typeManager;
 
+        public NullableType()
+            : base(Semantics.TypeKind.TK_NullableType)
+        {
+        }
+
         public AggregateType GetAts()
         {
             if (ats == null)

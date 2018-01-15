@@ -10,6 +10,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
     internal sealed class TypeParameterType : CType
     {
+        public TypeParameterType()
+            : base(Semantics.TypeKind.TK_TypeParameterType)
+        {
+        }
+
         public TypeParameterSymbol GetTypeParameterSymbol() { return _pTypeParameterSymbol; }
         public void SetTypeParameterSymbol(TypeParameterSymbol pTypePArameterSymbol) { _pTypeParameterSymbol = pTypePArameterSymbol; }
 

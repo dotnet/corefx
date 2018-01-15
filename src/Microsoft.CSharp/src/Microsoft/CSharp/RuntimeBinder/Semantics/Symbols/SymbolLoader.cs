@@ -99,7 +99,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                    typeSym is ArrayType ||
                    typeSym is NullableType);
 
-            switch (typeSym.GetTypeKind())
+            switch (typeSym.TypeKind)
             {
                 case TypeKind.TK_AggregateType:
                     return (AggregateType)typeSym;

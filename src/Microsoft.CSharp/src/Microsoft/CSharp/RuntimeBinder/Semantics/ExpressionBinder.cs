@@ -681,7 +681,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType typeSrc = arg.Type;
 
         LAgain:
-            switch (typeSrc.GetTypeKind())
+            switch (typeSrc.TypeKind)
             {
                 case TypeKind.TK_NullableType:
                     typeSrc = typeSrc.StripNubs();

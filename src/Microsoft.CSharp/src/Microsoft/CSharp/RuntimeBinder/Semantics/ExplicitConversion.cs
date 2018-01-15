@@ -127,10 +127,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 // But it failed, and so we know that the constant is not in range
 
-                switch (_typeDest.GetTypeKind())
+                switch (_typeDest.TypeKind)
                 {
                     default:
-                        Debug.Fail($"Bad type kind: {_typeDest.GetTypeKind()}");
+                        Debug.Fail($"Bad type kind: {_typeDest.TypeKind}");
                         return false;
 
                     case TypeKind.TK_VoidType:
