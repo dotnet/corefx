@@ -57,28 +57,35 @@ namespace System.Net.NetworkInformation
 
             private static void ChangedAddress(object sender, EventArgs eventArgs)
             {
+                Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> s_copy = null;
+
                 lock (s_globalLock)
                 {
                     bool isAvailableNow = SystemNetworkInterface.InternalGetIsNetworkAvailable();
 
+                    // If there is an Availability Change, need to execute user callbacks.
                     if (isAvailableNow != s_isAvailable)
                     {
                         s_isAvailable = isAvailableNow;
 
-                        var s_copy =
+                        s_copy =
                             new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>(s_availabilityCallerArray);
+                    }
+                }
 
-                        foreach (var handler in s_copy.Keys)
+                // Executing user callbacks if Availability Change event occured.
+                if (s_copy != null)
+                {
+                    foreach (var handler in s_copy.Keys)
+                    {
+                        ExecutionContext context = s_copy[handler];
+                        if (context == null)
                         {
-                            ExecutionContext context = s_copy[handler];
-                            if (context == null)
-                            {
-                                handler(null, new NetworkAvailabilityEventArgs(s_isAvailable));
-                            }
-                            else
-                            {
-                                ExecutionContext.Run(context, s_RunHandlerCallback, handler);
-                            }
+                            handler(null, new NetworkAvailabilityEventArgs(s_isAvailable));
+                        }
+                        else
+                        {
+                            ExecutionContext.Run(context, s_RunHandlerCallback, handler);
                         }
                     }
                 }
@@ -133,6 +140,8 @@ namespace System.Net.NetworkInformation
             // Callback fired when an address change occurs.
             private static void AddressChangedCallback(object stateObject, bool signaled)
             {
+                Dictionary<NetworkAddressChangedEventHandler, ExecutionContext> copy;
+
                 lock (s_globalLock)
                 {
                     // The listener was canceled, which would only happen if we aren't listening for more events.
@@ -146,7 +155,7 @@ namespace System.Net.NetworkInformation
                     s_isListening = false;
 
                     // Need to copy the array so the callback can call start and stop
-                    var copy = new Dictionary<NetworkAddressChangedEventHandler, ExecutionContext>(s_callerArray);
+                    copy = new Dictionary<NetworkAddressChangedEventHandler, ExecutionContext>(s_callerArray);
 
                     try
                     {
@@ -157,7 +166,11 @@ namespace System.Net.NetworkInformation
                     {
                         if (NetEventSource.IsEnabled) NetEventSource.Error(null, nie);
                     }
+                }
 
+                // Release the lock before calling into user callback.
+                if (copy.Count > 0)
+                {
                     foreach (var handler in copy.Keys)
                     {
                         ExecutionContext context = copy[handler];
