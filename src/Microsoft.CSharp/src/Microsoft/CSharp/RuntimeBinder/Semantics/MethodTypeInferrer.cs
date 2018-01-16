@@ -1713,8 +1713,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // inference so we do not try to pass the inaccessible type
             // back to overload resolution.
 
-            CType pBestAccessible;
-            if (GetTypeManager().GetBestAccessibleType(_binder.GetSemanticChecker(), _binder.GetContext(), pBest, out pBestAccessible))
+            if (GetTypeManager().GetBestAccessibleType(_binder.GetSemanticChecker(), _binder.GetContext().ContextForMemberLookup, pBest, out CType pBestAccessible))
             {
                 pBest = pBestAccessible;
             }
