@@ -33,6 +33,8 @@ namespace System
         public static unsafe void ValidateNonNullEmpty<T>(this Span<T> span)
         {
             Assert.True(span.IsEmpty);
+
+            // Validate that empty Span is not normalized to null
             Assert.True(Unsafe.AsPointer(ref MemoryMarshal.GetReference(span)) != null);
         }
 
@@ -95,6 +97,8 @@ namespace System
         public static unsafe void ValidateNonNullEmpty<T>(this ReadOnlySpan<T> span)
         {
             Assert.True(span.IsEmpty);
+
+            // Validate that empty Span is not normalized to null
             Assert.True(Unsafe.AsPointer(ref MemoryMarshal.GetReference(span)) != null);
         }
 
