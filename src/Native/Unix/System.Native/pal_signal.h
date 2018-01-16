@@ -4,6 +4,10 @@
 
 #pragma once
 
+#include "pal_compiler.h"
+
+BEGIN_EXTERN_C
+
 #include "pal_types.h"
 
 /**
@@ -11,9 +15,7 @@
  *
  * Returns 1 on success; otherwise returns 0 and sets errno.
  */
-extern "C" int32_t SystemNative_InitializeSignalHandling();
-
-typedef int32_t (*CtrlCallback)(CtrlCode signalCode);
+int32_t SystemNative_InitializeSignalHandling();
 
 /**
  * Hooks up the specified callback for notifications when SIGINT or SIGQUIT is received.
@@ -23,7 +25,7 @@ typedef int32_t (*CtrlCallback)(CtrlCode signalCode);
  *
  * Should only be called when a callback is not currently registered.
  */
-extern "C" void SystemNative_RegisterForCtrl(CtrlCallback callback);
+void SystemNative_RegisterForCtrl(CtrlCallback callback);
 
 /**
  * Unregisters the previously registered ctrlCCallback.
@@ -35,7 +37,7 @@ extern "C" void SystemNative_RegisterForCtrl(CtrlCallback callback);
  * previously registered must remain valid until all ctrl handling activity
  * has quiesced.
  */
-extern "C" void SystemNative_UnregisterForCtrl();
+void SystemNative_UnregisterForCtrl();
 
 typedef void (*SigChldCallback)();
 
@@ -47,9 +49,11 @@ typedef void (*SigChldCallback)();
  *
  * Should only be called when a callback is not currently registered.
  */
-extern "C" void SystemNative_RegisterForSigChld(SigChldCallback callback);
+void SystemNative_RegisterForSigChld(SigChldCallback callback);
 
 /**
  * Calls the original SIGCHLD handler.
  */
-extern "C" void SystemNative_ResumeSigChld();
+void SystemNative_ResumeSigChld();
+
+END_EXTERN_C

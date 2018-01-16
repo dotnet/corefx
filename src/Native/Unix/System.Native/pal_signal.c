@@ -19,8 +19,8 @@
 
 static struct sigaction g_origSigIntHandler, g_origSigQuitHandler; // saved signal handlers for ctrl handling
 static struct sigaction g_origSigContHandler, g_origSigChldHandler; // saved signal handlers for reinitialization
-static volatile CtrlCallback g_ctrlCallback = nullptr; // Callback invoked for SIGINT/SIGQUIT
-static volatile SigChldCallback g_sigChldCallback = nullptr; // Callback invoked for SIGCHLD
+static volatile CtrlCallback g_ctrlCallback = NULL; // Callback invoked for SIGINT/SIGQUIT
+static volatile SigChldCallback g_sigChldCallback = NULL; // Callback invoked for SIGCHLD
 static int g_signalPipe[2] = {-1, -1}; // Pipe used between signal handler and worker
 
 static struct sigaction* OrigActionFor(int sig)
@@ -34,7 +34,7 @@ static struct sigaction* OrigActionFor(int sig)
     }
 
     assert(false);
-    return nullptr;
+    return NULL;
 }
 
 static void SignalHandler(int sig, siginfo_t* siginfo, void* context)
@@ -53,9 +53,9 @@ static void SignalHandler(int sig, siginfo_t* siginfo, void* context)
     if (sig == SIGQUIT || sig == SIGINT || sig == SIGCHLD)
     {
         // Write the signal code to the pipe
-        uint8_t signalCodeByte = static_cast<uint8_t>(sig);
+        uint8_t signalCodeByte = (uint8_t)sig;
         ssize_t writtenBytes;
-        while (CheckInterrupted(writtenBytes = write(g_signalPipe[1], &signalCodeByte, 1)));
+        while ((writtenBytes = write(g_signalPipe[1], &signalCodeByte, 1)) < 0 && errno == EINTR);
 
         if (writtenBytes != 1)
         {
@@ -67,20 +67,20 @@ static void SignalHandler(int sig, siginfo_t* siginfo, void* context)
     if (sig == SIGCONT)
     {
         struct sigaction* origHandler = OrigActionFor(sig);
-        if (origHandler->sa_sigaction != nullptr &&
-            reinterpret_cast<void*>(origHandler->sa_sigaction) != reinterpret_cast<void*>(SIG_DFL) &&
-            reinterpret_cast<void*>(origHandler->sa_sigaction) != reinterpret_cast<void*>(SIG_IGN))
+        if (origHandler->sa_sigaction != NULL &&
+            (void*)origHandler->sa_sigaction != (void*)SIG_DFL &&
+            (void*)origHandler->sa_sigaction != (void*)SIG_IGN)
         {
             origHandler->sa_sigaction(sig, siginfo, context);
         }
     }
 }
 
-extern "C" void SystemNative_ResumeSigChld()
+void SystemNative_ResumeSigChld()
 {
     struct sigaction* origHandler = OrigActionFor(SIGCHLD);
 
-    if (reinterpret_cast<void*>(origHandler->sa_sigaction) == reinterpret_cast<void*>(SIG_IGN))
+    if ((void*)origHandler->sa_sigaction == (void*)SIG_IGN)
     {
         // When the original disposition is SIG_IGN, children that terminated did not become zombies.
         // Since we overwrote the disposition, we are now responsible for reaping those processes.
@@ -88,17 +88,17 @@ extern "C" void SystemNative_ResumeSigChld()
         do
         {
             int status;
-            while (CheckInterrupted(pid = waitpid(-1, &status, WNOHANG)));
+            while ((pid = waitpid(-1, &status, WNOHANG)) < 0 && errno == EINTR);
         } while (pid > 0);
     }
-    else if (reinterpret_cast<void*>(origHandler->sa_sigaction) == reinterpret_cast<void*>(SIG_DFL))
+    else if ((void*)origHandler->sa_sigaction == (void*)SIG_DFL)
     {
         // do nothing
     }
-    else if (origHandler->sa_sigaction != nullptr)
+    else if (origHandler->sa_sigaction != NULL)
     {
-        // TODO?: We are passing a nullptr siginfo and context, do we need to try and do better?
-        origHandler->sa_sigaction(SIGCHLD, nullptr, nullptr);
+        // TODO?: We are passing a NULL siginfo and context, do we need to try and do better?
+        origHandler->sa_sigaction(SIGCHLD, NULL, NULL);
     }
 }
 
@@ -109,8 +109,8 @@ void* SignalHandlerLoop(void* arg)
 {
     // Passed in argument is a ptr to the file descriptor
     // for the read end of the pipe.
-    assert(arg != nullptr);
-    int pipeFd = *reinterpret_cast<int*>(arg);
+    assert(arg != NULL);
+    int pipeFd = *(int*)arg;
     free(arg);
     assert(pipeFd >= 0);
 
@@ -121,7 +121,7 @@ void* SignalHandlerLoop(void* arg)
         // Read the next signal, trying again if we were interrupted
         uint8_t signalCode;
         ssize_t bytesRead;
-        while (CheckInterrupted(bytesRead = read(pipeFd, &signalCode, 1)));
+        while ((bytesRead = read(pipeFd, &signalCode, 1)) < 0 && errno == EINTR);
 
         if (bytesRead <= 0)
         {
@@ -129,14 +129,14 @@ void* SignalHandlerLoop(void* arg)
             // Regardless, no more data is available, so we close the read
             // end of the pipe and exit.
             close(pipeFd);
-            return nullptr;
+            return NULL;
         }
 
         if (signalCode == SIGQUIT || signalCode == SIGINT)
         {
             // We're now handling SIGQUIT and SIGINT. Invoke the callback, if we have one.
             CtrlCallback callback = g_ctrlCallback;
-            int rv = callback != nullptr ? callback(signalCode == SIGQUIT ? Break : Interrupt) : 0;
+            int rv = callback != NULL ? callback(signalCode == SIGQUIT ? Break : Interrupt) : 0;
             if (rv == 0) // callback removed or was invoked and didn't handle the signal
             {
                 // In general, we now want to remove our handler and reissue the signal to
@@ -151,7 +151,7 @@ void* SignalHandlerLoop(void* arg)
         else if (signalCode == SIGCHLD)
         {
             SigChldCallback callback = g_sigChldCallback;
-            if (callback != nullptr)
+            if (callback != NULL)
             {
                 callback();
             }
@@ -162,7 +162,7 @@ void* SignalHandlerLoop(void* arg)
         }
         else
         {
-            assert_msg(false, "invalid signalCode", static_cast<int>(signalCode));
+            assert_msg(false, "invalid signalCode", (int)signalCode);
         }
     }
 }
@@ -177,27 +177,27 @@ static void CloseSignalHandlingPipe()
     g_signalPipe[1] = -1;
 }
 
-extern "C" void SystemNative_RegisterForCtrl(CtrlCallback callback)
+void SystemNative_RegisterForCtrl(CtrlCallback callback)
 {
-    assert(callback != nullptr);
-    assert(g_ctrlCallback == nullptr);
+    assert(callback != NULL);
+    assert(g_ctrlCallback == NULL);
     g_ctrlCallback = callback;
 }
 
-extern "C" void SystemNative_UnregisterForCtrl()
+void SystemNative_UnregisterForCtrl()
 {
-    assert(g_ctrlCallback != nullptr);
-    g_ctrlCallback = nullptr;
+    assert(g_ctrlCallback != NULL);
+    g_ctrlCallback = NULL;
 }
 
-extern "C" void SystemNative_RegisterForSigChld(SigChldCallback callback)
+void SystemNative_RegisterForSigChld(SigChldCallback callback)
 {
-    assert(callback != nullptr);
-    assert(g_sigChldCallback == nullptr);
+    assert(callback != NULL);
+    assert(g_sigChldCallback == NULL);
     g_sigChldCallback = callback;
 }
 
-static bool InstallSignalHandler(int sig, bool overwriteIgnored = true)
+static bool InstallSignalHandler(int sig, bool overwriteIgnored)
 {
     int rv;
     struct sigaction* orig = OrigActionFor(sig);
@@ -206,7 +206,7 @@ static bool InstallSignalHandler(int sig, bool overwriteIgnored = true)
     {
         rv = sigaction(sig, NULL, orig);
         assert(rv == 0);
-        if (reinterpret_cast<void*>(orig->sa_sigaction) == reinterpret_cast<void*>(SIG_IGN))
+        if ((void*)orig->sa_sigaction == (void*)SIG_IGN)
         {
             return true;
         }
@@ -238,8 +238,8 @@ static bool InitializeSignalHandling()
     assert(g_signalPipe[1] >= 0);
 
     // Create a small object to pass the read end of the pipe to the worker.
-    int* readFdPtr = reinterpret_cast<int*>(malloc(sizeof(int)));
-    if (readFdPtr == nullptr)
+    int* readFdPtr = (int*)malloc(sizeof(int));
+    if (readFdPtr == NULL)
     {
         CloseSignalHandlingPipe();
         errno = ENOMEM;
@@ -249,7 +249,7 @@ static bool InitializeSignalHandling()
 
     // The pipe is created.  Create the worker thread.
     pthread_t handlerThread;
-    if (pthread_create(&handlerThread, nullptr, SignalHandlerLoop, readFdPtr) != 0)
+    if (pthread_create(&handlerThread, NULL, SignalHandlerLoop, readFdPtr) != 0)
     {
         int err = errno;
         free(readFdPtr);
@@ -263,13 +263,13 @@ static bool InitializeSignalHandling()
     // processes would reset to the default on exec causing them to terminate on these signals.
     InstallSignalHandler(SIGINT , /* overwriteIgnored */ false);
     InstallSignalHandler(SIGQUIT, /* overwriteIgnored */ false);
-    InstallSignalHandler(SIGCONT);
-    InstallSignalHandler(SIGCHLD);
+    InstallSignalHandler(SIGCONT, /* overwriteIgnored */ true);
+    InstallSignalHandler(SIGCHLD, /* overwriteIgnored */ true);
 
     return true;
 }
 
-extern "C" int32_t SystemNative_InitializeSignalHandling()
+int32_t SystemNative_InitializeSignalHandling()
 {
     static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
     static bool initialized = false;
