@@ -10,26 +10,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed partial class ExpressionBinder
     {
-        private RuntimeBinderException ReportReadOnlyError(ExprField field, bool isNested)
+        private RuntimeBinderException ReportReadOnlyError(ExprField field)
         {
             Debug.Assert(field != null);
-
-            FieldWithType fieldWithType = field.FieldWithType;
-            bool isStatic = fieldWithType.Field().isStatic;
-            ErrArg[] args;
-            ErrorCode err;
-            if (isNested)
-            {
-                args = new ErrArg[]{ fieldWithType };
-                err = isStatic ? ErrorCode.ERR_AssgReadonlyStatic2 : ErrorCode.ERR_AssgReadonly2;
-            }
-            else
-            {
-                args = Array.Empty<ErrArg>();
-                err = isStatic ? ErrorCode.ERR_AssgReadonlyStatic : ErrorCode.ERR_AssgReadonly;
-            }
-
-            return ErrorContext.Error(err, args);
+            return ErrorContext.Error(
+                field.FieldWithType.Field().isStatic ? ErrorCode.ERR_AssgReadonlyStatic : ErrorCode.ERR_AssgReadonly);
         }
 
         private void TryReportLvalueFailure(Expr expr, CheckLvalueKind kind)
@@ -46,8 +31,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(!(expr is ExprProperty), "No other property readonly failure possible.");
             if (expr is ExprField field)
             {
-				Debug.Assert(field.FieldWithType.Field().isReadOnly);
-                throw ReportReadOnlyError(field, false);
+                Debug.Assert(field.FieldWithType.Field().isReadOnly);
+                throw ReportReadOnlyError(field);
             }
 
             throw ErrorContext.Error(GetStandardLvalueError(kind));
