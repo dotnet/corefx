@@ -988,41 +988,43 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 case ExpressionKind.Property:
                     ExprProperty prop = (ExprProperty)expr;
-                    if (!prop.MethWithTypeSet)
-                    {
-                        // Assigning to a property without a setter.
-                        // If we have
-                        // bool? b = true; (bool)b = false;
-                        // then this is realized immediately as 
-                        // b.Value = false; 
-                        // and no ExpressionKind.EK_CAST is generated. We'd rather not give a "you're writing
-                        // to a read-only property" error in the case where the property access
-                        // is not explicit in the source code.  Fortunately in this case the
-                        // cast is still hanging around in the parse tree, so we can look for it.
+                    Debug.Assert(!prop.MethWithTypeSet);
+                    // Assigning to a property without a setter.
+                    // If we have
+                    // bool? b = true; (bool)b = false;
+                    // then this is realized immediately as
+                    // b.Value = false;
+                    // and no ExpressionKind.EK_CAST is generated. We'd rather not give a "you're writing
+                    // to a read-only property" error in the case where the property access
+                    // is not explicit in the source code.  Fortunately in this case the
+                    // cast is still hanging around in the parse tree, so we can look for it.
 
-                        // POSSIBLE ERROR: It would be nice to also give this error for other situations
-                        // POSSIBLE ERROR: in which the user is attempting to assign to a value, such as
-                        // POSSIBLE ERROR: an explicit (bool)b.Value = false;
-                        // POSSIBLE ERROR: Unfortunately we cannot use this trick in that situation because
-                        // POSSIBLE ERROR: we've already discarded the OperatorKind.OP_CAST node.  (This is an SyntaxKind.Dot).
+                    // POSSIBLE ERROR: It would be nice to also give this error for other situations
+                    // POSSIBLE ERROR: in which the user is attempting to assign to a value, such as
+                    // POSSIBLE ERROR: an explicit (bool)b.Value = false;
+                    // POSSIBLE ERROR: Unfortunately we cannot use this trick in that situation because
+                    // POSSIBLE ERROR: we've already discarded the OperatorKind.OP_CAST node.  (This is an SyntaxKind.Dot).
 
-                        // SPEC VIOLATION: More generally:
-                        // SPEC VIOLATION: The spec states that the result of any cast is a value, not a
-                        // SPEC VIOLATION: variable. Unfortunately we do not correctly implement this
-                        // SPEC VIOLATION: and we probably should not start implementing it because this
-                        // SPEC VIOLATION: would be a breaking change.  We currently discard "no op" casts
-                        // SPEC VIOLATION: very aggressively rather than generating an ExpressionKind.EK_CAST node.
+                    // SPEC VIOLATION: More generally:
+                    // SPEC VIOLATION: The spec states that the result of any cast is a value, not a
+                    // SPEC VIOLATION: variable. Unfortunately we do not correctly implement this
+                    // SPEC VIOLATION: and we probably should not start implementing it because this
+                    // SPEC VIOLATION: would be a breaking change.  We currently discard "no op" casts
+                    // SPEC VIOLATION: very aggressively rather than generating an ExpressionKind.EK_CAST node.
 
-                        throw ErrorContext.Error(ErrorCode.ERR_AssgReadonlyProp, prop.PropWithTypeSlot);
-                    }
-                    break;
+                    throw ErrorContext.Error(ErrorCode.ERR_AssgReadonlyProp, prop.PropWithTypeSlot);
 
-                case ExpressionKind.BoundLambda:
-                case ExpressionKind.Constant:
+                case ExpressionKind.Field:
+                    ExprField field = (ExprField)expr;
+                    Debug.Assert(field.FieldWithType.Field().isReadOnly);
+                    throw ErrorContext.Error(
+                        field.FieldWithType.Field().isStatic
+                            ? ErrorCode.ERR_AssgReadonlyStatic
+                            : ErrorCode.ERR_AssgReadonly);
+
+                default:
                     throw ErrorContext.Error(GetStandardLvalueError(kind));
             }
-
-            TryReportLvalueFailure(expr, kind);
         }
 
         private void PostBindMethod(MethWithInst pMWI)
