@@ -978,7 +978,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     CheckLvalueProp(prop);
                 }
 
-                markFieldAssigned(expr);
                 return;
             }
 
@@ -1115,14 +1114,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 AggregateSymbol aggCalled = swt.Sym.parent as AggregateSymbol;
                 Debug.Assert(swt.GetType().OwningAggregate == aggCalled);
-
-                // If we're invoking code on a struct-valued field, mark the struct as assigned (to
-                // avoid warning CS0649).
-                if (pObject is ExprField field && !field.FieldWithType.Field().isAssigned && !(swt.Sym is FieldSymbol) &&
-                    typeObj.IsStructType && !typeObj.IsPredefined)
-                {
-                    field.FieldWithType.Field().isAssigned = true;
-                }
 
                 pObject = tryConvert(pObject, swt.GetType(), CONVERTTYPE.NOUDC);
                 Debug.Assert(pObject != null);
@@ -1401,24 +1392,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-        // Sets the isAssigned bit
-
-        private void markFieldAssigned(Expr expr)
-        {
-            if (0 != (expr.Flags & EXPRFLAG.EXF_LVALUE) && expr is ExprField field)
-            {
-                FieldSymbol symbol;
-                do
-                {
-                    symbol = field.FieldWithType.Field();
-                    symbol.isAssigned = true;
-                    expr = field.OptionalObject;
-                }
-                while (symbol.getClass().IsStruct() && !symbol.isStatic && expr != null && (field = expr as ExprField) != null);
-            }
-        }
-
         private static readonly PredefinedType[] s_rgptIntOp =
         {
             PredefinedType.PT_INT,
@@ -1426,8 +1399,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             PredefinedType.PT_LONG,
             PredefinedType.PT_ULONG
         };
-
-
 
         internal CType ChooseArrayIndexType(Expr args)
         {
