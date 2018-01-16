@@ -466,11 +466,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(mwi.Sym is MethodSymbol && (!mwi.Meth().isOverride || mwi.Meth().isHideByName));
             Debug.Assert(pMemGroup != null);
 
-            bool fConstrained;
             Expr pObject = pMemGroup.OptionalObject;
             CType callingObjectType = pObject?.Type;
             PostBindMethod(mwi);
-            pObject = AdjustMemberObject(mwi, pObject, out fConstrained);
+            pObject = AdjustMemberObject(mwi, pObject);
             pMemGroup.OptionalObject = pObject;
 
             CType pReturnType;
@@ -498,14 +497,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            if (fConstrained && pObject != null)
-            {
-                // Use the constrained prefix.
-                pResult.Flags |= EXPRFLAG.EXF_CONSTRAINED;
-            }
-
             verifyMethodArgs(pResult, callingObjectType);
-
             return pResult;
         }
 
@@ -518,7 +510,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(fwt.GetType() != null && fwt.Field().getClass() == fwt.GetType().OwningAggregate);
 
             CType pFieldType = GetTypes().SubstType(fwt.Field().GetType(), fwt.GetType());
-            pOptionalObject = AdjustMemberObject(fwt, pOptionalObject, out _);
+            pOptionalObject = AdjustMemberObject(fwt, pOptionalObject);
 
             checkUnsafe(pFieldType); // added to the binder so we don't bind to pointer ops
 
@@ -597,8 +589,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     pwt.Prop().getClass() == pwt.GetType().OwningAggregate);
             Debug.Assert(pwt.Prop().Params.Count == 0 || pwt.Prop() is IndexerSymbol);
 
-            bool fConstrained;
-
             // We keep track of the type of the pObject which we're doing the call through so that we can report 
             // protection access errors later, either below when binding the get, or later when checking that
             // the setter is actually an lvalue.
@@ -613,15 +603,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                      )
                 )
             {
-                pObject = AdjustMemberObject(mwtGet, pObject, out fConstrained);
+                pObject = AdjustMemberObject(mwtGet, pObject);
             }
             else if (mwtSet)
             {
-                pObject = AdjustMemberObject(mwtSet, pObject, out fConstrained);
+                pObject = AdjustMemberObject(mwtSet, pObject);
             }
             else
             {
-                pObject = AdjustMemberObject(pwt, pObject, out fConstrained);
+                pObject = AdjustMemberObject(pwt, pObject);
             }
 
             pMemGroup.OptionalObject = pObject;
@@ -657,12 +647,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             ExprProperty result = GetExprFactory().CreateProperty(pReturnType, pObjectThrough, args, pMemGroup, pwt, mwtSet);
-            if (fConstrained && pObject != null)
-            {
-                // Use the constrained prefix.
-                result.Flags |= EXPRFLAG.EXF_CONSTRAINED;
-            }
-
             if (result.OptionalArguments != null)
             {
                 verifyMethodArgs(result, pObjectThrough?.Type);
@@ -1075,13 +1059,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        private Expr AdjustMemberObject(SymWithType swt, Expr pObject, out bool pfConstrained)
+        private Expr AdjustMemberObject(SymWithType swt, Expr pObject)
         {
             // Assert that the type is present and is an instantiation of the member's parent.
             Debug.Assert(swt.GetType() != null && swt.GetType().OwningAggregate == swt.Sym.parent as AggregateSymbol);
             bool bIsMatchingStatic = IsMatchingStatic(swt, pObject);
-            pfConstrained = false;
-
             bool isStatic = swt.Sym.isStatic;
 
             // If our static doesn't match, bail out of here.
@@ -1140,15 +1122,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     typeObj.IsStructType && !typeObj.IsPredefined)
                 {
                     field.FieldWithType.Field().isAssigned = true;
-                }
-
-                if (pfConstrained &&
-                    (typeObj is TypeParameterType ||
-                     typeObj.IsStructType && swt.GetType().IsReferenceType && swt.Sym.IsVirtual()))
-                {
-                    // For calls on type parameters or virtual calls on struct types (not enums),
-                    // use the constrained prefix.
-                    pfConstrained = true;
                 }
 
                 pObject = tryConvert(pObject, swt.GetType(), CONVERTTYPE.NOUDC);
