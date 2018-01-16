@@ -20,7 +20,7 @@ namespace System.Buffers.Text
         internal const string HexTableLower = "0123456789abcdef";
 
         internal const string HexTableUpper = "0123456789ABCDEF";
-        
+
         /// <summary>
         /// Returns the symbol contained within the standard format. If the standard format
         /// has not been initialized, returns the provided fallback symbol.

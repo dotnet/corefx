@@ -42,7 +42,7 @@ namespace System.Buffers.Text
             // Int64.MinValue = -9,223,372,036,854,775,808 (26 digits, including minus and commas)
             // Int64.MaxValue =  9,223,372,036,854,775,807
 
-            bool retVal = TryFormatUInt64N((ulong)Int64.MaxValue, precision, buffer, true /* insertNegationSign */, out int tempBytesWritten);
+            bool retVal = TryFormatUInt64N((ulong)Int64.MaxValue, precision, buffer, insertNegationSign: true, out int tempBytesWritten);
             if (retVal)
             {
                 buffer[25]++; // bump the last ASCII '7' to an '8'
