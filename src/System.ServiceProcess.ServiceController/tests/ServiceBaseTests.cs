@@ -120,8 +120,7 @@ OnStop
             {
                 controller.Pause();
                 Console.WriteLine("hi");
-                client.WaitForPipeDrain();
-                Console.WriteLine("hi");
+                // client.WaitForPipeDrain();
                 Assert.Equal("Pause", reader.ReadLine());
 
                 controller.Stop();
@@ -214,18 +213,28 @@ OnStop
 
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnContinueBeforePause()
-        {
-            var controller = new ServiceController(_testService.TestServiceName);
+        {            
+
+            var serviceName = _testService.TestServiceName;
+            var controller = new ServiceController(serviceName);
             AssertExpectedProperties(controller);
-            string expected =
-@"OnStart args=
-OnStop
-";
-            controller.Continue();
-            controller.WaitForStatus(ServiceControllerStatus.Running);
-            controller.Stop();
-            controller.WaitForStatus(ServiceControllerStatus.Stopped);
-            Assert.Equal(expected, _testService.GetServiceOutput());
+            var client = new NamedPipeClientStream(serviceName);
+            StreamReader reader = new StreamReader(client);
+
+            try
+            {
+                client.Connect();
+                controller.Continue();
+                Assert.Equal("Continue", reader.ReadLine());
+                controller.Pause();
+               // Assert.Equal("Pause", reader.ReadLine());
+                controller.Stop();
+            }
+            finally
+            {
+                reader.Dispose();
+                client.Dispose();
+            }
         }
 
         [ConditionalFact(nameof(IsElevatedAndSupportsEventLogs))]

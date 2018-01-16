@@ -48,46 +48,21 @@ namespace System.ServiceProcess.Tests
         {
             WriteLog(nameof(OnContinue));
             base.OnContinue();
-            lock (streamlock)
-            {
-
-                using (StreamWriter writer = new StreamWriter(Server))
-                {
-                    writer.WriteLine("Continue");
-                    writer.Flush();
-
-                }
-            }
+            WriteStream("Continue");
         }
 
         protected override void OnCustomCommand(int command)
         {
             WriteLog(nameof(OnCustomCommand) + " command=" + command);
             base.OnCustomCommand(command);
-            lock(streamlock)
-            {
-                using (StreamWriter writer = new StreamWriter(Server))
-                {
-                    writer.WriteLine("executeCommand");
-                    writer.Flush();
-                }
-            }
+            WriteStream("executeCommand");
         }
 
         protected override void OnPause()
         {
             WriteLog(nameof(OnPause));
             base.OnPause();
-            lock (streamlock)
-            {
-
-                using (StreamWriter writer = new StreamWriter(Server))
-                {
-                    writer.WriteLine("Pause");
-                    writer.Flush();
-
-                }
-            }
+            WriteStream("Pause");
         }
 
         protected override void OnSessionChange(SessionChangeDescription changeDescription)
@@ -120,21 +95,27 @@ namespace System.ServiceProcess.Tests
         {
             WriteLog(nameof(OnStop));
             base.OnStop();
+            WriteStream("Stop");
+
+        }
+
+        private void WriteLog(string msg)
+        {
+             File.AppendAllText(GetLogPath(ServiceName), msg + Environment.NewLine);
+        }
+
+        private void WriteStream(string msg)
+        {
             Console.WriteLine("hit111");
             lock (streamlock)
             {
                 Console.WriteLine("hit");
                 using (StreamWriter writer = new StreamWriter(Server))
                 {
-                    writer.WriteLine("Stop");
+                    writer.WriteLine(msg);
                     writer.Flush();
                 }
             }
-        }
-
-        private void WriteLog(string msg)
-        {
-             File.AppendAllText(GetLogPath(ServiceName), msg + Environment.NewLine);
         }
     }
 }
