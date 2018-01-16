@@ -40,68 +40,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // We have a lvalue failure. Was the reason because this field
             // was marked readonly? Give special messages for this case.
 
-            bool isNested = false; // Did we recurse on a field or property to give a better error?
+            Debug.Assert(expr != null);
 
-            while (true)
+            // We've already reported read-only-property errors.
+            Debug.Assert(!(expr is ExprProperty), "No other property readonly failure possible.");
+            if (expr is ExprField field)
             {
-                Debug.Assert(expr != null);
-
-                Expr pObject = null;
-
-                if (expr is ExprProperty prop)
-                {
-                    // We've already reported read-only-property errors.
-                    Debug.Assert(prop.MethWithTypeSet != null);
-                    pObject = prop.MemberGroup.OptionalObject;
-                }
-                else if (expr is ExprField field)
-                {
-                    if (field.FieldWithType.Field().isReadOnly)
-                    {
-                        throw ReportReadOnlyError(field, isNested);
-                    }
-                    if (!field.FieldWithType.Field().isStatic)
-                    {
-                        pObject = field.OptionalObject;
-                    }
-                }
-
-                if (pObject != null && pObject.Type.IsStructOrEnum)
-                {
-                    if (pObject is ExprWithArgs withArgs)
-                    {
-                        // assigning to RHS of method or property getter returning a value-type on the stack or
-                        // passing RHS of method or property getter returning a value-type on the stack, as ref or out
-                        throw ErrorContext.Error(ErrorCode.ERR_ReturnNotLValue, withArgs.GetSymWithType());
-                    }
-                    if (pObject is ExprCast)
-                    {
-                        // An unboxing conversion.
-                        //
-                        // In the static compiler, we give the following error here:
-                        // ErrorContext.Error(pObject.GetTree(), ErrorCode.ERR_UnboxNotLValue);
-                        //
-                        // But in the runtime, we allow this - mark that we're doing an
-                        // unbox here, so that we gen the correct expression tree for it.
-                        pObject.Flags |= EXPRFLAG.EXF_UNBOXRUNTIME;
-                        return;
-                    }
-                }
-
-                // everything else
-                if (pObject != null && !pObject.isLvalue() && (expr is ExprField || !isNested))
-                {
-                    Debug.Assert(pObject.Type.IsStructOrEnum);
-                    Debug.Assert(!(pObject is ExprLocal));
-                    expr = pObject;
-                }
-                else
-                {
-                    throw ErrorContext.Error(GetStandardLvalueError(kind));
-                }
-
-                isNested = true;
+				Debug.Assert(field.FieldWithType.Field().isReadOnly);
+                throw ReportReadOnlyError(field, false);
             }
+
+            throw ErrorContext.Error(GetStandardLvalueError(kind));
         }
     }
 }
