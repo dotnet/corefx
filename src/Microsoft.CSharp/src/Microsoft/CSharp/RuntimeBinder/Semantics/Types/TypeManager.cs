@@ -699,8 +699,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(bindingContext != null);
             Debug.Assert(typeSrc != null);
 
-            typeDst = null;
-
             if (semanticChecker.CheckTypeAccess(typeSrc, bindingContext.ContextForMemberLookup))
             {
                 // If we already have an accessible type, then use it. This is the terminal point of the recursion.
@@ -711,30 +709,61 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // These guys have no accessibility concerns.
             Debug.Assert(!(typeSrc is VoidType) && !(typeSrc is TypeParameterType));
 
-            if (typeSrc is ParameterModifierType || typeSrc is PointerType)
-            {
-                // We cannot vary these.
-                return false;
-            }
-
             CType intermediateType;
-            if (typeSrc is AggregateType aggSrc && (aggSrc.IsInterfaceType || aggSrc.IsDelegateType) && TryVarianceAdjustmentToGetAccessibleType(semanticChecker, bindingContext, aggSrc, out intermediateType))
+            if (typeSrc is AggregateType aggSrc)
             {
-                // If we have an interface or delegate type, then it can potentially be varied by its type arguments
-                // to produce an accessible type, and if that's the case, then return that.
-                // Example: IEnumerable<PrivateConcreteFoo> --> IEnumerable<PublicAbstractFoo>
-                typeDst = intermediateType;
+                for (;;)
+                {
+                    if ((aggSrc.IsInterfaceType || aggSrc.IsDelegateType) && TryVarianceAdjustmentToGetAccessibleType(semanticChecker, bindingContext, aggSrc, out intermediateType))
+                    {
+                        // If we have an interface or delegate type, then it can potentially be varied by its type arguments
+                        // to produce an accessible type, and if that's the case, then return that.
+                        // Example: IEnumerable<PrivateConcreteFoo> --> IEnumerable<PublicAbstractFoo>
+                        typeDst = intermediateType;
 
-                Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
-                return true;
+                        Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
+                        return true;
+                    }
+
+                    // We have an AggregateType, so recurse on its base class.
+                    AggregateType baseType = aggSrc.BaseClass;
+                    if (baseType == null)
+                    {
+                        // This happens with interfaces, for instance. But in that case, the
+                        // conversion to object does exist, is an implicit reference conversion,
+                        // and is guaranteed to be accessible, so we will use it.
+                        typeDst = GetPredefAgg(PredefinedType.PT_OBJECT).getThisType();
+                        return true;
+                    }
+
+                    if (semanticChecker.CheckTypeAccess(baseType, bindingContext.ContextForMemberLookup))
+                    {
+                        typeDst = baseType;
+                        return true;
+                    }
+
+                    // baseType is always an AggregateType, so no need for logic of other types.
+                    aggSrc = baseType;
+                }
             }
 
-            if (typeSrc is ArrayType arrSrc && TryArrayVarianceAdjustmentToGetAccessibleType(semanticChecker, bindingContext, arrSrc, out intermediateType))
+            if (typeSrc is ArrayType arrSrc)
             {
-                // Similarly to the interface and delegate case, arrays are covariant in their element type and
-                // so we can potentially produce an array type that is accessible.
-                // Example: PrivateConcreteFoo[] --> PublicAbstractFoo[]
-                typeDst = intermediateType;
+                if (TryArrayVarianceAdjustmentToGetAccessibleType(
+                    semanticChecker, bindingContext, arrSrc, out intermediateType))
+                {
+                    // Similarly to the interface and delegate case, arrays are covariant in their element type and
+                    // so we can potentially produce an array type that is accessible.
+                    // Example: PrivateConcreteFoo[] --> PublicAbstractFoo[]
+                    typeDst = intermediateType;
+
+                    Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
+                    return true;
+                }
+
+                // We have an inaccessible array type for which we could not earlier find a better array type
+                // with a covariant conversion, so the best we can do is System.Array.
+                typeDst = GetPredefAgg(PredefinedType.PT_ARRAY).getThisType();
 
                 Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
                 return true;
@@ -749,34 +778,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            if (typeSrc is ArrayType)
-            {
-                // We have an inaccessible array type for which we could not earlier find a better array type
-                // with a covariant conversion, so the best we can do is System.Array.
-                typeDst = GetPredefAgg(PredefinedType.PT_ARRAY).getThisType();
-
-                Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, bindingContext.ContextForMemberLookup));
-                return true;
-            }
-
-            Debug.Assert(typeSrc is AggregateType);
-
-            if (typeSrc is AggregateType aggType)
-            {
-                // We have an AggregateType, so recurse on its base class.
-                AggregateType baseType = aggType.BaseClass;
-
-                if (baseType == null)
-                {
-                    // This happens with interfaces, for instance. But in that case, the
-                    // conversion to object does exist, is an implicit reference conversion,
-                    // and so we will use it.
-                    baseType = GetPredefAgg(PredefinedType.PT_OBJECT).getThisType();
-                }
-
-                return GetBestAccessibleType(semanticChecker, bindingContext, baseType, out typeDst);
-            }
-
+            // We cannot vary these.
+            Debug.Assert(typeSrc is ParameterModifierType || typeSrc is PointerType);
+            typeDst = null;
             return false;
         }
 
