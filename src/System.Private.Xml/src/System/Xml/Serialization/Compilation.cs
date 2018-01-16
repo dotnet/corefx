@@ -176,42 +176,31 @@ namespace System.Xml.Serialization
                     {
                         serializerPath = Path.Combine(Path.GetDirectoryName(type.Assembly.Location), serializerName + ".dll");
                     }
-                }
-                catch
-                {
-                }
 
-                try
-                {
                     if ((string.IsNullOrEmpty(serializerPath) || !File.Exists(serializerPath)) && !string.IsNullOrEmpty(Assembly.GetEntryAssembly().Location))
                     {
                         serializerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), serializerName + ".dll");
                     }
-                }
-                catch
-                {
-                }
- 
-                if (!string.IsNullOrEmpty(serializerPath))
-                {
-                    try
+
+                    if (!string.IsNullOrEmpty(serializerPath))
                     {
                         serializer = Assembly.LoadFile(serializerPath);
                     }
-                    catch (Exception e)
+                }
+                catch (Exception e)
+                {
+                    if (e is OutOfMemoryException)
                     {
-                        if (e is OutOfMemoryException)
-                        {
-                            throw;
-                        }
-                        byte[] token = name.GetPublicKeyToken();
-                        if (token != null && token.Length > 0)
-                        {
-                            // the parent assembly was signed, so do not try to LoadWithPartialName
-                            return null;
-                        }
+                        throw;
+                    }
+                    byte[] token = name.GetPublicKeyToken();
+                    if (token != null && token.Length > 0)
+                    {
+                        // the parent assembly was signed, so do not try to LoadWithPartialName
+                        return null;
                     }
                 }
+
 
                 if (serializer == null)
                 {
