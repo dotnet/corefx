@@ -655,11 +655,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 verifyMethodArgs(result, pObjectThrough?.Type);
             }
 
-            if (mwtSet)
-            {
-                Debug.Assert(objectIsLvalue(result.MemberGroup.OptionalObject));
-                result.Flags |= EXPRFLAG.EXF_LVALUE;
-            }
+            Debug.Assert(objectIsLvalue(result.MemberGroup.OptionalObject));
 
             return result;
         }
