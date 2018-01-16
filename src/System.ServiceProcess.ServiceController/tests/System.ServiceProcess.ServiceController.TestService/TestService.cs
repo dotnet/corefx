@@ -19,6 +19,7 @@ namespace System.ServiceProcess.Tests
     public class TestService : ServiceBase
     {
         private object streamlock = new object();
+
         public TestService(string serviceName)
         {
             this.ServiceName = serviceName;
@@ -49,9 +50,13 @@ namespace System.ServiceProcess.Tests
             base.OnContinue();
             lock (streamlock)
             {
-                StreamWriter writer = new StreamWriter(Server);
-                writer.WriteLine("Continue");
-                writer.Flush();
+
+                using (StreamWriter writer = new StreamWriter(Server))
+                {
+                    writer.WriteLine("Continue");
+                    writer.Flush();
+
+                }
             }
         }
 
@@ -61,9 +66,11 @@ namespace System.ServiceProcess.Tests
             base.OnCustomCommand(command);
             lock(streamlock)
             {
-                StreamWriter writer = new StreamWriter(Server);
-                writer.WriteLine("executeCommand");
-                writer.Flush();
+                using (StreamWriter writer = new StreamWriter(Server))
+                {
+                    writer.WriteLine("executeCommand");
+                    writer.Flush();
+                }
             }
         }
 
@@ -73,9 +80,13 @@ namespace System.ServiceProcess.Tests
             base.OnPause();
             lock (streamlock)
             {
-                StreamWriter writer = new StreamWriter(Server);
-                writer.WriteLine("Pause");
-                writer.Flush();
+
+                using (StreamWriter writer = new StreamWriter(Server))
+                {
+                    writer.WriteLine("Pause");
+                    writer.Flush();
+
+                }
             }
         }
 
@@ -109,11 +120,15 @@ namespace System.ServiceProcess.Tests
         {
             WriteLog(nameof(OnStop));
             base.OnStop();
+            Console.WriteLine("hit111");
             lock (streamlock)
             {
-                StreamWriter writer = new StreamWriter(Server);
-                writer.WriteLine("Stop");
-                writer.Flush();
+                Console.WriteLine("hit");
+                using (StreamWriter writer = new StreamWriter(Server))
+                {
+                    writer.WriteLine("Stop");
+                    writer.Flush();
+                }
             }
         }
 

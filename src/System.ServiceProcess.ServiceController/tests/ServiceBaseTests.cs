@@ -155,13 +155,13 @@ OnStop
                 controller.Continue();
                 Console.WriteLine("hi");
                 Console.WriteLine("hello");
-                //Assert.Equal("Continue", reader.ReadToEnd());
+                Assert.Equal("Continue", reader.ReadLine());
 
                 Console.WriteLine("hello1");
                 controller.Stop();
                 Console.WriteLine("hi");
                 //client.WaitForPipeDrain();
-                //Assert.Equal("Stop", reader.ReadLine());                
+                Assert.Equal("Stop", reader.ReadLine());                
             }
             finally
             {
