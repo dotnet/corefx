@@ -65,7 +65,7 @@ int32_t SystemNative_IsATty(intptr_t fd);
  *
  * Returns 1 on success; otherwise returns 0 and sets errno.
  */
-int32_t SystemNative_InitializeConsole();
+int32_t SystemNative_InitializeConsole(void);
 
 /**
  * Stores the string that can be written to stdout to transition
@@ -90,7 +90,7 @@ void SystemNative_GetControlCharacters(
 /**
  * Returns 1 if any input is waiting on stdin; otherwise, 0.
  */
-int32_t SystemNative_StdinReady();
+int32_t SystemNative_StdinReady(void);
 
 /**
  * Initializes the terminal in preparation for a read operation.
@@ -100,7 +100,7 @@ void SystemNative_InitializeConsoleBeforeRead(uint8_t minChars, uint8_t deciseco
 /**
  * Restores the terminal's attributes to what they were before InitializeConsoleBeforeRead was called.
  */
-void SystemNative_UninitializeConsoleAfterRead();
+void SystemNative_UninitializeConsoleAfterRead(void);
 
 /**
  * Reads the number of bytes specified into the provided buffer from stdin.
@@ -111,7 +111,7 @@ int32_t SystemNative_ReadStdin(void* buffer, int32_t bufferSize);
 /**
  * Gets the terminal's break mode.
  */
-int32_t SystemNative_GetSignalForBreak();
+int32_t SystemNative_GetSignalForBreak(void);
 
 /**
  * Configures the terminal's break mode.
@@ -132,11 +132,11 @@ typedef int32_t (*CtrlCallback)(enum CtrlCode signalCode);
 /**
  * Called by pal_signal.cpp to reinitialize the console on SIGCONT/SIGCHLD.
  */
-void ReinitializeConsole();
+void ReinitializeConsole(void);
 
 /**
  * Called by pal_signal.cpp to uninitialize the console on SIGINT/SIGQUIT.
  */
-void UninitializeConsole();
+void UninitializeConsole(void);
 
 END_EXTERN_C

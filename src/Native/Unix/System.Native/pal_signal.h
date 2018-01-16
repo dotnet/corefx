@@ -15,7 +15,7 @@ BEGIN_EXTERN_C
  *
  * Returns 1 on success; otherwise returns 0 and sets errno.
  */
-int32_t SystemNative_InitializeSignalHandling();
+int32_t SystemNative_InitializeSignalHandling(void);
 
 /**
  * Hooks up the specified callback for notifications when SIGINT or SIGQUIT is received.
@@ -37,9 +37,9 @@ void SystemNative_RegisterForCtrl(CtrlCallback callback);
  * previously registered must remain valid until all ctrl handling activity
  * has quiesced.
  */
-void SystemNative_UnregisterForCtrl();
+void SystemNative_UnregisterForCtrl(void);
 
-typedef void (*SigChldCallback)();
+typedef void (*SigChldCallback)(void);
 
 /**
  * Hooks up the specified callback for notifications when SIGCHLD is received.
@@ -54,6 +54,6 @@ void SystemNative_RegisterForSigChld(SigChldCallback callback);
 /**
  * Calls the original SIGCHLD handler.
  */
-void SystemNative_ResumeSigChld();
+void SystemNative_ResumeSigChld(void);
 
 END_EXTERN_C
