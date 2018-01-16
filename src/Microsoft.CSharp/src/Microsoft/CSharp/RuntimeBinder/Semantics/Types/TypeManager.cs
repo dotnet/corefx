@@ -708,18 +708,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // These guys have no accessibility concerns.
             Debug.Assert(!(typeSrc is VoidType) && !(typeSrc is TypeParameterType));
 
-            CType intermediateType;
             if (typeSrc is AggregateType aggSrc)
             {
                 for (;;)
                 {
-                    if ((aggSrc.IsInterfaceType || aggSrc.IsDelegateType) && TryVarianceAdjustmentToGetAccessibleType(semanticChecker, context, aggSrc, out intermediateType))
+                    if ((aggSrc.IsInterfaceType || aggSrc.IsDelegateType) && TryVarianceAdjustmentToGetAccessibleType(semanticChecker, context, aggSrc, out typeDst))
                     {
                         // If we have an interface or delegate type, then it can potentially be varied by its type arguments
                         // to produce an accessible type, and if that's the case, then return that.
                         // Example: IEnumerable<PrivateConcreteFoo> --> IEnumerable<PublicAbstractFoo>
-                        typeDst = intermediateType;
-
                         Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, context));
                         return true;
                     }
@@ -748,13 +745,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (typeSrc is ArrayType arrSrc)
             {
-                if (TryArrayVarianceAdjustmentToGetAccessibleType(semanticChecker, context, arrSrc, out intermediateType))
+                if (TryArrayVarianceAdjustmentToGetAccessibleType(semanticChecker, context, arrSrc, out typeDst))
                 {
                     // Similarly to the interface and delegate case, arrays are covariant in their element type and
                     // so we can potentially produce an array type that is accessible.
                     // Example: PrivateConcreteFoo[] --> PublicAbstractFoo[]
-                    typeDst = intermediateType;
-
                     Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, context));
                     return true;
                 }
@@ -803,7 +798,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             TypeArray typeParams = aggOpenType.TypeArgsThis;
             CType[] newTypeArgsTemp = new CType[typeArgs.Count];
 
-            for (int i = 0; i < typeArgs.Count; i++)
+            for (int i = 0; i < newTypeArgsTemp.Length; i++)
             {
                 if (semanticChecker.CheckTypeAccess(typeArgs[i], context))
                 {
@@ -818,23 +813,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return false;
                 }
 
-                if (GetBestAccessibleType(semanticChecker, context, typeArgs[i], out CType intermediateTypeArg))
-                {
-                    // now we either have a value type (which must be accessible due to the above
-                    // check, OR we have an inaccessible type (which must be a ref type). In either
-                    // case, the recursion worked out and we are OK to vary this argument.
-                    newTypeArgsTemp[i] = intermediateTypeArg;
-                    continue;
-                }
-                else
+                if (!GetBestAccessibleType(semanticChecker, context, typeArgs[i], out newTypeArgsTemp[i]))
                 {
                     Debug.Assert(false, "GetBestAccessibleType unexpectedly failed on a type that was used as a type parameter");
                     return false;
                 }
+
+                // now we either have a value type (which must be accessible due to the above
+                // check, OR we have an inaccessible type (which must be a ref type). In either
+                // case, the recursion worked out and we are OK to vary this argument.
             }
 
             TypeArray newTypeArgs = semanticChecker.getBSymmgr().AllocParams(typeArgs.Count, newTypeArgsTemp);
-            CType intermediateType = this.GetAggregate(aggSym, typeSrc.OuterType, newTypeArgs);
+            CType intermediateType = GetAggregate(aggSym, typeSrc.OuterType, newTypeArgs);
 
             // All type arguments were varied successfully, which means now we must be accessible. But we could
             // have violated constraints. Let's check that out.
