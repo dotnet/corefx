@@ -251,6 +251,7 @@ namespace System.Text.Tests
             yield return new object[] { new StringBuilder("Hello"), sb1, 2, 2, "Helloll" };
             yield return new object[] { new StringBuilder("Hello"), sb1, 2, 0, "Hello" };
             yield return new object[] { new StringBuilder("Hello"), new StringBuilder(), 0, 0, "Hello" };
+            yield return new object[] { new StringBuilder("Hello"), null, 0, 0, "Hello" };
             yield return new object[] { new StringBuilder(), new StringBuilder("Hello"), 2, 3, "llo" };
             yield return new object[] { new StringBuilder("Hello"), sb2, 0, 3, "Helloone" };
 
@@ -286,6 +287,9 @@ namespace System.Text.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => sb.Append(sb, 4, 5));
             
             Assert.Throws<ArgumentNullException>(() => sb.Append( (StringBuilder)null, 2, 2));
+            Assert.Throws<ArgumentNullException>(() => sb.Append((StringBuilder)null, 2, 3));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new StringBuilder(3, 6).Append("Hello").Append(sb));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new StringBuilder(3, 6).Append("Hello").Append("Hello"));
 
             Assert.Throws<ArgumentOutOfRangeException>(() => sb.Append(sb));
         }
