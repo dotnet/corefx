@@ -518,7 +518,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // Since dynamic objects for fields come from locals or casts/conversions on locals
             // (never properties) and hence always have EXF_LVALUE set, the first part of this is
             // always true, leaving the rest to be determined by the field ctor
-            Debug.Assert(objectIsLvalue(pOptionalObject));
+            AssertObjectIsLvalue(pOptionalObject);
 
             AggregateType fieldType = null;
             // If this field is the backing field of a WindowsRuntime event then we need to bind to its
@@ -655,7 +655,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 verifyMethodArgs(result, pObjectThrough?.Type);
             }
 
-            Debug.Assert(objectIsLvalue(result.MemberGroup.OptionalObject));
+            AssertObjectIsLvalue(result.MemberGroup.OptionalObject);
 
             return result;
         }
@@ -1160,10 +1160,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         ////////////////////////////////////////////////////////////////////////////////
         // this determines whether the expression as an pObject of a prop or field is an
         // lvalue
-
-        private bool objectIsLvalue(Expr pObject)
+        [Conditional("DEBUG")]
+        private void AssertObjectIsLvalue(Expr pObject)
         {
-            return (
+            Debug.Assert (
                        pObject == null ||  // statics are always lvalues
                        (((pObject.Flags & EXPRFLAG.EXF_LVALUE) != 0) && (pObject.Kind != ExpressionKind.Property)) ||
                        // things marked as lvalues have props/fields which are lvalues, with one exception:  props of structs
