@@ -530,7 +530,10 @@ namespace System.Runtime.Caching
             else {
                 if (s_includeThreadPrefix) {
                     idThread = Thread.CurrentThread.ManagedThreadId;
-                    idProcess = Process.GetCurrentProcess().Id;
+                    using(var process = Process.GetCurrentProcess())
+                    {
+                        idProcess = process.Id;
+                    }
                     traceFormat = "[0x{0:x}.{1:x} {2} {3}] {4}\n{5}";
                 }
                 else {
@@ -616,6 +619,11 @@ Stack trace:
 
 A=Exit process R=Debug I=Continue";
             }
+            int idProcess = 0;
+            using (var process = Process.GetCurrentProcess())
+            {
+                idProcess = process.Id;
+            }
 
             string dialogMessage = string.Format(
                 CultureInfo.InvariantCulture,
@@ -623,35 +631,9 @@ A=Exit process R=Debug I=Continue";
                 message,
                 fileName, lineNumber,
                 COMPONENT,
-                Process.GetCurrentProcess().Id, Thread.CurrentThread.ManagedThreadId,
+                idProcess, Thread.CurrentThread.ManagedThreadId,
                 trace.ToString());
 
-            //MBResult mbResult = new MBResult();
-
-            //Thread thread = new Thread(
-            //    delegate() {
-            //        for (int i = 0; i < 100; i++) {
-            //            NativeMethods.MSG msg = new NativeMethods.MSG();
-            //            NativeMethods.PeekMessage(ref msg, new HandleRef(mbResult, IntPtr.Zero), 0, 0, NativeMethods.PM_REMOVE);
-            //        }
-
-            //        mbResult.Result = NativeMethods.MessageBox(new HandleRef(mbResult, IntPtr.Zero), dialogMessage, PRODUCT + " Assertion",                
-            //            NativeMethods.MB_SERVICE_NOTIFICATION | 
-            //            NativeMethods.MB_TOPMOST |
-            //            NativeMethods.MB_ABORTRETRYIGNORE | 
-            //            NativeMethods.MB_ICONEXCLAMATION);
-            //    }
-            //);
-
-            //thread.Start();
-            //thread.Join();
-
-            //if (mbResult.Result == NativeMethods.IDABORT) {
-            //    IntPtr currentProcess = NativeMethods.GetCurrentProcess();
-            //    NativeMethods.TerminateProcess(new HandleRef(mbResult, currentProcess), 1);
-            //}
-
-            //return mbResult.Result == NativeMethods.IDRETRY;
             Debug.Fail(dialogMessage);
             return true;
         }
@@ -832,22 +814,15 @@ A=Exit process R=Debug I=Continue";
         internal static void Break()
         {
 #if DEBUG
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && NativeMethods.IsDebuggerPresent()) 
             {
-                if (NativeMethods.IsDebuggerPresent()) 
-                {
-                    NativeMethods.DebugBreak();
-                }
-                else if (!Debugger.IsAttached) 
-                {
-                    Debugger.Launch();
-                }
-                else 
-                {
-                    Debugger.Break();            
-                }
+                NativeMethods.DebugBreak();
             }
-            else
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !Debugger.IsAttached) 
+            {
+                Debugger.Launch();
+            }
+            else 
             {
                 Debugger.Break();            
             }

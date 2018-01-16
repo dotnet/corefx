@@ -81,7 +81,7 @@ namespace System.Runtime.Caching
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Interop.Kernel32.MEMORYSTATUSEX memoryStatusEx = default;
-                memoryStatusEx.dwLength = (uint)Marshal.SizeOf(typeof(Interop.Kernel32.MEMORYSTATUSEX));
+                memoryStatusEx.dwLength = (uint)Marshal.SizeOf<Interop.Kernel32.MEMORYSTATUSEX>();
                 if (Interop.Kernel32.GlobalMemoryStatusEx(out memoryStatusEx) == 0)
                 {
                     return 0;

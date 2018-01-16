@@ -184,6 +184,6 @@
     <value>System.Runtime.Caching is not supported on this platform.</value>
   </data>
   <data name="PlatformNotSupported_PhysicalMemoryLimitPercentage" xml:space="preserve">
-    <value>PhysicalMemoryLimitPercentage parameter is not supported on this platform.</value>
+    <value>The PhysicalMemoryLimitPercentage parameter is not supported on this platform.</value>
   </data>
 </root>
