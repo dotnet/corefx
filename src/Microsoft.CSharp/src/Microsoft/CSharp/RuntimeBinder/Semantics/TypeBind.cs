@@ -36,30 +36,29 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             type = type.GetNakedType(false);
 
-            if (type is NullableType nub)
-            {
-                type = nub.GetAts();
-            }
-
             if (!(type is AggregateType ats))
-                return true;
+            {
+                if (type is NullableType nub)
+                {
+                    ats = nub.GetAts();
+                }
+                else
+                {
+                    return true;
+                }
+            }
 
             if (ats.TypeArgsAll.Count == 0)
             {
                 // Common case: there are no type vars, so there are no constraints.
-                ats.fConstraintsChecked = true;
-                ats.fConstraintError = false;
+                ats.ConstraintError = false;
                 return true;
             }
 
-            if (ats.fConstraintsChecked)
+            // Already checked and no errors.
+            if (ats.ConstraintError == false)
             {
-                // Already checked.
-                if (!ats.fConstraintError)
-                {
-                    // No errors or no need to report errors again.
-                    return !ats.fConstraintError;
-                }
+                return true;
             }
 
             TypeArray typeVars = ats.OwningAggregate.GetTypeVars();
@@ -68,35 +67,39 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(typeVars.Count == typeArgsThis.Count);
 
-            if (!ats.fConstraintsChecked)
+            if (!ats.ConstraintError.HasValue)
             {
-                ats.fConstraintsChecked = true;
-                ats.fConstraintError = false;
+                ats.ConstraintError = false;
             }
 
             // Check the outer type first. If CheckConstraintsFlags.Outer is not specified and the
             // outer type has already been checked then don't bother checking it.
-            if (ats.OuterType != null && ((flags & CheckConstraintsFlags.Outer) != 0 || !ats.OuterType.fConstraintsChecked))
+            if (ats.OuterType != null && ((flags & CheckConstraintsFlags.Outer) != 0 || !ats.OuterType.ConstraintError.HasValue))
             {
                 CheckConstraints(checker, errHandling, ats.OuterType, flags);
-                ats.fConstraintError |= ats.OuterType.fConstraintError;
+                ats.ConstraintError = ats.OuterType.ConstraintError;
             }
 
             if (typeVars.Count > 0)
-                ats.fConstraintError |= !CheckConstraintsCore(checker, errHandling, ats.OwningAggregate, typeVars, typeArgsThis, typeArgsAll, null, (flags & CheckConstraintsFlags.NoErrors));
+            {
+                ats.ConstraintError |= !CheckConstraintsCore(checker, errHandling, ats.OwningAggregate, typeVars, typeArgsThis, typeArgsAll, null, (flags & CheckConstraintsFlags.NoErrors));
+            }
 
             // Now check type args themselves.
             for (int i = 0; i < typeArgsThis.Count; i++)
             {
                 CType arg = typeArgsThis[i].GetNakedType(true);
-                if (arg is AggregateType atArg && !atArg.fConstraintsChecked)
+                if (arg is AggregateType atArg && !atArg.ConstraintError.HasValue)
                 {
                     CheckConstraints(checker, errHandling, atArg, flags | CheckConstraintsFlags.Outer);
-                    if (atArg.fConstraintError)
-                        ats.fConstraintError = true;
+                    if (atArg.ConstraintError.GetValueOrDefault())
+                    {
+                        ats.ConstraintError = true;
+                    }
                 }
             }
-            return !ats.fConstraintError;
+
+            return !ats.ConstraintError.GetValueOrDefault();
         }
 
         ////////////////////////////////////////////////////////////////////////////////

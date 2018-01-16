@@ -122,7 +122,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 pAggregate = new AggregateType(agg, typeArgs, atsOuter);
 
-                Debug.Assert(!pAggregate.fConstraintsChecked && !pAggregate.fConstraintError);
+                Debug.Assert(!pAggregate.ConstraintError.HasValue);
 
                 _typeTable.InsertAggregate(agg, atsOuter, typeArgs, pAggregate);
             }

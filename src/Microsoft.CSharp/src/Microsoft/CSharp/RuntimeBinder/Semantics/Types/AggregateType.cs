@@ -64,8 +64,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 .ConcatenateTypeArrays(outerType != null ? outerType.TypeArgsAll : BSYMMGR.EmptyTypeArray(), typeArgsThis);
         }
 
-        public bool fConstraintsChecked;    // Have the constraints been checked yet?
-        public bool fConstraintError;       // Did the constraints check produce an error?
+        public bool? ConstraintError;       // Did the constraints check produce an error?
 
         // These two flags are used to track hiding within interfaces.
         // Their use and validity is always localized. See e.g. MemberLookup::LookupInInterfaces.
