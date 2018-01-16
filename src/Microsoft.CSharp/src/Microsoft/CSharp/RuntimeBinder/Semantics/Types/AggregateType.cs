@@ -68,8 +68,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         // These two flags are used to track hiding within interfaces.
         // Their use and validity is always localized. See e.g. MemberLookup::LookupInInterfaces.
-        public bool fAllHidden;             // All members are hidden by a derived interface member.
-        public bool fDiffHidden;            // Members other than a specific kind are hidden by a derived interface member or class member.
+        public bool AllHidden;             // All members are hidden by a derived interface member.
+        public bool DiffHidden;            // Members other than a specific kind are hidden by a derived interface member or class member.
 
         public AggregateType OuterType { get; }         // the outer type if this is a nested type
 

@@ -297,7 +297,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                     else if (_swtFirst.Sym.getKind() != symCur.getKind())
                     {
-                        if (!typeCur.fDiffHidden)
+                        if (!typeCur.DiffHidden)
                         {
                             // Give method groups priority.
                             if (!(_swtFirst.Sym is MethodSymbol))
@@ -429,16 +429,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // kind of member in all the interfaces.
             if (typeStart != null)
             {
-                typeStart.fAllHidden = false;
-                typeStart.fDiffHidden = (_swtFirst != null);
+                typeStart.AllHidden = false;
+                typeStart.DiffHidden = (_swtFirst != null);
             }
 
             for (int i = 0; i < types.Count; i++)
             {
                 AggregateType type = (AggregateType)types[i];
                 Debug.Assert(type.IsInterfaceType);
-                type.fAllHidden = false;
-                type.fDiffHidden = !!_swtFirst;
+                type.AllHidden = false;
+                type.DiffHidden = !!_swtFirst;
             }
 
             bool fHideObject = false;
@@ -456,7 +456,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert(typeCur != null && typeCur.IsInterfaceType);
 
-                if (!typeCur.fAllHidden && SearchSingleType(typeCur, out bool fHideByName))
+                if (!typeCur.AllHidden && SearchSingleType(typeCur, out bool fHideByName))
                 {
                     fHideByName |= !_fMulti;
 
@@ -466,10 +466,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         Debug.Assert(type.IsInterfaceType);
                         if (fHideByName)
                         {
-                            type.fAllHidden = true;
+                            type.AllHidden = true;
                         }
 
-                        type.fDiffHidden = true;
+                        type.DiffHidden = true;
                     }
 
                     // If we hide all base types, that includes object!
