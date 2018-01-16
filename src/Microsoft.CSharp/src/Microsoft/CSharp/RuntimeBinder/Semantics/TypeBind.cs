@@ -55,10 +55,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            // Already checked and no errors.
-            if (ats.ConstraintError == false)
+            // Already checked.
+            if (ats.ConstraintError.HasValue)
             {
-                return true;
+                // No errors
+                if (!ats.ConstraintError.GetValueOrDefault())
+                {
+                    return true;
+                }
+
+                // We want the result, not an exception.
+                if ((flags & CheckConstraintsFlags.NoErrors) != 0)
+                {
+                    return false;
+                }
             }
 
             TypeArray typeVars = ats.OwningAggregate.GetTypeVars();
