@@ -177,7 +177,10 @@ namespace System.Xml.Serialization
 
                 try
                 {
-                    serializerPath = Path.Combine(Path.GetDirectoryName(type.Assembly.Location), serializerName + ".dll");
+                    if (!string.IsNullOrEmpty(type.Assembly.Location))
+                    {
+                        serializerPath = Path.Combine(Path.GetDirectoryName(type.Assembly.Location), serializerName + ".dll");
+                    }
                 }
                 catch
                 {
@@ -185,7 +188,7 @@ namespace System.Xml.Serialization
 
                 try
                 {
-                    if (string.IsNullOrEmpty(serializerPath) || !File.Exists(serializerPath))
+                    if ((string.IsNullOrEmpty(serializerPath) || !File.Exists(serializerPath)) && !string.IsNullOrEmpty(Assembly.GetEntryAssembly().Location))
                     {
                         serializerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), serializerName + ".dll");
                     }
