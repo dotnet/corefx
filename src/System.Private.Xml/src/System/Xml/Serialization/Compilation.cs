@@ -201,7 +201,6 @@ namespace System.Xml.Serialization
                     }
                 }
 
-
                 if (serializer == null)
                 {
                     if (XmlSerializer.Mode == SerializationMode.PreGenOnly)
