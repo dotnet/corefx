@@ -44,12 +44,15 @@ namespace System.Runtime.Caching
 
         static MemoryMonitor()
         {
-            Interop.Kernel32.MEMORYSTATUSEX memoryStatusEx;
-            memoryStatusEx.dwLength = (uint)Marshal.SizeOf(typeof(Interop.Kernel32.MEMORYSTATUSEX));
-            if (Interop.Kernel32.GlobalMemoryStatusEx(out memoryStatusEx) != 0)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                s_totalPhysical = (long)memoryStatusEx.ullTotalPhys;
-                s_totalVirtual = (long)memoryStatusEx.ullTotalVirtual;
+                Interop.Kernel32.MEMORYSTATUSEX memoryStatusEx = default;
+                memoryStatusEx.dwLength = (uint)Marshal.SizeOf(typeof(Interop.Kernel32.MEMORYSTATUSEX));
+                if (Interop.Kernel32.GlobalMemoryStatusEx(out memoryStatusEx) != 0)
+                {
+                    s_totalPhysical = (long)memoryStatusEx.ullTotalPhys;
+                    s_totalVirtual = (long)memoryStatusEx.ullTotalVirtual;
+                }
             }
         }
 

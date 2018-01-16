@@ -413,29 +413,35 @@ namespace System.Runtime.Caching
         }
 
         private static void MonitorRegistryForOneChange() {
-            // Close the open reg handle
-            if (s_regHandle != null) {
-                s_regHandle.Close();
-                s_regHandle = null;
-            }
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Close the open reg handle
+                if (s_regHandle != null) 
+                {
+                    s_regHandle.Close();
+                    s_regHandle = null;
+                }
 
-            // Open the reg key
-            int result = NativeMethods.RegOpenKeyEx(NativeMethods.HKEY_LOCAL_MACHINE, s_listenKeyName, 0, NativeMethods.KEY_READ, out s_regHandle);
-            if (result != 0) {
-                StopRegistryMonitor();
-                return;
-            }
+                // Open the reg key
+                int result = NativeMethods.RegOpenKeyEx(NativeMethods.HKEY_LOCAL_MACHINE, s_listenKeyName, 0, NativeMethods.KEY_READ, out s_regHandle);
+                if (result != 0) 
+                {
+                    StopRegistryMonitor();
+                    return;
+                }
 
-            // Listen for changes.
-            result = NativeMethods.RegNotifyChangeKeyValue(
-                    s_regHandle, 
-                    true, 
-                    NativeMethods.REG_NOTIFY_CHANGE_NAME | NativeMethods.REG_NOTIFY_CHANGE_LAST_SET,
-                    s_notifyEvent.SafeWaitHandle,
-                    true);
+                // Listen for changes.
+                result = NativeMethods.RegNotifyChangeKeyValue(
+                        s_regHandle, 
+                        true, 
+                        NativeMethods.REG_NOTIFY_CHANGE_NAME | NativeMethods.REG_NOTIFY_CHANGE_LAST_SET,
+                        s_notifyEvent.SafeWaitHandle,
+                        true);
 
-            if (result != 0) {
-                StopRegistryMonitor();
+                if (result != 0) 
+                {
+                    StopRegistryMonitor();
+                }
             }
         }
 
@@ -523,8 +529,8 @@ namespace System.Runtime.Caching
             }
             else {
                 if (s_includeThreadPrefix) {
-                    idThread = NativeMethods.GetCurrentThreadId();
-                    idProcess = NativeMethods.GetCurrentProcessId();
+                    idThread = Thread.CurrentThread.ManagedThreadId;
+                    idProcess = Process.GetCurrentProcess().Id;
                     traceFormat = "[0x{0:x}.{1:x} {2} {3}] {4}\n{5}";
                 }
                 else {
@@ -617,7 +623,7 @@ A=Exit process R=Debug I=Continue";
                 message,
                 fileName, lineNumber,
                 COMPONENT,
-                NativeMethods.GetCurrentProcessId(), NativeMethods.GetCurrentThreadId(),
+                Process.GetCurrentProcess().Id, Thread.CurrentThread.ManagedThreadId,
                 trace.ToString());
 
             //MBResult mbResult = new MBResult();
@@ -826,13 +832,23 @@ A=Exit process R=Debug I=Continue";
         internal static void Break()
         {
 #if DEBUG
-            if (NativeMethods.IsDebuggerPresent()) {
-                NativeMethods.DebugBreak();
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (NativeMethods.IsDebuggerPresent()) 
+                {
+                    NativeMethods.DebugBreak();
+                }
+                else if (!Debugger.IsAttached) 
+                {
+                    Debugger.Launch();
+                }
+                else 
+                {
+                    Debugger.Break();            
+                }
             }
-            else if (!Debugger.IsAttached) {
-                Debugger.Launch();
-            }
-            else {
+            else
+            {
                 Debugger.Break();            
             }
 #endif

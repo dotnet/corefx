@@ -78,15 +78,22 @@ namespace System.Runtime.Caching
 
         protected override int GetCurrentPressure()
         {
-            Interop.Kernel32.MEMORYSTATUSEX memoryStatusEx = default;
-            memoryStatusEx.dwLength = (uint)Marshal.SizeOf(typeof(Interop.Kernel32.MEMORYSTATUSEX));
-            if (Interop.Kernel32.GlobalMemoryStatusEx(out memoryStatusEx) == 0)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Interop.Kernel32.MEMORYSTATUSEX memoryStatusEx = default;
+                memoryStatusEx.dwLength = (uint)Marshal.SizeOf(typeof(Interop.Kernel32.MEMORYSTATUSEX));
+                if (Interop.Kernel32.GlobalMemoryStatusEx(out memoryStatusEx) == 0)
+                {
+                    return 0;
+                }
+
+                int memoryLoad = (int)memoryStatusEx.dwMemoryLoad;
+                return memoryLoad;
+            }
+            else
             {
                 return 0;
             }
-
-            int memoryLoad = (int)memoryStatusEx.dwMemoryLoad;
-            return memoryLoad;
         }
 
         internal override int GetPercentToTrim(DateTime lastTrimTime, int lastTrimPercent)
