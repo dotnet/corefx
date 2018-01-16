@@ -79,7 +79,7 @@ static struct termios g_currTermios = {};    // the current attributes set durin
 
 void UninitializeConsole()
 {
-    // pal_signal.cpp calls this on SIGKILL/SIGTERM.
+    // pal_signal.cpp calls this on SIGQUIT/SIGINT.
     // This can happen when SystemNative_InitializeConsole was not called.
 
     // Put the attributes back to what they were when the console was initially initialized.

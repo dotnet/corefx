@@ -20,7 +20,7 @@
 static struct sigaction g_origSigIntHandler, g_origSigQuitHandler; // saved signal handlers for ctrl handling
 static struct sigaction g_origSigContHandler, g_origSigChldHandler; // saved signal handlers for reinitialization
 static volatile CtrlCallback g_ctrlCallback = nullptr; // Callback invoked for SIGINT/SIGQUIT
-static volatile SigChldCallback g_sigChldCallback = nullptr; // Callback invoked for SIGINT/SIGQUIT
+static volatile SigChldCallback g_sigChldCallback = nullptr; // Callback invoked for SIGCHLD
 static int g_signalPipe[2] = {-1, -1}; // Pipe used between signal handler and worker
 
 static struct sigaction* OrigActionFor(int sig)
@@ -142,8 +142,7 @@ void* SignalHandlerLoop(void* arg)
                 // In general, we now want to remove our handler and reissue the signal to
                 // be picked up by the previously registered handler.  In the most common case,
                 // this will be the default handler, causing the process to be torn down.
-                // It could also be a custom handle registered by other code before us.
-
+                // It could also be a custom handler registered by other code before us.
                 UninitializeConsole();
                 sigaction(signalCode, OrigActionFor(signalCode), NULL);
                 kill(getpid(), signalCode);
@@ -260,6 +259,8 @@ static bool InitializeSignalHandling()
     }
 
     // Finally, register our signal handlers
+    // We don't handle ignored SIGINT/SIGQUIT signals. If we'd setup a handler, our child
+    // processes would reset to the default on exec causing them to terminate on these signals.
     InstallSignalHandler(SIGINT , /* overwriteIgnored */ false);
     InstallSignalHandler(SIGQUIT, /* overwriteIgnored */ false);
     InstallSignalHandler(SIGCONT);
