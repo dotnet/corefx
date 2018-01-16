@@ -517,9 +517,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // lvalue if the object is an lvalue (or it's static) and the field is not readonly.
             // Since dynamic objects for fields come from locals or casts/conversions on locals
             // (never properties) and hence always have EXF_LVALUE set, the first part of this is
-            // always true.
+            // always true, leaving the rest to be determined by the field ctor
             Debug.Assert(objectIsLvalue(pOptionalObject));
-            bool isLValue = fwt.Field().isReadOnly;
 
             AggregateType fieldType = null;
             // If this field is the backing field of a WindowsRuntime event then we need to bind to its
@@ -538,7 +537,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             ExprField pResult = GetExprFactory()
-                .CreateField(pFieldType, pOptionalObject, fwt, isLValue);
+                .CreateField(pFieldType, pOptionalObject, fwt);
 
             Debug.Assert(BindingFlag.BIND_MEMBERSET == (BindingFlag)EXPRFLAG.EXF_MEMBERSET);
             pResult.Flags |= (EXPRFLAG)(bindFlags & BindingFlag.BIND_MEMBERSET);
