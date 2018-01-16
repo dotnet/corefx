@@ -20,36 +20,7 @@ namespace System.Buffers.Text
         internal const string HexTableLower = "0123456789abcdef";
 
         internal const string HexTableUpper = "0123456789ABCDEF";
-
-        // TODO: Where should the below method live? Ideally it should be publicly exposed
-        // since having blittable access to structs would be convenient.
-        // Should it be on BinaryPrimitives?
-
-        /// <summary>
-        /// Given a reference to a blittable value type, returns a Span that allows
-        /// access to the binary representation of the value.
-        /// </summary>
-        /// <remarks>
-        /// No copy is performed as part of this method's logic.
-        /// This is intended to be a "safe" API even though it's implemented in terms of unsafe casts.
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<byte> GetSpanForBlittable<T>(ref T value) where T : struct
-        {
-#if netstandard
-            if (SpanHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
-            }
-#else
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                ThrowHelper.ThrowArgumentException_InvalidTypeWithPointersNotSupported(typeof(T));
-            }
-#endif
-            return Span<byte>.DangerousCreate(null, ref Unsafe.As<T, byte>(ref value), Unsafe.SizeOf<T>());
-        }
-
+        
         /// <summary>
         /// Returns the symbol contained within the standard format. If the standard format
         /// has not been initialized, returns the provided fallback symbol.

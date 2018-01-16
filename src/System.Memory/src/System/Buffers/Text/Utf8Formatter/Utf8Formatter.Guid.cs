@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
+
 namespace System.Buffers.Text
 {
     public static partial class Utf8Formatter
@@ -105,10 +107,8 @@ namespace System.Buffers.Text
             // At this point, the low byte of flags contains the closing brace char (if any)
             // And since we're performing arithmetic shifting the high bit of flags is set (flags is negative) if dashes are required
 
-            // The JIT is smart enough to elide bounds checking on accesses to guidAsBytes[00 .. 15]
-            // since the Span returned by GetSpanForBlittable is known to have length 16 [= sizeof(Guid)].
-
-            var guidAsBytes = FormattingHelpers.GetSpanForBlittable(ref value);
+            DecomposedGuid guidAsBytes = default;
+            guidAsBytes.Guid = value;
 
             // When a GUID is blitted, the first three components are little-endian, and the last component is big-endian.
 
@@ -118,10 +118,10 @@ namespace System.Buffers.Text
             // We use 8 instead of 7 so that we also capture the dash if we're asked to insert one.
 
             { var unused = buffer[8]; }
-            FormattingHelpers.WriteHexByte(guidAsBytes[3], buffer, 0, FormattingHelpers.HexCasing.Lowercase);
-            FormattingHelpers.WriteHexByte(guidAsBytes[2], buffer, 2, FormattingHelpers.HexCasing.Lowercase);
-            FormattingHelpers.WriteHexByte(guidAsBytes[1], buffer, 4, FormattingHelpers.HexCasing.Lowercase);
-            FormattingHelpers.WriteHexByte(guidAsBytes[0], buffer, 6, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte03, buffer, 0, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte02, buffer, 2, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte01, buffer, 4, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte00, buffer, 6, FormattingHelpers.HexCasing.Lowercase);
 
             if (flags < 0 /* use dash? */)
             {
@@ -134,8 +134,8 @@ namespace System.Buffers.Text
             }
 
             { var unused = buffer[4]; }
-            FormattingHelpers.WriteHexByte(guidAsBytes[5], buffer, 0, FormattingHelpers.HexCasing.Lowercase);
-            FormattingHelpers.WriteHexByte(guidAsBytes[4], buffer, 2, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte05, buffer, 0, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte04, buffer, 2, FormattingHelpers.HexCasing.Lowercase);
 
             if (flags < 0 /* use dash? */)
             {
@@ -148,8 +148,8 @@ namespace System.Buffers.Text
             }
 
             { var unused = buffer[4]; }
-            FormattingHelpers.WriteHexByte(guidAsBytes[7], buffer, 0, FormattingHelpers.HexCasing.Lowercase);
-            FormattingHelpers.WriteHexByte(guidAsBytes[6], buffer, 2, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte07, buffer, 0, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte06, buffer, 2, FormattingHelpers.HexCasing.Lowercase);
 
             if (flags < 0 /* use dash? */)
             {
@@ -162,8 +162,8 @@ namespace System.Buffers.Text
             }
 
             { var unused = buffer[4]; }
-            FormattingHelpers.WriteHexByte(guidAsBytes[8], buffer, 0, FormattingHelpers.HexCasing.Lowercase);
-            FormattingHelpers.WriteHexByte(guidAsBytes[9], buffer, 2, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte08, buffer, 0, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte09, buffer, 2, FormattingHelpers.HexCasing.Lowercase);
 
             if (flags < 0 /* use dash? */)
             {
@@ -176,12 +176,12 @@ namespace System.Buffers.Text
             }
 
             { var unused = buffer[11]; } // can't hoist bounds check on the final brace (if exists)
-            FormattingHelpers.WriteHexByte(guidAsBytes[10], buffer, 0, FormattingHelpers.HexCasing.Lowercase);
-            FormattingHelpers.WriteHexByte(guidAsBytes[11], buffer, 2, FormattingHelpers.HexCasing.Lowercase);
-            FormattingHelpers.WriteHexByte(guidAsBytes[12], buffer, 4, FormattingHelpers.HexCasing.Lowercase);
-            FormattingHelpers.WriteHexByte(guidAsBytes[13], buffer, 6, FormattingHelpers.HexCasing.Lowercase);
-            FormattingHelpers.WriteHexByte(guidAsBytes[14], buffer, 8, FormattingHelpers.HexCasing.Lowercase);
-            FormattingHelpers.WriteHexByte(guidAsBytes[15], buffer, 10, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte10, buffer, 0, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte11, buffer, 2, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte12, buffer, 4, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte13, buffer, 6, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte14, buffer, 8, FormattingHelpers.HexCasing.Lowercase);
+            FormattingHelpers.WriteHexByte(guidAsBytes.Byte15, buffer, 10, FormattingHelpers.HexCasing.Lowercase);
 
             if ((byte)flags != 0)
             {
@@ -189,6 +189,31 @@ namespace System.Buffers.Text
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Used to provide access to the individual bytes of a GUID.
+        /// </summary>
+        [StructLayout(LayoutKind.Explicit)]
+        private struct DecomposedGuid
+        {
+            [FieldOffset(00)] public Guid Guid;
+            [FieldOffset(00)] public byte Byte00;
+            [FieldOffset(01)] public byte Byte01;
+            [FieldOffset(02)] public byte Byte02;
+            [FieldOffset(03)] public byte Byte03;
+            [FieldOffset(04)] public byte Byte04;
+            [FieldOffset(05)] public byte Byte05;
+            [FieldOffset(06)] public byte Byte06;
+            [FieldOffset(07)] public byte Byte07;
+            [FieldOffset(08)] public byte Byte08;
+            [FieldOffset(09)] public byte Byte09;
+            [FieldOffset(10)] public byte Byte10;
+            [FieldOffset(11)] public byte Byte11;
+            [FieldOffset(12)] public byte Byte12;
+            [FieldOffset(13)] public byte Byte13;
+            [FieldOffset(14)] public byte Byte14;
+            [FieldOffset(15)] public byte Byte15;
         }
     }
 }
