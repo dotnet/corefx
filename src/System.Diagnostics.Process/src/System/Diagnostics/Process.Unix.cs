@@ -628,7 +628,7 @@ namespace System.Diagnostics
                 {
                     if (!Interop.Sys.InitializeSignalHandling())
                     {
-                        throw Interop.GetExceptionForIoErrno(Interop.Sys.GetLastErrorInfo());
+                        throw new Win32Exception();
                     }
 
                     Interop.Sys.RegisterForSigChld(s_sigChildHandler);

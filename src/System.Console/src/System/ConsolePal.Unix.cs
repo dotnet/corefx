@@ -4,6 +4,7 @@
 
 using Microsoft.Win32.SafeHandles;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -665,7 +666,7 @@ namespace System
                     // Ensure signal handling is setup.
                     if (!Interop.Sys.InitializeSignalHandling())
                     {
-                        throw Interop.GetExceptionForIoErrno(Interop.Sys.GetLastErrorInfo());
+                        throw new Win32Exception();
                     }
 
                     // Ensure the console is configured appropriately.
