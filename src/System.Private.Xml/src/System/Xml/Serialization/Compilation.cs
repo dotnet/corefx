@@ -206,7 +206,6 @@ namespace System.Xml.Serialization
                     }
                 }
 
-
                 if (serializer == null)
                 {
                     return null;
