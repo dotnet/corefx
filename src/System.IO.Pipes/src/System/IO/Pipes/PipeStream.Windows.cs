@@ -5,7 +5,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-using System.Security;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
@@ -412,6 +412,33 @@ namespace System.IO.Pipes
             return secAttrs;
         }
 
+        internal static unsafe Interop.Kernel32.SECURITY_ATTRIBUTES GetSecAttrs(HandleInheritability inheritability, PipeSecurity pipeSecurity, out object pinningHandle)
+        {
+            pinningHandle = null;
+            Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = GetSecAttrs(inheritability);
+
+            if (pipeSecurity != null)
+            {
+                // no inherability flag was found so we need to initialize secAttrs structure.
+                if (secAttrs.Equals(default(Interop.Kernel32.SECURITY_ATTRIBUTES)))
+                {
+                    secAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES();
+                    secAttrs.nLength = (uint)sizeof(Interop.Kernel32.SECURITY_ATTRIBUTES);
+                }
+
+                byte[] securityDescriptor = pipeSecurity.GetSecurityDescriptorBinaryForm();
+                pinningHandle = GCHandle.Alloc(securityDescriptor, GCHandleType.Pinned);
+                fixed (byte* pSecurityDescriptor = securityDescriptor)
+                {
+                    secAttrs.lpSecurityDescriptor = (IntPtr)pSecurityDescriptor;
+                }
+            }
+
+            return secAttrs;
+        }
+
+
+
         /// <summary>
         /// Determine pipe read mode from Win32 
         /// </summary>
@@ -463,5 +490,7 @@ namespace System.IO.Pipes
 
             return Win32Marshal.GetExceptionForWin32Error(errorCode);
         }
+
+        internal SecurityIdentifier GetCurrentUser() => WindowsIdentity.GetCurrent().Owner;
     }
 }

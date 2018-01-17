@@ -88,7 +88,7 @@ namespace System.IO.Pipes
             {
                 throw new ArgumentException(SR.Argument_NeedNonemptyPipeName);
             }
-            if ((options & ~(PipeOptions.WriteThrough | PipeOptions.Asynchronous)) != 0)
+            if ((options & ~(PipeOptions.WriteThrough | PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly)) != 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(options), SR.ArgumentOutOfRange_OptionsInvalid);
             }

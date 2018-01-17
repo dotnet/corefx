@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
+using System.Security.Principal;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.IO.Pipes.Tests
@@ -188,6 +190,13 @@ namespace System.IO.Pipes.Tests
                         safeHandle.DangerousRelease();
                 }
             }
+        }
+
+        [Fact]
+        public static void CreateServer_CurrentUserOnly()
+        {
+            // Should not throw.
+            new NamedPipeServerStream(GetUniquePipeName(), PipeDirection.InOut, 2, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly).Dispose();
         }
 
         [Theory]
