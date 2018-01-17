@@ -69,7 +69,7 @@ namespace System
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
-                ThrowHelper.ThrowArgumentOutOfRangeException();
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             _object = array;
             _index = start;
@@ -96,7 +96,7 @@ namespace System
         /// Defines an implicit conversion of an array to a <see cref="ReadOnlyMemory{T}"/>
         /// </summary>
         public static implicit operator ReadOnlyMemory<T>(T[] array) => new ReadOnlyMemory<T>(array);
-        
+
         /// <summary>
         /// Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="ReadOnlyMemory{T}"/>
         /// </summary>
@@ -168,7 +168,11 @@ namespace System
                 }
                 else if (typeof(T) == typeof(char) && _object is string s)
                 {
+#if CORECLR || CORERT
                     return new ReadOnlySpan<T>(ref Unsafe.As<char, T>(ref s.GetRawStringData()), s.Length).Slice(_index, _length);
+#else
+                    return new ReadOnlySpan<T>(Unsafe.As<Pinnable<T>>(s), MemoryExtensions.StringAdjustment, s.Length).Slice(_index, _length);
+#endif // CORECLR || CORERT
                 }
                 else if (_object != null)
                 {
@@ -222,13 +226,21 @@ namespace System
                 else if (typeof(T) == typeof(char) && _object is string s)
                 {
                     GCHandle handle = GCHandle.Alloc(s, GCHandleType.Pinned);
+#if CORECLR || CORERT
                     void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref s.GetRawStringData()), _index);
+#else
+                    void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
+#endif // CORECLR || CORERT
                     memoryHandle = new MemoryHandle(null, pointer, handle);
                 }
                 else if (_object is T[] array)
                 {
                     var handle = GCHandle.Alloc(array, GCHandleType.Pinned);
+#if CORECLR || CORERT
                     void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
+#else
+                    void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
+#endif // CORECLR || CORERT
                     memoryHandle = new MemoryHandle(null, pointer, handle);
                 }
             }
@@ -286,7 +298,7 @@ namespace System
         {
             return _object != null ? CombineHashCodes(_object.GetHashCode(), _index.GetHashCode(), _length.GetHashCode()) : 0;
         }
-        
+
         private static int CombineHashCodes(int left, int right)
         {
             return ((left << 5) + left) ^ right;

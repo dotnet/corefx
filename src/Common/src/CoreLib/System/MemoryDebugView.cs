@@ -41,7 +41,11 @@ namespace System
                     return (T[])(object)text.Substring(start, length).ToCharArray();
                 }
 
+#if CORECLR || CORERT
                 return Array.Empty<T>();
+#else
+                return SpanHelpers.PerTypeValues<T>.EmptyArray;
+#endif // CORECLR || CORERT
             }
         }
     }
