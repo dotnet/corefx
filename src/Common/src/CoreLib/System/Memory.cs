@@ -77,7 +77,7 @@ namespace System
             if (default(T) == null && array.GetType() != typeof(T[]))
                 ThrowHelper.ThrowArrayTypeMismatchException();
             if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                ThrowHelper.ThrowArgumentOutOfRangeException();
 
             _object = array;
             _index = start;

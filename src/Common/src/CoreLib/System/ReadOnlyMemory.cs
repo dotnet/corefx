@@ -71,7 +71,7 @@ namespace System
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                ThrowHelper.ThrowArgumentOutOfRangeException();
 
             _object = array;
             _index = start;
