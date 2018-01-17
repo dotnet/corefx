@@ -5,6 +5,8 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace System
 {
     public static partial class MemoryExtensions
@@ -62,6 +64,7 @@ namespace System
         public static bool StartsWith<T>(this System.ReadOnlySpan<T> span, System.ReadOnlySpan<T> value) where T : System.IEquatable<T> { throw null; }
         public static bool StartsWith<T>(this System.Span<T> span, System.ReadOnlySpan<T> value) where T : System.IEquatable<T> { throw null; }
         public static bool TryGetString(this System.ReadOnlyMemory<char> readOnlyMemory, out string text, out int start, out int length) { throw null; }
+        public static IEnumerable<T> ToEnumerable<T>(Memory<T> memory) { throw null; }
     }
     public readonly partial struct Memory<T>
     {
