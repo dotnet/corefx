@@ -44,6 +44,10 @@ namespace System
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateIndexOutOfRangeException() { return new IndexOutOfRangeException(); }
 
+        internal static void ThrowArgumentOutOfRangeException() { throw CreateArgumentOutOfRangeException(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateArgumentOutOfRangeException() { return new ArgumentOutOfRangeException(); }
+
         internal static void ThrowArgumentOutOfRangeException(ExceptionArgument argument) { throw CreateArgumentOutOfRangeException(argument); }
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentOutOfRangeException(ExceptionArgument argument) { return new ArgumentOutOfRangeException(argument.ToString()); }
@@ -104,7 +108,6 @@ namespace System
         ownedMemory,
         pointer,
         comparable,
-        comparer,
-        index
+        comparer
     }
 }

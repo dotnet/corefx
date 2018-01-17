@@ -88,12 +88,6 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Memory(OwnedMemory<T> owner, int index, int length)
         {
-            if (owner == null)
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.ownedMemory);
-            if (index < 0)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index);
-            if (length < 0)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
 
             _object = owner;
             _index = index | (1 << 31); // Before using _index, check if _index < 0, then 'and' it with RemoveOwnedFlagBitMask
@@ -174,7 +168,7 @@ namespace System
         {
             if ((uint)start > (uint)_length || (uint)length > (uint)(_length - start))
             {
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+                ThrowHelper.ThrowArgumentOutOfRangeException();
             }
 
             return new Memory<T>(_object, _index + start, length);
