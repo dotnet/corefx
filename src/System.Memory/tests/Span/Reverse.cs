@@ -17,7 +17,8 @@ namespace System.SpanTests
             span.Reverse();
 
             byte[] actual = { 1, 2, 3, 4 };
-            byte[] expected = actual;
+            byte[] expected = { 1, 2, 3, 4 };
+
             span = actual;
             span.Slice(2, 0).Reverse();
             
@@ -31,7 +32,8 @@ namespace System.SpanTests
             span.Reverse();
 
             string[] actual = { "a", "b", "c", "d" };
-            string[] expected = actual;
+            string[] expected = { "a", "b", "c", "d" };
+
             span = actual;
             span.Slice(2, 0).Reverse();
 
@@ -49,10 +51,30 @@ namespace System.SpanTests
         }
 
         [Fact]
+        public static void ReverseByteLonger()
+        {
+            for(int length = 0; length < byte.MaxValue; length++)
+            {
+                var actual = new byte[length];
+                for (int i = 0; i < length; i++)
+                {
+                    actual[i] = (byte)i;
+                }
+                byte[] expected = new byte[length];
+                Array.Copy(actual, expected, length);
+                Array.Reverse(expected);
+
+                var span = new Span<byte>(actual);
+                span.Reverse();
+                Assert.Equal<byte>(expected, actual);
+            }
+        }
+
+        [Fact]
         public static void ReverseByteTwiceReturnsOriginal()
         {
             byte[] actual = { 1, 2, 3, 4, 5 };
-            byte[] expected = actual;
+            byte[] expected = { 1, 2, 3, 4, 5 };
 
             Span<byte> span = actual;
             span.Reverse();
@@ -70,7 +92,8 @@ namespace System.SpanTests
             {
                 actualFull[i] = (byte)i;
             }
-            byte[] expectedFull = actualFull;
+            byte[] expectedFull = new byte[length];
+            Array.Copy(actualFull, expectedFull, length);
             Array.Reverse(expectedFull, offset, length - offset - 1);
 
             var expectedSpan = new Span<byte>(expectedFull, offset, length - offset - 1);
@@ -94,7 +117,8 @@ namespace System.SpanTests
             {
                 actualFull[i] = (byte)i;
             }
-            byte[] expectedFull = actualFull;
+            byte[] expectedFull = new byte[length];
+            Array.Copy(actualFull, expectedFull, length);
             Array.Reverse(expectedFull, offset, length - offset - 1);
 
             var expectedSpan = new Span<byte>(expectedFull, offset, length - offset - 1);
@@ -121,7 +145,8 @@ namespace System.SpanTests
             {
                 actualFull[i] = IntPtr.Zero + i;
             }
-            IntPtr[] expectedFull = actualFull;
+            IntPtr[] expectedFull = new IntPtr[length];
+            Array.Copy(actualFull, expectedFull, length);
             Array.Reverse(expectedFull, offset, length - offset);
             
             var expectedSpan = new Span<IntPtr>(expectedFull, offset, length - offset);
@@ -155,7 +180,8 @@ namespace System.SpanTests
             {
                 actual[i] = i;
             }
-            int[] expected = actual;
+            int[] expected = new int[length];
+            Array.Copy(actual, expected, length);
             Array.Reverse(expected);
 
             var span = new Span<int>(actual);
@@ -172,7 +198,8 @@ namespace System.SpanTests
             {
                 actual[i] = i;
             }
-            long[] expected = actual;
+            long[] expected = new long[length];
+            Array.Copy(actual, expected, length);
             Array.Reverse(expected);
 
             var span = new Span<long>(actual);
@@ -195,7 +222,7 @@ namespace System.SpanTests
         public static void ReverseReferenceTwiceReturnsOriginal()
         {
             string[] actual = { "a1", "b2", "c3" };
-            string[] expected = actual;
+            string[] expected = { "a1", "b2", "c3" };
 
             var span = new Span<string>(actual);
             span.Reverse();
@@ -212,7 +239,8 @@ namespace System.SpanTests
             {
                 actual[i] = i.ToString();
             }
-            string[] expected = actual;
+            string[] expected = new string[length];
+            Array.Copy(actual, expected, length);
             Array.Reverse(expected);
 
             var span = new Span<string>(actual);
