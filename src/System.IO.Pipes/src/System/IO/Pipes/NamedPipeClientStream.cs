@@ -24,6 +24,7 @@ namespace System.IO.Pipes
         private readonly PipeOptions _pipeOptions;
         private readonly HandleInheritability _inheritability;
         private readonly PipeDirection _direction;
+        private readonly bool _isCurrentUserOnly;
 
         // Creates a named pipe client using default server (same machine, or "."), and PipeDirection.InOut 
         public NamedPipeClientStream(String pipeName)
@@ -72,7 +73,7 @@ namespace System.IO.Pipes
             {
                 throw new ArgumentException(SR.Argument_EmptyServerName);
             }
-            if ((options & ~(PipeOptions.WriteThrough | PipeOptions.Asynchronous)) != 0)
+            if ((options & ~(PipeOptions.WriteThrough | PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly)) != 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(options), SR.ArgumentOutOfRange_OptionsInvalid);
             }
@@ -83,6 +84,13 @@ namespace System.IO.Pipes
             if (inheritability < HandleInheritability.None || inheritability > HandleInheritability.Inheritable)
             {
                 throw new ArgumentOutOfRangeException(nameof(inheritability), SR.ArgumentOutOfRange_HandleInheritabilityNoneOrInheritable);
+            }
+            if ((options & PipeOptions.CurrentUserOnly) != 0)
+            {
+                _isCurrentUserOnly = true;
+
+                // We need to remove this flag from options because it is not a valid flag for windows PInvoke to create a pipe.
+                options &= ~PipeOptions.CurrentUserOnly;
             }
 
             _normalizedPipePath = GetPipePath(serverName, pipeName);

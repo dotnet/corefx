@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32.SafeHandles;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-using System.Security;
+using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes
 {
@@ -99,9 +99,14 @@ namespace System.IO.Pipes
                 }
             }
 
-            // Success! 
+            // Success!
             InitializeHandle(handle, false, (_pipeOptions & PipeOptions.Asynchronous) != 0);
             State = PipeState.Connected;
+
+            if (_isCurrentUserOnly)
+            {
+                ValidateRemotePipeIsCurrentUser();
+            }
 
             return true;
         }
@@ -126,6 +131,19 @@ namespace System.IO.Pipes
                 }
 
                 return numInstances;
+            }
+        }
+
+        private void ValidateRemotePipeIsCurrentUser()
+        {
+            SecurityIdentifier currentUserSid = GetCurrentUser();
+            PipeSecurity accessControl = this.GetAccessControl();
+
+            IdentityReference remoteOwnerSid = accessControl.GetOwner(typeof(SecurityIdentifier));
+            if (remoteOwnerSid != currentUserSid)
+            {
+                State = PipeState.Closed;
+                throw new UnauthorizedAccessException();
             }
         }
 
