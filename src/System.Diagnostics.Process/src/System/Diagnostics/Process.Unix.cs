@@ -18,6 +18,10 @@ namespace System.Diagnostics
     {
         private static readonly UTF8Encoding s_utf8NoBom =
             new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+        private static bool s_sigchildHandlerRegistered = false;
+        private static readonly object s_sigchildGate = new object();
+        private static readonly Interop.Sys.SigChldCallback s_sigChildHandler = OnSigChild;
+        private static readonly ReaderWriterLock s_processStartLock = new ReaderWriterLock();
 
         /// <summary>
         /// Puts a Process component in state to interact with operating system processes that run in a 
@@ -296,7 +300,9 @@ namespace System.Diagnostics
             }
 
             // Lock to avoid races with OnSigChild
-            lock (s_sigchildGate)
+            // By using a ReaderWriterLock we allow multiple processes to start concurrently.
+            s_processStartLock.AcquireReaderLock(Timeout.Infinite);
+            try
             {
                 // Invoke the shim fork/execve routine.  It will create pipes for all requested
                 // redirects, fork a child process, map the pipe ends onto the appropriate stdin/stdout/stderr
@@ -316,6 +322,10 @@ namespace System.Diagnostics
 
                 // Ensure we'll reap this process.
                 _waitStateHolder = new ProcessWaitState.Holder(_processId, isNewChild: true);
+            }
+            finally
+            {
+                s_processStartLock.ReleaseReaderLock();
             }
 
             // Configure the parent's ends of the redirection streams.
@@ -616,10 +626,6 @@ namespace System.Diagnostics
 
         private bool WaitForInputIdleCore(int milliseconds) => throw new InvalidOperationException(SR.InputIdleUnkownError);
 
-        private static bool s_sigchildHandlerRegistered = false;
-        private static readonly object s_sigchildGate = new object();
-        private static readonly Interop.Sys.SigChldCallback s_sigChildHandler = OnSigChild;
-
         private static void EnsureSigChildHandler()
         {
             if (s_sigchildHandlerRegistered)
@@ -645,9 +651,14 @@ namespace System.Diagnostics
         private static void OnSigChild(bool reapAll)
         {
             // Lock to avoid races with Process.Start
-            lock (s_sigchildGate)
+            s_processStartLock.AcquireWriterLock(Timeout.Infinite);
+            try
             {
                 ProcessWaitState.CheckChildren(reapAll);
+            }
+            finally
+            {
+                s_processStartLock.ReleaseWriterLock();
             }
         }
     }
