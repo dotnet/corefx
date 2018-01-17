@@ -185,8 +185,13 @@ void SystemNative_UnregisterForCtrl()
     g_ctrlCallback = NULL;
 }
 
-void SystemNative_RegisterForSigChld(SigChldCallback callback)
+uint32_t SystemNative_RegisterForSigChld(SigChldCallback callback)
 {
+    if (!InitializeSignalHandling())
+    {
+        return 0;
+    }
+
     assert(callback != NULL);
     assert(g_sigChldCallback == NULL);
 
@@ -195,20 +200,22 @@ void SystemNative_RegisterForSigChld(SigChldCallback callback)
         g_sigChldCallback = callback;
     }
     pthread_mutex_unlock(&lock);
+
+    return 1;
 }
 
-static bool InstallSignalHandler(int sig, bool overwriteIgnored)
+static void InstallSignalHandler(int sig, bool skipWhenSigIgn)
 {
     int rv;
     struct sigaction* orig = OrigActionFor(sig);
 
-    if (!overwriteIgnored)
+    if (skipWhenSigIgn)
     {
         rv = sigaction(sig, NULL, orig);
         assert(rv == 0);
         if ((void*)orig->sa_sigaction == (void*)SIG_IGN)
         {
-            return true;
+            return;
         }
     }
 
@@ -220,11 +227,9 @@ static bool InstallSignalHandler(int sig, bool overwriteIgnored)
 
     rv = sigaction(sig, &newAction, orig);
     assert(rv == 0);
-
-    return true;
 }
 
-static bool InitializeSignalHandling()
+static bool InitializeSignalHandlingCore()
 {
     // Create a pipe we'll use to communicate with our worker
     // thread.  We can't do anything interesting in the signal handler,
@@ -261,15 +266,15 @@ static bool InitializeSignalHandling()
     // Finally, register our signal handlers
     // We don't handle ignored SIGINT/SIGQUIT signals. If we'd setup a handler, our child
     // processes would reset to the default on exec causing them to terminate on these signals.
-    InstallSignalHandler(SIGINT , /* overwriteIgnored */ false);
-    InstallSignalHandler(SIGQUIT, /* overwriteIgnored */ false);
-    InstallSignalHandler(SIGCONT, /* overwriteIgnored */ true);
-    InstallSignalHandler(SIGCHLD, /* overwriteIgnored */ true);
+    InstallSignalHandler(SIGINT , /* skipWhenSigIgn */ true);
+    InstallSignalHandler(SIGQUIT, /* skipWhenSigIgn */ true);
+    InstallSignalHandler(SIGCONT, /* skipWhenSigIgn */ false);
+    InstallSignalHandler(SIGCHLD, /* skipWhenSigIgn */ false);
 
     return true;
 }
 
-int32_t SystemNative_InitializeSignalHandling()
+uint32_t InitializeSignalHandling()
 {
     static bool initialized = false;
 
@@ -277,7 +282,7 @@ int32_t SystemNative_InitializeSignalHandling()
     {
         if (!initialized)
         {
-            initialized = InitializeSignalHandling();
+            initialized = InitializeSignalHandlingCore();
         }
     }
     pthread_mutex_unlock(&lock);

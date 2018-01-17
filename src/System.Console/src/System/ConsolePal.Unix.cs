@@ -663,13 +663,7 @@ namespace System
             {
                 if (!s_initialized)
                 {
-                    // Ensure signal handling is setup.
-                    if (!Interop.Sys.InitializeSignalHandling())
-                    {
-                        throw new Win32Exception();
-                    }
-
-                    // Ensure the console is configured appropriately.
+                    // Ensure signal handling is setup and the console is configured appropriately.
                     if (!Interop.Sys.InitializeConsole())
                     {
                         throw Interop.GetExceptionForIoErrno(Interop.Sys.GetLastErrorInfo());

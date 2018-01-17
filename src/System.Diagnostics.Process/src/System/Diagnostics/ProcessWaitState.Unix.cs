@@ -63,9 +63,9 @@ namespace System.Diagnostics
         {
             internal ProcessWaitState _state;
 
-            internal Holder(int processId, bool isChild = false)
+            internal Holder(int processId, bool isNewChild = false)
             {
-                _state = ProcessWaitState.AddRef(processId, isChild);
+                _state = ProcessWaitState.AddRef(processId, isNewChild);
             }
 
             ~Holder()
@@ -107,14 +107,14 @@ namespace System.Diagnostics
         /// </summary>
         /// <param name="processId">The process ID for which we need wait state.</param>
         /// <returns>The wait state object.</returns>
-        internal static ProcessWaitState AddRef(int processId, bool isChild)
+        internal static ProcessWaitState AddRef(int processId, bool isNewChild)
         {
             lock (s_childProcessWaitStates)
             {
                 ProcessWaitState pws;
-                if (isChild)
+                if (isNewChild)
                 {
-                    pws = new ProcessWaitState(processId, isChild);
+                    pws = new ProcessWaitState(processId, isChild: true);
                     s_childProcessWaitStates.Add(processId, pws);
                     pws._outstandingRefCount++; // For Holder
                     pws._outstandingRefCount++; // Decremented in CheckChildren
@@ -123,10 +123,12 @@ namespace System.Diagnostics
                 {
                     lock (s_processWaitStates)
                     {
-                        if (!s_childProcessWaitStates.TryGetValue(processId, out pws)
-                        && !s_processWaitStates.TryGetValue(processId, out pws))
+                        // We are referencing an existing process.
+                        // This may be a child process, so we check s_childProcessWaitStates too.
+                        if (!s_childProcessWaitStates.TryGetValue(processId, out pws) &&
+                            !s_processWaitStates.TryGetValue(processId, out pws))
                         {
-                            pws = new ProcessWaitState(processId, isChild);
+                            pws = new ProcessWaitState(processId, isChild: false);
                             s_processWaitStates.Add(processId, pws);
                         }
                         pws._outstandingRefCount++;

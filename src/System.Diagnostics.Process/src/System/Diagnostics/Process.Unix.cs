@@ -315,7 +315,7 @@ namespace System.Diagnostics
                 SetProcessHandle(new SafeProcessHandle(childPid));
 
                 // Ensure we'll reap this process.
-                _waitStateHolder = new ProcessWaitState.Holder(_processId, isChild: true);
+                _waitStateHolder = new ProcessWaitState.Holder(_processId, isNewChild: true);
             }
 
             // Configure the parent's ends of the redirection streams.
@@ -620,23 +620,26 @@ namespace System.Diagnostics
         private static readonly object s_sigchildGate = new object();
         private static readonly Interop.Sys.SigChldCallback s_sigChildHandler = OnSigChild;
 
-        private static bool EnsureSigChildHandler()
+        private static void EnsureSigChildHandler()
         {
+            if (s_sigchildHandlerRegistered)
+            {
+                return;
+            }
+
             lock (s_sigchildGate)
             {
                 if (!s_sigchildHandlerRegistered)
                 {
-                    if (!Interop.Sys.InitializeSignalHandling())
+                    // Ensure signal handling is setup and register our callback.
+                    if (!Interop.Sys.RegisterForSigChld(s_sigChildHandler))
                     {
                         throw new Win32Exception();
                     }
 
-                    Interop.Sys.RegisterForSigChld(s_sigChildHandler);
-
                     s_sigchildHandlerRegistered = true;
                 }
             }
-            return s_sigchildHandlerRegistered;
         }
 
         private static void OnSigChild(bool reapAll)

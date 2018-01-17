@@ -15,7 +15,7 @@ BEGIN_EXTERN_C
  *
  * Returns 1 on success; otherwise returns 0 and sets errno.
  */
-int32_t SystemNative_InitializeSignalHandling(void);
+uint32_t InitializeSignalHandling(void);
 
 /**
  * Hooks up the specified callback for notifications when SIGINT or SIGQUIT is received.
@@ -49,4 +49,6 @@ typedef void (*SigChldCallback)(int reapAll);
  *
  * Should only be called when a callback is not currently registered.
  */
-void SystemNative_RegisterForSigChld(SigChldCallback callback);
+uint32_t SystemNative_RegisterForSigChld(SigChldCallback callback);
+
+END_EXTERN_C

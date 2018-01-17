@@ -5,6 +5,7 @@
 #include "pal_config.h"
 #include "pal_console.h"
 #include "pal_utilities.h"
+#include "pal_signal.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -321,6 +322,11 @@ void ReinitializeConsole()
 
 extern "C" int32_t SystemNative_InitializeConsole()
 {
+    if (!InitializeSignalHandling())
+    {
+        return 0;
+    }
+
     if (tcgetattr(STDIN_FILENO, &g_initTermios) >= 0)
     {
         g_haveInitTermios = true;
