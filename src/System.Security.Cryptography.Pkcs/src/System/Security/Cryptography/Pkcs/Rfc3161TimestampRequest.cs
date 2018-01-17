@@ -68,10 +68,11 @@ namespace System.Security.Cryptography.Pkcs
                 throw new ArgumentOutOfRangeException(nameof(uri), SR.Cryptography_TimestampReq_HttpOrHttps);
 
             byte[] responseContents;
+            HttpClient httpClient = null;
 
             try
             {
-                HttpClient httpClient = new HttpClient
+                httpClient = new HttpClient
                 {
                     Timeout = timeout,
                 };
@@ -80,7 +81,7 @@ namespace System.Security.Cryptography.Pkcs
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/timestamp-query");
 
                 HttpResponseMessage response = await httpClient.PostAsync(uri, content);
-                
+
                 if (!response.IsSuccessStatusCode)
                 {
                     throw new CryptographicException(
@@ -101,6 +102,10 @@ namespace System.Security.Cryptography.Pkcs
             catch (Exception e)
             {
                 throw new CryptographicException(SR.Cryptography_TimestampReq_Error, e);
+            }
+            finally
+            {
+                httpClient?.Dispose();
             }
 
             if (responseContents == null)
