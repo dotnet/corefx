@@ -88,7 +88,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Memory(OwnedMemory<T> owner, int index, int length)
         {
-
+            // No validation performed; caller must provide any necessary validation.
             _object = owner;
             _index = index | (1 << 31); // Before using _index, check if _index < 0, then 'and' it with RemoveOwnedFlagBitMask
             _length = length;
