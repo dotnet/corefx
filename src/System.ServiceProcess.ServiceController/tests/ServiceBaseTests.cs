@@ -74,7 +74,7 @@ namespace System.ServiceProcess.Tests
             }
         }
 
-        [ConditionalFact(nameof(IsProcessElevated))]
+        //[ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartThenStop()
         {
             var controller = new ServiceController(_testService.TestServiceName);
@@ -88,7 +88,7 @@ OnStop
             Assert.Equal(expected, _testService.GetServiceOutput());
         }
 
-        [ConditionalFact(nameof(IsProcessElevated))]
+        //[ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartWithArgsThenStop()
         {
             var controller = new ServiceController(_testService.TestServiceName);
@@ -107,31 +107,32 @@ OnStop
             Assert.Equal(expected, _testService.GetServiceOutput());
         }
 
-        [ConditionalFact(nameof(IsProcessElevated))]
+        //[ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseThenStop()
         {
             string serviceName = _testService.TestServiceName;
-            var client = new NamedPipeClientStream(serviceName);
-            StreamReader reader = new StreamReader(client);
-            client.Connect();
-            var controller = new ServiceController(serviceName);
-            AssertExpectedProperties(controller);
-            try
+            using (var client = new NamedPipeClientStream(serviceName))
             {
+                Console.WriteLine("First");
+                StreamReader reader = new StreamReader(client);
+                client.Connect();
+                Console.WriteLine("First");
+                var controller = new ServiceController(serviceName);
+                AssertExpectedProperties(controller);
+
                 controller.Pause();
-                Console.WriteLine("hi");
-                // client.WaitForPipeDrain();
+                Console.WriteLine("First");
                 Assert.Equal("Pause", reader.ReadLine());
 
                 controller.Stop();
-                Console.WriteLine("hi");
-                //client.WaitForPipeDrain();
-                Console.WriteLine("hi");
-                //Assert.Equal("Stop", reader.ReadLine());
-            }
-            finally
-            {
-                client.Dispose();
+                Console.WriteLine("Second");
+
+                Assert.Equal("Stop", reader.ReadLine());
+                if (!_disposed)
+                {
+                    _testService.DeleteTestServices();
+                    _disposed = true;
+                }
             }
         }
 
@@ -139,33 +140,30 @@ OnStop
         public void TestOnPauseAndContinueThenStop()
         {
             string serviceName = _testService.TestServiceName;
-            var controller = new ServiceController(serviceName);
-            AssertExpectedProperties(controller);
-            var client = new NamedPipeClientStream(".", serviceName, PipeDirection.In);
-            StreamReader reader = new StreamReader(client);
-            client.Connect();
-            try
+            using (var client = new NamedPipeClientStream(serviceName))
             {
+                StreamReader reader = new StreamReader(client);
+                client.Connect();
+                var controller = new ServiceController(serviceName);
+                AssertExpectedProperties(controller);
+
                 controller.Pause();
-                Console.WriteLine("hi");
-                Console.WriteLine("hello");
+                Console.WriteLine("First");
                 Assert.Equal("Pause", reader.ReadLine());
 
                 controller.Continue();
-                Console.WriteLine("hi");
-                Console.WriteLine("hello");
-                //Assert.Equal("Continue", reader.ReadLine());
+                Console.WriteLine("Second");
+                Assert.Equal("Continue", reader.ReadLine());
 
-                Console.WriteLine("hello1");
                 controller.Stop();
-                Console.WriteLine("hi");
-                //client.WaitForPipeDrain();
-                //Assert.Equal("Stop", reader.ReadLine());                
-            }
-            finally
-            {
-                reader.Dispose();
-                client.Dispose();
+                Console.WriteLine("Third");
+
+                Assert.Equal("Stop", reader.ReadLine());
+                if (!_disposed)
+                {
+                    _testService.DeleteTestServices();
+                    _disposed = true;
+                }
             }
         }
 
@@ -186,7 +184,7 @@ OnStop
             Assert.Equal(expected, _testService.GetServiceOutput());
         }
 
-        [ConditionalFact(nameof(IsProcessElevated))]
+        //[ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnExecuteCustomCommand_newVersion()
         {
             var serviceName = _testService.TestServiceName;
@@ -211,7 +209,7 @@ OnStop
         }
 
 
-        [ConditionalFact(nameof(IsProcessElevated))]
+        //[ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnContinueBeforePause()
         {            
 
@@ -240,7 +238,7 @@ OnStop
             }
         }
 
-        [ConditionalFact(nameof(IsElevatedAndSupportsEventLogs))]
+        //[ConditionalFact(nameof(IsElevatedAndSupportsEventLogs))]
         public void LogWritten()
         {
             using (EventLog eventLog = new EventLog("Application"))
@@ -261,7 +259,7 @@ OnStop
             } 
         }
 
-        [ConditionalFact(nameof(IsElevatedAndSupportsEventLogs))]
+        //[ConditionalFact(nameof(IsElevatedAndSupportsEventLogs))]
         public void LogWritten_AutoLog_False()
         {
             using (EventLog eventLog = new EventLog("Application"))
