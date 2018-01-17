@@ -75,5 +75,15 @@ namespace System.MemoryTests
             var li = new List<int>(enumer);
             Assert.Equal(a, li);
         }
+
+        [Fact]
+        public static void ToEnumerableSameAsIEnumerator()
+        {
+            int[] a = { 91, 92, 93 };
+            var memory = new Memory<int>(a);
+            IEnumerable<int> enumer = memory.ToEnumerable();
+            IEnumerator<int> enumerat = enumer.GetEnumerator();
+            Assert.Same(enumer, enumerat);
+        }
     }
 }
