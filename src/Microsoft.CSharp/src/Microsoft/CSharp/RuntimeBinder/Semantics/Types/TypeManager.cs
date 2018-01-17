@@ -686,7 +686,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // RUNTIME BINDER ONLY CHANGE
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        internal bool GetBestAccessibleType(CSemanticChecker semanticChecker, AggregateDeclaration context, CType typeSrc, out CType typeDst)
+        internal CType GetBestAccessibleType(CSemanticChecker semanticChecker, AggregateDeclaration context, CType typeSrc)
         {
             // This method implements the "best accessible type" algorithm for determining the type
             // of untyped arguments in the runtime binder. It is also used in method type inference
@@ -697,12 +697,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(semanticChecker != null);
             Debug.Assert(typeSrc != null);
+            Debug.Assert(!(typeSrc is ParameterModifierType));
+            Debug.Assert(!(typeSrc is PointerType));
 
             if (semanticChecker.CheckTypeAccess(typeSrc, context))
             {
-                // If we already have an accessible type, then use it. This is the terminal point of the recursion.
-                typeDst = typeSrc;
-                return true;
+                // If we already have an accessible type, then use it.
+                return typeSrc;
             }
 
             // These guys have no accessibility concerns.
@@ -712,13 +713,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 for (;;)
                 {
-                    if ((aggSrc.IsInterfaceType || aggSrc.IsDelegateType) && TryVarianceAdjustmentToGetAccessibleType(semanticChecker, context, aggSrc, out typeDst))
+                    if ((aggSrc.IsInterfaceType || aggSrc.IsDelegateType) && TryVarianceAdjustmentToGetAccessibleType(semanticChecker, context, aggSrc, out CType typeDst))
                     {
                         // If we have an interface or delegate type, then it can potentially be varied by its type arguments
                         // to produce an accessible type, and if that's the case, then return that.
                         // Example: IEnumerable<PrivateConcreteFoo> --> IEnumerable<PublicAbstractFoo>
                         Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, context));
-                        return true;
+                        return typeDst;
                     }
 
                     // We have an AggregateType, so recurse on its base class.
@@ -728,14 +729,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // This happens with interfaces, for instance. But in that case, the
                         // conversion to object does exist, is an implicit reference conversion,
                         // and is guaranteed to be accessible, so we will use it.
-                        typeDst = GetPredefAgg(PredefinedType.PT_OBJECT).getThisType();
-                        return true;
+                        return GetPredefAgg(PredefinedType.PT_OBJECT).getThisType();
                     }
 
                     if (semanticChecker.CheckTypeAccess(baseType, context))
                     {
-                        typeDst = baseType;
-                        return true;
+                        return baseType;
                     }
 
                     // baseType is always an AggregateType, so no need for logic of other types.
@@ -745,36 +744,24 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (typeSrc is ArrayType arrSrc)
             {
-                if (TryArrayVarianceAdjustmentToGetAccessibleType(semanticChecker, context, arrSrc, out typeDst))
+                if (TryArrayVarianceAdjustmentToGetAccessibleType(semanticChecker, context, arrSrc, out CType typeDst))
                 {
                     // Similarly to the interface and delegate case, arrays are covariant in their element type and
                     // so we can potentially produce an array type that is accessible.
                     // Example: PrivateConcreteFoo[] --> PublicAbstractFoo[]
                     Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, context));
-                    return true;
+                    return typeDst;
                 }
 
                 // We have an inaccessible array type for which we could not earlier find a better array type
                 // with a covariant conversion, so the best we can do is System.Array.
-                typeDst = GetPredefAgg(PredefinedType.PT_ARRAY).getThisType();
-
-                Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, context));
-                return true;
+                return GetPredefAgg(PredefinedType.PT_ARRAY).getThisType();
             }
 
-            if (typeSrc is NullableType)
-            {
-                // We have an inaccessible nullable type, which means that the best we can do is System.ValueType.
-                typeDst = GetPredefAgg(PredefinedType.PT_VALUE).getThisType();
+            Debug.Assert(typeSrc is NullableType);
 
-                Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, context));
-                return true;
-            }
-
-            // We cannot vary these.
-            Debug.Assert(typeSrc is ParameterModifierType || typeSrc is PointerType);
-            typeDst = null;
-            return false;
+            // We have an inaccessible nullable type, which means that the best we can do is System.ValueType.
+            return GetPredefAgg(PredefinedType.PT_VALUE).getThisType();
         }
 
         private bool TryVarianceAdjustmentToGetAccessibleType(CSemanticChecker semanticChecker, AggregateDeclaration context, AggregateType typeSrc, out CType typeDst)
@@ -800,24 +787,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             for (int i = 0; i < newTypeArgsTemp.Length; i++)
             {
-                if (semanticChecker.CheckTypeAccess(typeArgs[i], context))
+                CType typeArg = typeArgs[i];
+                if (semanticChecker.CheckTypeAccess(typeArg, context))
                 {
                     // we have an accessible argument, this position is not a problem.
-                    newTypeArgsTemp[i] = typeArgs[i];
+                    newTypeArgsTemp[i] = typeArg;
                     continue;
                 }
 
-                if (!typeArgs[i].IsReferenceType || !((TypeParameterType)typeParams[i]).Covariant)
+                if (!typeArg.IsReferenceType || !((TypeParameterType)typeParams[i]).Covariant)
                 {
                     // This guy is inaccessible, and we are not going to be able to vary him, so we need to fail.
                     return false;
                 }
 
-                if (!GetBestAccessibleType(semanticChecker, context, typeArgs[i], out newTypeArgsTemp[i]))
-                {
-                    Debug.Assert(false, "GetBestAccessibleType unexpectedly failed on a type that was used as a type parameter");
-                    return false;
-                }
+                newTypeArgsTemp[i] = GetBestAccessibleType(semanticChecker, context, typeArg);
 
                 // now we either have a value type (which must be accessible due to the above
                 // check, OR we have an inaccessible type (which must be a ref type). In either
@@ -850,8 +834,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             CType elementType = typeSrc.ElementType;
             // Covariant array conversions exist for reference types only.
-            if (elementType.IsReferenceType && GetBestAccessibleType(semanticChecker, context, elementType, out CType destElement))
+            if (elementType.IsReferenceType)
             {
+                CType destElement = GetBestAccessibleType(semanticChecker, context, elementType);
                 typeDst = GetArray(destElement, typeSrc.Rank, typeSrc.IsSZArray);
 
                 Debug.Assert(semanticChecker.CheckTypeAccess(typeDst, context));
