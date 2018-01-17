@@ -1694,16 +1694,17 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(23768)]
+        // Not to be checked as it is, intended to get a run on CI
+        //[ActiveIssue(23768)]
         [ActiveIssue(22191, TargetFrameworkMonikers.Uap)]
-        [OuterLoop] // takes several seconds
+        // [OuterLoop] // takes several seconds
         [Fact]
         public async Task PostAsync_RedirectWith307_LargePayload()
         {
             await PostAsync_Redirect_LargePayload_Helper(307, true);
         }
 
-        [OuterLoop] // takes several seconds
+        // [OuterLoop] // takes several seconds
         [Fact]
         public async Task PostAsync_RedirectWith302_LargePayload()
         {
