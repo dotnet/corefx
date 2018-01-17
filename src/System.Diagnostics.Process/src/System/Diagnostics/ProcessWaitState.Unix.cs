@@ -534,32 +534,56 @@ namespace System.Diagnostics
             }
         }
 
-        internal static void CheckChildren()
+        internal static void CheckChildren(bool reapAll)
         {
             // This is called on SIGCHLD from a native thread.
             // A lock in Process ensures no new processes are spawned while we are checking.
             lock (s_childProcessWaitStates)
             {
-                bool restart;
-                do
+                // We track things to unref so we don't invalidate our iterator by changing s_childProcessWaitStates. 
+                ProcessWaitState firstToRemove = null;
+                List<ProcessWaitState> additionalToRemove = null;
+                foreach (KeyValuePair<int, ProcessWaitState> kv in s_childProcessWaitStates)
                 {
-                    restart = false;
-                    foreach (var kv in s_childProcessWaitStates)
+                    ProcessWaitState pws = kv.Value;
+                    if (pws.TryReapChild())
                     {
-                        ProcessWaitState pws = kv.Value;
-                        if (pws.TryReapChild())
+                        if (firstToRemove == null)
                         {
-                            bool removed = pws.ReleaseRef();
-                            // We have removed an item from s_childProcessWaitStates
-                            // so our iterator has become invalid.
-                            if (removed)
+                            firstToRemove = pws;
+                        }
+                        else
+                        {
+                            if (additionalToRemove == null)
                             {
-                                restart = true;
-                                break;
+                                additionalToRemove = new List<ProcessWaitState>();
                             }
+                            additionalToRemove.Add(pws);
                         }
                     }
-                } while (restart);
+                }
+
+                if (firstToRemove != null)
+                {
+                    firstToRemove.ReleaseRef();
+                    if (additionalToRemove != null)
+                    {
+                        foreach (ProcessWaitState pws in additionalToRemove)
+                        {
+                            pws.ReleaseRef();
+                        }
+                    }
+                }
+
+                if (reapAll)
+                {
+                    int pid;
+                    do
+                    {
+                        int status;
+                        pid = Interop.Sys.WaitPid(-1, out status, Interop.Sys.WaitPidOptions.WNOHANG);
+                    } while (pid > 0);
+                }
             }
         }
     }

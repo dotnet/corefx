@@ -639,13 +639,12 @@ namespace System.Diagnostics
             return s_sigchildHandlerRegistered;
         }
 
-        private static void OnSigChild()
+        private static void OnSigChild(bool reapAll)
         {
             // Lock to avoid races with Process.Start
             lock (s_sigchildGate)
             {
-                ProcessWaitState.CheckChildren();
-                Interop.Sys.ResumeSigChld();
+                ProcessWaitState.CheckChildren(reapAll);
             }
         }
     }

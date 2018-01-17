@@ -39,7 +39,7 @@ void SystemNative_RegisterForCtrl(CtrlCallback callback);
  */
 void SystemNative_UnregisterForCtrl(void);
 
-typedef void (*SigChldCallback)(void);
+typedef void (*SigChldCallback)(int reapAll);
 
 /**
  * Hooks up the specified callback for notifications when SIGCHLD is received.
@@ -50,10 +50,3 @@ typedef void (*SigChldCallback)(void);
  * Should only be called when a callback is not currently registered.
  */
 void SystemNative_RegisterForSigChld(SigChldCallback callback);
-
-/**
- * Calls the original SIGCHLD handler.
- */
-void SystemNative_ResumeSigChld(void);
-
-END_EXTERN_C

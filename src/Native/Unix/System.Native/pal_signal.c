@@ -17,6 +17,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static struct sigaction g_origSigIntHandler, g_origSigQuitHandler; // saved signal handlers for ctrl handling
 static struct sigaction g_origSigContHandler, g_origSigChldHandler; // saved signal handlers for reinitialization
 static volatile CtrlCallback g_ctrlCallback = NULL; // Callback invoked for SIGINT/SIGQUIT
@@ -64,7 +65,8 @@ static void SignalHandler(int sig, siginfo_t* siginfo, void* context)
     }
 
     // Delegate to any saved handler we may have
-    if (sig == SIGCONT)
+    // We assume the original SIGCHLD handler will not reap our children.
+    if (sig == SIGCONT || sig == SIGCHLD)
     {
         struct sigaction* origHandler = OrigActionFor(sig);
         if (origHandler->sa_sigaction != NULL &&
@@ -73,32 +75,6 @@ static void SignalHandler(int sig, siginfo_t* siginfo, void* context)
         {
             origHandler->sa_sigaction(sig, siginfo, context);
         }
-    }
-}
-
-void SystemNative_ResumeSigChld()
-{
-    struct sigaction* origHandler = OrigActionFor(SIGCHLD);
-
-    if ((void*)origHandler->sa_sigaction == (void*)SIG_IGN)
-    {
-        // When the original disposition is SIG_IGN, children that terminated did not become zombies.
-        // Since we overwrote the disposition, we are now responsible for reaping those processes.
-        pid_t pid;
-        do
-        {
-            int status;
-            while ((pid = waitpid(-1, &status, WNOHANG)) < 0 && errno == EINTR);
-        } while (pid > 0);
-    }
-    else if ((void*)origHandler->sa_sigaction == (void*)SIG_DFL)
-    {
-        // do nothing
-    }
-    else if (origHandler->sa_sigaction != NULL)
-    {
-        // TODO?: We are passing a NULL siginfo and context, do we need to try and do better?
-        origHandler->sa_sigaction(SIGCHLD, NULL, NULL);
     }
 }
 
@@ -150,14 +126,33 @@ void* SignalHandlerLoop(void* arg)
         }
         else if (signalCode == SIGCHLD)
         {
+            // When the original disposition is SIG_IGN, children that terminated did not become zombies.
+            // Since we overwrote the disposition, we have become responsible for reaping those processes.
+            bool reapAll = (void*)OrigActionFor(signalCode)->sa_sigaction == (void*)SIG_IGN;
             SigChldCallback callback = g_sigChldCallback;
+
+            // double-checked locking
+            if (callback == NULL && reapAll)
+            {
+                // avoid race with SystemNative_RegisterForSigChld
+                pthread_mutex_lock(&lock);
+                {
+                    callback = g_sigChldCallback;
+                    if (callback == NULL)
+                    {
+                        pid_t pid;
+                        do
+                        {
+                            int status;
+                            while ((pid = waitpid(-1, &status, WNOHANG)) < 0 && errno == EINTR);
+                        } while (pid > 0);
+                    }
+                }
+            }
+
             if (callback != NULL)
             {
-                callback();
-            }
-            else
-            {
-                SystemNative_ResumeSigChld();
+                callback(reapAll ? 1 : 0);
             }
         }
         else
@@ -194,7 +189,12 @@ void SystemNative_RegisterForSigChld(SigChldCallback callback)
 {
     assert(callback != NULL);
     assert(g_sigChldCallback == NULL);
-    g_sigChldCallback = callback;
+
+    pthread_mutex_lock(&lock);
+    {
+        g_sigChldCallback = callback;
+    }
+    pthread_mutex_unlock(&lock);
 }
 
 static bool InstallSignalHandler(int sig, bool overwriteIgnored)
@@ -271,7 +271,6 @@ static bool InitializeSignalHandling()
 
 int32_t SystemNative_InitializeSignalHandling()
 {
-    static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
     static bool initialized = false;
 
     pthread_mutex_lock(&lock);
