@@ -458,9 +458,20 @@ namespace System.Security.Cryptography.Pkcs
 
             foreach (CryptographicAttributeObject attrSet in signer.SignedAttributes)
             {
+                string setOid = attrSet.Oid?.Value;
+
+                if (setOid != null &&
+                    setOid != Oids.SigningCertificate &&
+                    setOid != Oids.SigningCertificateV2)
+                {
+                    continue;
+                }
+
                 foreach (AsnEncodedData attr in attrSet.Values)
                 {
-                    if (attr.Oid.Value == Oids.SigningCertificate)
+                    string attrOid = attr.Oid?.Value;
+
+                    if (attrOid == Oids.SigningCertificate)
                     {
                         if (certId != null)
                         {
@@ -486,7 +497,7 @@ namespace System.Security.Cryptography.Pkcs
                         }
                     }
 
-                    if (attr.Oid.Value == Oids.SigningCertificateV2)
+                    if (attrOid == Oids.SigningCertificateV2)
                     {
                         if (certId2 != null)
                         {
