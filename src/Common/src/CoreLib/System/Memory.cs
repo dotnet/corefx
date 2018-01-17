@@ -8,13 +8,15 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
+#if !FEATURE_PORTABLE_SPAN
 using Internal.Runtime.CompilerServices;
+#endif // FEATURE_PORTABLE_SPAN
 
 namespace System
 {
     /// <summary>
-    /// Memory represents a contiguous region of arbitrary memory similar to Span.
-    /// Unlike Span, it is not a byref-like type.
+    /// Memory represents a contiguous region of arbitrary memory similar to <see cref="Span{T}"/>.
+    /// Unlike <see cref="Span{T}"/>, it is not a byref-like type.
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     [DebuggerTypeProxy(typeof(MemoryDebugView<>))]
@@ -47,7 +49,7 @@ namespace System
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             if (default(T) == null && array.GetType() != typeof(T[]))
-                ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
+                ThrowHelper.ThrowArrayTypeMismatchException();
 
             _object = array;
             _index = 0;
@@ -73,7 +75,7 @@ namespace System
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             if (default(T) == null && array.GetType() != typeof(T[]))
-                ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
+                ThrowHelper.ThrowArrayTypeMismatchException();
             if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
@@ -88,8 +90,10 @@ namespace System
         {
             if (owner == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.ownedMemory);
-            if (index < 0 || length < 0)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+            if (index < 0)
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index);
+            if (length < 0)
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
 
             _object = owner;
             _index = index | (1 << 31); // Before using _index, check if _index < 0, then 'and' it with RemoveOwnedFlagBitMask
@@ -195,11 +199,11 @@ namespace System
                     // and then cast to a Memory<T>. Such a cast can only be done with unsafe or marshaling code,
                     // in which case that's the dangerous operation performed by the dev, and we're just following
                     // suit here to make it work as best as possible.
-#if CORECLR || CORERT
-                    return new Span<T>(ref Unsafe.As<char, T>(ref s.GetRawStringData()), s.Length).Slice(_index, _length);
-#else
+#if FEATURE_PORTABLE_SPAN
                     return new Span<T>(Unsafe.As<Pinnable<T>>(s), MemoryExtensions.StringAdjustment, s.Length).Slice(_index, _length);
-#endif // CORECLR || CORERT
+#else
+                    return new Span<T>(ref Unsafe.As<char, T>(ref s.GetRawStringData()), s.Length).Slice(_index, _length);
+#endif // FEATURE_PORTABLE_SPAN
                 }
                 else if (_object != null)
                 {
@@ -257,21 +261,21 @@ namespace System
                     // a readable ReadOnlyMemory<char> or a writable Memory<char> can still be pinned and
                     // used for interop purposes.
                     GCHandle handle = GCHandle.Alloc(s, GCHandleType.Pinned);
-#if CORECLR || CORERT
-                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref s.GetRawStringData()), _index);
-#else
+#if FEATURE_PORTABLE_SPAN
                     void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
-#endif // CORECLR || CORERT
+#else
+                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref s.GetRawStringData()), _index);
+#endif // FEATURE_PORTABLE_SPAN
                     memoryHandle = new MemoryHandle(null, pointer, handle);
                 }
                 else if (_object is T[] array)
                 {
                     var handle = GCHandle.Alloc(array, GCHandleType.Pinned);
-#if CORECLR || CORERT
-                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
-#else
+#if FEATURE_PORTABLE_SPAN
                     void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
-#endif // CORECLR || CORERT
+#else
+                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
+#endif // FEATURE_PORTABLE_SPAN
                     memoryHandle = new MemoryHandle(null, pointer, handle);
                 }
             }

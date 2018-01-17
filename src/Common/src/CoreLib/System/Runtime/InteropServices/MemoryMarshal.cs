@@ -4,7 +4,9 @@
 
 using System.Buffers;
 using System.Runtime.CompilerServices;
+#if !FEATURE_PORTABLE_SPAN
 using Internal.Runtime.CompilerServices;
+#endif // FEATURE_PORTABLE_SPAN
 
 namespace System.Runtime.InteropServices
 {
@@ -26,12 +28,7 @@ namespace System.Runtime.InteropServices
         public static Memory<T> AsMemory<T>(ReadOnlyMemory<T> readOnlyMemory) =>
             Unsafe.As<ReadOnlyMemory<T>, Memory<T>>(ref readOnlyMemory);
 
-
-#if CORECLR || CORERT
-        public static ref T GetReference<T>(Span<T> span) => ref span._pointer.Value;
-
-        public static ref T GetReference<T>(ReadOnlySpan<T> span) => ref span._pointer.Value;
-#else
+#if FEATURE_PORTABLE_SPAN
         /// <summary>
         /// Returns a reference to the 0th element of the Span. If the Span is empty, returns a reference to the location where the 0th element
         /// would have been stored. Such a reference can be used for pinning but must never be dereferenced.
@@ -55,7 +52,19 @@ namespace System.Runtime.InteropServices
             else
                 return ref Unsafe.AddByteOffset<T>(ref span.Pinnable.Data, span.ByteOffset);
         }
-#endif // CORECLR || CORERT
+#else
+        /// <summary>
+        /// Returns a reference to the 0th element of the Span. If the Span is empty, returns a reference to the location where the 0th element
+        /// would have been stored. Such a reference can be used for pinning but must never be dereferenced.
+        /// </summary>
+        public static ref T GetReference<T>(Span<T> span) => ref span._pointer.Value;
+
+        /// <summary>
+        /// Returns a reference to the 0th element of the ReadOnlySpan. If the Span is empty, returns a reference to the location where the 0th element
+        /// would have been stored. Such a reference can be used for pinning but must never be dereferenced.
+        /// </summary>
+        public static ref T GetReference<T>(ReadOnlySpan<T> span) => ref span._pointer.Value;
+#endif // FEATURE_PORTABLE_SPAN
 
         /// <summary>
         /// Get an array segment from the underlying memory.

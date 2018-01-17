@@ -28,9 +28,9 @@ namespace System
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentNullException(ExceptionArgument argument) { return new ArgumentNullException(argument.ToString()); }
 
-        internal static void ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(Type type) { throw CreateArrayTypeMismatchException_ArrayTypeMustBeExactMatch(type); }
+        internal static void ThrowArrayTypeMismatchException() { throw CreateArrayTypeMismatchException(); }
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static Exception CreateArrayTypeMismatchException_ArrayTypeMustBeExactMatch(Type type) { return new ArrayTypeMismatchException(SR.Format(SR.ArrayTypeMustBeExactMatch, type)); }
+        private static Exception CreateArrayTypeMismatchException() { return new ArrayTypeMismatchException(); }
 
         internal static void ThrowArgumentException_InvalidTypeWithPointersNotSupported(Type type) { throw CreateArgumentException_InvalidTypeWithPointersNotSupported(type); }
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -104,6 +104,7 @@ namespace System
         ownedMemory,
         pointer,
         comparable,
-        comparer
+        comparer,
+        index
     }
 }

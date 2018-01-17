@@ -41,11 +41,11 @@ namespace System
                     return (T[])(object)text.Substring(start, length).ToCharArray();
                 }
 
-#if CORECLR || CORERT
-                return Array.Empty<T>();
-#else
+#if FEATURE_PORTABLE_SPAN
                 return SpanHelpers.PerTypeValues<T>.EmptyArray;
-#endif // CORECLR || CORERT
+#else
+                return Array.Empty<T>();
+#endif // FEATURE_PORTABLE_SPAN
             }
         }
     }

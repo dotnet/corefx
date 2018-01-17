@@ -8,7 +8,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
+#if !FEATURE_PORTABLE_SPAN
 using Internal.Runtime.CompilerServices;
+#endif // FEATURE_PORTABLE_SPAN
 
 namespace System
 {
@@ -168,11 +170,11 @@ namespace System
                 }
                 else if (typeof(T) == typeof(char) && _object is string s)
                 {
-#if CORECLR || CORERT
-                    return new ReadOnlySpan<T>(ref Unsafe.As<char, T>(ref s.GetRawStringData()), s.Length).Slice(_index, _length);
-#else
+#if FEATURE_PORTABLE_SPAN
                     return new ReadOnlySpan<T>(Unsafe.As<Pinnable<T>>(s), MemoryExtensions.StringAdjustment, s.Length).Slice(_index, _length);
-#endif // CORECLR || CORERT
+#else
+                    return new ReadOnlySpan<T>(ref Unsafe.As<char, T>(ref s.GetRawStringData()), s.Length).Slice(_index, _length);
+#endif // FEATURE_PORTABLE_SPAN
                 }
                 else if (_object != null)
                 {
@@ -226,21 +228,21 @@ namespace System
                 else if (typeof(T) == typeof(char) && _object is string s)
                 {
                     GCHandle handle = GCHandle.Alloc(s, GCHandleType.Pinned);
-#if CORECLR || CORERT
-                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref s.GetRawStringData()), _index);
-#else
+#if FEATURE_PORTABLE_SPAN
                     void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
-#endif // CORECLR || CORERT
+#else
+                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref s.GetRawStringData()), _index);
+#endif // FEATURE_PORTABLE_SPAN
                     memoryHandle = new MemoryHandle(null, pointer, handle);
                 }
                 else if (_object is T[] array)
                 {
                     var handle = GCHandle.Alloc(array, GCHandleType.Pinned);
-#if CORECLR || CORERT
-                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
-#else
+#if FEATURE_PORTABLE_SPAN
                     void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
-#endif // CORECLR || CORERT
+#else
+                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
+#endif // FEATURE_PORTABLE_SPAN
                     memoryHandle = new MemoryHandle(null, pointer, handle);
                 }
             }
