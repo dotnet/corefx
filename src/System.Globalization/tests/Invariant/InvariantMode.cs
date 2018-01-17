@@ -468,6 +468,25 @@ namespace System.Globalization.Tests
             yield return new object[] { "xn--de-jg4avhby1noc0d", 0, 21, "\u30D1\u30D5\u30A3\u30FC\u0064\u0065\u30EB\u30F3\u30D0" };
         }
 
+        private static IEnumerable<object[]> GetHashCode_TestData()
+        {
+            yield return new object[] { "abc.xn--d9juau41awczczp.xn--de-jg4avhby1noc0d" };
+            yield return new object[] { "abc.xn--d9juau41awczczp" };
+            yield return new object[] { "abc.xn--d9juau41awczczp." };
+            yield return new object[] { "xn--d9juau41awczczp.xn--de-jg4avhby1noc0d" };
+            yield return new object[] { "xn--d9juau41awczczp" };
+            yield return new object[] { "xn--d9juau41awczczp." };
+            yield return new object[] { "xn--de-jg4avhby1noc0d" };
+            yield return new object[] { "\u0101" };
+            yield return new object[] { "\u0101\u0061\u0041" };
+            yield return new object[] { "\u0061\u0101\u0062" };
+            yield return new object[] { "\u0061\u0062\u0101" };
+            yield return new object[] { "fooBar" };
+            yield return new object[] { "Hello" };
+            yield return new object[] { "\u0130" };
+            yield return new object[] { "" };
+        }
+
         [Theory]
         [MemberData(nameof(Cultures_TestData))]
         public void TestCultureData(string cultureName)
@@ -783,6 +802,20 @@ namespace System.Globalization.Tests
                 Assert.Equal(expected, new IdnMapping().GetUnicode(ascii, index));
             }
             Assert.Equal(expected, new IdnMapping().GetUnicode(ascii, index, count));
+        }
+
+        [Theory]
+        [MemberData(nameof(GetHashCode_TestData))]
+        public void GetHashCode(string value)
+        {
+            int stringComparerHash = StringComparer.OrdinalIgnoreCase.GetHashCode(value);
+            foreach (string cul in s_cultureNames)
+            {
+                int hash = CultureInfo.GetCultureInfo(cul).CompareInfo.GetHashCode(value, CompareOptions.OrdinalIgnoreCase);
+                int repeatedHash = CultureInfo.GetCultureInfo(cul).CompareInfo.GetHashCode(value, CompareOptions.OrdinalIgnoreCase);
+                Assert.Equal(hash, repeatedHash);
+                Assert.Equal(stringComparerHash, hash);
+            }
         }
     }
 }
