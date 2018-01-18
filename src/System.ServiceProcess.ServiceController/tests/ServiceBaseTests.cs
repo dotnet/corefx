@@ -107,36 +107,37 @@ OnStop
             Assert.Equal(expected, _testService.GetServiceOutput());
         }
 
-        //[ConditionalFact(nameof(IsProcessElevated))]
+        [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseThenStop()
         {
             string serviceName = _testService.TestServiceName;
             using (var client = new NamedPipeClientStream(serviceName))
             {
-                Console.WriteLine("First");
                 StreamReader reader = new StreamReader(client);
                 client.Connect();
-                Console.WriteLine("First");
                 var controller = new ServiceController(serviceName);
                 AssertExpectedProperties(controller);
 
+                Console.WriteLine("First");
                 controller.Pause();
+                controller.WaitForStatus(ServiceControllerStatus.Paused);
                 Console.WriteLine("First");
                 Assert.Equal("Pause", reader.ReadLine());
 
                 controller.Stop();
                 Console.WriteLine("Second");
-
+                controller.WaitForStatus(ServiceControllerStatus.Stopped);
                 Assert.Equal("Stop", reader.ReadLine());
-                if (!_disposed)
-                {
-                    _testService.DeleteTestServices();
-                    _disposed = true;
-                }
+                
+            //    if (!_disposed)
+            //    {
+            //        _testService.DeleteTestServices();
+            //        _disposed = true;
+            //    }
             }
         }
 
-        [ConditionalFact(nameof(IsProcessElevated))]
+        //[ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseAndContinueThenStop()
         {
             string serviceName = _testService.TestServiceName;
