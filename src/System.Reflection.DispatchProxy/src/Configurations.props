@@ -5,12 +5,12 @@
       netfx;
       netstandard;
       netcoreapp2.0;
-      uapaot-Windows_NT;
-      uap-Windows_NT;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
       netcoreapp;
+      uap-Windows_NT;
+      uapaot-Windows_NT;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
