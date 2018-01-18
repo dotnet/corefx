@@ -2,18 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
-using System.IO;
-using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace System.Net.Http
 {
     internal sealed partial class HttpProxyConnectionHandler : HttpMessageHandler
     {
         // On Unix we get default proxy configuration from environment variables
-        static private IWebProxy GetDefaultProxy()
+        static private IWebProxy ConstructSystemProxy()
         {
             return HttpEnvironmentProxy.TryToCreate();
         }

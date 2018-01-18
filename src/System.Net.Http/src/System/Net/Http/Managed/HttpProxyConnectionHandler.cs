@@ -24,7 +24,7 @@ namespace System.Net.Http
             Debug.Assert(settings._useProxy);
 
             _innerHandler = innerHandler;
-            _proxy = settings._proxy ?? GetDefaultProxy();
+            _proxy = settings._proxy ?? ConstructSystemProxy();
             _defaultCredentials = settings._defaultProxyCredentials;
             _connectionPools = new HttpConnectionPools(settings._maxConnectionsPerServer);
         }
@@ -163,7 +163,7 @@ namespace System.Net.Http
 
         public static bool DefaultProxyConfigured => s_DefaultProxy.Value != null;
 
-        private static readonly Lazy<IWebProxy> s_DefaultProxy = new Lazy<IWebProxy>(() => GetDefaultProxy());
+        private static readonly Lazy<IWebProxy> s_DefaultProxy = new Lazy<IWebProxy>(() => ConstructSystemProxy());
 
         private sealed class PassthroughWebProxy : IWebProxy
         {
