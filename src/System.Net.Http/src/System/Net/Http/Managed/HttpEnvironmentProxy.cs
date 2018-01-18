@@ -5,6 +5,7 @@
 using System;
 using System.Net.Http;
 using System.Net;
+using System.Collections.Generic;
 
 namespace System.Net.Http
 {
@@ -47,14 +48,14 @@ namespace System.Net.Http
             // Note that curl uses HTTPS_PROXY but not HTTP_PROXY.
             // For http, only http_proxy and generic variables are used.
 
-            string httpProxy = Environment.GetEnvironmentVariable(envHttpProxyLC);
-            string httpsProxy = Environment.GetEnvironmentVariable(envHttpsProxyLC) ??
-                             Environment.GetEnvironmentVariable(envHttpsProxyUC);
+            Uri httpProxy = GetUriFromString(Environment.GetEnvironmentVariable(envHttpProxyLC));
+            Uri httpsProxy = GetUriFromString(Environment.GetEnvironmentVariable(envHttpsProxyLC)) ??
+                             GetUriFromString(Environment.GetEnvironmentVariable(envHttpsProxyUC));
 
             if (httpProxy == null || httpsProxy == null)
             {
-                string allProxy = Environment.GetEnvironmentVariable(envAllProxyLC) ??
-                                    Environment.GetEnvironmentVariable(envAllProxyUC);
+                Uri allProxy = GetUriFromString(Environment.GetEnvironmentVariable(envAllProxyLC)) ??
+                                GetUriFromString(Environment.GetEnvironmentVariable(envAllProxyUC));
 
                 if (httpProxy == null)
                 {
@@ -68,7 +69,7 @@ namespace System.Net.Http
 
             // Do not instantiate if nothing is set.
             // Caller may pick some other proxy type.
-            if (string.IsNullOrWhiteSpace(httpProxy) && string.IsNullOrWhiteSpace(httpsProxy))
+            if (httpProxy == null && httpsProxy == null)
             {
                 return null;
             }
@@ -76,30 +77,24 @@ namespace System.Net.Http
             return new HttpEnvironmentProxy(httpProxy, httpsProxy, Environment.GetEnvironmentVariable(envNoProxyLC));
         }
 
-        private HttpEnvironmentProxy(string http, string https, string bypassList)
+        private HttpEnvironmentProxy(Uri httpProxy, Uri httpsProxy, string bypassList)
         {
             NetworkCredential httpCred = null;
             NetworkCredential httpsCred = null;
             bool sameAuth = false;
 
-            if (!string.IsNullOrWhiteSpace(http))
+            if (httpProxy != null)
             {
-                _http = GetUriFromString(http);
-                if (_http != null)
-                {
-                    httpCred = GetCredientialsFromString(_http.UserInfo);
-                }
+                _http = httpProxy;
+                httpCred = GetCredientialsFromString(_http.UserInfo);
             }
-            if (!string.IsNullOrWhiteSpace(https))
+            if (httpsProxy != null)
             {
-                _https = GetUriFromString(https);
-                if (_https != null)
+                _https = httpsProxy;
+                httpsCred = GetCredientialsFromString(_https.UserInfo);
+                if ((_http != null) && (_http.UserInfo == _https.UserInfo))
                 {
-                    httpsCred = GetCredientialsFromString(_https.UserInfo);
-                    if ((_http != null) && (_http.UserInfo == _https.UserInfo))
-                    {
-                        sameAuth = true;
-                    }
+                    sameAuth = true;
                 }
             }
             if (httpCred != null || httpsCred != null)
@@ -119,7 +114,21 @@ namespace System.Net.Http
 
             if (!string.IsNullOrWhiteSpace(bypassList))
             {
-                _bypass = bypassList.Split(',');
+                string[] list = bypassList.Split(',');
+                List<string> tmpList = new List<string>();
+
+                foreach (string value in list)
+                {
+                    string tmp = value.Trim();
+                    if (tmp.Length > 0)
+                    {
+                        tmpList.Add(tmp);
+                    }
+                }
+                if (tmpList.Count > 0)
+                {
+                    _bypass = tmpList.ToArray();
+                }
             }
         }
 
@@ -128,8 +137,13 @@ namespace System.Net.Http
         /// it to Uri object. The string could contain URI fragment, IP address and  port
         /// tuple or just IP address or name. It will return null if parsing fails.
         /// </summary>
-        private Uri GetUriFromString(String value)
+        private static Uri GetUriFromString(String value)
         {
+            if (value == null)
+            {
+                return null;
+            }
+
             Uri uri = null;
             try
             {
@@ -142,7 +156,14 @@ namespace System.Net.Http
                     throw;
                 }
                 // string perhaps did not have Scheme part
-                uri = new Uri("http://" + value);
+                try
+                {
+                    uri = new Uri("http://" + value);
+                }
+                catch
+                {
+                    return null;
+                }
             }
 
             if (uri == null || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
@@ -174,7 +195,7 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// This function returns true if given Host mach bypss list.
+        /// This function returns true if given Host match bypass list.
         /// Note, that the list is common for http and https.
         /// </summary>
         private bool IsMatchInBypassList(Uri input)
@@ -200,7 +221,7 @@ namespace System.Net.Http
                     }
                     else
                     {
-                        if (String.Compare(s, input.Host, StringComparison.OrdinalIgnoreCase) == 0)
+                        if (String.Equals(s, input.Host, StringComparison.OrdinalIgnoreCase))
                         {
                             return true;
                         }
