@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -991,6 +992,35 @@ namespace System
             var comparable = new SpanHelpers.ComparerComparable<T, TComparer>(
                 value, comparer);
             return BinarySearch(span, comparable);
+        }
+
+        /// <summary>
+        /// Creates an <see cref="IEnumerable{T}"/> view of the given <paramref name="memory" /> to allow
+        /// the <paramref name="memory" /> to be used in existing APIs that take an <see cref="IEnumerable{T}"/>.
+        /// </summary>
+        /// <typeparam name="T">The element type of the <paramref name="memory" />.</typeparam>
+        /// <param name="memory">The Memory to view as an <see cref="IEnumerable{T}"/></param>
+        /// <returns>An <see cref="IEnumerable{T}"/> view of the given <paramref name="memory" /></returns>
+        public static IEnumerable<T> ToEnumerable<T>(Memory<T> memory) => new MemoryEnumerable<T>(memory);
+
+        internal class MemoryEnumerable<T> : IEnumerable<T>, IEnumerable, IEnumerator<T>, IEnumerator, IDisposable
+        {
+            ReadOnlyMemory<T> _memory;
+            int _index;
+
+            public MemoryEnumerable(Memory<T> memory)
+            {
+                _memory = memory;
+                _index = -1;
+            }
+
+            T IEnumerator<T>.Current => _memory.Span[_index];
+            object IEnumerator.Current => _memory.Span[_index];
+            void IDisposable.Dispose() { }
+            IEnumerator<T> IEnumerable<T>.GetEnumerator() => this;
+            IEnumerator IEnumerable.GetEnumerator() => this;
+            bool IEnumerator.MoveNext() => ++_index < _memory.Length;
+            void IEnumerator.Reset() => _index = 0;
         }
     }
 }
