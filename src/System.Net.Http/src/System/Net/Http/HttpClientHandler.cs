@@ -13,7 +13,7 @@ namespace System.Net.Http
     {
         // This partial implementation contains members common to all HttpClientHandler implementations.
         private const string ManagedHandlerSettingName = "COMPlus_UseManagedHttpClientHandler";
-        private const string AppCtxManagedHandlerSettingName = "Switch.System.Net.Http.DefaultHttpClientHandlerToManagedHandler";
+        private const string AppCtxManagedHandlerSettingName = "System.Net.Http.UseManagedHttpClientHandler";
 
         private static LocalDataStoreSlot s_useManagedHandlerSlot;
 
