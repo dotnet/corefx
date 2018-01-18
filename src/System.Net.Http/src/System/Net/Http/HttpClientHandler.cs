@@ -13,6 +13,7 @@ namespace System.Net.Http
     {
         // This partial implementation contains members common to all HttpClientHandler implementations.
         private const string ManagedHandlerSettingName = "COMPlus_UseManagedHttpClientHandler";
+        private const string AppCtxManagedHandlerSettingName = "Switch.System.Net.Http.DefaultUseManagedHttp";
 
         private static LocalDataStoreSlot s_useManagedHandlerSlot;
 
@@ -22,6 +23,12 @@ namespace System.Net.Http
             {
                 // Check the environment variable to see if it's been set to true.  If it has, use the managed handler.
                 if (Environment.GetEnvironmentVariable(ManagedHandlerSettingName) == "true")
+                {
+                    return true;
+                }
+
+                bool managedEnabled=false;
+                if (AppContext.TryGetSwitch(AppCtxManagedHandlerSettingName, out managedEnabled) && managedEnabled)
                 {
                     return true;
                 }
