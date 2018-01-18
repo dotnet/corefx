@@ -77,22 +77,24 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(typeVars.Count == typeArgsThis.Count);
 
-            if (!ats.ConstraintError.HasValue)
-            {
-                ats.ConstraintError = false;
-            }
-
             // Check the outer type first. If CheckConstraintsFlags.Outer is not specified and the
             // outer type has already been checked then don't bother checking it.
             if (ats.OuterType != null && ((flags & CheckConstraintsFlags.Outer) != 0 || !ats.OuterType.ConstraintError.HasValue))
             {
-                CheckConstraints(checker, errHandling, ats.OuterType, flags);
-                ats.ConstraintError = ats.OuterType.ConstraintError;
+                if (!CheckConstraints(checker, errHandling, ats.OuterType, flags))
+                {
+                    ats.ConstraintError = true;
+                    return false;
+                }
             }
 
             if (typeVars.Count > 0)
             {
-                ats.ConstraintError |= !CheckConstraintsCore(checker, errHandling, ats.OwningAggregate, typeVars, typeArgsThis, typeArgsAll, null, (flags & CheckConstraintsFlags.NoErrors));
+                if (!CheckConstraintsCore(checker, errHandling, ats.OwningAggregate, typeVars, typeArgsThis, typeArgsAll, null, flags & CheckConstraintsFlags.NoErrors))
+                {
+                    ats.ConstraintError = true;
+                    return false;
+                }
             }
 
             // Now check type args themselves.
@@ -105,11 +107,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (atArg.ConstraintError.GetValueOrDefault())
                     {
                         ats.ConstraintError = true;
+                        return false;
                     }
                 }
             }
 
-            return !ats.ConstraintError.GetValueOrDefault();
+            ats.ConstraintError = false;
+            return true;
         }
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -136,19 +140,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(typeVars.Count > 0);
             Debug.Assert(flags == CheckConstraintsFlags.None || flags == CheckConstraintsFlags.NoErrors);
 
-            bool fError = false;
-
             for (int i = 0; i < typeVars.Count; i++)
             {
                 // Empty bounds should be set to object.
                 TypeParameterType var = (TypeParameterType)typeVars[i];
                 CType arg = typeArgs[i];
 
-                bool fOK = CheckSingleConstraint(checker, errHandling, symErr, var, arg, typeArgsCls, typeArgsMeth, flags);
-                fError |= !fOK;
+                if (!CheckSingleConstraint(checker, errHandling, symErr, var, arg, typeArgsCls, typeArgsMeth, flags))
+                {
+                    return false;
+                }
             }
 
-            return !fError;
+            return true;
         }
 
         private static bool CheckSingleConstraint(CSemanticChecker checker, ErrorHandling errHandling, Symbol symErr, TypeParameterType var, CType arg, TypeArray typeArgsCls, TypeArray typeArgsMeth, CheckConstraintsFlags flags)
@@ -158,7 +162,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             bool fReportErrors = 0 == (flags & CheckConstraintsFlags.NoErrors);
 
-            bool fError = false;
             if (var.HasRefConstraint && !arg.IsReferenceType)
             {
                 if (fReportErrors)
@@ -166,7 +169,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     throw errHandling.Error(ErrorCode.ERR_RefConstraintNotSatisfied, symErr, new ErrArgNoRef(var), arg);
                 }
 
-                fError = true;
+                return false;
             }
 
             TypeArray bnds = checker.SymbolLoader.GetTypeManager().SubstTypeArray(var.Bounds, typeArgsCls, typeArgsMeth);
@@ -189,7 +192,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         throw errHandling.Error(ErrorCode.ERR_ValConstraintNotSatisfied, symErr, new ErrArgNoRef(var), arg);
                     }
 
-                    fError = true;
+                    return false;
                 }
 
                 // Since FValCon() is set it is redundant to check System.ValueType as well.
@@ -257,14 +260,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         throw errHandling.Error(error, new ErrArg(symErr), new ErrArg(typeBnd, ErrArgFlags.Unique), var, new ErrArg(arg, ErrArgFlags.Unique));
                     }
 
-                    fError = true;
+                    return false;
                 }
             }
 
             // Check the newable constraint.
             if (!var.HasNewConstraint || arg.IsValueType)
             {
-                return !fError;
+                return true;
             }
 
             if (arg.IsClassType)
@@ -279,7 +282,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 if (agg.HasPubNoArgCtor() && !agg.IsAbstract())
                 {
-                    return !fError;
+                    return true;
                 }
             }
 
