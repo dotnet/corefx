@@ -171,6 +171,8 @@ static void ConvertFileStatus(const struct stat_* src, struct FileStatus* dst)
 #endif
 }
 
+// CoreCLR expects the "2" suffixes on these: they should be cleaned up in our
+// next coordinated System.Native changes
 int32_t SystemNative_Stat2(const char* path, struct FileStatus* output)
 {
     struct stat_ result;
