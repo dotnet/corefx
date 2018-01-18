@@ -27,8 +27,7 @@ namespace System.Net.Http
                     return true;
                 }
 
-                bool managedEnabled;
-                if (AppContext.TryGetSwitch(AppCtxManagedHandlerSettingName, out managedEnabled) && managedEnabled)
+                if (AppContext.TryGetSwitch(AppCtxManagedHandlerSettingName, out bool isManagedEnabled) && isManagedEnabled)
                 {
                     return true;
                 }
