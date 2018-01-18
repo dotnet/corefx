@@ -568,9 +568,10 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(23769)]
-        [ActiveIssue(22707, TestPlatforms.AnyUnix)]
-        [OuterLoop] // TODO: Issue #11345
+        //[ActiveIssue(23769)]
+        //[ActiveIssue(22707, TestPlatforms.AnyUnix)]
+        //[OuterLoop] // TODO: Issue #11345
+        [Trait("inv", "1")]
         [Theory, MemberData(nameof(RedirectStatusCodesOldMethodsNewMethods))]
         public async Task AllowAutoRedirect_True_ValidateNewMethodUsedOnRedirection(
             int statusCode, string oldMethod, string newMethod)
@@ -578,6 +579,53 @@ namespace System.Net.Http.Functional.Tests
             HttpClientHandler handler = CreateHttpClientHandler();
             using (var client = new HttpClient(handler))
             {
+                await LoopbackServer.CreateServerAsync(async (origServer, origUrl) =>
+                {
+                    var request = new HttpRequestMessage(new HttpMethod(oldMethod), origUrl);
+
+                    Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
+
+                    Task<List<string>> serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(origServer,
+                            $"HTTP/1.1 {statusCode} OK\r\n" +
+                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            $"Location: {origUrl}\r\n" +
+                            "\r\n");
+                    await Task.WhenAny(getResponseTask, serverTask);
+                    Assert.False(getResponseTask.IsCompleted, $"{getResponseTask.Status}: {getResponseTask.Exception}");
+                    await serverTask;
+
+                    serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(origServer,
+                            $"HTTP/1.1 200 OK\r\n" +
+                            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                            "\r\n");
+                    await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
+
+                    List<string> receivedRequest = await serverTask;
+                    string[] statusLineParts = receivedRequest[0].Split(' ');
+
+                    using (HttpResponseMessage response = await getResponseTask)
+                    {
+                        Assert.Equal(200, (int)response.StatusCode);
+                        Assert.Equal(newMethod, statusLineParts[0]);
+                    }
+                });
+            }
+        }
+
+        //[ActiveIssue(23769)]
+        //[ActiveIssue(22707, TestPlatforms.AnyUnix)]
+        //[OuterLoop] // TODO: Issue #11345
+        [Trait("inv", "1")]
+        [Fact]
+        public async Task ReliableReproForIssue23769()
+        {
+            HttpClientHandler handler = CreateHttpClientHandler();
+            using (var client = new HttpClient(handler))
+            {
+                const int statusCode = 302;
+                const string oldMethod = "HEAD";
+                const string newMethod = "HEAD";
+
                 await LoopbackServer.CreateServerAsync(async (origServer, origUrl) =>
                 {
                     var request = new HttpRequestMessage(new HttpMethod(oldMethod), origUrl);
