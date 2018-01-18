@@ -32,13 +32,13 @@
     <RuntimeGroup Include="debian">
       <Parent>linux</Parent>
       <Architectures>x64;x86;arm;armel;arm64</Architectures>
-      <Versions>8</Versions>
+      <Versions>8;9</Versions>
     </RuntimeGroup>
 
     <RuntimeGroup Include="fedora">
       <Parent>linux</Parent>
       <Architectures>x64</Architectures>
-      <Versions>23;24;25;26</Versions>
+      <Versions>23;24;25;26;27</Versions>
       <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 
@@ -55,13 +55,13 @@
     <RuntimeGroup Include="linuxmint.18">
       <Parent>ubuntu.16.04</Parent>
       <Architectures>x64</Architectures>
-      <Versions>1</Versions>
+      <Versions>1;2;3</Versions>
     </RuntimeGroup>
 
     <RuntimeGroup Include="ol">
       <Parent>rhel</Parent>
       <Architectures>x64</Architectures>
-      <Versions>7;7.0;7.1;7.2</Versions>
+      <Versions>7;7.0;7.1;7.2;7.3;7.4</Versions>
       <ApplyVersionsToParent>true</ApplyVersionsToParent>
     </RuntimeGroup>
 
@@ -69,14 +69,14 @@
     <RuntimeGroup Include="opensuse">
       <Parent>linux</Parent>
       <Architectures>x64</Architectures>
-      <Versions>13.2;42.1</Versions>
+      <Versions>13.2;42.1;42.2;42.3</Versions>
       <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 
     <RuntimeGroup Include="osx">
       <Parent>unix</Parent>
       <Architectures>x64</Architectures>
-      <Versions>10.10;10.11;10.12</Versions>
+      <Versions>10.10;10.11;10.12;10.13</Versions>
     </RuntimeGroup>
 
     <!-- rhel 6 is independent -->
@@ -109,6 +109,12 @@
       <Parent>debian</Parent>
       <Architectures>x64;x86;arm;arm64</Architectures>
       <Versions>16.04;16.10</Versions>
+      <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
+    </RuntimeGroup>
+    <RuntimeGroup Include="ubuntu">
+      <Parent>debian</Parent>
+      <Architectures>x64;x86;arm;arm64</Architectures>
+      <Versions>17.04;17.10</Versions>
       <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 
