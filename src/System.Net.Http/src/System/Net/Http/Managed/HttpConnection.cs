@@ -1149,7 +1149,7 @@ namespace System.Net.Http
                     // at any point to understand if the connection has been closed or if errant data
                     // has been sent on the connection by the server, either of which would mean we
                     // should close the connection and not use it for subsequent requests.
-                    _readAheadTask = Task.Run<int>(async () =>
+                    _readAheadTask = Task.Run(async () =>
                     {
                         await Task.Delay(1000);
                         return await _stream.ReadAsync(_readBuffer, 0, _readBuffer.Length);

@@ -571,7 +571,7 @@ namespace System.Net.Http.Functional.Tests
         //[ActiveIssue(23769)]
         //[ActiveIssue(22707, TestPlatforms.AnyUnix)]
         //[OuterLoop] // TODO: Issue #11345
-        [Trait("inv", "1")]
+        //[Trait("inv", "1")]
         [Theory, MemberData(nameof(RedirectStatusCodesOldMethodsNewMethods))]
         public async Task AllowAutoRedirect_True_ValidateNewMethodUsedOnRedirection(
             int statusCode, string oldMethod, string newMethod)
@@ -615,7 +615,7 @@ namespace System.Net.Http.Functional.Tests
         //[ActiveIssue(23769)]
         //[ActiveIssue(22707, TestPlatforms.AnyUnix)]
         //[OuterLoop] // TODO: Issue #11345
-        [Trait("inv", "1")]
+        //[Trait("inv", "1")]
         [Fact]
         public async Task ReliableReproForIssue23769()
         {
