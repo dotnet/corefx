@@ -233,6 +233,7 @@ namespace System.Diagnostics
     public sealed class RemoteInvokeOptions
     {
         public bool Start { get; set; } = true;
+        public bool RunAsSudo { get; set; } = false;
         public ProcessStartInfo StartInfo { get; set; } = new ProcessStartInfo();
         public bool EnableProfiling { get; set; } = true;
         public bool CheckExitCode { get; set; } = true;
