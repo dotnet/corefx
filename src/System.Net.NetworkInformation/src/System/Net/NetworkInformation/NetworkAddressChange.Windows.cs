@@ -57,7 +57,7 @@ namespace System.Net.NetworkInformation
 
             private static void ChangedAddress(object sender, EventArgs eventArgs)
             {
-                Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> s_copy = null;
+                Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> copy = null;
 
                 lock (s_globalLock)
                 {
@@ -68,17 +68,18 @@ namespace System.Net.NetworkInformation
                     {
                         s_isAvailable = isAvailableNow;
 
-                        s_copy =
+                        copy =
                             new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>(s_availabilityCallerArray);
                     }
                 }
 
                 // Executing user callbacks if Availability Change event occured.
-                if (s_copy != null)
+                if (copy != null)
                 {
-                    foreach (var handler in s_copy.Keys)
+                    foreach (var entry in copy)
                     {
-                        ExecutionContext context = s_copy[handler];
+                        NetworkAvailabilityChangedEventHandler handler = entry.Key;
+                        ExecutionContext context = entry.Value;
                         if (context == null)
                         {
                             handler(null, new NetworkAvailabilityEventArgs(s_isAvailable));
@@ -171,9 +172,10 @@ namespace System.Net.NetworkInformation
                 // Release the lock before calling into user callback.
                 if (copy.Count > 0)
                 {
-                    foreach (var handler in copy.Keys)
+                    foreach (var entry in copy)
                     {
-                        ExecutionContext context = copy[handler];
+                        NetworkAddressChangedEventHandler handler = entry.Key;
+                        ExecutionContext context = entry.Value;
                         if (context == null)
                         {
                             handler(null, EventArgs.Empty);
