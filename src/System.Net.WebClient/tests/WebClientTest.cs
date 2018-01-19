@@ -560,6 +560,7 @@ namespace System.Net.Tests
                 string largeText = GetRandomText(1024 * 1024);
 
                 var downloadProgressInvokedWithContentLength = new TaskCompletionSource<bool>();
+                var wc = new WebClient();
                 wc.DownloadProgressChanged += (s, e) =>
                 {
                     if (e.TotalBytesToReceive == largeText.Length && e.BytesReceived < e.TotalBytesToReceive)
@@ -568,7 +569,6 @@ namespace System.Net.Tests
                     }
                 };
 
-                var wc = new WebClient();
                 Task<byte[]> download = DownloadDataAsync(wc, url.ToString());
                 await LoopbackServer.ReadRequestAndSendResponseAsync(server,
                         "HTTP/1.1 200 OK\r\n" +
