@@ -58,7 +58,7 @@ namespace System.Net.Security.Tests
 
             try
             {
-                await Task.WhenAll(tasks);
+                await TestConfiguration.WhenAllOrAnyFailedWithTimeout(tasks);
                 if (PlatformDetection.IsWindows && PlatformDetection.WindowsVersion >= 10)
                 {
                     Assert.True(
