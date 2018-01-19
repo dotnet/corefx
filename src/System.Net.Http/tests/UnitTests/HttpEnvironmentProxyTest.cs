@@ -18,7 +18,7 @@ namespace System.Net.Http.Tests
 
         // This will clean specific environmental variables
         // to be sure they do not interfere with the test.
-        private void cleanEnv()
+        private void CleanEnv()
         {
             List<string>  vars = new List<string>() { "http_proxy", "HTTPS_PROY", "https_proxy",
                                                       "all_proxy", "ALL_PROXY", 
@@ -32,11 +32,11 @@ namespace System.Net.Http.Tests
         public HttpEnvironmentProxyTest(ITestOutputHelper output)
         {
             _output = output;
-            cleanEnv();
+            CleanEnv();
         }
 
         [Fact]
-        public void getBasicProxy()
+        public void HttpProxy_EnvironmentProxy_Loaded()
         {
             RemoteInvoke(() =>
             {
@@ -45,12 +45,12 @@ namespace System.Net.Http.Tests
                 Uri u;
 
                 // It should not return object if there are no variables set.
-                Assert.True(HttpEnvironmentProxy.TryToCreate() == null);
+                Assert.Null(HttpEnvironmentProxy.TryToCreate());
 
                 Environment.SetEnvironmentVariable("all_proxy", "http://1.1.1.1:3000");
                 p = HttpEnvironmentProxy.TryToCreate();
-                Assert.True(p != null);
-                Assert.True(p.Credentials == null);
+                Assert.NotNull(p);
+                Assert.Null(p.Credentials);
 
                 u = p.GetProxy(fooHttp);
                 Assert.True(u != null && u.Host == "1.1.1.1");
@@ -59,7 +59,7 @@ namespace System.Net.Http.Tests
 
                 Environment.SetEnvironmentVariable("http_proxy", "http://1.1.1.2:3001");
                 p = HttpEnvironmentProxy.TryToCreate();
-                Assert.True(p != null);
+                Assert.NotNull(p);
 
                 // Protocol specific variables should take precedence over all_
                 // and https should still use all_proxy.
@@ -72,7 +72,7 @@ namespace System.Net.Http.Tests
                 Environment.SetEnvironmentVariable("http_proxy", "1.1.1.3:3003");
                 Environment.SetEnvironmentVariable("https_proxy", "ab!cd");
                 p = HttpEnvironmentProxy.TryToCreate();
-                Assert.True(p != null);
+                Assert.NotNull(p);
 
                 u = p.GetProxy(fooHttp);
                 Assert.True(u != null && u.Host == "1.1.1.3" && u.Port == 3003);
@@ -83,14 +83,14 @@ namespace System.Net.Http.Tests
                 // to mimic curl behavior.
                 Environment.SetEnvironmentVariable("https_proxy", "socks5://1.1.1.4:3004");
                 p = HttpEnvironmentProxy.TryToCreate();
-                Assert.True(p != null);
+                Assert.NotNull(p);
                 u = p.GetProxy(fooHttps);
                 Assert.True(u != null && u.Host == "1.1.1.1" && u.Port == 3000);
 
                 // Set https to valid URI but different from http.
                 Environment.SetEnvironmentVariable("https_proxy", "http://1.1.1.5:3005");
                 p = HttpEnvironmentProxy.TryToCreate();
-                Assert.True(p != null);
+                Assert.NotNull(p);
 
                 u = p.GetProxy(fooHttp);
                 Assert.True(u != null && u.Host == "1.1.1.3" && u.Port == 3003);
@@ -102,7 +102,7 @@ namespace System.Net.Http.Tests
         }
 
         [Fact]
-        public void parseCredientials()
+        public void HttpProxy_CredentialParsing_Basic()
         {
 
             RemoteInvoke(() =>
@@ -111,20 +111,20 @@ namespace System.Net.Http.Tests
 
                 Environment.SetEnvironmentVariable("all_proxy", "http://foo:bar@1.1.1.1:3000");
                 p = HttpEnvironmentProxy.TryToCreate();
-                Assert.True(p != null);
-                Assert.True(p.Credentials != null);
+                Assert.NotNull(p);
+                Assert.NotNull(p.Credentials);
 
                 // Use user only without password.
                 Environment.SetEnvironmentVariable("all_proxy", "http://foo@1.1.1.1:3000");
                 p = HttpEnvironmentProxy.TryToCreate();
-                Assert.True(p != null);
-                Assert.True(p.Credentials != null);
+                Assert.NotNull(p);
+                Assert.NotNull(p.Credentials);
 
                 // Use different user for http and https
                 Environment.SetEnvironmentVariable("https_proxy", "http://foo1:bar1@1.1.1.1:3000");
                 p = HttpEnvironmentProxy.TryToCreate();
-                Assert.True(p != null);
-                Assert.True(p.Credentials != null);
+                Assert.NotNull(p);
+                Assert.NotNull(p.Credentials);
 
                 Assert.True(p.Credentials.GetCredential(fooHttp, "Basic") != p.Credentials.GetCredential(fooHttps, "Basic"));
 
@@ -133,7 +133,7 @@ namespace System.Net.Http.Tests
         }
 
         [Fact]
-        public void exceptionList()
+        public void HttpProxy_Exceptions_Match()
         {
             RemoteInvoke(() =>
             {
@@ -142,7 +142,7 @@ namespace System.Net.Http.Tests
                 Environment.SetEnvironmentVariable("no_proxy", ".test.com,, foo.com");
                 Environment.SetEnvironmentVariable("all_proxy", "http://foo:bar@1.1.1.1:3000");
                 p = HttpEnvironmentProxy.TryToCreate();
-                Assert.True(p != null);
+                Assert.NotNull(p);
 
                 Assert.True(p.IsBypassed(fooHttp));
                 Assert.True(p.IsBypassed(fooHttps));

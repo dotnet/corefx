@@ -7,7 +7,7 @@ namespace System.Net.Http
     internal sealed partial class HttpProxyConnectionHandler : HttpMessageHandler
     {
         // On Unix we get default proxy configuration from environment variables
-        static private IWebProxy ConstructSystemProxy()
+        private static IWebProxy ConstructSystemProxy()
         {
             return HttpEnvironmentProxy.TryToCreate();
         }

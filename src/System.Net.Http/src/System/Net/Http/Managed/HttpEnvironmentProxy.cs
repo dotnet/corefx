@@ -12,8 +12,8 @@ namespace System.Net.Http
     public sealed class HttpEnvironmentProxyCredientials : ICredentials
     {
         // Wrapper class for cases when http and https has different authentication.
-        private NetworkCredential _http;
-        private NetworkCredential _https;
+        private readonly NetworkCredential _http;
+        private readonly NetworkCredential _https;
 
         public HttpEnvironmentProxyCredientials(NetworkCredential http, NetworkCredential https)
         {
@@ -29,12 +29,12 @@ namespace System.Net.Http
 
     internal sealed class HttpEnvironmentProxy : IWebProxy
     {
-        private const string envAllProxyUC = "ALL_PROXY";
-        private const string envAllProxyLC = "all_proxy";
-        private const string envHttpProxyLC = "http_proxy";
-        private const string envHttpsProxyLC = "https_proxy";
-        private const string envHttpsProxyUC = "HTTPS_PROXY";
-        private const string envNoProxyLC = "no_proxy";
+        private const string EnvAllProxyUC = "ALL_PROXY";
+        private const string EnvAllProxyLC = "all_proxy";
+        private const string EnvHttpProxyLC = "http_proxy";
+        private const string EnvHttpsProxyLC = "https_proxy";
+        private const string EnvHttpsProxyUC = "HTTPS_PROXY";
+        private const string EnvNoProxyLC = "no_proxy";
 
         private Uri _http;          // String URI for HTTP requests
         private Uri _https;         // String URI for HTTPS requests
@@ -48,14 +48,14 @@ namespace System.Net.Http
             // Note that curl uses HTTPS_PROXY but not HTTP_PROXY.
             // For http, only http_proxy and generic variables are used.
 
-            Uri httpProxy = GetUriFromString(Environment.GetEnvironmentVariable(envHttpProxyLC));
-            Uri httpsProxy = GetUriFromString(Environment.GetEnvironmentVariable(envHttpsProxyLC)) ??
-                             GetUriFromString(Environment.GetEnvironmentVariable(envHttpsProxyUC));
+            Uri httpProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpProxyLC));
+            Uri httpsProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpsProxyLC)) ??
+                             GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpsProxyUC));
 
             if (httpProxy == null || httpsProxy == null)
             {
-                Uri allProxy = GetUriFromString(Environment.GetEnvironmentVariable(envAllProxyLC)) ??
-                                GetUriFromString(Environment.GetEnvironmentVariable(envAllProxyUC));
+                Uri allProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvAllProxyLC)) ??
+                                GetUriFromString(Environment.GetEnvironmentVariable(EnvAllProxyUC));
 
                 if (httpProxy == null)
                 {
@@ -74,7 +74,7 @@ namespace System.Net.Http
                 return null;
             }
 
-            return new HttpEnvironmentProxy(httpProxy, httpsProxy, Environment.GetEnvironmentVariable(envNoProxyLC));
+            return new HttpEnvironmentProxy(httpProxy, httpsProxy, Environment.GetEnvironmentVariable(EnvNoProxyLC));
         }
 
         private HttpEnvironmentProxy(Uri httpProxy, Uri httpsProxy, string bypassList)
@@ -137,33 +137,28 @@ namespace System.Net.Http
         /// it to Uri object. The string could contain URI fragment, IP address and  port
         /// tuple or just IP address or name. It will return null if parsing fails.
         /// </summary>
-        private static Uri GetUriFromString(String value)
+        private static Uri GetUriFromString(string value)
         {
-            if (value == null)
+            if (string.IsNullOrEmpty(value))
             {
                 return null;
             }
+
+            if (!value.Contains("://"))
+            {
+                value = "http://" + value;
+            }
+
+
 
             Uri uri = null;
             try
             {
                 uri = new Uri(value);
             }
-            catch (UriFormatException)
+            catch
             {
-                if (value.Contains("://"))
-                {
-                    throw;
-                }
-                // string perhaps did not have Scheme part
-                try
-                {
-                    uri = new Uri("http://" + value);
-                }
-                catch
-                {
-                    return null;
-                }
+                return null;
             }
 
             if (uri == null || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))

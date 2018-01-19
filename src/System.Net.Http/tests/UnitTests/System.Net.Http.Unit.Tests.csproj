@@ -361,7 +361,7 @@
     <Compile Include="HttpRuleParserTest.cs" />
     <Compile Include="MockContent.cs" />
     <Compile Include="StreamToStreamCopyTest.cs" />
-    <Compile Include="HttpProxy.cs" />
+    <Compile Include="HttpEnvironmentProxyTest.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netstandard' And '$(TargetGroup)' != 'netcoreapp'">
     <Compile Include="$(CommonPath)\System\SerializableAttribute.cs">
