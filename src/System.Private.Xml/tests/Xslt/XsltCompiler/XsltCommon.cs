@@ -333,16 +333,22 @@ namespace XmlCoreTest.Common
 
         public static string SearchPath(String fileName)
         {
-            var tools64 = @"C:\program Files (x86)\Microsoft SDKs\Windows";
-            var tools32 = @"C:\program Files\Microsoft SDKs\Windows";
+            var locations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            // 32 bit if on 64 bit Windows
+            locations.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"Microsoft SDKs\Windows"));
+            // 32 bit if on 32 bit Windows, otherwise 64 bit
+            locations.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Microsoft SDKs\Windows"));
+            // 64 bit if in 32 bit process on 64 bit Windows
+            locations.Add(Path.Combine(Environment.GetEnvironmentVariable("ProgramW6432"), @"Microsoft SDKs\Windows"));
 
             var files = new List<string>();
 
-            if (Directory.Exists(tools64))
-                files.AddRange(Directory.GetFiles(tools64, fileName, SearchOption.AllDirectories));
-
-            if (Directory.Exists(tools32))
-                files.AddRange(Directory.GetFiles(tools32, fileName, SearchOption.AllDirectories));
+            foreach (var location in locations)
+            {
+                if (Directory.Exists(location))
+                    files.AddRange(Directory.GetFiles(location, fileName, SearchOption.AllDirectories));
+            }
 
             if (files.Count == 0)
                 throw new FileNotFoundException(fileName);
