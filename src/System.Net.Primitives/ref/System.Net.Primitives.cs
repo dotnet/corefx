@@ -172,6 +172,10 @@ namespace System.Net
         Unused = 306,
         UpgradeRequired = 426,
         UseProxy = 305,
+        PreconditionRequired = 428,
+        TooManyRequests = 429,
+        RequestHeaderFieldsTooLarge = 431,
+        NetworkAuthenticationRequired = 511
     }
     public partial interface ICredentials
     {
