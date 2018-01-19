@@ -68,9 +68,6 @@ namespace System.PrivateUri.Tests
 
             Uri u1 = new Uri(uriDataFra);
 
-            // TODO #8330 : Normalization should produce the same result for escaped/unescaped URIs.
-            // Assert.Equal(root + "Type=%C3%A9", u1.AbsoluteUri);
-
             Assert.NotEqual(root + "Type=%C3%A9", u1.AbsoluteUri);
         }
 
@@ -79,11 +76,6 @@ namespace System.PrivateUri.Tests
         {
             Uri u1 = new Uri(@"http://test.com/%2c");
             Uri u2 = new Uri(@"http://test.com/,");
-
-            // TODO #8330 : Normalization should produce the same result for escaped/unescaped URIs.
-            //Assert.Equal(
-            //    u1.ToString(),
-            //    u2.ToString());
 
             Assert.NotEqual(
                 u1.ToString(),
