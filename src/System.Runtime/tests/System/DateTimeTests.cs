@@ -815,6 +815,16 @@ namespace System.Tests
             Assert.Equal(expectedString, result.ToString("g"));
         }
 
+        [Fact]
+        // Regression test for https://github.com/dotnet/coreclr/issues/15896
+        public static void TryParseExact_EmptyAMPMDesignator()
+        {
+            var englishCulture = new CultureInfo("en-US");
+            englishCulture.DateTimeFormat.AMDesignator = "";
+            englishCulture.DateTimeFormat.PMDesignator = "";
+            Assert.False(DateTime.TryParseExact(" ", "%t", englishCulture, DateTimeStyles.None, out _));
+        }
+
         public static void ParseExact_EscapedSingleQuotes()
         {
             var formatInfo = DateTimeFormatInfo.GetInstance(new CultureInfo("mt-MT"));
