@@ -92,26 +92,16 @@ namespace System.Reflection.Metadata.Tests
             return pinned;
         }
 
-        internal static unsafe int FindIndex(byte[] peImage, byte[] toFind, int start)
+        internal static unsafe int IndexOf(byte[] peImage, byte[] toFind, int start)
         {
-            byte[] toTest = new byte[toFind.Length];
             for (int i = 0; i < peImage.Length - toFind.Length; i++)
             {
-                Array.Copy(peImage, i + start, toTest, 0, toTest.Length);
-                if (toTest.SequenceEqual(toFind))
+                if (toFind.SequenceEqual(peImage.Slice(i + start, i + start + toFind.Length)))
                 {
                     return i;
                 }
             }
             return -1;
-        }
-
-        internal static unsafe void InsertBytes(byte[] peImage, byte[] toInsert, int start)
-        {
-            for (int i = 0; i < toInsert.Length; i++)
-            {
-                peImage[start + i] = toInsert[i];
-            }
         }
 
         #endregion
@@ -142,7 +132,7 @@ namespace System.Reflection.Metadata.Tests
             PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
 
             //find index for mscorlib
-            int mscorlibIndex = FindIndex(peImage, Encoding.ASCII.GetBytes("mscorlib"), headers.MetadataStartOffset);
+            int mscorlibIndex = IndexOf(peImage, Encoding.ASCII.GetBytes("mscorlib"), headers.MetadataStartOffset);
             Assert.NotEqual(mscorlibIndex, -1);
             //mutate mscorlib
             peImage[mscorlibIndex + headers.MetadataStartOffset] = 0xFF;
@@ -161,10 +151,10 @@ namespace System.Reflection.Metadata.Tests
 
             // mutate CLR to reach MetadataKind.WindowsMetadata
             // find CLR
-            int clrIndex = FindIndex(peImage, Encoding.ASCII.GetBytes("CLR"), headers.MetadataStartOffset);
+            int clrIndex = IndexOf(peImage, Encoding.ASCII.GetBytes("CLR"), headers.MetadataStartOffset);
             Assert.NotEqual(clrIndex, -1);
             //find 5, This is the streamcount and is the last thing that should be read befor the test.
-            int fiveIndex = FindIndex(peImage, new byte[] {5}, headers.MetadataStartOffset + clrIndex);
+            int fiveIndex = IndexOf(peImage, new byte[] {5}, headers.MetadataStartOffset + clrIndex);
             Assert.NotEqual(fiveIndex, -1);
 
             peImage[clrIndex + headers.MetadataStartOffset] = 0xFF;
@@ -186,9 +176,9 @@ namespace System.Reflection.Metadata.Tests
             PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
 
             //find 5, This is the streamcount we'll change to one to leave out loops.
-            int fiveIndex = FindIndex(peImage, new byte[] { 5 }, headers.MetadataStartOffset);
+            int fiveIndex = IndexOf(peImage, new byte[] { 5 }, headers.MetadataStartOffset);
             Assert.NotEqual(fiveIndex, -1);
-            InsertBytes(peImage, BitConverter.GetBytes((ushort)1), fiveIndex + headers.MetadataStartOffset);
+            Array.Copy(BitConverter.GetBytes((ushort)1), 0, peImage, fiveIndex + headers.MetadataStartOffset, BitConverter.GetBytes((ushort)1).Length);
 
             string[] streamNames= new string[]
             {
@@ -200,13 +190,14 @@ namespace System.Reflection.Metadata.Tests
 
             foreach (string name in streamNames)
             {
-                InsertBytes(peImage, Encoding.ASCII.GetBytes(name), fiveIndex + 10 + headers.MetadataStartOffset);
-                InsertBytes(peImage, new byte[] { 0 }, fiveIndex + 10 + headers.MetadataStartOffset + name.Length);
+                Array.Copy(Encoding.ASCII.GetBytes(name), 0, peImage, fiveIndex + 10 + headers.MetadataStartOffset, Encoding.ASCII.GetBytes(name).Length);
+                peImage[fiveIndex + 10 + headers.MetadataStartOffset + name.Length] = (byte)0;
                 Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + 15 + name.Length));
             }
 
-            InsertBytes(peImage, Encoding.ASCII.GetBytes(COR20Constants.MinimalDeltaMetadataTableStreamName), fiveIndex + 10 + headers.MetadataStartOffset);
-            InsertBytes(peImage, new byte[] { 0 }, fiveIndex + 10 + headers.MetadataStartOffset + COR20Constants.MinimalDeltaMetadataTableStreamName.Length);
+
+            Array.Copy(Encoding.ASCII.GetBytes(COR20Constants.MinimalDeltaMetadataTableStreamName), 0, peImage, fiveIndex + 10 + headers.MetadataStartOffset, Encoding.ASCII.GetBytes(COR20Constants.MinimalDeltaMetadataTableStreamName).Length);
+            peImage[fiveIndex + 10 + headers.MetadataStartOffset + COR20Constants.MinimalDeltaMetadataTableStreamName.Length] = (byte)0;
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
 
         }
@@ -218,10 +209,10 @@ namespace System.Reflection.Metadata.Tests
             GCHandle pinned = GetPinnedPEImage(peImage);
 
             //38654710855 is the external table mask from PortablePdbs.DocumentsPdb
-            int externalTableMaskIndex = FindIndex(peImage, BitConverter.GetBytes(38654710855), 0);
+            int externalTableMaskIndex = IndexOf(peImage, BitConverter.GetBytes(38654710855), 0);
             Assert.NotEqual(externalTableMaskIndex, -1);
-
-            InsertBytes(peImage, BitConverter.GetBytes(38654710855 + 1), externalTableMaskIndex);
+            
+            Array.Copy(BitConverter.GetBytes(38654710855 + 1), 0, peImage, externalTableMaskIndex, BitConverter.GetBytes(38654710855 + 1).Length);
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length));
         }
 
@@ -231,21 +222,19 @@ namespace System.Reflection.Metadata.Tests
             byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
             GCHandle pinned = GetPinnedPEImage(peImage);
             //Find COR20Constants.StringStreamName to be changed to COR20Constants.MinimalDeltaMetadataTableStreamName
-            int stringIndex = FindIndex(peImage, Encoding.ASCII.GetBytes(COR20Constants.StringStreamName), 0);
+            int stringIndex = IndexOf(peImage, Encoding.ASCII.GetBytes(COR20Constants.StringStreamName), 0);
             Assert.NotEqual(stringIndex, -1);
             //find remainingBytes to be increased because we are changing to uncompressed
-            int remainingBytesIndex = FindIndex(peImage, BitConverter.GetBytes(180), 0);
+            int remainingBytesIndex = IndexOf(peImage, BitConverter.GetBytes(180), 0);
             Assert.NotEqual(remainingBytesIndex, -1);
             //find compressed to change to uncompressed
-            int compressedIndex = FindIndex(peImage, Encoding.ASCII.GetBytes(COR20Constants.CompressedMetadataTableStreamName), 0);
+            int compressedIndex = IndexOf(peImage, Encoding.ASCII.GetBytes(COR20Constants.CompressedMetadataTableStreamName), 0);
             Assert.NotEqual(compressedIndex, -1);
-
-            InsertBytes(peImage, Encoding.ASCII.GetBytes(COR20Constants.MinimalDeltaMetadataTableStreamName), stringIndex);
-            InsertBytes(peImage, new byte[] { 0 }, stringIndex + COR20Constants.MinimalDeltaMetadataTableStreamName.Length);
-
-            InsertBytes(peImage, BitConverter.GetBytes(250), remainingBytesIndex);
-
-            InsertBytes(peImage, Encoding.ASCII.GetBytes(COR20Constants.UncompressedMetadataTableStreamName), compressedIndex);
+            
+            Array.Copy(Encoding.ASCII.GetBytes(COR20Constants.MinimalDeltaMetadataTableStreamName), 0, peImage, stringIndex, Encoding.ASCII.GetBytes(COR20Constants.MinimalDeltaMetadataTableStreamName).Length);
+            peImage[stringIndex + COR20Constants.MinimalDeltaMetadataTableStreamName.Length] = (byte)0;
+            Array.Copy(BitConverter.GetBytes(250), 0, peImage, remainingBytesIndex, BitConverter.GetBytes(250).Length);
+            Array.Copy(Encoding.ASCII.GetBytes(COR20Constants.UncompressedMetadataTableStreamName), 0, peImage, compressedIndex, Encoding.ASCII.GetBytes(COR20Constants.UncompressedMetadataTableStreamName).Length);
 
             MetadataReader minimalDeltaReader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
             Assert.True(minimalDeltaReader.IsMinimalDelta);
@@ -262,29 +251,29 @@ namespace System.Reflection.Metadata.Tests
             PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
 
             //1392 is the remaining bytes from NetModule.AppCS
-            int remainingBytesIndex = FindIndex(peImage, BitConverter.GetBytes(1392), headers.MetadataStartOffset);
+            int remainingBytesIndex = IndexOf(peImage, BitConverter.GetBytes(1392), headers.MetadataStartOffset);
             Assert.NotEqual(remainingBytesIndex, -1);
             //14057656686423 is the presentTables from NetModule.AppCS, must be after remainingBytesIndex
-            int presentTablesIndex = FindIndex(peImage, BitConverter.GetBytes(14057656686423), headers.MetadataStartOffset + remainingBytesIndex);
+            int presentTablesIndex = IndexOf(peImage, BitConverter.GetBytes(14057656686423), headers.MetadataStartOffset + remainingBytesIndex);
             Assert.NotEqual(presentTablesIndex, -1);
 
             //Set this.ModuleTable.NumberOfRows to 0
-            InsertBytes(peImage, BitConverter.GetBytes((ulong)0), presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset + 16);
+            Array.Copy(BitConverter.GetBytes((ulong)0), 0, peImage, presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset + 16, BitConverter.GetBytes((ulong)0).Length);
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
             //set row counts greater than TokenTypeIds.RIDMask
-            InsertBytes(peImage, BitConverter.GetBytes((ulong)16777216), presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset + 16);
+            Array.Copy(BitConverter.GetBytes((ulong)16777216), 0, peImage, presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset + 16, BitConverter.GetBytes((ulong)16777216).Length);
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
             //set remaining bytes smaller than required for row counts.
-            InsertBytes(peImage, BitConverter.GetBytes(25), remainingBytesIndex + headers.MetadataStartOffset);
+            Array.Copy(BitConverter.GetBytes(25), 0, peImage, remainingBytesIndex + headers.MetadataStartOffset, BitConverter.GetBytes(25).Length);
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
             //14057656686424 is a value to make (presentTables & ~validTables) != 0 but not (presentTables & (ulong)(TableMask.PtrTables | TableMask.EnCMap)) != 0
-            InsertBytes(peImage, BitConverter.GetBytes((ulong)14057656686424), presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset);
+            Array.Copy(BitConverter.GetBytes((ulong)14057656686424), 0, peImage, presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset, BitConverter.GetBytes((ulong)14057656686424).Length);
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
             //14066246621015 makes (presentTables & ~validTables) != 0 fail
-            InsertBytes(peImage, BitConverter.GetBytes((ulong)14066246621015), presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset);
+            Array.Copy(BitConverter.GetBytes((ulong)14066246621015), 0, peImage, presentTablesIndex + remainingBytesIndex + headers.MetadataStartOffset, BitConverter.GetBytes((ulong)14066246621015).Length);
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
             //set remaining bytes smaller than MetadataStreamConstants.SizeOfMetadataTableHeader
-            InsertBytes(peImage, BitConverter.GetBytes(1), remainingBytesIndex + headers.MetadataStartOffset);
+            Array.Copy(BitConverter.GetBytes(1), 0, peImage, remainingBytesIndex + headers.MetadataStartOffset, BitConverter.GetBytes(1).Length);
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize));
         }
 
