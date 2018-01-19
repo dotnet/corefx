@@ -73,6 +73,13 @@
       <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 
+    <RuntimeGroup Include="sles">
+      <Parent>linux</Parent>
+      <Architectures>x64</Architectures>
+      <Versions>12;12.1;12.2;12.3</Versions>
+      <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
+    </RuntimeGroup>
+
     <RuntimeGroup Include="osx">
       <Parent>unix</Parent>
       <Architectures>x64</Architectures>
