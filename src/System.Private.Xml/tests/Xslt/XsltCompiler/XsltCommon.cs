@@ -5,6 +5,7 @@
 using OLEDB.Test.ModuleCore;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -332,22 +333,25 @@ namespace XmlCoreTest.Common
 
         public static string SearchPath(String fileName)
         {
-            const string ToolsDirectorySuffix = @"bin\NETFX 4.5.1 Tools";
+            var tools64 = @"C:\program Files (x86)\Microsoft SDKs\Windows";
+            var tools32 = @"C:\program Files\Microsoft SDKs\Windows";
 
-            var tools64 = new DirectoryInfo(@"C:\program Files (x86)\Microsoft SDKs\Windows");
-            var tools32 = new DirectoryInfo(@"C:\program Files\Microsoft SDKs\Windows");
+            var files = new List<string>();
 
-            var directories64 = tools64.Exists ? tools64.EnumerateDirectories() : Enumerable.Empty<DirectoryInfo>();
-            var directories32 = tools32.Exists ? tools32.EnumerateDirectories() : Enumerable.Empty<DirectoryInfo>();
+            if (Directory.Exists(tools64))
+                files.AddRange(Directory.GetFiles(tools64, fileName, SearchOption.AllDirectories));
 
-            var toolPath = directories64.Concat(directories32)
-                .Select(dir => Path.Combine(dir.FullName, ToolsDirectorySuffix, fileName))
-                .SingleOrDefault(File.Exists);
+            if (Directory.Exists(tools32))
+                files.AddRange(Directory.GetFiles(tools32, fileName, SearchOption.AllDirectories));
 
-            if (toolPath == null)
+            if (files.Count == 0)
                 throw new FileNotFoundException(fileName);
 
-            return toolPath;
+            // Crudely prefer newer versions, eg 4.6.2 over 4.6.1,
+            // but it currently is not important
+            files.Sort(StringComparer.OrdinalIgnoreCase);
+
+            return files[files.Count - 1];
         }
     }
 
