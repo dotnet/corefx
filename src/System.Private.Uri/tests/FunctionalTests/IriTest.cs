@@ -83,6 +83,17 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        public void Iri_UnknownSchemeWithoutAuthority_DoesNormalize()
+        {
+            string[] paths = { "\u00E8", "%C3%A8" };
+            foreach (string path in paths)
+            {
+                Uri noAuthority = new Uri("scheme:" + path);
+                Assert.Equal("scheme:\u00E8", noAuthority.ToString());
+            }
+        }
+
+        [Fact]
         public void Iri_804110_TryCreateUri_ShouldNotThrowIndexOutOfRange()
         {
             string u1 = "http://b.contos.oc.om/entry/d.contos.oc.om/AbcDefg/21234567/1234567890";
