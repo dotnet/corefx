@@ -1135,8 +1135,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     pfConstrained = true;
                 }
 
-                Debug.Assert(tryConvert(pObject, swt.GetType(), CONVERTTYPE.NOUDC) != null);
-                return tryConvert(pObject, swt.GetType(), CONVERTTYPE.NOUDC);
+                pObject = tryConvert(pObject, swt.GetType(), CONVERTTYPE.NOUDC);
+                Debug.Assert(pObject != null);
             }
 
             return pObject;
