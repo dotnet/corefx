@@ -559,6 +559,15 @@ namespace System.Net.Tests
             {
                 string largeText = GetRandomText(1024 * 1024);
 
+                var downloadProgressInvokedWithContentLength = new TaskCompletionSource<bool>();
+                wc.DownloadProgressChanged += (s, e) =>
+                {
+                    if (e.TotalBytesToReceive == largeText.Length && e.BytesReceived < e.TotalBytesToReceive)
+                    {
+                        downloadProgressInvokedWithContentLength.TrySetResult(true);
+                    }
+                };
+
                 var wc = new WebClient();
                 Task<byte[]> download = DownloadDataAsync(wc, url.ToString());
                 await LoopbackServer.ReadRequestAndSendResponseAsync(server,
@@ -568,6 +577,7 @@ namespace System.Net.Tests
                         "\r\n" +
                         $"{largeText}");
                 Assert.Equal(largeText, Encoding.ASCII.GetString(await download));
+                Assert.True(!IsAsync || await downloadProgressInvokedWithContentLength.Task, "Expected download progress callback to be invoked with Content-Length");
             });
         }
 
