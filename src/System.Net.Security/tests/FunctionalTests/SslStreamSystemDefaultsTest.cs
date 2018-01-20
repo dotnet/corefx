@@ -29,10 +29,12 @@ namespace System.Net.Security.Tests
             _serverStream = new SslStream(serverNet, false, ServerCertCallback);
         }
 
+        public static bool IsNotWindows7 => !PlatformDetection.IsWindows7;
+
         protected abstract Task AuthenticateClientAsync(string targetHost, X509CertificateCollection clientCertificates, bool checkCertificateRevocation, SslProtocols? protocols = null);
         protected abstract Task AuthenticateServerAsync(X509Certificate serverCertificate, bool clientCertificateRequired, bool checkCertificateRevocation, SslProtocols? protocols = null);
 
-        [Theory]
+        [ConditionalTheory(nameof(IsNotWindows7))]
         [InlineData(null, null)]
         [InlineData(SslProtocols.None, null)]
         [InlineData(null, SslProtocols.None)]
