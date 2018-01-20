@@ -38,7 +38,7 @@
     <RuntimeGroup Include="fedora">
       <Parent>linux</Parent>
       <Architectures>x64</Architectures>
-      <Versions>23;24;25;26;27</Versions>
+      <Versions>23;24;25;26;27;28</Versions>
       <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 
@@ -56,6 +56,11 @@
       <Parent>ubuntu.16.04</Parent>
       <Architectures>x64</Architectures>
       <Versions>1;2;3</Versions>
+    </RuntimeGroup>
+    <RuntimeGroup Include="linuxmint.19">
+      <Parent>ubuntu.18.04</Parent>
+      <Architectures>x64</Architectures>
+      <Versions></Versions>
     </RuntimeGroup>
 
     <RuntimeGroup Include="ol">
@@ -113,7 +118,7 @@
     <RuntimeGroup Include="ubuntu">
       <Parent>debian</Parent>
       <Architectures>x64;x86;arm;arm64</Architectures>
-      <Versions>16.04;16.10;17.04;17.10</Versions>
+      <Versions>16.04;16.10;17.04;17.10;18.04</Versions>
       <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 

@@ -578,6 +578,31 @@
         "fedora-x64-corert"
       ]
     },
+    "fedora.28": {
+      "#import": [
+        "fedora"
+      ]
+    },
+    "fedora.28-corert": {
+      "#import": [
+        "fedora.28",
+        "fedora-corert"
+      ]
+    },
+    "fedora.28-x64": {
+      "#import": [
+        "fedora.28",
+        "fedora-x64"
+      ]
+    },
+    "fedora.28-x64-corert": {
+      "#import": [
+        "fedora.28-corert",
+        "fedora.28-x64",
+        "fedora.28",
+        "fedora-x64-corert"
+      ]
+    },
     "gentoo": {
       "#import": [
         "linux"
@@ -874,6 +899,30 @@
         "linuxmint.18.3-x64",
         "linuxmint.18.3",
         "linuxmint.18.2-x64-corert"
+      ]
+    },
+    "linuxmint.19": {
+      "#import": [
+        "ubuntu.18.04"
+      ]
+    },
+    "linuxmint.19-corert": {
+      "#import": [
+        "linuxmint.19",
+        "ubuntu.18.04-corert"
+      ]
+    },
+    "linuxmint.19-x64": {
+      "#import": [
+        "linuxmint.19",
+        "ubuntu.18.04-x64"
+      ]
+    },
+    "linuxmint.19-x64-corert": {
+      "#import": [
+        "linuxmint.19-corert",
+        "linuxmint.19-x64",
+        "ubuntu.18.04-x64-corert"
       ]
     },
     "ol": {
@@ -2228,6 +2277,73 @@
         "ubuntu.17.10-corert",
         "ubuntu.17.10-x86",
         "ubuntu.17.10",
+        "ubuntu-x86-corert"
+      ]
+    },
+    "ubuntu.18.04": {
+      "#import": [
+        "ubuntu"
+      ]
+    },
+    "ubuntu.18.04-arm": {
+      "#import": [
+        "ubuntu.18.04",
+        "ubuntu-arm"
+      ]
+    },
+    "ubuntu.18.04-arm-corert": {
+      "#import": [
+        "ubuntu.18.04-corert",
+        "ubuntu.18.04-arm",
+        "ubuntu.18.04",
+        "ubuntu-arm-corert"
+      ]
+    },
+    "ubuntu.18.04-arm64": {
+      "#import": [
+        "ubuntu.18.04",
+        "ubuntu-arm64"
+      ]
+    },
+    "ubuntu.18.04-arm64-corert": {
+      "#import": [
+        "ubuntu.18.04-corert",
+        "ubuntu.18.04-arm64",
+        "ubuntu.18.04",
+        "ubuntu-arm64-corert"
+      ]
+    },
+    "ubuntu.18.04-corert": {
+      "#import": [
+        "ubuntu.18.04",
+        "ubuntu-corert"
+      ]
+    },
+    "ubuntu.18.04-x64": {
+      "#import": [
+        "ubuntu.18.04",
+        "ubuntu-x64"
+      ]
+    },
+    "ubuntu.18.04-x64-corert": {
+      "#import": [
+        "ubuntu.18.04-corert",
+        "ubuntu.18.04-x64",
+        "ubuntu.18.04",
+        "ubuntu-x64-corert"
+      ]
+    },
+    "ubuntu.18.04-x86": {
+      "#import": [
+        "ubuntu.18.04",
+        "ubuntu-x86"
+      ]
+    },
+    "ubuntu.18.04-x86-corert": {
+      "#import": [
+        "ubuntu.18.04-corert",
+        "ubuntu.18.04-x86",
+        "ubuntu.18.04",
         "ubuntu-x86-corert"
       ]
     },
