@@ -584,7 +584,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 // Know issue: curl does not change method to "GET"
                 // https://github.com/dotnet/corefx/issues/26434
-                return;
+                newMethod = "POST";
             }
 
             HttpClientHandler handler = CreateHttpClientHandler();
