@@ -55,7 +55,7 @@ namespace System.ServiceProcess
         public ServiceController(string name, string machineName)
         {
             if (!CheckMachineName(machineName))
-                throw new ArgumentException(SR.Format(SR.BadMachineName, machineName));
+             throw new ArgumentException(SR.Format(SR.BadMachineName, machineName));
 
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentException(SR.Format(SR.InvalidParameter, nameof(name), name));

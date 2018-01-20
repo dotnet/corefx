@@ -152,11 +152,15 @@ namespace System.ServiceProcess.Tests
                 {
                     try
                     {
+                        Debug.WriteLine("Service stopping");
                         svc.Stop();
+                        Debug.WriteLine("Service stopped");
+                        Debug.WriteLine(ServiceName);
                     }
                     catch (InvalidOperationException)
                     {
                         ServiceName = null;
+                        Debug.WriteLine("Service not stopped");
                         return;
                     }
 

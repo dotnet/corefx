@@ -19,8 +19,7 @@ namespace System.ServiceProcess.Tests
     public class TestService : ServiceBase
     {
         private object streamlock = new object();
-        private StreamWriter writer;
-
+        
         public TestService(string serviceName)
         {
             this.ServiceName = serviceName;
@@ -37,10 +36,9 @@ namespace System.ServiceProcess.Tests
 
             this.Server = new NamedPipeServerStream(serviceName);
             this.Server.WaitForConnectionAsync();
-            writer = new StreamWriter(this.Server);
         }
 
-        public NamedPipeServerStream Server { get; set;}
+        public NamedPipeServerStream Server { get; set; }
 
         public static string GetLogPath(string serviceName)
         {
@@ -49,32 +47,23 @@ namespace System.ServiceProcess.Tests
 
         protected override void OnContinue()
         {
-        //    lock (streamlock)
-            {
-                WriteLog(nameof(OnContinue));
-                base.OnContinue();
-                WriteStream("Continue");
-            }
+            WriteLog(nameof(OnContinue));
+            base.OnContinue();
+            WriteStream("Continue");
         }
 
         protected override void OnCustomCommand(int command)
         {
-            //lock (streamlock)
-            {
-                WriteLog(nameof(OnCustomCommand) + " command=" + command);
-                base.OnCustomCommand(command);
-                WriteStream("executeCommand");
-            }
+            WriteLog(nameof(OnCustomCommand) + " command=" + command);
+            base.OnCustomCommand(command);
+            WriteStream("executeCommand");
         }
 
         protected override void OnPause()
         {
-            //lock (streamlock)
-            {
-                WriteLog(nameof(OnPause));
-                base.OnPause();
-                WriteStream("Pause");
-            }
+            WriteLog(nameof(OnPause));
+            base.OnPause();
+            WriteStream("Pause");
         }
 
         protected override void OnSessionChange(SessionChangeDescription changeDescription)
@@ -105,28 +94,31 @@ namespace System.ServiceProcess.Tests
 
         protected override void OnStop()
         {
-            //lock (streamlock)
-            {
-                WriteLog(nameof(OnStop));
-                base.OnStop();
-                WriteStream("Stop");
-            }
+            Debug.WriteLine("Stopcalled");
+            WriteLog(nameof(OnStop));
+            base.OnStop();
+            Debug.WriteLine("Stopcalled");
+            WriteStream("Stop");
         }
 
         private void WriteLog(string msg)
         {
-             File.AppendAllText(GetLogPath(ServiceName), msg + Environment.NewLine);
+            File.AppendAllText(GetLogPath(ServiceName), msg + Environment.NewLine);
         }
 
         private void WriteStream(string msg)
         {
-            Console.WriteLine("hit111");
-        //    lock (streamlock)
-            {
-                Console.WriteLine("hit");
-                    writer.WriteLine(msg);
-            }
+            Debug.WriteLine("LockNotAcquired");
+            //lock (streamlock)
+
+            Debug.WriteLine("LockAcquired");
+            //Server.WaitForPipeDrain();
+            Server.WriteByte(123);
+            Debug.WriteLine("sent");
+            Server.Flush();
             
         }
+
+
     }
 }
