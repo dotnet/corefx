@@ -765,11 +765,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                         // The conversion is applicable so it affects the best types.
 
-                        prguci.Add(new UdConvInfo());
-                        prguci[prguci.Count - 1].mwt = new MethWithType();
-                        prguci[prguci.Count - 1].mwt.Set(convCur, atsCur);
-                        prguci[prguci.Count - 1].fSrcImplicit = fFromImplicit;
-                        prguci[prguci.Count - 1].fDstImplicit = fToImplicit;
+                        prguci.Add(new UdConvInfo
+                        {
+                            mwt = new MethWithType(convCur, atsCur),
+                            fSrcImplicit = fFromImplicit,
+                            fDstImplicit = fToImplicit
+                        });
 
                         if (!fBestSrcExact)
                         {

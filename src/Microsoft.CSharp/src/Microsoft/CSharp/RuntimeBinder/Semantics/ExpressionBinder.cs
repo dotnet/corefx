@@ -1052,30 +1052,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private void PostBindProperty(PropWithType pwt, Expr pObject, out MethWithType pmwtGet, out MethWithType pmwtSet)
         {
-            pmwtGet = new MethWithType();
-            pmwtSet = new MethWithType();
+            PropertySymbol prop = pwt.Prop();
+            Debug.Assert(prop != null);
             // Get the accessors.
-            if (pwt.Prop().GetterMethod != null)
-            {
-                pmwtGet.Set(pwt.Prop().GetterMethod, pwt.GetType());
-            }
-            else
-            {
-                pmwtGet.Clear();
-            }
+            pmwtGet = prop.GetterMethod != null
+                ? new MethWithType(prop.GetterMethod, pwt.GetType())
+                : new MethWithType();
+            pmwtSet = prop.SetterMethod != null
+                ? new MethWithType(prop.SetterMethod, pwt.GetType())
+                : new MethWithType();
 
-            if (pwt.Prop().SetterMethod != null)
+            if (prop.RetType != null)
             {
-                pmwtSet.Set(pwt.Prop().SetterMethod, pwt.GetType());
-            }
-            else
-            {
-                pmwtSet.Clear();
-            }
-
-            if (pwt.Prop().RetType != null)
-            {
-                checkUnsafe(pwt.Prop().RetType);
+                checkUnsafe(prop.RetType);
             }
         }
 
