@@ -544,9 +544,9 @@ namespace System.Collections.ObjectModel.Tests
 
             // act
             if (comparer == null)
-                collection.ReplaceRange(newItems, comparer);
-            else
                 collection.ReplaceRange(newItems);
+            else
+                collection.ReplaceRange(newItems, comparer);
 
             // cleanup
             inpc.PropertyChanged -= Collection_PropertyChanged;

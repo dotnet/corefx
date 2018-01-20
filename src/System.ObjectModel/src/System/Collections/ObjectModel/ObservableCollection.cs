@@ -72,7 +72,7 @@ namespace System.Collections.ObjectModel
         public ObservableCollection(List<T> list) : base(CreateCopy(list, nameof(list))) { }
 
         // Note: If we're gonna introduce new constructors not using a List<T>, 
-        // review ReplaceRange(index, collection) and RemoveRange(index, count).
+        // review InsertRange, ReplaceRange(index, collection) and RemoveRange(index, count).
         private static List<T> CreateCopy(IEnumerable<T> collection, string paramName)
         {
             if (collection == null)
@@ -130,29 +130,15 @@ namespace System.Collections.ObjectModel
             if (index > Count)
                 throw new ArgumentOutOfRangeException(nameof(index));
 
-            if (collection is ICollection<T> list)
+            if (collection is ICollection<T> countable)
             {
-                if (list.Count == 0)
+                if (countable.Count == 0)
                 {
                     return;
-                }
-                if (!(list is IList))
-                {
-                    list = new List<T>(list);
                 }
             }
             else if (!ContainsAny(collection))
             {
-                return;
-            }
-            else
-            {
-                list = new List<T>(collection);
-            }
-
-            if (list.Count == 1)
-            {
-                InsertItem(index, ((IList<T>)list)[0]);
                 return;
             }
 
@@ -163,12 +149,16 @@ namespace System.Collections.ObjectModel
             target.InsertRange(index, collection);
 
             OnEssentialPropertiesChanged();
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, (IList)list, index));
+
+            if (!(collection is IList list))
+                list = new List<T>(collection);
+
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, list, index));
         }
 
 
         /// <summary> 
-        /// Removes the first occurence of each item in the specified collection from ObservableCollection(Of T).
+        /// Removes the first occurence of each item in the specified collection from the <see cref="ObservableCollection{T}"/>.
         /// </summary>
         /// <param name="collection">The items to remove.</param>        
         /// <exception cref="ArgumentNullException"><paramref name="collection"/> is null.</exception>
@@ -181,12 +171,12 @@ namespace System.Collections.ObjectModel
             {
                 return;
             }
-            else if (collection is ICollection<T> list)
+            else if (collection is ICollection<T> countable)
             {
-                if (list.Count == 0)
+                if (countable.Count == 0)
                     return;
-                else if (list.Count == 1)
-                    using (IEnumerator<T> enumerator = list.GetEnumerator())
+                else if (countable.Count == 1)
+                    using (IEnumerator<T> enumerator = countable.GetEnumerator())
                     {
                         enumerator.MoveNext();
                         Remove(enumerator.Current);
@@ -253,6 +243,7 @@ namespace System.Collections.ObjectModel
                 return;
             }
 
+            //Items will always be List<T>, see constructors
             var items = (List<T>)Items;
             List<T> removedItems = items.GetRange(index, count);
 
@@ -270,110 +261,125 @@ namespace System.Collections.ObjectModel
         /// Clears the current collection and replaces it with the specified collection,
         /// using the default <see cref="EqualityComparer{T}"/>.
         /// </summary>             
-        /// <param name="newItems">The items to fill the collection with, after clearing it.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="newItems"/> is null.</exception>
-        public void ReplaceRange(IEnumerable<T> newItems)
+        /// <param name="collection">The items to fill the collection with, after clearing it.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="collection"/> is null.</exception>
+        public void ReplaceRange(IEnumerable<T> collection)
         {
-            ReplaceRange(newItems, EqualityComparer<T>.Default);
+            ReplaceRange(0, Count, collection, EqualityComparer<T>.Default);
         }
 
         /// <summary>
-        /// Clears the current collection and replaces it with the specified collection.
+        /// Clears the current collection and replaces it with the specified collection,
+        /// using the specified comparer to skip equal items.
         /// </summary>
-        /// <param name="newItems">The items to fill the collection with, after clearing it.</param>
+        /// <param name="collection">The items to fill the collection with, after clearing it.</param>
         /// <param name="comparer">An <see cref="IEqualityComparer{T}"/> to be used
         /// to check whether an item in the same location already existed before,
         /// which in case it would not be added to the collection, and no event will be raised for it.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="newItems"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="collection"/> is null.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="comparer"/> is null.</exception>
-        public void ReplaceRange(IEnumerable<T> newItems, IEqualityComparer<T> comparer)
+        public void ReplaceRange(IEnumerable<T> collection, IEqualityComparer<T> comparer)
         {
-            if (newItems == null)
-                throw new ArgumentNullException(nameof(newItems));
+            ReplaceRange(0, Count, collection, comparer);
+        }
+
+        /// <summary>
+        /// Removes the specified range and inserts the specified collection,
+        /// ignoring equal items (using <see cref="EqualityComparer{T}.Default"/>).
+        /// </summary>
+        /// <param name="index">The index of where to start the replacement.</param>
+        /// <param name="count">The number of items to be replaced.</param>
+        /// <param name="collection">The collection to insert in that location.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is out of range.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="count"/> is out of range.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="collection"/> is null.</exception>
+        public void ReplaceRange(int index, int count, IEnumerable<T> collection)
+        {
+            ReplaceRange(index, count, collection, EqualityComparer<T>.Default);
+        }
+
+        /// <summary>
+        /// Removes the specified range and inserts the specified collection, ignoring equal items.
+        /// </summary>
+        /// <param name="index">The index of where to start the replacement.</param>
+        /// <param name="count">The number of items to be replaced.</param>
+        /// <param name="collection">The collection to insert in that location.</param>
+        /// <param name="comparer">The comparer to use when checking for equal items.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is out of range.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="count"/> is out of range.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="collection"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="comparer"/> is null.</exception>
+        public void ReplaceRange(int index, int count, IEnumerable<T> collection, IEqualityComparer<T> comparer)
+        {
+            if (index + count < count)
+                throw new ArgumentOutOfRangeException($"index or count must not exceed the collection.");
+
+            if (collection == null)
+                throw new ArgumentNullException(nameof(collection));
+
             if (comparer == null)
                 throw new ArgumentNullException(nameof(comparer));
 
-            if (newItems is ICollection<T> gCollection)
+            if (collection is ICollection<T> countable)
             {
-                if (gCollection.Count == 0)
+                if (countable.Count == 0)
                 {
-                    ClearItems();
+                    RemoveRange(index, count);
                     return;
                 }
-                /*
-                else if (gCollection.Count == 1)
-                {
-                    using (IEnumerator<T> enumerator = gCollection.GetEnumerator())
-                    {
-                        enumerator.MoveNext();
-                        T current = enumerator.Current;
-                        var index = IndexOf(current);
-                        if (index > -1)
-                        {
-                            if(index > 0)
-                            {
-                              //TODO remove anything besides existing item, placing it at first location.
-                            }
-                            SetItem(0, current);
-                        }
-                        else
-                            ClearItems();
-                    }
-                    return;
-                }
-                */
             }
-            else if (!ContainsAny(newItems))
+            else if (!ContainsAny(collection))
             {
-                ClearItems();
+                RemoveRange(index, count);
                 return;
             }
-            else
-                gCollection = new List<T>(newItems);
+
+            if (index + count == 0)
+            {
+                AddRange(collection);
+                return;
+            }
+
+            if (!(collection is IList<T> list))
+                list = new List<T>(collection);
 
             var oldCount = Count;
-            var lCount = gCollection.Count;
-
-            var max = Count >= lCount ? Count : lCount;
-
-            if (!(gCollection is IList<T> list))
-                list = new List<T>(gCollection);
+            var addedCount = list.Count;
+            var max = addedCount >= Count ? addedCount : Count;
 
             using (BlockReentrancy())
             {
                 var changesMade = false;
+                List<T>
+                    oldCluster = new List<T>(),
+                    newCluster = new List<T>();
 
-                var oldCluster = new List<T>();
-                var newCluster = new List<T>();
-
-                for (int i = 0; i < max; i++)
+                for (int i = index; i < index + max; i++)
                 {
                     //parallel position
-                    if (i < Count && i < lCount)
+                    if (i < Count && i < addedCount)
                     {
                         T old = this[i], @new = list[i];
                         if (comparer.Equals(old, @new))
                         {
                             OnRangeReplaced(i, newCluster, oldCluster);
-
                             continue;
                         }
                         else
                         {
                             Items[i] = @new;
-                            //prefer multiple single-item events over resets       
-                            oldCluster.Add(old);
                             newCluster.Add(@new);
+                            oldCluster.Add(old);
+
                             changesMade = true;
-                            //OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, replacedItems.sel @new, old, i));
                         }
                     }
                     else
-                    {   
+                    {
                         OnRangeReplaced(i, newCluster, oldCluster);
 
                         //exceeding position
-                        if (Count > lCount)
+                        if (Count > addedCount)
                         {
                             var removed = new Stack<T>();
                             for (var j = Count - 1; j >= i; j--)
@@ -388,7 +394,7 @@ namespace System.Collections.ObjectModel
                         else
                         {
                             var added = new List<T>();
-                            for (int j = i; j < gCollection.Count; j++)
+                            for (int j = i; j < list.Count; j++)
                             {
                                 T @new = list[j];
                                 Items.Add(@new);
@@ -399,27 +405,37 @@ namespace System.Collections.ObjectModel
                         }
                     }
                 }
-                           
+
                 if (max > 0)
-                {                       
+                {
                     OnRangeReplaced(Count, newCluster, oldCluster);
                     if (oldCount != Count)
                         OnEssentialPropertiesChanged();
-                    else if(changesMade)
+                    else if (changesMade)
                         OnIndexerPropertyChanged();
                 }
             }
         }
-        private void OnRangeReplaced(int lastItemIndex, ICollection<T> newCluster, ICollection<T> oldCluster)
+
+
+        /// <summary>
+        /// </summary>
+        /// <param name="followingItemIndex">The index of the item following the replacement block.</param>
+        /// <param name="newCluster"></param>
+        /// <param name="oldCluster"></param>
+        //TODO should have really been a local method inside ReplaceRange(int index, int count, IEnumerable<T> collection, IEqualityComparer<T> comparer),
+        //move when supported language version updated.
+        private void OnRangeReplaced(int followingItemIndex, ICollection<T> newCluster, ICollection<T> oldCluster)
         {
             if (oldCluster.Count == 0)
                 return;
+
             OnCollectionChanged(
                 new NotifyCollectionChangedEventArgs(
                     NotifyCollectionChangedAction.Replace,
                     new List<T>(newCluster),
                     new List<T>(oldCluster),
-                    lastItemIndex - oldCluster.Count));
+                    followingItemIndex - oldCluster.Count));
 
             oldCluster.Clear();
             newCluster.Clear();

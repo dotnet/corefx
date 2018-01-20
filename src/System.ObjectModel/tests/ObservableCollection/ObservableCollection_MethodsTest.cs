@@ -502,26 +502,27 @@ namespace System.Collections.ObjectModel.Tests
         [Fact]
         public static void RaplaceRangeTest()
         {
-            var allItems = new[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf" };
-            var oldItems = allItems.Take(3).ToArray();
+            string[] allItems, oldItems, newItems;
             ObservableCollection<string> col;
             CollectionAndPropertyChangedTester tester;
-            void reset(params string[] items)
+            void reset(params string[] itemsAddedToCollection)
             {
-                col = new ObservableCollection<string>(items ?? Enumerable.Empty<string>());
+                allItems = new[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf" };
+                oldItems = allItems.Take(3).ToArray();
+                newItems = allItems.Skip(3).Take(3).ToArray();
+                col = new ObservableCollection<string>(itemsAddedToCollection ?? Enumerable.Empty<string>());
                 tester = new CollectionAndPropertyChangedTester();
             }
 
             reset();
-            Assert.Throws<ArgumentNullException>("newItems", () => col.ReplaceRange(null));
-            Assert.Throws<ArgumentNullException>("newItems", () => col.ReplaceRange(null, EqualityComparer<string>.Default));
+            Assert.Throws<ArgumentNullException>("collection", () => col.ReplaceRange(null));
+            Assert.Throws<ArgumentNullException>("collection", () => col.ReplaceRange(null, EqualityComparer<string>.Default));
             Assert.Throws<ArgumentNullException>("comparer", () => col.ReplaceRange(oldItems, null));
 
             //replace 3 items with 3 other items
             reset(oldItems);
-            var newItems = allItems.Skip(3).Take(3).ToArray();
             tester.ReplaceRangeTest(col,
-                newItems, 
+                newItems,
                 (0, NotifyCollectionChangedAction.Replace, newItems, oldItems));
 
             //replace 3 items with 3 similar items (do nothing)
@@ -532,7 +533,7 @@ namespace System.Collections.ObjectModel.Tests
             //replace 2 equal items and remove last
             reset(oldItems);
             tester.ReplaceRangeTest(col,
-                oldItems.Take(2),            
+                oldItems.Take(2),
                 (2, NotifyCollectionChangedAction.Remove, null, oldItems.Last()));
 
             //replace one item and leave last two (by similarity)
@@ -549,11 +550,37 @@ namespace System.Collections.ObjectModel.Tests
             tester.ReplaceRangeTest(col,
                 Enumerable.Empty<string>(),
                 (0, NotifyCollectionChangedAction.Reset, Enumerable.Empty<string>(), oldItems));
-                
+
+            //replace 3 items with new 3 equal + added items
+            reset(oldItems);
+            tester.ReplaceRangeTest(col,
+                oldItems.Concat(newItems),
+                (3, NotifyCollectionChangedAction.Add, newItems, Enumerable.Empty<string>()));
+
+            //replace 3 items with new 2 equal + added items
+            reset(oldItems);
+            tester.ReplaceRangeTest(col,
+                oldItems.Take(2).Concat(newItems),
+                (2, NotifyCollectionChangedAction.Replace, newItems.Take(1), oldItems.Skip(2)),
+                (3, NotifyCollectionChangedAction.Add, newItems.Skip(1), Enumerable.Empty<string>()));
+
+            reset(allItems);
+            var newItem = '_'+ allItems[3];
+            newItems = allItems.Take(3).Concat(new[] { newItem }).Concat(allItems.Skip(4)).ToArray();
+            tester.ReplaceRangeTest(col,
+                newItems,
+                (3, NotifyCollectionChangedAction.Replace, newItem, allItems[3]));
             
+            /**************************************
+
+            TODO: add tests using index and count!!
+
+            ***************************************/
+
+
             //replace empty collection with empty collection
             reset();
-            tester.ReplaceRangeTest(col, 
+            tester.ReplaceRangeTest(col,
                 Enumerable.Empty<string>());
         }
 

@@ -53,6 +53,8 @@ namespace System.Collections.ObjectModel
         public void RemoveRange(System.Collections.Generic.IEnumerable<T> collection) { }
         public void ReplaceRange(System.Collections.Generic.IEnumerable<T> collection) { }
         public void ReplaceRange(System.Collections.Generic.IEnumerable<T> collection, System.Collections.Generic.IEqualityComparer<T> comparer) { }
+        public void ReplaceRange(int index, int count, IEnumerable<T> collection) { }
+        public void ReplaceRange(int index, int count, IEnumerable<T> collection, System.Collections.Generic.IEqualityComparer<T> comparer) { }
         public int RemoveAll(System.Predicate<T> match) { throw null; }
         #endregion Range functionality
     }
