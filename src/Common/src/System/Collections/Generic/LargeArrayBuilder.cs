@@ -124,13 +124,29 @@ namespace System.Collections.Generic
         {
             Debug.Assert(_maxCapacity > _count);
 
-            if (_index == _current.Length)
+            int index = _index;
+            T[] current = _current;
+            
+            // Must be >= and not == to enable range check elimination
+            if ((uint)index >= (uint)current.Length)
             {
-                AllocateBuffer();
+                AddWithBufferAllocation(item);
             }
-
-            _current[_index++] = item;
+            else
+            {
+                current[index] = item;
+                _index = index + 1;
+            }
+            
             _count++;
+        }
+        
+        // Non-inline to improve code quality as uncommon path
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void AddWithBufferAllocation(T item)
+        {
+            AllocateBuffer();
+            _current[_index++] = item;
         }
 
         /// <summary>
