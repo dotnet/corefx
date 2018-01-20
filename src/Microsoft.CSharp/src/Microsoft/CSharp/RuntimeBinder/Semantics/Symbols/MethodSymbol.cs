@@ -62,10 +62,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return false;
         }
 
-        public MethodKindEnum MethKind()
-        {
-            return _methKind;
-        }
+        public MethodKindEnum MethKind => _methKind;
 
         public bool IsConstructor()
         {
