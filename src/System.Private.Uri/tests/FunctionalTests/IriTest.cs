@@ -83,6 +83,7 @@ namespace System.PrivateUri.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void Iri_UnknownSchemeWithoutAuthority_DoesNormalize()
         {
             string[] paths = { "\u00E8", "%C3%A8" };
