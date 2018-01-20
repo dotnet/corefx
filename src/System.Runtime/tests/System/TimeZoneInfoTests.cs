@@ -133,6 +133,20 @@ namespace System.Tests
         }
 
         [Fact]
+        public static void CaseInsensiveLookup()
+        {
+            Assert.NotNull(TimeZoneInfo.FindSystemTimeZoneById(s_strBrasilia.ToLowerInvariant()));
+            Assert.NotNull(TimeZoneInfo.FindSystemTimeZoneById(s_strJohannesburg.ToUpperInvariant()));
+
+            // Populate internal cache with all timezones. The implementation takes different path for lookup by id
+            // when all timezones are populated.
+            TimeZoneInfo.GetSystemTimeZones();
+
+            Assert.NotNull(TimeZoneInfo.FindSystemTimeZoneById(s_strSydney.ToLowerInvariant()));
+            Assert.NotNull(TimeZoneInfo.FindSystemTimeZoneById(s_strPerth.ToUpperInvariant()));
+        }
+
+        [Fact]
         public static void ConvertTime_DateTimeOffset_Invalid()
         {
             DateTimeOffset time1 = new DateTimeOffset(2006, 5, 12, 0, 0, 0, TimeSpan.Zero);
