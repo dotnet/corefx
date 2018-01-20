@@ -105,7 +105,6 @@
       <Versions>4.0.0</Versions>
     </RuntimeGroup>
 
-    <!-- ubuntu releases are compatible on major versions-->
     <RuntimeGroup Include="ubuntu">
       <Parent>debian</Parent>
       <Architectures>x64;x86;arm</Architectures>
@@ -115,13 +114,7 @@
     <RuntimeGroup Include="ubuntu">
       <Parent>debian</Parent>
       <Architectures>x64;x86;arm;arm64</Architectures>
-      <Versions>16.04;16.10</Versions>
-      <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
-    </RuntimeGroup>
-    <RuntimeGroup Include="ubuntu">
-      <Parent>debian</Parent>
-      <Architectures>x64;x86;arm;arm64</Architectures>
-      <Versions>17.04;17.10</Versions>
+      <Versions>16.04;16.10;17.04;17.10</Versions>
       <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 
