@@ -50,11 +50,13 @@ namespace System.Diagnostics
         private string _machineName;
         private string _perfLcid;
 
-        private Hashtable _customCategoryTable;
+
         private static volatile Hashtable s_libraryTable;
+        private Hashtable _customCategoryTable;
         private Hashtable _categoryTable;
         private Hashtable _nameTable;
         private Hashtable _helpTable;
+        private readonly object _customCategoryTableLock = new Object();
         private readonly object _categoryTableLock = new Object();
         private readonly object _nameTableLock = new Object();
         private readonly object _helpTableLock = new Object();
@@ -299,19 +301,17 @@ namespace System.Diagnostics
         {
             if (s_libraryTable != null)
             {
-                foreach (PerformanceCounterLib library in s_libraryTable.Values)
-                    library.Close();
+                //race with GetPerformanceCounterLib
+                lock (InternalSyncObject)
+                {
+                    if (s_libraryTable != null)
+                    {
+                        foreach (PerformanceCounterLib library in s_libraryTable.Values)
+                            library.Close();
 
-                s_libraryTable = null;
-            }
-        }
-
-        internal static void CloseAllTables()
-        {
-            if (s_libraryTable != null)
-            {
-                foreach (PerformanceCounterLib library in s_libraryTable.Values)
-                    library.CloseTables();
+                        s_libraryTable = null;
+                    }
+                }
             }
         }
 
@@ -320,7 +320,9 @@ namespace System.Diagnostics
             _nameTable = null;
             _helpTable = null;
             _categoryTable = null;
-            _customCategoryTable = null;
+            //race with FindCustomCategory
+            lock (_customCategoryTableLock)
+                _customCategoryTable = null;
         }
 
         internal void Close()
@@ -638,83 +640,85 @@ namespace System.Diagnostics
             RegistryKey baseKey = null;
             categoryType = PerformanceCounterCategoryType.Unknown;
 
-            if (_customCategoryTable == null)
+            //race with CloseTables
+            lock (_customCategoryTableLock)
             {
-                Interlocked.CompareExchange(ref _customCategoryTable, new Hashtable(StringComparer.OrdinalIgnoreCase), null);
-            }
+                if (_customCategoryTable == null)
+                    _customCategoryTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
-            if (_customCategoryTable.ContainsKey(category))
-            {
-                categoryType = (PerformanceCounterCategoryType)_customCategoryTable[category];
-                return true;
-            }
-            else
-            {
-                try
+                if (_customCategoryTable.ContainsKey(category))
                 {
-                    string keyPath = ServicePath + "\\" + category + "\\Performance";
-                    if (_machineName == "." || string.Equals(_machineName, ComputerName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        key = Registry.LocalMachine.OpenSubKey(keyPath);
-                    }
-                    else
-                    {
-                        baseKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, "\\\\" + _machineName);
-                        if (baseKey != null)
-                        {
-                            try
-                            {
-                                key = baseKey.OpenSubKey(keyPath);
-                            }
-                            catch (SecurityException)
-                            {
-                                // we may not have permission to read the registry key on the remote machine.  The security exception  
-                                // is thrown when RegOpenKeyEx returns ERROR_ACCESS_DENIED or ERROR_BAD_IMPERSONATION_LEVEL
-                                //
-                                // In this case we return an 'Unknown' category type and 'false' to indicate the category is *not* custom.
-                                //
-                                categoryType = PerformanceCounterCategoryType.Unknown;
-                                _customCategoryTable[category] = categoryType;
-                                return false;
-                            }
-                        }
-                    }
-
-                    if (key != null)
-                    {
-                        object systemDllName = key.GetValue("Library", null, RegistryValueOptions.DoNotExpandEnvironmentNames);
-                        if (systemDllName != null && systemDllName is string
-                            && (string.Equals((string)systemDllName, PerformanceCounterLib.PerfShimName, StringComparison.OrdinalIgnoreCase)
-                              || ((string)systemDllName).EndsWith(PerformanceCounterLib.PerfShimFullNameSuffix, StringComparison.OrdinalIgnoreCase)))
-                        {
-
-                            object isMultiInstanceObject = key.GetValue("IsMultiInstance");
-                            if (isMultiInstanceObject != null)
-                            {
-                                categoryType = (PerformanceCounterCategoryType)isMultiInstanceObject;
-                                if (categoryType < PerformanceCounterCategoryType.Unknown || categoryType > PerformanceCounterCategoryType.MultiInstance)
-                                    categoryType = PerformanceCounterCategoryType.Unknown;
-                            }
-                            else
-                                categoryType = PerformanceCounterCategoryType.Unknown;
-
-                            object objectID = key.GetValue("First Counter");
-                            if (objectID != null)
-                            {
-                                int firstID = (int)objectID;
-
-                                _customCategoryTable[category] = categoryType;
-                                return true;
-                            }
-                        }
-                    }
+                    categoryType = (PerformanceCounterCategoryType)_customCategoryTable[category];
+                    return true;
                 }
-                finally
+                else
                 {
-                    if (key != null)
-                        key.Close();
-                    if (baseKey != null)
-                        baseKey.Close();
+                    try
+                    {
+                        string keyPath = ServicePath + "\\" + category + "\\Performance";
+                        if (_machineName == "." || string.Equals(_machineName, ComputerName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            key = Registry.LocalMachine.OpenSubKey(keyPath);
+                        }
+                        else
+                        {
+                            baseKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, "\\\\" + _machineName);
+                            if (baseKey != null)
+                            {
+                                try
+                                {
+                                    key = baseKey.OpenSubKey(keyPath);
+                                }
+                                catch (SecurityException)
+                                {
+                                    // we may not have permission to read the registry key on the remote machine.  The security exception  
+                                    // is thrown when RegOpenKeyEx returns ERROR_ACCESS_DENIED or ERROR_BAD_IMPERSONATION_LEVEL
+                                    //
+                                    // In this case we return an 'Unknown' category type and 'false' to indicate the category is *not* custom.
+                                    //
+                                    categoryType = PerformanceCounterCategoryType.Unknown;
+                                    _customCategoryTable[category] = categoryType;
+                                    return false;
+                                }
+                            }
+                        }
+
+                        if (key != null)
+                        {
+                            object systemDllName = key.GetValue("Library", null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+                            if (systemDllName != null && systemDllName is string
+                                && (string.Equals((string)systemDllName, PerformanceCounterLib.PerfShimName, StringComparison.OrdinalIgnoreCase)
+                                  || ((string)systemDllName).EndsWith(PerformanceCounterLib.PerfShimFullNameSuffix, StringComparison.OrdinalIgnoreCase)))
+                            {
+
+                                object isMultiInstanceObject = key.GetValue("IsMultiInstance");
+                                if (isMultiInstanceObject != null)
+                                {
+                                    categoryType = (PerformanceCounterCategoryType)isMultiInstanceObject;
+                                    if (categoryType < PerformanceCounterCategoryType.Unknown || categoryType > PerformanceCounterCategoryType.MultiInstance)
+                                        categoryType = PerformanceCounterCategoryType.Unknown;
+                                }
+                                else
+                                    categoryType = PerformanceCounterCategoryType.Unknown;
+
+                                object objectID = key.GetValue("First Counter");
+                                if (objectID != null)
+                                {
+                                    int firstID = (int)objectID;
+
+                                    _customCategoryTable[category] = categoryType;
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        if (key != null)
+                            key.Close();
+                        if (baseKey != null)
+                            baseKey.Close();
+                    }
                 }
             }
             return false;
@@ -974,23 +978,21 @@ namespace System.Diagnostics
 
             machineName = (machineName == "." ? ComputerName : machineName).ToLowerInvariant();
 
-            if (PerformanceCounterLib.s_libraryTable == null)
+            //race with CloseAllLibraries
+            lock (InternalSyncObject)
             {
-                lock (InternalSyncObject)
-                {
-                    if (PerformanceCounterLib.s_libraryTable == null)
-                        PerformanceCounterLib.s_libraryTable = new Hashtable();
-                }
-            }
+                if (PerformanceCounterLib.s_libraryTable == null)
+                    PerformanceCounterLib.s_libraryTable = new Hashtable();
 
-            string libraryKey = machineName + ":" + lcidString;
-            if (PerformanceCounterLib.s_libraryTable.Contains(libraryKey))
-                return (PerformanceCounterLib)PerformanceCounterLib.s_libraryTable[libraryKey];
-            else
-            {
-                PerformanceCounterLib library = new PerformanceCounterLib(machineName, lcidString);
-                PerformanceCounterLib.s_libraryTable[libraryKey] = library;
-                return library;
+                string libraryKey = machineName + ":" + lcidString;
+                if (PerformanceCounterLib.s_libraryTable.Contains(libraryKey))
+                    return (PerformanceCounterLib)PerformanceCounterLib.s_libraryTable[libraryKey];
+                else
+                {
+                    PerformanceCounterLib library = new PerformanceCounterLib(machineName, lcidString);
+                    PerformanceCounterLib.s_libraryTable[libraryKey] = library;
+                    return library;
+                }
             }
         }
 
@@ -1169,6 +1171,25 @@ namespace System.Diagnostics
             return categoryType;
         }
 
+        public static bool IsPublished(string category)
+        {
+            PerformanceCounterLib library = GetPerformanceCounterLib(".", new CultureInfo(EnglishLCID));
+            if (library.CategoryTable[category] != null)
+                return true;
+            if (CultureInfo.CurrentCulture.Parent.LCID != EnglishLCID)
+            {
+                CultureInfo culture = CultureInfo.CurrentCulture;
+                while (culture != CultureInfo.InvariantCulture)
+                {
+                    library = GetPerformanceCounterLib(".", culture);
+                    if (library.CategoryTable[category] != null)
+                        return true;
+                    culture = culture.Parent;
+                }
+            }
+            return false;
+        }
+
         internal static void RegisterCategory(string categoryName, PerformanceCounterCategoryType categoryType, string categoryHelp, CounterCreationDataCollection creationData)
         {
             try
@@ -1182,8 +1203,21 @@ namespace System.Diagnostics
                     CreateSymbolFile(creationData);
                     RegisterFiles(IniFilePath, false);
                 }
-                CloseAllTables();
-                CloseAllLibraries();
+                /*
+                  Wait some seconds for publication, sometimes registry modification is not immediatly visibile to all.
+                  (https://msdn.microsoft.com/en-us/library/cs38wsc4%28v=vs.110%29.aspx?f=255&MSPPError=-2147217396)
+                  Similar pattern of GetStringTable()  "int waitRetries = 14;   //((2^13)-1)*10ms == approximately 1.4mins"
+                 */
+                bool isPublished = false;
+                DateTime now = DateTime.UtcNow;
+                while ((DateTime.UtcNow.Subtract(now).TotalSeconds < 10))
+                {
+                    CloseAllLibraries();
+                    if (isPublished = IsPublished(categoryName))
+                        break;
+                }
+                if (!isPublished)
+                    throw new InvalidOperationException(SR.CantCreateCategoryRegistration);
             }
             finally
             {
@@ -1237,7 +1271,6 @@ namespace System.Diagnostics
         {
             RegisterFiles(categoryName, true);
             DeleteRegistryEntry(categoryName);
-            CloseAllTables();
             CloseAllLibraries();
         }
     }

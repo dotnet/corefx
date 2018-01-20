@@ -1,10 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
-
+//#define MyTrait
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Threading;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -12,6 +14,84 @@ namespace System.Diagnostics.Tests
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // In appcontainer, cannot write to perf counters
     public static class PerformanceCounterCategoryTests
     {
+#if MyTrait
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
+        [Trait("MyTrait", "MyTrait")]
+        public static void PerformanceCounterCategory_MyTest()
+        {
+            var pc = Environment.ProcessorCount * 8;
+
+            Console.WriteLine("Clean counters");
+            List<string> names = new List<string>();
+            for (int i = 0; i < pc; i++)
+            {
+                var name = nameof(PerformanceCounterCategory_MyTest) + "_Counter_" + i;
+                if (PerformanceCounterCategory.Exists(name))
+                {
+                    PerformanceCounterCategory.Delete(name);
+                    Console.WriteLine("Delete category {0}", name);
+                }
+                names.Add(name);
+            }
+            Console.WriteLine("End clean counters");
+            Console.WriteLine($"Total counter {names.Count}");
+
+            Console.WriteLine($"[{DateTime.UtcNow}]Test start");
+            foreach (var i in names)
+            {
+                new Thread(
+                    catName =>
+                    {
+
+                        while (true)
+                        {
+                            try
+                            {
+                                PerformanceCounterCategory category = null;
+                                if (PerformanceCounterCategory.Exists((string)catName))
+                                {
+                                    PerformanceCounterCategory.Delete((string)catName);
+                                }
+                                category = PerformanceCounterCategory.Create((string)catName, "description", PerformanceCounterCategoryType.SingleInstance, (string)catName, "counter description");
+                                var pcc = new PerformanceCounterCategory(category.CategoryName);
+
+                                try
+                                {
+                                    DateTime dt = DateTime.Now;
+                                    while (true)
+                                    {
+                                        var counters = pcc.GetCounters();
+                                        var value = counters[0].NextValue();
+                                        var sample = counters[0].NextSample().RawValue;
+                                        if ((DateTime.Now - dt).Seconds > 5)
+                                            break;
+
+                                    }
+                                }
+                                catch (Exception ex1)
+                                {
+                                    if (ex1 is NullReferenceException)
+                                        System.Diagnostics.Debugger.Break();
+                                    Console.WriteLine($"[{DateTime.UtcNow}]GetCounters() {ex1.Message} {catName}");
+                                }
+
+                            }
+                            catch (Exception ex2)
+                            {
+                                if (ex2 is NullReferenceException)
+                                    System.Diagnostics.Debugger.Break();
+                                Console.WriteLine($"[{DateTime.UtcNow}]GetCounters() {ex2.Message} {catName}");
+                            }
+                        }
+
+                    }).Start(i);
+
+            }
+
+            System.Threading.Thread.Sleep(Timeout.Infinite);
+
+        }
+#endif
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]
         public static void PerformanceCounterCategory_CreatePerformanceCounterCategory_DefaultConstructor()
         {

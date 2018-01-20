@@ -204,6 +204,9 @@
   <data name="CantChangeCategoryRegistration" xml:space="preserve">
     <value>Cannot create or delete the Performance Category '{0}' because access is denied.</value>
   </data>
+  <data name="CantCreateCategoryRegistration" xml:space="preserve">
+    <value>Cannot create the Performance Category '{0}' because it is not present on Windows registry after 10 seconds.</value>
+  </data>
   <data name="InvalidProperty" xml:space="preserve">
     <value>Invalid value {1} for property {0}.</value>
   </data>
