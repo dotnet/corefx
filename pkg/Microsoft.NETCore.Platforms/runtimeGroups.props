@@ -78,12 +78,6 @@
       <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 
-    <RuntimeGroup Include="sles">
-      <Parent>linux</Parent>
-      <Architectures>x64</Architectures>
-      <Versions>12;12.1;12.2;12.3</Versions>
-    </RuntimeGroup>
-
     <RuntimeGroup Include="osx">
       <Parent>unix</Parent>
       <Architectures>x64</Architectures>
@@ -101,6 +95,12 @@
       <Parent>linux</Parent>
       <Architectures>x64</Architectures>
       <Versions>7;7.0;7.1;7.2;7.3;7.4</Versions>
+    </RuntimeGroup>
+
+    <RuntimeGroup Include="sles">
+      <Parent>linux</Parent>
+      <Architectures>x64</Architectures>
+      <Versions>12;12.1;12.2;12.3</Versions>
     </RuntimeGroup>
 
     <RuntimeGroup Include="tizen">
