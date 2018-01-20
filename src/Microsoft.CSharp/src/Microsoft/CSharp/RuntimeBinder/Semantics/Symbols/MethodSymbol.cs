@@ -92,11 +92,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return _methKind == MethodKindEnum.EventAccessor;
         }
 
-        private bool isExplicit()          // is user defined explicit conversion operator
-        {
-            return _methKind == MethodKindEnum.ExplicitConv;
-        }
-
         public bool isImplicit()          // is user defined implicit conversion operator
         {
             return _methKind == MethodKindEnum.ImplicitConv;
@@ -114,14 +109,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public MethodSymbol ConvNext()
         {
-            Debug.Assert(isImplicit() || isExplicit());
+            AssertIsConversionOperator();
             return _convNext;
         }
 
         public void SetConvNext(MethodSymbol conv)
         {
-            Debug.Assert(isImplicit() || isExplicit());
-            Debug.Assert(conv == null || conv.isImplicit() || conv.isExplicit());
+            AssertIsConversionOperator();
+            conv?.AssertIsConversionOperator();
             _convNext = conv;
         }
 
@@ -149,9 +144,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _evt = evt;
         }
 
-        public bool isConversionOperator()
+        [Conditional("DEBUG")]
+        private void AssertIsConversionOperator()
         {
-            return (isExplicit() || isImplicit());
+            Debug.Assert(MethKind == MethodKindEnum.ExplicitConv || MethKind == MethodKindEnum.ImplicitConv);
         }
 
         public new bool isUserCallable()
