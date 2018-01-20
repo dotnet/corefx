@@ -1566,19 +1566,19 @@
     },
     "sles.12.1": {
       "#import": [
-        "sles"
+        "sles.12"
       ]
     },
     "sles.12.1-corert": {
       "#import": [
         "sles.12.1",
-        "sles-corert"
+        "sles.12-corert"
       ]
     },
     "sles.12.1-x64": {
       "#import": [
         "sles.12.1",
-        "sles-x64"
+        "sles.12-x64"
       ]
     },
     "sles.12.1-x64-corert": {
@@ -1586,24 +1586,24 @@
         "sles.12.1-corert",
         "sles.12.1-x64",
         "sles.12.1",
-        "sles-x64-corert"
+        "sles.12-x64-corert"
       ]
     },
     "sles.12.2": {
       "#import": [
-        "sles"
+        "sles.12.1"
       ]
     },
     "sles.12.2-corert": {
       "#import": [
         "sles.12.2",
-        "sles-corert"
+        "sles.12.1-corert"
       ]
     },
     "sles.12.2-x64": {
       "#import": [
         "sles.12.2",
-        "sles-x64"
+        "sles.12.1-x64"
       ]
     },
     "sles.12.2-x64-corert": {
@@ -1611,24 +1611,24 @@
         "sles.12.2-corert",
         "sles.12.2-x64",
         "sles.12.2",
-        "sles-x64-corert"
+        "sles.12.1-x64-corert"
       ]
     },
     "sles.12.3": {
       "#import": [
-        "sles"
+        "sles.12.2"
       ]
     },
     "sles.12.3-corert": {
       "#import": [
         "sles.12.3",
-        "sles-corert"
+        "sles.12.2-corert"
       ]
     },
     "sles.12.3-x64": {
       "#import": [
         "sles.12.3",
-        "sles-x64"
+        "sles.12.2-x64"
       ]
     },
     "sles.12.3-x64-corert": {
@@ -1636,7 +1636,7 @@
         "sles.12.3-corert",
         "sles.12.3-x64",
         "sles.12.3",
-        "sles-x64-corert"
+        "sles.12.2-x64-corert"
       ]
     },
     "tizen": {
