@@ -12,11 +12,18 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     // Used by bindUserDefinedConversion
-    internal sealed class UdConvInfo
+    internal readonly struct UdConvInfo
     {
-        public MethWithType mwt;
-        public bool fSrcImplicit;
-        public bool fDstImplicit;
+        public readonly MethWithType Meth;
+        public readonly bool SrcImplicit;
+        public readonly bool DstImplicit;
+
+        public UdConvInfo(MethWithType mwt, bool srcImplicit, bool dstImplicit)
+        {
+            Meth = mwt;
+            SrcImplicit = srcImplicit;
+            DstImplicit = dstImplicit;
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////
@@ -1555,10 +1562,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             foreach (UdConvInfo conv in convTable)
             {
-                if (conv.mwt.Meth() == meth &&
-                    conv.mwt.GetType() == ats &&
-                    conv.fSrcImplicit == fSrc &&
-                    conv.fDstImplicit == fDst)
+                if (conv.Meth.Meth() == meth &&
+                    conv.Meth.GetType() == ats &&
+                    conv.SrcImplicit == fSrc &&
+                    conv.DstImplicit == fDst)
                 {
                     return true;
                 }

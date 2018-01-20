@@ -765,12 +765,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                         // The conversion is applicable so it affects the best types.
 
-                        prguci.Add(new UdConvInfo
-                        {
-                            mwt = new MethWithType(convCur, atsCur),
-                            fSrcImplicit = fFromImplicit,
-                            fDstImplicit = fToImplicit
-                        });
+                        prguci.Add(new UdConvInfo(new MethWithType(convCur, atsCur), fFromImplicit, fToImplicit));
 
                         if (!fBestSrcExact)
                         {
@@ -791,7 +786,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             else if (typeBestSrc != typeFrom)
                             {
                                 Debug.Assert(0 <= iuciBestSrc && iuciBestSrc < prguci.Count - 1);
-                                int n = CompareSrcTypesBased(typeBestSrc, prguci[iuciBestSrc].fSrcImplicit, typeFrom, fFromImplicit);
+                                int n = CompareSrcTypesBased(typeBestSrc, prguci[iuciBestSrc].SrcImplicit, typeFrom, fFromImplicit);
                                 if (n > 0)
                                 {
                                     typeBestSrc = typeFrom;
@@ -818,7 +813,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             else if (typeBestDst != typeTo)
                             {
                                 Debug.Assert(0 <= iuciBestDst && iuciBestDst < prguci.Count - 1);
-                                int n = CompareDstTypesBased(typeBestDst, prguci[iuciBestDst].fDstImplicit, typeTo, fToImplicit);
+                                int n = CompareDstTypesBased(typeBestDst, prguci[iuciBestDst].DstImplicit, typeTo, fToImplicit);
                                 if (n > 0)
                                 {
                                     typeBestDst = typeTo;
@@ -850,8 +845,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 UdConvInfo uci = prguci[iuci];
 
                 // Get the substituted src and dst types.
-                typeFrom = GetTypes().SubstType(uci.mwt.Meth().Params[0], uci.mwt.GetType());
-                typeTo = GetTypes().SubstType(uci.mwt.Meth().RetType, uci.mwt.GetType());
+                typeFrom = GetTypes().SubstType(uci.Meth.Meth().Params[0], uci.Meth.GetType());
+                typeTo = GetTypes().SubstType(uci.Meth.Meth().RetType, uci.Meth.GetType());
 
                 int ctypeLift = 0;
 
@@ -907,7 +902,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // convertible to each other (eg, int? and int??) and hence not distinguishable by CompareXxxTypesBase.
                 if (!fBestSrcExact && typeFrom != typeBestSrc)
                 {
-                    int n = CompareSrcTypesBased(typeBestSrc, prguci[iuciBestSrc].fSrcImplicit, typeFrom, uci.fSrcImplicit);
+                    int n = CompareSrcTypesBased(typeBestSrc, prguci[iuciBestSrc].SrcImplicit, typeFrom, uci.SrcImplicit);
                     Debug.Assert(n <= 0);
                     if (n >= 0)
                     {
@@ -921,7 +916,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
                 if (!fBestDstExact && typeTo != typeBestDst)
                 {
-                    int n = CompareDstTypesBased(typeBestDst, prguci[iuciBestDst].fDstImplicit, typeTo, uci.fDstImplicit);
+                    int n = CompareDstTypesBased(typeBestDst, prguci[iuciBestDst].DstImplicit, typeTo, uci.DstImplicit);
                     Debug.Assert(n <= 0);
                     if (n >= 0)
                     {
@@ -947,7 +942,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 throw HandleAmbiguity(typeSrc, typeDst, prguci, iuciBest, iuciAmbig);
             }
 
-            MethWithInst mwiBest = new MethWithInst(prguci[iuciBest].mwt.Meth(), prguci[iuciBest].mwt.GetType(), null);
+            MethWithInst mwiBest = new MethWithInst(prguci[iuciBest].Meth.Meth(), prguci[iuciBest].Meth.GetType(), null);
 
             Debug.Assert(ctypeLiftBest <= 2);
 
@@ -1026,7 +1021,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(0 <= iuciBestSrc && iuciBestSrc < prguci.Count);
             Debug.Assert(0 <= iuciBestDst && iuciBestDst < prguci.Count);
-            return ErrorContext.Error(ErrorCode.ERR_AmbigUDConv, prguci[iuciBestSrc].mwt, prguci[iuciBestDst].mwt, typeSrc, typeDst);
+            return ErrorContext.Error(ErrorCode.ERR_AmbigUDConv, prguci[iuciBestSrc].Meth, prguci[iuciBestDst].Meth, typeSrc, typeDst);
         }
 
         private void MarkAsIntermediateConversion(Expr pExpr)
