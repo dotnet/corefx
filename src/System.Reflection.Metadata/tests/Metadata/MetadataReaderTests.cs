@@ -114,15 +114,6 @@ namespace System.Reflection.Metadata.Tests
         }
 
         [Fact]
-        public unsafe void InvalidVersionStringLength()
-        {
-            GCHandle pinned = GetPinnedPEImage(NetModule.AppCS);
-            PEHeaders headers = new PEHeaders(new MemoryStream(NetModule.AppCS));
-
-            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, 16));
-        }
-
-        [Fact]
         public unsafe void InvalidFindMscorlibAssemblyRefNoProjection()
         {
             // start with a valid PE (cloned because we'll mutate it).
@@ -159,10 +150,12 @@ namespace System.Reflection.Metadata.Tests
 
             peImage[clrIndex + headers.MetadataStartOffset] = 0xFF;
 
-            //StreamHeaderTooSmall for index of five + uint16.
+            //Not enough space for VersionString
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + 2, MetadataReaderOptions.Default));
             //NotEnoughSpaceForStreamHeaderName for index of five + uint16 + COR20Constants.MinimumSizeofStreamHeader
             Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + clrIndex + COR20Constants.MinimumSizeofStreamHeader + 2, MetadataReaderOptions.Default));
+            //SR.StreamHeaderTooSmall
+            Assert.Throws<BadImageFormatException>(() => new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, fiveIndex + clrIndex + COR20Constants.MinimumSizeofStreamHeader , MetadataReaderOptions.Default));
 
         }
 
