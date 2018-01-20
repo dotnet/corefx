@@ -49,9 +49,10 @@ namespace System.Collections.ObjectModel
         #region Range functionality
         public void AddRange(System.Collections.Generic.IEnumerable<T> collection) { }
         public void InsertRange(int index, System.Collections.Generic.IEnumerable<T> collection) { }
+        public void RemoveRange(int index, int count) { }
         public void RemoveRange(System.Collections.Generic.IEnumerable<T> collection) { }
-        public void RemoveRange(int index, int count) { }    
         public void ReplaceRange(System.Collections.Generic.IEnumerable<T> collection) { }
+        public void ReplaceRange(System.Collections.Generic.IEnumerable<T> collection, System.Collections.Generic.IEqualityComparer<T> comparer) { }
         public int RemoveAll(System.Predicate<T> match) { throw null; }
         #endregion Range functionality
     }

@@ -204,7 +204,7 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => { col.RemoveRange(0, 1); });
         }
 
-                
+
         /// <summary>
         /// Verifies that all matches are removed from the collection.
         /// </summary>
@@ -493,6 +493,68 @@ namespace System.Collections.ObjectModel.Tests
             CollectionAndPropertyChangedTester helper = new CollectionAndPropertyChangedTester();
             helper.ReplaceItemTest(collection, 1, "seven");
             helper.ReplaceItemTest(collection, 3, "zero");
+        }
+
+        /// <summary>
+        /// Tests that the collecion is cleared and the specified items are added.
+        /// Additionally, tests that the minimal items to be refreshed will be refreshed.
+        /// </summary>
+        [Fact]
+        public static void RaplaceRangeTest()
+        {
+            var allItems = new[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf" };
+            var oldItems = allItems.Take(3).ToArray();
+            ObservableCollection<string> col;
+            CollectionAndPropertyChangedTester tester;
+            void reset(params string[] items)
+            {
+                col = new ObservableCollection<string>(items ?? Enumerable.Empty<string>());
+                tester = new CollectionAndPropertyChangedTester();
+            }
+
+            reset();
+            Assert.Throws<ArgumentNullException>("newItems", () => col.ReplaceRange(null));
+            Assert.Throws<ArgumentNullException>("newItems", () => col.ReplaceRange(null, EqualityComparer<string>.Default));
+            Assert.Throws<ArgumentNullException>("comparer", () => col.ReplaceRange(oldItems, null));
+
+            //replace 3 items with 3 other items
+            reset(oldItems);
+            var newItems = allItems.Skip(3).Take(3).ToArray();
+            tester.ReplaceRangeTest(col,
+                newItems, 
+                (0, NotifyCollectionChangedAction.Replace, newItems, oldItems));
+
+            //replace 3 items with 3 similar items (do nothing)
+            reset(oldItems);
+            tester.ReplaceRangeTest(col,
+                oldItems);
+
+            //replace 2 equal items and remove last
+            reset(oldItems);
+            tester.ReplaceRangeTest(col,
+                oldItems.Take(2),            
+                (2, NotifyCollectionChangedAction.Remove, null, oldItems.Last()));
+
+            //replace one item and leave last two (by similarity)
+            //the ObservableCollection is only affording to check for equality in similar position
+            //not search for each item for equality.
+            reset(oldItems);
+            tester.ReplaceRangeTest(col,
+                oldItems.Skip(1),
+                (0, NotifyCollectionChangedAction.Replace, oldItems.Skip(1), oldItems.Take(2)),
+                (2, NotifyCollectionChangedAction.Remove, null, oldItems.Skip(2)));
+
+            //replace 3 items with empty collection
+            reset(oldItems);
+            tester.ReplaceRangeTest(col,
+                Enumerable.Empty<string>(),
+                (0, NotifyCollectionChangedAction.Reset, Enumerable.Empty<string>(), oldItems));
+                
+            
+            //replace empty collection with empty collection
+            reset();
+            tester.ReplaceRangeTest(col, 
+                Enumerable.Empty<string>());
         }
 
         /// <summary>

@@ -1,3 +1,4 @@
+using System.Security;
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
@@ -267,20 +268,40 @@ namespace System.Collections.ObjectModel
         }
 
         /// <summary> 
-        /// Clears the current collection and replaces it with the specified collection. 
-        /// </summary>                 
-        public void ReplaceRange(IEnumerable<T> collection)
+        /// Clears the current collection and replaces it with the specified collection,
+        /// using the default <see cref="EqualityComparer{T}"/>.
+        /// </summary>             
+        /// <param name="newItems">The items to fill the collection with, after clearing it.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="newItems"/> is null.</exception>
+        public void ReplaceRange(IEnumerable<T> newItems)
         {
-            if (collection == null)
-                throw new ArgumentNullException(nameof(collection));
+            ReplaceRange(newItems, EqualityComparer<T>.Default);
+        }
 
-            if (collection is ICollection<T> gCollection)
+        /// <summary>
+        /// Clears the current collection and replaces it with the specified collection.
+        /// </summary>
+        /// <param name="newItems">The items to fill the collection with, after clearing it.</param>
+        /// <param name="comparer">An <see cref="IEqualityComparer{T}"/> to be used
+        /// to check whether an item in the same location already existed before,
+        /// which in case it would not be added to the collection, and no event will be raised for it.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="newItems"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="comparer"/> is null.</exception>
+        public void ReplaceRange(IEnumerable<T> newItems, IEqualityComparer<T> comparer)
+        {
+            if (newItems == null)
+                throw new ArgumentNullException(nameof(newItems));
+            if (comparer == null)
+                throw new ArgumentNullException(nameof(comparer));
+
+            if (newItems is ICollection<T> gCollection)
             {
                 if (gCollection.Count == 0)
                 {
-                    Clear();
+                    ClearItems();
                     return;
                 }
+                /*
                 else if (gCollection.Count == 1)
                 {
                     using (IEnumerator<T> enumerator = gCollection.GetEnumerator())
@@ -290,19 +311,26 @@ namespace System.Collections.ObjectModel
                         var index = IndexOf(current);
                         if (index > -1)
                         {
-                            SetItem(index, current);
-                            return;
+                            if(index > 0)
+                            {
+                              //TODO remove anything besides existing item, placing it at first location.
+                            }
+                            SetItem(0, current);
                         }
+                        else
+                            ClearItems();
                     }
+                    return;
                 }
+                */
             }
-            else if (!ContainsAny(collection))
+            else if (!ContainsAny(newItems))
             {
-                Clear();
+                ClearItems();
                 return;
             }
             else
-                gCollection = new List<T>(collection);
+                gCollection = new List<T>(newItems);
 
             var oldCount = Count;
             var lCount = gCollection.Count;
@@ -314,50 +342,88 @@ namespace System.Collections.ObjectModel
 
             using (BlockReentrancy())
             {
+                var changesMade = false;
+
+                var oldCluster = new List<T>();
+                var newCluster = new List<T>();
+
                 for (int i = 0; i < max; i++)
                 {
                     //parallel position
                     if (i < Count && i < lCount)
                     {
                         T old = this[i], @new = list[i];
-                        if (Equals(old, @new))
+                        if (comparer.Equals(old, @new))
+                        {
+                            OnRangeReplaced(i, newCluster, oldCluster);
+
                             continue;
+                        }
                         else
                         {
                             Items[i] = @new;
-                            //prefer multiple single-item events over resets
-                            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, @new, @old, i));
+                            //prefer multiple single-item events over resets       
+                            oldCluster.Add(old);
+                            newCluster.Add(@new);
+                            changesMade = true;
+                            //OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, replacedItems.sel @new, old, i));
                         }
                     }
-                    //exceeding position
-                    else if (Count > lCount)
-                    {
-                        var removed = new Stack<T>();
-                        for (var j = Count - 1; j >= i; j--)
-                        {
-                            removed.Push(this[j]);
-                            Items.RemoveAt(j);
-                        }
-                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T>(removed), i));
-                        break;
-                    }
-                    //new position                    
                     else
-                    {
-                        var added = new List<T>();
-                        for (int j = i; j < gCollection.Count; j++)
+                    {   
+                        OnRangeReplaced(i, newCluster, oldCluster);
+
+                        //exceeding position
+                        if (Count > lCount)
                         {
-                            T @new = list[j];
-                            Items.Add(@new);
-                            added.Add(@new);
+                            var removed = new Stack<T>();
+                            for (var j = Count - 1; j >= i; j--)
+                            {
+                                removed.Push(this[j]);
+                                Items.RemoveAt(j);
+                            }
+                            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T>(removed), i));
+                            break;
                         }
-                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, added, i));
-                        break;
+                        //new position                    
+                        else
+                        {
+                            var added = new List<T>();
+                            for (int j = i; j < gCollection.Count; j++)
+                            {
+                                T @new = list[j];
+                                Items.Add(@new);
+                                added.Add(@new);
+                            }
+                            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, added, i));
+                            break;
+                        }
                     }
                 }
-
-                OnEssentialPropertiesChanged();
+                           
+                if (max > 0)
+                {                       
+                    OnRangeReplaced(Count, newCluster, oldCluster);
+                    if (oldCount != Count)
+                        OnEssentialPropertiesChanged();
+                    else if(changesMade)
+                        OnIndexerPropertyChanged();
+                }
             }
+        }
+        private void OnRangeReplaced(int lastItemIndex, ICollection<T> newCluster, ICollection<T> oldCluster)
+        {
+            if (oldCluster.Count == 0)
+                return;
+            OnCollectionChanged(
+                new NotifyCollectionChangedEventArgs(
+                    NotifyCollectionChangedAction.Replace,
+                    new List<T>(newCluster),
+                    new List<T>(oldCluster),
+                    lastItemIndex - oldCluster.Count));
+
+            oldCluster.Clear();
+            newCluster.Clear();
         }
 
         /// <summary>
@@ -375,39 +441,41 @@ namespace System.Collections.ObjectModel
             var index = -1;
             var removedCount = 0;
 
-            CheckReentrancy();
-
-            for (int i = 0; i < Count; i++)
+            using (BlockReentrancy())
             {
-                T item = Items[i];
-                if (match(item))
+                for (int i = 0; i < Count; i++)
                 {
-                    Items.RemoveAt(i);
-                    removedCount++;
-
-                    if (index == i)
+                    T item = Items[i];
+                    if (match(item))
                     {
-                        Debug.Assert(cluster != null);
-                        cluster.Add(item);
-                    }
-                    else
-                    {
-                        cluster = new List<T> { item };
-                        index = i;
-                    }
+                        Items.RemoveAt(i);
+                        removedCount++;
 
-                    i--;
+                        if (index == i)
+                        {
+                            Debug.Assert(cluster != null);
+                            cluster.Add(item);
+                        }
+                        else
+                        {
+                            cluster = new List<T> { item };
+                            index = i;
+                        }
+
+                        i--;
+                    }
+                    else if (index > -1)
+                    {
+                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, index));
+                        index = -1;
+                        cluster = null;
+                    }
                 }
-                else if (index > -1)
-                {
+
+                if (index > -1)
                     OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, index));
-                    index = -1;
-                    cluster = null;    
-                }
             }
 
-            if (index > -1)
-                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, index));
             return removedCount;
         }
 

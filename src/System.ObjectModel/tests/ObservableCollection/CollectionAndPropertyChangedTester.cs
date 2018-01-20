@@ -443,15 +443,16 @@ namespace System.Collections.ObjectModel.Tests
             // act
             collection.RemoveRange(index, count);
 
-            // assert
-            Assert.Equal(expectedCollection, collection);
-
+            // cleanup
             collection.CollectionChanged -= Collection_CollectionChanged;
             inpc.PropertyChanged -= Collection_PropertyChanged;
+
+            // assert
+            Assert.Equal(expectedCollection, collection);
         }
 
         public void RemoveAllTest(ObservableCollection<string> collection, Predicate<string> match, params (int StartingIndex, IEnumerable<string> Items)[] clusters)
-        {               
+        {
             // prepare
             List<NotifyCollectionChangedEventArgs> eventArgsCollection = new List<NotifyCollectionChangedEventArgs>();
             void logEventArgs(object sender, NotifyCollectionChangedEventArgs e) => eventArgsCollection.Add(e);
@@ -489,13 +490,134 @@ namespace System.Collections.ObjectModel.Tests
                 Assert.Equal(-1, args.NewStartingIndex);
                 Assert.Equal(cluster.StartingIndex, args.OldStartingIndex);
                 Assert.Equal(cluster.Items, args.OldItems.Cast<string>());
-            }            
-            
+            }
+
             collection.CollectionChanged -= logEventArgs;
             collection.CollectionChanged -= Collection_CollectionChanged;
-            inpc.PropertyChanged -= Collection_PropertyChanged;  
+            inpc.PropertyChanged -= Collection_PropertyChanged;
         }
 
+
+
+        /// <summary>
+        /// Use when no events are expected.
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <param name="newItems"></param>
+        public void ReplaceRangeTest(ObservableCollection<string> collection, IEnumerable<string> newItems) =>
+            ReplaceRangeTest(collection, newItems, Enumerable.Empty<(int, NotifyCollectionChangedAction, IEnumerable<string>, IEnumerable<string>)>().ToArray());
+
+        public void ReplaceRangeTest(ObservableCollection<string> collection, IEnumerable<string> newItems,
+            params (int StartingIndex, NotifyCollectionChangedAction Action, string NewItem, string oldItem)[] expectedEvents) =>
+            ReplaceRangeTest(collection, newItems, expectedEvents.Select(ev =>
+                (ev.StartingIndex, ev.Action, Wrap(ev.NewItem), Wrap(ev.oldItem))).ToArray());
+
+        public void ReplaceRangeTest(ObservableCollection<string> collection, IEnumerable<string> newItems,
+            params (int StartingIndex, NotifyCollectionChangedAction Action, IEnumerable<string> NewItems, IEnumerable<string> OldItems)[] expectedvents) =>
+            ReplaceRangeTest(collection, newItems, EqualityComparer<string>.Default, expectedvents);
+
+        public void ReplaceRangeTest(ObservableCollection<string> collection, IEnumerable<string> newItems, IEqualityComparer<string> comparer,
+            params (int StartingIndex, NotifyCollectionChangedAction Action, string NewItem, string OldItem)[] expectedEvents) =>
+            ReplaceRangeTest(collection, newItems, comparer,
+                expectedEvents.Select(ev =>
+                    (ev.StartingIndex, ev.Action, Wrap(ev.NewItem), Wrap(ev.OldItem))).ToArray());
+
+        public void ReplaceRangeTest(ObservableCollection<string> collection, IEnumerable<string> newItems, IEqualityComparer<string> comparer,
+            params (int StartingIndex, NotifyCollectionChangedAction Action, IEnumerable<string> NewItems, IEnumerable<string> OldItems)[] expectedEvents)
+        {
+            Debug.Assert(expectedEvents != null);
+
+            // prepare
+            SkipVerifyEventArgs = true;
+            INotifyPropertyChanged inpc = collection;
+
+            _expectedPropertyChanged = new[]
+            {
+                new PropertyNameExpected(COUNT),
+                new PropertyNameExpected(ITEMARRAY)
+            };
+            var eventargsCollection = new List<NotifyCollectionChangedEventArgs>();
+            void logCollectionChanged(object sender, NotifyCollectionChangedEventArgs args) => eventargsCollection.Add(args);
+
+            inpc.PropertyChanged += Collection_PropertyChanged;
+            collection.CollectionChanged += logCollectionChanged;
+
+            // act
+            if (comparer == null)
+                collection.ReplaceRange(newItems, comparer);
+            else
+                collection.ReplaceRange(newItems);
+
+            // cleanup
+            inpc.PropertyChanged -= Collection_PropertyChanged;
+            collection.CollectionChanged -= logCollectionChanged;
+
+            //assert
+            Assert.Equal(newItems, collection, comparer);
+            Assert.Equal(expectedEvents.Length, eventargsCollection.Count);
+                
+            if (expectedEvents.Length == 0)
+                Assert.False(_expectedPropertyChanged.Any(p => p.IsFound), "Expected no property change.");
+            else
+            {
+                var expectedCount = !expectedEvents.All(e => e.Action == NotifyCollectionChangedAction.Replace);
+                Assert.Equal(expectedCount, _expectedPropertyChanged.Single(p => p.Name == COUNT).IsFound);
+
+                Assert.True(_expectedPropertyChanged.Single(p => p.Name == ITEMARRAY).IsFound);
+            }
+
+            for (int i = 0; i < expectedEvents.Length; i++)
+            {
+                var expectedEvent = expectedEvents[i];
+                var actualEvent = eventargsCollection[i];
+                var action = actualEvent.Action;
+
+                Assert.Equal(expectedEvent.Action, action);
+
+                switch (action)
+                {
+                    case NotifyCollectionChangedAction.Add:
+                        Assert.Equal(-1, actualEvent.OldStartingIndex);
+                        Assert.Equal(null, actualEvent.OldItems);
+
+                        Assert.Equal(expectedEvent.StartingIndex, actualEvent.NewStartingIndex);
+                        Assert.Equal(expectedEvent.NewItems, actualEvent.NewItems.Cast<string>());
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+                        Assert.Equal(-1, actualEvent.NewStartingIndex);
+                        Assert.Equal(null, actualEvent.NewItems);
+
+                        Assert.Equal(expectedEvent.StartingIndex, actualEvent.OldStartingIndex);
+                        Assert.Equal(expectedEvent.OldItems, actualEvent.OldItems.Cast<string>());
+                        break;
+                    case NotifyCollectionChangedAction.Replace:
+                        Assert.Equal(expectedEvent.StartingIndex, actualEvent.OldStartingIndex);
+                        Assert.Equal(expectedEvent.StartingIndex, actualEvent.NewStartingIndex);
+
+                        Assert.Equal(expectedEvent.NewItems, actualEvent.NewItems.Cast<string>());
+                        Assert.Equal(expectedEvent.OldItems, actualEvent.OldItems.Cast<string>());
+                        break;
+                    case NotifyCollectionChangedAction.Reset:
+                        Assert.Equal(0, collection.Count);
+                        Assert.Equal(-1, actualEvent.NewStartingIndex);
+                        Assert.Equal(-1, actualEvent.OldStartingIndex);
+                        Assert.Equal(null, actualEvent.NewItems);
+                        Assert.Equal(null, actualEvent.OldItems);
+
+                        break;
+                    default:
+                        Assert.False(true, $"Action '{action}' not expected in '{nameof(ObservableCollection<string>.ReplaceRange)}'.");
+                        break;
+                }
+            }             
+        }
+
+        private static IEnumerable<string> Wrap(string item)
+        {
+            return item == null
+                ? Enumerable.Empty<string>()
+                : Enumerable.Repeat(item, 1);
+        }
 
         /// <summary>
         /// Verifies that the eventargs fired matches the expected results.
