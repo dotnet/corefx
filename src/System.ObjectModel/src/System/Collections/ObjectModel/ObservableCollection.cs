@@ -108,6 +108,7 @@ namespace System.Collections.ObjectModel
         /// The collection whose elements should be added to the end of the <see cref="ObservableCollection{T}"/>.
         /// The collection itself cannot be null, but it can contain elements that are null, if type T is a reference type.
         /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="collection"/> is null.</exception>
         public void AddRange(IEnumerable<T> collection)
         {
             InsertRange(Count, collection);
@@ -116,11 +117,11 @@ namespace System.Collections.ObjectModel
         /// <summary>
         /// Inserts the elements of a collection into the <see cref="ObservableCollection{T}"/> at the specified index.
         /// </summary>
-        /// <exception cref="ArgumentNullException"><paramref name="collection"/> is null.</exception>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is not in the collection range.</exception>
         /// <param name="index">The zero-based index at which the new elements should be inserted.</param>
         /// <param name="collection">The collection whose elements should be inserted into the List<T>.
         /// The collection itself cannot be null, but it can contain elements that are null, if type T is a reference type.</param>                
+        /// <exception cref="ArgumentNullException"><paramref name="collection"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is not in the collection range.</exception>
         public void InsertRange(int index, IEnumerable<T> collection)
         {
             if (collection == null)
@@ -169,8 +170,8 @@ namespace System.Collections.ObjectModel
         /// <summary> 
         /// Removes the first occurence of each item in the specified collection from ObservableCollection(Of T).
         /// </summary>
-        /// <exception cref="ArgumentNullException"><paramref name="collection"/> is null.</exception>
         /// <param name="collection">The items to remove.</param>        
+        /// <exception cref="ArgumentNullException"><paramref name="collection"/> is null.</exception>
         public void RemoveRange(IEnumerable<T> collection)
         {
             if (collection == null)
@@ -427,9 +428,9 @@ namespace System.Collections.ObjectModel
         /// <summary>
         /// Iterates over the collection and removes all items that satisfy the specified match.
         /// </summary>
-        /// <exception cref="ArgumentNullException"><paramref name="match"/> is null.</exception>
         /// <param name="match"></param>
         /// <returns>Returns the number of elements that where </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="match"/> is null.</exception>
         public int RemoveAll(Predicate<T> match)
         {
             if (match == null)
