@@ -77,11 +77,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 IsConstructor();
         }
 
-        public bool IsDestructor()              // Is a destructor
-        {
-            return _methKind == MethodKindEnum.Destructor;
-        }
-
         public bool isPropertyAccessor()  // true if this method is a property set or get method
         {
             return _methKind == MethodKindEnum.PropAccessor;
@@ -95,11 +90,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool isImplicit()          // is user defined implicit conversion operator
         {
             return _methKind == MethodKindEnum.ImplicitConv;
-        }
-
-        public bool isInvoke()            // Invoke method on a delegate - isn't user callable
-        {
-            return _methKind == MethodKindEnum.Invoke;
         }
 
         public void SetMethKind(MethodKindEnum mk)
