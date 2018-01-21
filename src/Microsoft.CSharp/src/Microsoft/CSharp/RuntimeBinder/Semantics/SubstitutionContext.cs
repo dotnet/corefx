@@ -6,41 +6,33 @@ using System;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    // Used to specify whether and which type variables should be normalized.
-    [Flags]
-    internal enum SubstTypeFlags
-    {
-        NormNone = 0x00,
-        DenormMeth = 0x08,   // Replace normalized (standard) method type variables with the given method type args.
-    }
-
     internal sealed class SubstContext
     {
         public readonly CType[] ClassTypes;
         public readonly CType[] MethodTypes;
-        public readonly SubstTypeFlags grfst;
+        public readonly bool DenormMeth;
 
-        public SubstContext(TypeArray typeArgsCls, TypeArray typeArgsMeth, SubstTypeFlags grfst)
+        public SubstContext(TypeArray typeArgsCls, TypeArray typeArgsMeth, bool denormMeth)
         {
             typeArgsCls?.AssertValid();
             ClassTypes = typeArgsCls?.Items ?? Array.Empty<CType>();
             typeArgsMeth?.AssertValid();
             MethodTypes = typeArgsMeth?.Items ?? Array.Empty<CType>();
-            this.grfst = grfst;
+            DenormMeth = denormMeth;
         }
 
         public SubstContext(AggregateType type)
-            : this(type, null, SubstTypeFlags.NormNone)
+            : this(type, null, false)
         {
         }
 
         public SubstContext(AggregateType type, TypeArray typeArgsMeth)
-            : this(type, typeArgsMeth, SubstTypeFlags.NormNone)
+            : this(type, typeArgsMeth, false)
         {
         }
 
-        private SubstContext(AggregateType type, TypeArray typeArgsMeth, SubstTypeFlags grfst)
-            : this(type?.TypeArgsAll, typeArgsMeth, grfst)
+        private SubstContext(AggregateType type, TypeArray typeArgsMeth, bool denormMeth)
+            : this(type?.TypeArgsAll, typeArgsMeth, denormMeth)
         {
         }
 

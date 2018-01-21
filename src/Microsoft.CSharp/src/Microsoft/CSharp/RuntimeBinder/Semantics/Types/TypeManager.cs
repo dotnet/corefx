@@ -200,12 +200,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public AggregateSymbol GetNullable() => GetPredefAgg(PredefinedType.PT_G_OPTIONAL);
 
-        private CType SubstType(CType typeSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth, SubstTypeFlags grfst)
+        private CType SubstType(CType typeSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth, bool denormMeth)
         {
             if (typeSrc == null)
                 return null;
 
-            var ctx = new SubstContext(typeArgsCls, typeArgsMeth, grfst);
+            var ctx = new SubstContext(typeArgsCls, typeArgsMeth, denormMeth);
             return ctx.IsNop ? typeSrc : SubstTypeCore(typeSrc, ctx);
         }
 
@@ -213,7 +213,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             if (typeSrc != null)
             {
-                SubstContext ctx = new SubstContext(typeArgsCls, null, SubstTypeFlags.NormNone);
+                SubstContext ctx = new SubstContext(typeArgsCls, null, false);
                 if (!ctx.IsNop)
                 {
                     return SubstTypeCore(typeSrc, ctx);
@@ -223,10 +223,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return typeSrc;
         }
 
-        private CType SubstType(CType typeSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth)
-        {
-            return SubstType(typeSrc, typeArgsCls, typeArgsMeth, SubstTypeFlags.NormNone);
-        }
+        private CType SubstType(CType typeSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth) =>
+            SubstType(typeSrc, typeArgsCls, typeArgsMeth, false);
 
         public TypeArray SubstTypeArray(TypeArray taSrc, SubstContext ctx)
         {
@@ -258,7 +256,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public TypeArray SubstTypeArray(TypeArray taSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth)
             => taSrc == null || taSrc.Count == 0
             ? taSrc
-            : SubstTypeArray(taSrc, new SubstContext(typeArgsCls, typeArgsMeth, SubstTypeFlags.NormNone));
+            : SubstTypeArray(taSrc, new SubstContext(typeArgsCls, typeArgsMeth, false));
 
         public TypeArray SubstTypeArray(TypeArray taSrc, TypeArray typeArgsCls) => SubstTypeArray(taSrc, typeArgsCls, null);
 
@@ -321,8 +319,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         int index = tvs.GetIndexInTotalParameters();
                         if (tvs.IsMethodTypeParameter())
                         {
-                            if ((pctx.grfst & SubstTypeFlags.DenormMeth) != 0 && tvs.parent != null)
+                            if (pctx.DenormMeth && tvs.parent != null)
+                            {
                                 return type;
+                            }
+
                             Debug.Assert(tvs.GetIndexInOwnParameters() == tvs.GetIndexInTotalParameters());
                             if (index < pctx.MethodTypes.Length)
                             {
@@ -338,20 +339,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        public bool SubstEqualTypes(CType typeDst, CType typeSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth, SubstTypeFlags grfst)
+        public bool SubstEqualTypes(CType typeDst, CType typeSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth, bool denormMeth)
         {
             if (typeDst.Equals(typeSrc))
             {
-                Debug.Assert(typeDst.Equals(SubstType(typeSrc, typeArgsCls, typeArgsMeth, grfst)));
+                Debug.Assert(typeDst.Equals(SubstType(typeSrc, typeArgsCls, typeArgsMeth, denormMeth)));
                 return true;
             }
 
-            var ctx = new SubstContext(typeArgsCls, typeArgsMeth, grfst);
+            SubstContext ctx = new SubstContext(typeArgsCls, typeArgsMeth, denormMeth);
 
             return !ctx.IsNop && SubstEqualTypesCore(typeDst, typeSrc, ctx);
         }
 
-        public bool SubstEqualTypeArrays(TypeArray taDst, TypeArray taSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth, SubstTypeFlags grfst)
+        public bool SubstEqualTypeArrays(TypeArray taDst, TypeArray taSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth, bool denormMeth)
         {
             // Handle the simple common cases first.
             if (taDst == taSrc || (taDst != null && taDst.Equals(taSrc)))
@@ -369,7 +370,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (taDst.Count == 0)
                 return true;
 
-            var ctx = new SubstContext(typeArgsCls, typeArgsMeth, grfst);
+            var ctx = new SubstContext(typeArgsCls, typeArgsMeth, denormMeth);
 
             if (ctx.IsNop)
             {
@@ -456,12 +457,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                         if (tvs.IsMethodTypeParameter())
                         {
-                            if ((pctx.grfst & SubstTypeFlags.DenormMeth) != 0 && tvs.parent != null)
+                            if (pctx.DenormMeth && tvs.parent != null)
                             {
                                 // typeDst == typeSrc was handled above.
                                 Debug.Assert(typeDst != typeSrc);
                                 return false;
                             }
+
                             Debug.Assert(tvs.GetIndexInOwnParameters() == index);
                             Debug.Assert(tvs.GetIndexInTotalParameters() < pctx.MethodTypes.Length);
                             if (index < pctx.MethodTypes.Length)
@@ -635,20 +637,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return this.SubstTypeArray(taSrc, atsCls, (TypeArray)null);
         }
 
-        private bool SubstEqualTypes(CType typeDst, CType typeSrc, CType typeCls, TypeArray typeArgsMeth)
-        {
-            return SubstEqualTypes(typeDst, typeSrc, (typeCls as AggregateType)?.TypeArgsAll, typeArgsMeth, SubstTypeFlags.NormNone);
-        }
+        private bool SubstEqualTypes(CType typeDst, CType typeSrc, CType typeCls, TypeArray typeArgsMeth) =>
+            SubstEqualTypes(typeDst, typeSrc, (typeCls as AggregateType)?.TypeArgsAll, typeArgsMeth, false);
 
         public bool SubstEqualTypes(CType typeDst, CType typeSrc, CType typeCls)
         {
             return SubstEqualTypes(typeDst, typeSrc, typeCls, (TypeArray)null);
         }
-
-        //public bool SubstEqualTypeArrays(TypeArray taDst, TypeArray taSrc, AggregateType atsCls, TypeArray typeArgsMeth)
-        //{
-        //    return SubstEqualTypeArrays(taDst, taSrc, atsCls != null ? atsCls.TypeArgsAll : (TypeArray)null, typeArgsMeth, SubstTypeFlags.NormNone);
-        //}
 
         public TypeParameterType GetStdMethTypeVar(int iv)
         {
