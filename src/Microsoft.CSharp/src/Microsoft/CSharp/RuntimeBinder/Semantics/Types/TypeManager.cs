@@ -417,10 +417,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     goto LCheckBases;
 
                 case TypeKind.TK_ParameterModifierType:
-                    if (!(typeDst is ParameterModifierType modDest) ||
-                        ((pctx.grfst & SubstTypeFlags.NoRefOutDifference) == 0 &&
-                         modDest.IsOut != ((ParameterModifierType)typeSrc).IsOut))
+                    if (!(typeDst is ParameterModifierType modDest) || modDest.IsOut != ((ParameterModifierType)typeSrc).IsOut)
+                    {
                         return false;
+                    }
+
                     goto LCheckBases;
 
                 case TypeKind.TK_PointerType:
