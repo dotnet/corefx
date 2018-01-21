@@ -428,12 +428,12 @@ namespace System.Threading.Tests
         [MemberData(nameof(GetCount))]
         public static async Task AsyncLocalsUnwind(int count)
         {
-            var locals = new AsyncLocal<object>[count];
+            AsyncLocal<object>[] locals = new AsyncLocal<object>[count];
 
-            var setManually = new int[count];
-            var unsetAutomatically = new int[count];
-            var setAutomatically = new int[count];
-            var contexts = new ExecutionContext[count];
+            int[] setManually = new int[count];
+            int[] unsetAutomatically = new int[count];
+            int[] setAutomatically = new int[count];
+            ExecutionContext[] contexts = new ExecutionContext[count];
 
             await AsyncRecursive(count - 1, locals, contexts, args =>
             {
@@ -489,7 +489,7 @@ namespace System.Threading.Tests
 
             for (int i = 0; i < locals.Length; i++)
             {
-                ExecutionContext.Run(contexts[i], o =>
+                ExecutionContext.Run(contexts[i].CreateCopy(), o =>
                 {
                     for (int index = 0; index < locals.Length; index++)
                     {
@@ -503,7 +503,7 @@ namespace System.Threading.Tests
                         }
                     }
 
-                    ExecutionContext.Run(Default, _ =>
+                    ExecutionContext.Run(Default.CreateCopy(), _ =>
                     {
                         for (int index = 0; index < locals.Length; index++)
                         {
@@ -522,7 +522,7 @@ namespace System.Threading.Tests
 
                     for (int c = 0; c < locals.Length; c++)
                     {
-                        ExecutionContext.Run(contexts[c], _ =>
+                        ExecutionContext.Run(contexts[c].CreateCopy(), _ =>
                         {
                             for (int index = locals.Length - 1; index >= 0; index--)
                             {
