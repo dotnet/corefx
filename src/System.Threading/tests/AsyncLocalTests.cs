@@ -487,62 +487,74 @@ namespace System.Threading.Tests
 
             ExecutionContext Default = ExecutionContext.Capture();
 
-            for (int i = 0; i < locals.Length; i++)
-            {
-                ExecutionContext.Run(contexts[i].CreateCopy(), o =>
-                {
-                    for (int index = 0; index < locals.Length; index++)
-                    {
-                        if (index >= i)
-                        {
-                            Assert.Equal(index, (int)locals[index].Value);
-                        }
-                        else
-                        {
-                            Assert.Null(locals[index].Value);
-                        }
-                    }
+            TestExecutionContextRun();
 
-                    ExecutionContext.Run(Default.CreateCopy(), _ =>
+            ExecutionContext.SuppressFlow();
+            try
+            {
+                TestExecutionContextRun();
+            }
+            finally
+            {
+                ExecutionContext.RestoreFlow();
+            }
+
+            void TestExecutionContextRun()
+            {
+                for (int i = 0; i < locals.Length; i++)
+                {
+                    ExecutionContext.Run(contexts[i].CreateCopy(), o =>
                     {
                         for (int index = 0; index < locals.Length; index++)
                         {
-                            Assert.Null(locals[index].Value);
+                            if (index >= i)
+                            {
+                                Assert.Equal(index, (int) locals[index].Value);
+                            }
+                            else
+                            {
+                                Assert.Null(locals[index].Value);
+                            }
+                        }
+
+                        ExecutionContext.Run(Default.CreateCopy(), _ =>
+                        {
+                            for (int index = 0; index < locals.Length; index++)
+                            {
+                                Assert.Null(locals[index].Value);
+                            }
+                        }, null);
+
+                        for (int l = 0; l < locals.Length; l++)
+                        {
+                            Assert.Equal(0, setManually[l]);
+                            Assert.Equal(l < i ? 0 : 1, unsetAutomatically[l]);
+                            Assert.Equal(l < i ? 0 : 2, setAutomatically[l]);
+                        }
+
+                        for (int c = 0; c < locals.Length; c++)
+                        {
+                            ExecutionContext.Run(contexts[c].CreateCopy(), _ =>
+                            {
+                                for (int index = locals.Length - 1; index >= 0; index--)
+                                {
+                                    if (index >= c)
+                                    {
+                                        Assert.Equal(index, (int) locals[index].Value);
+                                    }
+                                    else
+                                    {
+                                        Assert.Null(locals[index].Value);
+                                    }
+                                }
+                            }, null);
                         }
                     }, null);
 
-                    for (int l = 0; l < locals.Length; l++)
-                    {
-                        Assert.Equal(0, setManually[l]);
-                        Assert.Equal(l < i ? 0 : 1, unsetAutomatically[l]);
-                        Assert.Equal(l < i ? 0 : 2, setAutomatically[l]);
-                    }
-
-                    Assert.True(true);
-
-                    for (int c = 0; c < locals.Length; c++)
-                    {
-                        ExecutionContext.Run(contexts[c].CreateCopy(), _ =>
-                        {
-                            for (int index = locals.Length - 1; index >= 0; index--)
-                            {
-                                if (index >= c)
-                                {
-                                    Assert.Equal(index, (int)locals[index].Value);
-                                }
-                                else
-                                {
-                                    Assert.Null(locals[index].Value);
-                                }
-                            }
-                        }, null);
-                    }
-
-                }, null);
-
-                Array.Clear(setManually, 0, count);
-                Array.Clear(unsetAutomatically, 0, count);
-                Array.Clear(setAutomatically, 0, count);
+                    Array.Clear(setManually, 0, count);
+                    Array.Clear(unsetAutomatically, 0, count);
+                    Array.Clear(setAutomatically, 0, count);
+                }
             }
         }
 
