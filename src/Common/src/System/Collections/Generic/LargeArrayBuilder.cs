@@ -171,23 +171,36 @@ namespace System.Collections.Generic
 
                 while (enumerator.MoveNext())
                 {
-                    if (index == destination.Length)
+                    T item = enumerator.Current;
+                    
+                    if ((uint)index >= (uint)destination.Length)
                     {
-                        // No more space in this buffer. Resize.
-                        _count += index - _index;
-                        _index = index;
-                        AllocateBuffer();
-                        destination = _current;
-                        index = _index; // May have been reset to 0
+                        AddWithBufferAllocation(item, ref destination, ref index);
                     }
-
-                    destination[index++] = enumerator.Current;
+                    else
+                    {
+                        destination[index] = item;
+                    }
+                    
+                    index++;
                 }
 
                 // Final update to _count and _index.
                 _count += index - _index;
                 _index = index;
             }
+        }
+
+        // Non-inline to improve code quality as uncommon path
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void AddWithBufferAllocation(T item, ref T[] destination, ref int index)
+        {
+            _count += index - _index;
+            _index = index;
+            AllocateBuffer();
+            destination = _current;
+            index = _index;
+            _current[index] = item;
         }
 
         /// <summary>
