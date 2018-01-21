@@ -11,9 +11,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal enum SubstTypeFlags
     {
         NormNone = 0x00,
-        NormClass = 0x01,  // Replace class type variables with the normalized (standard) ones.
-        NormMeth = 0x02,   // Replace method type variables with the normalized (standard) ones.
-        NormAll = NormClass | NormMeth,
         DenormMeth = 0x08,   // Replace normalized (standard) method type variables with the given method type args.
     }
 
@@ -61,7 +58,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool FNop()
         {
-            return 0 == ctypeCls && 0 == ctypeMeth && 0 == (grfst & SubstTypeFlags.NormAll);
+            return 0 == ctypeCls && 0 == ctypeMeth;
         }
 
         // Initializes a substitution context. Returns false iff no substitutions will ever be performed.

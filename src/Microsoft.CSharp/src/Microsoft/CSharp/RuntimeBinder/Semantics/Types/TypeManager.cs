@@ -331,15 +331,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 Debug.Assert(pctx.prgtypeMeth != null);
                                 return pctx.prgtypeMeth[index];
                             }
-                            else
-                            {
-                                return ((pctx.grfst & SubstTypeFlags.NormMeth) != 0 ? GetStdMethTypeVar(index) : type);
-                            }
-                        }
-                        if ((pctx.grfst & SubstTypeFlags.DenormClass) != 0 && tvs.parent != null)
+
                             return type;
-                        return index < pctx.ctypeCls ? pctx.prgtypeCls[index] :
-                               ((pctx.grfst & SubstTypeFlags.NormClass) != 0 ? GetStdClsTypeVar(index) : type);
+                        }
+
+                        return index < pctx.ctypeCls ? pctx.prgtypeCls[index] : type;
                     }
             }
         }
@@ -472,24 +468,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             {
                                 return typeDst == pctx.prgtypeMeth[index];
                             }
-                            if ((pctx.grfst & SubstTypeFlags.NormMeth) != 0)
-                            {
-                                return typeDst == GetStdMethTypeVar(index);
-                            }
                         }
                         else
                         {
-                            if ((pctx.grfst & SubstTypeFlags.DenormClass) != 0 && tvs.parent != null)
-                            {
-                                // typeDst == typeSrc was handled above.
-                                Debug.Assert(typeDst != typeSrc);
-                                return false;
-                            }
                             Debug.Assert(pctx.prgtypeCls == null || tvs.GetIndexInTotalParameters() < pctx.ctypeCls);
                             if (index < pctx.ctypeCls)
                                 return typeDst == pctx.prgtypeCls[index];
-                            if ((pctx.grfst & SubstTypeFlags.NormClass) != 0)
-                                return typeDst == GetStdClsTypeVar(index);
                         }
                     }
                     return false;
