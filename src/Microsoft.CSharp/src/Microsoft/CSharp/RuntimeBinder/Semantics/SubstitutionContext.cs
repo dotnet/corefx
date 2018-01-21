@@ -44,9 +44,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
         }
 
-        public bool FNop()
-        {
-            return prgtypeCls.Length == 0 & prgtypeMeth.Length == 0;
-        }
+        public bool IsNop => prgtypeCls.Length == 0 & prgtypeMeth.Length == 0;
     }
 }

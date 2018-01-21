@@ -206,7 +206,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return null;
 
             var ctx = new SubstContext(typeArgsCls, typeArgsMeth, grfst);
-            return ctx.FNop() ? typeSrc : SubstTypeCore(typeSrc, ctx);
+            return ctx.IsNop ? typeSrc : SubstTypeCore(typeSrc, ctx);
         }
 
         public AggregateType SubstType(AggregateType typeSrc, TypeArray typeArgsCls)
@@ -214,7 +214,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (typeSrc != null)
             {
                 SubstContext ctx = new SubstContext(typeArgsCls, null, SubstTypeFlags.NormNone);
-                if (!ctx.FNop())
+                if (!ctx.IsNop)
                 {
                     return SubstTypeCore(typeSrc, ctx);
                 }
@@ -230,7 +230,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeArray SubstTypeArray(TypeArray taSrc, SubstContext ctx)
         {
-            if (taSrc != null && taSrc.Count != 0 && ctx != null && !ctx.FNop())
+            if (taSrc != null && taSrc.Count != 0 && ctx != null && !ctx.IsNop)
             {
                 CType[] srcs = taSrc.Items;
                 for (int i = 0; i < srcs.Length; i++)
@@ -348,7 +348,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             var ctx = new SubstContext(typeArgsCls, typeArgsMeth, grfst);
 
-            return !ctx.FNop() && SubstEqualTypesCore(typeDst, typeSrc, ctx);
+            return !ctx.IsNop && SubstEqualTypesCore(typeDst, typeSrc, ctx);
         }
 
         public bool SubstEqualTypeArrays(TypeArray taDst, TypeArray taSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth, SubstTypeFlags grfst)
@@ -371,8 +371,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             var ctx = new SubstContext(typeArgsCls, typeArgsMeth, grfst);
 
-            if (ctx.FNop())
+            if (ctx.IsNop)
+            {
                 return false;
+            }
 
             for (int i = 0; i < taDst.Count; i++)
             {
@@ -603,12 +605,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         public AggregateType SubstType(AggregateType typeSrc, SubstContext ctx) =>
-            ctx == null || ctx.FNop() ? typeSrc : SubstTypeCore(typeSrc, ctx);
+            ctx == null || ctx.IsNop ? typeSrc : SubstTypeCore(typeSrc, ctx);
 
-        public CType SubstType(CType typeSrc, SubstContext pctx)
-        {
-            return (pctx == null || pctx.FNop()) ? typeSrc : SubstTypeCore(typeSrc, pctx);
-        }
+        public CType SubstType(CType typeSrc, SubstContext pctx) =>
+            pctx == null || pctx.IsNop ? typeSrc : SubstTypeCore(typeSrc, pctx);
 
         public CType SubstType(CType typeSrc, AggregateType atsCls)
         {

@@ -141,7 +141,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 return;
             }
 
-            if (pctx != null && !pctx.FNop() && parent is AggregateSymbol agg && 0 != agg.GetTypeVarsAll().Count)
+            if (pctx != null && !pctx.IsNop && parent is AggregateSymbol agg && 0 != agg.GetTypeVarsAll().Count)
             {
                 CType pType = GetTypeManager().SubstType(agg.getThisType(), pctx);
                 ErrAppendType(pType, null);
@@ -415,7 +415,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         {
             if (pctx != null)
             {
-                if (!pctx.FNop())
+                if (!pctx.IsNop)
                 {
                     pType = GetTypeManager().SubstType(pType, pctx);
                 }
