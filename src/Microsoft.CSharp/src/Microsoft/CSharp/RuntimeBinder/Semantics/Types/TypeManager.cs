@@ -324,16 +324,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             if ((pctx.grfst & SubstTypeFlags.DenormMeth) != 0 && tvs.parent != null)
                                 return type;
                             Debug.Assert(tvs.GetIndexInOwnParameters() == tvs.GetIndexInTotalParameters());
-                            if (index < pctx.prgtypeMeth.Length)
+                            if (index < pctx.MethodTypes.Length)
                             {
-                                Debug.Assert(pctx.prgtypeMeth != null);
-                                return pctx.prgtypeMeth[index];
+                                Debug.Assert(pctx.MethodTypes != null);
+                                return pctx.MethodTypes[index];
                             }
 
                             return type;
                         }
 
-                        return index < pctx.prgtypeCls.Length ? pctx.prgtypeCls[index] : type;
+                        return index < pctx.ClassTypes.Length ? pctx.ClassTypes[index] : type;
                     }
             }
         }
@@ -463,18 +463,18 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 return false;
                             }
                             Debug.Assert(tvs.GetIndexInOwnParameters() == index);
-                            Debug.Assert(tvs.GetIndexInTotalParameters() < pctx.prgtypeMeth.Length);
-                            if (index < pctx.prgtypeMeth.Length)
+                            Debug.Assert(tvs.GetIndexInTotalParameters() < pctx.MethodTypes.Length);
+                            if (index < pctx.MethodTypes.Length)
                             {
-                                return typeDst == pctx.prgtypeMeth[index];
+                                return typeDst == pctx.MethodTypes[index];
                             }
                         }
                         else
                         {
-                            Debug.Assert(index < pctx.prgtypeCls.Length);
-                            if (index < pctx.prgtypeCls.Length)
+                            Debug.Assert(index < pctx.ClassTypes.Length);
+                            if (index < pctx.ClassTypes.Length)
                             {
-                                return typeDst == pctx.prgtypeCls[index];
+                                return typeDst == pctx.ClassTypes[index];
                             }
                         }
                     }
