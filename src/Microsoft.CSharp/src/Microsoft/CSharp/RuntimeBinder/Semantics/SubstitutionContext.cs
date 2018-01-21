@@ -66,20 +66,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
         }
 
-        public SubstContext(CType[] prgtypeCls, int ctypeCls, CType[] prgtypeMeth, int ctypeMeth)
-            : this(prgtypeCls, ctypeCls, prgtypeMeth, ctypeMeth, SubstTypeFlags.NormNone)
-        {
-        }
-
-        private SubstContext(CType[] prgtypeCls, int ctypeCls, CType[] prgtypeMeth, int ctypeMeth, SubstTypeFlags grfst)
-        {
-            this.prgtypeCls = prgtypeCls;
-            this.ctypeCls = ctypeCls;
-            this.prgtypeMeth = prgtypeMeth;
-            this.ctypeMeth = ctypeMeth;
-            this.grfst = grfst;
-        }
-
         public bool FNop()
         {
             return 0 == ctypeCls && 0 == ctypeMeth;
