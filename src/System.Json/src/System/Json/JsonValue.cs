@@ -122,7 +122,10 @@ namespace System.Json
                 throw new ArgumentNullException(nameof(stream));
             }
 
-            Save(new StreamWriter(stream));
+            using (StreamWriter writer = new StreamWriter(stream, new UTF8Encoding(false), 1024, true))
+            {
+                Save(writer);
+            }
         }
 
         public virtual void Save(TextWriter textWriter)
