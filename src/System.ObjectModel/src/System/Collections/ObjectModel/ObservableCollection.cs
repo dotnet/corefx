@@ -725,12 +725,18 @@ namespace System.Collections.ObjectModel
                 return enumerator.MoveNext();
         }
 
+        /// <summary>
+        /// Helper to raise Count property and the Indexer property.
+        /// </summary>
         private void OnEssentialPropertiesChanged()
         {
             OnPropertyChanged(EventArgsCache.CountPropertyChanged);
             OnIndexerPropertyChanged();
         }
 
+        /// <summary>
+        /// /// Helper to raise a PropertyChanged event for the Indexer property
+        /// /// </summary>
         private void OnIndexerPropertyChanged()
         {
             OnPropertyChanged(EventArgsCache.IndexerPropertyChanged);
@@ -823,11 +829,15 @@ namespace System.Collections.ObjectModel
 
         #endregion Private Types
 
-        private static class EventArgsCache
-        {
-            internal static readonly PropertyChangedEventArgs CountPropertyChanged = new PropertyChangedEventArgs("Count");
-            internal static readonly PropertyChangedEventArgs IndexerPropertyChanged = new PropertyChangedEventArgs("Item[]");
-            internal static readonly NotifyCollectionChangedEventArgs ResetCollectionChanged = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
-        }
+    }
+
+    /// <remarks>
+    /// To be kept outside <see cref="ObservableCollection{T}"/>, since otherwise, a new instance will be created for each generic type used.
+    /// </remarks>
+    internal static class EventArgsCache
+    {
+        internal static readonly PropertyChangedEventArgs CountPropertyChanged = new PropertyChangedEventArgs("Count");
+        internal static readonly PropertyChangedEventArgs IndexerPropertyChanged = new PropertyChangedEventArgs("Item[]");
+        internal static readonly NotifyCollectionChangedEventArgs ResetCollectionChanged = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
     }
 }
