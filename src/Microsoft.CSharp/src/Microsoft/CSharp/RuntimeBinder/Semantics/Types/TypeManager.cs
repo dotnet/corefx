@@ -352,7 +352,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return !ctx.IsNop && SubstEqualTypesCore(typeDst, typeSrc, ctx);
         }
 
-        public bool SubstEqualTypeArrays(TypeArray taDst, TypeArray taSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth, bool denormMeth)
+        public bool SubstEqualTypeArrays(TypeArray taDst, TypeArray taSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth)
         {
             // Handle the simple common cases first.
             if (taDst == taSrc || (taDst != null && taDst.Equals(taSrc)))
@@ -370,7 +370,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (taDst.Count == 0)
                 return true;
 
-            var ctx = new SubstContext(typeArgsCls, typeArgsMeth, denormMeth);
+            var ctx = new SubstContext(typeArgsCls, typeArgsMeth, true);
 
             if (ctx.IsNop)
             {

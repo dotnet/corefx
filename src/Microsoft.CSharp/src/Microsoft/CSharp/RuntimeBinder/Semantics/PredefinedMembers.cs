@@ -407,7 +407,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         methsym.isVirtual == isVirtual &&
                         methsym.typeVars.Count == cMethodTyVars &&
                         GetTypeManager().SubstEqualTypes(methsym.RetType, returnType, null, methsym.typeVars, true) &&
-                        GetTypeManager().SubstEqualTypeArrays(methsym.Params, argumentTypes, null, methsym.typeVars, true))
+                        GetTypeManager().SubstEqualTypeArrays(methsym.Params, argumentTypes, null, methsym.typeVars))
                     {
                         return methsym;
                     }
