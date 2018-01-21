@@ -21,14 +21,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private SymbolTable _symbolTable;
 
         private readonly StdTypeVarColl _stvcMethod;
-        private readonly StdTypeVarColl _stvcClass;
 
         public TypeManager(BSYMMGR bsymmgr, PredefinedTypes predefTypes)
         {
             _typeTable = new TypeTable();
 
             _stvcMethod = new StdTypeVarColl();
-            _stvcClass = new StdTypeVarColl();
             _BSymmgr = bsymmgr;
             _predefTypes = predefTypes;
         }
@@ -653,11 +651,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public TypeParameterType GetStdMethTypeVar(int iv)
         {
             return _stvcMethod.GetTypeVarSym(iv, this, true);
-        }
-
-        private TypeParameterType GetStdClsTypeVar(int iv)
-        {
-            return _stvcClass.GetTypeVarSym(iv, this, false);
         }
 
         // These are singletons for each.
