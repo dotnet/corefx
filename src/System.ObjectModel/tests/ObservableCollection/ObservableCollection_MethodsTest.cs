@@ -214,6 +214,17 @@ namespace System.Collections.ObjectModel.Tests
             var items = new[] { "alpha", "bravo", "charlie", "delta", "echo" };
             ObservableCollection<string> col;
             CollectionAndPropertyChangedTester tester;
+            void reset()
+            {
+                col = new ObservableCollection<string>(items);
+                tester = new CollectionAndPropertyChangedTester();
+            }
+
+            reset();
+            col.Clear();
+            Assert.Throws<ArgumentNullException>("match", () => col.RemoveAll(null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => col.RemoveAll(0, 1, i => true));
+            Assert.Throws<ArgumentOutOfRangeException>(() => col.RemoveAll(1, 0, i => true));
 
             //remove single item
             reset();
@@ -239,17 +250,14 @@ namespace System.Collections.ObjectModel.Tests
             reset();
             tester.RemoveAllTest(col, i => true, (0, items));
 
-            /**********************
+            //remove all within boundary 1+3
+            reset();
+            tester.RemoveAllTest(col, 1, 3, i => true, (1, items.Skip(1).Take(3)));
 
-            TODO test RemoveAll with range
+            reset();
+            tester.RemoveAllTest(col, 1, 3, i => i.EndsWith('a'), (3, new[] { items[3] }));
 
-            ***********************/
-
-            void reset()
-            {
-                col = new ObservableCollection<string>(items);
-                tester = new CollectionAndPropertyChangedTester();
-            }
+            tester.RemoveAllTest(col, 0, 0, i => true);
         }
 
         /// <summary>
@@ -573,12 +581,12 @@ namespace System.Collections.ObjectModel.Tests
                 (3, NotifyCollectionChangedAction.Add, newItems.Skip(1), Enumerable.Empty<string>()));
 
             reset(allItems);
-            var newItem = '_'+ allItems[3];
+            var newItem = '_' + allItems[3];
             newItems = allItems.Take(3).Concat(new[] { newItem }).Concat(allItems.Skip(4)).ToArray();
             tester.ReplaceRangeTest(col,
                 newItems,
                 (3, NotifyCollectionChangedAction.Replace, newItem, allItems[3]));
-            
+
             /**************************************
 
             TODO: add tests using index and count!!

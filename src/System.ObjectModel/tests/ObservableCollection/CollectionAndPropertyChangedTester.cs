@@ -451,7 +451,10 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Equal(expectedCollection, collection);
         }
 
-        public void RemoveAllTest(ObservableCollection<string> collection, Predicate<string> match, params (int StartingIndex, IEnumerable<string> Items)[] clusters)
+        public void RemoveAllTest(ObservableCollection<string> collection, Predicate<string> match, params (int StartingIndex, IEnumerable<string> Items)[] clusters) =>
+            RemoveAllTest(collection, 0, collection.Count, match, clusters);
+
+        public void RemoveAllTest(ObservableCollection<string> collection, int index, int count, Predicate<string> match, params (int StartingIndex, IEnumerable<string> Items)[] clusters)
         {
             // prepare
             List<NotifyCollectionChangedEventArgs> eventArgsCollection = new List<NotifyCollectionChangedEventArgs>();
@@ -468,14 +471,26 @@ namespace System.Collections.ObjectModel.Tests
             ExpectedAction = NotifyCollectionChangedAction.Remove;
 
             var expected = collection.ToList();
-            var expectedRemoveCount = expected.RemoveAll(match);
+            int expectedRemoveCount;
+            if (index == 0 && count == collection.Count)
+                expectedRemoveCount = expected.RemoveAll(match);
+            else
+            {
+                var range = expected.GetRange(index, count);
+                expected.RemoveRange(index, count);
+                expectedRemoveCount = range.RemoveAll(match);
+                expected.InsertRange(index, range);
+            }
+
+            if (clusters == null)
+                clusters = new(int, IEnumerable<string>)[] { };
 
             if (clusters.Any())
                 ExpectedCollectionChangedFired = clusters.Length;
             SkipVerifyEventArgs = true;
 
             // act                  
-            var removeCount = collection.RemoveAll(match);
+            var removeCount = collection.RemoveAll(index, count, match);
 
             // assert
             Assert.Equal(expected, collection);
@@ -555,7 +570,7 @@ namespace System.Collections.ObjectModel.Tests
             //assert
             Assert.Equal(newItems, collection, comparer);
             Assert.Equal(expectedEvents.Length, eventargsCollection.Count);
-                
+
             if (expectedEvents.Length == 0)
                 Assert.False(_expectedPropertyChanged.Any(p => p.IsFound), "Expected no property change.");
             else
@@ -609,7 +624,7 @@ namespace System.Collections.ObjectModel.Tests
                         Assert.False(true, $"Action '{action}' not expected in '{nameof(ObservableCollection<string>.ReplaceRange)}'.");
                         break;
                 }
-            }             
+            }
         }
 
         private static IEnumerable<string> Wrap(string item)
