@@ -127,7 +127,7 @@ namespace System.Collections.ObjectModel
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection));
 
-            if (index > Count)
+            if (index < 0 || index > Count)
                 throw new ArgumentOutOfRangeException(nameof(index));
 
             if (collection is ICollection<T> countable)
@@ -231,8 +231,8 @@ namespace System.Collections.ObjectModel
         /// <exception cref="ArgumentOutOfRangeException">The specified range is exceeding the collection.</exception>
         public void RemoveRange(int index, int count)
         {
-            if (index < 0 || (index + count) > Count)
-                throw new ArgumentOutOfRangeException();
+            if (index < 0 || index + count > Count)
+                throw new ArgumentOutOfRangeException($"index or count must not exceed the collection.");
 
             if (count == 0)
                 return;
@@ -311,7 +311,7 @@ namespace System.Collections.ObjectModel
         /// <exception cref="ArgumentNullException"><paramref name="comparer"/> is null.</exception>
         public void ReplaceRange(int index, int count, IEnumerable<T> collection, IEqualityComparer<T> comparer)
         {
-            if (index + count < count)
+            if (index < 0 || index + count < Count)
                 throw new ArgumentOutOfRangeException($"index or count must not exceed the collection.");
 
             if (collection == null)
@@ -444,29 +444,35 @@ namespace System.Collections.ObjectModel
         /// <summary>
         /// Iterates over the collection and removes all items that satisfy the specified match.
         /// </summary>
+        /// <remarks>The complexity is O(n).</remarks>
         /// <param name="match"></param>
         /// <returns>Returns the number of elements that where </returns>
         /// <exception cref="ArgumentNullException"><paramref name="match"/> is null.</exception>
         public int RemoveAll(Predicate<T> match)
         {
+            return RemoveAll(0, Count, match);
+
+            /*
             if (match == null)
                 throw new ArgumentNullException(nameof(match));
 
-            List<T> cluster = null;
-            var index = -1;
-            var removedCount = 0;
+            if (Count == 0)
+                return 0;
 
+            List<T> cluster = null;
+            var clusterIndex = -1;
+            var removedCount = 0;
             using (BlockReentrancy())
             {
-                for (int i = 0; i < Count; i++)
+                for (int index = 0; index < Count; index++)
                 {
-                    T item = Items[i];
+                    T item = Items[index];
                     if (match(item))
                     {
-                        Items.RemoveAt(i);
+                        Items.RemoveAt(index);
                         removedCount++;
 
-                        if (index == i)
+                        if (clusterIndex == index)
                         {
                             Debug.Assert(cluster != null);
                             cluster.Add(item);
@@ -474,21 +480,85 @@ namespace System.Collections.ObjectModel
                         else
                         {
                             cluster = new List<T> { item };
-                            index = i;
+                            clusterIndex = index;
                         }
 
-                        i--;
+                        index--;
                     }
-                    else if (index > -1)
+                    else if (clusterIndex > -1)
                     {
-                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, index));
-                        index = -1;
+                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, clusterIndex));
+                        clusterIndex = -1;
                         cluster = null;
                     }
                 }
 
-                if (index > -1)
-                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, index));
+                if (clusterIndex > -1)
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, clusterIndex));
+            }
+
+            return removedCount;    
+            */
+        }
+
+        /// <summary>
+        /// Iterates over the specified range within the collection and removes all items that satisfy the specified match.
+        /// </summary>
+        /// <remarks>The complexity is O(n).</remarks>
+        /// <param name="index">The index of where to start performing the search.</param>
+        /// <param name="count">The number of items to iterate on.</param>
+        /// <param name="match"></param>
+        /// <returns>Returns the number of elements that where </returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is out of range.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="count"/> is out of range.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="match"/> is null.</exception>
+        public int RemoveAll(int index, int count, Predicate<T> match)
+        {
+            if (index < 0 || index + count > Count)
+                throw new ArgumentOutOfRangeException($"index or count must not exceed the collection.");
+
+            if (match == null)
+                throw new ArgumentNullException(nameof(match));
+
+            if (Count == 0)
+                return 0;
+
+            List<T> cluster = null;
+            var clusterIndex = -1;
+            var removedCount = 0;
+            using (BlockReentrancy())
+            {
+                for (var i = 0; i < count; i++, index++)
+                {
+                    T item = Items[index];
+                    if (match(item))
+                    {
+                        Items.RemoveAt(index);
+                        removedCount++;
+
+                        if (clusterIndex == index)
+                        {
+                            Debug.Assert(cluster != null);
+                            cluster.Add(item);
+                        }
+                        else
+                        {
+                            cluster = new List<T> { item };
+                            clusterIndex = index;
+                        }
+
+                        index--;
+                    }
+                    else if (clusterIndex > -1)
+                    {
+                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, clusterIndex));
+                        clusterIndex = -1;
+                        cluster = null;
+                    }
+                }
+
+                if (clusterIndex > -1)
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, clusterIndex));
             }
 
             return removedCount;

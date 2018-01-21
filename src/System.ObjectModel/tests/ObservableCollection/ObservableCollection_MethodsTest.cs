@@ -239,6 +239,12 @@ namespace System.Collections.ObjectModel.Tests
             reset();
             tester.RemoveAllTest(col, i => true, (0, items));
 
+            /**********************
+
+            TODO test RemoveAll with range
+
+            ***********************/
+
             void reset()
             {
                 col = new ObservableCollection<string>(items);
@@ -515,6 +521,8 @@ namespace System.Collections.ObjectModel.Tests
             }
 
             reset();
+            Assert.Throws<ArgumentOutOfRangeException>(() => col.ReplaceRange(1, 0, Enumerable.Empty<string>()));
+
             Assert.Throws<ArgumentNullException>("collection", () => col.ReplaceRange(null));
             Assert.Throws<ArgumentNullException>("collection", () => col.ReplaceRange(null, EqualityComparer<string>.Default));
             Assert.Throws<ArgumentNullException>("comparer", () => col.ReplaceRange(oldItems, null));
