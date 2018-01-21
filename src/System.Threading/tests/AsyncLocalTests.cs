@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -365,10 +367,11 @@ namespace System.Threading.Tests
             Assert.Equal(local.Value, 42);
         }
 
-        [Fact]
-        public static async Task AddAndUpdateManyLocals_ValueType()
+        [Theory]
+        [MemberData(nameof(GetCount))]
+        public static async Task AddAndUpdateManyLocals_ValueType(int count)
         {
-            var locals = new AsyncLocal<int>[40];
+            var locals = new AsyncLocal<int>[count];
             for (int i = 0; i < locals.Length; i++)
             {
                 locals[i] = new AsyncLocal<int>();
@@ -387,10 +390,11 @@ namespace System.Threading.Tests
             }
         }
 
-        [Fact]
-        public static async Task AddUpdateAndRemoveManyLocals_ReferenceType()
+        [Theory]
+        [MemberData(nameof(GetCount))]
+        public static async Task AddUpdateAndRemoveManyLocals_ReferenceType(int count)
         {
-            var locals = new AsyncLocal<string>[40];
+            var locals = new AsyncLocal<string>[count];
 
             for (int i = 0; i < locals.Length; i++)
             {
@@ -417,6 +421,151 @@ namespace System.Threading.Tests
                 {
                     Assert.Equal(j.ToString(), locals[j].Value);
                 }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(GetCount))]
+        public static async Task AsyncLocalsUnwind(int count)
+        {
+            var locals = new AsyncLocal<object>[count];
+
+            var setManually = new int[count];
+            var unsetAutomatically = new int[count];
+            var setAutomatically = new int[count];
+            var contexts = new ExecutionContext[count];
+
+            await AsyncRecursive(count - 1, locals, contexts, args =>
+            {
+                if (!args.ThreadContextChanged)
+                {
+                    if (args.PreviousValue != null)
+                    {
+                        Assert.True(false, $"Trying to set {args.CurrentValue} when {args.PreviousValue} value already set");
+                    }
+
+                    Assert.IsType<int>(args.CurrentValue);
+
+                    setManually[(int)args.CurrentValue]++;
+                }
+                else
+                {
+                    if (args.PreviousValue == null && args.CurrentValue == null)
+                    {
+                        Assert.True(false, "CurrentValue and PreviousValue are both null");
+                    }
+
+                    if (args.PreviousValue != null && args.CurrentValue != null)
+                    {
+                        Assert.True(false, "CurrentValue and PreviousValue are both set");
+                    }
+
+                    if (args.CurrentValue != null)
+                    {
+                        Assert.IsType<int>(args.CurrentValue);
+                        setAutomatically[(int)args.CurrentValue]++;
+                    }
+                    else
+                    {
+                        Assert.IsType<int>(args.PreviousValue);
+                        unsetAutomatically[(int)args.PreviousValue]++;
+                    }
+
+                }
+            });
+
+            for (int i = 0; i < locals.Length; i++)
+            {
+                Assert.Equal(1, setManually[i]);
+                Assert.Equal(1, unsetAutomatically[i]);
+                Assert.Equal(0, setAutomatically[i]);
+            }
+
+            Array.Clear(setManually, 0, count);
+            Array.Clear(unsetAutomatically, 0, count);
+            Array.Clear(setAutomatically, 0, count);
+
+            ExecutionContext Default = ExecutionContext.Capture();
+
+            for (int i = 0; i < locals.Length; i++)
+            {
+                ExecutionContext.Run(contexts[i], o =>
+                {
+                    for (int index = 0; index < locals.Length; index++)
+                    {
+                        if (index >= i)
+                        {
+                            Assert.Equal(index, (int)locals[index].Value);
+                        }
+                        else
+                        {
+                            Assert.Null(locals[index].Value);
+                        }
+                    }
+
+                    ExecutionContext.Run(Default, _ =>
+                    {
+                        for (int index = 0; index < locals.Length; index++)
+                        {
+                            Assert.Null(locals[index].Value);
+                        }
+                    }, null);
+
+                    for (int l = 0; l < locals.Length; l++)
+                    {
+                        Assert.Equal(0, setManually[l]);
+                        Assert.Equal(l < i ? 0 : 1, unsetAutomatically[l]);
+                        Assert.Equal(l < i ? 0 : 2, setAutomatically[l]);
+                    }
+
+                    Assert.True(true);
+
+                    for (int c = 0; c < locals.Length; c++)
+                    {
+                        ExecutionContext.Run(contexts[c], _ =>
+                        {
+                            for (int index = locals.Length - 1; index >= 0; index--)
+                            {
+                                if (index >= c)
+                                {
+                                    Assert.Equal(index, (int)locals[index].Value);
+                                }
+                                else
+                                {
+                                    Assert.Null(locals[index].Value);
+                                }
+                            }
+                        }, null);
+                    }
+
+                }, null);
+
+                Array.Clear(setManually, 0, count);
+                Array.Clear(unsetAutomatically, 0, count);
+                Array.Clear(setAutomatically, 0, count);
+            }
+        }
+
+        static async Task AsyncRecursive(int index, AsyncLocal<object>[] locals, ExecutionContext[] contexts, Action<AsyncLocalValueChangedArgs<object>> valueChangedHandler)
+        {
+            locals[index] = new AsyncLocal<object>(valueChangedHandler);
+            locals[index].Value = index;
+
+            contexts[index] = ExecutionContext.Capture();
+
+            if (index > 0)
+            {
+                await AsyncRecursive(index - 1, locals, contexts, valueChangedHandler);
+            }
+        }
+
+        public static IEnumerable<object[]> GetCount()
+        {
+            const int max = 40;
+
+            foreach (int i in Enumerable.Range(1, max))
+            {
+                yield return new object[] { i };
             }
         }
     }
