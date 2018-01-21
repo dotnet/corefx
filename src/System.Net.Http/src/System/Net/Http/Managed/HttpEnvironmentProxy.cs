@@ -12,18 +12,18 @@ namespace System.Net.Http
     public sealed class HttpEnvironmentProxyCredientials : ICredentials
     {
         // Wrapper class for cases when http and https has different authentication.
-        private readonly NetworkCredential _http;
-        private readonly NetworkCredential _https;
+        private readonly NetworkCredential _httpCred;
+        private readonly NetworkCredential _httpsCred;
 
         public HttpEnvironmentProxyCredientials(NetworkCredential http, NetworkCredential https)
         {
-            _http = http;
-            _https = https;
+            _httpCred = http;
+            _httpsCred = https;
         }
 
         public NetworkCredential GetCredential(Uri uri, string authType)
         {
-            return uri.Scheme == Uri.UriSchemeHttp ? _http : _https;
+            return uri.Scheme == Uri.UriSchemeHttp ? _httpCred : _httpsCred;
         }
     }
 
@@ -36,10 +36,10 @@ namespace System.Net.Http
         private const string EnvHttpsProxyUC = "HTTPS_PROXY";
         private const string EnvNoProxyLC = "no_proxy";
 
-        private Uri _http;          // String URI for HTTP requests
-        private Uri _https;         // String URI for HTTPS requests
-        string[] _bypass = null;    // list of domains not to proxy
-        private ICredentials _credientials;
+        private Uri _httpProxyUri;      // String URI for HTTP requests
+        private Uri _httpsProxyUri;     // String URI for HTTPS requests
+        string[] _bypass = null;        // list of domains not to proxy
+        private ICredentials _credentials;
 
         public static HttpEnvironmentProxy TryToCreate()
         {
@@ -85,14 +85,14 @@ namespace System.Net.Http
 
             if (httpProxy != null)
             {
-                _http = httpProxy;
-                httpCred = GetCredientialsFromString(_http.UserInfo);
+                _httpProxyUri = httpProxy;
+                httpCred = GetCredentialsFromString(_httpProxyUri.UserInfo);
             }
             if (httpsProxy != null)
             {
-                _https = httpsProxy;
-                httpsCred = GetCredientialsFromString(_https.UserInfo);
-                if ((_http != null) && (_http.UserInfo == _https.UserInfo))
+                _httpsProxyUri = httpsProxy;
+                httpsCred = GetCredentialsFromString(_httpsProxyUri.UserInfo);
+                if ((_httpProxyUri != null) && (_httpProxyUri.UserInfo == _httpsProxyUri.UserInfo))
                 {
                     sameAuth = true;
                 }
@@ -103,12 +103,12 @@ namespace System.Net.Http
                 // use standard credential object
                 if (sameAuth || httpCred == null || httpsCred == null)
                 {
-                    _credientials = httpCred ?? httpsCred;
+                    _credentials = httpCred ?? httpsCred;
                 }
                 else
                 {
                     // use wrapper so we can decide later based on uri
-                    _credientials = new HttpEnvironmentProxyCredientials(httpCred, httpsCred);
+                    _credentials = new HttpEnvironmentProxyCredientials(httpCred, httpsCred);
                 }
             }
 
@@ -171,7 +171,7 @@ namespace System.Net.Http
         /// <summary>
         /// Converts string containing user:password to NetworkCredential object
         /// </summary>
-        private NetworkCredential GetCredientialsFromString(string value)
+        private NetworkCredential GetCredentialsFromString(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
@@ -231,7 +231,7 @@ namespace System.Net.Http
         /// </summary>
         public Uri GetProxy(Uri uri)
         {
-            return uri.Scheme == Uri.UriSchemeHttp ? _http : _https;
+            return uri.Scheme == Uri.UriSchemeHttp ? _httpProxyUri : _httpsProxyUri;
         }
 
         /// <summary>
@@ -239,10 +239,11 @@ namespace System.Net.Http
         /// </summary>
         public bool IsBypassed(Uri uri)
         {
-            bool ret =  (uri.Scheme == Uri.UriSchemeHttp ? _http : _https) == null;
+            bool ret =  (uri.Scheme == Uri.UriSchemeHttp ? _httpProxyUri : _httpsProxyUri) == null;
 
             if (ret)
             {
+                // If the is no proxy for given Scheme return right away.
                 return ret;
             }
             return IsMatchInBypassList(uri);
@@ -252,7 +253,7 @@ namespace System.Net.Http
         {
             get
             {
-                return _credientials;
+                return _credentials;
             }
             set { throw new NotSupportedException(); }
         }

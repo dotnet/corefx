@@ -20,8 +20,8 @@ namespace System.Net.Http.Tests
         // to be sure they do not interfere with the test.
         private void CleanEnv()
         {
-            List<string>  vars = new List<string>() { "http_proxy", "HTTPS_PROY", "https_proxy",
-                                                      "all_proxy", "ALL_PROXY", 
+            List<string>  vars = new List<string>() { "http_proxy", "HTTPS_PROXY", "https_proxy",
+                                                      "all_proxy", "ALL_PROXY",
                                                       "NO_PROXY" };
             foreach (string v in vars)
             {
