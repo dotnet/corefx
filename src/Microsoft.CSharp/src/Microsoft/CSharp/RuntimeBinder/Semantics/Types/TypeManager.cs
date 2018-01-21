@@ -324,7 +324,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             if ((pctx.grfst & SubstTypeFlags.DenormMeth) != 0 && tvs.parent != null)
                                 return type;
                             Debug.Assert(tvs.GetIndexInOwnParameters() == tvs.GetIndexInTotalParameters());
-                            if (index < pctx.ctypeMeth)
+                            if (index < pctx.prgtypeMeth.Length)
                             {
                                 Debug.Assert(pctx.prgtypeMeth != null);
                                 return pctx.prgtypeMeth[index];
@@ -333,7 +333,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             return type;
                         }
 
-                        return index < pctx.ctypeCls ? pctx.prgtypeCls[index] : type;
+                        return index < pctx.prgtypeCls.Length ? pctx.prgtypeCls[index] : type;
                     }
             }
         }
@@ -460,18 +460,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                                 Debug.Assert(typeDst != typeSrc);
                                 return false;
                             }
-                            Debug.Assert(tvs.GetIndexInOwnParameters() == tvs.GetIndexInTotalParameters());
-                            Debug.Assert(pctx.prgtypeMeth == null || tvs.GetIndexInTotalParameters() < pctx.ctypeMeth);
-                            if (index < pctx.ctypeMeth && pctx.prgtypeMeth != null)
+                            Debug.Assert(tvs.GetIndexInOwnParameters() == index);
+                            Debug.Assert(tvs.GetIndexInTotalParameters() < pctx.prgtypeMeth.Length);
+                            if (index < pctx.prgtypeMeth.Length)
                             {
                                 return typeDst == pctx.prgtypeMeth[index];
                             }
                         }
                         else
                         {
-                            Debug.Assert(pctx.prgtypeCls == null || tvs.GetIndexInTotalParameters() < pctx.ctypeCls);
-                            if (index < pctx.ctypeCls)
+                            Debug.Assert(index < pctx.prgtypeCls.Length);
+                            if (index < pctx.prgtypeCls.Length)
+                            {
                                 return typeDst == pctx.prgtypeCls[index];
+                            }
                         }
                     }
                     return false;

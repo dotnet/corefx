@@ -17,37 +17,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     internal sealed class SubstContext
     {
         public readonly CType[] prgtypeCls;
-        public readonly int ctypeCls;
         public readonly CType[] prgtypeMeth;
-        public readonly int ctypeMeth;
         public readonly SubstTypeFlags grfst;
 
         public SubstContext(TypeArray typeArgsCls, TypeArray typeArgsMeth, SubstTypeFlags grfst)
         {
-            if (typeArgsCls != null)
-            {
-                typeArgsCls.AssertValid();
-                ctypeCls = typeArgsCls.Count;
-                prgtypeCls = typeArgsCls.Items;
-            }
-            else
-            {
-                ctypeCls = 0;
-                prgtypeCls = null;
-            }
-
-            if (typeArgsMeth != null)
-            {
-                typeArgsMeth.AssertValid();
-                ctypeMeth = typeArgsMeth.Count;
-                prgtypeMeth = typeArgsMeth.Items;
-            }
-            else
-            {
-                ctypeMeth = 0;
-                prgtypeMeth = null;
-            }
-
+            typeArgsCls?.AssertValid();
+            prgtypeCls = typeArgsCls?.Items ?? Array.Empty<CType>();
+            typeArgsMeth?.AssertValid();
+            prgtypeMeth = typeArgsMeth?.Items ?? Array.Empty<CType>();
             this.grfst = grfst;
         }
 
@@ -68,7 +46,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool FNop()
         {
-            return 0 == ctypeCls && 0 == ctypeMeth;
+            return prgtypeCls.Length == 0 & prgtypeMeth.Length == 0;
         }
     }
 }
