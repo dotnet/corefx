@@ -14,10 +14,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         NormClass = 0x01,  // Replace class type variables with the normalized (standard) ones.
         NormMeth = 0x02,   // Replace method type variables with the normalized (standard) ones.
         NormAll = NormClass | NormMeth,
-        DenormClass = 0x04,  // Replace normalized (standard) class type variables with the given class type args.
         DenormMeth = 0x08,   // Replace normalized (standard) method type variables with the given method type args.
-        DenormAll = DenormClass | DenormMeth,
-        NoRefOutDifference = 0x10
     }
 
     internal sealed class SubstContext
