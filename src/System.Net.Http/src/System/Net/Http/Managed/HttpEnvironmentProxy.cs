@@ -9,13 +9,13 @@ using System.Collections.Generic;
 
 namespace System.Net.Http
 {
-    public sealed class HttpEnvironmentProxyCredientials : ICredentials
+    public sealed class HttpEnvironmentProxyCredentials : ICredentials
     {
         // Wrapper class for cases when http and https has different authentication.
         private readonly NetworkCredential _httpCred;
         private readonly NetworkCredential _httpsCred;
 
-        public HttpEnvironmentProxyCredientials(NetworkCredential http, NetworkCredential https)
+        public HttpEnvironmentProxyCredentials(NetworkCredential http, NetworkCredential https)
         {
             _httpCred = http;
             _httpsCred = https;
@@ -108,7 +108,7 @@ namespace System.Net.Http
                 else
                 {
                     // use wrapper so we can decide later based on uri
-                    _credentials = new HttpEnvironmentProxyCredientials(httpCred, httpsCred);
+                    _credentials = new HttpEnvironmentProxyCredentials(httpCred, httpsCred);
                 }
             }
 
