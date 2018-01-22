@@ -70,6 +70,55 @@ namespace System.Threading.Tests
             Assert.Equal(local.Value, 12);
         }
 
+        [Theory]
+        [MemberData(nameof(GetCounts))]
+        public static async Task CaptureAndRestoreNullAsyncLocals(int count)
+        {
+            AsyncLocal<object>[] locals = new AsyncLocal<object>[count];
+            for (var i = 0; i < locals.Length; i++)
+            {
+                locals[i] = new AsyncLocal<object>();
+            }
+
+            ExecutionContext ec = ExecutionContext.Capture();
+
+            ExecutionContext.Run(
+                ec,
+                _ =>
+                {
+                    for (var i = 0; i < locals.Length; i++)
+                    {
+                        AsyncLocal<object> local = locals[i];
+
+                        Assert.Null(local.Value);
+                        local.Value = 56;
+                        Assert.IsType<int>(local.Value);
+                        Assert.Equal(56, (int)local.Value);
+                    }
+                },
+                null);
+
+            for (var i = 0; i < locals.Length; i++)
+            {
+                Assert.Null(locals[i].Value);
+            }
+        }
+
+        [Fact]
+        public static async Task CaptureAndRunOnFlowSupressedContext()
+        {
+            ExecutionContext.SuppressFlow();
+            try
+            {
+                ExecutionContext ec = ExecutionContext.Capture();
+                Assert.Throws<InvalidOperationException>(() => ExecutionContext.Run(ec, _ => { }, null));
+            }
+            finally
+            {
+                ExecutionContext.RestoreFlow();
+            }
+        }
+
         [Fact]
         public static async Task NotifyOnValuePropertyChange()
         {
@@ -368,7 +417,7 @@ namespace System.Threading.Tests
         }
 
         [Theory]
-        [MemberData(nameof(GetCount))]
+        [MemberData(nameof(GetCounts))]
         public static async Task AddAndUpdateManyLocals_ValueType(int count)
         {
             var locals = new AsyncLocal<int>[count];
@@ -391,7 +440,7 @@ namespace System.Threading.Tests
         }
 
         [Theory]
-        [MemberData(nameof(GetCount))]
+        [MemberData(nameof(GetCounts))]
         public static async Task AddUpdateAndRemoveManyLocals_ReferenceType(int count)
         {
             var locals = new AsyncLocal<string>[count];
@@ -425,160 +474,178 @@ namespace System.Threading.Tests
         }
 
         [Theory]
-        [MemberData(nameof(GetCount))]
+        [MemberData(nameof(GetCounts))]
         public static async Task AsyncLocalsUnwind(int count)
         {
-            AsyncLocal<object>[] locals = new AsyncLocal<object>[count];
-
-            int[] setManually = new int[count];
-            int[] unsetAutomatically = new int[count];
-            int[] setAutomatically = new int[count];
-            ExecutionContext[] contexts = new ExecutionContext[count];
-
-            await AsyncRecursive(count - 1, locals, contexts, args =>
-            {
-                if (!args.ThreadContextChanged)
-                {
-                    if (args.PreviousValue != null)
-                    {
-                        Assert.True(false, $"Trying to set {args.CurrentValue} when {args.PreviousValue} value already set");
-                    }
-
-                    Assert.IsType<int>(args.CurrentValue);
-
-                    setManually[(int)args.CurrentValue]++;
-                }
-                else
-                {
-                    if (args.PreviousValue == null && args.CurrentValue == null)
-                    {
-                        Assert.True(false, "CurrentValue and PreviousValue are both null");
-                    }
-
-                    if (args.PreviousValue != null && args.CurrentValue != null)
-                    {
-                        Assert.True(false, "CurrentValue and PreviousValue are both set");
-                    }
-
-                    if (args.CurrentValue != null)
-                    {
-                        Assert.IsType<int>(args.CurrentValue);
-                        setAutomatically[(int)args.CurrentValue]++;
-                    }
-                    else
-                    {
-                        Assert.IsType<int>(args.PreviousValue);
-                        unsetAutomatically[(int)args.PreviousValue]++;
-                    }
-
-                }
-            });
-
-            for (int i = 0; i < locals.Length; i++)
-            {
-                Assert.Equal(1, setManually[i]);
-                Assert.Equal(1, unsetAutomatically[i]);
-                Assert.Equal(0, setAutomatically[i]);
-            }
-
-            Array.Clear(setManually, 0, count);
-            Array.Clear(unsetAutomatically, 0, count);
-            Array.Clear(setAutomatically, 0, count);
+            AsyncLocal<object>[] asyncLocals = new AsyncLocal<object>[count];
 
             ExecutionContext Default = ExecutionContext.Capture();
+            int[] manuallySetCounts = new int[count];
+            int[] automaticallyUnsetCounts = new int[count];
+            int[] automaticallySetCounts = new int[count];
+            ExecutionContext[] capturedContexts = new ExecutionContext[count];
 
-            TestExecutionContextRun();
+            // Setup the AsyncLocals; capturing ExecutionContext for each level
+            await SetLocalsRecursivelyAsync(count - 1);
+
+            ValidateCounts(thresholdIndex: 0, maunalSets: 1, automaticUnsets: 1, automaticSets: 0);
+            ValidateAsyncLocalsValuesNull();
+
+            // Check Running with the contexts captured when setting the locals
+            TestCapturedExecutionContexts();
 
             ExecutionContext.SuppressFlow();
             try
             {
-                TestExecutionContextRun();
+                // Re-check restoring, but starting with a suppressed flow
+                TestCapturedExecutionContexts();
             }
             finally
             {
                 ExecutionContext.RestoreFlow();
             }
 
-            void TestExecutionContextRun()
+            // -- Local functions --
+            void ValidateAsyncLocalsValuesNull()
             {
-                for (int i = 0; i < locals.Length; i++)
+                // Check AsyncLocals haven't leaked
+                for (int i = 0; i < asyncLocals.Length; i++)
                 {
-                    ExecutionContext.Run(contexts[i].CreateCopy(), o =>
-                    {
-                        for (int index = 0; index < locals.Length; index++)
-                        {
-                            if (index >= i)
-                            {
-                                Assert.Equal(index, (int) locals[index].Value);
-                            }
-                            else
-                            {
-                                Assert.Null(locals[index].Value);
-                            }
-                        }
-
-                        ExecutionContext.Run(Default.CreateCopy(), _ =>
-                        {
-                            for (int index = 0; index < locals.Length; index++)
-                            {
-                                Assert.Null(locals[index].Value);
-                            }
-                        }, null);
-
-                        for (int l = 0; l < locals.Length; l++)
-                        {
-                            Assert.Equal(0, setManually[l]);
-                            Assert.Equal(l < i ? 0 : 1, unsetAutomatically[l]);
-                            Assert.Equal(l < i ? 0 : 2, setAutomatically[l]);
-                        }
-
-                        for (int c = 0; c < locals.Length; c++)
-                        {
-                            ExecutionContext.Run(contexts[c].CreateCopy(), _ =>
-                            {
-                                for (int index = locals.Length - 1; index >= 0; index--)
-                                {
-                                    if (index >= c)
-                                    {
-                                        Assert.Equal(index, (int) locals[index].Value);
-                                    }
-                                    else
-                                    {
-                                        Assert.Null(locals[index].Value);
-                                    }
-                                }
-                            }, null);
-                        }
-                    }, null);
-
-                    Array.Clear(setManually, 0, count);
-                    Array.Clear(unsetAutomatically, 0, count);
-                    Array.Clear(setAutomatically, 0, count);
+                    Assert.Null(asyncLocals[i].Value);
                 }
             }
-        }
 
-        static async Task AsyncRecursive(int index, AsyncLocal<object>[] locals, ExecutionContext[] contexts, Action<AsyncLocalValueChangedArgs<object>> valueChangedHandler)
-        {
-            locals[index] = new AsyncLocal<object>(valueChangedHandler);
-            locals[index].Value = index;
-
-            contexts[index] = ExecutionContext.Capture();
-
-            if (index > 0)
+            void ValidateAsyncLocalsValues(int thresholdIndex)
             {
-                await AsyncRecursive(index - 1, locals, contexts, valueChangedHandler);
+                for (int localsIndex = 0; localsIndex < asyncLocals.Length; localsIndex++)
+                {
+                    if (localsIndex >= thresholdIndex)
+                    {
+                        Assert.Equal(localsIndex, (int)asyncLocals[localsIndex].Value);
+                    }
+                    else
+                    {
+                        Assert.Null(asyncLocals[localsIndex].Value);
+                    }
+                }
+            }
+
+            void TestCapturedExecutionContexts()
+            {
+                for (int contextIndex = 0; contextIndex < asyncLocals.Length; contextIndex++)
+                {
+                    ClearCounts();
+
+                    ExecutionContext.Run(
+                        capturedContexts[contextIndex].CreateCopy(), 
+                        (o) => TestCapturedExecutionContext((int)o), 
+                        contextIndex);
+
+                    // Validate locals have been restored to the Default context's values
+                    ValidateAsyncLocalsValuesNull();
+                }
+            }
+
+            void TestCapturedExecutionContext(int contextIndex)
+            {
+                ValidateCounts(thresholdIndex: contextIndex, maunalSets: 0, automaticUnsets: 0, automaticSets: 1);
+                // Validate locals have been restored to the outer context's values
+                ValidateAsyncLocalsValues(thresholdIndex: contextIndex);
+
+                // Validate locals are correctly reset Running with a Default context from a non-Default context
+                ExecutionContext.Run(
+                    Default.CreateCopy(), 
+                    _ => ValidateAsyncLocalsValuesNull(), 
+                    null);
+
+                ValidateCounts(thresholdIndex: contextIndex, maunalSets: 0, automaticUnsets: 1, automaticSets: 2);
+                // Validate locals have been restored to the outer context's values
+                ValidateAsyncLocalsValues(thresholdIndex: contextIndex);
+
+                for (int innerContextIndex = 0; innerContextIndex < asyncLocals.Length; innerContextIndex++)
+                {
+                    // Validate locals are correctly restored Running with another non-Default context from a non-Default context
+                    ExecutionContext.Run(
+                        capturedContexts[innerContextIndex].CreateCopy(), 
+                        o => ValidateAsyncLocalsValues(thresholdIndex: (int)o),
+                        innerContextIndex);
+
+                    // Validate locals have been restored to the outer context's values
+                    ValidateAsyncLocalsValues(thresholdIndex: contextIndex);
+                }
+            }
+
+            void ValidateCounts(int thresholdIndex, int maunalSets, int automaticUnsets, int automaticSets)
+            {
+                for (int localsIndex = 0; localsIndex < asyncLocals.Length; localsIndex++)
+                {
+                    Assert.Equal(localsIndex < thresholdIndex ? 0 : maunalSets, manuallySetCounts[localsIndex]);
+                    Assert.Equal(localsIndex < thresholdIndex ? 0 : automaticUnsets, automaticallyUnsetCounts[localsIndex]);
+                    Assert.Equal(localsIndex < thresholdIndex ? 0 : automaticSets, automaticallySetCounts[localsIndex]);
+                }
+            }
+
+            // Synchronous function is async to create different ExectutionContexts for each set, and check async unwinding
+            async Task SetLocalsRecursivelyAsync(int index)
+            {
+                // Set AsyncLocal
+                asyncLocals[index] = new AsyncLocal<object>(CountValueChanges)
+                {
+                    Value = index
+                };
+
+                // Capture context with AsyncLocal set
+                capturedContexts[index] = ExecutionContext.Capture();
+
+                if (index > 0)
+                {
+                    // Go deeper into async stack
+                    int nextIndex = index - 1;
+                    await SetLocalsRecursivelyAsync(index - 1);
+                    // Set is undone by the await
+                    Assert.Null(asyncLocals[nextIndex].Value);
+                }
+            }
+
+            void CountValueChanges(AsyncLocalValueChangedArgs<object> args)
+            {
+                if (!args.ThreadContextChanged)
+                {
+                    // Manual create, previous should be null
+                    Assert.Null(args.PreviousValue);
+                    Assert.IsType<int>(args.CurrentValue);
+                    manuallySetCounts[(int)args.CurrentValue]++;
+                }
+                else
+                {
+                    // Automatic change, only one value should be not null
+                    if (args.CurrentValue != null)
+                    {
+                        Assert.Null(args.PreviousValue);
+                        Assert.IsType<int>(args.CurrentValue);
+                        automaticallySetCounts[(int)args.CurrentValue]++;
+                    }
+                    else
+                    {
+                        Assert.Null(args.CurrentValue);
+                        Assert.NotNull(args.PreviousValue);
+                        Assert.IsType<int>(args.PreviousValue);
+                        automaticallyUnsetCounts[(int)args.PreviousValue]++;
+                    }
+                }
+            }
+
+            void ClearCounts()
+            {
+                Array.Clear(manuallySetCounts, 0, count);
+                Array.Clear(automaticallyUnsetCounts, 0, count);
+                Array.Clear(automaticallySetCounts, 0, count);
             }
         }
 
-        public static IEnumerable<object[]> GetCount()
-        {
-            const int max = 40;
-
-            foreach (int i in Enumerable.Range(1, max))
-            {
-                yield return new object[] { i };
-            }
-        }
+        // The data structure that holds AsyncLocals changes based on size;
+        // so it needs to be tested at a variety of sizes
+        public static IEnumerable<object[]> GetCounts()
+            => Enumerable.Range(1, 40).Select(i => new object[] { i });
     }
 }
