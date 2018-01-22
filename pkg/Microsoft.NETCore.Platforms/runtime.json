@@ -350,13 +350,13 @@
     },
     "debian.9": {
       "#import": [
-        "debian.8"
+        "debian"
       ]
     },
     "debian.9-arm": {
       "#import": [
         "debian.9",
-        "debian.8-arm"
+        "debian-arm"
       ]
     },
     "debian.9-arm-corert": {
@@ -364,13 +364,13 @@
         "debian.9-corert",
         "debian.9-arm",
         "debian.9",
-        "debian.8-arm-corert"
+        "debian-arm-corert"
       ]
     },
     "debian.9-arm64": {
       "#import": [
         "debian.9",
-        "debian.8-arm64"
+        "debian-arm64"
       ]
     },
     "debian.9-arm64-corert": {
@@ -378,13 +378,13 @@
         "debian.9-corert",
         "debian.9-arm64",
         "debian.9",
-        "debian.8-arm64-corert"
+        "debian-arm64-corert"
       ]
     },
     "debian.9-armel": {
       "#import": [
         "debian.9",
-        "debian.8-armel"
+        "debian-armel"
       ]
     },
     "debian.9-armel-corert": {
@@ -392,19 +392,19 @@
         "debian.9-corert",
         "debian.9-armel",
         "debian.9",
-        "debian.8-armel-corert"
+        "debian-armel-corert"
       ]
     },
     "debian.9-corert": {
       "#import": [
         "debian.9",
-        "debian.8-corert"
+        "debian-corert"
       ]
     },
     "debian.9-x64": {
       "#import": [
         "debian.9",
-        "debian.8-x64"
+        "debian-x64"
       ]
     },
     "debian.9-x64-corert": {
@@ -412,13 +412,13 @@
         "debian.9-corert",
         "debian.9-x64",
         "debian.9",
-        "debian.8-x64-corert"
+        "debian-x64-corert"
       ]
     },
     "debian.9-x86": {
       "#import": [
         "debian.9",
-        "debian.8-x86"
+        "debian-x86"
       ]
     },
     "debian.9-x86-corert": {
@@ -426,7 +426,7 @@
         "debian.9-corert",
         "debian.9-x86",
         "debian.9",
-        "debian.8-x86-corert"
+        "debian-x86-corert"
       ]
     },
     "fedora": {

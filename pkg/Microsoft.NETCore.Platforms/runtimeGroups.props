@@ -33,6 +33,7 @@
       <Parent>linux</Parent>
       <Architectures>x64;x86;arm;armel;arm64</Architectures>
       <Versions>8;9</Versions>
+      <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 
     <RuntimeGroup Include="fedora">
