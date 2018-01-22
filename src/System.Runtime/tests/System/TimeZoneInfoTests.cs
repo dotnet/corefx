@@ -133,17 +133,20 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET Framework has a bug. See https://github.com/dotnet/corefx/issues/26479")]
         public static void CaseInsensiveLookup()
         {
-            Assert.NotNull(TimeZoneInfo.FindSystemTimeZoneById(s_strBrasilia.ToLowerInvariant()));
-            Assert.NotNull(TimeZoneInfo.FindSystemTimeZoneById(s_strJohannesburg.ToUpperInvariant()));
+            Assert.Equal(TimeZoneInfo.FindSystemTimeZoneById(s_strBrasilia), TimeZoneInfo.FindSystemTimeZoneById(s_strBrasilia.ToLowerInvariant()));
+            Assert.Equal(TimeZoneInfo.FindSystemTimeZoneById(s_strJohannesburg), TimeZoneInfo.FindSystemTimeZoneById(s_strJohannesburg.ToUpperInvariant()));
 
             // Populate internal cache with all timezones. The implementation takes different path for lookup by id
             // when all timezones are populated.
             TimeZoneInfo.GetSystemTimeZones();
 
-            Assert.NotNull(TimeZoneInfo.FindSystemTimeZoneById(s_strSydney.ToLowerInvariant()));
-            Assert.NotNull(TimeZoneInfo.FindSystemTimeZoneById(s_strPerth.ToUpperInvariant()));
+            // The timezones used for the tests after GetSystemTimeZones calls have to be different from the ones used before GetSystemTimeZones to
+            // exercise the rare path.
+            Assert.Equal(TimeZoneInfo.FindSystemTimeZoneById(s_strSydney), TimeZoneInfo.FindSystemTimeZoneById(s_strSydney.ToLowerInvariant()));
+            Assert.Equal(TimeZoneInfo.FindSystemTimeZoneById(s_strPerth), TimeZoneInfo.FindSystemTimeZoneById(s_strPerth.ToUpperInvariant()));
         }
 
         [Fact]
