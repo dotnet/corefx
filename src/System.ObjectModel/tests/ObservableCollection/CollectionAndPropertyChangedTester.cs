@@ -532,15 +532,15 @@ namespace System.Collections.ObjectModel.Tests
 
         public void ReplaceRangeTest(ObservableCollection<string> collection, IEnumerable<string> newItems,
             params (int StartingIndex, NotifyCollectionChangedAction Action, IEnumerable<string> NewItems, IEnumerable<string> OldItems)[] expectedvents) =>
-            ReplaceRangeTest(collection, newItems, EqualityComparer<string>.Default, expectedvents);
+            ReplaceRangeTest(collection, newItems, 0, collection.Count, null, expectedvents);
 
         public void ReplaceRangeTest(ObservableCollection<string> collection, IEnumerable<string> newItems, IEqualityComparer<string> comparer,
             params (int StartingIndex, NotifyCollectionChangedAction Action, string NewItem, string OldItem)[] expectedEvents) =>
-            ReplaceRangeTest(collection, newItems, comparer,
+            ReplaceRangeTest(collection, newItems, 0, collection.Count, comparer,
                 expectedEvents.Select(ev =>
                     (ev.StartingIndex, ev.Action, Wrap(ev.NewItem), Wrap(ev.OldItem))).ToArray());
 
-        public void ReplaceRangeTest(ObservableCollection<string> collection, IEnumerable<string> newItems, IEqualityComparer<string> comparer,
+        public void ReplaceRangeTest(ObservableCollection<string> collection, IEnumerable<string> newItems, int index, int count, IEqualityComparer<string> comparer,
             params (int StartingIndex, NotifyCollectionChangedAction Action, IEnumerable<string> NewItems, IEnumerable<string> OldItems)[] expectedEvents)
         {
             Debug.Assert(expectedEvents != null);
@@ -560,18 +560,37 @@ namespace System.Collections.ObjectModel.Tests
             inpc.PropertyChanged += Collection_PropertyChanged;
             collection.CollectionChanged += logCollectionChanged;
 
+            IEnumerable<string> expectedCollection;
+            if (index == 0 && count == collection.Count)
+            {
+                expectedCollection = newItems.ToArray();
+            }
+            else
+            {
+                expectedCollection = collection
+                    .Take(index)
+                    .Concat(newItems)
+                    .Concat(collection.Skip(index + count)).ToArray();
+            }
+
             // act
             if (comparer == null)
-                collection.ReplaceRange(newItems);
+            {
+                collection.ReplaceRange(index, count, newItems);
+                //for later on
+                comparer = EqualityComparer<string>.Default;
+            }
             else
-                collection.ReplaceRange(newItems, comparer);
-
+                collection.ReplaceRange(index, count, newItems, comparer);
+            
             // cleanup
             inpc.PropertyChanged -= Collection_PropertyChanged;
             collection.CollectionChanged -= logCollectionChanged;
 
-            //assert
-            Assert.Equal(newItems, collection, comparer);
+            //assert            
+            comparer = EqualityComparer<string>.Default;
+
+            Assert.Equal(expectedCollection, collection, comparer);
             Assert.Equal(expectedEvents.Length, eventargsCollection.Count);
 
             if (expectedEvents.Length == 0)

@@ -35,7 +35,7 @@ namespace System.Collections.ObjectModel
         private DeferredEventsCollection _deferredEvents;
 
         [NonSerialized]
-        private int _blockReentrancyCount; 
+        private int _blockReentrancyCount;
         #endregion Private Fields
 
         //------------------------------------------------------
@@ -494,7 +494,7 @@ namespace System.Collections.ObjectModel
                     //parallel position
                     if (i < Count && i < addedCount)
                     {
-                        T old = this[i], @new = list[i];
+                        T old = this[i], @new = list[i - index];
                         if (comparer.Equals(old, @new))
                         {
                             OnRangeReplaced(i, newCluster, oldCluster);
@@ -516,28 +516,29 @@ namespace System.Collections.ObjectModel
                         //exceeding position
                         if (Count > addedCount)
                         {
-                            var removed = new Stack<T>();
+                            var removed = new T[Count - addedCount];
                             for (var j = Count - 1; j >= i; j--)
                             {
-                                removed.Push(this[j]);
+                                removed[j - i] = this[j];
                                 Items.RemoveAt(j);
                             }
-                            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T>(removed), i));
-                            break;
+                            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removed, i));
                         }
                         //new position                    
                         else
-                        {
-                            var added = new List<T>();
-                            for (int j = i; j < list.Count; j++)
+                        {   
+                            var k = i - index;
+                            T[] added = new T[addedCount - k];
+                            
+                            for (int j = k; j < addedCount; j++)
                             {
                                 T @new = list[j];
                                 Items.Add(@new);
-                                added.Add(@new);
+                                added[j - k] = @new;
                             }
                             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, added, i));
-                            break;
                         }
+                        break;
                     }
                 }
 
@@ -902,7 +903,7 @@ namespace System.Collections.ObjectModel
             internal int _busyCount; // Only used during (de)serialization to maintain compatibility with desktop. Do not rename (binary serialization)
 
             [NonSerialized]
-            internal ObservableCollection<T> _collection;
+            internal /*private readonly*/ ObservableCollection<T> _collection;
 
             public SimpleMonitor(ObservableCollection<T> collection)
             {
@@ -922,6 +923,7 @@ namespace System.Collections.ObjectModel
             private readonly ObservableCollection<T> _collection;
             public DeferredEventsCollection(ObservableCollection<T> collection)
             {
+                Debug.Assert(collection != null);
                 Debug.Assert(collection._deferredEvents == null);
                 _collection = collection;
                 _collection._deferredEvents = this;

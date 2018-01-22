@@ -561,6 +561,14 @@ namespace System.Collections.ObjectModel.Tests
                 (0, NotifyCollectionChangedAction.Replace, oldItems.Skip(1), oldItems.Take(2)),
                 (2, NotifyCollectionChangedAction.Remove, null, oldItems.Skip(2)));
 
+            //skip one similar, replace one, skip another equal one, then add three.
+            reset(oldItems);
+            allItems[1] = "_bravo";
+            tester.ReplaceRangeTest(col,  
+                allItems,
+                (1, NotifyCollectionChangedAction.Replace, allItems.Skip(1).Take(1), oldItems.Skip(1).Take(1)),
+                (3, NotifyCollectionChangedAction.Add,  allItems.Skip(3), null));
+
             //replace 3 items with empty collection
             reset(oldItems);
             tester.ReplaceRangeTest(col,
@@ -587,17 +595,23 @@ namespace System.Collections.ObjectModel.Tests
                 newItems,
                 (3, NotifyCollectionChangedAction.Replace, newItem, allItems[3]));
 
-            /**************************************
-
-            TODO: add tests using index and count!!
-
-            ***************************************/
-
-
             //replace empty collection with empty collection
             reset();
             tester.ReplaceRangeTest(col,
                 Enumerable.Empty<string>());
+
+            /* Tests using index and count */
+
+            //replace
+            // alpha bravo charlie
+            //with 
+            // bravo delta echo foxtrot golf
+            // starting from 2nd position
+            reset(oldItems);
+            tester.ReplaceRangeTest(col,
+                allItems.Skip(1).Take(1).Concat(allItems.Skip(3)), 1, col.Count - 1, null,
+                (2, NotifyCollectionChangedAction.Replace, allItems.Skip(3).Take(1), allItems.Skip(2).Take(1)),
+                (3, NotifyCollectionChangedAction.Add, allItems.Skip(4), null));
         }
 
         /// <summary>
