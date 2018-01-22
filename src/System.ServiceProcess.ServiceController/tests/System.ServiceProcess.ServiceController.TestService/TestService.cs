@@ -12,17 +12,14 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Globalization;
 using System.IO.Pipes;
-using System.Threading.Tasks;
 
 namespace System.ServiceProcess.Tests
 {
     public class TestService : ServiceBase
     {
-
         public TestService(string serviceName)
         {
             this.ServiceName = serviceName;
-            Console.WriteLine("constructor");
 
             // Enable all the events
             this.CanPauseAndContinue = true;
@@ -77,9 +74,7 @@ namespace System.ServiceProcess.Tests
             base.OnStart(args);
             if (args.Length == 3)
             {
-                Debug.WriteLine(Server.IsConnected);
                 Server.WaitForConnectionAsync();
-                Debug.WriteLine(Server.IsConnected);
                 WriteStream(PipeMessageByteCode.Start);
             }
         }
@@ -95,8 +90,8 @@ namespace System.ServiceProcess.Tests
             byte data = (byte)code;
             Server.WriteByte(data);
         }
-        public enum PipeMessageByteCode { Start, Continue, Pause, Stop, OnCustomCommand };
 
+        public enum PipeMessageByteCode { Start, Continue, Pause, Stop, OnCustomCommand };
     }
 
     
