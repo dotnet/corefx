@@ -30,8 +30,12 @@ namespace System.Collections.ObjectModel
 
         private SimpleMonitor _monitor; // Lazily allocated only when a subclass calls BlockReentrancy() or during serialization. Do not rename (binary serialization)
 
+        //TODO should serialize?
         [NonSerialized]
-        private int _blockReentrancyCount;
+        private DeferredEventsCollection _deferredEvents;
+
+        [NonSerialized]
+        private int _blockReentrancyCount; 
         #endregion Private Fields
 
         //------------------------------------------------------
@@ -145,7 +149,7 @@ namespace System.Collections.ObjectModel
             CheckReentrancy();
 
             //expand the following couple of lines when adding more constructors.
-            var target = (List<T>)Items;            
+            var target = (List<T>)Items;
             target.InsertRange(index, collection);
 
             OnEssentialPropertiesChanged();
@@ -308,7 +312,9 @@ namespace System.Collections.ObjectModel
             List<T> cluster = null;
             var clusterIndex = -1;
             var removedCount = 0;
+
             using (BlockReentrancy())
+            using (new DeferredEventsCollection(this))
             {
                 for (var i = 0; i < count; i++, index++)
                 {
@@ -343,11 +349,11 @@ namespace System.Collections.ObjectModel
                     OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, clusterIndex));
             }
 
-            if(removedCount > 0)
+            if (removedCount > 0)
                 OnEssentialPropertiesChanged();
 
             return removedCount;
-        }        
+        }
 
         /// <summary>
         /// Removes a range of elements from the <see cref="ObservableCollection{T}"/>>.
@@ -374,9 +380,11 @@ namespace System.Collections.ObjectModel
             List<T> removedItems = items.GetRange(index, count);
 
             CheckReentrancy();
+
             items.RemoveRange(index, count);
 
             OnEssentialPropertiesChanged();
+
             if (Count == 0)
                 OnCollectionReset();
             else
@@ -474,6 +482,7 @@ namespace System.Collections.ObjectModel
             var max = addedCount >= Count ? addedCount : Count;
 
             using (BlockReentrancy())
+            using (new DeferredEventsCollection(this))
             {
                 var changesMade = false;
                 List<T>
@@ -701,6 +710,12 @@ namespace System.Collections.ObjectModel
         /// </remarks>
         protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
+            if (_deferredEvents != null)
+            {
+                _deferredEvents.Add(e);
+                return;
+            }
+
             NotifyCollectionChangedEventHandler handler = CollectionChanged;
             if (handler != null)
             {
@@ -898,6 +913,25 @@ namespace System.Collections.ObjectModel
             public void Dispose()
             {
                 _collection._blockReentrancyCount--;
+            }
+        }
+
+        //TODO serialization?
+        private sealed class DeferredEventsCollection : List<NotifyCollectionChangedEventArgs>, IDisposable
+        {
+            private readonly ObservableCollection<T> _collection;
+            public DeferredEventsCollection(ObservableCollection<T> collection)
+            {
+                Debug.Assert(collection._deferredEvents == null);
+                _collection = collection;
+                _collection._deferredEvents = this;
+            }
+
+            public void Dispose()
+            {
+                _collection._deferredEvents = null;
+                foreach (var args in this)
+                    _collection.OnCollectionChanged(args);
             }
         }
 
