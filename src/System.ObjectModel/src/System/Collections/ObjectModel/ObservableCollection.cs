@@ -343,6 +343,9 @@ namespace System.Collections.ObjectModel
                     OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, cluster, clusterIndex));
             }
 
+            if(removedCount > 0)
+                OnEssentialPropertiesChanged();
+
             return removedCount;
         }
 

@@ -496,6 +496,9 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Equal(expected, collection);
             Assert.Equal(expectedRemoveCount, removeCount);
 
+            foreach (var prop in _expectedPropertyChanged)
+                Assert.Equal(removeCount > 0, prop.IsFound);
+
             for (int i = 0; i < clusters.Length; i++)
             {
                 var cluster = clusters[i];
