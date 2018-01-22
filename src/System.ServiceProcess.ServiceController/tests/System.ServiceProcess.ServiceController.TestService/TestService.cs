@@ -100,6 +100,4 @@ namespace System.ServiceProcess.Tests
 
         public enum PipeMessageByteCode { Start, Continue, Pause, Stop, OnCustomCommand };
     }
-
-    
 }
