@@ -79,62 +79,54 @@ namespace System.ServiceProcess.Tests
         {
             Debug.WriteLine(nameof(TestOnStartThenStop));
             string serviceName = _testService.TestServiceName;
-            Debug.WriteLine(serviceName);
             using (var client = new NamedPipeClientStream(serviceName))
             {
-                //client.Connect();
+                client.Connect();
                 var controller = new ServiceController(serviceName);
                 AssertExpectedProperties(controller);
-
-                Console.WriteLine("First");
-                Debug.WriteLine("First");
                 controller.Stop();
-                Console.WriteLine("Second");
-                Debug.WriteLine("Second");
-                //Assert.Equal(123, client.ReadByte());
-                Console.WriteLine("end");
-                Debug.WriteLine("end");
+                Assert.Equal((int)PipeMessageByteCode.Stop, client.ReadByte());
             }
         }
 
-        //[ConditionalFact(nameof(IsProcessElevated))]
+        [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartWithArgsThenStop()
         {
             Debug.WriteLine(nameof(TestOnStartWithArgsThenStop));
             string serviceName = _testService.TestServiceName;
-            Debug.WriteLine(serviceName);
+            var controller = new ServiceController(serviceName);
             using (var client = new NamedPipeClientStream(serviceName))
             {
                 StreamReader reader = new StreamReader(client);
                 client.Connect();
-                var controller = new ServiceController(serviceName);
                 AssertExpectedProperties(controller);
                 controller.Stop();
-                Debug.WriteLine("waiting");
+
+                Assert.Equal((int)PipeMessageByteCode.Stop, client.ReadByte());
                 controller.WaitForStatus(ServiceControllerStatus.Stopped);
-
-                Console.WriteLine("First");
-                Debug.WriteLine("First");
                 controller.Start(new string[] { "a", "b", "c" });
-                Assert.Equal(123, client.ReadByte());
-
-                controller.Stop();
-                Console.WriteLine("Second");
-                Debug.WriteLine("Second");
-                Assert.Equal(123, client.ReadByte());
-                Console.WriteLine("end");
-                Debug.WriteLine("end");
             }
 
+            using (var client = new NamedPipeClientStream(serviceName))
+            {
+                StreamReader reader = new StreamReader(client);
+                client.Connect();
+                
+                Assert.Equal((int)PipeMessageByteCode.Start, client.ReadByte());
+                controller.WaitForStatus(ServiceControllerStatus.Running);
+
+                controller.Stop();
+                Assert.Equal((int)PipeMessageByteCode.Stop, client.ReadByte());
+                controller.WaitForStatus(ServiceControllerStatus.Stopped);
+            }
         }
 
 
-        //[ConditionalFact(nameof(IsProcessElevated))]
+        [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseThenStop()
         {
             Debug.WriteLine(nameof(TestOnPauseThenStop));
             string serviceName = _testService.TestServiceName;
-            Debug.WriteLine(serviceName);
             using (var client = new NamedPipeClientStream(serviceName))
             {
                 StreamReader reader = new StreamReader(client);
@@ -142,17 +134,12 @@ namespace System.ServiceProcess.Tests
                 var controller = new ServiceController(serviceName);
                 AssertExpectedProperties(controller);
 
-                Console.WriteLine("First");
-                Debug.WriteLine("First");
                 controller.Pause();
-                Assert.Equal(123, client.ReadByte());
+                Assert.Equal((int)PipeMessageByteCode.Pause, client.ReadByte());
+                controller.WaitForStatus(ServiceControllerStatus.Paused);
 
                 controller.Stop();
-                Console.WriteLine("Second");
-                Debug.WriteLine("Second");                
-                Assert.Equal(123, client.ReadByte());
-                Console.WriteLine("end");
-                Debug.WriteLine("end");
+                Assert.Equal((int)PipeMessageByteCode.Stop, client.ReadByte());
             }
         }
 
@@ -160,50 +147,24 @@ namespace System.ServiceProcess.Tests
         public void TestOnPauseAndContinueThenStop()
         {
             Debug.WriteLine(nameof(TestOnPauseAndContinueThenStop));
-            Console.WriteLine(nameof(TestOnPauseAndContinueThenStop));
             string serviceName = _testService.TestServiceName;
-            Debug.WriteLine(serviceName);
             using (var client = new NamedPipeClientStream(serviceName))
             {
-                //client.Connect();
+                client.Connect();
                 var controller = new ServiceController(serviceName);
                 AssertExpectedProperties(controller);
 
-                Console.WriteLine("First");
-                Debug.WriteLine("First");
                 controller.Pause();
-                //Assert.Equal(123, client.ReadByte());
+                Assert.Equal((int)PipeMessageByteCode.Pause, client.ReadByte());
+                controller.WaitForStatus(ServiceControllerStatus.Paused);
 
                 controller.Continue();
-                Console.WriteLine("Second");
-                Debug.WriteLine("Second");
-                //Assert.Equal(123, client.ReadByte());
+                Assert.Equal((int)PipeMessageByteCode.Continue, client.ReadByte());
 
-
+                controller.WaitForStatus(ServiceControllerStatus.Running);
                 controller.Stop();
-                Console.WriteLine("Third");
-                Debug.WriteLine("Third");
-                //Assert.Equal(123, client.ReadByte());
-                Console.WriteLine("end");
-                Debug.WriteLine("end");
+                Assert.Equal((int)PipeMessageByteCode.Stop, client.ReadByte());
             }
-        }
-
-        // [ConditionalFact(nameof(IsProcessElevated))]
-        public void TestOnExecuteCustomCommand()
-        {
-            var controller = new ServiceController(_testService.TestServiceName);
-            AssertExpectedProperties(controller);
-            string expected =
-@"OnStart args=
-OnCustomCommand command=128
-OnStop
-";
-            controller.ExecuteCommand(128);
-            controller.WaitForStatus(ServiceControllerStatus.Running);
-            controller.Stop();
-            controller.WaitForStatus(ServiceControllerStatus.Stopped);
-            Assert.Equal(expected, _testService.GetServiceOutput());
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
@@ -211,64 +172,41 @@ OnStop
         {
             Debug.WriteLine(nameof(TestOnExecuteCustomCommand_newVersion));
             var serviceName = _testService.TestServiceName;
-
-            Debug.WriteLine(serviceName);
             using(var client = new NamedPipeClientStream(serviceName))
             {        
-                //client.Connect();
+                client.Connect();
                 var controller = new ServiceController(serviceName);
                 AssertExpectedProperties(controller);
 
-                Console.WriteLine("First");
-                Debug.WriteLine("First");
                 controller.ExecuteCommand(128);
-                //Assert.Equal(123, client.ReadByte());
+                Assert.Equal((int)PipeMessageByteCode.OnCustomCommand, client.ReadByte());
 
                 controller.Stop();
-                Console.WriteLine("second");
-                Debug.WriteLine("second");
-                //Assert.Equal(123, client.ReadByte());
-                Console.WriteLine("end");
-                Debug.WriteLine("end");
-
+                Assert.Equal((int)PipeMessageByteCode.Stop, client.ReadByte());
             }
         }
-
 
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnContinueBeforePause()
         {
             Debug.WriteLine(nameof(TestOnContinueBeforePause));
             var serviceName = _testService.TestServiceName;
-            Debug.WriteLine(serviceName);
             using (var client = new NamedPipeClientStream(".", serviceName, PipeDirection.In))
             {
                 client.Connect();
                 var controller = new ServiceController(serviceName);
                 AssertExpectedProperties(controller);
 
-                Console.WriteLine("First");
-                Debug.WriteLine("First");
                 controller.Continue();
                 controller.WaitForStatus(ServiceControllerStatus.Running);
-                Console.WriteLine("wait over");
-                Debug.WriteLine("waitover");
-                Assert.Equal(1, client.ReadByte());
-                //client.Flush();
-
-                Console.WriteLine("second");
+                
                 controller.Stop();
-
+                Assert.Equal((int)PipeMessageByteCode.Stop, client.ReadByte());
                 controller.WaitForStatus(ServiceControllerStatus.Stopped);
-                Console.WriteLine("second");
-                Debug.WriteLine("second");
-                //Assert.Equal(123, client.ReadByte());
-                Console.WriteLine("end");
-                Debug.WriteLine("end");
             }
         }
 
-        //[ConditionalFact(nameof(IsElevatedAndSupportsEventLogs))]
+        [ConditionalFact(nameof(IsElevatedAndSupportsEventLogs))]
         public void LogWritten()
         {
             using (EventLog eventLog = new EventLog("Application"))
@@ -289,7 +227,7 @@ OnStop
             } 
         }
 
-        //[ConditionalFact(nameof(IsElevatedAndSupportsEventLogs))]
+        [ConditionalFact(nameof(IsElevatedAndSupportsEventLogs))]
         public void LogWritten_AutoLog_False()
         {
             using (EventLog eventLog = new EventLog("Application"))
@@ -319,4 +257,5 @@ OnStop
             }
         }
     }
+    public enum PipeMessageByteCode { Start, Continue, Pause, Stop, OnCustomCommand };
 }

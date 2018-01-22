@@ -93,19 +93,6 @@ namespace System.ServiceProcess.Tests
                 TestServiceInstaller testServiceInstaller = new TestServiceInstaller();
                 testServiceInstaller.ServiceName = TestServiceName;
                 testServiceInstaller.RemoveService();
-
-                if (File.Exists(LogPath))
-                {
-                    try
-                    {
-                        File.Delete(LogPath);
-                    }
-                    catch (IOException)
-                    {
-                        // Don't fail simply because the service was not fully cleaned up
-                        // and is still holding a handle to the log file
-                    }
-                }
             }
             finally
             {
@@ -115,17 +102,6 @@ namespace System.ServiceProcess.Tests
                 {
                     _dependentServices.DeleteTestServices();
                 }
-            }
-        }
-
-        private string LogPath => TestService.GetLogPath(TestServiceName);
-
-        public string GetServiceOutput()
-        {
-            // Need to open with FileShare.ReadWrite because we expect the service still has it open for write
-            using (StreamReader reader = new StreamReader(File.Open(LogPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
-            {
-                return reader.ReadToEnd();
             }
         }
     }
