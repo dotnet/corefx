@@ -551,7 +551,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         optionalArgument = exprFactory.CreateConstant(
                             pRawParamType.IsEnumType && pConstValType == pRawParamType.UnderlyingEnumType
                                 ? pRawParamType
-                                : pConstValType, cv);
+                                : pConstValType,
+                            cv);
                     }
                     else if ((pParamType.IsReferenceType || pParamType is NullableType) && cv.IsNullRef)
                     {
