@@ -5,7 +5,6 @@
 using Microsoft.Win32;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.IO.Pipes;
 using System.Security.Principal;
 using Xunit;
@@ -118,7 +117,6 @@ namespace System.ServiceProcess.Tests
                 controller.WaitForStatus(ServiceControllerStatus.Stopped);
             }
         }
-
 
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseThenStop()

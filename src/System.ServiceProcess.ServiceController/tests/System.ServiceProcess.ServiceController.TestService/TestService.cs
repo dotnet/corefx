@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System;
 using System.Collections;
-using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Text;
@@ -19,8 +18,6 @@ namespace System.ServiceProcess.Tests
 {
     public class TestService : ServiceBase
     {
-        private object streamlock = new object();
-        private Task waitConnectTask;
 
         public TestService(string serviceName)
         {
@@ -37,7 +34,7 @@ namespace System.ServiceProcess.Tests
             this.CanHandlePowerEvent = false;
 
             this.Server = new NamedPipeServerStream(serviceName);
-            this.waitConnectTask = this.Server.WaitForConnectionAsync();
+            this.Server.WaitForConnectionAsync();
         }
 
         public NamedPipeServerStream Server { get; set; }
@@ -95,11 +92,8 @@ namespace System.ServiceProcess.Tests
 
         private void WriteStream(PipeMessageByteCode code)
         {
-            //lock (streamlock)
-            byte b = (byte)code;
-            Server.Flush();
-            Server.WriteByte(b);
-            Server.Flush();
+            byte data = (byte)code;
+            Server.WriteByte(data);
         }
         public enum PipeMessageByteCode { Start, Continue, Pause, Stop, OnCustomCommand };
 
