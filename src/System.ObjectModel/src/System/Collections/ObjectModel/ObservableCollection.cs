@@ -347,7 +347,7 @@ namespace System.Collections.ObjectModel
                 OnEssentialPropertiesChanged();
 
             return removedCount;
-        }
+        }        
 
         /// <summary>
         /// Removes a range of elements from the <see cref="ObservableCollection{T}"/>>.
@@ -541,30 +541,6 @@ namespace System.Collections.ObjectModel
                         OnIndexerPropertyChanged();
                 }
             }
-        }
-
-
-        /// <summary>
-        /// </summary>
-        /// <param name="followingItemIndex">The index of the item following the replacement block.</param>
-        /// <param name="newCluster"></param>
-        /// <param name="oldCluster"></param>
-        //TODO should have really been a local method inside ReplaceRange(int index, int count, IEnumerable<T> collection, IEqualityComparer<T> comparer),
-        //move when supported language version updated.
-        private void OnRangeReplaced(int followingItemIndex, ICollection<T> newCluster, ICollection<T> oldCluster)
-        {
-            if (oldCluster.Count == 0)
-                return;
-
-            OnCollectionChanged(
-                new NotifyCollectionChangedEventArgs(
-                    NotifyCollectionChangedAction.Replace,
-                    new List<T>(newCluster),
-                    new List<T>(oldCluster),
-                    followingItemIndex - oldCluster.Count));
-
-            oldCluster.Clear();
-            newCluster.Clear();
         }
 
         #endregion Public Methods
@@ -846,6 +822,31 @@ namespace System.Collections.ObjectModel
         {
             OnCollectionChanged(EventArgsCache.ResetCollectionChanged);
         }
+
+        /// <summary>
+        /// Helper to raise event for clustered action and clear cluster.
+        /// </summary>
+        /// <param name="followingItemIndex">The index of the item following the replacement block.</param>
+        /// <param name="newCluster"></param>
+        /// <param name="oldCluster"></param>
+        //TODO should have really been a local method inside ReplaceRange(int index, int count, IEnumerable<T> collection, IEqualityComparer<T> comparer),
+        //move when supported language version updated.
+        private void OnRangeReplaced(int followingItemIndex, ICollection<T> newCluster, ICollection<T> oldCluster)
+        {
+            if (oldCluster.Count == 0)
+                return;
+
+            OnCollectionChanged(
+                new NotifyCollectionChangedEventArgs(
+                    NotifyCollectionChangedAction.Replace,
+                    new List<T>(newCluster),
+                    new List<T>(oldCluster),
+                    followingItemIndex - oldCluster.Count));
+
+            oldCluster.Clear();
+            newCluster.Clear();
+        }
+
 
         private SimpleMonitor EnsureMonitorInitialized()
         {
