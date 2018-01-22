@@ -171,7 +171,7 @@ namespace System.ServiceProcess.Tests
                 AssertExpectedProperties(controller);
 
                 controller.ExecuteCommand(128);
-                Assert.Equal((int)PipeMessageByteCode.OnCustomCommand, client.ReadByte());
+                Assert.Equal(128, client.ReadByte());
 
                 controller.Stop();
                 Assert.Equal((int)PipeMessageByteCode.Stop, client.ReadByte());

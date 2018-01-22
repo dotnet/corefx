@@ -45,7 +45,7 @@ namespace System.ServiceProcess.Tests
         protected override void OnCustomCommand(int command)
         {
             base.OnCustomCommand(command);
-            WriteStream(PipeMessageByteCode.OnCustomCommand);
+            WriteStream(PipeMessageByteCode.OnCustomCommand, command);
         }
 
         protected override void OnPause()
@@ -85,10 +85,17 @@ namespace System.ServiceProcess.Tests
             WriteStream(PipeMessageByteCode.Stop);
         }
 
-        private void WriteStream(PipeMessageByteCode code)
+        private void WriteStream(PipeMessageByteCode code, int command = 0)
         {
-            byte data = (byte)code;
-            Server.WriteByte(data);
+            if (code == PipeMessageByteCode.OnCustomCommand)
+            {
+                Server.WriteByte((byte)command);
+            }
+            else
+            {
+                byte data = (byte)code;
+                Server.WriteByte(data);
+            }
         }
 
         public enum PipeMessageByteCode { Start, Continue, Pause, Stop, OnCustomCommand };
