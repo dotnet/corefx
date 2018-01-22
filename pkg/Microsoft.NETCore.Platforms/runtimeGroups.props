@@ -48,6 +48,7 @@
       <Architectures>x64</Architectures>
     </RuntimeGroup>
 
+    <!-- linux mint includes major version in Include because Parent is different for each major -->
     <RuntimeGroup Include="linuxmint.17">
       <Parent>ubuntu.14.04</Parent>
       <Architectures>x64</Architectures>
@@ -61,7 +62,7 @@
     <RuntimeGroup Include="linuxmint.19">
       <Parent>ubuntu.18.04</Parent>
       <Architectures>x64</Architectures>
-      <Versions></Versions>
+      <Versions></Versions><!-- Empty because there are no point releases yet -->
     </RuntimeGroup>
 
     <RuntimeGroup Include="ol">
