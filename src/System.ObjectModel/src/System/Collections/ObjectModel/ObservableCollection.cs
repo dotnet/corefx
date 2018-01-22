@@ -516,20 +516,29 @@ namespace System.Collections.ObjectModel
                         //exceeding position
                         if (Count > addedCount)
                         {
-                            var removed = new T[Count - addedCount];
+                            var removedCount = Count - addedCount;
+                            T[] removed = new T[removedCount];
+                            var items = (List<T>)Items;
+                            items.CopyTo(i, removed, 0, removed.Length);
+                            items.RemoveRange(i, removedCount);
+                            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removed, i));
+
+                            /*
+                            var removed = new T[removedCount];
                             for (var j = Count - 1; j >= i; j--)
                             {
                                 removed[j - i] = this[j];
-                                Items.RemoveAt(j);
+                                Items.RemoveAt(j);                                
                             }
                             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removed, i));
+                            */
                         }
                         //new position                    
                         else
-                        {   
+                        {
                             var k = i - index;
                             T[] added = new T[addedCount - k];
-                            
+
                             for (int j = k; j < addedCount; j++)
                             {
                                 T @new = list[j];

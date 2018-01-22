@@ -612,6 +612,8 @@ namespace System.Collections.ObjectModel.Tests
                 allItems.Skip(1).Take(1).Concat(allItems.Skip(3)), 1, col.Count - 1, null,
                 (2, NotifyCollectionChangedAction.Replace, allItems.Skip(3).Take(1), allItems.Skip(2).Take(1)),
                 (3, NotifyCollectionChangedAction.Add, allItems.Skip(4), null));
+
+            //TODO write more replace range text
         }
 
         /// <summary>
