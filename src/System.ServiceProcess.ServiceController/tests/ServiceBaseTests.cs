@@ -253,11 +253,12 @@ OnStop
                 controller.WaitForStatus(ServiceControllerStatus.Running);
                 Console.WriteLine("wait over");
                 Debug.WriteLine("waitover");
-                Assert.Equal(123, client.ReadByte());
+                Assert.Equal(1, client.ReadByte());
                 //client.Flush();
 
                 Console.WriteLine("second");
                 controller.Stop();
+
                 controller.WaitForStatus(ServiceControllerStatus.Stopped);
                 Console.WriteLine("second");
                 Debug.WriteLine("second");

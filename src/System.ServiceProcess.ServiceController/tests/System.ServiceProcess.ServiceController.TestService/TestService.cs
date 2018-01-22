@@ -112,8 +112,10 @@ namespace System.ServiceProcess.Tests
             //lock (streamlock)
 
             Debug.WriteLine("LockAcquired");
-            //Server.WaitForPipeDrain();
-            Server.WriteByte(123);
+            Server.Flush();
+            Byte b = 1;
+
+            Server.WriteByte(b);
             Debug.WriteLine("sent");
             Server.Flush();
             
