@@ -77,13 +77,13 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartThenStop()
         {
-            Debug.WriteLine(nameof(TestOnStartThenStop));
             string serviceName = _testService.TestServiceName;
-            using (var client = new NamedPipeClientStream(serviceName))
+            using (var client = new NamedPipeClientStream(".", serviceName, PipeDirection.In))
             {
                 client.Connect();
                 var controller = new ServiceController(serviceName);
                 AssertExpectedProperties(controller);
+
                 controller.Stop();
                 Assert.Equal((int)PipeMessageByteCode.Stop, client.ReadByte());
             }
@@ -92,26 +92,24 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartWithArgsThenStop()
         {
-            Debug.WriteLine(nameof(TestOnStartWithArgsThenStop));
             string serviceName = _testService.TestServiceName;
             var controller = new ServiceController(serviceName);
-            using (var client = new NamedPipeClientStream(serviceName))
+
+            using (var client = new NamedPipeClientStream(".", serviceName, PipeDirection.In))
             {
-                StreamReader reader = new StreamReader(client);
                 client.Connect();
                 AssertExpectedProperties(controller);
-                controller.Stop();
 
+                controller.Stop();
                 Assert.Equal((int)PipeMessageByteCode.Stop, client.ReadByte());
+
                 controller.WaitForStatus(ServiceControllerStatus.Stopped);
                 controller.Start(new string[] { "a", "b", "c" });
             }
 
-            using (var client = new NamedPipeClientStream(serviceName))
+            using (var client = new NamedPipeClientStream(".", serviceName, PipeDirection.In))
             {
-                StreamReader reader = new StreamReader(client);
-                client.Connect();
-                
+                client.Connect();                
                 Assert.Equal((int)PipeMessageByteCode.Start, client.ReadByte());
                 controller.WaitForStatus(ServiceControllerStatus.Running);
 
@@ -125,11 +123,9 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseThenStop()
         {
-            Debug.WriteLine(nameof(TestOnPauseThenStop));
             string serviceName = _testService.TestServiceName;
-            using (var client = new NamedPipeClientStream(serviceName))
+            using (var client = new NamedPipeClientStream(".", serviceName, PipeDirection.In))
             {
-                StreamReader reader = new StreamReader(client);
                 client.Connect();
                 var controller = new ServiceController(serviceName);
                 AssertExpectedProperties(controller);
@@ -146,9 +142,8 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseAndContinueThenStop()
         {
-            Debug.WriteLine(nameof(TestOnPauseAndContinueThenStop));
             string serviceName = _testService.TestServiceName;
-            using (var client = new NamedPipeClientStream(serviceName))
+            using (var client = new NamedPipeClientStream(".", serviceName, PipeDirection.In))
             {
                 client.Connect();
                 var controller = new ServiceController(serviceName);
@@ -168,11 +163,10 @@ namespace System.ServiceProcess.Tests
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
-        public void TestOnExecuteCustomCommand_newVersion()
+        public void TestOnExecuteCustomCommand()
         {
-            Debug.WriteLine(nameof(TestOnExecuteCustomCommand_newVersion));
             var serviceName = _testService.TestServiceName;
-            using(var client = new NamedPipeClientStream(serviceName))
+            using(var client = new NamedPipeClientStream(".", serviceName, PipeDirection.In))
             {        
                 client.Connect();
                 var controller = new ServiceController(serviceName);
@@ -189,7 +183,6 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnContinueBeforePause()
         {
-            Debug.WriteLine(nameof(TestOnContinueBeforePause));
             var serviceName = _testService.TestServiceName;
             using (var client = new NamedPipeClientStream(".", serviceName, PipeDirection.In))
             {
@@ -250,12 +243,11 @@ namespace System.ServiceProcess.Tests
         {
             if (!_disposed)
             {
-                Debug.WriteLine("Disposing");
                 _testService.DeleteTestServices();
                 _disposed = true;
-                Debug.WriteLine("Disposed");
             }
         }
     }
+
     public enum PipeMessageByteCode { Start, Continue, Pause, Stop, OnCustomCommand };
 }
