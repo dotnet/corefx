@@ -19,11 +19,11 @@
   <ItemGroup>
     <Compile Include="System.Memory.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true' and '$(TargetGroup)' != 'uap10.0.15138'">
     <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
     <ProjectReference Include="..\..\System.Runtime.InteropServices\ref\System.Runtime.InteropServices.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.1'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.1' Or '$(TargetGroup)' == 'uap10.0.15138'">
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.InteropServices" />
   </ItemGroup>
