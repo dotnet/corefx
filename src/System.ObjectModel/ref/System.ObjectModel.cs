@@ -51,12 +51,12 @@ namespace System.Collections.ObjectModel
         public void InsertRange(int index, System.Collections.Generic.IEnumerable<T> collection) { }
         public void RemoveRange(int index, int count) { }
         public void RemoveRange(System.Collections.Generic.IEnumerable<T> collection) { }
-        public void ReplaceRange(System.Collections.Generic.IEnumerable<T> collection) { }
-        public void ReplaceRange(System.Collections.Generic.IEnumerable<T> collection, System.Collections.Generic.IEqualityComparer<T> comparer) { }
-        public void ReplaceRange(int index, int count, IEnumerable<T> collection) { }
-        public void ReplaceRange(int index, int count, IEnumerable<T> collection, System.Collections.Generic.IEqualityComparer<T> comparer) { }
         public int RemoveAll(System.Predicate<T> match) { throw null; }
         public int RemoveAll(int index, int count, System.Predicate<T> match) { throw null; }
+        public void ReplaceRange(System.Collections.Generic.IEnumerable<T> collection) { }
+        public void ReplaceRange(System.Collections.Generic.IEnumerable<T> collection, System.Collections.Generic.IEqualityComparer<T> comparer) { }
+        public void ReplaceRange(int index, int count, System.Collections.Generic.IEnumerable<T> collection) { }
+        public void ReplaceRange(int index, int count, System.Collections.Generic.IEnumerable<T> collection, System.Collections.Generic.IEqualityComparer<T> comparer) { }
         #endregion Range functionality
     }
     public partial class ReadOnlyDictionary<TKey, TValue> : System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IDictionary<TKey, TValue>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IReadOnlyCollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>, System.Collections.ICollection, System.Collections.IDictionary, System.Collections.IEnumerable
