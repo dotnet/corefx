@@ -202,25 +202,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private CType SubstType(CType typeSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth, bool denormMeth)
         {
-            if (typeSrc == null)
-                return null;
-
-            var ctx = new SubstContext(typeArgsCls, typeArgsMeth, denormMeth);
+            Debug.Assert(typeSrc != null);
+            SubstContext ctx = new SubstContext(typeArgsCls, typeArgsMeth, denormMeth);
             return ctx.IsNop ? typeSrc : SubstTypeCore(typeSrc, ctx);
         }
 
         public AggregateType SubstType(AggregateType typeSrc, TypeArray typeArgsCls)
         {
-            if (typeSrc != null)
-            {
-                SubstContext ctx = new SubstContext(typeArgsCls, null, false);
-                if (!ctx.IsNop)
-                {
-                    return SubstTypeCore(typeSrc, ctx);
-                }
-            }
+            Debug.Assert(typeSrc != null);
 
-            return typeSrc;
+            SubstContext ctx = new SubstContext(typeArgsCls, null, false);
+            return ctx.IsNop ? typeSrc : SubstTypeCore(typeSrc, ctx);
         }
 
         private CType SubstType(CType typeSrc, TypeArray typeArgsCls, TypeArray typeArgsMeth) =>
