@@ -90,8 +90,8 @@ namespace System.Collections.ObjectModel.Tests
             helper.ClearTest(col);
 
             //tests that nothing is raised or changed if collection already empty.
-            //helper = new CollectionAndPropertyChangedTester();
-            //helper.ClearTest(col);
+            helper = new CollectionAndPropertyChangedTester();
+            helper.ClearTest(col);
         }
 
         /// <summary>

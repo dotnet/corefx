@@ -1,6 +1,8 @@
+using System.Collections.ObjectModel;
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -76,7 +78,7 @@ namespace System.Collections.ObjectModel
         public ObservableCollection(List<T> list) : base(CreateCopy(list, nameof(list))) { }
 
         // Note: If we're gonna introduce new constructors not using a List<T>, 
-        // review InsertRange, ReplaceRange(index, collection) and RemoveRange(index, count).
+        // revise all methods treating the Items as List<T>.
         private static List<T> CreateCopy(IEnumerable<T> collection, string paramName)
         {
             if (collection == null)
@@ -496,8 +498,8 @@ namespace System.Collections.ObjectModel
 
                 var changesMade = false;
                 List<T>
-                    oldCluster = new List<T>(),
-                    newCluster = new List<T>();
+                    newCluster = null,
+                    oldCluster = null;
 
 
                 int i = index;
@@ -513,8 +515,18 @@ namespace System.Collections.ObjectModel
                     else
                     {
                         Items[i] = @new;
-                        newCluster.Add(@new);
-                        oldCluster.Add(old);
+
+                        if (newCluster == null)
+                        {
+                            Debug.Assert(oldCluster == null);
+                            newCluster = new List<T> { @new };
+                            oldCluster = new List<T> { old };
+                        }
+                        else
+                        {
+                            newCluster.Add(@new);
+                            oldCluster.Add(old);
+                        }
 
                         changesMade = true;
                     }
@@ -852,8 +864,11 @@ namespace System.Collections.ObjectModel
         //move when supported language version updated.
         private void OnRangeReplaced(int followingItemIndex, ICollection<T> newCluster, ICollection<T> oldCluster)
         {
-            if (oldCluster.Count == 0)
+            if (oldCluster == null || oldCluster.Count == 0)
+            {
+                Debug.Assert(newCluster == null || newCluster.Count == 0);
                 return;
+            }
 
             OnCollectionChanged(
                 new NotifyCollectionChangedEventArgs(
@@ -864,8 +879,7 @@ namespace System.Collections.ObjectModel
 
             oldCluster.Clear();
             newCluster.Clear();
-        }
-
+        }      
 
         private SimpleMonitor EnsureMonitorInitialized()
         {

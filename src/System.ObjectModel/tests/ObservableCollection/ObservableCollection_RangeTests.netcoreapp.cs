@@ -219,6 +219,11 @@ namespace System.Collections.ObjectModel.Tests
 
             reset();
             Assert.Throws<ArgumentOutOfRangeException>(() => col.ReplaceRange(1, 0, Enumerable.Empty<string>()));
+            Assert.Throws<ArgumentOutOfRangeException>(() => col.ReplaceRange(0, 1, Enumerable.Empty<string>()));
+            Assert.Throws<ArgumentOutOfRangeException>(() => col.ReplaceRange(-1, 0, Enumerable.Empty<string>()));
+            Assert.Throws<ArgumentOutOfRangeException>(() => col.ReplaceRange(0, -1, Enumerable.Empty<string>()));
+            //assert does not throw
+            col.ReplaceRange(0, 0, Enumerable.Empty<string>());
 
             Assert.Throws<ArgumentNullException>("collection", () => col.ReplaceRange(null));
             Assert.Throws<ArgumentNullException>("collection", () => col.ReplaceRange(null, EqualityComparer<string>.Default));
@@ -289,6 +294,11 @@ namespace System.Collections.ObjectModel.Tests
             tester.ReplaceRangeTest(col,
                 Enumerable.Empty<string>());
 
+            //replace empty collection with added collection
+            reset();
+            tester.ReplaceRangeTest(col,
+                allItems, (0, NotifyCollectionChangedAction.Add, allItems, null));
+
             /* Tests using index and count */
 
             //replace
@@ -307,7 +317,16 @@ namespace System.Collections.ObjectModel.Tests
                 newItems.Take(1), 0, 1, null,
                 (0, NotifyCollectionChangedAction.Replace, newItems.Take(1), oldItems.Take(1)));
 
-            //TODO write more replace range text
+            reset();
+            tester.ReplaceRangeTest(col,
+                allItems, 0, 0, null, (0, NotifyCollectionChangedAction.Add, allItems, null));
+
+            //replace empty collection with empty collection by index.
+            reset();
+            tester.ReplaceRangeTest(col,
+                Enumerable.Empty<string>(), 0, 0, null);      
+
+            //TODO write more tests, and also such including comparer
         }
 
 
@@ -676,6 +695,6 @@ namespace System.Collections.ObjectModel.Tests
             return item == null
                 ? Enumerable.Empty<string>()
                 : Enumerable.Repeat(item, 1);
-        }            
+        }
     }
 }
