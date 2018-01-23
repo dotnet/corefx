@@ -95,7 +95,7 @@ namespace System.ServiceProcess.Tests
             Assert.Equal((int)PipeMessageByteCode.Stop, _testService.client.ReadByte());
 
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
-            controller.Start(new string[] { "a", "b", "c" });
+            controller.Start(new string[] { "StartWithArguments", "a", "b", "c" });
 
             _testService.client = null;
             _testService.client.Connect();
