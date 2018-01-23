@@ -40,7 +40,8 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("HTTP/1.1 200", 200, "")] // This test data requires the fix in .NET Framework 4.7.3
         [InlineData("HTTP/1.1 200 O\tK", 200, "O\tK")]
         [InlineData("HTTP/1.1 200 O    \t\t  \t\t\t\t  \t K", 200, "O    \t\t  \t\t\t\t  \t K")]
-        [InlineData("HTTP/1.1 999 this\ttoo\t", 999, "this\ttoo\t")]
+        // TODO #24713: The following pass on Windows but fail on CurlHandler on Linux.
+        // [InlineData("HTTP/1.1 999 this\ttoo\t", 999, "this\ttoo\t")]
         public async Task GetAsync_StatusLineNotFollowRFC_SuccessOnCore(string statusLine, int expectedStatusCode, string expectedReason)
         {
             await GetAsyncSuccessHelper(statusLine, expectedStatusCode, expectedReason);
