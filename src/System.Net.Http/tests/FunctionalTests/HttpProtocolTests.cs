@@ -15,8 +15,6 @@ namespace System.Net.Http.Functional.Tests
         protected virtual Stream GetStream(Stream s) => s;
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.3")]
-        [InlineData("HTTP/1.1 200", 200, "")] // This is the test data requires the fix in .NET Framework 4.7.3
         [InlineData("HTTP/1.1 200 OK", 200, "OK")]
         [InlineData("HTTP/1.1 200 Sure why not?", 200, "Sure why not?")]
         [InlineData("HTTP/1.1 200 OK\x0080", 200, "OK?")]
@@ -34,7 +32,8 @@ namespace System.Net.Http.Functional.Tests
             await GetAsyncSuccessHelper(statusLine, expectedStatusCode, expectedReason);
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The following pass on Windows on .NET Core but fail on .NET Framework.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The following pass on .NET Core but fail on .NET Framework.")]
+        [InlineData("HTTP/1.1 200", 200, "")] // This test data requires the fix in .NET Framework 4.7.3
         [InlineData("HTTP/1.1 200 O\tK", 200, "O\tK")]
         [InlineData("HTTP/1.1 200 O    \t\t  \t\t\t\t  \t K", 200, "O    \t\t  \t\t\t\t  \t K")]
         [InlineData("HTTP/1.1 999 this\ttoo\t", 999, "this\ttoo\t")]
@@ -67,16 +66,10 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp)]
         [InlineData("HTTP/1.1 2345")]
         [InlineData("HTTP/A.1 200 OK")]
         [InlineData("HTTP/X.Y.Z 200 OK")]
-        public async Task GetAsync_InvalidStatusLine_ThrowsException(string responseString)
-        {
-            await GetAsyncThrowsExceptionHelper(responseString);
-        }
-
-        [Theory]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp)]
         // The following pass on Windows on .NET Core but fail on .NET Framework.
         [InlineData("HTTP/1.12 200 OK")]
         [InlineData("HTTP/12.1 200 OK")]
@@ -86,6 +79,13 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("HTTP/1.1 20c")]
         [InlineData("HTTP/1.1 23")]
         [InlineData("HTTP/1.1 2bc")]
+        public async Task GetAsync_InvalidStatusLine_ThrowsException(string responseString)
+        {
+            await GetAsyncThrowsExceptionHelper(responseString);
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Theory]
         // The following pass on Windows but fail on CurlHandler on Linux.
         [InlineData("NOTHTTP/1.1")]
         [InlineData("HTTP/1.A 200 OK")]
@@ -102,7 +102,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("HTTP/1.1\t")]
         [InlineData("HTTP/1.1  ")]
         [InlineData("NOTHTTP/1.1 200 OK")]
-        public async Task GetAsync_InvalidStatusLine_ThrowsExceptionOnCore(string responseString)
+        public async Task GetAsync_InvalidStatusLine_ThrowsExceptionOnWindows(string responseString)
         {
             await GetAsyncThrowsExceptionHelper(responseString);
         }
