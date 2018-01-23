@@ -9,6 +9,7 @@ using System.Security.Principal;
 using Xunit;
 using System.IO;
 using System.Threading;
+using System.IO.Pipes;
 
 namespace System.ServiceProcess.Tests
 {
@@ -17,9 +18,31 @@ namespace System.ServiceProcess.Tests
         private static readonly Lazy<bool> s_runningWithElevatedPrivileges = new Lazy<bool>(
             () => new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator));
 
+        private NamedPipeClientStream _client;
+
         public static bool RunningWithElevatedPrivileges
         {
             get { return s_runningWithElevatedPrivileges.Value; }
+        }
+
+        public NamedPipeClientStream client
+        {
+            get
+            {
+                if (_client == null)
+                {
+                    _client = new NamedPipeClientStream(".", TestServiceName, PipeDirection.In);
+                }
+                return _client;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    _client.Dispose();
+                    _client = null;
+                }
+            }
         }
 
         public readonly string TestServiceAssembly = typeof(TestService).Assembly.Location;
@@ -90,6 +113,9 @@ namespace System.ServiceProcess.Tests
         {
             try
             {
+                if (_client != null)
+                    _client.Dispose();
+
                 TestServiceInstaller testServiceInstaller = new TestServiceInstaller();
                 testServiceInstaller.ServiceName = TestServiceName;
                 testServiceInstaller.RemoveService();
