@@ -65,12 +65,7 @@ namespace System
         {
             get
             {
-                string[] args = GetCommandLineArgs();
-                // Not to throw for quotes inside argv0. Since the input was constructed by the framework itself from the
-                // passed in command line, this shouldn't ever happen but if it ever does, throwing is a bit extreme here.
-                if (args.Length > 0 && !string.IsNullOrEmpty(args[0]))
-                    args[0] = args[0].Replace(PasteArguments.Quote, '\'');
-                return PasteArguments.Paste(args, true);
+                return PasteArguments.Paste(GetCommandLineArgs(), true);
             }
         }
 
