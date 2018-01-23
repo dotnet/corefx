@@ -35,6 +35,7 @@
     <Compile Include="ObservableCollection\CollectionAndPropertyChangedTester.cs" />
     <Compile Include="ObservableCollection\ObservableCollection_ConstructorAndPropertyTests.cs" />
     <Compile Include="ObservableCollection\ObservableCollection_MethodsTest.cs" />
+    <Compile Include="ObservableCollection\ObservableCollection_RangeTests.netcoreapp.cs" />
     <Compile Include="ObservableCollection\ObservableCollection_ReentrancyTests.cs" />
     <Compile Include="ReadOnlyDictionary\ReadOnlyDictionaryTests.cs" />
     <Compile Include="ReadOnlyObservableCollection\ReadOnlyObservableCollection_EventsTests.cs" />

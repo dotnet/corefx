@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Linq;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using Xunit;
 
 namespace System.Collections.ObjectModel.Tests
@@ -14,7 +12,7 @@ namespace System.Collections.ObjectModel.Tests
     /// that the CollectionChanged events and eventargs are fired and populated
     /// properly.
     /// </summary>
-    public static class PublicMethodsTest
+    public static partial class PublicMethodsTest
     {
         /// <summary>
         /// Tests that is possible to Add an item to the collection.
@@ -26,47 +24,6 @@ namespace System.Collections.ObjectModel.Tests
             ObservableCollection<string> col = new ObservableCollection<string>(anArray);
             CollectionAndPropertyChangedTester helper = new CollectionAndPropertyChangedTester();
             helper.AddOrInsertItemTest(col, "four");
-        }
-
-        /// <summary>
-        /// Tests that it's possible to add a range to the end of a collection. Consists of:
-        /// - Empty collection
-        /// - Collection already containing elements
-        /// - Trying to add an empty collection should not raise any events
-        /// </summary>
-        [Fact]
-        public static void AddOrInsertRangeTest()
-        {
-            string[] anArray = { "one", "two", "three" };
-            var col = new ObservableCollection<string>();
-
-            //inserting to new collection
-            var helper = new CollectionAndPropertyChangedTester();
-            helper.AddOrInsertRangeTest(col, anArray, 0);
-
-            //adding to inistialized collection
-            helper = new CollectionAndPropertyChangedTester();
-            helper.AddOrInsertRangeTest(col, anArray, null);
-
-            //inserting collection
-            helper = new CollectionAndPropertyChangedTester();
-            helper.AddOrInsertRangeTest(col, anArray, 0);
-
-            //adding single-item collection
-            helper = new CollectionAndPropertyChangedTester();
-            helper.AddOrInsertRangeTest(col, new[] { "single item" }, null);
-
-            //inserting single-item collection
-            helper = new CollectionAndPropertyChangedTester();
-            helper.AddOrInsertRangeTest(col, new[] { "single item" }, 0);
-
-            //adding empty collection
-            helper = new CollectionAndPropertyChangedTester();
-            helper.AddOrInsertRangeTest(col, new string[] { }, null);
-
-            //inserting empty collection
-            helper = new CollectionAndPropertyChangedTester();
-            helper.AddOrInsertRangeTest(col, new string[] { }, 0);
         }
 
         /// <summary>
@@ -109,153 +66,6 @@ namespace System.Collections.ObjectModel.Tests
                     occurrencesThree++;
             }
             Assert.Equal(1, occurrencesThree);
-        }
-
-        [Fact]
-        public static void RemoveRangeTest_Items()
-        {
-            string[] items = { "one", "two", "three" };
-            ObservableCollection<string> col;
-
-            //remove first two
-            resetCollection();
-            var toRemove = items.Take(2).ToArray();
-            var helper = new CollectionAndPropertyChangedTester();
-            helper.RemoveRangeTest(col, toRemove, (0, toRemove));
-
-            //remove last two
-            resetCollection();
-            toRemove = items.Skip(1).ToArray();
-            helper = new CollectionAndPropertyChangedTester();
-            helper.RemoveRangeTest(col, toRemove, (1, toRemove));
-
-            //remove first and last
-            resetCollection();
-            toRemove = items.Where((i) => i != items[1]).ToArray();
-            helper = new CollectionAndPropertyChangedTester();
-            helper.RemoveRangeTest(col, toRemove, (0, items.Take(1)), (1, items.Skip(2)));
-
-            //remove last and first
-            resetCollection();
-            toRemove = items.Where((i) => i != items[1]).Reverse().ToArray();
-            helper = new CollectionAndPropertyChangedTester();
-            helper.RemoveRangeTest(col, toRemove, (2, items.Skip(2)), (0, items.Take(1)));
-
-            //remove single item
-            resetCollection();
-            toRemove = items.Skip(1).Take(1).ToArray();
-            helper = new CollectionAndPropertyChangedTester();
-            helper.RemoveRangeTest(col, toRemove, (1, toRemove));
-
-            //remove empty collection
-            resetCollection();
-            toRemove = new string[0];
-            helper = new CollectionAndPropertyChangedTester();
-            helper.RemoveRangeTest(col, toRemove);
-
-            //remove all items
-            resetCollection();
-            toRemove = items;
-            helper = new CollectionAndPropertyChangedTester();
-            helper.RemoveRangeTest(col, toRemove);
-
-            //remove items in reversed order
-            //TODO: implement clustering items regardless to their removal order.
-            resetCollection();
-            toRemove = items.Skip(1).Reverse().ToArray();
-            helper = new CollectionAndPropertyChangedTester();
-            helper.RemoveRangeTest(col, toRemove, (2, toRemove.Take(1)), (1, toRemove.Skip(1)));
-
-            //remove non existing items
-            resetCollection();
-            toRemove = new[] { "zero" }.Concat(items.Skip(1)).Concat(new[] { "four", "five" }).ToArray();
-            helper = new CollectionAndPropertyChangedTester();
-            helper.RemoveRangeTest(col, toRemove, (1, items.Skip(1)));
-
-            void resetCollection() => col = new ObservableCollection<string>(items);
-        }
-
-        [Fact]
-        public static void RemoveRangeTest_IndexCount()
-        {
-            string[] items = { "one", "two", "three", "four", "five", "six" };
-            var col = new ObservableCollection<string>(items);
-            var helper = new CollectionAndPropertyChangedTester();
-
-            //remove first items
-            helper.RemoveRangeTest(col, 0, 2);
-
-            //remove subsequent items
-            helper = new CollectionAndPropertyChangedTester();
-            helper.RemoveRangeTest(col, 0, 2);
-
-            //remove single item
-            helper = new CollectionAndPropertyChangedTester();
-            helper.RemoveRangeTest(col, 0, 1);
-
-            //clear collection
-            col = new ObservableCollection<string>(items);
-            helper = new CollectionAndPropertyChangedTester();
-            helper.RemoveRangeTest(col, 0, col.Count);
-
-            col.Clear();
-            Assert.Throws<ArgumentOutOfRangeException>(() => { col.RemoveRange(0, 1); });
-        }
-
-
-        /// <summary>
-        /// Verifies that all matches are removed from the collection.
-        /// </summary>
-        [Fact]
-        public static void RemoveAllTest()
-        {
-            var items = new[] { "alpha", "bravo", "charlie", "delta", "echo" };
-            ObservableCollection<string> col;
-            CollectionAndPropertyChangedTester tester;
-            void reset()
-            {
-                col = new ObservableCollection<string>(items);
-                tester = new CollectionAndPropertyChangedTester();
-            }
-
-            reset();
-            col.Clear();
-            Assert.Throws<ArgumentNullException>("match", () => col.RemoveAll(null));
-            Assert.Throws<ArgumentOutOfRangeException>(() => col.RemoveAll(0, 1, i => true));
-            Assert.Throws<ArgumentOutOfRangeException>(() => col.RemoveAll(1, 0, i => true));
-
-            //remove single item
-            reset();
-            tester.RemoveAllTest(col, i => i.StartsWith("c"), (2, items.Skip(2).Take(1)));
-
-            //remove multiple items
-            reset();
-            tester.RemoveAllTest(col, i => i.First() > 'b', (2, items.Skip(2)));
-
-            //remove non-existing items
-            reset();
-            tester.RemoveAllTest(col, i => i == "foxtrot");
-
-            //remove 1st and 4th elements
-            reset();
-            tester.RemoveAllTest(col, i => i.EndsWith('a'), (0, items.Take(1)), (2, items.Skip(3).Take(1)));
-
-            //remove 1st, 3rd and 5th
-            reset();
-            tester.RemoveAllTest(col, (i) => Array.IndexOf(items, i) % 2 == 0, (0, items.Take(1)), (1, items.Skip(2).Take(1)), (2, items.TakeLast(1)));
-
-            //remove all
-            reset();
-            tester.RemoveAllTest(col, i => true, (0, items));
-
-            //remove all within boundary 1+3
-            reset();
-            tester.RemoveAllTest(col, 1, 3, i => true, (1, items.Skip(1).Take(3)));
-
-            reset();
-            tester.RemoveAllTest(col, 1, 3, i => i.EndsWith('a'), (3, new[] { items[3] }));
-
-            tester.RemoveAllTest(col, 0, 0, i => true);
         }
 
         /// <summary>
@@ -507,117 +317,6 @@ namespace System.Collections.ObjectModel.Tests
             helper.ReplaceItemTest(collection, 3, "zero");
         }
 
-        /// <summary>
-        /// Tests that the collecion is cleared and the specified items are added.
-        /// Additionally, tests that the minimal items to be refreshed will be refreshed.
-        /// </summary>
-        [Fact]
-        public static void RaplaceRangeTest()
-        {
-            string[] allItems, oldItems, newItems;
-            ObservableCollection<string> col;
-            CollectionAndPropertyChangedTester tester;
-            void reset(params string[] itemsAddedToCollection)
-            {
-                allItems = new[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf" };
-                oldItems = allItems.Take(3).ToArray();
-                newItems = allItems.Skip(3).Take(3).ToArray();
-                col = new ObservableCollection<string>(itemsAddedToCollection ?? Enumerable.Empty<string>());
-                tester = new CollectionAndPropertyChangedTester();
-            }
-
-            reset();
-            Assert.Throws<ArgumentOutOfRangeException>(() => col.ReplaceRange(1, 0, Enumerable.Empty<string>()));
-
-            Assert.Throws<ArgumentNullException>("collection", () => col.ReplaceRange(null));
-            Assert.Throws<ArgumentNullException>("collection", () => col.ReplaceRange(null, EqualityComparer<string>.Default));
-            Assert.Throws<ArgumentNullException>("comparer", () => col.ReplaceRange(oldItems, null));
-
-            //replace 3 items with 3 other items
-            reset(oldItems);
-            tester.ReplaceRangeTest(col,
-                newItems,
-                (0, NotifyCollectionChangedAction.Replace, newItems, oldItems));
-
-            //replace 3 items with 3 similar items (do nothing)
-            reset(oldItems);
-            tester.ReplaceRangeTest(col,
-                oldItems);
-
-            //replace 2 equal items and remove last
-            reset(oldItems);
-            tester.ReplaceRangeTest(col,
-                oldItems.Take(2),
-                (2, NotifyCollectionChangedAction.Remove, null, oldItems.Last()));
-
-            //replace one item and leave last two (by similarity)
-            //the ObservableCollection is only affording to check for equality in similar position
-            //not search for each item for equality.
-            reset(oldItems);
-            tester.ReplaceRangeTest(col,
-                oldItems.Skip(1),
-                (0, NotifyCollectionChangedAction.Replace, oldItems.Skip(1), oldItems.Take(2)),
-                (2, NotifyCollectionChangedAction.Remove, null, oldItems.Skip(2)));
-
-            //skip one similar, replace one, skip another equal one, then add three.
-            reset(oldItems);
-            allItems[1] = "_bravo";
-            tester.ReplaceRangeTest(col,  
-                allItems,
-                (1, NotifyCollectionChangedAction.Replace, allItems.Skip(1).Take(1), oldItems.Skip(1).Take(1)),
-                (3, NotifyCollectionChangedAction.Add,  allItems.Skip(3), null));
-
-            //replace 3 items with empty collection
-            reset(oldItems);
-            tester.ReplaceRangeTest(col,
-                Enumerable.Empty<string>(),
-                (0, NotifyCollectionChangedAction.Reset, Enumerable.Empty<string>(), oldItems));
-
-            //replace 3 items with new 3 equal + added items
-            reset(oldItems);
-            tester.ReplaceRangeTest(col,
-                oldItems.Concat(newItems),
-                (3, NotifyCollectionChangedAction.Add, newItems, Enumerable.Empty<string>()));
-
-            //replace 3 items with new 2 equal + added items
-            reset(oldItems);
-            tester.ReplaceRangeTest(col,
-                oldItems.Take(2).Concat(newItems),
-                (2, NotifyCollectionChangedAction.Replace, newItems.Take(1), oldItems.Skip(2)),
-                (3, NotifyCollectionChangedAction.Add, newItems.Skip(1), Enumerable.Empty<string>()));
-
-            reset(allItems);
-            var newItem = '_' + allItems[3];
-            newItems = allItems.Take(3).Concat(new[] { newItem }).Concat(allItems.Skip(4)).ToArray();
-            tester.ReplaceRangeTest(col,
-                newItems,
-                (3, NotifyCollectionChangedAction.Replace, newItem, allItems[3]));
-
-            //replace empty collection with empty collection
-            reset();
-            tester.ReplaceRangeTest(col,
-                Enumerable.Empty<string>());
-
-            /* Tests using index and count */
-
-            //replace
-            // alpha bravo charlie
-            //with 
-            // bravo delta echo foxtrot golf
-            // starting from 2nd position
-            reset(oldItems);
-            tester.ReplaceRangeTest(col,
-                allItems.Skip(1).Take(1).Concat(allItems.Skip(3)), 1, col.Count - 1, null,
-                (2, NotifyCollectionChangedAction.Replace, allItems.Skip(3).Take(1), allItems.Skip(2).Take(1)),
-                (3, NotifyCollectionChangedAction.Add, allItems.Skip(4), null));
-
-            reset(oldItems);
-            tester.ReplaceRangeTest(col,
-                newItems.Take(1), 0, 1, null,
-                (0, NotifyCollectionChangedAction.Replace, newItems.Take(1), oldItems.Take(1)));
-
-            //TODO write more replace range text
-        }
 
         /// <summary>
         /// Tests that contains returns true when the item is in the collection
