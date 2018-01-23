@@ -124,9 +124,13 @@ namespace System.Net.Http.Tests
                 Environment.SetEnvironmentVariable("https_proxy", "http://foo1:bar1@1.1.1.1:3000");
                 p = HttpEnvironmentProxy.TryToCreate();
                 Assert.NotNull(p);
-                Assert.NotNull(p.Credentials);
-
-                Assert.True(p.Credentials.GetCredential(fooHttp, "Basic") != p.Credentials.GetCredential(fooHttps, "Basic"));
+                Uri u = p.GetProxy(fooHttp);
+                Assert.NotNull(p.Credentials.GetCredential(u, "Basic"));
+                u = p.GetProxy(fooHttps);
+                Assert.NotNull(p.Credentials.GetCredential(u, "Basic"));
+                // This should not match Proxy Uri
+                Assert.Null(p.Credentials.GetCredential(fooHttp, "Basic"));
+                Assert.Null(p.Credentials.GetCredential(null, null));
 
                 return SuccessExitCode;
             }).Dispose();

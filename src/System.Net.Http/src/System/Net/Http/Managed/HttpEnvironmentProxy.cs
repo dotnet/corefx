@@ -9,21 +9,72 @@ using System.Collections.Generic;
 
 namespace System.Net.Http
 {
-    public sealed class HttpEnvironmentProxyCredentials : ICredentials
+    internal sealed class HttpEnvironmentProxyCredentials : ICredentials
     {
         // Wrapper class for cases when http and https has different authentication.
         private readonly NetworkCredential _httpCred;
         private readonly NetworkCredential _httpsCred;
+        private readonly Uri _httpProxy;
+        private readonly Uri _httpsProxy;
 
-        public HttpEnvironmentProxyCredentials(NetworkCredential http, NetworkCredential https)
+        public HttpEnvironmentProxyCredentials(Uri httpProxy, NetworkCredential httpCred,
+                                                Uri httpsProxy, NetworkCredential httpsCred)
         {
-            _httpCred = http;
-            _httpsCred = https;
+            _httpCred = httpCred;
+            _httpsCred = httpsCred;
+            _httpProxy = httpProxy;
+            _httpsProxy = httpsProxy;
         }
 
         public NetworkCredential GetCredential(Uri uri, string authType)
         {
-            return uri.Scheme == Uri.UriSchemeHttp ? _httpCred : _httpsCred;
+            if (uri == null)
+            {
+                return null;
+            }
+            return uri.Equals(_httpProxy) ? _httpCred :
+                   uri.Equals(_httpsProxy) ? _httpsCred : null;
+        }
+
+        public static HttpEnvironmentProxyCredentials TryToCreate(Uri httpProxy, Uri httpsProxy)
+        {
+            NetworkCredential httpCred = null;
+            NetworkCredential httpsCred = null;
+
+            if (httpProxy != null)
+            {
+                httpCred = GetCredentialsFromString(httpProxy.UserInfo);
+            }
+            if (httpsProxy != null)
+            {
+                httpsCred = GetCredentialsFromString(httpsProxy.UserInfo);
+            }
+            if (httpCred == null && httpsCred == null)
+            {
+                return null;
+            }
+            return new HttpEnvironmentProxyCredentials(httpProxy, httpCred, httpsProxy, httpsCred);
+        }
+
+        /// <summary>
+        /// Converts string containing user:password to NetworkCredential object
+        /// </summary>
+        private static NetworkCredential GetCredentialsFromString(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+            int idx = value.IndexOf(":");
+            if (idx < 0)
+            {
+                // only user name without password
+                return new NetworkCredential(value, "");
+            }
+            else
+            {
+                return new NetworkCredential(value.Substring(0, idx), value.Substring(idx+1, value.Length - idx -1 ));
+            }
         }
     }
 
@@ -79,38 +130,10 @@ namespace System.Net.Http
 
         private HttpEnvironmentProxy(Uri httpProxy, Uri httpsProxy, string bypassList)
         {
-            NetworkCredential httpCred = null;
-            NetworkCredential httpsCred = null;
-            bool sameAuth = false;
+            _httpProxyUri = httpProxy;
+            _httpsProxyUri = httpsProxy;
 
-            if (httpProxy != null)
-            {
-                _httpProxyUri = httpProxy;
-                httpCred = GetCredentialsFromString(_httpProxyUri.UserInfo);
-            }
-            if (httpsProxy != null)
-            {
-                _httpsProxyUri = httpsProxy;
-                httpsCred = GetCredentialsFromString(_httpsProxyUri.UserInfo);
-                if ((_httpProxyUri != null) && (_httpProxyUri.UserInfo == _httpsProxyUri.UserInfo))
-                {
-                    sameAuth = true;
-                }
-            }
-            if (httpCred != null || httpsCred != null)
-            {
-                // If only one protocol is set or both protocols have same auth,
-                // use standard credential object
-                if (sameAuth || httpCred == null || httpsCred == null)
-                {
-                    _credentials = httpCred ?? httpsCred;
-                }
-                else
-                {
-                    // use wrapper so we can decide later based on uri
-                    _credentials = new HttpEnvironmentProxyCredentials(httpCred, httpsCred);
-                }
-            }
+            _credentials = HttpEnvironmentProxyCredentials.TryToCreate(httpProxy, httpsProxy);
 
             if (!string.IsNullOrWhiteSpace(bypassList))
             {
@@ -149,44 +172,18 @@ namespace System.Net.Http
                 value = "http://" + value;
             }
 
-
-
-            Uri uri = null;
             try
             {
-                uri = new Uri(value);
+                Uri uri = new Uri(value);
+                if (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+                {
+                    // We only support http and https for now.
+                    return uri;
+                }
             }
-            catch
-            {
-                return null;
-            }
+            catch { };
 
-            if (uri == null || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-            {
-                return null;
-            }
-            return uri;
-        }
-
-        /// <summary>
-        /// Converts string containing user:password to NetworkCredential object
-        /// </summary>
-        private NetworkCredential GetCredentialsFromString(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return null;
-            }
-            int idx = value.IndexOf(":");
-            if (idx < 0)
-            {
-                // only user name without password
-                return new NetworkCredential(value, "");
-            }
-            else
-            {
-                return new NetworkCredential(value.Substring(0, idx), value.Substring(idx+1, value.Length - idx -1 ));
-            }
+            return null;
         }
 
         /// <summary>
