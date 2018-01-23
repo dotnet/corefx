@@ -17,7 +17,7 @@
       <Imports>netcore50</Imports>
       <CompatibleWith>netstandard1.4</CompatibleWith>
     </TargetGroups>
-    <TargetGroups Include="uapaot10.0.15138">
+    <TargetGroups Include="uap10.0.15138aot">
       <PackageTargetRuntimeSuffix>aot</PackageTargetRuntimeSuffix>
       <NuGetTargetMoniker>UAP,Version=v10.0.15138</NuGetTargetMoniker>
       <NuGetTargetMonikerShort>uap10.0.15138</NuGetTargetMonikerShort>
@@ -37,7 +37,7 @@
       <NuGetTargetMoniker>$(UAPvNextTFMFull)</NuGetTargetMoniker>
       <NuGetTargetMonikerShort>$(UAPvNextTFM)</NuGetTargetMonikerShort>
       <UWPCompatible>true</UWPCompatible>
-      <Imports>uapaot10.0.15138</Imports>
+      <Imports>uap10.0.15138aot</Imports>
       <CompatibleWith>uapvnext;netstandard2.0</CompatibleWith>
     </TargetGroups>
     <TargetGroups Include="uapvnext">
