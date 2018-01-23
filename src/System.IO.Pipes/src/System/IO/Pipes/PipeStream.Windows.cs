@@ -425,11 +425,14 @@ namespace System.IO.Pipes
                     secAttrs.bInheritHandle = Interop.BOOL.TRUE;
                 }
 
-                byte[] securityDescriptor = pipeSecurity.GetSecurityDescriptorBinaryForm();
-                pinningHandle = GCHandle.Alloc(securityDescriptor, GCHandleType.Pinned);
-                fixed (byte* pSecurityDescriptor = securityDescriptor)
+                if (pipeSecurity != null)
                 {
-                    secAttrs.lpSecurityDescriptor = (IntPtr)pSecurityDescriptor;
+                    byte[] securityDescriptor = pipeSecurity.GetSecurityDescriptorBinaryForm();
+                    pinningHandle = GCHandle.Alloc(securityDescriptor, GCHandleType.Pinned);
+                    fixed (byte* pSecurityDescriptor = securityDescriptor)
+                    {
+                        secAttrs.lpSecurityDescriptor = (IntPtr)pSecurityDescriptor;
+                    }
                 }
             }
 

@@ -138,7 +138,6 @@ namespace System.IO.Pipes
         {
             SecurityIdentifier currentUserSid = GetCurrentUser();
             PipeSecurity accessControl = this.GetAccessControl();
-
             IdentityReference remoteOwnerSid = accessControl.GetOwner(typeof(SecurityIdentifier));
             if (remoteOwnerSid != currentUserSid)
             {
