@@ -70,7 +70,6 @@ namespace System.Collections.ObjectModel.Tests
 
         /// <summary>
         /// Tests that a collection can be cleared.
-        /// Verifies that no events are raised if the collection was already empty.
         /// </summary>
         [Fact]
         public static void ClearTest()
@@ -88,12 +87,7 @@ namespace System.Collections.ObjectModel.Tests
             CollectionAndPropertyChangedTester helper = new CollectionAndPropertyChangedTester();
             col = new ObservableCollection<string>(anArray);
             helper.ClearTest(col);
-
-            //tests that nothing is raised or changed if collection already empty.
-            helper = new CollectionAndPropertyChangedTester();
-            helper.ClearTest(col);
         }
-
         /// <summary>
         /// Tests that we can remove items at a specific index, at the middle beginning and end.
         /// </summary>

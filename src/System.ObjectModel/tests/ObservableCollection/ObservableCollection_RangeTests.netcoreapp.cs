@@ -10,6 +10,21 @@ namespace System.Collections.ObjectModel.Tests
 {
     public static partial class PublicMethodsTests
     {
+
+        /// <summary>
+        /// Verifies that no events are raised when clearing an empty collection.
+        /// </summary>
+        [Fact]
+        public static void ClearTestEmpty()
+        {
+            ObservableCollection<string> col = new ObservableCollection<string>();
+
+            //tests that nothing is raised or changed if collection already empty.
+            var helper = new CollectionAndPropertyChangedTester();
+            helper.ClearTest(col);
+        }
+
+
         /// <summary>
         /// Tests that it's possible to add a range to the end of a collection. Consists of:
         /// - Empty collection
@@ -324,7 +339,7 @@ namespace System.Collections.ObjectModel.Tests
             //replace empty collection with empty collection by index.
             reset();
             tester.ReplaceRangeTest(col,
-                Enumerable.Empty<string>(), 0, 0, null);      
+                Enumerable.Empty<string>(), 0, 0, null);
 
             //TODO write more tests, and also such including comparer
         }
