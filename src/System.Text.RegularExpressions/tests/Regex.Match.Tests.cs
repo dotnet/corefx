@@ -758,7 +758,7 @@ namespace System.Text.RegularExpressions.Tests
             {
                   // Should not throw out of memory
                   Assert.False(Regex.IsMatch("a", @"a{2147483647,}"));
-                  Assert.False(Regex.IsMatch("a", @"a{2_000_000,}"));
+                  Assert.False(Regex.IsMatch("a", @"a{999999}"));
             });
         }
 
