@@ -506,6 +506,7 @@ namespace System
         public static double GetNumericValue(string s, int index) { throw null; }
         public System.TypeCode GetTypeCode() { throw null; }
         public static System.Globalization.UnicodeCategory GetUnicodeCategory(System.Char c) { throw null; }
+        public static System.Globalization.UnicodeCategory GetUnicodeCategory(int codePoint) { throw null; }
         public static System.Globalization.UnicodeCategory GetUnicodeCategory(string s, int index) { throw null; }
         public static bool IsControl(System.Char c) { throw null; }
         public static bool IsControl(string s, int index) { throw null; }
