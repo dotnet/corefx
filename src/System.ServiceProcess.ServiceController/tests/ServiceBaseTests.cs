@@ -245,7 +245,14 @@ namespace System.ServiceProcess.Tests
                 _disposed = true;
             }
         }
-    }
 
-    public enum PipeMessageByteCode { Start, Continue, Pause, Stop, OnCustomCommand };
+        public enum PipeMessageByteCode
+        {
+            Start = 0,
+            Continue = 1,
+            Pause = 2,
+            Stop = 3,
+            OnCustomCommand = 4
+        };
+    }
 }

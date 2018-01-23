@@ -15,8 +15,10 @@ using System.IO.Pipes;
 
 namespace System.ServiceProcess.Tests
 {
-    public class TestService : ServiceBase
+    public class TestService : ServiceBase, IDisposable
     {
+        private bool _disposed;
+
         public TestService(string serviceName)
         {
             this.ServiceName = serviceName;
@@ -88,16 +90,28 @@ namespace System.ServiceProcess.Tests
         private void WriteStream(PipeMessageByteCode code, int command = 0)
         {
             if (code == PipeMessageByteCode.OnCustomCommand)
-            {
                 Server.WriteByte((byte)command);
-            }
             else
+                Server.WriteByte((byte)code);
+        }
+
+        public new void Dispose()
+        {
+            if (!_disposed)
             {
-                byte data = (byte)code;
-                Server.WriteByte(data);
+                Server.Dispose();
+                _disposed = true;
+                base.Dispose();
             }
         }
 
-        public enum PipeMessageByteCode { Start, Continue, Pause, Stop, OnCustomCommand };
+        public enum PipeMessageByteCode
+        {
+            Start = 0,
+            Continue = 1,
+            Pause = 2,
+            Stop = 3,
+            OnCustomCommand = 4
+        };
     }
 }
