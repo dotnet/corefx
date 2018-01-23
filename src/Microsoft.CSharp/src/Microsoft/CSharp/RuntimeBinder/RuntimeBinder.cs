@@ -634,8 +634,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             // as well so that overload resolution can find them.
             if (callingType.IsWindowsRuntimeType())
             {
-                TypeArray collectioniFaces = callingType.GetWinRTCollectionIfacesAll(SymbolLoader);
-
                 foreach (AggregateType t in callingType.GetWinRTCollectionIfacesAll(SymbolLoader).Items)
                 {
                     if (_symbolTable.AggregateContainsMethod(t.GetOwningAggregate(), Name, mask) && distinctCallingTypes.Add(t))
@@ -731,7 +729,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             // For a field, simply create the EXPRFIELD and our caller takes care of the rest.
 
             FieldSymbol fieldSymbol = swt.Field();
-            CType returnType = fieldSymbol.GetType();
             AggregateType fieldType = swt.GetType();
             FieldWithType fwt = new FieldWithType(fieldSymbol, fieldType);
 
@@ -893,18 +890,14 @@ namespace Microsoft.CSharp.RuntimeBinder
                 memGroup.Flags &= ~EXPRFLAG.EXF_USERCALLABLE;
             }
 
-            ExprWithArgs pResult = _binder.BindMethodGroupToArguments(// Tree
-                BindingFlag.BIND_RVALUEREQUIRED | BindingFlag.BIND_STMTEXPRONLY, memGroup, CreateArgumentListEXPR(arguments, locals, 1, arguments.Length));
+            ExprCall result = _binder.BindMethodGroupToArguments(// Tree
+                BindingFlag.BIND_RVALUEREQUIRED | BindingFlag.BIND_STMTEXPRONLY, memGroup, CreateArgumentListEXPR(arguments, locals, 1, arguments.Length)) as ExprCall;
 
-            // If overload resolution failed, throw an error.
-            if (pResult == null || !pResult.IsOK)
-            {
-                throw Error.BindCallFailedOverloadResolution();
-            }
+            Debug.Assert(result != null);
 
-            CheckForConditionalMethodError(pResult);
-            ReorderArgumentsForNamedAndOptional(callingObject, pResult);
-            return pResult;
+            CheckForConditionalMethodError(result);
+            ReorderArgumentsForNamedAndOptional(callingObject, result);
+            return result;
         }
 
         private ExprWithArgs BindWinRTEventAccessor(EventWithType ewt, Expr callingObject, ArgumentObject[] arguments, LocalVariableSymbol[] locals, bool isAddAccessor)
@@ -958,28 +951,13 @@ namespace Microsoft.CSharp.RuntimeBinder
                 args);
         }
 
-        private static void CheckForConditionalMethodError(Expr pExpr)
+        private static void CheckForConditionalMethodError(ExprCall call)
         {
-            if (pExpr is ExprCall call)
+            MethodSymbol method = call.MethWithInst.Meth();
+            object[] conditions = method.AssociatedMemberInfo.GetCustomAttributes(typeof(ConditionalAttribute), true);
+            if (conditions.Length > 0)
             {
-                // This mimics the behavior of the native CompilerSymbolLoader in GetConditionalSymbols. Override
-                // methods cannot have the conditional attribute, but implicitly acquire it from their slot.
-
-                MethodSymbol method = call.MethWithInst.Meth();
-                if (method.isOverride)
-                {
-                    method = method.swtSlot.Meth();
-                }
-
-                object[] conditions = method.AssociatedMemberInfo.GetCustomAttributes(typeof(ConditionalAttribute), false).ToArray();
-                if (conditions.Length > 0)
-                {
-                    throw Error.BindCallToConditionalMethod(method.name);
-                }
-            }
-            else
-            {
-                Debug.Fail("Should be unreachable");
+                throw Error.BindCallToConditionalMethod(method.name);
             }
         }
 
