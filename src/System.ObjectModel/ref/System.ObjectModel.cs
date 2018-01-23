@@ -5,9 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
-using System.Collections.Generic;
-
 namespace System.Collections.ObjectModel
 {
     public abstract partial class KeyedCollection<TKey, TItem> : System.Collections.ObjectModel.Collection<TItem>

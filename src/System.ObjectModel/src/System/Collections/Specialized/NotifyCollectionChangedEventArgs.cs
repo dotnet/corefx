@@ -155,7 +155,7 @@ namespace System.Collections.Specialized
             {
                 if (changedItems == null)
                     throw new ArgumentNullException(nameof(changedItems));
-                if (startingIndex < 0)
+                if (startingIndex < -1)
                     throw new ArgumentException(SR.IndexCannotBeNegative, nameof(startingIndex));
 
                 InitializeAddOrRemove(action, changedItems, startingIndex);
