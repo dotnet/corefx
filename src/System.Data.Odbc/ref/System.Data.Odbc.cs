@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 namespace System.Data.Odbc
 {
     public sealed partial class OdbcCommand : System.Data.Common.DbCommand, System.ICloneable
@@ -198,7 +202,6 @@ namespace System.Data.Odbc
         internal OdbcException() { }
         public System.Data.Odbc.OdbcErrorCollection Errors { get { throw null; } }
         public override string Source { get { throw null; } }
-        [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.LinkDemand, Flags=(System.Security.Permissions.SecurityPermissionFlag)(128))]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo si, System.Runtime.Serialization.StreamingContext context) { }
     }
     public sealed partial class OdbcFactory : System.Data.Common.DbProviderFactory

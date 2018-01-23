@@ -41,7 +41,7 @@ namespace System.Threading.Tasks.Tests
 
     public enum WorkloadType
     {
-        CreateChildTask, //Start a attached childTask in the workload
+        CreateChildTask, //Start an attached childTask in the workload
         CreateDetachedChildTask, //start a detached childTask in the workload
         ContinueInside, //Invoke continuewith as the workload inside the task
         RunWithUserScheduler, //create a task with custom task scheduler that runs that task inline
@@ -89,13 +89,11 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        [SecuritySafeCritical]
         private bool ExecuteTask(Task task)
         {
             return TryExecuteTask(task);
         }
 
-        [SecurityCritical]
         protected override void QueueTask(Task task)
         {
             _tasks.Add(task);
@@ -109,7 +107,6 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        [SecurityCritical]
         protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
         {
             RunSyncCalledCount++;
@@ -128,7 +125,6 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        [SecurityCritical]
         protected override IEnumerable<Task> GetScheduledTasks()
         {
             return _tasks;

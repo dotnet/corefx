@@ -877,7 +877,7 @@ namespace System.Collections.Concurrent
                 TValue value;
                 if (!TryGetValue(key, out value))
                 {
-                    ThrowKeyNotFoundException();
+                    ThrowKeyNotFoundException(key);
                 }
                 return value;
             }
@@ -894,9 +894,9 @@ namespace System.Collections.Concurrent
         // of important methods like TryGetValue and ContainsKey.
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowKeyNotFoundException()
+        private static void ThrowKeyNotFoundException(object key)
         {
-            throw new KeyNotFoundException();
+            throw new KeyNotFoundException(SR.Format(SR.Arg_KeyNotFoundWithKey, key.ToString()));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -939,7 +939,7 @@ namespace System.Collections.Concurrent
         /// <summary>
         /// Gets the number of key/value pairs contained in the <see
         /// cref="ConcurrentDictionary{TKey,TValue}"/>. Should only be used after all locks
-        /// have been aquired.
+        /// have been acquired.
         /// </summary>
         /// <exception cref="T:System.OverflowException">The dictionary contains too many
         /// elements.</exception>

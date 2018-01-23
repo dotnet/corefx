@@ -827,7 +827,7 @@ namespace System.Collections.Concurrent
             /// <summary>Mask for quickly accessing a position within the queue's array.</summary>
             internal readonly int _slotsMask;
             /// <summary>The head and tail positions, with padding to help avoid false sharing contention.</summary>
-            /// <remarks>Dequeueing happens from the head, enqueueing happens at the tail.</remarks>
+            /// <remarks>Dequeuing happens from the head, enqueuing happens at the tail.</remarks>
             internal PaddedHeadAndTail _headAndTail; // mutable struct: do not make this readonly
 
             /// <summary>Indicates whether the segment has been marked such that dequeues don't overwrite the removed data.</summary>
@@ -1112,10 +1112,10 @@ namespace System.Collections.Concurrent
 
     /// <summary>Padded head and tail indices, to avoid false sharing between producers and consumers.</summary>
     [DebuggerDisplay("Head = {Head}, Tail = {Tail}")]
-    [StructLayout(LayoutKind.Explicit, Size = 192)] // padding before/between/after fields based on typical cache line size of 64
+    [StructLayout(LayoutKind.Explicit, Size = 384)] // padding before/between/after fields based on worst case cache line size of 128
     internal struct PaddedHeadAndTail
     {
-        [FieldOffset(64)] public int Head;
-        [FieldOffset(128)] public int Tail;
+        [FieldOffset(128)] public int Head;
+        [FieldOffset(256)] public int Tail;
     }
 }

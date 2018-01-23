@@ -31,7 +31,7 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Contains all the keys in the collection that hash to the same value.
         /// </summary>
-        internal struct HashBucket
+        internal readonly struct HashBucket
         {
             /// <summary>
             /// One of the values in this bucket.
@@ -182,7 +182,11 @@ namespace System.Collections.Immutable
                     int index = _additionalElements.IndexOf(value, valueComparer);
                     if (index >= 0)
                     {
+#if FEATURE_ITEMREFAPI
+                        existingValue = _additionalElements.ItemRef(index);
+#else
                         existingValue = _additionalElements[index];
+#endif
                         return true;
                     }
                 }

@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace System.SpanTests
 {
@@ -37,20 +37,20 @@ namespace System.SpanTests
                     try
                     {
                         ref Guid memory = ref Unsafe.AsRef<Guid>(memBlock.ToPointer());
-                        var span = new Span<Guid>(memBlock.ToPointer(), GuidThreeGiBLimit);
+                        var span = new Span<Guid>(memBlock.ToPointer(), s_guidThreeGiBLimit);
 
-                        int bigIndex = checked(GuidTwoGiBLimit + 1);
+                        int bigIndex = checked(s_guidTwoGiBLimit + 1);
                         uint byteOffset = checked((uint)bigIndex * (uint)sizeof(Guid));
-                        Assert.True(byteOffset > (uint)int.MaxValue);  // Make sure byteOffset actually overflows 2Gb, or this test is pointless.
+                        Assert.True(byteOffset > int.MaxValue);  // Make sure byteOffset actually overflows 2Gb, or this test is pointless.
                         ref Guid expected = ref Unsafe.Add<Guid>(ref memory, bigIndex);
 
                         Assert.True(Unsafe.AreSame<Guid>(ref expected, ref span[bigIndex]));
 
                         Span<Guid> slice = span.Slice(bigIndex);
-                        Assert.True(Unsafe.AreSame<Guid>(ref expected, ref slice.DangerousGetPinnableReference()));
+                        Assert.True(Unsafe.AreSame<Guid>(ref expected, ref MemoryMarshal.GetReference(slice)));
 
                         slice = span.Slice(bigIndex, 1);
-                        Assert.True(Unsafe.AreSame<Guid>(ref expected, ref slice.DangerousGetPinnableReference()));
+                        Assert.True(Unsafe.AreSame<Guid>(ref expected, ref MemoryMarshal.GetReference(slice)));
                     }
                     finally
                     {
@@ -64,8 +64,7 @@ namespace System.SpanTests
         private const long TwoGiB = 2L * 1024L * 1024L * 1024L;
         private const long OneGiB = 1L * 1024L * 1024L * 1024L;
 
-        private static readonly int GuidThreeGiBLimit = (int)(ThreeGiB / Unsafe.SizeOf<Guid>());  // sizeof(Guid) requires unsafe keyword and I don't want to mark the entire class unsafe.
-        private static readonly int GuidTwoGiBLimit = (int)(TwoGiB / Unsafe.SizeOf<Guid>());
-        private static readonly int GuidOneGiBLimit = (int)(OneGiB / Unsafe.SizeOf<Guid>());
+        private static readonly int s_guidThreeGiBLimit = (int)(ThreeGiB / Unsafe.SizeOf<Guid>());  // sizeof(Guid) requires unsafe keyword and I don't want to mark the entire class unsafe.
+        private static readonly int s_guidTwoGiBLimit = (int)(TwoGiB / Unsafe.SizeOf<Guid>());
     }
 }

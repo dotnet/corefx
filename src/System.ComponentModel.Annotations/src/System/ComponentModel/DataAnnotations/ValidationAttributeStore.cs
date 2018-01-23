@@ -20,16 +20,12 @@ namespace System.ComponentModel.DataAnnotations
     /// </remarks>
     internal class ValidationAttributeStore
     {
-        private static readonly ValidationAttributeStore _singleton = new ValidationAttributeStore();
         private readonly Dictionary<Type, TypeStoreItem> _typeStoreItems = new Dictionary<Type, TypeStoreItem>();
 
         /// <summary>
         ///     Gets the singleton <see cref="ValidationAttributeStore" />
         /// </summary>
-        internal static ValidationAttributeStore Instance
-        {
-            get { return _singleton; }
-        }
+        internal static ValidationAttributeStore Instance { get; } = new ValidationAttributeStore();
 
         /// <summary>
         ///     Retrieves the type level validation attributes for the given type.
@@ -120,14 +116,14 @@ namespace System.ComponentModel.DataAnnotations
 
             lock (_typeStoreItems)
             {
-                TypeStoreItem item = null;
-                if (!_typeStoreItems.TryGetValue(type, out item))
+                if (!_typeStoreItems.TryGetValue(type, out TypeStoreItem item))
                 {
                     // use CustomAttributeExtensions.GetCustomAttributes() to get inherited attributes as well as direct ones
                     var attributes = CustomAttributeExtensions.GetCustomAttributes(type, true);
                     item = new TypeStoreItem(type, attributes);
                     _typeStoreItems[type] = item;
                 }
+
                 return item;
             }
         }
@@ -144,35 +140,26 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
-        internal static bool IsPublic(PropertyInfo p)
-        {
-            return (p.GetMethod != null && p.GetMethod.IsPublic) || (p.SetMethod != null && p.SetMethod.IsPublic);
-        }
+        internal static bool IsPublic(PropertyInfo p) =>
+            (p.GetMethod != null && p.GetMethod.IsPublic) || (p.SetMethod != null && p.SetMethod.IsPublic);
 
-        internal static bool IsStatic(PropertyInfo p)
-        {
-            return (p.GetMethod != null && p.GetMethod.IsStatic) || (p.SetMethod != null && p.SetMethod.IsStatic);
-        }
+        internal static bool IsStatic(PropertyInfo p) =>
+            (p.GetMethod != null && p.GetMethod.IsStatic) || (p.SetMethod != null && p.SetMethod.IsStatic);
 
         /// <summary>
         ///     Private abstract class for all store items
         /// </summary>
         private abstract class StoreItem
         {
-            private readonly IEnumerable<ValidationAttribute> _validationAttributes;
-
             internal StoreItem(IEnumerable<Attribute> attributes)
             {
-                _validationAttributes = attributes.OfType<ValidationAttribute>();
+                ValidationAttributes = attributes.OfType<ValidationAttribute>();
                 DisplayAttribute = attributes.OfType<DisplayAttribute>().SingleOrDefault();
             }
 
-            internal IEnumerable<ValidationAttribute> ValidationAttributes
-            {
-                get { return _validationAttributes; }
-            }
+            internal IEnumerable<ValidationAttribute> ValidationAttributes { get; }
 
-            internal DisplayAttribute DisplayAttribute { get; set; }
+            internal DisplayAttribute DisplayAttribute { get; }
         }
 
         /// <summary>
@@ -192,14 +179,13 @@ namespace System.ComponentModel.DataAnnotations
 
             internal PropertyStoreItem GetPropertyStoreItem(string propertyName)
             {
-                PropertyStoreItem item = null;
-                if (!TryGetPropertyStoreItem(propertyName, out item))
+                if (!TryGetPropertyStoreItem(propertyName, out PropertyStoreItem item))
                 {
                     throw new ArgumentException(
                         string.Format(CultureInfo.CurrentCulture,
-                            SR.AttributeStore_Unknown_Property, _type.Name, propertyName),
-nameof(propertyName));
+                            SR.AttributeStore_Unknown_Property, _type.Name, propertyName), nameof(propertyName));
                 }
+
                 return item;
             }
 
@@ -248,19 +234,14 @@ nameof(propertyName));
         /// </summary>
         private class PropertyStoreItem : StoreItem
         {
-            private readonly Type _propertyType;
-
             internal PropertyStoreItem(Type propertyType, IEnumerable<Attribute> attributes)
                 : base(attributes)
             {
                 Debug.Assert(propertyType != null);
-                _propertyType = propertyType;
+                PropertyType = propertyType;
             }
 
-            internal Type PropertyType
-            {
-                get { return _propertyType; }
-            }
+            internal Type PropertyType { get; }
         }
     }
 }

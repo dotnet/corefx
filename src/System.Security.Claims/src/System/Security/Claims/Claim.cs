@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.IO;
 
 namespace System.Security.Claims
@@ -251,7 +250,7 @@ namespace System.Security.Claims
         /// <param name="originalIssuer">The original issuer of this claim. If this parameter is empty or null, then originalIssuer == issuer.</param>
         /// <param name="subject">The subject that this claim describes.</param>
         /// <param name="propertyKey">This allows adding a property when adding a Claim.</param>
-        /// <param name="propertyValue">The value associcated with the property.</param>
+        /// <param name="propertyValue">The value associated with the property.</param>
         internal Claim(string type, string value, string valueType, string issuer, string originalIssuer, ClaimsIdentity subject, string propertyKey, string propertyValue)
         {
             if (type == null)
@@ -263,8 +262,6 @@ namespace System.Security.Claims
             {
                 throw new ArgumentNullException(nameof(value));
             }
-
-            Contract.EndContractBlock();
 
             _type = type;
             _value = value;

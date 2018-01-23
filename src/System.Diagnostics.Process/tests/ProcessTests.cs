@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.DirectoryServices.ActiveDirectory;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -13,7 +13,6 @@ using System.Security;
 using System.Text;
 using System.Threading;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 namespace System.Diagnostics.Tests
 {
@@ -117,6 +116,107 @@ namespace System.Diagnostics.Tests
             else
             {
                 Assert.False(exitedInvoked);
+            }
+        }
+
+        [Fact]
+        public void ProcessStart_TryExitCommandAsFileName_ThrowsWin32Exception()
+        {
+            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = "exit", Arguments = "42" }));
+        }
+
+        [Fact]
+        public void ProcessStart_UseShellExecuteFalse_FilenameIsUrl_ThrowsWin32Exception()
+        {
+            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = "https://www.github.com/corefx" }));
+        }
+
+        [Fact]
+        public void ProcessStart_TryOpenFolder_UseShellExecuteIsFalse_ThrowsWin32Exception()
+        {
+            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = false, FileName = Path.GetTempPath() }));
+        }
+
+        [Fact]
+        [PlatformSpecific(~TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // UWP overrides WorkingDirectory (https://github.com/dotnet/corefx/pull/25266#issuecomment-347719832).
+        public void TestStartWithBadWorkingDirectory()
+        {
+            string program;
+            string workingDirectory;
+            if (PlatformDetection.IsWindows)
+            {
+                program = "powershell.exe";
+                workingDirectory = @"C:\does-not-exist";
+            }
+            else
+            {
+                program = "uname";
+                workingDirectory = "/does-not-exist";
+            }
+
+            if (IsProgramInstalled(program))
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = program,
+                    UseShellExecute = false,
+                    WorkingDirectory = workingDirectory
+                };
+
+                Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(psi));
+                Assert.NotEqual(0, e.NativeErrorCode);
+            }
+            else
+            {
+                Console.WriteLine($"Program {program} is not installed on this machine.");
+            }
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.HasWindowsShell))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
+        [OuterLoop("Launches File Explorer")]
+        public void ProcessStart_UseShellExecuteTrue_OpenMissingFile_Throws()
+        {
+            string fileToOpen = Path.Combine(Environment.CurrentDirectory, "_no_such_file.TXT");
+            Win32Exception e = Assert.Throws<Win32Exception>(() => Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }));
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.HasWindowsShell))]
+        [InlineData(true)]
+        [InlineData(false)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
+        [OuterLoop("Launches File Explorer")]
+        public void ProcessStart_UseShellExecute_OnWindows_DoesNotThrow(bool isFolder)
+        {
+            string fileToOpen;
+            if (isFolder)
+            {
+                fileToOpen = Environment.CurrentDirectory;
+            }
+            else
+            {
+                fileToOpen = GetTestFilePath() + ".txt";
+                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_UseShellExecute_OnWindows_DoesNotThrow)}");
+            }
+
+            using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }))
+            {
+                if (isFolder)
+                {
+                    Assert.Null(px);
+                }
+                else
+                {
+                    if (px != null) // sometimes process is null
+                    {
+                        Assert.Equal("notepad", px.ProcessName);
+
+                        px.Kill();
+                        Assert.True(px.WaitForExit(WaitInMS));
+                    }
+                }
             }
         }
 
@@ -822,6 +922,30 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        public void GetProcesses_InvalidMachineName_ThrowsInvalidOperationException()
+        {
+            Assert.Throws<InvalidOperationException>(() => Process.GetProcesses(Guid.NewGuid().ToString()));
+        }
+
+        [Fact]
+        public void GetProcesses_RemoteMachinePath_ReturnsExpected()
+        {
+            try
+            {
+                Process[] processes = Process.GetProcesses(Environment.MachineName + "." + Domain.GetComputerDomain());
+                Assert.NotEmpty(processes);
+            }
+            catch (ActiveDirectoryObjectNotFoundException)
+            {
+                //This will be thrown when the executing machine is not domain-joined, i.e. in CI
+            }
+            catch (PlatformNotSupportedException)
+            {
+                //System.DirectoryServices is not supported on all platforms
+            }
+        }
+
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void GetProcessesByName_ProcessName_ReturnsExpected()
         {
@@ -1049,6 +1173,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "GC has different behavior on Mono")]
         public void CanBeFinalized()
         {
             FinalizingProcess.CreateAndRelease();

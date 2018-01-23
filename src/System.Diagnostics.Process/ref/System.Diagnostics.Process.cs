@@ -11,7 +11,7 @@ namespace Microsoft.Win32.SafeHandles
     public sealed partial class SafeProcessHandle : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
     {
         public SafeProcessHandle(System.IntPtr existingHandle, bool ownsHandle) : base(default(bool)) { }
-        public override bool IsInvalid { [System.Security.SecurityCritical] get { throw null; } }
+        public override bool IsInvalid { get { throw null; } }
         protected override bool ReleaseHandle() { throw null; }
     }
 }
@@ -170,6 +170,7 @@ namespace System.Diagnostics
         public bool RedirectStandardInput { get { throw null; } set { } }
         public bool RedirectStandardOutput { get { throw null; } set { } }
         public System.Text.Encoding StandardErrorEncoding { get { throw null; } set { } }
+        public System.Text.Encoding StandardInputEncoding { get { throw null; } set { } }
         public System.Text.Encoding StandardOutputEncoding { get { throw null; } set { } }
         public string UserName { get { throw null; } set { } }
         public bool UseShellExecute { get { throw null; } set { } }

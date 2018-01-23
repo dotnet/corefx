@@ -11,31 +11,85 @@ using Xunit.Sdk;
 namespace System.Drawing
 {
     public static class Helpers
-    {        
+    {
         public const string GdiplusIsAvailable = nameof(Helpers) + "." + nameof(GetGdiplusIsAvailable);
+        public const string RecentGdiplusIsAvailable = nameof(Helpers) + "." + nameof(GetRecentGdiPlusIsAvailable);
+        public const string RecentGdiplusIsAvailable2 = nameof(Helpers) + "." + nameof(GetRecentGdiPlusIsAvailable2);
+        public const string GdiPlusIsAvailableNotRedhat73 = nameof(Helpers) + "." + nameof(GetGdiPlusIsAvailableNotRedhat73);
+        public const string GdiPlusIsAvailableNotWindows7 = nameof(Helpers) + "." + nameof(GetGdiPlusIsAvailableNotWindows7);
         public const string AnyInstalledPrinters = nameof(Helpers) + "." + nameof(IsAnyInstalledPrinters);
 
         public static bool GetGdiplusIsAvailable()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return PlatformDetection.IsNotWindowsNanoServer;
+                return PlatformDetection.IsNotWindowsNanoServer && PlatformDetection.IsNotWindowsServerCore;
             }
             else
             {
-                IntPtr nativeLib = dlopen("libgdiplus.so", RTLD_NOW);
-                if (nativeLib == IntPtr.Zero)
+                IntPtr nativeLib;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    nativeLib = dlopen("libgdiplus.so.0", RTLD_NOW);
+                    nativeLib = dlopen("libgdiplus.dylib", RTLD_NOW);
+                }
+                else
+                {
+                    nativeLib = dlopen("libgdiplus.so", RTLD_NOW);
+                    if (nativeLib == IntPtr.Zero)
+                    {
+                        nativeLib = dlopen("libgdiplus.so.0", RTLD_NOW);
+                    }
                 }
 
                 return nativeLib != IntPtr.Zero;
             }
         }
 
+        public static bool GetRecentGdiPlusIsAvailable2()
+        {
+            // RedHat and Ubuntu 14.04, as well as Fedora 25 and OpenSUSE 4.22 are running outdated versions of libgdiplus
+            if (PlatformDetection.IsRedHatFamily || PlatformDetection.IsUbuntu1404 || PlatformDetection.IsFedora || PlatformDetection.IsOpenSUSE)
+            {
+                return false;
+            }
+
+            return GetGdiplusIsAvailable();
+        }
+
+        public static bool GetGdiPlusIsAvailableNotRedhat73()
+        {
+            if (PlatformDetection.IsRedHatFamily)
+            {
+                return false;
+            }
+
+            return GetGdiplusIsAvailable();
+        }
+
+        public static bool GetGdiPlusIsAvailableNotWindows7()
+        {
+            if (PlatformDetection.IsWindows7)
+            {
+                return false;
+            }
+
+            return GetGdiplusIsAvailable();
+        }
+
+        public static bool GetRecentGdiPlusIsAvailable()
+        {
+            // RedHat and Ubuntu 14.04 are running outdated versions of libgdiplus
+            if (PlatformDetection.IsRedHatFamily || PlatformDetection.IsUbuntu1404)
+            {
+                return false;
+            }
+
+            return GetGdiplusIsAvailable();
+        }
+
         public static bool IsAnyInstalledPrinters()
         {
-            return PrinterSettings.InstalledPrinters.Count == 0;
+            return PrinterSettings.InstalledPrinters.Count > 0;
         }
 
         [DllImport("libdl")]

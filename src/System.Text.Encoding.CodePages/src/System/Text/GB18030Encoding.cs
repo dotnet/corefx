@@ -85,7 +85,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -115,7 +114,6 @@ namespace System.Text
         private const int GBLastSurrogateOffset = 0x12E247; // GBE3329A35
 
         // We have to load the 936 code page tables, so impersonate 936 as our base
-        [System.Security.SecurityCritical]  // auto-generated
         internal GB18030Encoding()
             // For GB18030Encoding just use default replacement fallbacks because its only for bad surrogates
             : base(GB18030, 936, EncoderFallback.ReplacementFallback, DecoderFallback.ReplacementFallback)
@@ -124,7 +122,6 @@ namespace System.Text
 
         // This loads our base 936 code page and then applies the changes from the tableUnicodeToGBDiffs table.
         // See table comments for table format.
-        [System.Security.SecurityCritical]  // auto-generated
         protected override unsafe void LoadManagedCodePage()
         {
             // Use base code page loading algorithm.
@@ -198,7 +195,6 @@ namespace System.Text
         // Is4Byte
         // Checks the 4 byte table and returns true if this is a 4 byte code.
         // Its a 4 byte code if the flag is set in mapUnicodeTo4BytesFlags
-        [System.Security.SecurityCritical]  // auto-generated
         internal unsafe bool Is4Byte(char charTest)
         {
             // See what kind it is
@@ -207,14 +203,12 @@ namespace System.Text
         }
 
         // GetByteCount
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetByteCount(char* chars, int count, EncoderNLS encoder)
         {
             // Just call GetBytes() with null bytes
             return GetBytes(chars, count, null, 0, encoder);
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetBytes(char* chars, int charCount,
                                                 byte* bytes, int byteCount, EncoderNLS encoder)
         {
@@ -395,14 +389,12 @@ namespace System.Text
         }
 
         // This is internal and called by something else,
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetCharCount(byte* bytes, int count, DecoderNLS baseDecoder)
         {
             // Just call GetChars() with null chars to count
             return GetChars(bytes, count, null, 0, baseDecoder);
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetChars(byte* bytes, int byteCount,
                                                 char* chars, int charCount, DecoderNLS baseDecoder)
         {
@@ -752,7 +744,6 @@ namespace System.Text
         {
             if (charCount < 0)
                 throw new ArgumentOutOfRangeException(nameof(charCount), SR.ArgumentOutOfRange_NeedNonNegNum);
-            Contract.EndContractBlock();
 
             // Characters would be # of characters + 1 in case high surrogate is ? * max fallback
             long byteCount = (long)charCount + 1;
@@ -773,7 +764,6 @@ namespace System.Text
         {
             if (byteCount < 0)
                 throw new ArgumentOutOfRangeException(nameof(byteCount), SR.ArgumentOutOfRange_NeedNonNegNum);
-            Contract.EndContractBlock();
 
             // Just return length, we could have a single char for each byte + whatever extra our decoder could do to us.
             // If decoder is messed up it could spit out 3 ?s.

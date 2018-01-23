@@ -19,9 +19,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private readonly SymFactory _symFactory;
 
-        private readonly NamespaceSymbol _rootNS;         // The "root" (unnamed) namespace.
-
-        private NameManager m_nameTable;
         private SYMTBL tableGlobal;
 
         // The hash table for type arrays.
@@ -29,15 +26,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private static readonly TypeArray s_taEmpty = new TypeArray(Array.Empty<CType>());
 
-        public BSYMMGR(NameManager nameMgr)
+        public BSYMMGR()
         {
-            this.m_nameTable = nameMgr;
             this.tableGlobal = new SYMTBL();
             _symFactory = new SymFactory(this.tableGlobal);
 
             this.tableTypeArrays = new Dictionary<TypeArrayKey, TypeArray>();
-            _rootNS = _symFactory.CreateNamespace(m_nameTable.Lookup(""), null);
-            GetNsAid(_rootNS);
 
             ////////////////////////////////////////////////////////////////////////////////
             // Build the data structures needed to make FPreLoad fast. Make sure the 
@@ -46,7 +40,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             for (int i = 0; i < (int)PredefinedType.PT_COUNT; ++i)
             {
-                NamespaceSymbol ns = GetRootNS();
+                NamespaceSymbol ns = NamespaceSymbol.Root;
                 string name = PredefinedTypeFacts.GetName((PredefinedType)i);
                 int start = 0;
                 while (start < name.Length)
@@ -55,17 +49,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (iDot == -1)
                         break;
                     string sub = (iDot > start) ? name.Substring(start, iDot - start) : name.Substring(start);
-                    Name nm = this.GetNameManager().Add(sub);
+                    Name nm = NameManager.Add(sub);
                     ns = LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol ?? _symFactory.CreateNamespace(nm, ns);
                     start += sub.Length + 1;
                 }
             }
-        }
-
-
-        public NameManager GetNameManager()
-        {
-            return m_nameTable;
         }
 
         public SYMTBL GetSymbolTable()
@@ -76,16 +64,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public static TypeArray EmptyTypeArray()
         {
             return s_taEmpty;
-        }
-
-        public AssemblyQualifiedNamespaceSymbol GetRootNsAid()
-        {
-            return GetNsAid(_rootNS);
-        }
-
-        public NamespaceSymbol GetRootNS()
-        {
-            return _rootNS;
         }
 
         public BetterType CompareTypes(TypeArray ta1, TypeArray ta2)
@@ -128,7 +106,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             Debug.Assert(false, "Bad kind in CompareTypes");
                             break;
                         case TypeKind.TK_TypeParameterType:
-                        case TypeKind.TK_ErrorType:
                             break;
 
                         case TypeKind.TK_PointerType:
@@ -166,30 +143,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return _symFactory;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-        // Build the data structures needed to make FPreLoad fast. Make sure the 
-        // namespaces are created. Compute and sort hashes of the NamespaceSymbol * value and type
-        // name (sans arity indicator).
-
-        private void InitPreLoad()
-        {
-            for (int i = 0; i < (int)PredefinedType.PT_COUNT; ++i)
-            {
-                NamespaceSymbol ns = GetRootNS();
-                string name = PredefinedTypeFacts.GetName((PredefinedType)i);
-                int start = 0;
-                while (start < name.Length)
-                {
-                    int iDot = name.IndexOf('.', start);
-                    if (iDot == -1) break;
-                    string sub = (iDot > start) ? name.Substring(start, iDot - start) : name.Substring(start);
-                    Name nm = this.GetNameManager().Add(sub);
-                    ns = LookupGlobalSymCore(nm, ns, symbmask_t.MASK_NamespaceSymbol) as NamespaceSymbol ?? _symFactory.CreateNamespace(nm, ns);
-                    start += sub.Length + 1;
-                }
-            }
-        }
-
         public Symbol LookupGlobalSymCore(Name name, ParentSymbol parent, symbmask_t kindmask)
         {
             return tableGlobal.LookupSym(name, parent, kindmask);
@@ -220,33 +173,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return null;
         }
 
-        public Name GetNameFromPtrs(object u1, object u2)
-        {
-            // Note: this won't produce the same names as the native logic
-            if (u2 != null)
-            {
-                return this.m_nameTable.Add(string.Format(CultureInfo.InvariantCulture, "{0:X}-{1:X}", u1.GetHashCode(), u2.GetHashCode()));
-            }
-            else
-            {
-                return this.m_nameTable.Add(string.Format(CultureInfo.InvariantCulture, "{0:X}", u1.GetHashCode()));
-            }
-        }
-
-        private AssemblyQualifiedNamespaceSymbol GetNsAid(NamespaceSymbol ns)
-        {
-            Name name = GetNameFromPtrs(0, 0);
-            Debug.Assert(name != null);
-
-            AssemblyQualifiedNamespaceSymbol nsa = LookupGlobalSymCore(name, ns, symbmask_t.MASK_AssemblyQualifiedNamespaceSymbol) as AssemblyQualifiedNamespaceSymbol
-                // Create a new one.
-                ?? _symFactory.CreateNamespaceAid(name, ns);
-
-            Debug.Assert(nsa.GetNS() == ns);
-
-            return nsa;
-        }
-
         ////////////////////////////////////////////////////////////////////////////////
         // Allocate a type array; used to represent a parameter list.
         // We use a hash table to make sure that allocating the same type array twice 
@@ -256,7 +182,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // 2) Make it so parameter lists can be compared by a simple pointer comparison
         // 3) Allow us to associate a token with each signature for faster metadata emit
 
-        private struct TypeArrayKey : IEquatable<TypeArrayKey>
+        private readonly struct TypeArrayKey : IEquatable<TypeArrayKey>
         {
             private readonly CType[] _types;
             private readonly int _hashCode;
@@ -264,11 +190,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             public TypeArrayKey(CType[] types)
             {
                 _types = types;
-                _hashCode = 0;
-                for (int i = 0, n = types.Length; i < n; i++)
+                int hashCode = 0x162A16FE;
+                foreach (CType type in types)
                 {
-                    _hashCode ^= types[i].GetHashCode();
+                    hashCode = (hashCode << 5) - hashCode;
+                    if (type != null)
+                    {
+                        hashCode ^= type.GetHashCode();
+                    }
                 }
+
+                _hashCode = hashCode;
             }
 
             public bool Equals(TypeArrayKey other)
@@ -287,7 +219,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 for (int i = 0; i < types.Length; i++)
                 {
-                    if (!types[i].Equals(otherTypes[i]))
+                    if (types[i] != otherTypes[i])
                     {
                         return false;
                     }
@@ -323,6 +255,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public TypeArray AllocParams(int ctype, TypeArray array, int offset)
         {
+            if (ctype == 0)
+            {
+                return s_taEmpty;
+            }
+
+            if (ctype == array.Count)
+            {
+                return array;
+            }
+
             CType[] types = array.Items;
             CType[] newTypes = new CType[ctype];
             Array.ConstrainedCopy(types, offset, newTypes, 0, ctype);

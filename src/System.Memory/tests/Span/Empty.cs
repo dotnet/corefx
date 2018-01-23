@@ -4,6 +4,7 @@
 
 using Xunit;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace System.SpanTests
 {
@@ -18,8 +19,8 @@ namespace System.SpanTests
             unsafe
             {
                 ref int expected = ref Unsafe.AsRef<int>(null);
-                ref int actual = ref empty.DangerousGetPinnableReference();
-                Assert.True(Unsafe.AreSame<int>(ref expected, ref actual));
+                ref int actual = ref MemoryMarshal.GetReference(empty);
+                Assert.True(Unsafe.AreSame(ref expected, ref actual));
             }
         }
     }

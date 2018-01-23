@@ -19,13 +19,17 @@ For more information about the different options when building, run `build.sh -?
 
 ### Linux
 
+First, the package lists might need to be updated
+
+`sudo apt-get update`
+
 #### Native build
 
 For Ubuntu 14.04, the following packages should be installed to build the native
 components
 
 * git
-* clang-3.5
+* clang-3.9
 * cmake
 * make
 * libc6-dev
@@ -34,7 +38,7 @@ components
 * libcurl4-openssl-dev
 * zlib1g-dev
 
-`sudo apt-get install git clang-3.5 cmake make libc6-dev libssl-dev libkrb5-dev
+`sudo apt-get install git clang-3.9 cmake make libc6-dev libssl-dev libkrb5-dev
 libcurl4-openssl-dev zlib1g-dev`
 
 #### Managed build
@@ -49,8 +53,6 @@ For Ubuntu 14.04, install the following packages:
 
 For Ubuntu 16.04 LTS / Bash on Ubuntu on Windows you may need to replace libicu52 with libicu55.
 Ubuntu 16.10 and Ubuntu 17.04 will require libicu57. 
-Ubuntu 17.04 also no longer provides clang-3.5 and comes with clang-3.8 by default.
-One will need to use `build.sh -Clang=clang3.8` to build native parts properly.
 
 `sudo apt-get install libunwind8 libicu55 curl`
 

@@ -101,7 +101,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
 
         PM_EXPRESSION_INVOKE,
-        PM_METHODINFO_CREATEDELEGATE_TYPE_OBJECT,
 
         PM_G_OPTIONAL_CTOR,
         PM_G_OPTIONAL_GETVALUE,
@@ -151,9 +150,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // start next value at PredefinedType.PT_VOID + 1,
         SIG_CLASS_TYVAR = (int)PredefinedType.PT_VOID + 1,          // next element in signature is index of class tyvar
         SIG_METH_TYVAR,                         // next element in signature is index of method tyvar
-        SIG_SZ_ARRAY,                           // must be followed by signature type of array elements
-        SIG_REF,                                // must be followed by signature of ref type
-        SIG_OUT,                                // must be followed by signature of out type
+        SIG_SZ_ARRAY                            // must be followed by signature type of array elements
     }
 
     // A description of a method the compiler uses while compiling.
@@ -211,47 +208,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private AggregateSymbol GetMethParent(PREDEFMETH method)
         {
-            return GetOptPredefAgg(GetMethPredefType(method));
-        }
-
-        // delegate specific helpers
-        private MethodSymbol FindDelegateConstructor(AggregateSymbol delegateType, int[] signature)
-        {
-            Debug.Assert(delegateType != null && delegateType.IsDelegate());
-            Debug.Assert(signature != null);
-
-            return LoadMethod(
-                                delegateType,
-                                signature,
-                                0,                          // meth ty vars
-                                GetPredefName(PredefinedName.PN_CTOR),
-                                ACCESS.ACC_PUBLIC,
-                                false,                      // MethodCallingConventionEnum.Static
-                                false);                     // MethodCallingConventionEnum.Virtual
-        }
-
-        private MethodSymbol FindDelegateConstructor(AggregateSymbol delegateType)
-        {
-            Debug.Assert(delegateType != null && delegateType.IsDelegate());
-
-            MethodSymbol ctor = FindDelegateConstructor(delegateType, s_DelegateCtorSignature1);
-            if (ctor == null)
-            {
-                ctor = FindDelegateConstructor(delegateType, s_DelegateCtorSignature2);
-            }
-
-            return ctor;
-        }
-
-        public MethodSymbol FindDelegateConstructor(AggregateSymbol delegateType, bool fReportErrors)
-        {
-            MethodSymbol ctor = FindDelegateConstructor(delegateType);
-            if (ctor == null && fReportErrors)
-            {
-                throw GetErrorContext().Error(ErrorCode.ERR_BadDelegateConstructor, delegateType);
-            }
-
-            return ctor;
+            return GetPredefAgg(GetMethPredefType(method));
         }
 
         private PropertySymbol LoadProperty(PREDEFPROP property)
@@ -275,7 +232,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(propertyGetter >= 0 && propertyGetter < PREDEFMETH.PM_COUNT);
 
             RuntimeBinderSymbolTable.AddPredefinedPropertyToSymbolTable(
-                GetOptPredefAgg(GetPropPredefType(predefProp)), propertyName);
+                GetPredefAgg(GetPropPredefType(predefProp)), propertyName);
             MethodSymbol getter = GetMethod(propertyGetter);
 
             getter.SetMethKind(MethodKindEnum.PropAccessor);
@@ -307,7 +264,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return NameManager.GetPredefinedName(pn);
         }
-        private AggregateSymbol GetOptPredefAgg(PredefinedType pt)
+        private AggregateSymbol GetPredefAgg(PredefinedType pt)
         {
             return GetSymbolLoader().GetPredefAgg(pt);
         }
@@ -321,76 +278,38 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             switch (current)
             {
-                case MethodSignatureEnum.SIG_REF:
-                    {
-                        CType refType = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                        if (refType == null)
-                        {
-                            return null;
-                        }
-                        return GetTypeManager().GetParameterModifier(refType, false);
-                    }
-                case MethodSignatureEnum.SIG_OUT:
-                    {
-                        CType outType = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                        if (outType == null)
-                        {
-                            return null;
-                        }
-                        return GetTypeManager().GetParameterModifier(outType, true);
-                    }
                 case MethodSignatureEnum.SIG_SZ_ARRAY:
-                    {
-                        CType elementType = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                        if (elementType == null)
-                        {
-                            return null;
-                        }
-                        return GetTypeManager().GetArray(elementType, 1, true);
-                    }
+                    return GetTypeManager()
+                        .GetArray(LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars), 1, true);
+
                 case MethodSignatureEnum.SIG_METH_TYVAR:
-                    {
-                        int index = signature[indexIntoSignatures];
-                        indexIntoSignatures++;
-                        return GetTypeManager().GetStdMethTypeVar(index);
-                    }
+                    return GetTypeManager().GetStdMethTypeVar(signature[indexIntoSignatures++]);
+
                 case MethodSignatureEnum.SIG_CLASS_TYVAR:
-                    {
-                        int index = signature[indexIntoSignatures];
-                        indexIntoSignatures++;
-                        return classTyVars[index];
-                    }
+                    return classTyVars[signature[indexIntoSignatures++]];
+
                 case (MethodSignatureEnum)PredefinedType.PT_VOID:
                     return GetTypeManager().GetVoid();
+
                 default:
+                    Debug.Assert(current >= 0 && (int)current < (int)PredefinedType.PT_COUNT);
+                    AggregateSymbol agg = GetPredefAgg((PredefinedType)current);
+                    int typeCount = agg.GetTypeVars().Count;
+                    if (typeCount == 0)
                     {
-                        Debug.Assert(current >= 0 && (int)current < (int)PredefinedType.PT_COUNT);
-                        AggregateSymbol agg = GetOptPredefAgg((PredefinedType)current);
-                        if (agg != null)
-                        {
-                            CType[] typeArgs = new CType[agg.GetTypeVars().Count];
-                            for (int iTypeArg = 0; iTypeArg < agg.GetTypeVars().Count; iTypeArg++)
-                            {
-                                typeArgs[iTypeArg] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                                if (typeArgs[iTypeArg] == null)
-                                {
-                                    return null;
-                                }
-                            }
-                            AggregateType type = GetTypeManager().GetAggregate(agg, getBSymmgr().AllocParams(agg.GetTypeVars().Count, typeArgs));
-                            if (type.isPredefType(PredefinedType.PT_G_OPTIONAL))
-                            {
-                                return GetTypeManager().GetNubFromNullable(type);
-                            }
-
-                            return type;
-                        }
+                        return GetTypeManager().GetAggregate(agg, BSYMMGR.EmptyTypeArray());
                     }
-                    break;
-            }
 
-            return null;
+                    CType[] typeArgs = new CType[typeCount];
+                    for (int iTypeArg = 0; iTypeArg < typeArgs.Length; iTypeArg++)
+                    {
+                        typeArgs[iTypeArg] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
+                    }
+
+                    return GetTypeManager().GetAggregate(agg, getBSymmgr().AllocParams(typeArgs));
+            }
         }
+
         private TypeArray LoadTypeArrayFromSignature(int[] signature, ref int indexIntoSignatures, TypeArray classTyVars)
         {
             Debug.Assert(signature != null);
@@ -401,14 +320,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(count >= 0);
 
             CType[] ptypes = new CType[count];
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < ptypes.Length; i++)
             {
                 ptypes[i] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                if (ptypes[i] == null)
-                {
-                    return null;
-                }
             }
+
             return getBSymmgr().AllocParams(count, ptypes);
         }
 
@@ -468,8 +384,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             TypeArray argumentTypes = LoadTypeArrayFromSignature(signature, ref index, classTyVars);
             Debug.Assert(argumentTypes != null);
 
-            TypeArray standardMethodTyVars = GetTypeManager().GetStdMethTyVarArray(cMethodTyVars);
-
             MethodSymbol ret = LookupMethodWhileLoading(type, cMethodTyVars, methodName, methodAccess, isStatic, isVirtual, returnType, argumentTypes);
 
             if (ret == null)
@@ -484,7 +398,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             for (Symbol sym = GetSymbolLoader().LookupAggMember(methodName, type, symbmask_t.MASK_ALL);
                  sym != null;
-                 sym = GetSymbolLoader().LookupNextSym(sym, type, symbmask_t.MASK_ALL))
+                 sym = SymbolLoader.LookupNextSym(sym, type, symbmask_t.MASK_ALL))
             {
                 if (sym is MethodSymbol methsym)
                 {
@@ -514,9 +428,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         IsMethStatic(method),
                         IsMethVirtual(method));
         }
-
-        private static readonly int[] s_DelegateCtorSignature1 = { (int)PredefinedType.PT_VOID, 2, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_INTPTR };
-        private static readonly int[] s_DelegateCtorSignature2 = { (int)PredefinedType.PT_VOID, 2, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_UINTPTR };
 
         private static PredefinedName GetPropPredefName(PREDEFPROP property)
         {
@@ -672,7 +583,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEWARRAYINIT,                         PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEWARRAYINIT,            MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_NEWARRAYEXPRESSION, 2, (int)PredefinedType.PT_TYPE, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_EXPRESSION }),
             new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_PROPERTY,                             PredefinedType.PT_EXPRESSION,          PredefinedName.PN_EXPRESSION_PROPERTY,     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_MEMBEREXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_PROPERTYINFO }),
             new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_INVOKE,                               PredefinedType.PT_EXPRESSION,          PredefinedName.PN_INVOKE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_INVOCATIONEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_EXPRESSION }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_METHODINFO_CREATEDELEGATE_TYPE_OBJECT,           PredefinedType.PT_METHODINFO,          PredefinedName.PN_CREATEDELEGATE,          MethodCallingConventionEnum.Virtual,    ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DELEGATE, 2, (int)PredefinedType.PT_TYPE, (int)PredefinedType.PT_OBJECT}),
             new PredefinedMethodInfo(   PREDEFMETH.PM_G_OPTIONAL_CTOR,                                 PredefinedType.PT_G_OPTIONAL,          PredefinedName.PN_CTOR,                    MethodCallingConventionEnum.Instance,   ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_VOID, 1, (int)MethodSignatureEnum.SIG_CLASS_TYVAR, 0  }),
             new PredefinedMethodInfo(   PREDEFMETH.PM_G_OPTIONAL_GETVALUE,                             PredefinedType.PT_G_OPTIONAL,          PredefinedName.PN_GETVALUE,                MethodCallingConventionEnum.Instance,   ACCESS.ACC_PUBLIC,     0,  new int[] { (int)MethodSignatureEnum.SIG_CLASS_TYVAR, 0, 0  }),
             new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_CONCAT_OBJECT_2,                          PredefinedType.PT_STRING,              PredefinedName.PN_CONCAT,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_STRING, 2, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_OBJECT  }),

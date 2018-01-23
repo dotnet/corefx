@@ -19,14 +19,14 @@ namespace System.Diagnostics
         /// <param name="args">The arguments to pass to the method.</param>
         /// <param name="start">true if this function should Start the Process; false if that responsibility is left up to the caller.</param>
         /// <param name="psi">The ProcessStartInfo to use, or null for a default.</param>
-        /// <param name="pasteArguments">true if this function should paste the arguments (e.g. surrounding with quotes); false if that reponsibility is left up to the caller.</param>
+        /// <param name="pasteArguments">true if this function should paste the arguments (e.g. surrounding with quotes); false if that responsibility is left up to the caller.</param>
         private static RemoteInvokeHandle RemoteInvoke(MethodInfo method, string[] args, RemoteInvokeOptions options, bool pasteArguments = true)
         {
             options = options ?? new RemoteInvokeOptions();
 
-            // Verify the specified method is and that it returns an int (the exit code),
+            // Verify the specified method returns an int (the exit code) or nothing,
             // and that if it accepts any arguments, they're all strings.
-            Assert.True(method.ReturnType == typeof(int) || method.ReturnType == typeof(Task<int>));
+            Assert.True(method.ReturnType == typeof(void) || method.ReturnType == typeof(int) || method.ReturnType == typeof(Task<int>));
             Assert.All(method.GetParameters(), pi => Assert.Equal(typeof(string), pi.ParameterType));
 
             // And make sure it's in this assembly.  This isn't critical, but it helps with deployment to know
@@ -55,8 +55,8 @@ namespace System.Diagnostics
             string passedArgs = pasteArguments ? PasteArguments.Paste(args, pasteFirstArgumentUsingArgV0Rules: false) : string.Join(" ", args);
             string testConsoleAppArgs = ExtraParameter + " " + metadataArgs + " " + passedArgs;
 
-            if (!File.Exists(TestConsoleApp))
-                throw new IOException("RemoteExecutorConsoleApp test app isn't present in the test runtime directory.");
+            if (!File.Exists(HostRunner))
+                throw new IOException($"{HostRunner} test app isn't present in the test runtime directory.");
 
             psi.FileName = HostRunner;
             psi.Arguments = testConsoleAppArgs;

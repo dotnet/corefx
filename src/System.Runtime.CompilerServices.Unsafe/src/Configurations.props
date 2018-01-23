@@ -4,6 +4,6 @@
     <BuildConfigurations>
       netstandard1.0;
       netstandard;
-    </BuildConfigurations>
+    </BuildConfigurations>  
   </PropertyGroup>
 </Project>

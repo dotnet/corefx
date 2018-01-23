@@ -25,10 +25,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         // All EXF flags are < 0x01000000
         MustBeInvocable = 0x20000000,
-        TypeVarsAllowed = 0x40000000,
-        ExtensionCall = 0x80000000,
 
-        All = Ctor | NewObj | Operator | Indexer | UserCallable | BaseCall | MustBeInvocable | TypeVarsAllowed | ExtensionCall
+        All = Ctor | NewObj | Operator | Indexer | UserCallable | BaseCall | MustBeInvocable
     }
 
     /////////////////////////////////////////////////////////////////////////////////
@@ -49,7 +47,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private Name _name;
         private int _arity;
         private MemLookFlags _flags;
-        private CMemberLookupResults _results;
 
         // For maintaining the type array. We throw the first 8 or so here.
         private readonly List<AggregateType> _rgtypeStart;
@@ -66,25 +63,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private readonly SymWithType _swtBad;       // If we're looking for a constructor or indexer, this matched on name, but isn't the right thing.
         private readonly SymWithType _swtBogus;     // A bogus member - such as an indexed property.
         private readonly SymWithType _swtBadArity;  // An symbol with the wrong arity.
-        private SymWithType _swtAmbigWarn; // An ambiguous symbol, but only warn.
-
-        // We have an override symbol, which we've errored on in SymbolPrepare. If we have nothing better, use this.
-        // This is because if we have:
-        //
-        // class C : D
-        // {
-        //     public override int M() { }
-        //     static void Main()
-        //     {
-        //         C c = new C();
-        //         c.M(); <-- 
-        //
-        // We try to look up M, and find the M on C, but throw it out since its an override, and 
-        // we want the virtual that it overrides. However, in this case, we'll never find that
-        // virtual, since it doesn't exist. We therefore want to use the override anyway, and
-        // continue on to give results with that.
-
-        private readonly SymWithType _swtOverride;
         private bool _fMulti;              // Whether symFirst is of a kind for which we collect multiples (methods and indexers).
 
         /***************************************************************************************************
@@ -134,10 +112,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
 
             // Loop through symbols.
-            Symbol symCur = null;
+            Symbol symCur;
             for (symCur = GetSymbolLoader().LookupAggMember(_name, typeCur.getAggregate(), symbmask_t.MASK_ALL);
                  symCur != null;
-                 symCur = GetSymbolLoader().LookupNextSym(symCur, typeCur.getAggregate(), symbmask_t.MASK_ALL))
+                 symCur = SymbolLoader.LookupNextSym(symCur, typeCur.getAggregate(), symbmask_t.MASK_ALL))
             {
                 // Check for arity.
                 switch (symCur.getKind())
@@ -164,17 +142,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         }
                         break;
 
-                    case SYMKIND.SK_TypeParameterSymbol:
-                        if ((_flags & MemLookFlags.TypeVarsAllowed) == 0)
-                            continue;
-                        if (_arity > 0)
-                        {
-                            if (!_swtBadArity)
-                                _swtBadArity.Set(symCur, typeCur);
-                            continue;
-                        }
-                        break;
-
                     default:
                         // All others are only considered when arity is zero.
                         if (_arity > 0)
@@ -189,10 +156,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // Check for user callability.
                 if (symCur.IsOverride() && !symCur.IsHideByName())
                 {
-                    if (!_swtOverride)
-                    {
-                        _swtOverride.Set(symCur, typeCur);
-                    }
                     continue;
                 }
 
@@ -326,7 +289,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                         // Give method groups priority.
                         if (!(symCur is MethodSymbol))
                             goto LAmbig;
-                        _swtAmbigWarn = _swtFirst;
                         // Erase previous results so we'll record this method as the first.
                         _prgtype = new List<AggregateType>();
                         _csym = 0;
@@ -340,8 +302,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                             // Give method groups priority.
                             if (!(_swtFirst.Sym is MethodSymbol))
                                 goto LAmbig;
-                            if (!_swtAmbigWarn)
-                                _swtAmbigWarn.Set(symCur, typeCur);
                         }
                         // This one is hidden by another. This one also hides any more in base types.
                         pfHideByName = true;
@@ -428,10 +388,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert(!typeCur.isInterfaceType());
 
-                bool fHideByName = false;
-
-                SearchSingleType(typeCur, out fHideByName);
-                _flags &= ~MemLookFlags.TypeVarsAllowed;
+                SearchSingleType(typeCur, out bool fHideByName);
 
                 if (_swtFirst && !_fMulti)
                 {
@@ -499,9 +456,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 Debug.Assert(typeCur != null && typeCur.isInterfaceType());
 
-                bool fHideByName = false;
-
-                if (!typeCur.fAllHidden && SearchSingleType(typeCur, out fHideByName))
+                if (!typeCur.fAllHidden && SearchSingleType(typeCur, out bool fHideByName))
                 {
                     fHideByName |= !_fMulti;
 
@@ -520,7 +475,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (fHideByName)
                         fHideObject = true;
                 }
-                _flags &= ~MemLookFlags.TypeVarsAllowed;
 
                 if (itypeNext >= types.Count)
                     return !fHideObject;
@@ -568,8 +522,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _swtBad = new SymWithType();
             _swtBogus = new SymWithType();
             _swtBadArity = new SymWithType();
-            _swtAmbigWarn = new SymWithType();
-            _swtOverride = new SymWithType();
         }
 
         /***************************************************************************************************
@@ -593,7 +545,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert((flags & ~MemLookFlags.All) == 0);
             Debug.Assert(obj == null || obj.Type != null);
-            Debug.Assert(typeSrc is AggregateType || typeSrc is TypeParameterType);
+            Debug.Assert(typeSrc is AggregateType);
             Debug.Assert(checker != null);
 
             _prgtype = _rgtypeStart;
@@ -616,16 +568,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             TypeArray ifaces = BSYMMGR.EmptyTypeArray();
             AggregateType typeCls2 = null;
 
-            if (typeSrc is TypeParameterType typeParamSrc)
-            {
-                Debug.Assert((_flags & (MemLookFlags.Ctor | MemLookFlags.NewObj | MemLookFlags.Operator | MemLookFlags.BaseCall | MemLookFlags.TypeVarsAllowed)) == 0);
-                _flags &= ~MemLookFlags.TypeVarsAllowed;
-                ifaces = typeParamSrc.GetInterfaceBounds();
-                typeCls1 = typeParamSrc.GetEffectiveBaseClass();
-                if (ifaces.Count > 0 && typeCls1.isPredefType(PredefinedType.PT_OBJECT))
-                    typeCls1 = null;
-            }
-            else if (!typeSrc.isInterfaceType())
+            if (!typeSrc.isInterfaceType())
             {
                 typeCls1 = (AggregateType)typeSrc;
 
@@ -659,15 +602,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            // if we are requested with extension methods
-            _results = new CMemberLookupResults(GetAllTypes(), _name);
-
             return !FError();
-        }
-
-        public CMemberLookupResults GetResults()
-        {
-            return _results;
         }
 
         // Whether there were errors.

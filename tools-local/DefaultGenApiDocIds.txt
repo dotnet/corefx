@@ -6,6 +6,7 @@ T:System.ComponentModel.Design.Serialization.RootDesignerSerializerAttribute
 T:System.ComponentModel.EditorAttribute
 T:System.ComponentModel.TypeConverterAttribute
 T:System.Configuration.ConfigurationPropertyAttribute
+T:System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute
 T:System.Diagnostics.CodeAnalysis.SuppressMessageAttribute
 T:System.Diagnostics.DebuggerBrowsableAttribute
 T:System.Diagnostics.DebuggerDisplayAttribute
@@ -26,6 +27,7 @@ T:System.Runtime.InteropServices.ComDefaultInterfaceAttribute
 T:System.Runtime.InteropServices.ComVisibleAttribute
 T:System.Runtime.InteropServices.GuidAttribute
 T:System.Runtime.InteropServices.InterfaceTypeAttribute
+T:System.Runtime.InteropServices.StructLayoutAttribute
 T:System.Runtime.Serialization.KnownTypeAttribute
 T:System.Security.Permissions.EnvironmentPermissionAttribute
 T:System.Security.Permissions.FileIOPermissionAttribute

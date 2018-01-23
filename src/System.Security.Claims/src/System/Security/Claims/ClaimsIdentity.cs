@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Security.Principal;
@@ -153,7 +152,7 @@ namespace System.Security.Claims
         /// <para>All <see cref="Claim"/>s are copied into this instance in a <see cref="List{Claim}"/>. Each Claim is examined and if Claim.Subject != this, then Claim.Clone(this) is called before the claim is added.</para>
         /// <para>Any 'External' claims are ignored.</para>
         /// </remarks>
-        /// <exception cref="InvalidOperationException">if 'identity' is a <see cref="ClaimsIdentity"/> and <see cref="ClaimsIdentity.Actor"/> results in a circular refrence back to 'this'.</exception>
+        /// <exception cref="InvalidOperationException">if 'identity' is a <see cref="ClaimsIdentity"/> and <see cref="ClaimsIdentity.Actor"/> results in a circular reference back to 'this'.</exception>
         public ClaimsIdentity(IIdentity identity, IEnumerable<Claim> claims, string authenticationType, string nameType, string roleType)
         {
             ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;
@@ -255,7 +254,6 @@ namespace System.Security.Claims
         /// The <see cref="SerializationInfo"/> to read from.
         /// </param>
         /// <exception cref="ArgumentNullException">Thrown is the <paramref name="info"/> is null.</exception>
-        [SecurityCritical]
         protected ClaimsIdentity(SerializationInfo info)
         {
             throw new PlatformNotSupportedException();
@@ -434,8 +432,6 @@ namespace System.Security.Claims
                 throw new ArgumentNullException(nameof(claim));
             }
 
-            Contract.EndContractBlock();
-
             if (object.ReferenceEquals(claim.Subject, this))
             {
                 _instanceClaims.Add(claim);
@@ -450,7 +446,7 @@ namespace System.Security.Claims
         /// Adds a <see cref="IEnumerable{Claim}"/> to the internal list.
         /// </summary>
         /// <param name="claims">Enumeration of claims to add.</param>
-        /// <remarks>Each claim is examined and if <see cref="Claim.Subject"/> != this, then then Claim.Clone(this) is called before the claim is added.</remarks>
+        /// <remarks>Each claim is examined and if <see cref="Claim.Subject"/> != this, then Claim.Clone(this) is called before the claim is added.</remarks>
         /// <exception cref="ArgumentNullException">if 'claims' is null.</exception>
         public virtual void AddClaims(IEnumerable<Claim> claims)
         {
@@ -458,8 +454,6 @@ namespace System.Security.Claims
             {
                 throw new ArgumentNullException(nameof(claims));
             }
-
-            Contract.EndContractBlock();
 
             foreach (Claim claim in claims)
             {
@@ -578,8 +572,6 @@ namespace System.Security.Claims
                 throw new ArgumentNullException(nameof(match));
             }
 
-            Contract.EndContractBlock();
-
             foreach (Claim claim in Claims)
             {
                 if (match(claim))
@@ -602,8 +594,6 @@ namespace System.Security.Claims
             {
                 throw new ArgumentNullException(nameof(type));
             }
-
-            Contract.EndContractBlock();
 
             foreach (Claim claim in Claims)
             {
@@ -630,8 +620,6 @@ namespace System.Security.Claims
                 throw new ArgumentNullException(nameof(match));
             }
 
-            Contract.EndContractBlock();
-
             foreach (Claim claim in Claims)
             {
                 if (match(claim))
@@ -656,8 +644,6 @@ namespace System.Security.Claims
             {
                 throw new ArgumentNullException(nameof(type));
             }
-
-            Contract.EndContractBlock();
 
             foreach (Claim claim in Claims)
             {
@@ -685,8 +671,6 @@ namespace System.Security.Claims
             {
                 throw new ArgumentNullException(nameof(match));
             }
-
-            Contract.EndContractBlock();
 
             foreach (Claim claim in Claims)
             {
@@ -719,8 +703,6 @@ namespace System.Security.Claims
             {
                 throw new ArgumentNullException(nameof(value));
             }
-
-            Contract.EndContractBlock();
 
             foreach (Claim claim in Claims)
             {

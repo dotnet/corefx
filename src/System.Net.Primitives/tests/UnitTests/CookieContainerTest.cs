@@ -143,7 +143,9 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // RFC 2965
 
-            yield return new object[] { u,
+            yield return new object[]
+            {
+                u,
                 "name98=value98; port=\"80, 90\", name99=value99",
                 new Cookie[]
                 {
@@ -152,7 +154,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // RFC 2965 (no path)
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 uSecure,
                 "name98=value98; name98=value98; comment=comment; comment=comment2; commentURL=http://url.com; commentURL=commentURL2; discard; discard; domain=.uri.com; domain=domain2; max-age=400; max-age=400; path=/; path=path; port=\"80, 90, 443\"; port=port2; path=path; expires=Wed, 09 Jun 2021 10:18:14 GMT; expires=expires2; secure; secure; httponly; httponly; Version=100; Version=100, name99=value99",
                 new Cookie[]
@@ -162,7 +165,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Double entries
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u,
                 "name98=value98; commentURL=invalidurl",
                 new Cookie[]
@@ -171,7 +175,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Ignore invalid comment url
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u6,
                 "name98=value98; unknown1; unknown2=unknown",
                 new Cookie[]
@@ -180,7 +185,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Ignore unknown tokens
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u6,
                 "name98=value98; =; token=",
                 new Cookie[]
@@ -189,7 +195,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Ignore invalid tokens
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u6,
                 "name98=\"value; domain=\".domain\"; max-age=\"400\"",
                 new Cookie[]
@@ -198,7 +205,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Use escaped values (1)
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u6,
                 "name98=\"\"",
                 new Cookie[]
@@ -206,6 +214,123 @@ namespace System.Net.Primitives.Unit.Tests
                     new Cookie("name98", "\"\"")
                 }
             }; // Use escaped values (2)
+            
+            yield return new object[]
+            {
+                u,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Normal case
+            
+            yield return new object[]
+            {
+                uSecure,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Normal case with secure URI
+            
+            yield return new object[]
+            {
+                u,
+                ",locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header at the beginning
+            
+            yield return new object[]
+            {
+                uSecure,
+                "          ,locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header composed of spaces at the beginning
+            
+            yield return new object[]
+            {
+                u,
+                "locale=en,, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header in the middle
+            
+            yield return new object[]
+            {
+                uSecure,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46,       , country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header composed of spaces in the middle
+            
+            yield return new object[]
+            {
+                u,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1,",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header at the end
+            
+            yield return new object[]
+            {
+                u,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1,   ",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header composed of spaces at the end
+            
+            yield return new object[]
+            {
+                uSecure,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1,   ,",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header followed by another empty header at the end
         }
 
         [Theory]
@@ -218,6 +343,7 @@ namespace System.Net.Primitives.Unit.Tests
 
         [Theory]
         [MemberData(nameof(SetCookiesData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void SetCookies_Success(Uri uri, string cookieHeader, Cookie[] expected)
         {
             CookieContainer cc = CreateCount11Container();
@@ -515,6 +641,29 @@ namespace System.Net.Primitives.Unit.Tests
             Assert.Equal(c1, cc2[0]);
             Assert.Equal(c2, cc2[1]);
             Assert.Equal(c4, cc2[2]);
+        }
+
+        [Fact]
+        public void GetCookies_DifferentPaths_ReturnsConsistentResults()
+        {
+            Cookie c1 = new Cookie("name1", "value", "/base", ".url.com");
+            Cookie c2 = new Cookie("name2", "value", "/base/url1", ".url.com");
+            Cookie c3 = new Cookie("name3", "value", "/base/url2", ".url.com");
+
+            CookieContainer cc1 = new CookieContainer();
+            cc1.Add(c1);
+            cc1.Add(c2);
+            cc1.Add(c3);
+
+            CookieCollection cc2 = cc1.GetCookies(new Uri("http://url.com/base/url1"));
+            Assert.Equal(2, cc2.Count);
+            Assert.Equal(c2, cc2[0]);
+            Assert.Equal(c1, cc2[1]);
+
+            CookieCollection cc3 = cc1.GetCookies(new Uri("http://url.com/base/url2"));
+            Assert.Equal(2, cc3.Count);
+            Assert.Equal(c3, cc3[0]);
+            Assert.Equal(c1, cc3[1]);
         }
 
         [Fact]

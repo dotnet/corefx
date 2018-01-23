@@ -105,6 +105,7 @@ namespace System.Data.SqlClient.SNI
 
             ContextFlagsPal requestedContextFlags = ContextFlagsPal.Connection
                 | ContextFlagsPal.Confidentiality
+                | ContextFlagsPal.Delegate
                 | ContextFlagsPal.MutualAuth;
 
             string serverSPN = System.Text.Encoding.UTF8.GetString(serverName);
@@ -144,11 +145,11 @@ namespace System.Data.SqlClient.SNI
                 // so we don't need to check for a GssApiException here.
                 if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError)
                 {
-                    throw new Exception(SQLMessage.KerberosTicketMissingError() + "\n" + statusCode);
+                    throw new InvalidOperationException(SQLMessage.KerberosTicketMissingError() + "\n" + statusCode);
                 }
                 else
                 {
-                    throw new Exception(SQLMessage.SSPIGenerateError() + "\n" + statusCode);
+                    throw new InvalidOperationException(SQLMessage.SSPIGenerateError() + "\n" + statusCode);
                 }
             }
         }
@@ -473,7 +474,7 @@ namespace System.Data.SqlClient.SNI
         /// Gets the Local db Named pipe data source if the input is a localDB server. 
         /// </summary>
         /// <param name="fullServerName">The data source</param>
-        /// <param name="error">Set true when an error occured while getting LocalDB up</param>
+        /// <param name="error">Set true when an error occurred while getting LocalDB up</param>
         /// <returns></returns>
         private string GetLocalDBDataSource(string fullServerName, out bool error)
         {

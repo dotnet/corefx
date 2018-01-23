@@ -8,7 +8,6 @@ using System.Security;
 
 namespace System.Drawing.Internal
 {
-    [SuppressUnmanagedCodeSecurity]
     internal static partial class IntUnsafeNativeMethods
     {
         [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true, EntryPoint = "GetDC", CharSet = CharSet.Auto)]
@@ -22,7 +21,7 @@ namespace System.Drawing.Internal
         }
 
         /// <summary>
-        /// NOTE: DeleteDC is to be used to delete the hdc created from CreateCompatibleDC ONLY. All other hdcs shoul
+        /// NOTE: DeleteDC is to be used to delete the hdc created from CreateCompatibleDC ONLY. All other hdcs should
         /// be deleted with DeleteHDC.
         /// </summary>
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, EntryPoint = "DeleteDC", CharSet = CharSet.Auto)]

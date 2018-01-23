@@ -32,13 +32,7 @@ public static partial class XmlSerializerTests
             method.Invoke(null, new object[] { 1 });
 #endif
 #if XMLSERIALIZERGENERATORTESTS
-            string path = Path.GetDirectoryName(typeof(XmlSerializerTests).Assembly.Location);
-            string serializername = typeof(TypeWithDateTimeStringProperty).Assembly.GetName().Name + ".XmlSerializers.dll";
-            string serializerPath = Path.Combine(path, serializername);
-            if (File.Exists(serializerPath))
-            {
-                method.Invoke(null, new object[] { 3 });
-            }
+            method.Invoke(null, new object[] { 3 });
 #endif
         }
     }
@@ -1617,6 +1611,15 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 </DefaultValuesSetToNaN>");
         Assert.NotNull(actual);
         Assert.Equal(value, actual);
+    }
+
+    [Fact]
+    public static void Xml_TypeWithMismatchBetweenAttributeAndPropertyType()
+    {
+        var value = new TypeWithMismatchBetweenAttributeAndPropertyType();
+        var actual = SerializeAndDeserialize(value,
+@"<?xml version=""1.0""?><RootElement xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" IntValue=""120"" />");
+        Assert.StrictEqual(value.IntValue, actual.IntValue);
     }
 
     private static readonly string s_defaultNs = "http://tempuri.org/";

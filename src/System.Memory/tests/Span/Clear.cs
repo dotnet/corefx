@@ -4,6 +4,7 @@
 
 using Xunit;
 using System.Runtime.CompilerServices;
+using static System.TestHelpers;
 
 namespace System.SpanTests
 {
@@ -56,8 +57,8 @@ namespace System.SpanTests
             var actualSpan = new Span<byte>(actualFull, start, length - start - 1);
             actualSpan.Clear();
 
-            var actual = actualSpan.ToArray();
-            var expected = expectedSpan.ToArray();
+            byte[] actual = actualSpan.ToArray();
+            byte[] expected = expectedSpan.ToArray();
             Assert.Equal<byte>(expected, actual);
             Assert.Equal(initial, actualFull[0]);
             Assert.Equal(initial, actualFull[length - 1]);
@@ -82,8 +83,8 @@ namespace System.SpanTests
                 var actualSpan = new Span<byte>(p + start, length - start - 1);
                 actualSpan.Clear();
 
-                var actual = actualSpan.ToArray();
-                var expected = expectedSpan.ToArray();
+                byte[] actual = actualSpan.ToArray();
+                byte[] expected = expectedSpan.ToArray();
                 Assert.Equal<byte>(expected, actual);
                 Assert.Equal(initial, actualFull[0]);
                 Assert.Equal(initial, actualFull[length - 1]);
@@ -107,8 +108,8 @@ namespace System.SpanTests
             var actualSpan = new Span<IntPtr>(actualFull, start, length - start - 1);
             actualSpan.Clear();
 
-            var actual = actualSpan.ToArray();
-            var expected = expectedSpan.ToArray();
+            IntPtr[] actual = actualSpan.ToArray();
+            IntPtr[] expected = expectedSpan.ToArray();
             Assert.Equal<IntPtr>(expected, actual);
             Assert.Equal(initial, actualFull[0]);
             Assert.Equal(initial, actualFull[length - 1]);
@@ -129,7 +130,6 @@ namespace System.SpanTests
             span.Clear();
             Assert.Equal<IntPtr>(expected, actual);
         }
-
 
         [Fact]
         public static void ClearValueTypeWithoutReferences()
@@ -201,8 +201,8 @@ namespace System.SpanTests
         [Fact]
         public static void ClearEnumType()
         {
-            TestEnum[] actual = {TestEnum.e0, TestEnum.e1, TestEnum.e2};
-            TestEnum[] expected = {default(TestEnum), default(TestEnum), default(TestEnum) };
+            TestEnum[] actual = { TestEnum.e0, TestEnum.e1, TestEnum.e2 };
+            TestEnum[] expected = { default, default, default };
 
             var span = new Span<TestEnum>(actual);
             span.Clear();
@@ -217,9 +217,9 @@ namespace System.SpanTests
                 new TestValueTypeWithReference() { I = 2, S = "b" },
                 new TestValueTypeWithReference() { I = 3, S = "c" } };
             TestValueTypeWithReference[] expected = {
-                default(TestValueTypeWithReference),
-                default(TestValueTypeWithReference),
-                default(TestValueTypeWithReference) };
+                default,
+                default,
+                default };
 
             var span = new Span<TestValueTypeWithReference>(actual);
             span.Clear();

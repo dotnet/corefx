@@ -28,8 +28,8 @@ namespace System.Net.Http
 
             HttpConnectionPool pool = _connectionPools.GetOrAddPool(key);
             ValueTask<HttpConnection> connectionTask = pool.GetConnectionAsync(
-                state => state.handler.CreateConnection(state.request, state.key, state.pool),
-                (handler: this, request: request, key: key, pool: pool));
+                (state, ct) => state.handler.CreateConnection(state.request, state.key, state.pool, ct),
+                (handler: this, request: request, key: key, pool: pool), cancellationToken);
 
             return connectionTask.IsCompletedSuccessfully ?
                 connectionTask.Result.SendAsync(request, cancellationToken) :
@@ -43,23 +43,36 @@ namespace System.Net.Http
             return await connection.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
 
-        private async ValueTask<SslStream> EstablishSslConnection(string host, HttpRequestMessage request, Stream stream)
+        private async ValueTask<SslStream> EstablishSslConnection(string host, HttpRequestMessage request, Stream stream, CancellationToken cancellationToken)
         {
             RemoteCertificateValidationCallback callback = null;
             if (_settings._serverCertificateCustomValidationCallback != null)
             {
                 callback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) =>
                 {
-                    return _settings._serverCertificateCustomValidationCallback(request, certificate as X509Certificate2, chain, sslPolicyErrors);
+                    try
+                    {
+                        return _settings._serverCertificateCustomValidationCallback(request, certificate as X509Certificate2, chain, sslPolicyErrors);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new HttpRequestException(SR.net_http_ssl_connection_failed, e);
+                    }
                 };
             }
 
-            SslStream sslStream = new SslStream(stream, false, callback);
+            var sslStream = new SslStream(stream);
 
             try
             {
-                // TODO https://github.com/dotnet/corefx/issues/23077#issuecomment-321807131: No cancellationToken?
-                await sslStream.AuthenticateAsClientAsync(host, _settings._clientCertificates, _settings._sslProtocols, _settings._checkCertificateRevocationList).ConfigureAwait(false);
+                await sslStream.AuthenticateAsClientAsync(new SslClientAuthenticationOptions
+                {
+                    TargetHost = host,
+                    ClientCertificates = _settings._clientCertificates,
+                    EnabledSslProtocols = _settings._sslProtocols,
+                    CertificateRevocationCheckMode = _settings._checkCertificateRevocationList ? X509RevocationMode.Online : X509RevocationMode.NoCheck,
+                    RemoteCertificateValidationCallback = callback
+                }, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -74,17 +87,53 @@ namespace System.Net.Http
             return sslStream;
         }
 
-        private async ValueTask<HttpConnection> CreateConnection(HttpRequestMessage request, HttpConnectionKey key, HttpConnectionPool pool)
+        private async ValueTask<HttpConnection> CreateConnection(
+            HttpRequestMessage request, HttpConnectionKey key, HttpConnectionPool pool, CancellationToken cancellationToken)
         {
             Uri uri = request.RequestUri;
 
-            Stream stream = await ConnectHelper.ConnectAsync(uri.IdnHost, uri.Port).ConfigureAwait(false);
+            Stream stream = await ConnectHelper.ConnectAsync(uri.IdnHost, uri.Port, cancellationToken).ConfigureAwait(false);
 
             TransportContext transportContext = null;
 
-            if (uri.Scheme == UriScheme.Https)
+            if (HttpUtilities.IsSupportedSecureScheme(uri.Scheme))
             {
-                SslStream sslStream = await EstablishSslConnection(uri.IdnHost, request, stream).ConfigureAwait(false);
+                // Get the appropriate host name to use for the SSL connection, allowing a host header to override.
+                string host = request.Headers.Host;
+                if (host == null)
+                {
+                    // No host header, use the host from the Uri.
+                    host = uri.IdnHost;
+                }
+                else
+                {
+                    // There is a host header.  Use it, but first see if we need to trim off a port.
+                    int colonPos = host.IndexOf(':');
+                    if (colonPos >= 0)
+                    {
+                        // There is colon, which could either be a port separator or a separator in
+                        // an IPv6 address.  See if this is an IPv6 address; if it's not, use everything
+                        // before the colon as the host name, and if it is, use everything before the last
+                        // colon iff the last colon is after the end of the IPv6 address (otherwise it's a
+                        // part of the address).
+                        int ipV6AddressEnd = host.IndexOf(']');
+                        if (ipV6AddressEnd == -1)
+                        {
+                            host = host.Substring(0, colonPos);
+                        }
+                        else
+                        {
+                            colonPos = host.LastIndexOf(':');
+                            if (colonPos > ipV6AddressEnd)
+                            {
+                                host = host.Substring(0, colonPos);
+                            }
+                        }
+                    }
+                }
+
+                // Establish the connection using the parsed host name.
+                SslStream sslStream = await EstablishSslConnection(host, request, stream, cancellationToken).ConfigureAwait(false);
                 stream = sslStream;
                 transportContext = sslStream.TransportContext;
             }

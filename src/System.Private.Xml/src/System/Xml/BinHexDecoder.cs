@@ -7,17 +7,6 @@ using System.Diagnostics;
 
 namespace System.Xml
 {
-#if XMLSERIALIZERGENERATOR
-    internal abstract class IncrementalReadDecoder
-    {
-        internal abstract int DecodedCount { get; }
-        internal abstract bool IsFull { get; }
-        internal abstract void SetNextOutputBuffer(Array array, int offset, int len);
-        internal abstract int Decode(char[] chars, int startPos, int len);
-        internal abstract int Decode(string str, int startPos, int len);
-        internal abstract void Reset();
-    }
-#endif
     internal class BinHexDecoder : IncrementalReadDecoder
     {
         //
@@ -49,7 +38,6 @@ namespace System.Xml
             }
         }
 
-        [System.Security.SecuritySafeCritical]
         internal override unsafe int Decode(char[] chars, int startPos, int len)
         {
             if (chars == null)
@@ -86,7 +74,6 @@ namespace System.Xml
             return charsDecoded;
         }
 
-        [System.Security.SecuritySafeCritical]
         internal override unsafe int Decode(string str, int startPos, int len)
         {
             if (str == null)
@@ -146,7 +133,6 @@ namespace System.Xml
         //
         // Static methods
         //
-        [System.Security.SecuritySafeCritical]
         public static unsafe byte[] Decode(char[] chars, bool allowOddChars)
         {
             if (chars == null)
@@ -175,11 +161,7 @@ namespace System.Xml
 
             if (hasHalfByteCached && !allowOddChars)
             {
-#if XMLSERIALIZERGENERATOR
-                throw new XmlException(SR.Format(SR.Xml_InvalidBinHexValueOddCount, new string(chars)));
-#else
                 throw new XmlException(SR.Xml_InvalidBinHexValueOddCount, new string(chars));
-#endif
             }
 
             if (bytesDecoded < bytes.Length)
@@ -196,7 +178,6 @@ namespace System.Xml
         // Private methods
         //
 
-        [System.Security.SecurityCritical]
         private static unsafe void Decode(char* pChars, char* pCharsEndPos,
                                     byte* pBytes, byte* pBytesEndPos,
                                     ref bool hasHalfByteCached, ref byte cachedHalfByte,
@@ -233,11 +214,7 @@ namespace System.Xml
                 }
                 else
                 {
-#if XMLSERIALIZERGENERATOR
-                    throw new XmlException(SR.Format(SR.Xml_InvalidBinHexValue, new string(pChars, 0, (int)(pCharsEndPos - pChars))));
-#else
                     throw new XmlException(SR.Xml_InvalidBinHexValue, new string(pChars, 0, (int)(pCharsEndPos - pChars)));
-#endif
                 }
 
                 if (hasHalfByteCached)

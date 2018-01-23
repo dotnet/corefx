@@ -5,7 +5,6 @@
 using System;
 using System.IO;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Text;
 using System.Threading;
 using System.Security;
@@ -17,9 +16,7 @@ namespace System.Text
     internal class DBCSCodePageEncoding : BaseCodePageEncoding
     {
         // Pointers to our memory section parts
-        [SecurityCritical]
         protected unsafe char* mapBytesToUnicode = null;      // char 65536
-        [SecurityCritical]
         protected unsafe ushort* mapUnicodeToBytes = null;      // byte 65536
 
         protected const char UNKNOWN_CHAR_FLAG = (char)0x0;
@@ -32,17 +29,14 @@ namespace System.Text
         private int _byteCountUnknown;
         protected char charUnknown = (char)0;
 
-        [System.Security.SecurityCritical]  // auto-generated
         public DBCSCodePageEncoding(int codePage) : this(codePage, codePage)
         {
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         internal DBCSCodePageEncoding(int codePage, int dataCodePage) : base(codePage, dataCodePage)
         {
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         internal DBCSCodePageEncoding(int codePage, int dataCodePage, EncoderFallback enc, DecoderFallback dec) : base(codePage, dataCodePage, enc, dec)
         {
         }
@@ -75,7 +69,6 @@ namespace System.Text
         //               correspond to those unicode code points.
         // We have a managed code page entry, so load our tables
         //
-        [System.Security.SecurityCritical]  // auto-generated
         protected override unsafe void LoadManagedCodePage()
         {
             Debug.Assert(m_codePageHeader?.Length > 0);
@@ -211,7 +204,6 @@ namespace System.Text
         }
 
         // Any special processing for this code page
-        [System.Security.SecurityCritical]  // auto-generated
         protected virtual unsafe void CleanUpEndBytes(char* chars)
         {
         }
@@ -232,7 +224,6 @@ namespace System.Text
         }
 
         // Read in our best fit table
-        [System.Security.SecurityCritical]  // auto-generated
         protected unsafe override void ReadBestFitTable()
         {
             // Lock so we don't confuse ourselves.
@@ -511,7 +502,6 @@ namespace System.Text
         // GetByteCount
         // Note: We start by assuming that the output will be the same as count.  Having
         // an encoder or fallback may change that assumption
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetByteCount(char* chars, int count, EncoderNLS encoder)
         {
             // Just need to ASSERT, this is called by something else internal that checked parameters already
@@ -607,7 +597,6 @@ namespace System.Text
             return (int)byteCount;
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetBytes(char* chars, int charCount,
                                                 byte* bytes, int byteCount, EncoderNLS encoder)
         {
@@ -758,7 +747,6 @@ namespace System.Text
         }
 
         // This is internal and called by something else,
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetCharCount(byte* bytes, int count, DecoderNLS baseDecoder)
         {
             // Just assert, we're called internally so these should be safe, checked already
@@ -909,7 +897,6 @@ namespace System.Text
             return charCount;
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetChars(byte* bytes, int byteCount,
                                                 char* chars, int charCount, DecoderNLS baseDecoder)
         {
@@ -1119,7 +1106,6 @@ namespace System.Text
         {
             if (charCount < 0)
                 throw new ArgumentOutOfRangeException(nameof(charCount), SR.ArgumentOutOfRange_NeedNonNegNum);
-            Contract.EndContractBlock();
 
             // Characters would be # of characters + 1 in case high surrogate is ? * max fallback
             long byteCount = (long)charCount + 1;
@@ -1140,7 +1126,6 @@ namespace System.Text
         {
             if (byteCount < 0)
                 throw new ArgumentOutOfRangeException(nameof(byteCount), SR.ArgumentOutOfRange_NeedNonNegNum);
-            Contract.EndContractBlock();
 
             // DBCS is pretty much the same, but could have hanging high byte making extra ? and fallback for unknown
             long charCount = ((long)byteCount + 1);

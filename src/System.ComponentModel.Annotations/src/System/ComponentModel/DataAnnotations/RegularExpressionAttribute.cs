@@ -34,7 +34,7 @@ namespace System.ComponentModel.DataAnnotations
         /// <summary>
         ///     Gets the regular expression pattern to use
         /// </summary>
-        public string Pattern { get; private set; }
+        public string Pattern { get; }
 
         private Regex Regex { get; set; }
 
@@ -103,7 +103,7 @@ namespace System.ComponentModel.DataAnnotations
 
                 Regex = MatchTimeoutInMilliseconds == -1
                     ? new Regex(Pattern)
-                    : new Regex(Pattern, default(RegexOptions), TimeSpan.FromMilliseconds((double)MatchTimeoutInMilliseconds));
+                    : new Regex(Pattern, default(RegexOptions), TimeSpan.FromMilliseconds(MatchTimeoutInMilliseconds));
             }
         }
     }

@@ -58,6 +58,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void OpenFile_RaisesArgumentException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
@@ -65,6 +66,18 @@ namespace System.IO.IsolatedStorage
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.OpenFile("\0bad", FileMode.Create));
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.OpenFile("\0bad", FileMode.Create, FileAccess.ReadWrite));
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.OpenFile("\0bad", FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite));
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void OpenFile_RaisesIsolatedStorageException()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
+            {
+                Assert.Throws<IsolatedStorageException>(() => isf.OpenFile("\0bad", FileMode.Create));
+                Assert.Throws<IsolatedStorageException>(() => isf.OpenFile("\0bad", FileMode.Create, FileAccess.ReadWrite));
+                Assert.Throws<IsolatedStorageException>(() => isf.OpenFile("\0bad", FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite));
             }
         }
 
@@ -131,7 +144,7 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void OpenFile_Existence(PresetScopes scope)
         {

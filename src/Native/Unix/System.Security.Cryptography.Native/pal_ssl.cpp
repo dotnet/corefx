@@ -14,8 +14,11 @@ static_assert(PAL_SSL_ERROR_WANT_WRITE == SSL_ERROR_WANT_WRITE, "");
 static_assert(PAL_SSL_ERROR_SYSCALL == SSL_ERROR_SYSCALL, "");
 static_assert(PAL_SSL_ERROR_ZERO_RETURN == SSL_ERROR_ZERO_RETURN, "");
 
+extern "C" int32_t CryptoNative_EnsureOpenSslInitialized();
+
 extern "C" void CryptoNative_EnsureLibSslInitialized()
 {
+    CryptoNative_EnsureOpenSslInitialized();
     SSL_library_init();
     SSL_load_error_strings();
 }
@@ -39,6 +42,28 @@ extern "C" SSL_CTX* CryptoNative_SslCtxCreate(SSL_METHOD* method)
     }
 
     return ctx;
+}
+
+/*
+Openssl supports setting ecdh curves by default from version 1.1.0.
+For lower versions, this is the recommended approach.
+Returns 1 on success, 0 on failure.
+*/
+static long TrySetECDHNamedCurve(SSL_CTX* ctx)
+{
+	long result = 0;
+#ifdef SSL_CTX_set_ecdh_auto
+	result = SSL_CTX_set_ecdh_auto(ctx, 1);
+#else
+	EC_KEY *ecdh = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
+	if (ecdh != nullptr)
+	{
+		result = SSL_CTX_set_tmp_ecdh(ctx, ecdh);
+		EC_KEY_free(ecdh);
+	}
+#endif
+
+	return result;
 }
 
 extern "C" void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
@@ -82,6 +107,7 @@ extern "C" void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols proto
 #endif
 
     SSL_CTX_set_options(ctx, protocolOptions);
+    TrySetECDHNamedCurve(ctx);
 }
 
 extern "C" SSL* CryptoNative_SslCreate(SSL_CTX* ctx)
@@ -91,7 +117,16 @@ extern "C" SSL* CryptoNative_SslCreate(SSL_CTX* ctx)
 
 extern "C" int32_t CryptoNative_SslGetError(SSL* ssl, int32_t ret)
 {
-    return SSL_get_error(ssl, ret);
+    // This pops off "old" errors left by other operations
+    // until the first and last error are the same
+    // this should be looked at again when OpenSsl 1.1 is migrated to
+    while (ERR_peek_error() != ERR_peek_last_error())
+    {
+        ERR_get_error();
+    }
+    int32_t errorCode = SSL_get_error(ssl, ret);
+    ERR_clear_error();
+    return errorCode;
 }
 
 extern "C" void CryptoNative_SslDestroy(SSL* ssl)
@@ -216,7 +251,10 @@ static ExchangeAlgorithmType MapExchangeAlgorithmType(const char* keyExchange, s
     return ExchangeAlgorithmType::None;
 }
 
-static void GetHashAlgorithmTypeAndSize(const char* mac, size_t macLength, HashAlgorithmType& dataHashAlg, DataHashSize& hashKeySize)
+static void GetHashAlgorithmTypeAndSize(const char* mac,
+                                        size_t macLength,
+                                        HashAlgorithmType& dataHashAlg,
+                                        DataHashSize& hashKeySize)
 {
     if (StringSpanEquals(mac, "MD5", macLength))
     {
@@ -271,7 +309,8 @@ Given a keyName string like "Enc=XXX", parses the description string and returns
 
 Returns a value indicating whether the pattern starting with keyName was found in description.
 */
-static bool GetDescriptionValue(const char* description, const char* keyName, size_t keyNameLength, const char** value, size_t& valueLength)
+static bool GetDescriptionValue(
+    const char* description, const char* keyName, size_t keyNameLength, const char** value, size_t& valueLength)
 {
     // search for keyName in description
     const char* keyNameStart = strstr(description, keyName);
@@ -381,13 +420,11 @@ err:
 
 extern "C" int32_t CryptoNative_SslWrite(SSL* ssl, const void* buf, int32_t num)
 {
-    ERR_clear_error();
     return SSL_write(ssl, buf, num);
 }
 
 extern "C" int32_t CryptoNative_SslRead(SSL* ssl, void* buf, int32_t num)
 {
-    ERR_clear_error();
     return SSL_read(ssl, buf, num);
 }
 
@@ -499,10 +536,6 @@ extern "C" int32_t CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPoli
     return SSL_CTX_set_cipher_list(ctx, cipherString);
 }
 
-extern "C" void CryptoNative_SslCtxSetClientCAList(SSL_CTX* ctx, X509NameStack* list)
-{
-    SSL_CTX_set_client_CA_list(ctx, list);
-}
 
 extern "C" void CryptoNative_SslCtxSetClientCertCallback(SSL_CTX* ctx, SslClientCertCallback callback)
 {
@@ -524,3 +557,58 @@ extern "C" int32_t CryptoNative_SslAddExtraChainCert(SSL* ssl, X509* x509)
 
     return 0;
 }
+
+extern "C" void CryptoNative_SslCtxSetAlpnSelectCb(SSL_CTX* ctx, SslCtxSetAlpnCallback cb, void* arg)
+{
+#if HAVE_OPENSSL_ALPN
+    if (API_EXISTS(SSL_CTX_set_alpn_select_cb))
+    {
+        SSL_CTX_set_alpn_select_cb(ctx, cb, arg);
+    }
+#else
+    (void)ctx;
+    (void)cb;
+    (void)arg;
+#endif
+}
+
+extern "C" int32_t CryptoNative_SslCtxSetAlpnProtos(SSL_CTX* ctx, const uint8_t* protos, uint32_t protos_len)
+{
+#if HAVE_OPENSSL_ALPN
+    if (API_EXISTS(SSL_CTX_set_alpn_protos))
+    {
+        return SSL_CTX_set_alpn_protos(ctx, protos, protos_len);
+    }
+    else
+#else
+    (void)ctx;
+    (void)protos;
+    (void)protos_len;
+#endif
+    {
+        return 0;
+    }
+}
+
+extern "C" void CryptoNative_SslGet0AlpnSelected(SSL* ssl, const uint8_t** protocol, uint32_t* len)
+{
+#if HAVE_OPENSSL_ALPN
+    if (API_EXISTS(SSL_get0_alpn_selected))
+    {
+        SSL_get0_alpn_selected(ssl, protocol, len);
+    }
+    else
+#else
+    (void)ssl;
+#endif
+    {
+        *protocol = nullptr;
+        *len = 0;
+    }
+}
+
+extern "C" int32_t CryptoNative_SslSetTlsExtHostName(SSL* ssl, const uint8_t* name)
+{
+    return static_cast<int32_t>(SSL_set_tlsext_host_name(ssl, name));
+}
+

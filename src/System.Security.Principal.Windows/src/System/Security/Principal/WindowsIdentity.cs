@@ -6,7 +6,6 @@ using Microsoft.Win32.SafeHandles;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Text;
@@ -56,7 +55,7 @@ namespace System.Security.Principal
         /// Initializes a new instance of the WindowsIdentity class for the user represented by the specified User Principal Name (UPN).
         /// </summary>
         /// <remarks>
-        /// Unlike the desktop version, we connect to Lsa only as an untrusted caller. We do not attempt to explot Tcb privilege or adjust the current
+        /// Unlike the desktop version, we connect to Lsa only as an untrusted caller. We do not attempt to exploit Tcb privilege or adjust the current
         /// thread privilege to include Tcb.
         /// </remarks>
         public WindowsIdentity(string sUserPrincipalName)
@@ -212,7 +211,6 @@ namespace System.Security.Principal
         {
             if (userToken == IntPtr.Zero)
                 throw new ArgumentException(SR.Argument_TokenZero);
-            Contract.EndContractBlock();
 
             // Find out if the specified token is a valid.
             uint dwLength = (uint)sizeof(uint);
@@ -372,8 +370,6 @@ namespace System.Security.Principal
         }
         private bool CheckNtTokenForSid(SecurityIdentifier sid)
         {
-            Contract.EndContractBlock();
-
             // special case the anonymous identity.
             if (_safeTokenHandle.IsInvalid)
                 return false;
@@ -915,8 +911,8 @@ namespace System.Security.Principal
         }
 
         /// <summary>
-        /// Intenal method to initialize the claim collection.
-        /// Lazy init is used so claims are not initialzed until needed
+        /// Internal method to initialize the claim collection.
+        /// Lazy init is used so claims are not initialized until needed
         /// </summary>        
         private void InitializeClaims()
         {

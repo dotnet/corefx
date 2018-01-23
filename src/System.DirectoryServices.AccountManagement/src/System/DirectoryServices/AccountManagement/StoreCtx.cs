@@ -28,13 +28,11 @@ namespace System.DirectoryServices.AccountManagement
         private PrincipalContext _owningContext = null;
         internal PrincipalContext OwningContext
         {
-            [System.Security.SecurityCritical]
             get
             {
                 return _owningContext;
             }
 
-            [System.Security.SecurityCritical]
             set
             {
                 Debug.Assert(value != null);
@@ -206,7 +204,7 @@ namespace System.DirectoryServices.AccountManagement
         // interact with other StoreCtxs to fulfill the request.
         //
         // This method is typically used by ResultSet implementations, when they're iterating over a collection
-        // (e.g., of group membership) and encounter a entry that represents a foreign principal.
+        // (e.g., of group membership) and encounter an entry that represents a foreign principal.
         internal abstract Principal ResolveCrossStoreRefToPrincipal(object o);
 
         //
@@ -219,12 +217,12 @@ namespace System.DirectoryServices.AccountManagement
         internal abstract bool IsValidProperty(Principal p, string propertyName);
 
         // Returns true if AccountInfo is supported for the specified principal, false otherwise.
-        // Used when a application tries to access the AccountInfo property of a newly-inserted
+        // Used when an application tries to access the AccountInfo property of a newly-inserted
         // (not yet persisted) AuthenticablePrincipal, to determine whether it should be allowed.
         internal abstract bool SupportsAccounts(AuthenticablePrincipal p);
 
         // Returns the set of credential types supported by this store for the specified principal.
-        // Used when a application tries to access the PasswordInfo property of a newly-inserted
+        // Used when an application tries to access the PasswordInfo property of a newly-inserted
         // (not yet persisted) AuthenticablePrincipal, to determine whether it should be allowed.
         // Also used to implement AuthenticablePrincipal.SupportedCredentialTypes.
         internal abstract CredentialTypes SupportedCredTypes(AuthenticablePrincipal p);
@@ -315,7 +313,6 @@ namespace System.DirectoryServices.AccountManagement
             PropertyNames.ComputerServicePrincipalNames
         };
 
-        [System.Security.SecurityCritical]
         protected QbeFilterDescription BuildQbeFilterDescription(Principal p)
         {
             QbeFilterDescription qbeFilterDescription = new QbeFilterDescription();
@@ -360,7 +357,6 @@ namespace System.DirectoryServices.AccountManagement
 
         // Applies to supplied propertySet to the supplied Principal, and adds any resulting filters
         // to qbeFilterDescription.
-        [System.Security.SecurityCritical]
         private void BuildFilterSet(Principal p, string[] propertySet, QbeFilterDescription qbeFilterDescription)
         {
             foreach (string propertyName in propertySet)

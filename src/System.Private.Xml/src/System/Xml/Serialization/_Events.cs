@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if XMLSERIALIZERGENERATOR
-namespace Microsoft.XmlSerializer.Generator
-#else
 namespace System.Xml.Serialization
-#endif
 {
     using System.IO;
     using System;
@@ -18,6 +14,7 @@ namespace System.Xml.Serialization
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
+
     public delegate void XmlAttributeEventHandler(object sender, XmlAttributeEventArgs e);
 
     /// <include file='doc\_Events.uex' path='docs/doc[@for="XmlAttributeEventArgs"]/*' />
@@ -157,6 +154,7 @@ namespace System.Xml.Serialization
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
     public delegate void XmlNodeEventHandler(object sender, XmlNodeEventArgs e);
+
 
     /// <include file='doc\_Events.uex' path='docs/doc[@for="XmlNodeEventArgs"]/*' />
     /// <devdoc>

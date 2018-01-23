@@ -6,7 +6,7 @@ using System.Security;
 
 namespace System.IO
 {
-    partial class FileSystemInfo : IFileSystemObject
+    partial class FileSystemInfo
     {
         // Cache the file/directory information
         private Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA _data;
@@ -17,29 +17,32 @@ namespace System.IO
         // throw an appropriate error when attempting to access the cached info.
         private int _dataInitialized = -1;
 
-        [SecurityCritical]
-        internal void Init(ref Interop.Kernel32.WIN32_FIND_DATA findData)
+        internal unsafe void Init(Interop.NtDll.FILE_FULL_DIR_INFORMATION* info)
         {
-            // Copy the information to data
-            _data.PopulateFrom(ref findData);
+            _data.dwFileAttributes = (int)info->FileAttributes;
+            _data.ftCreationTime = *((Interop.Kernel32.FILE_TIME*)&info->CreationTime);
+            _data.ftLastAccessTime = *((Interop.Kernel32.FILE_TIME*)&info->LastAccessTime);
+            _data.ftLastWriteTime = *((Interop.Kernel32.FILE_TIME*)&info->LastWriteTime);
+            _data.nFileSizeHigh = (uint)(info->EndOfFile >> 32);
+            _data.nFileSizeLow = (uint)info->EndOfFile;
             _dataInitialized = 0;
         }
 
-        FileAttributes IFileSystemObject.Attributes
+        public FileAttributes Attributes
         {
             get
             {
                 EnsureDataInitialized();
-                return (FileAttributes)_data.fileAttributes;
+                return (FileAttributes)_data.dwFileAttributes;
             }
             set
             {
-                FileSystem.Current.SetAttributes(FullPath, value);
+                FileSystem.SetAttributes(FullPath, value);
                 _dataInitialized = -1;
             }
         }
 
-        bool IFileSystemObject.Exists
+        internal bool ExistsCore
         {
             get
             {
@@ -52,61 +55,58 @@ namespace System.IO
                     // but Exists is supposed to return true or false.
                     return false;
                 }
-                return (_data.fileAttributes != -1) && ((this is DirectoryInfo) == ((_data.fileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) == Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY));
+                return (_data.dwFileAttributes != -1) && ((this is DirectoryInfo) == ((_data.dwFileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) == Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY));
             }
         }
 
-        DateTimeOffset IFileSystemObject.CreationTime
+        internal DateTimeOffset CreationTimeCore
         {
             get
             {
                 EnsureDataInitialized();
-                long dt = ((long)(_data.ftCreationTimeHigh) << 32) | ((long)_data.ftCreationTimeLow);
-                return DateTimeOffset.FromFileTime(dt);
+                return _data.ftCreationTime.ToDateTimeOffset();
             }
             set
             {
-                FileSystem.Current.SetCreationTime(FullPath, value, this is DirectoryInfo);
+                FileSystem.SetCreationTime(FullPath, value, this is DirectoryInfo);
                 _dataInitialized = -1;
             }
         }
 
-        DateTimeOffset IFileSystemObject.LastAccessTime
+        internal DateTimeOffset LastAccessTimeCore
         {
             get
             {
                 EnsureDataInitialized();
-                long dt = ((long)(_data.ftLastAccessTimeHigh) << 32) | ((long)_data.ftLastAccessTimeLow);
-                return DateTimeOffset.FromFileTime(dt);
+                return _data.ftLastAccessTime.ToDateTimeOffset();
             }
             set
             {
-                FileSystem.Current.SetLastAccessTime(FullPath, value, (this is DirectoryInfo));
+                FileSystem.SetLastAccessTime(FullPath, value, (this is DirectoryInfo));
                 _dataInitialized = -1;
             }
         }
 
-        DateTimeOffset IFileSystemObject.LastWriteTime
+        internal DateTimeOffset LastWriteTimeCore
         {
             get
             {
                 EnsureDataInitialized();
-                long dt = ((long)(_data.ftLastWriteTimeHigh) << 32) | ((long)_data.ftLastWriteTimeLow);
-                return DateTimeOffset.FromFileTime(dt);
+                return _data.ftLastWriteTime.ToDateTimeOffset();
             }
             set
             {
-                FileSystem.Current.SetLastWriteTime(FullPath, value, (this is DirectoryInfo));
+                FileSystem.SetLastWriteTime(FullPath, value, (this is DirectoryInfo));
                 _dataInitialized = -1;
             }
         }
 
-        long IFileSystemObject.Length
+        internal long LengthCore
         {
             get
             {
                 EnsureDataInitialized();
-                return ((long)_data.fileSizeHigh) << 32 | _data.fileSizeLow & 0xFFFFFFFFL;
+                return ((long)_data.nFileSizeHigh) << 32 | _data.nFileSizeLow & 0xFFFFFFFFL;
             }
         }
 
@@ -122,11 +122,11 @@ namespace System.IO
                 throw Win32Marshal.GetExceptionForWin32Error(_dataInitialized, FullPath);
         }
 
-        void IFileSystemObject.Refresh()
+        public void Refresh()
         {
             // This should not throw, instead we store the result so that we can throw it
             // when someone actually accesses a property
-            _dataInitialized = Win32FileSystem.FillAttributeInfo(FullPath, ref _data, returnErrorOnNotFound: false);
+            _dataInitialized = FileSystem.FillAttributeInfo(FullPath, ref _data, returnErrorOnNotFound: false);
         }
     }
 }

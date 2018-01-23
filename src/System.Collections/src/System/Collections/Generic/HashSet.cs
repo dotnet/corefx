@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
@@ -122,7 +121,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(collection));
             }
-            Contract.EndContractBlock();
 
             var otherAsHashSet = collection as HashSet<T>;
             if (otherAsHashSet != null && AreEqualityComparersEqual(this, otherAsHashSet))
@@ -208,7 +206,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentOutOfRangeException(nameof(capacity));
             }
-            Contract.EndContractBlock();
 
             if (capacity > 0)
             {
@@ -458,7 +455,7 @@ namespace System.Collections.Generic
         /// Searches the set for a given value and returns the equal value it finds, if any.
         /// </summary>
         /// <param name="equalValue">The value to search for.</param>
-        /// <param name="actualValue">The value from the set that the search found, or the original value if the search yielded no match.</param>
+        /// <param name="actualValue">The value from the set that the search found, or the default value of <typeparamref name="T"/> when the search yielded no match.</param>
         /// <returns>A value indicating whether the search was successful.</returns>
         /// <remarks>
         /// This can be useful when you want to reuse a previously stored reference instead of 
@@ -495,7 +492,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(other));
             }
-            Contract.EndContractBlock();
 
             foreach (T item in other)
             {
@@ -523,7 +519,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(other));
             }
-            Contract.EndContractBlock();
 
             // intersection of anything with empty set is empty set, so return if count is 0
             if (_count == 0)
@@ -571,7 +566,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(other));
             }
-            Contract.EndContractBlock();
 
             // this is already the empty set; return
             if (_count == 0)
@@ -603,7 +597,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(other));
             }
-            Contract.EndContractBlock();
 
             // if set is empty, then symmetric difference is other
             if (_count == 0)
@@ -655,7 +648,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(other));
             }
-            Contract.EndContractBlock();
 
             // The empty set is a subset of any set
             if (_count == 0)
@@ -712,7 +704,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(other));
             }
-            Contract.EndContractBlock();
 
             // no set is a proper subset of itself.
             if (other == this)
@@ -771,7 +762,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(other));
             }
-            Contract.EndContractBlock();
 
             // a set is always a superset of itself
             if (other == this)
@@ -829,7 +819,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(other));
             }
-            Contract.EndContractBlock();
 
             // the empty set isn't a proper superset of any set.
             if (_count == 0)
@@ -880,7 +869,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(other));
             }
-            Contract.EndContractBlock();
 
             if (_count == 0)
             {
@@ -915,7 +903,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(other));
             }
-            Contract.EndContractBlock();
 
             // a set is equal to itself
             if (other == this)
@@ -965,7 +952,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(array));
             }
-            Contract.EndContractBlock();
 
             // check array index valid index into array
             if (arrayIndex < 0)
@@ -1009,7 +995,6 @@ namespace System.Collections.Generic
             {
                 throw new ArgumentNullException(nameof(match));
             }
-            Contract.EndContractBlock();
 
             int numRemoved = 0;
             for (int i = 0; i < _lastIndex; i++)
@@ -1148,7 +1133,7 @@ namespace System.Collections.Generic
             }
 
             // Able to increase capacity; copy elements to larger array and rehash
-            SetCapacity(newSize, false);
+            SetCapacity(newSize);
         }
 
         /// <summary>
@@ -1156,7 +1141,7 @@ namespace System.Collections.Generic
         /// *must* be a prime.  It is very likely that you want to call IncreaseCapacity()
         /// instead of this method.
         /// </summary>
-        private void SetCapacity(int newSize, bool forceNewHashCodes)
+        private void SetCapacity(int newSize)
         {
             Debug.Assert(_buckets != null, "SetCapacity called on a set with no elements");
 
@@ -1165,21 +1150,6 @@ namespace System.Collections.Generic
             {
                 Array.Copy(_slots, 0, newSlots, 0, _lastIndex);
             }
-
-#if FEATURE_RANDOMIZED_STRING_HASHING
-            if (forceNewHashCodes)
-            {
-                for (int i = 0; i < _lastIndex; i++)
-                {
-                    if (newSlots[i].hashCode != -1)
-                    {
-                        newSlots[i].hashCode = InternalGetHashCode(newSlots[i].value);
-                    }
-                }
-            }
-#else
-            Debug.Assert(!forceNewHashCodes);
-#endif
 
             int[] newBuckets = new int[newSize];
             for (int i = 0; i < _lastIndex; i++)
@@ -1207,18 +1177,13 @@ namespace System.Collections.Generic
 
             int hashCode = InternalGetHashCode(value);
             int bucket = hashCode % _buckets.Length;
-#if FEATURE_RANDOMIZED_STRING_HASHING
-            int collisionCount = 0;
-#endif
+
             for (int i = _buckets[bucket] - 1; i >= 0; i = _slots[i].next)
             {
                 if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, value))
                 {
                     return false;
                 }
-#if FEATURE_RANDOMIZED_STRING_HASHING
-                collisionCount++;
-#endif
             }
 
             int index;
@@ -1244,14 +1209,6 @@ namespace System.Collections.Generic
             _buckets[bucket] = index + 1;
             _count++;
             _version++;
-
-#if FEATURE_RANDOMIZED_STRING_HASHING
-            if (collisionCount > HashHelpers.HashCollisionThreshold && HashHelpers.IsWellKnownEqualityComparer(_comparer))
-            {
-                _comparer = (IEqualityComparer<T>)HashHelpers.GetRandomizedEqualityComparer(_comparer);
-                SetCapacity(_buckets.Length, true);
-            }
-#endif // FEATURE_RANDOMIZED_STRING_HASHING
 
             return true;
         }

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
-using System.Reflection;
 
 namespace System.ComponentModel.DataAnnotations
 {
@@ -69,7 +68,7 @@ namespace System.ComponentModel.DataAnnotations
         ///     Gets the type of the <see cref="Minimum" /> and <see cref="Maximum" /> values (e.g. Int32, Double, or some custom
         ///     type)
         /// </summary>
-        public Type OperandType { get; private set; }
+        public Type OperandType { get; }
 
         private Func<object, object> Conversion { get; set; }
 
@@ -99,17 +98,12 @@ namespace System.ComponentModel.DataAnnotations
             SetupConversion();
 
             // Automatically pass if value is null or empty. RequiredAttribute should be used to assert a value is not empty.
-            if (value == null)
-            {
-                return true;
-            }
-            var s = value as string;
-            if (s != null && string.IsNullOrEmpty(s))
+            if (value == null || (value as string)?.Length == 0)
             {
                 return true;
             }
 
-            object convertedValue = null;
+            object convertedValue;
 
             try
             {
