@@ -32,6 +32,7 @@ namespace System.Linq.Expressions.Compiler
         internal static void EmitLoadArg(this ILGenerator il, int index)
         {
             Debug.Assert(index >= 0);
+            Debug.Assert(index < ushort.MaxValue);
 
             switch (index)
             {
@@ -54,7 +55,8 @@ namespace System.Linq.Expressions.Compiler
                     }
                     else
                     {
-                        il.Emit(OpCodes.Ldarg, index);
+                        // cast to short, result is correct ushort.
+                        il.Emit(OpCodes.Ldarg, (short)index);
                     }
                     break;
             }
@@ -63,6 +65,7 @@ namespace System.Linq.Expressions.Compiler
         internal static void EmitLoadArgAddress(this ILGenerator il, int index)
         {
             Debug.Assert(index >= 0);
+            Debug.Assert(index < ushort.MaxValue);
 
             if (index <= byte.MaxValue)
             {
@@ -70,13 +73,15 @@ namespace System.Linq.Expressions.Compiler
             }
             else
             {
-                il.Emit(OpCodes.Ldarga, index);
+                // cast to short, result is correct ushort.
+                il.Emit(OpCodes.Ldarga, (short)index);
             }
         }
 
         internal static void EmitStoreArg(this ILGenerator il, int index)
         {
             Debug.Assert(index >= 0);
+            Debug.Assert(index < ushort.MaxValue);
 
             if (index <= byte.MaxValue)
             {
@@ -84,7 +89,8 @@ namespace System.Linq.Expressions.Compiler
             }
             else
             {
-                il.Emit(OpCodes.Starg, index);
+                // cast to short, result is correct ushort.
+                il.Emit(OpCodes.Starg, (short)index);
             }
         }
 
@@ -737,15 +743,15 @@ namespace System.Linq.Expressions.Compiler
 
                     switch (tf)
                     {
-                        case TypeCode.Byte:   method = Decimal_op_Implicit_Byte;   break;
-                        case TypeCode.SByte:  method = Decimal_op_Implicit_SByte;  break;
-                        case TypeCode.Int16:  method = Decimal_op_Implicit_Int16;  break;
+                        case TypeCode.Byte: method = Decimal_op_Implicit_Byte; break;
+                        case TypeCode.SByte: method = Decimal_op_Implicit_SByte; break;
+                        case TypeCode.Int16: method = Decimal_op_Implicit_Int16; break;
                         case TypeCode.UInt16: method = Decimal_op_Implicit_UInt16; break;
-                        case TypeCode.Int32:  method = Decimal_op_Implicit_Int32;  break;
+                        case TypeCode.Int32: method = Decimal_op_Implicit_Int32; break;
                         case TypeCode.UInt32: method = Decimal_op_Implicit_UInt32; break;
-                        case TypeCode.Int64:  method = Decimal_op_Implicit_Int64;  break;
+                        case TypeCode.Int64: method = Decimal_op_Implicit_Int64; break;
                         case TypeCode.UInt64: method = Decimal_op_Implicit_UInt64; break;
-                        case TypeCode.Char:   method = Decimal_op_Implicit_Char;   break;
+                        case TypeCode.Char: method = Decimal_op_Implicit_Char; break;
                         default:
                             throw ContractUtils.Unreachable;
                     }

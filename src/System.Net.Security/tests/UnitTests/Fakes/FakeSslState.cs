@@ -17,14 +17,24 @@ namespace System.Net.Security
         //  The public Client and Server classes enforce the parameters rules before
         //  calling into this .ctor.
         //
-        internal SslState(Stream innerStream, RemoteCertValidationCallback certValidationCallback, LocalCertSelectionCallback certSelectionCallback, EncryptionPolicy encryptionPolicy)
+        internal SslState(Stream innerStream)
         {
         }
-        //
-        //
-        //
-        internal void ValidateCreateContext(bool isServer, string targetHost, SslProtocols enabledSslProtocols, X509Certificate serverCertificate, X509CertificateCollection clientCertificates, bool remoteCertRequired, bool checkCertRevocationStatus)
+
+        internal void ValidateCreateContext(SslClientAuthenticationOptions sslClientAuthenticationOptions)
         {
+        }
+
+        internal void ValidateCreateContext(SslServerAuthenticationOptions sslServerAuthenticationOptions)
+        {
+        }
+
+        internal SslApplicationProtocol NegotiatedApplicationProtocol
+        {
+            get
+            {
+                return default;
+            }
         }
 
         internal bool IsAuthenticated
@@ -268,8 +278,13 @@ namespace System.Net.Security
         {
             throw new NotImplementedException();
         }
+                
+        public new Task WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
 
-        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -280,6 +295,11 @@ namespace System.Net.Security
         }
 
         public override int EndRead(IAsyncResult asyncResult)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

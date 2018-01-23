@@ -92,7 +92,7 @@ namespace System.SpanTests
             int[] dst = { 99, 100 };
 
             ReadOnlySpan<int> srcSpan = new ReadOnlySpan<int>(src);
-            AssertThrows<ArgumentException, int>(srcSpan, (_srcSpan) => _srcSpan.CopyTo(dst));
+            TestHelpers.AssertThrows<ArgumentException, int>(srcSpan, (_srcSpan) => _srcSpan.CopyTo(dst));
             int[] expected = { 99, 100 };
             Assert.Equal<int>(expected, dst);  // CopyTo() checks for sufficient space before doing any copying.
         }
@@ -128,6 +128,7 @@ namespace System.SpanTests
         // the residual chunk of size (bufferSize % 4GB). The inputs sizes to this method, 4GB and 4GB+256B,
         // test the two size selection paths in CoptyTo method - memory size that is multiple of 4GB or,
         // a multiple of 4GB + some more size.
+        [ActiveIssue(25254)]
         [Theory]
         [OuterLoop]
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
@@ -172,16 +173,18 @@ namespace System.SpanTests
 
                         for (int count = 0; count < GuidCount; ++count)
                         {
-                            var guidfirst = Unsafe.Add(ref memoryFirst, count);
-                            var guidSecond = Unsafe.Add(ref memorySecond, count);
+                            Guid guidfirst = Unsafe.Add(ref memoryFirst, count);
+                            Guid guidSecond = Unsafe.Add(ref memorySecond, count);
                             Assert.Equal(guidfirst, guidSecond);
                         }
                     }
                 }
                 finally
                 {
-                    if (allocatedFirst) AllocationHelper.ReleaseNative(ref memBlockFirst);
-                    if (allocatedSecond) AllocationHelper.ReleaseNative(ref memBlockSecond);
+                    if (allocatedFirst)
+                        AllocationHelper.ReleaseNative(ref memBlockFirst);
+                    if (allocatedSecond)
+                        AllocationHelper.ReleaseNative(ref memBlockSecond);
                 }
             }
         }

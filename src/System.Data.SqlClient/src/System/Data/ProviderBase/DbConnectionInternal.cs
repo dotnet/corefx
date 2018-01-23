@@ -166,7 +166,7 @@ namespace System.Data.ProviderBase
         /// Get boolean value that indicates whether the enlisted transaction has been disposed.
         /// </summary>
         /// <value>
-        /// True if there is an enlisted transaction, and it has been diposed.
+        /// True if there is an enlisted transaction, and it has been disposed.
         /// False if there is an enlisted transaction that has not been disposed, or if the transaction reference is null.
         /// </value>
         /// <remarks>
@@ -862,8 +862,6 @@ namespace System.Data.ProviderBase
             CleanupConnectionOnTransactionCompletion(transaction);
         }
 
-        // TODO: Review whether we need the unmanaged code permission when we have the new object model available.
-        // [SecurityPermission(SecurityAction.Assert, Flags = SecurityPermissionFlag.UnmanagedCode)]
         private void TransactionOutcomeEnlist(Transaction transaction)
         {
             transaction.TransactionCompleted += new TransactionCompletedEventHandler(TransactionCompletedEvent);

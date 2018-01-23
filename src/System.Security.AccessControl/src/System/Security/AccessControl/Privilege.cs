@@ -17,7 +17,6 @@ using Microsoft.Win32.SafeHandles;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -366,7 +365,6 @@ namespace System.Security.AccessControl
 
             public SafeTokenHandle ThreadHandle
             {
-                [System.Security.SecurityCritical]  // auto-generated
                 get
                 { return this.threadHandle; }
             }
@@ -386,7 +384,6 @@ namespace System.Security.AccessControl
             {
                 throw new ArgumentNullException(nameof(privilegeName));
             }
-            Contract.EndContractBlock();
 
             this.luid = LuidFromPrivilege(privilegeName);
         }
@@ -419,7 +416,6 @@ namespace System.Security.AccessControl
 
         #endregion
 
-        //      [SecurityPermission( SecurityAction.Demand, TogglePrivileges=true )]
         private void ToggleState(bool enable)
         {
             int error = 0;
@@ -554,7 +550,6 @@ namespace System.Security.AccessControl
             }
         }
 
-        //      [SecurityPermission( SecurityAction.Demand, TogglePrivileges=true )]
         public void Revert()
         {
             int error = 0;
@@ -650,7 +645,6 @@ namespace System.Security.AccessControl
             {
                 throw new ArgumentNullException( "helper" );
             }
-            Contract.EndContractBlock();
             
             Privilege p = new Privilege( privilege );
 

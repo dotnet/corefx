@@ -252,7 +252,7 @@ namespace System.Net
                 }
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), SR.net_io_timeout_use_ge_zero);
+                    throw new ArgumentOutOfRangeException(nameof(value), SR.net_clsmall);
                 }
                 SetSpecialHeaders(HttpKnownHeaderNames.ContentLength, value.ToString());
             }
@@ -1199,6 +1199,8 @@ namespace System.Net
                 {
                     request.Headers.ConnectionClose = true;
                 }
+
+                request.Version = ProtocolVersion;
 
                 _sendRequestTask = client.SendAsync(
                     request,

@@ -81,9 +81,6 @@
   <data name="ValueCantBeNull" xml:space="preserve">
     <value>無法將 null 轉換成 '{0}'，因為它是不可為 null 的實值型別</value>
   </data>
-  <data name="WrongNestedThis" xml:space="preserve">
-    <value>無法透過巢狀型別 '{1}' 存取外部型別 '{0}' 的非靜態成員</value>
-  </data>
   <data name="NoSuchMember" xml:space="preserve">
     <value>'{0}' 不包含 '{1}' 的定義</value>
   </data>
@@ -104,9 +101,6 @@
   </data>
   <data name="NoConstructors" xml:space="preserve">
     <value>型別 '{0}' 沒有已定義的建構函式</value>
-  </data>
-  <data name="BadDelegateConstructor" xml:space="preserve">
-    <value>委派 '{0}' 沒有有效的建構函式</value>
   </data>
   <data name="PropertyLacksGet" xml:space="preserve">
     <value>無法於此內容中使用屬性或索引子 '{0}'，因為其欠缺 get 存取子</value>
@@ -159,9 +153,6 @@
   <data name="BadArity" xml:space="preserve">
     <value>使用泛型 {1} '{0}' 需要 '{2}' 個型別引數</value>
   </data>
-  <data name="BadTypeArgument" xml:space="preserve">
-    <value>類型"{0}"不可能用作類型參數</value>
-  </data>
   <data name="TypeArgsNotAllowed" xml:space="preserve">
     <value>{1} '{0}' 不能配合型別引數使用</value>
   </data>
@@ -180,23 +171,11 @@
   <data name="GenericConstraintNotSatisfiedNullableInterface" xml:space="preserve">
     <value>型別 '{3}' 不能做為泛型型別或方法 '{0}' 中的型別參數 '{2}'。可為 Null 的型別 '{3}' 未滿足 '{1}' 的條件約束。可為 Null 的型別無法滿足所有介面條件約束。</value>
   </data>
-  <data name="GenericConstraintNotSatisfiedTyVar" xml:space="preserve">
-    <value>型別 '{3}' 不能做為泛型型別或方法 '{0}' 中的型別參數 '{2}'。沒有從 '{3}' 到 '{1}' 的 Boxing 轉換或型別參數轉換。</value>
-  </data>
   <data name="GenericConstraintNotSatisfiedValType" xml:space="preserve">
     <value>型別 '{3}' 不能做為泛型型別或方法 '{0}' 中的型別參數 '{2}'。沒有從 '{3}' 到 '{1}' 的 Boxing 轉換。</value>
   </data>
-  <data name="TypeVarCantBeNull" xml:space="preserve">
-    <value>無法將 null 轉換成型別參數 '{0}'，因為它是不可為 null 的實值型別。請考慮使用 'default({0})' 代替。</value>
-  </data>
-  <data name="BadRetType" xml:space="preserve">
-    <value>'{1} {0}' 的傳回型別錯誤</value>
-  </data>
   <data name="CantInferMethTypeArgs" xml:space="preserve">
     <value>方法 '{0}' 的型別引數不能從使用方式推斷。請嘗試明確指定型別引數。</value>
-  </data>
-  <data name="MethGrpToNonDel" xml:space="preserve">
-    <value>無法將方法群組 '{0}' 轉換為非委派型別 '{1}'。您是否想要叫用這個方法?</value>
   </data>
   <data name="RefConstraintNotSatisfied" xml:space="preserve">
     <value>型別 '{2}' 必須是參考型別，才能在泛型型別或方法 '{0}' 中做為參數 '{1}' 使用</value>
@@ -215,9 +194,6 @@
   </data>
   <data name="ConvertToStaticClass" xml:space="preserve">
     <value>無法轉換為靜態型別 '{0}'</value>
-  </data>
-  <data name="GenericArgIsStaticClass" xml:space="preserve">
-    <value>'{0}': 靜態型別不能當做型別引數使用</value>
   </data>
   <data name="IncrementLvalueExpected" xml:space="preserve">
     <value>遞增或遞減運算子的運算元必須是變數、屬性或索引子。</value>
@@ -272,9 +248,6 @@
   </data>
   <data name="RefReadonlyLocalCause" xml:space="preserve">
     <value>無法將 '{0}' 當做 ref 或 out 引數傳遞，因為它是 '{1}'</value>
-  </data>
-  <data name="DelegateOnNullable" xml:space="preserve">
-    <value>不能將委託綁定到 '{0}'，因為它是 'System.Nullable&lt;T&gt;' 成員</value>
   </data>
   <data name="BadCtorArgCount" xml:space="preserve">
     <value>'{0}' 不包含接受 '{1}' 個引數的建構函式</value>

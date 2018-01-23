@@ -146,7 +146,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [PlatformSpecific(~TestPlatforms.OSX)] // typical OSX install has very low max open file descriptors value
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
+        [Fact]
         public void Select_Error_OneReadyAtATime()
         {
             const int Errors = 90; // value larger than the internal value in SocketPal.Unix that swaps between stack and heap allocation
@@ -241,7 +241,7 @@ namespace System.Net.Sockets.Tests
 
         [OuterLoop]
         [Fact]
-        public static void Select_AcceptNonBlocking_Success()
+        public static async Task Select_AcceptNonBlocking_Success()
         {
             using (Socket listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
@@ -264,8 +264,7 @@ namespace System.Net.Sockets.Tests
                 }
 
                 // Give the task 5 seconds to complete; if not, assume it's hung.
-                bool completed = t.Wait(5000);
-                Assert.True(completed);
+                await t.TimeoutAfter(5000);
             }
         }
 

@@ -6,22 +6,18 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Globalization;
-using System.Diagnostics.Contracts;
 
 namespace System.IO
 {
-    [Pure]
     internal static class Error
     {
         // An alternative to Win32Marshal with friendlier messages for drives
-        [System.Security.SecuritySafeCritical]  // auto-generated
         internal static Exception GetExceptionForLastWin32DriveError(String driveName)
         {
             int errorCode = Marshal.GetLastWin32Error();
             return GetExceptionForWin32DriveError(errorCode, driveName);
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         internal static Exception GetExceptionForWin32DriveError(int errorCode, String driveName)
         {
             switch (errorCode)

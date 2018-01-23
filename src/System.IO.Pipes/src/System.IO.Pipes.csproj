@@ -95,9 +95,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetNamedPipeInfo.cs">
       <Link>Common\Interop\Windows\Interop.GetNamedPipeInfo.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateNamedPipeClient.cs">
-      <Link>Common\Interop\Windows\Interop.CreateNamedPipeClient.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SetNamedPipeHandleState.cs">
       <Link>Common\Interop\Windows\Interop.SetNamedPipeHandleState.cs</Link>
     </Compile>
@@ -146,13 +143,27 @@
     <Compile Include="System\IO\Pipes\PipeStream.Windows.cs" />
     <Compile Include="System\IO\Pipes\ReadWriteCompletionSource.cs" />
   </ItemGroup>
+  <!-- Windows : Win32 only -->
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(TargetGroup)' != 'uap'">
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateNamedPipeClient.cs">
+      <Link>Common\Interop\Windows\Interop.CreateNamedPipeClient.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <!-- Windows : UAP - Win32 + WinRT -->
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(TargetGroup)' == 'uap'">
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateNamedPipeClient.Uap.cs">
+      <Link>Common\Interop\Windows\Interop.CreateNamedPipeClient.Uap.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CREATEFILE2_EXTENDED_PARAMETERS.cs">
+      <Link>Common\Interop\Windows\Interop.CREATEFILE2_EXTENDED_PARAMETERS.cs</Link>
+    </Compile>
+  </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="Microsoft\Win32\SafeHandles\SafePipeHandle.Unix.cs" />
     <Compile Include="System\IO\Pipes\AnonymousPipeServerStream.Unix.cs" />
     <Compile Include="System\IO\Pipes\NamedPipeClientStream.Unix.cs" />
     <Compile Include="System\IO\Pipes\NamedPipeServerStream.Unix.cs" />
     <Compile Include="System\IO\Pipes\PipeStream.Unix.cs" />
-    <Compile Include="System\Net\Sockets\UnixDomainSocketEndPoint.cs" />
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeFileHandleHelper.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeFileHandleHelper.Unix.cs</Link>
     </Compile>
@@ -176,9 +187,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.FLock.cs">
       <Link>Common\Interop\Unix\Interop.FLock.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetDomainSocketSizes.cs">
-      <Link>Common\Interop\Unix\Interop.GetDomainSocketSizes.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetHostName.cs">
       <Link>Common\Interop\Unix\Interop.GetHostName.cs</Link>
@@ -233,9 +241,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Diagnostics.Contracts" />
+    <Reference Include="System.Collections" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />

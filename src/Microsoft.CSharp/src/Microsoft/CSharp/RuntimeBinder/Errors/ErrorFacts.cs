@@ -44,9 +44,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_ValueCantBeNull:
                     codeStr = SR.ValueCantBeNull;
                     break;
-                case ErrorCode.ERR_WrongNestedThis:
-                    codeStr = SR.WrongNestedThis;
-                    break;
                 case ErrorCode.ERR_NoSuchMember:
                     codeStr = SR.NoSuchMember;
                     break;
@@ -59,17 +56,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_BadAccess:
                     codeStr = SR.BadAccess;
                     break;
-                case ErrorCode.ERR_MethDelegateMismatch:
-                    codeStr = SR.MethDelegateMismatch;
-                    break;
                 case ErrorCode.ERR_AssgLvalueExpected:
                     codeStr = SR.AssgLvalueExpected;
                     break;
                 case ErrorCode.ERR_NoConstructors:
                     codeStr = SR.NoConstructors;
-                    break;
-                case ErrorCode.ERR_BadDelegateConstructor:
-                    codeStr = SR.BadDelegateConstructor;
                     break;
                 case ErrorCode.ERR_PropertyLacksGet:
                     codeStr = SR.PropertyLacksGet;
@@ -80,20 +71,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_AssgReadonly:
                     codeStr = SR.AssgReadonly;
                     break;
-                case ErrorCode.ERR_RefReadonly:
-                    codeStr = SR.RefReadonly;
-                    break;
                 case ErrorCode.ERR_AssgReadonlyStatic:
                     codeStr = SR.AssgReadonlyStatic;
                     break;
-                case ErrorCode.ERR_RefReadonlyStatic:
-                    codeStr = SR.RefReadonlyStatic;
-                    break;
                 case ErrorCode.ERR_AssgReadonlyProp:
                     codeStr = SR.AssgReadonlyProp;
-                    break;
-                case ErrorCode.ERR_RefProperty:
-                    codeStr = SR.RefProperty;
                     break;
                 case ErrorCode.ERR_UnsafeNeeded:
                     codeStr = SR.UnsafeNeeded;
@@ -122,9 +104,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_BadArity:
                     codeStr = SR.BadArity;
                     break;
-                case ErrorCode.ERR_BadTypeArgument:
-                    codeStr = SR.BadTypeArgument;
-                    break;
                 case ErrorCode.ERR_TypeArgsNotAllowed:
                     codeStr = SR.TypeArgsNotAllowed;
                     break;
@@ -143,23 +122,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_GenericConstraintNotSatisfiedNullableInterface:
                     codeStr = SR.GenericConstraintNotSatisfiedNullableInterface;
                     break;
-                case ErrorCode.ERR_GenericConstraintNotSatisfiedTyVar:
-                    codeStr = SR.GenericConstraintNotSatisfiedTyVar;
-                    break;
                 case ErrorCode.ERR_GenericConstraintNotSatisfiedValType:
                     codeStr = SR.GenericConstraintNotSatisfiedValType;
                     break;
-                case ErrorCode.ERR_TypeVarCantBeNull:
-                    codeStr = SR.TypeVarCantBeNull;
-                    break;
-                case ErrorCode.ERR_BadRetType:
-                    codeStr = SR.BadRetType;
-                    break;
                 case ErrorCode.ERR_CantInferMethTypeArgs:
                     codeStr = SR.CantInferMethTypeArgs;
-                    break;
-                case ErrorCode.ERR_MethGrpToNonDel:
-                    codeStr = SR.MethGrpToNonDel;
                     break;
                 case ErrorCode.ERR_RefConstraintNotSatisfied:
                     codeStr = SR.RefConstraintNotSatisfied;
@@ -179,9 +146,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_ConvertToStaticClass:
                     codeStr = SR.ConvertToStaticClass;
                     break;
-                case ErrorCode.ERR_GenericArgIsStaticClass:
-                    codeStr = SR.GenericArgIsStaticClass;
-                    break;
                 case ErrorCode.ERR_IncrementLvalueExpected:
                     codeStr = SR.IncrementLvalueExpected;
                     break;
@@ -190,9 +154,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
                 case ErrorCode.ERR_BadArgTypes:
                     codeStr = SR.BadArgTypes;
-                    break;
-                case ErrorCode.ERR_RefLvalueExpected:
-                    codeStr = SR.RefLvalueExpected;
                     break;
                 case ErrorCode.ERR_BadProtectedAccess:
                     codeStr = SR.BadProtectedAccess;
@@ -209,44 +170,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_BadDelArgTypes:
                     codeStr = SR.BadDelArgTypes;
                     break;
-                case ErrorCode.ERR_AssgReadonlyLocal:
-                    codeStr = SR.AssgReadonlyLocal;
-                    break;
-                case ErrorCode.ERR_RefReadonlyLocal:
-                    codeStr = SR.RefReadonlyLocal;
-                    break;
                 case ErrorCode.ERR_ReturnNotLValue:
                     codeStr = SR.ReturnNotLValue;
                     break;
                 case ErrorCode.ERR_AssgReadonly2:
                     codeStr = SR.AssgReadonly2;
                     break;
-                case ErrorCode.ERR_RefReadonly2:
-                    codeStr = SR.RefReadonly2;
-                    break;
                 case ErrorCode.ERR_AssgReadonlyStatic2:
                     codeStr = SR.AssgReadonlyStatic2;
-                    break;
-                case ErrorCode.ERR_RefReadonlyStatic2:
-                    codeStr = SR.RefReadonlyStatic2;
-                    break;
-                case ErrorCode.ERR_AssgReadonlyLocalCause:
-                    codeStr = SR.AssgReadonlyLocalCause;
-                    break;
-                case ErrorCode.ERR_RefReadonlyLocalCause:
-                    codeStr = SR.RefReadonlyLocalCause;
-                    break;
-                case ErrorCode.ERR_DelegateOnNullable:
-                    codeStr = SR.DelegateOnNullable;
                     break;
                 case ErrorCode.ERR_BadCtorArgCount:
                     codeStr = SR.BadCtorArgCount;
                     break;
                 case ErrorCode.ERR_NonInvocableMemberCalled:
                     codeStr = SR.NonInvocableMemberCalled;
-                    break;
-                case ErrorCode.ERR_NamedArgumentSpecificationBeforeFixedArgument:
-                    codeStr = SR.NamedArgumentSpecificationBeforeFixedArgument;
                     break;
                 case ErrorCode.ERR_BadNamedArgument:
                     codeStr = SR.BadNamedArgument;
@@ -260,6 +197,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case ErrorCode.ERR_NamedArgumentUsedInPositional:
                     codeStr = SR.NamedArgumentUsedInPositional;
                     break;
+                case ErrorCode.ERR_BadNonTrailingNamedArgument:
+                    codeStr = SR.BadNonTrailingNamedArgument;
+                    break;
+
                 default:
                     // means missing resources match the code entry
                     Debug.Assert(false, "Missing resources for the error " + code.ToString());

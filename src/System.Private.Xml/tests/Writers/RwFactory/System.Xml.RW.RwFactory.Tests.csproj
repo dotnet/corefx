@@ -4,11 +4,8 @@
   <PropertyGroup>
     <ProjectGuid>{95C95878-A9CD-43D4-B1BB-D0DCAA54C3D7}</ProjectGuid>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="CFactoryModule.cs" />
     <Compile Include="CModCmdLine.cs" />
@@ -21,6 +18,7 @@
     <Compile Include="CXmlDriverVariation.cs" />
     <Compile Include="ReaderFactory.cs" />
     <Compile Include="WriterFactory.cs" />
+    <Compile Include="$(CommonTestPath)\System\Xml\DisableParallelization.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Xml\ModuleCore\ModuleCore.csproj" />

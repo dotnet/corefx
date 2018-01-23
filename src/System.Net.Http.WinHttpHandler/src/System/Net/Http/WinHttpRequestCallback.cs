@@ -258,7 +258,11 @@ namespace System.Net.Http
 
                     throw WinHttpException.CreateExceptionUsingError(lastError);
                 }
-                
+
+                // Get any additional certificates sent from the remote server during the TLS/SSL handshake.
+                X509Certificate2Collection remoteCertificateStore =
+                    UnmanagedCertificateContext.GetRemoteCertificatesFromStoreContext(certHandle);
+
                 // Create a managed wrapper around the certificate handle. Since this results in duplicating
                 // the handle, we will close the original handle after creating the wrapper.
                 var serverCertificate = new X509Certificate2(certHandle);
@@ -266,26 +270,28 @@ namespace System.Net.Http
 
                 X509Chain chain = null;
                 SslPolicyErrors sslPolicyErrors;
+                bool result = false;
 
                 try
                 {
                     WinHttpCertificateHelper.BuildChain(
                         serverCertificate,
+                        remoteCertificateStore,
                         state.RequestMessage.RequestUri.Host,
                         state.CheckCertificateRevocationList,
                         out chain,
                         out sslPolicyErrors);
 
-                    bool result = state.ServerCertificateValidationCallback(
+                    result = state.ServerCertificateValidationCallback(
                         state.RequestMessage,
                         serverCertificate,
                         chain,
                         sslPolicyErrors);
-                    if (!result)
-                    {
-                        throw WinHttpException.CreateExceptionUsingError(
-                            (int)Interop.WinHttp.ERROR_WINHTTP_SECURE_FAILURE);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    throw WinHttpException.CreateExceptionUsingError(
+                        (int)Interop.WinHttp.ERROR_WINHTTP_SECURE_FAILURE, ex);
                 }
                 finally
                 {
@@ -296,6 +302,12 @@ namespace System.Net.Http
 
                     serverCertificate.Dispose();
                 }
+
+                if (!result)
+                {
+                    throw WinHttpException.CreateExceptionUsingError(
+                        (int)Interop.WinHttp.ERROR_WINHTTP_SECURE_FAILURE);
+                }
             }
         }
 
@@ -304,10 +316,6 @@ namespace System.Net.Http
             WinHttpTraceHelper.TraceAsyncError("OnRequestError", asyncResult);
             
             Debug.Assert(state != null, "OnRequestError: state is null");
-
-            Debug.Assert((unchecked((int)asyncResult.dwError) != Interop.WinHttp.ERROR_INSUFFICIENT_BUFFER &&
-                unchecked((int)asyncResult.dwError) != unchecked((int)0x80090321)), // SEC_E_BUFFER_TOO_SMALL
-                $"Unexpected async error in WinHttpRequestCallback: {unchecked((int)asyncResult.dwError)}, WinHttp API: {unchecked((uint)asyncResult.dwResult.ToInt32())}");
 
             Exception innerException = WinHttpException.CreateExceptionUsingError(unchecked((int)asyncResult.dwError));
 

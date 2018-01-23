@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -55,6 +57,57 @@ namespace System.Diagnostics
             {
                 return BootTimeToDateTime(TicksToTimeSpan(GetStat().starttime));
             }
+        }
+
+        /// <summary>Computes a time based on a number of ticks since boot.</summary>
+        /// <param name="timespanAfterBoot">The timespan since boot.</param>
+        /// <returns>The converted time.</returns>
+        internal static DateTime BootTimeToDateTime(TimeSpan timespanAfterBoot)
+        {
+            // Use the uptime and the current time to determine the absolute boot time.
+            DateTime bootTime = DateTime.UtcNow - Uptime;
+
+            // And use that to determine the absolute time for timespan.
+            DateTime dt = bootTime + timespanAfterBoot;
+
+            // The return value is expected to be in the local time zone.
+            // It is converted here (rather than starting with DateTime.Now) to avoid DST issues.
+            return dt.ToLocalTime();
+        }
+
+        /// <summary>Gets the elapsed time since the system was booted.</summary>
+        private static TimeSpan Uptime
+        {
+            get
+            {
+                // '/proc/uptime' accounts time a device spends in sleep mode.
+                const string UptimeFile = Interop.procfs.ProcUptimeFilePath;
+                string text = File.ReadAllText(UptimeFile);
+
+                double uptimeSeconds = 0;
+                int length = text.IndexOf(' ');
+                if (length != -1)
+                {
+                    Double.TryParse(text.AsReadOnlySpan().Slice(0, length), NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo, out uptimeSeconds);
+                }
+
+                return TimeSpan.FromSeconds(uptimeSeconds);
+            }
+        }
+
+        /// <summary>Gets execution path</summary>
+        private string GetPathToOpenFile()
+        {
+            string[] allowedProgramsToRun = { "xdg-open", "gnome-open", "kfmclient" };
+            foreach (var program in allowedProgramsToRun)
+            {
+                string pathToProgram = FindProgramInPath(program);
+                if (!string.IsNullOrEmpty(pathToProgram))
+                {
+                    return pathToProgram;
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -171,36 +224,15 @@ namespace System.Diagnostics
         // ---- PAL layer ends here ----
         // -----------------------------
 
-        /// <summary>Gets the path to the current executable, or null if it could not be retrieved.</summary>
-        private static string GetExePath()
+        /// <summary>Gets the path to the executable for the process, or null if it could not be retrieved.</summary>
+        /// <param name="processId">The pid for the target process, or -1 for the current process.</param>
+        internal static string GetExePath(int processId = -1)
         {
-            // Determine the maximum size of a path
-            int maxPath = Interop.Sys.MaxPath;
+            string exeFilePath = processId == -1 ?
+                Interop.procfs.SelfExeFilePath :
+                Interop.procfs.GetExeFilePathForProcess(processId);
 
-            // Start small with a buffer allocation, and grow only up to the max path
-            for (int pathLen = 256; pathLen < maxPath; pathLen *= 2)
-            {
-                // Read from procfs the symbolic link to this process' executable
-                byte[] buffer = new byte[pathLen + 1]; // +1 for null termination
-                int resultLength = Interop.Sys.ReadLink(Interop.procfs.SelfExeFilePath, buffer, pathLen);
-
-                // If we got one, null terminate it (readlink doesn't do this) and return the string
-                if (resultLength > 0)
-                {
-                    buffer[resultLength] = (byte)'\0';
-                    return Encoding.UTF8.GetString(buffer, 0, resultLength);
-                }
-
-                // If the buffer was too small, loop around again and try with a larger buffer.
-                // Otherwise, bail.
-                if (resultLength == 0 || Interop.Sys.GetLastError() != Interop.Error.ENAMETOOLONG)
-                {
-                    break;
-                }
-            }
-
-            // Could not get a path
-            return null;
+            return Interop.Sys.ReadLink(exeFilePath);
         }
 
         // ----------------------------------

@@ -2,12 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Threading.Tasks;
+
 namespace System.Net.Sockets.Tests
 {
     public static class TestSettings
     {
         // Timeout values in milliseconds.
-        public const int PassingTestTimeout = 5000;
+        public const int PassingTestTimeout = 10000;
         public const int FailingTestTimeout = 100;
 
         // Number of redundant UDP packets to send to increase test reliability
@@ -17,5 +19,7 @@ namespace System.Net.Sockets.Tests
         // have the same port #.
         // This occurs on *nix but not Windows because *nix uses random values (1024-65535) while Windows increments.
         public const int UDPRedundancy = 1;
+
+        public static Task WhenAllOrAnyFailedWithTimeout(params Task[] tasks) => tasks.WhenAllOrAnyFailed(PassingTestTimeout);
     }
 }

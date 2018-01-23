@@ -12,11 +12,10 @@
 using Microsoft.Win32;
 using System;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-
+using System.ComponentModel;
 namespace System.Security.AccessControl
 {
     [Flags]
@@ -276,7 +275,6 @@ namespace System.Security.AccessControl
 nameof(binaryForm),
                     SR.ArgumentOutOfRange_ArrayTooSmall);
             }
-            Contract.EndContractBlock();
 
             //
             // the offset will grow as we go for each additional field (owner, group,
@@ -512,7 +510,6 @@ nameof(binaryForm),
                 throw new ArgumentOutOfRangeException(nameof(binaryForm),
                      SR.AccessControl_InvalidSecurityDescriptorRevision);
             }
-            Contract.EndContractBlock();
 
 
             ControlFlags flags;
@@ -632,7 +629,6 @@ nameof(binaryForm));
             {
                 throw new ArgumentNullException(nameof(sddlForm));
             }
-            Contract.EndContractBlock();
 
             int error;
             IntPtr byteArray = IntPtr.Zero;
@@ -671,8 +667,7 @@ nameof(sddlForm));
                     else if (error != Interop.Errors.ERROR_SUCCESS)
                     {
                         Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Unexpected error out of Win32.ConvertStringSdToSd: {0}", error));
-                        // TODO : This should be a Win32Exception once that type is available
-                        throw new Exception();
+                        throw new Win32Exception(error, SR.Format(SR.AccessControl_UnexpectedError, error));
                     }
                 }
 
@@ -952,7 +947,6 @@ nameof(discretionaryAcl));
             {
                 throw new ArgumentNullException(nameof(rawSecurityDescriptor));
             }
-            Contract.EndContractBlock();
 
             CreateFromParts(
                 isContainer,
@@ -1213,7 +1207,6 @@ nameof(value));
             {
                 throw new ArgumentNullException(nameof(sid));
             }
-            Contract.EndContractBlock();
 
             if (DiscretionaryAcl != null)
             {
@@ -1227,7 +1220,6 @@ nameof(value));
             {
                 throw new ArgumentNullException(nameof(sid));
             }
-            Contract.EndContractBlock();
 
             if (SystemAcl != null)
             {

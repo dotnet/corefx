@@ -61,12 +61,24 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void MoveDirectory_RaisesInvalidPath()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.MoveDirectory("\0bad", "bar"));
                 AssertExtensions.Throws<ArgumentException>("path", null, () => isf.MoveDirectory("foo", "\0bad"));
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void MoveDirectory_IsolatedStorageException()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
+            {
+                Assert.Throws<IsolatedStorageException>(() => isf.MoveDirectory("\0bad", "bar"));
+                Assert.Throws<IsolatedStorageException>(() => isf.MoveDirectory("foo", "\0bad"));
             }
         }
 
@@ -79,7 +91,7 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void MoveDirectory_MoveOver(PresetScopes scope)
         {
@@ -93,7 +105,7 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         [ActiveIssue("dotnet/corefx #18265", TargetFrameworkMonikers.NetFramework)]
         public void MoveDirectory_MovesDirectory(PresetScopes scope)
         {

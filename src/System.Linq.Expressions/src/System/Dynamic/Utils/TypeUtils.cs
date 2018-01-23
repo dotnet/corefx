@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -10,6 +11,11 @@ namespace System.Dynamic.Utils
 {
     internal static class TypeUtils
     {
+        private static readonly Type[] s_arrayAssignableInterfaces = typeof(int[]).GetInterfaces()
+            .Where(i => i.IsGenericType)
+            .Select(i => i.GetGenericTypeDefinition())
+            .ToArray();
+
         public static Type GetNonNullableType(this Type type) => IsNullableType(type) ? type.GetGenericArguments()[0] : type;
 
         public static Type GetNullableType(this Type type)
@@ -231,7 +237,7 @@ namespace System.Dynamic.Utils
             // nonbool==>bool and nonbool==>bool? which are only legal from
             // bool-backed enums.
             return IsConvertible(source) && IsConvertible(dest)
-                   && (GetNonNullableType(dest) != typeof(bool) 
+                   && (GetNonNullableType(dest) != typeof(bool)
                    || source.IsEnum && source.GetEnumUnderlyingType() == typeof(bool));
         }
 
@@ -274,8 +280,139 @@ namespace System.Dynamic.Utils
                 return true;
             }
 
-            // Object conversion
-            return source == typeof(object) || dest == typeof(object);
+            // Object conversion handled by assignable above.
+            Debug.Assert(source != typeof(object) && dest != typeof(object));
+
+            return (source.IsArray || dest.IsArray) && StrictHasReferenceConversionTo(source, dest, true);
+        }
+
+        private static bool StrictHasReferenceConversionTo(this Type source, Type dest, bool skipNonArray)
+        {
+            // HasReferenceConversionTo was both too strict and too lax. It was too strict in prohibiting
+            // some valid conversions involving arrays, and too lax in allowing casts between interfaces
+            // and sealed classes that don't implement them. Unfortunately fixing the lax cases would be
+            // a breaking change, especially since such expressions will even work if only given null
+            // arguments.
+            // This method catches the cases that were incorrectly disallowed, but when it needs to
+            // examine possible conversions of element or type parameters it applies stricter rules.
+
+            for(;;)
+            { 
+                if (!skipNonArray) // Skip if we just came from HasReferenceConversionTo and have just tested these
+                {
+                    if (source.IsValueType | dest.IsValueType)
+                    {
+                        return false;
+                    }
+
+                    // Includes to case of either being typeof(object)
+                    if (source.IsAssignableFrom(dest) || dest.IsAssignableFrom(source))
+                    {
+                        return true;
+                    }
+
+                    if (source.IsInterface)
+                    {
+                        if (dest.IsInterface || dest.IsClass && !dest.IsSealed)
+                        {
+                            return true;
+                        }
+                    }
+                    else if (dest.IsInterface)
+                    {
+                        if (source.IsClass && !source.IsSealed)
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                if (source.IsArray)
+                {
+                    if (dest.IsArray)
+                    {
+                        if (source.GetArrayRank() != dest.GetArrayRank() || source.IsSZArray != dest.IsSZArray)
+                        {
+                            return false;
+                        }
+
+                        source = source.GetElementType();
+                        dest = dest.GetElementType();
+                        skipNonArray = false;
+                    }
+                    else
+                    {
+                        return HasArrayToInterfaceConversion(source, dest);
+                    }
+                }
+                else if (dest.IsArray)
+                {
+                    if (HasInterfaceToArrayConversion(source, dest))
+                    {
+                        return true;
+                    }
+
+                    return IsImplicitReferenceConversion(typeof(Array), source);
+                }
+                else
+                {
+                    return IsLegalExplicitVariantDelegateConversion(source, dest);
+                }
+            }
+        }
+
+        private static bool HasArrayToInterfaceConversion(Type source, Type dest)
+        {
+            Debug.Assert(source.IsArray);
+            if (!source.IsSZArray || !dest.IsInterface || !dest.IsGenericType)
+            {
+                return false;
+            }
+
+            Type[] destParams = dest.GetGenericArguments();
+            if (destParams.Length != 1)
+            {
+                return false;
+            }
+
+            Type destGen = dest.GetGenericTypeDefinition();
+
+            foreach (Type iface in s_arrayAssignableInterfaces)
+            {
+                if (AreEquivalent(destGen, iface))
+                {
+                    return StrictHasReferenceConversionTo(source.GetElementType(), destParams[0], false);
+                }
+            }
+
+            return false;
+        }
+
+        private static bool HasInterfaceToArrayConversion(Type source, Type dest)
+        {
+            Debug.Assert(dest.IsSZArray);
+            if (!dest.IsSZArray || !source.IsInterface || !source.IsGenericType)
+            {
+                return false;
+            }
+
+            Type[] sourceParams = source.GetGenericArguments();
+            if (sourceParams.Length != 1)
+            {
+                return false;
+            }
+
+            Type sourceGen = source.GetGenericTypeDefinition();
+
+            foreach (Type iface in s_arrayAssignableInterfaces)
+            {
+                if (AreEquivalent(sourceGen, iface))
+                {
+                    return StrictHasReferenceConversionTo(sourceParams[0], dest.GetElementType(), false);
+                }
+            }
+
+            return false;
         }
 
         private static bool IsCovariant(Type t)
@@ -689,7 +826,7 @@ namespace System.Dynamic.Utils
         {
             do
             {
-                MethodInfo result = type.GetAnyStaticMethodValidated(name, new[] {type});
+                MethodInfo result = type.GetAnyStaticMethodValidated(name, new[] { type });
                 if (result != null && result.IsSpecialName && !result.ContainsGenericParameters)
                 {
                     return result;
@@ -754,46 +891,6 @@ namespace System.Dynamic.Utils
             return true;
         }
 
-        private static Assembly s_mscorlib;
-
-        private static Assembly MsCorLib => s_mscorlib ?? (s_mscorlib = typeof(object).Assembly);
-
-        /// <summary>
-        /// We can cache references to types, as long as they aren't in
-        /// collectible assemblies. Unfortunately, we can't really distinguish
-        /// between different flavors of assemblies. But, we can at least
-        /// create a cache for types in mscorlib (so we get the primitives, etc).
-        /// </summary>
-        public static bool CanCache(this Type t)
-        {
-            // Note: we don't have to scan base or declaring types here.
-            // There's no way for a type in mscorlib to derive from or be
-            // contained in a type from another assembly. The only thing we
-            // need to look at is the generic arguments, which are the thing
-            // that allows mscorlib types to be specialized by types in other
-            // assemblies.
-
-            Assembly asm = t.Assembly;
-            if (asm != MsCorLib)
-            {
-                // Not in mscorlib or our assembly
-                return false;
-            }
-
-            if (t.IsGenericType)
-            {
-                foreach (Type g in t.GetGenericArguments())
-                {
-                    if (!g.CanCache())
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
         public static MethodInfo GetInvokeMethod(this Type delegateType)
         {
             Debug.Assert(typeof(Delegate).IsAssignableFrom(delegateType));
@@ -836,6 +933,5 @@ namespace System.Dynamic.Utils
         }
 
 #endif
-
     }
 }

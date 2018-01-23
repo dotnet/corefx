@@ -19,39 +19,48 @@ namespace System
         public static bool IsWindows8x => false;
         public static bool IsWindows10Version1607OrGreater => false;
         public static bool IsWindows10Version1703OrGreater => false;
-        public static bool IsWindows10InsiderPreviewBuild16215OrGreater => false;
-        public static bool IsWindows10Version16251OrGreater => false;
+        public static bool IsWindows10Version1709OrGreater => false;
         public static bool IsNotOneCoreUAP =>  true;
-        public static bool IsNetfx462OrNewer() { return false; }
-        public static bool IsNetfx470OrNewer() { return false; }
-        public static bool IsNetfx471OrNewer() { return false; }
-        public static bool IsWinRT => false;
+        public static bool IsInAppContainer => false;
         public static int WindowsVersion => -1;
 
+        public static bool IsCentos6 => IsDistroAndVersion("centos", 6);
         public static bool IsOpenSUSE => IsDistroAndVersion("opensuse");
         public static bool IsUbuntu => IsDistroAndVersion("ubuntu");
         public static bool IsDebian => IsDistroAndVersion("debian");
-        public static bool IsDebian8 => IsDistroAndVersion("debian", "8");
-        public static bool IsUbuntu1404 => IsDistroAndVersion("ubuntu", "14.04");
-        public static bool IsCentos7 => IsDistroAndVersion("centos", "7");
+        public static bool IsDebian8 => IsDistroAndVersion("debian", 8);
+        public static bool IsUbuntu1404 => IsDistroAndVersion("ubuntu", 14, 4);
+        public static bool IsUbuntu1604 => IsDistroAndVersion("ubuntu", 16, 4);
+        public static bool IsUbuntu1704 => IsDistroAndVersion("ubuntu", 17, 4);
+        public static bool IsUbuntu1710 => IsDistroAndVersion("ubuntu", 17, 10);
         public static bool IsTizen => IsDistroAndVersion("tizen");
-        public static bool IsNotFedoraOrRedHatOrCentos => !IsDistroAndVersion("fedora") && !IsDistroAndVersion("rhel") && !IsDistroAndVersion("centos");
         public static bool IsFedora => IsDistroAndVersion("fedora");
         public static bool IsWindowsNanoServer => false;
+        public static bool IsWindowsServerCore => false;
         public static bool IsWindowsAndElevated => false;
 
-        public static Version OSXKernelVersion { get; } = GetOSXKernelVersion();
+        // RedHat family covers RedHat and CentOS
+        public static bool IsRedHatFamily => IsRedHatFamilyAndVersion();
+        public static bool IsNotRedHatFamily => !IsRedHatFamily;
+        public static bool IsRedHatFamily6 => IsRedHatFamilyAndVersion(6);
+        public static bool IsNotRedHatFamily6 => !IsRedHatFamily6;
+        public static bool IsRedHatFamily7 => IsRedHatFamilyAndVersion(7);
+        public static bool IsNotFedoraOrRedHatFamily => !IsFedora && !IsRedHatFamily;
+
+        public static Version OSXVersion { get; } = ToVersion(Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystemVersion);
+
+        public static Version OpenSslVersion => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? Interop.OpenSsl.OpenSslVersion : throw new PlatformNotSupportedException();
 
         public static string GetDistroVersionString()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                return "";
+                return "OSX Version=" + s_osxProductVersion.ToString();
             }
 
-            DistroInfo v = ParseOsReleaseFile();
+            DistroInfo v = GetDistroInfo();
 
-            return "Distro=" + v.Id + " VersionId=" + v.VersionId + " Pretty=" + v.PrettyName + " Version=" + v.Version;
+            return "Distro=" + v.Id + " VersionId=" + v.VersionId;
         }
 
         private static readonly Version s_osxProductVersion = GetOSXProductVersion();
@@ -71,60 +80,25 @@ namespace System
                                 ver >> 24);
         }
 
-        private static DistroInfo ParseOsReleaseFile()
+        static Version ToVersion(string versionString)
         {
-            Debug.Assert(RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
+            if (versionString.IndexOf('.') != -1)
+                return new Version(versionString);
 
-            DistroInfo ret = new DistroInfo();
-            ret.Id = "";
-            ret.VersionId = "";
-            ret.Version = "";
-            ret.PrettyName = "";
-
-            if (File.Exists("/etc/os-release"))
-            {
-                foreach (string line in File.ReadLines("/etc/os-release"))
-                {
-                    if (line.StartsWith("ID=", System.StringComparison.Ordinal))
-                    {
-                        ret.Id = RemoveQuotes(line.Substring("ID=".Length));
-                    }
-                    else if (line.StartsWith("VERSION_ID=", System.StringComparison.Ordinal))
-                    {
-                        ret.VersionId = RemoveQuotes(line.Substring("VERSION_ID=".Length));
-                    }
-                    else if (line.StartsWith("VERSION=", System.StringComparison.Ordinal))
-                    {
-                        ret.Version = RemoveQuotes(line.Substring("VERSION=".Length));
-                    }
-                    else if (line.StartsWith("PRETTY_NAME=", System.StringComparison.Ordinal))
-                    {
-                        ret.PrettyName = RemoveQuotes(line.Substring("PRETTY_NAME=".Length));
-                    }
-                }
-            }
-
-            return ret;
+            // minor version is required by Version
+            // let's default it to 0
+            return new Version(int.Parse(versionString), 0);
         }
 
-        private static string RemoveQuotes(string s)
+        private static DistroInfo GetDistroInfo() => new DistroInfo()
         {
-            s = s.Trim();
-            if (s.Length >= 2 && s[0] == '"' && s[s.Length - 1] == '"')
-            {
-                // Remove quotes.
-                s = s.Substring(1, s.Length - 2);
-            }
+            Id = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystem,
+            VersionId = ToVersion(Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystemVersion)
+        };
 
-            return s;
-        }
-
-        private struct DistroInfo
+        private static bool IsRedHatFamilyAndVersion(int major = -1, int minor = -1, int build = -1, int revision = -1)
         {
-            public string Id { get; set; }
-            public string VersionId { get; set; }
-            public string Version { get; set; }
-            public string PrettyName { get; set; }
+            return IsDistroAndVersion((distro) => distro == "rhel" || distro == "centos", major, minor, build, revision);
         }
 
         /// <summary>
@@ -133,12 +107,17 @@ namespace System
         /// <param name="distroId">The distribution id.</param>
         /// <param name="versionId">The distro version.  If omitted, compares the distro only.</param>
         /// <returns>Whether the OS platform matches the given Linux distro and optional version.</returns>
-        private static bool IsDistroAndVersion(string distroId, string versionId = null)
+        private static bool IsDistroAndVersion(string distroId, int major = -1, int minor = -1, int build = -1, int revision = -1)
+        {
+            return IsDistroAndVersion((distro) => distro == distroId, major, minor, build, revision);
+        }
+
+        private static bool IsDistroAndVersion(Predicate<string> distroPredicate, int major = -1, int minor = -1, int build = -1, int revision = -1)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                DistroInfo v = ParseOsReleaseFile();
-                if (v.Id == distroId && (versionId == null || v.VersionId == versionId))
+                DistroInfo v = GetDistroInfo();
+                if (distroPredicate(v.Id) && VersionEquivalentWith(major, minor, build, revision, v.VersionId))
                 {
                     return true;
                 }
@@ -147,18 +126,12 @@ namespace System
             return false;
         }
 
-        private static Version GetOSXKernelVersion()
+        private static bool VersionEquivalentWith(int major, int minor, int build, int revision, Version actualVersionId)
         {
-            if (IsOSX)
-            {
-                byte[] bytes = new byte[256];
-                IntPtr bytesLength = new IntPtr(bytes.Length);
-                Assert.Equal(0, sysctlbyname("kern.osrelease", bytes, ref bytesLength, null, IntPtr.Zero));
-                string versionString = Encoding.UTF8.GetString(bytes);
-                return Version.Parse(versionString);
-            }
-
-            return new Version(0, 0, 0);
+            return (major == -1 || major == actualVersionId.Major)
+                && (minor == -1 || minor == actualVersionId.Minor)
+                && (build == -1 || build == actualVersionId.Build)
+                && (revision == -1 || revision == actualVersionId.Revision);
         }
 
         private static Version GetOSXProductVersion()
@@ -221,5 +194,11 @@ namespace System
         private static extern int GlobalizationNative_GetICUVersion();
 
         public static bool IsSuperUser => geteuid() == 0;
+
+        private struct DistroInfo
+        {
+            public string Id { get; set; }
+            public Version VersionId { get; set; }
+        }
     }
 }

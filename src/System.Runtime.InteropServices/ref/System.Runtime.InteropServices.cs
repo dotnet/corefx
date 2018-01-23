@@ -5,8 +5,11 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-// Types moved down into System.Runtime.Handles
+// Types moved down into System.Runtime
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.InteropServices.CriticalHandle))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.InteropServices.GCHandle))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.InteropServices.GCHandleType))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.InteropServices.InAttribute))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.InteropServices.SafeHandle))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.Missing))]
 
@@ -136,9 +139,9 @@ namespace System.Runtime.InteropServices
         public AutomationProxyAttribute(bool val) { }
         public bool Value { get { throw null; } }
     }     
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct ArrayWithOffset
     {
+        private object _dummy;
         public ArrayWithOffset(object array, int offset) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Runtime.InteropServices.ArrayWithOffset obj) { throw null; }
@@ -393,31 +396,6 @@ namespace System.Runtime.InteropServices
         public ErrorWrapper(object errorCode) { }
         public int ErrorCode { get { throw null; } }
     }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct GCHandle
-    {
-        public bool IsAllocated { get { throw null; } }
-        public object Target {get { throw null; } set { } }
-        public System.IntPtr AddrOfPinnedObject() { throw null; }
-        public static System.Runtime.InteropServices.GCHandle Alloc(object value) { throw null; }
-        public static System.Runtime.InteropServices.GCHandle Alloc(object value, System.Runtime.InteropServices.GCHandleType type) { throw null; }
-        public override bool Equals(object o) { throw null; }
-        public void Free() { }
-        public static System.Runtime.InteropServices.GCHandle FromIntPtr(System.IntPtr value) { throw null; }
-        public override int GetHashCode() { throw null; }
-        public static bool operator ==(System.Runtime.InteropServices.GCHandle a, System.Runtime.InteropServices.GCHandle b) { throw null; }
-        public static explicit operator System.Runtime.InteropServices.GCHandle(System.IntPtr value) { throw null; }
-        public static explicit operator System.IntPtr(System.Runtime.InteropServices.GCHandle value) { throw null; }
-        public static bool operator !=(System.Runtime.InteropServices.GCHandle a, System.Runtime.InteropServices.GCHandle b) { throw null; }
-        public static System.IntPtr ToIntPtr(System.Runtime.InteropServices.GCHandle value) { throw null; }
-    }
-    public enum GCHandleType
-    {
-        Normal = 2,
-        Pinned = 3,
-        Weak = 0,
-        WeakTrackResurrection = 1,
-    }
     [System.AttributeUsageAttribute((System.AttributeTargets)(5149), Inherited = false)]
     public sealed partial class GuidAttribute : System.Attribute
     {
@@ -437,6 +415,7 @@ namespace System.Runtime.InteropServices
     }
     public struct HandleRef
     {
+        private object _dummy;
         public HandleRef(object wrapper, System.IntPtr handle) : this() { }
         public System.IntPtr Handle { get; }
         public object Wrapper { get; }
@@ -471,11 +450,6 @@ namespace System.Runtime.InteropServices
     {
         public ImportedFromTypeLibAttribute(String tlbFile) { }
         public String Value { get { throw null; } }
-    }         
-    [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited = false)]
-    public sealed partial class InAttribute : System.Attribute
-    {
-        public InAttribute() { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1024), Inherited = false)]
     public sealed partial class InterfaceTypeAttribute : System.Attribute
@@ -910,7 +884,6 @@ namespace System.Runtime.InteropServices
         public TypeLibVarFlags Value { get { throw null; } }
     }
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
-    [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class TypeLibVersionAttribute : Attribute
     {
         public TypeLibVersionAttribute(int major, int minor) {}

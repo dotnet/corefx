@@ -208,6 +208,9 @@ namespace System.IO.Tests
         [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
         public void Unix_NotFoundDirectory_ReadOnlyVolume()
         {
+            if (PlatformDetection.IsRedHatFamily6)
+                return; // [ActiveIssue(https://github.com/dotnet/corefx/issues/21920)]
+
             ReadOnly_FileSystemHelper(readOnlyDirectory =>
             {
                 Assert.Throws<DirectoryNotFoundException>(() => Delete(Path.Combine(readOnlyDirectory, "DoesNotExist")));
@@ -251,8 +254,10 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [ActiveIssue(24242)]
         [PlatformSpecific(TestPlatforms.Windows)]
         [OuterLoop("This test is very slow.")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop does not have the fix for #22596")]
         public void RecursiveDelete_DeepNesting()
         {
             // Create a 2000 level deep directory and recursively delete from the root.

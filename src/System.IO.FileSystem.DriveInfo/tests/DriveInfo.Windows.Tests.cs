@@ -17,7 +17,6 @@ namespace System.IO.FileSystem.DriveInfoTests
     public class DriveInfoWindowsTests
     {
         [Theory]
-        [InlineData(":\0", "driveName")]
         [InlineData(":", null)]
         [InlineData("://", null)]
         [InlineData(@":\", null)]
@@ -80,7 +79,7 @@ namespace System.IO.FileSystem.DriveInfoTests
             Assert.NotNull(validDrive.Name);
             Assert.NotNull(validDrive.RootDirectory.Name);
 
-            if (PlatformDetection.IsWinRT)
+            if (PlatformDetection.IsInAppContainer)
             {
                 Assert.Throws<UnauthorizedAccessException>(() => validDrive.AvailableFreeSpace);
                 Assert.Throws<UnauthorizedAccessException>(() => validDrive.DriveFormat);
@@ -218,7 +217,7 @@ namespace System.IO.FileSystem.DriveInfoTests
                 }
             };
             
-            if (PlatformDetection.IsWinRT)
+            if (PlatformDetection.IsInAppContainer)
             {
                 Assert.Throws<UnauthorizedAccessException>(() => DoDriveCheck());
             }
@@ -234,7 +233,7 @@ namespace System.IO.FileSystem.DriveInfoTests
         {
             DriveInfo drive = DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.Fixed).First();
             // Inside an AppContainer access to VolumeLabel is denied.
-            if (PlatformDetection.IsWinRT)
+            if (PlatformDetection.IsInAppContainer)
             {
                 Assert.Throws<UnauthorizedAccessException>(() => drive.VolumeLabel);
                 return;

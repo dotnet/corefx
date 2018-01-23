@@ -19,7 +19,6 @@ namespace System.IO
         protected string OriginalPath;      // path passed in by the user
         private string _displayPath = "";   // path that can be displayed to the user
 
-        [System.Security.SecurityCritical]
         protected FileSystemInfo()
         {
         }
@@ -37,7 +36,6 @@ namespace System.IO
         // Full path of the directory/file
         public virtual string FullName
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
                 return FullPath;
@@ -93,15 +91,14 @@ namespace System.IO
 
         public DateTime CreationTimeUtc
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
-                return FileSystemObject.CreationTime.UtcDateTime;
+                return CreationTimeCore.UtcDateTime;
             }
 
             set
             {
-                FileSystemObject.CreationTime = File.GetUtcDateTimeOffset(value);
+                CreationTimeCore = File.GetUtcDateTimeOffset(value);
             }
         }
 
@@ -121,15 +118,14 @@ namespace System.IO
 
         public DateTime LastAccessTimeUtc
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
-                return FileSystemObject.LastAccessTime.UtcDateTime;
+                return LastAccessTimeCore.UtcDateTime;
             }
 
             set
             {
-                FileSystemObject.LastAccessTime = File.GetUtcDateTimeOffset(value);
+                LastAccessTimeCore = File.GetUtcDateTimeOffset(value);
             }
         }
 
@@ -149,34 +145,14 @@ namespace System.IO
 
         public DateTime LastWriteTimeUtc
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
-                return FileSystemObject.LastWriteTime.UtcDateTime;
+                return LastWriteTimeCore.UtcDateTime;
             }
 
             set
             {
-                FileSystemObject.LastWriteTime = File.GetUtcDateTimeOffset(value);
-            }
-        }
-
-        public void Refresh()
-        {
-            FileSystemObject.Refresh();
-        }
-
-        public FileAttributes Attributes
-        {
-            [System.Security.SecuritySafeCritical]
-            get
-            {
-                return FileSystemObject.Attributes;
-            }
-            [System.Security.SecurityCritical] // auto-generated
-            set
-            {
-                FileSystemObject.Attributes = value;
+                LastWriteTimeCore = File.GetUtcDateTimeOffset(value);
             }
         }
 

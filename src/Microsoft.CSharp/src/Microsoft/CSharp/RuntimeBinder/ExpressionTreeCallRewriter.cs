@@ -45,19 +45,17 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        public static Expression Rewrite(TypeManager typeManager, Expr pExpr, Expression[] listOfParameters)
+        public static Expression Rewrite(TypeManager typeManager, ExprBinOp binOp, Expression[] listOfParameters)
         {
             ExpressionTreeCallRewriter rewriter = new ExpressionTreeCallRewriter(typeManager, listOfParameters);
 
-            // We should have a EXPRBINOP thats an EK_SEQUENCE. The RHS of our sequence
+            // We should have a ExprBinOp that's an EK_SEQUENCE. The RHS of our sequence
             // should be a call to PM_EXPRESSION_LAMBDA. The LHS of our sequence is the 
             // set of declarations for the parameters that we'll need.
             // Assert all of these first, and then unwrap them.
 
-            Debug.Assert(pExpr != null);
-            Debug.Assert(pExpr.Kind == ExpressionKind.Sequence);
-            ExprBinOp binOp = (ExprBinOp)pExpr;
             Debug.Assert(binOp != null);
+            Debug.Assert(binOp.Kind == ExpressionKind.Sequence);
             Debug.Assert(binOp.OptionalRightChild is ExprCall);
             Debug.Assert(((ExprCall)binOp.OptionalRightChild).PredefinedMethod == PREDEFMETH.PM_EXPRESSION_LAMBDA);
             Debug.Assert(binOp.OptionalLeftChild != null);
@@ -212,6 +210,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new ExpressionExpr(exp);
         }
 
+        // ExpressionTreeRewriter has optimized away identity or up-cast conversions, leaving us with a bare parameter
+        // access. Just get the expression for that parameter so the lambda produced can be p0 => p0
+        protected override Expr VisitWRAP(ExprWrap pExpr) => new ExpressionExpr(GetExpression(pExpr));
+
         #region Generators
         /////////////////////////////////////////////////////////////////////////////////
 
@@ -322,7 +324,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 ExprList list = (ExprList)pExpr.OptionalArguments;
                 ExprList list2 = (ExprList)list.OptionalNextListNode;
                 e = GetExpression(list.OptionalElement);
-                t = ((ExprTypeOf)list2.OptionalElement).SourceType.Type.AssociatedSystemType;
+                t = ((ExprTypeOf)list2.OptionalElement).SourceType.AssociatedSystemType;
 
                 if (e.Type.MakeByRefType() == t)
                 {
@@ -350,7 +352,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 ExprList list = (ExprList)pExpr.OptionalArguments;
 
                 e = GetExpression(list.OptionalElement);
-                t = ((ExprTypeOf)list.OptionalNextListNode).SourceType.Type.AssociatedSystemType;
+                t = ((ExprTypeOf)list.OptionalNextListNode).SourceType.AssociatedSystemType;
 
                 if (e.Type.MakeByRefType() == t)
                 {
@@ -466,7 +468,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return Expression.Constant(
                 GetObject(list.OptionalElement),
-                ((ExprTypeOf)list.OptionalNextListNode).SourceType.Type.AssociatedSystemType);
+                ((ExprTypeOf)list.OptionalNextListNode).SourceType.AssociatedSystemType);
         }
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -780,7 +782,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                         ExprList list = (ExprList)call.OptionalArguments;
                         return
                             Expression.NewArrayInit(
-                                ((ExprTypeOf)list.OptionalElement).SourceType.Type.AssociatedSystemType,
+                                ((ExprTypeOf)list.OptionalElement).SourceType.AssociatedSystemType,
                                 GetArgumentsFromArrayInit((ExprArrayInit)list.OptionalNextListNode));
                     }
 
@@ -881,7 +883,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
                 else if (pExpr is ExprTypeOf typeOf)
                 {
-                    return typeOf.SourceType.Type.AssociatedSystemType;
+                    return typeOf.SourceType.AssociatedSystemType;
                 }
                 else if (pExpr is ExprMethodInfo methodInfo)
                 {
@@ -975,9 +977,9 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (arrinit != null)
             {
                 Expr list = arrinit.OptionalArguments;
-                Expr p = list;
                 while (list != null)
                 {
+                    Expr p;
                     if (list is ExprList pList)
                     {
                         p = pList.OptionalElement;
@@ -988,6 +990,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                         p = list;
                         list = null;
                     }
+
                     expressions.Add(GetExpression(p));
                 }
 
@@ -1136,7 +1139,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             PropertySymbol propSym = propinfo.Property.Prop();
 
             TypeArray genericInstanceParams = _typeManager.SubstTypeArray(propSym.Params, aggType, null);
-            CType genericInstanceReturn = _typeManager.SubstType(propSym.RetType, aggType, null);
 
             Type type = aggType.AssociatedSystemType;
             PropertyInfo propertyInfo = propSym.AssociatedPropertyInfo;

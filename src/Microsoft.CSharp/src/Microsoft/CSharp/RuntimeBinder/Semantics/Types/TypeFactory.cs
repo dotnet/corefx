@@ -11,7 +11,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     {
         // Aggregate
         public AggregateType CreateAggregateType(
-            Name name,
             AggregateSymbol parent,
             TypeArray typeArgsThis,
             AggregateType outerType)
@@ -21,8 +20,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             type.outerType = outerType;
             type.SetOwningAggregate(parent);
             type.SetTypeArgsThis(typeArgsThis);
-            type.SetName(name);
-
             type.SetTypeKind(TypeKind.TK_AggregateType);
             return type;
         }
@@ -67,24 +64,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             ArgumentListType type = new ArgumentListType();
             type.SetTypeKind(TypeKind.TK_ArgumentListType);
             return type;
-        }
-
-        public ErrorType CreateError(
-            Name name,
-            CType parent,
-            AssemblyQualifiedNamespaceSymbol pParentNS,
-            Name nameText,
-            TypeArray typeArgs)
-        {
-            ErrorType e = new ErrorType();
-            e.SetName(name);
-            e.nameText = nameText;
-            e.typeArgs = typeArgs;
-            e.SetTypeParent(parent);
-            e.SetNSParent(pParentNS);
-
-            e.SetTypeKind(TypeKind.TK_ErrorType);
-            return e;
         }
 
         // Derived types - parent is base type

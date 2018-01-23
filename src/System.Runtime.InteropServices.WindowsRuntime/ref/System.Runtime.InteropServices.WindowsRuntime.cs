@@ -14,9 +14,9 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         public DefaultInterfaceAttribute(global::System.Type defaultInterface) { }
         public global::System.Type DefaultInterface { get { throw null; } }
     }
-    [global::System.Runtime.InteropServices.StructLayoutAttribute(global::System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct EventRegistrationToken
     {
+        private int _dummy;
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
         public static bool operator ==(global::System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken left, global::System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken right) { throw null; }
@@ -58,19 +58,12 @@ namespace System.Runtime.InteropServices.WindowsRuntime
     }
     public static partial class WindowsRuntimeMarshal
     {
-        [global::System.Security.SecurityCriticalAttribute]
         public static void AddEventHandler<T>(global::System.Func<T, global::System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken> addMethod, global::System.Action<global::System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken> removeMethod, T handler) { }
-        [global::System.Security.SecurityCriticalAttribute]
         public static void FreeHString(global::System.IntPtr ptr) { }
-        [global::System.Security.SecurityCriticalAttribute]
         public static global::System.Runtime.InteropServices.WindowsRuntime.IActivationFactory GetActivationFactory(global::System.Type type) { throw null; }
-        [global::System.Security.SecurityCriticalAttribute]
         public static string PtrToStringHString(global::System.IntPtr ptr) { throw null; }
-        [global::System.Security.SecurityCriticalAttribute]
         public static void RemoveAllEventHandlers(global::System.Action<global::System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken> removeMethod) { }
-        [global::System.Security.SecurityCriticalAttribute]
         public static void RemoveEventHandler<T>(global::System.Action<global::System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken> removeMethod, T handler) { }
-        [global::System.Security.SecurityCriticalAttribute]
         public static global::System.IntPtr StringToHString(string s) { throw null; }
     }
     [global::System.AttributeUsageAttribute((global::System.AttributeTargets)(2048), Inherited = false, AllowMultiple = false)]

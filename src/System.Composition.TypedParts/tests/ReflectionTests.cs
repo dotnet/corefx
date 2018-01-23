@@ -1,4 +1,8 @@
-﻿using System.Collections.Concurrent;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Collections.Concurrent;
 using System.Composition.Hosting;
 using System.Threading;
 using Xunit;
@@ -17,12 +21,13 @@ namespace System.Composition.TypedParts.Tests
         /// Non-deterministic
         /// </summary>
         /// <remarks>
-        /// Because MethodInfo.GetParameters() lazy intializes it's return value, 
+        /// Because MethodInfo.GetParameters() lazy initializes it's return value, 
         /// concurrent calls can create different ParameterInfo instances.
         /// This can cause arguments to an export's constructor to incorrectly
         /// revert to a default value during GetExport.
         /// </remarks>
         [ConditionalFact(nameof(HasMultiplerProcessors))]
+        [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void MultiThreadedGetExportsWorkWithImportingConstuctor()
         {
             var errors = new ConcurrentBag<Exception>();

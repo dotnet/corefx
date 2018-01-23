@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Linq;
 
 namespace System.Collections.Immutable
 {
@@ -120,6 +121,26 @@ namespace System.Collections.Immutable
             return _head;
         }
 
+#if FEATURE_ITEMREFAPI
+        /// <summary>
+        /// Gets a read-only reference to the element on the top of the stack.
+        /// </summary>
+        /// <returns>
+        /// A read-only reference to the element on the top of the stack. 
+        /// </returns>
+        /// <exception cref="InvalidOperationException">Thrown when the stack is empty.</exception>
+        [Pure]
+        public ref readonly T PeekRef()
+        {
+            if (this.IsEmpty)
+            {
+                throw new InvalidOperationException(SR.InvalidEmptyOperation);
+            }
+
+            return ref _head;
+        }
+#endif
+
         /// <summary>
         /// Pushes an element onto a stack and returns the new stack.
         /// </summary>
@@ -208,7 +229,9 @@ namespace System.Collections.Immutable
         [Pure]
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            return new EnumeratorObject(this);
+            return this.IsEmpty ?
+                Enumerable.Empty<T>().GetEnumerator() :
+                new EnumeratorObject(this);
         }
 
         /// <summary>

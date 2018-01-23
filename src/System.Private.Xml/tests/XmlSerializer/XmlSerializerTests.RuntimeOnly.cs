@@ -865,15 +865,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    public static void Xml_TypeWithMismatchBetweenAttributeAndPropertyType()
-    {
-        var value = new TypeWithMismatchBetweenAttributeAndPropertyType();
-        var actual = SerializeAndDeserialize(value,
-@"<?xml version=""1.0""?><RootElement xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" IntValue=""120"" />");
-        Assert.StrictEqual(value.IntValue, actual.IntValue);
-    }
-
-    [Fact]
     public static void Xml_TypeWithNestedPublicType()
     {
         var value = new List<TypeWithNestedPublicType.LevelData>();
@@ -1936,6 +1927,20 @@ public static partial class XmlSerializerTests
         Assert.False(xmp.CheckSpecified);
     }
 
+    [Fact]       
+    public static void XmlSchemaExporter_ExportMembersMapping_NotSupportedDefaultValue()
+    {
+        XmlReflectionImporter importer = new XmlReflectionImporter("http://www.contoso.com/");
+        XmlReflectionMember[] members = new XmlReflectionMember[1];
+        XmlReflectionMember member = members[0] = new XmlReflectionMember();
+        member.MemberType = typeof(TypeWithQNameArrayAsXmlAttributeInvalidDefaultValue);
+        XmlMembersMapping mappings = importer.ImportMembersMapping("root", "", members, true);
+        XmlMemberMapping xmp = mappings[0];
+        XmlSchemas schema = new XmlSchemas();
+        XmlSchemaExporter exporter = new XmlSchemaExporter(schema);
+        AssertExtensions.Throws<XmlException,Exception>(() => exporter.ExportMembersMapping(mappings));
+    }
+
     [Fact]
     public static void XmlSerializerVersionAttributeTest()
     {
@@ -2921,5 +2926,30 @@ public static partial class XmlSerializerTests
             serializerFactory);
 
         Assert.StrictEqual(value, actual);
+    }
+
+    [ConditionalFact(nameof(IsTimeSpanSerializationAvailable))]
+    public static void VerifyRestrictionElementForTimeSpanTest()
+    {
+        var schemas = new XmlSchemas();
+        var exporter = new XmlSchemaExporter(schemas);
+        XmlTypeMapping mapping = new XmlReflectionImporter().ImportTypeMapping(typeof(TimeSpan));
+        exporter.ExportTypeMapping(mapping);
+        XmlSchema schema = schemas.Where(s => s.TargetNamespace == "http://microsoft.com/wsdl/types/").FirstOrDefault();
+        Assert.NotNull(schema);
+        var ms = new MemoryStream();
+        schema.Write(ms);
+        ms.Position = 0;
+        string actualOutput = new StreamReader(ms).ReadToEnd();
+        XElement element = XElement.Parse(actualOutput);
+        while (element.Elements().Count() != 0)
+        {
+            element = element.Elements().First();
+        }
+
+        string expectedAttribute = "xs:duration";
+        string baseline = "<?xml version=\"1.0\"?>\r\n<xs:schema xmlns:tns=\"http://microsoft.com/wsdl/types/\" elementFormDefault=\"qualified\" targetNamespace=\"http://microsoft.com/wsdl/types/\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\r\n  <xs:simpleType name=\"TimeSpan\">\r\n    <xs:restriction base=\"xs:duration\" />\r\n  </xs:simpleType>\r\n</xs:schema>";
+        Assert.True(element.LastAttribute.Value == expectedAttribute, string.Format("{0}Test failed for wrong output from schema: {0}Expected Output: {1}{0}Actual Output: {2}",
+                Environment.NewLine, baseline, actualOutput));
     }
 }

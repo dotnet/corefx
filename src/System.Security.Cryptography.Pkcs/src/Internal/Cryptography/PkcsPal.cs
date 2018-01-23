@@ -70,7 +70,7 @@ namespace Internal.Cryptography
         public abstract Exception CreateDecryptAfterEncryptException();
 
         /// <summary>
-        /// If you call Decrupt() after a Decrypt(), the framework throws CryptographicException(CRYPT_E_INVALID_MSG_TYPE) on Windows.
+        /// If you call Decrypt() after a Encrypt(), the framework throws CryptographicException(CRYPT_E_INVALID_MSG_TYPE) on Windows.
         /// This method encapsulates what other OS's decide to throw in this situation.
         /// </summary>
         public abstract Exception CreateDecryptTwiceException();
@@ -79,6 +79,16 @@ namespace Internal.Cryptography
         /// Retrieve the certificate's subject key identifier value.
         /// </summary>
         public abstract byte[] GetSubjectKeyIdentifier(X509Certificate2 certificate);
+
+        /// <summary>
+        /// Retrieve a private key object for the certificate to use with signing.
+        /// </summary>
+        public abstract T GetPrivateKeyForSigning<T>(X509Certificate2 certificate, bool silent) where T : AsymmetricAlgorithm;
+
+        /// <summary>
+        /// Retrieve a private key object for the certificate to use with decryption.
+        /// </summary>
+        public abstract T GetPrivateKeyForDecryption<T>(X509Certificate2 certificate, bool silent) where T : AsymmetricAlgorithm;
 
         /// <summary>
         /// Get the one (and only) instance of PkcsPal.

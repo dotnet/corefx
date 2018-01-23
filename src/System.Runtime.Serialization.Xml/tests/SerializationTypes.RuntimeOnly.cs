@@ -1295,25 +1295,6 @@ namespace SerializationTypes
         }
     }
 
-    [XmlRoot("RootElement")]
-    public class TypeWithMismatchBetweenAttributeAndPropertyType
-    {
-        private int _intValue = 120;
-
-        [DefaultValue(true), XmlAttribute("IntValue")]
-        public int IntValue
-        {
-            get
-            {
-                return _intValue;
-            }
-            set
-            {
-                _intValue = value;
-            }
-        }
-    }
-
     public class Level
     {
         public string Name { get; set; }
@@ -1977,6 +1958,13 @@ namespace SerializationTypes
         public string[] XmlAttributeForms;
 
         public int IntField;
+    }
+
+    [XmlType(TypeName = "MyXmlType")]
+    public class TypeWithQNameArrayAsXmlAttributeInvalidDefaultValue
+    {
+        [DefaultValue("DefaultValue")]
+        public XmlQualifiedName XmlAttributeForms;
     }
 
     [XmlType(TypeName = "MyXmlType")]
@@ -4359,4 +4347,31 @@ public class TypeWithCollectionAndDateTimeOffset
     }
 
     public DateTimeOffset DateTimeOffset { get; set; }
+}
+
+[KnownType(typeof(bool))]
+[KnownType(typeof(byte[]))]
+[KnownType(typeof(char))]
+[KnownType(typeof(DateTime))]
+[KnownType(typeof(decimal))]
+[KnownType(typeof(double))]
+[KnownType(typeof(float))]
+[KnownType(typeof(Guid))]
+[KnownType(typeof(int))]
+[KnownType(typeof(long))]
+[KnownType(typeof(object))]
+[KnownType(typeof(XmlQualifiedName))]
+[KnownType(typeof(short))]
+[KnownType(typeof(sbyte))]
+[KnownType(typeof(string))]
+[KnownType(typeof(TimeSpan))]
+[KnownType(typeof(byte))]
+[KnownType(typeof(uint))]
+[KnownType(typeof(ulong))]
+[KnownType(typeof(ushort))]
+[KnownType(typeof(Uri))]
+[CollectionDataContract]
+public class TypeWithPrimitiveKnownTypes : List<object>
+{
+
 }
