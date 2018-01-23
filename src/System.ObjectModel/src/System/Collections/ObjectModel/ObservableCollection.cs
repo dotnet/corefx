@@ -1,3 +1,4 @@
+using System.Globalization;
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
@@ -129,10 +130,11 @@ namespace System.Collections.ObjectModel
         public void InsertRange(int index, IEnumerable<T> collection)
         {
             if (collection == null)
-                throw new ArgumentNullException(nameof(collection));
-
-            if (index < 0 || index > Count)
-                throw new ArgumentOutOfRangeException(nameof(index));
+                throw new ArgumentNullException(nameof(collection));      
+            if (index < 0)
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_NeedNonNegNum);     
+            if (index > Count)
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_ArgExceedsSize);
 
             if (collection is ICollection<T> countable)
             {
@@ -300,9 +302,12 @@ namespace System.Collections.ObjectModel
         /// <exception cref="ArgumentNullException"><paramref name="match"/> is null.</exception>
         public int RemoveAll(int index, int count, Predicate<T> match)
         {
-            if (index < 0 || index + count > Count)
-                throw new ArgumentOutOfRangeException($"index or count must not exceed the collection.");
-
+            if (index < 0)
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (index + count > Count)
+                throw new ArgumentOutOfRangeException(SR.ArgumentOutOfRange_ArgExceedsSize);
             if (match == null)
                 throw new ArgumentNullException(nameof(match));
 
@@ -363,8 +368,12 @@ namespace System.Collections.ObjectModel
         /// <exception cref="ArgumentOutOfRangeException">The specified range is exceeding the collection.</exception>
         public void RemoveRange(int index, int count)
         {
-            if (index < 0 || index + count > Count)
-                throw new ArgumentOutOfRangeException($"index or count must not exceed the collection.");
+            if (index < 0)
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (index + count > Count)
+                throw new ArgumentOutOfRangeException(SR.ArgumentOutOfRange_ArgExceedsSize);
 
             if (count == 0)
                 return;
@@ -433,7 +442,7 @@ namespace System.Collections.ObjectModel
         }
 
         /// <summary>
-        /// Removes the specified range and inserts the specified collection, ignoring equal items.
+        /// Removes the specified range and inserts the specified collection in its position, leaving equal items in equal positions intact.
         /// </summary>
         /// <param name="index">The index of where to start the replacement.</param>
         /// <param name="count">The number of items to be replaced.</param>
@@ -445,12 +454,15 @@ namespace System.Collections.ObjectModel
         /// <exception cref="ArgumentNullException"><paramref name="comparer"/> is null.</exception>
         public void ReplaceRange(int index, int count, IEnumerable<T> collection, IEqualityComparer<T> comparer)
         {
-            if (index < 0 || index + count < Count)
-                throw new ArgumentOutOfRangeException($"index or count must not exceed the collection.");
+            if (index < 0)
+                throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
+            if (index + count > Count)
+                throw new ArgumentOutOfRangeException(SR.ArgumentOutOfRange_ArgExceedsSize);
 
             if (collection == null)
-                throw new ArgumentNullException(nameof(collection));
-
+                throw new ArgumentNullException(nameof(collection));  
             if (comparer == null)
                 throw new ArgumentNullException(nameof(comparer));
 
@@ -470,95 +482,78 @@ namespace System.Collections.ObjectModel
 
             if (index + count == 0)
             {
-                AddRange(collection);
+                InsertRange(0, collection);
                 return;
             }
 
             if (!(collection is IList<T> list))
                 list = new List<T>(collection);
 
-            var oldCount = Count;
-            var addedCount = list.Count;
-            var max = addedCount >= Count ? addedCount : Count;
-
             using (BlockReentrancy())
             using (new DeferredEventsCollection(this))
             {
+                var rangeCount = index + count;
+                var addedCount = list.Count;
+
                 var changesMade = false;
                 List<T>
                     oldCluster = new List<T>(),
                     newCluster = new List<T>();
 
-                for (int i = index; i < index + max; i++)
+
+                int i = index;
+                for (; i < rangeCount && i - index < addedCount; i++)
                 {
                     //parallel position
-                    if (i < Count && i < addedCount)
+                    T old = this[i], @new = list[i - index];
+                    if (comparer.Equals(old, @new))
                     {
-                        T old = this[i], @new = list[i - index];
-                        if (comparer.Equals(old, @new))
-                        {
-                            OnRangeReplaced(i, newCluster, oldCluster);
-                            continue;
-                        }
-                        else
-                        {
-                            Items[i] = @new;
-                            newCluster.Add(@new);
-                            oldCluster.Add(old);
-
-                            changesMade = true;
-                        }
+                        OnRangeReplaced(i, newCluster, oldCluster);
+                        continue;
                     }
                     else
                     {
-                        OnRangeReplaced(i, newCluster, oldCluster);
+                        Items[i] = @new;
+                        newCluster.Add(@new);
+                        oldCluster.Add(old);
 
-                        //exceeding position
-                        if (Count > addedCount)
-                        {
-                            var removedCount = Count - addedCount;
-                            T[] removed = new T[removedCount];
-                            var items = (List<T>)Items;
-                            items.CopyTo(i, removed, 0, removed.Length);
-                            items.RemoveRange(i, removedCount);
-                            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removed, i));
-
-                            /*
-                            var removed = new T[removedCount];
-                            for (var j = Count - 1; j >= i; j--)
-                            {
-                                removed[j - i] = this[j];
-                                Items.RemoveAt(j);                                
-                            }
-                            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removed, i));
-                            */
-                        }
-                        //new position                    
-                        else
-                        {
-                            var k = i - index;
-                            T[] added = new T[addedCount - k];
-
-                            for (int j = k; j < addedCount; j++)
-                            {
-                                T @new = list[j];
-                                Items.Add(@new);
-                                added[j - k] = @new;
-                            }
-                            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, added, i));
-                        }
-                        break;
+                        changesMade = true;
                     }
                 }
 
-                if (max > 0)
-                {
-                    OnRangeReplaced(Count, newCluster, oldCluster);
-                    if (oldCount != Count)
-                        OnEssentialPropertiesChanged();
-                    else if (changesMade)
-                        OnIndexerPropertyChanged();
+                OnRangeReplaced(i, newCluster, oldCluster);
+
+                //exceeding position
+                if (count != addedCount)
+                {     
+                    var items = (List<T>)Items;
+                    if (count > addedCount)
+                    {
+                        var removedCount = rangeCount - addedCount;
+                        T[] removed = new T[removedCount];
+                        items.CopyTo(i, removed, 0, removed.Length);
+                        items.RemoveRange(i, removedCount);
+                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removed, i));
+                    }
+                    else
+                    {
+                        var k = i - index;
+                        T[] added = new T[addedCount - k];
+                        for (int j = k; j < addedCount; j++)
+                        {
+                            T @new = list[j];
+                            added[j - k] = @new;
+                        }
+                        items.InsertRange(i, added);
+                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, added, i));
+                    }
+
+                    OnEssentialPropertiesChanged();
                 }
+                else if(changesMade)
+                {
+                    OnIndexerPropertyChanged();
+                }  
             }
         }
 

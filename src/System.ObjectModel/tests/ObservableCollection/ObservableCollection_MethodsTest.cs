@@ -613,6 +613,11 @@ namespace System.Collections.ObjectModel.Tests
                 (2, NotifyCollectionChangedAction.Replace, allItems.Skip(3).Take(1), allItems.Skip(2).Take(1)),
                 (3, NotifyCollectionChangedAction.Add, allItems.Skip(4), null));
 
+            reset(oldItems);
+            tester.ReplaceRangeTest(col,
+                newItems.Take(1), 0, 1, null,
+                (0, NotifyCollectionChangedAction.Replace, newItems.Take(1), oldItems.Take(1)));
+
             //TODO write more replace range text
         }
 
