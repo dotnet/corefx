@@ -7,6 +7,7 @@ using System.Security;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace System.IO.Pipes
 {
@@ -92,6 +93,8 @@ namespace System.IO.Pipes
                 // We need to remove this flag from options because it is not a valid flag for windows PInvoke to create a pipe.
                 options &= ~PipeOptions.CurrentUserOnly;
             }
+
+            Debug.Assert((options & PipeOptions.CurrentUserOnly) == 0);
 
             _normalizedPipePath = GetPipePath(serverName, pipeName);
             _direction = direction;

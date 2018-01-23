@@ -412,18 +412,17 @@ namespace System.IO.Pipes
             return secAttrs;
         }
 
-        internal static unsafe Interop.Kernel32.SECURITY_ATTRIBUTES GetSecAttrs(HandleInheritability inheritability, PipeSecurity pipeSecurity, out object pinningHandle)
+        internal static unsafe Interop.Kernel32.SECURITY_ATTRIBUTES GetSecAttrs(HandleInheritability inheritability, PipeSecurity pipeSecurity, ref GCHandle pinningHandle)
         {
-            pinningHandle = null;
-            Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = GetSecAttrs(inheritability);
-
-            if (pipeSecurity != null)
+            Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = default(Interop.Kernel32.SECURITY_ATTRIBUTES);
+            if (pipeSecurity != null || (inheritability & HandleInheritability.Inheritable) != 0)
             {
-                // no inherability flag was found so we need to initialize secAttrs structure.
-                if (secAttrs.Equals(default(Interop.Kernel32.SECURITY_ATTRIBUTES)))
+                secAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES();
+                secAttrs.nLength = (uint)sizeof(Interop.Kernel32.SECURITY_ATTRIBUTES);
+
+                if ((inheritability & HandleInheritability.Inheritable) != 0)
                 {
-                    secAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES();
-                    secAttrs.nLength = (uint)sizeof(Interop.Kernel32.SECURITY_ATTRIBUTES);
+                    secAttrs.bInheritHandle = Interop.BOOL.TRUE;
                 }
 
                 byte[] securityDescriptor = pipeSecurity.GetSecurityDescriptorBinaryForm();

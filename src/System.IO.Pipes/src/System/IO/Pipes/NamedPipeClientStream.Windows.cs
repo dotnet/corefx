@@ -143,7 +143,7 @@ namespace System.IO.Pipes
             if (remoteOwnerSid != currentUserSid)
             {
                 State = PipeState.Closed;
-                throw new UnauthorizedAccessException();
+                throw new UnauthorizedAccessException(SR.UnauthorizedAccess_NotOwnedByCurrentUser);
             }
         }
 

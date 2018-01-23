@@ -54,6 +54,8 @@ namespace System.IO.Pipes
                 options &= ~PipeOptions.CurrentUserOnly;
             }
 
+            Debug.Assert((options & PipeOptions.CurrentUserOnly) == 0);
+
             int openMode = ((int)direction) |
                            (maxNumberOfServerInstances == 1 ? Interop.Kernel32.FileOperations.FILE_FLAG_FIRST_PIPE_INSTANCE : 0) |
                            (int)options;
@@ -67,7 +69,8 @@ namespace System.IO.Pipes
                 maxNumberOfServerInstances = 255;
             }
 
-            Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = PipeStream.GetSecAttrs(inheritability, pipeSecurity, out object pinningHandle);
+            var pinningHandle = new GCHandle();
+            Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = PipeStream.GetSecAttrs(inheritability, pipeSecurity, ref pinningHandle);
 
             try
             {
@@ -83,9 +86,9 @@ namespace System.IO.Pipes
             }
             finally
             {
-                if (pinningHandle != null)
+                if (pinningHandle.IsAllocated)
                 {
-                    ((GCHandle)pinningHandle).Free();
+                    pinningHandle.Free();
                 }
             }
         }
