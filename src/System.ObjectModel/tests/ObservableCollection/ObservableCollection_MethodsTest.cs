@@ -85,14 +85,13 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => col[1]);
 
             //tests that the collectionChanged events are fired.
-            var helper = new CollectionAndPropertyChangedTester();
-
+            CollectionAndPropertyChangedTester helper = new CollectionAndPropertyChangedTester();
             col = new ObservableCollection<string>(anArray);
             helper.ClearTest(col);
 
             //tests that nothing is raised or changed if collection already empty.
-            helper = new CollectionAndPropertyChangedTester();
-            helper.ClearTest(col);
+            //helper = new CollectionAndPropertyChangedTester();
+            //helper.ClearTest(col);
         }
 
         /// <summary>

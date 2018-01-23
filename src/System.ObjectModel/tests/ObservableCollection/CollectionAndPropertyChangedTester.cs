@@ -82,7 +82,7 @@ namespace System.Collections.ObjectModel.Tests
         }
 
         /// <summary>
-        /// Clears the given Collection.
+        /// Clears the given Collection, and raises events and property change notifications if any items were in it.
         /// </summary>
         public void ClearTest(ObservableCollection<string> collection)
         {
@@ -112,8 +112,8 @@ namespace System.Collections.ObjectModel.Tests
 
             foreach (var item in _expectedPropertyChanged)                
                 Assert.True(any == item.IsFound,
-                    $"The propertychanged event should have {(any ? "" : "not")} been fired for" + item.Name + 
-                    $", since the collection {(any ? "was just cleared" : "was already clear")}");
+                    string.Format("The propertychanged event should have {0} been fired for", any ? "" : "not") + item.Name + 
+                    ", since the collection " + (any ? "was just cleared" : "was already clear"));
 
             collection.CollectionChanged -= Collection_CollectionChanged;
             collectionPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
