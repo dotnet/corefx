@@ -42,7 +42,11 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
         public void GetDomainController_InvalidIPV6_ThrowsActiveDirectoryObjectNotFoundException()
         {
             var context = new DirectoryContext(DirectoryContextType.DirectoryServer, "[::1]:port");
-            Assert.Throws<ActiveDirectoryObjectNotFoundException>(() => DomainController.GetDomainController(context));
+            Exception exception = Record.Exception(() => DomainController.GetDomainController(context));
+            Assert.NotNull(exception);
+            Assert.True(exception is ActiveDirectoryObjectNotFoundException ||
+                        exception is ActiveDirectoryOperationException,
+                        $"We got unrecognized exception {exception}");
         }
 
         [Fact]
