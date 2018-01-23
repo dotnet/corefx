@@ -82,11 +82,11 @@ namespace System.Collections.ObjectModel.Tests
         }
 
         /// <summary>
-        /// Clears the given Collection, if it contains any elements.
+        /// Clears the given Collection.
         /// </summary>
         public void ClearTest(ObservableCollection<string> collection)
         {
-            bool isEmpty = collection.Count == 0;
+            bool any = collection.Count > 0;
             INotifyPropertyChanged collectionPropertyChanged = collection;
             collectionPropertyChanged.PropertyChanged += Collection_PropertyChanged;
             _expectedPropertyChanged = new[]
@@ -96,28 +96,24 @@ namespace System.Collections.ObjectModel.Tests
             };
 
             collection.CollectionChanged += Collection_CollectionChanged;
-
-            if (!isEmpty)
-            {
+            if (any)
                 ExpectedCollectionChangedFired++;
-                ExpectedAction = NotifyCollectionChangedAction.Reset;
-            }
+
+            ExpectedAction = NotifyCollectionChangedAction.Reset;
             ExpectedNewItems = null;
             ExpectedNewStartingIndex = -1;
             ExpectedOldItems = null;
             ExpectedOldStartingIndex = -1;
 
             collection.Clear();
+
             Assert.Equal(0, collection.Count);
             Assert.Equal(ExpectedCollectionChangedFired, NumCollectionChangedFired);
 
-            foreach (var item in _expectedPropertyChanged)
-            {
-                if (isEmpty)
-                    Assert.True(!item.IsFound, "The propertychanged event should not be fired for" + item.Name + ", since the collection was already empty");
-                else
-                    Assert.True(item.IsFound, "The propertychanged event should have fired for" + item.Name + ", since we just cleared the collection");
-            }
+            foreach (var item in _expectedPropertyChanged)                
+                Assert.True(any == item.IsFound,
+                    $"The propertychanged event should have {(any ? "" : "not")} been fired for" + item.Name + 
+                    $", since the collection {(any ? "was just cleared" : "was already clear")}");
 
             collection.CollectionChanged -= Collection_CollectionChanged;
             collectionPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
