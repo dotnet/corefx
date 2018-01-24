@@ -38,47 +38,11 @@ namespace System
         /// <param name="span">The span</param>
         public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span)
         {
-            if (span.Length == 0)
-                return default;
-
-            ref char first = ref MemoryMarshal.GetReference(span);
             int start = 0;
-#if !netstandard11
-            if (Vector.IsHardwareAccelerated && span.Length >= 2 * Vector<ushort>.Count)
+            for (; start < span.Length; start++)
             {
-                var equalityTester = new Vector<ushort>(ushort.MaxValue);
-                var whiteSpace9Mask = new Vector<ushort>(0x9);
-                var whiteSpace13Mask = new Vector<ushort>(0xd);
-                var whiteSpace32Mask = new Vector<ushort>(0x20);
-                var whiteSpace133Mask = new Vector<ushort>(0x85);
-                var whiteSpace160Mask = new Vector<ushort>(0xa0);
-                var isLatin1Mask = new Vector<ushort>(0xFF);
-                while (start < span.Length - Vector<ushort>.Count)
-                {
-                    Vector<ushort> value = Unsafe.ReadUnaligned<Vector<ushort>>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref first, start)));
-                    if (Vector.GreaterThanAny(value, isLatin1Mask))
-                        break;
-
-                    if (Vector.GreaterThanAny(value, whiteSpace13Mask) ||
-                        Vector.LessThanAny(value, whiteSpace9Mask))
-                    {
-                        Vector<ushort> comparison = Vector<ushort>.Zero;
-                        comparison |= Vector.Equals(value, whiteSpace32Mask);
-                        comparison |= Vector.Equals(value, whiteSpace133Mask);
-                        comparison |= Vector.Equals(value, whiteSpace160Mask);
-                        if (!equalityTester.Equals(comparison))
-                            break;
-                    }
-
-                    start += Vector<ushort>.Count;
-                }
-            }
-#endif
-            while (start < span.Length)
-            {
-                if (!char.IsWhiteSpace(Unsafe.Add(ref first, start)))
+                if (!char.IsWhiteSpace(span[start]))
                     break;
-                start++;
             }
             return span.Slice(start);
         }
@@ -89,49 +53,11 @@ namespace System
         /// <param name="span">The span</param>
         public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span)
         {
-            if (span.Length == 0)
-                return default;
-
-            ref char first = ref MemoryMarshal.GetReference(span);
             int end = span.Length - 1;
-#if !netstandard11
-            if (Vector.IsHardwareAccelerated && span.Length >= 2 * Vector<ushort>.Count)
+            for (; end >= 0; end--)
             {
-                var equalityTester = new Vector<ushort>(ushort.MaxValue);
-                var whiteSpace9Mask = new Vector<ushort>(0x9);
-                var whiteSpace13Mask = new Vector<ushort>(0xd);
-                var whiteSpace32Mask = new Vector<ushort>(0x20);
-                var whiteSpace133Mask = new Vector<ushort>(0x85);
-                var whiteSpace160Mask = new Vector<ushort>(0xa0);
-                var isLatin1Mask = new Vector<ushort>(0xFF);
-                do
-                {
-                    end -= Vector<ushort>.Count;
-                    Vector<ushort> value = Unsafe.ReadUnaligned<Vector<ushort>>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref first, end)));
-                    if (Vector.GreaterThanAny(value, isLatin1Mask))
-                        break;
-
-                    if (Vector.GreaterThanAny(value, whiteSpace13Mask) ||
-                        Vector.LessThanAny(value, whiteSpace9Mask))
-                    {
-                        Vector<ushort> comparison = Vector<ushort>.Zero;
-                        comparison |= Vector.Equals(value, whiteSpace32Mask);
-                        comparison |= Vector.Equals(value, whiteSpace133Mask);
-                        comparison |= Vector.Equals(value, whiteSpace160Mask);
-                        if (!equalityTester.Equals(comparison))
-                        {
-                            end += Vector<ushort>.Count;
-                            break;
-                        }
-                    }
-                } while (end > Vector<ushort>.Count);
-            }
-#endif
-            while (end >= 0)
-            {
-                if (!char.IsWhiteSpace(Unsafe.Add(ref first, end)))
+                if (!char.IsWhiteSpace(span[end]))
                     break;
-                end--;
             }
             return span.Slice(0, end + 1);
         }
