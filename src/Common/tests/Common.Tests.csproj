@@ -142,7 +142,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CommonTest\System\" />
-    <Folder Include="Common\System\Security\Cryptography\" />
     <Folder Include="System\Net\Sockets\" />
     <Folder Include="System\Net\VirtualNetwork\" />
   </ItemGroup>

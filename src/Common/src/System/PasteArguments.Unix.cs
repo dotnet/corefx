@@ -10,15 +10,17 @@ namespace System
 {
     internal static partial class PasteArguments
     {
-         /// <summary>
+        /// <summary>
         /// Repastes a set of arguments into a linear string that parses back into the originals under pre- or post-2008 VC parsing rules.
-        /// The rules for parsing the executable name (argv[0]) are special, so you must indicate whether the first argument actually is argv[0].
+        /// On Unix: the rules for parsing the executable name (argv[0]) are ignored.
         /// </summary>
         internal static string Paste(IEnumerable<string> arguments, bool pasteFirstArgumentUsingArgV0Rules)
         {
             var stringBuilder = new StringBuilder();
             foreach (string argument in arguments)
+            {
                 AppendArgument(stringBuilder, argument);
+            }
             return stringBuilder.ToString();
         }
 

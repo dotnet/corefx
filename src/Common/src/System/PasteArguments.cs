@@ -94,7 +94,7 @@ namespace System
             return true;
         }
 
-        internal const char Quote = '\"';
+        private const char Quote = '\"';
         private const char Backslash = '\\';
     }
 }

@@ -65,7 +65,7 @@ namespace System
         {
             get
             {
-                return PasteArguments.Paste(GetCommandLineArgs(), true);
+                return PasteArguments.Paste(GetCommandLineArgs(), pasteFirstArgumentUsingArgV0Rules: true);
             }
         }
 
