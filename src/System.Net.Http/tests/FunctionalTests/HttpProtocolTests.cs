@@ -15,9 +15,6 @@ namespace System.Net.Http.Functional.Tests
         protected virtual Stream GetStream(Stream s) => s;
 
         [Theory]
-        // The following disabled by ActiveIssue: 26540
-        // [InlineData("HTTP/1.1 200      ", 200, "     ")]
-        // [InlineData("HTTP/1.1 200      Something", 200, "     Something")]
         [InlineData("HTTP/1.1 200 OK", 200, "OK")]
         [InlineData("HTTP/1.1 200 Sure why not?", 200, "Sure why not?")]
         [InlineData("HTTP/1.1 200 OK\x0080", 200, "OK?")]
@@ -32,6 +29,15 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("HTTP/1.1 600 still valid", 600, "still valid")]
         public async Task GetAsync_ExpectedStatusCodeAndReason_Success(string statusLine, int expectedStatusCode, string expectedReason)
         {
+            await GetAsyncSuccessHelper(statusLine, expectedStatusCode, expectedReason);
+        }
+
+        [Theory]
+        [InlineData("HTTP/1.1 200      ", 200, "     ")]
+        [InlineData("HTTP/1.1 200      Something", 200, "     Something")]
+        public async Task GetAsync_ExpectedStatusCodeAndReason_SuccessSkipForWinHttpHandler(string statusLine, int expectedStatusCode, string expectedReason)
+        {
+            if (PlatformDetection.IsWindows && !UseManagedHandler) return;
             await GetAsyncSuccessHelper(statusLine, expectedStatusCode, expectedReason);
         }
 
@@ -74,10 +80,6 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("HTTP/1.1 2345")]
         [InlineData("HTTP/A.1 200 OK")]
         [InlineData("HTTP/X.Y.Z 200 OK")]
-        // The following disabled by ActiveIssue: 26542
-        //[InlineData("HTTP/1.1\t200 OK")]
-        //[InlineData("HTTP/1.1 200\tOK")]
-        //[InlineData("HTTP/1.1 200\t")]
         // TODO #24713: The following pass on Windows on .NET Core but fail on .NET Framework.
         //[InlineData("HTTP/0.1 200 OK")]
         //[InlineData("HTTP/3.5 200 OK")]
@@ -106,6 +108,21 @@ namespace System.Net.Http.Functional.Tests
         //[InlineData("HTTP/1.1  ")]
         //[InlineData("NOTHTTP/1.1 200 OK")]
         public async Task GetAsync_InvalidStatusLine_ThrowsException(string responseString)
+        {
+            await GetAsyncThrowsExceptionHelper(responseString);
+        }
+
+        [Theory]
+        [InlineData("HTTP/1.1\t200 OK")]
+        [InlineData("HTTP/1.1 200\tOK")]
+        [InlineData("HTTP/1.1 200\t")]
+        public async Task GetAsync_InvalidStatusLine_ThrowsExceptionSkipForWinHttpHandler(string responseString)
+        {
+            if (PlatformDetection.IsWindows && !UseManagedHandler) return;
+            await GetAsyncThrowsExceptionHelper(responseString);
+        }
+
+        private async Task GetAsyncThrowsExceptionHelper(string responseString)
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
