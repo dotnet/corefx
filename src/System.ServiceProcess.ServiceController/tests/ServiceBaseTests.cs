@@ -82,7 +82,7 @@ namespace System.ServiceProcess.Tests
             AssertExpectedProperties(controller);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, GetBytes());
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetBytes());
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
@@ -94,18 +94,18 @@ namespace System.ServiceProcess.Tests
             AssertExpectedProperties(controller);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, GetBytes());
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetBytes());
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
 
             controller.Start(new string[] { "StartWithArguments", "a", "b", "c" });
             _testService.Client = null;
             _testService.Client.Connect();
 
-            Assert.Equal((int)PipeMessageByteCode.Start, GetBytes());
+            Assert.Equal((int)PipeMessageByteCode.Start, _testService.GetBytes());
             controller.WaitForStatus(ServiceControllerStatus.Running);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, GetBytes());
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetBytes());
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
@@ -117,11 +117,11 @@ namespace System.ServiceProcess.Tests
             AssertExpectedProperties(controller);
 
             controller.Pause();
-            Assert.Equal((int)PipeMessageByteCode.Pause, GetBytes());
+            Assert.Equal((int)PipeMessageByteCode.Pause, _testService.GetBytes());
             controller.WaitForStatus(ServiceControllerStatus.Paused);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, GetBytes());
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetBytes());
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
@@ -133,15 +133,15 @@ namespace System.ServiceProcess.Tests
             AssertExpectedProperties(controller);
 
             controller.Pause();
-            Assert.Equal((int)PipeMessageByteCode.Pause, GetBytes());
+            Assert.Equal((int)PipeMessageByteCode.Pause, _testService.GetBytes());
             controller.WaitForStatus(ServiceControllerStatus.Paused);
 
             controller.Continue();
-            Assert.Equal((int)PipeMessageByteCode.Continue, GetBytes());
+            Assert.Equal((int)PipeMessageByteCode.Continue, _testService.GetBytes());
             controller.WaitForStatus(ServiceControllerStatus.Running);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, GetBytes());
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetBytes());
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
@@ -153,10 +153,10 @@ namespace System.ServiceProcess.Tests
             AssertExpectedProperties(controller);
 
             controller.ExecuteCommand(128);
-            Assert.Equal(128, GetBytes());
+            Assert.Equal(128, _testService.GetBytes());
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, GetBytes());
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetBytes());
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
@@ -171,7 +171,7 @@ namespace System.ServiceProcess.Tests
             controller.WaitForStatus(ServiceControllerStatus.Running);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, GetBytes());
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.GetBytes());
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
@@ -213,13 +213,6 @@ namespace System.ServiceProcess.Tests
                     sb.Stop();
                 }
             }
-        }
-
-        private byte GetBytes()
-        {
-            var task = Task.Run(() => _testService.ReadPipeAsync());
-            task.Wait();
-            return task.Result;
         }
 
         public void Dispose()

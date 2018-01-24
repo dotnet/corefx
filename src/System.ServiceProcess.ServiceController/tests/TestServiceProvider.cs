@@ -88,6 +88,13 @@ namespace System.ServiceProcess.Tests
             return received[0];
         }
 
+        public byte GetBytes()
+        {
+            var task = Task.Run(() => ReadPipeAsync());
+            task.Wait();
+            return task.Result;
+        }
+
         private void CreateTestServices()
         {
             TestServiceInstaller testServiceInstaller = new TestServiceInstaller();
