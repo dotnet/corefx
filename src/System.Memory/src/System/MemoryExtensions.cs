@@ -10,6 +10,10 @@ using System.Runtime.InteropServices;
 using Internal.Runtime.CompilerServices;
 #endif
 
+#if !netstandard11
+using System.Numerics;
+#endif
+
 namespace System
 {
     /// <summary>
@@ -23,7 +27,7 @@ namespace System
         /// <param name="span">The span</param>
         public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> span)
         {
-            return span.Length == 0 ? 
+            return span.Length == 0 ?
                     default :
                     span.TrimStart().TrimEnd();
         }
@@ -34,9 +38,49 @@ namespace System
         /// <param name="span">The span</param>
         public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span)
         {
-            return span.Length == 0 ? 
-                    default :
-                    span.Slice(SpanHelpers.TrimStart(ref MemoryMarshal.GetReference(span), span.Length));
+            if (span.Length == 0)
+                return default;
+
+            ref char first = ref MemoryMarshal.GetReference(span);
+            int start = 0;
+#if !netstandard11
+            if (Vector.IsHardwareAccelerated && span.Length >= 2 * Vector<ushort>.Count)
+            {
+                var equalityTester = new Vector<ushort>(ushort.MaxValue);
+                var whiteSpace9Mask = new Vector<ushort>(0x9);
+                var whiteSpace13Mask = new Vector<ushort>(0xd);
+                var whiteSpace32Mask = new Vector<ushort>(0x20);
+                var whiteSpace133Mask = new Vector<ushort>(0x85);
+                var whiteSpace160Mask = new Vector<ushort>(0xa0);
+                var isLatin1Mask = new Vector<ushort>(0xFF);
+                while (start < span.Length - Vector<ushort>.Count)
+                {
+                    Vector<ushort> value = Unsafe.ReadUnaligned<Vector<ushort>>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref first, start)));
+                    if (Vector.GreaterThanAny(value, isLatin1Mask))
+                        break;
+
+                    if (Vector.GreaterThanAny(value, whiteSpace13Mask) ||
+                        Vector.LessThanAny(value, whiteSpace9Mask))
+                    {
+                        Vector<ushort> comparison = Vector<ushort>.Zero;
+                        comparison |= Vector.Equals(value, whiteSpace32Mask);
+                        comparison |= Vector.Equals(value, whiteSpace133Mask);
+                        comparison |= Vector.Equals(value, whiteSpace160Mask);
+                        if (!equalityTester.Equals(comparison))
+                            break;
+                    }
+
+                    start += Vector<ushort>.Count;
+                }
+            }
+#endif
+            while (start < span.Length)
+            {
+                if (!char.IsWhiteSpace(Unsafe.Add(ref first, start)))
+                    break;
+                start++;
+            }
+            return span.Slice(start);
         }
 
         /// <summary>
@@ -45,9 +89,51 @@ namespace System
         /// <param name="span">The span</param>
         public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span)
         {
-            return span.Length == 0 ? 
-                    default :
-                    span.Slice(0, SpanHelpers.TrimEnd(ref MemoryMarshal.GetReference(span), span.Length));
+            if (span.Length == 0)
+                return default;
+
+            ref char first = ref MemoryMarshal.GetReference(span);
+            int end = span.Length - 1;
+#if !netstandard11
+            if (Vector.IsHardwareAccelerated && span.Length >= 2 * Vector<ushort>.Count)
+            {
+                var equalityTester = new Vector<ushort>(ushort.MaxValue);
+                var whiteSpace9Mask = new Vector<ushort>(0x9);
+                var whiteSpace13Mask = new Vector<ushort>(0xd);
+                var whiteSpace32Mask = new Vector<ushort>(0x20);
+                var whiteSpace133Mask = new Vector<ushort>(0x85);
+                var whiteSpace160Mask = new Vector<ushort>(0xa0);
+                var isLatin1Mask = new Vector<ushort>(0xFF);
+                do
+                {
+                    end -= Vector<ushort>.Count;
+                    Vector<ushort> value = Unsafe.ReadUnaligned<Vector<ushort>>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref first, end)));
+                    if (Vector.GreaterThanAny(value, isLatin1Mask))
+                        break;
+
+                    if (Vector.GreaterThanAny(value, whiteSpace13Mask) ||
+                        Vector.LessThanAny(value, whiteSpace9Mask))
+                    {
+                        Vector<ushort> comparison = Vector<ushort>.Zero;
+                        comparison |= Vector.Equals(value, whiteSpace32Mask);
+                        comparison |= Vector.Equals(value, whiteSpace133Mask);
+                        comparison |= Vector.Equals(value, whiteSpace160Mask);
+                        if (!equalityTester.Equals(comparison))
+                        {
+                            end += Vector<ushort>.Count;
+                            break;
+                        }
+                    }
+                } while (end > Vector<ushort>.Count);
+            }
+#endif
+            while (end >= 0)
+            {
+                if (!char.IsWhiteSpace(Unsafe.Add(ref first, end)))
+                    break;
+                end--;
+            }
+            return span.Slice(0, end + 1);
         }
 
         /// <summary>
@@ -58,7 +144,7 @@ namespace System
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> span, char trimChar)
         {
-            return span.Length == 0 ? 
+            return span.Length == 0 ?
                     default :
                     span.TrimStart(trimChar).TrimEnd(trimChar);
         }
@@ -71,9 +157,32 @@ namespace System
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span, char trimChar)
         {
-            return span.Length == 0 ? 
-                    default : 
-                    span.Slice(SpanHelpers.TrimStart(ref MemoryMarshal.GetReference(span), trimChar, span.Length));
+            if (span.Length == 0)
+                return default;
+
+            ref char first = ref MemoryMarshal.GetReference(span);
+            int start = 0;
+#if !netstandard11
+            if (Vector.IsHardwareAccelerated && span.Length >= 2 * Vector<ushort>.Count)
+            {
+                var mask = new Vector<ushort>(trimChar);
+                while (start < span.Length - Vector<ushort>.Count)
+                {
+                    if (Unsafe.ReadUnaligned<Vector<ushort>>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref first, start))) != mask)
+                    {
+                        break;
+                    }
+                    start += Vector<ushort>.Count;
+                }
+            }
+#endif
+            while (start < span.Length)
+            {
+                if (Unsafe.Add(ref first, start) != trimChar)
+                    break;
+                start++;
+            }
+            return span.Slice(start);
         }
 
         /// <summary>
@@ -83,9 +192,33 @@ namespace System
         /// <param name="trimChar">The specified character to look for and remove.</param>
         public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span, char trimChar)
         {
-            return span.Length == 0 ? 
-                    default : 
-                    span.Slice(0, SpanHelpers.TrimEnd(ref MemoryMarshal.GetReference(span), trimChar, span.Length));
+            if (span.Length == 0)
+                return default;
+
+            ref char first = ref MemoryMarshal.GetReference(span);
+            int end = span.Length - 1;
+#if !netstandard11
+            if (Vector.IsHardwareAccelerated && span.Length >= 2 * Vector<ushort>.Count)
+            {
+                var mask = new Vector<ushort>(trimChar);
+                do
+                {
+                    end -= Vector<ushort>.Count;
+                    if (Unsafe.ReadUnaligned<Vector<ushort>>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref first, end))) != mask)
+                    {
+                        end += Vector<ushort>.Count;
+                        break;
+                    }
+                } while (end > Vector<ushort>.Count);
+            }
+#endif
+            while (end >= 0)
+            {
+                if (Unsafe.Add(ref first, end) != trimChar)
+                    break;
+                end--;
+            }
+            return span.Slice(0, end + 1);
         }
 
         /// <summary>
@@ -96,8 +229,10 @@ namespace System
         /// <param name="trimChars">The span which contains the set of characters to remove.</param>
         public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
         {
-            if (span.Length == 0) return default;
-            if (trimChars.Length == 0) return span;
+            if (span.Length == 0)
+                return default;
+            if (trimChars.Length == 0)
+                return span;
 
             return span.TrimStart(trimChars).TrimEnd(trimChars);
         }
@@ -110,12 +245,48 @@ namespace System
         /// <param name="trimChars">The span which contains the set of characters to remove.</param>
         public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
         {
-            if (span.Length == 0) return default;
-            if (trimChars.Length == 0) return span;
+            if (span.Length == 0)
+                return default;
+            if (trimChars.Length == 0)
+                return span;
 
-            return span.Slice(SpanHelpers.TrimStartAny(
-                    ref MemoryMarshal.GetReference(span), span.Length,
-                    ref MemoryMarshal.GetReference(trimChars), trimChars.Length));
+            ref char first = ref MemoryMarshal.GetReference(span);
+            ref char firstTrimChar = ref MemoryMarshal.GetReference(trimChars);
+            int start = 0;
+#if !netstandard11
+            if (Vector.IsHardwareAccelerated && span.Length >= 2 * Vector<ushort>.Count)
+            {
+                var equalityTester = new Vector<ushort>(ushort.MaxValue);
+                while (start < span.Length - Vector<ushort>.Count)
+                {
+                    Vector<ushort> value = Unsafe.ReadUnaligned<Vector<ushort>>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref first, start)));
+                    Vector<ushort> comparison = Vector<ushort>.Zero;
+                    int j = 0;
+                    for (; j < trimChars.Length; j++)
+                    {
+                        var mask = new Vector<ushort>(Unsafe.Add(ref firstTrimChar, j));
+                        comparison |= Vector.Equals(value, mask);
+                    }
+                    if (!equalityTester.Equals(comparison))
+                        break;
+                    start += Vector<ushort>.Count;
+                }
+            }
+#endif
+            while (start < span.Length)
+            {
+                int j = 0;
+                while (j < trimChars.Length)
+                {
+                    if (Unsafe.Add(ref first, start) == Unsafe.Add(ref firstTrimChar, j))
+                        break;
+                    j++;
+                }
+                if (j == trimChars.Length)
+                    break;
+                start++;
+            }
+            return span.Slice(start);
         }
 
         /// <summary>
@@ -126,12 +297,52 @@ namespace System
         /// <param name="trimChars">The span which contains the set of characters to remove.</param>
         public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
         {
-            if (span.Length == 0) return default;
-            if (trimChars.Length == 0) return span;
+            if (span.Length == 0)
+                return default;
+            if (trimChars.Length == 0)
+                return span;
 
-            return span.Slice(0, SpanHelpers.TrimEndAny(
-                    ref MemoryMarshal.GetReference(span), span.Length,
-                    ref MemoryMarshal.GetReference(trimChars), trimChars.Length));
+            ref char first = ref MemoryMarshal.GetReference(span);
+            ref char firstTrimChar = ref MemoryMarshal.GetReference(trimChars);
+
+            int end = span.Length - 1;
+#if !netstandard11
+            if (Vector.IsHardwareAccelerated && span.Length >= 2 * Vector<ushort>.Count)
+            {
+                var equalityTester = new Vector<ushort>(ushort.MaxValue);
+                do
+                {
+                    end -= Vector<ushort>.Count;
+                    Vector<ushort> value = Unsafe.ReadUnaligned<Vector<ushort>>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref first, end)));
+                    Vector<ushort> comparison = Vector<ushort>.Zero;
+                    int j = 0;
+                    for (; j < trimChars.Length; j++)
+                    {
+                        var mask = new Vector<ushort>(Unsafe.Add(ref firstTrimChar, j));
+                        comparison |= Vector.Equals(value, mask);
+                    }
+                    if (!equalityTester.Equals(comparison))
+                    {
+                        end += Vector<ushort>.Count;
+                        break;
+                    }
+                } while (end > Vector<ushort>.Count);
+            }
+#endif
+            while (end >= 0)
+            {
+                int j = 0;
+                while (j < trimChars.Length)
+                {
+                    if (Unsafe.Add(ref first, end) == Unsafe.Add(ref firstTrimChar, j))
+                        break;
+                    j++;
+                }
+                if (j == trimChars.Length)
+                    break;
+                end--;
+            }
+            return span.Slice(0, end + 1);
         }
 
         /// <summary>
@@ -139,9 +350,49 @@ namespace System
         /// </summary>
         public static bool IsWhiteSpace(this ReadOnlySpan<char> span)
         {
-            return span.Length == 0 ? 
-                true : 
-                SpanHelpers.IsWhiteSpace(ref MemoryMarshal.GetReference(span), span.Length);
+            if (span.Length == 0)
+                return true;
+
+            ref char first = ref MemoryMarshal.GetReference(span);
+            int i = 0;
+#if !netstandard11
+            if (Vector.IsHardwareAccelerated && span.Length >= 2 * Vector<ushort>.Count)
+            {
+                var equalityTester = new Vector<ushort>(ushort.MaxValue);
+                var whiteSpace9Mask = new Vector<ushort>(0x9);
+                var whiteSpace13Mask = new Vector<ushort>(0xd);
+                var whiteSpace32Mask = new Vector<ushort>(0x20);
+                var whiteSpace133Mask = new Vector<ushort>(0x85);
+                var whiteSpace160Mask = new Vector<ushort>(0xa0);
+                var isLatin1Mask = new Vector<ushort>(0xFF);
+                while (i < span.Length - Vector<ushort>.Count)
+                {
+                    Vector<ushort> value = Unsafe.ReadUnaligned<Vector<ushort>>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref first, i)));
+                    if (Vector.GreaterThanAny(value, isLatin1Mask))
+                        break;
+
+                    if (Vector.GreaterThanAny(value, whiteSpace13Mask) ||
+                        Vector.LessThanAny(value, whiteSpace9Mask))
+                    {
+                        Vector<ushort> comparison = Vector<ushort>.Zero;
+                        comparison |= Vector.Equals(value, whiteSpace32Mask);
+                        comparison |= Vector.Equals(value, whiteSpace133Mask);
+                        comparison |= Vector.Equals(value, whiteSpace160Mask);
+                        if (!equalityTester.Equals(comparison))
+                            break;
+                    }
+
+                    i += Vector<ushort>.Count;
+                }
+            }
+#endif
+            while (i < span.Length)
+            {
+                if (!char.IsWhiteSpace(Unsafe.Add(ref first, i)))
+                    return false;
+                i++;
+            }
+            return true;
         }
 
         /// <summary>
