@@ -23,7 +23,9 @@ namespace System
         /// <param name="span">The span</param>
         public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> span)
         {
-            return span.TrimStart().TrimEnd();
+            return span.Length == 0 ? 
+                    default :
+                    span.TrimStart().TrimEnd();
         }
 
         /// <summary>
@@ -32,6 +34,7 @@ namespace System
         /// <param name="span">The span</param>
         public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span)
         {
+            if (span.Length == 0) return default;
             int start = 0;
             for (; start < span.Length; start++)
             {
@@ -46,6 +49,7 @@ namespace System
         /// <param name="span">The span</param>
         public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span)
         {
+            if (span.Length == 0) return default;
             int end = span.Length - 1;
             for (; end >= 0; end--)
             {
@@ -59,9 +63,12 @@ namespace System
         /// </summary>
         /// <param name="span">The source span from which the character is removed.</param>
         /// <param name="trimChar">The specified character to look for and remove.</param>
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> span, char trimChar)
         {
-            return span.TrimStart(trimChar).TrimEnd(trimChar);
+            return span.Length == 0 ? 
+                    default :
+                    span.TrimStart(trimChar).TrimEnd(trimChar);
         }
 
         /// <summary>
@@ -69,14 +76,12 @@ namespace System
         /// </summary>
         /// <param name="span">The source span from which the character is removed.</param>
         /// <param name="trimChar">The specified character to look for and remove.</param>
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span, char trimChar)
         {
-            int start = 0;
-            for (; start < span.Length; start++)
-            {
-                if (span[start] != trimChar) break;
-            }
-            return span.Slice(start);
+            return span.Length == 0 ? 
+                    default : 
+                    span.Slice(SpanHelpers.TrimStart(ref MemoryMarshal.GetReference(span), trimChar, span.Length));
         }
 
         /// <summary>
@@ -86,12 +91,9 @@ namespace System
         /// <param name="trimChar">The specified character to look for and remove.</param>
         public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span, char trimChar)
         {
-            int end = span.Length - 1;
-            for (; end >= 0; end--)
-            {
-                if (span[end] != trimChar) break;
-            }
-            return span.Slice(0, end + 1);
+            return span.Length == 0 ? 
+                    default : 
+                    span.Slice(0, SpanHelpers.TrimEnd(ref MemoryMarshal.GetReference(span), trimChar, span.Length));
         }
 
         /// <summary>
@@ -102,6 +104,9 @@ namespace System
         /// <param name="trimChars">The span which contains the set of characters to remove.</param>
         public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
         {
+            if (span.Length == 0) return default;
+            if (trimChars.Length == 0) return span;
+
             return span.TrimStart(trimChars).TrimEnd(trimChars);
         }
 
@@ -113,17 +118,12 @@ namespace System
         /// <param name="trimChars">The span which contains the set of characters to remove.</param>
         public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
         {
-            int start = 0;
-            for (; start < span.Length; start++)
-            {
-                int i = 0;
-                for (; i < trimChars.Length; i++)
-                {
-                    if (span[start] == trimChars[i]) break;
-                }
-                if (i == trimChars.Length) break;
-            }
-            return span.Slice(start);
+            if (span.Length == 0) return default;
+            if (trimChars.Length == 0) return span;
+
+            return span.Slice(SpanHelpers.TrimStartAny(
+                    ref MemoryMarshal.GetReference(span), span.Length,
+                    ref MemoryMarshal.GetReference(trimChars), trimChars.Length));
         }
 
         /// <summary>
@@ -134,17 +134,12 @@ namespace System
         /// <param name="trimChars">The span which contains the set of characters to remove.</param>
         public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
         {
-            int end = span.Length - 1;
-            for (; end >= 0; end--)
-            {
-                int i = 0;
-                for (; i < trimChars.Length; i++)
-                {
-                    if (span[end] == trimChars[i]) break;
-                }
-                if (i == trimChars.Length) break;
-            }
-            return span.Slice(0, end + 1);
+            if (span.Length == 0) return default;
+            if (trimChars.Length == 0) return span;
+
+            return span.Slice(0, SpanHelpers.TrimEndAny(
+                    ref MemoryMarshal.GetReference(span), span.Length,
+                    ref MemoryMarshal.GetReference(trimChars), trimChars.Length));
         }
 
         /// <summary>
@@ -152,11 +147,9 @@ namespace System
         /// </summary>
         public static bool IsWhiteSpace(this ReadOnlySpan<char> span)
         {
-            for (int i = 0; i < span.Length; i++)
-            {
-                if (!char.IsWhiteSpace(span[i])) return false;
-            }
-            return true;
+            return span.Length == 0 ? 
+                true : 
+                SpanHelpers.IsWhiteSpace(ref MemoryMarshal.GetReference(span), span.Length);
         }
 
         /// <summary>
