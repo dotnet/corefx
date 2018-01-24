@@ -13,8 +13,30 @@ namespace System.SpanTests
         [Fact]
         public static void ZeroLengthIsWhiteSpace()
         {
-            ReadOnlySpan<char> span = new ReadOnlySpan<char>(Array.Empty<char>());
+            var span = new ReadOnlySpan<char>(Array.Empty<char>());
             Assert.True(span.IsWhiteSpace());
+        }
+
+        [Fact]
+        public static void IsWhiteSpaceTrueLatin1()
+        {
+            Random rand = new Random(42);
+            for (int length = 0; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = s_whiteSpaceCharacters[rand.Next(0, s_whiteSpaceCharacters.Length - 1)];
+                }
+                var span = new Span<char>(a);
+                Assert.True(span.AsReadOnlySpan().IsWhiteSpace());
+
+                for (int i = 0; i < s_whiteSpaceCharacters.Length - 1; i++)
+                {
+                    span.Fill(s_whiteSpaceCharacters[i]);
+                    Assert.True(span.AsReadOnlySpan().IsWhiteSpace());
+                }
+            }
         }
 
         [Fact]
@@ -28,7 +50,7 @@ namespace System.SpanTests
                 {
                     a[i] = s_whiteSpaceCharacters[rand.Next(0, s_whiteSpaceCharacters.Length)];
                 }
-                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+                var span = new ReadOnlySpan<char>(a);
                 Assert.True(span.IsWhiteSpace());
             }
         }
@@ -40,50 +62,30 @@ namespace System.SpanTests
             for (int length = 1; length < 32; length++)
             {
                 char[] a = new char[length];
-                
-                // first character is not a white-space character
+                for (int i = 0; i < length; i++)
                 {
-                    for (int i = 0; i < length; i++)
-                    {
-                        a[i] = s_whiteSpaceCharacters[rand.Next(0, s_whiteSpaceCharacters.Length)];
-                    }
-                    a[0] = 'a';
-                    ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
-                    Assert.False(span.IsWhiteSpace());
+                    a[i] = s_whiteSpaceCharacters[rand.Next(0, s_whiteSpaceCharacters.Length)];
                 }
+                var span = new Span<char>(a);
+
+                // first character is not a white-space character
+                a[0] = 'a';
+                Assert.False(span.AsReadOnlySpan().IsWhiteSpace());
+                a[0] = ' ';
 
                 // last character is not a white-space character
-                {
-                    for (int i = 0; i < length; i++)
-                    {
-                        a[i] = s_whiteSpaceCharacters[rand.Next(0, s_whiteSpaceCharacters.Length)];
-                    }
-                    a[length - 1] = 'a';
-                    ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
-                    Assert.False(span.IsWhiteSpace());
-                }
+                a[length - 1] = 'a';
+                Assert.False(span.AsReadOnlySpan().IsWhiteSpace());
+                a[length - 1] = ' ';
 
                 // character in the middle is not a white-space character
-                {
-                    for (int i = 0; i < length; i++)
-                    {
-                        a[i] = s_whiteSpaceCharacters[rand.Next(0, s_whiteSpaceCharacters.Length)];
-                    }
-                    a[length/2] = 'a';
-                    ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
-                    Assert.False(span.IsWhiteSpace());
-                }
+                a[length/2] = 'a';
+                Assert.False(span.AsReadOnlySpan().IsWhiteSpace());
+                a[length/2] = ' ';
 
                 // no character is a white-space character
-                {
-                    for (int i = 0; i < length; i++)
-                    {
-                        a[i] = 'a';
-                    }
-                    ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
-                    Assert.False(span.IsWhiteSpace());
-                }
-
+                span.Fill('a');
+                Assert.False(span.AsReadOnlySpan().IsWhiteSpace());
             }
         }
 
