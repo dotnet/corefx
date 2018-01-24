@@ -816,6 +816,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Needs desktop port: https://github.com/dotnet/coreclr/issues/15896")]
         // Regression test for https://github.com/dotnet/coreclr/issues/15896
         public static void TryParseExact_EmptyAMPMDesignator()
         {
