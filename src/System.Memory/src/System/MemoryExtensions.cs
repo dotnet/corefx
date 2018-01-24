@@ -34,13 +34,9 @@ namespace System
         /// <param name="span">The span</param>
         public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span)
         {
-            if (span.Length == 0) return default;
-            int start = 0;
-            for (; start < span.Length; start++)
-            {
-                if (!char.IsWhiteSpace(span[start])) break;
-            }
-            return span.Slice(start);
+            return span.Length == 0 ? 
+                    default :
+                    span.Slice(SpanHelpers.TrimStart(ref MemoryMarshal.GetReference(span), span.Length));
         }
 
         /// <summary>
@@ -49,13 +45,9 @@ namespace System
         /// <param name="span">The span</param>
         public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span)
         {
-            if (span.Length == 0) return default;
-            int end = span.Length - 1;
-            for (; end >= 0; end--)
-            {
-                if (!char.IsWhiteSpace(span[end])) break;
-            }
-            return span.Slice(0, end + 1);
+            return span.Length == 0 ? 
+                    default :
+                    span.Slice(0, SpanHelpers.TrimEnd(ref MemoryMarshal.GetReference(span), span.Length));
         }
 
         /// <summary>

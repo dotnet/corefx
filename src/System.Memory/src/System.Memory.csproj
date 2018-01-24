@@ -25,6 +25,7 @@
     <Compile Include="System\SpanHelpers.BinarySearch.cs" />
     <Compile Include="System\SpanHelpers.T.cs" />
     <Compile Include="System\SpanHelpers.byte.cs" />
+    <Compile Include="System\SpanHelpers.char.cs" />
     <Compile Include="System\ThrowHelper.cs" />
     <Compile Include="System\Buffers\OperationStatus.cs" />
     <Compile Include="System\Buffers\Binary\Reader.cs" />
