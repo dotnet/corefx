@@ -10,11 +10,14 @@ using Xunit;
 using System.IO;
 using System.Threading;
 using System.IO.Pipes;
+using System.Threading.Tasks;
 
 namespace System.ServiceProcess.Tests
 {
     internal sealed class TestServiceProvider
     {
+        private const int readTimeout = 60000;
+
         private static readonly Lazy<bool> s_runningWithElevatedPrivileges = new Lazy<bool>(
             () => new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator));
 
@@ -74,6 +77,15 @@ namespace System.ServiceProcess.Tests
 
             // Create the service
             CreateTestServices();
+        }
+
+        public async Task<byte> ReadPipeAsync()
+        {
+            Task readTask;
+            byte[] received = new byte[] { 0 };
+            readTask = Client.ReadAsync(received, 0, 1);
+            await readTask.TimeoutAfter(readTimeout);
+            return received[0];
         }
 
         private void CreateTestServices()
