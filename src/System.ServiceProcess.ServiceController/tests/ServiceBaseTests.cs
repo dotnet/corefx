@@ -5,9 +5,9 @@
 using Microsoft.Win32;
 using System;
 using System.Diagnostics;
-using System.IO.Pipes;
 using System.Security.Principal;
 using Xunit;
+using System.Threading.Tasks;
 
 /// <summary>
 /// NOTE: All tests checking the output file should always call Stop before checking because Stop will flush the file to disk.
@@ -17,7 +17,8 @@ namespace System.ServiceProcess.Tests
     [OuterLoop(/* Modifies machine state */)]
     public class ServiceBaseTests : IDisposable
     {
-        private const int timeout = 5000;
+        private const int connectionTimeout = 30000;
+        private const int readTimeout = 60000;
         private readonly TestServiceProvider _testService;
 
         private static readonly Lazy<bool> s_isElevated = new Lazy<bool>(() => AdminHelpers.IsProcessElevated());
@@ -75,91 +76,129 @@ namespace System.ServiceProcess.Tests
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
-        public void TestOnStartThenStop()
+        public async Task TestOnStartThenStopAsync()
         {
-            _testService.Client.Connect(timeout);
+            Task readTask;
+            byte[] received = new byte[] { 0 };
+            _testService.Client.Connect(connectionTimeout);
             var controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.Client.ReadByte());
+            readTask = _testService.Client.ReadAsync(received, 0, 1);
+            await readTask.TimeoutAfter(readTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Stop, received[0]);
+            controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
-        public void TestOnStartWithArgsThenStop()
+        public async Task TestOnStartWithArgsThenStopAsync()
         {
+            Task readTask;
+            byte[] received = new byte[] { 0 };
             var controller = new ServiceController(_testService.TestServiceName);
-            _testService.Client.Connect(timeout);
+            _testService.Client.Connect(connectionTimeout);
             AssertExpectedProperties(controller);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.Client.ReadByte());
-
+            readTask = _testService.Client.ReadAsync(received, 0, 1);
+            await readTask.TimeoutAfter(readTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Stop, received[0]);
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
-            controller.Start(new string[] { "StartWithArguments", "a", "b", "c" });
 
+            controller.Start(new string[] { "StartWithArguments", "a", "b", "c" });
             _testService.Client = null;
             _testService.Client.Connect();
-            Assert.Equal((int)PipeMessageByteCode.Start, _testService.Client.ReadByte());
+
+            readTask =  _testService.Client.ReadAsync( received, 0, 1);
+            await readTask.TimeoutAfter(readTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Start, received[0]);
             controller.WaitForStatus(ServiceControllerStatus.Running);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.Client.ReadByte());
+            readTask = _testService.Client.ReadAsync(received, 0, 1);
+            await readTask.TimeoutAfter(readTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Stop, received[0]);
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
-        public void TestOnPauseThenStop()
+        public async Task TestOnPauseThenStopAsync()
         {
-            _testService.Client.Connect(timeout);
+            Task readTask;
+            byte[] received = new byte[] { 0 };
+            _testService.Client.Connect(connectionTimeout);
             var controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
 
             controller.Pause();
-            Assert.Equal((int)PipeMessageByteCode.Pause, _testService.Client.ReadByte());
+            readTask = _testService.Client.ReadAsync(received, 0, 1);
+            await readTask.TimeoutAfter(readTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Pause, received[0]);
             controller.WaitForStatus(ServiceControllerStatus.Paused);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.Client.ReadByte());
+            readTask = _testService.Client.ReadAsync(received, 0, 1);
+            await readTask.TimeoutAfter(readTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Stop, received[0]);
+            controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
-        public void TestOnPauseAndContinueThenStop()
+        public async Task TestOnPauseAndContinueThenStopAsync()
         {
-            _testService.Client.Connect(timeout);
+            Task readTask;
+            byte[] received = new byte[] { 0 };
+            _testService.Client.Connect(connectionTimeout);
             var controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
 
             controller.Pause();
-            Assert.Equal((int)PipeMessageByteCode.Pause, _testService.Client.ReadByte());
+            readTask = _testService.Client.ReadAsync(received, 0, 1);
+            await readTask.TimeoutAfter(readTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Pause, received[0]);
             controller.WaitForStatus(ServiceControllerStatus.Paused);
 
             controller.Continue();
-            Assert.Equal((int)PipeMessageByteCode.Continue, _testService.Client.ReadByte());
-
+            readTask = _testService.Client.ReadAsync(received, 0, 1);
+            await readTask.TimeoutAfter(readTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Continue, received[0]);
             controller.WaitForStatus(ServiceControllerStatus.Running);
+
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.Client.ReadByte());
+            readTask = _testService.Client.ReadAsync(received, 0, 1);
+            await readTask.TimeoutAfter(readTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Stop, received[0]);
+            controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
-        public void TestOnExecuteCustomCommand()
+        public async Task TestOnExecuteCustomCommandAsync()
         {
-            _testService.Client.Connect(timeout);
+            Task readTask;
+            byte[] received = new byte[] { 0 };
+            _testService.Client.Connect(connectionTimeout);
             var controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
 
             controller.ExecuteCommand(128);
-            Assert.Equal(128, _testService.Client.ReadByte());
+            readTask = _testService.Client.ReadAsync(received, 0, 1);
+            await readTask.TimeoutAfter(readTimeout);
+            Assert.Equal(128, received[0]);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.Client.ReadByte());
+            readTask = _testService.Client.ReadAsync(received, 0, 1);
+            await readTask.TimeoutAfter(readTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Stop, received[0]);
+            controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
-        public void TestOnContinueBeforePause()
+        public async Task TestOnContinueBeforePauseAsync()
         {
-            _testService.Client.Connect(timeout);
+            Task readTask;
+            byte[] received = new byte[] { 0 };
+            _testService.Client.Connect(connectionTimeout);
             var controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
 
@@ -167,7 +206,9 @@ namespace System.ServiceProcess.Tests
             controller.WaitForStatus(ServiceControllerStatus.Running);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.Client.ReadByte());
+            readTask = _testService.Client.ReadAsync(received, 0, 1);
+            await readTask.TimeoutAfter(readTimeout);
+            Assert.Equal((int)PipeMessageByteCode.Stop, received[0]);
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
