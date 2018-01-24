@@ -168,6 +168,11 @@ namespace System.Threading.Channels
 
                     // Mark that we're done writing.
                     parent._doneWriting = error ?? ChannelUtilities.s_doneWritingSentinel;
+
+                    ChannelUtilities.FailInteractors<WriterInteractor<T>, VoidResult>(parent._blockedWriters, ChannelUtilities.CreateInvalidCompletionException(error));
+                    ChannelUtilities.WakeUpWaiters(ref parent._waitingReaders, result: false, error: error);
+                    ChannelUtilities.WakeUpWaiters(ref parent._waitingWriters, result: false, error: error);
+
                     completeTask = parent._items.IsEmpty;
                 }
 
@@ -180,15 +185,6 @@ namespace System.Threading.Channels
                 {
                     ChannelUtilities.Complete(parent._completion, error);
                 }
-
-                // At this point, _blockedWriters and _waitingReaders/Writers will not be mutated:
-                // they're only mutated by readers/writers while holding the lock, and only if _doneWriting is null.
-                // We also know that only one thread (this one) will ever get here, as only that thread
-                // will be the one to transition from _doneWriting false to true.  As such, we can
-                // freely manipulate them without any concurrency concerns.
-                ChannelUtilities.FailInteractors<WriterInteractor<T>, VoidResult>(parent._blockedWriters, ChannelUtilities.CreateInvalidCompletionException(error));
-                ChannelUtilities.WakeUpWaiters(ref parent._waitingReaders, result: false, error: error);
-                ChannelUtilities.WakeUpWaiters(ref parent._waitingWriters, result: false, error: error);
 
                 // Successfully transitioned to completed.
                 return true;
