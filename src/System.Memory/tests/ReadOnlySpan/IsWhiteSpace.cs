@@ -8,13 +8,14 @@ namespace System.SpanTests
 {
     public static partial class ReadOnlySpanTests
     {
-        private static readonly char[] s_whiteSpaceCharacters = { (char)9, (char)10, (char)11, (char)12, (char)13, (char)32, (char)133, (char)160, (char)5760 };
+        private static readonly char[] s_whiteSpaceCharacters = { '\u0009', '\u000a', '\u000b', '\u000c', '\u000d', '\u0020', '\u0085', '\u00a0', '\u1680' };
 
         [Fact]
         public static void ZeroLengthIsWhiteSpace()
         {
             var span = new ReadOnlySpan<char>(Array.Empty<char>());
-            Assert.True(span.IsWhiteSpace());
+            bool result = span.IsWhiteSpace();
+            Assert.Equal(string.IsNullOrWhiteSpace(""), result);
         }
 
         [Fact]
@@ -29,12 +30,13 @@ namespace System.SpanTests
                     a[i] = s_whiteSpaceCharacters[rand.Next(0, s_whiteSpaceCharacters.Length - 1)];
                 }
                 var span = new Span<char>(a);
-                Assert.True(span.AsReadOnlySpan().IsWhiteSpace());
+                bool result = span.AsReadOnlySpan().IsWhiteSpace();
+                Assert.Equal(string.IsNullOrWhiteSpace(new string(a)), result);
 
                 for (int i = 0; i < s_whiteSpaceCharacters.Length - 1; i++)
                 {
                     span.Fill(s_whiteSpaceCharacters[i]);
-                    Assert.True(span.AsReadOnlySpan().IsWhiteSpace());
+                    Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), span.AsReadOnlySpan().IsWhiteSpace());
                 }
             }
         }
@@ -51,7 +53,8 @@ namespace System.SpanTests
                     a[i] = s_whiteSpaceCharacters[rand.Next(0, s_whiteSpaceCharacters.Length)];
                 }
                 var span = new ReadOnlySpan<char>(a);
-                Assert.True(span.IsWhiteSpace());
+                bool result = span.IsWhiteSpace();
+                Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), result);
             }
         }
 
@@ -70,22 +73,26 @@ namespace System.SpanTests
 
                 // first character is not a white-space character
                 a[0] = 'a';
-                Assert.False(span.AsReadOnlySpan().IsWhiteSpace());
+                bool result = span.AsReadOnlySpan().IsWhiteSpace();
+                Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), result);
                 a[0] = ' ';
 
                 // last character is not a white-space character
                 a[length - 1] = 'a';
-                Assert.False(span.AsReadOnlySpan().IsWhiteSpace());
+                result = span.AsReadOnlySpan().IsWhiteSpace();
+                Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), result);
                 a[length - 1] = ' ';
 
                 // character in the middle is not a white-space character
                 a[length/2] = 'a';
-                Assert.False(span.AsReadOnlySpan().IsWhiteSpace());
+                result = span.AsReadOnlySpan().IsWhiteSpace();
+                Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), result);
                 a[length/2] = ' ';
 
                 // no character is a white-space character
                 span.Fill('a');
-                Assert.False(span.AsReadOnlySpan().IsWhiteSpace());
+                result = span.AsReadOnlySpan().IsWhiteSpace();
+                Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), result);
             }
         }
 
@@ -98,7 +105,8 @@ namespace System.SpanTests
                 first[0] = ' ';
                 first[length - 1] = ' ';
                 var span = new ReadOnlySpan<char>(first, 1, length - 2);
-                Assert.False(span.IsWhiteSpace());
+                bool result = span.IsWhiteSpace();
+                Assert.Equal(string.IsNullOrWhiteSpace(new string(span.ToArray())), result);
             }
         }
     }
