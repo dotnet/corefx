@@ -99,7 +99,7 @@ namespace System.ServiceProcess.Tests
         private async Task WriteStreamAsync(PipeMessageByteCode code, int command = 0)
         {
             Task writeCompleted;
-            if (serverStarted.IsCompletedSuccessfully)
+            if (serverStarted.IsCompleted)
             {
                 if (code == PipeMessageByteCode.OnCustomCommand)
                 {
