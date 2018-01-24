@@ -40,6 +40,18 @@ namespace System.Text.RegularExpressions.Tests
             yield return new object[] { @"a{11}b", new string('a', 10) + "bc", RegexOptions.None, 0, 12, false, string.Empty };
             yield return new object[] { @"a{101}b", new string('a', 100) + "bc", RegexOptions.None, 0, 102, false, string.Empty };
 
+            yield return new object[] { @"a{1,3}b", "bc", RegexOptions.None, 0, 2, false, string.Empty };
+            yield return new object[] { @"a{1,3}b", "abc", RegexOptions.None, 0, 3, true, "ab" };
+            yield return new object[] { @"a{1,3}b", "aaabc", RegexOptions.None, 0, 5, true, "aaab" };
+            yield return new object[] { @"a{1,3}b", "aaaabc", RegexOptions.None, 0, 6, true, "aaab" };
+
+            yield return new object[] { @"a{2,}b", "abc", RegexOptions.None, 0, 3, false, string.Empty };
+            yield return new object[] { @"a{2,}b", "aabc", RegexOptions.None, 0, 4, true, "aab" };
+
+            yield return new object[] { @"a{,3}b", "aaaabc", RegexOptions.None, 0, 6, false, string.Empty };
+            yield return new object[] { @"a{,3}b", "aaabc", RegexOptions.None, 0, 5, true, "aaab" };
+            yield return new object[] { @"a{,3}b", "bc", RegexOptions.None, 0, 2, true, "b" };
+
             // Using [a-z], \s, \w: Actual - "([a-zA-Z]+)\\s(\\w+)"
             yield return new object[] { @"([a-zA-Z]+)\s(\w+)", "David Bau", RegexOptions.None, 0, 9, true, "David Bau" };
 
