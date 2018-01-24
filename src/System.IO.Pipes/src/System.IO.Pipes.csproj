@@ -140,7 +140,12 @@
     <Compile Include="System\IO\Pipes\ConnectionCompletionSource.cs" />
     <Compile Include="System\IO\Pipes\NamedPipeClientStream.Windows.cs" />
     <Compile Include="System\IO\Pipes\NamedPipeServerStream.Windows.cs" />
+    <Compile Include="System\IO\Pipes\PipeAccessRights.cs" />
+    <Compile Include="System\IO\Pipes\PipeAccessRule.cs" />
+    <Compile Include="System\IO\Pipes\PipeAuditRule.cs" />
+    <Compile Include="System\IO\Pipes\PipesAclExtensions.cs" />
     <Compile Include="System\IO\Pipes\PipeCompletionSource.cs" />
+    <Compile Include="System\IO\Pipes\PipeSecurity.cs" />
     <Compile Include="System\IO\Pipes\PipeStream.Windows.cs" />
     <Compile Include="System\IO\Pipes\ReadWriteCompletionSource.cs" />
   </ItemGroup>
@@ -256,7 +261,7 @@
     <Reference Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
-    <Reference Include="System.IO.Pipes.AccessControl" />
+    <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.Security.AccessControl" />
     <Reference Include="System.Security.Principal.Windows" />
     <Reference Include="System.Security.Claims" />
