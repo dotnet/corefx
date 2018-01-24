@@ -17,6 +17,7 @@ namespace System.ServiceProcess.Tests
     [OuterLoop(/* Modifies machine state */)]
     public class ServiceBaseTests : IDisposable
     {
+        private const int timeout = 5000;
         private readonly TestServiceProvider _testService;
 
         private static readonly Lazy<bool> s_isElevated = new Lazy<bool>(() => AdminHelpers.IsProcessElevated());
@@ -76,89 +77,89 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartThenStop()
         {
-            _testService.client.Connect();
+            _testService.Client.Connect(timeout);
             var controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.client.ReadByte());
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.Client.ReadByte());
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartWithArgsThenStop()
         {
             var controller = new ServiceController(_testService.TestServiceName);
-            _testService.client.Connect();
+            _testService.Client.Connect(timeout);
             AssertExpectedProperties(controller);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.client.ReadByte());
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.Client.ReadByte());
 
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
             controller.Start(new string[] { "StartWithArguments", "a", "b", "c" });
 
-            _testService.client = null;
-            _testService.client.Connect();
-            Assert.Equal((int)PipeMessageByteCode.Start, _testService.client.ReadByte());
+            _testService.Client = null;
+            _testService.Client.Connect();
+            Assert.Equal((int)PipeMessageByteCode.Start, _testService.Client.ReadByte());
             controller.WaitForStatus(ServiceControllerStatus.Running);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.client.ReadByte());
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.Client.ReadByte());
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseThenStop()
         {
-            _testService.client.Connect();
+            _testService.Client.Connect(timeout);
             var controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
 
             controller.Pause();
-            Assert.Equal((int)PipeMessageByteCode.Pause, _testService.client.ReadByte());
+            Assert.Equal((int)PipeMessageByteCode.Pause, _testService.Client.ReadByte());
             controller.WaitForStatus(ServiceControllerStatus.Paused);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.client.ReadByte());
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.Client.ReadByte());
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnPauseAndContinueThenStop()
         {
-            _testService.client.Connect();
+            _testService.Client.Connect(timeout);
             var controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
 
             controller.Pause();
-            Assert.Equal((int)PipeMessageByteCode.Pause, _testService.client.ReadByte());
+            Assert.Equal((int)PipeMessageByteCode.Pause, _testService.Client.ReadByte());
             controller.WaitForStatus(ServiceControllerStatus.Paused);
 
             controller.Continue();
-            Assert.Equal((int)PipeMessageByteCode.Continue, _testService.client.ReadByte());
+            Assert.Equal((int)PipeMessageByteCode.Continue, _testService.Client.ReadByte());
 
             controller.WaitForStatus(ServiceControllerStatus.Running);
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.client.ReadByte());
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.Client.ReadByte());
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnExecuteCustomCommand()
         {
-            _testService.client.Connect();
+            _testService.Client.Connect(timeout);
             var controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
 
             controller.ExecuteCommand(128);
-            Assert.Equal(128, _testService.client.ReadByte());
+            Assert.Equal(128, _testService.Client.ReadByte());
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.client.ReadByte());
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.Client.ReadByte());
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnContinueBeforePause()
         {
-            _testService.client.Connect();
+            _testService.Client.Connect(timeout);
             var controller = new ServiceController(_testService.TestServiceName);
             AssertExpectedProperties(controller);
 
@@ -166,7 +167,7 @@ namespace System.ServiceProcess.Tests
             controller.WaitForStatus(ServiceControllerStatus.Running);
 
             controller.Stop();
-            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.client.ReadByte());
+            Assert.Equal((int)PipeMessageByteCode.Stop, _testService.Client.ReadByte());
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
@@ -218,14 +219,5 @@ namespace System.ServiceProcess.Tests
                 _disposed = true;
             }
         }
-
-        public enum PipeMessageByteCode
-        {
-            Start = 0,
-            Continue = 1,
-            Pause = 2,
-            Stop = 3,
-            OnCustomCommand = 4
-        };
     }
 }

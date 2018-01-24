@@ -25,7 +25,7 @@ namespace System.ServiceProcess.Tests
             get { return s_runningWithElevatedPrivileges.Value; }
         }
 
-        public NamedPipeClientStream client
+        public NamedPipeClientStream Client
         {
             get
             {

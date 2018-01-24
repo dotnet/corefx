@@ -12,12 +12,14 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Globalization;
 using System.IO.Pipes;
+using System.Threading.Tasks;
 
 namespace System.ServiceProcess.Tests
 {
-    public class TestService : ServiceBase, IDisposable
+    public class TestService : ServiceBase
     {
         private bool _disposed;
+        private Task serverStarted;
 
         public TestService(string serviceName)
         {
@@ -33,10 +35,10 @@ namespace System.ServiceProcess.Tests
             this.CanHandlePowerEvent = false;
 
             this.Server = new NamedPipeServerStream(serviceName);
-            this.Server.WaitForConnectionAsync();
+            serverStarted = this.Server.WaitForConnectionAsync();
         }
 
-        public NamedPipeServerStream Server { get; set; }
+        private NamedPipeServerStream Server { get; }
 
         protected override void OnContinue()
         {
@@ -92,13 +94,16 @@ namespace System.ServiceProcess.Tests
 
         private void WriteStream(PipeMessageByteCode code, int command = 0)
         {
-            if (code == PipeMessageByteCode.OnCustomCommand)
-                Server.WriteByte((byte)command);
-            else
-                Server.WriteByte((byte)code);
+            if (serverStarted.IsCompletedSuccessfully)
+            {
+                if (code == PipeMessageByteCode.OnCustomCommand)
+                    Server.WriteByte((byte)command);
+                else
+                    Server.WriteByte((byte)code);
+            }
         }
 
-        public new void Dispose()
+        protected override void Dispose(bool disposing)
         {
             if (!_disposed)
             {
@@ -107,14 +112,5 @@ namespace System.ServiceProcess.Tests
                 base.Dispose();
             }
         }
-
-        public enum PipeMessageByteCode
-        {
-            Start = 0,
-            Continue = 1,
-            Pause = 2,
-            Stop = 3,
-            OnCustomCommand = 4
-        };
     }
 }
