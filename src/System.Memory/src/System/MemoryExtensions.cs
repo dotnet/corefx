@@ -120,7 +120,7 @@ namespace System
         public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
         {
             int start = 0;
-            while (start < span.Length)
+            for (; start < span.Length; start++)
             {
                 for (int i = 0; i < trimChars.Length; i++)
                 {
@@ -128,8 +128,7 @@ namespace System
                         goto Next;
                 }
                 break;
-            Next:
-                start++;
+            Next: ;
             }
             return span.Slice(start);
         }
@@ -143,7 +142,7 @@ namespace System
         public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
         {
             int end = span.Length - 1;
-            while (end >= 0)
+            for (; end >= 0; end--)
             {
                 for (int i = 0; i < trimChars.Length; i++)
                 {
@@ -151,8 +150,7 @@ namespace System
                         goto Next;
                 }
                 break;
-            Next:
-                end--;
+            Next: ;
             }
             return span.Slice(0, end + 1);
         }
