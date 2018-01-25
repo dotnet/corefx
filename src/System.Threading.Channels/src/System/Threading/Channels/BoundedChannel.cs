@@ -156,8 +156,6 @@ namespace System.Threading.Channels
             {
                 BoundedChannel<T> parent = _parent;
                 bool completeTask;
-                ReaderInteractor<bool> waitingReaders;
-                ReaderInteractor<bool> waitingWriters;
 
                 lock (parent.SyncObj)
                 {
@@ -172,17 +170,6 @@ namespace System.Threading.Channels
                     // Mark that we're done writing.
                     parent._doneWriting = error ?? ChannelUtilities.s_doneWritingSentinel;
 
-                    waitingReaders = parent._waitingReaders;
-                    if (waitingReaders != null)
-                    {
-                        parent._waitingReaders = null;
-                    }
-
-                    waitingWriters = parent._waitingWriters;
-                    if (waitingWriters != null)
-                    {
-                        parent._waitingWriters = null;
-                    }
 
                     completeTask = parent._items.IsEmpty;
                 }
@@ -197,12 +184,18 @@ namespace System.Threading.Channels
                     ChannelUtilities.Complete(parent._completion, error);
                 }
 
-                // The following line is not safe to do it outside https://github.com/dotnet/corefx/issues/26587
-                ChannelUtilities.FailInteractors<WriterInteractor<T>, VoidResult>(parent._blockedWriters, ChannelUtilities.CreateInvalidCompletionException(error));
+                // At this point, _blockedWriters and _waitingReaders/Writers will not be mutated:
+                // they're only mutated by readers/writers while holding the lock, and only if _doneWriting is null.
+                // We also know that only one thread (this one) will ever get here, as only that thread
+                // will be the one to transition from _doneWriting false to true.  As such, we can
+                // freely manipulate them without any concurrency concerns.
 
-                // Avoid waking the readers inside the lock in case AllowSynchronousContinuations is specified as the readers will be invoked synchronously.
-                ChannelUtilities.WakeUpWaiters(ref waitingReaders, result: false, error: error);
-                ChannelUtilities.WakeUpWaiters(ref waitingWriters, result: false, error: error);
+
+                 // The following 3 line are not safe to do it outside the lock https://github.com/dotnet/corefx/issues/26587
+                 ChannelUtilities.FailInteractors<WriterInteractor<T>, VoidResult>(parent._blockedWriters, ChannelUtilities.CreateInvalidCompletionException(error));
+                 ChannelUtilities.WakeUpWaiters(ref parent._waitingReaders, result: false, error: error);
+                 ChannelUtilities.WakeUpWaiters(ref parent._waitingWriters, result: false, error: error);
+
 
                 // Successfully transitioned to completed.
                 return true;
