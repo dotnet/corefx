@@ -102,8 +102,8 @@
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeEcKeyHandle.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeEcKeyHandle.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeEvpPKeyCtxHandle.Unix.cs">
-      <Link>Common\Microsoft\Win32\SafeHandles\SafeEvpPKeyCtxHandle.Unix.cs</Link>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeEvpPkeyCtxHandle.Unix.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeEvpPkeyCtxHandle.Unix.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeEvpPKeyHandle.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeEvpPKeyHandle.Unix.cs</Link>
