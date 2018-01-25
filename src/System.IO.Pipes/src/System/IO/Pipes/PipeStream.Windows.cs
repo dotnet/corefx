@@ -415,24 +415,20 @@ namespace System.IO.Pipes
         internal static unsafe Interop.Kernel32.SECURITY_ATTRIBUTES GetSecAttrs(HandleInheritability inheritability, PipeSecurity pipeSecurity, ref GCHandle pinningHandle)
         {
             Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = default(Interop.Kernel32.SECURITY_ATTRIBUTES);
-            if (pipeSecurity != null || (inheritability & HandleInheritability.Inheritable) != 0)
+            secAttrs.nLength = (uint)sizeof(Interop.Kernel32.SECURITY_ATTRIBUTES);
+
+            if ((inheritability & HandleInheritability.Inheritable) != 0)
             {
-                secAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES();
-                secAttrs.nLength = (uint)sizeof(Interop.Kernel32.SECURITY_ATTRIBUTES);
+                secAttrs.bInheritHandle = Interop.BOOL.TRUE;
+            }
 
-                if ((inheritability & HandleInheritability.Inheritable) != 0)
+            if (pipeSecurity != null)
+            {
+                byte[] securityDescriptor = pipeSecurity.GetSecurityDescriptorBinaryForm();
+                pinningHandle = GCHandle.Alloc(securityDescriptor, GCHandleType.Pinned);
+                fixed (byte* pSecurityDescriptor = securityDescriptor)
                 {
-                    secAttrs.bInheritHandle = Interop.BOOL.TRUE;
-                }
-
-                if (pipeSecurity != null)
-                {
-                    byte[] securityDescriptor = pipeSecurity.GetSecurityDescriptorBinaryForm();
-                    pinningHandle = GCHandle.Alloc(securityDescriptor, GCHandleType.Pinned);
-                    fixed (byte* pSecurityDescriptor = securityDescriptor)
-                    {
-                        secAttrs.lpSecurityDescriptor = (IntPtr)pSecurityDescriptor;
-                    }
+                    secAttrs.lpSecurityDescriptor = (IntPtr)pSecurityDescriptor;
                 }
             }
 

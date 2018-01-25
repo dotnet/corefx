@@ -150,12 +150,5 @@ namespace System.IO.Pipes.Tests
                 }
             }
         }
-
-        [Fact]
-        public static void CreateClient_CurrentUserOnly()
-        {
-            // Should not throw.
-            new NamedPipeClientStream(".", GetUniquePipeName(), PipeDirection.InOut, PipeOptions.CurrentUserOnly).Dispose();
-        }
     }
 }
