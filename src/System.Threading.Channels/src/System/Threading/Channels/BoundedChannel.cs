@@ -156,7 +156,6 @@ namespace System.Threading.Channels
             {
                 BoundedChannel<T> parent = _parent;
                 bool completeTask;
-
                 lock (parent.SyncObj)
                 {
                     parent.AssertInvariants();
@@ -169,8 +168,6 @@ namespace System.Threading.Channels
 
                     // Mark that we're done writing.
                     parent._doneWriting = error ?? ChannelUtilities.s_doneWritingSentinel;
-
-
                     completeTask = parent._items.IsEmpty;
                 }
 
@@ -189,7 +186,6 @@ namespace System.Threading.Channels
                 // We also know that only one thread (this one) will ever get here, as only that thread
                 // will be the one to transition from _doneWriting false to true.  As such, we can
                 // freely manipulate them without any concurrency concerns.
-
 
                  // The following 3 line are not safe to do it outside the lock https://github.com/dotnet/corefx/issues/26587
                  ChannelUtilities.FailInteractors<WriterInteractor<T>, VoidResult>(parent._blockedWriters, ChannelUtilities.CreateInvalidCompletionException(error));
