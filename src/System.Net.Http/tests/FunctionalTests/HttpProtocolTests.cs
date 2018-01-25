@@ -33,13 +33,20 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [InlineData("HTTP/1.1 200      ", 200, "     ")]
-        [InlineData("HTTP/1.1 200      Something", 200, "     Something")]
-        public async Task GetAsync_ExpectedStatusCodeAndReason_SuccessSkipForWinHttpHandlerCurlHandler(string statusLine, int expectedStatusCode, string expectedReason)
+        [InlineData("HTTP/1.1 200      ", 200, "     ", "")]
+        [InlineData("HTTP/1.1 200      Something", 200, "     Something", "Something")]
+        public async Task GetAsync_ExpectedStatusCodeAndReason_PlatformBehaviorTest(string statusLine,
+            int expectedStatusCode, string reasonWithSpace, string reasonNoSpace)
         {
-            if (PlatformDetection.IsUap || UseManagedHandler)
+            if (UseManagedHandler || PlatformDetection.IsFullFramework)
             {
-                await GetAsyncSuccessHelper(statusLine, expectedStatusCode, expectedReason);
+                // ManagedHandler and .NET Framework will keep the space characters.
+                await GetAsyncSuccessHelper(statusLine, expectedStatusCode, reasonWithSpace);
+            }
+            else
+            {
+                // WinRT, WinHttpHandler, and CurlHandler will trim space characters.
+                await GetAsyncSuccessHelper(statusLine, expectedStatusCode, reasonNoSpace);
             }
         }
 
@@ -118,12 +125,14 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("HTTP/1.1\t200 OK")]
         [InlineData("HTTP/1.1 200\tOK")]
         [InlineData("HTTP/1.1 200\t")]
-        public async Task GetAsync_InvalidStatusLine_ThrowsExceptionSkipForWinHttpHandlerCurlHandler(string responseString)
+        public async Task GetAsync_InvalidStatusLine_ThrowsExceptionOnManagedHandler(string responseString)
         {
-            if (PlatformDetection.IsUap || UseManagedHandler)
+            if (UseManagedHandler || PlatformDetection.IsFullFramework)
             {
+                // ManagedHandler and .NET Framework will throw HttpRequestException.
                 await GetAsyncThrowsExceptionHelper(responseString);
             }
+            // WinRT, WinHttpHandler, and CurlHandler will succeed.
         }
 
         private async Task GetAsyncThrowsExceptionHelper(string responseString)
