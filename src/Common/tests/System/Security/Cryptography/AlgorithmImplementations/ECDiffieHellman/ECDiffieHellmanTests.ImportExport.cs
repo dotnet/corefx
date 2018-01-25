@@ -11,6 +11,11 @@ namespace System.Security.Cryptography.EcDiffieHellman.Tests
 #if netcoreapp
     public partial class ECDiffieHellmanTests
     {
+        // On CentOS, secp224r1 (also called nistP224) appears to be disabled. To prevent test failures on that platform, 
+        // probe for this capability before depending on it. 
+        internal static bool ECDsa224Available =>
+            ECDiffieHellmanFactory.IsCurveValid(new Oid(ECDSA_P224_OID_VALUE));
+
         [Theory, MemberData(nameof(TestCurvesFull))]
         public static void TestNamedCurves(CurveDef curveDef)
         {
@@ -246,7 +251,7 @@ namespace System.Security.Cryptography.EcDiffieHellman.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(ECDsa224Available))]
         public static void TestNamedImportValidationNegative()
         {
             if (!ECDiffieHellmanFactory.ExplicitCurvesSupported)
@@ -331,7 +336,7 @@ namespace System.Security.Cryptography.EcDiffieHellman.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(ECDsa224Available))]
         public static void TestNamedCurveWithExplicitKey()
         {
             if (!ECDiffieHellmanFactory.ExplicitCurvesSupported)
