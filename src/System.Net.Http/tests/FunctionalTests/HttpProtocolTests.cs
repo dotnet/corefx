@@ -35,10 +35,12 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData("HTTP/1.1 200      ", 200, "     ")]
         [InlineData("HTTP/1.1 200      Something", 200, "     Something")]
-        public async Task GetAsync_ExpectedStatusCodeAndReason_SuccessSkipForWinHttpHandler(string statusLine, int expectedStatusCode, string expectedReason)
+        public async Task GetAsync_ExpectedStatusCodeAndReason_SuccessSkipForWinHttpHandlerCurlHandler(string statusLine, int expectedStatusCode, string expectedReason)
         {
-            if (PlatformDetection.IsWindows && !UseManagedHandler) return;
-            await GetAsyncSuccessHelper(statusLine, expectedStatusCode, expectedReason);
+            if (PlatformDetection.IsUap || UseManagedHandler)
+            {
+                await GetAsyncSuccessHelper(statusLine, expectedStatusCode, expectedReason);
+            }
         }
 
         [Theory]
@@ -116,10 +118,12 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("HTTP/1.1\t200 OK")]
         [InlineData("HTTP/1.1 200\tOK")]
         [InlineData("HTTP/1.1 200\t")]
-        public async Task GetAsync_InvalidStatusLine_ThrowsExceptionSkipForWinHttpHandler(string responseString)
+        public async Task GetAsync_InvalidStatusLine_ThrowsExceptionSkipForWinHttpHandlerCurlHandler(string responseString)
         {
-            if (PlatformDetection.IsWindows && !UseManagedHandler) return;
-            await GetAsyncThrowsExceptionHelper(responseString);
+            if (PlatformDetection.IsUap || UseManagedHandler)
+            {
+                await GetAsyncThrowsExceptionHelper(responseString);
+            }
         }
 
         private async Task GetAsyncThrowsExceptionHelper(string responseString)
