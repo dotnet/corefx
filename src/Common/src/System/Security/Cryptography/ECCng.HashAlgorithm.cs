@@ -63,26 +63,21 @@ namespace System.Security.Cryptography
         /// </summary>
         internal static string SpecialNistAlgorithmToCurveName(string algorithm)
         {
-            if (algorithm == BCryptNative.AlgorithmName.ECDHP256 ||
-                algorithm == BCryptNative.AlgorithmName.ECDsaP256)
+            switch (algorithm)
             {
-                return "nistP256";
+                case BCryptNative.AlgorithmName.ECDHP256:
+                case BCryptNative.AlgorithmName.ECDsaP256:
+                    return "nistP256";
+                case BCryptNative.AlgorithmName.ECDHP384:
+                case BCryptNative.AlgorithmName.ECDsaP384:
+                    return "nistP384";
+                case BCryptNative.AlgorithmName.ECDHP521:
+                case BCryptNative.AlgorithmName.ECDsaP521:
+                    return "nistP521";
             }
-
-            if (algorithm == BCryptNative.AlgorithmName.ECDHP384 ||
-                algorithm == BCryptNative.AlgorithmName.ECDsaP384)
-            {
-                return "nistP384";
-            }
-
-            if (algorithm == BCryptNative.AlgorithmName.ECDHP521 ||
-                algorithm == BCryptNative.AlgorithmName.ECDsaP521)
-            {
-                return "nistP521";
-            }
-
-            Debug.Fail(String.Format("Unknown curve {0}", algorithm));
-            throw new PlatformNotSupportedException(String.Format(SR.Cryptography_CurveNotSupported, algorithm));
+            
+            Debug.Fail($"Unknown curve {algorithm}");
+            throw new PlatformNotSupportedException(string.Format(SR.Cryptography_CurveNotSupported, algorithm));
         }
     }
 }

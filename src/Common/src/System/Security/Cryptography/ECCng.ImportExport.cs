@@ -397,13 +397,13 @@ namespace System.Security.Cryptography
 
                 case AlgorithmName.ECDsaP384:
                     return includePrivateParameters ?
-                    KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P384_MAGIC :
-                    KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P384_MAGIC;
+                        KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P384_MAGIC :
+                        KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P384_MAGIC;
 
                 case AlgorithmName.ECDsaP521:
                     return includePrivateParameters ?
-                    KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P521_MAGIC :
-                    KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P521_MAGIC;
+                        KeyBlobMagicNumber.BCRYPT_ECDSA_PRIVATE_P521_MAGIC :
+                        KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P521_MAGIC;
 
                 default:
                     // all other curves are new in Win10 so use named curves
@@ -429,13 +429,13 @@ namespace System.Security.Cryptography
 
                 case AlgorithmName.ECDHP384:
                     return includePrivateParameters ?
-                    KeyBlobMagicNumber.BCRYPT_ECDH_PRIVATE_P384_MAGIC :
-                    KeyBlobMagicNumber.BCRYPT_ECDH_PUBLIC_P384_MAGIC;
+                        KeyBlobMagicNumber.BCRYPT_ECDH_PRIVATE_P384_MAGIC :
+                        KeyBlobMagicNumber.BCRYPT_ECDH_PUBLIC_P384_MAGIC;
 
                 case AlgorithmName.ECDHP521:
                     return includePrivateParameters ?
-                    KeyBlobMagicNumber.BCRYPT_ECDH_PRIVATE_P521_MAGIC :
-                    KeyBlobMagicNumber.BCRYPT_ECDH_PUBLIC_P521_MAGIC;
+                        KeyBlobMagicNumber.BCRYPT_ECDH_PRIVATE_P521_MAGIC :
+                        KeyBlobMagicNumber.BCRYPT_ECDH_PUBLIC_P521_MAGIC;
 
                 default:
                     // all other curves are new in Win10 so use named curves

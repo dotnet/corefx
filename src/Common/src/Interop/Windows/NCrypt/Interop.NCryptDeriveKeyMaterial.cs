@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.Win32.SafeHandles;
@@ -43,18 +41,9 @@ internal static partial class Interop
             // First marshal the hash algoritm
             IntPtr hashAlgorithmString = IntPtr.Zero;
 
-            // Run in a CER so that we know we'll free the memory for the marshaled string
-            RuntimeHelpers.PrepareConstrainedRegions();
             try
             {
-                // Assign in a CER so we don't fail between allocating the memory and assigning the result
-                // back to the string variable.
-                RuntimeHelpers.PrepareConstrainedRegions();
-                try { }
-                finally
-                {
-                    hashAlgorithmString = Marshal.StringToCoTaskMemUni(hashAlgorithm);
-                }
+                hashAlgorithmString = Marshal.StringToCoTaskMemUni(hashAlgorithm);
 
                 Span<NCryptBuffer> parameters = stackalloc NCryptBuffer[4];
                 int parameterCount = 0;
@@ -227,7 +216,7 @@ internal static partial class Interop
             byte[] seed,
             SecretAgreementFlags flags)
         {
-            NCryptBuffer[] buffers = new NCryptBuffer[2];
+            Span<NCryptBuffer> buffers = stackalloc NCryptBuffer[2];
 
             unsafe
             {

@@ -125,7 +125,6 @@ namespace System.Security.Cryptography
                 int half = secretAgreement.Length / 2;
                 int odd = secretAgreement.Length & 1;
 
-
                 // PRF(secret, label, seed) = P_MD5(S1, label + seed) XOR
                 //                            P_SHA-1(S2, label + seed);
 
