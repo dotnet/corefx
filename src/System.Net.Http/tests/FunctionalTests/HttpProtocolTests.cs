@@ -120,6 +120,29 @@ namespace System.Net.Http.Functional.Tests
                 }
             });
         }
+
+        [Fact]
+        public async Task GetAsync_ResponseHasLFLineEndings_Success()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
+                    await TestHelper.WhenAllCompletedOrAnyFailed(
+                        getResponseTask,
+                        LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                            $"HTTP/1.1 200 OK\nDate: {DateTimeOffset.UtcNow:R}\nServer: TestServer\nContent-Length: 0\n\n",
+                            new LoopbackServer.Options { ResponseStreamWrapper = GetStream }));
+                    using (HttpResponseMessage response = await getResponseTask)
+                    {
+                        Assert.Equal(200, (int)response.StatusCode);
+                        Assert.Equal("OK", response.ReasonPhrase);
+                        Assert.Equal("TestServer", response.Headers.Server.ToString());
+                    }
+                }
+            });
+        }
     }
 
     public class HttpProtocolTests_Dribble : HttpProtocolTests
