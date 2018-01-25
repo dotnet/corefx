@@ -10,10 +10,6 @@ using System.Runtime.InteropServices;
 using Internal.Runtime.CompilerServices;
 #endif
 
-#if !netstandard11
-using System.Numerics;
-#endif
-
 namespace System
 {
     /// <summary>
@@ -123,44 +119,17 @@ namespace System
         /// <param name="trimChars">The span which contains the set of characters to remove.</param>
         public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
         {
-            if (trimChars.Length == 0)
-                return span;
-
-            ref char first = ref MemoryMarshal.GetReference(span);
-            ref char firstTrimChar = ref MemoryMarshal.GetReference(trimChars);
             int start = 0;
-#if !netstandard11
-            if (Vector.IsHardwareAccelerated && span.Length >= 2 * Vector<ushort>.Count)
+            for (; start < span.Length; start++)
             {
-                var equalityTester = new Vector<ushort>(ushort.MaxValue);
-                while (start < span.Length - Vector<ushort>.Count)
+                int i = 0;
+                for (; i < trimChars.Length; i++)
                 {
-                    Vector<ushort> value = Unsafe.ReadUnaligned<Vector<ushort>>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref first, start)));
-                    Vector<ushort> comparison = Vector<ushort>.Zero;
-                    int j = 0;
-                    for (; j < trimChars.Length; j++)
-                    {
-                        var mask = new Vector<ushort>(Unsafe.Add(ref firstTrimChar, j));
-                        comparison |= Vector.Equals(value, mask);
-                    }
-                    if (!equalityTester.Equals(comparison))
+                    if (span[start] == trimChars[i])
                         break;
-                    start += Vector<ushort>.Count;
                 }
-            }
-#endif
-            while (start < span.Length)
-            {
-                int j = 0;
-                while (j < trimChars.Length)
-                {
-                    if (Unsafe.Add(ref first, start) == Unsafe.Add(ref firstTrimChar, j))
-                        break;
-                    j++;
-                }
-                if (j == trimChars.Length)
+                if (i == trimChars.Length)
                     break;
-                start++;
             }
             return span.Slice(start);
         }
@@ -173,48 +142,17 @@ namespace System
         /// <param name="trimChars">The span which contains the set of characters to remove.</param>
         public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span, ReadOnlySpan<char> trimChars)
         {
-            if (trimChars.Length == 0)
-                return span;
-
-            ref char first = ref MemoryMarshal.GetReference(span);
-            ref char firstTrimChar = ref MemoryMarshal.GetReference(trimChars);
-
             int end = span.Length - 1;
-#if !netstandard11
-            if (Vector.IsHardwareAccelerated && span.Length >= 2 * Vector<ushort>.Count)
+            for (; end >= 0; end--)
             {
-                var equalityTester = new Vector<ushort>(ushort.MaxValue);
-                do
+                int i = 0;
+                for (; i < trimChars.Length; i++)
                 {
-                    end -= Vector<ushort>.Count;
-                    Vector<ushort> value = Unsafe.ReadUnaligned<Vector<ushort>>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref first, end)));
-                    Vector<ushort> comparison = Vector<ushort>.Zero;
-                    int j = 0;
-                    for (; j < trimChars.Length; j++)
-                    {
-                        var mask = new Vector<ushort>(Unsafe.Add(ref firstTrimChar, j));
-                        comparison |= Vector.Equals(value, mask);
-                    }
-                    if (!equalityTester.Equals(comparison))
-                    {
-                        end += Vector<ushort>.Count;
+                    if (span[end] == trimChars[i])
                         break;
-                    }
-                } while (end > Vector<ushort>.Count);
-            }
-#endif
-            while (end >= 0)
-            {
-                int j = 0;
-                while (j < trimChars.Length)
-                {
-                    if (Unsafe.Add(ref first, end) == Unsafe.Add(ref firstTrimChar, j))
-                        break;
-                    j++;
                 }
-                if (j == trimChars.Length)
+                if (i == trimChars.Length)
                     break;
-                end--;
             }
             return span.Slice(0, end + 1);
         }
