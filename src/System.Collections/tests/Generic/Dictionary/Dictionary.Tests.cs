@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Generic.Dictionary.HashCollisionScenarios;
 using Xunit;
 
 namespace System.Collections.Tests
@@ -229,6 +230,34 @@ namespace System.Collections.Tests
         {
             Dictionary<string, int> source = new Dictionary<string, int> { { "a", 1 }, { "A", 1 } };
             AssertExtensions.Throws<ArgumentException>(null, () => new Dictionary<string, int>(source, StringComparer.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Ensure that dictionary changes its comparer to randomized after it encounters more than 100 collisions on a single hash bucket
+        /// </summary>
+        [Fact]
+        public void AddToDictionary_PassesHashCollisionThreshold_SwitchesComparerToRandomized()
+        {
+            var dict = new Dictionary<string, int>();
+
+            if (PlatformDetection.IsFullFramework)
+            {
+                // the comparer is randomized by default in full framework
+                Assert.Same(EqualityComparer<string>.Default, dict.Comparer);
+                return;
+            }
+
+            Assert.NotSame(EqualityComparer<string>.Default, dict.Comparer);
+            var stringData = new StringsMatchingNonRandomizedHashCode().Data;
+
+            foreach (var s in stringData.Take(101))
+            {
+                dict.Add(s, 0);
+            }
+
+            Assert.NotSame(EqualityComparer<string>.Default, dict.Comparer);
+            dict.Add(stringData.ElementAt(101), 0);
+            Assert.Same(EqualityComparer<string>.Default, dict.Comparer);
         }
 
         public static IEnumerable<object[]> CopyConstructorStringComparerData
