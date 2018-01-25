@@ -71,7 +71,7 @@ namespace System.Net.Http.Functional.Tests
         {
             if (!UseManagedHandler)
             {
-                return;
+//                return;
             }
 
             await LoopbackServer.CreateServerAsync(async (server, url) =>
@@ -81,7 +81,13 @@ namespace System.Net.Http.Functional.Tests
                     HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                     request.Version = new Version(majorVersion, minorVersion);
 
-                    await Assert.ThrowsAsync<NotSupportedException>(async () => await client.SendAsync(request));
+                    Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
+                    Task<List<string>> serverTask =
+                        LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                            $"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 0\r\n\r\n",
+                            new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+
+                    await Assert.ThrowsAsync<NotSupportedException>(async () => await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask));
                 }
             });
         }
@@ -89,18 +95,13 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData(1, 2)]
         [InlineData(1, 6)]
-        [InlineData(2, 0)]
+        [InlineData(2, 0)]  // Note, this is plain HTTP (not HTTPS), so 2.0 is not supported and should degrade to 1.1
         [InlineData(2, 1)]
         [InlineData(2, 7)]
         [InlineData(3, 0)]
         [InlineData(4, 2)]
         public async Task GetAsync_UnknownVersion_DegradesTo11(int majorVersion, int minorVersion)
         {
-            if (!UseManagedHandler)
-            {
-                return;
-            }
-
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClient client = CreateHttpClient())
@@ -131,7 +132,7 @@ namespace System.Net.Http.Functional.Tests
         {
             if (managedHandlerOnly && !UseManagedHandler)
             {
-                return;
+//                return;
             }
 
             await LoopbackServer.CreateServerAsync(async (server, url) =>
