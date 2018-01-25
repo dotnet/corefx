@@ -126,11 +126,12 @@ namespace System
                 for (; i < trimChars.Length; i++)
                 {
                     if (span[start] == trimChars[i])
-                        break;
+                        goto Done;
                 }
                 if (i == trimChars.Length)
                     break;
             }
+        Done:
             return span.Slice(start);
         }
 
@@ -149,11 +150,12 @@ namespace System
                 for (; i < trimChars.Length; i++)
                 {
                     if (span[end] == trimChars[i])
-                        break;
+                        goto Done;
                 }
                 if (i == trimChars.Length)
                     break;
             }
+        Done:
             return span.Slice(0, end + 1);
         }
 
