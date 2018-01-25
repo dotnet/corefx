@@ -137,7 +137,6 @@ namespace System.Security.Cryptography
             {
                 throw new ArgumentNullException(nameof(oidValue));
             }
-
             return ECCurve.CreateFromValueAndName(oidValue, null);
         }
 
