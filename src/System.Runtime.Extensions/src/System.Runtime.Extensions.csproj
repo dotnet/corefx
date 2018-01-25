@@ -19,6 +19,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="..\..\Common\src\System\PasteArguments.cs">
+      <Link>Common\System\PasteArguments.cs</Link>
+    </Compile>
     <Compile Include="System\AppDomain.cs" />
     <Compile Include="System\AppDomainUnloadedException.cs" />
     <Compile Include="System\ApplicationId.cs" />
@@ -34,13 +37,8 @@
     <Compile Include="System\LoaderOptimizationAttribute.cs" />
     <Compile Include="System\OperatingSystem.cs" />
     <Compile Include="System\PlatformID.cs" />
-    <Compile Include="System\IO\EncodingCache.cs" />
-    <Compile Include="System\IO\StreamReader.cs" />
-    <Compile Include="System\IO\StreamWriter.cs" />
     <Compile Include="System\IO\StringReader.cs" />
     <Compile Include="System\IO\StringWriter.cs" />
-    <Compile Include="System\IO\TextReader.cs" />
-    <Compile Include="System\IO\TextWriter.cs" />
     <Compile Include="System\IO\BufferedStream.cs" />
     <Compile Include="System\IO\InvalidDataException.cs" />
     <Compile Include="System\Net\WebUtility.cs" />
@@ -101,6 +99,9 @@
   </ItemGroup>
   <!-- WINDOWS: Shared CoreCLR and .NET Native -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+    <Compile Include="..\..\Common\src\System\PasteArguments.Windows.cs">
+      <Link>Common\System\PasteArguments.Windows.cs</Link>
+    </Compile>
     <Compile Include="System\Environment.Windows.cs" />
     <Compile Include="System\Runtime\Versioning\VersioningHelper.Windows.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.Windows.cs" />
@@ -247,6 +248,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\IO\PersistedFiles.Names.Unix.cs">
       <Link>Common\System\IO\PersistedFiles.Unix.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\src\System\PasteArguments.Unix.cs">
+      <Link>Common\System\PasteArguments.Unix.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
