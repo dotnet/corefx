@@ -122,8 +122,7 @@ namespace System
             int start = 0;
             while (start < span.Length)
             {
-                int i = 0;
-                for (; i < trimChars.Length; i++)
+                for (int i = 0; i < trimChars.Length; i++)
                 {
                     if (span[start] == trimChars[i])
                         goto Next;
@@ -146,8 +145,7 @@ namespace System
             int end = span.Length - 1;
             while (end >= 0)
             {
-                int i = 0;
-                for (; i < trimChars.Length; i++)
+                for (int i = 0; i < trimChars.Length; i++)
                 {
                     if (span[end] == trimChars[i])
                         goto Next;
