@@ -6,8 +6,8 @@
       netcoreapp2.0-Windows_NT;
     </PackageConfigurations>
     <BuildConfigurations>
-      $(PackageConfigurations);
-      netcoreapp-Windows_NT;
+      netstandard-Windows_NT;
+      netstandard-Unix;
       _netfx;
     </BuildConfigurations>
   </PropertyGroup>
