@@ -9,6 +9,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.EcDiffieHellman.Tests
 {
+#if netcoreapp
     // These test cases are from http://csrc.nist.gov/groups/STM/cavp/component-testing.html#test-vectors
     // SP 800-56A ECCCDH Primitive test vectors
     // ecccdhtestvectors.zip
@@ -228,4 +229,5 @@ namespace System.Security.Cryptography.EcDiffieHellman.Tests
             Assert.Equal(hashedZ.ByteArrayToHex(), result.ByteArrayToHex());
         }
     }
+#endif
 }

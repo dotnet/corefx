@@ -8,6 +8,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.EcDiffieHellman.Tests
 {
+#if netcoreapp
     public partial class ECDiffieHellmanTests
     {
         [Theory, MemberData(nameof(TestCurvesFull))]
@@ -430,4 +431,5 @@ namespace System.Security.Cryptography.EcDiffieHellman.Tests
             AssertEqual(parameters, paramSecondExport);
         }
     }
+#endif
 }

@@ -111,6 +111,7 @@ namespace System.Security.Cryptography.EcDiffieHellman.Tests
             }
         }
 
+#if netcoreapp
         private static ECDiffieHellman OpenKnownKey()
         {
             ECParameters ecParams = new ECParameters
@@ -137,6 +138,7 @@ namespace System.Security.Cryptography.EcDiffieHellman.Tests
             ecdh.ImportParameters(ecParams);
             return ecdh;
         }
+#endif
     }
 
     internal static class EcdhTestExtensions

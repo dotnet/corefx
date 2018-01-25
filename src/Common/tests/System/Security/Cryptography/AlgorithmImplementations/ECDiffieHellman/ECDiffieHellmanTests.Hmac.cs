@@ -316,6 +316,7 @@ namespace System.Security.Cryptography.EcDiffieHellman.Tests
             };
         }
 
+#if netcoreapp
         [Theory]
         [MemberData(nameof(HmacDerivationTestCases))]
         public static void HmacDerivation_KnownResults(
@@ -339,5 +340,6 @@ namespace System.Security.Cryptography.EcDiffieHellman.Tests
 
             Assert.Equal(answer, output);
         }
+#endif
     }
 }

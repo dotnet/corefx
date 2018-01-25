@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Text;
-using Test.Cryptography;
 using Xunit;
 
 namespace System.Security.Cryptography.EcDiffieHellman.Tests
@@ -16,6 +14,7 @@ namespace System.Security.Cryptography.EcDiffieHellman.Tests
             return new ECDiffieHellmanCng();
         }
 
+#if netcoreapp
         [Fact]
         public static void ECCurve_ctor()
         {
@@ -37,6 +36,7 @@ namespace System.Security.Cryptography.EcDiffieHellman.Tests
                 ecdh.Exercise();
             }
         }
+#endif
 
         [Fact]
         public static void CngKey_ReusesObject()

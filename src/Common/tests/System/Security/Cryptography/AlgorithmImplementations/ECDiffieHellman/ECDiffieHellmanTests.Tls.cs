@@ -190,6 +190,7 @@ namespace System.Security.Cryptography.EcDiffieHellman.Tests
             };
         }
 
+#if netcoreapp
         [Theory]
         [MemberData(nameof(TlsDerivationTestCases))]
         public static void TlsDerivation_KnownResults(string labelText, string answerHex)
@@ -207,5 +208,6 @@ namespace System.Security.Cryptography.EcDiffieHellman.Tests
 
             Assert.Equal(answerHex, output.ByteArrayToHex());
         }
+#endif
     }
 }
