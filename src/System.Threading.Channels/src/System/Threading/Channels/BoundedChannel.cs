@@ -156,6 +156,8 @@ namespace System.Threading.Channels
             {
                 BoundedChannel<T> parent = _parent;
                 bool completeTask;
+                ReaderInteractor<bool> waitingReaders = parent._waitingReaders;
+
                 lock (parent.SyncObj)
                 {
                     parent.AssertInvariants();
@@ -170,11 +172,14 @@ namespace System.Threading.Channels
                     parent._doneWriting = error ?? ChannelUtilities.s_doneWritingSentinel;
 
                     ChannelUtilities.FailInteractors<WriterInteractor<T>, VoidResult>(parent._blockedWriters, ChannelUtilities.CreateInvalidCompletionException(error));
-                    ChannelUtilities.WakeUpWaiters(ref parent._waitingReaders, result: false, error: error);
                     ChannelUtilities.WakeUpWaiters(ref parent._waitingWriters, result: false, error: error);
+                    parent._waitingReaders = null;
 
                     completeTask = parent._items.IsEmpty;
                 }
+
+                // Avoid waking the readers inside the lock as the readers will be invoked synchronously.
+                ChannelUtilities.WakeUpWaiters(ref waitingReaders, result: false, error: error);
 
                 // If there are no items in the queue, complete the channel's task,
                 // as no more data can possibly arrive at this point.  We do this outside
