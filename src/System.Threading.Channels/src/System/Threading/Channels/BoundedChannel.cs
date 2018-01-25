@@ -156,7 +156,6 @@ namespace System.Threading.Channels
             {
                 BoundedChannel<T> parent = _parent;
                 bool completeTask;
-                Dequeue<WriterInteractor<T>> blockedWriters;
                 ReaderInteractor<bool> waitingReaders;
                 ReaderInteractor<bool> waitingWriters;
 
@@ -172,8 +171,6 @@ namespace System.Threading.Channels
 
                     // Mark that we're done writing.
                     parent._doneWriting = error ?? ChannelUtilities.s_doneWritingSentinel;
-
-                    blockedWriters = parent._blockedWriters;
 
                     waitingReaders = parent._waitingReaders;
                     if (waitingReaders != null)
@@ -200,7 +197,9 @@ namespace System.Threading.Channels
                     ChannelUtilities.Complete(parent._completion, error);
                 }
 
-                ChannelUtilities.FailInteractors<WriterInteractor<T>, VoidResult>(blockedWriters, ChannelUtilities.CreateInvalidCompletionException(error));
+                // The following line is not safe to do it outside https://github.com/dotnet/corefx/issues/26587
+                ChannelUtilities.FailInteractors<WriterInteractor<T>, VoidResult>(parent._blockedWriters, ChannelUtilities.CreateInvalidCompletionException(error));
+
                 // Avoid waking the readers inside the lock in case AllowSynchronousContinuations is specified as the readers will be invoked synchronously.
                 ChannelUtilities.WakeUpWaiters(ref waitingReaders, result: false, error: error);
                 ChannelUtilities.WakeUpWaiters(ref waitingWriters, result: false, error: error);
