@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Security.Cryptography.Tests;
 using Xunit;
 
 namespace System.Security.Cryptography.EcDsa.Tests
@@ -247,7 +248,7 @@ namespace System.Security.Cryptography.EcDsa.Tests
         {
             using (ECDsa ecdsa = ECDsaFactory.Create())
             {
-                ecdsa.ImportParameters(ECDsaTestData.GetNistP256ExplicitTestData());
+                ecdsa.ImportParameters(EccTestData.GetNistP256ExplicitTestData());
                 Verify256(ecdsa, true);
             }
         }

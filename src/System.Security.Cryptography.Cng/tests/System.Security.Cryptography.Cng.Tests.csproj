@@ -39,6 +39,8 @@
       <Link>CommonTest\AlgorithmImplementations\AES\AesFactory.cs</Link>
     </Compile>
     <Compile Include="AesProvider.cs" />
+    <Compile Include="ECDiffieHellmanCngProvider.cs" />
+    <Compile Include="ECDiffieHellmanCngTests.cs" />
     <Compile Include="TripleDESCngProvider.cs" />
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\TripleDES\TripleDESFactory.cs">
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\TripleDES\TripleDESFactory.cs</Link>
@@ -53,6 +55,36 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\EC\CurveDef.cs">
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\EC\CurveDef.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\EC\EccTestBase.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\EC\EccTestBase.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\EC\EccTestData.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\EC\EccTestData.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanFactory.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanFactory.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanTests.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanTests.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanTests.Hash.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanTests.Hash.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanTests.Hmac.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanTests.Hmac.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanTests.ImportExport.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanTests.ImportExport.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanTests.NistValidation.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanTests.NistValidation.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanTests.Tls.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanTests.Tls.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanTests.Xml.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDiffieHellmanTests.Xml.cs</Link>
     </Compile>
     <Compile Include="ECDsaCngProvider.cs" />
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDsa\ECDsaFactory.cs">
@@ -72,9 +104,6 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDsa\ECDsaTests.NistValidation.cs">
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\ECDsa\ECDsaTests.NistValidation.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDsa\ECDsaTestData.cs">
-      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\ECDsa\ECDsaTestData.cs</Link>
     </Compile>
     <Compile Include="RSACngProvider.cs" />
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\RSA\EncryptDecrypt.cs">
