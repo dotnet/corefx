@@ -190,13 +190,6 @@ namespace System.IO.Pipes.Tests
             }
         }
 
-        [Fact]
-        public static void CreateServer_CurrentUserOnly()
-        {
-            // Should not throw.
-            new NamedPipeServerStream(GetUniquePipeName(), PipeDirection.InOut, 2, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly).Dispose();
-        }
-
         [Theory]
         [InlineData(PipeDirection.In)]
         [InlineData(PipeDirection.InOut)]
