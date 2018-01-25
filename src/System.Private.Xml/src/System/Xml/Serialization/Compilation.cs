@@ -194,7 +194,7 @@ namespace System.Xml.Serialization
                 }
                 catch (Exception e)
                 {
-                    if (e is ThreadAbortException || e is StackOverflowException || e is OutOfMemoryException)
+                    if (e is StackOverflowException || e is OutOfMemoryException)
                     {
                         throw;
                     }
