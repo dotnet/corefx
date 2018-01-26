@@ -2,14 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography.EcDiffieHellman.Tests;
-using System.Security.Cryptography.EcDsa.Tests;
 using Test.Cryptography;
 using Xunit;
 
-namespace System.Security.Cryptography.EcDsa.OpenSsl.Tests
+namespace System.Security.Cryptography.EcDiffieHellman.OpenSsl.Tests
 {
     public class EcDiffieHellmanOpenSslTests : ECDiffieHellmanTests
     {
@@ -57,14 +54,6 @@ namespace System.Security.Cryptography.EcDsa.OpenSsl.Tests
                 int keySize = e.KeySize;
                 Assert.Equal(expectedKeySize, keySize);
                 e.Exercise();
-            }
-        }
-
-        internal static bool ECDsa224Available
-        {
-            get
-            {
-                return ECDsaFactory.IsCurveValid(new Oid(ECDSA_P224_OID_VALUE));
             }
         }
 
@@ -166,8 +155,6 @@ namespace System.Security.Cryptography.EcDsa.OpenSsl.Tests
         [Fact]
         public void VerifyDuplicateKey_ValidHandle()
         {
-            byte[] data = ByteUtils.RepeatByte(0x71, 11);
-
             using (var first = new ECDiffieHellmanOpenSsl())
             using (SafeEvpPKeyHandle firstHandle = first.DuplicateKeyHandle())
             using (ECDiffieHellman second = new ECDiffieHellmanOpenSsl(firstHandle))
