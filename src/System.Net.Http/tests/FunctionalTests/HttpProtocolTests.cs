@@ -122,6 +122,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]   // Does not support LF-only
         [Theory]
         [InlineData("\r\n")]
         [InlineData("\n")]
@@ -148,8 +149,13 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [Fact]
-        public async Task GetAsync_ResponseHasCRLineEndings_Throws()
+        [Theory]
+        [InlineData("\r")]
+        [InlineData("\n\r")]
+        [InlineData("\t")]
+        [InlineData(" ")]
+        [InlineData("")]
+        public async Task GetAsync_ResponseHasBadLineEndings_Throws(string lineEnding)
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
@@ -157,7 +163,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
                     Task<List<string>> serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                        $"HTTP/1.1 200 OK\rDate: {DateTimeOffset.UtcNow:R}\rServer: TestServer\rContent-Length: 0\r\r",
+                        $"HTTP/1.1 200 OK{lineEnding}Date: {DateTimeOffset.UtcNow:R}{lineEnding}Server: TestServer{lineEnding}Content-Length: 0{lineEnding}{lineEnding}",
                         new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
 
                     await Assert.ThrowsAsync<HttpRequestException>(() => TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask));
