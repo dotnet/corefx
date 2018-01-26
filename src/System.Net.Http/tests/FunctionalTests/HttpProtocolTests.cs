@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Test.Common;
 using System.Threading;
@@ -121,25 +122,45 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [Fact]
-        public async Task GetAsync_ResponseHasLFLineEndings_Success()
+        [Theory]
+        [InlineData("\r\n")]
+        [InlineData("\n")]
+        public async Task GetAsync_ResponseHasNormalLineEndings_Success(string lineEnding)
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClient client = CreateHttpClient())
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
-                    await TestHelper.WhenAllCompletedOrAnyFailed(
-                        getResponseTask,
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server,
-                            $"HTTP/1.1 200 OK\nDate: {DateTimeOffset.UtcNow:R}\nServer: TestServer\nContent-Length: 0\n\n",
-                            new LoopbackServer.Options { ResponseStreamWrapper = GetStream }));
+                    Task<List<string>> serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                        $"HTTP/1.1 200 OK{lineEnding}Date: {DateTimeOffset.UtcNow:R}{lineEnding}Server: TestServer{lineEnding}Content-Length: 0{lineEnding}{lineEnding}",
+                        new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+
+                    await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
+
                     using (HttpResponseMessage response = await getResponseTask)
                     {
                         Assert.Equal(200, (int)response.StatusCode);
                         Assert.Equal("OK", response.ReasonPhrase);
                         Assert.Equal("TestServer", response.Headers.Server.ToString());
                     }
+                }
+            });
+        }
+
+        [Fact]
+        public async Task GetAsync_ResponseHasCRLineEndings_Throws()
+        {
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
+                    Task<List<string>> serverTask = LoopbackServer.ReadRequestAndSendResponseAsync(server,
+                        $"HTTP/1.1 200 OK\rDate: {DateTimeOffset.UtcNow:R}\rServer: TestServer\rContent-Length: 0\r\r",
+                        new LoopbackServer.Options { ResponseStreamWrapper = GetStream });
+
+                    await Assert.ThrowsAsync<HttpRequestException>(() => TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask));
                 }
             });
         }
