@@ -18,9 +18,226 @@ namespace System
     public static partial class MemoryExtensions
     {
         /// <summary>
+        /// Moves the source characters to the destination with a specified number of characters starting at a specified position removed.
+        /// </summary>
+        /// <param name="source">The source span from which the characters are removed.</param>
+        /// <param name="startIndex">The zero-based position to begin deleting characters.</param>
+        /// <param name="count">The number of characters to delete.</param>
+        /// <param name="destination">The span to copy the leftover characters into.</param>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when the destination Span is too small to contain the source Span with the characters removed
+        /// (i.e. destination.Length &lt; source.Length - count).
+        /// </exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Thrown when either <paramref name="startIndex"/> or <paramref name="count"/> is less than zero or
+        /// when <paramref name="startIndex"/> plus <paramref name="count"/> specify a position outside the source span.
+        /// </exception>
+        public static void Remove(this ReadOnlySpan<char> source, int startIndex, int count, Span<char> destination)
+        {
+            if ((uint)startIndex > (uint)source.Length || (uint)count > (uint)(source.Length - startIndex))
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+            if (destination.Length < source.Length - count)
+                ThrowHelper.ThrowArgumentException_DestinationTooShort();
+
+            // Nothing to remove
+            if (count == 0)
+            {
+                source.CopyTo(destination);
+                return;
+            }
+
+            if (source.Length - count != 0)
+            {
+                if (startIndex == 0)
+                {
+                    source.Slice(count).CopyTo(destination);
+                    return;
+                }
+
+                // destination is after source, reverse the order of copying
+                if (source.Overlaps(destination, out int elementOffset) && elementOffset > 0)
+                {
+                    if (startIndex + count != source.Length)
+                        source.Slice(startIndex + count).CopyTo(destination.Slice(startIndex));
+
+                    // The Slice is necessary since startIndex cannot equal source.Length here.
+                    source.Slice(0, startIndex).CopyTo(destination);
+                }
+                else
+                {   // no overlap or destination is before source
+                    // The Slice is necessary since startIndex cannot equal source.Length here.
+                    source.Slice(0, startIndex).CopyTo(destination);
+
+                    if (startIndex + count != source.Length)
+                        source.Slice(startIndex + count).CopyTo(destination.Slice(startIndex));
+                }
+            }
+            else
+            {   // Remove everything
+                if (source.Length < destination.Length)
+                    destination.Slice(0, source.Length).Clear();
+                else
+                    destination.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Moves the source characters to the destination and right-aligns them by padding with
+        /// spaces on the left, for a specified total length.
+        /// </summary>
+        /// <param name="source">The source span that contains the characters to be padded.</param>
+        /// <param name="totalWidth">The number of characters in the resulting span, 
+        /// equal to the number of original characters plus any additional padding characters.</param>
+        /// <param name="destination">The span that contains the resulting right-aligned and padded characters.</param>
+        /// <remarks>
+        /// If the totalWidth is less than or equal to the length of the source,
+        /// the entire source is copied into the destination without padding.
+        /// </remarks>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when the destination span is too small to contain the source span with the padding
+        /// (i.e. destination.Length &lt; totalWidth or  destination.Length &lt; source.Length).
+        /// </exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Thrown when <paramref name="totalWidth"/> is less than zero.
+        /// </exception>
+        public static void PadLeft(this ReadOnlySpan<char> source, int totalWidth, Span<char> destination)
+        {
+            if (totalWidth < 0)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+            if (destination.Length < totalWidth)
+                ThrowHelper.ThrowArgumentException_DestinationTooShort();
+
+            int count = totalWidth - source.Length;
+            if (count <= 0)
+            {
+                // This will throw if destination.Length < source.Length
+                source.CopyTo(destination);
+            }
+            else
+            {
+                source.CopyTo(destination.Slice(count));
+                for (int i = 0; i < count; i++)
+                    destination[i] = ' ';
+            }
+        }
+
+        /// <summary>
+        /// Moves the source characters to the destination and right-aligns them by padding with 
+        /// a specified Unicode character on the left, for a specified total length.
+        /// </summary>
+        /// <param name="source">The source span that contains the characters to be padded.</param>
+        /// <param name="totalWidth">The number of characters in the resulting span, 
+        /// equal to the number of original characters plus any additional padding characters.</param>
+        /// <param name="destination">The span that contains the resulting right-aligned and padded characters.</param>
+        /// <param name="paddingChar">The Unicode characters used for the padding.</param>
+        /// <remarks>
+        /// If the totalWidth is less than or equal to the length of the source,
+        /// the entire source is copied into the destination without padding.
+        /// </remarks>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when the destination span is too small to contain the source span with the padding
+        /// (i.e. destination.Length &lt; totalWidth or  destination.Length &lt; source.Length).
+        /// </exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Thrown when <paramref name="totalWidth"/> is less than zero.
+        /// </exception>
+        public static void PadLeft(this ReadOnlySpan<char> source, int totalWidth, Span<char> destination, char paddingChar)
+        {
+            if (totalWidth < 0)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+            if (destination.Length < totalWidth)
+                ThrowHelper.ThrowArgumentException_DestinationTooShort();
+
+            int count = totalWidth - source.Length;
+            if (count <= 0)
+            {
+                // This will throw if destination.Length < source.Length
+                source.CopyTo(destination);
+            }
+            else
+            {
+                source.CopyTo(destination.Slice(count));
+                for (int i = 0; i < count; i++)
+                    destination[i] = paddingChar;
+            }
+        }
+
+        /// <summary>
+        /// Moves the source characters to the destination and left-aligns them by padding with
+        /// spaces on the right, for a specified total length.
+        /// </summary>
+        /// <param name="source">The source span that contains the characters to be padded.</param>
+        /// <param name="totalWidth">The number of characters in the resulting span, 
+        /// equal to the number of original characters plus any additional padding characters.</param>
+        /// <param name="destination">The span that contains the resulting left-aligned and padded characters.</param>
+        /// <remarks>
+        /// If the totalWidth is less than or equal to the length of the source,
+        /// the entire source is copied into the destination without padding.
+        /// </remarks>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when the destination span is too small to contain the source span with the padding
+        /// (i.e. destination.Length &lt; totalWidth or  destination.Length &lt; source.Length).
+        /// </exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Thrown when <paramref name="totalWidth"/> is less than zero.
+        /// </exception>
+        public static void PadRight(this ReadOnlySpan<char> source, int totalWidth, Span<char> destination)
+        {
+            if (totalWidth < 0)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+            if (destination.Length < totalWidth)
+                ThrowHelper.ThrowArgumentException_DestinationTooShort();
+
+            // This will throw if destination.Length < source.Length
+            source.CopyTo(destination);
+
+            if (totalWidth > source.Length)
+            {
+                for (int i = 0; i < totalWidth - source.Length; i++)
+                    destination[source.Length + i] = ' ';
+            }
+        }
+
+        /// <summary>
+        /// Moves the source characters to the destination and left-aligns them by padding with 
+        /// a specified Unicode character on the right, for a specified total length.
+        /// </summary>
+        /// <param name="source">The source span that contains the characters to be padded.</param>
+        /// <param name="totalWidth">The number of characters in the resulting span, 
+        /// equal to the number of original characters plus any additional padding characters.</param>
+        /// <param name="destination">The span that contains the resulting left-aligned and padded characters.</param>
+        /// <param name="paddingChar">The Unicode characters used for the padding.</param>
+        /// <remarks>
+        /// If the totalWidth is less than or equal to the length of the source,
+        /// the entire source is copied into the destination without padding.
+        /// </remarks>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when the destination span is too small to contain the source span with the padding
+        /// (i.e. destination.Length &lt; totalWidth or  destination.Length &lt; source.Length).
+        /// </exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Thrown when <paramref name="totalWidth"/> is less than zero.
+        /// </exception>
+        public static void PadRight(this ReadOnlySpan<char> source, int totalWidth, Span<char> destination, char paddingChar)
+        {
+            if (totalWidth < 0)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+            if (destination.Length < totalWidth)
+                ThrowHelper.ThrowArgumentException_DestinationTooShort();
+
+            // This will throw if destination.Length < source.Length
+            source.CopyTo(destination);
+
+            if (totalWidth > source.Length)
+            {
+                for (int i = 0; i < totalWidth - source.Length; i++)
+                    destination[source.Length + i] = paddingChar;
+            }
+        }
+
+        /// <summary>
         /// Removes all leading and trailing white-space characters from the span.
         /// </summary>
-        /// <param name="span">The span</param>
         public static ReadOnlySpan<char> Trim(this ReadOnlySpan<char> span)
         {
             return span.TrimStart().TrimEnd();
@@ -29,7 +246,6 @@ namespace System
         /// <summary>
         /// Removes all leading white-space characters from the span.
         /// </summary>
-        /// <param name="span">The span</param>
         public static ReadOnlySpan<char> TrimStart(this ReadOnlySpan<char> span)
         {
             int start = 0;
@@ -44,7 +260,6 @@ namespace System
         /// <summary>
         /// Removes all trailing white-space characters from the span.
         /// </summary>
-        /// <param name="span">The span</param>
         public static ReadOnlySpan<char> TrimEnd(this ReadOnlySpan<char> span)
         {
             int end = span.Length - 1;
@@ -128,7 +343,8 @@ namespace System
                         goto Next;
                 }
                 break;
-            Next: ;
+            Next:
+                ;
             }
             return span.Slice(start);
         }
@@ -150,7 +366,8 @@ namespace System
                         goto Next;
                 }
                 break;
-            Next: ;
+            Next:
+                ;
             }
             return span.Slice(0, end + 1);
         }

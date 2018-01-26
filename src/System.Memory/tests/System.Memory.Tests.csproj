@@ -96,6 +96,9 @@
     <Compile Include="ReadOnlySpan\NonPortableCast.cs" />
     <Compile Include="ReadOnlySpan\Overflow.cs" />
     <Compile Include="ReadOnlySpan\Overlaps.cs" />
+    <Compile Include="ReadOnlySpan\PadLeft.cs" />
+    <Compile Include="ReadOnlySpan\PadRight.cs" />
+    <Compile Include="ReadOnlySpan\Remove.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.T.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.byte.cs" />
     <Compile Include="ReadOnlySpan\SequenceEqual.char.cs" />
