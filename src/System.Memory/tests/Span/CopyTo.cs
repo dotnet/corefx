@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Xunit;
 
@@ -255,6 +256,33 @@ namespace System.SpanTests
                     if (allocatedSecond)
                         AllocationHelper.ReleaseNative(ref memBlockSecond);
                 }
+            }
+        }
+
+        [Fact]
+        public static void CopyToVaryingSizes()
+        {
+            var rng = new Random();
+            byte[] inputBuffer = new byte[2048];
+            byte[] outputBuffer = new byte[2048];
+
+            // Test all inputs from size 0 .. 2048 (inclusive) to make sure we don't have
+            // gaps in our Memmove logic.
+            for (int i = 0; i <= inputBuffer.Length; i++)
+            {
+                // Arrange
+
+                rng.NextBytes(inputBuffer);
+                Array.Clear(outputBuffer, 0, outputBuffer.Length);
+
+                // Act
+
+                new Span<byte>(inputBuffer, 0, i).CopyTo(outputBuffer);
+
+                // Assert
+
+                Assert.Equal(inputBuffer.Take(i), outputBuffer.Take(i)); // src successfully copied to dst
+                Assert.Equal(0, outputBuffer.Skip(i).Count(b => b != 0)); // no other part of dst was overwritten
             }
         }
     }
