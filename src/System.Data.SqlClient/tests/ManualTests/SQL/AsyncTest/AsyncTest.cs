@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -11,7 +12,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     {
         private const int TaskTimeout = 5000;
 
-        [CheckConnStrSetupFact]
+        //[CheckConnStrSetupFact]
         public static void ExecuteTest()
         {
             SqlCommand com = new SqlCommand("select * from Orders");
@@ -36,7 +37,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             con.Close();
         }
 
-        [CheckConnStrSetupFact]
+        //[CheckConnStrSetupFact]
         public static void FailureTest()
         {
             bool failure = false;
@@ -90,6 +91,100 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
             readerTask.Result.Dispose();
             con.Close();
+        }
+
+
+        [CheckConnStrSetupFact]
+        public static void TestReadAsync()
+        {
+            CompareReadSyncAndReadAsync();
+        }
+
+        private static async void CompareReadSyncAndReadAsync()
+        {
+            const string sql = "SET NOCOUNT ON"
+                            + " SELECT 'a'"
+                            + " DECLARE @t DATETIME = SYSDATETIME()"
+                            + " WHILE DATEDIFF(s, @t, SYSDATETIME()) < 20 BEGIN"
+                            + "   SELECT 2 x INTO #y"
+                            + "   DROP TABLE #y"
+                            + " END"
+                            + " SELECT 'b'";
+            double elapsedAsync = await RunReadAsync(sql);
+            double elapsedSync = RunReadSync(sql);
+            Assert.True(elapsedAsync < (elapsedSync / 2.0d));
+        }
+
+        private static async Task<double> RunReadAsync(string sql)
+        {
+            double maxElapsedTimeMillisecond = 0;
+            using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
+            {
+                await connection.OpenAsync();
+                using (SqlCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = sql;
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        Task<bool> t;
+                        Stopwatch stopwatch = new Stopwatch();
+                        do
+                        {
+                            do
+                            {
+                                stopwatch.Start();
+                                t = reader.ReadAsync();
+                                stopwatch.Stop();
+                                double elased = stopwatch.Elapsed.TotalMilliseconds;
+                                if (maxElapsedTimeMillisecond < elased)
+                                {
+                                    maxElapsedTimeMillisecond = elased;
+                                }
+                            }
+                            while (await t);
+                        }
+                        while (reader.NextResult());
+                    }
+                }
+            }
+
+            return maxElapsedTimeMillisecond;
+        }
+
+        private static double RunReadSync(string sql)
+        {
+            double maxElapsedTimeMillisecond = 0;
+            using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
+            {
+                connection.Open();
+                using (SqlCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = sql;
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        bool result;
+                        Stopwatch stopwatch = new Stopwatch();
+                        do
+                        {
+                            do
+                            {
+                                stopwatch.Start();
+                                result = reader.Read();
+                                stopwatch.Stop();
+                                double elased = stopwatch.Elapsed.TotalMilliseconds;
+                                if (maxElapsedTimeMillisecond < elased)
+                                {
+                                    maxElapsedTimeMillisecond = elased;
+                                }
+                            }
+                            while (result);
+                        }
+                        while (reader.NextResult());
+                    }
+                }
+            }
+
+            return maxElapsedTimeMillisecond;
         }
     }
 }
