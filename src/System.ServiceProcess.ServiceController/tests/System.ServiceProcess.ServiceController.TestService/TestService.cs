@@ -19,7 +19,8 @@ namespace System.ServiceProcess.Tests
     public class TestService : ServiceBase
     {
         private bool _disposed;
-        private Task serverStarted;
+        private Task _waitClientConnect;
+        private NamedPipeServerStream _serverStream;
 
         public TestService(string serviceName)
         {
@@ -34,31 +35,26 @@ namespace System.ServiceProcess.Tests
             this.CanHandleSessionChangeEvent = false;
             this.CanHandlePowerEvent = false;
 
-            this.Server = new NamedPipeServerStream(serviceName);
-            serverStarted = this.Server.WaitForConnectionAsync();
+            this._serverStream = new NamedPipeServerStream(serviceName);
+            _waitClientConnect = this._serverStream.WaitForConnectionAsync();
         }
-
-        private NamedPipeServerStream Server { get; }
 
         protected override void OnContinue()
         {
             base.OnContinue();
-            var task = Task.Run(() => WriteStreamAsync(PipeMessageByteCode.Continue));
-            task.Wait();
+            WriteStreamAsync(PipeMessageByteCode.Continue).Wait();
         }
 
         protected override void OnCustomCommand(int command)
         {
             base.OnCustomCommand(command);
-            var task = Task.Run(() => WriteStreamAsync(PipeMessageByteCode.OnCustomCommand, command));
-            task.Wait();
+            WriteStreamAsync(PipeMessageByteCode.OnCustomCommand, command).Wait();
         }
 
         protected override void OnPause()
         {
             base.OnPause();
-            var task = Task.Run(() => WriteStreamAsync(PipeMessageByteCode.Pause));
-            task.Wait();
+            WriteStreamAsync(PipeMessageByteCode.Pause).Wait();
         }
 
         protected override void OnSessionChange(SessionChangeDescription changeDescription)
@@ -84,37 +80,36 @@ namespace System.ServiceProcess.Tests
                 Debug.Assert(args[1] == "a");
                 Debug.Assert(args[2] == "b");
                 Debug.Assert(args[3] == "c");
-                var task = Task.Run(() => WriteStreamAsync(PipeMessageByteCode.Start));
-                task.Wait();
+                WriteStreamAsync(PipeMessageByteCode.Start).Wait();
             }
         }
 
         protected override void OnStop()
         {
             base.OnStop();
-            var task = Task.Run(() => WriteStreamAsync(PipeMessageByteCode.Stop));
-            task.Wait();
+            WriteStreamAsync(PipeMessageByteCode.Stop).Wait();
         }
 
         private async Task WriteStreamAsync(PipeMessageByteCode code, int command = 0)
         {
+            const int writeTimeout = 60000;
             Task writeCompleted;
-            if (serverStarted.IsCompleted)
+            if (_waitClientConnect.IsCompleted)
             {
                 if (code == PipeMessageByteCode.OnCustomCommand)
                 {
-                    writeCompleted = Server.WriteAsync(new byte[] { (byte)command }, 0, 1);
-                    await writeCompleted.TimeoutAfter(60000);
+                    writeCompleted = _serverStream.WriteAsync(new byte[] { (byte)command }, 0, 1);
+                    await writeCompleted.TimeoutAfter(writeTimeout).ConfigureAwait(false);
                 }
                 else
                 {
-                    writeCompleted = Server.WriteAsync(new byte[] { (byte)code }, 0, 1);
-                    await writeCompleted.TimeoutAfter(60000);
+                    writeCompleted = _serverStream.WriteAsync(new byte[] { (byte)code }, 0, 1);
+                    await writeCompleted.TimeoutAfter(writeTimeout).ConfigureAwait(false);
                 }
             }
             else
             {
-                throw new TimeoutException($"Connection timed out after 30 seconds");
+                throw new TimeoutException($"Client didn't connect to the pipe after 30 seconds");
             }
         }
 
@@ -122,7 +117,7 @@ namespace System.ServiceProcess.Tests
         {
             if (!_disposed)
             {
-                Server.Dispose();
+                _serverStream.Dispose();
                 _disposed = true;
                 base.Dispose();
             }

@@ -88,12 +88,7 @@ namespace System.ServiceProcess.Tests
             return received[0];
         }
 
-        public byte GetBytes()
-        {
-            var task = Task.Run(() => ReadPipeAsync());
-            task.Wait();
-            return task.Result;
-        }
+        public byte GetByte() => ReadPipeAsync().Result;
 
         private void CreateTestServices()
         {
