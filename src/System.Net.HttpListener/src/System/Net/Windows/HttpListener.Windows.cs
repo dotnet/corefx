@@ -1335,11 +1335,11 @@ namespace System.Net
         
         private static void FreeContext(ref HttpListenerContext httpContext, RequestContextBase memoryBlob)
         {
-            if (httpContext != null)
+            HttpListenerContext context = Interlocked.Exchange(ref httpContext, null);
+            if (context != null)
             {
-                httpContext.Request.DetachBlob(memoryBlob);
-                httpContext.Close();
-                httpContext = null;
+                context.Request.DetachBlob(memoryBlob);
+                context.Close();
             }
         }
 
