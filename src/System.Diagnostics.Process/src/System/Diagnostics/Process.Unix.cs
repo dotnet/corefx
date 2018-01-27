@@ -612,7 +612,8 @@ namespace System.Diagnostics
 
             (uint? userId, uint? groupId) = GetUserAndGroupIds(startInfo.UserName);
 
-            if (userId == null || groupId == null)
+            Debug.Assert(userId.HasValue == groupId.HasValue, "userId and groupId both need to have values, or both need to be null.");
+            if (!userId.HasValue)
             {
                 throw new Win32Exception(SR.Format(SR.UserDoesNotExist, startInfo.UserName));
             }
@@ -622,9 +623,14 @@ namespace System.Diagnostics
 
         private unsafe static (uint? userId, uint? groupId) GetUserAndGroupIds(string userName)
         {
-            // First try with a buffer that should suffice for 99% of cases.
             Interop.Sys.Passwd? passwd;
+#if DEBUG
+            // Use an artificially small buffer in DEBUG to test the fallback path
+            const int BufLen = 2;
+#else
+            // First try with a buffer that should suffice for 99% of cases.
             const int BufLen = 1024;
+#endif
             byte* stackBuf = stackalloc byte[BufLen];
             if (TryGetPasswd(userName, stackBuf, BufLen, out passwd))
             {
@@ -688,7 +694,7 @@ namespace System.Diagnostics
             }
 
             // Otherwise, fail.
-            throw new IOException(errorInfo.GetErrorMessage(), errorInfo.RawErrno);
+            throw new Win32Exception(errorInfo.RawErrno, errorInfo.GetErrorMessage());
         }
 
         public IntPtr MainWindowHandle => IntPtr.Zero;
