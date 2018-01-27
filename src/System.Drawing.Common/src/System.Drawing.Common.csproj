@@ -9,7 +9,7 @@
     <!-- TODO: RE-ENABLE THIS -->
     <EnablePInvokeAnalyzer>false</EnablePInvokeAnalyzer>
     <WarningsNotAsErrors>CS0618</WarningsNotAsErrors>
-    <DefineConstants Condition="'$(TargetsWindows)' == 'true'">$(DefineConstants);FEATURE_WINDOWS_SYSTEM_COLORS</DefineConstants>
+    <DefineConstants Condition="'$(TargetsWindows)' == 'true'">$(DefineConstants);FEATURE_WINDOWS_SYSTEM_COLORS;NETCORE</DefineConstants>
     <DefineConstants Condition="'$(TargetsUnix)' == 'true'">$(DefineConstants);CORECLR;NETCORE</DefineConstants>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard'">SR.PlatformNotSupported_Drawing</GeneratePlatformNotSupportedAssemblyMessage>
@@ -35,11 +35,12 @@
     <Compile Include="System\Drawing\CharacterRange.cs" />
     <Compile Include="System\Drawing\ColorTranslator.cs" />
     <Compile Include="System\Drawing\ContentAlignment.cs" />
-    <Compile Include="System\Drawing\IDeviceContext.cs" />
-    <Compile Include="System\Drawing\Image.cs" />
+    <Compile Include="System\Drawing\Font.cs" />
     <Compile Include="System\Drawing\GdiplusNative.cs" />
     <Compile Include="System\Drawing\Graphics.cs" />
     <Compile Include="System\Drawing\GraphicsUnit.cs" />
+    <Compile Include="System\Drawing\IDeviceContext.cs" />
+    <Compile Include="System\Drawing\Image.cs" />
     <Compile Include="System\Drawing\ImageType.cs" />
     <Compile Include="System\Drawing\Pen.cs" />
     <Compile Include="System\Drawing\Pens.cs" />
