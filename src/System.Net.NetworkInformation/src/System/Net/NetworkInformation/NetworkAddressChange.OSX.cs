@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Microsoft.Win32.SafeHandles;
 using System.Diagnostics;
 using System.Threading;
@@ -16,13 +17,21 @@ namespace System.Net.NetworkInformation
     // the documentation for CFRunLoop for more information on the components involved.
     public class NetworkChange
     {
-        private static object s_lockObj = new object();
-
         // The list of current address-changed subscribers.
-        private static NetworkAddressChangedEventHandler s_addressChangedSubscribers;
+        private static readonly Dictionary<NetworkAddressChangedEventHandler, ExecutionContext> s_addressChangedSubscribers =
+            new Dictionary<NetworkAddressChangedEventHandler, ExecutionContext>();
 
         // The list of current availability-changed subscribers.
-        private static NetworkAvailabilityChangedEventHandler s_availabilityChangedSubscribers;
+        private static readonly Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> s_availabilityChangedSubscribers =
+            new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>();
+
+        private static readonly NetworkAvailabilityEventArgs s_availableEventArgs = new NetworkAvailabilityEventArgs(isAvailable: true);
+        private static readonly NetworkAvailabilityEventArgs s_notAvailableEventArgs = new NetworkAvailabilityEventArgs(isAvailable: false);
+        private static readonly ContextCallback s_runHandlerAvailable = new ContextCallback(RunAvailabilityHandlerAvailable);
+        private static readonly ContextCallback s_runHandlerNotAvailable = new ContextCallback(RunAvailabilityHandlerNotAvailable);
+        private static readonly ContextCallback s_runAddressChangedHandler = new ContextCallback(RunAddressChangedHandler);
+
+        private static object s_lockObj = new object();
 
         // The dynamic store. We listen to changes in the IPv4 and IPv6 address keys.
         // When those keys change, our callback below is called (OnAddressChanged).
@@ -56,22 +65,22 @@ namespace System.Net.NetworkInformation
             {
                 lock (s_lockObj)
                 {
-                    if (s_addressChangedSubscribers == null && s_availabilityChangedSubscribers == null)
+                    if (s_addressChangedSubscribers.Count == 0 && s_availabilityChangedSubscribers.Count == 0)
                     {
                         CreateAndStartRunLoop();
                     }
 
-                    s_addressChangedSubscribers += value;
+                    s_addressChangedSubscribers.TryAdd(value, ExecutionContext.Capture());
                 }
             }
             remove
             {
                 lock (s_lockObj)
                 {
-                    bool hadAddressChangedSubscribers = s_addressChangedSubscribers != null;
-                    s_addressChangedSubscribers -= value;
+                    bool hadAddressChangedSubscribers = s_addressChangedSubscribers.Count != 0;
+                    s_addressChangedSubscribers.Remove(value);
 
-                    if (hadAddressChangedSubscribers && s_addressChangedSubscribers == null && s_availabilityChangedSubscribers == null)
+                    if (hadAddressChangedSubscribers && s_addressChangedSubscribers.Count == 0 && s_availabilityChangedSubscribers.Count == 0)
                     {
                         StopRunLoop();
                     }
@@ -85,7 +94,7 @@ namespace System.Net.NetworkInformation
             {
                 lock (s_lockObj)
                 {
-                    if (s_addressChangedSubscribers == null && s_availabilityChangedSubscribers == null)
+                    if (s_addressChangedSubscribers.Count == 0 && s_availabilityChangedSubscribers.Count == 0)
                     {
                         CreateAndStartRunLoop();
                     }
@@ -94,17 +103,17 @@ namespace System.Net.NetworkInformation
                         Debug.Assert(s_runLoop != IntPtr.Zero);
                     }
 
-                    s_availabilityChangedSubscribers += value;
+                    s_availabilityChangedSubscribers.TryAdd(value, ExecutionContext.Capture());
                 }
             }
             remove
             {
                 lock (s_lockObj)
                 {
-                    bool hadSubscribers = s_addressChangedSubscribers != null || s_availabilityChangedSubscribers != null;
-                    s_availabilityChangedSubscribers -= value;
+                    bool hadSubscribers = s_addressChangedSubscribers.Count != 0 || s_availabilityChangedSubscribers.Count != 0;
+                    s_availabilityChangedSubscribers.Remove(value);
 
-                    if (hadSubscribers && s_addressChangedSubscribers == null && s_availabilityChangedSubscribers == null)
+                    if (hadSubscribers && s_addressChangedSubscribers.Count == 0 && s_availabilityChangedSubscribers.Count == 0)
                     {
                         StopRunLoop();
                     }
@@ -221,8 +230,51 @@ namespace System.Net.NetworkInformation
 
         private static void OnAddressChanged(IntPtr store, IntPtr changedKeys, IntPtr info)
         {
-            s_addressChangedSubscribers?.Invoke(null, EventArgs.Empty);
-            s_availabilityChangedSubscribers?.Invoke(null, new NetworkAvailabilityEventArgs(NetworkInterface.GetIsNetworkAvailable()));
+            foreach (var subscriber in s_addressChangedSubscribers)
+            {
+                NetworkAddressChangedEventHandler handler = subscriber.Key;
+                ExecutionContext ec = subscriber.Value;
+
+                if (ec == null) // Flow supressed
+                {
+                    handler(null, EventArgs.Empty);
+                }
+                else
+                {
+                    ExecutionContext.Run(ec, s_runAddressChangedHandler, handler);
+                }
+            }
+
+            var isAvailable = NetworkInterface.GetIsNetworkAvailable();
+            foreach (var subscriber in s_availabilityChangedSubscribers)
+            {
+                NetworkAvailabilityChangedEventHandler handler = subscriber.Key;
+                ExecutionContext ec = subscriber.Value;
+
+                if (ec == null) // Flow supressed
+                {
+                    handler(null, isAvailable ? s_availableEventArgs : s_notAvailableEventArgs);
+                }
+                else
+                {
+                    ExecutionContext.Run(ec, isAvailable ? s_runHandlerAvailable : s_runHandlerNotAvailable, handler);
+                }
+            }
+        }
+
+        private static void RunAddressChangedHandler(object state)
+        {
+            ((NetworkAddressChangedEventHandler)state)(null, EventArgs.Empty);
+        }
+
+        private static void RunAvailabilityHandlerAvailable(object state)
+        {
+            ((NetworkAvailabilityChangedEventHandler)state)(null, s_availableEventArgs);
+        }
+
+        private static void RunAvailabilityHandlerNotAvailable(object state)
+        {
+            ((NetworkAvailabilityChangedEventHandler)state)(null, s_notAvailableEventArgs);
         }
     }
 }
