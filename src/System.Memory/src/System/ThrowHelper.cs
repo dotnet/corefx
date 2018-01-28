@@ -72,6 +72,11 @@ namespace System
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateArgumentException_OverlapAlignmentMismatch() { return new ArgumentException(SR.Argument_OverlapAlignmentMismatch); }
 
+        // TODO
+        internal static void ThrowArgumentException_ItemsMustHaveSameLength() { throw CreateArgumentException_ItemsMustHaveSameLength(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateArgumentException_ItemsMustHaveSameLength() { return new ArgumentException("Items must have same length as keys"); }//SR.Argument_ItemsMustHaveSameLength); }
+
         //
         // Enable use of ThrowHelper from TryFormat() routines without introducing dozens of non-code-coveraged "bytesWritten = 0; return false" boilerplate.
         //

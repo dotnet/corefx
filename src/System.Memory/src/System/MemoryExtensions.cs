@@ -9,6 +9,14 @@ using System.Runtime.CompilerServices;
 using Internal.Runtime.CompilerServices;
 #endif
 
+using SHC = System.SpanSortHelpersCommon;
+// Consolidated code
+//using SHK = System.SpanSortHelpersKeysAndOrValues;
+//using SHKV = System.SpanSortHelpersKeysAndOrValues;
+// Specialized for either only keys or keys and values and for comparable or not
+using SHK = System.SpanSortHelpersKeys;
+using SHKV = System.SpanSortHelpersKeysValues;
+
 namespace System
 {
     /// <summary>
@@ -933,13 +941,11 @@ namespace System
         /// <exception cref = "InvalidOperationException"> 
         /// One or more elements do not implement the <see cref="IComparable" /> interface.
         /// </exception>
+        // TODO: Revise exception list, if we do not try/catch
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort<T>(this Span<T> span)
         {
-            // TODO: Can we "statically" check if T is IComparable<T>
-            //       and force C# to then call implementation that
-            //       uses this instead of default comparer
-            SpanHelpers.Sort(span);
+            SHK.Sort(span);
         }
 
         /// <summary>
@@ -950,7 +956,7 @@ namespace System
         public static void Sort<T, TComparer>(this Span<T> span, TComparer comparer)
            where TComparer : IComparer<T>
         {
-            SpanHelpers.Sort(span, comparer);
+            SHK.Sort(span, comparer);
         }
 
         /// <summary>
@@ -963,7 +969,7 @@ namespace System
             if (comparison == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.comparison);
 
-            SpanHelpers.Sort(span, new SpanHelpers.ComparisonComparer<T>(comparison));
+            SHK.Sort(span, new SHC.ComparisonComparer<T>(comparison));
         }
 
         /// <summary>
@@ -977,7 +983,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Sort<TKey, TValue>(this Span<TKey> keys, Span<TValue> items)
         {
-
+            SHKV.Sort(keys, items);
         }
 
         /// <summary>
@@ -992,7 +998,7 @@ namespace System
            Span<TValue> items, TComparer comparer)
            where TComparer : IComparer<TKey>
         {
-
+            SHKV.Sort(keys, items, comparer);
         }
 
         /// <summary>
@@ -1006,7 +1012,7 @@ namespace System
         public static void Sort<TKey, TValue>(this Span<TKey> keys,
            Span<TValue> items, Comparison<TKey> comparison)
         {
-            
+            SHKV.Sort(keys, items, new SHC.ComparisonComparer<TKey>(comparison));
         }
     }
 }

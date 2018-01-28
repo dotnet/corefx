@@ -22,10 +22,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\MemoryExtensions.cs" />
-    <Compile Include="System\SpanHelpers.Sort.cs" />
     <Compile Include="System\SpanHelpers.BinarySearch.cs" />
     <Compile Include="System\SpanHelpers.T.cs" />
     <Compile Include="System\SpanHelpers.byte.cs" />
+    <Compile Include="System\SpanSortHelpers.Common.cs" />
+    <Compile Include="System\SpanSortHelpers.Keys.cs" />
+    <Compile Include="System\SpanSortHelpers.Keys.IComparable.cs" />
+    <Compile Include="System\SpanSortHelpers.Keys.Specialized.cs" />
+    <Compile Include="System\SpanSortHelpers.Keys.TComparer.cs" />
+    <Compile Include="System\SpanSortHelpers.KeysValues.cs" />
+    <Compile Include="System\SpanSortHelpers.KeysValues.IComparable.cs" />
+    <Compile Include="System\SpanSortHelpers.KeysValues.Specialized.cs" />
+    <Compile Include="System\SpanSortHelpers.KeysValues.TComparer.cs" />
     <Compile Include="System\ThrowHelper.cs" />
     <Compile Include="System\Buffers\OperationStatus.cs" />
     <Compile Include="System\Buffers\Binary\Reader.cs" />
