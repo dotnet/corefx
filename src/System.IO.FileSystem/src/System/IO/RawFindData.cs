@@ -7,20 +7,22 @@ namespace System.IO
     /// <summary>
     /// Used for processing and filtering find results.
     /// </summary>
-    internal unsafe ref struct RawFindData
+    internal unsafe ref struct RawFindData<TState>
     {
-        internal RawFindData(Interop.NtDll.FILE_FULL_DIR_INFORMATION* info, string directory, string originalDirectory, string originalUserDirectory)
+        internal RawFindData(Interop.NtDll.FILE_FULL_DIR_INFORMATION* info, string directory, string originalDirectory, string originalUserDirectory, TState state)
         {
             _info = info;
             Directory = directory;
             OriginalDirectory = originalDirectory;
             OriginalUserDirectory = originalUserDirectory;
+            State = state;
         }
 
         internal unsafe Interop.NtDll.FILE_FULL_DIR_INFORMATION* _info;
         public string Directory { get; private set; }
         public string OriginalDirectory { get; private set; }
         public string OriginalUserDirectory { get; private set; }
+        public TState State { get; private set; }
 
         public ReadOnlySpan<char> FileName => _info->FileName;
         public FileAttributes Attributes => _info->FileAttributes;

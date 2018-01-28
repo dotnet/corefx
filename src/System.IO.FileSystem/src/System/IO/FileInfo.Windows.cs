@@ -8,11 +8,12 @@ namespace System.IO
 {
     partial class FileInfo
     {
-        internal unsafe FileInfo(string fullPath, string fileName, ref RawFindData findData)
-            : this(fullPath, fileName: fileName, isNormalized: true)
+        internal static unsafe FileInfo Create<TState>(string fullPath, string fileName, ref RawFindData<TState> findData)
         {
             Debug.Assert(fileName.Equals(Path.GetFileName(fullPath)));
-            Init(findData._info);
+            FileInfo info = new FileInfo(fullPath, fileName: fileName, isNormalized: true);
+            info.Init(findData._info);
+            return info;
         }
     }
 }

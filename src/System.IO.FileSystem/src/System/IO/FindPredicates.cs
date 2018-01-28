@@ -6,9 +6,9 @@ namespace System.IO
 {
     internal static partial class FindPredicates
     {
-        internal static bool NotDotOrDotDot(ref RawFindData findData) => !PathHelpers.IsDotOrDotDot(findData.FileName);
+        internal static bool NotDotOrDotDot<TState>(ref RawFindData<TState> findData) => !PathHelpers.IsDotOrDotDot(findData.FileName);
 
-        internal static bool IsDirectory(ref RawFindData findData)
+        internal static bool IsDirectory<TState>(ref RawFindData<TState> findData)
         {
             FileAttributes attributes = findData.Attributes;
             return attributes != (FileAttributes)(-1)
