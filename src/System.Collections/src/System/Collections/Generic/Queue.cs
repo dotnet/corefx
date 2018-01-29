@@ -237,7 +237,7 @@ namespace System.Collections.Generic
             int head = _head;
             T[] array = _array;
             
-            if (_size == 0 || (uint)head >= (uint)array.Length)
+            if (_size == 0)
             {
                 ThrowForEmptyQueue();
             }
@@ -258,7 +258,7 @@ namespace System.Collections.Generic
             int head = _head;
             T[] array = _array;
 
-            if (_size == 0 || (uint)head >= (uint)array.Length)
+            if (_size == 0)
             {
             	result = default;
             	return false;
