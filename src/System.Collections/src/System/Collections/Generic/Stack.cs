@@ -283,7 +283,7 @@ namespace System.Collections.Generic
             {
                 array[size] = item;
                 _version++;
-                _size++;
+                _size = size + 1;
             }
             else
             {
