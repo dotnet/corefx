@@ -417,7 +417,7 @@ namespace System.Diagnostics.Tracing
                         restoreFlow = true;
                     }
 
-                    _pollingTimer = new Timer(OnTimer, null, _pollingIntervalInMilliseconds, _pollingIntervalInMilliseconds);
+                    _pollingTimer = new Timer(s => ((EventCounterGroup)s).OnTimer(null), this, _pollingIntervalInMilliseconds, _pollingIntervalInMilliseconds);
                 }
                 finally
                 {
