@@ -109,7 +109,7 @@ namespace System.ServiceProcess.Tests
             }
             else
             {
-                throw new TimeoutException($"Client didn't connect to the pipe after 30 seconds");
+                throw new TimeoutException($"Client didn't connect to the pipe");
             }
         }
 
