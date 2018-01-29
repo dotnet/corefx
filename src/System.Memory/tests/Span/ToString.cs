@@ -13,14 +13,14 @@ namespace System.SpanTests
         {
             int[] a = { 91, 92, 93 };
             Span<int> span = new Span<int>(a);
-            Assert.Equal("System.String[3]", span.ToString());
+            Assert.Equal("System.Span<int>[3]", span.ToString());
         }
 
         [Fact]
         public static void ToString_Empty()
         {
             Span<int> span = new Span<int>();
-            Assert.Equal("System.String[0]", span.ToString());
+            Assert.Equal("System.Span<int>[0]", span.ToString());
         }
     }
 }

@@ -106,8 +106,8 @@ namespace System
             _byteOffset = byteOffset;
         }
 
-        //Debugger Display = {T[length]}
-        private string DebuggerDisplay => string.Format("{{{0}[{1}]}}", typeof(T).Name, _length);
+        //Debugger Display = System.Span<T>[length]
+        private string DebuggerDisplay => string.Format("System.Span<{0}>[{1}]", typeof(T).Name, _length);
 
         /// <summary>
         /// The number of items in the span.
@@ -332,7 +332,7 @@ namespace System
         /// Returns a <see cref="String"/> with the name of the type and the number of elements
         /// </summary>
         /// <returns>A <see cref="String"/> with the name of the type and the number of elements</returns>
-        public override string ToString() => $"System.Span[{Length}]";
+        public override string ToString() => string.Format("System.Span<{0}>[{1}]", typeof(T).Name, Length);
 
         /// <summary>
         /// Defines an implicit conversion of an array to a <see cref="Span{T}"/>

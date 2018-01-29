@@ -13,14 +13,14 @@ namespace System.SpanTests
         {
             int[] a = { 91, 92, 93 };
             ReadOnlySpan<int> span = new ReadOnlySpan<int>(a);
-            Assert.Equal("System.String[3]", span.ToString());
+            Assert.Equal("System.ReadOnlySpan<int>[3]", span.ToString());
         }
 
         [Fact]
         public static void ToString_Empty()
         {
             ReadOnlySpan<int> span = new ReadOnlySpan<int>();
-            Assert.Equal("System.String[0]", span.ToString());
+            Assert.Equal("System.ReadOnlySpan<int>[0]", span.ToString());
         }
     }
 }
