@@ -6,13 +6,15 @@
     <RootNamespace>System.Numerics</RootNamespace>
     <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='netfx' OR '$(TargetGroup)'=='net46'">true</IsPartialFacadeAssembly>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net46' Or '$(TargetGroup)' == 'netcoreapp' Or '$(TargetGroup)' == 'uap'">true</IsPartialFacadeAssembly>
     <PackageTargetFramework Condition="'$(TargetGroup)' == 'netstandard1.0'">netstandard1.0;portable-net45+win8+wp8+wpa81</PackageTargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
@@ -22,7 +24,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <!-- Shared -->
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net46' OR $(TargetGroup.StartsWith('netstandard'))">
     <Compile Include="..\..\Common\src\System\Numerics\Hashing\HashHelpers.cs">
       <Link>Common\System\Numerics\Hashing\HashHelpers.cs</Link>
     </Compile>
@@ -45,29 +47,21 @@
     <Compile Include="System\Numerics\Vector_Operations.cs" />
   </ItemGroup>
   <!-- Carry a copy of MathF where not available -->
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true' OR $(TargetGroup.StartsWith('netstandard'))">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net46' OR $(TargetGroup.StartsWith('netstandard'))">
     <Compile Include="..\..\Common\src\System\MathF.netstandard.cs">
       <Link>System\MathF.netstandard.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Portable version only -->
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
-    <Compile Include="System\Numerics\Matrix3x2.cs" />
-    <Compile Include="System\Numerics\Matrix4x4.cs" />
-    <Compile Include="System\Numerics\Plane.cs" />
-    <Compile Include="System\Numerics\Quaternion.cs" />
-    <Compile Include="System\Numerics\Vector2.cs" />
-    <Compile Include="System\Numerics\Vector2_Intrinsics.cs" />
-    <Compile Include="System\Numerics\Vector3.cs" />
-    <Compile Include="System\Numerics\Vector3_Intrinsics.cs" />
-    <Compile Include="System\Numerics\Vector4.cs" />
-    <Compile Include="System\Numerics\Vector4_Intrinsics.cs" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' Or '$(TargetGroup)' == 'uap'">
+    <ReferenceFromRuntime Include="System.Private.CoreLib" />
+    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net46'">
     <Reference Include="mscorlib" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'net46' OR $(TargetGroup.StartsWith('netstandard'))">
     <None Include="System\Numerics\GenerationConfig.ttinclude" />
     <Content Include="System\Numerics\ConstantHelper.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
