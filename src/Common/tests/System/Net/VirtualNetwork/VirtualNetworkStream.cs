@@ -73,6 +73,21 @@ namespace System.Net.Test.Common
             _isFlushed = true;
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    _network.Dispose(_isServer);
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
+        }
+
         public override Task FlushAsync(CancellationToken cancellationToken)
         {
             if (_flushTcs != null)

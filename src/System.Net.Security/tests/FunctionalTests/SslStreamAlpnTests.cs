@@ -185,6 +185,70 @@ namespace System.Net.Security.Tests
             }
         }
 
+        [Fact]
+        public async Task SslStream_StreamToStream_ClientCancellation_Throws()
+        {
+            VirtualNetwork network = new VirtualNetwork();
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
+            using (var client = new SslStream(clientStream, leaveInnerStreamOpen: false))
+            using (var server = new SslStream(serverStream, leaveInnerStreamOpen: false))
+            using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
+            {
+                SslClientAuthenticationOptions clientOptions = new SslClientAuthenticationOptions();
+                clientOptions.RemoteCertificateValidationCallback = AllowAnyServerCertificate;
+                clientOptions.TargetHost = certificate.GetNameInfo(X509NameType.SimpleName, false);
+
+                SslServerAuthenticationOptions serverOptions = new SslServerAuthenticationOptions();
+                serverOptions.ServerCertificate = certificate;
+
+                CancellationTokenSource cts = new CancellationTokenSource();
+                cts.Cancel();
+
+                Task clientTask = Assert.ThrowsAnyAsync<OperationCanceledException>(() => client.AuthenticateAsClientAsync(clientOptions, cts.Token));
+                Task serverTask = Assert.ThrowsAsync<IOException>(() => server.AuthenticateAsServerAsync(serverOptions, CancellationToken.None));
+
+                // Await for the client task to be cancelled first, and dispose the innerstream.
+                await clientTask;
+                clientStream.Dispose();
+
+                // Await for the server task.
+                await serverTask;
+            }
+        }
+
+        [Fact]
+        public async Task SslStream_StreamToStream_ServerCancellation_Throws()
+        {
+            VirtualNetwork network = new VirtualNetwork();
+            using (var clientStream = new VirtualNetworkStream(network, isServer: false))
+            using (var serverStream = new VirtualNetworkStream(network, isServer: true))
+            using (var client = new SslStream(clientStream, leaveInnerStreamOpen: false))
+            using (var server = new SslStream(serverStream, leaveInnerStreamOpen: false))
+            using (X509Certificate2 certificate = Configuration.Certificates.GetServerCertificate())
+            {
+                SslClientAuthenticationOptions clientOptions = new SslClientAuthenticationOptions();
+                clientOptions.RemoteCertificateValidationCallback = AllowAnyServerCertificate;
+                clientOptions.TargetHost = certificate.GetNameInfo(X509NameType.SimpleName, false);
+
+                SslServerAuthenticationOptions serverOptions = new SslServerAuthenticationOptions();
+                serverOptions.ServerCertificate = certificate;
+
+                CancellationTokenSource cts = new CancellationTokenSource();
+                cts.Cancel();
+
+                Task clientTask = Assert.ThrowsAsync<IOException>(() => client.AuthenticateAsClientAsync(clientOptions, CancellationToken.None));
+                Task serverTask = Assert.ThrowsAnyAsync<OperationCanceledException>(() => server.AuthenticateAsServerAsync(serverOptions, cts.Token));
+
+                // Await for the server task to be cancelled first, and dispose the innerstream.
+                await serverTask;
+                serverStream.Dispose();
+
+                // Await for the client task.
+                await clientTask;
+            }
+        }
+
         internal static IEnumerable<object[]> Alpn_TestData()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
