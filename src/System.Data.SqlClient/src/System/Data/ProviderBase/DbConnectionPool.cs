@@ -665,7 +665,7 @@ namespace System.Data.ProviderBase
         }
 
         private Timer CreateCleanupTimer() =>
-            ADP.CreateGlobalTimer(
+            ADP.UnsafeCreateTimer(
                 new TimerCallback(CleanupCallback),
                 null,
                 _cleanupWait,

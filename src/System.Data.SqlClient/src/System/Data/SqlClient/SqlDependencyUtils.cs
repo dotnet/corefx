@@ -80,7 +80,7 @@ namespace System.Data.SqlClient
             _notificationIdToDependenciesHash = new Dictionary<string, DependencyList>();
             _commandHashToNotificationId = new Dictionary<string, string>();
 
-            _timeoutTimer = ADP.CreateGlobalTimer(
+            _timeoutTimer = ADP.UnsafeCreateTimer(
                 new TimerCallback(TimeoutTimerCallback),
                 null,
                 Timeout.Infinite,

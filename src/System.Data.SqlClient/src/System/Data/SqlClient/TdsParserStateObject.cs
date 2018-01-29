@@ -2295,7 +2295,7 @@ namespace System.Data.SqlClient
 
                 if (_networkPacketTimeout == null)
                 {
-                    _networkPacketTimeout = ADP.CreateGlobalTimer(
+                    _networkPacketTimeout = ADP.UnsafeCreateTimer(
                         new TimerCallback(OnTimeout),
                         null,
                         Timeout.Infinite,

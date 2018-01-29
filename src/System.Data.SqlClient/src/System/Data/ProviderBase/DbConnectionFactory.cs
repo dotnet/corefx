@@ -124,7 +124,7 @@ namespace System.Data.ProviderBase
         }
 
         private Timer CreatePruningTimer() => 
-            ADP.CreateGlobalTimer(
+            ADP.UnsafeCreateTimer(
                 new TimerCallback(PruneConnectionPoolGroups),
                 null,
                 PruningDueTime,

@@ -9,12 +9,10 @@ namespace System.Data.Common
     internal static partial class ADP
     {
 
-        internal static Timer CreateGlobalTimer(TimerCallback callback, object state, int dueTime, int period)
+        internal static Timer UnsafeCreateTimer(TimerCallback callback, object state, int dueTime, int period)
         {
             // Don't capture the current ExecutionContext and its AsyncLocals onto 
             // a global timer causing them to live forever
-
-            Timer timer;
             bool restoreFlow = false;
             try
             {
@@ -24,7 +22,7 @@ namespace System.Data.Common
                     restoreFlow = true;
                 }
 
-                timer = new Timer(callback, state, dueTime, period);
+                return new Timer(callback, state, dueTime, period);
             }
             finally
             {
@@ -32,8 +30,6 @@ namespace System.Data.Common
                 if (restoreFlow)
                     ExecutionContext.RestoreFlow();
             }
-
-            return timer;
         }
     }
 }

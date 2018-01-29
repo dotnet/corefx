@@ -613,8 +613,11 @@ internal class SqlDependencyProcessDispatcher : MarshalByRefObject
                         AsynchronouslyQueryServiceBrokerQueue();
                         _errorState = false;
                         Timer retryTimer = _retryTimer;
-                        _retryTimer = null;
-                        retryTimer?.Dispose();
+                        if (retryTimer != null)
+                        {
+                            _retryTimer = null;
+                            retryTimer.Dispose();
+                        }
                     }
                 }
 
