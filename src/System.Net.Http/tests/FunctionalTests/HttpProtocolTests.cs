@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public class HttpProtocolTests : HttpClientTest
+    public class HttpProtocolTests : HttpClientTestBase
     {
         protected virtual Stream GetStream(Stream s) => s;
 
@@ -27,17 +27,42 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("HTTP/1.1 500 Internal Server Error", 500, "Internal Server Error")]
         [InlineData("HTTP/1.1 555 we just don't like you", 555, "we just don't like you")]
         [InlineData("HTTP/1.1 600 still valid", 600, "still valid")]
-        // TODO #24713: The following pass on Windows on .NET Core but fail on .NET Framework.
-        //[InlineData("HTTP/1.1 200      ", 200, "")]
-        //[InlineData("HTTP/1.1 200      Something", 200, "Something")]
-        //[InlineData("HTTP/1.1\t200 OK", 200, "OK")]
-        //[InlineData("HTTP/1.1 200\tOK", 200, "OK")]
-        //[InlineData("HTTP/1.1 200", 200, "")]
-        //[InlineData("HTTP/1.1 200\t", 200, "")]
-        //[InlineData("HTTP/1.1 200 O\tK", 200, "O\tK")]
-        //[InlineData("HTTP/1.1 200 O    \t\t  \t\t\t\t  \t K", 200, "O    \t\t  \t\t\t\t  \t K")]
-        //[InlineData("HTTP/1.1 999 this\ttoo\t", 999, "this\ttoo\t")]
         public async Task GetAsync_ExpectedStatusCodeAndReason_Success(string statusLine, int expectedStatusCode, string expectedReason)
+        {
+            await GetAsyncSuccessHelper(statusLine, expectedStatusCode, expectedReason);
+        }
+
+        [Theory]
+        [InlineData("HTTP/1.1 200      ", 200, "     ", "")]
+        [InlineData("HTTP/1.1 200      Something", 200, "     Something", "Something")]
+        public async Task GetAsync_ExpectedStatusCodeAndReason_PlatformBehaviorTest(string statusLine,
+            int expectedStatusCode, string reasonWithSpace, string reasonNoSpace)
+        {
+            if (UseManagedHandler || PlatformDetection.IsFullFramework)
+            {
+                // ManagedHandler and .NET Framework will keep the space characters.
+                await GetAsyncSuccessHelper(statusLine, expectedStatusCode, reasonWithSpace);
+            }
+            else
+            {
+                // WinRT, WinHttpHandler, and CurlHandler will trim space characters.
+                await GetAsyncSuccessHelper(statusLine, expectedStatusCode, reasonNoSpace);
+            }
+        }
+
+        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The following pass on .NET Core but fail on .NET Framework.")]
+        [InlineData("HTTP/1.1 200", 200, "")] // This test data requires the fix in .NET Framework 4.7.3
+        [InlineData("HTTP/1.1 200 O\tK", 200, "O\tK")]
+        [InlineData("HTTP/1.1 200 O    \t\t  \t\t\t\t  \t K", 200, "O    \t\t  \t\t\t\t  \t K")]
+        // TODO #24713: The following pass on Windows but fail on CurlHandler on Linux.
+        // [InlineData("HTTP/1.1 999 this\ttoo\t", 999, "this\ttoo\t")]
+        public async Task GetAsync_StatusLineNotFollowRFC_SuccessOnCore(string statusLine, int expectedStatusCode, string expectedReason)
+        {
+            await GetAsyncSuccessHelper(statusLine, expectedStatusCode, expectedReason);
+        }
+
+        private async Task GetAsyncSuccessHelper(string statusLine, int expectedStatusCode, string expectedReason)
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
@@ -93,6 +118,25 @@ namespace System.Net.Http.Functional.Tests
         //[InlineData("NOTHTTP/1.1 200 OK")]
         public async Task GetAsync_InvalidStatusLine_ThrowsException(string responseString)
         {
+            await GetAsyncThrowsExceptionHelper(responseString);
+        }
+
+        [Theory]
+        [InlineData("HTTP/1.1\t200 OK")]
+        [InlineData("HTTP/1.1 200\tOK")]
+        [InlineData("HTTP/1.1 200\t")]
+        public async Task GetAsync_InvalidStatusLine_ThrowsExceptionOnManagedHandler(string responseString)
+        {
+            if (UseManagedHandler || PlatformDetection.IsFullFramework)
+            {
+                // ManagedHandler and .NET Framework will throw HttpRequestException.
+                await GetAsyncThrowsExceptionHelper(responseString);
+            }
+            // WinRT, WinHttpHandler, and CurlHandler will succeed.
+        }
+
+        private async Task GetAsyncThrowsExceptionHelper(string responseString)
+        {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClient client = CreateHttpClient())
@@ -108,7 +152,7 @@ namespace System.Net.Http.Functional.Tests
         }
     }
 
-    public class HttpProtocolTests_Dribble : HttpProtocolTests, IDisposable
+    public class HttpProtocolTests_Dribble : HttpProtocolTests
     {
         protected override Stream GetStream(Stream s) => new DribbleStream(s);
 
@@ -123,7 +167,7 @@ namespace System.Net.Http.Functional.Tests
                 for (int i = 0; i < count; i++)
                 {
                     await _wrapped.WriteAsync(buffer, offset + i, 1);
-                    await Task.Yield(); // introduce short delays, enough to send packets individually but so long as to extend test duration significantly
+                    await Task.Delay(3); // introduce short delays, enough to send packets individually but not so long as to extend test duration significantly
                 }
             }
 

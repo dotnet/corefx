@@ -21,10 +21,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return _exprFactory;
         }
-        private ErrorHandling GetErrorContext()
-        {
-            return _pErrorContext;
-        }
 
         private static bool IsNullableConstructor(Expr expr, out ExprCall call)
         {
@@ -66,7 +62,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             NullableType nubSrc = (NullableType)exprSrc.Type;
-            CType typeBase = nubSrc.GetUnderlyingType();
+            CType typeBase = nubSrc.UnderlyingType;
             AggregateType ats = nubSrc.GetAts();
             PropertySymbol prop = GetSymbolLoader().getBSymmgr().propNubValue;
             if (prop == null)

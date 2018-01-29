@@ -141,7 +141,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 return;
             }
 
-            if (pctx != null && !pctx.FNop() && parent is AggregateSymbol agg && 0 != agg.GetTypeVarsAll().Count)
+            if (pctx != null && !pctx.IsNop && parent is AggregateSymbol agg && 0 != agg.GetTypeVarsAll().Count)
             {
                 CType pType = GetTypeManager().SubstType(agg.getThisType(), pctx);
                 ErrAppendType(pType, null);
@@ -182,82 +182,92 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 return;
             }
 
-            if (meth.isPropertyAccessor())
+            MethodKindEnum methodKind = meth.MethKind;
+            switch (methodKind)
             {
-                PropertySymbol prop = meth.getProperty();
+                case MethodKindEnum.PropAccessor:
+                    PropertySymbol prop = meth.getProperty();
 
-                // this includes the parent class
-                ErrAppendSym(prop, pctx);
+                    // this includes the parent class
+                    ErrAppendSym(prop, pctx);
 
-                // add accessor name
-                if (prop.GetterMethod == meth)
-                {
-                    ErrAppendString(".get");
-                }
-                else
-                {
-                    Debug.Assert(meth == prop.SetterMethod);
-                    ErrAppendString(".set");
-                }
+                    // add accessor name
+                    if (prop.GetterMethod == meth)
+                    {
+                        ErrAppendString(".get");
+                    }
+                    else
+                    {
+                        Debug.Assert(meth == prop.SetterMethod);
+                        ErrAppendString(".set");
+                    }
 
-                // args already added
-                return;
-            }
+                    // args already added
+                    return;
 
-            if (meth.isEventAccessor())
-            {
-                EventSymbol @event = meth.getEvent();
+                case MethodKindEnum.EventAccessor:
+                    EventSymbol @event = meth.getEvent();
 
-                // this includes the parent class
-                ErrAppendSym(@event, pctx);
+                    // this includes the parent class
+                    ErrAppendSym(@event, pctx);
 
-                // add accessor name
-                if (@event.methAdd == meth)
-                {
-                    ErrAppendString(".add");
-                }
-                else
-                {
-                    Debug.Assert(meth == @event.methRemove);
-                    ErrAppendString(".remove");
-                }
+                    // add accessor name
+                    if (@event.methAdd == meth)
+                    {
+                        ErrAppendString(".add");
+                    }
+                    else
+                    {
+                        Debug.Assert(meth == @event.methRemove);
+                        ErrAppendString(".remove");
+                    }
 
-                // args already added
-                return;
+                    // args already added
+                    return;
             }
 
             ErrAppendParentSym(meth, pctx);
-            if (meth.IsConstructor())
+            switch (methodKind)
             {
-                // Use the name of the parent class instead of the name "<ctor>".
-                ErrAppendName(meth.getClass().name);
-            }
-            else if (meth.IsDestructor())
-            {
-                // Use the name of the parent class instead of the name "Finalize".
-                ErrAppendChar('~');
-                ErrAppendName(meth.getClass().name);
-            }
-            else if (meth.isConversionOperator())
-            {
-                // implicit/explicit
-                ErrAppendString(meth.isImplicit() ? "implicit" : "explicit");
-                ErrAppendString(" operator ");
+                case MethodKindEnum.Constructor:
+                    // Use the name of the parent class instead of the name "<ctor>".
+                    ErrAppendName(meth.getClass().name);
+                    break;
 
-                // destination type name
-                ErrAppendType(meth.RetType, pctx);
-            }
-            else if (meth.isOperator)
-            {
-                // handle user defined operators
-                // map from CLS predefined names to "operator <X>"
-                ErrAppendString("operator ");
-                ErrAppendString(Operators.OperatorOfMethodName(meth.name));
-            }
-            else if (!meth.IsExpImpl())
-            {
-                // regular method
-                ErrAppendName(meth.name);
+                case MethodKindEnum.Destructor:
+                    // Use the name of the parent class instead of the name "Finalize".
+                    ErrAppendChar('~');
+                    goto case MethodKindEnum.Constructor;
+
+                case MethodKindEnum.ExplicitConv:
+                    ErrAppendString("explicit");
+                    goto convOperatorName;
+
+                case MethodKindEnum.ImplicitConv:
+                    ErrAppendString("implicit");
+
+                convOperatorName:
+                    ErrAppendString(" operator ");
+
+                    // destination type name
+                    ErrAppendType(meth.RetType, pctx);
+                    break;
+
+                default:
+                    if (meth.isOperator)
+                    {
+                        // handle user defined operators
+                        // map from CLS predefined names to "operator <X>"
+                        ErrAppendString("operator ");
+                        ErrAppendString(Operators.OperatorOfMethodName(meth.name));
+                    }
+                    else if (!meth.IsExpImpl())
+                    {
+                        // regular method
+                        ErrAppendName(meth.name);
+                    }
+
+                    break;
             }
 
             ErrAppendTypeParameters(meth.typeVars, pctx, false);
@@ -266,9 +276,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             {
                 // append argument types
                 ErrAppendChar('(');
-
                 ErrAppendParamList(GetTypeManager().SubstTypeArray(meth.Params, pctx), meth.isParamArray);
-
                 ErrAppendChar(')');
             }
         }
@@ -406,24 +414,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
             }
         }
 
-        private void ErrAppendType(CType pType, SubstContext pCtx)
+        private void ErrAppendType(CType pType, SubstContext pctx)
         {
-            ErrAppendType(pType, pCtx, true);
-        }
-
-        private void ErrAppendType(CType pType, SubstContext pctx, bool fArgs)
-        {
-            if (pctx != null)
+            if (pctx != null && !pctx.IsNop)
             {
-                if (!pctx.FNop())
-                {
-                    pType = GetTypeManager().SubstType(pType, pctx);
-                }
-                // We shouldn't use the SubstContext again so set it to NULL.
-                pctx = null;
+                pType = GetTypeManager().SubstType(pType, pctx);
             }
 
-            switch (pType.GetTypeKind())
+            switch (pType.TypeKind)
             {
                 case TypeKind.TK_AggregateType:
                     {
@@ -431,7 +429,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                         // Check for a predefined class with a special "nice" name for
                         // error reported.
-                        string text = PredefinedTypes.GetNiceName(pAggType.getAggregate());
+                        string text = PredefinedTypes.GetNiceName(pAggType.OwningAggregate);
                         if (text != null)
                         {
                             // Found a nice name.
@@ -439,38 +437,42 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                         }
                         else
                         {
-                            if (pAggType.outerType != null)
+                            if (pAggType.OuterType != null)
                             {
-                                ErrAppendType(pAggType.outerType, pctx);
+                                ErrAppendType(pAggType.OuterType, null);
                                 ErrAppendChar('.');
                             }
                             else
                             {
                                 // In a namespace.
-                                ErrAppendParentSym(pAggType.getAggregate(), pctx);
+                                ErrAppendParentSym(pAggType.OwningAggregate, null);
                             }
-                            ErrAppendName(pAggType.getAggregate().name);
+
+                            ErrAppendName(pAggType.OwningAggregate.name);
                         }
-                        ErrAppendTypeParameters(pAggType.GetTypeArgsThis(), pctx, true);
+
+                        ErrAppendTypeParameters(pAggType.TypeArgsThis, null, true);
                         break;
                     }
 
                 case TypeKind.TK_TypeParameterType:
-                    if (null == pType.GetName())
+                    TypeParameterType tpType = (TypeParameterType)pType;
+                    if (null == tpType.Name)
                     {
-                        var tpType = (TypeParameterType)pType;
                         // It's a standard type variable.
-                        if (tpType.IsMethodTypeParameter())
+                        if (tpType.IsMethodTypeParameter)
                         {
                             ErrAppendChar('!');
                         }
+
                         ErrAppendChar('!');
-                        ErrAppendPrintf("{0}", tpType.GetIndexInTotalParameters());
+                        ErrAppendPrintf("{0}", tpType.IndexInTotalParameters);
                     }
                     else
                     {
-                        ErrAppendName(pType.GetName());
+                        ErrAppendName(tpType.Name);
                     }
+
                     break;
 
                 case TypeKind.TK_NullType:
@@ -488,21 +490,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
 
                 case TypeKind.TK_ArrayType:
                     {
-                        CType elementType = ((ArrayType)pType).GetBaseElementType();
+                        CType elementType = ((ArrayType)pType).BaseElementType;
 
-                        if (null == elementType)
-                        {
-                            Debug.Assert(false, "No element type");
-                            break;
-                        }
+                        Debug.Assert(elementType != null, "No element type");
 
-                        ErrAppendType(elementType, pctx);
+                        ErrAppendType(elementType, null);
 
                         for (elementType = pType;
                                 elementType is ArrayType arrType;
-                                elementType = arrType.GetElementType())
+                                elementType = arrType.ElementType)
                         {
-                            int rank = arrType.rank;
+                            int rank = arrType.Rank;
 
                             // Add [] with (rank-1) commas inside
                             ErrAppendChar('[');
@@ -535,15 +533,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                 case TypeKind.TK_ParameterModifierType:
                     ParameterModifierType mod = (ParameterModifierType)pType;
                     // add ref or out
-                    ErrAppendString(mod.isOut ? "out " : "ref ");
+                    ErrAppendString(mod.IsOut ? "out " : "ref ");
 
                     // add base type name
-                    ErrAppendType(mod.GetParameterType(), pctx);
+                    ErrAppendType(mod.ParameterType, null);
                     break;
 
                 case TypeKind.TK_PointerType:
                     // Generate the base type.
-                    ErrAppendType(((PointerType)pType).GetReferentType(), pctx);
+                    ErrAppendType(((PointerType)pType).ReferentType, null);
                     {
                         // add the trailing *
                         ErrAppendChar('*');
@@ -551,7 +549,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
                     break;
 
                 case TypeKind.TK_NullableType:
-                    ErrAppendType(((NullableType)pType).GetUnderlyingType(), pctx);
+                    ErrAppendType(((NullableType)pType).UnderlyingType, null);
                     ErrAppendChar('?');
                     break;
 
