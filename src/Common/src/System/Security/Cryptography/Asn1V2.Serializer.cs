@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -59,6 +60,9 @@ namespace System.Security.Cryptography.Asn1
         private delegate object Deserializer(AsnReader reader);
         private delegate bool TryDeserializer<T>(AsnReader reader, out T value);
 
+        private static readonly ConcurrentDictionary<Type, FieldInfo[]> s_orderedFields =
+            new ConcurrentDictionary<Type, FieldInfo[]>();
+
         private static Deserializer TryOrFail<T>(TryDeserializer<T> tryDeserializer)
         {
             return reader =>
@@ -69,6 +73,52 @@ namespace System.Security.Cryptography.Asn1
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             };
         }
+
+        private static FieldInfo[] GetOrderedFields(Type typeT)
+        {
+            return s_orderedFields.GetOrAdd(
+                typeT,
+                t =>
+                {
+                    // https://github.com/dotnet/corefx/issues/14606 asserts that ordering by the metadata
+                    // token on a SequentialLayout will produce the fields in their layout order.
+                    //
+                    // Some other alternatives:
+                    // * Add an attribute for controlling the field read order.
+                    //    fieldInfos.Select(fi => (fi, fi.GetCustomAttribute<AsnFieldOrderAttribute>(false)).
+                    //      Where(val => val.Item2 != null).OrderBy(val => val.Item2.OrderWeight).Select(val => val.Item1);
+                    //
+                    // * Use Marshal.OffsetOf as a sort key
+                    //
+                    // * Some sort of interface to return the fields in a declared order, using either
+                    //   an existing object, or Activator.CreateInstance.  It would need to check that
+                    //   any returned fields actually were declared on the type that was queried.
+                    //
+                    // * Invent more alternatives
+                    FieldInfo[] fieldInfos = t.GetFields(FieldFlags);
+
+                    if (fieldInfos.Length == 0)
+                    {
+                        return Array.Empty<FieldInfo>();
+                    }
+
+                    try
+                    {
+                        int token = fieldInfos[0].MetadataToken;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // If MetadataToken isn't available (like in ILC) then just hope that
+                        // the fields are returned in declared order.  For the most part that
+                        // will result in data misaligning to fields and deserialization failing,
+                        // thus a CryptographicException.
+                        return fieldInfos;
+                    }
+
+                    return fieldInfos.OrderBy(fi => fi.MetadataToken).ToArray();
+                });
+        }
+
 
         private static ChoiceAttribute GetChoiceAttribute(Type typeT)
         {
@@ -102,20 +152,7 @@ namespace System.Security.Cryptography.Asn1
             Type typeT,
             LinkedList<FieldInfo> currentSet)
         {
-            FieldInfo[] fieldInfos = typeT.GetFields(FieldFlags);
-
-            // https://github.com/dotnet/corefx/issues/14606 asserts that ordering by the metadata
-            // token on a SequentialLayout will produce the fields in their layout order.
-            //
-            // Some other alternatives:
-            // * Add an attribute for controlling the field read order.
-            //    fieldInfos.Select(fi => (fi, fi.GetCustomAttribute<AsnFieldOrderAttribute>(false)).
-            //      Where(val => val.Item2 != null).OrderBy(val => val.Item2.OrderWeight).Select(val => val.Item1);
-            //
-            // * Use Marshal.OffsetOf as a sort key
-            //
-            // * Invent more alternatives
-            foreach (FieldInfo fieldInfo in fieldInfos.OrderBy(fi => fi.MetadataToken))
+            foreach (FieldInfo fieldInfo in GetOrderedFields(typeT))
             {
                 Type fieldType = fieldInfo.FieldType;
 
@@ -211,7 +248,7 @@ namespace System.Security.Cryptography.Asn1
             }
             else
             {
-                FieldInfo[] fieldInfos = typeT.GetFields(FieldFlags);
+                FieldInfo[] fieldInfos = GetOrderedFields(typeT);
 
                 for (int i = 0; i < fieldInfos.Length; i++)
                 {
