@@ -102,8 +102,8 @@
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="$(CommonPath)\CoreLib\System\Memory.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\MemoryDebugView.cs" />
-    <Compile Include="$(CommonPath)\CoreLib\System\SpanDebugView.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\ReadOnlyMemory.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\SpanDebugView.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\Buffers\IRetainable.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\Buffers\MemoryHandle.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\Buffers\OwnedMemory.cs" />
