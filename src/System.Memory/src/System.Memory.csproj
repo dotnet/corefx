@@ -30,6 +30,7 @@
     <Compile Include="System\SpanSortHelpers.Keys.IComparable.cs" />
     <Compile Include="System\SpanSortHelpers.Keys.Specialized.cs" />
     <Compile Include="System\SpanSortHelpers.Keys.TComparer.cs" />
+    <Compile Include="System\SpanSortHelpers.KeysAndOrValues.cs" />
     <Compile Include="System\SpanSortHelpers.KeysValues.cs" />
     <Compile Include="System\SpanSortHelpers.KeysValues.IComparable.cs" />
     <Compile Include="System\SpanSortHelpers.KeysValues.Specialized.cs" />
