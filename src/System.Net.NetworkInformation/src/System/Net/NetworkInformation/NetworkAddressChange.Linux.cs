@@ -4,26 +4,14 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 
 namespace System.Net.NetworkInformation
 {
     // Linux implementation of NetworkChange
-    public class NetworkChange
+    public partial class NetworkChange
     {
-        private static readonly Dictionary<NetworkAddressChangedEventHandler, ExecutionContext> s_addressChangedSubscribers =
-            new Dictionary<NetworkAddressChangedEventHandler, ExecutionContext>();
-        private static readonly Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> s_availabilityChangedSubscribers =
-            new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>();
-
-        private static readonly NetworkAvailabilityEventArgs s_availableEventArgs = new NetworkAvailabilityEventArgs(isAvailable: true);
-        private static readonly NetworkAvailabilityEventArgs s_notAvailableEventArgs = new NetworkAvailabilityEventArgs(isAvailable: false);
-        private static readonly ContextCallback s_runHandlerAvailable = new ContextCallback(RunAvailabilityHandlerAvailable);
-        private static readonly ContextCallback s_runHandlerNotAvailable = new ContextCallback(RunAvailabilityHandlerNotAvailable);
-        private static readonly ContextCallback s_runAddressChangedHandler = new ContextCallback(RunAddressChangedHandler);
-
         private static volatile int s_socket = 0;
         // Lock controlling access to delegate subscriptions, socket initialization, availability-changed state and timer.
         private static readonly object s_gate = new object();
@@ -49,12 +37,15 @@ namespace System.Net.NetworkInformation
             {
                 lock (s_gate)
                 {
-                    if (s_socket == 0)
+                    if (s_socket == 0 && value != null)
                     {
                         CreateSocket();
                     }
 
-                    s_addressChangedSubscribers.TryAdd(value, ExecutionContext.Capture());
+                    if (value != null)
+                    {
+                        s_addressChangedSubscribers.TryAdd(value, ExecutionContext.Capture());
+                    }
                 }
             }
             remove
@@ -87,7 +78,7 @@ namespace System.Net.NetworkInformation
                         CreateSocket();
                     }
 
-                    if (s_availabilityTimer == null)
+                    if (s_availabilityTimer == null && value != null)
                     {
                         // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live forever
                         bool restoreFlow = false;
@@ -109,7 +100,10 @@ namespace System.Net.NetworkInformation
                         }
                     }
 
-                    s_availabilityChangedSubscribers.TryAdd(value, ExecutionContext.Capture());
+                    if (value != null)
+                    {
+                        s_availabilityChangedSubscribers.TryAdd(value, ExecutionContext.Capture());
+                    }
                 }
             }
             remove
@@ -198,20 +192,7 @@ namespace System.Net.NetworkInformation
             {
                 case Interop.Sys.NetworkChangeKind.AddressAdded:
                 case Interop.Sys.NetworkChangeKind.AddressRemoved:
-                    foreach (var subscriber in s_addressChangedSubscribers)
-                    {
-                        NetworkAddressChangedEventHandler handler = subscriber.Key;
-                        ExecutionContext ec = subscriber.Value;
-
-                        if (ec == null) // Flow supressed
-                        {
-                            handler(null, EventArgs.Empty);
-                        }
-                        else
-                        {
-                            ExecutionContext.Run(ec, s_runAddressChangedHandler, handler);
-                        }
-                    }
+                    OnAddressChanged();
                     break;
                 case Interop.Sys.NetworkChangeKind.AvailabilityChanged:
                     lock (s_gate)
@@ -229,48 +210,75 @@ namespace System.Net.NetworkInformation
             }
         }
 
+        private static void OnAddressChanged()
+        {
+            Dictionary<NetworkAddressChangedEventHandler, ExecutionContext> addressChangedSubscribers = null;
+
+            lock (s_gate)
+            {
+                if (s_addressChangedSubscribers.Count > 0)
+                {
+                    addressChangedSubscribers = new Dictionary<NetworkAddressChangedEventHandler, ExecutionContext>(s_addressChangedSubscribers);
+                }
+            }
+
+            if (addressChangedSubscribers != null)
+            {
+                foreach (KeyValuePair<NetworkAddressChangedEventHandler, ExecutionContext>
+                    subscriber in addressChangedSubscribers)
+                {
+                    NetworkAddressChangedEventHandler handler = subscriber.Key;
+                    ExecutionContext ec = subscriber.Value;
+
+                    if (ec == null) // Flow supressed
+                    {
+                        handler(null, EventArgs.Empty);
+                    }
+                    else
+                    {
+                        ExecutionContext.Run(ec, s_runAddressChangedHandler, handler);
+                    }
+                }
+            }
+        }
+
         private static void OnAvailabilityTimerFired(object state)
         {
+            Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> availabilityChangedSubscribers = null;
+
             bool changed;
             lock (s_gate)
             {
                 changed = s_availabilityHasChanged;
                 s_availabilityHasChanged = false;
+                if (s_availabilityChangedSubscribers.Count > 0)
+                {
+                    availabilityChangedSubscribers = new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>(s_availabilityChangedSubscribers);
+                }
             }
 
-            if (changed)
+            if (changed && availabilityChangedSubscribers != null)
             {
-                var isAvailable = NetworkInterface.GetIsNetworkAvailable();
-                foreach (var subscriber in s_availabilityChangedSubscribers)
+                bool isAvailable = NetworkInterface.GetIsNetworkAvailable();
+                NetworkAvailabilityEventArgs args = isAvailable ? s_availableEventArgs : s_notAvailableEventArgs;
+                ContextCallback callbackContext = isAvailable ? s_runHandlerAvailable : s_runHandlerNotAvailable;
+
+                foreach (KeyValuePair<NetworkAvailabilityChangedEventHandler, ExecutionContext> 
+                    subscriber in availabilityChangedSubscribers)
                 {
                     NetworkAvailabilityChangedEventHandler handler = subscriber.Key;
                     ExecutionContext ec = subscriber.Value;
 
                     if (ec == null) // Flow supressed
                     {
-                        handler(null, isAvailable ? s_availableEventArgs : s_notAvailableEventArgs);
+                        handler(null, args);
                     }
                     else
                     {
-                        ExecutionContext.Run(ec, isAvailable ? s_runHandlerAvailable : s_runHandlerNotAvailable, handler);
+                        ExecutionContext.Run(ec, callbackContext, handler);
                     }
                 }
             }
-        }
-
-        private static void RunAddressChangedHandler(object state)
-        {
-            ((NetworkAddressChangedEventHandler)state)(null, EventArgs.Empty);
-        }
-
-        private static void RunAvailabilityHandlerAvailable(object state)
-        {
-            ((NetworkAvailabilityChangedEventHandler)state)(null, s_availableEventArgs);
-        }
-
-        private static void RunAvailabilityHandlerNotAvailable(object state)
-        {
-            ((NetworkAvailabilityChangedEventHandler)state)(null, s_notAvailableEventArgs);
         }
     }
 }

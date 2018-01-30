@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace System.Net.NetworkInformation
 {
-    public class NetworkChange
+    public partial class NetworkChange
     {
         //introduced for supporting design-time loading of System.Windows.dll
         [Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
@@ -44,20 +44,12 @@ namespace System.Net.NetworkInformation
 
         internal static class AvailabilityChangeListener
         {
-            private static readonly Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> s_availabilityCallerArray =
-                new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>();
             private static readonly NetworkAddressChangedEventHandler s_addressChange = ChangedAddress;
             private static volatile bool s_isAvailable = false;
-            private static readonly ContextCallback s_RunHandlerCallback = new ContextCallback(RunHandlerCallback);
-
-            private static void RunHandlerCallback(object state)
-            {
-                ((NetworkAvailabilityChangedEventHandler)state)(null, new NetworkAvailabilityEventArgs(s_isAvailable));
-            }
 
             private static void ChangedAddress(object sender, EventArgs eventArgs)
             {
-                Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> copy = null;
+                Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> availabilityChangedSubscribers = null;
 
                 lock (s_globalLock)
                 {
@@ -68,25 +60,33 @@ namespace System.Net.NetworkInformation
                     {
                         s_isAvailable = isAvailableNow;
 
-                        copy =
-                            new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>(s_availabilityCallerArray);
+                        if (s_availabilityChangedSubscribers.Count > 0)
+                        {
+                            availabilityChangedSubscribers = new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>(s_availabilityChangedSubscribers);
+                        }
                     }
                 }
 
                 // Executing user callbacks if Availability Change event occured.
-                if (copy != null)
+                if (availabilityChangedSubscribers != null)
                 {
-                    foreach (var entry in copy)
+                    bool isAvailable = s_isAvailable;
+                    NetworkAvailabilityEventArgs args = isAvailable ? s_availableEventArgs : s_notAvailableEventArgs;
+                    ContextCallback callbackContext = isAvailable ? s_runHandlerAvailable : s_runHandlerNotAvailable;
+
+                    foreach (KeyValuePair<NetworkAvailabilityChangedEventHandler, ExecutionContext> 
+                        subscriber in availabilityChangedSubscribers)
                     {
-                        NetworkAvailabilityChangedEventHandler handler = entry.Key;
-                        ExecutionContext context = entry.Value;
-                        if (context == null)
+                        NetworkAvailabilityChangedEventHandler handler = subscriber.Key;
+                        ExecutionContext ec = subscriber.Value;
+
+                        if (ec == null) // Flow supressed
                         {
-                            handler(null, new NetworkAvailabilityEventArgs(s_isAvailable));
+                            handler(null, args);
                         }
                         else
                         {
-                            ExecutionContext.Run(context, s_RunHandlerCallback, handler);
+                            ExecutionContext.Run(ec, callbackContext, handler);
                         }
                     }
                 }
@@ -96,15 +96,15 @@ namespace System.Net.NetworkInformation
             {
                 lock (s_globalLock)
                 {
-                    if (s_availabilityCallerArray.Count == 0)
+                    if (s_availabilityChangedSubscribers.Count == 0 && caller != null)
                     {
                         s_isAvailable = NetworkInterface.GetIsNetworkAvailable();
                         AddressChangeListener.UnsafeStart(s_addressChange);
                     }
 
-                    if ((caller != null) && (!s_availabilityCallerArray.ContainsKey(caller)))
+                    if (caller != null)
                     {
-                        s_availabilityCallerArray.Add(caller, ExecutionContext.Capture());
+                        s_availabilityChangedSubscribers.TryAdd(caller, ExecutionContext.Capture());
                     }
                 }
             }
@@ -113,8 +113,8 @@ namespace System.Net.NetworkInformation
             {
                 lock (s_globalLock)
                 {
-                    s_availabilityCallerArray.Remove(caller);
-                    if (s_availabilityCallerArray.Count == 0)
+                    s_availabilityChangedSubscribers.Remove(caller);
+                    if (s_availabilityChangedSubscribers.Count == 0)
                     {
                         AddressChangeListener.Stop(s_addressChange);
                     }
@@ -125,9 +125,6 @@ namespace System.Net.NetworkInformation
         // Helper class for detecting address change events.
         internal static unsafe class AddressChangeListener
         {
-            private static readonly Dictionary<NetworkAddressChangedEventHandler, ExecutionContext> s_callerArray =
-                new Dictionary<NetworkAddressChangedEventHandler, ExecutionContext>();
-            private static readonly ContextCallback s_runHandlerCallback = new ContextCallback(RunHandlerCallback);
             private static RegisteredWaitHandle s_registeredWait;
 
             // Need to keep the reference so it isn't GC'd before the native call executes.
@@ -141,7 +138,7 @@ namespace System.Net.NetworkInformation
             // Callback fired when an address change occurs.
             private static void AddressChangedCallback(object stateObject, bool signaled)
             {
-                Dictionary<NetworkAddressChangedEventHandler, ExecutionContext> copy;
+                Dictionary<NetworkAddressChangedEventHandler, ExecutionContext> addressChangedSubscribers = null;
 
                 lock (s_globalLock)
                 {
@@ -156,7 +153,10 @@ namespace System.Net.NetworkInformation
                     s_isListening = false;
 
                     // Need to copy the array so the callback can call start and stop
-                    copy = new Dictionary<NetworkAddressChangedEventHandler, ExecutionContext>(s_callerArray);
+                    if (s_addressChangedSubscribers.Count > 0)
+                    {
+                        addressChangedSubscribers = new Dictionary<NetworkAddressChangedEventHandler, ExecutionContext>(s_addressChangedSubscribers);
+                    }
 
                     try
                     {
@@ -170,27 +170,24 @@ namespace System.Net.NetworkInformation
                 }
 
                 // Release the lock before calling into user callback.
-                if (copy.Count > 0)
+                if (addressChangedSubscribers != null)
                 {
-                    foreach (var entry in copy)
+                    foreach (KeyValuePair<NetworkAddressChangedEventHandler, ExecutionContext>
+                        subscriber in addressChangedSubscribers)
                     {
-                        NetworkAddressChangedEventHandler handler = entry.Key;
-                        ExecutionContext context = entry.Value;
-                        if (context == null)
+                        NetworkAddressChangedEventHandler handler = subscriber.Key;
+                        ExecutionContext ec = subscriber.Value;
+
+                        if (ec == null) // Flow supressed
                         {
                             handler(null, EventArgs.Empty);
                         }
                         else
                         {
-                            ExecutionContext.Run(context, s_runHandlerCallback, handler);
+                            ExecutionContext.Run(ec, s_runAddressChangedHandler, handler);
                         }
                     }
                 }
-            }
-
-            private static void RunHandlerCallback(object state)
-            {
-                ((NetworkAddressChangedEventHandler)state)(null, EventArgs.Empty);
             }
 
             internal static void Start(NetworkAddressChangedEventHandler caller)
@@ -230,12 +227,12 @@ namespace System.Net.NetworkInformation
                         }
                     }
 
-                    if ((caller != null) && (!s_callerArray.ContainsKey(caller)))
+                    if (caller != null)
                     {
-                        s_callerArray.Add(caller, captureContext ? ExecutionContext.Capture() : null);
+                        s_addressChangedSubscribers.TryAdd(caller, captureContext ? ExecutionContext.Capture() : null);
                     }
 
-                    if (s_isListening || s_callerArray.Count == 0)
+                    if (s_isListening || s_addressChangedSubscribers.Count == 0)
                     {
                         return;
                     }
@@ -333,8 +330,8 @@ namespace System.Net.NetworkInformation
             {
                 lock (s_globalLock)
                 {
-                    s_callerArray.Remove(caller);
-                    if (s_callerArray.Count == 0 && s_isListening)
+                    s_addressChangedSubscribers.Remove(caller);
+                    if (s_addressChangedSubscribers.Count == 0 && s_isListening)
                     {
                         s_isListening = false;
                     }
