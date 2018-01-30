@@ -130,7 +130,6 @@ namespace System.Threading.Channels.Tests
             {
                 Assert.Equal(MaxNumberToWriteToChannel, readCount);
             }
-            Console.WriteLine(DateTime.Now);
 
             // string message = $"{channel.GetType().Name}:  " +
             //                  $"SingleReader: {options.SingleReader}, " +
