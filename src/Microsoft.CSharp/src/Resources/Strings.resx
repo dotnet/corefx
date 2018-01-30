@@ -61,9 +61,6 @@
   <data name="InternalCompilerError" xml:space="preserve">
     <value>An unexpected exception occurred while binding a dynamic operation</value>
   </data>
-  <data name="BindCallFailedOverloadResolution" xml:space="preserve">
-    <value>Overload resolution failed</value>
-  </data>
   <data name="BindPropertyFailedMethodGroup" xml:space="preserve">
     <value>The name '{0}' is bound to a method and cannot be used like a property</value>
   </data>
@@ -111,9 +108,6 @@
   </data>
   <data name="ValueCantBeNull" xml:space="preserve">
     <value>Cannot convert null to '{0}' because it is a non-nullable value type</value>
-  </data>
-  <data name="WrongNestedThis" xml:space="preserve">
-    <value>Cannot access a non-static member of outer type '{0}' via nested type '{1}'</value>
   </data>
   <data name="NoSuchMember" xml:space="preserve">
     <value>'{0}' does not contain a definition for '{1}'</value>
@@ -221,7 +215,7 @@
     <value>The operand of an increment or decrement operator must be a variable, property or indexer</value>
   </data>
   <data name="BadArgCount" xml:space="preserve">
-    <value>No overload for method '{0}' takes '{1}' arguments</value>
+    <value>No overload for method '{0}' takes {1} arguments</value>
   </data>
   <data name="BadArgTypes" xml:space="preserve">
     <value>The best overloaded method match for '{0}' has some invalid arguments</value>
@@ -256,9 +250,6 @@
   <data name="NonInvocableMemberCalled" xml:space="preserve">
     <value>Non-invocable member '{0}' cannot be used like a method.</value>
   </data>
-  <data name="NamedArgumentSpecificationBeforeFixedArgument" xml:space="preserve">
-    <value>Named argument specifications must appear after all fixed arguments have been specified</value>
-  </data>
   <data name="BadNamedArgument" xml:space="preserve">
     <value>The best overload for '{0}' does not have a parameter named '{1}'</value>
   </data>
@@ -277,7 +268,7 @@
   <data name="DynamicArgumentNeedsValue" xml:space="preserve">
     <value>The runtime binder cannot bind a metaobject without a value</value>
   </data>
-  <data name="BindingNameCollision" xml:space="preserve">
-    <value>More than one type in the binding has the same full name.</value>
+  <data name="BadNonTrailingNamedArgument" xml:space="preserve">
+    <value>Named argument '{0}' is used out-of-position but is followed by an unnamed argument</value>
   </data>
 </root>
