@@ -334,8 +334,15 @@ namespace System.Net.Security.Tests
 
                 await clientSslStream.WriteAsync(new byte[] { 2 }, 0, 1);
 
-                IOException serverException = await Assert.ThrowsAsync<IOException>(() => serverReadTask);
-                Assert.IsType<ObjectDisposedException>(serverException.InnerException);
+                if (PlatformDetection.IsFullFramework)
+                {
+                    await Assert.ThrowsAsync<ObjectDisposedException>(() => serverReadTask);
+                }
+                else
+                {
+                    IOException serverException = await Assert.ThrowsAsync<IOException>(() => serverReadTask);
+                    Assert.IsType<ObjectDisposedException>(serverException.InnerException);
+                }
 
                 // Now, there is no pending read, so the internal buffer will be returned to ArrayPool.
                 serverSslStream.Dispose();
