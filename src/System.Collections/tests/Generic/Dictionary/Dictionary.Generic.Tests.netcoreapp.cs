@@ -127,11 +127,10 @@ namespace System.Collections.Tests
             }
         }
 
-        [Fact]
-        public void EnsureCapacity_ExistingCapacityRequested_SameValueReturned()
+        [Theory]
+        [InlineData(7)]
+        public void EnsureCapacity_ExistingCapacityRequested_SameValueReturned(int capacity)
         {
-            int capacity = 7;
-
             var dictionary = new Dictionary<int, int>(capacity);
             Assert.Equal(capacity, dictionary.EnsureCapacity(capacity));
 
@@ -156,7 +155,7 @@ namespace System.Collections.Tests
             int capacity = dictionary.EnsureCapacity(count * 2);
             Assert.Equal(capacity, dictionary.EnsureCapacity(count * 2));
         }
-        
+
         [Theory]
         [InlineData(1)]
         [InlineData(5)]
@@ -171,16 +170,17 @@ namespace System.Collections.Tests
             Assert.InRange(dictionary.EnsureCapacity(count - 1), count, int.MaxValue);
         }
 
-        [Fact]
-        public void EnsureCapacity_DictionaryNotEmpty_SetsToAtLeastTheRequested()
+        [Theory]
+        [InlineData(7)]
+        [InlineData(20)]
+        public void EnsureCapacity_DictionaryNotEmpty_SetsToAtLeastTheRequested(int count)
         {
-            int count = 20;
             var dictionary = new Dictionary<int, int>();
             for (int i = 0; i < count; i++)
             {
                 dictionary.Add(i, 0);
             }
-            
+
             // get current capacity
             int currentCapacity = dictionary.EnsureCapacity(0);
 
