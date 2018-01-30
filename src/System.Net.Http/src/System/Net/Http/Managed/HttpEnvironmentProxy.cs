@@ -1,122 +1,193 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Net.Http;
 using System.Net;
+using System.Collections.Generic;
 
 namespace System.Net.Http
 {
-    sealed internal class HttpEnvironmentProxy : IWebProxy {
-        private Uri _http = null;    // String URI for HTTP requests
-        private Uri _https = null;   // String URI for HTTPS requests
-        private NetworkCredential _httpCred;
-        private NetworkCredential _httpsCred;
-        String[] _bypass = null;    // list of domains not to proxy
+    internal sealed class HttpEnvironmentProxyCredentials : ICredentials
+    {
+        // Wrapper class for cases when http and https has different authentication.
+        private readonly NetworkCredential _httpCred;
+        private readonly NetworkCredential _httpsCred;
+        private readonly Uri _httpProxy;
+        private readonly Uri _httpsProxy;
 
+        public HttpEnvironmentProxyCredentials(Uri httpProxy, NetworkCredential httpCred,
+                                                Uri httpsProxy, NetworkCredential httpsCred)
+        {
+            _httpCred = httpCred;
+            _httpsCred = httpsCred;
+            _httpProxy = httpProxy;
+            _httpsProxy = httpsProxy;
+        }
+
+        public NetworkCredential GetCredential(Uri uri, string authType)
+        {
+            if (uri == null)
+            {
+                return null;
+            }
+            return uri.Equals(_httpProxy) ? _httpCred :
+                   uri.Equals(_httpsProxy) ? _httpsCred : null;
+        }
+
+        public static HttpEnvironmentProxyCredentials TryToCreate(Uri httpProxy, Uri httpsProxy)
+        {
+            NetworkCredential httpCred = null;
+            NetworkCredential httpsCred = null;
+
+            if (httpProxy != null)
+            {
+                httpCred = GetCredentialsFromString(httpProxy.UserInfo);
+            }
+            if (httpsProxy != null)
+            {
+                httpsCred = GetCredentialsFromString(httpsProxy.UserInfo);
+            }
+            if (httpCred == null && httpsCred == null)
+            {
+                return null;
+            }
+            return new HttpEnvironmentProxyCredentials(httpProxy, httpCred, httpsProxy, httpsCred);
+        }
+
+        /// <summary>
+        /// Converts string containing user:password to NetworkCredential object
+        /// </summary>
+        private static NetworkCredential GetCredentialsFromString(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+            int idx = value.IndexOf(":");
+            if (idx < 0)
+            {
+                // only user name without password
+                return new NetworkCredential(value, "");
+            }
+            else
+            {
+                return new NetworkCredential(value.Substring(0, idx), value.Substring(idx+1, value.Length - idx -1 ));
+            }
+        }
+    }
+
+    internal sealed class HttpEnvironmentProxy : IWebProxy
+    {
+        private const string EnvAllProxyUC = "ALL_PROXY";
+        private const string EnvAllProxyLC = "all_proxy";
+        private const string EnvHttpProxyLC = "http_proxy";
+        private const string EnvHttpsProxyLC = "https_proxy";
+        private const string EnvHttpsProxyUC = "HTTPS_PROXY";
+        private const string EnvNoProxyLC = "no_proxy";
+
+        private Uri _httpProxyUri;      // String URI for HTTP requests
+        private Uri _httpsProxyUri;     // String URI for HTTPS requests
+        private string[] _bypass = null;// list of domains not to proxy
+        private ICredentials _credentials;
 
         public static HttpEnvironmentProxy TryToCreate()
         {
-            string http = null;     // local variable to hold most specific value
-            string https = null;
-
-
-            // get environmental variables. protocol specific take precedence over
-            // general all_*, lover case variable has precedence over upper case.
-            // note that curl uses HTTPS_PROXY but not HTTP_PROXY.
+            // Get environmental variables. Protocol specific take precedence over
+            // general all_*, lower case variable has precedence over upper case.
+            // Note that curl uses HTTPS_PROXY but not HTTP_PROXY.
             // For http, only http_proxy and generic variables are used.
-            string value = Environment.GetEnvironmentVariable("ALL_PROXY");
-            if (value != null)
-            {
-                http = value;
-                https = value;
 
-            }
-            value = Environment.GetEnvironmentVariable("all_proxy");
-            if (value != null)
-            {
-                http = value;
-                https = value;
+            Uri httpProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpProxyLC));
+            Uri httpsProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpsProxyLC)) ??
+                             GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpsProxyUC));
 
-            }
-            value = Environment.GetEnvironmentVariable("http_proxy");
-            if (value != null)
+            if (httpProxy == null || httpsProxy == null)
             {
-                http = value;
-            }
-            value = Environment.GetEnvironmentVariable("HTTPS_PROXY");
-            if (value != null)
-            {
-                https = value;
+                Uri allProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvAllProxyLC)) ??
+                                GetUriFromString(Environment.GetEnvironmentVariable(EnvAllProxyUC));
+
+                if (httpProxy == null)
+                {
+                    httpProxy = allProxy;
+                }
+                if (httpsProxy == null)
+                {
+                    httpsProxy = allProxy;
+                }
             }
 
-            value = Environment.GetEnvironmentVariable("https_proxy");
-            if (value != null)
-            {
-                https = value;
-            }
-            // fail to instantiate if nothing is set.
-            // caller may pick some other proxy type.
-            if (String.IsNullOrWhiteSpace(http) && String.IsNullOrWhiteSpace(https))
+            // Do not instantiate if nothing is set.
+            // Caller may pick some other proxy type.
+            if (httpProxy == null && httpsProxy == null)
             {
                 return null;
             }
 
-            return new HttpEnvironmentProxy(http, https);
+            return new HttpEnvironmentProxy(httpProxy, httpsProxy, Environment.GetEnvironmentVariable(EnvNoProxyLC));
         }
 
-        private HttpEnvironmentProxy(string http, string https)
+        private HttpEnvironmentProxy(Uri httpProxy, Uri httpsProxy, string bypassList)
         {
+            _httpProxyUri = httpProxy;
+            _httpsProxyUri = httpsProxy;
 
-            if (!String.IsNullOrWhiteSpace(http))
-            {
-                _http = GetUriFromString(http);
-                if (!string.IsNullOrWhiteSpace(_http.UserInfo))
-                {
-                    String[] s = _http.UserInfo.Split(':', 2);
-                    _httpCred = new NetworkCredential(s[0], s[1]);
-                }
-            }
-            if (!String.IsNullOrWhiteSpace(https))
-            {
-                _https = GetUriFromString(https);
-                if (!string.IsNullOrWhiteSpace(_https.UserInfo))
-                {
-                    String[] s = _https.UserInfo.Split(':', 2);
-                    _httpsCred = new NetworkCredential(s[0], s[1]);
-                }
-            }
+            _credentials = HttpEnvironmentProxyCredentials.TryToCreate(httpProxy, httpsProxy);
 
-            string value = Environment.GetEnvironmentVariable("no_proxy");
-            if (!String.IsNullOrWhiteSpace(value)) 
+            if (!string.IsNullOrWhiteSpace(bypassList))
             {
-                _bypass = value.Split(',');
+                string[] list = bypassList.Split(',');
+                List<string> tmpList = new List<string>();
+
+                foreach (string value in list)
+                {
+                    string tmp = value.Trim();
+                    if (tmp.Length > 0)
+                    {
+                        tmpList.Add(tmp);
+                    }
+                }
+                if (tmpList.Count > 0)
+                {
+                    _bypass = tmpList.ToArray();
+                }
             }
         }
 
         /// <summary>
         /// This function will evaluate given string and it will try to convert
         /// it to Uri object. The string could contain URI fragment, IP address and  port
-        /// tuple or just IP address or name. 
+        /// tuple or just IP address or name. It will return null if parsing fails.
         /// </summary>
-        private Uri GetUriFromString(String value)
+        private static Uri GetUriFromString(string value)
         {
-            if (!value.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
-                !value.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrEmpty(value))
             {
-                // Default to HTTP
+                return null;
+            }
+
+            if (!value.Contains("://"))
+            {
                 value = "http://" + value;
             }
-            Uri uri = new Uri(value);
 
-            if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+            try
             {
-                throw new NotSupportedException("Only HTTP and HTTPS protocols are supported for proxy.");
+                Uri uri = new Uri(value);
+                if (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+                {
+                    // We only support http and https for now.
+                    return uri;
+                }
             }
-            return uri;
+            catch { };
+
+            return null;
         }
 
         /// <summary>
-        /// This function returns true if given Host mach bypss list.
+        /// This function returns true if given Host match bypass list.
         /// Note, that the list is common for http and https.
         /// </summary>
         private bool IsMatchInBypassList(Uri input)
@@ -136,18 +207,18 @@ namespace System.Net.Http
                         }
                         else if (input.Host.EndsWith(s, StringComparison.OrdinalIgnoreCase))
                         {
-                                return true;
+                            return true;
                         }
 
                     }
                     else
                     {
-                        if (String.Compare(s, input.Host, StringComparison.OrdinalIgnoreCase) == 0)
+                        if (String.Equals(s, input.Host, StringComparison.OrdinalIgnoreCase))
                         {
                             return true;
                         }
                     }
-
+                }
             }
             return false;
         }
@@ -157,43 +228,24 @@ namespace System.Net.Http
         /// </summary>
         public Uri GetProxy(Uri uri)
         {
-            return uri.Scheme == "http" ? _http : _https;
+            return uri.Scheme == Uri.UriSchemeHttp ? _httpProxyUri : _httpsProxyUri;
         }
 
         /// <summary>
-        /// CHecks if URI is subject to proxy or not. 
+        /// Checks if URI is subject to proxy or not.
         /// </summary>
         public bool IsBypassed(Uri uri)
         {
-            bool ret =  (uri.Scheme == "http" ? _http : _https) == null;
-
-            if (ret)
-            {
-                return ret;
-            }
-            return IsMatchInBypassList(uri);
+            return GetProxy(uri) == null ? true : IsMatchInBypassList(uri);
         }
 
         public ICredentials Credentials
         {
             get
             {
-                return _httpCred != null ? _httpCred : _httpsCred;
+                return _credentials;
             }
             set { throw new NotSupportedException(); }
-        }
-
-        public ICredentials GetCredentials(string scheme)
-        {
-            if (scheme == Uri.UriSchemeHttp)
-            {
-                return _httpCred;
-            }
-            else if (scheme == Uri.UriSchemeHttp)
-            {
-                return _httpsCred;
-            }
-            return null;
         }
     }
 }
