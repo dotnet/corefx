@@ -11,7 +11,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     public static class AsyncTest
     {
         [CheckConnStrSetupFact]
-        public static void TestReadAsync()
+        public static void TestReadAsyncTimeConsumed()
         {
             const string sql = "SET NOCOUNT ON"
                             + " SELECT 'a'"
@@ -25,8 +25,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             double elapsedSync = RunReadSync(sql);
             t.Wait();
             double elapsedAsync = t.Result;
-            Console.WriteLine("Asynchronous Operation: " + elapsedAsync + "ms");
-            Console.WriteLine("Synchronous Operation: " + elapsedSync + "ms");
             Assert.True(elapsedAsync < elapsedSync, "Asynchronous operation should be finished quicker than synchronous one");
             int limit = 100;
             Assert.True(elapsedAsync < limit, $"Asynchronous operation should be finished within {limit}ms");
