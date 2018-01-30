@@ -3,7 +3,6 @@
   <PropertyGroup>
     <BuildConfigurations>
       netstandard;
-      _netfx;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

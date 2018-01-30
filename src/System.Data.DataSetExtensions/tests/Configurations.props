@@ -3,8 +3,6 @@
   <PropertyGroup>
     <BuildConfigurations>
       netstandard;
-      <!-- NETFX configuration added to workaround: https://github.com/dotnet/corefx/issues/26575 needs to be deleted when fixed -->
-      netfx;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
