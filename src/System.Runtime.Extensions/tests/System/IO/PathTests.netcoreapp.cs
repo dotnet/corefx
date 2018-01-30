@@ -43,9 +43,9 @@ namespace System.IO.Tests
         [InlineData(@"dir/baz", "dir")]
         [InlineData(@"dir\baz", "dir")]
         [InlineData(@"dir\baz\bar", @"dir\baz")]
-        [InlineData(@"dir\\baz", "dir")]
-        [InlineData(@" dir\baz", " dir")]
-        [InlineData(@" C:\dir\baz", @"C:\dir")]
+        [InlineData(@"dir\baz", "dir")]
+        [InlineData(@" dir\\baz", @" dir\")]
+        [InlineData(@" C:\dir\baz", @" C:\dir")]
         [InlineData(@"..\..\files.txt", @"..\..")]
         [InlineData(@"C:\", null)]
         [InlineData(@"C:", null)]
@@ -133,10 +133,10 @@ namespace System.IO.Tests
         [InlineData(@"C:", @"C:")]
         [InlineData(@"C:\", @"C:\")]
         [InlineData(@"C:\\", @"C:\")]
-        [InlineData(@"C://", @"C:\")]
+        [InlineData(@"C://", @"C:/")]
         [InlineData(@"C:\foo1", @"C:\")]
         [InlineData(@"C:\\foo2", @"C:\")]
-        [InlineData(@"C://foo3", @"C:\")]
+        [InlineData(@"C://foo3", @"C:/")]
         public static void GetPathRoot_Windows_Span(string value, string expected)
         {
             Assert.True(Path.IsPathRooted(value.AsReadOnlySpan()));

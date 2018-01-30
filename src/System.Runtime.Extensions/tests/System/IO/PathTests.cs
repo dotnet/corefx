@@ -217,17 +217,17 @@ namespace System.IO.Tests
         [InlineData(" . ")]
         [InlineData(" .. ")]
         [InlineData("fi le")]
-        [InlineData("fi  le")]
         public static void GetFileName_Unix(string file)
         {
             Assert.Equal(file, Path.GetFileName(file));
-            Assert.Equal(file, new string(Path.GetFileName(file).AsReadOnlySpan()));
+            Assert.Equal(file, new string(Path.GetFileName(file).AsReadOnlySpan()));     
+        }
 
-            if (file.Equals("fi  le"))
-            {
-                Assert.Equal(file, Path.GetFileName(Path.Combine("b \r\n ar", file)));
-                Assert.Equal(file, new string(Path.GetFileName(Path.Combine("b \r\n ar", file).AsReadOnlySpan())));
-            }      
+        [Fact]
+        public static void GetFileNameWithSpaces_Unix()
+        {
+            Assert.Equal("fi  le", Path.GetFileName(Path.Combine("b \r\n ar", "fi  le")));
+            Assert.Equal("fi  le", new string(Path.GetFileName(Path.Combine("b \r\n ar", "fi  le").AsReadOnlySpan())));
         }
 
         public static IEnumerable<object[]> GetFileNameWithoutExtension_TestData()
