@@ -4,11 +4,9 @@
 
 using System.Buffers;
 using System.Collections.Generic;
-using System.IO.Pipelines.Testing;
-using System.Linq;
 using System.Text;
 
-namespace System.IO.Pipelines.Tests
+namespace System.Memory.Tests
 {
     public abstract class ReadOnlyBufferFactory
     {
@@ -59,12 +57,12 @@ namespace System.IO.Pipelines.Tests
         {
             public override ReadOnlyBuffer<byte> CreateOfSize(int size)
             {
-                return BufferUtilities.CreateBuffer(size);
+                return CreateWithContent(new byte[size]);
             }
 
             public override ReadOnlyBuffer<byte> CreateWithContent(byte[] data)
             {
-                return BufferUtilities.CreateBuffer(data);
+                return CreateSegments(data);
             }
         }
 
@@ -86,8 +84,54 @@ namespace System.IO.Pipelines.Tests
                     segments.Add(System.Array.Empty<byte>());
                 }
 
-                return BufferUtilities.CreateBuffer(segments.ToArray());
+                return CreateSegments(segments.ToArray());
             }
+        }
+
+        public static ReadOnlyBuffer<byte> CreateSegments(params byte[][] inputs)
+        {
+            if (inputs == null || inputs.Length == 0)
+            {
+                throw new InvalidOperationException();
+            }
+
+            var i = 0;
+
+            BufferSegment last = null;
+            BufferSegment first = null;
+
+            do
+            {
+                var s = inputs[i];
+                var length = s.Length;
+                var dataOffset = length;
+                var chars = new byte[length * 2];
+
+                for (int j = 0; j < length; j++)
+                {
+                    chars[dataOffset + j] = s[j];
+                }
+
+                // Create a segment that has offset relative to the OwnedMemory and OwnedMemory itself has offset relative to array
+                var current = new BufferSegment
+                {
+                    Memory = new Memory<byte>(chars).Slice(length, length)
+                };
+
+                if (first == null)
+                {
+                    first = current;
+                    last = current;
+                }
+                else
+                {
+                    last.SetNext(current);
+                    last = current;
+                }
+                i++;
+            } while (i < inputs.Length);
+
+            return new ReadOnlyBuffer<byte>(first, 0, last, last.Memory.Length);
         }
     }
 }

@@ -3,47 +3,36 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
-using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace System.IO.Pipelines.Tests
+namespace System.Memory.Tests
 {
-    public abstract class ReadableBufferFacts
+    public abstract class ReadOnlyBufferFacts
     {
-        public class Array: ReadableBufferFacts
+        public class Array: ReadOnlyBufferFacts
         {
             public Array() : base(ReadOnlyBufferFactory.Array) { }
         }
 
-        public class OwnedMemory: ReadableBufferFacts
+        public class OwnedMemory: ReadOnlyBufferFacts
         {
             public OwnedMemory() : base(ReadOnlyBufferFactory.OwnedMemory) { }
         }
 
-        public class SingleSegment: ReadableBufferFacts
+        public class SingleSegment: ReadOnlyBufferFacts
         {
             public SingleSegment() : base(ReadOnlyBufferFactory.SingleSegment) { }
         }
 
-        public class SegmentPerByte: ReadableBufferFacts
+        public class SegmentPerByte: ReadOnlyBufferFacts
         {
             public SegmentPerByte() : base(ReadOnlyBufferFactory.SegmentPerByte) { }
-
-            [Fact]
-            // This test verifies that optimization for known cursors works and
-            // avoids additional walk but it's only valid for multi segmented buffers
-            public void ReadCursorSeekDoesNotCheckEndIfTrustingEnd()
-            {
-                var buffer = Factory.CreateOfSize(3);
-                var buffer2 = Factory.CreateOfSize(3);
-                buffer.Seek(buffer.Start, buffer2.End, 2, false);
-            }
         }
 
         internal ReadOnlyBufferFactory Factory { get; }
 
-        internal ReadableBufferFacts(ReadOnlyBufferFactory factory)
+        internal ReadOnlyBufferFacts(ReadOnlyBufferFactory factory)
         {
             Factory = factory;
         }
@@ -78,14 +67,14 @@ namespace System.IO.Pipelines.Tests
 
         [Theory]
         [MemberData(nameof(OutOfRangeSliceCases))]
-        public void ReadableBufferDoesNotAllowSlicingOutOfRange(Action<ReadOnlyBuffer<byte>> fail)
+        public void ReadOnlyBufferDoesNotAllowSlicingOutOfRange(Action<ReadOnlyBuffer<byte>> fail)
         {
             var buffer = Factory.CreateOfSize(100);
-            var ex = Assert.Throws<InvalidOperationException>(() => fail(buffer));
+            Assert.Throws<ArgumentOutOfRangeException>(() => fail(buffer));
         }
 
         [Fact]
-        public void ReadableBufferGetPosition_MovesReadCursor()
+        public void ReadOnlyBufferGetPosition_MovesReadCursor()
         {
             var buffer = Factory.CreateOfSize(100);
             var cursor = buffer.GetPosition(buffer.Start, 65);
@@ -93,25 +82,23 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void ReadableBufferGetPosition_ChecksBounds()
+        public void ReadOnlyBufferGetPosition_ChecksBounds()
         {
             var buffer = Factory.CreateOfSize(100);
-            Assert.Throws<InvalidOperationException>(() => buffer.GetPosition(buffer.Start, 101));
+            Assert.Throws<ArgumentOutOfRangeException>(() => buffer.GetPosition(buffer.Start, 101));
         }
 
         [Fact]
-        public void ReadableBufferGetPosition_DoesNotAlowNegative()
+        public void ReadOnlyBufferGetPosition_DoesNotAlowNegative()
         {
             var buffer = Factory.CreateOfSize(20);
             Assert.Throws<ArgumentOutOfRangeException>(() => buffer.GetPosition(buffer.Start, -1));
         }
 
-        [Fact]
-        public void ReadCursorSeekChecksEndIfNotTrustingEnd()
+        public void ReadOnlyBufferSlice_ChecksEnd()
         {
-            var buffer = Factory.CreateOfSize(3);
-            var buffer2 = Factory.CreateOfSize(3);
-            Assert.Throws<InvalidOperationException>(() => buffer.Seek(buffer.Start, buffer2.End, 2, true));
+            var buffer = Factory.CreateOfSize(100);
+            Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Slice(70, buffer.Start));
         }
 
         [Fact]
@@ -121,18 +108,18 @@ namespace System.IO.Pipelines.Tests
             // [                ##############] -> [##############                ]
             //                         ^c1            ^c2
             var bufferSegment1 = new BufferSegment();
-            bufferSegment1.SetMemory(new OwnedArray<byte>(new byte[100]), 50, 99);
+            bufferSegment1.Memory = new byte[49];
 
             var bufferSegment2 = new BufferSegment();
-            bufferSegment2.SetMemory(new OwnedArray<byte>(new byte[100]), 0, 50);
+            bufferSegment2.Memory = new byte[50];
             bufferSegment1.SetNext(bufferSegment2);
 
-            var readableBuffer = new ReadOnlyBuffer<byte>(bufferSegment1, 0, bufferSegment2, 50);
+            var ReadOnlyBuffer = new ReadOnlyBuffer<byte>(bufferSegment1, 0, bufferSegment2, 50);
 
-            var c1 = readableBuffer.GetPosition(readableBuffer.Start, 25); // segment 1 index 75
-            var c2 = readableBuffer.GetPosition(readableBuffer.Start, 55); // segment 2 index 5
+            var c1 = ReadOnlyBuffer.GetPosition(ReadOnlyBuffer.Start, 25); // segment 1 index 75
+            var c2 = ReadOnlyBuffer.GetPosition(ReadOnlyBuffer.Start, 55); // segment 2 index 5
 
-            var sliced = readableBuffer.Slice(c1, c2);
+            var sliced = ReadOnlyBuffer.Slice(c1, c2);
 
             Assert.Equal(30, sliced.Length);
         }
@@ -140,16 +127,21 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public void GetPositionPrefersNextSegment()
         {
-            var bufferSegment1 = new BufferSegment();
-            bufferSegment1.SetMemory(new OwnedArray<byte>(new byte[100]), 49, 99);
+            var bufferSegment1 = new BufferSegment
+            {
+                Memory = new byte[50]
+            };
 
-            var bufferSegment2 = new BufferSegment();
-            bufferSegment2.SetMemory(new OwnedArray<byte>(new byte[100]), 0, 0);
+            var bufferSegment2 = new BufferSegment
+            {
+                Memory = new byte[0]
+            };
+
             bufferSegment1.SetNext(bufferSegment2);
 
-            var readableBuffer = new ReadOnlyBuffer<byte>(bufferSegment1, 0, bufferSegment2, 0);
+            var buffer = new ReadOnlyBuffer<byte>(bufferSegment1, 0, bufferSegment2, 0);
 
-            var c1 = readableBuffer.GetPosition(readableBuffer.Start, 50);
+            var c1 = buffer.GetPosition(buffer.Start, 50);
 
             Assert.Equal(0, c1.Index);
             Assert.Equal(bufferSegment2, c1.Segment);
@@ -158,21 +150,27 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public void GetPositionDoesNotCrossOutsideBuffer()
         {
-            var bufferSegment1 = new BufferSegment();
-            bufferSegment1.SetMemory(new OwnedArray<byte>(new byte[100]), 0, 100);
+            var bufferSegment1 = new BufferSegment
+            {
+                Memory = new byte[100]
+            };
 
-            var bufferSegment2 = new BufferSegment();
-            bufferSegment2.SetMemory(new OwnedArray<byte>(new byte[100]), 0, 100);
+            var bufferSegment2 = new BufferSegment
+            {
+                Memory = new byte[100]
+            };
 
-            var bufferSegment3 = new BufferSegment();
-            bufferSegment3.SetMemory(new OwnedArray<byte>(new byte[100]), 0, 0);
+            var bufferSegment3 = new BufferSegment
+            {
+                Memory = new byte[0]
+            };
 
             bufferSegment1.SetNext(bufferSegment2);
             bufferSegment2.SetNext(bufferSegment3);
 
-            var readableBuffer = new ReadOnlyBuffer<byte>(bufferSegment1, 0, bufferSegment2, 100);
+            var buffer = new ReadOnlyBuffer<byte>(bufferSegment1, 0, bufferSegment2, 100);
 
-            var c1 = readableBuffer.GetPosition(readableBuffer.Start, 200);
+            var c1 = buffer.GetPosition(buffer.Start, 200);
 
             Assert.Equal(100, c1.Index);
             Assert.Equal(bufferSegment2, c1.Segment);
@@ -181,25 +179,25 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public void Create_WorksWithArray()
         {
-            var readableBuffer = new ReadOnlyBuffer<byte>(new byte[] {1, 2, 3, 4, 5}, 2, 3);
-            Assert.Equal(readableBuffer.ToArray(), new byte[] {3, 4, 5});
+            var buffer = new ReadOnlyBuffer<byte>(new byte[] {1, 2, 3, 4, 5}, 2, 3);
+            Assert.Equal(buffer.ToArray(), new byte[] {3, 4, 5});
         }
 
         [Fact]
         public void Create_WorksWithMemory()
         {
             var memory = new Memory<byte>(new byte[] {1, 2, 3, 4, 5});
-            var readableBuffer = new ReadOnlyBuffer<byte>(memory.Slice(2, 3));
-            Assert.Equal(new byte[] {3, 4, 5}, readableBuffer.ToArray());
+            var buffer = new ReadOnlyBuffer<byte>(memory.Slice(2, 3));
+            Assert.Equal(new byte[] {3, 4, 5}, buffer.ToArray());
         }
 
         [Fact]
         public void Create_WorksWithIEnumerableOfMemory()
         {
             var memories = new Memory<byte>[] { new byte[] {1, 2, 3}, new byte[] {4, 5, 6}};
-            var readableBuffer = new ReadOnlyBuffer<byte>(memories);
+            var buffer = new ReadOnlyBuffer<byte>(memories);
 
-            Assert.Equal(new byte[] {1, 2, 3, 4, 5, 6}, readableBuffer.ToArray());
+            Assert.Equal(new byte[] {1, 2, 3, 4, 5, 6}, buffer.ToArray());
         }
 
         [Fact]
@@ -216,8 +214,7 @@ namespace System.IO.Pipelines.Tests
             b => b.Slice(b.Start, 101),
             b => b.Slice(0, 70).Slice(b.End, b.End),
             b => b.Slice(0, 70).Slice(b.Start, b.End),
-            b => b.Slice(0, 70).Slice(0, b.End),
-            b => b.Slice(70, b.Start)
+            b => b.Slice(0, 70).Slice(0, b.End)
         };
     }
 }
