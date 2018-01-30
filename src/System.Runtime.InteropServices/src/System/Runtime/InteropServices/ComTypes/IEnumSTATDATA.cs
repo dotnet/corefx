@@ -13,7 +13,8 @@ namespace System.Runtime.InteropServices.ComTypes
     [ComImport()]
     [Guid("00000103-0000-0000-C000-000000000046")]
     [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IEnumSTATDATA {
+    public interface IEnumSTATDATA
+    {
 
         /// <devdoc>
         ///     Retrieves the next celt items in the enumeration sequence. If there are
