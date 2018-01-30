@@ -85,7 +85,19 @@ namespace System.Collections.Tests
         #endregion
 
         #region EnsureCapacity
-        
+
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void EnsureCapacity_RequestingLargerCapacity_DoesNotInvalidateEnumeration(int count)
+        {
+            Dictionary<TKey, TValue> dictionary = (Dictionary<TKey, TValue>)(GenericIDictionaryFactory(count));
+            var capacity = dictionary.EnsureCapacity(0);
+            ICollection<TValue> values = dictionary.Values;
+            IEnumerator<TValue> valuesEnum = values.GetEnumerator();
+            dictionary.EnsureCapacity(capacity + 1); // Verify EnsureCapacity does not invalidate enumeration
+            while (valuesEnum.MoveNext());
+        }
+
         [Fact]
         public void EnsureCapacity_NegativeCapacityRequested_Throws()
         {
