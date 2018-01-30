@@ -14,7 +14,7 @@ namespace System.Net.Security
     //
     // This is a wrapping stream that does data encryption/decryption based on a successfully authenticated SSPI context.
     //
-    internal partial class SslStreamInternal
+    internal partial class SslStreamInternal : IDisposable
     {
         private const int FrameOverhead = 32;
         private const int ReadBufferSize = 4096 * 4 + FrameOverhead;         // We read in 16K chunks + headers.
@@ -57,7 +57,27 @@ namespace System.Net.Security
 
         ~SslStreamInternal()
         {
-            if (_internalBuffer != null)
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+
+            if (_internalBuffer == null)
+            {
+                // Suppress finalizer if the read buffer was returned.
+                GC.SuppressFinalize(this);
+            }
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (_internalBuffer != null &&
+                // When disposing, ensure a Read operation is not in progress,
+                // block potential reads since Sslstream is disposing.
+                ((disposing && Interlocked.Exchange(ref _nestedRead, 1) == 0) ||
+                !disposing))
             {
                 ArrayPool<byte>.Shared.Return(_internalBuffer);
                 _internalBuffer = null;
