@@ -21,7 +21,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="System\Buffers\IMemoryList.cs" />
+    <Compile Include="System\Buffers\ReadOnlyBuffer.cs" />
+    <Compile Include="System\Buffers\ReadOnlyBuffer_helpers.cs" />
+    <Compile Include="System\Buffers\SpanLiteralExtensions.cs" />
     <Compile Include="System\MemoryExtensions.cs" />
+    <Compile Include="System\SequencePosition.cs" />
     <Compile Include="System\SpanHelpers.BinarySearch.cs" />
     <Compile Include="System\SpanHelpers.T.cs" />
     <Compile Include="System\SpanHelpers.byte.cs" />
