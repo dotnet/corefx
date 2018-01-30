@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace System.Security.Cryptography.Asn1
 {
@@ -115,7 +116,8 @@ namespace System.Security.Cryptography.Asn1
                         return fieldInfos;
                     }
 
-                    return fieldInfos.OrderBy(fi => fi.MetadataToken).ToArray();
+                    Array.Sort(fieldInfos, (x, y) => x.MetadataToken.CompareTo(y.MetadataToken));
+                    return fieldInfos;
                 });
         }
 
