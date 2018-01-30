@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Xunit;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Text;
 
 namespace System.Net.Http.Functional.Tests
 {
@@ -81,6 +82,102 @@ namespace System.Net.Http.Functional.Tests
                     return null;
                 });
             });
+        }
+
+        [Fact]
+        public async Task PostAsyncExpect100Continue_RetryOnConnectionClosed_Success()
+        {
+            Console.WriteLine("Running");
+
+            await CreateServerAndClientAsync(async url =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    // Send initial request and receive response so connection is established
+                    HttpResponseMessage response1 = await client.GetAsync(url);
+                    Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
+                    Assert.Equal(s_simpleContent, await response1.Content.ReadAsStringAsync());
+
+                    // Send second request.  Should reuse same connection.  
+                    // The server will close the connection, but HttpClient should retry the request.
+                    HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
+                    request.Headers.ExpectContinue = true;
+                    var content = new CustomContent();
+                    request.Content = content;
+
+                    HttpResponseMessage response2 = await client.SendAsync(request);
+                    Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
+                    Assert.Equal(s_simpleContent, await response1.Content.ReadAsStringAsync());
+
+                    Assert.Equal(1, content.SerializeCount);
+                }
+            },
+            async server =>
+            {
+                await LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                {
+                    Console.WriteLine("A");
+
+                    // Initial response
+                    await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, s_simpleResponse);
+
+                    Console.WriteLine("B");
+
+                    // Second response: Read request headers, then close connection
+                    List<string> lines = await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer, "");
+                    Assert.Contains("Expect: 100-continue", lines);
+                    s.Close();
+
+                    Console.WriteLine("D");
+
+                    // Client should reconnect.  Accept that connection and send response.
+                    await LoopbackServer.AcceptSocketAsync(server, async (s2, stream2, reader2, writer2) =>
+                    {
+                        Console.WriteLine("E");
+
+                        List<string> lines2 = await LoopbackServer.ReadWriteAcceptedAsync(s2, reader2, writer2, "");
+                        Assert.Contains("Expect: 100-continue", lines2);
+
+                        Console.WriteLine("F");
+
+                        await writer2.WriteAsync("HTTP/1.1 100 Continue\r\n\r\n");
+
+                        string contentLine = await reader2.ReadLineAsync();
+                        Assert.Equal(s_simpleContent, contentLine + "\r\n");
+
+                        await writer2.WriteAsync(s_simpleResponse);
+
+                        return null;
+                    });
+
+                    return null;
+                });
+            });
+        }
+
+        class CustomContent : HttpContent
+        {
+            private int _serializeCount;
+
+            public CustomContent()
+            {
+                _serializeCount = 0;
+            }
+
+            public int SerializeCount => _serializeCount;
+
+            protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
+            {
+                _serializeCount++;
+
+                await stream.WriteAsync(Encoding.UTF8.GetBytes(s_simpleContent));
+            }
+
+            protected override bool TryComputeLength(out long length)
+            {
+                length = s_simpleContent.Length;
+                return true;
+            }
         }
     }
 }
