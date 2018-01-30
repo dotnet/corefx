@@ -104,7 +104,6 @@ namespace System.Net.Http.Tests
         [Fact]
         public void HttpProxy_CredentialParsing_Basic()
         {
-
             RemoteInvoke(() =>
             {
                 IWebProxy p;

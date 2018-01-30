@@ -89,7 +89,7 @@ namespace System.Net.Http
 
         private Uri _httpProxyUri;      // String URI for HTTP requests
         private Uri _httpsProxyUri;     // String URI for HTTPS requests
-        string[] _bypass = null;        // list of domains not to proxy
+        private string[] _bypass = null;// list of domains not to proxy
         private ICredentials _credentials;
 
         public static HttpEnvironmentProxy TryToCreate()
@@ -236,14 +236,7 @@ namespace System.Net.Http
         /// </summary>
         public bool IsBypassed(Uri uri)
         {
-            bool ret =  (uri.Scheme == Uri.UriSchemeHttp ? _httpProxyUri : _httpsProxyUri) == null;
-
-            if (ret)
-            {
-                // If the is no proxy for given Scheme return right away.
-                return ret;
-            }
-            return IsMatchInBypassList(uri);
+            return GetProxy(uri) == null ? true : IsMatchInBypassList(uri);
         }
 
         public ICredentials Credentials
