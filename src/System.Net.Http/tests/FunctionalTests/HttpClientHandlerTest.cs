@@ -568,13 +568,25 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(23769)]
-        [ActiveIssue(22707, TestPlatforms.AnyUnix)]
-        [OuterLoop] // TODO: Issue #11345
         [Theory, MemberData(nameof(RedirectStatusCodesOldMethodsNewMethods))]
         public async Task AllowAutoRedirect_True_ValidateNewMethodUsedOnRedirection(
             int statusCode, string oldMethod, string newMethod)
         {
+            // Active issues for specific parameter values
+            if (UseManagedHandler)
+            {
+                if (oldMethod == "HEAD")
+                    // ActiveIssue: known issue with managed handler when pooling connections of HEAD
+                    // https://github.com/dotnet/corefx/issues/26453
+                    return;
+            }
+            else if (!PlatformDetection.IsWindows && statusCode == 300 && oldMethod == "POST")
+            {
+                // Know issue: curl does not change method to "GET"
+                // https://github.com/dotnet/corefx/issues/26434
+                newMethod = "POST";
+            }
+
             HttpClientHandler handler = CreateHttpClientHandler();
             using (var client = new HttpClient(handler))
             {

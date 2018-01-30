@@ -38,6 +38,7 @@ namespace System.Net.Test.Common
 
         private Options _options;
         private int _port;
+        private Socket _accepted;
         private TcpListener _listener;
         private VerboseTestLogging _log = VerboseTestLogging.GetInstance();
         
@@ -91,39 +92,37 @@ namespace System.Net.Test.Common
             {
                 try
                 {
-                    using (Socket accepted = await _listener.AcceptSocketAsync().ConfigureAwait(false))
+                    _accepted = await _listener.AcceptSocketAsync().ConfigureAwait(false);
+                    _log.WriteLine("[Server] Client connected.");
+
+                    using (NetworkStream ns = new NetworkStream(_accepted, ownsSocket: false))
+                    using (Stream = new SslStream(ns, false, RemoteCertificateCallback))
                     {
-                        _log.WriteLine("[Server] Client connected.");
+                        _log.WriteLine(
+                            "[Server] Authenticating. Protocols = {0}, Certificate = {1}, ClientCertRequired = {2}",
+                            _options.AllowedProtocols,
+                            _options.ServerCertificate.Subject,
+                            _options.RequireClientAuthentication);
 
-                        using (NetworkStream ns = new NetworkStream(accepted, ownsSocket: false))
-                        using (Stream = new SslStream(ns, false, RemoteCertificateCallback))
+                        await Stream.AuthenticateAsServerAsync(
+                            _options.ServerCertificate,
+                            _options.RequireClientAuthentication,
+                            _options.AllowedProtocols,
+                            false).ConfigureAwait(false);
+
+                        _log.WriteLine("[Server] Client authenticated: Protocol: {0}", Stream.SslProtocol);
+
+                        _log.WriteLine("[Server] Starting HTTP conversation.");
+
+                        if (httpConversation == null)
                         {
-                            _log.WriteLine(
-                                "[Server] Authenticating. Protocols = {0}, Certificate = {1}, ClientCertRequired = {2}",
-                                _options.AllowedProtocols,
-                                _options.ServerCertificate.Subject,
-                                _options.RequireClientAuthentication);
-
-                            await Stream.AuthenticateAsServerAsync(
-                                _options.ServerCertificate,
-                                _options.RequireClientAuthentication,
-                                _options.AllowedProtocols,
-                                false).ConfigureAwait(false);
-
-                            _log.WriteLine("[Server] Client authenticated: Protocol: {0}", Stream.SslProtocol);
-
-                            _log.WriteLine("[Server] Starting HTTP conversation.");
-
-                            if (httpConversation == null)
-                            {
-                                httpConversation = DefaultHttpConversation;
-                            }
-
-                            done = await ProcessHttp(httpConversation).ConfigureAwait(false);
+                            httpConversation = DefaultHttpConversation;
                         }
 
-                        accepted.Shutdown(SocketShutdown.Send);
+                        done = await ProcessHttp(httpConversation).ConfigureAwait(false);
                     }
+
+                    _accepted.Shutdown(SocketShutdown.Send);
                 }
                 catch (IOException ex)
                 {
@@ -186,6 +185,7 @@ namespace System.Net.Test.Common
 
         public void Dispose()
         {
+            _accepted.Dispose();
             _listener.Stop();
         }
     }
