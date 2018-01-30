@@ -10,97 +10,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public static class AsyncTest
     {
-        private const int TaskTimeout = 5000;
-
-        //[CheckConnStrSetupFact]
-        public static void ExecuteTest()
-        {
-            SqlCommand com = new SqlCommand("select * from Orders");
-            SqlConnection con = new SqlConnection(DataTestUtility.TcpConnStr);
-
-            com.Connection = con;
-
-            con.Open();
-
-            Task<SqlDataReader> readerTask = com.ExecuteReaderAsync();
-            bool taskCompleted = readerTask.Wait(TaskTimeout);
-            Assert.True(taskCompleted, "FAILED: ExecuteReaderAsync Task did not complete successfully.");
-
-            SqlDataReader reader = readerTask.Result;
-
-            int rows;
-            for (rows = 0; reader.Read(); rows++) ;
-
-            Assert.True(rows == 830, string.Format("FAILED: ExecuteTest reader had wrong number of rows. Expected: {0}. Actual: {1}", 830, rows));
-
-            reader.Dispose();
-            con.Close();
-        }
-
-        //[CheckConnStrSetupFact]
-        public static void FailureTest()
-        {
-            bool failure = false;
-            bool taskCompleted = false;
-
-            SqlCommand com = new SqlCommand("select * from Orders");
-            SqlConnection con = new SqlConnection((new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { Pooling = false }).ConnectionString);
-            com.Connection = con;
-            con.Open();
-
-            Task<int> nonQueryTask = com.ExecuteNonQueryAsync();
-            try
-            {
-                com.ExecuteNonQueryAsync().Wait(TaskTimeout);
-            }
-            catch (AggregateException agrEx)
-            {
-                agrEx.Handle(
-                    (ex) =>
-                    {
-                        Assert.True(ex is InvalidOperationException, "FAILED: Thrown exception for ExecuteNonQueryAsync was not an InvalidOperationException");
-                        failure = true;
-                        return true;
-                    });
-            }
-            Assert.True(failure, "FAILED: No exception thrown after trying second ExecuteNonQueryAsync.");
-            failure = false;
-
-            taskCompleted = nonQueryTask.Wait(TaskTimeout);
-            Assert.True(taskCompleted, "FAILED: ExecuteNonQueryAsync Task did not complete successfully.");
-
-            Task<SqlDataReader> readerTask = com.ExecuteReaderAsync();
-            try
-            {
-                com.ExecuteReaderAsync().Wait(TaskTimeout);
-            }
-            catch (AggregateException agrEx)
-            {
-                agrEx.Handle(
-                    (ex) =>
-                    {
-                        Assert.True(ex is InvalidOperationException, "FAILED: Thrown exception for ExecuteReaderAsync was not an InvalidOperationException: " + ex);
-                        failure = true;
-                        return true;
-                    });
-            }
-            Assert.True(failure, "FAILED: No exception thrown after trying second ExecuteReaderAsync.");
-
-            taskCompleted = readerTask.Wait(TaskTimeout);
-            Assert.True(taskCompleted, "FAILED: ExecuteReaderAsync Task did not complete successfully.");
-
-            readerTask.Result.Dispose();
-            con.Close();
-        }
-
-
         [CheckConnStrSetupFact]
         public static void TestReadAsync()
-        {
-            CompareReadSyncAndReadAsync();
-        }
-
-        private static async void CompareReadSyncAndReadAsync()
         {
             const string sql = "SET NOCOUNT ON"
                             + " SELECT 'a'"
@@ -110,9 +21,14 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                             + "   DROP TABLE #y"
                             + " END"
                             + " SELECT 'b'";
-            double elapsedAsync = await RunReadAsync(sql);
+            Task<double> t = RunReadAsync(sql);
             double elapsedSync = RunReadSync(sql);
-            Assert.True(elapsedAsync < (elapsedSync / 2.0d));
+            t.Wait();
+            double elapsedAsync = t.Result;
+            Assert.True(elapsedAsync < elapsedSync);
+            Assert.True(elapsedAsync < 100);
+            Console.WriteLine("Asynchronous Operation: "+ elapsedAsync+"ms");
+            Console.WriteLine("Synchronous Operation: " + elapsedSync + "ms");
         }
 
         private static async Task<double> RunReadAsync(string sql)
