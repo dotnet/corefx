@@ -15,7 +15,6 @@
   <ItemGroup>
     <Compile Include="AllocationHelper.cs" />
     <Compile Include="ReadOnlyBuffer\BufferSegment.cs" />
-    <Compile Include="ReadOnlyBuffer\OwnedArray.cs" />
     <Compile Include="ReadOnlyBuffer\ReadableBufferFacts.cs" />
     <Compile Include="ReadOnlyBuffer\ReadOnlyBufferFactory.cs" />
     <Compile Include="TInt.cs" />
