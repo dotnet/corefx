@@ -82,12 +82,12 @@ namespace System.Buffers
 
                     next = default;
                     return true;
+                default:
+                    ThrowHelper.ThrowInvalidOperationException_UnexpectedSegmentType();
+                    next = default;
+                    data = default;
+                    return false;
             }
-
-            ThrowHelper.ThrowNotSupportedException();
-            next = default;
-            data = default;
-            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -126,7 +126,7 @@ namespace System.Buffers
                     return default;
 
                 default:
-                    ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
+                    ThrowHelper.ThrowInvalidOperationException_UnexpectedSegmentType();
                     return default;
             }
         }
@@ -143,7 +143,6 @@ namespace System.Buffers
 
             switch (type)
             {
-
                 case BufferType.MemoryList:
                     if (start.Segment == end.Segment && endIndex - startIndex >= count)
                     {
@@ -163,10 +162,11 @@ namespace System.Buffers
 
                     ThrowHelper.ThrowArgumentOutOfRangeException_CountOutOfRange();
                     return default;
-            }
 
-            ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
-            return default;
+                default:
+                    ThrowHelper.ThrowInvalidOperationException_UnexpectedSegmentType();
+                    return default;
+            }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -187,7 +187,7 @@ namespace System.Buffers
                     var currentEnd = current == end ? endPosition : memory.Length;
 
                     memory = memory.Slice(0, currentEnd - currentIndex);
-                    // We would prefer to put cursor in the beginning of next segment
+                    // We would prefer to put position in the beginning of next segment
                     // then past the end of previous one, but only if we are not leaving current buffer
                     if (memory.Length > count ||
                        (memory.Length == count && current == end))
@@ -238,10 +238,10 @@ namespace System.Buffers
                 case BufferType.OwnedMemory:
                 case BufferType.Array:
                     return endIndex - startIndex;
+                default:
+                    ThrowHelper.ThrowInvalidOperationException_UnexpectedSegmentType();
+                    return default;
             }
-
-            ThrowHelper.ThrowInvalidOperationException_UnexpectedSegmentType();
-            return default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -262,10 +262,10 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void BoundsCheck(SequencePosition start, SequencePosition newCursor)
+        private void BoundsCheck(SequencePosition start, SequencePosition position)
         {
             var startIndex = start.Index;
-            var endIndex = newCursor.Index;
+            var endIndex = position.Index;
             var type = GetBufferType();
 
             startIndex = GetIndex(startIndex);
@@ -281,7 +281,7 @@ namespace System.Buffers
                     }
                     return;
                 case BufferType.MemoryList:
-                    var segment = (IMemoryList<T>)newCursor.Segment;
+                    var segment = (IMemoryList<T>)position.Segment;
                     var memoryList = (IMemoryList<T>) start.Segment;
 
                     if (segment.RunningIndex - startIndex > memoryList.RunningIndex - endIndex)
@@ -290,7 +290,7 @@ namespace System.Buffers
                     }
                     return;
                 default:
-                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+                    ThrowHelper.ThrowInvalidOperationException_UnexpectedSegmentType();
                     return;
             }
         }

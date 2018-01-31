@@ -74,11 +74,11 @@ namespace System.Memory.Tests
         }
 
         [Fact]
-        public void ReadOnlyBufferGetPosition_MovesReadCursor()
+        public void ReadOnlyBufferGetPosition_MovesPosition()
         {
             var buffer = Factory.CreateOfSize(100);
-            var cursor = buffer.GetPosition(buffer.Start, 65);
-            Assert.Equal(buffer.Slice(65).Start, cursor);
+            var position = buffer.GetPosition(buffer.Start, 65);
+            Assert.Equal(buffer.Slice(65).Start, position);
         }
 
         [Fact]

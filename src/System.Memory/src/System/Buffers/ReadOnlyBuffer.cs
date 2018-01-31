@@ -75,14 +75,14 @@ namespace System.Buffers
             BufferEnd = new SequencePosition(endSegment, endIndex);
         }
 
-        public ReadOnlyBuffer(IMemoryList<T> startSegment, int offset, IMemoryList<T> endSegment, int endIndex)
+        public ReadOnlyBuffer(IMemoryList<T> startSegment, int startIndex, IMemoryList<T> endSegment, int endIndex)
         {
             Debug.Assert(startSegment != null);
             Debug.Assert(endSegment != null);
-            Debug.Assert(startSegment.Memory.Length >= offset);
+            Debug.Assert(startSegment.Memory.Length >= startIndex);
             Debug.Assert(endSegment.Memory.Length >= endIndex);
 
-            BufferStart = new SequencePosition(startSegment, offset | MemoryListStartMask);
+            BufferStart = new SequencePosition(startSegment, startIndex | MemoryListStartMask);
             BufferEnd = new SequencePosition(endSegment, endIndex | MemoryListEndMask);
         }
 
@@ -101,14 +101,16 @@ namespace System.Buffers
             BufferEnd = new SequencePosition(array, offset + length | ArrayEndMask);
         }
 
-        public ReadOnlyBuffer(Memory<T> data)
+        // Consumer is expected to manage lifetime of memory until
+        // ReadOnlyBuffer is not used anymore
+        public ReadOnlyBuffer(Memory<T> memory)
         {
             var segment = new ReadOnlyBufferSegment
             {
-                Memory = data
+                Memory = memory
             };
             BufferStart = new SequencePosition(segment, 0 | MemoryListStartMask);
-            BufferEnd = new SequencePosition(segment, data.Length | MemoryListEndMask);
+            BufferEnd = new SequencePosition(segment, memory.Length | MemoryListEndMask);
         }
 
         public ReadOnlyBuffer(IEnumerable<Memory<T>> buffers)
@@ -164,6 +166,7 @@ namespace System.Buffers
         public ReadOnlyBuffer<T> Slice(long offset, SequencePosition end)
         {
             BoundsCheck(BufferEnd, end);
+
             var begin = Seek(BufferStart, end, offset);
             return SliceImpl(begin, end);
         }
@@ -178,7 +181,6 @@ namespace System.Buffers
             BoundsCheck(BufferEnd, start);
 
             var end = Seek(start, BufferEnd, length, false);
-
             return SliceImpl(start, end);
         }
 
@@ -202,6 +204,7 @@ namespace System.Buffers
         public ReadOnlyBuffer<T> Slice(int offset, SequencePosition end)
         {
             BoundsCheck(BufferEnd, end);
+
             var begin = Seek(BufferStart, end, offset);
             return SliceImpl(begin, end);
         }
@@ -216,7 +219,6 @@ namespace System.Buffers
             BoundsCheck(BufferEnd, start);
 
             var end = Seek(start, BufferEnd, length, false);
-
             return SliceImpl(start, end);
         }
 
@@ -267,10 +269,10 @@ namespace System.Buffers
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.destination);
             }
 
-            foreach (var buffer in this)
+            foreach (var segment in this)
             {
-                buffer.Span.CopyTo(destination);
-                destination = destination.Slice(buffer.Length);
+                segment.Span.CopyTo(destination);
+                destination = destination.Slice(segment.Length);
             }
         }
 
@@ -300,7 +302,6 @@ namespace System.Buffers
             }
             return base.ToString();
         }
-
 
         /// <summary>
         /// Returns an enumerator over the <see cref="ReadOnlyBuffer{T}"/>
@@ -337,7 +338,6 @@ namespace System.Buffers
         {
             private readonly ReadOnlyBuffer<T> _readOnlyBuffer;
             private SequencePosition _next;
-
             private ReadOnlyMemory<T> _currentMemory;
 
             /// <summary>
@@ -353,11 +353,7 @@ namespace System.Buffers
             /// <summary>
             /// The current <see cref="Memory{Byte}"/>
             /// </summary>
-            public ReadOnlyMemory<T> Current
-            {
-                get => _currentMemory;
-                set => _currentMemory = value;
-            }
+            public ReadOnlyMemory<T> Current => _currentMemory;
 
             /// <summary>
             /// Moves to the next <see cref="Memory{Byte}"/> in the <see cref="ReadOnlyBuffer{T}"/>
@@ -396,8 +392,10 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private  BufferType GetBufferType()
+        private BufferType GetBufferType()
         {
+            // We take high order bits of two indexes index and move them
+            // to a first and second position to convert to BufferType
             return (BufferType)((((uint)Start.Index >> 30) & 2) | (uint)End.Index >> 31);
         }
 
