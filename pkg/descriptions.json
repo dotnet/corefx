@@ -64,6 +64,11 @@
     "CommonTypes": []
   },
   {
+    "Name": "CoreFx.Private.TestUtilities",
+    "Description": ".",
+    "CommonTypes": []
+  },
+  {
     "Name": "Microsoft.Windows.Compatibility",
     "Description": "This Windows Compatibility Pack provides access to APIs that were previously available only for .NET Framework. It can be used from both .NET Core as well as .NET Standard.",
     "CommonTypes": []
