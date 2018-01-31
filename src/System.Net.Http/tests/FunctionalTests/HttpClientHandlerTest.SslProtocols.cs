@@ -85,7 +85,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        // Temporarily in inner loop for CI run [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(SslProtocols.Tls, false)]
         [InlineData(SslProtocols.Tls, true)]
@@ -97,12 +97,6 @@ namespace System.Net.Http.Functional.Tests
         {
             if (!BackendSupportsSslConfiguration)
             {
-                return;
-            }
-
-            if (UseManagedHandler)
-            {
-                // TODO #26186: The managed handler is failing on some OSes.
                 return;
             }
 
@@ -136,17 +130,11 @@ namespace System.Net.Http.Functional.Tests
         // instead of local ones.  We're keeping it for now (as outerloop) because it helps
         // to validate against another SSL implementation that what we mean by a particular
         // TLS version matches that other implementation.
-        [OuterLoop("Avoid www.ssllabs.com dependency in innerloop.")]
+        // Temporarily in inner loop for CI run [OuterLoop("Avoid www.ssllabs.com dependency in innerloop.")]
         [Theory]
         [MemberData(nameof(SupportedSSLVersionServers))]
         public async Task GetAsync_SupportedSSLVersion_Succeeds(SslProtocols sslProtocols, string url)
         {
-            if (UseManagedHandler)
-            {
-                // TODO #26186: The managed handler is failing on some OSes.
-                return;
-            }
-
             using (HttpClientHandler handler = CreateHttpClientHandler())
             {
                 if (PlatformDetection.IsRedHatFamily7)
