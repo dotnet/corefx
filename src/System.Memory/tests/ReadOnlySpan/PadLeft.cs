@@ -15,25 +15,25 @@ namespace System.SpanTests
             var source = new ReadOnlySpan<char>(Array.Empty<char>());
             var destination = new Span<char>(Array.Empty<char>());
 
-            source.PadLeft(0, destination);
+            source.PadLeft(destination);
             Assert.True(destination.SequenceEqual(source));
 
             char[] charArray = "abcdefg".ToCharArray();
             destination = charArray;
-            source.PadLeft(0, destination);
+            source.PadLeft(destination.Slice(0, 0));
             Assert.True(destination.SequenceEqual(charArray));
 
-            source.PadLeft(1, destination);
+            source.PadLeft(destination.Slice(0, 1));
             Assert.True(destination.SequenceEqual(" bcdefg".AsReadOnlySpan()));
         }
 
         [Fact]
-        public static void ZeroLengthPadLeftWhiteSpace()
+        public static void SourceLengthPadLeftWhiteSpace()
         {
             ReadOnlySpan<char> source = "abcde".AsReadOnlySpan();
-            Span<char> destination = new char[5];
+            Span<char> destination = new char[source.Length];
 
-            source.PadLeft(0, destination);
+            source.PadLeft(destination);
             Assert.True(destination.SequenceEqual(source));
 
             string str = "abcde".PadLeft(0);
@@ -53,7 +53,7 @@ namespace System.SpanTests
                     a[i] = 'a';
                 }
                 var source = new ReadOnlySpan<char>(a);
-                source.PadLeft(totalWidth, destination);
+                source.PadLeft(destination);
                 Assert.True(destination.Slice(length / 2).SequenceEqual(source));
 
                 var str = new string(a);
@@ -75,9 +75,9 @@ namespace System.SpanTests
                     a[i] = 'a';
                 }
                 var source = new ReadOnlySpan<char>(a);
-                source.PadLeft(totalWidth, destination);
+                source.PadLeft(destination);
                 Assert.True(destination.Slice(length / 2).SequenceEqual(source));
-                destination.AsReadOnlySpan().PadLeft(totalWidth, destination);
+                destination.AsReadOnlySpan().PadLeft(destination);
                 Assert.True(destination.Slice(length / 2).SequenceEqual(source));
 
                 var str = new string(a);
@@ -93,17 +93,13 @@ namespace System.SpanTests
             ReadOnlySpan<char> source = sourceString.AsReadOnlySpan();
             fixed (void* ptr = &MemoryMarshal.GetReference(source))
             {
-                Span<char> destination = new Span<char>(ptr, source.Length);
-                source.PadLeft(sourceString.Length, destination);
-                Assert.Equal(sourceString, new string(source.ToArray()));
-                Assert.Equal(sourceString, new string(destination.ToArray()));
-
-                source.PadLeft(sourceString.Length - 1, destination);
+                Span<char> destination = new Span<char>(ptr, sourceString.Length);
+                source.PadLeft(destination);
                 Assert.Equal(sourceString, new string(source.ToArray()));
                 Assert.Equal(sourceString, new string(destination.ToArray()));
 
                 TestHelpers.AssertThrows<ArgumentException, char>(
-                    source, destination, (_source, _destination) => _source.PadLeft(sourceString.Length + 1, _destination));
+                    source, destination, (_source, _destination) => _source.PadLeft(_destination.Slice(0, sourceString.Length - 1)));
             }
         }
 
@@ -118,7 +114,7 @@ namespace System.SpanTests
             Span<char> destination = entireBuffer;
             destination = destination.Slice(sourceString.Length - 1, entireBuffer.Length - sourceString.Length + 1);
 
-            source.PadLeft(destination.Length, destination);
+            source.PadLeft(destination);
             Assert.Equal("abcdef    abcdefg\0\0\0", new string(entireBuffer));
         }
 
@@ -133,37 +129,8 @@ namespace System.SpanTests
             Span<char> destination = entireBuffer;
             destination = destination.Slice(0, entireBuffer.Length - sourceString.Length + 1);
 
-            source.PadLeft(destination.Length, destination);
+            source.PadLeft(destination);
             Assert.Equal("    \0\0\0abcdefgbcdefg", new string(entireBuffer));
-        }
-
-        [Fact]
-        public static void PadLeftWhiteSpaceTotalWidthTooSmall()
-        {
-            int totalWidth = 10;
-            var a = new char[totalWidth * 2];
-            Span<char> destination = new char[totalWidth * 2];
-            for (int i = 0; i < a.Length; i++)
-            {
-                a[i] = 'a';
-            }
-            var source = new ReadOnlySpan<char>(a);
-            source.PadLeft(totalWidth, destination);
-            Assert.True(destination.SequenceEqual(source));
-
-            var str = new string(a);
-            str = str.PadLeft(totalWidth);
-            Assert.Equal(str, new string(destination.ToArray()));
-        }
-
-        [Fact]
-        public static void PadLeftWhiteSpaceNegativeTotalWidth()
-        {
-            string destinationData = "abcdefg";
-            var source = new char[destinationData.Length];
-            char[] destination = destinationData.ToCharArray();
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySpan<char>(source).PadLeft(-1, destination));
-            Assert.Equal(destinationData, new string(destination));
         }
 
         [Fact]
@@ -171,15 +138,12 @@ namespace System.SpanTests
         {
             string destinationData = "abcdefg";
             var source = new char[destinationData.Length + 1];
-            char[] destination = destinationData.ToCharArray();
-            Assert.Throws<ArgumentException>(() => new ReadOnlySpan<char>(source).PadLeft(source.Length, destination));
-            Assert.Throws<ArgumentException>(() => new ReadOnlySpan<char>(source).PadLeft(destination.Length - 1, destination));
-            Assert.Equal(destinationData, new string(destination));
+            char[] destArray = destinationData.ToCharArray();
+            Span<char> destination = destArray;
 
-            string destinationDataLarger = "abcdefghijk";
-            destination = destinationDataLarger.ToCharArray();
-            Assert.Throws<ArgumentException>(() => new ReadOnlySpan<char>(source).PadLeft(destination.Length + 1, destination));
-            Assert.Equal(destinationDataLarger, new string(destination));
+            TestHelpers.AssertThrows<ArgumentException, char>(
+                    source, destination, (_source, _destination) => _source.PadLeft(_destination.Slice(0, _destination.Length - 1)));
+            Assert.Equal(destinationData, new string(destArray));
         }
 
         [Fact]
@@ -187,7 +151,7 @@ namespace System.SpanTests
         {
             string sourceString = "abcdefg";
             Span<char> destination = new char[10];
-            sourceString.AsReadOnlySpan().PadLeft(10, destination);
+            sourceString.AsReadOnlySpan().PadLeft(destination);
             Assert.Equal("   abcdefg", new string(destination.ToArray()));
             ReadOnlySpan<char> result = destination.AsReadOnlySpan().TrimStart();
             Assert.Equal(sourceString, new string(result.ToArray()));
@@ -198,8 +162,8 @@ namespace System.SpanTests
         {
             string sourceString = "abcdefg";
             Span<char> destination = new char[20];
-            sourceString.AsReadOnlySpan().PadLeft(10, destination);
-            destination.Slice(0, 10).AsReadOnlySpan().PadRight(20, destination);
+            sourceString.AsReadOnlySpan().PadLeft(destination.Slice(0, 10));
+            destination.Slice(0, 10).AsReadOnlySpan().PadRight(destination);
             Assert.Equal("   abcdefg          ", new string(destination.ToArray()));
             ReadOnlySpan<char> result = destination.AsReadOnlySpan().Trim();
             Assert.Equal(sourceString, new string(result.ToArray()));
@@ -211,7 +175,7 @@ namespace System.SpanTests
             int totalWidth = 5;
             ReadOnlySpan<char> source = "abc".AsReadOnlySpan();
             Span<char> destination = "abcdefgh".ToCharArray();
-            source.PadLeft(totalWidth, destination);
+            source.PadLeft(destination.Slice(0, totalWidth));
 
             Assert.True(destination.Slice(totalWidth - source.Length, source.Length).SequenceEqual(source));
             Assert.Equal("  abcfgh", new string(destination.ToArray()));
@@ -226,25 +190,25 @@ namespace System.SpanTests
             var source = new ReadOnlySpan<char>(Array.Empty<char>());
             var destination = new Span<char>(Array.Empty<char>());
 
-            source.PadLeft(0, destination, 'z');
+            source.PadLeft(destination, 'z');
             Assert.True(destination.SequenceEqual(source));
 
             char[] charArray = "abcdefg".ToCharArray();
             destination = charArray;
-            source.PadLeft(0, destination, 'z');
+            source.PadLeft(destination.Slice(0, 0), 'z');
             Assert.True(destination.SequenceEqual(charArray));
 
-            source.PadLeft(1, destination, 'z');
+            source.PadLeft(destination.Slice(0, 1), 'z');
             Assert.True(destination.SequenceEqual("zbcdefg".AsReadOnlySpan()));
         }
 
         [Fact]
-        public static void ZeroLengthPadLeftCharacter()
+        public static void SourceLengthPadLeftCharacter()
         {
             ReadOnlySpan<char> source = "abcde".AsReadOnlySpan();
-            Span<char> destination = new char[5];
+            Span<char> destination = new char[source.Length];
 
-            source.PadLeft(0, destination, 'z');
+            source.PadLeft(destination, 'z');
             Assert.True(destination.SequenceEqual(source));
 
             string str = "abcde".PadLeft(0, 'z');
@@ -264,7 +228,7 @@ namespace System.SpanTests
                     a[i] = 'a';
                 }
                 var source = new ReadOnlySpan<char>(a);
-                source.PadLeft(totalWidth, destination, 'z');
+                source.PadLeft(destination, 'z');
                 Assert.True(destination.Slice(length / 2).SequenceEqual(source));
 
                 var str = new string(a);
@@ -286,9 +250,9 @@ namespace System.SpanTests
                     a[i] = 'a';
                 }
                 var source = new ReadOnlySpan<char>(a);
-                source.PadLeft(totalWidth, destination, 'z');
+                source.PadLeft(destination, 'z');
                 Assert.True(destination.Slice(length / 2).SequenceEqual(source));
-                destination.AsReadOnlySpan().PadLeft(totalWidth, destination, 'z');
+                destination.AsReadOnlySpan().PadLeft(destination, 'z');
                 Assert.True(destination.Slice(length / 2).SequenceEqual(source));
 
                 var str = new string(a);
@@ -305,16 +269,12 @@ namespace System.SpanTests
             fixed (void* ptr = &MemoryMarshal.GetReference(source))
             {
                 Span<char> destination = new Span<char>(ptr, source.Length);
-                source.PadLeft(sourceString.Length, destination, 'z');
-                Assert.Equal(sourceString, new string(source.ToArray()));
-                Assert.Equal(sourceString, new string(destination.ToArray()));
-
-                source.PadLeft(sourceString.Length - 1, destination, 'z');
+                source.PadLeft(destination, 'z');
                 Assert.Equal(sourceString, new string(source.ToArray()));
                 Assert.Equal(sourceString, new string(destination.ToArray()));
 
                 TestHelpers.AssertThrows<ArgumentException, char>(
-                    source, destination, (_source, _destination) => _source.PadLeft(sourceString.Length + 1, _destination, 'z'));
+                    source, destination, (_source, _destination) => _source.PadLeft(_destination.Slice(0, sourceString.Length - 1), 'z'));
             }
         }
 
@@ -329,7 +289,7 @@ namespace System.SpanTests
             Span<char> destination = entireBuffer;
             destination = destination.Slice(sourceString.Length - 1, entireBuffer.Length - sourceString.Length + 1);
 
-            source.PadLeft(destination.Length, destination, 'z');
+            source.PadLeft(destination, 'z');
             Assert.Equal("abcdefzzzzabcdefg\0\0\0", new string(entireBuffer));
         }
 
@@ -344,37 +304,8 @@ namespace System.SpanTests
             Span<char> destination = entireBuffer;
             destination = destination.Slice(0, entireBuffer.Length - sourceString.Length + 1);
 
-            source.PadLeft(destination.Length, destination, 'z');
+            source.PadLeft(destination, 'z');
             Assert.Equal("zzzz\0\0\0abcdefgbcdefg", new string(entireBuffer));
-        }
-
-        [Fact]
-        public static void PadLeftCharacterTotalWidthTooSmall()
-        {
-            int totalWidth = 10;
-            var a = new char[totalWidth * 2];
-            Span<char> destination = new char[totalWidth * 2];
-            for (int i = 0; i < a.Length; i++)
-            {
-                a[i] = 'a';
-            }
-            var source = new ReadOnlySpan<char>(a);
-            source.PadLeft(totalWidth, destination, 'z');
-            Assert.True(destination.SequenceEqual(source));
-
-            var str = new string(a);
-            str = str.PadLeft(totalWidth, 'z');
-            Assert.Equal(str, new string(destination.ToArray()));
-        }
-
-        [Fact]
-        public static void PadLeftCharacterNegativeTotalWidth()
-        {
-            string destinationData = "abcdefg";
-            var source = new char[destinationData.Length];
-            char[] destination = destinationData.ToCharArray();
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ReadOnlySpan<char>(source).PadLeft(-1, destination, 'z'));
-            Assert.Equal(destinationData, new string(destination));
         }
 
         [Fact]
@@ -382,15 +313,12 @@ namespace System.SpanTests
         {
             string destinationData = "abcdefg";
             var source = new char[destinationData.Length + 1];
-            char[] destination = destinationData.ToCharArray();
-            Assert.Throws<ArgumentException>(() => new ReadOnlySpan<char>(source).PadLeft(source.Length, destination, 'z'));
-            Assert.Throws<ArgumentException>(() => new ReadOnlySpan<char>(source).PadLeft(destination.Length - 1, destination, 'z'));
-            Assert.Equal(destinationData, new string(destination));
+            char[] destArray = destinationData.ToCharArray();
+            Span<char> destination = destArray;
 
-            string destinationDataLarger = "abcdefghijk";
-            destination = destinationDataLarger.ToCharArray();
-            Assert.Throws<ArgumentException>(() => new ReadOnlySpan<char>(source).PadLeft(destination.Length + 1, destination, 'z'));
-            Assert.Equal(destinationDataLarger, new string(destination));
+            TestHelpers.AssertThrows<ArgumentException, char>(
+                    source, destination, (_source, _destination) => _source.PadLeft(_destination.Slice(0, _destination.Length - 1)));
+            Assert.Equal(destinationData, new string(destArray));
         }
 
         [Fact]
@@ -398,7 +326,7 @@ namespace System.SpanTests
         {
             string sourceString = "abcdefg";
             Span<char> destination = new char[10];
-            sourceString.AsReadOnlySpan().PadLeft(10, destination, 'z');
+            sourceString.AsReadOnlySpan().PadLeft(destination, 'z');
             Assert.Equal("zzzabcdefg", new string(destination.ToArray()));
             ReadOnlySpan<char> result = destination.AsReadOnlySpan().TrimStart('z');
             Assert.Equal(sourceString, new string(result.ToArray()));
@@ -409,8 +337,8 @@ namespace System.SpanTests
         {
             string sourceString = "abcdefg";
             Span<char> destination = new char[20];
-            sourceString.AsReadOnlySpan().PadLeft(10, destination, 'z');
-            destination.Slice(0, 10).AsReadOnlySpan().PadRight(20, destination, 'z');
+            sourceString.AsReadOnlySpan().PadLeft(destination.Slice(0, 10), 'z');
+            destination.Slice(0, 10).AsReadOnlySpan().PadRight(destination, 'z');
             Assert.Equal("zzzabcdefgzzzzzzzzzz", new string(destination.ToArray()));
             ReadOnlySpan<char> result = destination.AsReadOnlySpan().Trim('z');
             Assert.Equal(sourceString, new string(result.ToArray()));
@@ -422,7 +350,7 @@ namespace System.SpanTests
             int totalWidth = 5;
             ReadOnlySpan<char> source = "abc".AsReadOnlySpan();
             Span<char> destination = "abcdefgh".ToCharArray();
-            source.PadLeft(totalWidth, destination, 'z');
+            source.PadLeft(destination.Slice(0, totalWidth), 'z');
 
             Assert.True(destination.Slice(totalWidth - source.Length, source.Length).SequenceEqual(source));
             Assert.Equal("zzabcfgh", new string(destination.ToArray()));
