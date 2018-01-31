@@ -1,14 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <PackageConfigurations>
-      netstandard;
-      netstandard1.1;
-      uap10.0.15138;
-    </PackageConfigurations>
     <BuildConfigurations>
-      $(PackageConfigurations);
-      uap;
+      uap10.0.15138;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
