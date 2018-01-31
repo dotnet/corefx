@@ -114,12 +114,12 @@ namespace System.Memory.Tests
             bufferSegment2.Memory = new byte[50];
             bufferSegment1.SetNext(bufferSegment2);
 
-            var ReadOnlyBuffer = new ReadOnlyBuffer<byte>(bufferSegment1, 0, bufferSegment2, 50);
+            var buffer = new ReadOnlyBuffer<byte>(bufferSegment1, 0, bufferSegment2, 50);
 
-            var c1 = ReadOnlyBuffer.GetPosition(ReadOnlyBuffer.Start, 25); // segment 1 index 75
-            var c2 = ReadOnlyBuffer.GetPosition(ReadOnlyBuffer.Start, 55); // segment 2 index 5
+            var c1 = buffer.GetPosition(buffer.Start, 25); // segment 1 index 75
+            var c2 = buffer.GetPosition(buffer.Start, 55); // segment 2 index 5
 
-            var sliced = ReadOnlyBuffer.Slice(c1, c2);
+            var sliced = buffer.Slice(c1, c2);
 
             Assert.Equal(30, sliced.Length);
         }
