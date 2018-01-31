@@ -46,6 +46,7 @@ namespace System.Security.Cryptography.Pkcs
     }
     public sealed partial class Rfc3161TimestampToken
     {
+        private Rfc3161TimestampToken() { }
         public Rfc3161TimestampTokenInfo TokenInfo => throw null;
         public SignedCms AsSignedCms() => throw null;
         public bool VerifyData(ReadOnlySpan<byte> data) => throw null;
