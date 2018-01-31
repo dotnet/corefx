@@ -17,7 +17,7 @@ namespace System.Memory.Tests
 
         public class OwnedMemory: ReadOnlyBufferFacts
         {
-            public OwnedMemory() : base(ReadOnlyBufferFactory.OwnedMemory) { }
+            public OwnedMemory() : base(ReadOnlyBufferFactory.Memory) { }
         }
 
         public class SingleSegment: ReadOnlyBufferFacts
@@ -122,12 +122,8 @@ namespace System.Memory.Tests
             // 0               50           100    0             50             100
             // [                ##############] -> [##############                ]
             //                         ^c1            ^c2
-            var bufferSegment1 = new BufferSegment();
-            bufferSegment1.Memory = new byte[49];
-
-            var bufferSegment2 = new BufferSegment();
-            bufferSegment2.Memory = new byte[50];
-            bufferSegment1.SetNext(bufferSegment2);
+            var bufferSegment1 = new BufferSegment(new byte[49]);
+            var bufferSegment2 = bufferSegment1.Append(new byte[50]);
 
             var buffer = new ReadOnlyBuffer<byte>(bufferSegment1, 0, bufferSegment2, 50);
 
@@ -142,17 +138,8 @@ namespace System.Memory.Tests
         [Fact]
         public void GetPositionPrefersNextSegment()
         {
-            var bufferSegment1 = new BufferSegment
-            {
-                Memory = new byte[50]
-            };
-
-            var bufferSegment2 = new BufferSegment
-            {
-                Memory = new byte[0]
-            };
-
-            bufferSegment1.SetNext(bufferSegment2);
+            var bufferSegment1 = new BufferSegment(new byte[50]);
+            var bufferSegment2 = bufferSegment1.Append(new byte[0]);
 
             var buffer = new ReadOnlyBuffer<byte>(bufferSegment1, 0, bufferSegment2, 0);
 
@@ -165,23 +152,9 @@ namespace System.Memory.Tests
         [Fact]
         public void GetPositionDoesNotCrossOutsideBuffer()
         {
-            var bufferSegment1 = new BufferSegment
-            {
-                Memory = new byte[100]
-            };
-
-            var bufferSegment2 = new BufferSegment
-            {
-                Memory = new byte[100]
-            };
-
-            var bufferSegment3 = new BufferSegment
-            {
-                Memory = new byte[0]
-            };
-
-            bufferSegment1.SetNext(bufferSegment2);
-            bufferSegment2.SetNext(bufferSegment3);
+            var bufferSegment1 = new BufferSegment(new byte[100]);
+            var bufferSegment2 = bufferSegment1.Append(new byte[100]);
+            var bufferSegment3 = bufferSegment2.Append(new byte[0]);
 
             var buffer = new ReadOnlyBuffer<byte>(bufferSegment1, 0, bufferSegment2, 100);
 

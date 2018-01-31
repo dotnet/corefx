@@ -11,7 +11,7 @@ namespace System.Memory.Tests
     public abstract class ReadOnlyBufferFactory
     {
         public static ReadOnlyBufferFactory Array { get; } = new ArrayTestBufferFactory();
-        public static ReadOnlyBufferFactory OwnedMemory { get; } = new MemoryTestBufferFactory();
+        public static ReadOnlyBufferFactory Memory { get; } = new MemoryTestBufferFactory();
         public static ReadOnlyBufferFactory SingleSegment { get; } = new SingleSegmentTestBufferFactory();
         public static ReadOnlyBufferFactory SegmentPerByte { get; } = new BytePerSegmentTestBufferFactory();
 
@@ -113,20 +113,16 @@ namespace System.Memory.Tests
                 }
 
                 // Create a segment that has offset relative to the OwnedMemory and OwnedMemory itself has offset relative to array
-                var current = new BufferSegment
-                {
-                    Memory = new Memory<byte>(chars).Slice(length, length)
-                };
+                var memory = new Memory<byte>(chars).Slice(length, length);
 
                 if (first == null)
                 {
-                    first = current;
-                    last = current;
+                    first = new BufferSegment(memory);
+                    last = first;
                 }
                 else
                 {
-                    last.SetNext(current);
-                    last = current;
+                    last = last.Append(memory);
                 }
                 i++;
             } while (i < inputs.Length);

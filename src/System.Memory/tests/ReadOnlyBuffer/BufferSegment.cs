@@ -3,12 +3,16 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
-using System.Diagnostics;
 
 namespace System.Memory.Tests
 {
     internal class BufferSegment : IMemoryList<byte>
     {
+        public BufferSegment(Memory<byte> memory)
+        {
+            Memory = memory;
+        }
+
         /// <summary>
         /// Combined length of all segments before this
         /// </summary>
@@ -18,21 +22,14 @@ namespace System.Memory.Tests
 
         public IMemoryList<byte> Next { get; private set; }
 
-        public void SetNext(BufferSegment segment)
+        public BufferSegment Append(Memory<byte> memory)
         {
-            Debug.Assert(segment != null);
-            Debug.Assert(Next == null);
-
-            Next = segment;
-
-            segment = this;
-
-            while (segment.Next != null)
+            var segment = new BufferSegment(memory)
             {
-                var next = (BufferSegment)segment.Next;
-                next.RunningIndex = segment.RunningIndex + segment.Memory.Length;
-                segment = next;
-            }
+                RunningIndex = RunningIndex + Memory.Length
+            };
+            Next = segment;
+            return segment;
         }
     }
 }
