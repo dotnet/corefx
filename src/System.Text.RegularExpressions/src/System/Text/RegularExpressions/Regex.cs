@@ -111,6 +111,7 @@ namespace System.Text.RegularExpressions
         internal bool _refsInitialized = false;
 
         internal static LinkedList<CachedCodeEntry> s_livecode = new LinkedList<CachedCodeEntry>();// the cache of code and factories that are currently loaded
+        internal static Dictionary<CachedCodeEntryKey, CachedCodeEntry> s_livecode_dict = new Dictionary<CachedCodeEntryKey, CachedCodeEntry>();
         internal static int s_cacheSize = 15;
 
         internal const int MaxOptionShift = 10;
@@ -364,7 +365,11 @@ namespace System.Text.RegularExpressions
                     lock (s_livecode)
                     {
                         while (s_livecode.Count > s_cacheSize)
-                            s_livecode.RemoveLast();
+						{
+							var last = s_livecode.Last;
+							s_livecode_dict.Remove(last.Value._key);
+							s_livecode.RemoveLast();
+						}
                     }
                 }
             }
@@ -1030,18 +1035,14 @@ namespace System.Text.RegularExpressions
         {
             lock (s_livecode)
             {
-                for (LinkedListNode<CachedCodeEntry> current = s_livecode.First; current != null; current = current.Next)
+                if (s_livecode_dict.ContainsKey(key))
                 {
-                    if (current.Value._key == key)
-                    {
-                        // If we find an entry in the cache, move it to the head at the same time.
-                        s_livecode.Remove(current);
-                        s_livecode.AddFirst(current);
-                        return current.Value;
-                    }
+                    var entry = s_livecode_dict[key];
+                    s_livecode.Remove(entry);
+                    s_livecode.AddFirst(entry);
+                    return entry;
                 }
             }
-
             return null;
         }
 
@@ -1055,23 +1056,25 @@ namespace System.Text.RegularExpressions
             lock (s_livecode)
             {
                 // first look for it in the cache and move it to the head
-                for (LinkedListNode<CachedCodeEntry> current = s_livecode.First; current != null; current = current.Next)
+                if (s_livecode_dict.ContainsKey(key))
                 {
-                    if (current.Value._key == key)
-                    {
-                        s_livecode.Remove(current);
-                        s_livecode.AddFirst(current);
-                        return current.Value;
-                    }
+                    var entry = s_livecode_dict[key];
+                    s_livecode.Remove(entry);
+                    s_livecode.AddFirst(entry);
+                    return entry;
                 }
-
                 // it wasn't in the cache, so we'll add a new one.  Shortcut out for the case where cacheSize is zero.
-                if (s_cacheSize != 0)
+                else if(s_cacheSize != 0)
                 {
                     newcached = new CachedCodeEntry(key, capnames, capslist, _code, caps, capsize, _runnerref, _replref);
+                    s_livecode_dict.Add(key, newcached);
                     s_livecode.AddFirst(newcached);
                     if (s_livecode.Count > s_cacheSize)
+                    {
+                        var last = s_livecode.Last;
+                        s_livecode_dict.Remove(last.Value._key);
                         s_livecode.RemoveLast();
+                    }
                 }
             }
 
