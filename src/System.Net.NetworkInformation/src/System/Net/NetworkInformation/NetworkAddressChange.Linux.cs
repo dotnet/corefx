@@ -35,33 +35,37 @@ namespace System.Net.NetworkInformation
         {
             add
             {
-                lock (s_gate)
+                if (value != null)
                 {
-                    if (s_socket == 0 && value != null)
+                    lock (s_gate)
                     {
-                        CreateSocket();
-                    }
+                        if (s_socket == 0)
+                        {
+                            CreateSocket();
+                        }
 
-                    if (value != null)
-                    {
                         s_addressChangedSubscribers.TryAdd(value, ExecutionContext.Capture());
                     }
                 }
             }
             remove
             {
-                lock (s_gate)
+                if (value != null)
                 {
-                    if (s_addressChangedSubscribers.Count == 0 && s_availabilityChangedSubscribers.Count == 0)
+                    lock (s_gate)
                     {
-                        Debug.Assert(s_socket == 0, "s_socket != 0, but there are no subscribers to NetworkAddressChanged or NetworkAvailabilityChanged.");
-                        return;
-                    }
+                        if (s_addressChangedSubscribers.Count == 0 && s_availabilityChangedSubscribers.Count == 0)
+                        {
+                            Debug.Assert(s_socket == 0,
+                                "s_socket != 0, but there are no subscribers to NetworkAddressChanged or NetworkAvailabilityChanged.");
+                            return;
+                        }
 
-                    s_addressChangedSubscribers.Remove(value);
-                    if (s_addressChangedSubscribers.Count == 0 && s_availabilityChangedSubscribers.Count == 0)
-                    {
-                        CloseSocket();
+                        s_addressChangedSubscribers.Remove(value);
+                        if (s_addressChangedSubscribers.Count == 0 && s_availabilityChangedSubscribers.Count == 0)
+                        {
+                            CloseSocket();
+                        }
                     }
                 }
             }
@@ -71,64 +75,68 @@ namespace System.Net.NetworkInformation
         {
             add
             {
-                lock (s_gate)
+                if (value != null)
                 {
-                    if (s_socket == 0)
+                    lock (s_gate)
                     {
-                        CreateSocket();
-                    }
-
-                    if (s_availabilityTimer == null && value != null)
-                    {
-                        // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live forever
-                        bool restoreFlow = false;
-                        try
+                        if (s_socket == 0)
                         {
-                            if (!ExecutionContext.IsFlowSuppressed())
+                            CreateSocket();
+                        }
+
+                        if (s_availabilityTimer == null)
+                        {
+                            // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live forever
+                            bool restoreFlow = false;
+                            try
                             {
-                                ExecutionContext.SuppressFlow();
-                                restoreFlow = true;
+                                if (!ExecutionContext.IsFlowSuppressed())
+                                {
+                                    ExecutionContext.SuppressFlow();
+                                    restoreFlow = true;
+                                }
+
+                                s_availabilityTimer = new Timer(s_availabilityTimerFiredCallback, null, Timeout.Infinite, Timeout.Infinite);
                             }
-
-                            s_availabilityTimer = new Timer(s_availabilityTimerFiredCallback, null, -1, -1);
+                            finally
+                            {
+                                // Restore the current ExecutionContext
+                                if (restoreFlow)
+                                    ExecutionContext.RestoreFlow();
+                            }
                         }
-                        finally
-                        {
-                            // Restore the current ExecutionContext
-                            if (restoreFlow)
-                                ExecutionContext.RestoreFlow();
-                        }
-                    }
 
-                    if (value != null)
-                    {
                         s_availabilityChangedSubscribers.TryAdd(value, ExecutionContext.Capture());
                     }
                 }
             }
             remove
             {
-                lock (s_gate)
+                if (value != null)
                 {
-                    if (s_addressChangedSubscribers.Count == 0 && s_availabilityChangedSubscribers.Count == 0)
+                    lock (s_gate)
                     {
-                        Debug.Assert(s_socket == 0, "s_socket != 0, but there are no subscribers to NetworkAddressChanged or NetworkAvailabilityChanged.");
-                        return;
-                    }
-
-                    s_availabilityChangedSubscribers.Remove(value);
-                    if (s_availabilityChangedSubscribers.Count == 0)
-                    {
-                        if (s_availabilityTimer != null)
+                        if (s_addressChangedSubscribers.Count == 0 && s_availabilityChangedSubscribers.Count == 0)
                         {
-                            s_availabilityTimer.Dispose();
-                            s_availabilityTimer = null;
-                            s_availabilityHasChanged = false;
+                            Debug.Assert(s_socket == 0,
+                                "s_socket != 0, but there are no subscribers to NetworkAddressChanged or NetworkAvailabilityChanged.");
+                            return;
                         }
 
-                        if (s_addressChangedSubscribers.Count == 0)
+                        s_availabilityChangedSubscribers.Remove(value);
+                        if (s_availabilityChangedSubscribers.Count == 0)
                         {
-                            CloseSocket();
+                            if (s_availabilityTimer != null)
+                            {
+                                s_availabilityTimer.Dispose();
+                                s_availabilityTimer = null;
+                                s_availabilityHasChanged = false;
+                            }
+
+                            if (s_addressChangedSubscribers.Count == 0)
+                            {
+                                CloseSocket();
+                            }
                         }
                     }
                 }
@@ -246,18 +254,21 @@ namespace System.Net.NetworkInformation
         {
             Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> availabilityChangedSubscribers = null;
 
-            bool changed;
             lock (s_gate)
             {
-                changed = s_availabilityHasChanged;
-                s_availabilityHasChanged = false;
-                if (s_availabilityChangedSubscribers.Count > 0)
+                if (s_availabilityHasChanged)
                 {
-                    availabilityChangedSubscribers = new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>(s_availabilityChangedSubscribers);
+                    s_availabilityHasChanged = false;
+                    if (s_availabilityChangedSubscribers.Count > 0)
+                    {
+                        availabilityChangedSubscribers =
+                            new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>(
+                                s_availabilityChangedSubscribers);
+                    }
                 }
             }
 
-            if (changed && availabilityChangedSubscribers != null)
+            if (availabilityChangedSubscribers != null)
             {
                 bool isAvailable = NetworkInterface.GetIsNetworkAvailable();
                 NetworkAvailabilityEventArgs args = isAvailable ? s_availableEventArgs : s_notAvailableEventArgs;

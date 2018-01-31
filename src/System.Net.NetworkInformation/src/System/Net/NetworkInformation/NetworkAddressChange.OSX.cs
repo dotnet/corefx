@@ -49,31 +49,34 @@ namespace System.Net.NetworkInformation
         {
             add
             {
-                lock (s_lockObj)
+                if (value != null)
                 {
-                    if (s_addressChangedSubscribers.Count == 0 && 
-                        s_availabilityChangedSubscribers.Count == 0 &&
-                        value != null)
+                    lock (s_lockObj)
                     {
-                        CreateAndStartRunLoop();
-                    }
+                        if (s_addressChangedSubscribers.Count == 0 && 
+                            s_availabilityChangedSubscribers.Count == 0)
+                        {
+                            CreateAndStartRunLoop();
+                        }
 
-                    if (value != null)
-                    {
                         s_addressChangedSubscribers.TryAdd(value, ExecutionContext.Capture());
                     }
                 }
             }
             remove
             {
-                lock (s_lockObj)
+                if (value != null)
                 {
-                    bool hadAddressChangedSubscribers = s_addressChangedSubscribers.Count != 0;
-                    s_addressChangedSubscribers.Remove(value);
-
-                    if (hadAddressChangedSubscribers && s_addressChangedSubscribers.Count == 0 && s_availabilityChangedSubscribers.Count == 0)
+                    lock (s_lockObj)
                     {
-                        StopRunLoop();
+                        bool hadAddressChangedSubscribers = s_addressChangedSubscribers.Count != 0;
+                        s_addressChangedSubscribers.Remove(value);
+
+                        if (hadAddressChangedSubscribers && s_addressChangedSubscribers.Count == 0 &&
+                            s_availabilityChangedSubscribers.Count == 0)
+                        {
+                            StopRunLoop();
+                        }
                     }
                 }
             }
@@ -83,35 +86,39 @@ namespace System.Net.NetworkInformation
         {
             add
             {
-                lock (s_lockObj)
+                if (value != null)
                 {
-                    if (s_addressChangedSubscribers.Count == 0 && 
-                        s_availabilityChangedSubscribers.Count == 0 &&
-                        value != null)
+                    lock (s_lockObj)
                     {
-                        CreateAndStartRunLoop();
-                    }
-                    else
-                    {
-                        Debug.Assert(s_runLoop != IntPtr.Zero);
-                    }
+                        if (s_addressChangedSubscribers.Count == 0 &&
+                            s_availabilityChangedSubscribers.Count == 0)
+                        {
+                            CreateAndStartRunLoop();
+                        }
+                        else
+                        {
+                            Debug.Assert(s_runLoop != IntPtr.Zero);
+                        }
 
-                    if (value != null)
-                    {
                         s_availabilityChangedSubscribers.TryAdd(value, ExecutionContext.Capture());
                     }
                 }
             }
             remove
             {
-                lock (s_lockObj)
+                if (value != null)
                 {
-                    bool hadSubscribers = s_addressChangedSubscribers.Count != 0 || s_availabilityChangedSubscribers.Count != 0;
-                    s_availabilityChangedSubscribers.Remove(value);
-
-                    if (hadSubscribers && s_addressChangedSubscribers.Count == 0 && s_availabilityChangedSubscribers.Count == 0)
+                    lock (s_lockObj)
                     {
-                        StopRunLoop();
+                        bool hadSubscribers = s_addressChangedSubscribers.Count != 0 ||
+                                              s_availabilityChangedSubscribers.Count != 0;
+                        s_availabilityChangedSubscribers.Remove(value);
+
+                        if (hadSubscribers && s_addressChangedSubscribers.Count == 0 &&
+                            s_availabilityChangedSubscribers.Count == 0)
+                        {
+                            StopRunLoop();
+                        }
                     }
                 }
             }
