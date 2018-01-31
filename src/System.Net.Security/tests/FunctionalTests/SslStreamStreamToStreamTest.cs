@@ -344,6 +344,8 @@ namespace System.Net.Security.Tests
                     Assert.IsType<ObjectDisposedException>(serverException.InnerException);
                 }
 
+                await Assert.ThrowsAsync<ObjectDisposedException>(() => serverSslStream.ReadAsync(serverBuffer, 0, serverBuffer.Length));
+
                 // Now, there is no pending read, so the internal buffer will be returned to ArrayPool.
                 serverSslStream.Dispose();
                 await Assert.ThrowsAsync<ObjectDisposedException>(() => serverSslStream.ReadAsync(serverBuffer, 0, serverBuffer.Length));

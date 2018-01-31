@@ -73,14 +73,20 @@ namespace System.Net.Security
 
         private void Dispose(bool disposing)
         {
-            if (_internalBuffer != null &&
-                // When disposing, ensure a Read operation is not in progress,
-                // block potential reads since Sslstream is disposing.
-                ((disposing && Interlocked.Exchange(ref _nestedRead, 1) == 0) ||
-                !disposing))
+            // Ensure a Read operation is not in progress,
+            // block potential reads since SslStream is disposing.
+            // This leaves the _nestedRead = 1, but that's ok, since
+            // subsequent Reads first check if the context is still available.
+            if (Interlocked.CompareExchange(ref _nestedRead, 1, 0) == 0)
             {
-                ArrayPool<byte>.Shared.Return(_internalBuffer);
-                _internalBuffer = null;
+                byte[] buffer = _internalBuffer;
+                if (buffer != null)
+                {
+                    _internalBuffer = null;
+                    _internalBufferCount = 0;
+                    _internalOffset = 0;
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
             }
         }
 
