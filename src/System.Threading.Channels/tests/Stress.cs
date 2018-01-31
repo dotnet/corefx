@@ -11,46 +11,123 @@ namespace System.Threading.Channels.Tests
 {
     public class StressTests
     {
+        public delegate Task<bool> Read(ChannelReader<int> reader);
+        public delegate Task Write(ChannelWriter<int> writer, int value);
+
         public static IEnumerable<object[]> TestData()
         {
+            foreach (var readDelegate in new Read[] { ReadSynchronous, ReadASynchronous, ReadSyncAndASync} )
+            foreach (var writeDelegate in new Write[] { WriteSynchronous, WriteASynchronous, WriteSyncAndASync} )
             foreach (bool singleReader in new [] {false, true})
-                foreach (bool singleWriter in new [] {false, true})
-                    foreach (bool allowSynchronousContinuations in new [] {false, true})
-                    {
-                        Func<ChannelOptions, Channel<int>> unbounded = o => Channel.CreateUnbounded<int>((UnboundedChannelOptions)o);
-                        yield return new object[] { unbounded, new UnboundedChannelOptions
-                                                                    {
-                                                                        SingleReader = singleReader,
-                                                                        SingleWriter = singleWriter,
-                                                                        AllowSynchronousContinuations = allowSynchronousContinuations
-                                                                    }};
-                    }
+            foreach (bool singleWriter in new [] {false, true})
+            foreach (bool allowSynchronousContinuations in new [] {false, true})
+            {
+                Func<ChannelOptions, Channel<int>> unbounded = o => Channel.CreateUnbounded<int>((UnboundedChannelOptions)o);
+                yield return new object[] { unbounded, new UnboundedChannelOptions
+                                                            {
+                                                                SingleReader = singleReader,
+                                                                SingleWriter = singleWriter,
+                                                                AllowSynchronousContinuations = allowSynchronousContinuations
+                                                            }, readDelegate, writeDelegate
+                };
+            }
 
+            foreach (var readDelegate in new Read[] { ReadSynchronous, ReadASynchronous, ReadSyncAndASync} )
+            foreach (var writeDelegate in new Write[] { WriteSynchronous, WriteASynchronous, WriteSyncAndASync} )
             for (BoundedChannelFullMode bco = BoundedChannelFullMode.Wait;  bco <= BoundedChannelFullMode.DropWrite; bco++)
-                foreach (int capacity in new [] { 1, 1000 })
-                    foreach (bool singleReader in new [] {false, true})
-                        foreach (bool singleWriter in new [] {false, true})
-                            foreach (bool allowSynchronousContinuations in new [] {false, true})
-                            {
-                                Func<ChannelOptions, Channel<int>> bounded = o => Channel.CreateBounded<int>((BoundedChannelOptions)o);
-                                yield return new object[] { bounded, new BoundedChannelOptions(capacity)
-                                                                        {
-                                                                            SingleReader = singleReader,
-                                                                            SingleWriter = singleWriter,
-                                                                            AllowSynchronousContinuations = allowSynchronousContinuations,
-                                                                            FullMode = bco
-                                                                        }};
-                            }
-
+            foreach (int capacity in new [] { 1, 1000 })
+            foreach (bool singleReader in new [] {false, true})
+            foreach (bool singleWriter in new [] {false, true})
+            foreach (bool allowSynchronousContinuations in new [] {false, true})
+            {
+                Func<ChannelOptions, Channel<int>> bounded = o => Channel.CreateBounded<int>((BoundedChannelOptions)o);
+                yield return new object[] { bounded, new BoundedChannelOptions(capacity)
+                                                        {
+                                                            SingleReader = singleReader,
+                                                            SingleWriter = singleWriter,
+                                                            AllowSynchronousContinuations = allowSynchronousContinuations,
+                                                            FullMode = bco
+                                                            }, readDelegate, writeDelegate
+                };
+            }
         }
 
-        const int MaxNumberToWriteToChannel = 1_000_000;
+        private static async Task<bool> ReadSynchronous(ChannelReader<int> reader)
+        {
+            while (!reader.TryRead(out int value))
+            {
+                if (!await reader.WaitToReadAsync())
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static async Task<bool> ReadASynchronous(ChannelReader<int> reader)
+        {
+            if (await reader.WaitToReadAsync())
+            {
+                await reader.ReadAsync();
+                return true;
+            }
+
+            return false;
+        }
+
+        private static async Task<bool> ReadSyncAndASync(ChannelReader<int> reader)
+        {
+            if (!reader.TryRead(out int value))
+            {
+                if (await reader.WaitToReadAsync())
+                {
+                    await reader.ReadAsync();
+                    return true;
+                }
+                return false;
+            }
+
+            return true;
+        }
+
+        private static async Task WriteSynchronous(ChannelWriter<int> writer, int value)
+        {
+            while (!writer.TryWrite(value))
+            {
+                if (!await writer.WaitToWriteAsync())
+                {
+                    break;
+                }
+            }
+        }
+
+        private static async Task WriteASynchronous(ChannelWriter<int> writer, int value)
+        {
+            if (await writer.WaitToWriteAsync())
+            {
+                await writer.WriteAsync(value);
+            }
+        }
+
+        private static async Task WriteSyncAndASync(ChannelWriter<int> writer, int value)
+        {
+            if (!writer.TryWrite(value))
+            {
+                if (await writer.WaitToWriteAsync())
+                {
+                    await writer.WriteAsync(value);
+                }
+            }
+        }
+
+        const int MaxNumberToWriteToChannel = 400_000;
         private static readonly int MaxTaskCounts = Math.Max(2, Environment.ProcessorCount);
 
         [OuterLoop]
         [Theory]
         [MemberData(nameof(TestData))]
-        public void RunInStressMode(Func<ChannelOptions, Channel<int>> channelCreator, ChannelOptions options)
+        public void RunInStressMode(Func<ChannelOptions, Channel<int>> channelCreator, ChannelOptions options, Read readDelegate, Write writeDelegate)
         {
             Channel<int> channel = channelCreator(options);
             ChannelReader<int> reader = channel.Reader;
@@ -85,20 +162,17 @@ namespace System.Threading.Channels.Tests
             {
                 taskList.Add(Task.Run(async delegate
                 {
-                    while (true)
+                    try
                     {
-                        try
+                        while (true)
                         {
-                            if (!reader.TryRead(out int value))
-                            {
-                                value = await reader.ReadAsync();
-                            }
+                            if (!await readDelegate(reader))
+                                break;
                             Interlocked.Increment(ref readCount);
                         }
-                        catch (ChannelClosedException)
-                        {
-                            break;
-                        }
+                    }
+                    catch (ChannelClosedException)
+                    {
                     }
                 }));
             }
@@ -113,7 +187,7 @@ namespace System.Threading.Channels.Tests
                     int num = Interlocked.Increment(ref numberToWriteToQueue);
                     while (num < MaxNumberToWriteToChannel)
                     {
-                        await writer.WriteAsync(num);
+                        await writeDelegate(writer, num);
                         num = Interlocked.Increment(ref numberToWriteToQueue);
                     }
 
@@ -130,15 +204,6 @@ namespace System.Threading.Channels.Tests
             {
                 Assert.Equal(MaxNumberToWriteToChannel, readCount);
             }
-
-            // string message = $"{channel.GetType().Name}:  " +
-            //                  $"SingleReader: {options.SingleReader}, " +
-            //                  $"SingleWriter: {options.SingleWriter}, " +
-            //                  $"AllowSynchronousContinuations: {options.AllowSynchronousContinuations}, " +
-            //                  (boundedOptions == null ? "" : $"Mode: {boundedOptions.FullMode}, Capacity: {boundedOptions.Capacity},") +
-            //                  $"read: {readCount}, " +
-            //                  $"Max: {MaxNumberToWriteToChannel}";
-            // Console.WriteLine(message);
         }
     }
 }
