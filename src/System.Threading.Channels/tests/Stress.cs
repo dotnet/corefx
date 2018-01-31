@@ -198,12 +198,15 @@ namespace System.Threading.Channels.Tests
 
             Task.WaitAll(taskList.ToArray());
 
-            Assert.True(readCount <= MaxNumberToWriteToChannel);
-
             if (shouldReadAllWrittenValues)
             {
                 Assert.Equal(MaxNumberToWriteToChannel, readCount);
             }
+            else
+            {
+                Assert.InRange(readCount, 0, MaxNumberToWriteToChannel);
+            }
+
         }
     }
 }
