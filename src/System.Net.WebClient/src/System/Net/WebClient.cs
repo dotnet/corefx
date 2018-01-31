@@ -876,7 +876,7 @@ namespace System.Net
                     writeStream.SetLength(copyBuffer.Length);
                 }
                 
-                if (contentLength > 0)
+                if (contentLength >= 0)
                 {
                     _progress.TotalBytesToReceive = contentLength;
                 }
