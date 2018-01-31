@@ -215,7 +215,7 @@ namespace System.Security.Cryptography.Pkcs
             
             return CreateFromHash(
                 hash,
-                new Oid(oidStr),
+                new Oid(oidStr, oidStr),
                 requestedPolicyId,
                 nonce,
                 requestSignerCertificates,
@@ -256,8 +256,13 @@ namespace System.Security.Cryptography.Pkcs
 
             // The RFC implies DER (see TryParse), and DER is the most widely understood given that
             // CER isn't specified.
-            AsnWriter writer = AsnSerializer.Serialize(req, AsnEncodingRules.DER);
+            const AsnEncodingRules ruleSet = AsnEncodingRules.DER;
+            AsnWriter writer = AsnSerializer.Serialize(req, ruleSet);
+            byte[] encodedBytes = writer.Encode();
 
+            // Make sure everything normalizes
+            req = AsnSerializer.Deserialize<Rfc3161TimeStampReq>(encodedBytes, ruleSet);
+            
             return new Rfc3161TimestampRequest
             {
                 _encodedBytes = writer.Encode(),

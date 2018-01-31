@@ -49,7 +49,8 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 hashAlgorithmId,
                 requestSignerCertificates: true);
 
-            Assert.Same(hashAlgorithmId, request.HashAlgorithmId);
+            Assert.NotSame(hashAlgorithmId, request.HashAlgorithmId);
+            Assert.Equal(hashAlgorithmId.Value, request.HashAlgorithmId.Value);
 
             VerifyExpectedRequest(request, viaSpan);
         }
@@ -177,7 +178,8 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(512 / 8, req.GetMessageHash().Length);
             Assert.Equal(Oids.Sha512, req.HashAlgorithmId.Value);
             Assert.NotNull(req.RequestedPolicyId);
-            Assert.Same(requestedPolicyOid, req.RequestedPolicyId);
+            Assert.NotSame(requestedPolicyOid, req.RequestedPolicyId);
+            Assert.Equal(requestedPolicyOid.Value, req.RequestedPolicyId.Value);
             Assert.True(req.GetNonce().HasValue, "req.GetNonce().HasValue");
             Assert.Equal(nonce.ByteArrayToHex(), req.GetNonce().Value.ByteArrayToHex());
             Assert.True(req.RequestSignerCertificate, "req.RequestSignerCertificate");
@@ -677,6 +679,61 @@ namespace System.Security.Cryptography.Pkcs.Tests
             {
                 Assert.Throws<CryptographicException>(() => request.ProcessResponse(inputBytes, out bytesRead));
             }
+        }
+
+        [Fact]
+        public static void EmptyNonce()
+        {
+            byte[] sha256 = new byte[256 / 8];
+
+            Rfc3161TimestampRequest req = Rfc3161TimestampRequest.CreateFromHash(
+                sha256,
+                HashAlgorithmName.SHA256,
+                nonce: Array.Empty<byte>());
+
+            Assert.Equal("00", req.GetNonce().Value.ByteArrayToHex());
+        }
+
+        [Fact]
+        public static void NegativeNonceIsMadePositive()
+        {
+            byte[] sha256 = new byte[256 / 8];
+            byte[] nonce = { 0xFE };
+
+            Rfc3161TimestampRequest req = Rfc3161TimestampRequest.CreateFromHash(
+                sha256,
+                HashAlgorithmName.SHA256,
+                nonce: nonce);
+
+            Assert.Equal("00FE", req.GetNonce().Value.ByteArrayToHex());
+        }
+
+        [Fact]
+        public static void NonceLeadingZerosIgnored()
+        {
+            byte[] sha256 = new byte[256 / 8];
+            byte[] nonce = { 0x00, 0x00, 0x01, 0xFE };
+
+            Rfc3161TimestampRequest req = Rfc3161TimestampRequest.CreateFromHash(
+                sha256,
+                HashAlgorithmName.SHA256,
+                nonce: nonce);
+
+            Assert.Equal("01FE", req.GetNonce().Value.ByteArrayToHex());
+        }
+
+        [Fact]
+        public static void NoncePaddingZerosIgnored()
+        {
+            byte[] sha256 = new byte[256 / 8];
+            byte[] nonce = { 0x00, 0x00, 0xFE };
+
+            Rfc3161TimestampRequest req = Rfc3161TimestampRequest.CreateFromHash(
+                sha256,
+                HashAlgorithmName.SHA256,
+                nonce: nonce);
+
+            Assert.Equal("00FE", req.GetNonce().Value.ByteArrayToHex());
         }
 
         public enum Rfc3161RequestResponseStatus
