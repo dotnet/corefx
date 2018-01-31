@@ -48,8 +48,8 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Rfc3161TimestampToken token;
 
             Assert.True(
-                Rfc3161TimestampToken.TryParse(tokenBytes, out bytesRead, out token),
-                "Rfc3161TimestampToken.TryParse");
+                Rfc3161TimestampToken.TryDecode(tokenBytes, out token, out bytesRead),
+                "Rfc3161TimestampToken.TryDecode");
 
             if (expectedBytesRead != null)
             {
@@ -91,48 +91,103 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 }
             }
 
+            X509Certificate2 returnedCert;
             ReadOnlySpan<byte> messageContentSpan = testData.MessageContent.Span;
+            X509Certificate2Collection candidates = null;
 
-            Assert.True(token.VerifyData(messageContentSpan), "token.VerifyData(correct)");
-            Assert.False(token.VerifyData(messageContentSpan.Slice(1)), "token.VerifyData(incorrect)");
+            if (testData.EmbeddedSigningCertificate != null)
+            {
+                Assert.True(
+                    token.VerifySignatureForData(messageContentSpan, out returnedCert),
+                    "token.VerifySignatureForData(correct)");
+
+                Assert.NotNull(returnedCert);
+                Assert.Equal(signedCms.SignerInfos[0].Certificate, returnedCert);
+            }
+            else
+            {
+                candidates = new X509Certificate2Collection
+                {
+                    new X509Certificate2(testData.ExternalCertificateBytes),
+                };
+
+                Assert.False(
+                    token.VerifySignatureForData(messageContentSpan, out returnedCert),
+                    "token.VerifySignatureForData(correct, no cert)");
+
+                Assert.Null(returnedCert);
+
+                Assert.True(
+                    token.VerifySignatureForData(messageContentSpan, out returnedCert, candidates),
+                    "token.VerifySignatureForData(correct, certs)");
+
+                Assert.NotNull(returnedCert);
+                Assert.Equal(candidates[0], returnedCert);
+            }
+
+            X509Certificate2 previousCert = returnedCert;
+
+            Assert.False(
+                token.VerifySignatureForData(messageContentSpan.Slice(1), out returnedCert, candidates),
+                "token.VerifySignatureForData(incorrect)");
+
+            Assert.Null(returnedCert);
 
             byte[] messageHash = testData.HashBytes.ToArray();
 
-            Assert.True(token.VerifyHash(messageHash), "token.VerifyHash(correct)");
+            Assert.False(
+                token.VerifySignatureForHash(messageHash, HashAlgorithmName.MD5, out returnedCert, candidates),
+                "token.VerifyHash(correct, MD5)");
+            Assert.Null(returnedCert);
+
+            Assert.False(
+                token.VerifySignatureForHash(messageHash, new Oid(Oids.Md5), out returnedCert, candidates),
+                "token.VerifyHash(correct, Oid(MD5))");
+            Assert.Null(returnedCert);
+
+            Assert.True(
+                token.VerifySignatureForHash(messageHash, new Oid(testData.HashAlgorithmId), out returnedCert, candidates),
+                "token.VerifyHash(correct, Oid(algId))");
+            Assert.NotNull(returnedCert);
+            Assert.Equal(previousCert, returnedCert);
+
             messageHash[0] ^= 0xFF;
-            Assert.False(token.VerifyHash(messageHash), "token.VerifyHash(incorrect)");
+            Assert.False(
+                token.VerifySignatureForHash(messageHash, new Oid(testData.HashAlgorithmId), out returnedCert, candidates),
+                "token.VerifyHash(incorrect, Oid(algId))");
+            Assert.Null(returnedCert);
         }
 
         [Fact]
-        public static void TryParse_Fails_SignedCmsOfData()
+        public static void TryDecode_Fails_SignedCmsOfData()
         {
             Assert.False(
-                Rfc3161TimestampToken.TryParse(
+                Rfc3161TimestampToken.TryDecode(
                     SignedDocuments.RsaPkcs1OneSignerIssuerAndSerialNumber,
-                    out int bytesRead,
-                    out Rfc3161TimestampToken token),
-                "Rfc3161TimestampToken.TryParse");
+                    out Rfc3161TimestampToken token,
+                    out int bytesRead),
+                "Rfc3161TimestampToken.TryDecode");
 
             Assert.Equal(0, bytesRead);
             Assert.Null(token);
         }
 
         [Fact]
-        public static void TryParse_Fails_Empty()
+        public static void TryDecode_Fails_Empty()
         {
             Assert.False(
-                Rfc3161TimestampToken.TryParse(
+                Rfc3161TimestampToken.TryDecode(
                     ReadOnlyMemory<byte>.Empty,
-                    out int bytesRead,
-                    out Rfc3161TimestampToken token),
-                "Rfc3161TimestampToken.TryParse");
+                    out Rfc3161TimestampToken token,
+                    out int bytesRead),
+                "Rfc3161TimestampToken.TryDecode");
 
             Assert.Equal(0, bytesRead);
             Assert.Null(token);
         }
 
         [Fact]
-        public static void TryParse_Fails_EnvelopedCms()
+        public static void TryDecode_Fails_EnvelopedCms()
         {
             byte[] encodedMessage =
             ("3082010c06092a864886f70d010703a081fe3081fb0201003181c83081c5020100302e301a311830160603550403130f5253"
@@ -143,18 +198,18 @@ namespace System.Security.Cryptography.Pkcs.Tests
              + "030704089c8119f6cf6b174c8008bcea3a10d0737eb9").HexToByteArray();
 
             Assert.False(
-                Rfc3161TimestampToken.TryParse(
+                Rfc3161TimestampToken.TryDecode(
                     encodedMessage,
-                    out int bytesRead,
-                    out Rfc3161TimestampToken token),
-                "Rfc3161TimestampToken.TryParse");
+                    out Rfc3161TimestampToken token,
+                    out int bytesRead),
+                "Rfc3161TimestampToken.TryDecode");
 
             Assert.Equal(0, bytesRead);
             Assert.Null(token);
         }
 
         [Fact]
-        public static void TryParse_Fails_MalformedToken()
+        public static void TryDecode_Fails_MalformedToken()
         {
             ContentInfo contentInfo = new ContentInfo(
                 new Oid(Oids.TstInfo, Oids.TstInfo),
@@ -168,11 +223,11 @@ namespace System.Security.Cryptography.Pkcs.Tests
             }
 
             Assert.False(
-                Rfc3161TimestampToken.TryParse(
+                Rfc3161TimestampToken.TryDecode(
                     cms.Encode(),
-                    out int bytesRead,
-                    out Rfc3161TimestampToken token),
-                "Rfc3161TimestampToken.TryParse");
+                    out Rfc3161TimestampToken token,
+                    out int bytesRead),
+                "Rfc3161TimestampToken.TryDecode");
 
             Assert.Equal(0, bytesRead);
             Assert.Null(token);
@@ -666,7 +721,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 identifierType);
 
             Rfc3161TimestampToken token;
-            Assert.True(Rfc3161TimestampToken.TryParse(tokenBytes, out int bytesRead, out token));
+            Assert.True(Rfc3161TimestampToken.TryDecode(tokenBytes, out token, out int bytesRead));
 
             Assert.Equal(tokenBytes.Length, bytesRead);
             Assert.NotNull(token);
@@ -675,7 +730,14 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
             using (X509Certificate2 cert = Certificates.ValidLookingTsaCert.GetCertificate())
             {
-                Assert.True(token.CheckCertificate(cert));
+                Assert.True(
+                    token.VerifySignatureForHash(
+                        token.TokenInfo.GetMessageHash().Span,
+                        token.TokenInfo.HashAlgorithmId,
+                        out X509Certificate2 signer,
+                        new X509Certificate2Collection(cert)));
+
+                Assert.Equal(cert, signer);
             }
         }
 
@@ -728,18 +790,25 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
             if (willParse)
             {
-                Assert.True(Rfc3161TimestampToken.TryParse(tokenBytes, out int bytesRead, out token));
+                Assert.True(Rfc3161TimestampToken.TryDecode(tokenBytes, out token, out int bytesRead));
                 Assert.NotNull(token);
                 Assert.Equal(tokenBytes.Length, bytesRead);
 
                 using (X509Certificate2 cert = loader.GetCertificate())
                 {
-                    Assert.False(token.CheckCertificate(cert));
+                    Assert.False(
+                        token.VerifySignatureForHash(
+                            token.TokenInfo.GetMessageHash().Span,
+                            token.TokenInfo.HashAlgorithmId,
+                            out X509Certificate2 signer,
+                            new X509Certificate2Collection(cert)));
+
+                    Assert.Null(signer);
                 }
             }
             else
             {
-                Assert.False(Rfc3161TimestampToken.TryParse(tokenBytes, out int bytesRead, out token));
+                Assert.False(Rfc3161TimestampToken.TryDecode(tokenBytes, out token, out int bytesRead));
 
                 Assert.Null(token);
                 Assert.Equal(0, bytesRead);
@@ -769,7 +838,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 accuracyMicroSeconds,
                 isOrdering: true);
 
-            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.TstInfo, Oids.TstInfo), info.RawData);
+            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.TstInfo, Oids.TstInfo), info.Encode());
             SignedCms cms = new SignedCms(contentInfo);
 
             using (X509Certificate2 tsaCert = cert.TryGetCertificateWithPrivateKey())

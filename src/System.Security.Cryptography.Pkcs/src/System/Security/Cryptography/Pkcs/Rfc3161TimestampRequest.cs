@@ -4,12 +4,9 @@
 
 using System.Diagnostics;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.Pkcs.Asn1;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography.Pkcs
@@ -58,84 +55,15 @@ namespace System.Security.Cryptography.Pkcs
             return coll;
         }
 
-        public async Task<Rfc3161TimestampToken> SubmitRequestAsync(Uri uri, TimeSpan timeout)
-        {
-            if (uri == null)
-                throw new ArgumentNullException(nameof(uri));
-            if (!uri.IsAbsoluteUri)
-                throw new ArgumentOutOfRangeException(nameof(uri), SR.Cryptography_TimestampReq_HttpOrHttps);
-            if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
-                throw new ArgumentOutOfRangeException(nameof(uri), SR.Cryptography_TimestampReq_HttpOrHttps);
-
-            byte[] responseContents;
-            HttpClient httpClient = null;
-
-            try
-            {
-                httpClient = new HttpClient
-                {
-                    Timeout = timeout,
-                };
-
-                HttpContent content = new ReadOnlyMemoryContent(_encodedBytes);
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/timestamp-query");
-
-                HttpResponseMessage response = await httpClient.PostAsync(uri, content);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new CryptographicException(
-                        SR.Format(
-                            SR.Cryptography_TimestampReq_HttpError,
-                            (int)response.StatusCode,
-                            response.StatusCode,
-                            response.ReasonPhrase));
-                }
-
-                if (response.Content.Headers.ContentType.MediaType != "application/timestamp-reply")
-                {
-                    throw new CryptographicException(SR.Cryptography_TimestampReq_BadResponse);
-                }
-
-                responseContents = await response.Content.ReadAsByteArrayAsync();
-            }
-            catch (Exception e)
-            {
-                throw new CryptographicException(SR.Cryptography_TimestampReq_Error, e);
-            }
-            finally
-            {
-                httpClient?.Dispose();
-            }
-
-            if (responseContents == null)
-            {
-                throw new CryptographicException(SR.Cryptography_TimestampReq_BadResponse);
-            }
-
-            return AcceptResponse(responseContents, out _);
-        }
-
-        public bool TryAcceptResponse(
-            ReadOnlyMemory<byte> source,
-            out int bytesRead,
-            out Rfc3161RequestResponseStatus status,
-            out Rfc3161TimestampToken token)
-        {
-            return AcceptResponse(source, out bytesRead, out status, out token, shouldThrow: false);
-        }
-
-        public Rfc3161TimestampToken AcceptResponse(
-            ReadOnlyMemory<byte> source,
-            out int bytesRead)
+        public Rfc3161TimestampToken ProcessResponse(ReadOnlyMemory<byte> source, out int bytesConsumed)
         {
             Rfc3161RequestResponseStatus status;
             Rfc3161TimestampToken token;
 
-            if (AcceptResponse(source, out int localBytesRead, out status, out token, shouldThrow: true))
+            if (ProcessResponse(source, out token, out status, out int localBytesRead, shouldThrow: true))
             {
                 Debug.Assert(status == Rfc3161RequestResponseStatus.Accepted);
-                bytesRead = localBytesRead;
+                bytesConsumed = localBytesRead;
                 return token;
             }
 
@@ -143,11 +71,11 @@ namespace System.Security.Cryptography.Pkcs
             throw new CryptographicException();
         }
 
-        private bool AcceptResponse(
+        private bool ProcessResponse(
             ReadOnlyMemory<byte> source,
-            out int bytesRead,
-            out Rfc3161RequestResponseStatus status,
             out Rfc3161TimestampToken token,
+            out Rfc3161RequestResponseStatus status,
+            out int bytesConsumed,
             bool shouldThrow)
         {
             status = Rfc3161RequestResponseStatus.Unknown;
@@ -157,7 +85,7 @@ namespace System.Security.Cryptography.Pkcs
 
             try
             {
-                resp = AsnSerializer.Deserialize<Rfc3161TimeStampResp>(source, AsnEncodingRules.DER, out bytesRead);
+                resp = AsnSerializer.Deserialize<Rfc3161TimeStampResp>(source, AsnEncodingRules.DER, out bytesConsumed);
             }
             catch (CryptographicException)
             {
@@ -166,7 +94,7 @@ namespace System.Security.Cryptography.Pkcs
                     throw;
                 }
 
-                bytesRead = 0;
+                bytesConsumed = 0;
                 status = Rfc3161RequestResponseStatus.DoesNotParse;
                 return false;
             }
@@ -191,14 +119,14 @@ namespace System.Security.Cryptography.Pkcs
                 return false;
             }
 
-            if (!Rfc3161TimestampToken.TryParse(resp.TimeStampToken.GetValueOrDefault(), out _, out token))
+            if (!Rfc3161TimestampToken.TryDecode(resp.TimeStampToken.GetValueOrDefault(), out token, out _))
             {
                 if (shouldThrow)
                 {
                     throw new CryptographicException(SR.Cryptography_TimestampReq_BadResponse);
                 }
 
-                bytesRead = 0;
+                bytesConsumed = 0;
                 status = Rfc3161RequestResponseStatus.DoesNotParse;
                 return false;
             }
@@ -225,7 +153,7 @@ namespace System.Security.Cryptography.Pkcs
             return true;
         }
 
-        public static Rfc3161TimestampRequest BuildForSignerInfo(
+        public static Rfc3161TimestampRequest CreateFromSignerInfo(
             SignerInfo signerInfo,
             HashAlgorithmName hashAlgorithm,
             Oid requestedPolicyId = null,
@@ -243,7 +171,7 @@ namespace System.Security.Cryptography.Pkcs
             // The value of messageImprint field within TimeStampToken shall be a
             // hash of the value of signature field within SignerInfo for the
             // signedData being time-stamped.
-            return BuildForData(
+            return CreateFromData(
                 signerInfo.GetSignature(),
                 hashAlgorithm,
                 requestedPolicyId,
@@ -252,7 +180,7 @@ namespace System.Security.Cryptography.Pkcs
                 extensions);
         }
 
-        public static Rfc3161TimestampRequest BuildForData(
+        public static Rfc3161TimestampRequest CreateFromData(
             ReadOnlySpan<byte> data,
             HashAlgorithmName hashAlgorithm,
             Oid requestedPolicyId = null,
@@ -265,7 +193,7 @@ namespace System.Security.Cryptography.Pkcs
                 hasher.AppendData(data);
                 byte[] digest = hasher.GetHashAndReset();
 
-                return BuildForHash(
+                return CreateFromHash(
                     digest,
                     hashAlgorithm,
                     requestedPolicyId,
@@ -275,7 +203,7 @@ namespace System.Security.Cryptography.Pkcs
             }
         }
 
-        public static Rfc3161TimestampRequest BuildForHash(
+        public static Rfc3161TimestampRequest CreateFromHash(
             ReadOnlyMemory<byte> hash,
             HashAlgorithmName hashAlgorithm,
             Oid requestedPolicyId = null,
@@ -285,7 +213,7 @@ namespace System.Security.Cryptography.Pkcs
         {
             string oidStr = Helpers.GetOidFromHashAlgorithm(hashAlgorithm);
             
-            return BuildForHash(
+            return CreateFromHash(
                 hash,
                 new Oid(oidStr),
                 requestedPolicyId,
@@ -294,7 +222,7 @@ namespace System.Security.Cryptography.Pkcs
                 extensions);
         }
 
-        public static Rfc3161TimestampRequest BuildForHash(
+        public static Rfc3161TimestampRequest CreateFromHash(
             ReadOnlyMemory<byte> hash,
             Oid hashAlgorithmId,
             Oid requestedPolicyId = null,
@@ -337,10 +265,10 @@ namespace System.Security.Cryptography.Pkcs
             };
         }
 
-        public static bool TryParse(
-            ReadOnlyMemory<byte> source,
-            out int bytesRead,
-            out Rfc3161TimestampRequest request)
+        public static bool TryDecode(
+            ReadOnlyMemory<byte> encodedBytes,
+            out Rfc3161TimestampRequest request,
+            out int bytesConsumed)
         {
             try
             {
@@ -352,7 +280,7 @@ namespace System.Security.Cryptography.Pkcs
                 // Since nothing says BER, assume DER only.
                 const AsnEncodingRules RuleSet = AsnEncodingRules.DER;
 
-                AsnReader reader = new AsnReader(source, RuleSet);
+                AsnReader reader = new AsnReader(encodedBytes, RuleSet);
                 ReadOnlyMemory<byte> firstElement = reader.PeekEncodedValue();
 
                 var req = AsnSerializer.Deserialize<Rfc3161TimeStampReq>(firstElement, RuleSet);
@@ -363,7 +291,7 @@ namespace System.Security.Cryptography.Pkcs
                     _encodedBytes = firstElement.ToArray(),
                 };
 
-                bytesRead = firstElement.Length;
+                bytesConsumed = firstElement.Length;
                 return true;
             }
             catch (CryptographicException)
@@ -371,7 +299,7 @@ namespace System.Security.Cryptography.Pkcs
             }
 
             request = null;
-            bytesRead = 0;
+            bytesConsumed = 0;
             return false;
         }
 
@@ -385,7 +313,7 @@ namespace System.Security.Cryptography.Pkcs
             // field descriptions in https://tools.ietf.org/html/rfc3161#section-2.4.1 and
             // https://tools.ietf.org/html/rfc3161#section-2.4.2
 
-            if (!token.VerifyHash(GetMessageHash().Span))
+            if (!token.VerifyHash(GetMessageHash().Span, HashAlgorithmId.Value))
             {
                 if (shouldThrow)
                 {
@@ -396,16 +324,6 @@ namespace System.Security.Cryptography.Pkcs
             }
 
             Rfc3161TimestampTokenInfo tokenInfo = token.TokenInfo;
-
-            if (tokenInfo.HashAlgorithmId.Value != HashAlgorithmId.Value)
-            {
-                if (shouldThrow)
-                {
-                    throw new CryptographicException(SR.Cryptography_BadHashValue);
-                }
-
-                return Rfc3161RequestResponseStatus.HashMismatch;
-            }
 
             // We only understand V1 messaging and validation
             if (tokenInfo.Version != 1)

@@ -11,15 +11,11 @@ using Internal.Cryptography;
 
 namespace System.Security.Cryptography.Pkcs
 {
-    public sealed class Rfc3161TimestampTokenInfo : AsnEncodedData
+    public sealed class Rfc3161TimestampTokenInfo
     {
-        private Rfc3161TstInfo _parsedData;
-        private ReadOnlyMemory<byte>? _tstName;
-
-        public Rfc3161TimestampTokenInfo(byte[] timestampTokenInfo)
-            : base(Oids.TstInfo, timestampTokenInfo)
-        {
-        }
+        private readonly byte[] _encodedBytes;
+        private readonly Rfc3161TstInfo _parsedData;
+        private ReadOnlyMemory<byte>? _tsaNameBytes;
 
         public Rfc3161TimestampTokenInfo(
             Oid policyId,
@@ -32,71 +28,59 @@ namespace System.Security.Cryptography.Pkcs
             ReadOnlyMemory<byte>? nonce = null,
             ReadOnlyMemory<byte>? tsaName = null,
             X509ExtensionCollection extensions = null)
-            : base(
-                  Oids.TstInfo,
-                  Encode(
-                      policyId,
-                      hashAlgorithmId,
-                      messageHash,
-                      serialNumber,
-                      timestamp,
-                      isOrdering,
-                      accuracyInMicroseconds,
-                      nonce,
-                      tsaName,
-                      extensions))
         {
+            _encodedBytes = Encode(
+                policyId,
+                hashAlgorithmId,
+                messageHash,
+                serialNumber,
+                timestamp,
+                isOrdering,
+                accuracyInMicroseconds,
+                nonce,
+                tsaName,
+                extensions);
+
+            if (!TryDecode(_encodedBytes, true, out _parsedData, out _, out _))
+            {
+                Debug.Fail("Unable to decode the data we encoded");
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
         }
 
-        private Rfc3161TimestampTokenInfo(ReadOnlyMemory<byte> rawData, Rfc3161TstInfo tstInfo)
-            : base(Oids.TstInfo, rawData.ToArray())
+        private Rfc3161TimestampTokenInfo(byte[] copiedBytes, Rfc3161TstInfo tstInfo)
         {
+            _encodedBytes = copiedBytes;
             _parsedData = tstInfo;
         }
 
-        private Rfc3161TstInfo GetParsedValue()
-        {
-            if (_parsedData == null)
-            {
-                if (!TryParse(RawData, out _, out Rfc3161TstInfo parsedData))
-                {
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                }
-
-                _parsedData = parsedData;
-                Debug.Assert(_parsedData != null);
-            }
-
-            return _parsedData;
-        }
-
-        public int Version => GetParsedValue().Version;
-        public Oid PolicyId => GetParsedValue().Policy;
-        public Oid HashAlgorithmId => GetParsedValue().MessageImprint.HashAlgorithm.Algorithm;
-        public ReadOnlyMemory<byte> GetMessageHash() => GetParsedValue().MessageImprint.HashedMessage;
-        public ReadOnlyMemory<byte> GetSerialNumber() => GetParsedValue().SerialNumber;
-        public DateTimeOffset Timestamp => GetParsedValue().GenTime;
-        public long? AccuracyInMicroseconds => GetParsedValue().Accuracy?.TotalMicros;
-        public bool IsOrdering => GetParsedValue().Ordering;
-        public ReadOnlyMemory<byte>? GetNonce() => GetParsedValue().Nonce;
-        public bool HasExtensions => GetParsedValue().Extensions?.Length > 0;
+        public int Version => _parsedData.Version;
+        public Oid PolicyId => _parsedData.Policy;
+        public Oid HashAlgorithmId => _parsedData.MessageImprint.HashAlgorithm.Algorithm;
+        public ReadOnlyMemory<byte> GetMessageHash() => _parsedData.MessageImprint.HashedMessage;
+        public ReadOnlyMemory<byte> GetSerialNumber() => _parsedData.SerialNumber;
+        public DateTimeOffset Timestamp => _parsedData.GenTime;
+        public long? AccuracyInMicroseconds => _parsedData.Accuracy?.TotalMicros;
+        public bool IsOrdering => _parsedData.Ordering;
+        public ReadOnlyMemory<byte>? GetNonce() => _parsedData.Nonce;
+        public bool HasExtensions => _parsedData.Extensions?.Length > 0;
 
         public ReadOnlyMemory<byte>? GetTimestampAuthorityName()
         {
-            if (_tstName == null)
+            if (_tsaNameBytes == null)
             {
-                GeneralName? tsaName = GetParsedValue().Tsa;
+                GeneralName? tsaName = _parsedData.Tsa;
 
                 if (tsaName == null)
                 {
                     return null;
                 }
 
-                _tstName = AsnSerializer.Serialize(tsaName.Value, AsnEncodingRules.DER).Encode();
-                Debug.Assert(_tstName.HasValue);
+                _tsaNameBytes = AsnSerializer.Serialize(tsaName.Value, AsnEncodingRules.DER).Encode();
+                Debug.Assert(_tsaNameBytes.HasValue);
             }
 
-            return _tstName.Value;
+            return _tsaNameBytes.Value;
         }
 
         public X509ExtensionCollection GetExtensions()
@@ -108,7 +92,7 @@ namespace System.Security.Cryptography.Pkcs
                 return coll;
             }
 
-            X509ExtensionAsn[] rawExtensions = GetParsedValue().Extensions;
+            X509ExtensionAsn[] rawExtensions = _parsedData.Extensions;
 
             foreach (X509ExtensionAsn rawExtension in rawExtensions)
             {
@@ -126,26 +110,46 @@ namespace System.Security.Cryptography.Pkcs
             return coll;
         }
 
-        public static bool TryParse(
-            ReadOnlyMemory<byte> source,
-            out int bytesRead,
-            out Rfc3161TimestampTokenInfo timestampTokenInfo)
+        public byte[] Encode()
         {
-            if (TryParse(source, out bytesRead, out Rfc3161TstInfo tstInfo))
+            return _encodedBytes.CloneByteArray();
+        }
+
+        public bool TryEncode(Span<byte> destination, out int bytesWritten)
+        {
+            if (destination.Length < _encodedBytes.Length)
             {
-                timestampTokenInfo = new Rfc3161TimestampTokenInfo(source.Slice(0, bytesRead), tstInfo);
+                bytesWritten = 0;
+                return false;
+            }
+
+            _encodedBytes.AsSpan().CopyTo(destination);
+            bytesWritten = _encodedBytes.Length;
+            return true;
+        }
+
+        public static bool TryDecode(
+            ReadOnlyMemory<byte> source,
+            out Rfc3161TimestampTokenInfo timestampTokenInfo,
+            out int bytesConsumed)
+        {
+            if (TryDecode(source, false, out Rfc3161TstInfo tstInfo, out bytesConsumed, out byte[] copiedBytes))
+            {
+                timestampTokenInfo = new Rfc3161TimestampTokenInfo(copiedBytes, tstInfo);
                 return true;
             }
 
-            bytesRead = 0;
+            bytesConsumed = 0;
             timestampTokenInfo = null;
             return false;
         }
 
-        private static bool TryParse(
+        private static bool TryDecode(
             ReadOnlyMemory<byte> source,
-            out int bytesRead,
-            out Rfc3161TstInfo tstInfo)
+            bool ownsMemory,
+            out Rfc3161TstInfo tstInfo,
+            out int bytesConsumed,
+            out byte[] copiedBytes)
         {
             // https://tools.ietf.org/html/rfc3161#section-2.4.2
             // The eContent SHALL be the DER-encoded value of TSTInfo.
@@ -155,9 +159,19 @@ namespace System.Security.Cryptography.Pkcs
             {
                 ReadOnlyMemory<byte> firstElement = reader.PeekEncodedValue();
 
-                Rfc3161TstInfo parsedInfo = AsnSerializer.Deserialize<Rfc3161TstInfo>(
+                if (ownsMemory)
+                {
+                    copiedBytes = null;
+                }
+                else
+                {
                     // Copy the data so no ReadOnlyMemory values are pointing back to user data.
-                    firstElement.ToArray(),
+                    copiedBytes = firstElement.ToArray();
+                    firstElement = copiedBytes;
+                }
+
+                Rfc3161TstInfo parsedInfo = AsnSerializer.Deserialize<Rfc3161TstInfo>(
+                    firstElement,
                     AsnEncodingRules.DER);
 
                 // The deserializer doesn't do bounds checks.
@@ -178,13 +192,14 @@ namespace System.Security.Cryptography.Pkcs
                 }
 
                 tstInfo = parsedInfo;
-                bytesRead = firstElement.Length;
+                bytesConsumed = firstElement.Length;
                 return true;
             }
             catch (CryptographicException)
             {
                 tstInfo = null;
-                bytesRead = 0;
+                bytesConsumed = 0;
+                copiedBytes = null;
                 return false;
             }
         }
@@ -245,13 +260,6 @@ namespace System.Security.Cryptography.Pkcs
 
             AsnWriter writer = AsnSerializer.Serialize(tstInfo, AsnEncodingRules.DER);
             return writer.Encode();
-        }
-
-        public override void CopyFrom(AsnEncodedData asnEncodedData)
-        {
-            base.CopyFrom(asnEncodedData);
-            _parsedData = null;
-            _tstName = null;
         }
     }
 }

@@ -15,6 +15,9 @@ namespace System.Security.Cryptography.Pkcs
     public sealed class Rfc3161TimestampToken
     {
         private SignedCms _parsedDocument;
+        private SignerInfo _signerInfo;
+        private EssCertId _essCertId;
+        private EssCertIdV2 _essCertIdV2;
 
         public Rfc3161TimestampTokenInfo TokenInfo { get; private set; }
 
@@ -27,13 +30,152 @@ namespace System.Security.Cryptography.Pkcs
         /// The SignedCms class is mutable, but changes to that object are not reflected in the
         /// <see cref="Rfc3161TimestampToken"/> object which produced it.
         /// The value from calling <see cref="SignedCms.Encode"/> can be interpreted again as an
-        /// <see cref="Rfc3161TimestampToken"/> via another call to <see cref="TryParse"/>.
+        /// <see cref="Rfc3161TimestampToken"/> via another call to <see cref="TryDecode"/>.
         /// </remarks>
         public SignedCms AsSignedCms() => _parsedDocument;
 
-        public bool VerifyData(ReadOnlySpan<byte> data)
+        private X509Certificate2 GetSignerCertificate(X509Certificate2Collection extraCandidates)
         {
-            HashAlgorithmName hashAlgorithmName = Helpers.GetDigestAlgorithm(TokenInfo.HashAlgorithmId);
+            Debug.Assert(_signerInfo != null, "_signerInfo != null");
+            X509Certificate2 signerCert = _signerInfo.Certificate;
+
+            if (signerCert != null)
+            {
+                if (CheckCertificate(signerCert, _signerInfo, _essCertId, _essCertIdV2, TokenInfo))
+                {
+                    return signerCert;
+                }
+
+                // SignedCms will not try another certificate in this state, so just fail.
+                return null;
+            }
+
+            if (extraCandidates == null || extraCandidates.Count == 0)
+            {
+                return null;
+            }
+
+            foreach (X509Certificate2 candidate in extraCandidates)
+            {
+                if (CheckCertificate(candidate, _signerInfo, _essCertId, _essCertIdV2, TokenInfo))
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
+        }
+
+        public bool VerifySignatureForData(
+            ReadOnlySpan<byte> data,
+            out X509Certificate2 signerCertificate,
+            X509Certificate2Collection extraCandidates = null)
+        {
+            signerCertificate = null;
+
+            X509Certificate2 cert = GetSignerCertificate(extraCandidates);
+
+            if (cert == null)
+            {
+                return false;
+            }
+
+            bool ret = VerifyData(data);
+
+            if (ret)
+            {
+                signerCertificate = cert;
+            }
+
+            return ret;
+        }
+
+        public bool VerifySignatureForHash(
+            ReadOnlySpan<byte> hash,
+            HashAlgorithmName hashAlgorithm,
+            out X509Certificate2 signerCertificate,
+            X509Certificate2Collection extraCandidates = null)
+        {
+            signerCertificate = null;
+
+            X509Certificate2 cert = GetSignerCertificate(extraCandidates);
+
+            if (cert == null)
+            {
+                return false;
+            }
+
+            bool ret = VerifyHash(hash, Helpers.GetOidFromHashAlgorithm(hashAlgorithm));
+
+            if (ret)
+            {
+                signerCertificate = cert;
+            }
+
+            return ret;
+        }
+
+        public bool VerifySignatureForHash(
+            ReadOnlySpan<byte> hash,
+            Oid hashAlgorithmId,
+            out X509Certificate2 signerCertificate,
+            X509Certificate2Collection extraCandidates = null)
+        {
+            if (hashAlgorithmId == null)
+            {
+                throw new ArgumentNullException(nameof(hashAlgorithmId));
+            }
+
+            signerCertificate = null;
+
+            X509Certificate2 cert = GetSignerCertificate(extraCandidates);
+
+            if (cert == null)
+            {
+                return false;
+            }
+
+            bool ret = VerifyHash(hash, hashAlgorithmId.Value);
+
+            if (ret)
+            {
+                // REVIEW: Should this return the cert, or new X509Certificate2(cert.RawData)?
+                // SignedCms.SignerInfos builds new objects each call, which makes
+                // ReferenceEquals(cms.SignerInfos[0].Certificate, cms.SignerInfos[0].Certificate) be false.
+                // So maybe it's weird to give back a cert we've copied from that?
+                signerCertificate = cert;
+            }
+
+            return ret;
+        }
+
+        public bool VerifySignatureForSignerInfo(
+            SignerInfo signerInfo,
+            out X509Certificate2 signerCertificate,
+            X509Certificate2Collection extraCandidates = null)
+        {
+            if (signerInfo == null)
+            {
+                throw new ArgumentNullException(nameof(signerInfo));
+            }
+
+            return VerifySignatureForData(
+                signerInfo.GetSignatureMemory().Span,
+                out signerCertificate,
+                extraCandidates);
+        }
+
+        internal bool VerifyHash(ReadOnlySpan<byte> hash, string hashAlgorithmId)
+        {
+            return
+                hash.SequenceEqual(TokenInfo.GetMessageHash().Span) &&
+                hashAlgorithmId == TokenInfo.HashAlgorithmId.Value;
+        }
+
+        private bool VerifyData(ReadOnlySpan<byte> data)
+        {
+            Oid hashAlgorithmId = TokenInfo.HashAlgorithmId;
+            HashAlgorithmName hashAlgorithmName = Helpers.GetDigestAlgorithm(hashAlgorithmId);
 
             using (IncrementalHash hasher = IncrementalHash.CreateHash(hashAlgorithmName))
             {
@@ -44,55 +186,16 @@ namespace System.Security.Cryptography.Pkcs
 
                 if (hasher.TryGetHashAndReset(stackSpan, out int bytesWritten))
                 {
-                    return VerifyHash(stackSpan.Slice(0, bytesWritten));
+                    return VerifyHash(stackSpan.Slice(0, bytesWritten), hashAlgorithmId.Value);
                 }
 
                 // Something we understood, but is bigger than 512-bit.
                 // Allocate at runtime, trip in a debug build so we can re-evaluate this.
                 Debug.Fail(
-                    $"TryGetHashAndReset did not fit in {stackSpan.Length} for hash {TokenInfo.HashAlgorithmId.Value}");
-                return VerifyHash(hasher.GetHashAndReset());
+                    $"TryGetHashAndReset did not fit in {stackSpan.Length} for hash {hashAlgorithmId.Value}");
+
+                return VerifyHash(hasher.GetHashAndReset(), hashAlgorithmId.Value);
             }
-        }
-
-        public bool VerifyHash(ReadOnlySpan<byte> hash)
-        {
-            return hash.SequenceEqual(TokenInfo.GetMessageHash().Span);
-        }
-
-        public bool CheckCertificate(X509Certificate2 tsaCertificate)
-        {
-            if (tsaCertificate == null)
-            {
-                return false;
-            }
-
-            Debug.Assert(_parsedDocument != null, "_parsedDocument != null");
-
-            SignerInfoCollection signerInfos = _parsedDocument.SignerInfos;
-            Debug.Assert(signerInfos.Count == 1);
-
-            SignerInfo signer = signerInfos[0];
-            X509Certificate2 signerCert = signer.Certificate;
-
-            // If we already mapped the signer cert in the CMS object we can't use another
-            // input to verify the signature.  So in that case just check that it's the
-            // one we already checked in TryParse.
-            if (signerCert != null)
-            {
-                return signerCert.RawData.SequenceEqual(tsaCertificate.RawData);
-            }
-
-            EssCertId certId;
-            EssCertIdV2 certId2;
-
-            if (!TryGetCertIds(signer, out certId, out certId2))
-            {
-                Debug.Fail("TryGetCertIds failed, which should have prevented object creation");
-                return false;
-            }
-
-            return CheckCertificate(tsaCertificate, signer, certId, certId2, TokenInfo);
         }
 
         private static bool CheckCertificate(
@@ -182,9 +285,9 @@ namespace System.Security.Cryptography.Pkcs
             }
         }
 
-        public static bool TryParse(ReadOnlyMemory<byte> source, out int bytesRead, out Rfc3161TimestampToken token)
+        public static bool TryDecode(ReadOnlyMemory<byte> source, out Rfc3161TimestampToken token, out int bytesConsumed)
         {
-            bytesRead = 0;
+            bytesConsumed = 0;
             token = null;
 
             try
@@ -282,7 +385,7 @@ namespace System.Security.Cryptography.Pkcs
 
                 Rfc3161TimestampTokenInfo tokenInfo;
 
-                if (Rfc3161TimestampTokenInfo.TryParse(cms.ContentInfo.Content, out _, out tokenInfo))
+                if (Rfc3161TimestampTokenInfo.TryDecode(cms.ContentInfo.Content, out tokenInfo, out _))
                 {
                     if (signerCert != null &&
                         !CheckCertificate(signerCert, signer, certId, certId2, tokenInfo))
@@ -293,10 +396,13 @@ namespace System.Security.Cryptography.Pkcs
                     token = new Rfc3161TimestampToken
                     {
                         _parsedDocument = cms,
+                        _signerInfo = signer,
+                        _essCertId = certId,
+                        _essCertIdV2 = certId2,
                         TokenInfo = tokenInfo,
                     };
 
-                    bytesRead = bytesActuallyRead;
+                    bytesConsumed = bytesActuallyRead;
                     return true;
                 }
             }

@@ -4,7 +4,7 @@
 
 namespace System.Security.Cryptography.Pkcs
 {
-    public enum Rfc3161RequestResponseStatus
+    internal enum Rfc3161RequestResponseStatus
     {
         Unknown = 0,
         Accepted = 1,

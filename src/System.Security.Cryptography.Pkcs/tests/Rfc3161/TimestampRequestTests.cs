@@ -2,8 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
-using System.Diagnostics;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using Test.Cryptography;
 using Xunit;
@@ -17,7 +16,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         [InlineData(true)]
         public static void BuildExpectedRequest_FromData(bool viaSpan)
         {
-            Rfc3161TimestampRequest request = Rfc3161TimestampRequest.BuildForData(
+            Rfc3161TimestampRequest request = Rfc3161TimestampRequest.CreateFromData(
                 System.Text.Encoding.ASCII.GetBytes("Hello, world!!"),
                 HashAlgorithmName.SHA256,
                 requestSignerCertificates: true);
@@ -30,7 +29,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         [InlineData(true)]
         public static void BuildExpectedRequest_FromHashAndName(bool viaSpan)
         {
-            Rfc3161TimestampRequest request = Rfc3161TimestampRequest.BuildForHash(
+            Rfc3161TimestampRequest request = Rfc3161TimestampRequest.CreateFromHash(
                 "11806C2441295EA697EA96EE4247C0F9C71EE7638863CB8E29CD941A488FCB5A".HexToByteArray(),
                 HashAlgorithmName.SHA256,
                 requestSignerCertificates: true);
@@ -45,7 +44,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         {
             Oid hashAlgorithmId = new Oid("2.16.840.1.101.3.4.2.1", "Nothing should read this friendly name");
 
-            Rfc3161TimestampRequest request = Rfc3161TimestampRequest.BuildForHash(
+            Rfc3161TimestampRequest request = Rfc3161TimestampRequest.CreateFromHash(
                 "11806C2441295EA697EA96EE4247C0F9C71EE7638863CB8E29CD941A488FCB5A".HexToByteArray(),
                 hashAlgorithmId,
                 requestSignerCertificates: true);
@@ -139,8 +138,8 @@ namespace System.Security.Cryptography.Pkcs.Tests
             SignerInfo signerInfo = cms.SignerInfos[0];
             byte[] sig = signerInfo.GetSignature();
 
-            Rfc3161TimestampRequest fromSigner = Rfc3161TimestampRequest.BuildForSignerInfo(signerInfo, HashAlgorithmName.SHA256);
-            Rfc3161TimestampRequest fromData = Rfc3161TimestampRequest.BuildForData(sig, HashAlgorithmName.SHA256);
+            Rfc3161TimestampRequest fromSigner = Rfc3161TimestampRequest.CreateFromSignerInfo(signerInfo, HashAlgorithmName.SHA256);
+            Rfc3161TimestampRequest fromData = Rfc3161TimestampRequest.CreateFromData(sig, HashAlgorithmName.SHA256);
 
             Assert.Equal(fromData.Encode().ByteArrayToHex(), fromSigner.Encode().ByteArrayToHex());
         }
@@ -150,7 +149,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         {
             AssertExtensions.Throws<ArgumentNullException>(
                 "signerInfo",
-                () => Rfc3161TimestampRequest.BuildForSignerInfo(null, HashAlgorithmName.SHA256));
+                () => Rfc3161TimestampRequest.CreateFromSignerInfo(null, HashAlgorithmName.SHA256));
         }
 
         [Fact]
@@ -166,7 +165,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 new X509Extension("0.1.2", new byte[] { 0x04, 0x00 }, false),
             };
             
-            Rfc3161TimestampRequest req = Rfc3161TimestampRequest.BuildForData(
+            Rfc3161TimestampRequest req = Rfc3161TimestampRequest.CreateFromData(
                 data,
                 HashAlgorithmName.SHA512,
                 requestedPolicyOid,
@@ -204,7 +203,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public static void TryParse_WithExtensions(bool withExcessData)
+        public static void TryDecode_WithExtensions(bool withExcessData)
         {
             const string PaddingHex = "0403010203";
 
@@ -221,7 +220,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Rfc3161TimestampRequest request;
             int bytesRead;
 
-            Assert.True(Rfc3161TimestampRequest.TryParse(toUse, out bytesRead, out request), "TryParse");
+            Assert.True(Rfc3161TimestampRequest.TryDecode(toUse, out request, out bytesRead), "TryDecode");
             Assert.Equal(dataRange.Length, bytesRead);
             Assert.NotNull(request);
 
@@ -262,7 +261,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         [InlineData(Rfc3161RequestResponseStatus.DoesNotParse, 5)]
         [InlineData(Rfc3161RequestResponseStatus.DoesNotParse, 6)]
         [InlineData(Rfc3161RequestResponseStatus.DoesNotParse, 7)]
-        public static void ParseResponse_FreeTsa_WithCerts_NoNonce(Rfc3161RequestResponseStatus expectedStatus, int variant)
+        public static void ProcessResponse_FreeTsa_WithCerts_NoNonce(Rfc3161RequestResponseStatus expectedStatus, int variant)
         {
             const string Padding = "0400";
 
@@ -483,13 +482,13 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 }
             }
 
-            Rfc3161TimestampRequest request = Rfc3161TimestampRequest.BuildForHash(
+            Rfc3161TimestampRequest request = Rfc3161TimestampRequest.CreateFromHash(
                 hash,
                 hashAlgorithmName,
                 nonce: nonce,
                 requestSignerCertificates: expectedStatus != Rfc3161RequestResponseStatus.UnexpectedCertificates);
 
-            ParseResponse(expectedStatus, request, inputBytes, Padding.Length / 2);
+            ProcessResponse(expectedStatus, request, inputBytes, Padding.Length / 2);
         }
 
         [Theory]
@@ -503,7 +502,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         [InlineData(Rfc3161RequestResponseStatus.DoesNotParse, 0)]
         [InlineData(Rfc3161RequestResponseStatus.DoesNotParse, 1)]
         [InlineData(Rfc3161RequestResponseStatus.DoesNotParse, 2)]
-        public static void ParseResponse_Symantec_NoCerts_WithNonce(
+        public static void ProcessResponse_Symantec_NoCerts_WithNonce(
             Rfc3161RequestResponseStatus expectedStatus,
             int variant)
         {
@@ -611,16 +610,16 @@ namespace System.Security.Cryptography.Pkcs.Tests
                     inputBytes[646] ^= 0xFF;
                 }
             }
-            Rfc3161TimestampRequest request = Rfc3161TimestampRequest.BuildForHash(
+            Rfc3161TimestampRequest request = Rfc3161TimestampRequest.CreateFromHash(
                 hash,
                 hashAlgorithmName,
                 nonce: nonce,
                 requestSignerCertificates: expectedStatus == Rfc3161RequestResponseStatus.RequestedCertificatesMissing);
 
-            ParseResponse(expectedStatus, request, inputBytes, Padding.Length / 2);
+            ProcessResponse(expectedStatus, request, inputBytes, Padding.Length / 2);
         }
 
-        private static void ParseResponse(
+        private static void ProcessResponse(
             Rfc3161RequestResponseStatus expectedStatus,
             Rfc3161TimestampRequest request,
             byte[] inputBytes,
@@ -629,17 +628,17 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Rfc3161TimestampToken token;
             int bytesRead;
             Rfc3161RequestResponseStatus status;
-            bool result = request.TryAcceptResponse(inputBytes, out bytesRead, out status, out token);
+            bool result = request.TryProcessResponse(inputBytes, out token, out status, out bytesRead);
 
             Assert.Equal(expectedStatus, status);
 
             if (expectedStatus == Rfc3161RequestResponseStatus.Accepted)
             {
-                Assert.True(result, "request.TryAcceptResponse return value");
+                Assert.True(result, "request.TryProcessResponse return value");
             }
             else
             {
-                Assert.False(result, "request.TryAcceptResponse return value");
+                Assert.False(result, "request.TryProcessResponse return value");
             }
 
             if (expectedStatus == Rfc3161RequestResponseStatus.DoesNotParse)
@@ -668,7 +667,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
             if (result)
             {
-                Rfc3161TimestampToken token2 = request.AcceptResponse(inputBytes, out int bytesRead2);
+                Rfc3161TimestampToken token2 = request.ProcessResponse(inputBytes, out int bytesRead2);
 
                 Assert.Equal(bytesRead, bytesRead2);
                 Assert.NotNull(token2);
@@ -676,23 +675,52 @@ namespace System.Security.Cryptography.Pkcs.Tests
             }
             else
             {
-                Assert.Throws<CryptographicException>(() => request.AcceptResponse(inputBytes, out bytesRead));
+                Assert.Throws<CryptographicException>(() => request.ProcessResponse(inputBytes, out bytesRead));
             }
         }
-        
-        //[Fact]
-        public static async void TryARequest()
+
+        public enum Rfc3161RequestResponseStatus
         {
-            Rfc3161TimestampRequest request = Rfc3161TimestampRequest.BuildForHash(
-                "11806C2441295EA697EA96EE4247C0F9C71EE7638863CB8E29CD941A488FCB5A".HexToByteArray(),
-                HashAlgorithmName.SHA256,
-                requestSignerCertificates: false,
-                nonce: "3230313830313035313730373030".HexToByteArray());
+            Unknown = 0,
+            Accepted = 1,
+            DoesNotParse = 2,
+            RequestFailed = 3,
+            HashMismatch = 4,
+            VersionTooNew = 5,
+            NonceMismatch = 6,
+            RequestedCertificatesMissing = 7,
+            UnexpectedCertificates = 8,
+        }
+    }
 
-            Rfc3161TimestampToken foo =
-                await request.SubmitRequestAsync(new Uri("http://sha256timestamp.ws.symantec.com/sha256/timestamp"), TimeSpan.FromSeconds(10));
+    internal static class Rfc3161TimestampRequestExtensions
+    {
+        private static readonly MethodInfo s_tryProcesses;
 
-            Console.WriteLine(foo.AsSignedCms().Encode().ByteArrayToHex());
+        static Rfc3161TimestampRequestExtensions()
+        {
+            s_tryProcesses = typeof(Rfc3161TimestampRequest)
+                .GetMethod("ProcessResponse", BindingFlags.NonPublic | BindingFlags.Instance);
+        }
+
+        internal static bool TryProcessResponse(
+            this Rfc3161TimestampRequest request,
+            ReadOnlyMemory<byte> inputBytes,
+            out Rfc3161TimestampToken token,
+            out TimestampRequestTests.Rfc3161RequestResponseStatus status,
+            out int bytesRead)
+        {
+            object[] parameters = { inputBytes, null, null, null, false };
+            object result = s_tryProcesses.Invoke(request, parameters);
+
+            token = (Rfc3161TimestampToken)parameters[1];
+
+            status = (TimestampRequestTests.Rfc3161RequestResponseStatus)
+                Enum.ToObject(typeof(TimestampRequestTests.Rfc3161RequestResponseStatus), parameters[2]);
+
+            bytesRead = (int)parameters[3];
+
+            return (bool)result;
         }
     }
 }

@@ -6,22 +6,9 @@
 // ------------------------------------------------------------------------------
 
 using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
 
 namespace System.Security.Cryptography.Pkcs
 {
-    public enum Rfc3161RequestResponseStatus
-    {
-        Unknown = 0,
-        Accepted = 1,
-        DoesNotParse = 2,
-        RequestFailed = 3,
-        HashMismatch = 4,
-        VersionTooNew = 5,
-        NonceMismatch = 6,
-        RequestedCertificatesMissing = 7,
-        UnexpectedCertificates = 8,
-    }
     public sealed partial class Rfc3161TimestampRequest
     {
         private Rfc3161TimestampRequest() { }
@@ -33,31 +20,29 @@ namespace System.Security.Cryptography.Pkcs
         public ReadOnlyMemory<byte>? GetNonce() => throw null;
         public bool HasExtensions => throw null;
         public X509ExtensionCollection GetExtensions() => throw null;
-        public Task<Rfc3161TimestampToken> SubmitRequestAsync(Uri uri, TimeSpan timeout) => throw null;
         public byte[] Encode() => throw null;
         public bool TryEncode(Span<byte> destination, out int bytesWritten) => throw null;
-        public Rfc3161TimestampToken AcceptResponse(ReadOnlyMemory<byte> source, out int bytesRead) => throw null;
-        public bool TryAcceptResponse(ReadOnlyMemory<byte> source, out int bytesRead, out Rfc3161RequestResponseStatus status, out Rfc3161TimestampToken token) => throw null;
-        public static Rfc3161TimestampRequest BuildForData(ReadOnlySpan<byte> data, HashAlgorithmName hashAlgorithm, Oid requestedPolicyId = null, ReadOnlyMemory<byte>? nonce = null, bool requestSignerCertificates = false, X509ExtensionCollection extensions = null) => throw null;
-        public static Rfc3161TimestampRequest BuildForHash(ReadOnlyMemory<byte> hash, HashAlgorithmName hashAlgorithm, Oid requestedPolicyId = null, ReadOnlyMemory<byte>? nonce = null, bool requestSignerCertificates = false, X509ExtensionCollection extensions = null) => throw null;
-        public static Rfc3161TimestampRequest BuildForHash(ReadOnlyMemory<byte> hash, Oid hashAlgorithmId, Oid requestedPolicyId = null, ReadOnlyMemory<byte>? nonce = null, bool requestSignerCertificates = false, X509ExtensionCollection extensions = null) => throw null;
-        public static Rfc3161TimestampRequest BuildForSignerInfo(SignerInfo signerInfo, HashAlgorithmName hashAlgorithm, Oid requestedPolicyId = null, ReadOnlyMemory<byte>? nonce = null, bool requestSignerCertificates = false, X509ExtensionCollection extensions = null) => throw null;
-        public static bool TryParse(ReadOnlyMemory<byte> source, out int bytesRead, out Rfc3161TimestampRequest request) => throw null;
+        public Rfc3161TimestampToken ProcessResponse(ReadOnlyMemory<byte> responseBytes, out int bytesConsumed) => throw null;
+        public static Rfc3161TimestampRequest CreateFromData(ReadOnlySpan<byte> data, HashAlgorithmName hashAlgorithm, Oid requestedPolicyId = null, ReadOnlyMemory<byte>? nonce = null, bool requestSignerCertificates = false, X509ExtensionCollection extensions = null) => throw null;
+        public static Rfc3161TimestampRequest CreateFromHash(ReadOnlyMemory<byte> hash, HashAlgorithmName hashAlgorithm, Oid requestedPolicyId = null, ReadOnlyMemory<byte>? nonce = null, bool requestSignerCertificates = false, X509ExtensionCollection extensions = null) => throw null;
+        public static Rfc3161TimestampRequest CreateFromHash(ReadOnlyMemory<byte> hash, Oid hashAlgorithmId, Oid requestedPolicyId = null, ReadOnlyMemory<byte>? nonce = null, bool requestSignerCertificates = false, X509ExtensionCollection extensions = null) => throw null;
+        public static Rfc3161TimestampRequest CreateFromSignerInfo(SignerInfo signerInfo, HashAlgorithmName hashAlgorithm, Oid requestedPolicyId = null, ReadOnlyMemory<byte>? nonce = null, bool requestSignerCertificates = false, X509ExtensionCollection extensions = null) => throw null;
+        public static bool TryDecode(ReadOnlyMemory<byte> encodedBytes, out Rfc3161TimestampRequest request, out int bytesConsumed) => throw null;
     }
     public sealed partial class Rfc3161TimestampToken
     {
         private Rfc3161TimestampToken() { }
         public Rfc3161TimestampTokenInfo TokenInfo => throw null;
         public SignedCms AsSignedCms() => throw null;
-        public bool VerifyData(ReadOnlySpan<byte> data) => throw null;
-        public bool VerifyHash(ReadOnlySpan<byte> hash) => throw null;
-        public bool CheckCertificate(X509Certificate2 tsaCertificate) => throw null;
-        public static bool TryParse(ReadOnlyMemory<byte> source, out int bytesRead, out Rfc3161TimestampToken token) => throw null;
+        public bool VerifySignatureForHash(ReadOnlySpan<byte> hash, HashAlgorithmName hashAlgorithm, out X509Certificate2 signerCertificate, X509Certificate2Collection extraCandidates = null) => throw null;
+        public bool VerifySignatureForHash(ReadOnlySpan<byte> hash, Oid hashAlgorithmId, out X509Certificate2 signerCertificate, X509Certificate2Collection extraCandidates = null) => throw null;
+        public bool VerifySignatureForData(ReadOnlySpan<byte> data, out X509Certificate2 signerCertificate, X509Certificate2Collection extraCandidates = null) => throw null;
+        public bool VerifySignatureForSignerInfo(SignerInfo signerInfo, out X509Certificate2 signerCertificate, X509Certificate2Collection extraCandidates = null) => throw null;
+        public static bool TryDecode(ReadOnlyMemory<byte> encodedBytes, out Rfc3161TimestampToken token, out int bytesConsumed) => throw null;
     }
-    public sealed partial class Rfc3161TimestampTokenInfo : AsnEncodedData
+    public sealed partial class Rfc3161TimestampTokenInfo
     {
-        public Rfc3161TimestampTokenInfo(byte[] timestampTokenInfo) { }
-        public Rfc3161TimestampTokenInfo(Oid policyId, Oid hashAlgorithmId, ReadOnlyMemory<byte> messageHash, ReadOnlyMemory<byte> serialNumber, DateTimeOffset timestamp, long? accuracyInMicroseconds=null, bool isOrdering=false, ReadOnlyMemory<byte>? nonce=null, ReadOnlyMemory<byte>? tsaName=null, X509ExtensionCollection extensions =null) { throw null; }
+        public Rfc3161TimestampTokenInfo(Oid policyId, Oid hashAlgorithmId, ReadOnlyMemory<byte> messageHash, ReadOnlyMemory<byte> serialNumber, DateTimeOffset timestamp, long? accuracyInMicroseconds=null, bool isOrdering=false, ReadOnlyMemory<byte>? nonce=null, ReadOnlyMemory<byte>? timestampAuthorityName=null, X509ExtensionCollection extensions =null) { throw null; }
         public int Version => throw null;
         public Oid PolicyId=> throw null;
         public Oid HashAlgorithmId => throw null;
@@ -70,7 +55,9 @@ namespace System.Security.Cryptography.Pkcs
         public ReadOnlyMemory<byte>? GetTimestampAuthorityName() { throw null; }
         public bool HasExtensions => throw null;
         public X509ExtensionCollection GetExtensions() { throw null; }
-        public static bool TryParse(ReadOnlyMemory<byte> source, out int bytesRead, out Rfc3161TimestampTokenInfo timestampTokenInfo) { throw null; }
+        public byte[] Encode() => throw null;
+        public bool TryEncode(Span<byte> destination, out int bytesWritten) => throw null;
+        public static bool TryDecode(ReadOnlyMemory<byte> encodedBytes, out Rfc3161TimestampTokenInfo timestampTokenInfo, out int bytesConsumed) { throw null; }
     }
     public sealed partial class SignerInfo
     {
