@@ -55,16 +55,17 @@ namespace System.Buffers
                     break;
                 default:
                     // ASCII printable character
-                    if (!char.IsControl(c))
+                    if (char.IsControl(c) || c > 127)
+                    {
+                        sb.Append(@"\u");
+                        sb.AppendFormat("{0:x4}", (int)c);
+                    }
+                    else
                     {
                         sb.Append(c);
                         // As UTF16 escaped character
                     }
-                    else
-                    {
-                        sb.Append(@"\u");
-                        sb.Append(((int) c).ToString("x4"));
-                    }
+
                     break;
             }
         }

@@ -368,16 +368,6 @@ namespace System.Buffers
 
                 return _readOnlyBuffer.TryGet(ref _next, out _currentMemory);
             }
-
-            public Enumerator GetEnumerator()
-            {
-                return this;
-            }
-
-            public void Reset()
-            {
-                ThrowHelper.ThrowNotSupportedException();
-            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

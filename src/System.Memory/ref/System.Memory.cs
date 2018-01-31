@@ -304,10 +304,8 @@ namespace System.Buffers
         {
             private object _dummy;
             public Enumerator(System.Buffers.ReadOnlyBuffer<T> readOnlyBuffer) { throw null; }
-            public System.ReadOnlyMemory<T> Current { get { throw null; } set { } }
-            public System.Buffers.ReadOnlyBuffer<T>.Enumerator GetEnumerator() { throw null; }
+            public System.ReadOnlyMemory<T> Current { get { throw null; } }
             public bool MoveNext() { throw null; }
-            public void Reset() { }
         }
     }
     public readonly partial struct StandardFormat : System.IEquatable<System.Buffers.StandardFormat>
