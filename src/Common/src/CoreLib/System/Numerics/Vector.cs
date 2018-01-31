@@ -66,10 +66,10 @@ namespace System.Numerics
             [Intrinsic]
             get
             {
-                return zero;
+                return s_zero;
             }
         }
-        private static readonly Vector<T> zero = new Vector<T>();
+        private static readonly Vector<T> s_zero = new Vector<T>();
 
         /// <summary>
         /// Returns a vector containing all ones.
@@ -79,13 +79,13 @@ namespace System.Numerics
             [Intrinsic]
             get
             {
-                return one;
+                return s_one;
             }
         }
-        private static readonly Vector<T> one = new Vector<T>(GetOneValue());
+        private static readonly Vector<T> s_one = new Vector<T>(GetOneValue());
 
-        internal static Vector<T> AllOnes { get { return allOnes; } }
-        private static readonly Vector<T> allOnes = new Vector<T>(GetAllBitsSetValue());
+        internal static Vector<T> AllOnes { get { return s_allOnes; } }
+        private static readonly Vector<T> s_allOnes = new Vector<T>(GetAllBitsSetValue());
         #endregion Static Members
 
         #region Static Initialization
@@ -2746,7 +2746,7 @@ namespace System.Numerics
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static Vector<T> operator ~(Vector<T> value)
         {
-            return allOnes ^ value;
+            return s_allOnes ^ value;
         }
         #endregion Bitwise Operators
 
