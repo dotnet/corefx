@@ -270,13 +270,19 @@ namespace System.Buffers
         public abstract void Retain();
         protected internal abstract bool TryGetArray(out System.ArraySegment<T> arraySegment);
     }
+    public static partial class ReadOnlyBufferExtensions
+    {
+        public static void CopyTo<T>(this System.Buffers.ReadOnlyBuffer<T> buffer, System.Span<T> destination) { }
+        public static System.Nullable<System.SequencePosition> PositionOf<T>(this System.Buffers.ReadOnlyBuffer<T> buffer, T value) where T : System.IEquatable<T> { throw null; }
+        public static T[] ToArray<T>(this System.Buffers.ReadOnlyBuffer<T> buffer) { throw null; }
+    }
     public readonly partial struct ReadOnlyBuffer<T>
     {
         private readonly object _dummy;
         public static readonly System.Buffers.ReadOnlyBuffer<T> Empty;
-        public ReadOnlyBuffer(System.Buffers.IMemoryList<T> startSegment, int offset, System.Buffers.IMemoryList<T> endSegment, int endIndex) { throw null; }
+        public ReadOnlyBuffer(System.Buffers.IMemoryList<T> startSegment, int startIndex, System.Buffers.IMemoryList<T> endSegment, int endIndex) { throw null; }
         public ReadOnlyBuffer(System.Collections.Generic.IEnumerable<System.Memory<T>> buffers) { throw null; }
-        public ReadOnlyBuffer(System.Memory<T> data) { throw null; }
+        public ReadOnlyBuffer(System.Memory<T> memory) { throw null; }
         public ReadOnlyBuffer(T[] array) { throw null; }
         public ReadOnlyBuffer(T[] array, int offset, int length) { throw null; }
         public System.SequencePosition End { get { throw null; } }
@@ -285,7 +291,6 @@ namespace System.Buffers
         public bool IsSingleSegment { get { throw null; } }
         public long Length { get { throw null; } }
         public System.SequencePosition Start { get { throw null; } }
-        public void CopyTo(System.Span<T> destination) { }
         public System.Buffers.ReadOnlyBuffer<T>.Enumerator GetEnumerator() { throw null; }
         public System.SequencePosition GetPosition(System.SequencePosition origin, long offset) { throw null; }
         public System.Buffers.ReadOnlyBuffer<T> Slice(int offset, int length) { throw null; }
@@ -297,7 +302,6 @@ namespace System.Buffers
         public System.Buffers.ReadOnlyBuffer<T> Slice(System.SequencePosition start, int length) { throw null; }
         public System.Buffers.ReadOnlyBuffer<T> Slice(System.SequencePosition start, long length) { throw null; }
         public System.Buffers.ReadOnlyBuffer<T> Slice(System.SequencePosition start, System.SequencePosition end) { throw null; }
-        public T[] ToArray() { throw null; }
         public override string ToString() { throw null; }
         public bool TryGet(ref System.SequencePosition position, out System.ReadOnlyMemory<T> data, bool advance = true) { throw null; }
         public partial struct Enumerator

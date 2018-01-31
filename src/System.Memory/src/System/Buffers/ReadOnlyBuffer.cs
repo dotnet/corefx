@@ -258,34 +258,6 @@ namespace System.Buffers
             return SliceImpl(begin, BufferEnd);
         }
 
-        /// <summary>
-        /// Copy the <see cref="ReadOnlyBuffer{T}"/> to the specified <see cref="Span{Byte}"/>.
-        /// </summary>
-        /// <param name="destination">The destination <see cref="Span{Byte}"/>.</param>
-        public void CopyTo(Span<T> destination)
-        {
-            if (Length > destination.Length)
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.destination);
-            }
-
-            foreach (var segment in this)
-            {
-                segment.Span.CopyTo(destination);
-                destination = destination.Slice(segment.Length);
-            }
-        }
-
-        /// <summary>
-        /// Converts the <see cref="ReadOnlyBuffer{T}"/> to an array/>
-        /// </summary>
-        public T[] ToArray()
-        {
-            var buffer = new T[Length];
-            CopyTo(buffer);
-            return buffer;
-        }
-
         public override string ToString()
         {
             if (typeof(T) == typeof(byte))
