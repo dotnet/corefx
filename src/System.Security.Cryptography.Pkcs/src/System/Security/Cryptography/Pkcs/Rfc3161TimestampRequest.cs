@@ -222,6 +222,31 @@ namespace System.Security.Cryptography.Pkcs
                 extensions);
         }
 
+        /// <summary>
+        /// Create a timestamp request using a pre-computed hash value.
+        /// </summary>
+        /// <param name="hash">The pre-computed hash value to be timestamped.</param>
+        /// <param name="hashAlgorithmId">
+        ///   The Object Identifier (OID) for the hash algorithm which produced <paramref name="hash"/>.
+        /// </param>
+        /// <param name="requestedPolicyId">
+        ///   The Object Identifier (OID) for a timestamp policy the Timestamp Authority (TSA) should use,
+        ///   or <c>null</c> to express no preference.
+        /// </param>
+        /// <param name="nonce">
+        ///   An optional nonce (number used once) to uniquely identify this request to pair it with the response.
+        ///   The value is interpreted as an unsigned big-endian integer and may be normalized to the encoding format.
+        /// </param>
+        /// <param name="requestSignerCertificates">
+        ///   Indicates whether the Timestamp Authority (TSA) must (<c>true</c>) or must not (<c>false</c>) include
+        ///   the signing certificate in the issued timestamp token.
+        /// </param>
+        /// <param name="extensions">RFC3161 extensions to present with the request.</param>
+        /// <returns>
+        ///   An <see cref="Rfc3161TimestampRequest"/> representing the chosen values.
+        /// </returns>
+        /// <seealso cref="Encode"/>
+        /// <seealso cref="TryEncode"/>
         public static Rfc3161TimestampRequest CreateFromHash(
             ReadOnlyMemory<byte> hash,
             Oid hashAlgorithmId,
