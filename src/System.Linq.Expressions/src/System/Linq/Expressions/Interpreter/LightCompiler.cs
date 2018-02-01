@@ -256,7 +256,7 @@ namespace System.Linq.Expressions.Interpreter
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes")]
-    internal struct InterpretedFrameInfo
+    internal readonly struct InterpretedFrameInfo
     {
         private readonly string _methodName;
 
@@ -305,6 +305,8 @@ namespace System.Linq.Expressions.Interpreter
 
         public LightDelegateCreator CompileTop(LambdaExpression node)
         {
+            node.ValidateArgumentCount();
+
             //Console.WriteLine(node.DebugView);
             for (int i = 0, n = node.ParameterCount; i < n; i++)
             {
@@ -1036,13 +1038,35 @@ namespace System.Linq.Expressions.Interpreter
             {
                 BranchLabel end = _instructions.MakeLabel();
                 BranchLabel loadDefault = _instructions.MakeLabel();
+                MethodInfo method = node.Method;
+                ParameterInfo[] parameters = method.GetParametersCached();
+                Debug.Assert(parameters.Length == 1);
+                ParameterInfo parameter = parameters[0];
+                Expression operand = node.Operand;
+                Type operandType = operand.Type;
+                LocalDefinition opTemp = _locals.DefineLocal(Expression.Parameter(operandType), _instructions.Count);
+                ByRefUpdater updater = null;
+                Type parameterType = parameter.ParameterType;
+                if (parameterType.IsByRef)
+                {
+                    if (node.IsLifted)
+                    {
+                        Compile(node.Operand);
+                    }
+                    else
+                    {
+                        updater = CompileAddress(node.Operand, 0);
+                        parameterType = parameterType.GetElementType();
+                    }
+                }
+                else
+                {
+                    Compile(node.Operand);
+                }
 
-                LocalDefinition opTemp = _locals.DefineLocal(Expression.Parameter(node.Operand.Type), _instructions.Count);
-                Compile(node.Operand);
                 _instructions.EmitStoreLocal(opTemp.Index);
 
-                if (!node.Operand.Type.IsValueType ||
-                    (node.Operand.Type.IsNullableType() && node.IsLiftedToNull))
+                if (!operandType.IsValueType || operandType.IsNullableType() && node.IsLiftedToNull)
                 {
                     _instructions.EmitLoadLocal(opTemp.Index);
                     _instructions.EmitLoad(null, typeof(object));
@@ -1051,13 +1075,20 @@ namespace System.Linq.Expressions.Interpreter
                 }
 
                 _instructions.EmitLoadLocal(opTemp.Index);
-                if (node.Operand.Type.IsNullableType() &&
-                    node.Method.GetParametersCached()[0].ParameterType.Equals(node.Operand.Type.GetNonNullableType()))
+                if (operandType.IsNullableType() && parameterType.Equals(operandType.GetNonNullableType()))
                 {
                     _instructions.Emit(NullableMethodCallInstruction.CreateGetValue());
                 }
 
-                _instructions.EmitCall(node.Method);
+                if (updater == null)
+                {
+                    _instructions.EmitCall(method);
+                }
+                else
+                {
+                    _instructions.EmitByRefCall(method, parameters, new[] {updater});
+                    updater.UndefineTemps(_instructions, _locals);
+                }
 
                 _instructions.EmitBranch(end, hasResult: false, hasValue: true);
 
@@ -1944,7 +1975,6 @@ namespace System.Linq.Expressions.Interpreter
             }
             else
             {
-
                 BranchLabel end = _instructions.MakeLabel();
                 BranchLabel gotoEnd = _instructions.MakeLabel();
                 int tryStart = _instructions.Count;
@@ -2213,9 +2243,9 @@ namespace System.Linq.Expressions.Interpreter
                         return ((IndexExpression)node).Object.Type.IsArray;
                     case ExpressionType.MemberAccess:
                         return ((MemberExpression)node).Member is FieldInfo;
-                    // ExpressionType.Unbox does have the behaviour write-back is used to simulate, but
-                    // it doesn't need explicit write-back to produce it, so include it in the default
-                    // false cases.
+                        // ExpressionType.Unbox does have the behaviour write-back is used to simulate, but
+                        // it doesn't need explicit write-back to produce it, so include it in the default
+                        // false cases.
                 }
             }
             return false;
@@ -2579,8 +2609,13 @@ namespace System.Linq.Expressions.Interpreter
                 // nullable value types with implicit (numeric) conversions which are allowed by Coalesce
                 // factory methods
 
-                Type nnLeftType = node.Left.Type.GetNonNullableType();
-                if (!TypeUtils.AreEquivalent(node.Type, nnLeftType))
+                Type typeToCompare = node.Left.Type;
+                if (!node.Type.IsNullableType())
+                {
+                    typeToCompare = typeToCompare.GetNonNullableType();
+                }
+
+                if (!TypeUtils.AreEquivalent(node.Type, typeToCompare))
                 {
                     hasImplicitConversion = true;
                     hasConversion = true;
@@ -2600,6 +2635,12 @@ namespace System.Linq.Expressions.Interpreter
                 // skip over conversion on RHS
                 end = _instructions.MakeLabel();
                 _instructions.EmitBranch(end);
+            }
+            else if (node.Right.Type.IsValueType && !TypeUtils.AreEquivalent(node.Type, node.Right.Type))
+            {
+                // The right hand side may need to be widened to either the left hand side's type
+                // if the right hand side is nullable, or the left hand side's underlying type otherwise
+                CompileConvertToType(node.Right.Type, node.Type, isChecked: true, isLiftedToNull: node.Type.IsNullableType());
             }
 
             _instructions.MarkLabel(leftNotNull);

@@ -25,12 +25,9 @@ namespace Microsoft.CSharp.RuntimeBinder
         // Members from the managed binder.
         private readonly SYMTBL _symbolTable;
         private readonly SymFactory _symFactory;
-        private readonly NameManager _nameManager;
         private readonly TypeManager _typeManager;
         private readonly BSYMMGR _bsymmgr;
         private readonly CSemanticChecker _semanticChecker;
-
-        private NamespaceSymbol _rootNamespace;
 
         /////////////////////////////////////////////////////////////////////////////////
 
@@ -67,18 +64,15 @@ namespace Microsoft.CSharp.RuntimeBinder
         internal SymbolTable(
             SYMTBL symTable,
             SymFactory symFactory,
-            NameManager nameManager,
             TypeManager typeManager,
             BSYMMGR bsymmgr,
             CSemanticChecker semanticChecker)
         {
             _symbolTable = symTable;
             _symFactory = symFactory;
-            _nameManager = nameManager;
             _typeManager = typeManager;
             _bsymmgr = bsymmgr;
             _semanticChecker = semanticChecker;
-            _rootNamespace = _bsymmgr.GetRootNS();
 
             // Now populate object.
             LoadSymbolsFromType(typeof(object));
@@ -154,8 +148,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 context,
                 GetName(name),
                 arity,
-                MemLookFlags.TypeVarsAllowed |
-                    (allowSpecialNames ? 0 : MemLookFlags.UserCallable) |
+                (allowSpecialNames ? 0 : MemLookFlags.UserCallable) |
                     (name == SpecialNames.Indexer ? MemLookFlags.Indexer : 0) |
                     (name == SpecialNames.Constructor ? MemLookFlags.Ctor : 0) |
                     (requireInvocable ? MemLookFlags.MustBeInvocable : 0)))
@@ -213,7 +206,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     CType cType = GetCTypeFromType(type);
                     if (!(cType is AggregateType aggType))
                         continue;
-                    AggregateSymbol aggregate = aggType.getAggregate();
+                    AggregateSymbol aggregate = aggType.OwningAggregate;
                     FieldSymbol addedField = null;
 
                     // We need to add fields before the actual events, so do the first iteration
@@ -320,14 +313,14 @@ namespace Microsoft.CSharp.RuntimeBinder
             // If we have a WinRT type then we should load the members of it's collection interfaces
             // as well as those members are on this type as far as the user is concerned.
             CType ctype = GetCTypeFromType(type);
-            if (ctype.IsWindowsRuntimeType())
+            if (ctype.IsWindowsRuntimeType)
             {
                 TypeArray collectioniFaces = ((AggregateType)ctype).GetWinRTCollectionIfacesAll(_semanticChecker.SymbolLoader);
 
                 for (int i = 0; i < collectioniFaces.Count; i++)
                 {
                     CType collectionType = collectioniFaces[i];
-                    Debug.Assert(collectionType.isInterfaceType());
+                    Debug.Assert(collectionType.IsInterfaceType);
 
                     // Insert into our list of Types.
                     list.Add(collectionType.AssociatedSystemType);
@@ -342,7 +335,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private Name GetName(string p)
         {
-            return _nameManager.Add(p ?? "");
+            return NameManager.Add(p ?? "");
         }
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -355,11 +348,11 @@ namespace Microsoft.CSharp.RuntimeBinder
                 int idx = name.IndexOf('`');
                 if (idx >= 0)
                 {
-                    return _nameManager.Add(name, idx);
+                    return NameManager.Add(name, idx);
                 }
             }
 
-            return _nameManager.Add(name);
+            return NameManager.Add(name);
         }
 
         #endregion
@@ -383,9 +376,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 for (int i = 0; i < genericArguments.Length; i++)
                 {
                     Type t = genericArguments[i];
-                    ((TypeParameterType)ctypes[i]).GetTypeParameterSymbol().SetBounds(
-                        _bsymmgr.AllocParams(
-                        GetCTypeArrayFromTypes(t.GetGenericParameterConstraints())));
+                    ((TypeParameterType)ctypes[i]).Symbol.SetBounds(_bsymmgr.AllocParams(GetCTypeArrayFromTypes(t.GetGenericParameterConstraints())));
                 }
                 return _bsymmgr.AllocParams(ctypes.Length, ctypes);
             }
@@ -437,7 +428,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                     // We check to make sure we own the type parameter - this is because we're
                     // currently calculating TypeArgsThis, NOT TypeArgsAll.
-                    if (((TypeParameterType)ctype).GetOwningSymbol() == agg)
+                    if (((TypeParameterType)ctype).OwningSymbol == agg)
                     {
                         ctypes.Add(ctype);
                     }
@@ -645,127 +636,66 @@ namespace Microsoft.CSharp.RuntimeBinder
         #region LoadTypeChain
         /////////////////////////////////////////////////////////////////////////////////
 
-        private CType LoadSymbolsFromType(Type originalType)
+        private CType LoadSymbolsFromType(Type type)
         {
-            List<object> declarationChain = BuildDeclarationChain(originalType);
+            List<object> declarationChain = BuildDeclarationChain(type);
 
-            Type type = originalType;
-            CType ret = null;
-            bool bIsByRef = type.IsByRef;
-            if (bIsByRef)
-            {
-                type = type.GetElementType();
-            }
-
-            NamespaceOrAggregateSymbol current = _rootNamespace;
+            NamespaceOrAggregateSymbol current = NamespaceSymbol.Root;
 
             // Go through the declaration chain and add namespaces and types for
             // each element in the chain.
             for (int i = 0; i < declarationChain.Count; i++)
             {
                 object o = declarationChain[i];
-                NamespaceOrAggregateSymbol next;
-                if (o is Type)
+                if (o is Type t)
                 {
-                    Type t = o as Type;
-                    Name name = null;
-                    name = GetName(t);
-                    next = _symbolTable.LookupSym(name, current, symbmask_t.MASK_AggregateSymbol) as AggregateSymbol;
-
-                    // Make sure we match arity as well when we find an aggregate.
-                    if (next != null)
+                    if (t.IsNullableType())
                     {
-                        next = FindSymWithMatchingArity(next as AggregateSymbol, t);
+                        return _typeManager.GetNullable(GetCTypeFromType(t.GetGenericArguments()[0]));
                     }
 
-                    // In the event that two different types exist that have the same name, they
-                    // cannot both have entries in the symbol table with our current architecture.
-                    // This can happen in dynamic, since the runtime binder lives across all
-                    // call sites in an appdomain, and assemblies can have been loaded at runtime
-                    // that have different types with the same name.
-
-                    // In the real compiler, this would have been an error and name lookup would
-                    // be ambiguous, but here we never have to lookup names of types for real (only
-                    // names of members).
-
-                    // The tactical fix is this: if we encounter this situation, where we have
-                    // identically named types that are not the same, then we are going to clear
-                    // the entire symbol table and restart this binding. This solution is not
-                    // without its own problems, since it is possible to conceive of a single
-                    // dynamic binding that needs to simultaneously know about both of the
-                    // similarly named types, but we are not going to try to solve that
-                    // scenario here.
-
-                    if (next != null)
-                    {
-                        Type existingType = (next as AggregateSymbol).AssociatedSystemType;
-                        Type newType = t.IsGenericType ? t.GetGenericTypeDefinition() : t;
-
-                        // We use "IsEquivalentTo" so that unified local types for NoPIA do
-                        // not trigger a reset. There are other mechanisms to make those sorts
-                        // of types work in some scenarios.
-                        if (!existingType.IsEquivalentTo(newType))
-                        {
-                            throw new ResetBindException();
-                        }
-                    }
+                    AggregateSymbol next = FindSymForType(
+                        _symbolTable.LookupSym(GetName(t), current, symbmask_t.MASK_AggregateSymbol), t);
 
                     // If we haven't found this type yet, then add it to our symbol table.
-                    if (next == null || t.IsNullableType())
+                    if (next == null)
                     {
                         // Note that if we have anything other than an AggregateSymbol,
                         // we must be at the end of the line - that is, nothing else can
                         // have children.
-
                         CType ctype = ProcessSpecialTypeInChain(current, t);
                         if (ctype != null)
                         {
-                            // If we had an aggregate type, its possible we're not at the end.
-                            // This will happen for nullable<T> for instance.
-                            if (ctype is AggregateType cat)
-                            {
-                                next = cat.GetOwningAggregate();
-                            }
-                            else
-                            {
-                                ret = ctype;
-                                break;
-                            }
+                            Debug.Assert(!(ctype is AggregateType));
+                            return ctype;
                         }
-                        else
-                        {
-                            // This is a regular class.
-                            next = AddAggregateToSymbolTable(current, t);
-                        }
+
+                        // This is a regular class.
+                        next = AddAggregateToSymbolTable(current, t);
                     }
 
                     if (t == type)
                     {
-                        ret = GetConstructedType(type, next as AggregateSymbol);
-                        break;
+                        return GetConstructedType(type, next);
                     }
+
+                    current = next;
                 }
-                else if (o is MethodInfo)
+                else if (o is MethodInfo m)
                 {
                     // We cant be at the end.
                     Debug.Assert(i + 1 < declarationChain.Count);
-                    ret = ProcessMethodTypeParameter(o as MethodInfo, declarationChain[++i] as Type, current as AggregateSymbol);
-                    break;
+                    return ProcessMethodTypeParameter(m, declarationChain[++i] as Type, current as AggregateSymbol);
                 }
                 else
                 {
                     Debug.Assert(o is string);
-                    next = AddNamespaceToSymbolTable(current, o as string);
+                    current = AddNamespaceToSymbolTable(current, o as string);
                 }
-                current = next;
             }
 
-            Debug.Assert(ret != null);
-            if (bIsByRef)
-            {
-                ret = _typeManager.GetParameterModifier(ret, false);
-            }
-            return ret;
+            Debug.Fail("Should be unreachable");
+            return null;
         }
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -813,18 +743,17 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private CType ProcessSpecialTypeInChain(NamespaceOrAggregateSymbol parent, Type t)
         {
-            CType ctype;
             if (t.IsGenericParameter)
             {
                 AggregateSymbol agg = parent as AggregateSymbol;
                 Debug.Assert(agg != null);
-                ctype = LoadClassTypeParameter(agg, t);
-                return ctype;
+                return LoadClassTypeParameter(agg, t);
             }
-            else if (t.IsArray)
+
+            if (t.IsArray)
             {
                 // Now we return an array of nesting level corresponding to the rank.
-                ctype = _typeManager.GetArray(
+                return _typeManager.GetArray(
                     GetCTypeFromType(t.GetElementType()), 
                     t.GetArrayRank(),
 #if netcoreapp
@@ -833,37 +762,14 @@ namespace Microsoft.CSharp.RuntimeBinder
                     t.GetElementType().MakeArrayType() == t
 #endif
                     );
-                return ctype;
             }
-            else if (t.IsPointer)
+
+            if (t.IsPointer)
             {
                 // Now we return the pointer type that we want.
-                ctype = _typeManager.GetPointer(GetCTypeFromType(t.GetElementType()));
-                return ctype;
+                return _typeManager.GetPointer(GetCTypeFromType(t.GetElementType()));
             }
-            else if (t.IsNullableType())
-            {
-                // Get a nullable type of the underlying type.
-                if (t.GetGenericArguments()[0].DeclaringType == t)
-                {
-                    // If the generic argument for nullable is our child, then we're
-                    // declaring the initial Nullable<T>.
-                    AggregateSymbol agg = _symbolTable.LookupSym(
-                        GetName(t), parent, symbmask_t.MASK_AggregateSymbol) as AggregateSymbol;
-                    if (agg != null)
-                    {
-                        agg = FindSymWithMatchingArity(agg, t);
-                        if (agg != null)
-                        {
-                            Debug.Assert(agg.getThisType().AssociatedSystemType == t);
-                            return agg.getThisType();
-                        }
-                    }
-                    return AddAggregateToSymbolTable(parent, t).getThisType();
-                }
-                ctype = _typeManager.GetNullable(GetCTypeFromType(t.GetGenericArguments()[0]));
-                return ctype;
-            }
+
             return null;
         }
 
@@ -915,39 +821,40 @@ namespace Microsoft.CSharp.RuntimeBinder
                     Debug.Assert(bAdded);
                 }
             }
+
             callChain.Reverse();
 
             // Now take out the namespaces and add them to the end of the chain.
-
             if (callingType.Namespace != null)
             {
-                string[] namespaces = callingType.Namespace.Split('.');
-                int index = 0;
-                foreach (string s in namespaces)
-                {
-                    callChain.Insert(index++, s);
-                }
+                callChain.InsertRange(0, callingType.Namespace.Split('.'));
             }
             return callChain;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
+        // We have an aggregate symbol of the correct parent and full name, but it may have the wrong arity, or, due to
+        // dynamic loading or creation, two different types can exist that have the same name.
 
-        private AggregateSymbol FindSymWithMatchingArity(AggregateSymbol aggregateSymbol, Type type)
+        // In the static compiler, this would have been an error and name lookup would be ambiguous, but here we never have
+        // to lookup names of types for real (only names of members).
+
+        // For either case, move onto the next symbol in the chain, and check again for appropriate type.
+        private AggregateSymbol FindSymForType(Symbol sym, Type t)
         {
-            for (AggregateSymbol agg = aggregateSymbol;
-                agg != null;
-                agg = BSYMMGR.LookupNextSym(agg, agg.Parent, symbmask_t.MASK_AggregateSymbol) as AggregateSymbol)
+            while (sym != null)
             {
-                if (agg.GetTypeVarsAll().Count == type.GetGenericArguments().Length)
+                // We use "IsEquivalentTo" so that unified local types match.
+                if (sym is AggregateSymbol agg)
+                if (agg.AssociatedSystemType.IsEquivalentTo(t.IsGenericType ? t.GetGenericTypeDefinition() : t))
                 {
                     return agg;
                 }
+
+                sym = sym.nextSameName;
             }
+
             return null;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private NamespaceSymbol AddNamespaceToSymbolTable(NamespaceOrAggregateSymbol parent, string sz)
         {
@@ -983,10 +890,10 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         /////////////////////////////////////////////////////////////////////////////////
 
-        internal CType GetCTypeFromType(Type t)
-        {
-            return LoadSymbolsFromType(t);
-        }
+        internal CType GetCTypeFromType(Type type) => type.IsByRef
+            ? _typeManager.GetParameterModifier(LoadSymbolsFromType(type.GetElementType()), false)
+            : LoadSymbolsFromType(type);
+
         #endregion
 
         #region Aggregates
@@ -1044,10 +951,8 @@ namespace Microsoft.CSharp.RuntimeBinder
             else if (type.IsNested)
             {
                 // If its nested, we may have other accessibility options.
-                if (type.IsNestedAssembly || type.IsNestedFamANDAssem)
+                if (type.IsNestedAssembly)
                 {
-                    // Note that we don't directly support NestedFamANDAssem, but we're just
-                    // going to default to internal.
                     access = ACCESS.ACC_INTERNAL;
                 }
                 else if (type.IsNestedFamORAssem)
@@ -1061,6 +966,10 @@ namespace Microsoft.CSharp.RuntimeBinder
                 else if (type.IsNestedFamily)
                 {
                     access = ACCESS.ACC_PROTECTED;
+                }
+                else if (type.IsNestedFamANDAssem)
+                {
+                    access = ACCESS.ACC_INTERNAL_AND_PROTECTED;
                 }
                 else
                 {
@@ -1091,9 +1000,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     Type t = genericArguments[i];
                     if (agg.GetTypeVars()[i] is TypeParameterType typeVar)
                     {
-                        typeVar.GetTypeParameterSymbol().SetBounds(
-                            _bsymmgr.AllocParams(
-                            GetCTypeArrayFromTypes(t.GetGenericParameterConstraints())));
+                        typeVar.Symbol.SetBounds(_bsymmgr.AllocParams(GetCTypeArrayFromTypes(t.GetGenericParameterConstraints())));
                     }
                 }
             }
@@ -1196,14 +1103,18 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 access = ACCESS.ACC_PROTECTED;
             }
-            else if (fieldInfo.IsAssembly || fieldInfo.IsFamilyAndAssembly)
+            else if (fieldInfo.IsAssembly)
             {
                 access = ACCESS.ACC_INTERNAL;
             }
+            else if (fieldInfo.IsFamilyOrAssembly)
+            {
+                access = ACCESS.ACC_INTERNALPROTECTED;
+            }
             else
             {
-                Debug.Assert(fieldInfo.IsFamilyOrAssembly);
-                access = ACCESS.ACC_INTERNALPROTECTED;
+                Debug.Assert(fieldInfo.IsFamilyAndAssembly);
+                access = ACCESS.ACC_INTERNAL_AND_PROTECTED;
             }
             field.SetAccess(access);
             field.isReadOnly = fieldInfo.IsInitOnly;
@@ -1386,7 +1297,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     }
 
                     prevProp = prop;
-                    prop = _semanticChecker.SymbolLoader.LookupNextSym(prop, prop.parent, symbmask_t.MASK_PropertySymbol) as PropertySymbol;
+                    prop = SymbolLoader.LookupNextSym(prop, prop.parent, symbmask_t.MASK_PropertySymbol) as PropertySymbol;
                 }
 
                 prop = prevProp;
@@ -1590,15 +1501,18 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 access = ACCESS.ACC_INTERNALPROTECTED;
             }
+            else if (member.IsAssembly)
+            {
+                access = ACCESS.ACC_INTERNAL;
+            }
             else
             {
-                Debug.Assert(member.IsAssembly || member.IsFamilyAndAssembly);
-                access = ACCESS.ACC_INTERNAL;
+                Debug.Assert(member.IsFamilyAndAssembly);
+                access = ACCESS.ACC_INTERNAL_AND_PROTECTED;
             }
 
             methodSymbol.SetAccess(access);
             methodSymbol.isVirtual = member.IsVirtual;
-            methodSymbol.isAbstract = member.IsAbstract;
             methodSymbol.isStatic = member.IsStatic;
 
             if (method != null)
@@ -1607,7 +1521,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 methodSymbol.isOverride = method.IsVirtual && method.IsHideBySig && method.GetRuntimeBaseDefinition() != method;
                 methodSymbol.isOperator = IsOperator(method);
                 methodSymbol.swtSlot = GetSlotForOverride(method);
-                methodSymbol.isVarargs = (method.CallingConvention & CallingConventions.VarArgs) == CallingConventions.VarArgs;
                 methodSymbol.RetType = GetCTypeFromType(method.ReturnType);
             }
             else
@@ -1616,8 +1529,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 methodSymbol.isOverride = false;
                 methodSymbol.isOperator = false;
                 methodSymbol.swtSlot = null;
-                methodSymbol.isVarargs = false;
-                methodSymbol.RetType = _typeManager.GetVoid();
+                methodSymbol.RetType = VoidType.Instance;
             }
 
             methodSymbol.modOptCount = GetCountOfModOpts(parameters);
@@ -1625,7 +1537,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             methodSymbol.isParamArray = DoesMethodHaveParameterArray(parameters);
             methodSymbol.isHideByName = false;
 
-            methodSymbol.errExpImpl = null;
             methodSymbol.Params = CreateParameterArray(methodSymbol.AssociatedMemberInfo, parameters);
 
             SetParameterDataForMethProp(methodSymbol, parameters);
@@ -1714,6 +1625,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     {
                         object defValue = parameter.DefaultValue;
 #endif
+                        Debug.Assert(Type.GetTypeCode(defValue.GetType()) != TypeCode.Decimal); // Handled above
                         switch (Type.GetTypeCode(defValue.GetType()))
                         {
 
@@ -1745,11 +1657,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                             case TypeCode.Double:
                                 cv = ConstVal.Get((double)defValue);
                                 cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DOUBLE);
-                                break;
-
-                            case TypeCode.Decimal:
-                                cv = ConstVal.Get((decimal)defValue);
-                                cvType = _semanticChecker.SymbolLoader.GetPredefindType(PredefinedType.PT_DECIMAL);
                                 break;
 
                             case TypeCode.Char:
@@ -1834,21 +1741,20 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private TypeArray CreateParameterArray(MemberInfo associatedInfo, ParameterInfo[] parameters)
         {
-            List<CType> types = new List<CType>();
+            bool isVarArg = associatedInfo is MethodBase mb && (mb.CallingConvention & CallingConventions.VarArgs) != 0;
+            CType[] types = new CType[isVarArg ? parameters.Length + 1 : parameters.Length];
 
-            foreach (ParameterInfo p in parameters)
+            for (int i = 0; i < parameters.Length; i++)
             {
-                types.Add(GetTypeOfParameter(p, associatedInfo));
+                types[i] = GetTypeOfParameter(parameters[i], associatedInfo);
             }
 
-            MethodInfo mi = associatedInfo as MethodInfo;
-
-            if (mi != null && (mi.CallingConvention & CallingConventions.VarArgs) == CallingConventions.VarArgs)
+            if (isVarArg)
             {
-                types.Add(_typeManager.GetArgListType());
+                types[types.Length - 1] = ArgumentListType.Instance;
             }
 
-            return _bsymmgr.AllocParams(types.Count, types.ToArray());
+            return _bsymmgr.AllocParams(types);
         }
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -1870,7 +1776,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             // Check if we have an out parameter.
             if (ctype is ParameterModifierType mod && p.IsOut && !p.IsIn)
             {
-                CType parameterType = mod.GetParameterType();
+                CType parameterType = mod.ParameterType;
                 ctype = _typeManager.GetParameterModifier(parameterType, true);
             }
 
@@ -1917,18 +1823,12 @@ namespace Microsoft.CSharp.RuntimeBinder
                 // the methods in order. As such, our parent methods should be in the
                 // symbol table at this point.
 
-                AggregateSymbol aggregate = GetCTypeFromType(baseMethodInfo.DeclaringType).getAggregate();
+                AggregateSymbol aggregate = ((AggregateType)GetCTypeFromType(baseMethodInfo.DeclaringType)).OwningAggregate;
                 MethodSymbol baseMethod = FindMethodFromMemberInfo(baseMethodInfo);
-
-                // This assert is temporarily disabled to improve testability of the area on .NetNative
-                //Debug.Assert(baseMethod != null);
-                if ((object)baseMethod == null)
-                {
-                    throw Error.InternalCompilerError();
-                }
-
+                Debug.Assert(baseMethod != null);
                 return new SymWithType(baseMethod, aggregate.getThisType());
             }
+
             return null;
         }
 
@@ -1938,7 +1838,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             CType t = GetCTypeFromType(baseMemberInfo.DeclaringType);
             Debug.Assert(t is AggregateType);
-            AggregateSymbol aggregate = t.getAggregate();
+            AggregateSymbol aggregate = ((AggregateType)t).OwningAggregate;
             Debug.Assert(aggregate != null);
 
             MethodSymbol meth = _semanticChecker.SymbolLoader.LookupAggMember(
@@ -1947,7 +1847,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 symbmask_t.MASK_MethodSymbol) as MethodSymbol;
             for (;
                     meth != null && !meth.AssociatedMemberInfo.IsEquivalentTo(baseMemberInfo);
-                    meth = _semanticChecker.SymbolLoader.LookupNextSym(meth, aggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol)
+                    meth = SymbolLoader.LookupNextSym(meth, aggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol)
                 ;
 
             return meth;
@@ -1997,7 +1897,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (!(t is AggregateType))
             {
                 CType endT;
-                while ((endT = t.GetBaseOrParameterOrElementType()) != null)
+                while ((endT = t.BaseOrParameterOrElementType) != null)
                 {
                     t = endT;
                 }
@@ -2006,7 +1906,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (t is TypeParameterType paramType)
             {
                 // Add conversions for the bounds.
-                foreach (CType bound in paramType.GetBounds().Items)
+                foreach (CType bound in paramType.Bounds.Items)
                 {
                     AddConversionsForType(bound.AssociatedSystemType);
                 }
@@ -2014,7 +1914,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
 
             Debug.Assert(t is AggregateType);
-            AggregateSymbol aggregate = ((AggregateType)t).getAggregate();
+            AggregateSymbol aggregate = ((AggregateType)t).OwningAggregate;
 
             // Now find all the conversions and make them.
             foreach (MethodInfo conversion in type.GetRuntimeMethods())

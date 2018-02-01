@@ -21,22 +21,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             return _exprFactory;
         }
-        private ErrorHandling GetErrorContext()
-        {
-            return _pErrorContext;
-        }
+
         private static bool IsNullableConstructor(Expr expr, out ExprCall call)
         {
             Debug.Assert(expr != null);
 
-            if (expr is ExprCall pCall && pCall.MemberGroup.OptionalObject == null)
+            if (expr is ExprCall pCall && pCall.MemberGroup.OptionalObject == null
+                && (pCall.MethWithInst?.Meth().IsNullableConstructor() ?? false))
             {
-                MethodSymbol meth = pCall.MethWithInst.Meth();
-                if (meth != null && meth.IsNullableConstructor())
-                {
-                    call = pCall;
-                    return true;
-                }
+                call = pCall;
+                return true;
             }
 
             call = null;
@@ -68,7 +62,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             NullableType nubSrc = (NullableType)exprSrc.Type;
-            CType typeBase = nubSrc.GetUnderlyingType();
+            CType typeBase = nubSrc.UnderlyingType;
             AggregateType ats = nubSrc.GetAts();
             PropertySymbol prop = GetSymbolLoader().getBSymmgr().propNubValue;
             if (prop == null)

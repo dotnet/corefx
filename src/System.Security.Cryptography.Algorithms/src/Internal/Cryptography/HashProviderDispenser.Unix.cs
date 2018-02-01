@@ -27,7 +27,7 @@ namespace Internal.Cryptography
                 case HashAlgorithmNames.MD5:
                     return new EvpHashProvider(Interop.Crypto.EvpMd5());
             }
-            throw new CryptographicException();
+            throw new CryptographicException(SR.Format(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithmId));
         }
 
         public static unsafe HashProvider CreateMacProvider(string hashAlgorithmId, byte[] key)
@@ -45,7 +45,7 @@ namespace Internal.Cryptography
                 case HashAlgorithmNames.MD5:
                     return new HmacHashProvider(Interop.Crypto.EvpMd5(), key);
             }
-            throw new CryptographicException();
+            throw new CryptographicException(SR.Format(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithmId));
         }
 
         // -----------------------------
@@ -95,7 +95,7 @@ namespace Internal.Cryptography
                 }
 
                 uint length = (uint)destination.Length;
-                Check(Interop.Crypto.EvpDigestFinalEx(_ctx, ref destination.DangerousGetPinnableReference(), ref length));
+                Check(Interop.Crypto.EvpDigestFinalEx(_ctx, ref MemoryMarshal.GetReference(destination), ref length));
                 Debug.Assert(length == _hashSize);
                 bytesWritten = (int)length;
 
@@ -132,7 +132,7 @@ namespace Internal.Cryptography
                     throw new CryptographicException();
                 }
 
-                _hmacCtx = Interop.Crypto.HmacCreate(ref new Span<byte>(key).DangerousGetPinnableReference(), key.Length, algorithmEvp);
+                _hmacCtx = Interop.Crypto.HmacCreate(ref MemoryMarshal.GetReference(new Span<byte>(key)), key.Length, algorithmEvp);
                 Interop.Crypto.CheckValidOpenSslHandle(_hmacCtx);
             }
 
@@ -157,7 +157,7 @@ namespace Internal.Cryptography
                 }
 
                 int length = destination.Length;
-                Check(Interop.Crypto.HmacFinal(_hmacCtx, ref destination.DangerousGetPinnableReference(), ref length));
+                Check(Interop.Crypto.HmacFinal(_hmacCtx, ref MemoryMarshal.GetReference(destination), ref length));
                 Debug.Assert(length == _hashSize);
                 bytesWritten = length;
 

@@ -127,55 +127,55 @@ namespace System.SpanTests
         public static void CopyToArray()
         {
             int[] src = { 1, 2, 3 };
-            int[] dst = { 99, 100, 101 };
+            Span<int> dst = new int[3] { 99, 100, 101 };
 
             src.CopyTo(dst);
-            Assert.Equal<int>(src, dst);
+            Assert.Equal<int>(src, dst.ToArray());
         }
 
         [Fact]
         public static void CopyToSingleArray()
         {
             int[] src = { 1 };
-            int[] dst = { 99 };
+            Span<int> dst = new int[1] { 99 };
 
             src.CopyTo(dst);
-            Assert.Equal<int>(src, dst);
+            Assert.Equal<int>(src, dst.ToArray());
         }
 
         [Fact]
         public static void CopyToEmptyArray()
         {
             int[] src = { };
-            int[] dst = { 99, 100, 101 };
+            Span<int> dst = new int[3] { 99, 100, 101 };
 
             src.CopyTo(dst);
             int[] expected = { 99, 100, 101 };
-            Assert.Equal<int>(expected, dst);
+            Assert.Equal<int>(expected, dst.ToArray());
 
-            int[] dstEmpty = { };
+            Span<int> dstEmpty = new int[0] { };
 
-            src.CopyTo(dst);
+            src.CopyTo(dstEmpty);
             int[] expectedEmpty = { };
-            Assert.Equal<int>(expectedEmpty, dstEmpty);
+            Assert.Equal<int>(expectedEmpty, dstEmpty.ToArray());
         }
 
         [Fact]
         public static void CopyToLongerArray()
         {
             int[] src = { 1, 2, 3 };
-            int[] dst = { 99, 100, 101, 102 };
+            Span<int> dst = new int[4] { 99, 100, 101, 102 };
 
             src.CopyTo(dst);
             int[] expected = { 1, 2, 3, 102 };
-            Assert.Equal<int>(expected, dst);
+            Assert.Equal<int>(expected, dst.ToArray());
         }
 
         [Fact]
         public static void CopyToShorterArray()
         {
             int[] src = { 1, 2, 3 };
-            int[] dst = { 99, 100 };
+            int[] dst = new int[2] { 99, 100 };
 
             TestHelpers.AssertThrows<ArgumentException, int>(src, (_src) => _src.CopyTo(dst));
             int[] expected = { 99, 100 };
@@ -186,7 +186,7 @@ namespace System.SpanTests
         public static void CopyToCovariantArray()
         {
             string[] src = new string[] { "Hello" };
-            object[] dst = new object[] { "world" };
+            Span<object> dst = new object[] { "world" };
 
             src.CopyTo<object>(dst);
             Assert.Equal("Hello", dst[0]);
@@ -197,6 +197,7 @@ namespace System.SpanTests
         // the residual chunk of size (bufferSize % 4GB). The inputs sizes to this method, 4GB and 4GB+256B,
         // test the two size selection paths in CoptyTo method - memory size that is multiple of 4GB or,
         // a multiple of 4GB + some more size.
+        [ActiveIssue(25254)]
         [Theory]
         [OuterLoop]
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
@@ -241,17 +242,50 @@ namespace System.SpanTests
 
                         for (int count = 0; count < GuidCount; ++count)
                         {
-                            var guidfirst = Unsafe.Add(ref memoryFirst, count);
-                            var guidSecond = Unsafe.Add(ref memorySecond, count);
+                            Guid guidfirst = Unsafe.Add(ref memoryFirst, count);
+                            Guid guidSecond = Unsafe.Add(ref memorySecond, count);
                             Assert.Equal(guidfirst, guidSecond);
                         }
                     }
                 }
                 finally
                 {
-                    if (allocatedFirst) AllocationHelper.ReleaseNative(ref memBlockFirst);
-                    if (allocatedSecond) AllocationHelper.ReleaseNative(ref memBlockSecond);
+                    if (allocatedFirst)
+                        AllocationHelper.ReleaseNative(ref memBlockFirst);
+                    if (allocatedSecond)
+                        AllocationHelper.ReleaseNative(ref memBlockSecond);
                 }
+            }
+        }
+
+        [Fact]
+        public static void CopyToVaryingSizes()
+        {
+            const int MaxLength = 2048;
+
+            var rng = new Random();
+            byte[] inputArray = new byte[MaxLength];
+            Span<byte> inputSpan = inputArray;
+            Span<byte> outputSpan = new byte[MaxLength];
+            Span<byte> allZerosSpan = new byte[MaxLength];
+
+            // Test all inputs from size 0 .. MaxLength (inclusive) to make sure we don't have
+            // gaps in our Memmove logic.
+            for (int i = 0; i <= MaxLength; i++)
+            {
+                // Arrange
+
+                rng.NextBytes(inputArray);
+                outputSpan.Clear();
+
+                // Act
+
+                inputSpan.Slice(0, i).CopyTo(outputSpan);
+
+                // Assert
+
+                Assert.True(inputSpan.Slice(0, i).SequenceEqual(outputSpan.Slice(0, i))); // src successfully copied to dst
+                Assert.True(outputSpan.Slice(i).SequenceEqual(allZerosSpan.Slice(i))); // no other part of dst was overwritten
             }
         }
     }

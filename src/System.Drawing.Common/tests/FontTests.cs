@@ -302,20 +302,6 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("NoSuchFont")]
-        [InlineData("Serif")]
-        public void Ctor_NoSuchFamilyName_SetsFamilyToGenericSansSerif(string familyName)
-        {
-            using (var font = new Font(familyName, 10))
-            {
-                Assert.Equal("Microsoft Sans Serif", font.FontFamily.Name);
-            }
-        }
-
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void Ctor_NullFont_ThrowsNullReferenceException()
         {
@@ -638,7 +624,7 @@ namespace System.Drawing.Tests
                 };
                 using (Font font = Font.FromLogFont(logFont))
                 {
-                    VerifyFont(font, family.Name, 16, fontStyle, GraphicsUnit.World, charSet, expectedGdiVerticalFont: false);
+                    VerifyFont(font, family.Name, font.Size, fontStyle, GraphicsUnit.World, charSet, expectedGdiVerticalFont: false);
                 }
             }
         }

@@ -254,14 +254,8 @@ namespace System.Drawing.Printing.Tests
                 case PaperKind.Letter:
                     Assert.Equal(new Rectangle(0, 0, 850, 1100), pageSettings.Bounds);
                     break;
-
-                default:
-                    Assert.False(true, "Unexpected default paper size");
-                    break;
             }
 
-            Assert.False(pageSettings.Landscape);
-            Assert.Equal(PaperSourceKind.FormSource, pageSettings.PaperSource.Kind);
             Assert.Equal(PrinterResolutionKind.Custom, pageSettings.PrinterResolution.Kind);
             Assert.True(pageSettings.PrinterSettings.IsDefaultPrinter);
         }

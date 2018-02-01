@@ -81,9 +81,6 @@
   <data name="ValueCantBeNull" xml:space="preserve">
     <value>Null 非許容の値型であるため、Null を '{0}' に変換できません</value>
   </data>
-  <data name="WrongNestedThis" xml:space="preserve">
-    <value>入れ子にされた型 '{1}' を経由して、外の型 '{0}' の静的でないメンバーにアクセスすることはできません</value>
-  </data>
   <data name="NoSuchMember" xml:space="preserve">
     <value>'{0}' に '{1}' の定義がありません</value>
   </data>
@@ -176,9 +173,6 @@
   </data>
   <data name="GenericConstraintNotSatisfiedValType" xml:space="preserve">
     <value>型 '{3}' はジェネリック型またはメソッド '{0}' 内で型パラメーター '{2}' として使用できません。'{3}' から '{1}' へのボックス変換がありません。</value>
-  </data>
-  <data name="TypeVarCantBeNull" xml:space="preserve">
-    <value>Null 非許容の値型である可能性があるため、Null を型パラメーター '{0}' に変換できません。'default({0})' を使用してください。</value>
   </data>
   <data name="CantInferMethTypeArgs" xml:space="preserve">
     <value>メソッド '{0}' の型引数を使い方から推論することはできません。型引数を明示的に指定してください。</value>

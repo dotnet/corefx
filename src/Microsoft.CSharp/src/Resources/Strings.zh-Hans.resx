@@ -81,9 +81,6 @@
   <data name="ValueCantBeNull" xml:space="preserve">
     <value>无法将 null 转换为“{0}”，因为后者是不可以为 null 的值类型</value>
   </data>
-  <data name="WrongNestedThis" xml:space="preserve">
-    <value>无法通过嵌套类型“{1}”来访问外部类型“{0}”的非静态成员</value>
-  </data>
   <data name="NoSuchMember" xml:space="preserve">
     <value>“{0}”未包含“{1}”的定义</value>
   </data>
@@ -176,9 +173,6 @@
   </data>
   <data name="GenericConstraintNotSatisfiedValType" xml:space="preserve">
     <value>类型“{3}”不能用作泛型类型或方法“{0}”中的类型参数“{2}”。没有从“{3}”到“{1}”的装箱转换。</value>
-  </data>
-  <data name="TypeVarCantBeNull" xml:space="preserve">
-    <value>无法将 null 转换为类型参数“{0}”，因为它可能是不可以为 null 的值类型。请考虑改用“default({0})”。</value>
   </data>
   <data name="CantInferMethTypeArgs" xml:space="preserve">
     <value>无法从用法中推断出方法“{0}”的类型参数。请尝试显式指定类型参数。</value>

@@ -281,6 +281,20 @@
 #endif
   } // end of method Unsafe::AsRef
 
+  .method public hidebysig static !!T& AsRef<T>(!!T& source) cil managed aggressiveinlining
+  {
+        .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
+        .param [1]
+#ifdef netcoreapp
+        .custom instance void [CORE_ASSEMBLY]System.Runtime.CompilerServices.IsReadOnlyAttribute::.ctor() = ( 01 00 00 00 )
+#else
+        .custom instance void System.Runtime.CompilerServices.IsReadOnlyAttribute::.ctor() = ( 01 00 00 00 )
+#endif
+        .maxstack 1
+        ldarg.0
+        ret
+  } // end of method Unsafe::AsRef
+
   .method public hidebysig static !!TTo& As<TFrom, TTo>(!!TFrom& source) cil managed aggressiveinlining
   {
         .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
@@ -405,6 +419,26 @@
         ret 
   } // end of method Unsafe::AreSame
 
+  .method public hidebysig static bool IsAddressGreaterThan<T>(!!T& left, !!T& right) cil managed aggressiveinlining
+  {
+        .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
+        .maxstack 2
+        ldarg.0
+        ldarg.1
+        cgt.un
+        ret 
+  } // end of method Unsafe::IsAddressGreaterThan
+
+  .method public hidebysig static bool IsAddressLessThan<T>(!!T& left, !!T& right) cil managed aggressiveinlining
+  {
+        .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
+        .maxstack 2
+        ldarg.0
+        ldarg.1
+        clt.un
+        ret 
+  } // end of method Unsafe::IsAddressLessThan
+
 } // end of class System.Runtime.CompilerServices.Unsafe
 
 .class private auto ansi sealed beforefieldinit System.Runtime.Versioning.NonVersionableAttribute
@@ -423,3 +457,20 @@
   } // end of method NonVersionableAttribute::.ctor
 
 } // end of class System.Runtime.Versioning.NonVersionableAttribute
+
+#ifdef netcoreapp
+#else
+.class private auto ansi sealed beforefieldinit System.Runtime.CompilerServices.IsReadOnlyAttribute
+       extends [CORE_ASSEMBLY]System.Attribute
+{
+  .method public hidebysig specialname rtspecialname 
+          instance void .ctor () cil managed 
+  {
+        .maxstack 1
+        ldarg.0
+        call instance void [CORE_ASSEMBLY]System.Attribute::.ctor()
+        ret
+  } // end of method IsReadOnlyAttribute::.ctor
+
+} // end of class System.Runtime.CompilerServices.IsReadOnlyAttribute
+#endif

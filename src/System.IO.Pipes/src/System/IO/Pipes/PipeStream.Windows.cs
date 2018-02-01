@@ -47,13 +47,14 @@ namespace System.IO.Pipes
             _threadPoolBinding = ThreadPoolBoundHandle.BindHandle(handle);
         }
 
-        private void UninitializeAsyncHandle()
+        private void DisposeCore(bool disposing)
         {
-            if (_threadPoolBinding != null)
-                _threadPoolBinding.Dispose();
+            if (disposing)
+            {
+                _threadPoolBinding?.Dispose();
+            }
         }
 
-        [SecurityCritical]
         private unsafe int ReadCore(Span<byte> buffer)
         {
             int errorCode = 0;
@@ -80,17 +81,16 @@ namespace System.IO.Pipes
             return r;
         }
 
-        [SecuritySafeCritical]
-        private Task<int> ReadAsyncCore(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        private Task<int> ReadAsyncCore(Memory<byte> buffer, CancellationToken cancellationToken)
         {
-            var completionSource = new ReadWriteCompletionSource(this, buffer, cancellationToken, isWrite: false);
+            var completionSource = new ReadWriteCompletionSource(this, buffer, isWrite: false);
 
             // Queue an async ReadFile operation and pass in a packed overlapped
             int errorCode = 0;
             int r;
             unsafe
             {
-                r = ReadFileNative(_handle, new Span<byte>(buffer, offset, count), completionSource.Overlapped, out errorCode);
+                r = ReadFileNative(_handle, buffer.Span, completionSource.Overlapped, out errorCode);
             }
 
             // ReadFile, the OS version, will return 0 on failure, but this ReadFileNative wrapper
@@ -131,11 +131,10 @@ namespace System.IO.Pipes
                 }
             }
 
-            completionSource.RegisterForCancellation();
+            completionSource.RegisterForCancellation(cancellationToken);
             return completionSource.Task;
         }
 
-        [SecurityCritical]
         private unsafe void WriteCore(ReadOnlySpan<byte> buffer)
         {
             int errorCode = 0;
@@ -148,17 +147,16 @@ namespace System.IO.Pipes
             Debug.Assert(r >= 0, "PipeStream's WriteCore is likely broken.");
         }
 
-        [SecuritySafeCritical]
-        private Task WriteAsyncCore(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        private Task WriteAsyncCore(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
         {
-            var completionSource = new ReadWriteCompletionSource(this, buffer, cancellationToken, isWrite: true);
+            var completionSource = new ReadWriteCompletionSource(this, buffer, isWrite: true);
             int errorCode = 0;
 
             // Queue an async WriteFile operation and pass in a packed overlapped
             int r;
             unsafe
             {
-                r = WriteFileNative(_handle, new ReadOnlySpan<byte>(buffer, offset, count), completionSource.Overlapped, out errorCode);
+                r = WriteFileNative(_handle, buffer.Span, completionSource.Overlapped, out errorCode);
             }
 
             // WriteFile, the OS version, will return 0 on failure, but this WriteFileNative 
@@ -177,12 +175,11 @@ namespace System.IO.Pipes
                 throw WinIOError(errorCode);
             }
 
-            completionSource.RegisterForCancellation();
+            completionSource.RegisterForCancellation(cancellationToken);
             return completionSource.Task;
         }
 
         // Blocks until the other end of the pipe has read in all written buffer.
-        [SecurityCritical]
         public void WaitForPipeDrain()
         {
             CheckWriteOperations();
@@ -202,7 +199,6 @@ namespace System.IO.Pipes
         // override this in cases where only one mode is legal (such as anonymous pipes)
         public virtual PipeTransmissionMode TransmissionMode
         {
-            [SecurityCritical]
             [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             get
             {
@@ -236,7 +232,6 @@ namespace System.IO.Pipes
         // access. If that passes, call to GetNamedPipeInfo will succeed.
         public virtual int InBufferSize
         {
-            [SecurityCritical]
             [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands")]
             get
             {
@@ -262,7 +257,6 @@ namespace System.IO.Pipes
         // the ctor.
         public virtual int OutBufferSize
         {
-            [SecurityCritical]
             [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             get
             {
@@ -291,7 +285,6 @@ namespace System.IO.Pipes
 
         public virtual PipeTransmissionMode ReadMode
         {
-            [SecurityCritical]
             get
             {
                 CheckPipePropertyOperations();
@@ -303,7 +296,6 @@ namespace System.IO.Pipes
                 }
                 return _readMode;
             }
-            [SecurityCritical]
             [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             set
             {
@@ -335,7 +327,6 @@ namespace System.IO.Pipes
         // ---- PAL layer ends here ----
         // -----------------------------
 
-        [SecurityCritical]
         private unsafe int ReadFileNative(SafePipeHandle handle, Span<byte> buffer, NativeOverlapped* overlapped, out int errorCode)
         {
             DebugAssertHandleValid(handle);
@@ -352,7 +343,7 @@ namespace System.IO.Pipes
             int r = 0;
             int numBytesRead = 0;
 
-            fixed (byte* p = &buffer.DangerousGetPinnableReference())
+            fixed (byte* p = &MemoryMarshal.GetReference(buffer))
             {
                 r = _isAsync ?
                     Interop.Kernel32.ReadFile(handle, p, buffer.Length, IntPtr.Zero, overlapped) :
@@ -374,7 +365,6 @@ namespace System.IO.Pipes
             }
         }
 
-        [SecurityCritical]
         private unsafe int WriteFileNative(SafePipeHandle handle, ReadOnlySpan<byte> buffer, NativeOverlapped* overlapped, out int errorCode)
         {
             DebugAssertHandleValid(handle);
@@ -391,7 +381,7 @@ namespace System.IO.Pipes
             int r = 0;
             int numBytesWritten = 0;
 
-            fixed (byte* p = &buffer.DangerousGetPinnableReference())
+            fixed (byte* p = &MemoryMarshal.GetReference(buffer))
             {
                 r = _isAsync ?
                     Interop.Kernel32.WriteFile(handle, p, buffer.Length, IntPtr.Zero, overlapped) :
@@ -410,7 +400,6 @@ namespace System.IO.Pipes
             }
         }
 
-        [SecurityCritical]
         internal static unsafe Interop.Kernel32.SECURITY_ATTRIBUTES GetSecAttrs(HandleInheritability inheritability)
         {
             Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = default(Interop.Kernel32.SECURITY_ATTRIBUTES);
@@ -426,7 +415,6 @@ namespace System.IO.Pipes
         /// <summary>
         /// Determine pipe read mode from Win32 
         /// </summary>
-        [SecurityCritical]
         private void UpdateReadMode()
         {
             int flags;
@@ -450,7 +438,6 @@ namespace System.IO.Pipes
         /// Filter out all pipe related errors and do some cleanup before calling Error.WinIOError.
         /// </summary>
         /// <param name="errorCode"></param>
-        [SecurityCritical]
         internal Exception WinIOError(int errorCode)
         {
             switch (errorCode)

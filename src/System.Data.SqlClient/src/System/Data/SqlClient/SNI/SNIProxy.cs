@@ -105,6 +105,7 @@ namespace System.Data.SqlClient.SNI
 
             ContextFlagsPal requestedContextFlags = ContextFlagsPal.Connection
                 | ContextFlagsPal.Confidentiality
+                | ContextFlagsPal.Delegate
                 | ContextFlagsPal.MutualAuth;
 
             string serverSPN = System.Text.Encoding.UTF8.GetString(serverName);
@@ -144,11 +145,11 @@ namespace System.Data.SqlClient.SNI
                 // so we don't need to check for a GssApiException here.
                 if (statusCode.ErrorCode == SecurityStatusPalErrorCode.InternalError)
                 {
-                    throw new Exception(SQLMessage.KerberosTicketMissingError() + "\n" + statusCode);
+                    throw new InvalidOperationException(SQLMessage.KerberosTicketMissingError() + "\n" + statusCode);
                 }
                 else
                 {
-                    throw new Exception(SQLMessage.SSPIGenerateError() + "\n" + statusCode);
+                    throw new InvalidOperationException(SQLMessage.SSPIGenerateError() + "\n" + statusCode);
                 }
             }
         }

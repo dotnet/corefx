@@ -33,15 +33,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprProperty CreateProperty(CType type, Expr optionalObjectThrough, Expr arguments, ExprMemberGroup memberGroup, PropWithType property, MethWithType setMethod) => 
             new ExprProperty(type, optionalObjectThrough, arguments, memberGroup, property, setMethod);
 
-        public ExprMemberGroup CreateMemGroup(EXPRFLAG flags, Name name, TypeArray typeArgs, SYMKIND symKind, CType parentType, MethodOrPropertySymbol memberSymbol, Expr obj, CMemberLookupResults memberLookupResults) => 
-            new ExprMemberGroup(Types.GetMethGrpType(), flags, name, typeArgs, symKind, parentType, memberSymbol, obj, memberLookupResults);
+        public ExprMemberGroup CreateMemGroup(EXPRFLAG flags, Name name, TypeArray typeArgs, SYMKIND symKind, CType parentType, MethodOrPropertySymbol memberSymbol, Expr obj, CMemberLookupResults memberLookupResults) =>
+            new ExprMemberGroup(flags, name, typeArgs, symKind, parentType, memberSymbol, obj, memberLookupResults);
 
         public ExprMemberGroup CreateMemGroup(Expr obj, MethPropWithInst method)
         {
             Name name = method.Sym?.name;
             MethodOrPropertySymbol methProp = method.MethProp();
 
-            CType type = method.GetType() ?? (CType)Types.GetErrorSym();
+            CType type = method.GetType();
 
             return CreateMemGroup(
                 0, name, method.TypeArgs, methProp?.getKind() ?? SYMKIND.SK_MethodSymbol, method.GetType(), methProp,
@@ -51,19 +51,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprUserDefinedConversion CreateUserDefinedConversion(Expr arg, Expr call, MethWithInst method) => 
             new ExprUserDefinedConversion(arg, call, method);
 
-        public ExprCast CreateCast(CType type, Expr argument) => CreateCast(0, CreateClass(type), argument);
+        public ExprCast CreateCast(CType type, Expr argument) => CreateCast(0, type, argument);
 
-        public ExprCast CreateCast(EXPRFLAG flags, ExprClass type, Expr argument) => new ExprCast(flags, type, argument);
-
-        public ExprReturn CreateReturn(Expr optionalObject) => new ExprReturn(optionalObject);
+        public ExprCast CreateCast(EXPRFLAG flags, CType type, Expr argument) => new ExprCast(flags, type, argument);
 
         public ExprLocal CreateLocal(LocalVariableSymbol local) => new ExprLocal(local);
 
-        public ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType, Scope argumentScope) => 
-            new ExprBoundLambda(delegateType, argumentScope);
-
-        public ExprHoistedLocalExpr CreateHoistedLocalInExpression() => 
-            new ExprHoistedLocalExpr(Types.GetPredefAgg(PredefinedType.PT_EXPRESSION).getThisType());
+        public ExprBoundLambda CreateAnonymousMethod(AggregateType delegateType, Scope argumentScope, Expr expression) => 
+            new ExprBoundLambda(delegateType, argumentScope, expression);
 
         public ExprMethodInfo CreateMethodInfo(MethPropWithInst mwi) => 
             CreateMethodInfo(mwi.Meth(), mwi.GetType(), mwi.TypeArgs);
@@ -81,10 +76,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public ExprFieldInfo CreateFieldInfo(FieldSymbol field, AggregateType fieldType) => 
             new ExprFieldInfo(field, fieldType, Types.GetPredefAgg(PredefinedType.PT_FIELDINFO).getThisType());
 
-        private ExprTypeOf CreateTypeOf(ExprClass sourceType) => 
+        public ExprTypeOf CreateTypeOf(CType sourceType) => 
             new ExprTypeOf(Types.GetPredefAgg(PredefinedType.PT_TYPE).getThisType(), sourceType);
 
-        public ExprTypeOf CreateTypeOf(CType sourceType) => CreateTypeOf(CreateClass(sourceType));
 
         public ExprUserLogicalOp CreateUserLogOp(CType type, Expr trueFalseCall, ExprCall operatorCall) => 
             new ExprUserLogicalOp(type, trueFalseCall, operatorCall);
@@ -112,25 +106,25 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(type != null);
 
-            if (type.isEnumType())
+            if (type.IsEnumType)
             {
                 // For enum types, we create a constant that has the default value
                 // as an object pointer.
                 return CreateConstant(type, ConstVal.Get(Activator.CreateInstance(type.AssociatedSystemType)));
             }
 
-            Debug.Assert(type.fundType() > FUNDTYPE.FT_NONE);
-            Debug.Assert(type.fundType() < FUNDTYPE.FT_COUNT);
-            switch (type.fundType())
+            Debug.Assert(type.FundamentalType > FUNDTYPE.FT_NONE);
+            Debug.Assert(type.FundamentalType < FUNDTYPE.FT_COUNT);
+            switch (type.FundamentalType)
             {
                 case FUNDTYPE.FT_PTR:
                     {
                         // Just allocate a new node and fill it in.
-                        return CreateCast(0, CreateClass(type), CreateNull());
+                        return CreateCast(0, type, CreateNull());
                     }
 
                 case FUNDTYPE.FT_STRUCT:
-                    if (type.isPredefType(PredefinedType.PT_DECIMAL))
+                    if (type.IsPredefType(PredefinedType.PT_DECIMAL))
                     {
                         goto default;
                     }
@@ -141,7 +135,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     return new ExprZeroInit(type);
 
                 default:
-                    return CreateConstant(type, ConstVal.GetDefaultValue(type.constValKind()));
+                    return CreateConstant(type, ConstVal.GetDefaultValue(type.ConstValKind));
             }
         }
 
@@ -152,8 +146,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public ExprConstant CreateBoolConstant(bool b) => 
             CreateConstant(Types.GetPredefAgg(PredefinedType.PT_BOOL).getThisType(), ConstVal.Get(b));
-
-        public ExprBlock CreateBlock(ExprStatement pOptionalStatements) => new ExprBlock(pOptionalStatements);
 
         public ExprArrayIndex CreateArrayIndex(CType type, Expr array, Expr index) =>
             new ExprArrayIndex(type, array, index);
@@ -198,9 +190,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         ////////////////////////////////////////////////////////////////////////////////
         // Create a node that evaluates the first, evaluates the second, results in the first.
 
-        public ExprBinOp CreateReverseSequence(Expr first, Expr second) =>
-            CreateBinop(ExpressionKind.SequenceReverse, first.Type, first, second);
-
         public ExprAssignment CreateAssignment(Expr left, Expr right) => new ExprAssignment(left, right);
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -218,7 +207,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return expr;
         }
 
-        public ExprConstant CreateNull() => CreateConstant(Types.GetNullType(), default(ConstVal));
+        public ExprConstant CreateNull() => CreateConstant(NullType.Instance, default);
 
         public void AppendItemToList(
             Expr newItem,

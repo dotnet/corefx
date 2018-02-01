@@ -11,26 +11,15 @@ using System.Security.Permissions;
 
 namespace System.Drawing
 {
-    [ComVisible(true)]
     public sealed partial class Bitmap : Image
     {
         private static Color s_defaultTransparentColor = Color.LightGray;
 
-        public Bitmap(string filename)
-        {
-            // GDI+ will read this file multiple times. Get the fully qualified path
-            // so if the app's default directory changes we won't get an error.
-            filename = Path.GetFullPath(filename);
+        private Bitmap() { }
 
-            IntPtr bitmap = IntPtr.Zero;
-            int status = SafeNativeMethods.Gdip.GdipCreateBitmapFromFile(filename, out bitmap);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+        internal Bitmap(IntPtr ptr) => SetNativeImage(ptr);
 
-            ValidateBitmap(bitmap);
-
-            SetNativeImage(bitmap);
-            EnsureSave(this, filename, null);
-        }
+        public Bitmap(string filename) : this (filename, useIcm: false) { }
 
         public Bitmap(string filename, bool useIcm)
         {
@@ -57,65 +46,24 @@ namespace System.Drawing
             EnsureSave(this, filename, null);
         }
 
-        public Bitmap(Type type, string resource)
+        public Bitmap(Stream stream) : this(stream, false) { }
+
+        public Bitmap(int width, int height) : this(width, height, PixelFormat.Format32bppArgb)
         {
-            Stream stream = type.Module.Assembly.GetManifestResourceStream(type, resource);
-            if (stream == null)
-            {
-                throw new ArgumentException(SR.Format(SR.ResourceNotFound, type, resource));
-            }
-
-            IntPtr bitmap = IntPtr.Zero;
-            int status = SafeNativeMethods.Gdip.GdipCreateBitmapFromStream(new GPStream(stream), out bitmap);
-            SafeNativeMethods.Gdip.CheckStatus(status);
-
-            ValidateBitmap(bitmap);
-
-            SetNativeImage(bitmap);
-            EnsureSave(this, null, stream);
         }
 
-        public Bitmap(Stream stream)
+        public Bitmap(int width, int height, Graphics g)
         {
-            if (stream == null)
+            if (g == null)
             {
-                throw new ArgumentNullException(nameof(stream));
+                throw new ArgumentNullException(nameof(g));
             }
 
             IntPtr bitmap = IntPtr.Zero;
-            int status = SafeNativeMethods.Gdip.GdipCreateBitmapFromStream(new GPStream(stream), out bitmap);
+            int status = SafeNativeMethods.Gdip.GdipCreateBitmapFromGraphics(width, height, new HandleRef(g, g.NativeGraphics), out bitmap);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
-            ValidateBitmap(bitmap);
-
             SetNativeImage(bitmap);
-            EnsureSave(this, null, stream);
-        }
-
-        public Bitmap(Stream stream, bool useIcm)
-        {
-            if (stream == null)
-            {
-                throw new ArgumentNullException(nameof(stream));
-            }
-
-            IntPtr bitmap = IntPtr.Zero;
-            int status;
-
-            if (useIcm)
-            {
-                status = SafeNativeMethods.Gdip.GdipCreateBitmapFromStreamICM(new GPStream(stream), out bitmap);
-            }
-            else
-            {
-                status = SafeNativeMethods.Gdip.GdipCreateBitmapFromStream(new GPStream(stream), out bitmap);
-            }
-            SafeNativeMethods.Gdip.CheckStatus(status);
-
-            ValidateBitmap(bitmap);
-
-            SetNativeImage(bitmap);
-            EnsureSave(this, null, stream);
         }
 
         public Bitmap(int width, int height, int stride, PixelFormat format, IntPtr scan0)
@@ -136,29 +84,15 @@ namespace System.Drawing
             SetNativeImage(bitmap);
         }
 
-        public Bitmap(int width, int height) : this(width, height, PixelFormat.Format32bppArgb)
-        {
-        }
-
-        public Bitmap(int width, int height, Graphics g)
-        {
-            if (g == null)
-            {
-                throw new ArgumentNullException(nameof(g));
-            }
-
-            IntPtr bitmap = IntPtr.Zero;
-            int status = SafeNativeMethods.Gdip.GdipCreateBitmapFromGraphics(width, height, new HandleRef(g, g.NativeGraphics), out bitmap);
-            SafeNativeMethods.Gdip.CheckStatus(status);
-
-            SetNativeImage(bitmap);
-        }
-
         public Bitmap(Image original) : this(original, original.Width, original.Height)
         {
         }
 
-        public Bitmap(Image original, int width, int height) : this(width, height)
+        public Bitmap(Image original, Size newSize) : this(original, newSize.Width, newSize.Height)
+        {
+        }
+
+        public Bitmap(Image original, int width, int height) : this(width, height, PixelFormat.Format32bppArgb)
         {
             using (Graphics g = Graphics.FromImage(this))
             {
@@ -173,7 +107,7 @@ namespace System.Drawing
             int status = SafeNativeMethods.Gdip.GdipCreateBitmapFromHICON(new HandleRef(null, hicon), out bitmap);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
-            return FromGDIplus(bitmap);
+            return new Bitmap(bitmap);
         }
 
         public static Bitmap FromResource(IntPtr hinstance, string bitmapName)
@@ -192,14 +126,12 @@ namespace System.Drawing
                 Marshal.FreeHGlobal(name);
             }
 
-            return FromGDIplus(bitmap);
+            return new Bitmap(bitmap);
         }
 
-        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public IntPtr GetHbitmap() => GetHbitmap(Color.LightGray);
 
-        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public IntPtr GetHbitmap(Color background)
         {
@@ -216,7 +148,6 @@ namespace System.Drawing
             return hBitmap;
         }
 
-        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public IntPtr GetHicon()
         {
@@ -225,46 +156,6 @@ namespace System.Drawing
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return hIcon;
-        }
-
-        public Bitmap(Image original, Size newSize) : this(original, newSize.Width, newSize.Height)
-        {
-        }
-
-        private Bitmap() { }
-
-        /*
-         * Create a new bitmap object from a native bitmap handle.
-         * This is only for internal purpose.
-         */
-        internal static Bitmap FromGDIplus(IntPtr handle)
-        {
-            Bitmap result = new Bitmap();
-            result.SetNativeImage(handle);
-            return result;
-        }
-
-        public Bitmap Clone(Rectangle rect, PixelFormat format)
-        {
-            if (rect.Width == 0 || rect.Height == 0)
-            {
-                throw new ArgumentException(SR.Format(SR.GdiplusInvalidRectangle, rect.ToString()));
-            }
-
-            IntPtr dstHandle = IntPtr.Zero;
-            int status = SafeNativeMethods.Gdip.GdipCloneBitmapAreaI(
-                                                     rect.X,
-                                                     rect.Y,
-                                                     rect.Width,
-                                                     rect.Height,
-                                                     unchecked((int)format),
-                                                     new HandleRef(this, nativeImage),
-                                                     out dstHandle);
-
-            if (status != SafeNativeMethods.Gdip.Ok || dstHandle == IntPtr.Zero)
-                throw SafeNativeMethods.Gdip.StatusException(status);
-
-            return FromGDIplus(dstHandle);
         }
 
         public Bitmap Clone(RectangleF rect, PixelFormat format)
@@ -288,7 +179,7 @@ namespace System.Drawing
             if (status != SafeNativeMethods.Gdip.Ok || dstHandle == IntPtr.Zero)
                 throw SafeNativeMethods.Gdip.StatusException(status);
 
-            return FromGDIplus(dstHandle);
+            return new Bitmap(dstHandle);
         }
 
         public void MakeTransparent()
@@ -340,30 +231,32 @@ namespace System.Drawing
             }
         }
 
-        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public BitmapData LockBits(Rectangle rect, ImageLockMode flags, PixelFormat format)
         {
             return LockBits(rect, flags, format, new BitmapData());
         }
 
-        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public BitmapData LockBits(Rectangle rect, ImageLockMode flags, PixelFormat format, BitmapData bitmapData)
         {
             var gprect = new GPRECT(rect);
             int status = SafeNativeMethods.Gdip.GdipBitmapLockBits(new HandleRef(this, nativeImage), ref gprect,
                                                     flags, format, bitmapData);
+            // libgdiplus has the wrong error code mapping for this state.
+            if (status == 7)
+            {
+                status = 8;
+            }
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return bitmapData;
         }
 
-        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         public void UnlockBits(BitmapData bitmapdata)
         {
             int status = SafeNativeMethods.Gdip.GdipBitmapUnlockBits(new HandleRef(this, nativeImage), bitmapdata);
             SafeNativeMethods.Gdip.CheckStatus(status);
         }
-        
+
         public Color GetPixel(int x, int y)
         {
             if (x < 0 || x >= Width)
@@ -409,15 +302,27 @@ namespace System.Drawing
             int status = SafeNativeMethods.Gdip.GdipBitmapSetResolution(new HandleRef(this, nativeImage), xDpi, yDpi);
             SafeNativeMethods.Gdip.CheckStatus(status);
         }
-
-        private void ValidateBitmap(IntPtr bitmap)
+        public Bitmap Clone(Rectangle rect, PixelFormat format)
         {
-            int status = SafeNativeMethods.Gdip.GdipImageForceValidation(new HandleRef(null, bitmap));
-            if (status != SafeNativeMethods.Gdip.Ok)
+            if (rect.Width == 0 || rect.Height == 0)
             {
-                SafeNativeMethods.Gdip.GdipDisposeImage(new HandleRef(null, bitmap));
-                throw SafeNativeMethods.Gdip.StatusException(status);
+                throw new ArgumentException(SR.Format(SR.GdiplusInvalidRectangle, rect.ToString()));
             }
+
+            IntPtr dstHandle = IntPtr.Zero;
+            int status = SafeNativeMethods.Gdip.GdipCloneBitmapAreaI(
+                                                     rect.X,
+                                                     rect.Y,
+                                                     rect.Width,
+                                                     rect.Height,
+                                                     unchecked((int)format),
+                                                     new HandleRef(this, nativeImage),
+                                                     out dstHandle);
+
+            if (status != SafeNativeMethods.Gdip.Ok || dstHandle == IntPtr.Zero)
+                throw SafeNativeMethods.Gdip.StatusException(status);
+
+            return new Bitmap(dstHandle);
         }
     }
 }

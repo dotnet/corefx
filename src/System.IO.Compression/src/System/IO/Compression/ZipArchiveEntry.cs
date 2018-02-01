@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Text;
 
 namespace System.IO.Compression
@@ -47,13 +46,6 @@ namespace System.IO.Compression
         private List<ZipGenericExtraField> _lhUnknownExtraFields;
         private byte[] _fileComment;
         private CompressionLevel? _compressionLevel;
-
-        // Initializes, attaches it to archive
-        internal ZipArchiveEntry(ZipArchive archive, ZipCentralDirectoryFileHeader cd, CompressionLevel compressionLevel)
-            : this(archive, cd)
-        {
-            _compressionLevel = compressionLevel;
-        }
 
         // Initializes, attaches it to archive
         internal ZipArchiveEntry(ZipArchive archive, ZipCentralDirectoryFileHeader cd)
@@ -152,6 +144,9 @@ namespace System.IO.Compression
         /// </summary>
         public ZipArchive Archive => _archive;
 
+        [CLSCompliant(false)]
+        public uint Crc32 => _crc32;
+
         /// <summary>
         /// The compressed size of the entry. If the archive that the entry belongs to is in Create mode, attempts to get this property will always throw an exception. If the archive that the entry belongs to is in update mode, this property will only be valid if the entry has not been opened.
         /// </summary>
@@ -160,8 +155,6 @@ namespace System.IO.Compression
         {
             get
             {
-                Contract.Ensures(Contract.Result<long>() >= 0);
-
                 if (_everOpenedForWrite)
                     throw new InvalidOperationException(SR.LengthAfterWrite);
                 return _compressedSize;
@@ -188,7 +181,6 @@ namespace System.IO.Compression
         {
             get
             {
-                Contract.Ensures(Contract.Result<string>() != null);
                 return _storedEntryName;
             }
 
@@ -249,8 +241,6 @@ namespace System.IO.Compression
         {
             get
             {
-                Contract.Ensures(Contract.Result<long>() >= 0);
-
                 if (_everOpenedForWrite)
                     throw new InvalidOperationException(SR.LengthAfterWrite);
                 return _uncompressedSize;
@@ -295,8 +285,6 @@ namespace System.IO.Compression
         /// <exception cref="ObjectDisposedException">The ZipArchive that this entry belongs to has been disposed.</exception>
         public Stream Open()
         {
-            Contract.Ensures(Contract.Result<Stream>() != null);
-
             ThrowIfInvalidArchive();
 
             switch (_archive.Mode)
@@ -318,8 +306,6 @@ namespace System.IO.Compression
         /// <returns>FullName of the entry</returns>
         public override string ToString()
         {
-            Contract.Ensures(Contract.Result<string>() != null);
-
             return FullName;
         }
 
@@ -1124,8 +1110,6 @@ namespace System.IO.Compression
             {
                 get
                 {
-                    Contract.Ensures(Contract.Result<long>() >= 0);
-
                     ThrowIfDisposed();
                     return _position;
                 }
@@ -1177,7 +1161,6 @@ namespace System.IO.Compression
                     throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentNeedNonNegative);
                 if ((buffer.Length - offset) < count)
                     throw new ArgumentException(SR.OffsetLengthInvalid);
-                Contract.EndContractBlock();
 
                 ThrowIfDisposed();
                 Debug.Assert(CanWrite);
@@ -1239,7 +1222,5 @@ namespace System.IO.Compression
         private enum BitFlagValues : ushort { DataDescriptor = 0x8, UnicodeFileName = 0x800 }
 
         internal enum CompressionMethodValues : ushort { Stored = 0x0, Deflate = 0x8, Deflate64 = 0x9, BZip2 = 0xC, LZMA = 0xE }
-
-        private enum OpenableValues { Openable, FileNonExistent, FileTooLarge }
     }
 }

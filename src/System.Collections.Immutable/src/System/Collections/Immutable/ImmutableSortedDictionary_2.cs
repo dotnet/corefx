@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.Linq;
 
 namespace System.Collections.Immutable
 {
@@ -207,9 +208,22 @@ namespace System.Collections.Immutable
                     return value;
                 }
 
-                throw new KeyNotFoundException();
+                throw new KeyNotFoundException(SR.Format(SR.Arg_KeyNotFoundWithKey, key.ToString()));
             }
         }
+
+#if FEATURE_ITEMREFAPI
+        /// <summary>
+        /// Returns a read-only reference to the value associated with the provided key.
+        /// </summary>
+        /// <exception cref="KeyNotFoundException">If the key is not present.</exception>
+        public ref readonly TValue ValueRef(TKey key)
+        {
+            Requires.NotNullAllowStructs(key, nameof(key));
+
+            return ref _root.ValueRef(key, _keyComparer);
+        }
+#endif
 
         #endregion
 
@@ -733,7 +747,9 @@ namespace System.Collections.Immutable
         [ExcludeFromCodeCoverage]
         IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
         {
-            return this.GetEnumerator();
+            return this.IsEmpty ?
+                Enumerable.Empty<KeyValuePair<TKey, TValue>>().GetEnumerator() :
+                this.GetEnumerator();
         }
 
         #endregion

@@ -16,8 +16,8 @@ namespace System
     /// or native memory, or to memory allocated on the stack. It is type- and memory-safe.
     /// </summary>
     [DebuggerTypeProxy(typeof(SpanDebugView<>))]
-    [DebuggerDisplay("Length = {Length}")]
-    public struct Span<T>
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    public readonly ref struct Span<T>
     {
         /// <summary>
         /// Creates a new span over the entirety of the target array.
@@ -32,7 +32,7 @@ namespace System
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             if (default(T) == null && array.GetType() != typeof(T[]))
-                ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
+                ThrowHelper.ThrowArrayTypeMismatchException();
 
             _length = array.Length;
             _pinnable = Unsafe.As<Pinnable<T>>(array);
@@ -58,7 +58,7 @@ namespace System
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             if (default(T) == null && array.GetType() != typeof(T[]))
-                ThrowHelper.ThrowArrayTypeMismatchException_ArrayTypeMustBeExactMatch(typeof(T));
+                ThrowHelper.ThrowArrayTypeMismatchException();
             if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
@@ -81,6 +81,7 @@ namespace System
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="length"/> is negative.
         /// </exception>
+        [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe Span(void* pointer, int length)
         {
@@ -94,23 +95,6 @@ namespace System
             _byteOffset = new IntPtr(pointer);
         }
 
-        /// <summary>
-        /// Create a new span over a portion of a regular managed object. This can be useful
-        /// if part of a managed object represents a "fixed array." This is dangerous because neither the
-        /// <paramref name="length"/> is checked, nor <paramref name="obj"/> being null, nor the fact that
-        /// "rawPointer" actually lies within <paramref name="obj"/>.
-        /// </summary>
-        /// <param name="obj">The managed object that contains the data to span over.</param>
-        /// <param name="objectData">A reference to data within that object.</param>
-        /// <param name="length">The number of <typeparamref name="T"/> elements the memory contains.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<T> DangerousCreate(object obj, ref T objectData, int length)
-        {
-            Pinnable<T> pinnable = Unsafe.As<Pinnable<T>>(obj);
-            IntPtr byteOffset = Unsafe.ByteOffset<T>(ref pinnable.Data, ref objectData);
-            return new Span<T>(pinnable, byteOffset, length);
-        }
-
         // Constructor for internal use only.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Span(Pinnable<T> pinnable, IntPtr byteOffset, int length)
@@ -121,6 +105,9 @@ namespace System
             _pinnable = pinnable;
             _byteOffset = byteOffset;
         }
+
+        //Debugger Display = System.Span<T>[length]
+        private string DebuggerDisplay => string.Format("System.Span<{0}>[{1}]", typeof(T).Name, _length);
 
         /// <summary>
         /// The number of items in the span.
@@ -342,14 +329,21 @@ namespace System
         }
 
         /// <summary>
+        /// Returns a <see cref="String"/> with the name of the type and the number of elements
+        /// </summary>
+        /// <returns>A <see cref="String"/> with the name of the type and the number of elements</returns>
+        public override string ToString() => string.Format("System.Span<{0}>[{1}]", typeof(T).Name, Length);
+
+        /// <summary>
         /// Defines an implicit conversion of an array to a <see cref="Span{T}"/>
         /// </summary>
-        public static implicit operator Span<T>(T[] array) => new Span<T>(array);
+        public static implicit operator Span<T>(T[] array) => array != null ? new Span<T>(array) : default;
 
         /// <summary>
         /// Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="Span{T}"/>
         /// </summary>
-        public static implicit operator Span<T>(ArraySegment<T> arraySegment) => new Span<T>(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
+        public static implicit operator Span<T>(ArraySegment<T> arraySegment)
+            => arraySegment.Array != null ? new Span<T>(arraySegment.Array, arraySegment.Offset, arraySegment.Count) : default;
 
         /// <summary>
         /// Defines an implicit conversion of a <see cref="Span{T}"/> to a <see cref="ReadOnlySpan{T}"/>
@@ -413,16 +407,60 @@ namespace System
         public static Span<T> Empty => default(Span<T>);
 
         /// <summary>
+        /// This method is obsolete, use System.Runtime.InteropServices.MemoryMarshal.GetReference instead.
         /// Returns a reference to the 0th element of the Span. If the Span is empty, returns a reference to the location where the 0th element
         /// would have been stored. Such a reference can be used for pinning but must never be dereferenced.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref T DangerousGetPinnableReference()
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal ref T DangerousGetPinnableReference()
         {
             if (_pinnable == null)
                 unsafe { return ref Unsafe.AsRef<T>(_byteOffset.ToPointer()); }
             else
                 return ref Unsafe.AddByteOffset<T>(ref _pinnable.Data, _byteOffset);
+        }
+
+        /// <summary>Gets an enumerator for this span.</summary>
+        public Enumerator GetEnumerator() => new Enumerator(this);
+
+        /// <summary>Enumerates the elements of a <see cref="Span{T}"/>.</summary>
+        public ref struct Enumerator
+        {
+            /// <summary>The span being enumerated.</summary>
+            private readonly Span<T> _span;
+            /// <summary>The next index to yield.</summary>
+            private int _index;
+
+            /// <summary>Initialize the enumerator.</summary>
+            /// <param name="span">The span to enumerate.</param>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal Enumerator(Span<T> span)
+            {
+                _span = span;
+                _index = -1;
+            }
+
+            /// <summary>Advances the enumerator to the next element of the span.</summary>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool MoveNext()
+            {
+                int index = _index + 1;
+                if (index < _span.Length)
+                {
+                    _index = index;
+                    return true;
+                }
+
+                return false;
+            }
+
+            /// <summary>Gets the element at the current position of the enumerator.</summary>
+            public ref T Current
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ref _span[_index];
+            }
         }
 
         // These expose the internal representation for Span-related apis use only.

@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static class DateTimeTests
+    public static partial class DateTimeTests
     {
         [Fact]
         public static void MaxValue()
@@ -555,7 +555,7 @@ namespace System.Tests
         {
             AssertExtensions.Throws<ArgumentNullException>("s", () => DateTime.Parse(null));
             AssertExtensions.Throws<ArgumentNullException>("s", () => DateTime.Parse(null, new MyFormatter()));
-            AssertExtensions.Throws<ArgumentNullException>("s", () => DateTime.Parse(null, new MyFormatter(), DateTimeStyles.NoCurrentDateDefault));
+            AssertExtensions.Throws<ArgumentNullException>("s", () => DateTime.Parse((string)null, new MyFormatter(), DateTimeStyles.NoCurrentDateDefault));
 
             Assert.Throws<FormatException>(() => DateTime.Parse(""));
             Assert.Throws<FormatException>(() => DateTime.Parse("", new MyFormatter()));
@@ -575,8 +575,8 @@ namespace System.Tests
         public static void ParseExact_InvalidArguments_Throws()
         {
             AssertExtensions.Throws<ArgumentNullException>("s", () => DateTime.ParseExact(null, "d", new MyFormatter()));
-            AssertExtensions.Throws<ArgumentNullException>("s", () => DateTime.ParseExact(null, "d", new MyFormatter(), DateTimeStyles.None));
-            AssertExtensions.Throws<ArgumentNullException>("s", () => DateTime.ParseExact(null, new[] { "d" }, new MyFormatter(), DateTimeStyles.NoCurrentDateDefault));
+            AssertExtensions.Throws<ArgumentNullException>("s", () => DateTime.ParseExact((string)null, "d", new MyFormatter(), DateTimeStyles.None));
+            AssertExtensions.Throws<ArgumentNullException>("s", () => DateTime.ParseExact((string)null, new[] { "d" }, new MyFormatter(), DateTimeStyles.NoCurrentDateDefault));
 
             Assert.Throws<FormatException>(() => DateTime.ParseExact("", "d", new MyFormatter()));
             Assert.Throws<FormatException>(() => DateTime.ParseExact("", "d", new MyFormatter(), DateTimeStyles.None));
@@ -596,8 +596,8 @@ namespace System.Tests
         [Fact]
         public static void TryParseExact_InvalidArguments_ReturnsFalse()
         {
-            Assert.False(DateTime.TryParseExact(null, "d", new MyFormatter(), DateTimeStyles.None, out DateTime result));
-            Assert.False(DateTime.TryParseExact(null, new[] { "d" }, new MyFormatter(), DateTimeStyles.None, out result));
+            Assert.False(DateTime.TryParseExact((string)null, "d", new MyFormatter(), DateTimeStyles.None, out DateTime result));
+            Assert.False(DateTime.TryParseExact((string)null, new[] { "d" }, new MyFormatter(), DateTimeStyles.None, out result));
 
             Assert.False(DateTime.TryParseExact("", "d", new MyFormatter(), DateTimeStyles.None, out result));
             Assert.False(DateTime.TryParseExact("", new[] { "d" }, new MyFormatter(), DateTimeStyles.None, out result));
@@ -815,6 +815,17 @@ namespace System.Tests
             Assert.Equal(expectedString, result.ToString("g"));
         }
 
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Needs desktop port: https://github.com/dotnet/coreclr/issues/15896")]
+        // Regression test for https://github.com/dotnet/coreclr/issues/15896
+        public static void TryParseExact_EmptyAMPMDesignator()
+        {
+            var englishCulture = new CultureInfo("en-US");
+            englishCulture.DateTimeFormat.AMDesignator = "";
+            englishCulture.DateTimeFormat.PMDesignator = "";
+            Assert.False(DateTime.TryParseExact(" ", "%t", englishCulture, DateTimeStyles.None, out _));
+        }
+
         public static void ParseExact_EscapedSingleQuotes()
         {
             var formatInfo = DateTimeFormatInfo.GetInstance(new CultureInfo("mt-MT"));
@@ -979,17 +990,12 @@ namespace System.Tests
             yield return new object[] { "#10/10/2095#\0", CultureInfo.InvariantCulture, new DateTime(2095, 10, 10, 0, 0, 0) };
 
             DateTime today = DateTime.Today;
+            var hebrewCulture = new CultureInfo("he-IL");
+            hebrewCulture.DateTimeFormat.Calendar = new HebrewCalendar();
+            yield return new object[] { today.ToString(hebrewCulture), hebrewCulture, today };
 
-            if (PlatformDetection.IsWindows) // [ActiveIssue(23923)]
-            {
-                var hebrewCulture = new CultureInfo("he-IL");
-                hebrewCulture.DateTimeFormat.Calendar = new HebrewCalendar();
-                yield return new object[] { today.ToString(hebrewCulture), hebrewCulture, today };
-            }
-
-            // [ActiveIssue(23922)] // This is failing on Windows 8.1
-            //var mongolianCulture = new CultureInfo("mn-MN");
-            //yield return new object[] { today.ToString(mongolianCulture.DateTimeFormat.FullDateTimePattern, mongolianCulture), mongolianCulture, today };
+            var mongolianCulture = new CultureInfo("mn-MN");
+            yield return new object[] { today.ToString(mongolianCulture), mongolianCulture, today };
         }
 
         [Theory]

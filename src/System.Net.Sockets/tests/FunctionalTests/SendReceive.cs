@@ -19,7 +19,7 @@ namespace System.Net.Sockets.Tests
         [InlineData(1, 1, 2)] // count high
         public async Task InvalidArguments_Throws(int? length, int offset, int count)
         {
-            if (length == null && !ValidatesArrayArguments) return;
+            if (!ValidatesArrayArguments) return;
 
             using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
@@ -137,7 +137,7 @@ namespace System.Net.Sockets.Tests
                         if (!useMultipleBuffers)
                         {
                             var recvBuffer = new byte[256];
-                            for (;;)
+                            for (; ; )
                             {
                                 int received = await ReceiveAsync(remote, new ArraySegment<byte>(recvBuffer));
                                 if (received == 0)
@@ -156,7 +156,7 @@ namespace System.Net.Sockets.Tests
                                 new ArraySegment<byte>(new byte[256], 2, 100),
                                 new ArraySegment<byte>(new byte[1], 0, 0),
                                 new ArraySegment<byte>(new byte[64], 9, 33)};
-                            for (;;)
+                            for (; ; )
                             {
                                 int received = await ReceiveAsync(remote, recvBuffers);
                                 if (received == 0)
@@ -553,7 +553,7 @@ namespace System.Net.Sockets.Tests
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(LoopbacksAndBuffers))]
-        public void SendRecvPollSync_TcpListener_Socket(IPAddress listenAt, bool pollBeforeOperation)
+        public async Task SendRecvPollSync_TcpListener_Socket(IPAddress listenAt, bool pollBeforeOperation)
         {
             const int BytesToSend = 123456;
             const int ListenBacklog = 1;
@@ -619,10 +619,12 @@ namespace System.Net.Sockets.Tests
                             bytesSent += sent;
                             sentChecksum.Add(sendBuffer, 0, sent);
                         }
+
+                        client.Shutdown(SocketShutdown.Send);
                     }
                 });
 
-                Assert.True(Task.WaitAll(new[] { serverTask, clientTask }, TestTimeout), "Wait timed out");
+                await (new[] { serverTask, clientTask }).WhenAllOrAnyFailed(TestTimeout);
 
                 Assert.Equal(bytesSent, bytesReceived);
                 Assert.Equal(sentChecksum.Sum, receivedChecksum.Sum);
@@ -697,6 +699,7 @@ namespace System.Net.Sockets.Tests
                     Assert.False(receive.IsCompleted, $"Task should not have been completed, was {receive.Status}");
 
                     // Disconnect the client
+                    server.Shutdown(SocketShutdown.Both);
                     server.Close();
 
                     // The client should now wake up
@@ -868,6 +871,8 @@ namespace System.Net.Sockets.Tests
 
                         Assert.Equal(SegmentCount, bytesSent);
                         Assert.Equal(SocketError.Success, error);
+
+                        acceptSocket.Shutdown(SocketShutdown.Send);
                     }
                 });
 
@@ -1005,6 +1010,35 @@ namespace System.Net.Sockets.Tests
             Assert.True(receiveTask.IsCompleted);
             await receiveTask;
         }
+
+        [Fact]
+        [PlatformSpecific(~TestPlatforms.Windows)] // All data is sent, even when very large (100M).
+        public void SocketSendWouldBlock_ReturnsBytesSent()
+        {
+            using (var server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            using (var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                // listen
+                server.BindToAnonymousPort(IPAddress.Loopback);
+                server.Listen(1);
+                // connect
+                client.Connect(server.LocalEndPoint);
+                // accept
+                using (Socket socket = server.Accept())
+                {
+                    // We send a large amount of data but don't read it.
+                    // A chunck will be sent, attempts to send more will return SocketError.WouldBlock.
+                    // Socket.Send must return the success of the partial send.
+                    socket.Blocking = false;
+                    var data = new byte[5_000_000];
+                    SocketError error;
+                    int bytesSent = socket.Send(data, 0, data.Length, SocketFlags.None, out error);
+
+                    Assert.Equal(SocketError.Success, error);
+                    Assert.InRange(bytesSent, 1, data.Length - 1);
+                }
+            }
+        }
     }
 
     public sealed class SendReceiveUdpClient : MemberDatas
@@ -1012,15 +1046,15 @@ namespace System.Net.Sockets.Tests
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(Loopbacks))]
-        public void SendToRecvFromAsync_Datagram_UDP_UdpClient(IPAddress loopbackAddress)
+        public async Task SendToRecvFromAsync_Datagram_UDP_UdpClient(IPAddress loopbackAddress)
         {
             IPAddress leftAddress = loopbackAddress, rightAddress = loopbackAddress;
 
             // TODO #5185: harden against packet loss
             const int DatagramSize = 256;
             const int DatagramsToSend = 256;
-            const int AckTimeout = 1000;
-            const int TestTimeout = 30000;
+            const int AckTimeout = 10000;
+            const int TestTimeout = 60000;
 
             using (var left = new UdpClient(new IPEndPoint(leftAddress, 0)))
             using (var right = new UdpClient(new IPEndPoint(rightAddress, 0)))
@@ -1078,7 +1112,7 @@ namespace System.Net.Sockets.Tests
                     }
                 });
 
-                Assert.True(Task.WaitAll(new[] { receiverTask, senderTask }, TestTimeout));
+                await (new[] { receiverTask, senderTask }).WhenAllOrAnyFailed(TestTimeout);
                 for (int i = 0; i < DatagramsToSend; i++)
                 {
                     Assert.NotNull(receivedChecksums[i]);
@@ -1093,7 +1127,7 @@ namespace System.Net.Sockets.Tests
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(Loopbacks))]
-        public void SendRecvAsync_TcpListener_TcpClient(IPAddress listenAt)
+        public async Task SendRecvAsync_TcpListener_TcpClient(IPAddress listenAt)
         {
             const int BytesToSend = 123456;
             const int ListenBacklog = 1;
@@ -1111,7 +1145,7 @@ namespace System.Net.Sockets.Tests
                 using (NetworkStream stream = remote.GetStream())
                 {
                     var recvBuffer = new byte[256];
-                    for (;;)
+                    for (; ; )
                     {
                         int received = await stream.ReadAsync(recvBuffer, 0, recvBuffer.Length);
                         if (received == 0)
@@ -1155,8 +1189,7 @@ namespace System.Net.Sockets.Tests
                 }
             });
 
-            Assert.True(Task.WaitAll(new[] { serverTask, clientTask }, TestTimeout),
-                $"Time out waiting for serverTask ({serverTask.Status}) and clientTask ({clientTask.Status})");
+            await (new[] { serverTask, clientTask }).WhenAllOrAnyFailed(TestTimeout);
 
             Assert.Equal(bytesSent, bytesReceived);
             Assert.Equal(sentChecksum.Sum, receivedChecksum.Sum);

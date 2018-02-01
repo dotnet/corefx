@@ -21,8 +21,12 @@ namespace System.Net.Http
             public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken ignored)
             {
                 ValidateBufferArgs(buffer, offset, count);
-                
-                if (count == 0)
+                return WriteAsync(new Memory<byte>(buffer, offset, count), ignored);
+            }
+
+            public override Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default)
+            {
+                if (source.Length == 0)
                 {
                     // Don't write if nothing was given, especially since we don't want to accidentally send a 0 chunk,
                     // which would indicate end of body.  Instead, just ensure no content is stuck in the buffer.
@@ -36,10 +40,10 @@ namespace System.Net.Http
                     return Task.CompletedTask;
                 }
 
-                return WriteChunkAsync(buffer, offset, count);
+                return WriteChunkAsync(source);
             }
 
-            private async Task WriteChunkAsync(byte[] buffer, int offset, int count)
+            private async Task WriteChunkAsync(ReadOnlyMemory<byte> source)
             {
                 // Write chunk length -- hex representation of count
                 bool digitWritten = false;
@@ -47,7 +51,7 @@ namespace System.Net.Http
                 {
                     int shift = i * 4;
                     int mask = 0xF << shift;
-                    int digit = (count & mask) >> shift;
+                    int digit = (source.Length & mask) >> shift;
                     if (digitWritten || digit != 0)
                     {
                         await _connection.WriteByteAsync((byte)(digit < 10 ? '0' + digit : 'A' + digit - 10), RequestCancellationToken).ConfigureAwait(false);
@@ -59,7 +63,7 @@ namespace System.Net.Http
                 await _connection.WriteTwoBytesAsync((byte)'\r', (byte)'\n', RequestCancellationToken).ConfigureAwait(false);
 
                 // Write chunk contents
-                await _connection.WriteAsync(buffer, offset, count, RequestCancellationToken).ConfigureAwait(false);
+                await _connection.WriteAsync(source, RequestCancellationToken).ConfigureAwait(false);
                 await _connection.WriteTwoBytesAsync((byte)'\r', (byte)'\n', RequestCancellationToken).ConfigureAwait(false);
 
                 // Flush the chunk.  This is reasonable from the standpoint of having just written a standalone piece
@@ -68,7 +72,7 @@ namespace System.Net.Http
                 // source was empty, and it might be kept open to enable subsequent communication.  And it's necessary
                 // in general for at least the first write, as we need to ensure if it's the entirety of the content
                 // and if all of the headers and content fit in the write buffer that we've actually sent the request.
-                await _connection.FlushAsync(RequestCancellationToken);
+                await _connection.FlushAsync(RequestCancellationToken).ConfigureAwait(false);
             }
 
             public override Task FlushAsync(CancellationToken ignored)

@@ -34,12 +34,7 @@ namespace System.Net.Sockets
         public static SocketError GetLastSocketError()
         {
             int win32Error = Marshal.GetLastWin32Error();
-
-            if (win32Error == 0)
-            {
-                NetEventSource.Fail(null, "GetLastWin32Error() returned zero.");
-            }
-
+            Debug.Assert(win32Error != 0, "Expected non-0 error");
             return (SocketError)win32Error;
         }
 
@@ -91,7 +86,7 @@ namespace System.Net.Sockets
             return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
         }
 
-        public static SocketError Bind(SafeCloseSocket handle, byte[] buffer, int nameLen)
+        public static SocketError Bind(SafeCloseSocket handle, ProtocolType socketProtocolType, byte[] buffer, int nameLen)
         {
             SocketError errorCode = Interop.Winsock.bind(handle, buffer, nameLen);
             return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
@@ -180,7 +175,7 @@ namespace System.Net.Sockets
         public static unsafe SocketError Send(SafeCloseSocket handle, ReadOnlySpan<byte> buffer, SocketFlags socketFlags, out int bytesTransferred)
         {
             int bytesSent;
-            fixed (byte* bufferPtr = &buffer.DangerousGetPinnableReference())
+            fixed (byte* bufferPtr = &MemoryMarshal.GetReference(buffer))
             {
                 bytesSent = Interop.Winsock.send(handle.DangerousGetHandle(), bufferPtr, buffer.Length, socketFlags);
             }
@@ -300,7 +295,7 @@ namespace System.Net.Sockets
         public static unsafe SocketError Receive(SafeCloseSocket handle, Span<byte> buffer, SocketFlags socketFlags, out int bytesTransferred)
         {
             int bytesReceived;
-            fixed (byte* bufferPtr = &buffer.DangerousGetPinnableReference())
+            fixed (byte* bufferPtr = &MemoryMarshal.GetReference(buffer))
             {
                 bytesReceived = Interop.Winsock.recv(handle.DangerousGetHandle(), bufferPtr, buffer.Length, socketFlags);
             }

@@ -6,8 +6,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Xunit;
 
 namespace Microsoft.CSharp.RuntimeBinder.Tests
@@ -373,40 +378,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         }
 
         [Fact]
-        public void NamedArgumentBeforeFixedStatic()
-        {
-            CallSite<Func<CallSite, object, object, object, object>> site =
-                CallSite<Func<CallSite, object, object, object, object>>.Create(
-                    Binder.InvokeMember(
-                        CSharpBinderFlags.None, "Equals", null, GetType(),
-                        new[]
-                        {
-                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.IsStaticType, null),
-                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.NamedArgument, "objA"),
-                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null)
-                        }));
-            Func<CallSite, object, object, object, object> target = site.Target;
-            Assert.Throws<RuntimeBinderException>(() => target.Invoke(site, typeof(object), 2, 2));
-        }
-
-        [Fact]
-        public void NamedArgumentBeforeFixedInstance()
-        {
-            CallSite<Func<CallSite, object, object, object, object>> site =
-                CallSite<Func<CallSite, object, object, object, object>>.Create(
-                    Microsoft.CSharp.RuntimeBinder.Binder.InvokeMember(
-                        CSharpBinderFlags.None, "Equals", null, GetType(),
-                        new[]
-                        {
-                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
-                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.NamedArgument, "x"),
-                            CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null)
-                        }));
-            Func<CallSite, object, object, object, object> target = site.Target;
-            Assert.Throws<RuntimeBinderException>(() => target.Invoke(site, EqualityComparer<int>.Default, 2, 2));
-        }
-
-        [Fact]
         public void DuplicateNamedArgument()
         {
             CallSite<Func<CallSite, object, object, object, object>> site =
@@ -421,6 +392,84 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
                         }));
             Func<CallSite, object, object, object, object> target = site.Target;
             Assert.Throws<RuntimeBinderException>(() => target.Invoke(site, EqualityComparer<int>.Default, 2, 2));
+        }
+
+        public static IEnumerable<object[]> WrongArgumentCounts(int correct) =>
+            Enumerable.Range(0, 5).Where(i => i != correct).Select(i => new object[] {i});
+
+        [Theory, MemberData(nameof(WrongArgumentCounts), 2)]
+        public void BinaryOperatorWrongNumberArguments(int argumentCount)
+        {
+            CSharpArgumentInfo x = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null);
+            CSharpArgumentInfo y = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null);
+            CallSiteBinder binder =
+                Binder.BinaryOperation(
+                    CSharpBinderFlags.None, ExpressionType.Add,
+                    GetType(), new[] { x, y });
+            LabelTarget target = Expression.Label();
+            object[] args = Enumerable.Range(0, argumentCount).Select(i => (object)i).ToArray();
+            ReadOnlyCollection<ParameterExpression> parameters = Enumerable.Range(0, argumentCount)
+                .Select(_ => Expression.Parameter(typeof(int)))
+                .ToList()
+                .AsReadOnly();
+            // Throws ArgumentOutOfRangeException for zero arguments, ArgumentException for 1 or 3 or more.
+            Assert.ThrowsAny<ArgumentException>(() => binder.Bind(args, parameters, target));
+        }
+
+        public static void DoStuff<T>(IEnumerable<T> x)
+        {
+            // Don't actually do stuff!
+        }
+
+        [Fact]
+        public void CannotInferTypeArgument()
+        {
+            dynamic d = new object();
+            Assert.Throws<RuntimeBinderException>(() => DoStuff(d));
+        }
+
+        [Fact]
+        public void CannotCallOperatorDirectly()
+        {
+            CultureInfo prev = CultureInfo.CurrentCulture;
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            dynamic d = "";
+            RuntimeBinderException e = Assert.Throws<RuntimeBinderException>(() => d.op_Equality("", ""));
+            Assert.Equal("'string.operator ==(string, string)': cannot explicitly call operator or accessor", e.Message);
+            Thread.CurrentThread.CurrentCulture = prev;
+        }
+
+        [Fact]
+        public void CannotCallAccessorDirectly()
+        {
+            CultureInfo prev = CultureInfo.CurrentCulture;
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            dynamic d = "";
+            RuntimeBinderException e = Assert.Throws<RuntimeBinderException>(() => d.get_Length());
+            Assert.Equal("'string.Length.get': cannot explicitly call operator or accessor", e.Message);
+            Thread.CurrentThread.CurrentCulture = prev;
+        }
+
+        [Fact]
+        public void AllowIndexerAccess()
+        {
+            // Indexers' accessors can be accessed directly. This is against the C# rules, which only allow
+            // direct access of indexer accessors when they are not the default member as C# has no other
+            // way to express such access, but being stricter would be a breaking change.
+            List<int> list = new List<int> { 1, 2, 3 };
+            dynamic d = list;
+            d.set_Item(2, 4);
+            dynamic e = d.get_Item(2);
+            Assert.Equal(4, e);
+            Assert.Equal(4, list[2]);
+        }
+
+        [Fact]
+        public void AllowStringIndexerAccess()
+        {
+            dynamic d = "abcd";
+            char c = d.get_Chars(2);
+            Assert.Equal('c', c);
         }
     }
 }

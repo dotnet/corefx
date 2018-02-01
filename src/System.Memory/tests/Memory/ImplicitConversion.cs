@@ -48,6 +48,22 @@ namespace System.MemoryTests
 
             Memory<int> memoryEmptyInt = emptyArray2;
             CastReadOnly<int>(memoryEmptyInt);
+
+            object[] emptyObjectArray = new object[0];
+            CastReference<object>(emptyObjectArray);
+
+            Memory<object> memoryObject = emptyObjectArray;
+            CastReadOnlyReference<object>(memoryObject);
+        }
+
+        [Fact]
+        public static void CtorImplicitDefaultMemory()
+        {
+            Memory<int> memoryEmpty = default;
+            CastReadOnly<int>(memoryEmpty);
+
+            Memory<object> memoryObject = default;
+            CastReadOnlyReference<object>(memoryObject);
         }
 
         [Fact]
@@ -95,6 +111,14 @@ namespace System.MemoryTests
 
             Memory<int> memoryEmptyInt = segmentInt;
             CastReadOnly<int>(memoryEmptyInt);
+        }
+
+        [Fact]
+        public static void NullImplicitCast()
+        {
+            int[] dst = null;
+            Memory<int> srcMemory = dst;
+            Assert.True(Memory<int>.Empty.Span == srcMemory.Span);
         }
 
         private static void Cast<T>(Memory<T> memory, params T[] expected) where T : struct, IEquatable<T>

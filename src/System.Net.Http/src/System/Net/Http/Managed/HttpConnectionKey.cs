@@ -1,28 +1,27 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 namespace System.Net.Http
 {
-    internal struct HttpConnectionKey : IEquatable<HttpConnectionKey>
+    internal readonly struct HttpConnectionKey : IEquatable<HttpConnectionKey>
     {
-        public readonly bool UsingSSL;
         public readonly string Host;
         public readonly int Port;
+        public readonly string SslHostName;     // null if not SSL
 
-        public HttpConnectionKey(Uri uri)
+        public HttpConnectionKey(string host, int port, string sslHostName)
         {
-            UsingSSL = 
-                uri.Scheme == UriScheme.Http ? false :
-                uri.Scheme == UriScheme.Https ? true :
-                throw new ArgumentException(SR.net_http_client_http_baseaddress_required, nameof(uri));
-
-            Host = uri.Host;
-            Port = uri.Port;
+            Host = host;
+            Port = port;
+            SslHostName = sslHostName;
         }
 
+        // The common cases here are SslHostName == null or SslHostName == Host
         public override int GetHashCode() =>
-            UsingSSL.GetHashCode() << 16 ^ Host.GetHashCode() ^ Port.GetHashCode();
+            SslHostName == null ? Host.GetHashCode() ^ Port.GetHashCode() :
+            SslHostName == Host ? Host.GetHashCode() ^ Port.GetHashCode() ^ 0x1 :
+            Host.GetHashCode() ^ Port.GetHashCode() ^ SslHostName.GetHashCode();
 
         public override bool Equals(object obj) =>
             obj != null &&
@@ -30,11 +29,18 @@ namespace System.Net.Http
             Equals((HttpConnectionKey)obj);
 
         public bool Equals(HttpConnectionKey other) =>
-            UsingSSL == other.UsingSSL &&
             Host == other.Host &&
-            Port == other.Port;
+            Port == other.Port &&
+            SslHostName == other.SslHostName;
 
         public static bool operator ==(HttpConnectionKey key1, HttpConnectionKey key2) => key1.Equals(key2);
         public static bool operator !=(HttpConnectionKey key1, HttpConnectionKey key2) => !key1.Equals(key2);
+
+        public bool IsSecure => SslHostName != null;
+
+        public override string ToString() =>
+            SslHostName == null ?
+            $"{Host}:{Port}" :
+            $"{Host}:{Port} SslHostName: {SslHostName}";
     }
 }

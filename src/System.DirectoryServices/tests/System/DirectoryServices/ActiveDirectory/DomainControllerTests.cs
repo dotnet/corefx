@@ -29,21 +29,28 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [OuterLoop("Takes too long on domain joined machines")]
         [InlineData("\0")]
-        [InlineData("server:port")]
         [InlineData("[")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Access to path is denied when in App container")]
-        public void GetDomainController_InvalidName_ThrowsActiveDirectoryObjectNotFoundException(string name)
+        public void GetDomainController_InvalidName(string name)
         {
             var context = new DirectoryContext(DirectoryContextType.DirectoryServer, name);
-            Assert.Throws<ActiveDirectoryObjectNotFoundException>(() => DomainController.GetDomainController(context));
+            Exception exception = Record.Exception(() => DomainController.GetDomainController(context));
+            Assert.NotNull(exception);
+            Assert.True(exception is ActiveDirectoryObjectNotFoundException ||
+                        exception is ActiveDirectoryOperationException,
+                        $"We got unrecognized exception {exception}");
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] 
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Access to path is denied when in App container")]
-        public void GetDomainController_InvalidIPV6_ThrowsActiveDirectoryObjectNotFoundException()
+        public void GetDomainController_InvalidIPV6()
         {
             var context = new DirectoryContext(DirectoryContextType.DirectoryServer, "[::1]:port");
-            Assert.Throws<ActiveDirectoryObjectNotFoundException>(() => DomainController.GetDomainController(context));
+            Exception exception = Record.Exception(() => DomainController.GetDomainController(context));
+            Assert.NotNull(exception);
+            Assert.True(exception is ActiveDirectoryObjectNotFoundException ||
+                        exception is ActiveDirectoryOperationException,
+                        $"We got unrecognized exception {exception}");
         }
 
         [Fact]
@@ -109,9 +116,13 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not approved COM object for app")]
         public void FindAll_NoSuchName_ReturnsEmpty()
         {
-            var context = new DirectoryContext(DirectoryContextType.Domain, "\0");
-            Assert.Empty(DomainController.FindAll(context));
-            Assert.Empty(DomainController.FindAll(context, "siteName"));
+            // Domain joined machines can have entries in the DomainController.
+            if (PlatformDetection.IsDomainJoinedMachine)
+            {
+                var context = new DirectoryContext(DirectoryContextType.Domain, "\0");
+                Assert.NotNull(DomainController.FindAll(context));
+                Assert.NotNull(DomainController.FindAll(context, "siteName"));
+            }
         }
 
         [Fact]
@@ -121,7 +132,10 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
         public void FindAll_NullName_ThrowsActiveDirectoryOperationException()
         {
             var context = new DirectoryContext(DirectoryContextType.Domain);
-            Assert.Throws<ActiveDirectoryOperationException>(() => DomainController.FindAll(context));
+            if (!PlatformDetection.IsDomainJoinedMachine)
+            {
+                Assert.Throws<ActiveDirectoryOperationException>(() => DomainController.FindAll(context));
+            }
         }
 
         [Fact]
@@ -130,7 +144,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
             AssertExtensions.Throws<ArgumentNullException>("context", () => DomainController.FindAll(null));
             AssertExtensions.Throws<ArgumentNullException>("context", () => DomainController.FindAll(null, "siteName"));
         }
-   
+
         [Theory]
         [InlineData(DirectoryContextType.ApplicationPartition)]
         [InlineData(DirectoryContextType.ConfigurationSet)]

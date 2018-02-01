@@ -22,8 +22,13 @@ namespace System.Net.Http
         private readonly ConcurrentDictionary<HttpConnectionKey, HttpConnectionPool> _pools;
         /// <summary>Timer used to initiate cleaning of the pools.</summary>
         private readonly Timer _cleaningTimer;
+        /// <summary>True if we are managing proxy connections, false for direct connections.</summary>
+        private readonly bool _usingProxy;
         /// <summary>The maximum number of connections allowed per pool. <see cref="int.MaxValue"/> indicates unlimited.</summary>
         private readonly int _maxConnectionsPerServer;
+        // Temporary
+        private readonly HttpConnectionSettings _settings;
+
         /// <summary>
         /// Keeps track of whether or not the cleanup timer is running. It helps us avoid the expensive
         /// <see cref="ConcurrentDictionary{TKey,TValue}.IsEmpty"/> call.
@@ -34,13 +39,40 @@ namespace System.Net.Http
 
         /// <summary>Initializes the pools.</summary>
         /// <param name="maxConnectionsPerServer">The maximum number of connections allowed per pool. <see cref="int.MaxValue"/> indicates unlimited.</param>
-        public HttpConnectionPools(int maxConnectionsPerServer)
+        
+        // CONSIDER: We are passing HttpConnectionSettings here, but all we really need are the SSL settings.
+        // When we refactor the SSL settings to use SslAuthenticationOptions, just pass that here.
+
+        public HttpConnectionPools(HttpConnectionSettings settings, int maxConnectionsPerServer, bool usingProxy)
         {
+            _settings = settings;
+            _usingProxy = usingProxy;
             _maxConnectionsPerServer = maxConnectionsPerServer;
             _pools = new ConcurrentDictionary<HttpConnectionKey, HttpConnectionPool>();
             // Start out with the timer not running, since we have no pools.
-            _cleaningTimer = new Timer(s => ((HttpConnectionPools)s).RemoveStalePools(), this, Timeout.Infinite, Timeout.Infinite);
+
+            // Don't capture the current ExecutionContext and its AsyncLocals onto the timer causing them to live forever
+            bool restoreFlow = false;
+            try
+            {
+                if (!ExecutionContext.IsFlowSuppressed())
+                {
+                    ExecutionContext.SuppressFlow();
+                    restoreFlow = true;
+                }
+
+                _cleaningTimer = new Timer(s => ((HttpConnectionPools)s).RemoveStalePools(), this, Timeout.Infinite, Timeout.Infinite);
+            }
+            finally
+            {
+                // Restore the current ExecutionContext
+                if (restoreFlow)
+                    ExecutionContext.RestoreFlow();
+            }
         }
+
+        public HttpConnectionSettings Settings => _settings;
+        public bool UsingProxy => _usingProxy;
 
         /// <summary>Gets a pool for the specified endpoint, adding one if none existed.</summary>
         /// <param name="key">The endpoint for the pool.</param>
@@ -50,7 +82,7 @@ namespace System.Net.Http
             HttpConnectionPool pool;
             while (!_pools.TryGetValue(key, out pool))
             {
-                pool = new HttpConnectionPool(_maxConnectionsPerServer);
+                pool = new HttpConnectionPool(this, key, _maxConnectionsPerServer);
                 if (_pools.TryAdd(key, pool))
                 {
                     // We need to ensure the cleanup timer is running if it isn't

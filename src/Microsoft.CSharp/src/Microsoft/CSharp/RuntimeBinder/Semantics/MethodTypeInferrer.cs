@@ -25,13 +25,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Unknown = 0x00,
             NotDependent = 0x01,
             DependsMask = 0x10,
-            Direct = 0x11,
             Indirect = 0x12
         }
         private readonly SymbolLoader _symbolLoader;
         private readonly ExpressionBinder _binder;
         private readonly TypeArray _pMethodTypeParameters;
-        private readonly TypeArray _pClassTypeArguments;
         private readonly TypeArray _pMethodFormalParameterTypes;
         private readonly ArgInfos _pMethodArguments;
         private readonly List<CType>[] _pExactBounds;
@@ -85,7 +83,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             ExpressionBinder binder,
             SymbolLoader symbolLoader,
             MethodSymbol pMethod,
-            TypeArray pClassTypeArguments,
             TypeArray pMethodFormalParameterTypes,
             ArgInfos pMethodArguments,
             out TypeArray ppInferredTypeArguments)
@@ -104,16 +101,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             var inferrer = new MethodTypeInferrer(binder, symbolLoader,
                 pMethodFormalParameterTypes, pMethodArguments,
-                pMethod.typeVars, pClassTypeArguments);
-            bool success;
-            if (pMethodArguments.fHasExprs)
-            {
-                success = inferrer.InferTypeArgs();
-            }
-            else
-            {
-                success = inferrer.InferForMethodGroupConversion();
-            }
+                pMethod.typeVars);
+            bool success = inferrer.InferTypeArgs();
 
             ppInferredTypeArguments = inferrer.GetResults();
             return success;
@@ -131,14 +120,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private MethodTypeInferrer(
             ExpressionBinder exprBinder, SymbolLoader symLoader,
             TypeArray pMethodFormalParameterTypes, ArgInfos pMethodArguments,
-            TypeArray pMethodTypeParameters, TypeArray pClassTypeArguments)
+            TypeArray pMethodTypeParameters)
         {
             _binder = exprBinder;
             _symbolLoader = symLoader;
             _pMethodFormalParameterTypes = pMethodFormalParameterTypes;
             _pMethodArguments = pMethodArguments;
             _pMethodTypeParameters = pMethodTypeParameters;
-            _pClassTypeArguments = pClassTypeArguments;
             _pFixedResults = new CType[pMethodTypeParameters.Count];
             _pLowerBounds = new List<CType>[pMethodTypeParameters.Count];
             _pUpperBounds = new List<CType>[pMethodTypeParameters.Count];
@@ -154,52 +142,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         ////////////////////////////////////////////////////////////////////////////////
 
-        private TypeArray GetResults()
-        {
-            // Anything we didn't infer a CType for, give the error CType.
-            // Note: the error CType will have the same name as the name
-            // of the CType parameter we were trying to infer.  This will give a
-            // nice user experience where by we will show something like
-            // the following:
-            //
-            // user types: customers.Select(
-            // we show   : IE<TResult> IE<Customer>.Select<Customer,TResult>(Func<Customer,TResult> selector)
-            //
-            // Initially we thought we'd just show ?.  i.e.:
-            //
-            //  IE<?> IE<Customer>.Select<Customer,?>(Func<Customer,?> selector)
-            //
-            // This is nice and concise.  However, it falls down if there are multiple
-            // CType params that we have left.
-
-            for (int iParam = 0; iParam < _pMethodTypeParameters.Count; iParam++)
-            {
-                // We iterate through the resultant types and replace any that are
-                // null, or an error CType that has less information (e.g null name or
-                // PredefinedName.PN_MISSING name).
-
-                // We get an ErrorType with a null nameText
-                // for a CType variable that we couldn't infer.
-                if (_pFixedResults[iParam] != null)
-                {
-                    if (!(_pFixedResults[iParam] is ErrorType err))
-                    {
-                        continue;
-                    }
-
-                    Name pErrorTypeName = err.nameText;
-                    if (pErrorTypeName != null)
-                    {
-                        continue;
-                    }
-                }
-
-                _pFixedResults[iParam] = GetTypeManager().GetErrorType(
-                                        ((TypeParameterType)_pMethodTypeParameters[iParam]).GetName(),
-                                        BSYMMGR.EmptyTypeArray());
-            }
-            return GetGlobalSymbols().AllocParams(_pMethodTypeParameters.Count, _pFixedResults);
-        }
+        private TypeArray GetResults() => GetGlobalSymbols().AllocParams(_pFixedResults);
 
         ////////////////////////////////////////////////////////////////////////////////
 
@@ -215,8 +158,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private bool IsUnfixed(TypeParameterType pParam)
         {
             Debug.Assert(pParam != null);
-            Debug.Assert(pParam.IsMethodTypeParameter());
-            int iParam = pParam.GetIndexInTotalParameters();
+            Debug.Assert(pParam.IsMethodTypeParameter);
+            int iParam = pParam.IndexInTotalParameters;
             Debug.Assert(_pMethodTypeParameters[iParam] == pParam);
             return IsUnfixed(iParam);
         }
@@ -240,7 +183,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private void AddLowerBound(TypeParameterType pParam, CType pBound)
         {
             Debug.Assert(IsUnfixed(pParam));
-            int iParam = pParam.GetIndexInTotalParameters();
+            int iParam = pParam.IndexInTotalParameters;
             if (!_pLowerBounds[iParam].Contains(pBound))
             {
                 _pLowerBounds[iParam].Add(pBound);
@@ -252,7 +195,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private void AddUpperBound(TypeParameterType pParam, CType pBound)
         {
             Debug.Assert(IsUnfixed(pParam));
-            int iParam = pParam.GetIndexInTotalParameters();
+            int iParam = pParam.IndexInTotalParameters;
             if (!_pUpperBounds[iParam].Contains(pBound))
             {
                 _pUpperBounds[iParam].Add(pBound);
@@ -264,7 +207,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private void AddExactBound(TypeParameterType pParam, CType pBound)
         {
             Debug.Assert(IsUnfixed(pParam));
-            int iParam = pParam.GetIndexInTotalParameters();
+            int iParam = pParam.IndexInTotalParameters;
             if (!_pExactBounds[iParam].Contains(pBound))
             {
                 _pExactBounds[iParam].Add(pBound);
@@ -280,33 +223,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return !_pLowerBounds[iParam].IsEmpty() ||
                 !_pExactBounds[iParam].IsEmpty() ||
                 !_pUpperBounds[iParam].IsEmpty();
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        private TypeArray GetFixedDelegateParameters(AggregateType pDelegateType)
-        {
-            Debug.Assert(pDelegateType.isDelegateType());
-
-            // We have a delegate where the input types use no unfixed parameters.  Create
-            // a substitution context; we can substitute unfixed parameters for themselves
-            // since they don't actually occur in the inputs.  (They may occur in the outputs,
-            // or there may be input parameters fixed to _unfixed_ method CType variables.
-            // Both of those scenarios are legal.)
-
-            CType[] ppMethodParameters = new CType[_pMethodTypeParameters.Count];
-            for (int iParam = 0; iParam < _pMethodTypeParameters.Count; iParam++)
-            {
-                TypeParameterType pParam = (TypeParameterType)_pMethodTypeParameters[iParam];
-                ppMethodParameters[iParam] = IsUnfixed(iParam) ? pParam : _pFixedResults[iParam];
-            }
-            SubstContext subsctx = new SubstContext(_pClassTypeArguments.Items, _pClassTypeArguments.Count,
-                ppMethodParameters, _pMethodTypeParameters.Count);
-            AggregateType pFixedDelegateType =
-                GetTypeManager().SubstType(pDelegateType, subsctx) as AggregateType;
-            TypeArray pFixedDelegateParams =
-                pFixedDelegateType.GetDelegateParameters(GetSymbolLoader());
-            return pFixedDelegateParams;
         }
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -380,13 +296,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 bool wasOutOrRef = false;
                 if (pDest is ParameterModifierType modDest)
                 {
-                    pDest = modDest.GetParameterType();
+                    pDest = modDest.ParameterType;
                     wasOutOrRef = true;
                 }
+
                 if (pSource is ParameterModifierType modSource)
                 {
-                    pSource = modSource.GetParameterType();
+                    pSource = modSource.ParameterType;
                 }
+
                 // If the argument is a TYPEORNAMESPACEERROR and the pSource is an
                 // error CType, then we want to set it to the generic error CType 
                 // that has no name text. This is because of the following scenario:
@@ -509,7 +427,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:       CType parameter Xj,
             // SPEC:   then an output CType inference is made from all such Ei to Ti.
 
-            MakeOutputTypeInferences();
+            // Irrelevant to dynamic binding.
 
             // SPEC:  Whether or not the previous step actually made an inference, we
             // SPEC:   must now fix at least one CType parameter, as follows:
@@ -539,35 +457,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:  Otherwise, we are unable to make progress and there are
             // SPEC:   unfixed parameters. CType inference fails.
             return NewInferenceResult.InferenceFailed;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        private void MakeOutputTypeInferences()
-        {
-            // SPEC: Otherwise, for all arguments Ei with corresponding parameter CType Ti
-            // SPEC: where the output types contain unfixed CType parameters but the input
-            // SPEC: types do not, an output CType inference is made from Ei to Ti.
-
-            for (int iArg = 0; iArg < _pMethodArguments.carg; iArg++)
-            {
-                CType pDest = _pMethodFormalParameterTypes[iArg];
-                if (pDest is ParameterModifierType modDest)
-                {
-                    pDest = modDest.GetParameterType();
-                }
-                Expr pExpr = _pMethodArguments.prgexpr[iArg];
-                if (HasUnfixedParamInOutputType(pExpr, pDest) &&
-                    !HasUnfixedParamInInputType(pExpr, pDest))
-                {
-                    CType pSource = _pMethodArguments.types[iArg];
-                    if (pSource is ParameterModifierType modSource)
-                    {
-                        pSource = modSource.GetParameterType();
-                    }
-                    OutputTypeInference(pExpr, pSource, pDest);
-                }
-            }
         }
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -648,149 +537,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return res;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-        //
-        // Input types
-        //
-        private bool DoesInputTypeContain(Expr pSource, CType pDest,
-            TypeParameterType pParam)
-        {
-            // SPEC: If E is a method group or an anonymous function and T is a delegate
-            // SPEC: CType or expression tree CType then all the parameter types of T are
-            // SPEC: input types of E with CType T.
-
-            pDest = pDest.GetDelegateTypeOfPossibleExpression();
-            if (pDest.isDelegateType())
-            {
-                switch (pSource.Kind)
-                {
-                    case ExpressionKind.MemberGroup:
-                    case ExpressionKind.BoundLambda:
-                        TypeArray pDelegateParameters = (pDest as AggregateType).GetDelegateParameters(GetSymbolLoader());
-                        if (pDelegateParameters != null)
-                        {
-                            return TypeManager.ParametersContainTyVar(pDelegateParameters, pParam);
-                        }
-
-                        break;
-                }
-            }
-
-            return false;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        private bool HasUnfixedParamInInputType(Expr pSource, CType pDest)
-        {
-            for (int iParam = 0; iParam < _pMethodTypeParameters.Count; iParam++)
-            {
-                if (IsUnfixed(iParam))
-                {
-                    if (DoesInputTypeContain(pSource, pDest,
-                        _pMethodTypeParameters[iParam] as TypeParameterType))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-        //
-        // Output types
-        //
-        private bool DoesOutputTypeContain(Expr pSource, CType pDest, TypeParameterType pParam)
-        {
-            // SPEC: If E is a method group or an anonymous function and T is a delegate
-            // SPEC: CType or expression tree CType then the return CType of T is an output CType
-            // SPEC: of E with CType T.
-
-            pDest = pDest.GetDelegateTypeOfPossibleExpression();
-            if (pDest.isDelegateType())
-            {
-                switch (pSource.Kind)
-                {
-                    case ExpressionKind.MemberGroup:
-                    case ExpressionKind.BoundLambda:
-                        CType pDelegateReturn = ((AggregateType)pDest).GetDelegateReturnType(GetSymbolLoader());
-                        if (pDelegateReturn != null)
-                        {
-                            return TypeManager.TypeContainsType(pDelegateReturn, pParam);
-                        }
-
-                        break;
-                }
-            }
-
-            return false;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        private bool HasUnfixedParamInOutputType(Expr pSource, CType pDest)
-        {
-            for (int iParam = 0; iParam < _pMethodTypeParameters.Count; iParam++)
-            {
-                if (IsUnfixed(iParam))
-                {
-                    if (DoesOutputTypeContain(pSource, pDest,
-                        _pMethodTypeParameters[iParam] as TypeParameterType))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-        //
-        // Dependence
-        //
-
-        private bool DependsDirectlyOn(int iParam, int jParam)
-        {
-            Debug.Assert(0 <= iParam && iParam < _pMethodTypeParameters.Count);
-            Debug.Assert(0 <= jParam && jParam < _pMethodTypeParameters.Count);
-
-            // SPEC: An unfixed CType parameter Xi depends directly on an unfixed CType
-            // SPEC: parameter Xj if for some argument Ek with CType Tk, Xj occurs
-            // SPEC: in an input CType of Ek and Xi occurs in an output CType of Ek
-            // SPEC: with CType Tk.
-
-            // We compute and record the Depends Directly On relationship once, in
-            // InitializeDependencies, below.
-
-            // At this point, everything should be unfixed.
-
-            Debug.Assert(IsUnfixed(iParam));
-            Debug.Assert(IsUnfixed(jParam));
-
-            for (int iArg = 0; iArg < _pMethodArguments.carg; iArg++)
-            {
-                CType pDest = _pMethodFormalParameterTypes[iArg];
-                if (pDest is ParameterModifierType modDest)
-                {
-                    pDest = modDest.GetParameterType();
-                }
-
-                Expr pExpr = _pMethodArguments.prgexpr[iArg];
-
-                if (DoesInputTypeContain(pExpr, pDest,
-                        _pMethodTypeParameters[jParam] as TypeParameterType) &&
-                    DoesOutputTypeContain(pExpr, pDest,
-                        _pMethodTypeParameters[iParam] as TypeParameterType))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-
         private void InitializeDependencies()
         {
             // We track dependencies by a two-d square array that gives the known
@@ -833,13 +579,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             for (int iParam = 0; iParam < _pMethodTypeParameters.Count; ++iParam)
             {
                 _ppDependencies[iParam] = new Dependency[_pMethodTypeParameters.Count];
-                for (int jParam = 0; jParam < _pMethodTypeParameters.Count; ++jParam)
-                {
-                    if (DependsDirectlyOn(iParam, jParam))
-                    {
-                        _ppDependencies[iParam][jParam] = Dependency.Direct;
-                    }
-                }
             }
 
             DeduceAllDependencies();
@@ -1012,102 +751,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         ////////////////////////////////////////////////////////////////////////////////
         //
-        // Output CType inferences
-        //
-
-
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        private void OutputTypeInference(Expr pExpr, CType pSource, CType pDest)
-        {
-            // SPEC: An output CType inference is made from an expression E to a CType T
-            // SPEC: in the following way:
-
-            // SPEC:  If E is an anonymous function with inferred return CType U and
-            // SPEC:   T is a delegate CType or expression tree with return CType Tb
-            // SPEC:   then a lower bound inference is made from U to Tb.
-
-            // SPEC:  Otherwise, if E is a method group and T is a delegate CType or
-            // SPEC:   expression tree CType with parameter types T1...Tk and return
-            // SPEC:   CType Tb and overload resolution of E with the types T1...Tk
-            // SPEC:   yields a single method with return CType U then a lower-bound
-            // SPEC:   inference is made from U to Tb.
-            if (MethodGroupReturnTypeInference(pExpr, pDest))
-            {
-                return;
-            }
-            // SPEC:  Otherwise, if E is an expression with CType U then a lower-bound
-            // SPEC:   inference is made from U to T.
-            if (IsReallyAType(pSource))
-            {
-                LowerBoundInference(pSource, pDest);
-            }
-            // SPEC:  Otherwise, no inferences are made.
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-
-        private bool MethodGroupReturnTypeInference(Expr pSource, CType pType)
-        {
-            // SPEC:  Otherwise, if E is a method group and T is a delegate CType or
-            // SPEC:   expression tree CType with parameter types T1...Tk and return
-            // SPEC:   CType Tb and overload resolution of E with the types T1...Tk
-            // SPEC:   yields a single method with return CType U then a lower-bound
-            // SPEC:   inference is made from U to Tb.
-
-            if (!(pSource is ExprMemberGroup memGrp))
-            {
-                return false;
-            }
-            pType = pType.GetDelegateTypeOfPossibleExpression();
-            if (!pType.isDelegateType())
-            {
-                return false;
-            }
-            AggregateType pDelegateType = pType as AggregateType;
-            CType pDelegateReturnType = pDelegateType.GetDelegateReturnType(GetSymbolLoader());
-            if (pDelegateReturnType == null)
-            {
-                return false;
-            }
-            if (pDelegateReturnType is VoidType)
-            {
-                return false;
-            }
-
-            // At this point we are in the second phase; we know that all the input types are fixed.
-
-            TypeArray pDelegateParameters = GetFixedDelegateParameters(pDelegateType);
-            if (pDelegateParameters == null)
-            {
-                return false;
-            }
-
-            ArgInfos argInfo = new ArgInfos() { carg = pDelegateParameters.Count, types = pDelegateParameters, fHasExprs = false, prgexpr = null };
-
-            var argsBinder = new ExpressionBinder.GroupToArgsBinder(_binder, 0/* flags */, memGrp, argInfo, null, false, pDelegateType);
-
-            bool success = argsBinder.Bind(false);
-            if (!success)
-            {
-                return false;
-            }
-
-            MethPropWithInst mwi = argsBinder.GetResultsOfBind().GetBestResult();
-            CType pMethodReturnType = GetTypeManager().SubstType(mwi.Meth().RetType,
-                mwi.GetType(), mwi.TypeArgs);
-            if (pMethodReturnType is VoidType)
-            {
-                return false;
-            }
-
-            LowerBoundInference(pMethodReturnType, pDelegateReturnType);
-            return true;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-        //
         // Exact inferences
         //
         private void ExactInference(CType pSource, CType pDest)
@@ -1155,7 +798,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   for Xi.
             if (pDest is TypeParameterType pTPType)
             {
-                if (pTPType.IsMethodTypeParameter() && IsUnfixed(pTPType))
+                if (pTPType.IsMethodTypeParameter && IsUnfixed(pTPType))
                 {
                     AddExactBound(pTPType, pSource);
                     return true;
@@ -1175,12 +818,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            if (pArraySource.rank != pArrayDest.rank || pArraySource.IsSZArray != pArrayDest.IsSZArray)
+            if (pArraySource.Rank != pArrayDest.Rank || pArraySource.IsSZArray != pArrayDest.IsSZArray)
             {
                 return false;
             }
 
-            ExactInference(pArraySource.GetElementType(), pArrayDest.GetElementType());
+            ExactInference(pArraySource.ElementType, pArrayDest.ElementType);
             return true;
         }
 
@@ -1195,7 +838,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            ExactInference(nubSource.GetUnderlyingType(), nubDest.GetUnderlyingType());
+            ExactInference(nubSource.UnderlyingType, nubDest.UnderlyingType);
             return true;
         }
 
@@ -1208,7 +851,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   is made from each Ui to the corresponding Vi.
 
             if (!(pSource is AggregateType pConstructedSource) || !(pDest is AggregateType pConstructedDest)
-                || pConstructedSource.GetOwningAggregate() != pConstructedDest.GetOwningAggregate())
+                || pConstructedSource.OwningAggregate != pConstructedDest.OwningAggregate)
             {
                 return false;
             }
@@ -1225,10 +868,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
-            Debug.Assert(pSource.GetOwningAggregate() == pDest.GetOwningAggregate());
+            Debug.Assert(pSource.OwningAggregate == pDest.OwningAggregate);
 
-            TypeArray pSourceArgs = pSource.GetTypeArgsAll();
-            TypeArray pDestArgs = pDest.GetTypeArgsAll();
+            TypeArray pSourceArgs = pSource.TypeArgsAll;
+            TypeArray pDestArgs = pDest.TypeArgsAll;
 
             Debug.Assert(pSourceArgs != null);
             Debug.Assert(pDestArgs != null);
@@ -1320,7 +963,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   for Xi.
             if (pDest is TypeParameterType pTPType)
             {
-                if (pTPType.IsMethodTypeParameter() && IsUnfixed(pTPType))
+                if (pTPType.IsMethodTypeParameter && IsUnfixed(pTPType))
                 {
                     AddLowerBound(pTPType, pSource);
                     return true;
@@ -1349,46 +992,42 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //   public override M<U>(U u) { M(u); } // should infer M<int>
             // }
 
-            if (pSource is TypeParameterType sourceParamType)
-            {
-                pSource = sourceParamType.GetEffectiveBaseClass();
-            }
-
             if (!(pSource is ArrayType pArraySource))
             {
                 return false;
             }
 
-            CType pElementSource = pArraySource.GetElementType();
+            CType pElementSource = pArraySource.ElementType;
             CType pElementDest;
 
             if (pDest is ArrayType pArrayDest)
             {
-                if (pArrayDest.rank != pArraySource.rank || pArrayDest.IsSZArray != pArraySource.IsSZArray)
+                if (pArrayDest.Rank != pArraySource.Rank || pArrayDest.IsSZArray != pArraySource.IsSZArray)
                 {
                     return false;
                 }
-                pElementDest = pArrayDest.GetElementType();
+
+                pElementDest = pArrayDest.ElementType;
             }
-            else if (pDest.isPredefType(PredefinedType.PT_G_IENUMERABLE) ||
-                pDest.isPredefType(PredefinedType.PT_G_ICOLLECTION) ||
-                pDest.isPredefType(PredefinedType.PT_G_ILIST) ||
-                pDest.isPredefType(PredefinedType.PT_G_IREADONLYCOLLECTION) ||
-                pDest.isPredefType(PredefinedType.PT_G_IREADONLYLIST))
+            else if (pDest.IsPredefType(PredefinedType.PT_G_IENUMERABLE) ||
+                pDest.IsPredefType(PredefinedType.PT_G_ICOLLECTION) ||
+                pDest.IsPredefType(PredefinedType.PT_G_ILIST) ||
+                pDest.IsPredefType(PredefinedType.PT_G_IREADONLYCOLLECTION) ||
+                pDest.IsPredefType(PredefinedType.PT_G_IREADONLYLIST))
             {
                 if (!pArraySource.IsSZArray)
                 {
                     return false;
                 }
                 AggregateType pAggregateDest = (AggregateType)pDest;
-                pElementDest = pAggregateDest.GetTypeArgsThis()[0];
+                pElementDest = pAggregateDest.TypeArgsThis[0];
             }
             else
             {
                 return false;
             }
 
-            if (pElementSource.IsRefType())
+            if (pElementSource.IsReferenceType)
             {
                 LowerBoundInference(pElementSource, pElementDest);
             }
@@ -1396,6 +1035,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 ExactInference(pElementSource, pElementDest);
             }
+
             return true;
         }
 
@@ -1415,7 +1055,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return false;
             }
-            ExactInference(pSource, pDest.AsNullableType().GetUnderlyingType());
+            ExactInference(pSource, pDest.AsNullableType().UnderlyingType);
             return true;
         }
          * */
@@ -1429,7 +1069,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            TypeArray pDestArgs = pConstructedDest.GetTypeArgsAll();
+            TypeArray pDestArgs = pConstructedDest.TypeArgsAll;
             if (pDestArgs.Count == 0)
             {
                 return false;
@@ -1444,10 +1084,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   lower bound inference or upper bound inference
             // SPEC:   is made from each Ui to the corresponding Vi.
 
-            if (pSource is AggregateType aggSource &&
-                aggSource.GetOwningAggregate() == pConstructedDest.GetOwningAggregate())
+            if (pSource is AggregateType aggSource && aggSource.OwningAggregate == pConstructedDest.OwningAggregate)
             {
-                if (aggSource.isInterfaceType() || aggSource.isDelegateType())
+                if (aggSource.IsInterfaceType || aggSource.IsDelegateType)
                 {
                     LowerBoundTypeArgumentInference(aggSource, pConstructedDest);
                 }
@@ -1455,6 +1094,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     ExactTypeArgumentInference(aggSource, pConstructedDest);
                 }
+
                 return true;
             }
 
@@ -1486,7 +1126,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool LowerBoundClassInference(CType pSource, AggregateType pDest)
         {
-            if (!pDest.isClassType())
+            if (!pDest.IsClassType)
             {
                 return false;
             }
@@ -1504,24 +1144,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             AggregateType pSourceBase = null;
 
-            if (pSource.isClassType())
+            if (pSource.IsClassType)
             {
-                pSourceBase = (pSource as AggregateType).GetBaseClass();
-            }
-            else if (pSource is TypeParameterType sourceType)
-            {
-                pSourceBase = sourceType.GetEffectiveBaseClass();
+                pSourceBase = (pSource as AggregateType).BaseClass;
             }
 
             while (pSourceBase != null)
             {
-                if (pSourceBase.GetOwningAggregate() == pDest.GetOwningAggregate())
+                if (pSourceBase.OwningAggregate == pDest.OwningAggregate)
                 {
                     ExactTypeArgumentInference(pSourceBase, pDest);
                     return true;
                 }
-                pSourceBase = pSourceBase.GetBaseClass();
+
+                pSourceBase = pSourceBase.BaseClass;
             }
+
             return false;
         }
 
@@ -1529,7 +1167,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool LowerBoundInterfaceInference(CType pSource, AggregateType pDest)
         {
-            if (!pDest.isInterfaceType())
+            if (!pDest.IsInterfaceType)
             {
                 return false;
             }
@@ -1543,8 +1181,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             //TypeArray pInterfaces = null;
 
-            if (!pSource.isStructType() && !pSource.isClassType() &&
-                !pSource.isInterfaceType() && !(pSource is TypeParameterType))
+            if (!pSource.IsStructType && !pSource.IsClassType && !pSource.IsInterfaceType && !(pSource is TypeParameterType))
             {
                 return false;
             }
@@ -1553,7 +1190,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType pInterface = null;
             foreach (AggregateType pCurrent in interfaces)
             {
-                if (pCurrent.GetOwningAggregate() == pDest.GetOwningAggregate())
+                if (pCurrent.OwningAggregate == pDest.OwningAggregate)
                 {
                     if (pInterface == null)
                     {
@@ -1590,11 +1227,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
-            Debug.Assert(pSource.GetOwningAggregate() == pDest.GetOwningAggregate());
+            Debug.Assert(pSource.OwningAggregate == pDest.OwningAggregate);
 
-            TypeArray pTypeParams = pSource.GetOwningAggregate().GetTypeVarsAll();
-            TypeArray pSourceArgs = pSource.GetTypeArgsAll();
-            TypeArray pDestArgs = pDest.GetTypeArgsAll();
+            TypeArray pTypeParams = pSource.OwningAggregate.GetTypeVarsAll();
+            TypeArray pSourceArgs = pSource.TypeArgsAll;
+            TypeArray pDestArgs = pDest.TypeArgsAll;
 
             Debug.Assert(pTypeParams != null);
             Debug.Assert(pSourceArgs != null);
@@ -1609,18 +1246,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CType pSourceArg = pSourceArgs[arg];
                 CType pDestArg = pDestArgs[arg];
 
-                if (pSourceArg.IsRefType() && pTypeParam.Covariant)
+                if (pSourceArg.IsReferenceType)
                 {
-                    LowerBoundInference(pSourceArg, pDestArg);
+                    if (pTypeParam.Covariant)
+                    {
+                        LowerBoundInference(pSourceArg, pDestArg);
+                        continue;
+                    }
+
+                    if (pTypeParam.Contravariant)
+                    {
+                        UpperBoundInference(pSourceArgs[arg], pDestArgs[arg]);
+                        continue;
+                    }
                 }
-                else if (pSourceArg.IsRefType() && pTypeParam.Contravariant)
-                {
-                    UpperBoundInference(pSourceArgs[arg], pDestArgs[arg]);
-                }
-                else
-                {
-                    ExactInference(pSourceArgs[arg], pDestArgs[arg]);
-                }
+
+                ExactInference(pSourceArgs[arg], pDestArgs[arg]);
             }
         }
 
@@ -1678,7 +1319,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   for Xi.
             if (pDest is TypeParameterType pTPType)
             {
-                if (pTPType.IsMethodTypeParameter() && IsUnfixed(pTPType))
+                if (pTPType.IsMethodTypeParameter && IsUnfixed(pTPType))
                 {
                     AddUpperBound(pTPType, pSource);
                     return true;
@@ -1704,36 +1345,37 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            CType pElementDest = pArrayDest.GetElementType();
+            CType pElementDest = pArrayDest.ElementType;
             CType pElementSource;
 
             if (pSource is ArrayType pArraySource)
             {
-                if (pArrayDest.rank != pArraySource.rank || pArrayDest.IsSZArray != pArraySource.IsSZArray)
+                if (pArrayDest.Rank != pArraySource.Rank || pArrayDest.IsSZArray != pArraySource.IsSZArray)
                 {
                     return false;
                 }
-                pElementSource = pArraySource.GetElementType();
+
+                pElementSource = pArraySource.ElementType;
             }
-            else if (pSource.isPredefType(PredefinedType.PT_G_IENUMERABLE) ||
-                pSource.isPredefType(PredefinedType.PT_G_ICOLLECTION) ||
-                pSource.isPredefType(PredefinedType.PT_G_ILIST) ||
-                pSource.isPredefType(PredefinedType.PT_G_IREADONLYLIST) ||
-                pSource.isPredefType(PredefinedType.PT_G_IREADONLYCOLLECTION))
+            else if (pSource.IsPredefType(PredefinedType.PT_G_IENUMERABLE) ||
+                pSource.IsPredefType(PredefinedType.PT_G_ICOLLECTION) ||
+                pSource.IsPredefType(PredefinedType.PT_G_ILIST) ||
+                pSource.IsPredefType(PredefinedType.PT_G_IREADONLYLIST) ||
+                pSource.IsPredefType(PredefinedType.PT_G_IREADONLYCOLLECTION))
             {
                 if (!pArrayDest.IsSZArray)
                 {
                     return false;
                 }
                 AggregateType pAggregateSource = (AggregateType)pSource;
-                pElementSource = pAggregateSource.GetTypeArgsThis()[0];
+                pElementSource = pAggregateSource.TypeArgsThis[0];
             }
             else
             {
                 return false;
             }
 
-            if (pElementSource.IsRefType())
+            if (pElementSource.IsReferenceType)
             {
                 UpperBoundInference(pElementSource, pElementDest);
             }
@@ -1741,6 +1383,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 ExactInference(pElementSource, pElementDest);
             }
+
             return true;
         }
 
@@ -1753,7 +1396,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            TypeArray pSourceArgs = pConstructedSource.GetTypeArgsAll();
+            TypeArray pSourceArgs = pConstructedSource.TypeArgsAll;
             if (pSourceArgs.Count == 0)
             {
                 return false;
@@ -1764,10 +1407,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   lower bound inference or upper bound inference
             // SPEC:   is made from each Ui to the corresponding Vi.
 
-            if (pDest is AggregateType aggDest &&
-                pConstructedSource.GetOwningAggregate() == aggDest.GetOwningAggregate())
+            if (pDest is AggregateType aggDest && pConstructedSource.OwningAggregate == aggDest.OwningAggregate)
             {
-                if (aggDest.isInterfaceType() || aggDest.isDelegateType())
+                if (aggDest.IsInterfaceType || aggDest.IsDelegateType)
                 {
                     UpperBoundTypeArgumentInference(pConstructedSource, aggDest);
                 }
@@ -1775,6 +1417,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     ExactTypeArgumentInference(pConstructedSource, aggDest);
                 }
+
                 return true;
             }
 
@@ -1803,7 +1446,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool UpperBoundClassInference(AggregateType pSource, CType pDest)
         {
-            if (!pSource.isClassType() || !pDest.isClassType())
+            if (!pSource.IsClassType || !pDest.IsClassType)
             {
                 return false;
             }
@@ -1812,17 +1455,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   inherits directly or indirectly from C<V1...Vk> then an exact 
             // SPEC:   inference is made from each Ui to the corresponding Vi.
 
-            AggregateType pDestBase = ((AggregateType)pDest).GetBaseClass();
+            AggregateType pDestBase = ((AggregateType)pDest).BaseClass;
 
             while (pDestBase != null)
             {
-                if (pDestBase.GetOwningAggregate() == pSource.GetOwningAggregate())
+                if (pDestBase.OwningAggregate == pSource.OwningAggregate)
                 {
                     ExactTypeArgumentInference(pSource, pDestBase);
                     return true;
                 }
-                pDestBase = pDestBase.GetBaseClass();
+
+                pDestBase = pDestBase.BaseClass;
             }
+
             return false;
         }
 
@@ -1830,7 +1475,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool UpperBoundInterfaceInference(AggregateType pSource, CType pDest)
         {
-            if (!pSource.isInterfaceType())
+            if (!pSource.IsInterfaceType)
             {
                 return false;
             }
@@ -1840,8 +1485,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:   or indirectly implements C<V1...Vk> then an exact ...
             // SPEC:  ... and U is an interface CType ...
 
-            if (!pDest.isStructType() && !pDest.isClassType() &&
-                !pDest.isInterfaceType())
+            if (!pDest.IsStructType && !pDest.IsClassType && !pDest.IsInterfaceType)
             {
                 return false;
             }
@@ -1850,7 +1494,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType pInterface = null;
             foreach (AggregateType pCurrent in interfaces)
             {
-                if (pCurrent.GetOwningAggregate() == pSource.GetOwningAggregate())
+                if (pCurrent.OwningAggregate == pSource.OwningAggregate)
                 {
                     if (pInterface == null)
                     {
@@ -1887,11 +1531,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
-            Debug.Assert(pSource.GetOwningAggregate() == pDest.GetOwningAggregate());
+            Debug.Assert(pSource.OwningAggregate == pDest.OwningAggregate);
 
-            TypeArray pTypeParams = pSource.GetOwningAggregate().GetTypeVarsAll();
-            TypeArray pSourceArgs = pSource.GetTypeArgsAll();
-            TypeArray pDestArgs = pDest.GetTypeArgsAll();
+            TypeArray pTypeParams = pSource.OwningAggregate.GetTypeVarsAll();
+            TypeArray pSourceArgs = pSource.TypeArgsAll;
+            TypeArray pDestArgs = pDest.TypeArgsAll;
 
             Debug.Assert(pTypeParams != null);
             Debug.Assert(pSourceArgs != null);
@@ -1906,18 +1550,22 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CType pSourceArg = pSourceArgs[arg];
                 CType pDestArg = pDestArgs[arg];
 
-                if (pSourceArg.IsRefType() && pTypeParam.Covariant)
+                if (pSourceArg.IsReferenceType)
                 {
-                    UpperBoundInference(pSourceArg, pDestArg);
+                    if (pTypeParam.Covariant)
+                    {
+                        UpperBoundInference(pSourceArg, pDestArg);
+                        continue;
+                    }
+
+                    if (pTypeParam.Contravariant)
+                    {
+                        LowerBoundInference(pSourceArgs[arg], pDestArgs[arg]);
+                        continue;
+                    }
                 }
-                else if (pSourceArg.IsRefType() && pTypeParam.Contravariant)
-                {
-                    LowerBoundInference(pSourceArgs[arg], pDestArgs[arg]);
-                }
-                else
-                {
-                    ExactInference(pSourceArgs[arg], pDestArgs[arg]);
-                }
+
+                ExactInference(pSourceArgs[arg], pDestArgs[arg]);
             }
         }
 
@@ -2083,64 +1731,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _pFixedResults[iParam] = pBest;
             UpdateDependenciesAfterFix(iParam);
             return true;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
-        //
-        // CType inference for conversion of method groups
-        //
-        private bool InferForMethodGroupConversion()
-        {
-            // SPEC: Similar to calls of generic methods, CType inference must
-            // SPEC: also be applied when a method group M containing a generic
-            // SPEC: method is converted to a given delegate CType D.  Given a method
-            // SPEC: Tr M<X1...Xn>(T1 x1, ... Tm xm) and the method group M being
-            // SPEC: assigned to the delegate CType D the task of CType inference is
-            // SPEC: to find CType arguments S1...Sn so that the expression M<S1...Sn>
-            // SPEC: becomes compatible with D.
-            // SPEC: Unlike the CType inference algorithm for generic method calls, in
-            // SPEC: this case there are only argument types, no argument expressions.
-            // SPEC: In particular, there are no anonymous functions and hence no need
-            // SPEC: for multiple phases of inference.
-            // SPEC: Instead, all Xi are considered unfixed and a lower-bound inference
-            // SPEC: is made from each argument CType Uj of D to the corresponding parameter
-            // SPEC: CType Tj of M.  If for any of the Xi no bounds were found, CType
-            // SPEC: inference fails. Otherwise, all Xi are fixed to corresponding Si,
-            // SPEC: which are the result of CType inference.
-
-            Debug.Assert(_pMethodFormalParameterTypes != null);
-            Debug.Assert(_pMethodArguments != null);
-            Debug.Assert(_pMethodArguments.carg <= _pMethodFormalParameterTypes.Count);
-
-            for (int iArg = 0; iArg < _pMethodArguments.carg; iArg++)
-            {
-                CType pDest = _pMethodFormalParameterTypes[iArg];
-                CType pSource = _pMethodArguments.types[iArg];
-                if (pDest is ParameterModifierType modDest)
-                {
-                    pDest = modDest.GetParameterType();
-                }
-                if (pSource is ParameterModifierType modSource)
-                {
-                    pSource = modSource.GetParameterType();
-                }
-
-                LowerBoundInference(pSource, pDest);
-            }
-
-            bool success = true;
-
-            // In the event of failure we still want to fix as much as we can, so
-            // that intellisense gives the best possible result.
-
-            for (int iParam = 0; iParam < _pMethodTypeParameters.Count; iParam++)
-            {
-                if (!HasBound(iParam) || !Fix(iParam))
-                {
-                    success = false;
-                }
-            }
-            return success;
         }
 
         ////////////////////////////////////////////////////////////////////////////////

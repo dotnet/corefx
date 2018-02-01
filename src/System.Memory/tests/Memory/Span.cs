@@ -22,7 +22,7 @@ namespace System.MemoryTests
             memory.Span.Validate(91, 92, -93, 94);
 
             OwnedMemory<int> owner = new CustomMemoryForTest<int>(a);
-            owner.AsMemory.Span.Validate(91, 92, -93, 94);
+            owner.Memory.Span.Validate(91, 92, -93, 94);
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace System.MemoryTests
             memory.Span.Validate(91, -92, 93, 94, -95);
 
             OwnedMemory<long> owner = new CustomMemoryForTest<long>(a);
-            owner.AsMemory.Span.Validate(91, -92, 93, 94, -95);
+            owner.Memory.Span.Validate(91, -92, 93, 94, -95);
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace System.MemoryTests
             memory.Span.ValidateReferenceType(o1, o2);
 
             OwnedMemory<object> owner = new CustomMemoryForTest<object>(a);
-            owner.AsMemory.Span.ValidateReferenceType(o1, o2);
+            owner.Memory.Span.ValidateReferenceType(o1, o2);
         }
 
         [Fact]
@@ -66,13 +66,13 @@ namespace System.MemoryTests
             Memory<int> memory;
 
             memory = new Memory<int>(empty);
-            memory.Span.Validate();
+            memory.Span.ValidateNonNullEmpty();
 
             memory = new Memory<int>(empty, 0, empty.Length);
-            memory.Span.Validate();
+            memory.Span.ValidateNonNullEmpty();
 
             OwnedMemory<int> owner = new CustomMemoryForTest<int>(empty);
-            owner.AsMemory.Span.Validate();
+            owner.Memory.Span.Validate();
         }
 
         [Fact]
@@ -91,7 +91,19 @@ namespace System.MemoryTests
             memory.Span.Validate(42, -1);
 
             OwnedMemory<int> owner = new CustomMemoryForTest<int>(aAsIntArray);
-            owner.AsMemory.Span.Validate(42, -1);
+            owner.Memory.Span.Validate(42, -1);
+        }
+
+        [Fact]
+        public static void SpanFromDefaultMemory()
+        {
+            Memory<int> memory = default;
+            Span<int> span = memory.Span;
+            Assert.True(span.SequenceEqual(default));
+
+            Memory<string> memoryObject = default;
+            Span<string> spanObject = memoryObject.Span;
+            Assert.True(spanObject.SequenceEqual(default));
         }
 
     }

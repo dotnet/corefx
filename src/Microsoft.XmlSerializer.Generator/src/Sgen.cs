@@ -9,10 +9,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Xml.Serialization;
 
 namespace Microsoft.XmlSerializer.Generator
 {
-    public class Sgen
+    internal class Sgen
     {
         public static int Main(string[] args)
         {
@@ -28,18 +29,14 @@ namespace Microsoft.XmlSerializer.Generator
             var errs = new ArrayList();
             bool force = false;
             bool proxyOnly = false;
-            bool caseSensitive = false;
+            bool disableRun = true;
+            bool noLogo = false;
+            bool parsableErrors = false;
+            bool silent = false;
+            bool warnings = false;
 
             try
             {
-                if (args.Length > 0)
-                {
-                    if (args.Any(s => s.IndexOf("casesensitive", StringComparison.OrdinalIgnoreCase) >= 0))
-                    {
-                        caseSensitive = true;
-                    }
-                }
-
                 for (int i = 0; i < args.Length; i++)
                 {
                     string arg = args[i];
@@ -55,10 +52,8 @@ namespace Microsoft.XmlSerializer.Generator
                         }
                     }
 
-                    if (!caseSensitive)
-                    {
-                        arg = arg.ToLower(CultureInfo.InvariantCulture);
-                    }
+                    string originalArg = arg;
+                    arg = arg.ToLower(CultureInfo.InvariantCulture);
 
                     if (ArgumentMatch(arg, "?") || ArgumentMatch(arg, "help"))
                     {
@@ -85,11 +80,43 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                     else if (ArgumentMatch(arg, "type"))
                     {
-                        types.Add(value);
+                        if (value != string.Empty)
+                        {
+                            string[] typelist = value.Split(';');
+                            foreach (var type in typelist)
+                            {
+                                types.Add(type);
+                            }
+                        }
                     }
-                    else if (ArgumentMatch(arg, "casesensitive"))
+                    else if (ArgumentMatch(arg, "assembly"))
                     {
-                        continue;
+                        if (assembly != null)
+                        {
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
+                        }
+
+                        assembly = value;
+                    }
+                    else if (ArgumentMatch(arg, "quiet"))
+                    {
+                        disableRun = false;
+                    }
+                    else if (ArgumentMatch(arg, "nologo"))
+                    {
+                        noLogo = true;
+                    }
+                    else if (ArgumentMatch(arg, "silent"))
+                    {
+                        silent = true;
+                    }
+                    else if (ArgumentMatch(arg, "parsableerrors"))
+                    {
+                        parsableErrors = true;
+                    }
+                    else if (ArgumentMatch(arg, "verbose"))
+                    {
+                        warnings = true;
                     }
                     else
                     {
@@ -100,7 +127,7 @@ namespace Microsoft.XmlSerializer.Generator
                                 errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
                             }
 
-                            assembly = arg;
+                            assembly = originalArg;
                         }
                         else
                         {
@@ -109,11 +136,16 @@ namespace Microsoft.XmlSerializer.Generator
                     }
                 }
 
+                if (!noLogo)
+                {
+                    WriteHeader();
+                }
+
                 if (errs.Count > 0)
                 {
                     foreach (string err in errs)
                     {
-                        Console.Error.WriteLine(FormatMessage(true, SR.Format(SR.Warning, err)));
+                        Console.Error.WriteLine(FormatMessage(parsableErrors, true, SR.Format(SR.Warning, err)));
                     }
                 }
 
@@ -121,14 +153,21 @@ namespace Microsoft.XmlSerializer.Generator
                 {
                     if (assembly == null)
                     {
-                        Console.Error.WriteLine(FormatMessage(false, SR.Format(SR.ErrMissingRequiredArgument, SR.Format(SR.ErrAssembly, "assembly"))));
+                        Console.Error.WriteLine(FormatMessage(parsableErrors, false, SR.Format(SR.ErrMissingRequiredArgument, SR.Format(SR.ErrAssembly, "assembly"))));
                     }
 
                     WriteHelp();
                     return 0;
                 }
 
-                GenerateFile(types, assembly, proxyOnly, force, codePath);
+                if(disableRun)
+                {
+                    Console.WriteLine("This tool is not intended to be used directly.");
+                    Console.WriteLine("Please refer to https://go.microsoft.com/fwlink/?linkid=858594 on how to use it.");
+                    return 0;
+                }
+
+                GenerateFile(types, assembly, proxyOnly, silent, warnings, force, codePath, parsableErrors);
             }
             catch (Exception e)
             {
@@ -137,14 +176,14 @@ namespace Microsoft.XmlSerializer.Generator
                     throw;
                 }
 
-                WriteError(e);
+                WriteError(e, parsableErrors);
                 return 1;
             }
 
             return 0;
         }
 
-        private void GenerateFile(List<string> typeNames, string assemblyName, bool proxyOnly, bool force, string outputDirectory)
+        private void GenerateFile(List<string> typeNames, string assemblyName, bool proxyOnly, bool silent, bool warnings, bool force, string outputDirectory, bool parsableerrors)
         {
             Assembly assembly = LoadAssembly(assemblyName, true);
             Type[] types;
@@ -178,7 +217,7 @@ namespace Microsoft.XmlSerializer.Generator
                     Type type = assembly.GetType(typeName);
                     if (type == null)
                     {
-                        Console.Error.WriteLine(FormatMessage(false, SR.Format(SR.ErrorDetails, SR.Format(SR.ErrLoadType, typeName, assemblyName))));
+                        Console.Error.WriteLine(FormatMessage(parsableerrors, false, SR.Format(SR.ErrorDetails, SR.Format(SR.ErrLoadType, typeName, assemblyName))));
                     }
 
                     types[typeIndex++] = type;
@@ -214,7 +253,7 @@ namespace Microsoft.XmlSerializer.Generator
 
                 if (!proxyOnly)
                 {
-                    ImportType(type, mappings, importedTypes, importer);
+                    ImportType(type, mappings, importedTypes, warnings, importer, parsableerrors);
                 }
             }
 
@@ -225,7 +264,7 @@ namespace Microsoft.XmlSerializer.Generator
 
                 bool gac = assembly.GlobalAssemblyCache;
                 outputDirectory = outputDirectory == null ? (gac ? Environment.CurrentDirectory : Path.GetDirectoryName(assembly.Location)) : outputDirectory;
-                string serializerName = XmlSerializer.GetXmlSerializerAssemblyName(serializableTypes[0], null);
+                string serializerName = GetXmlSerializerAssemblyName(serializableTypes[0], null);
                 string codePath = Path.Combine(outputDirectory, serializerName + ".cs");
 
                 if (!force)
@@ -256,7 +295,15 @@ namespace Microsoft.XmlSerializer.Generator
 
                     using (FileStream fs = File.Create(codePath))
                     {
-                        success = XmlSerializer.GenerateSerializer(serializableTypes, allMappings, fs);
+                        MethodInfo method = typeof(System.Xml.Serialization.XmlSerializer).GetMethod("GenerateSerializer", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                        if (method == null)
+                        {
+                            Console.Error.WriteLine(FormatMessage(parsableerrors: false, warning: false, message: SR.GenerateSerializerNotFound));
+                        }
+                        else
+                        { 
+                            success = (bool)method.Invoke(null, new object[] { serializableTypes, allMappings, fs });
+                        }
                     }
                 }
                 catch (UnauthorizedAccessException)
@@ -274,17 +321,20 @@ namespace Microsoft.XmlSerializer.Generator
 
                 if (success)
                 {
-                    Console.Out.WriteLine(SR.Format(SR.InfoAssemblyName, codePath));
-                    Console.Out.WriteLine(SR.Format(SR.InfoGeneratedAssembly, assembly.Location, codePath));
+                    if (!silent)
+                    {
+                        Console.Out.WriteLine(SR.Format(SR.InfoFileName, codePath));
+                        Console.Out.WriteLine(SR.Format(SR.InfoGeneratedFile, assembly.Location, codePath));
+                    }
                 }
                 else
                 {
-                    Console.Out.WriteLine(FormatMessage(false, SR.Format(SR.ErrGenerationFailed, assembly.Location)));
+                    Console.Out.WriteLine(FormatMessage(parsableerrors, false, SR.Format(SR.ErrGenerationFailed, assembly.Location)));
                 }
             }
             else
             {
-                Console.Out.WriteLine(FormatMessage(true, SR.Format(SR.InfoNoSerializableTypes, assembly.Location)));
+                Console.Out.WriteLine(FormatMessage(parsableerrors, true, SR.Format(SR.InfoNoSerializableTypes, assembly.Location)));
             }
         }
 
@@ -300,7 +350,7 @@ namespace Microsoft.XmlSerializer.Generator
             return (arg == formal || (arg.Length == 1 && arg[0] == formal[0]));
         }
 
-        private void ImportType(Type type, ArrayList mappings, ArrayList importedTypes, XmlReflectionImporter importer)
+        private void ImportType(Type type, ArrayList mappings, ArrayList importedTypes, bool verbose, XmlReflectionImporter importer, bool parsableerrors)
         {
             XmlTypeMapping xmlTypeMapping = null;
             var localImporter = new XmlReflectionImporter();
@@ -314,6 +364,13 @@ namespace Microsoft.XmlSerializer.Generator
                 {
                     throw;
                 }
+
+                if (verbose)
+                {
+                    Console.Out.WriteLine(FormatMessage(parsableerrors, true, SR.Format(SR.InfoIgnoreType, type.FullName)));
+                    WriteWarning(e, parsableerrors);
+                }
+
                 return;
             }
             if (xmlTypeMapping != null)
@@ -327,7 +384,7 @@ namespace Microsoft.XmlSerializer.Generator
         private static Assembly LoadAssembly(string assemblyName, bool throwOnFail)
         {
             Assembly assembly = null;
-            string path = Path.GetFullPath(assemblyName);
+            string path = Path.IsPathRooted(assemblyName) ? assemblyName : Path.GetFullPath(assemblyName);
             assembly = Assembly.LoadFile(path);
             if (assembly == null)
             {
@@ -340,33 +397,75 @@ namespace Microsoft.XmlSerializer.Generator
         private void WriteHeader()
         {
             // do not localize Copyright header
-            Console.WriteLine(String.Format(CultureInfo.CurrentCulture, "[Microsoft (R) .NET Framework, Version {0}]", TempAssembly.ThisAssembly.InformationalVersion));
+            Console.WriteLine(String.Format(CultureInfo.CurrentCulture, "[Microsoft (R) .NET Core Xml Serialization Generation Utility, Version {0}]", ThisAssembly.InformationalVersion));
             Console.WriteLine("Copyright (C) Microsoft Corporation. All rights reserved.");
         }
 
         private void WriteHelp()
         {
-            //TBD
-            Console.WriteLine("In Development");
+            Console.Out.WriteLine(SR.Format(SR.HelpDescription));
+            Console.Out.WriteLine(SR.Format(SR.HelpUsage, this.GetType().Assembly.GetName().Name));
+            Console.Out.WriteLine(SR.Format(SR.HelpDevOptions));
+            Console.Out.WriteLine(SR.Format(SR.HelpAssembly, "/assembly:", "/a:"));
+            Console.Out.WriteLine(SR.Format(SR.HelpType, "/type:", "/t:"));
+            Console.Out.WriteLine(SR.Format(SR.HelpProxy, "/proxytypes", "/p"));
+            Console.Out.WriteLine(SR.Format(SR.HelpForce, "/force", "/f"));
+            Console.Out.WriteLine(SR.Format(SR.HelpOut, "/out:", "/o:"));
+
+            Console.Out.WriteLine(SR.Format(SR.HelpMiscOptions));
+            Console.Out.WriteLine(SR.Format(SR.HelpHelp, "/?", "/help"));
         }
 
-        private static string FormatMessage(bool warning, string message)
+        private static string FormatMessage(bool parsableerrors, bool warning, string message)
         {
-            return FormatMessage(warning, "SGEN1", message);
+            return FormatMessage(parsableerrors, warning, "SGEN1", message);
         }
 
-        private static string FormatMessage(bool warning, string code, string message)
+        private static string FormatMessage(bool parsableerrors, bool warning, string code, string message)
         {
+            if (!parsableerrors)
+            {
+                return message;
+            }
+
             return "SGEN: " + (warning ? "warning " : "error ") + code + ": " + message;
         }
 
-        private static void WriteError(Exception e)
+        private static void WriteError(Exception e, bool parsableerrors)
         {
-            Console.Error.WriteLine(FormatMessage(false, e.Message));
+            Console.Error.WriteLine(FormatMessage(parsableerrors, false, e.Message));
             if (e.InnerException != null)
             {
-                WriteError(e.InnerException);
+                WriteError(e.InnerException, parsableerrors);
             }
+        }
+
+        static void WriteWarning(Exception e, bool parsableerrors)
+        {
+            Console.Out.WriteLine(FormatMessage(parsableerrors, true, e.Message));
+            if (e.InnerException != null)
+            {
+                WriteWarning(e.InnerException, parsableerrors);
+            }
+        }
+
+        private static string GetXmlSerializerAssemblyName(Type type)
+        {
+            return GetXmlSerializerAssemblyName(type, null);
+        }
+
+        private static string GetXmlSerializerAssemblyName(Type type, string defaultNamespace)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException("type");
+            }
+            return GetTempAssemblyName(type.Assembly.GetName(), defaultNamespace);
+        }
+
+        private static string GetTempAssemblyName(AssemblyName parent, string ns)
+        {
+            return parent.Name + ".XmlSerializers" + (ns == null || ns.Length == 0 ? "" : "." + ns.GetHashCode());
         }
     }
 }

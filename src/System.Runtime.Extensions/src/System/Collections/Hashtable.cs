@@ -13,7 +13,6 @@
 ===========================================================*/
 
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -275,7 +274,6 @@ namespace System.Collections
                 throw new ArgumentOutOfRangeException(nameof(capacity), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (!(loadFactor >= 0.1f && loadFactor <= 1.0f))
                 throw new ArgumentOutOfRangeException(nameof(loadFactor), SR.Format(SR.ArgumentOutOfRange_HashtableLoadFactor, .1, 1.0));
-            Contract.EndContractBlock();
 
             // Based on perf work, .72 is the optimal load factor for this table.  
             _loadFactor = 0.72f * loadFactor;
@@ -362,7 +360,6 @@ namespace System.Collections
         {
             if (d == null)
                 throw new ArgumentNullException(nameof(d), SR.ArgumentNull_Dictionary);
-            Contract.EndContractBlock();
 
             IDictionaryEnumerator e = d.GetEnumerator();
             while (e.MoveNext()) Add(e.Key, e.Value);
@@ -373,7 +370,6 @@ namespace System.Collections
         {
             if (d == null)
                 throw new ArgumentNullException(nameof(d), SR.ArgumentNull_Dictionary);
-            Contract.EndContractBlock();
 
             IDictionaryEnumerator e = d.GetEnumerator();
             while (e.MoveNext()) Add(e.Key, e.Value);
@@ -496,7 +492,6 @@ namespace System.Collections
             {
                 throw new ArgumentNullException(nameof(key), SR.ArgumentNull_Key);
             }
-            Contract.EndContractBlock();
 
             uint seed;
             uint incr;
@@ -602,7 +597,7 @@ namespace System.Collections
                 throw new ArgumentOutOfRangeException(nameof(arrayIndex), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (array.Length - arrayIndex < Count)
                 throw new ArgumentException(SR.Arg_ArrayPlusOffTooSmall);
-            Contract.EndContractBlock();
+
             CopyEntries(array, arrayIndex);
         }
 
@@ -658,7 +653,6 @@ namespace System.Collections
                 {
                     throw new ArgumentNullException(nameof(key), SR.ArgumentNull_Key);
                 }
-                Contract.EndContractBlock();
 
                 uint seed;
                 uint incr;
@@ -732,13 +726,13 @@ namespace System.Collections
         private void expand()
         {
             int rawsize = HashHelpers.ExpandPrime(_buckets.Length);
-            rehash(rawsize, false);
+            rehash(rawsize);
         }
 
         // We occasionally need to rehash the table to clean up the collision bits.
         private void rehash()
         {
-            rehash(_buckets.Length, false);
+            rehash(_buckets.Length);
         }
 
         private void UpdateVersion()
@@ -748,7 +742,7 @@ namespace System.Collections
             _version++;
         }
 
-        private void rehash(int newsize, bool forceNewHashCode)
+        private void rehash(int newsize)
         {
             // reset occupancy
             _occupancy = 0;
@@ -768,7 +762,7 @@ namespace System.Collections
                 bucket oldb = _buckets[nb];
                 if ((oldb.key != null) && (oldb.key != _buckets))
                 {
-                    int hashcode = ((forceNewHashCode ? GetHash(oldb.key) : oldb.hash_coll) & 0x7FFFFFFF);
+                    int hashcode = oldb.hash_coll & 0x7FFFFFFF;
                     putEntry(newBuckets, oldb.key, oldb.val, hashcode);
                 }
             }
@@ -781,7 +775,6 @@ namespace System.Collections
             _isWriterInProgress = false;
             // minimum size of hashtable is 3 now and maximum loadFactor is 0.72 now.
             Debug.Assert(_loadsize < newsize, "Our current implementation means this is not possible.");
-            return;
         }
 
         // Returns an enumerator for this hashtable.
@@ -897,7 +890,7 @@ namespace System.Collections
             {
                 throw new ArgumentNullException(nameof(key), SR.ArgumentNull_Key);
             }
-            Contract.EndContractBlock();
+
             if (_count >= _loadsize)
             {
                 expand();
@@ -945,18 +938,7 @@ namespace System.Collections
                     _count++;
                     UpdateVersion();
                     _isWriterInProgress = false;
-#if FEATURE_RANDOMIZED_STRING_HASHING
-                    if (ntry > HashHelpers.HashCollisionThreshold && HashHelpers.IsWellKnownEqualityComparer(_keycomparer))
-                    {
-                        // PERF: We don't want to rehash if _keycomparer is already a RandomizedObjectEqualityComparer since in some
-                        // cases there may not be any strings in the hashtable and we wouldn't get any mixing.
-                        if (_keycomparer == null || !(_keycomparer is System.Collections.Generic.RandomizedObjectEqualityComparer))
-                        {
-                            _keycomparer = HashHelpers.GetRandomizedEqualityComparer(_keycomparer);
-                            rehash(buckets.Length, true);
-                        }
-                    }
-#endif
+
                     return;
                 }
 
@@ -975,18 +957,6 @@ namespace System.Collections
                     UpdateVersion();
                     _isWriterInProgress = false;
 
-#if FEATURE_RANDOMIZED_STRING_HASHING
-                    if (ntry > HashHelpers.HashCollisionThreshold && HashHelpers.IsWellKnownEqualityComparer(_keycomparer))
-                    {
-                        // PERF: We don't want to rehash if _keycomparer is already a RandomizedObjectEqualityComparer since in some
-                        // cases there may not be any strings in the hashtable and we wouldn't get any mixing.
-                        if (_keycomparer == null || !(_keycomparer is System.Collections.Generic.RandomizedObjectEqualityComparer))
-                        {
-                            _keycomparer = HashHelpers.GetRandomizedEqualityComparer(_keycomparer);
-                            rehash(buckets.Length, true);
-                        }
-                    }
-#endif
                     return;
                 }
 
@@ -1017,18 +987,6 @@ namespace System.Collections
                 UpdateVersion();
                 _isWriterInProgress = false;
 
-#if FEATURE_RANDOMIZED_STRING_HASHING
-                if (buckets.Length > HashHelpers.HashCollisionThreshold && HashHelpers.IsWellKnownEqualityComparer(_keycomparer))
-                {
-                    // PERF: We don't want to rehash if _keycomparer is already a RandomizedObjectEqualityComparer since in some
-                    // cases there may not be any strings in the hashtable and we wouldn't get any mixing.
-                    if (_keycomparer == null || !(_keycomparer is System.Collections.Generic.RandomizedObjectEqualityComparer))
-                    {
-                        _keycomparer = HashHelpers.GetRandomizedEqualityComparer(_keycomparer);
-                        rehash(buckets.Length, true);
-                    }
-                }
-#endif
                 return;
             }
 
@@ -1075,7 +1033,7 @@ namespace System.Collections
             {
                 throw new ArgumentNullException(nameof(key), SR.ArgumentNull_Key);
             }
-            Contract.EndContractBlock();
+
             Debug.Assert(!_isWriterInProgress, "Race condition detected in usages of Hashtable - multiple threads appear to be writing to a Hashtable instance simultaneously!  Don't do that - use Hashtable.Synchronized.");
 
             uint seed;
@@ -1139,7 +1097,6 @@ namespace System.Collections
         {
             if (table == null)
                 throw new ArgumentNullException(nameof(table));
-            Contract.EndContractBlock();
             return new SyncHashtable(table);
         }
 
@@ -1149,7 +1106,7 @@ namespace System.Collections
             {
                 throw new ArgumentNullException(nameof(info));
             }
-            Contract.EndContractBlock();
+
             // This is imperfect - it only works well if all other writes are
             // also using our synchronized wrapper.  But it's still a good idea.
             lock (SyncRoot)
@@ -1319,7 +1276,6 @@ namespace System.Collections
                     throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, nameof(array));
                 if (arrayIndex < 0)
                     throw new ArgumentOutOfRangeException(nameof(arrayIndex), SR.ArgumentOutOfRange_NeedNonNegNum);
-                Contract.EndContractBlock();
                 if (array.Length - arrayIndex < _hashtable._count)
                     throw new ArgumentException(SR.Arg_ArrayPlusOffTooSmall);
                 _hashtable.CopyKeys(array, arrayIndex);
@@ -1365,7 +1321,6 @@ namespace System.Collections
                     throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, nameof(array));
                 if (arrayIndex < 0)
                     throw new ArgumentOutOfRangeException(nameof(arrayIndex), SR.ArgumentOutOfRange_NeedNonNegNum);
-                Contract.EndContractBlock();
                 if (array.Length - arrayIndex < _hashtable._count)
                     throw new ArgumentException(SR.Arg_ArrayPlusOffTooSmall);
                 _hashtable.CopyValues(array, arrayIndex);
@@ -1479,7 +1434,6 @@ namespace System.Collections
                 {
                     throw new ArgumentNullException(nameof(key), SR.ArgumentNull_Key);
                 }
-                Contract.EndContractBlock();
                 return _table.ContainsKey(key);
             }
 
@@ -1672,7 +1626,6 @@ namespace System.Collections
                 {
                     throw new ArgumentNullException(nameof(hashtable));
                 }
-                Contract.EndContractBlock();
 
                 _hashtable = hashtable;
             }
@@ -1690,10 +1643,6 @@ namespace System.Collections
 
     internal static class HashHelpers
     {
-#if FEATURE_RANDOMIZED_STRING_HASHING
-        public const int HashCollisionThreshold = 100;
-        public static bool s_UseRandomizedStringHashing = String.UseRandomizedHashing();
-#endif
         // Table of prime numbers to use as hash table sizes. 
         // A typical resize algorithm would pick the smallest prime number in this array
         // that is larger than twice the previous capacity. 
@@ -1731,7 +1680,6 @@ namespace System.Collections
         {
             if (min < 0)
                 throw new ArgumentException(SR.Arg_HTCapacityOverflow);
-            Contract.EndContractBlock();
 
             for (int i = 0; i < primes.Length; i++)
             {
@@ -1771,87 +1719,5 @@ namespace System.Collections
 
         private static ConditionalWeakTable<object, SerializationInfo> s_serializationInfoTable;
         public static ConditionalWeakTable<object, SerializationInfo> SerializationInfoTable => LazyInitializer.EnsureInitialized(ref s_serializationInfoTable);
-
-#if FEATURE_RANDOMIZED_STRING_HASHING
-        public static bool IsWellKnownEqualityComparer(object comparer)
-        {
-            return (comparer == null || comparer == System.Collections.Generic.EqualityComparer<string>.Default || comparer is IWellKnownStringEqualityComparer);
-        }
-
-        public static IEqualityComparer GetRandomizedEqualityComparer(object comparer)
-        {
-            Debug.Assert(comparer == null || comparer == System.Collections.Generic.EqualityComparer<string>.Default || comparer is IWellKnownStringEqualityComparer);
-
-            if (comparer == null)
-            {
-                return new System.Collections.Generic.RandomizedObjectEqualityComparer();
-            }
-
-            if (comparer == System.Collections.Generic.EqualityComparer<string>.Default)
-            {
-                return new System.Collections.Generic.RandomizedStringEqualityComparer();
-            }
-
-            IWellKnownStringEqualityComparer cmp = comparer as IWellKnownStringEqualityComparer;
-
-            if (cmp != null)
-            {
-                return cmp.GetRandomizedEqualityComparer();
-            }
-
-            Debug.Fail("Missing case in GetRandomizedEqualityComparer!");
-
-            return null;
-        }
-
-        public static object GetEqualityComparerForSerialization(object comparer)
-        {
-            if (comparer == null)
-            {
-                return null;
-            }
-
-            IWellKnownStringEqualityComparer cmp = comparer as IWellKnownStringEqualityComparer;
-
-            if (cmp != null)
-            {
-                return cmp.GetEqualityComparerForSerialization();
-            }
-
-            return comparer;
-        }
-
-        private const int bufferSize = 1024;
-        private static RandomNumberGenerator rng;
-        private static byte[] data;
-        private static int currentIndex = bufferSize;
-        private static readonly object lockObj = new Object();
-
-        internal static long GetEntropy()
-        {
-            lock (lockObj)
-            {
-                long ret;
-
-                if (currentIndex == bufferSize)
-                {
-                    if (null == rng)
-                    {
-                        rng = RandomNumberGenerator.Create();
-                        data = new byte[bufferSize];
-                        Debug.Assert(bufferSize % 8 == 0, "We increment our current index by 8, so our buffer size must be a multiple of 8");
-                    }
-
-                    rng.GetBytes(data);
-                    currentIndex = 0;
-                }
-
-                ret = BitConverter.ToInt64(data, currentIndex);
-                currentIndex += 8;
-
-                return ret;
-            }
-        }
-#endif // FEATURE_RANDOMIZED_STRING_HASHING
     }
 }

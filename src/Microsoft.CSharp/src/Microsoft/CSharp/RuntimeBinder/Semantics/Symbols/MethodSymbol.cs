@@ -24,8 +24,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private EventSymbol _evt;     // For event accessors, this is the EventSymbol.
 
         public bool isVirtual;              // Virtual member?
-        public bool isAbstract;             // Abstract method?
-        public bool isVarargs;              // has varargs
         public MemberInfo AssociatedMemberInfo;
 
         public TypeArray typeVars;          // All the type variables for a generic method, as declarations.
@@ -64,10 +62,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return false;
         }
 
-        public MethodKindEnum MethKind()
-        {
-            return _methKind;
-        }
+        public MethodKindEnum MethKind => _methKind;
 
         public bool IsConstructor()
         {
@@ -82,11 +77,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 IsConstructor();
         }
 
-        public bool IsDestructor()              // Is a destructor
-        {
-            return _methKind == MethodKindEnum.Destructor;
-        }
-
         public bool isPropertyAccessor()  // true if this method is a property set or get method
         {
             return _methKind == MethodKindEnum.PropAccessor;
@@ -97,19 +87,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return _methKind == MethodKindEnum.EventAccessor;
         }
 
-        private bool isExplicit()          // is user defined explicit conversion operator
-        {
-            return _methKind == MethodKindEnum.ExplicitConv;
-        }
-
         public bool isImplicit()          // is user defined implicit conversion operator
         {
             return _methKind == MethodKindEnum.ImplicitConv;
-        }
-
-        public bool isInvoke()            // Invoke method on a delegate - isn't user callable
-        {
-            return _methKind == MethodKindEnum.Invoke;
         }
 
         public void SetMethKind(MethodKindEnum mk)
@@ -119,14 +99,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public MethodSymbol ConvNext()
         {
-            Debug.Assert(isImplicit() || isExplicit());
+            AssertIsConversionOperator();
             return _convNext;
         }
 
         public void SetConvNext(MethodSymbol conv)
         {
-            Debug.Assert(isImplicit() || isExplicit());
-            Debug.Assert(conv == null || conv.isImplicit() || conv.isExplicit());
+            AssertIsConversionOperator();
+            conv?.AssertIsConversionOperator();
             _convNext = conv;
         }
 
@@ -154,9 +134,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _evt = evt;
         }
 
-        public bool isConversionOperator()
+        [Conditional("DEBUG")]
+        private void AssertIsConversionOperator()
         {
-            return (isExplicit() || isImplicit());
+            Debug.Assert(MethKind == MethodKindEnum.ExplicitConv || MethKind == MethodKindEnum.ImplicitConv);
         }
 
         public new bool isUserCallable()

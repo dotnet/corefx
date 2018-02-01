@@ -5,6 +5,7 @@
 using Microsoft.Win32;
 using System;
 using System.Diagnostics;
+using System.IO.Pipes;
 using System.Security.Principal;
 using Xunit;
 
@@ -19,6 +20,7 @@ namespace System.ServiceProcess.Tests
         protected static bool IsProcessElevated => s_isElevated.Value;
 
         private const int ExpectedDependentServiceCount = 3;
+        private bool _disposed;
 
         public ServiceControllerTests()
         {
@@ -76,27 +78,6 @@ namespace System.ServiceProcess.Tests
         }
 
         [ConditionalFact(nameof(IsProcessElevated))]
-        public void StartWithArguments()
-        {
-            var controller = new ServiceController(_testService.TestServiceName);
-            controller.WaitForStatus(ServiceControllerStatus.Running, _testService.ControlTimeout);
-            Assert.Equal(ServiceControllerStatus.Running, controller.Status);
-
-            controller.Stop();
-            controller.WaitForStatus(ServiceControllerStatus.Stopped, _testService.ControlTimeout);
-            Assert.Equal(ServiceControllerStatus.Stopped, controller.Status);
-
-            var args = new[] { "a", "b", "c", "d", "e" };
-            controller.Start(args);
-            controller.WaitForStatus(ServiceControllerStatus.Running, _testService.ControlTimeout);
-            Assert.Equal(ServiceControllerStatus.Running, controller.Status);
-
-            string argsOutput = _testService.GetServiceOutput().Trim();
-            string argsInput = "OnStart args=" + string.Join(",", args);
-            Assert.Equal(argsInput, argsOutput);
-        }
-
-        [ConditionalFact(nameof(IsProcessElevated))]
         public void Start_NullArg_ThrowsArgumentNullException()
         {
             var controller = new ServiceController(_testService.TestServiceName);
@@ -125,19 +106,26 @@ namespace System.ServiceProcess.Tests
         [ConditionalFact(nameof(IsProcessElevated))]
         public void PauseAndContinue()
         {
-            var controller = new ServiceController(_testService.TestServiceName);
+            string serviceName = _testService.TestServiceName;
+            var controller = new ServiceController(serviceName);
             controller.WaitForStatus(ServiceControllerStatus.Running, _testService.ControlTimeout);
             Assert.Equal(ServiceControllerStatus.Running, controller.Status);
 
-            for (int i = 0; i < 2; i++)
+            using (var client = new NamedPipeClientStream(".", serviceName, PipeDirection.In))
             {
-                controller.Pause();
-                controller.WaitForStatus(ServiceControllerStatus.Paused, _testService.ControlTimeout);
-                Assert.Equal(ServiceControllerStatus.Paused, controller.Status);
+                client.Connect();
+                for (int i = 0; i < 2; i++)
+                {
+                    controller.Pause();
+                    client.ReadByte();
+                    controller.WaitForStatus(ServiceControllerStatus.Paused, _testService.ControlTimeout);
+                    Assert.Equal(ServiceControllerStatus.Paused, controller.Status);
 
-                controller.Continue();
-                controller.WaitForStatus(ServiceControllerStatus.Running, _testService.ControlTimeout);
-                Assert.Equal(ServiceControllerStatus.Running, controller.Status);
+                    controller.Continue();
+                    client.ReadByte();
+                    controller.WaitForStatus(ServiceControllerStatus.Running, _testService.ControlTimeout);
+                    Assert.Equal(ServiceControllerStatus.Running, controller.Status);
+                }
             }
         }
 
@@ -190,7 +178,11 @@ namespace System.ServiceProcess.Tests
 
         public void Dispose()
         {
-            _testService.DeleteTestServices();
+            if (!_disposed)
+            {
+                _testService.DeleteTestServices();
+                _disposed = true;
+            }
         }
 
         private static ServiceController AssertHasDependent(ServiceController controller, string serviceName, string displayName)

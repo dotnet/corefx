@@ -5,10 +5,11 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-// Types moved down into System.Runtime.Handles
+// Types moved down into System.Runtime
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.InteropServices.CriticalHandle))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.InteropServices.GCHandle))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.InteropServices.GCHandleType))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.InteropServices.InAttribute))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.InteropServices.SafeHandle))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.Missing))]
 
@@ -138,9 +139,9 @@ namespace System.Runtime.InteropServices
         public AutomationProxyAttribute(bool val) { }
         public bool Value { get { throw null; } }
     }     
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct ArrayWithOffset
     {
+        private object _dummy;
         public ArrayWithOffset(object array, int offset) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Runtime.InteropServices.ArrayWithOffset obj) { throw null; }
@@ -414,6 +415,7 @@ namespace System.Runtime.InteropServices
     }
     public struct HandleRef
     {
+        private object _dummy;
         public HandleRef(object wrapper, System.IntPtr handle) : this() { }
         public System.IntPtr Handle { get; }
         public object Wrapper { get; }
@@ -448,11 +450,6 @@ namespace System.Runtime.InteropServices
     {
         public ImportedFromTypeLibAttribute(String tlbFile) { }
         public String Value { get { throw null; } }
-    }         
-    [System.AttributeUsageAttribute((System.AttributeTargets)(2048), Inherited = false)]
-    public sealed partial class InAttribute : System.Attribute
-    {
-        public InAttribute() { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(1024), Inherited = false)]
     public sealed partial class InterfaceTypeAttribute : System.Attribute
@@ -887,7 +884,6 @@ namespace System.Runtime.InteropServices
         public TypeLibVarFlags Value { get { throw null; } }
     }
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
-    [System.Runtime.InteropServices.ComVisible(true)]
     public sealed class TypeLibVersionAttribute : Attribute
     {
         public TypeLibVersionAttribute(int major, int minor) {}

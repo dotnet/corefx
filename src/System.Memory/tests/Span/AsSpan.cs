@@ -9,16 +9,24 @@ namespace System.SpanTests
     public static partial class SpanTests
     {
         [Fact]
-        public static void ArrayAsSpan()
+        public static void IntArrayAsSpan()
         {
             int[] a = { 91, 92, -93, 94 };
             Span<int> spanInt = a.AsSpan();
             spanInt.Validate(91, 92, -93, 94);
+        }
 
+        [Fact]
+        public static void LongArrayAsSpan()
+        {
             long[] b = { 91, -92, 93, 94, -95 };
             Span<long> spanLong = b.AsSpan();
             spanLong.Validate(91, -92, 93, 94, -95);
+        }
 
+        [Fact]
+        public static void ObjectArrayAsSpan()
+        {
             object o1 = new object();
             object o2 = new object();
             object[] c = { o1, o2 };
@@ -31,22 +39,30 @@ namespace System.SpanTests
         {
             int[] empty = Array.Empty<int>();
             Span<int> span = empty.AsSpan();
-            span.Validate();
+            span.ValidateNonNullEmpty();
         }
 
         [Fact]
-        public static void ArraySegmentAsSpan()
+        public static void IntArraySegmentAsSpan()
         {
             int[] a = { 91, 92, -93, 94 };
             ArraySegment<int> segmentInt = new ArraySegment<int>(a, 1, 2);
             Span<int> spanInt = segmentInt.AsSpan();
             spanInt.Validate(92, -93);
+        }
 
+        [Fact]
+        public static void LongArraySegmentAsSpan()
+        {
             long[] b = { 91, -92, 93, 94, -95 };
             ArraySegment<long> segmentLong = new ArraySegment<long>(b, 1, 3);
             Span<long> spanLong = segmentLong.AsSpan();
             spanLong.Validate(-92, 93, 94);
+        }
 
+        [Fact]
+        public static void ObjectArraySegmentAsSpan()
+        {
             object o1 = new object();
             object o2 = new object();
             object o3 = new object();
@@ -63,12 +79,12 @@ namespace System.SpanTests
             int[] empty = Array.Empty<int>();
             ArraySegment<int> segmentEmpty = new ArraySegment<int>(empty);
             Span<int> spanEmpty = segmentEmpty.AsSpan();
-            spanEmpty.Validate();
+            spanEmpty.ValidateNonNullEmpty();
 
             int[] a = { 91, 92, -93, 94 };
             ArraySegment<int> segmentInt = new ArraySegment<int>(a, 0, 0);
             Span<int> spanInt = segmentInt.AsSpan();
-            spanInt.Validate();
+            spanInt.ValidateNonNullEmpty();
         }
     }
 }

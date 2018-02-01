@@ -6,7 +6,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants Condition="'$(TargetsWindows)' == 'true'">$(DefineConstants);TargetsWindows</DefineConstants>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Unix-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
@@ -18,6 +17,9 @@
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\PasteArguments.cs">
       <Link>Common\System\PasteArguments.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\StringParser.cs">
+      <Link>Common\System\IO\StringParser.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\ShouldNotBeInvokedException.cs">
       <Link>Common\System\ShouldNotBeInvokedException.cs</Link>
@@ -42,11 +44,27 @@
     <Compile Include="RemotelyInvokable.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' or '$(TargetGroup)' == 'uap'">
+    <Compile Include="ProcessStreamReadTests.netcoreapp.cs" />
+    <Compile Include="ProcessTests.netcoreapp.cs" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <!-- WINDOWS: Shared CoreCLR and .NET Native -->
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+    <Compile Include="..\..\Common\src\System\PasteArguments.Windows.cs">
+      <Link>Common\System\PasteArguments.Windows.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <!-- UNIX -->
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="..\..\Common\src\System\PasteArguments.Unix.cs">
+      <Link>Common\System\PasteArguments.Unix.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

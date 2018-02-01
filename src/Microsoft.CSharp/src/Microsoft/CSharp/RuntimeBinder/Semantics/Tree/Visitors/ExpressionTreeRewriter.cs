@@ -9,15 +9,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class ExpressionTreeRewriter : ExprVisitorBase
     {
-        public static Expr Rewrite(Expr expr, ExprFactory expressionFactory, SymbolLoader symbolLoader)
-        {
-            ExpressionTreeRewriter rewriter = new ExpressionTreeRewriter(expressionFactory, symbolLoader);
-            return rewriter.Visit(expr);
-        }
+        public static ExprBinOp Rewrite(ExprBoundLambda expr, ExprFactory expressionFactory, SymbolLoader symbolLoader) =>
+            new ExpressionTreeRewriter(expressionFactory, symbolLoader).VisitBoundLambda(expr);
 
         private ExprFactory expressionFactory;
         private SymbolLoader symbolLoader;
-        private ExprBoundLambda currentAnonMeth;
 
         private ExprFactory GetExprFactory() { return expressionFactory; }
 
@@ -94,42 +90,27 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         /////////////////////////////////////////////////////////////////////////////////
         // Expression types.
 
-        protected override Expr VisitBOUNDLAMBDA(ExprBoundLambda anonmeth)
+        private ExprBinOp VisitBoundLambda(ExprBoundLambda anonmeth)
         {
             Debug.Assert(anonmeth != null);
 
-            ExprBoundLambda prevAnonMeth = currentAnonMeth;
-            currentAnonMeth = anonmeth;
             MethodSymbol lambdaMethod = GetPreDefMethod(PREDEFMETH.PM_EXPRESSION_LAMBDA);
-
-            CType delegateType = anonmeth.DelegateType;
+            AggregateType delegateType = anonmeth.DelegateType;
             TypeArray lambdaTypeParams = GetSymbolLoader().getBSymmgr().AllocParams(1, new CType[] { delegateType });
             AggregateType expressionType = GetSymbolLoader().GetPredefindType(PredefinedType.PT_EXPRESSION);
             MethWithInst mwi = new MethWithInst(lambdaMethod, expressionType, lambdaTypeParams);
             Expr createParameters = CreateWraps(anonmeth);
-            Expr body = RewriteLambdaBody(anonmeth);
-            Expr parameters = RewriteLambdaParameters(anonmeth);
+            Debug.Assert(createParameters != null);
+            Debug.Assert(anonmeth.Expression != null);
+            Expr body = Visit(anonmeth.Expression);
+            Debug.Assert(anonmeth.ArgumentScope.nextChild == null);
+            Expr parameters = GenerateParamsArray(null, PredefinedType.PT_PARAMETEREXPRESSION);
             Expr args = GetExprFactory().CreateList(body, parameters);
             CType typeRet = GetSymbolLoader().GetTypeManager().SubstType(mwi.Meth().RetType, mwi.GetType(), mwi.TypeArgs);
             ExprMemberGroup pMemGroup = GetExprFactory().CreateMemGroup(null, mwi);
             ExprCall call = GetExprFactory().CreateCall(0, typeRet, args, pMemGroup, mwi);
-            Expr callLambda = call;
-
             call.PredefinedMethod = PREDEFMETH.PM_EXPRESSION_LAMBDA;
-
-            currentAnonMeth = prevAnonMeth;
-            if (createParameters != null)
-            {
-                callLambda = GetExprFactory().CreateSequence(createParameters, callLambda);
-            }
-            Expr expr = DestroyWraps(anonmeth, callLambda);
-            // If we are already inside an expression tree rewrite and this is an expression tree lambda
-            // then it needs to be quoted.
-            if (currentAnonMeth != null)
-            {
-                expr = GenerateCall(PREDEFMETH.PM_EXPRESSION_QUOTE, expr);
-            }
-            return expr;
+            return GetExprFactory().CreateSequence(createParameters, call);
         }
         protected override Expr VisitCONSTANT(ExprConstant expr)
         {
@@ -139,14 +120,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         protected override Expr VisitLOCAL(ExprLocal local)
         {
             Debug.Assert(local != null);
-            Debug.Assert(!local.Local.isThis);
-            // this is true for all parameters of an expression lambda
-            if (local.Local.wrap != null)
-            {
-                return local.Local.wrap;
-            }
-            Debug.Assert(local.Local.fUsedInAnonMeth);
-            return GetExprFactory().CreateHoistedLocalInExpression();
+            Debug.Assert(local.Local.wrap != null);
+            return local.Local.wrap;
         }
         protected override Expr VisitFIELD(ExprField expr)
         {
@@ -177,7 +152,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // If we have generated an identity cast or reference cast to a base class
             // we can omit the cast.
             if (pArgument.Type == pExpr.Type ||
-                    GetSymbolLoader().IsBaseClassOfClass(pArgument.Type, pExpr.Type) ||
+                    SymbolLoader.IsBaseClassOfClass(pArgument.Type, pExpr.Type) ||
                     CConversions.FImpRefConv(GetSymbolLoader(), pArgument.Type, pExpr.Type))
             {
                 return Visit(pArgument);
@@ -186,7 +161,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // If we have a cast to PredefinedType.PT_G_EXPRESSION and the thing that we're casting is 
             // a EXPRBOUNDLAMBDA that is an expression tree, then just visit the expression tree.
             if (pExpr.Type != null &&
-                    pExpr.Type.isPredefType(PredefinedType.PT_G_EXPRESSION) &&
+                    pExpr.Type.IsPredefType(PredefinedType.PT_G_EXPRESSION) &&
                     pArgument is ExprBoundLambda)
             {
                 return Visit(pArgument);
@@ -204,7 +179,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(expr != null);
             PREDEFMETH pdm;
-            if (expr.FirstArgument.Type.isPredefType(PredefinedType.PT_STRING) && expr.SecondArgument.Type.isPredefType(PredefinedType.PT_STRING))
+            if (expr.FirstArgument.Type.IsPredefType(PredefinedType.PT_STRING) && expr.SecondArgument.Type.IsPredefType(PredefinedType.PT_STRING))
             {
                 pdm = PREDEFMETH.PM_STRING_CONCAT_STRING_2;
             }
@@ -344,7 +319,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         {
             Debug.Assert(expr != null);
             // POSSIBLE ERROR: Multi-d should be an error?
-            Expr pTypeOf = CreateTypeOf(((ArrayType)expr.Type).GetElementType());
+            Expr pTypeOf = CreateTypeOf(((ArrayType)expr.Type).ElementType);
             Expr args = GenerateArgsList(expr.OptionalArguments);
             Expr Params = GenerateParamsArray(args, PredefinedType.PT_EXPRESSION);
             return GenerateCall(PREDEFMETH.PM_EXPRESSION_NEWARRAYINIT, pTypeOf, Params);
@@ -424,32 +399,32 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType convertL = null;
             CType convertR = null;
 
-            if (typeL.isEnumType())
+            if (typeL.IsEnumType)
             {
                 // We have already inserted casts if not lifted, so we should never see an enum.
                 Debug.Assert(expr.IsLifted);
-                convertL = GetSymbolLoader().GetTypeManager().GetNullable(typeL.underlyingEnumType());
+                convertL = GetSymbolLoader().GetTypeManager().GetNullable(typeL.UnderlyingEnumType);
                 typeL = convertL;
                 didEnumConversion = true;
             }
-            else if (typeL is NullableType nubL && nubL.UnderlyingType.isEnumType())
+            else if (typeL is NullableType nubL && nubL.UnderlyingType.IsEnumType)
             {
                 Debug.Assert(expr.IsLifted);
-                convertL = GetSymbolLoader().GetTypeManager().GetNullable(nubL.UnderlyingType.underlyingEnumType());
+                convertL = GetSymbolLoader().GetTypeManager().GetNullable(nubL.UnderlyingType.UnderlyingEnumType);
                 typeL = convertL;
                 didEnumConversion = true;
             }
-            if (typeR.isEnumType())
+            if (typeR.IsEnumType)
             {
                 Debug.Assert(expr.IsLifted);
-                convertR = GetSymbolLoader().GetTypeManager().GetNullable(typeR.underlyingEnumType());
+                convertR = GetSymbolLoader().GetTypeManager().GetNullable(typeR.UnderlyingEnumType);
                 typeR = convertR;
                 didEnumConversion = true;
             }
-            else if (typeR is NullableType nubR && nubR.UnderlyingType.isEnumType())
+            else if (typeR is NullableType nubR && nubR.UnderlyingType.IsEnumType)
             {
                 Debug.Assert(expr.IsLifted);
-                convertR = GetSymbolLoader().GetTypeManager().GetNullable(nubR.UnderlyingType.underlyingEnumType());
+                convertR = GetSymbolLoader().GetTypeManager().GetNullable(nubR.UnderlyingType.UnderlyingEnumType);
                 typeR = convertR;
                 didEnumConversion = true;
             }
@@ -473,7 +448,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             Expr call = GenerateCall(pdm, newL, newR);
 
-            if (didEnumConversion && expr.Type.StripNubs().isEnumType())
+            if (didEnumConversion && expr.Type.StripNubs().IsEnumType)
             {
                 call = GenerateCall(PREDEFMETH.PM_EXPRESSION_CONVERT, call, CreateTypeOf(expr.Type));
             }
@@ -499,28 +474,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             Expr origOp = expr.Child;
 
-            return GenerateBuiltInUnaryOperator(pdm, origOp, expr);
-        }
-
-        private Expr GenerateBuiltInUnaryOperator(PREDEFMETH pdm, Expr pOriginalOperator, Expr pOperator)
-        {
-            Expr op = Visit(pOriginalOperator);
-            bool isNullableEnum = pOriginalOperator.Type is NullableType nub && nub.underlyingType().isEnumType();
-            if (isNullableEnum)
-            {
-                Debug.Assert(pOperator.Kind == ExpressionKind.BitwiseNot); // The only built-in unary operator defined on nullable enum.
-                CType underlyingType = pOriginalOperator.Type.StripNubs().underlyingEnumType();
-                CType nullableType = GetSymbolLoader().GetTypeManager().GetNullable(underlyingType);
-                op = GenerateCall(PREDEFMETH.PM_EXPRESSION_CONVERT, op, CreateTypeOf(nullableType));
-            }
-
-            Expr call = GenerateCall(pdm, op);
-            if (isNullableEnum)
-            {
-                call = GenerateCall(PREDEFMETH.PM_EXPRESSION_CONVERT, call, CreateTypeOf(pOperator.Type));
-            }
-
-            return call;
+            // Such operations are always already casts on operations on casts.
+            Debug.Assert(!(origOp.Type is NullableType nub) || !nub.UnderlyingType.IsEnumType);
+            return GenerateCall(pdm, Visit(origOp));
         }
 
         private Expr GenerateUserDefinedBinaryOperator(ExprBinOp expr)
@@ -691,54 +647,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GenerateCall(pdm, p1, p2, lift, methodInfo);
         }
 
-        private Expr RewriteLambdaBody(ExprBoundLambda anonmeth)
-        {
-            Debug.Assert(anonmeth != null);
-            Debug.Assert(anonmeth.OptionalBody != null);
-            Debug.Assert(anonmeth.OptionalBody.OptionalStatements != null);
-            // There ought to be no way to get an empty statement block successfully converted into an expression tree.
-            Debug.Assert(anonmeth.OptionalBody.OptionalStatements.OptionalNextStatement== null);
-
-            ExprBlock body = anonmeth.OptionalBody;
-
-            // The most likely case:
-            if (body.OptionalStatements is ExprReturn ret)
-            {
-                Debug.Assert(ret.OptionalObject != null);
-                return Visit(ret.OptionalObject);
-            }
-            // This can only if it is a void delegate and this is a void expression, such as a call to a void method
-            // or something like Expression<Action<Foo>> e = (Foo f) => f.MyEvent += MyDelegate;
-
-            throw Error.InternalCompilerError();
-        }
-
-        private Expr RewriteLambdaParameters(ExprBoundLambda anonmeth)
-        {
-            Debug.Assert(anonmeth != null);
-
-            // new ParameterExpression[2] {Parameter(typeof(type1), name1), Parameter(typeof(type2), name2)}
-
-            Expr paramArrayInitializerArgs = null;
-            Expr paramArrayInitializerArgsTail = paramArrayInitializerArgs;
-
-            for (Symbol sym = anonmeth.ArgumentScope; sym != null; sym = sym.nextChild)
-            {
-                if (!(sym is LocalVariableSymbol local))
-                {
-                    continue;
-                }
-
-                if (local.isThis)
-                {
-                    continue;
-                }
-                GetExprFactory().AppendItemToList(local.wrap, ref paramArrayInitializerArgs, ref paramArrayInitializerArgsTail);
-            }
-
-            return GenerateParamsArray(paramArrayInitializerArgs, PredefinedType.PT_PARAMETEREXPRESSION);
-        }
-
         private Expr GenerateConversion(Expr arg, CType CType, bool bChecked)
         {
             return GenerateConversionWithSource(Visit(arg), CType, bChecked || arg.isChecked());
@@ -777,7 +685,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // represented in the Expr tree so that this is more transparent.
 
                 // converting an enum to its underlying CType never fails, so no need to check it.
-                CType underlyingType = arg.Type.StripNubs().underlyingEnumType();
+                CType underlyingType = arg.Type.StripNubs().UnderlyingEnumType;
                 CType nullableType = GetSymbolLoader().GetTypeManager().GetNullable(underlyingType);
                 Expr typeofNubEnum = CreateTypeOf(nullableType);
                 target = GenerateCall(PREDEFMETH.PM_EXPRESSION_CONVERT, target, typeofNubEnum);
@@ -883,11 +791,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     continue;
                 }
 
-                if (local.isThis)
-                {
-                    continue;
-                }
-                Debug.Assert(anonmeth.OptionalBody != null);
+                Debug.Assert(anonmeth.Expression != null);
                 Expr create = GenerateParameter(local.name.Text, local.GetType());
                 local.wrap = GetExprFactory().CreateWrap(create);
                 Expr save = GetExprFactory().CreateSave(local.wrap);
@@ -901,27 +805,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            return sequence;
-        }
-
-        private Expr DestroyWraps(ExprBoundLambda anonmeth, Expr sequence)
-        {
-            for (Symbol sym = anonmeth.ArgumentScope; sym != null; sym = sym.nextChild)
-            {
-                if (!(sym is LocalVariableSymbol local))
-                {
-                    continue;
-                }
-
-                if (local.isThis)
-                {
-                    continue;
-                }
-                Debug.Assert(local.wrap != null);
-                Debug.Assert(anonmeth.OptionalBody != null);
-                Expr freeWrap = GetExprFactory().CreateWrap(local.wrap);
-                sequence = GetExprFactory().CreateReverseSequence(sequence, freeWrap);
-            }
             return sequence;
         }
 
@@ -958,8 +841,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Expr newIndex = it.Current();
                 if (newIndex.Type != intType)
                 {
-                    ExprClass exprType = expressionFactory.CreateClass(intType);
-                    newIndex = expressionFactory.CreateCast(EXPRFLAG.EXF_INDEXEXPR, exprType, newIndex);
+                    newIndex = expressionFactory.CreateCast(EXPRFLAG.EXF_INDEXEXPR, intType, newIndex);
                     newIndex.Flags |= EXPRFLAG.EXF_CHECKOVERFLOW;
                 }
                 Expr rewrittenIndex = Visit(newIndex);
@@ -986,8 +868,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 flags = EXPRFLAG.EXF_BOX;
             }
 
-            ExprClass objectType = GetExprFactory().CreateClass(pObject);
-            ExprCast cast = GetExprFactory().CreateCast(flags, objectType, expr);
+            ExprCast cast = GetExprFactory().CreateCast(flags, pObject, expr);
             ExprTypeOf pTypeOf2 = CreateTypeOf(expr.Type);
 
             return GenerateCall(PREDEFMETH.PM_EXPRESSION_CONSTANT_OBJECT_TYPE, cast, pTypeOf2);
@@ -1080,9 +961,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             CType aatype2 = orig2.Type;
             // Is the operator even a candidate for lifting?
             if (!(fptype1 is AggregateType fat1)
-                || !fat1.getAggregate().IsValueType()
+                || !fat1.OwningAggregate.IsValueType()
                 || !(fptype2 is AggregateType fat2)
-                || !fat2.getAggregate().IsValueType())
+                || !fat2.OwningAggregate.IsValueType())
             {
                 return;
             }
@@ -1105,7 +986,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         private bool IsNullableValueType(CType pType) =>
-            pType is NullableType && pType.StripNubs() is AggregateType agg && agg.getAggregate().IsValueType();
+            pType is NullableType && pType.StripNubs() is AggregateType agg && agg.OwningAggregate.IsValueType();
 
         private bool IsNullableValueAccess(Expr pExpr, Expr pObject)
         {
@@ -1114,6 +995,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         private static bool isEnumToDecimalConversion(CType argtype, CType desttype) =>
-            argtype.StripNubs().isEnumType() && desttype.StripNubs().isPredefType(PredefinedType.PT_DECIMAL);
+            argtype.StripNubs().IsEnumType && desttype.StripNubs().IsPredefType(PredefinedType.PT_DECIMAL);
     }
 }

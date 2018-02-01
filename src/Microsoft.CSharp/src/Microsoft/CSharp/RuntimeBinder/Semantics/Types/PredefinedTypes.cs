@@ -24,8 +24,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // We want to delay load the predefined symbols as needed.
         private AggregateSymbol DelayLoadPredefSym(PredefinedType pt)
         {
-            CType type = _runtimeBinderSymbolTable.GetCTypeFromType(PredefinedTypeFacts.GetAssociatedSystemType(pt));
-            AggregateSymbol sym = type.getAggregate();
+            AggregateType type = (AggregateType)_runtimeBinderSymbolTable.GetCTypeFromType(PredefinedTypeFacts.GetAssociatedSystemType(pt));
+            AggregateSymbol sym = type.OwningAggregate;
             return InitializePredefinedType(sym, pt);
         }
 
@@ -59,8 +59,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public static string GetNiceName(AggregateSymbol type) =>
             type.IsPredefined() ? GetNiceName(type.GetPredefType()) : null;
-
-        public static string GetFullName(PredefinedType pt) => PredefinedTypeFacts.GetName(pt);
     }
 
     internal static class PredefinedTypeFacts
@@ -210,6 +208,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             new PredefinedTypeInfo(PredefinedType.PT_MISSING, typeof(System.Reflection.Missing), "System.Reflection.Missing"),
             new PredefinedTypeInfo(PredefinedType.PT_G_IREADONLYLIST, typeof(IReadOnlyList<>), "System.Collections.Generic.IReadOnlyList`1"),
             new PredefinedTypeInfo(PredefinedType.PT_G_IREADONLYCOLLECTION, typeof(IReadOnlyCollection<>), "System.Collections.Generic.IReadOnlyCollection`1"),
+            new PredefinedTypeInfo(PredefinedType.PT_FUNC, typeof(Func<>), "System.Func`1")
         };
 
         private static readonly Dictionary<string, PredefinedType> s_typesByName = CreatePredefinedTypeFacts();

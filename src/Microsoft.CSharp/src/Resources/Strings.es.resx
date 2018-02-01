@@ -81,9 +81,6 @@
   <data name="ValueCantBeNull" xml:space="preserve">
     <value>No se puede convertir NULL en '{0}' porque es un tipo de valor que no acepta valores NULL.</value>
   </data>
-  <data name="WrongNestedThis" xml:space="preserve">
-    <value>No se puede obtener acceso a un miembro no estático de tipo externo '{0}' mediante el tipo anidado '{1}'.</value>
-  </data>
   <data name="NoSuchMember" xml:space="preserve">
     <value>'{0}' no contiene una definición para '{1}'.</value>
   </data>
@@ -176,9 +173,6 @@
   </data>
   <data name="GenericConstraintNotSatisfiedValType" xml:space="preserve">
     <value>El tipo '{3}' no se puede usar como parámetro de tipo '{2}' en el tipo o método genérico '{0}'. No hay conversión boxing de '{3}' a '{1}'.</value>
-  </data>
-  <data name="TypeVarCantBeNull" xml:space="preserve">
-    <value>No se puede convertir NULL en el parámetro de tipo '{0}' porque podría ser un tipo de valor que no acepta valores NULL. Use 'default({0})' en su lugar.</value>
   </data>
   <data name="CantInferMethTypeArgs" xml:space="preserve">
     <value>Los argumentos de tipo para el método '{0}' no se pueden inferir a partir del uso. Intente especificar los argumentos de tipo explícitamente.</value>

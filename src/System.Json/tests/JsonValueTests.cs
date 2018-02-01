@@ -88,6 +88,8 @@ namespace System.Json.Tests
                 Assert.Equal(4, value.Count);
                 Assert.Equal(JsonType.Array, value.JsonType);
                 Assert.Equal("[1, 2, 3, null]", value.ToString());
+                ((JsonArray) value).Add(null);
+                Assert.Equal("[1, 2, 3, null, null]", value.ToString());
             });
         }
         
@@ -430,7 +432,22 @@ namespace System.Json.Tests
             using (MemoryStream stream = new MemoryStream())
             {
                 value.Save(stream);
-                Assert.Empty(stream.ToArray());
+                string json = Encoding.UTF8.GetString(stream.ToArray());
+                Assert.True(stream.CanWrite);
+                Assert.Equal("Hello", json);
+            }
+        }
+
+        [Fact]
+        public void Save_TextWriter()
+        {
+            JsonSubValue value = new JsonSubValue();
+
+            using (StringWriter writer = new StringWriter())
+            {
+                value.Save(writer);
+                string json = writer.ToString();
+                Assert.Equal("Hello", json);
             }
         }
 

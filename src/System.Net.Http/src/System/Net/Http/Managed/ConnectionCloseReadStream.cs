@@ -12,23 +12,25 @@ namespace System.Net.Http
     {
         private sealed class ConnectionCloseReadStream : HttpContentReadStream
         {
-            public ConnectionCloseReadStream(HttpConnection connection)
-                : base(connection)
+            public ConnectionCloseReadStream(HttpConnection connection) : base(connection)
             {
             }
 
-            public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
                 ValidateBufferArgs(buffer, offset, count);
+                return ReadAsync(new Memory<byte>(buffer, offset, count), cancellationToken).AsTask();
+            }
 
-                if (_connection == null || count == 0)
+            public override async ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default)
+            {
+                if (_connection == null || destination.Length == 0)
                 {
                     // Response body fully consumed or the caller didn't ask for any data
                     return 0;
                 }
 
-                int bytesRead = await _connection.ReadAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
-
+                int bytesRead = await _connection.ReadAsync(destination, cancellationToken).ConfigureAwait(false);
                 if (bytesRead == 0)
                 {
                     // We cannot reuse this connection, so close it.
@@ -47,17 +49,14 @@ namespace System.Net.Http
                     throw new ArgumentNullException(nameof(destination));
                 }
 
-                if (_connection == null)
+                if (_connection != null) // null if response body fully consumed
                 {
-                    // Response body fully consumed
-                    return;
+                    await _connection.CopyToAsync(destination, cancellationToken).ConfigureAwait(false);
+
+                    // We cannot reuse this connection, so close it.
+                    _connection.Dispose();
+                    _connection = null;
                 }
-
-                await _connection.CopyToAsync(destination, cancellationToken).ConfigureAwait(false);
-
-                // We cannot reuse this connection, so close it.
-                _connection.Dispose();
-                _connection = null;
             }
         }
     }

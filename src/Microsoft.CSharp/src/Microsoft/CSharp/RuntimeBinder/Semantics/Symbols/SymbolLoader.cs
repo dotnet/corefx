@@ -10,17 +10,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
     internal sealed class SymbolLoader
     {
-        private readonly NameManager _nameManager;
-
-        public PredefinedMembers PredefinedMembers { get; }
+        private PredefinedMembers PredefinedMembers { get; }
         private GlobalSymbolContext GlobalSymbolContext { get; }
         public ErrorHandling ErrorContext { get; }
         public SymbolTable RuntimeBinderSymbolTable { get; private set; }
 
         public SymbolLoader()
         {
-            GlobalSymbolContext globalSymbols = new GlobalSymbolContext(new NameManager());
-            _nameManager = globalSymbols.GetNameManager();
+            GlobalSymbolContext globalSymbols = new GlobalSymbolContext();
             PredefinedMembers = new PredefinedMembers(this);
             ErrorContext = new ErrorHandling(globalSymbols);
             GlobalSymbolContext = globalSymbols;
@@ -35,26 +32,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public GlobalSymbolContext GetGlobalSymbolContext()
         {
             return GlobalSymbolContext;
-        }
-
-        public MethodSymbol LookupInvokeMeth(AggregateSymbol pAggDel)
-        {
-            Debug.Assert(pAggDel.AggKind() == AggKindEnum.Delegate);
-            for (Symbol pSym = LookupAggMember(NameManager.GetPredefinedName(PredefinedName.PN_INVOKE), pAggDel, symbmask_t.MASK_ALL);
-                 pSym != null;
-                 pSym = LookupNextSym(pSym, pAggDel, symbmask_t.MASK_ALL))
-            {
-                if (pSym is MethodSymbol meth && meth.isInvoke())
-                {
-                    return meth;
-                }
-            }
-            return null;
-        }
-
-        public NameManager GetNameManager()
-        {
-            return _nameManager;
         }
 
         public PredefinedTypes GetPredefindTypes()
@@ -96,28 +73,23 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return getBSymmgr().LookupAggMember(name, agg, mask);
         }
 
-        public Symbol LookupNextSym(Symbol sym, ParentSymbol parent, symbmask_t kindmask)
-        {
-            return BSYMMGR.LookupNextSym(sym, parent, kindmask);
-        }
+        public static Symbol LookupNextSym(Symbol sym, ParentSymbol parent, symbmask_t kindmask)
+            => BSYMMGR.LookupNextSym(sym, parent, kindmask);
 
         // It would be nice to make this a virtual method on typeSym.
         public AggregateType GetAggTypeSym(CType typeSym)
         {
             Debug.Assert(typeSym != null);
             Debug.Assert(typeSym is AggregateType ||
-                   typeSym is TypeParameterType ||
                    typeSym is ArrayType ||
                    typeSym is NullableType);
 
-            switch (typeSym.GetTypeKind())
+            switch (typeSym.TypeKind)
             {
                 case TypeKind.TK_AggregateType:
                     return (AggregateType)typeSym;
                 case TypeKind.TK_ArrayType:
                     return GetPredefindType(PredefinedType.PT_ARRAY);
-                case TypeKind.TK_TypeParameterType:
-                    return ((TypeParameterType)typeSym).GetEffectiveBaseClass();
                 case TypeKind.TK_NullableType:
                     return ((NullableType)typeSym).GetAts();
             }
@@ -125,77 +97,73 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return null;
         }
 
-        private bool IsBaseInterface(CType pDerived, CType pBase)
+        private static bool IsBaseInterface(AggregateType atsDer, AggregateType pBase)
         {
-            Debug.Assert(pDerived != null);
+            Debug.Assert(atsDer != null);
             Debug.Assert(pBase != null);
-            if (!pBase.isInterfaceType())
+            if (pBase.IsInterfaceType)
             {
-                return false;
-            }
-            if (!(pDerived is AggregateType atsDer))
-            {
-                return false;
+                while (atsDer != null)
+                {
+                    foreach (CType iface in atsDer.IfacesAll.Items)
+                    {
+                        if (AreTypesEqualForConversion(iface, pBase))
+                        {
+                            return true;
+                        }
+                    }
+
+                    atsDer = atsDer.BaseClass;
+                }
             }
 
-            while (atsDer != null)
-            {
-                TypeArray ifacesAll = atsDer.GetIfacesAll();
-                for (int i = 0; i < ifacesAll.Count; i++)
-                {
-                    if (AreTypesEqualForConversion(ifacesAll[i], pBase))
-                    {
-                        return true;
-                    }
-                }
-                atsDer = atsDer.GetBaseClass();
-            }
             return false;
         }
 
-        public bool IsBaseClassOfClass(CType pDerived, CType pBase)
+        public static bool IsBaseClassOfClass(CType pDerived, CType pBase)
         {
             Debug.Assert(pDerived != null);
             Debug.Assert(pBase != null);
 
-            // This checks to see whether derived is a class, and if so, 
+            // This checks to see whether derived is a class, and if so,
             // if base is a base class of derived.
-            if (!pDerived.isClassType())
-            {
-                return false;
-            }
-            return IsBaseClass(pDerived, pBase);
+            return pDerived.IsClassType && IsBaseClass(pDerived, pBase);
         }
 
-        private bool IsBaseClass(CType pDerived, CType pBase)
+        private static bool IsBaseClass(CType pDerived, CType pBase)
         {
             Debug.Assert(pDerived != null);
             Debug.Assert(pBase != null);
             // A base class has got to be a class. The derived type might be a struct.
 
-            if (!(pBase is AggregateType atsBase && atsBase.isClassType()))
+            if (!(pBase is AggregateType atsBase && atsBase.IsClassType))
             {
                 return false;
-            }
-            if (pDerived is NullableType derivedNub)
-            {
-                pDerived = derivedNub.GetAts();
             }
 
             if (!(pDerived is AggregateType atsDer))
             {
-                return false;
+                if (pDerived is NullableType derivedNub)
+                {
+                    atsDer = derivedNub.GetAts();
+                }
+                else
+                {
+                    return false;
+                }
             }
 
-            AggregateType atsCur = atsDer.GetBaseClass();
+            AggregateType atsCur = atsDer.BaseClass;
             while (atsCur != null)
             {
                 if (atsCur == atsBase)
                 {
                     return true;
                 }
-                atsCur = atsCur.GetBaseClass();
+
+                atsCur = atsCur.BaseClass;
             }
+
             return false;
         }
 
@@ -206,8 +174,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // * S and T differ only in element type. In other words, S and T have the same number of dimensions.
             // * Both SE and TE are reference types.
             // * An implicit reference conversion exists from SE to TE.
-            return (pSource.rank == pDest.rank) && pSource.IsSZArray == pDest.IsSZArray &&
-                HasImplicitReferenceConversion(pSource.GetElementType(), pDest.GetElementType());
+            return pSource.Rank == pDest.Rank && pSource.IsSZArray == pDest.IsSZArray &&
+                HasImplicitReferenceConversion(pSource.ElementType, pDest.ElementType);
         }
 
         public bool HasIdentityOrImplicitReferenceConversion(CType pSource, CType pDest)
@@ -222,20 +190,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return HasImplicitReferenceConversion(pSource, pDest);
         }
 
-        private bool AreTypesEqualForConversion(CType pType1, CType pType2)
-        {
-            return pType1.Equals(pType2);
-        }
+        private static bool AreTypesEqualForConversion(CType pType1, CType pType2) => pType1.Equals(pType2);
 
         private bool HasArrayConversionToInterface(ArrayType pSource, CType pDest)
         {
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
-            if (!pSource.IsSZArray)
-            {
-                return false;
-            }
-            if (!pDest.isInterfaceType())
+            if (!pSource.IsSZArray || !pDest.IsInterfaceType)
             {
                 return false;
             }
@@ -251,13 +212,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // * The base interface of IReadOnlyList<T> is IReadOnlyCollection<T>.
             // * The base interface of IReadOnlyCollection<T> is IEnumerable<T>.
 
-            if (pDest.isPredefType(PredefinedType.PT_IENUMERABLE))
+            if (pDest.IsPredefType(PredefinedType.PT_IENUMERABLE))
             {
                 return true;
             }
 
             AggregateType atsDest = (AggregateType)pDest;
-            AggregateSymbol aggDest = atsDest.getAggregate();
+            AggregateSymbol aggDest = atsDest.OwningAggregate;
             if (!aggDest.isPredefAgg(PredefinedType.PT_G_ILIST) &&
                 !aggDest.isPredefAgg(PredefinedType.PT_G_ICOLLECTION) &&
                 !aggDest.isPredefAgg(PredefinedType.PT_G_IENUMERABLE) &&
@@ -267,188 +228,140 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return false;
             }
 
-            Debug.Assert(atsDest.GetTypeArgsAll().Count == 1);
+            Debug.Assert(atsDest.TypeArgsAll.Count == 1);
 
-            CType pSourceElement = pSource.GetElementType();
-            CType pDestTypeArgument = atsDest.GetTypeArgsAll()[0];
-            return HasIdentityOrImplicitReferenceConversion(pSourceElement, pDestTypeArgument);
+            return HasIdentityOrImplicitReferenceConversion(pSource.ElementType, atsDest.TypeArgsAll[0]);
         }
 
         private bool HasImplicitReferenceConversion(CType pSource, CType pDest)
         {
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
+            Debug.Assert(!(pSource is TypeParameterType));
 
             // The implicit reference conversions are:
             // * From any reference type to Object.
-            if (pSource.IsRefType() && pDest.isPredefType(PredefinedType.PT_OBJECT))
-            {
-                return true;
-            }
-            // * From any class type S to any class type T provided S is derived from T.
-            if (pSource.isClassType() && pDest.isClassType() && IsBaseClass(pSource, pDest))
+            if (pSource.IsReferenceType && pDest.IsPredefType(PredefinedType.PT_OBJECT))
             {
                 return true;
             }
 
-            // ORIGINAL RULES:
-            //    // * From any class type S to any interface type T provided S implements T.
-            //    if (pSource.isClassType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
-            //    {
-            //        return true;
-            //    }
-            //    // * from any interface type S to any interface type T, provided S is derived from T.
-            //    if (pSource.isInterfaceType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
-            //    {
-            //        return true;
-            //    }
-
-            // VARIANCE EXTENSIONS:
-            // * From any class type S to any interface type T provided S implements an interface
-            //   convertible to T.
-            // * From any interface type S to any interface type T provided S implements an interface
-            //   convertible to T.
-            // * From any interface type S to any interface type T provided S is not T and S is 
-            //   an interface convertible to T.
-
-            if (pSource.isClassType() && pDest.isInterfaceType() && HasAnyBaseInterfaceConversion(pSource, pDest))
+            if (pSource is AggregateType aggSource)
             {
-                return true;
-            }
-            if (pSource.isInterfaceType() && pDest.isInterfaceType() && HasAnyBaseInterfaceConversion(pSource, pDest))
-            {
-                return true;
-            }
-            if (pSource.isInterfaceType() && pDest.isInterfaceType() && pSource != pDest &&
-                HasInterfaceConversion(pSource as AggregateType, pDest as AggregateType))
-            {
-                return true;
-            }
+                if (pDest is AggregateType aggDest)
+                {
+                    switch (aggSource.OwningAggregate.AggKind())
+                    {
+                        case AggKindEnum.Class:
+                            switch (aggDest.OwningAggregate.AggKind())
+                            {
+                                case AggKindEnum.Class:
+                                    // * From any class type S to any class type T provided S is derived from T.
+                                    return IsBaseClass(aggSource, aggDest);
 
-            if (pSource is ArrayType arrSource)
+                                case AggKindEnum.Interface:
+                                    // ORIGINAL RULES:
+                                    //    // * From any class type S to any interface type T provided S implements T.
+                                    //    if (pSource.isClassType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
+                                    //    {
+                                    //        return true;
+                                    //    }
+                                    //    // * from any interface type S to any interface type T, provided S is derived from T.
+                                    //    if (pSource.isInterfaceType() && pDest.isInterfaceType() && IsBaseInterface(pSource, pDest))
+                                    //    {
+                                    //        return true;
+                                    //    }
+
+                                    // VARIANCE EXTENSIONS:
+                                    // * From any class type S to any interface type T provided S implements an interface
+                                    //   convertible to T.
+                                    // * From any interface type S to any interface type T provided S implements an interface
+                                    //   convertible to T.
+                                    // * From any interface type S to any interface type T provided S is not T and S is 
+                                    //   an interface convertible to T.
+
+                                    return HasAnyBaseInterfaceConversion(aggSource, aggDest);
+                            }
+
+                            break;
+
+                        case AggKindEnum.Interface:
+                            if (aggDest.IsInterfaceType)
+                            {
+                                return HasAnyBaseInterfaceConversion(aggSource, aggDest) || HasInterfaceConversion(aggSource, aggDest);
+                            }
+
+                            break;
+
+                        case AggKindEnum.Delegate:
+                            // * From any delegate type to System.Delegate
+                            // 
+                            // SPEC OMISSION:
+                            // 
+                            // The spec should actually say
+                            //
+                            // * From any delegate type to System.Delegate 
+                            // * From any delegate type to System.MulticastDelegate
+                            // * From any delegate type to any interface implemented by System.MulticastDelegate
+                            if (aggDest.IsPredefType(PredefinedType.PT_MULTIDEL)
+                                || aggDest.IsPredefType(PredefinedType.PT_DELEGATE) || IsBaseInterface(
+                                    GetPredefindType(PredefinedType.PT_MULTIDEL), aggDest))
+                            {
+                                return true;
+                            }
+
+                            // VARIANCE EXTENSION:
+                            // * From any delegate type S to a delegate type T provided S is not T and
+                            //   S is a delegate convertible to T
+                            return pDest.IsDelegateType && HasDelegateConversion(aggSource, aggDest);
+                    }
+                }
+            }
+            else if (pSource is ArrayType arrSource)
             {
                 // * From an array type S with an element type SE to an array type T with element type TE
                 //   provided that all of the following are true:
                 //   * S and T differ only in element type. In other words, S and T have the same number of dimensions.
                 //   * Both SE and TE are reference types.
                 //   * An implicit reference conversion exists from SE to TE.
-                if (pDest is ArrayType arrDest && HasCovariantArrayConversion(arrSource, arrDest))
+                if (pDest is ArrayType arrDest)
                 {
-                    return true;
+                    return HasCovariantArrayConversion(arrSource, arrDest);
                 }
 
-                // * From any array type to System.Array or any interface implemented by System.Array.
-                if (pDest.isPredefType(PredefinedType.PT_ARRAY) || IsBaseInterface(GetPredefindType(PredefinedType.PT_ARRAY), pDest))
+                if (pDest is AggregateType aggDest)
                 {
-                    return true;
-                }
+                    // * From any array type to System.Array or any interface implemented by System.Array.
+                    if (aggDest.IsPredefType(PredefinedType.PT_ARRAY)
+                        || IsBaseInterface(GetPredefindType(PredefinedType.PT_ARRAY), aggDest))
+                    {
+                        return true;
+                    }
 
-                // * From a single-dimensional array type S[] to IList<T> and its base
-                //   interfaces, provided that there is an implicit identity or reference
-                //   conversion from S to T.
-                if (HasArrayConversionToInterface(arrSource, pDest))
-                {
-                    return true;
-                }
-            }
-
-            // * From any delegate type to System.Delegate
-            // 
-            // SPEC OMISSION:
-            // 
-            // The spec should actually say
-            //
-            // * From any delegate type to System.Delegate 
-            // * From any delegate type to System.MulticastDelegate
-            // * From any delegate type to any interface implemented by System.MulticastDelegate
-            if (pSource.isDelegateType() &&
-                (pDest.isPredefType(PredefinedType.PT_MULTIDEL) ||
-                pDest.isPredefType(PredefinedType.PT_DELEGATE) ||
-                IsBaseInterface(GetPredefindType(PredefinedType.PT_MULTIDEL), pDest)))
-            {
-                return true;
-            }
-
-            // VARIANCE EXTENSION:
-            // * From any delegate type S to a delegate type T provided S is not T and
-            //   S is a delegate convertible to T
-
-            if (pSource.isDelegateType() && pDest.isDelegateType() &&
-                HasDelegateConversion(pSource as AggregateType, pDest as AggregateType))
-            {
-                return true;
-            }
-
-            // * From the null literal to any reference type
-            // NOTE: We extend the specification here. The C# 3.0 spec does not describe
-            // a "null type". Rather, it says that the null literal is typeless, and is
-            // convertible to any reference or nullable type. However, the C# 2.0 and 3.0
-            // implementations have a "null type" which some expressions other than the
-            // null literal may have. (For example, (null??null), which is also an
-            // extension to the specification.)
-            if (pSource is NullType)
-            {
-                if (pDest.IsRefType() || pDest is NullableType)
-                {
-                    return true;
+                    // * From a single-dimensional array type S[] to IList<T> and its base
+                    //   interfaces, provided that there is an implicit identity or reference
+                    //   conversion from S to T.
+                    return HasArrayConversionToInterface(arrSource, pDest);
                 }
             }
-
-            // * Implicit conversions involving type parameters that are known to be reference types.
-            return pSource is TypeParameterType srcParType && HasImplicitReferenceTypeParameterConversion(srcParType, pDest);
-        }
-
-        private bool HasImplicitReferenceTypeParameterConversion(
-            TypeParameterType pSource, CType pDest)
-        {
-            Debug.Assert(pSource != null);
-            Debug.Assert(pDest != null);
-
-            if (!pSource.IsRefType())
+            else if (pSource is NullType)
             {
-                // Not a reference conversion.
-                return false;
+                // * From the null literal to any reference type
+                // NOTE: We extend the specification here. The C# 3.0 spec does not describe
+                // a "null type". Rather, it says that the null literal is typeless, and is
+                // convertible to any reference or nullable type. However, the C# 2.0 and 3.0
+                // implementations have a "null type" which some expressions other than the
+                // null literal may have. (For example, (null??null), which is also an
+                // extension to the specification.)
+                return pDest.IsReferenceType || pDest is NullableType;
             }
 
-            // The following implicit conversions exist for a given type parameter T:
-            //
-            // * From T to its effective base class C.
-            AggregateType pEBC = pSource.GetEffectiveBaseClass();
-            if (pDest == pEBC)
-            {
-                return true;
-            }
-            // * From T to any base class of C.
-            if (IsBaseClass(pEBC, pDest))
-            {
-                return true;
-            }
-            // * From T to any interface implemented by C.
-            if (IsBaseInterface(pEBC, pDest))
-            {
-                return true;
-            }
-            // * From T to any interface type I in T's effective interface set, and
-            //   from T to any base interface of I.
-            TypeArray pInterfaces = pSource.GetInterfaceBounds();
-            for (int i = 0; i < pInterfaces.Count; ++i)
-            {
-                if (pInterfaces[i] == pDest)
-                {
-                    return true;
-                }
-            }
-            // * From T to a type parameter U, provided T depends on U.
-            return pDest is TypeParameterType typeParamDest && pSource.DependsOn(typeParamDest);
+            return false;
         }
 
         private bool HasAnyBaseInterfaceConversion(CType pDerived, CType pBase)
         {
-            if (!pBase.isInterfaceType())
-            {
-                return false;
-            }
-            if (!(pDerived is AggregateType atsDer))
+            if (!pBase.IsInterfaceType || !(pDerived is AggregateType atsDer))
             {
                 return false;
             }
@@ -456,7 +369,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             AggregateType atsBase = (AggregateType)pBase;
             while (atsDer != null)
             {
-                foreach (AggregateType iface in atsDer.GetIfacesAll().Items)
+                foreach (AggregateType iface in atsDer.IfacesAll.Items)
                 {
                     if (HasInterfaceConversion(iface, atsBase))
                     {
@@ -464,7 +377,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     }
                 }
 
-                atsDer = atsDer.GetBaseClass();
+                atsDer = atsDer.BaseClass;
             }
 
             return false;
@@ -485,8 +398,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool HasInterfaceConversion(AggregateType pSource, AggregateType pDest)
         {
-            Debug.Assert(pSource != null && pSource.isInterfaceType());
-            Debug.Assert(pDest != null && pDest.isInterfaceType());
+            Debug.Assert(pSource != null && pSource.IsInterfaceType);
+            Debug.Assert(pDest != null && pDest.IsInterfaceType);
             return HasVariantConversion(pSource, pDest);
         }
 
@@ -494,8 +407,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         private bool HasDelegateConversion(AggregateType pSource, AggregateType pDest)
         {
-            Debug.Assert(pSource != null && pSource.isDelegateType());
-            Debug.Assert(pDest != null && pDest.isDelegateType());
+            Debug.Assert(pSource != null && pSource.IsDelegateType);
+            Debug.Assert(pDest != null && pDest.IsDelegateType);
             return HasVariantConversion(pSource, pDest);
         }
 
@@ -509,15 +422,15 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return true;
             }
-            AggregateSymbol pAggSym = pSource.getAggregate();
-            if (pAggSym != pDest.getAggregate())
+            AggregateSymbol pAggSym = pSource.OwningAggregate;
+            if (pAggSym != pDest.OwningAggregate)
             {
                 return false;
             }
 
             TypeArray pTypeParams = pAggSym.GetTypeVarsAll();
-            TypeArray pSourceArgs = pSource.GetTypeArgsAll();
-            TypeArray pDestArgs = pDest.GetTypeArgsAll();
+            TypeArray pSourceArgs = pSource.TypeArgsAll;
+            TypeArray pDestArgs = pDest.TypeArgsAll;
 
             Debug.Assert(pTypeParams.Count == pSourceArgs.Count);
             Debug.Assert(pTypeParams.Count == pDestArgs.Count);
@@ -554,99 +467,31 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-
-        private bool HasImplicitBoxingTypeParameterConversion(
-            TypeParameterType pSource, CType pDest)
+        private bool HasImplicitBoxingConversion(CType pSource, CType pDest)
         {
             Debug.Assert(pSource != null);
             Debug.Assert(pDest != null);
-
-            if (pSource.IsRefType())
-            {
-                // Not a boxing conversion; both source and destination are references.
-                return false;
-            }
-
-            // The following implicit conversions exist for a given type parameter T:
-            //
-            // * From T to its effective base class C.
-            AggregateType pEBC = pSource.GetEffectiveBaseClass();
-            if (pDest == pEBC)
-            {
-                return true;
-            }
-            // * From T to any base class of C.
-            if (IsBaseClass(pEBC, pDest))
-            {
-                return true;
-            }
-            // * From T to any interface implemented by C.
-            if (IsBaseInterface(pEBC, pDest))
-            {
-                return true;
-            }
-            // * From T to any interface type I in T's effective interface set, and
-            //   from T to any base interface of I.
-            TypeArray pInterfaces = pSource.GetInterfaceBounds();
-            for (int i = 0; i < pInterfaces.Count; ++i)
-            {
-                if (pInterfaces[i] == pDest)
-                {
-                    return true;
-                }
-            }
-            // * The conversion from T to a type parameter U, provided T depends on U, is not
-            //   classified as a boxing conversion because it is not guaranteed to box.
-            //   (If both T and U are value types then it is an identity conversion.)
-
-            return false;
-        }
-
-        private bool HasImplicitTypeParameterBaseConversion(
-            TypeParameterType pSource, CType pDest)
-        {
-            Debug.Assert(pSource != null);
-            Debug.Assert(pDest != null);
-
-            if (HasImplicitReferenceTypeParameterConversion(pSource, pDest))
-            {
-                return true;
-            }
-            if (HasImplicitBoxingTypeParameterConversion(pSource, pDest))
-            {
-                return true;
-            }
-
-            return pDest is TypeParameterType typeParamDest && pSource.DependsOn(typeParamDest);
-        }
-
-        public bool HasImplicitBoxingConversion(CType pSource, CType pDest)
-        {
-            Debug.Assert(pSource != null);
-            Debug.Assert(pDest != null);
-
-            // Certain type parameter conversions are classified as boxing conversions.
-
-            if (pSource is TypeParameterType srcParType && HasImplicitBoxingTypeParameterConversion(srcParType, pDest))
-            {
-                return true;
-            }
+            Debug.Assert(!(pSource is TypeParameterType));
 
             // The rest of the boxing conversions only operate when going from a value type
             // to a reference type.
 
-            if (!pSource.IsValType() || !pDest.IsRefType())
+            if (!pDest.IsReferenceType)
             {
                 return false;
             }
 
             // A boxing conversion exists from a nullable type to a reference type
             // if and only if a boxing conversion exists from the underlying type.
-
             if (pSource is NullableType nubSource)
             {
-                return HasImplicitBoxingConversion(nubSource.GetUnderlyingType(), pDest);
+                pSource = nubSource.UnderlyingType; // pSource.IsValType() known to be true.
             }
+            else if (!pSource.IsValueType)
+            {
+                return false;
+            }
+
 
             // A boxing conversion exists from any non-nullable value type to object,
             // to System.ValueType, and to any interface type implemented by the
@@ -656,15 +501,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // We set the base class of the structs to System.ValueType, System.Enum, etc,
             // so we can just check here.
 
-            if (IsBaseClass(pSource, pDest))
-            {
-                return true;
-            }
-            if (HasAnyBaseInterfaceConversion(pSource, pDest))
-            {
-                return true;
-            }
-            return false;
+            return IsBaseClass(pSource, pDest) || HasAnyBaseInterfaceConversion(pSource, pDest);
         }
 
         public bool HasBaseConversion(CType pSource, CType pDest)
@@ -688,7 +525,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //
             // This notion is not found in the spec but it is useful in the implementation.
 
-            if (pSource is AggregateType && pDest.isPredefType(PredefinedType.PT_OBJECT))
+            if (pSource is AggregateType && pDest.IsPredefType(PredefinedType.PT_OBJECT))
             {
                 // If we are going from any aggregate type (class, struct, interface, enum or delegate)
                 // to object, we immediately return true. This may seem like a mere optimization --
@@ -707,19 +544,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            if (HasIdentityOrImplicitReferenceConversion(pSource, pDest))
-            {
-                return true;
-            }
-            if (HasImplicitBoxingConversion(pSource, pDest))
-            {
-                return true;
-            }
-
-            return pSource is TypeParameterType srcParType && HasImplicitTypeParameterBaseConversion(srcParType, pDest);
+            return HasIdentityOrImplicitReferenceConversion(pSource, pDest) || HasImplicitBoxingConversion(pSource, pDest);
         }
 
-        public bool IsBaseAggregate(AggregateSymbol derived, AggregateSymbol @base)
+        public static bool IsBaseAggregate(AggregateSymbol derived, AggregateSymbol @base)
         {
             Debug.Assert(!derived.IsEnum() && !@base.IsEnum());
 
@@ -737,9 +565,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 {
                     foreach (AggregateType iface in derived.GetIfacesAll().Items)
                     {
-                        if (iface.getAggregate() == @base)
+                        if (iface.OwningAggregate == @base)
+                        {
                             return true;
+                        }
                     }
+
                     derived = derived.GetBaseAgg();
                 }
 
@@ -750,10 +581,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             while (derived.GetBaseClass() != null)
             {
-                derived = derived.GetBaseClass().getAggregate();
+                derived = derived.GetBaseClass().OwningAggregate;
                 if (derived == @base)
+                {
                     return true;
+                }
             }
+
             return false;
         }
 

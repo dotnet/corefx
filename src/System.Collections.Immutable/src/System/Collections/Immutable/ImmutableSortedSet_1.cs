@@ -150,9 +150,25 @@ namespace System.Collections.Immutable
         {
             get
             {
+#if FEATURE_ITEMREFAPI
+                return _root.ItemRef(index);
+#else
                 return _root[index];
+#endif
             }
         }
+
+#if FEATURE_ITEMREFAPI
+        /// <summary>
+        /// Gets a read-only reference of the element of the set at the given index.
+        /// </summary>
+        /// <param name="index">The 0-based index of the element in the set to return.</param>
+        /// <returns>A read-only reference of the element at the given position.</returns>
+        public ref readonly T ItemRef(int index)
+        {
+            return ref _root.ItemRef(index);
+        }
+#endif
 
         #endregion
 
@@ -957,7 +973,9 @@ namespace System.Collections.Immutable
         [ExcludeFromCodeCoverage]
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            return this.GetEnumerator();
+            return this.IsEmpty ?
+                Enumerable.Empty<T>().GetEnumerator() :
+                this.GetEnumerator();
         }
 
         #endregion

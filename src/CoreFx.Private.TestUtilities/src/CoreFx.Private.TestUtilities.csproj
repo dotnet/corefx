@@ -30,6 +30,8 @@
     <Compile Condition="'$(TargetGroup)' != 'uap'" Include="System\Diagnostics\RemoteExecutorTestBase.Process.cs" />
     <Compile Condition="'$(TargetGroup)' == 'uap'" Include="System\Diagnostics\RemoteExecutorTestBase.uap.cs" />
     <Compile Condition="'$(TargetGroup)' == 'uapaot'" Include="System\Diagnostics\RemoteExecutorTestBase.uapaot.cs" />
+    <Compile Condition="'$(TargetGroup)' == 'netfx'" Include="System\PlatformDetection.NetFx.cs" />
+    <Compile Condition="'$(TargetGroup)' != 'netfx'" Include="System\PlatformDetection.NonNetFx.cs" />
     <Compile Include="System\PlatformDetection.cs" />
     <Compile Include="System\PlatformDetection.Unix.cs" Condition="'$(TargetsWindows)' != 'true'" />
     <Compile Include="System\PlatformDetection.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
@@ -40,6 +42,8 @@
     <Compile Include="System\TheoryExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="System.Memory" />
+    <Reference Include="Microsoft.Win32.Registry" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.IO.FileSystem" />
     <Reference Include="System.Linq" />
@@ -56,6 +60,7 @@
     <ReferenceFromRuntime Include="xunit.core" />
     <ReferenceFromRuntime Include="Xunit.NetCore.Extensions" />
     <ReferenceFromRuntime Include="xunit.assert" />
+    <ReferenceFromRuntime Condition="'$(TargetGroup)' != 'uapaot'" Include="Microsoft.DotNet.PlatformAbstractions" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Reference Include="System.Security.Principal.Windows" />
@@ -64,6 +69,9 @@
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCurrentProcess_IntPtr.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GetCurrentProcess_IntPtr.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\src\System\PasteArguments.Windows.cs">
+      <Link>Common\System\PasteArguments.Windows.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.OpenProcessToken_SafeAccessTokenHandle.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.OpenProcessToken_SafeAccessTokenHandle.cs</Link>
@@ -89,6 +97,12 @@
     <Compile Include="System\AdminHelpers.Windows.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.OpenSslVersion.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.OpenSslVersion.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\src\System\PasteArguments.Unix.cs">
+      <Link>Common\System\PasteArguments.Unix.cs</Link>
+    </Compile>
     <Compile Include="System\AdminHelpers.Unix.cs" />
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetEUid.cs">
       <Link>Common\Interop\Unix\Interop.GetEUid.cs</Link>

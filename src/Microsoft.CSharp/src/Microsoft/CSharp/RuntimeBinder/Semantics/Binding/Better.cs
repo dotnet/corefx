@@ -129,11 +129,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private TypeArray RearrangeNamedArguments(TypeArray pta, MethPropWithInst mpwi,
             CType pTypeThrough, ArgInfos args)
         {
-            if (!args.fHasExprs)
-            {
-                return pta;
-            }
-
 #if DEBUG
             // We never have a named argument that is in a position in the argument
             // list past the end of what would be the formal parameter list.
@@ -142,6 +137,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 Debug.Assert(!(args.prgexpr[i] is ExprNamedArgumentSpecification));
             }
 #endif
+            // If we've no args we can skip. If the last argument isn't named then either we
+            // have no named arguments, and we can skip, or we have non-trailing named arguments
+            // and we MUST skip!
+            if (args.carg == 0 || !(args.prgexpr[args.carg - 1] is ExprNamedArgumentSpecification))
+            {
+                return pta;
+            }
 
             CType type = pTypeThrough != null ? pTypeThrough : mpwi.GetType();
             CType[] typeList = new CType[pta.Count];
@@ -238,7 +240,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             int carg = args.carg;
             for (int i = 0; i < carg; i++)
             {
-                Expr arg = args.fHasExprs ? args.prgexpr[i] : null;
+                Expr arg = args.prgexpr[i];
                 CType p1 = pta1[i];
                 CType p2 = pta2[i];
 
@@ -384,12 +386,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return a2b ? BetterType.Left : BetterType.Right;
             }
 
-            if (p1.isPredefined() && p2.isPredefined())
+            if (p1.IsPredefined && p2.IsPredefined)
             {
-                PredefinedType pt1 = p1.getPredefType();
+                PredefinedType pt1 = p1.PredefinedType;
                 if (pt1 <= PredefinedType.PT_OBJECT)
                 {
-                    PredefinedType pt2 = p2.getPredefType();
+                    PredefinedType pt2 = p2.PredefinedType;
                     if (pt2 <= PredefinedType.PT_OBJECT)
                     {
                         return (BetterType)s_betterConversionTable[(int)pt1][(int)pt2];

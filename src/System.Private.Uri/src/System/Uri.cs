@@ -558,10 +558,11 @@ namespace System
                         // Hence anything like x:sdsd is a relative path and be added to the baseUri Path
                         break;
                     }
-                    fixed (char* sptr = relativeStr) // relativeStr.Substring(0, i) represents the scheme
+                    string scheme = relativeStr.Substring(0, i);
+                    fixed (char* sptr = scheme)
                     {
                         UriParser syntax = null;
-                        if (CheckSchemeSyntax(sptr, (ushort)i, ref syntax) == ParsingError.None)
+                        if (CheckSchemeSyntax(sptr, (ushort)scheme.Length, ref syntax) == ParsingError.None)
                         {
                             if (baseUri.Syntax == syntax)
                             {
@@ -4190,7 +4191,15 @@ namespace System
                 if (UncNameHelper.IsValid(pString, start, ref end, StaticNotAny(flags, Flags.ImplicitFile)))
                 {
                     if (end - start <= UncNameHelper.MaximumInternetNameLength)
+                    {
                         flags |= Flags.UncHostType;
+                        if (hasUnicode && iriParsing && hostNotUnicodeNormalized)
+                        {
+                            newHost += new string(pString, start, end - start);
+                            flags |= Flags.HostUnicodeNormalized;
+                            justNormalized = true;
+                        }
+                    }
                 }
             }
 

@@ -81,9 +81,6 @@
   <data name="ValueCantBeNull" xml:space="preserve">
     <value>無法將 null 轉換成 '{0}'，因為它是不可為 null 的實值型別</value>
   </data>
-  <data name="WrongNestedThis" xml:space="preserve">
-    <value>無法透過巢狀型別 '{1}' 存取外部型別 '{0}' 的非靜態成員</value>
-  </data>
   <data name="NoSuchMember" xml:space="preserve">
     <value>'{0}' 不包含 '{1}' 的定義</value>
   </data>
@@ -176,9 +173,6 @@
   </data>
   <data name="GenericConstraintNotSatisfiedValType" xml:space="preserve">
     <value>型別 '{3}' 不能做為泛型型別或方法 '{0}' 中的型別參數 '{2}'。沒有從 '{3}' 到 '{1}' 的 Boxing 轉換。</value>
-  </data>
-  <data name="TypeVarCantBeNull" xml:space="preserve">
-    <value>無法將 null 轉換成型別參數 '{0}'，因為它是不可為 null 的實值型別。請考慮使用 'default({0})' 代替。</value>
   </data>
   <data name="CantInferMethTypeArgs" xml:space="preserve">
     <value>方法 '{0}' 的型別引數不能從使用方式推斷。請嘗試明確指定型別引數。</value>
